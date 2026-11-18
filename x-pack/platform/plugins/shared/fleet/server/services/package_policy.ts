@@ -20,6 +20,7 @@ import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
   SavedObject,
+  SavedObjectsUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
@@ -330,7 +331,8 @@ function keepsAgentVersionConditions({
 }): boolean {
   // The update writes the manifest condition, so a stale stored one (left by an upgrade before
   // #294439) gets cleared. A stale `inputs_for_versions` is cleared by
-  // `compilePackagePolicyForVersions`, which forces a recompute separately. (Un)assigning changes which agent policies count this package policy's conditions.
+  // `clearStaleInputsForVersions`, which forces a recompute separately. (Un)assigning changes
+  // which agent policies count this package policy's conditions.
   return (
     oldPackagePolicy.package?.name === newPackage?.name &&
     oldPackagePolicy.package?.version === newPackage?.version &&
@@ -899,15 +901,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     assetsMap: PackagePolicyAssetsMap,
     packagePolicy: PackagePolicy,
     agentVersions?: string[]
-  ): Promise<{ cleared: boolean }> {
-    if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
-      return { cleared: false };
-    }
-    // Covers both manifest level (`conditions.agent.version`) and template level conditions.
+  ) {
+    // Covers both manifest level (`conditions.agent.version`) and template level conditions, and
+    // checks the `enableVersionSpecificPolicies` feature flag.
     if (!hasAgentVersionCondition(packageInfo, assetsMap)) {
-      // An upgrade to a package that dropped its agent version condition leaves the cache of the
-      // old version behind. Clear it, otherwise agents keep receiving the stale inputs.
-      return this.clearStaleInputsForVersions(soClient, packagePolicy.id);
+      return;
     }
     return withActiveSpan(
       'compile-package-policy-versions',
@@ -932,7 +930,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           versionsToCompile = agentVersions.filter((v) => !existingInputsForVersions[v]);
           if (versionsToCompile.length === 0) {
             t.end();
-            return { cleared: false };
+            return;
           }
         } else {
           // Create/update path: compile default common agent versions plus any extra versions already
@@ -967,33 +965,71 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             )
           );
         t.end();
-        return { cleared: false };
       }
     );
   }
 
+  /**
+   * An upgrade to a package that dropped its agent version condition leaves the `inputs_for_versions`
+   * of the old version behind, so agents keep receiving the stale inputs and the agent policy keeps
+   * its version conditions. Clears the cache of the given package policies whose package has no
+   * condition, with a single read and write. Returns whether any cache was cleared.
+   */
   private async clearStaleInputsForVersions(
     soClient: SavedObjectsClientContract,
-    packagePolicyId: string
-  ): Promise<{ cleared: boolean }> {
-    const savedObjectType = await getPackagePolicySavedObjectType();
-    const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(
-      savedObjectType,
-      packagePolicyId
-    );
-    if (Object.keys(packagePolicySO.attributes.inputs_for_versions ?? {}).length === 0) {
-      return { cleared: false };
+    candidates: Array<{
+      packagePolicyId: string;
+      packageInfo: PackageInfo;
+      assetsMap: PackagePolicyAssetsMap;
+    }>
+  ): Promise<boolean> {
+    if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+      return false;
     }
-    await soClient
-      .update<PackagePolicySOAttributes>(savedObjectType, packagePolicyId, {
-        inputs_for_versions: {},
-      })
+    const withoutCondition = candidates.filter(
+      ({ packageInfo, assetsMap }) => !hasAgentVersionCondition(packageInfo, assetsMap)
+    );
+    if (withoutCondition.length === 0) {
+      return false;
+    }
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const { saved_objects: packagePolicySOs } = await soClient
+      .bulkGet<PackagePolicySOAttributes>(
+        withoutCondition.map(({ packagePolicyId }) => ({
+          type: savedObjectType,
+          id: packagePolicyId,
+          fields: ['inputs_for_versions'],
+        }))
+      )
       .catch(
         catchAndSetErrorStackTrace.withMessage(
-          `attempt to clear inputs_for_versions of package policy saved object failed`
+          'attempt to read inputs_for_versions of package policy saved objects failed'
         )
       );
-    return { cleared: true };
+    const staleIds = packagePolicySOs
+      .filter(
+        (so): so is SavedObject<PackagePolicySOAttributes> =>
+          !isSavedObjectErrorResult(so) &&
+          Object.keys(so.attributes?.inputs_for_versions ?? {}).length > 0
+      )
+      .map((so) => so.id);
+    if (staleIds.length === 0) {
+      return false;
+    }
+    await soClient
+      .bulkUpdate<PackagePolicySOAttributes>(
+        staleIds.map((id) => ({
+          type: savedObjectType,
+          id,
+          attributes: { inputs_for_versions: {} },
+        }))
+      )
+      .catch(
+        catchAndSetErrorStackTrace.withMessage(
+          'attempt to clear inputs_for_versions of package policy saved objects failed'
+        )
+      );
+    return true;
   }
 
   private async bumpAgentPoliciesRevision(
@@ -2134,12 +2170,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    const { cleared: clearedInputsForVersions } = await this.compilePackagePolicyForVersions(
-      soClient,
-      pkgInfo,
-      assetsMap,
-      newPolicy
-    );
+    const clearedInputsForVersions = await this.clearStaleInputsForVersions(soClient, [
+      { packagePolicyId: newPolicy.id, packageInfo: pkgInfo, assetsMap },
+    ]);
+    await this.compilePackagePolicyForVersions(soClient, pkgInfo, assetsMap, newPolicy);
 
     // Bump revision of all associated agent policies (old and new), unless the
     // caller opted out via `bumpRevision: false` (e.g. silent updates that must
@@ -2639,23 +2673,39 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate)
       .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed`));
 
-    for (const updatedPolicy of updatedPolicies) {
-      if (isSavedObjectErrorResult(updatedPolicy)) {
-        continue;
-      }
+    const savedPolicies = updatedPolicies.filter(
+      (updatedPolicy): updatedPolicy is SavedObjectsUpdateResponse<PackagePolicySOAttributes> =>
+        !isSavedObjectErrorResult(updatedPolicy)
+    );
+    const toAssets = (updatedPolicy: SavedObjectsUpdateResponse<PackagePolicySOAttributes>) => {
       const pkgInfo = packageInfos.get(
         `${updatedPolicy.attributes.package?.name}-${updatedPolicy.attributes.package?.version}`
       )!;
-      const { cleared } = await this.compilePackagePolicyForVersions(
+      return {
+        pkgInfo,
+        assetsMap: packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!,
+      };
+    };
+    // A cleared cache changes the agent policies' conditions, so they must be recomputed.
+    if (
+      await this.clearStaleInputsForVersions(
+        soClient,
+        savedPolicies.map((updatedPolicy) => {
+          const { pkgInfo, assetsMap } = toAssets(updatedPolicy);
+          return { packagePolicyId: updatedPolicy.id, packageInfo: pkgInfo, assetsMap };
+        })
+      )
+    ) {
+      agentVersionConditionsUnchanged = false;
+    }
+    for (const updatedPolicy of savedPolicies) {
+      const { pkgInfo, assetsMap } = toAssets(updatedPolicy);
+      await this.compilePackagePolicyForVersions(
         soClient,
         pkgInfo,
-        packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!,
+        assetsMap,
         mapPackagePolicySavedObjectToPackagePolicy(updatedPolicy as any)
       );
-      // A cleared cache changes the agent policy's conditions, so they must be recomputed.
-      if (cleared) {
-        agentVersionConditionsUnchanged = false;
-      }
     }
 
     // Bump revision of all associated agent policies (old and new)

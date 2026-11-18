@@ -420,6 +420,11 @@ export default function (providerContext: FtrProviderContext) {
         return res._source?.['fleet-package-policies']?.inputs_for_versions ?? {};
       }
 
+      async function getAgentPolicyId() {
+        const { body } = await supertest.get(`/api/fleet/agents/${agentId}`).expect(200);
+        return body.item.policy_id;
+      }
+
       before(async () => {
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
@@ -445,13 +450,26 @@ export default function (providerContext: FtrProviderContext) {
                 policy_template: 'abnormal_security',
                 type: 'cel',
                 enabled: true,
-                streams: [],
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { type: 'logs', dataset: 'abnormal_security.audit' },
+                    vars: { interval: { value: '5m', type: 'text' } },
+                  },
+                ],
               },
             ],
             package: { name: 'abnormal_security', version: '1.12.0' },
           })
           .expect(200);
         packagePolicyId = packagePolicyResponse.item.id;
+
+        // The package policy is upgraded to the latest installed version, so install it first.
+        await supertest
+          .post(`/api/fleet/epm/packages/abnormal_security/1.12.1`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
 
         await fleetAndAgents.generateAgent(
           'online',
@@ -482,11 +500,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(before.item.has_agent_version_conditions).to.eql(true);
         expect(Object.keys(await getInputsForVersions()).length).to.be.greaterThan(0);
 
-        await supertest
+        const { body: upgradeResponse } = await supertest
           .post(`/api/fleet/package_policies/upgrade`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packagePolicyIds: [packagePolicyId] })
           .expect(200);
+        // The route returns 200 with a per item result.
+        expect(upgradeResponse[0].success).to.eql(true);
 
         const { body: upgraded } = await supertest
           .get(`/api/fleet/package_policies/${packagePolicyId}`)
@@ -502,22 +522,35 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should serve later edits to agents on the base policy', async () => {
+        await retry.tryForTime(20000, async () => {
+          expect(await getAgentPolicyId()).to.eql(agentPolicyId);
+        });
+
+        const { body: current } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .expect(200);
+        const { id, revision, updated_at, updated_by, created_at, created_by, ...updatable } =
+          current.item;
+        updatable.inputs[0].streams[0].vars.interval.value = '10m';
         await supertest
           .put(`/api/fleet/package_policies/${packagePolicyId}`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ description: 'edited after upgrade' })
+          .send(updatable)
           .expect(200);
 
-        const { body } = await supertest
-          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
-          .expect(200);
-        const input = body.item.inputs.find(
-          (i: { meta?: { package?: { name?: string } } }) =>
-            i.meta?.package?.name === 'abnormal_security'
-        );
-        expect(input).to.be.ok();
+        await retry.tryForTime(20000, async () => {
+          const { body } = await supertest
+            .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+            .expect(200);
+          const input = body.item.inputs.find(
+            (i: { meta?: { package?: { name?: string } } }) =>
+              i.meta?.package?.name === 'abnormal_security'
+          );
+          expect(input.streams[0].interval).to.eql('10m');
+        });
 
         expect(Object.keys(await getInputsForVersions()).length).to.eql(0);
+        expect(await getAgentPolicyId()).to.eql(agentPolicyId);
       });
     });
 

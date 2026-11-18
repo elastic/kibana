@@ -451,7 +451,7 @@ const createEndpointPackagePolicyWithInputId = (
 };
 
 describe('Package policy service', () => {
-  let compileForVersionsSpy: jest.SpyInstance;
+  let clearStaleInputsSpy: jest.SpyInstance;
 
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
@@ -459,14 +459,14 @@ describe('Package policy service', () => {
     jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableVersionSpecificPolicies: true,
     } as any);
-    compileForVersionsSpy = jest
-      .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-      .mockResolvedValue({ cleared: false });
+    clearStaleInputsSpy = jest
+      .spyOn(packagePolicyService as any, 'clearStaleInputsForVersions')
+      .mockResolvedValue(false);
   });
 
   afterEach(() => {
     appContextService.stop();
-    compileForVersionsSpy.mockRestore();
+    clearStaleInputsSpy.mockRestore();
 
     // `jest.resetAllMocks` breaks a ton of tests in this file 🤷‍♂️
     mockAgentPolicyService.get.mockReset();
@@ -788,7 +788,7 @@ describe('Package policy service', () => {
       const soClient = createSavedObjectClientMock();
       jest
         .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-        .mockResolvedValueOnce({ cleared: false });
+        .mockResolvedValueOnce(undefined);
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-package-policy',
@@ -878,7 +878,7 @@ describe('Package policy service', () => {
       const soClient = createSavedObjectClientMock();
       jest
         .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-        .mockResolvedValueOnce({ cleared: false });
+        .mockResolvedValueOnce(undefined);
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-package-policy',
@@ -2462,7 +2462,7 @@ describe('Package policy service', () => {
         const soClient = createSavedObjectClientMock();
         jest
           .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-          .mockResolvedValueOnce({ cleared: false });
+          .mockResolvedValueOnce(undefined);
         soClient.bulkCreate.mockResolvedValueOnce({
           saved_objects: [
             {
@@ -4926,7 +4926,7 @@ describe('Package policy service', () => {
         const savedObjectsClient = createSavedObjectClientMock();
         jest
           .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-          .mockResolvedValueOnce({ cleared: false });
+          .mockResolvedValueOnce(undefined);
         const mockPackagePolicy = createPackagePolicyMock();
 
         (getPackageInfo as jest.Mock).mockResolvedValue({
@@ -5535,7 +5535,7 @@ describe('Package policy service', () => {
         const savedObjectsClient = createSavedObjectClientMock();
         jest
           .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-          .mockResolvedValueOnce({ cleared: false });
+          .mockResolvedValueOnce(undefined);
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         const testPolicyIds = ['test-agent-policy-1', 'test-agent-policy-2'];
 
@@ -7490,7 +7490,7 @@ describe('Package policy service', () => {
       const mockPackageWithAgentVersionCondition = () => {
         jest
           .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-          .mockResolvedValueOnce({ cleared: false });
+          .mockResolvedValueOnce(undefined);
         (getPackageInfo as jest.Mock).mockImplementation(async ({ pkgName, pkgVersion }) => ({
           name: pkgName,
           version: pkgVersion,
@@ -7522,7 +7522,7 @@ describe('Package policy service', () => {
         },
         {
           when: 'a stale inputs_for_versions cache was cleared on the same package version',
-          setup: () => compileForVersionsSpy.mockResolvedValue({ cleared: true }),
+          setup: () => clearStaleInputsSpy.mockResolvedValue(true),
           expected: false,
         },
         {
@@ -7593,7 +7593,7 @@ describe('Package policy service', () => {
       const savedObjectsClient = createSavedObjectClientMock();
       jest
         .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-        .mockResolvedValueOnce({ cleared: false });
+        .mockResolvedValueOnce(undefined);
       const mockPackagePolicy = createPackagePolicyMock();
 
       (getPackageInfo as jest.Mock).mockResolvedValue({
@@ -16847,36 +16847,18 @@ describe('compilePackagePolicyForVersions()', () => {
       );
     });
 
-    it('does nothing when there is no manifest or template condition and no stored cache', async () => {
+    it('does nothing when there is no manifest or template condition', async () => {
       const soClient = makeSoClient({});
 
-      const result = await packagePolicyService.compilePackagePolicyForVersions(
+      await packagePolicyService.compilePackagePolicyForVersions(
         soClient,
         mockPackageInfo,
         noConditionAssetsMap,
         mockPackagePolicy
       );
 
-      expect(result).toEqual({ cleared: false });
       expect(mockRecompileInputsWithAgentVersion).not.toHaveBeenCalled();
       expect(soClient.update).not.toHaveBeenCalled();
-    });
-
-    it('clears a stale inputs_for_versions when the package no longer has a condition', async () => {
-      const soClient = makeSoClient({ '9.5': [{ type: 'logfile' }] });
-
-      const result = await packagePolicyService.compilePackagePolicyForVersions(
-        soClient,
-        mockPackageInfo,
-        noConditionAssetsMap,
-        mockPackagePolicy
-      );
-
-      expect(result).toEqual({ cleared: true });
-      expect(mockRecompileInputsWithAgentVersion).not.toHaveBeenCalled();
-      expect(soClient.update).toHaveBeenCalledWith(expect.any(String), 'pkg-policy-1', {
-        inputs_for_versions: {},
-      });
     });
 
     it('does nothing when the feature flag is disabled', async () => {
@@ -16893,9 +16875,117 @@ describe('compilePackagePolicyForVersions()', () => {
       );
 
       expect(mockRecompileInputsWithAgentVersion).not.toHaveBeenCalled();
-      expect(soClient.get).not.toHaveBeenCalled();
       expect(soClient.update).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('clearStaleInputsForVersions()', () => {
+  const noConditionAssetsMap = new Map() as PackagePolicyAssetsMap;
+  const conditionPackageInfo = {
+    name: 'test',
+    version: '1.0.0',
+    conditions: { agent: { version: '^9.3.0' } },
+  } as PackageInfo;
+  const noConditionPackageInfo = { name: 'test', version: '1.0.1' } as PackageInfo;
+  const clear = (soClient: any, candidates: any[]) =>
+    (packagePolicyService as any).clearStaleInputsForVersions(soClient, candidates);
+
+  const makeSoClient = (caches: Record<string, Record<string, any>>) => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.bulkGet.mockImplementation(async (objs: any[]) => ({
+      saved_objects: objs.map(({ id }) => ({
+        id,
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: { inputs_for_versions: caches[id] },
+      })),
+    }));
+    soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+    return soClient;
+  };
+
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: true,
+    } as any);
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+    jest.clearAllMocks();
+  });
+
+  it('clears the stale caches of package policies without a condition in one read and one write', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] }, b: {}, c: { '9.5': [] } });
+
+    const result = await clear(soClient, [
+      {
+        packagePolicyId: 'a',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+      {
+        packagePolicyId: 'b',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+      { packagePolicyId: 'c', packageInfo: conditionPackageInfo, assetsMap: noConditionAssetsMap },
+    ]);
+
+    expect(result).toBe(true);
+    expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+    expect(soClient.bulkGet.mock.calls[0][0]!.map((o) => o.id)).toEqual(['a', 'b']);
+    expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+    expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+      expect.objectContaining({ id: 'a', attributes: { inputs_for_versions: {} } }),
+    ]);
+  });
+
+  it('does not write when no cache is stored', async () => {
+    const soClient = makeSoClient({ a: {} });
+
+    const result = await clear(soClient, [
+      {
+        packagePolicyId: 'a',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+    ]);
+
+    expect(result).toBe(false);
+    expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+  });
+
+  it('does no I/O when every package still has a condition', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+
+    const result = await clear(soClient, [
+      { packagePolicyId: 'a', packageInfo: conditionPackageInfo, assetsMap: noConditionAssetsMap },
+    ]);
+
+    expect(result).toBe(false);
+    expect(soClient.bulkGet).not.toHaveBeenCalled();
+  });
+
+  it('does no I/O when the feature flag is disabled', async () => {
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: false,
+    } as any);
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+
+    const result = await clear(soClient, [
+      {
+        packagePolicyId: 'a',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+    ]);
+
+    expect(result).toBe(false);
+    expect(soClient.bulkGet).not.toHaveBeenCalled();
   });
 });
 
