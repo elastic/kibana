@@ -196,6 +196,55 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
     await workflows.delete(workflowId);
   });
 
+  apiTest(
+    'history: a pack dispatch records the workflow and execution IDs and is listed with source Workflow',
+    async ({ apiClient, esClient, kbnClient }) => {
+      const workflows = workflowsClient(apiClient, adminHeaders);
+      const workflowId = await workflows.create(
+        'osq-wf-pack-history-source',
+        runPackStep(`pack: osq-wf-pack`)
+      );
+      const executionId = await workflows.run(workflowId);
+      const state = await workflows.waitForDispatch(executionId, 'p');
+      for (const { action_id: queryActionId } of state.queries) {
+        await answerQuery(esClient, {
+          queryActionId,
+          agent: AGENT,
+          rows: [{ pid: '1', name: 'systemd', uid: '0' }],
+        });
+      }
+      await workflows.waitForEnd(executionId);
+
+      // The execution ID comes from the engine's `x-kibana-workflow-execution-id`, not the step.
+      const [action] = await findPackActionDocs(systemEs, packId, state.action_id);
+      expect(action).toMatchObject({
+        dispatch_source: 'workflow',
+        dispatch_workflow_id: workflowId,
+        dispatch_execution_id: executionId,
+      });
+
+      const history = async (sourceFilters?: string) => {
+        const { data } = await kbnClient.request<{
+          data: Array<{ actionId?: string; source: string }>;
+        }>({
+          method: 'GET',
+          path: `/api/osquery/history?pageSize=100${
+            sourceFilters ? `&sourceFilters=${sourceFilters}` : ''
+          }`,
+          headers: { 'elastic-api-version': '2023-10-31' },
+        });
+
+        return data.data.filter((row) => row.actionId === state.action_id);
+      };
+
+      // One action for the whole pack, so one history row.
+      expect(await history()).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history('workflow')).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history('live,rule')).toHaveLength(0);
+      await workflows.delete(workflowId);
+    }
+  );
+
   apiTest('timed_out: no agent answers any pack query by the deadline', async ({ apiClient }) => {
     const workflows = workflowsClient(apiClient, adminHeaders);
     const workflowId = await workflows.create(
