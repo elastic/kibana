@@ -18,7 +18,13 @@ import { collectHuntArtifacts, type HuntArtifacts } from '../collect';
 import type { HuntWatchClient } from '../hunt_watch_client';
 import { applyHuntFault, resetHuntReport } from '../seed_hunt_data';
 import type { HuntExpected, HuntWatchExample } from '../types';
-import { CODE_SCORERS, scoreCanaryTripped, type CodeScore } from './code_scores';
+import {
+  CODE_SCORERS,
+  scoreCanaryTripped,
+  deferredVerdict,
+  hitCascade,
+  type CodeScore,
+} from './code_scores';
 import {
   createJudgeEvaluators,
   expectsNoNarrative,
@@ -73,6 +79,27 @@ export const createNarrativeRubricEvaluator = (
         score: null,
         label: 'N/A',
         explanation: 'row expects no Investigation narrative, so there is nothing to judge',
+      };
+    }
+    // The rubric criteria assume the row's hit verdict; judging a narrative of the wrong verdict
+    // against them repeats the Hit Consistency failure as a low prose score.
+    // A deferred verdict is checked first, as the code scorers do: Outcome Label owns that stop.
+    const cascade = expected.expected.reports
+      .map((report) => {
+        const actual = output.reports[report.reportId];
+        if (!actual) return undefined;
+        const deferred = deferredVerdict(expected.expected, actual);
+        if (deferred) return { ...deferred, cascadeFrom: 'Outcome Label' };
+        const miss = hitCascade(report, actual);
+        return miss && { ...miss, cascadeFrom: 'Hit Consistency' };
+      })
+      .find((result) => result !== undefined);
+    if (cascade) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: `the rubric does not apply: ${cascade.explanation}`,
+        metadata: { cascadeFrom: cascade.cascadeFrom },
       };
     }
     const narrative = narrativeOf(output);

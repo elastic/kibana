@@ -16,21 +16,21 @@ never part of that gate.
 
 | Name | Kind | What it checks |
 |---|---|---|
-| Outcome Label | CODE | `resolve_run_outcome` is one of the accepted labels, plus `incomplete_stage` when pinned and the run did not complete |
+| Outcome Label | CODE | `resolve_run_outcome` is one of the accepted labels, plus `incomplete_stage` when pinned and the run did not complete; a run that did not complete records where it stopped in `metadata.stoppedAt` (outcome, stage, coordinator completeness, retryable reasons) |
 | Index Scope Gate | CODE | `index_scope_blocked` matches, and a blocked run opens no Investigation |
 | Candidate Selection | CODE | named reports were selected; expected skip reasons (`not_found`) reported |
-| Stage Progression | CODE | find-or-create, hunt, package, conclusion all completed, in order |
+| Stage Progression | CODE | find-or-create, hunt, package, conclusion all completed, in order; the explanation names a hunt that stopped `incomplete_retryable` inside a completed stage |
 | Hit Consistency | CODE | hunt `hit`, SSE `has_confirmed_hit`, and `hit_sources` agree with the expectation |
 | Tier 1 Status | CODE | SSE `hunt_result.tier1.status`, falling back to the hunt headline |
 | Tier 2 Execution | CODE | whether any behavior query executed |
-| SSE Attachment | CODE | a `security.significant_security_event` attachment with a `hunt_result` exists iff expected |
+| SSE Attachment | CODE | a `security.significant_security_event` attachment with a `hunt_result` exists iff expected; `N/A` when the hit verdict is wrong (see below) |
 | Evidence Honesty | CODE | report `evidence[]` written iff the coordinator result's `completed_successfully` is true (`complete` or `incomplete_final`, never `incomplete_retryable`), the same flag the hunt child's `write_evidence` step reads |
-| Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum; a row pinned to zero checks the run created no Proposal in any status |
+| Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum; a row pinned to zero checks the run created no Proposal in any status; `N/A` when the hit verdict is wrong (see below), except on a zero row |
 | Proposal Convergence | CODE | multi-candidate only: each actioned subject (target plus criticality level, the key packaging converges on) is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
 | Canary Inverted | CODE | 1 iff the hunt reached a verdict with Tier 1 `no_searchable_terms` and the prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE; a hunt that failed before searching scores 0 |
-| Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; reported, not gated |
-| Factuality | LLM | narrative claims against a ground truth synthesized from the row's pinned expectations; reported, not gated |
+| Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; `N/A` when the hunt `hit` verdict is wrong, since the criteria assume the row's verdict; reported, not gated |
+| Factuality | LLM | the judge's verdict on the narrative's claims against a ground truth synthesized from the row's pinned expectations plus the report's recorded metadata, search scope and executed behaviors: 1 for `ACCURATE` or `MINOR_INACCURACIES`, 0 otherwise, with the claim-score mean kept as `claimScore`; reported, not gated |
 | Relevance | LLM | share of narrative claims that answer the hunt question; reported, not gated |
 | Groundedness | LLM | narrative claims against the hunt facts (hunt output, SSE `hunt_result`, packaging, Proposals, evidence); reported, not gated |
 
@@ -50,21 +50,49 @@ measured" and "measured and expected to be nothing" read differently. `src/datas
 enforces the two shapes that would make a pin vacuous: no `pendingProposals: { min: 0 }`, and an
 `incompleteStage` on every row whose `outcome` admits `partial`.
 
+A row whose `outcome` does not admit `partial`, on a run that stopped `partial` with the coordinator
+`incomplete_retryable` and no confirmed hit, has deferred its verdict: no SSE, Proposal or
+Investigation update exists yet. Outcome Label scores that stop as 0 (so the gate stays red);
+Hit Consistency, Tier 2 Execution, SSE Attachment, Proposal Presence and Investigation Status
+return `N/A` naming the retryable reasons instead of each failing for the same cause, and Evidence
+Honesty applies the write rule (no stamp) rather than the row's pin.
+
+A hunt that reached the wrong hit verdict (hunt `hit` differs from the row's `hasConfirmedHit`)
+fails Hit Consistency once. The SSE attachment, the Proposals and the narrative all follow from
+the verdict, so SSE Attachment, Proposal Presence and Narrative Rubric return `N/A` with
+`metadata.cascadeFrom: 'Hit Consistency'` instead of each adding a failure for the same miss.
+A row pinned to zero Proposals keeps Proposal Presence scored: a Proposal minted on a clean report
+is a hard kill, and that check is its only detector. A mismatch only in the SSE
+`has_confirmed_hit` or `hit_sources` fails Hit Consistency without the cascade.
+
 The gate itself has a positive control. `src/evaluators/dataset_evaluator.test.ts` drives the
 whole seam (stub executor, task, evaluator callbacks, score collector, `assertCodeScoresPass`)
 and asserts that a known-bad output turns the dataset red and a known-good one does not, so a
 wiring regression that left the suite green while measuring nothing would fail there.
 
 Read the LLM scores against their ceilings. The ground truth is synthesized from the row's
-pinned expectations, so Factuality docks the narrative's peripheral detail (publish date,
-indicator values, search window) as "not in ground truth"; about 0.9 is a healthy row, and a
-drop below that points at a central claim the judge contradicted. Counts a row leaves unpinned
+pinned expectations, so the judge marks the narrative's peripheral detail (publish date,
+indicator values, search window) as "not in ground truth". That drags the claim-score mean
+below 0.8 on narratives the judge itself calls accurate, so Factuality scores the verdict
+instead: a 0 means the judge found a central claim contradicted or unsupported, and
+`claimScore` shows how much peripheral detail it could not check. Counts a row leaves unpinned
 (no `tier1Status`, no `tier2Executed`, no `pendingProposals`) are stated to the judge
-as open, so the narrative is not docked for reporting them. Groundedness judges the same
+as open, so the narrative is not docked for reporting them. The ground truth also states the
+Investigation status and `close_reason` the run recorded, so a narrative that reports them
+truthfully passes Factuality even when they differ from the row's expectation: Investigation
+Status and Outcome Label score the outcome itself, and `close_reason` is not pinned or scored
+by any code check. Groundedness judges the same
 narrative against the collected hunt facts (report doc, hunt output, coordinator result, SSE,
 packaging, Proposals, evidence, plus every pending Proposal in the space because convergence
 notes cite other Investigations), so a dip there is a claim the Worker made that none of its
 own data supports.
+
+Read Relevance only under a judge that has been checked against graded labels. Under the
+gemini-3.1-pro judge it agrees with independent graders on 19/21 golden and 48/53 hard cells at
+0.8. Under the glm-5.2 judge it carries no signal: almost every narrative is labelled
+`PARTIALLY_RELEVANT`, and on the golden cohort narratives the graders passed scored lower on
+average (0.51) than the ones they failed (0.71), so neither a lower threshold nor a label rule
+recovers it. Do not compare Relevance across judges.
 
 ## Proposal gate (approve and dismiss)
 

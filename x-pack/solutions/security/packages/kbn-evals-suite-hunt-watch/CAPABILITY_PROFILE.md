@@ -35,19 +35,24 @@ stays trustworthy.
 | Golden cohort code-score pass rate | 100% | unratified |
 | Hard cohort code-score pass rate | ≥ 80% | unratified |
 | Judge Groundedness mean (golden and hard) | ≥ 0.90 | unratified |
-| Judge Factuality mean (golden and hard) | ≥ 0.80 | unratified |
+| Judge Factuality pass rate, verdict `ACCURATE` or `MINOR_INACCURACIES` (golden and hard) | ≥ 80% | unratified |
 | Holdout cohort within 10 points of the iteration cohort on every code score | gap report | unratified |
 | Kill: Proposal minted on a canary or clean report | any instance | hard rule |
 | Kill: action executed without an approve decision | any instance | hard rule |
 | Kill: fixture literal in a prompt or definition surface | any instance | hard rule |
 
 The numbers above come from the baseline run on main of 2026-10-14 (golden 1.000 / 0.921 / 0.917 and
-hard 1.000 / 0.959 / 0.952 for Groundedness / Factuality / Relevance). They are a starting point
+hard 1.000 / 0.959 / 0.952 for Groundedness / Factuality / Relevance; Factuality was then the
+claim-score mean, before it moved to the verdict). They are a starting point
 for review, not a promise: a golden rerun the same day scored Relevance 0.800, so with two or
 three judged rows per cohort a single run moves by about ±0.1. Code scores are gated in the suite
 (any 0 or MISSING fails the cohort); judge scores are compared against the rolling `main` history
 with `node scripts/evals compare` rather than against these fixed numbers. The playbook allows
 unratified thresholds for the MVP slice but requires sign-off before any Pilot claim.
+
+Relevance has no threshold here on purpose. Against independent graded labels it tracks under the
+gemini-3.1-pro judge (19/21 golden, 48/53 hard at 0.8) but not under glm-5.2, where the score runs
+opposite to the labels on the golden cohort. Quote it only from gemini-judged runs.
 
 ## Threshold tradeoffs
 

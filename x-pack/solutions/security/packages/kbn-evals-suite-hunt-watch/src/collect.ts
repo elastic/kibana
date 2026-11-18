@@ -43,7 +43,12 @@ const REPORT_FAN_OUT_STEP_ID = 'report_fan_out';
 export interface HuntBehaviorOutput {
   execution?: { hit?: boolean; executed?: boolean; row_count?: number };
   technique_name?: string;
+  technique_id?: string;
   parent_technique_id?: string;
+  severity?: string;
+  confidence?: number;
+  affected_hosts?: string[];
+  affected_users?: string[];
 }
 
 export interface HuntStepOutput {
@@ -53,6 +58,8 @@ export interface HuntStepOutput {
   reason?: string;
   sse_count?: number;
   behaviors?: HuntBehaviorOutput[];
+  /** Parts of the report the hunt did not search, and why. */
+  coverage_gaps?: Array<{ reason?: string; technique_id?: string; detail?: string }>;
 }
 
 export interface PackageStepOutput {

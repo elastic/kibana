@@ -7,13 +7,18 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
+import type { HuntResult } from '@kbn/alertzero-common';
 import type { DefaultEvaluators, EvalsExecutorClient, Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { collectHuntArtifacts, type HuntArtifacts, type HuntReportArtifacts } from '../collect';
 import type { HuntWatchClient } from '../hunt_watch_client';
 import { resetHuntReport } from '../seed_hunt_data';
 import type { HuntWatchExample } from '../types';
-import { createCanaryEvaluators, createEvaluateDataset } from './dataset_evaluator';
+import {
+  createCanaryEvaluators,
+  createEvaluateDataset,
+  createNarrativeRubricEvaluator,
+} from './dataset_evaluator';
 
 jest.mock('../collect', () => ({ collectHuntArtifacts: jest.fn() }));
 jest.mock('../seed_hunt_data', () => ({ applyHuntFault: jest.fn(), resetHuntReport: jest.fn() }));
@@ -195,5 +200,107 @@ describe('createEvaluateDataset', () => {
     await expect(
       evaluateDataset({ dataset, evaluatorOverrides: createCanaryEvaluators() })
     ).rejects.toThrow(/Canary Inverted/);
+  });
+});
+
+describe('createNarrativeRubricEvaluator', () => {
+  const criteria = jest.fn(() => judgeStub('criteria'));
+  const rubric = createNarrativeRubricEvaluator({
+    criteria,
+  } as unknown as DefaultEvaluators);
+
+  const hitRow: HuntWatchExample['output'] = {
+    expected: {
+      indexScopeBlocked: false,
+      reports: [
+        {
+          reportId: REPORT_ID,
+          hasConfirmedHit: true,
+          pendingProposals: { min: 1 },
+          evidenceWritten: true,
+          sseAttachment: true,
+        },
+      ],
+    },
+    criteria: ['Names the matched behavior.'],
+  };
+
+  const judgedOutput = (hit: boolean): HuntArtifacts =>
+    blockedArtifacts(
+      { indexScopeBlocked: false },
+      { selected: true, hunt: { hit }, narrative: 'Hunt Watch confirmed a hit' }
+    );
+
+  beforeEach(() => criteria.mockClear());
+
+  it('returns N/A naming Hit Consistency when the hit verdict is wrong', async () => {
+    const result = await rubric.evaluate({
+      input: blockedRow.input,
+      output: judgedOutput(false),
+      expected: hitRow,
+      metadata: null,
+    });
+    expect(result.label).toBe('N/A');
+    expect(result.metadata).toEqual({ cascadeFrom: 'Hit Consistency' });
+    expect(criteria).not.toHaveBeenCalled();
+  });
+
+  it('names Outcome Label, not Hit Consistency, when the run deferred its verdict', async () => {
+    const output = blockedArtifacts(
+      { indexScopeBlocked: false },
+      {
+        selected: true,
+        outcome: 'partial',
+        incompleteStage: 'hunt',
+        coordinator: { completeness: 'incomplete_retryable', has_confirmed_hit: false },
+        hunt: { hit: false },
+        narrative: 'Hunt Watch stopped before a verdict',
+      }
+    );
+    const result = await rubric.evaluate({
+      input: blockedRow.input,
+      output,
+      expected: { ...hitRow, expected: { ...hitRow.expected, outcome: ['completed'] } },
+      metadata: null,
+    });
+    expect(result.label).toBe('N/A');
+    expect(result.explanation).toContain('verdict deferred');
+    expect(result.metadata).toEqual({ cascadeFrom: 'Outcome Label' });
+    expect(criteria).not.toHaveBeenCalled();
+  });
+
+  it('judges the narrative when only the SSE hit fields disagree', async () => {
+    const output = judgedOutput(true);
+    const huntResult: HuntResult = {
+      has_confirmed_hit: true,
+      hit_sources: [],
+      time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+      tier1: {
+        status: 'no_environment_hits',
+        counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+        per_index: [],
+        resolved_iocs: [],
+      },
+    };
+    output.reports[REPORT_ID].sseEvents = [{ severity: 'high', hunt_result: huntResult }];
+    const result = await rubric.evaluate({
+      input: blockedRow.input,
+      output,
+      expected: hitRow,
+      metadata: null,
+    });
+    expect(result.score).toBe(1);
+    expect(criteria).toHaveBeenCalledWith(hitRow.criteria);
+  });
+
+  it('judges the narrative when the hit verdict matches', async () => {
+    const result = await rubric.evaluate({
+      input: blockedRow.input,
+      output: judgedOutput(true),
+      expected: hitRow,
+      metadata: null,
+    });
+    expect(result.score).toBe(1);
+    expect(criteria).toHaveBeenCalledWith(hitRow.criteria);
   });
 });

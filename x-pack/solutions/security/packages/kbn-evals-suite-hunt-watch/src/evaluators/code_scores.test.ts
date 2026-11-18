@@ -15,12 +15,14 @@ import {
   scoreCanaryTripped,
   scoreEvidenceHonesty,
   scoreHitConsistency,
+  scoreInvestigationStatus,
   scoreOutcome,
   scoreProposalConvergence,
   scoreProposalPresence,
   scoreSseAttachment,
   scoreStageProgression,
   scoreTier1Status,
+  scoreTier2Execution,
 } from './code_scores';
 
 const REPORT_ID = 'r1';
@@ -660,5 +662,192 @@ describe('scoreStageProgression', () => {
         })
       ).score
     ).toBe(0);
+  });
+
+  it('names an incomplete_retryable hunt in an otherwise passing run', () => {
+    const result = scoreStageProgression(
+      buildExpected({ tier1Status: 'no_environment_hits' }),
+      buildArtifacts({
+        coordinator: { completeness: 'incomplete_retryable', completed_successfully: false },
+        stages: {
+          find_or_create_investigation: completed('2026-01-01T00:00:00Z'),
+          hunt: completed('2026-01-01T00:01:00Z'),
+          package_report: completed('2026-01-01T00:02:00Z'),
+          write_run_conclusion: completed('2026-01-01T00:03:00Z'),
+        },
+      })
+    );
+    expect(result.score).toBe(1);
+    expect(result.explanation).toMatch(/incomplete_retryable/);
+  });
+});
+
+describe('deferred verdict', () => {
+  const hitRow = (): HuntExpected =>
+    buildExpected(
+      {
+        hasConfirmedHit: true,
+        tier1Status: 'no_environment_hits',
+        tier2Executed: true,
+        pendingProposals: { min: 1 },
+        evidenceWritten: true,
+        sseAttachment: true,
+        investigationStatus: 'open',
+      },
+      { outcome: ['completed'] }
+    );
+
+  const retryable = (coordinator: Record<string, unknown> = {}) =>
+    buildArtifacts({
+      outcome: 'partial',
+      incompleteStage: 'hunt',
+      hunt: { status: 'partial', hit: false, behaviors: [] },
+      coordinator: {
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+        has_confirmed_hit: false,
+        retryable_reasons: ['quote_ungrounded'],
+        ...coordinator,
+      },
+      reportDoc: {},
+      conversation: { id: 'c', metadata: { status: 'open' } },
+    });
+
+  it('returns N/A for the verdict checks once Outcome Label has scored the retryable stop', () => {
+    const expected = hitRow();
+    const artifacts = retryable();
+    expect(scoreOutcome(expected, artifacts).score).toBe(0);
+    for (const scorer of [
+      scoreHitConsistency,
+      scoreTier2Execution,
+      scoreSseAttachment,
+      scoreProposalPresence,
+      scoreInvestigationStatus,
+    ]) {
+      const result = scorer(expected, artifacts);
+      expect(result.label).toBe('N/A');
+      expect(result.explanation).toContain('quote_ungrounded');
+    }
+  });
+
+  it('still fails a Proposal minted on a zero row when the verdict was deferred', () => {
+    const expected = buildExpected(
+      { hasConfirmedHit: false, pendingProposals: 0 },
+      { outcome: ['completed'] }
+    );
+    const artifacts = retryable();
+    artifacts.reports[REPORT_ID].proposals = [proposalAt('2026-01-01T12:05:00.000Z', 'pending')];
+    expect(scoreProposalPresence(expected, artifacts)).toMatchObject({ score: 0 });
+  });
+
+  it('scores evidence by the write rule on a deferred verdict', () => {
+    expect(scoreEvidenceHonesty(hitRow(), retryable()).score).toBe(1);
+    expect(
+      scoreEvidenceHonesty(
+        hitRow(),
+        buildArtifacts({
+          ...retryable().reports[REPORT_ID],
+          reportDoc: { evidence: [{ last_hunted_at: '2026-01-01T12:00:00.000Z' }] },
+        })
+      ).score
+    ).toBe(0);
+  });
+
+  it('still scores the verdict checks when the row accepts partial', () => {
+    const expected = hitRow();
+    expected.outcome = ['completed', 'partial'];
+    expect(scoreHitConsistency(expected, retryable()).score).toBe(0);
+  });
+
+  it('still scores the verdict checks when a retryable run carries a confirmed hit', () => {
+    const artifacts = retryable({ has_confirmed_hit: true });
+    artifacts.reports[REPORT_ID].hunt = { status: 'partial', hit: true, behaviors: [] };
+    expect(scoreSseAttachment(hitRow(), artifacts).score).toBe(0);
+  });
+
+  it('still scores the verdict checks on a completed run', () => {
+    const artifacts = retryable();
+    artifacts.reports[REPORT_ID].outcome = 'completed';
+    expect(scoreHitConsistency(hitRow(), artifacts).score).toBe(0);
+  });
+});
+
+describe('hit verdict cascade', () => {
+  const hitRow = (): HuntExpected =>
+    buildExpected({ hasConfirmedHit: true, pendingProposals: { min: 1 }, sseAttachment: true });
+
+  const missedHit = () =>
+    buildArtifacts({
+      hunt: { status: 'completed', hit: false, behaviors: [] },
+      conversation: { id: 'c', metadata: { status: 'open' } },
+    });
+
+  it('fails Hit Consistency once and marks the checks that follow from the verdict N/A', () => {
+    expect(scoreHitConsistency(hitRow(), missedHit()).score).toBe(0);
+    for (const scorer of [scoreSseAttachment, scoreProposalPresence]) {
+      const result = scorer(hitRow(), missedHit());
+      expect(result.label).toBe('N/A');
+      expect(result.explanation).toContain('Hit Consistency scores the root cause');
+    }
+  });
+
+  it('still fails a zero row that minted a Proposal after an unexpected hit', () => {
+    const result = scoreProposalPresence(
+      buildExpected({ tier1Status: 'no_environment_hits', pendingProposals: 0 }),
+      buildArtifacts({
+        hunt: { hit: true },
+        proposals: [proposalAt('2026-01-01T12:05:00.000Z', 'pending')],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('1 Proposal(s) created by this run');
+  });
+
+  it('marks an unexpected hit as a cascade on the SSE attachment of a zero row', () => {
+    const result = scoreSseAttachment(
+      buildExpected({ tier1Status: 'no_environment_hits', pendingProposals: 0 }),
+      buildArtifacts({ hunt: { hit: true } })
+    );
+    expect(result.label).toBe('N/A');
+  });
+
+  it('still scores the downstream checks when the hit verdict matches', () => {
+    const artifacts = missedHit();
+    artifacts.reports[REPORT_ID].hunt = { status: 'completed', hit: true, behaviors: [] };
+    expect(scoreSseAttachment(hitRow(), artifacts).score).toBe(0);
+    expect(scoreProposalPresence(hitRow(), artifacts).score).toBe(0);
+  });
+});
+
+describe('Outcome Label stop metadata', () => {
+  it('records the stage, completeness and reasons of a run that did not complete', () => {
+    const result = scoreOutcome(
+      buildExpected({}, { outcome: ['completed'] }),
+      buildArtifacts({
+        outcome: 'partial',
+        incompleteStage: 'hunt',
+        coordinator: {
+          completeness: 'incomplete_retryable',
+          retryable_reasons: ['quote_ungrounded'],
+        },
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.metadata?.stoppedAt).toEqual({
+      [REPORT_ID]: {
+        outcome: 'partial',
+        stage: 'hunt',
+        completeness: 'incomplete_retryable',
+        retryableReasons: ['quote_ungrounded'],
+      },
+    });
+  });
+
+  it('records no stop for a completed run', () => {
+    const result = scoreOutcome(
+      buildExpected({}, { outcome: ['completed'] }),
+      buildArtifacts({ outcome: 'completed' })
+    );
+    expect(result.metadata?.stoppedAt).toBeUndefined();
   });
 });
