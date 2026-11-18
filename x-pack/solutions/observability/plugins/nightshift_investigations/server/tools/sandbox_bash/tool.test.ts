@@ -7,7 +7,7 @@
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import {
@@ -20,9 +20,11 @@ const GITHUB_TOKEN = 'ghp_sandbox_secret_value';
 
 const setup = ({
   resolveConnectorCredentials,
+  allowedHosts = [],
   stdout = '',
 }: {
   resolveConnectorCredentials?: ResolveConnectorCredentials;
+  allowedHosts?: string[];
   stdout?: string;
 } = {}) => {
   const runCommand = jest.fn().mockResolvedValue({
@@ -33,19 +35,23 @@ const setup = ({
   });
   const mkdirs = jest.fn().mockResolvedValue([true]);
   const writeFiles = jest.fn().mockResolvedValue([{ success: true }]);
-  const session = { runCommand, mkdirs, writeFiles } as unknown as SandboxSession;
+  const session = { runCommand, mkdirs, writeFiles } as unknown as AuditedSandboxSession;
   const sandboxStart = {
     getSession: jest.fn(() => session),
-  } as unknown as SandboxPluginStart;
+  } as unknown as NightshiftSandboxStart;
   const sandboxWorkspaceManager = {
     ensureWorkspaceReady: jest.fn().mockResolvedValue(undefined),
   } as unknown as SandboxWorkspaceManager;
+  const sandboxAllowlistClient = {
+    getHostsForCommand: jest.fn().mockResolvedValue(allowedHosts),
+  };
   const logger = loggingSystemMock.createLogger();
 
   const tool = createSandboxBashTool({
     getSandboxStart: () => sandboxStart,
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
+    sandboxAllowlistClient,
     logger,
   });
 
@@ -53,6 +59,7 @@ const setup = ({
   const context = {
     request,
     runContext: { stack: [{ type: 'agent', agentId: 'agent', conversationId: 'conv-1' }] },
+    callContext: { toolId: 'nightshift_sandbox_bash', toolCallId: 'call-1', callSource: 'agent' },
     agentConfiguration: { connector_ids: ['connector-1'] },
   };
 
@@ -62,7 +69,17 @@ const setup = ({
       context
     );
 
-  return { tool, run, runCommand, writeFiles, request, logger, session };
+  return {
+    tool,
+    run,
+    runCommand,
+    writeFiles,
+    request,
+    logger,
+    session,
+    sandboxStart,
+    sandboxAllowlistClient,
+  };
 };
 
 describe('sandbox bash tool', () => {
@@ -70,6 +87,18 @@ describe('sandbox bash tool', () => {
     const { tool } = setup();
 
     expect(tool.excludeFromMcp).toBe(true);
+  });
+
+  it('names the tool and this call of it when it obtains the session, so its RPCs are audited', async () => {
+    const { run, request, sandboxStart } = setup();
+
+    await run({});
+
+    expect(sandboxStart.getSession).toHaveBeenCalledWith(request, 'conv-1', {
+      type: 'tool',
+      toolId: 'nightshift_sandbox_bash',
+      toolCallId: 'call-1',
+    });
   });
 
   it('logs only the error type, never the error message, when the sandbox call throws', async () => {
@@ -135,6 +164,39 @@ describe('sandbox bash tool — connector credentials', () => {
     ]);
   });
 
+  it('passes space egress firewall rules in allowed_hosts when configured on the space', async () => {
+    const { run, runCommand } = setup({
+      resolveConnectorCredentials: resolved(),
+      allowedHosts: ['allow pypi.org GET,HEAD /simple/', 'deny api.github.com POST /gists'],
+    });
+
+    await run({ connector_id: 'connector-1' });
+
+    expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual([
+      'allow pypi.org GET,HEAD /simple/',
+      'deny api.github.com POST /gists',
+    ]);
+  });
+
+  it('logs the error and returns a structured tool error without running the command when getHostsForCommand rejects', async () => {
+    const { run, runCommand, sandboxAllowlistClient, logger } = setup();
+    sandboxAllowlistClient.getHostsForCommand.mockRejectedValueOnce(new Error('corrupted policy'));
+
+    const res = await run({});
+
+    expect(res).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: { message: 'Space sandbox egress allowlist is invalid or unavailable.' },
+        },
+      ],
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to load space sandbox egress allowlist: corrupted policy'
+    );
+    expect(runCommand).not.toHaveBeenCalled();
+  });
   it('passes no credentials without a connector_id', async () => {
     const resolveConnectorCredentials = resolved();
     const { run, runCommand } = setup({ resolveConnectorCredentials });

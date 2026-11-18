@@ -88,7 +88,8 @@ describe('loadConnectorsThunk', () => {
     );
     expect(getWorkflowZodSchema).toHaveBeenCalledWith(
       mockConnectorsResponse1.connectorTypes,
-      expect.any(Array)
+      expect.any(Array),
+      { includePageTrigger: false }
     );
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
     expect(result.payload).toEqual(mockConnectorsResponse1);
@@ -208,7 +209,8 @@ describe('loadConnectorsThunk', () => {
     );
     expect(getWorkflowZodSchema).toHaveBeenCalledWith(
       mockConnectorsResponse2.connectorTypes,
-      expect.any(Array)
+      expect.any(Array),
+      { includePageTrigger: false }
     );
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
     expect(result.payload).toEqual(mockConnectorsResponse2);
@@ -308,7 +310,8 @@ describe('loadConnectorsThunk', () => {
     );
     expect(getWorkflowZodSchema).toHaveBeenCalledWith(
       mockConnectorsResponse1.connectorTypes,
-      expect.any(Array)
+      expect.any(Array),
+      { includePageTrigger: false }
     );
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
     expect(result.payload).toEqual(mockConnectorsResponse1);

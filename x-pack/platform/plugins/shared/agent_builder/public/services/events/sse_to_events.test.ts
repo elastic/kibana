@@ -153,6 +153,16 @@ describe('sseToEvents', () => {
     });
   });
 
+  it('carries the tool call intent onto the step', () => {
+    const stepId = executionStepEventId(ROUND_ID, 0, 0);
+    const state = fold(executionStarted(), {
+      type: ChatEventType.toolCall,
+      data: { tool_call_id: 't1', tool_id: 'my_tool', params: {}, intent: 'Searching logs' },
+    } as ChatEvent);
+
+    expect(stepAt(state, stepId)).toMatchObject({ tool_call_id: 't1', intent: 'Searching logs' });
+  });
+
   it('builds a step from a resume’s tool_result when no tool_call preceded it', () => {
     const stepId = executionStepEventId(ROUND_ID, 1, 0);
     const state = fold(executionStarted(RESUME_EXECUTION_ID), {

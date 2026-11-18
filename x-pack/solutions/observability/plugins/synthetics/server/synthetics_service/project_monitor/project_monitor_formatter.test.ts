@@ -24,6 +24,7 @@ import * as addMonitorBulk from '../../routes/monitor_cruds/bulk_cruds/add_monit
 import { mockEncryptedSO } from '../utils/mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
+import { SCHEDULE_INTERVAL_FIELD } from '../../../common/lib/schedule_to_time';
 
 jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
   getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
@@ -449,6 +450,7 @@ describe('ProjectMonitorFormatter', () => {
             [ConfigKey.NAMESPACE]: 'default',
             [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
             [ConfigKey.CONFIG_ID]: expect.any(String),
+            [SCHEDULE_INTERVAL_FIELD]: 180,
           },
         }),
         expect.objectContaining({
@@ -457,6 +459,7 @@ describe('ProjectMonitorFormatter', () => {
             ...soData[1].attributes,
             [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
             [ConfigKey.CONFIG_ID]: expect.any(String),
+            [SCHEDULE_INTERVAL_FIELD]: 180,
           },
         }),
       ])

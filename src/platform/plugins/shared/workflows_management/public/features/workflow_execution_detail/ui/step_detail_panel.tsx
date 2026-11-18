@@ -420,6 +420,7 @@ export const StepDetailPanel = ({
   const stepAi = useStepAi({
     workflowDefinition: workflowExecution?.workflowDefinition ?? null,
     stepId,
+    stepType,
     activeStepExecution,
   });
   const stepInputFieldPathPrefix = getStepFieldPathPrefix({

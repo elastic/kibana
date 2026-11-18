@@ -12,7 +12,11 @@ import {
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import type { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
-import { MAX_LENGTH_PER_WORKFLOW_TAG } from '@kbn/cases-plugin/common/constants';
+import {
+  CASE_CONFIGURE_SAVED_OBJECT,
+  MAX_LENGTH_PER_WORKFLOW_TAG,
+} from '@kbn/cases-plugin/common/constants';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -72,6 +76,195 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       expect(updated.extractObservables).to.be(false);
+    });
+
+    describe('extractObservables owner rule', () => {
+      const ownersThatCannotAutoExtract = ['cases', 'observability'];
+      const getExpectedError = (owner: string) => ({
+        error: 'Bad Request',
+        message: `Setting extractObservables to true is not allowed for the "${owner}" owner. Only owners that support automatic observable extraction can enable it.`,
+        statusCode: 400,
+      });
+
+      const getTemplate = (extractObservables: boolean) => ({
+        key: 'template_1',
+        name: 'Template 1',
+        caseFields: { settings: { syncAlerts: true, extractObservables } },
+      });
+
+      /**
+       * The API can no longer create these values, so the old data is written directly.
+       * The write changes the version, so callers must read the configuration again.
+       * The document id has no space prefix, so this helper works only in the default space.
+       */
+      const storeExtractObservablesTrue = async (configurationId: string) => {
+        await es.update({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          id: `${CASE_CONFIGURE_SAVED_OBJECT}:${configurationId}`,
+          doc: {
+            [CASE_CONFIGURE_SAVED_OBJECT]: {
+              extractObservables: true,
+              templates: [getTemplate(true)],
+            },
+          },
+          refresh: true,
+        });
+      };
+
+      const getStoredConfiguration = async (owner: string) => {
+        const [configuration] = await getConfiguration({ supertest, query: { owner } });
+        return configuration;
+      };
+
+      for (const owner of ownersThatCannotAutoExtract) {
+        describe(`owner ${owner}`, () => {
+          it('rejects a change from false to true with a 400 and keeps the stored value', async () => {
+            const configuration = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner } })
+            );
+
+            const response = await updateConfiguration(
+              supertest,
+              configuration.id,
+              { extractObservables: true, version: configuration.version },
+              400
+            );
+
+            expect(response).to.eql(getExpectedError(owner));
+            expect((await getStoredConfiguration(owner)).extractObservables).to.be(false);
+          });
+
+          it('rejects a new template with extractObservables true and keeps the stored templates', async () => {
+            const configuration = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner } })
+            );
+
+            const response = await updateConfiguration(
+              supertest,
+              configuration.id,
+              { templates: [getTemplate(true)], version: configuration.version },
+              400
+            );
+
+            expect(response).to.eql(getExpectedError(owner));
+            expect((await getStoredConfiguration(owner)).templates).to.eql([]);
+          });
+
+          it('rejects a template that changes from false to true', async () => {
+            const configuration = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner, templates: [getTemplate(false)] } })
+            );
+
+            const response = await updateConfiguration(
+              supertest,
+              configuration.id,
+              { templates: [getTemplate(true)], version: configuration.version },
+              400
+            );
+
+            expect(response).to.eql(getExpectedError(owner));
+          });
+
+          it('rejects a new template key with true even when the stored configuration has true', async () => {
+            const { id } = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner, templates: [getTemplate(false)] } })
+            );
+            await storeExtractObservablesTrue(id);
+            const stored = await getStoredConfiguration(owner);
+
+            const response = await updateConfiguration(
+              supertest,
+              id,
+              {
+                templates: [
+                  getTemplate(true),
+                  { ...getTemplate(true), key: 'template_2', name: 'Template 2' },
+                ],
+                version: stored.version,
+              },
+              400
+            );
+
+            expect(response).to.eql(getExpectedError(owner));
+          });
+
+          it('accepts a request that keeps the stored true', async () => {
+            const { id } = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner, templates: [getTemplate(false)] } })
+            );
+            await storeExtractObservablesTrue(id);
+            const stored = await getStoredConfiguration(owner);
+            expect(stored.extractObservables).to.be(true);
+
+            const updated = await updateConfiguration(supertest, id, {
+              extractObservables: true,
+              templates: [getTemplate(true)],
+              closure_type: 'close-by-pushing',
+              version: stored.version,
+            });
+
+            expect(updated.extractObservables).to.be(true);
+            expect(updated.closure_type).to.be('close-by-pushing');
+          });
+
+          it('accepts a patch that does not send extractObservables or templates', async () => {
+            const { id } = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner } })
+            );
+            await storeExtractObservablesTrue(id);
+            const stored = await getStoredConfiguration(owner);
+
+            const updated = await updateConfiguration(supertest, id, {
+              closure_type: 'close-by-pushing',
+              version: stored.version,
+            });
+
+            expect(updated.extractObservables).to.be(true);
+          });
+
+          it('accepts a change from true to false', async () => {
+            const { id } = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner } })
+            );
+            await storeExtractObservablesTrue(id);
+            const stored = await getStoredConfiguration(owner);
+
+            const updated = await updateConfiguration(supertest, id, {
+              extractObservables: false,
+              templates: [getTemplate(false)],
+              version: stored.version,
+            });
+
+            expect(updated.extractObservables).to.be(false);
+          });
+        });
+      }
+
+      describe('owner securitySolution', () => {
+        it('accepts a change from false to true, also in a template', async () => {
+          const configuration = await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: { owner: 'securitySolution', extractObservables: false },
+            })
+          );
+
+          const updated = await updateConfiguration(supertest, configuration.id, {
+            extractObservables: true,
+            templates: [getTemplate(true)],
+            version: configuration.version,
+          });
+
+          expect(updated.extractObservables).to.be(true);
+        });
+      });
     });
 
     it('should patch a configuration with customFields', async () => {

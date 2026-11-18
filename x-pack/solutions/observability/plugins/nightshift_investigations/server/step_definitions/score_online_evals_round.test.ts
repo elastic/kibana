@@ -10,6 +10,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { EvaluateFn } from '@kbn/evals-plugin/server';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import type { EvaluateResult } from '../online_evals/build_score_event';
+import * as tracing from '../tracing';
 import { scoreOnlineEvalsRoundStepDefinition } from './score_online_evals_round';
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
@@ -48,7 +49,6 @@ const INPUT = {
   graded_report: 'first_round',
   evaluator_set: 'reference_free',
   evaluators: [{ name: 'conclusion_quality' }, { name: 'rca_reward', version: '1.0.0' }],
-  judge_connector_id: 'judge-connector',
   investigation_started_at: '2026-10-29T09:59:58.000Z',
   investigation_ended_at: '2026-10-29T10:02:00.000Z',
   investigation_execution_id: 'investigation-exec-1',
@@ -79,12 +79,14 @@ const setup = ({
     workflow: { spaceId: 'ops' },
     execution: { id: 'scoring-exec-1' },
   });
+  const resolveJudgeConnectorId = jest.fn().mockResolvedValue('judge-connector');
   const definition = scoreOnlineEvalsRoundStepDefinition({
     getAgentBuilder: () =>
       agentBuilderAvailable
         ? ({ conversations: { getScopedClient } } as unknown as AgentBuilderPluginStart)
         : undefined,
     getEvaluate: () => (evalsAvailable ? evaluate : undefined),
+    resolveJudgeConnectorId,
     isPaused: () => paused,
     shouldIncludeExplanations: () => includeExplanations,
     telemetry: {
@@ -108,6 +110,7 @@ const setup = ({
     get,
     getScopedClient,
     getContext,
+    resolveJudgeConnectorId,
     reportOnlineEvalScore,
     reportOnlineEvalsStepFailed,
     logger,
@@ -115,6 +118,29 @@ const setup = ({
 };
 
 describe('scoreOnlineEvalsRoundStepDefinition', () => {
+  it('runs the judges in a span on the investigator round trace', async () => {
+    const roundTraceId = 'ebf7677419199e9edc53ac5dc26b9e0e';
+    const spanSpy = jest
+      .spyOn(tracing, 'withNightshiftBackgroundSpan')
+      .mockImplementation((_options, fn) => fn(undefined));
+    const evaluate = jest.fn().mockResolvedValue([okResult('conclusion_quality')]);
+    const { run } = setup({ evaluate, rounds: [{ ...ROUND, trace_id: ['other', roundTraceId] }] });
+
+    await run();
+
+    expect(spanSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'nightshift.onlineEvals.score',
+        foregroundTraceId: roundTraceId,
+        roundId: 'round-1',
+        spaceId: 'ops',
+      }),
+      expect.any(Function)
+    );
+    expect(evaluate).toHaveBeenCalledTimes(1);
+    spanSpy.mockRestore();
+  });
+
   it('scores the round with every evaluator on the judge connector and reports the event', async () => {
     const evaluate = jest
       .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
@@ -242,6 +268,18 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
         );
       }
     );
+
+    it('never grades a recovery that is the first round against itself', async () => {
+      const { run, evaluate, reportOnlineEvalsStepFailed } = setup({ rounds: [RECOVERY] });
+
+      await expect(run({ ...RECOVERY_INPUT, graded_report: 'first_round' })).resolves.toEqual({
+        output: { scored: false, skip_reason: 'scoring_failed' },
+      });
+      expect(evaluate).not.toHaveBeenCalled();
+      expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'score', code: 'invalid_input' })
+      );
+    });
   });
 
   it('passes no ground truth for an initial round', async () => {
@@ -326,6 +364,29 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     );
   });
 
+  it('reports a judge model it cannot resolve as a step failure, without running the judges', async () => {
+    const {
+      run,
+      evaluate,
+      resolveJudgeConnectorId,
+      reportOnlineEvalScore,
+      reportOnlineEvalsStepFailed,
+    } = setup();
+    resolveJudgeConnectorId.mockRejectedValue(
+      new Error('Model ".openai-gpt-6-sol-chat_completion" is blocked')
+    );
+
+    await expect(run()).resolves.toEqual({
+      output: { scored: false, skip_reason: 'scoring_failed' },
+    });
+    expect(resolveJudgeConnectorId).toHaveBeenCalledWith(request);
+    expect(evaluate).not.toHaveBeenCalled();
+    expect(reportOnlineEvalScore).not.toHaveBeenCalled();
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ step: 'score', code: 'judge_model_unavailable' })
+    );
+  });
+
   it('reports an unreadable investigation as a step failure', async () => {
     const { run, get, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup();
     get.mockRejectedValue(new Error('Conversation inv-1 not found'));
@@ -378,7 +439,7 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     const { run, evaluate, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup();
 
     await expect(
-      run({ evaluators: ['a', 'b', 'c', 'd', 'e'].map((name) => ({ name })) })
+      run({ evaluators: ['a', 'b', 'c', 'd', 'e', 'f'].map((name) => ({ name })) })
     ).resolves.toEqual({ output: { scored: false, skip_reason: 'scoring_failed' } });
     expect(evaluate).not.toHaveBeenCalled();
     expect(reportOnlineEvalScore).not.toHaveBeenCalled();

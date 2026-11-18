@@ -86,8 +86,8 @@ const cellLoadingPlaceholderCss = css`
   border-radius: 1px;
 `;
 
-// The alerts flyout has no service case yet, and the anomalies flyout takes only hosts and users.
-const ALERTS_FLYOUT_TYPES: ReadonlySet<string> = new Set(['host', 'user', 'generic']);
+const ALERTS_FLYOUT_TYPES: ReadonlySet<string> = new Set(['host', 'user', 'service', 'generic']);
+// The anomalies flyout takes only hosts and users.
 const ANOMALIES_FLYOUT_TYPES: ReadonlySet<string> = new Set(['host', 'user']);
 
 const opensFor = <T,>(handler: T | undefined, types: ReadonlySet<string>, row: Row) =>

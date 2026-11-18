@@ -58,6 +58,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     Storage,
     storageKey,
     disableLocalStorageSync = false,
+    transformControls,
   } = props;
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
   const [controlsFromUrl, setControlsFromUrl] = useState(controlsUrlState ?? []);
@@ -272,29 +273,39 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     if (storedControlGroupState) {
       controlsFromLocalStorage = getFilterItemObjListFromControlState(storedControlGroupState);
     }
-    let overridingControls = mergeControls({
+    const overridingControls = mergeControls({
       controlsWithPriority: [controlsFromUrl, controlsFromLocalStorage],
       defaultControlsObj,
     });
 
-    if (!overridingControls || overridingControls.length === 0) return defaultControls;
+    const withDefaults = (controls: FilterControlConfig[]) =>
+      controls.map((item) => {
+        return {
+          // give default value to params which are coming from the URL
+          field_name: item.field_name,
+          title: item.title,
+          selected_options: item.selected_options ?? [],
+          exists_selected: item.exists_selected ?? false,
+          exclude: item.exclude,
+        };
+      });
 
-    overridingControls = overridingControls.map((item) => {
-      return {
-        // give default value to params which are coming from the URL
-        field_name: item.field_name,
-        title: item.title,
-        selected_options: item.selected_options ?? [],
-        exists_selected: item.exists_selected ?? false,
-        exclude: item.exclude,
-      };
-    });
+    const resolvedControls =
+      !overridingControls || overridingControls.length === 0
+        ? defaultControls
+        : reorderControlsWithDefaultControls({
+            controls: withDefaults(overridingControls),
+            defaultControls,
+          });
 
-    return reorderControlsWithDefaultControls({
-      controls: overridingControls,
-      defaultControls,
-    });
-  }, [getStoredControlState, controlsFromUrl, defaultControlsObj, defaultControls]);
+    return transformControls ? transformControls(resolvedControls) : resolvedControls;
+  }, [
+    getStoredControlState,
+    controlsFromUrl,
+    defaultControlsObj,
+    defaultControls,
+    transformControls,
+  ]);
 
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (defaultState, { addOptionsListControl }: ControlGroupStateBuilder) => {

@@ -6,10 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const ADD_CONNECTOR_BUTTON_LABEL = i18n.translate(
-  'xpack.automaticImport.components.connectorSelector.addConnectorButtonLabel',
+export const ADD_AI_CONNECTOR_BUTTON_LABEL = i18n.translate(
+  'xpack.automaticImport.components.connectorSelector.addAiConnectorButtonLabel',
   {
-    defaultMessage: 'Add connector',
+    defaultMessage: 'Add AI connector',
   }
 );
 

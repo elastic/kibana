@@ -16,7 +16,7 @@ export default createTestConfig({
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
     `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
-    `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify(['tinesWorkflowsMigration'])}`,
   ],
   testFiles: [require.resolve('..')],
   junit: {

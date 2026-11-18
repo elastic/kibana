@@ -17,6 +17,7 @@ const block = (blockedMs: number, overrides: Partial<DetectedBlock> = {}): Detec
   blockedMs,
   report: true,
   suppressedBlocks: 0,
+  ongoing: false,
   ...overrides,
 });
 

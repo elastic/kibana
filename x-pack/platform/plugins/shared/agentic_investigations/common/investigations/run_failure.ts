@@ -8,6 +8,7 @@
 import { lazySchema, z } from '@kbn/zod/v4';
 
 export const INVESTIGATION_RUN_FAILED_EVENT_TYPE = 'investigation_run_failed' as const;
+export const INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE = 'investigation_run_timed_out' as const;
 export const MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH = 10_000;
 
 export const investigationRunFailedEventSchema = lazySchema(() =>

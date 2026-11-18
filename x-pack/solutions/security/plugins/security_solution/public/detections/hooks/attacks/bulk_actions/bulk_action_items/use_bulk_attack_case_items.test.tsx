@@ -246,10 +246,14 @@ describe('useBulkAttackCaseItems', () => {
      * Plays out an attach to `theCase` the way the case selector does: it builds the payload for
      * the case, posts it, then reports success with the same case.
      */
-    const attachTo = (theCase: Partial<CaseUI>, isNewCase = false) => {
+    const attachTo = (
+      theCase: Partial<CaseUI>,
+      isNewCase = false,
+      createdAttachments?: CaseUI['comments']
+    ) => {
       const attachments = resolveAttachments(theCase);
       const { onSuccess } = useAddToCase.mock.lastCall[0];
-      onSuccess(theCase as CaseUI, isNewCase);
+      onSuccess(theCase as CaseUI, isNewCase, createdAttachments);
       return attachments;
     };
 
@@ -341,6 +345,19 @@ describe('useBulkAttackCaseItems', () => {
       expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
     });
 
+    it('warns that the alerts did not fit when the server added nothing to a full case', async () => {
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      await clickAddToCase();
+
+      const theCase = { id: 'case-1', totalAlerts: MAX_ALERTS_PER_CASE } as CaseUI;
+      resolveAttachments(theCase);
+      const { onNoAttachmentsAdded } = useAddToCase.mock.lastCall[0];
+      onNoAttachmentsAdded(theCase);
+
+      expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
+    });
+
     it('truncates against the chosen case, so a case with room takes every alert', async () => {
       useIsExperimentalFeatureEnabled.mockReturnValue(true);
 
@@ -348,6 +365,26 @@ describe('useBulkAttackCaseItems', () => {
 
       expect(attachTo({ totalAlerts: MAX_ALERTS_PER_CASE - 2 })).toEqual(expectedAttachments);
       expect(appToastsMock.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('warns when the attack was already attached to the chosen case', async () => {
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      await clickAddToCase();
+
+      // The server dropped the attack and created only its alerts.
+      attachTo({ id: 'case-1', totalAlerts: 0 }, false, [
+        {
+          id: 'comment-1',
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentId: ['alert-1', 'alert-2'],
+          metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-1'] },
+        },
+      ] as unknown as CaseUI['comments']);
+
+      expect(appToastsMock.addWarning).toHaveBeenCalledWith({
+        title: '1 attack was already attached to this case and was not added again.',
+      });
     });
 
     it('does not warn before the user has picked a case', async () => {

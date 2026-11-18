@@ -16,6 +16,7 @@ import {
   MAX_PREVIEW_HEIGHT,
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
+import { readContextQueries } from '../../common/panel_context_queries';
 import { getServices } from '../services';
 
 /** Used when the attachment predates the captured height, or the panel was never measured. */
@@ -66,7 +67,7 @@ export const RenderPanelContext = ({ data }: { data: CustomContentContextAttachm
       <CustomContentComponent
         services={services}
         embeddableId={data.embeddable_id}
-        esqlQuery={data.esql_query}
+        esqlQueries={readContextQueries(data)}
         // The range captured when the panel was sent to chat, so the preview matches what
         // the user was looking at. Older attachments have none and render unranged.
         timeRange={data.time_range}

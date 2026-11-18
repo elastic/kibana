@@ -23,16 +23,22 @@ import { i18n } from '@kbn/i18n';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
-import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
   selectHasChanges,
   selectHasYamlSchemaValidationErrors,
-  selectIsSavingYaml,
+  selectIsSaveInProgress,
   selectIsYamlSynced,
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { useDisableWorkflowsConfirmation } from '../../../features/linked_rules/model/use_disable_workflows_confirmation';
+import { useSaveYamlWithConfirmation } from '../../../features/linked_rules/model/use_save_yaml_with_confirmation';
+import { useWorkflowDependentsContext } from '../../../features/workflow_dependents/model/workflow_dependents_context';
+import {
+  getCalledWorkflowsBadge,
+  getDependentsBadge,
+} from '../../../features/workflow_dependents/ui/get_dependents_badge';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { getSaveWorkflowTooltipContent } from '../../../shared/ui';
@@ -153,11 +159,17 @@ export const WorkflowDetailHeader = React.memo(
       [workflow]
     );
 
-    const saveYaml = useSaveYaml();
-    const isSaving = useSelector(selectIsSavingYaml);
+    const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
+    const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
+    const isSaving = useSelector(selectIsSaveInProgress);
     const handleSaveWorkflow = useCallback(() => {
       saveYaml();
     }, [saveYaml]);
+
+    const workflowDependents = useWorkflowDependentsContext();
+    const openLinks = workflowDependents?.openLinks;
+    const openDependents = useCallback(() => openLinks?.('usedBy'), [openLinks]);
+    const openCalledWorkflows = useCallback(() => openLinks?.('runs'), [openLinks]);
 
     const updateWorkflow = useUpdateWorkflow();
 
@@ -303,7 +315,10 @@ export const WorkflowDetailHeader = React.memo(
         }),
         labelProps: {},
         checked: isEnabled,
-        onChange: (checked: boolean) => {
+        onChange: async (checked: boolean) => {
+          if (!checked && !(await confirmDisable([workflowId]))) {
+            return;
+          }
           updateWorkflow({ workflow: { enabled: checked } });
         },
         disabled: isLoading || !canUpdateWorkflow || !isSchemaValid || hasUnsavedChanges,
@@ -313,6 +328,7 @@ export const WorkflowDetailHeader = React.memo(
     }, [
       workflowId,
       isEnabled,
+      confirmDisable,
       updateWorkflow,
       isLoading,
       canUpdateWorkflow,
@@ -369,6 +385,21 @@ export const WorkflowDetailHeader = React.memo(
         });
       }
 
+      const dependentsBadge = getDependentsBadge({
+        analysis: workflowDependents?.dependents.analysis,
+        onClick: openDependents,
+      });
+      if (dependentsBadge) {
+        result.push(dependentsBadge);
+      }
+      const calledBadge = getCalledWorkflowsBadge({
+        calledWorkflows: workflowDependents?.dependents.calledWorkflows,
+        onClick: openCalledWorkflows,
+      });
+      if (calledBadge) {
+        result.push(calledBadge);
+      }
+
       return result;
     }, [
       isManagedWorkflow,
@@ -377,6 +408,10 @@ export const WorkflowDetailHeader = React.memo(
       savedLabel,
       highlightDiff,
       setHighlightDiff,
+      workflowDependents?.dependents.analysis,
+      workflowDependents?.dependents.calledWorkflows,
+      openDependents,
+      openCalledWorkflows,
     ]);
 
     const appMenu = useMemo<AppMenuConfig>(() => {
@@ -469,6 +504,7 @@ export const WorkflowDetailHeader = React.memo(
         {isAccessOpen && workflow && (
           <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
         )}
+        {disableConfirmModal}
       </>
     );
   }

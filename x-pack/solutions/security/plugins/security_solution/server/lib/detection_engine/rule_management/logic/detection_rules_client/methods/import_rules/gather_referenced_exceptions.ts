@@ -9,6 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ExceptionListQueryInfo } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
 import { getAllListTypes } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
 import type { RuleToImport } from '../../../../../../../../common/api/detection_engine/rule_management';
+import { withSecuritySpan } from '../../../../../../../utils/with_security_span';
 
 /**
  * splitting out the parsing of the lists from the fetching
@@ -64,7 +65,8 @@ export const getReferencedExceptionLists = async ({
 }: {
   rules: Array<RuleToImport | Error>;
   savedObjectsClient: SavedObjectsClientContract;
-}): Promise<Record<string, ExceptionListSchema>> => {
-  const [agnosticLists, nonAgnosticLists] = parseReferencedExceptionsLists(rules);
-  return getAllListTypes(agnosticLists, nonAgnosticLists, savedObjectsClient);
-};
+}): Promise<Record<string, ExceptionListSchema>> =>
+  withSecuritySpan('ruleManagement.getReferencedExceptionLists', async () => {
+    const [agnosticLists, nonAgnosticLists] = parseReferencedExceptionsLists(rules);
+    return getAllListTypes(agnosticLists, nonAgnosticLists, savedObjectsClient);
+  });

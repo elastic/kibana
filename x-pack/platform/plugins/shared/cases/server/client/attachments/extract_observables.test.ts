@@ -280,6 +280,34 @@ describe('extractAndAddObservables', () => {
       expect(payload).not.toHaveProperty('observables');
     });
 
+    it('returns the patched case with the new observables and version', async () => {
+      licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      alertsService.getAlerts.mockResolvedValue({
+        docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
+      });
+      caseService.getCase.mockResolvedValue(caseSO);
+      caseService.patchCase.mockImplementation(async ({ updatedAttributes }) => ({
+        id: caseSO.id,
+        type: caseSO.type,
+        version: 'patched-version',
+        attributes: updatedAttributes,
+        references: [],
+      }));
+
+      const res = await extractAndAddObservables(
+        'case-1',
+        [alertAttachment],
+        makeCase(true),
+        clientArgs
+      );
+
+      expect(res?.version).toBe('patched-version');
+      expect(res?.attributes.observables).toEqual([
+        expect.objectContaining({ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '1.2.3.4' }),
+      ]);
+      expect(res?.attributes.total_observables).toBe(1);
+    });
+
     it('skips patchCase when extracted observables array is empty (no matching ECS fields)', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({
@@ -330,7 +358,9 @@ describe('extractAndAddObservables', () => {
       });
       const theCase = makeCase(true);
 
-      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
+      await expect(
+        extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs)
+      ).resolves.toBeUndefined();
 
       expect(caseService.patchCase).not.toHaveBeenCalled();
       expect(clientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();

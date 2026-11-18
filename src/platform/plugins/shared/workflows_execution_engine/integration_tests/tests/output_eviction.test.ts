@@ -12,8 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
-// Failing: See https://github.com/elastic/kibana/issues/302843
-describe.skip('workflow output eviction', () => {
+describe('workflow output eviction', () => {
   let workflowRunFixture: WorkflowRunFixture;
 
   beforeEach(() => {
@@ -757,7 +756,7 @@ steps:
       minPayloadSize: new ByteSizeValue(1),
     };
     await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
-    await workflowRunFixture.resumeWorkflowAtScheduledTime();
+    await workflowRunFixture.driveToTerminal();
   });
 
   it('completes the workflow after resume', () => {

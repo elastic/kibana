@@ -25,7 +25,8 @@ const ONBOARDING_API_PATHS = {
 export const renderApp = (
   core: CoreStart,
   services: ServerlessVectordbServices,
-  { element, history }: AppMountParameters
+  { element, history }: AppMountParameters,
+  onOnboardingExit: () => void
 ) => {
   ReactDOM.render(
     core.rendering.addContext(
@@ -34,7 +35,7 @@ export const renderApp = (
           <I18nProvider>
             <OnboardingApiPathsProvider paths={ONBOARDING_API_PATHS}>
               <Router history={history}>
-                <AppRoutes />
+                <AppRoutes onOnboardingExit={onOnboardingExit} />
               </Router>
             </OnboardingApiPathsProvider>
           </I18nProvider>

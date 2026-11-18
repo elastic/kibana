@@ -6,7 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { EvaluateEvidence, EvaluateFn } from '@kbn/evals-plugin/server';
@@ -14,11 +14,15 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { buildOnlineEvalsEvidence } from '../online_evals/build_evidence';
 import { buildOnlineEvalScoreEvent, type EvaluateResult } from '../online_evals/build_score_event';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { OnlineEvalsStepError, reportOnlineEvalsStepFailure } from '../online_evals/step_failure';
 import type { NightshiftTelemetryClient } from '../telemetry';
 
-/** Judges run in parallel within one evaluation, so this bounds concurrent judge calls. */
-export const MAX_ONLINE_EVALS_EVALUATORS = 4;
+/**
+ * The most evaluators one evaluation takes. The evals plugin grades four at a time, so a larger
+ * set does not raise the number of concurrent judge calls.
+ */
+export const MAX_ONLINE_EVALS_EVALUATORS = 5;
 
 const isDate = (value: string) => !Number.isNaN(Date.parse(value));
 
@@ -53,7 +57,6 @@ const inputSchema = lazySchema(() =>
       .min(1)
       .max(MAX_ONLINE_EVALS_EVALUATORS)
       .describe('The evaluators to run.'),
-    judge_connector_id: z.string().min(1).max(256).describe('The connector every judge calls.'),
     investigation_started_at: z
       .string()
       .max(100)
@@ -108,6 +111,13 @@ const getGradedRound = (
   round: ConversationRound
 ): ConversationRound => {
   if (input.graded_report === 'first_round') {
+    // A recovery that is the first round, or read before it was saved, would grade itself.
+    if (input.round_kind === 'alert_recovery' && rounds[0].id === round.id) {
+      throw new OnlineEvalsStepError(
+        'invalid_input',
+        'Cannot grade an alert recovery against itself: it is the first round'
+      );
+    }
     return rounds[0];
   }
   if (input.graded_report === 'current' && input.round_kind !== 'alert_recovery') {
@@ -159,6 +169,18 @@ const readRound = async ({
   };
 };
 
+/** Resolves the judge model. Throws a coded error, reported as a step failure, when it can't. */
+const resolveJudge = async (
+  resolveJudgeConnectorId: (request: KibanaRequest) => Promise<string>,
+  request: KibanaRequest
+): Promise<string> => {
+  try {
+    return await resolveJudgeConnectorId(request);
+  } catch (error) {
+    throw new OnlineEvalsStepError('judge_model_unavailable', getErrorMessage(error));
+  }
+};
+
 /**
  * Runs the judges on the evidence. An `evaluate()` that throws is reported in the score event as
  * every evaluator failing, rather than as a failed step.
@@ -166,6 +188,7 @@ const readRound = async ({
 const runJudges = async ({
   input,
   evidence,
+  judgeConnectorId,
   evaluate,
   request,
   spaceId,
@@ -173,6 +196,7 @@ const runJudges = async ({
 }: {
   input: ScoreInput;
   evidence: EvaluateEvidence;
+  judgeConnectorId: string;
   evaluate: EvaluateFn;
   request: KibanaRequest;
   spaceId: string;
@@ -185,7 +209,7 @@ const runJudges = async ({
       evidence,
       evaluators: input.evaluators.map((evaluator) => ({
         ...evaluator,
-        connector_id: input.judge_connector_id,
+        connector_id: judgeConnectorId,
       })),
     });
     return { results, failedEvaluators: [] };
@@ -202,18 +226,25 @@ const runJudges = async ({
 export const scoreOnlineEvalsRoundStepDefinition = ({
   getAgentBuilder,
   getEvaluate,
+  resolveJudgeConnectorId,
   isPaused,
   shouldIncludeExplanations,
   telemetry,
+  getSavedObjects,
+  getUiSettings,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   /** The evals plugin's `evaluate()`; absent when the evals plugin isn't loaded. */
   getEvaluate: () => EvaluateFn | undefined;
+  /** The connector every judge calls, resolved through Nightshift's model config. */
+  resolveJudgeConnectorId: (request: KibanaRequest) => Promise<string>;
   /** The `nightshift.onlineEvals.paused` kill switch. */
   isPaused: () => boolean;
   /** The `nightshift.onlineEvals.includeExplanations` flag. */
   shouldIncludeExplanations: () => boolean;
   telemetry: NightshiftTelemetryClient;
+  getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings?: () => CoreStart['uiSettings'] | undefined;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.onlineEvals.score',
@@ -253,19 +284,44 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
           getAgentBuilder,
           request,
         });
-        const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
-        const { results, failedEvaluators } = await runJudges({
-          input,
-          evidence: buildOnlineEvalsEvidence({
-            round: gradedRound,
-            alertOutcome:
-              input.round_kind === 'alert_recovery' ? round.response.message : undefined,
-          }),
-          evaluate,
-          request,
-          spaceId: workflow.spaceId,
-          logger: context.logger,
-        });
+        // A round resumed after human-in-the-loop has one trace per execution; the latest is the
+        // one whose response the user sees.
+        const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id.at(-1) : round.trace_id;
+        const judgeConnectorId = await resolveJudge(resolveJudgeConnectorId, request);
+        // Joins the round's trace so the judges show up in the conversation trace flyout.
+        const { results, failedEvaluators } = await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.onlineEvals.score',
+            traceId: execution.id,
+            foregroundTraceId: roundTraceId,
+            roundId: input.round_id,
+            conversationId: input.investigation_id,
+            spaceId: workflow.spaceId,
+            workflowExecutionId: execution.id,
+            request,
+            getSavedObjects,
+            getUiSettings,
+            logger: context.logger,
+            attributes: {
+              'nightshift.evaluator_set': input.evaluator_set,
+              'nightshift.round_kind': input.round_kind,
+            },
+          },
+          () =>
+            runJudges({
+              input,
+              evidence: buildOnlineEvalsEvidence({
+                round: gradedRound,
+                alertOutcome:
+                  input.round_kind === 'alert_recovery' ? round.response.message : undefined,
+              }),
+              judgeConnectorId,
+              evaluate,
+              request,
+              spaceId: workflow.spaceId,
+              logger: context.logger,
+            })
+        );
 
         const event = buildOnlineEvalScoreEvent({
           metadata: {
@@ -283,7 +339,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
             graded_report: input.graded_report,
             ...(input.entry_point ? { entry_point: input.entry_point } : {}),
             ...(input.alert_rule_type ? { alert_rule_type: input.alert_rule_type } : {}),
-            judge_connector_id: input.judge_connector_id,
+            judge_connector_id: judgeConnectorId,
             investigation_started_at: input.investigation_started_at,
             ...(input.investigation_ended_at
               ? { investigation_ended_at: input.investigation_ended_at }

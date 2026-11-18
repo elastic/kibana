@@ -18,7 +18,11 @@ export type {
   ManagedFilter,
   WorkflowQueryFilter,
 } from './lib/workflow_filters';
-export type { WorkflowsApiRequestHandlerContext, WorkflowsClient } from './types';
+export type {
+  ResumeExternalHitlParams,
+  WorkflowsApiRequestHandlerContext,
+  WorkflowsClient,
+} from './types';
 
 export { WorkflowRepository } from './repositories/workflow_repository';
 export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
@@ -33,7 +37,6 @@ export {
 } from './external_resume/constants';
 export { buildExternalResumeUrl } from './external_resume/build_external_resume_url';
 export { buildExternalResumeFormUrl } from './external_resume/build_external_resume_form_url';
-export { computeTokenHmac } from './external_resume/compute_token_hmac';
 
 export type {
   GetManagedWorkflowStatusOptions,

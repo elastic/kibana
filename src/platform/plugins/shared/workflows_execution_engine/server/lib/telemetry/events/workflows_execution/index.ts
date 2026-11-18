@@ -15,6 +15,7 @@ import {
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
   type WorkflowExecutionFailedParams,
+  type WorkflowExecutionRunAs,
   WorkflowExecutionTelemetryEventTypes,
 } from './types';
 
@@ -57,6 +58,8 @@ const baseWorkflowExecutionSchema: RootSchema<{
   managedBy?: string;
   originManagedWorkflowId?: string;
   managedVersion?: number;
+  runAs: WorkflowExecutionRunAs;
+  runAsInherited?: boolean;
   ruleId?: string;
   compositionDepth?: number;
   parentWorkflowId?: string;
@@ -150,6 +153,22 @@ const baseWorkflowExecutionSchema: RootSchema<{
     _meta: {
       description:
         'Registered managed workflow definition version, when this execution came from one',
+      optional: true,
+    },
+  },
+  runAs: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Whose credentials the execution runs with: service_account when it is bound to a service account, user when it runs as the user or API key that triggered or scheduled it.',
+      optional: false,
+    },
+  },
+  runAsInherited: {
+    type: 'boolean',
+    _meta: {
+      description:
+        "Whether the service account came from the parent workflow rather than this workflow's own settings.run_as. Only present when runAs is service_account.",
       optional: true,
     },
   },

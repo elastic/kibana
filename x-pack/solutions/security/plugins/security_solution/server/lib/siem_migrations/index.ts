@@ -16,5 +16,6 @@ export const getSiemMigrationClients = (
   return {
     getRulesClient: memoize(() => siemMigrationsService.createRulesClient(params)),
     getDashboardsClient: memoize(() => siemMigrationsService.createDashboardsClient(params)),
+    getWorkflowsClient: memoize(() => siemMigrationsService.createWorkflowsClient(params)),
   };
 };

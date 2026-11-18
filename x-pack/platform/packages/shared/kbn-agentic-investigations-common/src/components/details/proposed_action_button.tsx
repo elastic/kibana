@@ -105,7 +105,7 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
 
     &:hover,
     &:focus-visible {
-      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
     }
 
     &:focus-visible {
