@@ -10,7 +10,7 @@
 import type { z } from '@kbn/zod';
 import type { AsCodeSavedDataView } from '@kbn/as-code-data-views-schema';
 import {
-  fromDataViewSpecToAsCodeSavedSchema,
+  toAsCodeSavedDataView,
   isCompositeRuntimeField,
   toDataViewSpec,
 } from '@kbn/as-code-data-views-transforms';
@@ -76,7 +76,7 @@ export class DataViewsAsCodeService {
         )
       : [];
 
-    const dataViewAsCode = fromDataViewSpecToAsCodeSavedSchema({
+    const dataViewAsCode = toAsCodeSavedDataView({
       ...dataViewSpec,
       ...(scriptedFields.length > 0 && {
         fields: Object.fromEntries(scriptedFields.map((field) => [field.name, field])),

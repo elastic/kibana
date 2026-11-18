@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  fromDataViewSpecToAsCodeSavedSchema,
-  toDataViewSpec,
-} from '@kbn/as-code-data-views-transforms';
+import { toAsCodeSavedDataView, toDataViewSpec } from '@kbn/as-code-data-views-transforms';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DataViewsAsCodeService } from './data_views_as_code_service';
@@ -87,7 +84,7 @@ const createService = ({
 };
 
 const getExpectedMappedData = (spec: DataViewSpec) => {
-  const { id: _id, ...data } = fromDataViewSpecToAsCodeSavedSchema(spec);
+  const { id: _id, ...data } = toAsCodeSavedDataView(spec);
   return data;
 };
 

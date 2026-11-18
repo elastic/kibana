@@ -12,7 +12,7 @@ import type {
   DiscoverSessionApiEmbeddableOverrides,
   DiscoverSessionApiTabBase,
 } from '@kbn/as-code-discover-schema';
-import { fromDataViewSpec, toDataViewSpec } from '@kbn/as-code-data-views-transforms';
+import { toAsCodeDataView, toDataViewSpec } from '@kbn/as-code-data-views-transforms';
 import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { AsCodeQuery } from '@kbn/as-code-shared-schemas';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
@@ -134,7 +134,7 @@ export const fromStoredSearchAndTable = (
         ...(sampleSize && { sample_size: Math.max(10, sampleSize) }),
         ...(query && { query: fromStoredClassicQuery(query) }),
         filters: fromStoredFilters(filter) ?? [],
-        data_source: fromDataViewSpec(index),
+        data_source: toAsCodeDataView(index),
         view_mode: viewMode ?? VIEW_MODE.DOCUMENT_LEVEL,
       };
 };

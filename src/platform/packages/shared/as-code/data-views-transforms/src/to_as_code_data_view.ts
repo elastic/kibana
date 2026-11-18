@@ -23,7 +23,7 @@ import { fromStoredFields, fromStoredScriptedFields } from './from_stored_fields
  * @param index String id (referenced data view), inline {@link DataViewSpec}, or null/undefined
  * @returns As-code `data_source` object for classic (KQL/Lucene) tabs
  */
-export function fromDataViewSpec(index: string | DataViewSpec | null | undefined): AsCodeDataView {
+export function toAsCodeDataView(index: string | DataViewSpec | null | undefined): AsCodeDataView {
   if (!index) throw new Error('Cannot derive data view from empty index');
   if (typeof index === 'string') {
     return { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: index };
@@ -46,9 +46,7 @@ export function fromDataViewSpec(index: string | DataViewSpec | null | undefined
   };
 }
 
-export function fromDataViewSpecToAsCodeSavedSchema(
-  index: DataViewSpec
-): AsCodeSavedDataViewWithScriptedFields {
+export function toAsCodeSavedDataView(index: DataViewSpec): AsCodeSavedDataViewWithScriptedFields {
   if (!index.title) throw new Error('Cannot derive data view without `title`');
   const scriptedFields = fromStoredScriptedFields(
     index.fields,
