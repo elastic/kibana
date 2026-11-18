@@ -19,6 +19,7 @@ import {
   createWriteupTask,
   fillKnowledge,
   loadPromptArm,
+  RESPONSE_STYLE_PATH,
   resolvePromptCommit,
   replayReply,
 } from './task';
@@ -284,6 +285,34 @@ describe('loadPromptArm', () => {
     expect(loadPromptArm('merge-base', root).prompt).toBe('main prompt');
     expect(loadPromptArm('HEAD', root).label).toBe(`HEAD@${head.slice(0, 10)}`);
     expect(() => resolvePromptCommit('no-such-ref', root)).toThrow();
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it('fills the reply rules from the same place as the prompt', () => {
+    const root = mkdtempSync(join(tmpdir(), 'writeup-style-'));
+    const git = (...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim();
+    const write = (path: string, text: string) => {
+      mkdirSync(dirname(join(root, path)), { recursive: true });
+      writeFileSync(join(root, path), text);
+    };
+    git('init', '-q');
+    // Before the split: the rules are inline and there's no placeholder.
+    write(INVESTIGATOR_PROMPT_PATH, 'Method.\nInline style.\n');
+    git('add', '.');
+    git('commit', '-q', '-m', 'inline');
+    write(INVESTIGATOR_PROMPT_PATH, 'Method.\n{{response_style_section}}\n');
+    write(RESPONSE_STYLE_PATH, 'Committed style.\n');
+    git('add', '.');
+    git('commit', '-q', '-m', 'split');
+    write(RESPONSE_STYLE_PATH, 'Edited style.\n');
+
+    expect(loadPromptArm(undefined, root).prompt).toBe('Method.\nEdited style.\n');
+    expect(loadPromptArm('HEAD', root).prompt).toBe('Method.\nCommitted style.\n');
+    expect(loadPromptArm('HEAD~1', root).prompt).toBe('Method.\nInline style.\n');
     rmSync(root, { recursive: true, force: true });
   });
 });

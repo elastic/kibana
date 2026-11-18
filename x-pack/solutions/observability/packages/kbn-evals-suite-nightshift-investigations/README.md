@@ -619,7 +619,16 @@ NIGHTSHIFT_DATASETS=writeup node scripts/evals start \
   --model eis-anthropic-claude-5-sonnet --judge eis-anthropic-claude-5-opus
 ```
 
-In CI it is the suite's `writeup` shard, judged by GPT 6 Sol, so it runs on `main` with every
+The reply rules live in their own file,
+[`response_style.md.text`](../../plugins/nightshift_investigations/server/agents/investigation/instructions/response_style.md.text),
+which the investigator prompt pulls in at `{{response_style_section}}`. A PR that changes that file
+(or this eval) gets the `evals:nightshift-writeup` label from `.github/paths-labeller.yml`, and the
+label runs the `nightshift-writeup` suite: this eval alone, on Sonnet 5.5, judged by GPT 6 Sol. A
+change that only touches how the agent replies needs nothing else. A change to the method, the
+tools or the recorder can change how the agent investigates, which this eval can't see, so it
+needs the end-to-end evals too. To skip the run on a PR, add `evals:skip-nightshift-writeup`.
+
+In CI it is also the `nightshift-investigations` suite's `writeup` shard, judged by GPT 6 Sol, so it runs on `main` with every
 daily and weekly run of the suite and publishes to the golden cluster. That's the history to
 watch `main` over time. A prompt change is still measured against a baseline in the same run
 (below), not against an old run: the head to head needs both replies in front of one judge, and an

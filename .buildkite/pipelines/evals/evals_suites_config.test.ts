@@ -192,4 +192,25 @@ describe('Nightshift CI coverage', () => {
     const suiteRoot = Path.dirname(Path.resolve(__dirname, '../../..', configPath));
     for (const file of files) expect(Fs.existsSync(Path.join(suiteRoot, file))).toBe(true);
   });
+
+  it('runs the writeup eval alone, with a default model, when a PR carries its label', () => {
+    const suite = suites.find(({ id }) => id === 'nightshift-writeup');
+    expect(suite?.ciLabels).toEqual(['evals:nightshift-writeup']);
+    expect(suite?.defaultModelGroups?.length).toBeGreaterThan(0);
+    expect(suite?.shards?.map(({ id, specFiles }) => [id, specFiles])).toEqual([
+      ['writeup', ['evals/writeup/writeup.spec.ts']],
+    ]);
+    // The label comes from .github/paths-labeller.yml, on changes to the reply rules.
+    const repoRoot = Path.resolve(__dirname, '../../..');
+    const labeller = parseYaml(
+      Fs.readFileSync(Path.join(repoRoot, '.github/paths-labeller.yml'), 'utf8')
+    ) as Array<Record<string, string[]>>;
+    const paths = labeller.find((entry) => 'evals:nightshift-writeup' in entry)?.[
+      'evals:nightshift-writeup'
+    ];
+    const responseStyle =
+      'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/response_style.md.text';
+    expect(paths).toContain(responseStyle);
+    expect(Fs.existsSync(Path.join(repoRoot, responseStyle))).toBe(true);
+  });
 });

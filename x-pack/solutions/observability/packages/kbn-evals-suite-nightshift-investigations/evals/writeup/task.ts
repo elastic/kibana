@@ -33,6 +33,8 @@ export const INVESTIGATOR_PROMPT_PATH =
   'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/investigator.md.text';
 const INSTRUCTIONS_DIR =
   'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions';
+/** The reply rules, which the prompt pulls in at `{{response_style_section}}`. */
+export const RESPONSE_STYLE_PATH = `${INSTRUCTIONS_DIR}/response_style.md.text`;
 /** The knowledge section, by the name a prompt's placeholder uses: `wiki` now, `cortex` before #303544. */
 export const knowledgeSectionPath = (name: 'wiki' | 'cortex') =>
   `${INSTRUCTIONS_DIR}/knowledge_${name}.text`;
@@ -88,8 +90,9 @@ export const loadPromptArm = (spec?: string, repoRoot = REPO_ROOT): PromptArm =>
     execFileSync('git', ['show', `${ref}:${path}`], { cwd: repoRoot, encoding: 'utf8' });
   let label = 'current';
   let prompt: string;
-  // The Cortex section comes from the same place as the prompt; a prompt file uses the checkout's.
+  // The sections come from the same place as the prompt; a prompt file uses the checkout's.
   let section = (name: 'wiki' | 'cortex') => fromTree(knowledgeSectionPath(name));
+  let responseStyle = () => fromTree(RESPONSE_STYLE_PATH);
   if (!spec) {
     prompt = fromTree(INVESTIGATOR_PROMPT_PATH);
   } else if (existsSync(resolve(spec))) {
@@ -101,6 +104,11 @@ export const loadPromptArm = (spec?: string, repoRoot = REPO_ROOT): PromptArm =>
     label = `${spec}@${commit.slice(0, 10)}`;
     prompt = fromRef(commit, INVESTIGATOR_PROMPT_PATH);
     section = (name) => fromRef(commit, knowledgeSectionPath(name));
+    responseStyle = () => fromRef(commit, RESPONSE_STYLE_PATH);
+  }
+  // A prompt from before the reply rules had their own file has them inline and no placeholder.
+  if (prompt.includes('{{response_style_section}}')) {
+    prompt = prompt.replace('{{response_style_section}}', responseStyle().trimEnd());
   }
   const knowledge = prompt.match(/\{\{knowledge_(wiki|cortex)_section\}\}/)?.[1] as
     | 'wiki'
