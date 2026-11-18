@@ -71,6 +71,11 @@ export const EndpointActionGetFileSchema = {
         if (bodyContent.parameters.export !== undefined && bodyContent.endpoint_ids.length > 1) {
           return '[parameters.export]: export supports one host per request';
         }
+
+        // Endpoint hasn't confirmed that an export can carry several paths (elastic/security-team#19465)
+        if (bodyContent.parameters.export !== undefined && paths !== undefined) {
+          return '[parameters.export]: export supports a single path';
+        }
       },
     }
   ),
