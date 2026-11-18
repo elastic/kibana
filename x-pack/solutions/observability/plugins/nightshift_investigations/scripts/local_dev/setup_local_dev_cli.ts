@@ -19,7 +19,13 @@ import {
   ORCA_CONNECTOR_ID,
   ORCA_INDEX_PATTERNS,
   ORCA_SANDBOX_ALLOWED_HOSTS,
+  ORCA_URL,
   ORCA_VAULT_SECRET,
+  RIVER_ORCA_KEY_PLACEHOLDER,
+  RIVER_RELAY_CA_PATH,
+  RIVER_SANDBOX_API_KEY_PLACEHOLDER,
+  RIVER_SANDBOX_RELAY_HOST,
+  RIVER_SANDBOX_RELAY_PORT,
 } from './constants';
 import {
   getLocalDevSettings,
@@ -59,6 +65,9 @@ interface Flags {
   kibanaAuth?: string;
   esUrl: string;
   kibanaConfig: string;
+  /** Use River's relay and placeholders instead of reading real credentials from Vault. */
+  river: boolean;
+  orcaUrl: string;
 }
 
 const getKibanaAuths = ({ kibanaAuth }: Flags): readonly string[] =>
@@ -76,6 +85,36 @@ const readSecrets = async (
   redactor.add(sandbox.apiKey, orca.apiKey);
   log.success(`Read the sandbox credential (${sandboxPath}) and the ORCA key (${orcaPath})`);
   return { sandbox, orca };
+};
+
+/**
+ * The connections of a River session, which hold no credential: Kibana reaches sandbox-api through
+ * the River daemon's relay, and River's control plane attaches the real sandbox-api key and replaces
+ * the ORCA placeholder in a command's environment, only for the ORCA hosts.
+ */
+const getRiverConnections = (
+  log: ToolingLog,
+  orcaUrl: string
+): { sandbox: SandboxConnection; orca: OrcaConnection } => {
+  if (!existsSync(RIVER_RELAY_CA_PATH)) {
+    throw new Error(
+      `${RIVER_RELAY_CA_PATH} does not exist. --river only works in a River session, whose daemon publishes the relay CA there.`
+    );
+  }
+  log.info('River session: using the River relay and placeholders, no credentials are read');
+  return {
+    sandbox: {
+      host: RIVER_SANDBOX_RELAY_HOST,
+      port: RIVER_SANDBOX_RELAY_PORT,
+      apiKey: RIVER_SANDBOX_API_KEY_PLACEHOLDER,
+      certificateAuthorities: RIVER_RELAY_CA_PATH,
+    },
+    orca: {
+      url: orcaUrl.replace(/\/+$/, ''),
+      apiKey: RIVER_ORCA_KEY_PLACEHOLDER,
+      placeholder: true,
+    },
+  };
 };
 
 const readConfigFile = async (path: string): Promise<string> =>
@@ -113,13 +152,19 @@ const writeKibanaConfig = async (
   return true;
 };
 
-const checkSandboxCredential = async (log: ToolingLog, sandbox: SandboxConnection) => {
+const checkSandboxCredential = async (
+  log: ToolingLog,
+  sandbox: SandboxConnection,
+  { river }: { river: boolean }
+) => {
   const result = await probeSandboxCredential(sandbox);
   if (result === 'authenticated') {
     log.success(`The sandbox credential works on ${sandbox.host}:${sandbox.port}`);
   } else if (result === 'unauthenticated') {
     throw new Error(
-      'sandbox-api rejects the credential in Vault (Unauthenticated). A maintainer must rotate it with rotate_local_dev_sandbox_credential.js.'
+      river
+        ? 'sandbox-api rejects the call through the River relay (Unauthenticated). River is not configured with a sandbox-api key for this repository, or its key was rotated; ask a River maintainer.'
+        : 'sandbox-api rejects the credential in Vault (Unauthenticated). A maintainer must rotate it with rotate_local_dev_sandbox_credential.js.'
     );
   } else {
     log.warning(
@@ -206,7 +251,9 @@ const setUpKibana = async ({
       `  - connector ${ORCA_CONNECTOR_ID} on the investigator, reading ${ORCA_INDEX_PATTERNS.join(
         ', '
       )}`,
-      `  - ${orcaLogCount} ORCA log documents readable`,
+      orcaLogCount === 'skipped'
+        ? '  - the ORCA key is a River placeholder, usable only from the sandbox'
+        : `  - ${orcaLogCount} ORCA log documents readable`,
       `  - ORCA source code context and ${ORCA_SANDBOX_ALLOWED_HOSTS.join(
         ', '
       )} egress in the space`,
@@ -268,6 +315,8 @@ run(
       kibanaAuth: typeof rawFlags['kibana-auth'] === 'string' ? rawFlags['kibana-auth'] : undefined,
       esUrl: String(rawFlags['es-url']),
       kibanaConfig: Path.resolve(String(rawFlags['kibana-config'])),
+      river: Boolean(rawFlags.river),
+      orcaUrl: String(rawFlags['orca-url']),
     };
     const redactor = createRedactor();
     if (flags.kibanaAuth) redactor.add(flags.kibanaAuth);
@@ -276,12 +325,14 @@ run(
         await remove({ log, flags, redactor });
         return;
       }
-      const { sandbox, orca } = await readSecrets(log, redactor);
+      const { sandbox, orca } = flags.river
+        ? getRiverConnections(log, flags.orcaUrl)
+        : await readSecrets(log, redactor);
       if (rawFlags['dry-run']) {
         await writeKibanaConfig(log, flags.kibanaConfig, sandbox, { dryRun: true });
         return;
       }
-      await checkSandboxCredential(log, sandbox);
+      await checkSandboxCredential(log, sandbox, { river: flags.river });
 
       let configChangedAt: number | undefined;
       if (!rawFlags['connector-only']) {
@@ -310,12 +361,14 @@ run(
       writes a managed block to config/kibana.dev.yml, waits for Kibana to restart, binds the default
       space to the Nightshift service accounts and saves the ORCA connector on the investigator.
       On a local Serverless project it binds the space as an admin of the mock IdP.
-      Re-run it to pick up a rotated credential.
+      Re-run it to pick up a rotated credential. In a River session, --river reads nothing from Vault
+      and points Kibana at River's sandbox-api relay with credential placeholders.
     `,
     flags: {
-      boolean: ['dry-run', 'skip-connector', 'connector-only', 'remove'],
-      string: ['kibana-url', 'kibana-auth', 'es-url', 'kibana-config'],
+      boolean: ['dry-run', 'skip-connector', 'connector-only', 'remove', 'river'],
+      string: ['kibana-url', 'kibana-auth', 'es-url', 'kibana-config', 'orca-url'],
       default: {
+        'orca-url': ORCA_URL,
         'kibana-url': 'http://localhost:5601',
         'es-url': 'http://localhost:9200',
         'kibana-config': DEFAULT_KIBANA_CONFIG,
@@ -329,6 +382,8 @@ run(
         --kibana-auth     user:password of a superuser (default: elastic:changeme, then elastic_serverless:changeme)
         --es-url          Elasticsearch URL, for the service account roles (default: http://localhost:9200)
         --kibana-config   Kibana config to write (default: config/kibana.dev.yml)
+        --river           In a River session: use River's sandbox-api relay and credential placeholders, read nothing from Vault
+        --orca-url        ORCA cluster URL for --river (default: ${ORCA_URL})
       `,
     },
   }

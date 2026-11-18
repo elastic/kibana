@@ -1,6 +1,6 @@
 ---
 name: nightshift-local-dev
-description: Set up a local Kibana to run Nightshift investigations against the ORCA-bench telemetry cluster with the shared eval sandbox, in one command after `vault login`. Use when you need realistic, reproducible incident data on a local Kibana (prompt A/B tests, demos, debugging the investigation agent), when local Nightshift reports `available:false` or sandbox `Unauthenticated`, or when rotating the shared `kibana-local-dev` sandbox credential.
+description: Set up a local Kibana to run Nightshift investigations against the ORCA-bench telemetry cluster with the shared eval sandbox, in one command after `vault login`, or with `--river` in a River session. Use when you need realistic, reproducible incident data on a local Kibana (prompt A/B tests, demos, debugging the investigation agent), when local Nightshift reports `available:false` or sandbox `Unauthenticated`, or when rotating the shared `kibana-local-dev` sandbox credential.
 ---
 
 # Nightshift on a local Kibana, with ORCA data
@@ -76,6 +76,58 @@ node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/se
 UIAM rejects basic auth for creating service accounts, so the script binds the space as the mock
 IdP's `admin`, as Scout does. That login doesn't support a dev base path, hence `--no-base-path`;
 `publicBaseUrl` keeps the investigation's `kibana.request` steps on the local Kibana.
+
+## In a River session
+
+A River session has no Vault access and holds no real credential. River's control plane keeps the
+EIS key, the sandbox-api key and the ORCA key, and attaches them on the way out. The session only
+sees placeholders:
+
+- Elasticsearch reaches EIS through the River daemon on `http://127.0.0.1:3002` with a placeholder
+  CCM key.
+- Kibana reaches sandbox-api through the daemon's TLS relay on `localhost:3003`, trusting the CA in
+  `/etc/river/relay-ca.pem`, with a placeholder `xpack.sandbox.api_key`.
+- The `orcabench-es` connector holds `ApiKey river-secret:orca-es`. When a command runs in the
+  sandbox, River replaces the placeholder with the real key, and only if the connector's hosts are
+  the ones River has registered for that key.
+
+Stateful (stop the River `elasticsearch` service first, since it starts Elasticsearch without EIS):
+
+```bash
+river service stop elasticsearch
+pnpm es snapshot --license trial -E xpack.inference.elastic.url=http://127.0.0.1:3002   # terminal 1
+KIBANA_EIS_CCM_API_KEY=river-eis-relay node scripts/eis.js                              # once it is green
+pnpm start                                                                               # terminal 2
+node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/setup_local_dev.js --river
+```
+
+Serverless (the images are pre-pulled in River's prepared image; stop `elasticsearch` and `kibana`
+first, they use the same ports):
+
+```bash
+river service stop elasticsearch; river service stop kibana
+pnpm es serverless --projectType observability --productTier complete -E xpack.inference.elastic.url=http://127.0.0.1:3002
+KIBANA_EIS_CCM_API_KEY=river-eis-relay node scripts/eis.js
+pnpm start --serverless=oblt --no-base-path --server.publicBaseUrl=http://localhost:5601
+node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/setup_local_dev.js --river
+```
+
+`--river` reads nothing from Vault. It writes the relay settings and the placeholder key to the
+managed block, creates the connector with the placeholder, and checks sandbox-api through the relay.
+It skips the direct ORCA count, which needs the real key. The ORCA URL defaults to the evals cluster;
+override it with `--orca-url`.
+
+In River, `RunCommandBidi` is not relayed, so commands that use `kbn-tool` callbacks fail with
+`UNIMPLEMENTED`; plain commands work. With UIAM, mock IdP logins need a numeric username, such as
+`12345`.
+
+- **`Unauthenticated` from the relay**: River has no sandbox-api key for this repository; ask a
+  River maintainer.
+- **`secret placeholder refused`**: the connector's host is not one River registered for
+  `orca-es`. River must list `nightshift-orca.es.us-west2.gcp.elastic-cloud.com`, as a bare
+  hostname, in its ORCA hosts.
+- **EIS endpoints missing, or `eis.js` fails**: River is not configured to relay EIS for this
+  repository.
 
 ## Run an investigation
 

@@ -528,6 +528,22 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
     return;
   }
 
+  try {
+    await pullDockerImage(log, image);
+  } catch (error) {
+    // Without access to the registry (offline, or a River sandbox whose images were pulled during
+    // the image bake and which holds no registry credential), a local copy is still usable.
+    if (await isDockerImageAvailableLocally(image)) {
+      log.warning(
+        `Could not pull ${image}; using the local copy, which may be older than the registry's.`
+      );
+      return;
+    }
+    throw error;
+  }
+}
+
+async function pullDockerImage(log: ToolingLog, image: string) {
   await pRetry(
     async () => {
       await execa('docker', ['pull', image], {
@@ -552,7 +568,7 @@ ${message}`;
           }
         }
 
-        log.warning('Docker pull failed, error not retriable. Exiting.');
+        log.warning('Docker pull failed, error not retriable.');
         throw error;
       },
     }

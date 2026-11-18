@@ -87,3 +87,22 @@ describe('redactManagedBlock', () => {
     expect(redacted).toContain('xpack.sandbox.host: sandbox.example');
   });
 });
+
+describe('getLocalDevSettings', () => {
+  it('trusts the given CA only when one is set, as for the River relay', () => {
+    expect(settings).not.toHaveProperty('xpack.sandbox.ssl.certificate_authorities');
+    expect(
+      getLocalDevSettings({
+        host: 'localhost',
+        port: 3003,
+        apiKey: 'river-relay',
+        certificateAuthorities: '/etc/river/relay-ca.pem',
+      })
+    ).toMatchObject({
+      'xpack.sandbox.host': 'localhost',
+      'xpack.sandbox.port': 3003,
+      'xpack.sandbox.api_key': 'river-relay',
+      'xpack.sandbox.ssl.certificate_authorities': '/etc/river/relay-ca.pem',
+    });
+  });
+});

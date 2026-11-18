@@ -3,6 +3,7 @@
 ## Setup
 - Use the Node version pinned in `.nvmrc` (matches `engines.node` in `package.json`).
 - Run `node scripts/kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
+- In a River session, the serverless stack images are pre-pulled and the session has no registry login: start the stack with `pnpm es serverless --projectType <type>` and Kibana with `pnpm serverless-<type>` as usual (the stateful `elasticsearch` and `kibana` services use the same ports, so stop them first). With UIAM, mock IdP logins need a numeric username.
 
 ## Overview
 - Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages. Aside from tooling and testing, most code lives in these modules.
