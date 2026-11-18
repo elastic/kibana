@@ -197,11 +197,19 @@ export function registerSecurityUsageCollector({
             _meta: { description: 'The number of service accounts with at least one workload.' },
           },
           byWorkload: {
-            DYNAMIC_KEY: {
-              type: 'long',
-              _meta: {
-                description:
-                  'The number of bound workloads, keyed by `<pluginId>__<workloadType>`.',
+            type: 'array',
+            items: {
+              pluginId: {
+                type: 'keyword',
+                _meta: { description: 'The ID of the plugin that owns the workload type.' },
+              },
+              workloadType: {
+                type: 'keyword',
+                _meta: { description: 'The workload type, unique within its plugin.' },
+              },
+              count: {
+                type: 'long',
+                _meta: { description: 'The number of bound workloads of this type.' },
               },
             },
           },

@@ -15,7 +15,6 @@ import type {
   ServiceAccountWorkloadBinder,
   ServiceAccountWorkloadBinding,
 } from '@kbn/core-security-server';
-import { SERVICE_ACCOUNT_WORKLOAD_KEY_SEPARATOR } from '@kbn/core-security-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 
@@ -42,14 +41,21 @@ const SERVICE_ACCOUNT_ID_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attri
  */
 const SUMMARY_TERMS_SIZE = 100;
 
+/** The number of bindings for one workload type of one plugin. */
+export interface WorkloadTypeBindingCount {
+  pluginId: string;
+  workloadType: string;
+  count: number;
+}
+
 /** Every binding in every space, counted for usage telemetry. */
 export interface WorkloadBindingSummary {
   /** Workloads bound to a service account, across every plugin and space. */
   total: number;
   /** Accounts with at least one binding. */
   serviceAccounts: number;
-  /** Binding counts keyed by `<pluginId>__<workloadType>`. */
-  byWorkload: Record<string, number>;
+  /** Binding counts for each workload type of each plugin. */
+  byWorkload: WorkloadTypeBindingCount[];
   /** Binding counts by who bound the workload: a user, an API key or a service account. */
   byBinderType: { user: number; api_key: number; service_account: number };
 }
@@ -342,12 +348,15 @@ export class WorkloadBindingStore {
     });
 
     const pluginBuckets = toBuckets(aggregations?.byPlugin);
-    const byWorkload: WorkloadBindingSummary['byWorkload'] = {};
-    for (const { key: pluginId, byWorkloadType } of pluginBuckets) {
-      for (const { key: workloadType, doc_count: count } of toBuckets(byWorkloadType)) {
-        byWorkload[`${pluginId}${SERVICE_ACCOUNT_WORKLOAD_KEY_SEPARATOR}${workloadType}`] = count;
-      }
-    }
+    const byWorkload = pluginBuckets.flatMap(({ key: pluginId, byWorkloadType }) =>
+      toBuckets(byWorkloadType).map(
+        ({ key: workloadType, doc_count: count }): WorkloadTypeBindingCount => ({
+          pluginId: String(pluginId),
+          workloadType: String(workloadType),
+          count,
+        })
+      )
+    );
 
     const byBinderType: WorkloadBindingSummary['byBinderType'] = {
       user: 0,

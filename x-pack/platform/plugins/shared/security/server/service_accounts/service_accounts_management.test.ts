@@ -333,7 +333,7 @@ describe('ServiceAccountsManagement', () => {
       const summary = {
         total: 1,
         serviceAccounts: 1,
-        byWorkload: { ['workflowsExecutionEngine__workflow']: 1 },
+        byWorkload: [{ pluginId: 'workflowsExecutionEngine', workloadType: 'workflow', count: 1 }],
         byBinderType: { user: 1, api_key: 0, service_account: 0 },
       };
       store.summarize.mockResolvedValue(summary);

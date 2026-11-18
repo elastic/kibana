@@ -784,7 +784,7 @@ describe('Security UsageCollector', () => {
     const summary = {
       total: 3,
       serviceAccounts: 2,
-      byWorkload: { ['workflowsExecutionEngine__workflow']: 3 },
+      byWorkload: [{ pluginId: 'workflowsExecutionEngine', workloadType: 'workflow', count: 3 }],
       byBinderType: { user: 2, api_key: 1, service_account: 0 },
     };
 

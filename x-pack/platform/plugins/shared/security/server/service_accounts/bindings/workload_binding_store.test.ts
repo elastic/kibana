@@ -633,11 +633,11 @@ describe('WorkloadBindingStore', () => {
       await expect(store.summarize()).resolves.toEqual({
         total: 5,
         serviceAccounts: 2,
-        byWorkload: {
-          ['workflowsExecutionEngine__workflow']: 3,
-          ['alerting__rule']: 1,
-          ['alerting__action']: 1,
-        },
+        byWorkload: [
+          { pluginId: 'workflowsExecutionEngine', workloadType: 'workflow', count: 3 },
+          { pluginId: 'alerting', workloadType: 'rule', count: 1 },
+          { pluginId: 'alerting', workloadType: 'action', count: 1 },
+        ],
         byBinderType: { user: 4, api_key: 0, service_account: 1 },
       });
       expect(client.find).toHaveBeenCalledTimes(1);
@@ -691,7 +691,7 @@ describe('WorkloadBindingStore', () => {
       await expect(store.summarize()).resolves.toEqual({
         total: 0,
         serviceAccounts: 0,
-        byWorkload: {},
+        byWorkload: [],
         byBinderType: { user: 0, api_key: 0, service_account: 0 },
       });
     });

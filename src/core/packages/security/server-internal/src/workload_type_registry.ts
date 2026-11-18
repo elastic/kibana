@@ -9,7 +9,6 @@
 
 import type { ServiceAccountWorkloadTypeRegistration } from '@kbn/core-security-server';
 import {
-  SERVICE_ACCOUNT_WORKLOAD_KEY_SEPARATOR,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_NAME_MAX_LENGTH,
@@ -41,12 +40,6 @@ export class WorkloadTypeRegistry {
     if (!SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX.test(type)) {
       throw new Error(
         `Invalid service account workload type [${type}] registered by plugin [${pluginId}]: only lowercase letters, digits and underscores are allowed.`
-      );
-    }
-
-    if (type.includes(SERVICE_ACCOUNT_WORKLOAD_KEY_SEPARATOR)) {
-      throw new Error(
-        `Invalid service account workload type [${type}] registered by plugin [${pluginId}]: it must not contain [${SERVICE_ACCOUNT_WORKLOAD_KEY_SEPARATOR}].`
       );
     }
 

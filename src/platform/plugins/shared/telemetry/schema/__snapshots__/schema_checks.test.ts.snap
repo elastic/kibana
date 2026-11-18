@@ -333,8 +333,6 @@ Array [
   "properties.maps.properties.attributesPerMap.properties.emsVectorLayersCount.properties.DYNAMIC_KEY.properties.min.type",
   "properties.maps.properties.attributesPerMap.properties.emsVectorLayersCount.properties.DYNAMIC_KEY.properties.max.type",
   "properties.maps.properties.attributesPerMap.properties.emsVectorLayersCount.properties.DYNAMIC_KEY.properties.avg.type",
-  "properties.security.properties.serviceAccounts.properties.boundWorkloads.properties.byWorkload.properties.DYNAMIC_KEY.type",
-  "properties.security.properties.serviceAccounts.properties.boundWorkloads.properties.byWorkload.properties.DYNAMIC_KEY._meta.description",
   "properties.spaces.properties.disabledFeatures.properties.DYNAMIC_KEY.type",
   "properties.spaces.properties.disabledFeatures.properties.DYNAMIC_KEY._meta.description",
 ]

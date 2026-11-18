@@ -76,15 +76,6 @@ describe('WorkloadTypeRegistry', () => {
     }
   );
 
-  it.each(['alerting__rule', '__rule', 'rule__', '___'])(
-    'rejects the type [%s], which contains the key separator',
-    (type) => {
-      expect(() => registry.register('alerting', { type, name: 'Name' })).toThrow(
-        `Invalid service account workload type [${type}] registered by plugin [alerting]: it must not contain [__].`
-      );
-    }
-  );
-
   it('rejects a type longer than 256 characters', () => {
     expect(() =>
       registry.register('alerting', { type: 'a'.repeat(256), name: 'Name' })

@@ -17,14 +17,6 @@
 export const SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX = /^[a-z0-9_]+$/;
 
 /**
- * Joins a plugin ID and a workload type into one key, as usage telemetry does. Plugin IDs are
- * camelCase and workload types may not contain it, so the key always splits back into the two.
- *
- * @public
- */
-export const SERVICE_ACCOUNT_WORKLOAD_KEY_SEPARATOR = '__';
-
-/**
  * @public
  */
 export const SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH = 256;
@@ -63,8 +55,7 @@ export const SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH = 512;
 export interface ServiceAccountWorkloadTypeRegistration {
   /**
    * Kind of workload within the plugin, e.g. `rule`. Must match
-   * {@link SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX}, must not contain
-   * {@link SERVICE_ACCOUNT_WORKLOAD_KEY_SEPARATOR}, and must be no longer than
+   * {@link SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX} and be no longer than
    * {@link SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH}.
    */
   type: string;

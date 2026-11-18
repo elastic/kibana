@@ -37,7 +37,7 @@ const getCompletedEventProperties = async (
 interface BoundWorkloadsUsage {
   total: number;
   serviceAccounts: number;
-  byWorkload: Record<string, number>;
+  byWorkload: Array<{ pluginId: string; workloadType: string; count: number }>;
   byBinderType: Record<string, number>;
 }
 
@@ -111,9 +111,11 @@ apiTest.describe(
         expect(enabled).toBe(true);
         expect(boundWorkloads?.total).toBeGreaterThanOrEqual(1);
         expect(boundWorkloads?.serviceAccounts).toBeGreaterThanOrEqual(1);
-        expect(
-          boundWorkloads?.byWorkload.workflowsExecutionEngine__workflow
-        ).toBeGreaterThanOrEqual(1);
+        const workflows = boundWorkloads?.byWorkload.find(
+          ({ pluginId, workloadType }) =>
+            pluginId === 'workflowsExecutionEngine' && workloadType === 'workflow'
+        );
+        expect(workflows?.count).toBeGreaterThanOrEqual(1);
         expect(boundWorkloads?.byBinderType.user).toBeGreaterThanOrEqual(1);
       }
     );
