@@ -4,6 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+load_cloud_deploy_credentials
+
 ES_SNAPSHOTS_DAILY_BASE_URL="https://storage.googleapis.com/kibana-ci-es-snapshots-daily"
 ES_SHA_PATTERN="^[0-9a-f]{40}$"
 

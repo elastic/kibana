@@ -39,6 +39,7 @@ const generate = (
     errorReplayRate: 0,
     replaySize: 'light' as ReplaySize,
     sessionLength: 'typical' as SessionLength,
+    ongoingSessions: false,
     scale: 1,
     seed: 'digital-experience-replay-test',
     ...opts,

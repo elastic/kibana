@@ -82,6 +82,7 @@ export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibComponentsUseIsNestedEuiProvider = require('@elastic/eui/optimize/es/components/provider/nested');
 export const ElasticEuiLibServicesThemeWarning = require('@elastic/eui/optimize/es/services/theme/warning');
 export const ElasticEuiThemeBorealis = require('@elastic/eui-theme-borealis');
+export const ElasticEuiThemeCommon = require('@elastic/eui-theme-common');
 export const KbnDatemath = require('@kbn/datemath');
 export const HelloPangeaDnd = require('@hello-pangea/dnd/dist/dnd');
 export const ReduxjsToolkit = require('@reduxjs/toolkit');

@@ -8,10 +8,7 @@
 import React, { type FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type {
-  BarStyleAccessor,
-  RectAnnotationSpec,
-} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import type { BarStyleAccessor, RectAnnotationSpec } from '@elastic/charts';
 
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 import { DocumentCountChartRedux } from '@kbn/aiops-components';

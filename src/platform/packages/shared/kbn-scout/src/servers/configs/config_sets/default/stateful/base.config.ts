@@ -141,7 +141,7 @@ export const defaultConfig: ScoutServerConfig = {
       `--xpack.productDocBase.artifactRepositoryUrl=${PRODUCT_DOC_STUB_REPOSITORY_URL}`,
       `--server.maxPayload=1679958`,
       // newsfeed mock service
-      `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/newsfeed')}`,
+      `--plugin-path=${join(REPO_ROOT, '/src/platform/test_plugins/common/newsfeed')}`,
       // otel mock service
       `--plugin-path=${join(REPO_ROOT, '/src/platform/test_plugins/otel_metrics')}`,
       `--newsfeed.service.urlRoot=${kbnUrl}`,

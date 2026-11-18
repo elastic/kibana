@@ -11,8 +11,7 @@ import type { SearchBoostSetupDependencies } from './types';
 
 export class SearchBoostPlugin implements Plugin<void, void, SearchBoostSetupDependencies> {
   public setup(_core: CoreSetup, { features }: SearchBoostSetupDependencies) {
-    // The `_boost` APIs are `cluster:admin/boost/*` for writes and `cluster:monitor/boost/*` for
-    // reads, which `manage` and `monitor` cover; there is no boost-specific privilege.
+    // Profiles and rules are shown together, so each level needs the privilege for both.
     features.registerElasticsearchFeature({
       id: SEARCH_BOOST_APP_ID,
       management: {
@@ -20,11 +19,11 @@ export class SearchBoostPlugin implements Plugin<void, void, SearchBoostSetupDep
       },
       privileges: [
         {
-          requiredClusterPrivileges: ['manage'],
+          requiredClusterPrivileges: ['manage_boost_profiles', 'manage_boost_rules'],
           ui: ['save'],
         },
         {
-          requiredClusterPrivileges: ['monitor'],
+          requiredClusterPrivileges: ['read_boost_profiles', 'read_boost_rules'],
           ui: ['show'],
         },
       ],

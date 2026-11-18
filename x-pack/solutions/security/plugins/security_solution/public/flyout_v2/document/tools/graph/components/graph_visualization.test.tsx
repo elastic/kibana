@@ -522,7 +522,7 @@ describe('GraphVisualization', () => {
 
       onOpenEventPreview?.({
         id: 'node-1',
-        shape: 'label',
+        kind: 'event',
         documentsData: [{ id: 'doc-id', type: 'event', index: 'logs-*' }],
       } as never);
 
@@ -536,7 +536,7 @@ describe('GraphVisualization', () => {
 
       onOpenEventPreview?.({
         id: 'node-1',
-        shape: 'label',
+        kind: 'event',
         documentsData: [{ id: 'alert-id', type: 'alert', index: '.alerts-*' }],
       } as never);
 
@@ -550,7 +550,7 @@ describe('GraphVisualization', () => {
 
       onOpenEventPreview?.({
         id: 'node-1',
-        shape: 'hexagon',
+        kind: 'entity',
         documentsData: [
           {
             id: 'entity-2',
@@ -570,7 +570,7 @@ describe('GraphVisualization', () => {
 
       onOpenEventPreview?.({
         id: 'node-1',
-        shape: 'hexagon',
+        kind: 'entity',
         documentsData: [
           {
             id: 'entity-2',
@@ -590,7 +590,7 @@ describe('GraphVisualization', () => {
 
       onOpenEventPreview?.({
         id: 'node-1',
-        shape: 'hexagon',
+        kind: 'entity',
         documentsData: [
           { id: 'entity-2', type: 'entity', entity: { name: 'Entity 2' } },
           { id: 'entity-3', type: 'entity', entity: { name: 'Entity 3' } },
@@ -606,7 +606,7 @@ describe('GraphVisualization', () => {
 
       onOpenEventPreview?.({
         id: 'node-1',
-        shape: 'label',
+        kind: 'event',
         documentsData: [
           { id: 'doc-1', type: 'event' },
           { id: 'doc-2', type: 'event' },

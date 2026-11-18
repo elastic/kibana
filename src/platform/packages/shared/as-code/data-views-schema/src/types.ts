@@ -21,8 +21,10 @@ import type {
 } from './runtime_fields/schema_embedded_runtime_field';
 import type {
   savedDataViewSpecSchema,
+  savedDataViewSpecWithScriptedFieldsSchema,
   savedFieldSettingsSchema,
 } from './data_views/schema_saved_data_view';
+import type { savedScriptedFieldSchema } from './scripted_fields/schema_saved_scripted_fields';
 import type {
   savedCompositeRuntimeFieldSchema,
   savedPrimitiveRuntimeFieldSchema,
@@ -48,6 +50,10 @@ export type AsCodeSavedCompositeRuntimeField = z.output<typeof savedCompositeRun
 export type AsCodeSavedPrimitiveRuntimeField = z.output<typeof savedPrimitiveRuntimeFieldSchema>;
 export type AsCodeSavedRuntimeField = z.output<typeof savedRuntimeFieldSchema>;
 export type AsCodeSavedDataView = z.output<typeof savedDataViewSpecSchema>;
+export type AsCodeSavedScriptedField = z.output<typeof savedScriptedFieldSchema>;
+export type AsCodeSavedDataViewWithScriptedFields = z.output<
+  typeof savedDataViewSpecWithScriptedFieldsSchema
+>;
 
 // Field formats
 export type AsCodeFieldFormat = z.output<typeof formatSchema>;
