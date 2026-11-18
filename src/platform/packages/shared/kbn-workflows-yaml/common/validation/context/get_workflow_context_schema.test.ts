@@ -589,6 +589,7 @@ describe('getWorkflowContextSchema - page inputs', () => {
       workflowWith([
         {
           type: 'page',
+          id: 'default',
           title: 'Report',
           inputs: { type: 'object', properties: { summary: { type: 'string' } } },
         },

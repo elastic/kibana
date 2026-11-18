@@ -9,7 +9,6 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 
-import { LegacyWorkflowInputSchema } from './manual_trigger_schema';
 import { withJsonModelRootRefinements } from '../common/json_model_schema';
 import { JsonModelRootShapeSchema, JsonModelShapeSchema } from '../common/json_model_shape_schema';
 
@@ -123,7 +122,7 @@ export const PageTriggerSchema = lazySchema(() =>
       .default(DEFAULT_PAGE_TRIGGER_ID),
     title: z.string().trim().min(1).max(PAGE_TITLE_MAX_LENGTH),
     description: z.string().max(PAGE_DESCRIPTION_MAX_LENGTH).optional(),
-    inputs: z.union([PageInputsSchema, z.array(LegacyWorkflowInputSchema)]).optional(),
+    inputs: PageInputsSchema.optional(),
     ui: PageUiSchema.optional(),
   })
 );

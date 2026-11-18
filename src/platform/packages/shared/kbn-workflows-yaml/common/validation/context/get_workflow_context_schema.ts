@@ -114,8 +114,6 @@ export function getWorkflowContextSchema(
   const eventSchema = buildEventSchemaFromTriggers(registry, triggers ?? [], inputsZodSchema);
   const pageTrigger = (triggers ?? []).find(isPageTrigger);
 
-  const pageTrigger = (triggers ?? []).find(isPageTrigger);
-
   return DynamicWorkflowContextSchema.extend({
     inputs: inputsZodSchema,
     // Page submissions are untrusted, so they get their own `page.inputs` key, apart from `inputs`.

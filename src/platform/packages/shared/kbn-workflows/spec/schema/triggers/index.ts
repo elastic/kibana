@@ -16,7 +16,6 @@ import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../../../commo
 
 export { AlertRuleTriggerSchema } from './alert_trigger_schema';
 export { ManualTriggerSchema } from './manual_trigger_schema';
-export { PageTriggerSchema, isPageTrigger, type PageTrigger } from './page_trigger_schema';
 export {
   DEFAULT_PAGE_TRIGGER_ID,
   isPageTrigger,

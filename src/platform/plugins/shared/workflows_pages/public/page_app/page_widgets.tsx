@@ -230,7 +230,7 @@ const CheckboxesWidget = ({ id, value, options, disabled, readonly, onChange }: 
   const choices = (options.enumOptions ?? []) as Array<{ label: string; value: unknown }>;
   return (
     <EuiCheckboxGroup
-      idSelected={Object.fromEntries(
+      idToSelectedMap={Object.fromEntries(
         choices.map((choice, index) => [`${id}-${index}`, selected.has(toText(choice.value))])
       )}
       options={choices.map((choice, index) => ({ id: `${id}-${index}`, label: choice.label }))}

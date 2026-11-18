@@ -18,7 +18,7 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
-import { isPageTrigger, validatePageTriggers } from './schema/triggers/page_trigger_schema';
+import { validatePageTriggers } from './schema/triggers/page_trigger_schema';
 import {
   CONNECTOR_ID_MAX_LENGTH,
   IF_CONDITION_MAX_LENGTH,
@@ -1454,8 +1454,7 @@ export const WorkflowSchema = lazySchema(() =>
     const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
     const mappedTriggers = (data.triggers ?? []).map((trigger) => {
-      // POC: a page trigger can also use the legacy inputs array.
-      if (!(isManualTrigger(trigger) || isPageTrigger(trigger)) || !trigger.inputs) {
+      if (!isManualTrigger(trigger) || !trigger.inputs) {
         return trigger;
       }
 
@@ -1654,10 +1653,9 @@ export const WorkflowContextSchema = z.object({
    */
   context: WorkflowTemplatePersistedContextSchema.optional(),
   /**
-   * Alias for the inputs defined on the manual trigger (`triggers[type=manual].inputs`),
-   * page trigger (`triggers[type=page].inputs`), or workflow call trigger
-   * (`triggers[type=workflow_call].inputs`). Populated from the trigger's
-   * event.input values at execution time.
+   * Alias for the inputs defined on the manual trigger (`triggers[type=manual].inputs`)
+   * or workflow call trigger (`triggers[type=workflow_call].inputs`). Populated from the
+   * trigger's event.input values at execution time.
    */
   inputs: z.record(z.string(), z.unknown()).optional(),
   event: AlertEventSchema.optional(),
