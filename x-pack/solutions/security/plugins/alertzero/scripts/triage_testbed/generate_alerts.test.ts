@@ -242,6 +242,38 @@ describe('generate_alerts', () => {
         )
         .map(({ _source: doc }) => doc);
 
+    it('keeps the count of an aggregation alert in the threshold result, where a real alert has it, and out of the reason', () => {
+      const docs = unkeyed('true_positive').concat(unkeyed('false_positive'));
+
+      expect(docs.length).toBeGreaterThan(0);
+      docs.forEach((doc) => {
+        expect(typeof doc['kibana.alert.threshold_result.count']).toBe('number');
+        // The reason is the default template of Kibana: no count, and no sentence about a usual rate.
+        expect(String(doc['kibana.alert.reason'])).not.toMatch(/\d+ events|usual/);
+        expect(String(doc['kibana.alert.reason'])).toMatch(
+          /^network event( with source [\d.]+)? on host-\d+ created low alert .+\.$/
+        );
+      });
+    });
+
+    it('gives an aggregation true positive a higher count than any false positive, so that the count carries the signal', () => {
+      const counts = (verdict: Verdict) =>
+        unkeyed(verdict).map((doc) => Number(doc['kibana.alert.threshold_result.count']));
+
+      expect(Math.min(...counts('true_positive'))).toBeGreaterThan(
+        Math.max(...counts('false_positive'))
+      );
+    });
+
+    it('gives no threshold result to an alert that is not an aggregation alert', () => {
+      const others = result.alerts.filter((_, i) => !result.truth[i].keyId.startsWith('unkeyed-'));
+
+      expect(others.length).toBeGreaterThan(0);
+      others.forEach(({ _source: doc }) => {
+        expect(doc['kibana.alert.threshold_result.count']).toBeUndefined();
+      });
+    });
+
     it('gives a cloud true positive a change by root in an unusual region, and a false positive a read by a service role', () => {
       const bad = docsOf('cloud', 'true_positive');
       const good = docsOf('cloud', 'false_positive');

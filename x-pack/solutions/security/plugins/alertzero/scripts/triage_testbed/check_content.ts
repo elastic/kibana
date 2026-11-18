@@ -22,7 +22,7 @@
 import fs from 'fs';
 import path from 'path';
 
-type FieldValue = string | boolean | string[];
+type FieldValue = string | number | boolean | string[];
 type AlertSource = Record<string, FieldValue | undefined>;
 type Sign = string | false | null;
 
@@ -49,7 +49,8 @@ const readLines = <T>(file: string): T[] =>
     .map((line) => JSON.parse(line) as T);
 
 const inTemp = (value: FieldValue | undefined): boolean => /\\temp\\/i.test(String(value ?? ''));
-const baseline = /(\d+) events in 5 minutes against a usual (\d+)/;
+/** A threshold rule keeps its count in `kibana.alert.threshold_result.count`. A false positive of the generator stays under 48. */
+const FAR_ABOVE_USUAL_COUNT = 60;
 
 /** The signs, per kind. Each returns the reasons why an analyst would read the alert as malicious. */
 const SIGNS: Record<string, (d: AlertSource) => Sign[]> = {
@@ -94,9 +95,9 @@ const SIGNS: Record<string, (d: AlertSource) => Sign[]> = {
       'unusual region',
   ],
   aggregate: (d: AlertSource) => {
-    const match = baseline.exec(String(d['kibana.alert.reason'] ?? ''));
     return [
-      match && Number(match[1]) / Number(match[2]) >= 10 && 'far above the usual rate',
+      Number(d['kibana.alert.threshold_result.count'] ?? 0) >= FAR_ABOVE_USUAL_COUNT &&
+        'far above the usual rate',
       ['root', 'system:anonymous', 'admin-impersonation', 'unmanaged-device-bot'].includes(
         d['user.id'] as string
       ) && 'unusual principal',

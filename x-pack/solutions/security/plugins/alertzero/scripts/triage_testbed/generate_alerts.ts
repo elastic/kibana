@@ -620,8 +620,19 @@ const ruleNameAndKind = (
 const baseName = (value: FieldValue | undefined): string =>
   value ? path.win32.basename(String(value)) : 'unknown';
 
+/** Where a threshold rule keeps its aggregated count, as in a real alert. The reason never holds it. */
+const THRESHOLD_COUNT_FIELD = 'kibana.alert.threshold_result.count';
+
 const reasonOf = (rule: GeneratedRule, doc: AlertDoc): string => {
   const host = doc['host.name'];
+  if (doc[THRESHOLD_COUNT_FIELD] !== undefined) {
+    // The default reason of Kibana is a template of fields that the alert shows already. It has no count.
+    const category = [doc['event.category']].flat()[0];
+    const source = doc['source.ip'];
+    return `${category} event${source ? ` with source ${source}` : ''} on ${host} created ${
+      doc['kibana.alert.severity']
+    } alert ${rule.name}.`;
+  }
   const signer = doc['process.code_signature.subject_name'];
   const actor = `${baseName(doc['process.executable'])} (${
     signer ? `signed by ${signer}` : 'unsigned'
@@ -887,10 +898,11 @@ const buildDay = (
       const observed =
         verdict === 'true_positive' ? baseline * (15 + rng.int(45)) : baseline + rng.int(baseline);
       const content = {
-        reasonText: `${rule.name}: ${observed} events in 5 minutes against a usual ${baseline} for this principal.`,
+        // The count of the threshold rule, where a real alert keeps it. The prompt of Alert Analysis does not show this field.
+        [THRESHOLD_COUNT_FIELD]: observed,
         'event.category': ['network'],
         ...(distinct ? { 'source.ip': `192.0.2.${(i % distinct) % 250}` } : {}),
-        // Context fields that the prompt shows (the count in the reason text is not in it), by rule family. An aggregation alert has no
+        // Context fields that the prompt shows (the count in `kibana.alert.threshold_result` is not in it), by rule family. An aggregation alert has no
         // user name and no account, so no field here can turn it into a keyed alert.
         ...aggregateContext(
           verdict === 'true_positive',
