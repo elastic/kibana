@@ -49,6 +49,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
+  fillMissingHeatmapYBuckets,
   findMinMaxByColumnId,
   getFormattedTable,
   getSortPredicate,
@@ -471,6 +472,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         });
       }
     }
+
+    const yInterval = yAxisColumn
+      ? datatableUtilities.getNumberHistogramInterval(yAxisColumn)
+      : undefined;
+    chartData = fillMissingHeatmapYBuckets(chartData, yAccessor, valueAccessor, yInterval);
 
     chartData = sortRowsByRangeLowerBound(chartData, xAxisColumn, args.gridConfig.xSortPredicate);
     chartData = sortRowsByRangeLowerBound(chartData, yAxisColumn, args.gridConfig.ySortPredicate);
