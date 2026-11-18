@@ -17,6 +17,8 @@ import {
 } from './get_axios_instance';
 import { actionsConfigMock } from '../actions_config.mock';
 import { connectorAuthCounter } from './connector_metrics';
+import { AllowlistDeniedError } from './single_file_connectors/connector_network_errors';
+import { classifyConnectorFailure } from './single_file_connectors/classify_connector_failure';
 import { getCustomAgents } from './get_custom_agents';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
@@ -594,9 +596,18 @@ describe('getAxiosInstance', () => {
       return { data: {}, status: 200, statusText: 'OK', headers: {}, config };
     };
 
-    await expect(result.request({ url: 'https://denied.example.com/api' })).rejects.toBe(
-      allowlistError
-    );
+    // Typed, so a denied egress is classified as a network failure rather than a bug in the
+    // connector's code; the original error is kept as the cause.
+    const rejection = await result
+      .request({ url: 'https://denied.example.com/api' })
+      .then(
+        () => undefined,
+        (err) => err
+      );
+    expect(rejection).toBeInstanceOf(AllowlistDeniedError);
+    expect(rejection.message).toBe(allowlistError.message);
+    expect(rejection.cause).toBe(allowlistError);
+    expect(classifyConnectorFailure(rejection)).toBe('network');
     expect(adapterCalled).toBe(false);
   });
 

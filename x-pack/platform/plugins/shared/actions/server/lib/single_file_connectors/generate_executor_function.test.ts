@@ -1603,7 +1603,8 @@ describe('generateExecutorFunction', () => {
     it('returns status error with the allowedHosts message and no retry when ctx.client rejects with a policy error', async () => {
       const policyMessage =
         'target url "https://denied.example.com/api" is not added to the Kibana config xpack.actions.allowedHosts';
-      const policyError = new Error(policyMessage);
+      // What the axios allowlist interceptor throws for a denied host.
+      const policyError = new AllowlistDeniedError(policyMessage);
 
       const denyingClient = { get: jest.fn().mockRejectedValue(policyError) };
       mockGetAxiosInstanceWithAuth.mockResolvedValue(denyingClient as never);
@@ -1622,7 +1623,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: policyMessage,
         actionId: connectorId,
-        failureClass: 'handler',
+        failureClass: 'network',
       });
       expect(result).not.toHaveProperty('retry');
     });

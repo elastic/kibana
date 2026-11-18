@@ -7,6 +7,7 @@
 
 import { classifyConnectorFailure, getHttpStatus } from './classify_connector_failure';
 import { AllowlistDeniedError } from './connector_network_errors';
+import { RelayRequestError } from '../relay/relay_error';
 
 /** An axios error for a request the vendor answered. */
 const responseError = (status: number) =>
@@ -107,6 +108,26 @@ describe('classifyConnectorFailure', () => {
 
     it('classifies a non-numeric status as a handler failure, not a vendor one', () => {
       const error = Object.assign(new Error('odd'), { response: { status: '500' } });
+      expect(classifyConnectorFailure(error)).toBe('handler');
+    });
+  });
+
+  describe('transports that are not axios', () => {
+    it('classifies a Relay 5xx as a vendor outage, not a connector bug', () => {
+      const error = new RelayRequestError('/chat.postMessage', 503, 'upstream unavailable');
+
+      expect(classifyConnectorFailure(error)).toBe('vendor_5xx');
+    });
+
+    it('classifies a Relay 4xx as a vendor rejection', () => {
+      const error = new RelayRequestError('/chat.postMessage', 400, 'invalid_payload');
+
+      expect(classifyConnectorFailure(error)).toBe('vendor_4xx');
+    });
+
+    it('ignores a non-numeric top-level status', () => {
+      const error = Object.assign(new Error('odd'), { statusCode: '503' });
+
       expect(classifyConnectorFailure(error)).toBe('handler');
     });
   });

@@ -12,6 +12,8 @@ interface AxiosLikeError {
   code?: unknown;
   request?: { res?: unknown };
   response?: { status?: unknown };
+  /** Transports that aren't axios put the status at the top level, as Relay's errors do. */
+  statusCode?: unknown;
 }
 
 /**
@@ -33,10 +35,23 @@ const NETWORK_ERROR_CODES = new Set([
   'ERR_NETWORK',
 ]);
 
-/** The HTTP status a vendor answered with, for errors that carry a response. */
+/** The HTTP status an axios error carries, used for `errorMeta` and the retry date. */
 export const getHttpStatus = (error: unknown): number | undefined => {
   const status = (error as AxiosLikeError | undefined)?.response?.status;
   return typeof status === 'number' ? status : undefined;
+};
+
+/**
+ * The status the vendor answered with, over any transport a connector can use: axios puts it on
+ * the response, while Relay's `RelayRequestError` carries it at the top level. Kept separate
+ * from `getHttpStatus` so classifying a failure doesn't change `errorMeta` or the retry date.
+ */
+const getVendorStatus = (error: unknown): number | undefined => {
+  const fromResponse = getHttpStatus(error);
+  if (fromResponse !== undefined) return fromResponse;
+
+  const { statusCode } = (error ?? {}) as AxiosLikeError;
+  return typeof statusCode === 'number' ? statusCode : undefined;
 };
 
 /**
@@ -68,7 +83,7 @@ const isNetworkError = (error: unknown): boolean => {
  * (authorization, rate limiting, disabled connectors, invalid config) never reach here.
  */
 export const classifyConnectorFailure = (error: unknown): ConnectorExecuteFailureClass => {
-  const status = getHttpStatus(error);
+  const status = getVendorStatus(error);
 
   if (status !== undefined) {
     if (status >= 500) return 'vendor_5xx';
