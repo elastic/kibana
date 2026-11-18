@@ -7,17 +7,15 @@
 
 import { createHash } from 'crypto';
 import { Parser, mutate } from '@elastic/esql';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { AiIndexChangeEvent, AiIndexChangeHandler } from '@kbn/context-engine-plugin/server';
-import {
-  findInstalledTemplateWorkflowIdByName,
-  installAutomationTemplate,
-  type InstallAutomationTemplateDependencies,
-} from './install_automation_template';
-import { MAX_AUTOMATION_NAME_LENGTH } from './template_params';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { AiIndexChangeEvent, AiIndexChangeHandler } from '../ai_indices/changes';
+import type { AiIndexService } from '../ai_indices/service';
+import { AUTOMATION_TEMPLATE_TAGS, renderIndexMetadataTemplate } from './render';
 
 export const SOURCE_AUTOMATIONS_CHANGE_HANDLER_ID = 'index_metadata_source_automations';
 
+/** Same cap as the automation names agents give templates. */
+const MAX_AUTOMATION_NAME_LENGTH = 200;
 const NAME_PREFIX = 'Index metadata: ';
 const HASH_LENGTH = 8;
 const MAX_CATEGORY_CANDIDATES = 20;
@@ -30,10 +28,48 @@ const CATEGORY_NAME_PATTERN =
 /** Field names that usually hold an identifier, which never makes a good category. */
 const IDENTIFIER_NAME_PATTERN = /(^|[._])(id|uuid|guid|hash|key|_id)$/i;
 
+/** Duck-typed so Context Engine does not depend on `@kbn/workflows-management-plugin` (Moon cycle). */
+export interface AutomationWorkflowsApi {
+  getWorkflow(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ id?: string; name?: string; tags?: string[] } | null>;
+  createWorkflow(
+    workflow: { yaml: string },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ id: string; valid: boolean }>;
+  updateWorkflow(
+    workflowId: string,
+    workflow: { yaml: string },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ valid: boolean }>;
+  deleteWorkflows(workflowIds: string[], spaceId: string, request: KibanaRequest): Promise<unknown>;
+}
+
+export interface SourceAutomationsDependencies {
+  logger: Logger;
+  getAiIndexService: () => AiIndexService;
+  /** Resolves to `undefined` without workflows management. */
+  getWorkflowsManagement: () => Promise<AutomationWorkflowsApi | undefined>;
+  /** Whether the request may create, or delete, workflows in the space. */
+  canManageWorkflows: (
+    request: KibanaRequest,
+    spaceId: string,
+    operation: 'create' | 'delete'
+  ) => Promise<boolean>;
+  /** An Elasticsearch client acting as the user who saved the AI index. */
+  getScopedEsClient: (request: KibanaRequest) => Promise<ElasticsearchClient>;
+}
+
 interface EsqlSource {
   type: 'esql';
   value: string;
 }
+
+type SourceEvent = Pick<AiIndexChangeEvent, 'aiIndexId' | 'spaceId' | 'request'>;
 
 const esqlSourcesOf = (sources: ReadonlyArray<{ type: string; value: string }> | undefined) =>
   (sources ?? []).filter((source): source is EsqlSource => source.type === 'esql');
@@ -120,17 +156,37 @@ export const chooseCategoryField = async (
   return counted[0]?.field;
 };
 
-export interface SourceAutomationsDependencies extends InstallAutomationTemplateDependencies {
-  /** An Elasticsearch client acting as the user who saved the AI index. */
-  getScopedEsClient: (request: KibanaRequest) => Promise<ElasticsearchClient>;
-}
+/** The workflow attached to the AI index that the index metadata template installed under a name. */
+const findTemplateWorkflowId = async (
+  { getAiIndexService }: SourceAutomationsDependencies,
+  workflowsManagement: AutomationWorkflowsApi,
+  { aiIndexId, spaceId, request }: SourceEvent,
+  name: string
+): Promise<string | undefined> => {
+  const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+  for (const { type, value } of aiIndex.automations) {
+    if (type !== 'workflow') {
+      continue;
+    }
+    const workflow = await workflowsManagement.getWorkflow(value, spaceId, request);
+    if (
+      workflow?.name === name &&
+      workflow.tags?.includes(AUTOMATION_TEMPLATE_TAGS.index_metadata)
+    ) {
+      return workflow.id ?? value;
+    }
+  }
+  return undefined;
+};
 
 const installForSource = async (
   deps: SourceAutomationsDependencies,
-  { aiIndexId, spaceId, request }: Pick<AiIndexChangeEvent, 'aiIndexId' | 'spaceId' | 'request'>,
+  workflowsManagement: AutomationWorkflowsApi,
+  event: SourceEvent,
   { value }: EsqlSource
 ): Promise<void> => {
-  const { logger } = deps;
+  const { logger, getAiIndexService } = deps;
+  const { aiIndexId, spaceId, request } = event;
   const name = sourceAutomationName(value);
   const targets = esqlSourceTargets(value);
   if (targets.length === 0) {
@@ -148,50 +204,63 @@ const installForSource = async (
     );
     return;
   }
-  const result = await installAutomationTemplate({
-    ...deps,
+  const yaml = renderIndexMetadataTemplate({
     aiIndexId,
-    spaceId,
-    request,
-    params: {
-      template: 'index_metadata',
-      name,
-      sources: [{ index: targets.join(','), categoryField }],
-    },
-  });
+    automationName: name,
+    sources: [{ index: targets.join(','), categoryField }],
+  }).replace(/^name: .*/m, `name: ${JSON.stringify(name)}`);
+
+  const existing = await findTemplateWorkflowId(deps, workflowsManagement, event, name);
+  if (existing) {
+    await workflowsManagement.updateWorkflow(existing, { yaml }, spaceId, request);
+    logger.info(`Updated "${name}" on AI index '${aiIndexId}' in space '${spaceId}'`);
+    return;
+  }
+  if (!(await deps.canManageWorkflows(request, spaceId, 'create'))) {
+    throw new Error(
+      `the user who saved the AI index cannot create workflows, so "${name}" was not installed`
+    );
+  }
+  const aiIndexService = getAiIndexService();
+  await aiIndexService.assertCanAcceptAutomation(aiIndexId, spaceId);
+  const { id: workflowId } = await workflowsManagement.createWorkflow({ yaml }, spaceId, request);
+  try {
+    await aiIndexService.addAutomation(aiIndexId, spaceId, { type: 'workflow', value: workflowId });
+  } catch (error) {
+    await workflowsManagement.deleteWorkflows([workflowId], spaceId, request).catch(() => {
+      logger.warn(`Failed to roll back workflow '${workflowId}' after attaching it failed`);
+    });
+    throw error;
+  }
   logger.info(
-    `${
-      result.replaced ? 'Reinstalled' : 'Installed'
-    } "${name}" on AI index '${aiIndexId}' in space '${spaceId}' as workflow '${
-      result.workflowId
-    }', grouped by '${categoryField}'`
+    `Installed "${name}" on AI index '${aiIndexId}' in space '${spaceId}' as workflow '${workflowId}', grouped by '${categoryField}'`
   );
 };
 
 const removeForSource = async (
   deps: SourceAutomationsDependencies,
-  { aiIndexId, spaceId, request }: Pick<AiIndexChangeEvent, 'aiIndexId' | 'spaceId' | 'request'>,
+  workflowsManagement: AutomationWorkflowsApi,
+  event: SourceEvent,
   { value }: EsqlSource
 ): Promise<void> => {
-  const { logger, getAiIndexService, getWorkflowsManagement } = deps;
+  const { logger, getAiIndexService } = deps;
+  const { aiIndexId, spaceId, request } = event;
   const name = sourceAutomationName(value);
-  const workflowId = await findInstalledTemplateWorkflowIdByName({
-    aiIndexId,
-    spaceId,
-    request,
-    template: 'index_metadata',
-    name,
-    logger,
-    getAiIndexService,
-    getWorkflowsManagement,
-  });
+  const workflowId = await findTemplateWorkflowId(deps, workflowsManagement, event, name);
   if (!workflowId) {
     return;
   }
-  await (
-    await getAiIndexService()
-  ).removeAutomation(aiIndexId, spaceId, { type: 'workflow', value: workflowId });
-  await getWorkflowsManagement().deleteWorkflows([workflowId], spaceId, request);
+  await getAiIndexService().removeAutomation(aiIndexId, spaceId, {
+    type: 'workflow',
+    value: workflowId,
+  });
+  if (!(await deps.canManageWorkflows(request, spaceId, 'delete'))) {
+    logger.warn(
+      `Detached "${name}" from AI index '${aiIndexId}' with its source; the user who saved it cannot delete workflows, so workflow '${workflowId}' was kept`
+    );
+    return;
+  }
+  await workflowsManagement.deleteWorkflows([workflowId], spaceId, request);
   logger.info(
     `Removed "${name}" from AI index '${aiIndexId}' in space '${spaceId}' with its source, and deleted workflow '${workflowId}'`
   );
@@ -206,12 +275,25 @@ export const reconcileSourceAutomations = async (
   deps: SourceAutomationsDependencies,
   event: AiIndexChangeEvent
 ): Promise<void> => {
-  const { previous, current } = event;
+  const { previous, current, aiIndexId } = event;
   if (!current || current.managed) {
     return;
   }
   const before = new Set(esqlSourcesOf(previous?.sources).map(({ value }) => value.trim()));
   const after = new Set(esqlSourcesOf(current.sources).map(({ value }) => value.trim()));
+  const removed = esqlSourcesOf(previous?.sources).filter(({ value }) => !after.has(value.trim()));
+  const added = esqlSourcesOf(current.sources).filter(({ value }) => !before.has(value.trim()));
+  if (removed.length === 0 && added.length === 0) {
+    return;
+  }
+  const workflowsManagement = await deps.getWorkflowsManagement();
+  if (!workflowsManagement) {
+    deps.logger.debug(
+      `Workflows management is not available: AI index '${aiIndexId}' gets no source automations`
+    );
+    return;
+  }
+
   const failures: string[] = [];
   const attempt = async (label: string, run: () => Promise<void>) => {
     try {
@@ -220,20 +302,15 @@ export const reconcileSourceAutomations = async (
       failures.push(`${label}: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
-
-  for (const source of esqlSourcesOf(previous?.sources)) {
-    if (!after.has(source.value.trim())) {
-      await attempt(`removing "${sourceAutomationName(source.value)}"`, () =>
-        removeForSource(deps, event, source)
-      );
-    }
+  for (const source of removed) {
+    await attempt(`removing "${sourceAutomationName(source.value)}"`, () =>
+      removeForSource(deps, workflowsManagement, event, source)
+    );
   }
-  for (const source of esqlSourcesOf(current.sources)) {
-    if (!before.has(source.value.trim())) {
-      await attempt(`installing "${sourceAutomationName(source.value)}"`, () =>
-        installForSource(deps, event, source)
-      );
-    }
+  for (const source of added) {
+    await attempt(`installing "${sourceAutomationName(source.value)}"`, () =>
+      installForSource(deps, workflowsManagement, event, source)
+    );
   }
   if (failures.length > 0) {
     throw new Error(failures.join('; '));

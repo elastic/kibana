@@ -10,12 +10,6 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
-import { assertContextEngineWriteAccess } from '../agent_builder/assert_context_engine_write_access';
-import {
-  parseWorkflowNameFromYaml,
-  saveWorkflowToAiIndex,
-  type SaveAutomationResult,
-} from '../agent_builder/tools/save_automation/handler';
 import {
   AUTOMATION_TEMPLATE_TAGS,
   renderDocumentOrchestrationTemplate,
@@ -27,7 +21,13 @@ import {
   type IndexMetadataTemplateValues,
   type TargetedKiWriterTemplateValues,
   type UnitProfileTemplateValues,
-} from '../agent_builder/tools/install_automation_template/render';
+} from '@kbn/context-engine-plugin/server/automation_templates/render';
+import { assertContextEngineWriteAccess } from '../agent_builder/assert_context_engine_write_access';
+import {
+  parseWorkflowNameFromYaml,
+  saveWorkflowToAiIndex,
+  type SaveAutomationResult,
+} from '../agent_builder/tools/save_automation/handler';
 import { InvalidTemplateParamsError } from '../errors';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -124,44 +124,11 @@ export const findInstalledTemplateWorkflowId = async ({
   logger: Logger;
   getAiIndexService: () => Promise<AiIndexService>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
-}): Promise<string | undefined> =>
-  findInstalledTemplateWorkflowIdByName({
-    aiIndexId,
-    spaceId,
-    request,
-    template,
-    name: parseWorkflowNameFromYaml(workflowYaml),
-    logger,
-    getAiIndexService,
-    getWorkflowsManagement,
-  });
-
-/**
- * Finds the id of the workflow on the AI index installed from the template with exactly this
- * name, if one exists. A workflow tagged as a different template is never matched.
- */
-export const findInstalledTemplateWorkflowIdByName = async ({
-  aiIndexId,
-  spaceId,
-  request,
-  template,
-  name: templateName,
-  logger,
-  getAiIndexService,
-  getWorkflowsManagement,
-}: {
-  aiIndexId: string;
-  spaceId: string;
-  request: KibanaRequest;
-  template: AutomationTemplateId;
-  name: string | undefined;
-  logger: Logger;
-  getAiIndexService: () => Promise<AiIndexService>;
-  getWorkflowsManagement: () => WorkflowsManagementApi;
 }): Promise<string | undefined> => {
   const aiIndex = await (await getAiIndexService()).get(aiIndexId, spaceId);
   const workflowsManagement = getWorkflowsManagement();
   const templateTag = AUTOMATION_TEMPLATE_TAGS[template];
+  const templateName = parseWorkflowNameFromYaml(workflowYaml);
 
   for (const automation of aiIndex.automations) {
     if (automation.type !== 'workflow') {
