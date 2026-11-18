@@ -199,6 +199,54 @@ describe('connector metrics', () => {
       });
     });
 
+    it('reports a known vendor status code as itself', () => {
+      recordConnectorExecute({
+        connectorType: '.slack',
+        specBased: true,
+        origin: 'saved_object',
+        errorType: 'other',
+        errorSource: 'user',
+        failureClass: 'vendor_4xx',
+        statusCode: 429,
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ 'error.status_code': '429', 'error.failure_class': 'vendor_4xx' })
+      );
+    });
+
+    it('reports a status code outside the allowlist as unknown, keeping the label bounded', () => {
+      recordConnectorExecute({
+        connectorType: '.slack',
+        specBased: true,
+        origin: 'saved_object',
+        errorType: 'other',
+        errorSource: 'user',
+        failureClass: 'vendor_4xx',
+        statusCode: 418,
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ 'error.status_code': 'unknown' })
+      );
+    });
+
+    it('leaves out the status code when the execution succeeded', () => {
+      recordConnectorExecute({
+        connectorType: '.slack',
+        specBased: true,
+        origin: 'saved_object',
+        statusCode: 429,
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.not.objectContaining({ 'error.status_code': expect.anything() })
+      );
+    });
+
     it('leaves out the failure class when the execution succeeded', () => {
       recordConnectorExecute({
         connectorType: '.sharepoint',

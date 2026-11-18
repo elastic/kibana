@@ -34,7 +34,11 @@ import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_i
 import type { LeasePool } from '../lease_pool';
 import { buildClientLeaseKey } from './build_client_lease_key';
 import { AllowlistDeniedError } from './connector_network_errors';
-import { classifyConnectorFailure, getHttpStatus } from './classify_connector_failure';
+import {
+  classifyConnectorFailure,
+  getHttpStatus,
+  getVendorStatus,
+} from './classify_connector_failure';
 
 type RecordUnknown = Record<string, unknown>;
 interface FetchOptions {
@@ -345,12 +349,14 @@ export const generateExecutorFunction = ({
       });
       const errorMeta = getErrorMeta({ error, contentLengthBytes });
       const retryDate = getRetryDate(error);
+      const vendorStatusCode = getVendorStatus(error);
       logger.error(`error on ${connectorId} event: ${errorMessage}`);
       return {
         status: 'error',
         message: errorMessage,
         actionId: connectorId,
         failureClass: classifyConnectorFailure(error),
+        ...(vendorStatusCode !== undefined ? { vendorStatusCode } : {}),
         ...(errorMeta ? { errorMeta } : {}),
         ...(errorSource === TaskErrorSource.USER
           ? { retry: false, errorSource: TaskErrorSource.USER }

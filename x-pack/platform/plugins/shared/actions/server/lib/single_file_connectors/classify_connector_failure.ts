@@ -46,7 +46,7 @@ export const getHttpStatus = (error: unknown): number | undefined => {
  * the response, while Relay's `RelayRequestError` carries it at the top level. Kept separate
  * from `getHttpStatus` so classifying a failure doesn't change `errorMeta` or the retry date.
  */
-const getVendorStatus = (error: unknown): number | undefined => {
+export const getVendorStatus = (error: unknown): number | undefined => {
   const fromResponse = getHttpStatus(error);
   if (fromResponse !== undefined) return fromResponse;
 

@@ -71,6 +71,8 @@ export interface ActionTypeExecutorResult<Data> {
   errorName?: string;
   errorMeta?: Record<string, unknown>;
   failureClass?: ConnectorExecuteFailureClass;
+  /** The HTTP status the vendor answered with, over whichever transport the connector used. */
+  vendorStatusCode?: number;
 }
 
 export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {

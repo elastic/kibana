@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
 import { AllowlistDeniedError } from './connector_network_errors';
+import { RelayRequestError } from '../relay/relay_error';
 import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import type {
   ActionContext,
@@ -1403,6 +1404,7 @@ describe('generateExecutorFunction', () => {
           message: 'Request failed with status code 429',
           actionId: connectorId,
           failureClass: 'vendor_4xx',
+          vendorStatusCode: 429,
           errorMeta: { statusCode: 429 },
           retry: inSeconds(30),
         });
@@ -1528,6 +1530,26 @@ describe('generateExecutorFunction', () => {
         const result = await executeWithError(makeHttpError(503));
 
         expect(result).toMatchObject({ status: 'error', failureClass: 'vendor_5xx' });
+      });
+
+      it('carries the vendor status alongside the class', async () => {
+        const result = await executeWithError(makeHttpError(429));
+
+        expect(result).toMatchObject({ failureClass: 'vendor_4xx', vendorStatusCode: 429 });
+      });
+
+      it('carries the status for a transport that is not axios', async () => {
+        const result = await executeWithError(
+          new RelayRequestError('/chat.postMessage', 503, 'upstream unavailable')
+        );
+
+        expect(result).toMatchObject({ failureClass: 'vendor_5xx', vendorStatusCode: 503 });
+      });
+
+      it('leaves the status out when the vendor never answered', async () => {
+        const result = await executeWithError(new Error('no document id in the response'));
+
+        expect(result).not.toHaveProperty('vendorStatusCode');
       });
 
       it('classifies a transport failure as network', async () => {

@@ -78,6 +78,15 @@ export type ConnectorExecuteOrigin =
 /** Who is responsible for a failed execution. */
 export type ConnectorErrorSource = 'user' | 'framework';
 
+/**
+ * The vendor status codes reported as themselves. Anything else is reported as `unknown`, so
+ * the label stays low-cardinality whatever a vendor answers; `error.failure_class` still
+ * carries the 4xx/5xx split for the codes that fall through.
+ */
+const REPORTED_STATUS_CODES = new Set([
+  400, 401, 403, 404, 408, 409, 413, 422, 429, 500, 502, 503, 504,
+]);
+
 const NO_AUTH_TYPE = 'none';
 /** Sub-action reported for connectors that have a single operation and no sub-actions. */
 export const DEFAULT_SUB_ACTION = 'default';
@@ -185,6 +194,8 @@ export interface RecordConnectorExecuteOpts {
   errorSource?: ConnectorErrorSource;
   /** Why a connector's own handler failed, when the failure came from one. */
   failureClass?: ConnectorExecuteFailureClass;
+  /** The HTTP status the vendor answered with, reported bounded. */
+  statusCode?: number;
   durationMs?: number;
 }
 
@@ -196,6 +207,7 @@ export const recordConnectorExecute = ({
   errorType,
   errorSource,
   failureClass,
+  statusCode,
   durationMs,
 }: RecordConnectorExecuteOpts): void => {
   const attributes: Attributes = {
@@ -211,6 +223,14 @@ export const recordConnectorExecute = ({
     ...attributes,
     ...(errorType && errorSource ? { 'error.source': errorSource } : {}),
     ...(errorType && failureClass ? { 'error.failure_class': failureClass } : {}),
+    ...(errorType && statusCode !== undefined
+      ? {
+          'error.status_code': toBoundedLabel(
+            String(statusCode),
+            REPORTED_STATUS_CODES.has(statusCode)
+          ),
+        }
+      : {}),
   });
 
   if (durationMs !== undefined) {
