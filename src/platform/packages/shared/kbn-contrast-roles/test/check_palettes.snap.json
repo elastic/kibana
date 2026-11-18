@@ -1,0 +1,96 @@
+{
+  "light": {
+    "surface": "#FFFFFF",
+    "hues": {
+      "teal": {
+        "faint": { "hex": "#D7FEFB", "lc": 0, "wcag": 1.1 },
+        "muted": { "hex": "#7AE2DD", "lc": 24, "wcag": 1.5 },
+        "base": { "hex": "#16C5C0", "lc": 42, "wcag": 2.1 },
+        "strong": { "hex": "#00938F", "lc": 65, "wcag": 3.8 },
+        "ink": { "hex": "#006D6B", "lc": 75, "wcag": 5.7 }
+      },
+      "blue": {
+        "faint": { "hex": "#EDF4FF", "lc": 0, "wcag": 1.1 },
+        "muted": { "hex": "#A4C9FF", "lc": 30, "wcag": 1.7 },
+        "base": { "hex": "#61A2FF", "lc": 50, "wcag": 2.6 },
+        "strong": { "hex": "#3978D2", "lc": 70, "wcag": 4.4 },
+        "ink": { "hex": "#1A5BB2", "lc": 75, "wcag": 6 }
+      },
+      "pink": {
+        "faint": { "hex": "#FFEFF4", "lc": 0, "wcag": 1.1 },
+        "muted": { "hex": "#FFABCA", "lc": 32, "wcag": 1.8 },
+        "base": { "hex": "#EE72A6", "lc": 53, "wcag": 2.8 },
+        "strong": { "hex": "#C0487E", "lc": 72, "wcag": 4.7 },
+        "ink": { "hex": "#9F2962", "lc": 76, "wcag": 6.4 }
+      },
+      "red": {
+        "faint": { "hex": "#FFEFED", "lc": 0, "wcag": 1.1 },
+        "muted": { "hex": "#FFAFA7", "lc": 32, "wcag": 1.8 },
+        "base": { "hex": "#F6726A", "lc": 53, "wcag": 2.8 },
+        "strong": { "hex": "#C84844", "lc": 72, "wcag": 4.7 },
+        "ink": { "hex": "#A52627", "lc": 76, "wcag": 6.5 }
+      },
+      "yellow": {
+        "faint": { "hex": "#FFF6E4", "lc": 0, "wcag": 1.1 },
+        "muted": { "hex": "#FDCE71", "lc": 22, "wcag": 1.5 },
+        "base": { "hex": "#EAAE01", "lc": 38, "wcag": 2 },
+        "strong": { "hex": "#C07800", "lc": 63, "wcag": 3.5 },
+        "ink": { "hex": "#8D5600", "lc": 75, "wcag": 5.6 }
+      },
+      "purple": {
+        "faint": { "hex": "#F5F1FF", "lc": 0, "wcag": 1.1 },
+        "muted": { "hex": "#D1B8FF", "lc": 32, "wcag": 1.7 },
+        "base": { "hex": "#B386F9", "lc": 53, "wcag": 2.7 },
+        "strong": { "hex": "#8C5ECD", "lc": 71, "wcag": 4.6 },
+        "ink": { "hex": "#7041AE", "lc": 76, "wcag": 6.2 }
+      }
+    }
+  },
+  "dark": {
+    "surface": "#111C2C",
+    "hues": {
+      "teal": {
+        "faint": { "hex": "#003F3D", "lc": 0, "wcag": 1.5 },
+        "muted": { "hex": "#009390", "lc": 36, "wcag": 4.5 },
+        "base": { "hex": "#16C5C0", "lc": 59, "wcag": 8 },
+        "strong": { "hex": "#76E0DB", "lc": 76, "wcag": 11 },
+        "ink": { "hex": "#9AEDE9", "lc": 79, "wcag": 8.8 }
+      },
+      "blue": {
+        "faint": { "hex": "#153460", "lc": 0, "wcag": 1.4 },
+        "muted": { "hex": "#4379C7", "lc": 30, "wcag": 3.9 },
+        "base": { "hex": "#61A2FF", "lc": 50, "wcag": 6.6 },
+        "strong": { "hex": "#A1C8FF", "lc": 70, "wcag": 10 },
+        "ink": { "hex": "#BCD8FF", "lc": 75, "wcag": 8.5 }
+      },
+      "pink": {
+        "faint": { "hex": "#581D37", "lc": 0, "wcag": 1.3 },
+        "muted": { "hex": "#B9517E", "lc": 29, "wcag": 3.7 },
+        "base": { "hex": "#EE72A6", "lc": 47, "wcag": 6.2 },
+        "strong": { "hex": "#FFA9C9", "lc": 68, "wcag": 9.6 },
+        "ink": { "hex": "#FFC5DA", "lc": 75, "wcag": 8.7 }
+      },
+      "red": {
+        "faint": { "hex": "#5B1D1B", "lc": 0, "wcag": 1.3 },
+        "muted": { "hex": "#C0514B", "lc": 28, "wcag": 3.7 },
+        "base": { "hex": "#F6726A", "lc": 47, "wcag": 6.1 },
+        "strong": { "hex": "#FFACA4", "lc": 68, "wcag": 9.5 },
+        "ink": { "hex": "#FFC8C3", "lc": 75, "wcag": 8.7 }
+      },
+      "yellow": {
+        "faint": { "hex": "#4A341B", "lc": 0, "wcag": 1.5 },
+        "muted": { "hex": "#FDCE71", "lc": 79, "wcag": 11.6 },
+        "base": { "hex": "#E1B14D", "lc": 63, "wcag": 8.6 },
+        "strong": { "hex": "#F4CF85", "lc": 79, "wcag": 11.5 },
+        "ink": { "hex": "#FCDDA2", "lc": 81, "wcag": 8.9 }
+      },
+      "purple": {
+        "faint": { "hex": "#3E275E", "lc": 0, "wcag": 1.4 },
+        "muted": { "hex": "#8963C3", "lc": 29, "wcag": 3.8 },
+        "base": { "hex": "#B386F9", "lc": 48, "wcag": 6.3 },
+        "strong": { "hex": "#D0B6FF", "lc": 68, "wcag": 9.6 },
+        "ink": { "hex": "#DECEFF", "lc": 75, "wcag": 8.7 }
+      }
+    }
+  }
+}

@@ -1100,6 +1100,9 @@ importers:
       '@kbn/context-switcher-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/context-switcher-components
+      '@kbn/contrast-roles':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-contrast-roles
       '@kbn/control-group-renderer':
         specifier: workspace:*
         version: link:src/platform/packages/shared/controls/control-group-renderer
@@ -4508,6 +4511,9 @@ importers:
       classnames:
         specifier: 2.5.1
         version: 2.5.1
+      colorjs.io:
+        specifier: 0.7.1
+        version: 0.7.1
       commander:
         specifier: 4.1.1
         version: 4.1.1
@@ -4526,6 +4532,9 @@ importers:
       css-box-model:
         specifier: 1.2.1
         version: 1.2.1
+      culori:
+        specifier: 4.0.2
+        version: 4.0.2
       d3:
         specifier: 3.5.17
         version: 3.5.17
@@ -6234,6 +6243,9 @@ importers:
       '@types/cli-progress':
         specifier: 3.11.5
         version: 3.11.5
+      '@types/culori':
+        specifier: 4.0.1
+        version: 4.0.1
       '@types/d3':
         specifier: 3.5.43
         version: 3.5.43
@@ -8098,6 +8110,8 @@ importers:
         version: 3.0.2
 
   src/platform/packages/shared/kbn-content-management-utils: {}
+
+  src/platform/packages/shared/kbn-contrast-roles: {}
 
   src/platform/packages/shared/kbn-core-server-benchmarks: {}
 
@@ -14875,6 +14889,9 @@ packages:
   '@types/cors@2.8.19':
     resolution: {integrity: sha512-mFNylyeyqN93lfe/9CSxOGREz8cpzAhH+E93xJ4xWQf62V8sQ/24reV2nyzUWM6H6Xji+GGHpkbLe7pVoUEskg==}
 
+  '@types/culori@4.0.1':
+    resolution: {integrity: sha512-43M51r/22CjhbOXyGT361GZ9vncSVQ39u62x5eJdBQFviI8zWp2X5jzqg7k4M6PVgDQAClpy2bUe2dtwEgEDVQ==}
+
   '@types/d3-array@2.12.3':
     resolution: {integrity: sha512-hN879HLPTVqZV3FQEXy7ptt083UXwguNbnxdTGzVW4y4KjX5uyNKljrQixZcSJfLyFirbpUokxpXtvR+N5+KIg==}
 
@@ -17321,6 +17338,10 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  culori@4.0.2:
+    resolution: {integrity: sha512-1+BhOB8ahCn4O0cep0Sh2l9KCOfOdY+BXJnKMHFFzDEouSr/el18QwXEMRlOj9UY5nCeA8UN3a/82rUWRBeyBw==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
   cypress-axe@1.7.0:
     resolution: {integrity: sha512-zzJpvAAjauEB3GZl0KYXb8i3w6MztWAt2WM3czYTFyNVC30alDmqCm9E7GwZ4bgkldZJlmHakaVEyu73R5St4w==}
@@ -31463,6 +31484,8 @@ snapshots:
     dependencies:
       '@types/node': 24.10.13
 
+  '@types/culori@4.0.1': {}
+
   '@types/d3-array@2.12.3': {}
 
   '@types/d3-brush@3.0.1':
@@ -34115,6 +34138,8 @@ snapshots:
   csstype@3.0.7: {}
 
   csstype@3.2.3: {}
+
+  culori@4.0.2: {}
 
   cypress-axe@1.7.0(axe-core@4.13.0)(cypress@15.12.0):
     dependencies:
