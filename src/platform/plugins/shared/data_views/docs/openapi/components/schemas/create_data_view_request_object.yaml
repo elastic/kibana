@@ -52,5 +52,7 @@ properties:
       in `data_view.namespaces`, or in the current space if that's omitted or empty.
       If no name matches, an ID match keeps the existing spaces unless a non-empty
       `data_view.namespaces` is provided.
-      Unless `data_view.id` is provided, a new ID is generated, which can break existing references.
+      Unless `data_view.id` is provided, a new ID is generated, which can break existing references. 
+      If the namespaces param is passed, the data view might get duplicated. The name match only runs on the current namespace, 
+      so if the current namespace is A but the namespaces param is just B, the name match won't find it.
     default: false
