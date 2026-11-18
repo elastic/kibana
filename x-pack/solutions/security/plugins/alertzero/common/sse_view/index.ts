@@ -51,3 +51,7 @@ export {
   type SseEventGroup,
   type GroupEventsHuntResult,
 } from './group_events_by_detection';
+
+export { toSseViewModel, type SseEntityLine, type SseViewModel } from './view_model';
+
+export { SSE_BASIS_LABELS } from './basis_labels';

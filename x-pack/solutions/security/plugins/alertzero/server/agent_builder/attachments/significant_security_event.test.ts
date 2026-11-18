@@ -7,7 +7,7 @@
 
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { createSignificantSecurityEventAttachmentType } from './significant_security_event';
-import { formatToText } from './test_utils';
+import { formatToText, renderSurface, surfaceContext } from './test_utils';
 
 const validPayload = {
   attachmentLabel: 'Significant Security Event',
@@ -460,6 +460,151 @@ describe('createSignificantSecurityEventAttachmentType', () => {
 
       // Each section that ran out of budget says so, rather than ending mid-list.
       expect(value).toContain('more not shown (section size limit reached)');
+    });
+  });
+
+  describe('toSurfaceComposition', () => {
+    const toComposition = async (data: unknown) =>
+      attachmentType.toSurfaceComposition?.(
+        { id: 'attachment-1', type: attachmentType.id, data },
+        surfaceContext
+      );
+
+    const detections = [
+      {
+        id: 'ioc:ip:203.0.113.10',
+        kind: 'ioc',
+        field: 'destination.ip',
+        basis: 'ioc_strong',
+        matched_on: [{ field: 'destination.ip', value: '203.0.113.10' }],
+        total: 12,
+        host_count: 3,
+        user_count: 1,
+        first_seen: '2026-01-01T00:00:00.000Z',
+        last_seen: '2026-01-02T00:00:00.000Z',
+      },
+      {
+        id: 'behavior:T1078.004',
+        kind: 'behavior',
+        technique_id: 'T1078.004',
+        technique_name: 'Cloud Accounts',
+        basis: 'ioc_and_behavior',
+        matched_on: [],
+        total: 1,
+        host_count: 20,
+        hosts_truncated: true,
+      },
+    ];
+
+    it('renders the classification, summary, hypothesis, detections and evidence', async () => {
+      const composition = await toComposition({
+        ...validPayload,
+        summary: 'ip 203.0.113.10 seen 12x on 3 hosts',
+        basis: 'ioc_and_behavior',
+        detections,
+        evidence_for: Array.from({ length: 7 }, (_, index) => `Finding\n${index + 1}`),
+        evidence_against: ['No persistence found'],
+      });
+
+      expect(composition?.title).toBe('Suspicious lateral movement detected');
+      expect(composition?.subtitle).toBe('From tr-lateral-movement-2026-01');
+      expect(composition?.body).toEqual([
+        {
+          type: 'context',
+          items: [
+            { text: 'High severity' },
+            { text: '82% confidence' },
+            { text: 'Open' },
+            { text: 'IOC and behavior' },
+          ],
+        },
+        { type: 'markdown', text: 'ip 203.0.113.10 seen 12x on 3 hosts' },
+        {
+          type: 'section',
+          title: 'Hypothesis',
+          body: [{ type: 'markdown', text: 'Adversary used stolen credentials to move laterally' }],
+        },
+        {
+          type: 'table',
+          columns: [
+            { label: 'What matched' },
+            { label: 'Basis' },
+            { label: 'Scope' },
+            { label: 'Seen' },
+          ],
+          rows: [
+            [
+              '203.0.113.10 (destination.ip)',
+              'Strong IOC',
+              '12 events, 3 hosts, 1 user',
+              '2026-01-01T00:00:00.000Z – 2026-01-02T00:00:00.000Z',
+            ],
+            ['T1078.004 Cloud Accounts', 'IOC and behavior', '1 event, 20+ hosts', null],
+          ],
+        },
+        {
+          type: 'section',
+          title: 'Evidence',
+          collapsible: true,
+          body: [
+            {
+              type: 'markdown',
+              text: [
+                '**Evidence for**',
+                '- Finding 1',
+                '- Finding 2',
+                '- Finding 3',
+                '- Finding 4',
+                '- Finding 5',
+                '- +2 more',
+              ].join('\n'),
+            },
+            { type: 'markdown', text: '**Evidence against**\n- No persistence found' },
+          ],
+        },
+      ]);
+
+      const { valid, errors, slack } = await renderSurface(composition);
+
+      expect(errors).toEqual([]);
+      expect(valid).toBe(true);
+      expect(slack).toContain('203.0.113.10 (destination.ip)');
+      expect(slack).toContain('Finding 5');
+    });
+
+    it('shows which hunt confirmed the finding and its reach', async () => {
+      const composition = await toComposition({
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: true,
+          hit_sources: ['tier1'],
+          time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+          tier1: {
+            status: 'environment_hits_found',
+            counts: { total_hits: 12, returned_hits: 12, affected_hosts: 3, affected_users: 1 },
+            per_index: [{ index: 'logs-endpoint', hit_count: 12, required: true }],
+          },
+        },
+      });
+
+      expect(composition?.body).toContainEqual({
+        type: 'fields',
+        items: [
+          { label: 'Confirmed by', value: 'IOC Hunt' },
+          { label: 'IOC Hunt hits', value: '12' },
+          { label: 'Affected hosts', value: '3' },
+          { label: 'Affected users', value: '1' },
+        ],
+      });
+
+      expect((await renderSurface(composition)).valid).toBe(true);
+    });
+
+    it('renders an old payload without summary, basis or detections', async () => {
+      const composition = await toComposition(validPayload);
+
+      expect(composition?.body.map(({ type }) => type)).toEqual(['context', 'section', 'section']);
+      expect((await renderSurface(composition)).valid).toBe(true);
     });
   });
 });

@@ -6,7 +6,10 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentTypeDefinition,
+  SurfaceComposition,
+} from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 
 /**
@@ -47,6 +50,7 @@ export const createReadonlyAttachmentType = <T>({
   describePayload,
   renderNoun,
   maxContentLength,
+  toSurfaceComposition,
 }: {
   id: string;
   schema: z.ZodType<T>;
@@ -70,6 +74,11 @@ export const createReadonlyAttachmentType = <T>({
    * still exceeds it.
    */
   maxContentLength: number;
+  /**
+   * Maps the payload, read through `readSchema`, to what a person sees outside Kibana, such as
+   * in Slack. Without it, those surfaces leave the attachment out.
+   */
+  toSurfaceComposition?: (data: T) => SurfaceComposition;
 }): AttachmentTypeDefinition => ({
   id,
   // System-produced: the agent must not create or update these via the
@@ -108,6 +117,18 @@ export const createReadonlyAttachmentType = <T>({
       },
     };
   },
+  ...(toSurfaceComposition
+    ? {
+        toSurfaceComposition: (attachment: Attachment<string, unknown>): SurfaceComposition => {
+          const parseResult = readSchema.safeParse(attachment.data);
+          if (!parseResult.success) {
+            throw new Error(`Invalid ${id} attachment data for attachment ${attachment.id}`);
+          }
+
+          return toSurfaceComposition(parseResult.data);
+        },
+      }
+    : {}),
   getAgentDescription: () => `
 ${describePayload}
 
