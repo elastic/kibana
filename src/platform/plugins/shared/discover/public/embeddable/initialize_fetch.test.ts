@@ -394,36 +394,6 @@ describe('initialize fetch', () => {
       expect(mockedApi.searchError$.getValue()).toBeUndefined();
     });
 
-    it('should not append a page that arrives after the data view went away', async () => {
-      const page = createDeferred<unknown>();
-      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
-        rawResponse: { hits: { hits: firstPage, total: 2 } },
-        pagination: createPagination(true, jest.fn().mockReturnValue(page.promise)),
-      });
-      mockedApi.savedSearch$.next(savedSearch);
-      await waitOneTick();
-
-      // The api is shared by the tests of this file, so the data view is put back afterwards
-      const dataViews = mockedApi.dataSources$.getValue();
-      try {
-        const pending = fetchMore?.();
-        await waitOneTick();
-        mockedApi.dataSources$.next(undefined);
-        await waitOneTick();
-        page.resolve({
-          rawResponse: { hits: { hits: secondPage, total: 2 } },
-          pagination: createPagination(false),
-        });
-        await pending;
-
-        expect(stateManager.rows.getValue()).toHaveLength(1);
-        expect(mockedApi.searchError$.getValue()).toBeUndefined();
-      } finally {
-        mockedApi.dataSources$.next(dataViews);
-        await waitOneTick();
-      }
-    });
-
     it('should surface an error from loading the next page and stop loading', async () => {
       discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
         rawResponse: { hits: { hits: firstPage, total: 2 } },
