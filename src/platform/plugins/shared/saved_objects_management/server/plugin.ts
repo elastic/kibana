@@ -15,10 +15,12 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
 import { ApiBodyRegistry, SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
 import { exportReferencedObjects, importReferencedObjects } from './services/referenced_objects';
+import { createDataViewApiBodyEntry } from './services/data_view_api_body_entry';
 import { capabilitiesProvider } from './capabilities_provider';
 
 export class SavedObjectsManagementPlugin
@@ -40,6 +42,7 @@ export class SavedObjectsManagementPlugin
     });
 
     capabilities.registerProvider(capabilitiesProvider);
+    this.apiBodyRegistry.register(DATA_VIEW_SAVED_OBJECT_TYPE, createDataViewApiBodyEntry());
 
     return {
       registerApiBodyEntry: (type, entry) => this.apiBodyRegistry.register(type, entry),

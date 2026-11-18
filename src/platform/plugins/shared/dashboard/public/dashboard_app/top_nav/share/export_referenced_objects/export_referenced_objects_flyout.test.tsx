@@ -85,6 +85,41 @@ describe('ExportReferencedObjectsFlyout', () => {
     ).toBeInTheDocument();
   });
 
+  it('lists data views by name, or by index pattern, and groups their problems under the dashboard', async () => {
+    renderFlyout({
+      exportDashboards: jest.fn().mockResolvedValue({
+        objects: [
+          { type: 'index-pattern', id: 'logs', data: { name: 'Logs', index_pattern: 'logs-*' } },
+          { type: 'index-pattern', id: 'metrics', data: { index_pattern: 'metrics-*' } },
+          { type: 'dashboard', id: 'sales', data: { title: 'Sales' } },
+        ],
+        problems: [
+          {
+            type: 'index-pattern',
+            id: 'gone',
+            reason: 'not_found',
+            message: "Saved object [index-pattern/gone] is referenced but doesn't exist.",
+            roots: ['sales'],
+          },
+          {
+            type: 'visualization',
+            id: 'legacy',
+            reason: 'unsupported_type',
+            message: "Saved objects of type [visualization] can't be exported.",
+            roots: ['sales'],
+          },
+        ],
+      }),
+    });
+
+    const table = await screen.findByTestId('exportReferencedObjectsTable');
+    expect(within(table).getByText('Logs')).toBeInTheDocument();
+    expect(within(table).getByText('metrics-*')).toBeInTheDocument();
+    const group = screen.getByTestId('exportReferencedObjectsProblems-sales');
+    expect(within(group).getByRole('heading', { name: 'Sales' })).toBeInTheDocument();
+    expect(within(group).getAllByRole('listitem')).toHaveLength(2);
+  });
+
   it('downloads the export response unchanged, named after the dashboard', async () => {
     const { downloadExport } = renderFlyout();
 

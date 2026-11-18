@@ -28,6 +28,7 @@ import { getClientErrorMessage } from '@kbn/as-code-import-flyout-component';
 import type { ExportReferencedObjectsResponse } from '@kbn/saved-objects-management-plugin/common';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import { exportReferencedObjectsStrings as strings } from './_export_referenced_objects_strings';
 
 type ExportedObject = ExportReferencedObjectsResponse['objects'][number];
@@ -47,8 +48,13 @@ type ExportState =
   | { status: 'error'; message: string }
   | { status: 'loaded'; response: ExportReferencedObjectsResponse };
 
-const getObjectTitle = ({ id, data }: ExportedObject): string =>
-  typeof data.title === 'string' && data.title.length > 0 ? data.title : id;
+const getObjectTitle = ({
+  id,
+  data: { title, name, index_pattern: indexPattern },
+}: ExportedObject): string =>
+  [title, name, indexPattern].find(
+    (label): label is string => typeof label === 'string' && label.length > 0
+  ) ?? id;
 
 const groupProblemsByRoot = (problems: ExportProblem[]): Map<string, ExportProblem[]> => {
   const byRoot = new Map<string, ExportProblem[]>();
@@ -85,7 +91,11 @@ export const ExportReferencedObjectsFlyout = ({
   }, [dashboardId, exportDashboards]);
 
   const response = state.status === 'loaded' ? state.response : undefined;
-  const titlesById = new Map((response?.objects ?? []).map((object) => [object.id, object]));
+  const dashboardsById = new Map(
+    (response?.objects ?? [])
+      .filter(({ type }) => type === DASHBOARD_SAVED_OBJECT_TYPE)
+      .map((object) => [object.id, object])
+  );
 
   const renderBody = () => {
     if (!dashboardId) {
@@ -151,7 +161,7 @@ export const ExportReferencedObjectsFlyout = ({
               data-test-subj="exportReferencedObjectsProblems"
             >
               {[...groupProblemsByRoot(problems)].map(([root, rootProblems]) => {
-                const rootObject = titlesById.get(root);
+                const rootObject = dashboardsById.get(root);
                 return (
                   <div key={root} data-test-subj={`exportReferencedObjectsProblems-${root}`}>
                     <EuiTitle size="xxs">
@@ -201,7 +211,7 @@ export const ExportReferencedObjectsFlyout = ({
               isDisabled={!response || response.objects.length === 0}
               onClick={() => {
                 if (!response) return;
-                const rootTitle = dashboardId && titlesById.get(dashboardId);
+                const rootTitle = dashboardId && dashboardsById.get(dashboardId);
                 downloadExport(
                   `${rootTitle ? getObjectTitle(rootTitle) : 'export'}.json`,
                   JSON.stringify(response, null, 2)

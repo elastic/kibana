@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISavedObjectsImporter, SavedObject } from '@kbn/core/server';
+import type {
+  ISavedObjectsImporter,
+  SavedObject,
+  SavedObjectsImportResponse,
+  SavedObjectTypeIdTuple,
+} from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
 import { prettifyError } from '@kbn/zod';
 import type { ApiBodyRegistry } from '../api_body_registry';
@@ -18,7 +23,38 @@ import type {
 
 type ImportResult = ImportReferencedObjectsResponse['results'][number];
 
-const toKey = ({ type, id }: { type: string; id: string }) => `${type}:${id}`;
+const toKey = ({ type, id }: SavedObjectTypeIdTuple) => `${type}:${id}`;
+
+const writePendingObjects = async (
+  importer: ISavedObjectsImporter,
+  storedObjects: SavedObject[],
+  { successResults = [], errors = [] }: SavedObjectsImportResponse
+): Promise<Required<Pick<SavedObjectsImportResponse, 'successResults' | 'errors'>>> => {
+  // Core writes nothing while any object has a resolvable error, so SOM's flyout retries the rest.
+  const hasPendingObjects = errors.some(({ error }) =>
+    ['conflict', 'ambiguous_conflict', 'missing_references'].includes(error.type)
+  );
+  if (!hasPendingObjects || successResults.length === 0) {
+    return { successResults: hasPendingObjects ? [] : successResults, errors };
+  }
+
+  const resolved = await importer.resolveImportErrors({
+    readStream: createListStream(storedObjects),
+    retries: successResults.map(({ type, id, overwrite, destinationId, createNewCopy }) => ({
+      type,
+      id,
+      overwrite: overwrite ?? false,
+      destinationId,
+      createNewCopy,
+      replaceReferences: [],
+    })),
+    createNewCopies: false,
+  });
+  return {
+    successResults: resolved.successResults ?? [],
+    errors: [...errors, ...(resolved.errors ?? [])],
+  };
+};
 
 /**
  * Imports API bodies through core's importer: each body is validated against its type's schema
@@ -68,11 +104,12 @@ export const importReferencedObjects = async ({
   }
 
   if (storedObjects.length > 0) {
-    const { successResults = [], errors = [] } = await importer.import({
+    const imported = await importer.import({
       readStream: createListStream(storedObjects),
       overwrite: mode === 'overwrite',
       createNewCopies: false,
     });
+    const { successResults, errors } = await writePendingObjects(importer, storedObjects, imported);
 
     successResults.forEach(({ type, id, destinationId, overwrite }) => {
       results.set(toKey({ type, id }), {
