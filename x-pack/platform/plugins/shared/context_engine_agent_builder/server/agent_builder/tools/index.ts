@@ -65,21 +65,8 @@ export const registerAgentBuilderTools = ({
   agentBuilder.tools.register(createListAiIndicesTool(aiIndexToolDeps));
   agentBuilder.tools.register(createDescribeAiIndexTool(aiIndexToolDeps));
   agentBuilder.tools.register(createQueryAiIndicesTool(aiIndexToolDeps));
-  agentBuilder.tools.register(
-    createRememberTool({
-      getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
-      getCoreStart,
-      getSecurityStart,
-    })
-  );
-  agentBuilder.tools.register(
-    createRecallTool({ getContextEngineStart, getCoreStart, getSecurityStart })
-  );
-  agentBuilder.tools.register(
-    createForgetTool({
-      getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
-      getCoreStart,
-      getSecurityStart,
-    })
-  );
+  const memoryToolDeps = { getContextEngineStart, getCoreStart, getSecurityStart };
+  agentBuilder.tools.register(createRememberTool(memoryToolDeps));
+  agentBuilder.tools.register(createRecallTool(memoryToolDeps));
+  agentBuilder.tools.register(createForgetTool(memoryToolDeps));
 };
