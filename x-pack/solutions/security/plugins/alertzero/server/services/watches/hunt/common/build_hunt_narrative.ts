@@ -14,7 +14,7 @@ import type { HuntModelTier } from '../types';
 import type { ValidatedBehavior } from '../tier2/types';
 import { isRetryableIncompleteReason } from './completeness';
 import { TIER2_MODEL_TIERS, describeModelTiers } from './hunt_model_tiers';
-import { NO_SEARCHABLE_PATTERN_MESSAGE } from './partition_hunt_universe';
+import { MAX_LISTED, code, codeList, listOf, plural } from './text_lists';
 import type { Tier2TargetSource } from './resolve_tier2_targets';
 
 /**
@@ -24,32 +24,13 @@ import type { Tier2TargetSource } from './resolve_tier2_targets';
  */
 export interface HuntNarrativeContext {
   reportTitle?: string;
+  /** The scope was blocked because the default data view held only hidden or alerts indices. */
+  blockedByPolicyOnly?: boolean;
 }
 
-const MAX_LISTED = 6;
 const MAX_BEHAVIORS_NARRATED = 8;
 /** Under journal_note.yaml's `message` maxLength (8000) with headroom for the caller's suffix. */
 export const MAX_HUNT_NARRATIVE_CHARS = 7000;
-
-const plural = (count: number, singular: string, pluralForm = `${singular}s`): string =>
-  `${count} ${count === 1 ? singular : pluralForm}`;
-
-const code = (value: string): string => `\`${value}\``;
-
-const listOf = (items: string[], max = MAX_LISTED): string => {
-  const shown = items.slice(0, max);
-  const rest = items.length - shown.length;
-  if (shown.length === 0) return '';
-  if (rest > 0) return `${shown.join(', ')} and ${plural(rest, 'more', 'more')}`;
-  if (shown.length === 1) return shown[0];
-  return `${shown.slice(0, -1).join(', ')} and ${shown[shown.length - 1]}`;
-};
-
-/** A blocked result whose scope held only policy-skipped entries carries exactly this message. */
-const isBlockedByPolicyOnlyResult = ({ status, message }: HuntCoordinatorCoreResult): boolean =>
-  status === 'blocked' && message === NO_SEARCHABLE_PATTERN_MESSAGE;
-
-export const codeList = (items: string[], max = MAX_LISTED): string => listOf(items.map(code), max);
 
 const describeIocs = (iocs: HuntIoc[]): string => {
   const byType = new Map<string, string[]>();
@@ -378,7 +359,7 @@ const describeOutcome = (
   if (result.status === 'blocked') {
     return {
       heading: 'Hunt Watch could not hunt this report',
-      summary: isBlockedByPolicyOnlyResult(result)
+      summary: ctx.blockedByPolicyOnly
         ? `Hunt Watch could not hunt ${report}: the space's default data view names only hidden or alerts indices, which Hunt does not search, so nothing was searched.`
         : `Hunt Watch could not hunt ${report}: no index in the space's default data view is visible to this hunt, so nothing was searched.`,
     };
@@ -444,9 +425,12 @@ const describeOutcome = (
 };
 
 /** One short clause for the run conclusion, e.g. "confirmed hit: Tier 1 matched 121 documents; Tier 2 confirmed 2 of 5 behaviors". */
-export const buildHuntHeadline = (result: HuntCoordinatorCoreResult): string => {
+export const buildHuntHeadline = (
+  result: HuntCoordinatorCoreResult,
+  ctx: HuntNarrativeContext = {}
+): string => {
   if (result.status === 'blocked') {
-    return isBlockedByPolicyOnlyResult(result)
+    return ctx.blockedByPolicyOnly
       ? "hunt blocked, the space's default data view names only hidden or alerts indices"
       : "hunt blocked, no index in the space's default data view is visible to this hunt";
   }

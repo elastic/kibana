@@ -11,7 +11,7 @@ import {
   parseIndexScopeEntry,
   stripBackingPrefix,
 } from '../../../../../common/remote_cluster';
-import { codeList } from './build_hunt_narrative';
+import { codeList } from './text_lists';
 import { buildMatchesRequired } from './matches_required';
 
 /**

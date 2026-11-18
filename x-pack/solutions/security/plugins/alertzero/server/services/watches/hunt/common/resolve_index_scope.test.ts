@@ -716,4 +716,26 @@ describe('resolveHuntScope', () => {
       expect(result.index_patterns).toEqual(['logs-*', '-logs-foo*']);
     });
   });
+
+  it('stops after the resolve and read checks when asked to resolve only', async () => {
+    const env = createEsClient({
+      resolved: resolveResponse({ dataStreams: ['logs-okta.system-default'] }),
+    });
+
+    const scope = await resolveHuntScope({
+      esClient: env.esClient,
+      spaceId: SPACE_ID,
+      indexPatterns: ['logs-*', 'custom-edr-1'],
+      resolveOnly: true,
+    });
+
+    expect(scope).toMatchObject({
+      status: 'ok',
+      index_patterns: ['logs-*'],
+      missing: ['custom-edr-1'],
+      discovered: [],
+      actionable_indices: [],
+    });
+    expect(env.fieldCapsFn).not.toHaveBeenCalled();
+  });
 });

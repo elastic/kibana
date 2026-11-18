@@ -670,3 +670,19 @@ describe('buildHuntHeadline', () => {
     ).toBe('hunt failed, the report is not visible in this space');
   });
 });
+
+describe('a blocked result for a data view of only hidden or alerts indices', () => {
+  const blocked = result({ status: 'blocked' });
+
+  it('says so in the narrative and the headline when the context flags it', () => {
+    const flagged = { blockedByPolicyOnly: true };
+
+    expect(buildHuntNarrative(blocked, flagged)).toContain('names only hidden or alerts indices');
+    expect(buildHuntHeadline(blocked, flagged)).toContain('names only hidden or alerts indices');
+  });
+
+  it('keeps the generic text otherwise, whatever the result message says', () => {
+    expect(buildHuntNarrative(blocked)).toContain('no index in the space');
+    expect(buildHuntHeadline(blocked)).toContain('no index in the space');
+  });
+});

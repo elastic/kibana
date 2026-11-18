@@ -67,8 +67,8 @@ paths:
                       type: string
                       maxLength: 512
                     description: >-
-                      Patterns that resolve to nothing for the caller: not found, or not
-                      readable by the caller.
+                      Patterns that resolve to nothing for the caller: not found, closed,
+                      or not visible to the caller.
                   source:
                     type: string
                     enum: [last_sweep, role, unavailable]

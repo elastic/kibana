@@ -57,8 +57,8 @@ export const readLastSweepIndexScope = async ({
 
     const parsed = HuntScope.safeParse(step.output);
     if (!parsed.success) {
-      // Reads as "no sweep answer", so the caller falls back to the role lookup. A scope past
-      // the schema bounds (500 entries, 512 chars each) lands here.
+      // Reads as "no sweep answer", so the caller falls back to the role lookup. An output that
+      // is not a scope (a failed gate step, or an older shape) lands here.
       logger.warn(
         `The index scope of hunt execution ${executionId} does not match the HuntScope schema and is ignored: ${parsed.error.issues
           .slice(0, 3)

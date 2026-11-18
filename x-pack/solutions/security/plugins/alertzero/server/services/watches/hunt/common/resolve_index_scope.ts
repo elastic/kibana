@@ -186,6 +186,7 @@ export const resolveHuntScope = async ({
   report,
   logger,
   policySkippedPatterns = [],
+  resolveOnly = false,
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
@@ -193,6 +194,8 @@ export const resolveHuntScope = async ({
   indexPatterns: string[];
   /** Entries the caller removed by policy (dot-prefixed names), echoed as `policy_skipped`. */
   policySkippedPatterns?: string[];
+  /** Stop after the resolve and read checks: no dataset discovery and no `_field_caps` call. */
+  resolveOnly?: boolean;
   /** Cross-project search is on: an unqualified pattern resolving only on a linked project is not missing. */
   crossProjectSearch?: boolean;
   window?: IndexScopeWindow;
@@ -265,6 +268,21 @@ export const resolveHuntScope = async ({
   const searched = indexPatterns.filter((pattern) => !dropped.has(pattern));
   if (!searched.some((pattern) => !isIndexExclusion(pattern))) {
     return blocked('blocked:empty_universe', missing);
+  }
+
+  if (resolveOnly) {
+    return {
+      status: 'ok',
+      resolution: 'universe',
+      index_patterns: searched,
+      missing,
+      policy_skipped: policySkippedPatterns,
+      discovered: [],
+      report_matches: [],
+      actionable_indices: [],
+      window: resolvedWindow,
+      row_limit,
+    };
   }
 
   const discovered = await discoverHuntDatasets({

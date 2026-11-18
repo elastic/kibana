@@ -86,6 +86,7 @@ export const registerHuntBehaviorRoute = ({
             indexPatterns: universe,
             policySkippedPatterns: policySkipped,
             crossProjectSearch,
+            resolveOnly: true,
             logger,
           });
           if (scope.status === 'blocked') {

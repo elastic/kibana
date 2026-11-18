@@ -46,13 +46,13 @@ export const HuntWorkerIndexCoverageResponse = lazySchema(() =>
         .max(500)
         .describe("Patterns the caller can resolve and the worker's account cannot."),
       /**
-       * Patterns that resolve to nothing for the caller: not found, or not readable by the caller.
+       * Patterns that resolve to nothing for the caller: not found, closed, or not visible to the caller.
        */
       missing_for_everyone: z
         .array(z.string().max(512))
         .max(500)
         .describe(
-          'Patterns that resolve to nothing for the caller: not found, or not readable by the caller.'
+          'Patterns that resolve to nothing for the caller: not found, closed, or not visible to the caller.'
         ),
       source: z.enum(['last_sweep', 'role', 'unavailable']),
       /**

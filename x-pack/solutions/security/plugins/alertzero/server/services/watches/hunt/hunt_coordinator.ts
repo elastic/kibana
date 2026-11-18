@@ -31,6 +31,7 @@ import { selectHuntCallModel } from './common/select_hunt_call_model';
 import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
 import { unsearchedGaps } from './common/unsearched_patterns';
 import { blockedScopeGuidance } from './common/blocked_scope_guidance';
+import { isBlockedByPolicyOnly } from './common/partition_hunt_universe';
 import type { HuntNarrativeContext } from './common/build_hunt_narrative';
 import { isTier1SearchableIoc } from './tier1/attribute_hits';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
@@ -749,6 +750,7 @@ const huntCoordinatorCore = async (
   // hunt evidence.
   if (scope.status === 'blocked') {
     const { message, nextStep } = blockedScopeGuidance(scope, indexPatterns);
+    narrativeContext.blockedByPolicyOnly = isBlockedByPolicyOnly(scope);
     return {
       status: 'blocked',
       report_id: reportId,
@@ -1252,7 +1254,7 @@ export const huntCoordinator = async (
     unavailable.length > 0 ? { ...coreResult, unavailable_model_tiers: unavailable } : coreResult;
   return {
     ...core,
-    headline: buildHuntHeadline(core),
+    headline: buildHuntHeadline(core, narrativeContext),
     narrative: buildHuntNarrative(core, narrativeContext),
   };
 };
