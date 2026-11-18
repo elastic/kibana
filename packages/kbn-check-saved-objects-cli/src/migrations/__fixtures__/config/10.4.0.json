@@ -1,18 +1,31 @@
 {
   "10.3.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.3.0 and 10.4.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "buildNum": 9007199254740991
+    },
+    {
+      "buildNum": 9007199254740991,
+      "observability:streamsEnableQueryStreams": true,
+      "observability:streamsEnableDraftStreams": true,
+      "observability:streamsEnableWiredStreamViews": true
+    },
+    {
+      "buildNum": 9007199254740991,
+      "observability:streamsEnableQueryStreams": false,
+      "dateFormat:tz": "Europe/Madrid"
     }
   ],
   "10.4.0": [
     {
-      "buildNum": "number?|null"
+      "buildNum": 9007199254740991
+    },
+    {
+      "buildNum": 9007199254740991,
+      "observability:streamsEnableWiredStreamViews": true
+    },
+    {
+      "buildNum": 9007199254740991,
+      "dateFormat:tz": "Europe/Madrid"
     }
   ]
 }
