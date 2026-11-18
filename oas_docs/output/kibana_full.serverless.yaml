@@ -73622,6 +73622,8 @@ paths:
                       - created_at: '2025-02-26T13:37:30.452Z'
                         created_by: elastic
                         description: My pack
+                        effective_policy_ids:
+                          - my_policy_id
                         enabled: true
                         name: my_pack
                         queries:
@@ -73782,6 +73784,8 @@ paths:
                       created_at: '2025-02-26T13:37:30.452Z'
                       created_by: elastic
                       description: My pack
+                      effective_policy_ids:
+                        - my_policy_id
                       enabled: true
                       name: my_pack
                       policy_ids:
@@ -211630,6 +211634,29 @@ components:
           required:
             - saved_object_id
             - name
+        warnings:
+          description: Additional agent policies receiving this enabled pack through a shared integration.
+          items:
+            type: object
+            properties:
+              additional_policy_ids:
+                items:
+                  type: string
+                type: array
+              code:
+                enum:
+                  - shared_integration_overdelivery
+                type: string
+              package_policy_id:
+                type: string
+              package_policy_name:
+                type: string
+            required:
+              - code
+              - package_policy_id
+              - package_policy_name
+              - additional_policy_ids
+          type: array
       required:
         - data
     Security_Osquery_API_CreateSavedQueryRequestBody:
@@ -212167,6 +212194,11 @@ components:
               type: string
             description:
               $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+            effective_policy_ids:
+              description: Live agent-policy owners of integrations carrying this pack. Absent when Fleet state is unavailable.
+              items:
+                type: string
+              type: array
             enabled:
               $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
@@ -212263,6 +212295,11 @@ components:
                 type: string
               description:
                 $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+              effective_policy_ids:
+                description: Live agent-policy owners of integrations carrying this pack. Absent when Fleet state is unavailable.
+                items:
+                  type: string
+                type: array
               enabled:
                 $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
               interval:
@@ -213283,6 +213320,29 @@ components:
             version:
               description: The pack version number.
               type: integer
+        warnings:
+          description: Additional agent policies receiving this enabled pack through a shared integration.
+          items:
+            type: object
+            properties:
+              additional_policy_ids:
+                items:
+                  type: string
+                type: array
+              code:
+                enum:
+                  - shared_integration_overdelivery
+                type: string
+              package_policy_id:
+                type: string
+              package_policy_name:
+                type: string
+            required:
+              - code
+              - package_policy_id
+              - package_policy_name
+              - additional_policy_ids
+          type: array
     Security_Osquery_API_UpdateSavedQueryRequestBody:
       example:
         id: updated_my_saved_query_name
