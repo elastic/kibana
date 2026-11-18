@@ -153,9 +153,9 @@ describe('EditTransformRetentionPolicy', () => {
       'timestamp'
     );
     expect(screen.getByTestId('transformEditFlyoutRetentionPolicyMaxAgeInput')).toHaveValue(1);
-    expect(screen.getByTestId('transformEditFlyoutRetentionPolicyMaxAgeUnitSelect')).toHaveValue(
-      'd'
-    );
+    expect(
+      screen.getByTestId('transformEditFlyoutRetentionPolicyMaxAgeUnitSelect')
+    ).toHaveTextContent('days');
   });
 
   it('shows an existing retention policy when the preview request fails', () => {

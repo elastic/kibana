@@ -23,6 +23,11 @@ jest.mock('../state_management/edit_transform_flyout_state', () => ({
 
 jest.mock('../state_management/selectors/form_field');
 
+const selectUnit = (unit: string) => {
+  fireEvent.click(screen.getByTestId('transformEditFlyoutFrequencyUnitSelect'));
+  fireEvent.click(screen.getByTestId(`transformEditFlyoutFrequencyUnitOption-${unit}`));
+};
+
 describe('EditTransformDurationInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,7 +46,9 @@ describe('EditTransformDurationInput', () => {
     );
 
     expect(screen.getByTestId('transformEditFlyoutFrequencyInput')).toHaveValue(10);
-    expect(screen.getByTestId('transformEditFlyoutFrequencyUnitSelect')).toHaveValue('m');
+    expect(screen.getByTestId('transformEditFlyoutFrequencyUnitSelect')).toHaveTextContent(
+      'minutes'
+    );
   });
 
   it('stores the value and selected unit in the Elasticsearch duration format', () => {
@@ -59,9 +66,7 @@ describe('EditTransformDurationInput', () => {
     });
     expect(mockSetFormField).toHaveBeenCalledWith({ field: 'frequency', value: '20m' });
 
-    fireEvent.change(screen.getByTestId('transformEditFlyoutFrequencyUnitSelect'), {
-      target: { value: 'h' },
-    });
+    selectUnit('h');
     expect(mockSetFormField).toHaveBeenCalledWith({ field: 'frequency', value: '10h' });
   });
 
@@ -78,9 +83,7 @@ describe('EditTransformDurationInput', () => {
       />
     );
 
-    fireEvent.change(screen.getByTestId('transformEditFlyoutFrequencyUnitSelect'), {
-      target: { value: 'h' },
-    });
+    selectUnit('h');
     fireEvent.change(screen.getByTestId('transformEditFlyoutFrequencyInput'), {
       target: { value: '20' },
     });

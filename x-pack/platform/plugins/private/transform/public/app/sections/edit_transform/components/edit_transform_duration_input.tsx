@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo, useRef, useState } from 'react';
+import React, { type FC, useRef, useState } from 'react';
 
-import { css } from '@emotion/react';
-import { EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
+import {
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFieldNumber,
+  EuiFormAppend,
+  EuiFormRow,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useEditTransformFlyoutActions } from '../state_management/edit_transform_flyout_state';
@@ -44,10 +50,6 @@ const durationUnitLabels: Record<DurationUnit, string> = {
 
 const durationPattern = /^(\d+)(nanos|micros|ms|s|m|h|d)$/;
 const invalidNumberKeys = ['-', '+', '.', 'e', 'E'];
-const durationUnitSelectStyles = css`
-  background: transparent;
-  box-shadow: none;
-`;
 
 interface EditTransformDurationInputProps {
   defaultUnit: DurationUnit;
@@ -72,6 +74,7 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
   const durationValue = durationMatch?.[1] ?? '';
   const parsedUnit = durationMatch?.[2] as DurationUnit | undefined;
   const [pickedUnit, setPickedUnit] = useState<DurationUnit>();
+  const [isUnitPopoverOpen, setIsUnitPopoverOpen] = useState(false);
   const previousParsedUnit = useRef(parsedUnit);
   if (parsedUnit !== undefined) {
     previousParsedUnit.current = parsedUnit;
@@ -79,15 +82,6 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
   const unit = parsedUnit ?? pickedUnit ?? previousParsedUnit.current ?? defaultUnit;
   const displayedErrors = showErrors ? errorMessages : [];
   const upperCaseField = capitalizeFirstLetter(field);
-  const unitOptions = useMemo(
-    () =>
-      units.map((durationUnit) => ({
-        value: durationUnit,
-        text: durationUnitLabels[durationUnit],
-      })),
-    [units]
-  );
-
   const setDurationValue = (nextValue: string) => {
     setFormField({
       field,
@@ -96,6 +90,7 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
   };
 
   const setDurationUnit = (nextUnit: DurationUnit) => {
+    setIsUnitPopoverOpen(false);
     setPickedUnit(nextUnit);
     if (durationValue !== '') {
       setFormField({ field, value: `${durationValue}${nextUnit}` });
@@ -113,7 +108,7 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
     >
       <EuiFieldNumber
         append={
-          <EuiSelect
+          <EuiPopover
             aria-label={i18n.translate(
               'xpack.transform.transformList.editFlyoutDurationUnitAriaLabel',
               {
@@ -121,13 +116,32 @@ export const EditTransformDurationInput: FC<EditTransformDurationInputProps> = (
                 values: { label },
               }
             )}
-            compressed
-            css={durationUnitSelectStyles}
-            data-test-subj={`transformEditFlyout${upperCaseField}UnitSelect`}
-            options={unitOptions}
-            value={unit}
-            onChange={(event) => setDurationUnit(event.target.value as DurationUnit)}
-          />
+            button={
+              <EuiFormAppend
+                element="button"
+                data-test-subj={`transformEditFlyout${upperCaseField}UnitSelect`}
+                label={durationUnitLabels[unit]}
+                iconRight="chevronSingleDown"
+                onClick={() => setIsUnitPopoverOpen((isOpen) => !isOpen)}
+              />
+            }
+            closePopover={() => setIsUnitPopoverOpen(false)}
+            isOpen={isUnitPopoverOpen}
+            panelPaddingSize="none"
+          >
+            <EuiContextMenuPanel
+              items={units.map((durationUnit) => (
+                <EuiContextMenuItem
+                  key={durationUnit}
+                  data-test-subj={`transformEditFlyout${upperCaseField}UnitOption-${durationUnit}`}
+                  icon={durationUnit === unit ? 'check' : 'empty'}
+                  onClick={() => setDurationUnit(durationUnit)}
+                >
+                  {durationUnitLabels[durationUnit]}
+                </EuiContextMenuItem>
+              ))}
+            />
+          </EuiPopover>
         }
         aria-label={i18n.translate(
           'xpack.transform.transformList.editFlyoutDurationValueAriaLabel',

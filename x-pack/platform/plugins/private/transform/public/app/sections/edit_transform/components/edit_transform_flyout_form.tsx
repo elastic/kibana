@@ -15,7 +15,7 @@ import {
   EuiForm,
   EuiIcon,
   EuiSpacer,
-  EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -68,14 +68,9 @@ const EditTransformAccordion: FC<PropsWithChildren<EditTransformAccordionProps>>
           responsive={false}
         >
           <EuiFlexItem>
-            <EuiText
-              css={css`
-                font-weight: ${euiTheme.font.weight.semiBold};
-              `}
-              size="s"
-            >
-              {title}
-            </EuiText>
+            <EuiTitle size="xxs">
+              <h3>{title}</h3>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiIcon type={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'} aria-hidden={true} />
@@ -88,9 +83,15 @@ const EditTransformAccordion: FC<PropsWithChildren<EditTransformAccordionProps>>
       buttonProps={{ paddingSize: 'l' }}
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={setIsOpen}
-      paddingSize="l"
+      paddingSize="none"
     >
-      {children}
+      <div
+        css={css`
+          padding: 0 ${euiTheme.size.l} ${euiTheme.size.l};
+        `}
+      >
+        {children}
+      </div>
     </EuiAccordion>
   );
 };
