@@ -8,7 +8,7 @@
 import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { apiTest } from '../fixtures';
-import { getUninstallToken } from '../fixtures/fleet_agent';
+import { getUninstallToken, waitForAgentOnPolicy } from '../fixtures/fleet_agent';
 import { getElasticInstallState, uninstallAgent } from '../fixtures/host_agent_commands';
 
 const TEST_TIMEOUT_MS = 15 * 60 * 1000;
@@ -48,7 +48,11 @@ apiTest.describe(
       async ({ apiClient, log, agentPolicies, enrolledHost }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
         const { first: protectedPolicy } = agentPolicies;
-        const { hostname } = enrolledHost;
+        const { agentId, hostname } = enrolledHost;
+
+        await apiTest.step('the agent applies the protected policy', async () => {
+          await waitForAgentOnPolicy(apiClient, requestHeaders, agentId, protectedPolicy);
+        });
 
         await apiTest.step('an uninstall without a token is rejected', async () => {
           const { output } = await uninstallAgent(log, hostname);
