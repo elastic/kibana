@@ -20,6 +20,7 @@ import { dateRangeQuery, termQuery, termsQuery } from '@kbn/es-query';
 import type { CoreWebVital } from '../../../../common/core_web_vitals';
 import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import { LAST_SEEN_AGGREGATION } from '../../../lib/helpers/aggregations';
+import type { HistogramParams } from '../../../lib/helpers/time_series';
 import { dateHistogram } from '../../../lib/helpers/time_series';
 import { environmentFilter, environmentNotDefinedFilter } from '../../../lib/helpers/environment';
 import { vitalStatsAggs } from '../../../lib/helpers/web_vitals';
@@ -42,6 +43,7 @@ export interface SearchParams {
   end: number;
   /** Only this environment's data when set. */
   environment?: string;
+  histogram: HistogramParams;
 }
 
 const ENVIRONMENT_FIELDS = [SERVICE_ENVIRONMENT];
@@ -99,6 +101,7 @@ export const classicSearch = ({
   start,
   end,
   environment,
+  histogram,
 }: SearchParams): APMEventESSearchRequest => ({
   apm: { events: [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.span] },
   track_total_hits: false,
@@ -146,7 +149,7 @@ export const classicSearch = ({
         },
         pageLoadsOverTime: {
           ...documentCount(pageLoadTransactions),
-          aggs: { histogram: dateHistogram(start, end) },
+          aggs: { histogram: dateHistogram({ start, end, histogram }) },
         },
       },
     },

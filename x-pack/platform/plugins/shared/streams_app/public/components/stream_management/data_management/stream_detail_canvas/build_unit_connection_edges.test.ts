@@ -528,7 +528,7 @@ describe('reading line ends from canvas nodes', () => {
     id: 'configured-destination-es',
     type: DESTINATION_NODE_TYPE,
     position: { x: 0, y: 0 },
-    data: { destinationId: 'es', title: 'es' },
+    data: { destinationId: 'es', title: 'es', hasSavedSource: true },
   };
   const graph = buildUnitCanvasGraph(processingUnit, ['src', 'plain'], ['es', 'debug']);
   const nodes = [sourceNode, destinationNode, ...graph.processingNodes, ...graph.routingNodes];

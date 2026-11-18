@@ -21,7 +21,9 @@
     "StalledAfterLoadSkill",
     "RubricCapNoToolCall",
     "ChainCoverage",
-    "AD Failure Class"
+    "AD Failure Class",
+    "PersonaRubric",
+    "AdAxesRubric"
   ],
   "defaultScale": 10,
   "decimals": 2,
@@ -488,7 +490,7 @@
       "Scores in this matrix are NOT comparable to matrices generated before 2026-08-24: the judged-evaluator scoring basis changed from continuous mean to verdict ladder, and the judge population changed. Compare model-to-model within this matrix, not cell-to-cell across generations.",
       "Fixture fingerprint pins the dataset/tool seeds this matrix was scored against; comparing across fingerprints is a cross-generation comparison, not a model delta.",
       "GLM models (zai-glm-5-2, z-ai/glm-5.3-flash) are excluded from this matrix: neither has a complete, correctly-instrumented 21-example run. This is a data-availability exclusion, not a quality judgement.",
-      "Deterministic behaviour evaluators (WorkflowValidity, EicarTrap, SimulationAwareness, UnrequestedSideEffects, StalledAfterLoadSkill, RubricCapNoToolCall, ChainCoverage, AD Failure Class) are recorded per cell as informational and excluded from cell means."
+      "Deterministic behaviour evaluators (WorkflowValidity, EicarTrap, SimulationAwareness, UnrequestedSideEffects, StalledAfterLoadSkill, RubricCapNoToolCall, ChainCoverage, AD Failure Class) are recorded per cell as informational and excluded from cell means. The opt-in LLM rubric judges (PersonaRubric, AdAxesRubric) are likewise excluded from cell means; their per-example scores stay in the evaluation scores index."
     ]
   }
 }

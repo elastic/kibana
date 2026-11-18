@@ -13,7 +13,7 @@ import { openSnoozeExpiryModal } from './snooze_expiry_modal';
 
 jest.mock('@kbn/react-kibana-mount', () => ({
   toMountPoint: (node: unknown) => (element: HTMLElement) => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { createRoot } = require('react-dom/client');
     const root = createRoot(element);
     root.render(node);

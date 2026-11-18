@@ -35,17 +35,22 @@ const runHandler = ({
   query = { start: START, end: END },
 }: {
   serviceName?: string;
-  // As the schema parses it: the percentile is a number by now.
+  // As the schema parses it: the percentile is a number by now, and the time zone defaults to UTC.
   query?: { start: string; end: string; environment?: string; percentile?: number } & Partial<
-    Record<'filters' | 'kuery', string>
+    Record<'filters' | 'kuery' | 'timeZone', string>
   >;
 } = {}) => {
   const handler = overviewRouteRepository[APPLICATION_OVERVIEW_ENDPOINT].handler as unknown as (
     resources: unknown
   ) => Promise<ApplicationOverviewResponse>;
   return handler({
-    params: { path: { serviceName }, query },
-    context: { core: Promise.resolve({ elasticsearch: { client: { asCurrentUser: esClient } } }) },
+    params: { path: { serviceName }, query: { timeZone: 'UTC', ...query } },
+    context: {
+      core: Promise.resolve({
+        elasticsearch: { client: { asCurrentUser: esClient } },
+        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+      }),
+    },
     request: { events: { aborted$: NEVER } },
     plugins: {},
     isServerless: false,
@@ -102,8 +107,20 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     );
   });
 
+  it('passes the time zone', async () => {
+    await runHandler({ query: { start: START, end: END, timeZone: 'America/New_York' } });
+
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        histogram: expect.objectContaining({ timeZone: 'America/New_York' }),
+      })
+    );
+  });
+
   it('filters by the selected environment, and by none when it is left out', async () => {
-    await runHandler({ query: { start: START, end: END, environment: 'production' } });
+    await runHandler({
+      query: { start: START, end: END, environment: 'production', timeZone: 'UTC' },
+    });
 
     expect(mockedOtel).toHaveBeenCalledWith(expect.objectContaining({ environment: 'production' }));
 

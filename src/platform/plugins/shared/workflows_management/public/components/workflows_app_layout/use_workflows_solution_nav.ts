@@ -9,11 +9,11 @@
 
 import { matchPath, useHistory, useLocation } from 'react-router-dom';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
-import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { WorkflowsPageName } from '@kbn/deeplinks-workflows';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 import { PLUGIN_ID, PLUGIN_NAME } from '../../../common';
+import { useKibana } from '../../hooks/use_kibana';
 
 type SolutionNavItems = NonNullable<SolutionNavProps['items']>;
 
@@ -35,7 +35,7 @@ const getNavLinkPath = (navLink: ChromeNavLink) => navLink.href.replace(navLink.
 export const useWorkflowsSolutionNav = (): SolutionNavProps | null => {
   const history = useHistory();
   const { pathname } = useLocation();
-  const { navLinks } = useChromeService();
+  const { navLinks } = useKibana().services.chrome;
 
   const pages = NAV_PAGES.flatMap((page) => {
     const navLink = navLinks.get(`${PLUGIN_ID}:${page}`);

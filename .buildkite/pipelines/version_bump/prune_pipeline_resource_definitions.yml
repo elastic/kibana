@@ -1,0 +1,10 @@
+steps:
+  - name: 'Prune superseded branches from pipeline resource definitions'
+    key: prune-pipeline-resource-definitions
+    command: .buildkite/scripts/steps/version_bump/prune_pipeline_resource_definitions.sh
+    soft_fail: true
+    agents:
+      image: family/kibana-minimal-ubuntu-2604
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
