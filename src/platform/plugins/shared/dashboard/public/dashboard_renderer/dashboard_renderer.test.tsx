@@ -25,6 +25,8 @@ jest.mock('./viewport/dashboard_viewport', () => ({
 
 const loadDashboardApiMock = loadDashboardApi as jest.MockedFunction<typeof loadDashboardApi>;
 
+type LoadedDashboard = NonNullable<Awaited<ReturnType<typeof loadDashboardApi>>>;
+
 function deferred<T>() {
   let resolve: (value: T) => void = () => undefined;
   const promise = new Promise<T>((res) => {
@@ -43,7 +45,7 @@ function mockLoadedDashboard() {
     api,
     cleanup,
     internalApi: {},
-  };
+  } as LoadedDashboard & { cleanup: jest.Mock };
 }
 
 describe('DashboardRenderer onApiCleanup', () => {
