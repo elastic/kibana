@@ -4,6 +4,11 @@
       { "source": "ssm", "method": "POST", "path": "/DescribeInstanceInformation" }
     ]
   },
+  "findNodesByInventory": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/GetInventory" }
+    ]
+  },
   "getAutomationExecution": {
     "queries": [
       { "source": "ssm", "method": "POST", "path": "/GetAutomationExecution" }
@@ -17,6 +22,11 @@
   "getDocument": {
     "queries": [
       { "source": "ssm", "method": "POST", "path": "/GetDocument" }
+    ]
+  },
+  "getInventory": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/ListInventoryEntries" }
     ]
   },
   "getParameter": {

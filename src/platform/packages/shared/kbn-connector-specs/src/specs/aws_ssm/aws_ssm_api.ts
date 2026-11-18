@@ -20,9 +20,11 @@ type SsmOperation =
   | 'GetAutomationExecution'
   | 'GetCommandInvocation'
   | 'GetDocument'
+  | 'GetInventory'
   | 'GetParameter'
   | 'ListCommands'
   | 'ListDocuments'
+  | 'ListInventoryEntries'
   | 'SendCommand'
   | 'StartAutomationExecution'
   | 'StopAutomationExecution';

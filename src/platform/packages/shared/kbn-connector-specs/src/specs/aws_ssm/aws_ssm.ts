@@ -13,9 +13,11 @@ import type { ConnectorSpec } from '../../connector_spec';
 import { callSsmApi } from './aws_ssm_api';
 import { cancelCommand } from './tools/cancel_command';
 import { describeInstanceInformation } from './tools/describe_instance_information';
+import { findNodesByInventory } from './tools/find_nodes_by_inventory';
 import { getAutomationExecution } from './tools/get_automation_execution';
 import { getCommandInvocation } from './tools/get_command_invocation';
 import { getDocument } from './tools/get_document';
+import { getInventory } from './tools/get_inventory';
 import { getParameter } from './tools/get_parameter';
 import { listAutomationExecutions } from './tools/list_automation_executions';
 import { listCommands } from './tools/list_commands';
@@ -69,6 +71,8 @@ export const AwsSsmConnector: ConnectorSpec = {
 
   actions: {
     describeInstanceInformation,
+    getInventory,
+    findNodesByInventory,
     listDocuments,
     getDocument,
     sendCommand,
@@ -92,6 +96,7 @@ export const AwsSsmConnector: ConnectorSpec = {
     "- To run an Automation runbook: find it with `listDocuments`, read its parameters and steps with `getDocument`, confirm with the user, call `startAutomationExecution`, then call `getAutomationExecution` until `isFinished` is true. On failure, the failed step's `failureMessage` says why.",
     '- To stop something you started, call `cancelCommand` for a command or `stopAutomationExecution` for a runbook, then read its status again to confirm it was cancelled.',
     '- To see what ran on a node, call `listCommands` with its `instanceId`, then `getCommandInvocation` for the output.',
+    '- To check installed software or patches: call `findNodesByInventory` to find the nodes with an application, then `getInventory` on a node for its version. Prefer inventory over running a command when it answers the question.',
     '',
     '### Gotchas',
     '- Every list action is paged: while `nextToken` is not null, call again with it and the same filters. Do not report a fleet-wide count from a single page.',

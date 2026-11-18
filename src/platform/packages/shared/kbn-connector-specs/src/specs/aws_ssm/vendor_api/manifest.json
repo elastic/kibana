@@ -26,6 +26,25 @@
         "source": "ssm"
       }
     ],
+    "findNodesByInventory": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "Entities",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/GetInventory",
+        "source": "ssm"
+      }
+    ],
     "getAutomationExecution": [
       {
         "method": "post",
@@ -44,6 +63,25 @@
       {
         "method": "post",
         "path": "/GetDocument",
+        "source": "ssm"
+      }
+    ],
+    "getInventory": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "Entries",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/ListInventoryEntries",
         "source": "ssm"
       }
     ],

@@ -419,6 +419,77 @@ describe('AwsSsmConnector', () => {
     });
   });
 
+  describe('getInventory', () => {
+    it('sends key/values/type filters, and returns the entries with their capture time', async () => {
+      const entry = { Name: 'openssl', Version: '3.2.2' };
+      mockClient.post.mockResolvedValue({
+        data: { CaptureTime: '2026-11-18T13:07:45Z', Entries: [entry], NextToken: '' },
+      });
+
+      const result = await AwsSsmConnector.actions.getInventory.handler(mockContext, {
+        instanceId: 'i-1234567890abcdef0',
+        typeName: 'AWS:Application',
+        filters: [{ key: 'Name', values: ['openssl'], type: 'BeginWith' }],
+      });
+
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
+        InstanceId: 'i-1234567890abcdef0',
+        TypeName: 'AWS:Application',
+        Filters: [{ Key: 'Name', Values: ['openssl'], Type: 'BeginWith' }],
+      });
+      expect(result).toEqual({
+        captureTime: '2026-11-18T13:07:45Z',
+        entries: [entry],
+        nextToken: null,
+      });
+    });
+  });
+
+  describe('findNodesByInventory', () => {
+    it('returns each matching node with its instance information', async () => {
+      mockClient.post.mockResolvedValue({
+        data: {
+          Entities: [
+            {
+              Id: 'i-1234567890abcdef0',
+              Data: {
+                'AWS:InstanceInformation': {
+                  Content: [
+                    {
+                      ComputerName: 'ip-172-31-43-172',
+                      PlatformName: 'Amazon Linux',
+                      PlatformVersion: '2023',
+                      IpAddress: '172.31.43.172',
+                      InstanceStatus: 'Active',
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      });
+
+      const result = await AwsSsmConnector.actions.findNodesByInventory.handler(mockContext, {
+        filters: [{ key: 'AWS:Application.Name', values: ['openssl'] }],
+      });
+
+      expect(result).toEqual({
+        nodes: [
+          {
+            instanceId: 'i-1234567890abcdef0',
+            computerName: 'ip-172-31-43-172',
+            platformName: 'Amazon Linux',
+            platformVersion: '2023',
+            ipAddress: '172.31.43.172',
+            instanceStatus: 'Active',
+          },
+        ],
+        nextToken: null,
+      });
+    });
+  });
+
   describe('listAutomationExecutions', () => {
     it('sends each filter as a key with its values, and reports which executions are finished', async () => {
       mockClient.post.mockResolvedValue({

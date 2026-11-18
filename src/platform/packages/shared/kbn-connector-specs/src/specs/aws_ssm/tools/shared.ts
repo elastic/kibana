@@ -25,11 +25,32 @@ const UUID_LENGTH = 36;
 const AUTOMATION_EXECUTION_ID_LENGTH = 36;
 // SSM documents no length limit for NextToken; this only guards against unbounded input.
 const NEXT_TOKEN_MAX_LENGTH = 4096;
+// The pattern SSM's model gives an inventory type name.
+const INVENTORY_TYPE_NAME_PATTERN = /^(AWS|Custom):.+$/;
+const INVENTORY_TYPE_NAME_MAX_LENGTH = 100;
+const INVENTORY_FILTERS_MAX = 5;
+const INVENTORY_FILTER_KEY_MAX_LENGTH = 200;
+const INVENTORY_FILTER_VALUES_MAX = 40;
+// SSM documents no length limit for an inventory filter value; this only guards against unbounded input.
+const INVENTORY_FILTER_VALUE_MAX_LENGTH = 256;
+// SSM's Exists type only works together with aggregators, which the connector does not send.
+const INVENTORY_FILTER_TYPES = [
+  'Equal',
+  'NotEqual',
+  'BeginWith',
+  'LessThan',
+  'GreaterThan',
+] as const;
 
 /** A `Key`/`Values` filter, as DescribeInstanceInformation and ListDocuments take them. */
 export interface SsmFilter {
   Key: string;
   Values: string[];
+}
+
+/** A `Key`/`Values`/`Type` filter, as GetInventory and ListInventoryEntries take them. */
+export interface SsmInventoryFilter extends SsmFilter {
+  Type?: (typeof INVENTORY_FILTER_TYPES)[number];
 }
 
 export const instanceIdSchema = () =>
@@ -67,6 +88,36 @@ export const nextTokenSchema = () =>
     .max(NEXT_TOKEN_MAX_LENGTH)
     .optional()
     .describe('Pagination token from a previous response. Omit to fetch the first page.');
+
+export const inventoryTypeNameSchema = () =>
+  z
+    .string()
+    .max(INVENTORY_TYPE_NAME_MAX_LENGTH)
+    .regex(INVENTORY_TYPE_NAME_PATTERN, 'Must be an inventory type, e.g. AWS:Application.');
+
+export const inventoryFiltersSchema = (keyDescription: string) =>
+  z
+    .array(
+      z.object({
+        key: z.string().min(1).max(INVENTORY_FILTER_KEY_MAX_LENGTH).describe(keyDescription),
+        values: z
+          .array(z.string().min(1).max(INVENTORY_FILTER_VALUE_MAX_LENGTH))
+          .min(1)
+          .max(INVENTORY_FILTER_VALUES_MAX)
+          .describe('The values to compare the attribute with.'),
+        type: z
+          .enum(INVENTORY_FILTER_TYPES)
+          .optional()
+          .describe('How to compare. Defaults to Equal.'),
+      })
+    )
+    .min(1)
+    .max(INVENTORY_FILTERS_MAX);
+
+export const toInventoryFilters = (
+  filters: ReadonlyArray<{ key: string; values: string[]; type?: SsmInventoryFilter['Type'] }>
+): SsmInventoryFilter[] =>
+  filters.map(({ key, values, type }) => ({ Key: key, Values: values, Type: type }));
 
 // SSM answers an empty string on the last page.
 export const toNextToken = (nextToken: string | undefined): string | null => nextToken || null;
