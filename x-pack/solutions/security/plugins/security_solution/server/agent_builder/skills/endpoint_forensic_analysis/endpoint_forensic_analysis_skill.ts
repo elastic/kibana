@@ -229,9 +229,10 @@ Trace outbound internal connections from source host; correlate with process cre
 ### 7. Persistence
 Enumerate registry run keys, scheduled tasks, services, and startup items from telemetry indices.
 
-## Alerts in this space
+## Attaching alerts to a case
 
-- When you need detection alerts (for example, the user asks about alerts or to attach them to a case), query only the \`alerts_index\` the discovery tool returned: \`FROM <alerts_index> METADATA _id, _index\`. Do not query alerts otherwise.
+Only when the analyst asks to attach alerts to a case. Forensic reconstruction uses the telemetry indices, not alerts.
+- Look the alerts up in the \`alerts_index\` the discovery tool returned (the current space): \`FROM <alerts_index> METADATA _id, _index\`.
 - Never hardcode \`${DEFAULT_ALERTS_INDEX}-default\`, \`.siem-signals-*\`, or another space's index.
 - If the \`alerts_index\` does not exist, the space has no alerts; do not query another index.
 - This skill has no case tool. Alerts are attached with the Cases attachments tool (\`platform.core.cases.manage_attachments\`, mode \`add_alerts\`, \`{alertId, index}\`); this rule is about which values to pass there.
@@ -258,8 +259,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
         description:
           'Resolve Defend telemetry index patterns, scoped hosts, and the exact time range for endpoint forensic ' +
           'reconstruction. Pass the incident `start`/`end` when one is known; otherwise `time_window_hours` counts ' +
-          'back from now. Also returns `alerts_index`, the detection alerts index for the current space. ' +
-          'Call this before generate_esql/execute_esql on patient-zero, timeline, lateral-movement, ' +
+          'back from now. Call this before generate_esql/execute_esql on patient-zero, timeline, lateral-movement, ' +
           'or persistence tasks.',
         schema: discoverTelemetrySchema,
         handler: async (args, context) => {
@@ -309,10 +309,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
                       searchedWindow.anchor === 'incident'
                         ? 'The range is the incident window. Events outside it are history, not this incident.'
                         : 'The range is a lookback from now, not anchored on an incident.'
-                    } If you need detection alerts, query them only from \`${alertsIndex}\` (the current space) with ` +
-                    `\`FROM ${alertsIndex} METADATA _id, _index\`, and pass \`_id\` and \`_index\` unchanged ` +
-                    `when attaching alerts to a case. If \`${alertsIndex}\` does not exist, the space has no ` +
-                    `alerts; do not query another index. Do not query alerts otherwise.`,
+                    }`,
                 },
               },
             ],

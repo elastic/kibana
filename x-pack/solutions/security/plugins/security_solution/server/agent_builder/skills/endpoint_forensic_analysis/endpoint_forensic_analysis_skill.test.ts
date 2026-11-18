@@ -258,15 +258,9 @@ describe('endpointForensicAnalysisSkill', () => {
       const data = await runHandler({ hosts: ['WKSTN-RECV01'] }, createContext(spaceId));
 
       expect(data.alerts_index).toBe(alertsIndex);
-      expect(data.guidance).toContain(
-        `If you need detection alerts, query them only from \`${alertsIndex}\``
-      );
-      expect(data.guidance).toContain('Do not query alerts otherwise.');
-      expect(data.guidance).toContain(`FROM ${alertsIndex} METADATA _id, _index`);
-      expect(data.guidance).toContain('`_id` and `_index` unchanged');
-      expect(data.guidance).toContain(
-        `If \`${alertsIndex}\` does not exist, the space has no alerts; do not query another index.`
-      );
+      // Alert guidance lives in the case-attachment section only, so the discovery result
+      // does not prompt alert lookups during plain forensic questions.
+      expect(data.guidance).not.toContain('alert');
     });
 
     it('never mentions the default-space alerts index for a non-default space', async () => {
@@ -285,11 +279,15 @@ describe('endpointForensicAnalysisSkill', () => {
 
   it('scopes alert lookups and case attachments to the current space', () => {
     const { content } = endpointForensicAnalysisSkill;
-    expect(content).toContain('## Alerts in this space');
+    expect(content).toContain('## Attaching alerts to a case');
+    expect(content).toContain('Only when the analyst asks to attach alerts to a case.');
+    expect(content).toContain('Forensic reconstruction uses the telemetry indices, not alerts.');
     expect(content).toContain('`alerts_index`');
     expect(content).toContain('FROM <alerts_index> METADATA _id, _index');
-    expect(content).toContain('When you need detection alerts');
-    expect(content).toContain('Do not query alerts otherwise.');
+    // The alerts index is named in the case-attachment section only.
+    expect(content.indexOf('alerts_index')).toBeGreaterThan(
+      content.indexOf('## Attaching alerts to a case')
+    );
     expect(content).toContain('Pass `_id` and `_index` unchanged');
     expect(content).toContain('do not rewrite it to the alias');
     expect(content).toContain('`kibana.alert.uuid` equals `_id`');
