@@ -126,7 +126,22 @@ describe('Significant Events run quota workflow contracts', () => {
       ['detection', 'ki_extraction'].sort()
     );
 
-    for (const step of quotaSteps) {
+    const onboardingGate = findStep(definitions.onboarding, 'check_budget');
+    expect(onboardingGate.if).toBe(
+      '${{ inputs.rootTriggeredBy == "scheduled" and inputs.sourceType != "metrics" }}'
+    );
+    expect(
+      evaluateExpression(onboardingGate.if as string, {
+        inputs: { rootTriggeredBy: 'scheduled', sourceType: 'logs' },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(onboardingGate.if as string, {
+        inputs: { rootTriggeredBy: 'scheduled', sourceType: 'metrics' },
+      })
+    ).toBe(false);
+
+    for (const step of quotaSteps.filter((quotaStep) => quotaStep !== onboardingGate)) {
       expect(step.if).toBe('${{ inputs.rootTriggeredBy == "scheduled" }}');
       expect(
         evaluateExpression(step.if as string, { inputs: { rootTriggeredBy: 'scheduled' } })

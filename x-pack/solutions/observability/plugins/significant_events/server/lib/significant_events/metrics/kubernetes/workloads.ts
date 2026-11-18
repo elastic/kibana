@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// Finds one workload type KI per kind and cluster from Kubernetes pod and OTel kubeletstats data.
+// Finds one workload type KI per kind and source from Kubernetes pod and OTel kubeletstats data.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
@@ -14,11 +14,9 @@ import {
 import type { Condition } from '@kbn/streamlang';
 import {
   buildDatasetFilter,
-  buildScopedFilter,
+  buildTypeFilter,
   formatDatasetList,
   KUBERNETES_POD_DATASETS,
-  stringsOf,
-  type ClusterScope,
 } from '../entity_rows/helpers';
 import {
   createDroppedRows,
@@ -30,6 +28,7 @@ import {
   type EsqlRow,
 } from '../entity_rows/types';
 import {
+  buildConceptCountLine,
   buildConceptListQuery,
   buildInfrastructureConceptDescription,
   type InfrastructureConcept,
@@ -122,34 +121,36 @@ ${WORKLOAD_OWNER_DERIVATION}
 | WHERE kind IN ("deployment", "statefulset", "daemonset", "cronjob")
     AND workload IS NOT NULL
     AND kubernetes.namespace IS NOT NULL
-| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""
 | STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace, kind, workload
-| STATS member_count = COUNT(*), activity = SUM(replicas), last_seen = MAX(last_seen),
-        members = TOP(CONCAT(kubernetes.namespace, "/", workload), 50, "asc")
-  BY orchestrator.cluster.name, kind
+| STATS member_count = COUNT(*), cluster_count = COUNT_DISTINCT(orchestrator.cluster.name),
+        activity = SUM(replicas), last_seen = MAX(last_seen)
+  BY kind
 | SORT activity DESC
 | LIMIT ${ENTITY_QUERY_LIMIT}`;
 
+const getWorkloadBreakdown = (kind: WorkloadKind): string[] => [
+  'orchestrator.cluster.name',
+  'kubernetes.namespace',
+  WORKLOAD_TYPES[kind].ownerField,
+];
+
 const buildWorkloadListQuery = ({
   sourceQuery,
-  clusterScope,
   kind,
 }: {
   sourceQuery: string;
-  clusterScope: ClusterScope;
   kind: WorkloadKind;
 }): string =>
   buildConceptListQuery({
     sourceQuery,
-    clusterScope,
     datasetCondition: `data_stream.dataset IN (${formatDatasetList(
       KUBERNETES_POD_DATASETS
     )}) AND kubernetes.pod.uid IS NOT NULL`,
     additionalPipeline: `${WORKLOAD_OWNER_DERIVATION}
 | WHERE kind == "${kind}" AND workload IS NOT NULL AND kubernetes.namespace IS NOT NULL
 | EVAL \`${WORKLOAD_TYPES[kind].ownerField}\` = workload`,
-    breakdownFields: ['kubernetes.namespace', WORKLOAD_TYPES[kind].ownerField],
+    breakdownFields: getWorkloadBreakdown(kind),
   });
 
 export const foldWorkloadRows = (
@@ -162,22 +163,16 @@ export const foldWorkloadRows = (
     if (!isWorkloadKind(kind)) {
       return [];
     }
-    const clusterValue = row['orchestrator.cluster.name'];
-    const cluster = typeof clusterValue === 'string' ? clusterValue : undefined;
-    const clusterScope: Exclude<ClusterScope, undefined> =
-      cluster === undefined ? { missing: true } : { name: cluster };
-    const scope = cluster ?? sourceId;
-    const { plural, ownerField } = WORKLOAD_TYPES[kind];
-    const id = `k8s.${plural}:${scope}`;
-    const title = cluster
-      ? `Kubernetes ${plural} of ${cluster}`
-      : `Kubernetes ${plural} (cluster not reported)`;
+    const { plural } = WORKLOAD_TYPES[kind];
+    const id = `k8s.${plural}:${sourceId}`;
+    const title = `Kubernetes ${plural}`;
     if (id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
       droppedRows.idTooLong += 1;
       return [];
     }
-    const members = stringsOf(row.members).slice(0, 50);
     const memberCount = typeof row.member_count === 'number' ? row.member_count : 0;
+    const clusterCount = typeof row.cluster_count === 'number' ? row.cluster_count : 0;
+    const breakdown = getWorkloadBreakdown(kind);
     const entityStoreType = getKubernetesEntityStoreType(kind);
     return [
       {
@@ -187,23 +182,21 @@ export const foldWorkloadRows = (
         title,
         description: buildInfrastructureConceptDescription({
           concept: plural,
-          scope,
           memberCount,
-          breakdownFields: ['kubernetes.namespace', ownerField],
-          members,
-          clusterMissing: cluster === undefined,
+          clusterCount,
+          breakdownFields: breakdown,
         }),
-        filter: buildScopedFilter(
-          clusterScope,
+        evidence: [buildConceptCountLine({ concept: plural, memberCount, clusterCount })],
+        filter: buildTypeFilter(
           buildDatasetFilter(KUBERNETES_POD_DATASETS),
           WORKLOAD_TYPE_FILTERS[kind]
         ),
         properties: {
-          breakdown: ['kubernetes.namespace', ownerField],
+          breakdown,
           entity_store_type: entityStoreType,
           member_count: memberCount,
-          members,
-          list_query: buildWorkloadListQuery({ sourceQuery, clusterScope, kind }),
+          cluster_count: clusterCount,
+          list_query: buildWorkloadListQuery({ sourceQuery, kind }),
           origin: 'metrics',
           key_row: 'ecs.k8s_workload',
         },

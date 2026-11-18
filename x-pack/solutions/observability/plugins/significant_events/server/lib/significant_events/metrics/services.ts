@@ -13,7 +13,7 @@ import {
 } from '@kbn/significant-events-schema';
 import {
   buildDatasetFilter,
-  buildScopedFilter,
+  buildTypeFilter,
   formatDatasetList,
   stringsOf,
 } from './entity_rows/helpers';
@@ -26,6 +26,7 @@ import {
   type EsqlRow,
 } from './entity_rows/types';
 import {
+  buildConceptCountLine,
   buildConceptListQuery,
   buildInfrastructureConceptDescription,
 } from './kubernetes/concepts';
@@ -46,7 +47,6 @@ export const buildServiceQuery = (sourceQuery: string): string => `${sourceQuery
         docs = COUNT(*)
   BY service.name
 | STATS member_count = COUNT(*), activity = SUM(docs), last_seen = MAX(last_seen),
-        members = TOP(service.name, 50, "asc"),
         environments = VALUES(environments)
 | WHERE member_count > 0
 | SORT activity DESC
@@ -77,7 +77,6 @@ export const foldServiceRows = (
     };
   }
 
-  const members = stringsOf(row.members).slice(0, 50);
   const memberCount = typeof row.member_count === 'number' ? row.member_count : 0;
   const features: FeatureUpsert[] = [
     {
@@ -87,12 +86,11 @@ export const foldServiceRows = (
       title,
       description: buildInfrastructureConceptDescription({
         concept: 'services',
-        scope: sourceId,
         memberCount,
         breakdownFields: ['service.name'],
-        members,
       }),
-      filter: buildScopedFilter(undefined, buildDatasetFilter(SERVICE_DATASETS), {
+      evidence: [buildConceptCountLine({ concept: 'services', memberCount })],
+      filter: buildTypeFilter(buildDatasetFilter(SERVICE_DATASETS), {
         field: 'service.name',
         exists: true,
       }),
@@ -100,7 +98,6 @@ export const foldServiceRows = (
         breakdown: ['service.name'],
         entity_store_type: 'service',
         member_count: memberCount,
-        members,
         list_query: buildConceptListQuery({
           sourceQuery,
           datasetCondition: `${SERVICE_DATASET_CONDITION} AND service.name IS NOT NULL`,

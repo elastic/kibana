@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// Finds one namespace type KI per cluster from Kubernetes pod and OTel kubeletstats datasets.
+// Finds one namespace type KI per source from Kubernetes pod and OTel kubeletstats datasets.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
@@ -13,11 +13,9 @@ import {
 } from '@kbn/significant-events-schema';
 import {
   buildDatasetFilter,
-  buildScopedFilter,
+  buildTypeFilter,
   formatDatasetList,
   KUBERNETES_POD_DATASETS,
-  stringsOf,
-  type ClusterScope,
 } from '../entity_rows/helpers';
 import {
   createDroppedRows,
@@ -27,21 +25,26 @@ import {
   type EntityFoldResult,
   type EsqlRow,
 } from '../entity_rows/types';
-import { buildConceptListQuery, buildInfrastructureConceptDescription } from './concepts';
+import {
+  buildConceptCountLine,
+  buildConceptListQuery,
+  buildInfrastructureConceptDescription,
+} from './concepts';
 import { KUBERNETES_ENTITY_STORE_TYPES } from './ids';
+
+// A namespace name is only unique inside its cluster.
+const NAMESPACE_BREAKDOWN = ['orchestrator.cluster.name', 'kubernetes.namespace'];
 
 export const buildNamespaceQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_POD_DATASETS)})
     AND kubernetes.pod.uid IS NOT NULL
     AND kubernetes.namespace IS NOT NULL
-| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""
 | STATS activity = COUNT(*), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace
-| STATS member_count = COUNT(*), activity = SUM(activity), last_seen = MAX(last_seen),
-        members = TOP(kubernetes.namespace, 50, "asc")
-  BY orchestrator.cluster.name
-| SORT activity DESC
+| STATS member_count = COUNT(*), cluster_count = COUNT_DISTINCT(orchestrator.cluster.name),
+        activity = SUM(activity), last_seen = MAX(last_seen)
+| WHERE member_count > 0
 | LIMIT ${ENTITY_QUERY_LIMIT}`;
 
 export const foldNamespaceRows = (
@@ -49,79 +52,54 @@ export const foldNamespaceRows = (
   { sourceQuery, sourceId }: EntityFoldContext
 ): EntityFoldResult => {
   const droppedRows = createDroppedRows();
-  const conceptsByCluster = new Map<
-    string,
-    { cluster?: string; memberCount: number; members: string[] }
-  >();
-  for (const row of rows) {
-    const clusterValue = row['orchestrator.cluster.name'];
-    const cluster = typeof clusterValue === 'string' ? clusterValue : undefined;
-    const clusterKey = cluster === undefined ? 'source' : `cluster:${cluster}`;
-    const concept = conceptsByCluster.get(clusterKey) ?? {
-      cluster,
-      memberCount: 0,
-      members: [],
+  const row = rows[0];
+  const id = `k8s.namespaces:${sourceId}`;
+  const title = 'Kubernetes namespaces';
+  if (!row || id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
+    droppedRows.idTooLong += row ? 1 : 0;
+    return {
+      features: [],
+      droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
+      droppedRows,
     };
-    concept.memberCount =
-      typeof row.member_count === 'number'
-        ? Math.max(concept.memberCount, row.member_count)
-        : concept.memberCount;
-    // The description lists at most 50 members before directing readers to the live query.
-    concept.members = stringsOf(row.members).slice(0, 50);
-    conceptsByCluster.set(clusterKey, concept);
   }
-
-  const features = [...conceptsByCluster.values()].flatMap((concept): FeatureUpsert[] => {
-    const { cluster } = concept;
-    const clusterScope: Exclude<ClusterScope, undefined> =
-      cluster === undefined ? { missing: true } : { name: cluster };
-    const id = `k8s.namespaces:${cluster ?? sourceId}`;
-    const title = cluster
-      ? `Kubernetes namespaces of ${cluster}`
-      : 'Kubernetes namespaces (cluster not reported)';
-    if (id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
-      droppedRows.idTooLong += 1;
-      return [];
-    }
-    const members = concept.members;
-    return [
-      {
-        type: 'infrastructure',
-        subtype: KUBERNETES_ENTITY_STORE_TYPES.namespace,
-        id,
-        title,
-        description: buildInfrastructureConceptDescription({
-          concept: 'namespaces',
-          scope: cluster ?? sourceId,
-          memberCount: concept.memberCount,
-          breakdownFields: ['kubernetes.namespace'],
-          members,
-          clusterMissing: cluster === undefined,
+  const memberCount = typeof row.member_count === 'number' ? row.member_count : 0;
+  const clusterCount = typeof row.cluster_count === 'number' ? row.cluster_count : 0;
+  const features: FeatureUpsert[] = [
+    {
+      type: 'infrastructure',
+      subtype: KUBERNETES_ENTITY_STORE_TYPES.namespace,
+      id,
+      title,
+      description: buildInfrastructureConceptDescription({
+        concept: 'namespaces',
+        memberCount,
+        clusterCount,
+        breakdownFields: NAMESPACE_BREAKDOWN,
+      }),
+      evidence: [buildConceptCountLine({ concept: 'namespaces', memberCount, clusterCount })],
+      filter: buildTypeFilter(buildDatasetFilter(KUBERNETES_POD_DATASETS), {
+        field: 'kubernetes.namespace',
+        exists: true,
+      }),
+      properties: {
+        breakdown: NAMESPACE_BREAKDOWN,
+        entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.namespace,
+        member_count: memberCount,
+        cluster_count: clusterCount,
+        list_query: buildConceptListQuery({
+          sourceQuery,
+          datasetCondition: `data_stream.dataset IN (${formatDatasetList(
+            KUBERNETES_POD_DATASETS
+          )}) AND kubernetes.pod.uid IS NOT NULL AND kubernetes.namespace IS NOT NULL`,
+          breakdownFields: NAMESPACE_BREAKDOWN,
         }),
-        filter: buildScopedFilter(clusterScope, buildDatasetFilter(KUBERNETES_POD_DATASETS), {
-          field: 'kubernetes.namespace',
-          exists: true,
-        }),
-        properties: {
-          breakdown: ['kubernetes.namespace'],
-          entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.namespace,
-          member_count: concept.memberCount,
-          members,
-          list_query: buildConceptListQuery({
-            sourceQuery,
-            clusterScope,
-            datasetCondition: `data_stream.dataset IN (${formatDatasetList(
-              KUBERNETES_POD_DATASETS
-            )})`,
-            breakdownFields: ['kubernetes.namespace'],
-          }),
-          origin: 'metrics',
-          key_row: 'ecs.k8s_namespaces',
-        },
-        confidence: 100,
+        origin: 'metrics',
+        key_row: 'ecs.k8s_namespaces',
       },
-    ];
-  });
+      confidence: 100,
+    },
+  ];
   return {
     features,
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),

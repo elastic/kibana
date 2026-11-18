@@ -13,16 +13,16 @@ import { toFromSourceQuery } from '@kbn/nightshift-shared';
 import { timeoutSignal } from '@kbn/std';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { ENTITY_KEY_TABLE } from './entity_key_table';
-import { getDatasetFamily } from './entity_rows/helpers';
+import { buildDatasetEvidence, getDatasetFamily } from './entity_rows/helpers';
 import {
   createDroppedRows,
   ENTITY_QUERY_LIMIT,
   type DroppedMetricsEntityRows,
+  type EntityKeyRow,
   type EsqlCell,
   type EsqlRow,
   type EsqlScalar,
 } from './entity_rows/types';
-import { mergeHostFeatures } from './hosts';
 
 const MAX_ENTITIES = 500;
 const DATASET_QUERY_TIMEOUT_MS = 30_000;
@@ -137,6 +137,12 @@ const entityPriority = (feature: FeatureUpsert): number => {
 };
 
 /** Lists a metrics source's datasets and writes its deterministic type KIs. */
+const keyRowCoversDataset = (
+  { datasets: keyDatasets, datasetPrefixes = [] }: EntityKeyRow,
+  dataset: string
+): boolean =>
+  keyDatasets.includes(dataset) || datasetPrefixes.some((prefix) => dataset.startsWith(prefix));
+
 export const identifyMetricsEntities = async ({
   esClient,
   esql,
@@ -169,12 +175,8 @@ export const identifyMetricsEntities = async ({
     };
   }
 
-  const matchedKeyRows = ENTITY_KEY_TABLE.filter(
-    ({ datasets: keyDatasets, datasetPrefixes = [] }) =>
-      keyDatasets.some((dataset) => datasets.includes(dataset)) ||
-      datasetPrefixes.some((prefix) =>
-        datasets.some((dataset) => typeof dataset === 'string' && dataset.startsWith(prefix))
-      )
+  const matchedKeyRows = ENTITY_KEY_TABLE.filter((keyRow) =>
+    datasets.some((dataset) => typeof dataset === 'string' && keyRowCoversDataset(keyRow, dataset))
   );
   const uncoveredDatasets = datasets.filter(
     (dataset) => !COVERED_DATASET_FAMILIES.has(getDatasetFamily(dataset) ?? '')
@@ -233,12 +235,15 @@ export const identifyMetricsEntities = async ({
     }
     metricsEntityRowsCount += rows.length;
     const folded = keyRow.foldRows(rows, { sourceQuery, sourceId });
+    const datasetEvidence = buildDatasetEvidence(datasets, (dataset) =>
+      keyRowCoversDataset(keyRow, dataset)
+    );
     folded.features.forEach((feature, rowPosition) => {
       if (!featureRowPositions.has(feature.id)) {
         featureRowPositions.set(feature.id, rowPosition);
       }
+      features.push({ ...feature, evidence: [...(feature.evidence ?? []), ...datasetEvidence] });
     });
-    features.push(...folded.features);
     droppedIncompleteRowsCount += folded.droppedIncompleteRowsCount;
     droppedRows.idTooLong += folded.droppedRows.idTooLong;
   }
@@ -251,8 +256,7 @@ export const identifyMetricsEntities = async ({
   const priorBySlug = new Map(
     priorFeatures.map((feature) => [normalizeFeatureSlug(feature.id), feature])
   );
-  const mergedFeatures = mergeHostFeatures(features);
-  const selectedFeatures = mergedFeatures
+  const selectedFeatures = features
     .filter(({ id }) => !excludedFeatureIds.has(normalizeFeatureSlug(id)))
     .sort((left, right) => {
       const priority = entityPriority(left) - entityPriority(right);
@@ -267,7 +271,7 @@ export const identifyMetricsEntities = async ({
       }
       return compareEntityIds(left, right);
     });
-  const excludedSkippedCount = mergedFeatures.length - selectedFeatures.length;
+  const excludedSkippedCount = features.length - selectedFeatures.length;
   const droppedOverflowRowsCount = Math.max(0, selectedFeatures.length - MAX_ENTITIES);
   if (droppedOverflowRowsCount > 0) {
     logger.info(

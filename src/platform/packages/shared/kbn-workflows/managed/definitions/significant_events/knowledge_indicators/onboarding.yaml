@@ -114,9 +114,10 @@ triggers:
         required: false
         description: "Root workflow trigger type propagated by a managed driver."
 steps:
+  # Metrics onboarding calls no LLM, so it does not spend the KI extraction budget.
   - name: check_budget
     type: kibana.request
-    if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
+    if: '${{ inputs.rootTriggeredBy == "scheduled" and inputs.sourceType != "metrics" }}'
     with:
       method: POST
       path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'

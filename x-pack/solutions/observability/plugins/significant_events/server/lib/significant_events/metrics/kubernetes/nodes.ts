@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// Finds one node type KI per cluster from Kubernetes node and OTel kubeletstats datasets.
+// Finds one node type KI per source from Kubernetes node and OTel kubeletstats datasets.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
@@ -13,11 +13,10 @@ import {
 } from '@kbn/significant-events-schema';
 import {
   buildDatasetFilter,
-  buildScopedFilter,
+  buildTypeFilter,
   formatDatasetList,
   KUBERNETES_NODE_DATASETS,
   stringsOf,
-  type ClusterScope,
 } from '../entity_rows/helpers';
 import {
   createDroppedRows,
@@ -27,22 +26,26 @@ import {
   type EntityFoldResult,
   type EsqlRow,
 } from '../entity_rows/types';
-import { buildConceptListQuery, buildInfrastructureConceptDescription } from './concepts';
+import {
+  buildConceptCountLine,
+  buildConceptListQuery,
+  buildInfrastructureConceptDescription,
+} from './concepts';
 import { KUBERNETES_ENTITY_STORE_TYPES } from './ids';
+
+const NODE_BREAKDOWN = ['orchestrator.cluster.name', 'kubernetes.node.name'];
 
 export const buildNodeQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_NODE_DATASETS)})
     AND kubernetes.node.name IS NOT NULL
-| WHERE orchestrator.cluster.name IS NULL OR orchestrator.cluster.name != ""
 | STATS activity = COUNT(*), last_seen = MAX(@timestamp),
         os = VALUES(host.os.name), cloud_provider = VALUES(cloud.provider)
   BY orchestrator.cluster.name, kubernetes.node.name
-| STATS member_count = COUNT(*), activity = SUM(activity), last_seen = MAX(last_seen),
-        members = TOP(kubernetes.node.name, 50, "asc"),
+| STATS member_count = COUNT(*), cluster_count = COUNT_DISTINCT(orchestrator.cluster.name),
+        activity = SUM(activity), last_seen = MAX(last_seen),
         os = VALUES(os), cloud_provider = VALUES(cloud_provider)
-  BY orchestrator.cluster.name
-| SORT activity DESC
+| WHERE member_count > 0
 | LIMIT ${ENTITY_QUERY_LIMIT}`;
 
 export const foldNodeRows = (
@@ -50,94 +53,58 @@ export const foldNodeRows = (
   { sourceQuery, sourceId }: EntityFoldContext
 ): EntityFoldResult => {
   const droppedRows = createDroppedRows();
-  const conceptsByCluster = new Map<
-    string,
-    {
-      cluster?: string;
-      memberCount: number;
-      members: string[];
-      os: Set<string>;
-      cloudProviders: Set<string>;
-    }
-  >();
-  for (const row of rows) {
-    const clusterValue = row['orchestrator.cluster.name'];
-    const cluster = typeof clusterValue === 'string' ? clusterValue : undefined;
-    const clusterKey = cluster === undefined ? 'source' : `cluster:${cluster}`;
-    const concept = conceptsByCluster.get(clusterKey) ?? {
-      cluster,
-      memberCount: 0,
-      members: [],
-      os: new Set<string>(),
-      cloudProviders: new Set<string>(),
+  const row = rows[0];
+  const id = `k8s.nodes:${sourceId}`;
+  const title = 'Kubernetes nodes';
+  if (!row || id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
+    droppedRows.idTooLong += row ? 1 : 0;
+    return {
+      features: [],
+      droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
+      droppedRows,
     };
-    concept.memberCount =
-      typeof row.member_count === 'number'
-        ? Math.max(concept.memberCount, row.member_count)
-        : concept.memberCount;
-    // The description lists at most 50 members before directing readers to the live query.
-    concept.members = stringsOf(row.members).slice(0, 50);
-    stringsOf(row.os).forEach((value) => concept.os.add(value));
-    stringsOf(row.cloud_provider).forEach((value) => concept.cloudProviders.add(value));
-    conceptsByCluster.set(clusterKey, concept);
   }
-
-  const features = [...conceptsByCluster.values()].flatMap((concept): FeatureUpsert[] => {
-    const { cluster } = concept;
-    const clusterScope: Exclude<ClusterScope, undefined> =
-      cluster === undefined ? { missing: true } : { name: cluster };
-    const id = `k8s.nodes:${cluster ?? sourceId}`;
-    const title = cluster
-      ? `Kubernetes nodes of ${cluster}`
-      : 'Kubernetes nodes (cluster not reported)';
-    if (id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
-      droppedRows.idTooLong += 1;
-      return [];
-    }
-    const members = concept.members;
-    return [
-      {
-        type: 'infrastructure',
-        subtype: KUBERNETES_ENTITY_STORE_TYPES.node,
-        id,
-        title,
-        description: buildInfrastructureConceptDescription({
-          concept: 'nodes',
-          scope: cluster ?? sourceId,
-          memberCount: concept.memberCount,
-          breakdownFields: ['kubernetes.node.name'],
-          members,
-          clusterMissing: cluster === undefined,
+  const memberCount = typeof row.member_count === 'number' ? row.member_count : 0;
+  const clusterCount = typeof row.cluster_count === 'number' ? row.cluster_count : 0;
+  const features: FeatureUpsert[] = [
+    {
+      type: 'infrastructure',
+      subtype: KUBERNETES_ENTITY_STORE_TYPES.node,
+      id,
+      title,
+      description: buildInfrastructureConceptDescription({
+        concept: 'nodes',
+        memberCount,
+        clusterCount,
+        breakdownFields: NODE_BREAKDOWN,
+      }),
+      evidence: [buildConceptCountLine({ concept: 'nodes', memberCount, clusterCount })],
+      filter: buildTypeFilter(buildDatasetFilter(KUBERNETES_NODE_DATASETS), {
+        field: 'kubernetes.node.name',
+        exists: true,
+      }),
+      properties: {
+        breakdown: NODE_BREAKDOWN,
+        entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.node,
+        member_count: memberCount,
+        cluster_count: clusterCount,
+        list_query: buildConceptListQuery({
+          sourceQuery,
+          datasetCondition: `data_stream.dataset IN (${formatDatasetList(
+            KUBERNETES_NODE_DATASETS
+          )}) AND kubernetes.node.name IS NOT NULL`,
+          breakdownFields: NODE_BREAKDOWN,
         }),
-        filter: buildScopedFilter(clusterScope, buildDatasetFilter(KUBERNETES_NODE_DATASETS), {
-          field: 'kubernetes.node.name',
-          exists: true,
-        }),
-        properties: {
-          breakdown: ['kubernetes.node.name'],
-          entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.node,
-          member_count: concept.memberCount,
-          members,
-          list_query: buildConceptListQuery({
-            sourceQuery,
-            clusterScope,
-            datasetCondition: `data_stream.dataset IN (${formatDatasetList(
-              KUBERNETES_NODE_DATASETS
-            )})`,
-            breakdownFields: ['kubernetes.node.name'],
-          }),
-          host_summary: {
-            os: [...concept.os].sort(),
-            cloud_provider: [...concept.cloudProviders].sort(),
-          },
-          origin: 'metrics',
-          key_row: 'ecs.k8s_nodes',
+        host_summary: {
+          os: stringsOf(row.os),
+          cloud_provider: stringsOf(row.cloud_provider),
         },
-        confidence: 100,
+        origin: 'metrics',
+        key_row: 'ecs.k8s_nodes',
       },
-    ];
-  });
-
+      confidence: 100,
+    },
+  ];
   return {
     features,
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),

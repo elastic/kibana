@@ -6,9 +6,6 @@
  */
 
 // Describes metrics type KIs; it reads no datasets.
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
-import { quoteEsqlString, type ClusterScope } from '../entity_rows/helpers';
-
 export type InfrastructureConcept =
   | 'deployments'
   | 'statefulsets'
@@ -19,93 +16,70 @@ export type InfrastructureConcept =
   | 'hosts'
   | 'services';
 
-const getClusterCondition = (clusterScope: ClusterScope): string => {
-  if (clusterScope === undefined) {
+const CONCEPT_MEANINGS: Record<InfrastructureConcept, string> = {
+  deployments: 'Kubernetes deployments',
+  statefulsets: 'Kubernetes statefulsets',
+  daemonsets: 'Kubernetes daemonsets',
+  cronjobs: 'Kubernetes cronjobs',
+  nodes: 'Kubernetes nodes are the machines that run workloads',
+  namespaces: 'Kubernetes namespaces partition workloads',
+  hosts: 'Hosts',
+  services: 'Services',
+};
+
+const formatClusterCount = (clusterCount: number | undefined): string => {
+  if (clusterCount === undefined) {
     return '';
   }
-  if ('name' in clusterScope) {
-    return `AND orchestrator.cluster.name == ${quoteEsqlString(clusterScope.name)}\n    `;
-  }
-  return 'AND orchestrator.cluster.name IS NULL\n    ';
+  return ` across ${clusterCount} ${clusterCount === 1 ? 'cluster' : 'clusters'}`;
 };
+
+/** One line count summary shared by the description and the evidence. */
+export const buildConceptCountLine = ({
+  concept,
+  memberCount,
+  clusterCount,
+}: {
+  concept: InfrastructureConcept;
+  memberCount: number;
+  clusterCount?: number;
+}): string => `${memberCount} ${concept}${formatClusterCount(clusterCount)} seen in the last hour`;
 
 export const buildInfrastructureConceptDescription = ({
   concept,
-  scope,
   memberCount,
+  clusterCount,
   breakdownFields,
-  members,
-  clusterMissing = false,
 }: {
   concept: InfrastructureConcept;
-  scope: string;
   memberCount: number;
+  clusterCount?: number;
   breakdownFields: readonly string[];
-  members: readonly string[];
-  clusterMissing?: boolean;
-}): string => {
-  const meaning = (() => {
-    if (clusterMissing) {
-      return `Kubernetes ${concept} with no cluster name reported`;
-    }
-    switch (concept) {
-      case 'nodes':
-        return `Kubernetes nodes are the machines that run workloads in cluster ${scope}`;
-      case 'namespaces':
-        return `Kubernetes namespaces partition workloads in cluster ${scope}`;
-      case 'hosts':
-        return `Hosts outside Kubernetes in source ${scope}`;
-      case 'services':
-        return `Services in source ${scope}`;
-      default:
-        return `Kubernetes ${concept} in cluster ${scope}`;
-    }
-  })();
-  const sentences = [
-    `${meaning}; this source has ${memberCount} ${concept}.`,
+}): string =>
+  [
+    `${CONCEPT_MEANINGS[concept]}; this source has ${buildConceptCountLine({
+      concept,
+      memberCount,
+      clusterCount,
+    })}.`,
     `Break them down by ${breakdownFields.join(' and ')}; properties.list_query lists them live.`,
-  ];
-
-  const descriptionPrefix = `${sentences.join(' ')} Members: `;
-  // The 9,800-character budget leaves room for the final omitted-member count.
-  const descriptionLimit = MAX_TEXT_LENGTH - 200;
-  const includedMembers: string[] = [];
-  for (const member of members) {
-    const nextMembers = [...includedMembers, member];
-    const remaining = Math.max(0, memberCount - nextMembers.length);
-    const suffix = remaining > 0 ? `, and ${remaining} more.` : '.';
-    if (`${descriptionPrefix}${nextMembers.join(', ')}${suffix}`.length > descriptionLimit) {
-      break;
-    }
-    includedMembers.push(member);
-  }
-
-  const remaining = Math.max(0, memberCount - includedMembers.length);
-  if (includedMembers.length === 0) {
-    return `${descriptionPrefix}${remaining} more.`;
-  }
-  const suffix = remaining > 0 ? `, and ${remaining} more.` : '.';
-  return `${descriptionPrefix}${includedMembers.join(', ')}${suffix}`;
-};
+  ].join(' ');
 
 export const buildConceptListQuery = ({
   sourceQuery,
-  clusterScope,
   datasetCondition,
   additionalPipeline,
   breakdownFields,
 }: {
   sourceQuery: string;
-  clusterScope?: ClusterScope;
   datasetCondition: string;
   additionalPipeline?: string;
   breakdownFields: readonly string[];
 }): string => {
   const extraPipeline = additionalPipeline ? `\n${additionalPipeline}` : '';
-  const clusterCondition = getClusterCondition(clusterScope);
   return `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
-    ${clusterCondition}AND ${datasetCondition}${extraPipeline}
+    AND ${datasetCondition}${extraPipeline}
 | STATS last_seen = MAX(@timestamp) BY ${breakdownFields.join(', ')}
 | SORT ${breakdownFields.join(', ')}`;
 };

@@ -35,21 +35,19 @@ export const buildDatasetFilter = (datasets: readonly string[]): Condition => ({
   or: datasets.map((dataset) => ({ field: 'data_stream.dataset', eq: dataset })),
 });
 
-export type ClusterScope = { name: string } | { missing: true } | undefined;
-
-const getClusterConditions = (clusterScope: ClusterScope): Condition[] => {
-  if (clusterScope === undefined) {
-    return [];
-  }
-  if ('name' in clusterScope) {
-    return [{ field: 'orchestrator.cluster.name', eq: clusterScope.name }];
-  }
-  return [{ not: { field: 'orchestrator.cluster.name', exists: true } }];
-};
-
-export const buildScopedFilter = (
-  clusterScope: ClusterScope,
-  ...conditions: Condition[]
-): Condition => ({
-  and: [...getClusterConditions(clusterScope), ...conditions],
+export const buildTypeFilter = (...conditions: Condition[]): Condition => ({
+  and: conditions,
 });
+
+const MAX_EVIDENCE_DATASETS = 10;
+
+/** Evidence lines naming the source datasets, seen in the last hour, that a type KI was built from. */
+export const buildDatasetEvidence = (
+  datasets: ReadonlyArray<string | null>,
+  matches: (dataset: string) => boolean
+): string[] =>
+  datasets
+    .filter((dataset): dataset is string => typeof dataset === 'string' && matches(dataset))
+    .sort()
+    .slice(0, MAX_EVIDENCE_DATASETS)
+    .map((dataset) => `data_stream.dataset: ${dataset}`);
