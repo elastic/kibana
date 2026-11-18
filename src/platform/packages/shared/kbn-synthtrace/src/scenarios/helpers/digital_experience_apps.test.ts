@@ -22,6 +22,7 @@ import {
   generateOngoingPerMinute,
   generatePerMinute,
   getDefaultSeed,
+  getTimestamp,
   parseDigitalExperienceScenarioOpts,
   type OngoingSessionStore,
 } from './digital_experience_apps';
@@ -1091,6 +1092,34 @@ describe('digital experience ongoing sessions', () => {
       expect(describeDocs(docsOf(restarted))).toEqual(
         describeDocs(whole.filter((doc) => timeOf(doc) >= restartAt))
       );
+    });
+
+    it('writes every event in the window of its release time, when one is given', () => {
+      const releaseDelay = 45_000;
+      const batches = runInBatches(from, END, 1000, (timeRange) => [
+        generateOngoingPerMinute(timeRange, 2, {
+          store,
+          key: 'release',
+          maxDuration: MAX_DURATION,
+          create: ({ time, index }) =>
+            OFFSETS.map(
+              (offset) =>
+                new Serializable<EdotBrowserDocument>({
+                  '@timestamp': time + offset,
+                  event_name: String(index),
+                })
+            ),
+          releaseTime: (event) => getTimestamp(event) + releaseDelay,
+        }),
+      ]);
+
+      batches.forEach(({ from: batchFrom, to: batchTo, docs }) =>
+        docs.forEach((doc) => {
+          expect(timeOf(doc) + releaseDelay).toBeGreaterThanOrEqual(batchFrom);
+          expect(timeOf(doc) + releaseDelay).toBeLessThan(batchTo);
+        })
+      );
+      expect(docsOf(batches).length).toBeGreaterThan(0);
     });
 
     it('creates each session once while the batches follow each other', () => {

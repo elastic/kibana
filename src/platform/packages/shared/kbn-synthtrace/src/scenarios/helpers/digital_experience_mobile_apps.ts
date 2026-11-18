@@ -19,6 +19,7 @@ import {
   type MobileHealthProfile,
   type MobilePlatform,
   type NetworkConnection,
+  type Serializable,
   type SynthtraceGenerator,
   type Timerange,
 } from '@kbn/synthtrace-client';
@@ -805,9 +806,45 @@ type GenerateSessionsOpts = DigitalExperienceMobileScenarioOpts & {
   apps?: readonly DigitalExperienceMobileApp[];
 };
 
-// Bounds a native session from its start to its last event, with room to spare: two visits up to
-// 30 minutes apart, and a relaunch up to 15 minutes after a crash. Events after it are left out.
-const MAX_NATIVE_SESSION_MS = 2 * HOUR_MS;
+// Native sessions are written from their start, so their launches and screen views are capped, which
+// bounds how long a session lasts
+const NATIVE_MAX_LAUNCH_MS = 30_000;
+const NATIVE_MAX_VIEW_APPEAR_MS = 10_000;
+const NATIVE_MAX_DWELL_MS = 5 * 60_000;
+// Both SDKs start a new session after 30 minutes without activity
+const SESSION_IDLE_TIMEOUT_MS = 30 * 60_000;
+const MAX_SLOWDOWN = Math.max(
+  ...Object.values(edotReactNative.deviceProfiles).map(({ slowdown }) => slowdown)
+);
+
+/**
+ * The longest a native session can last: up to two visits and the relaunch that reports a crash,
+ * each idle gap shorter than the SDKs' idle timeout, and the screen views of the visits plus the
+ * relaunch's, with a minute to spare for rounding.
+ */
+const MAX_NATIVE_SESSION_MS =
+  3 * NATIVE_MAX_LAUNCH_MS * MAX_SLOWDOWN +
+  (MAX_SCREEN_VIEWS + 1) * (NATIVE_MAX_VIEW_APPEAR_MS * MAX_SLOWDOWN + NATIVE_MAX_DWELL_MS) +
+  2 * SESSION_IDLE_TIMEOUT_MS +
+  60_000;
+
+const NATIVE_DWELL = { ...edotReactNative.defaultDwell, max: NATIVE_MAX_DWELL_MS };
+
+const withNativeCaps = (health: MobileHealthProfile): MobileHealthProfile => ({
+  ...health,
+  coldLaunch: { ...health.coldLaunch, max: NATIVE_MAX_LAUNCH_MS },
+  viewAppear: { ...health.viewAppear, max: NATIVE_MAX_VIEW_APPEAR_MS },
+});
+
+/** When the SDK sends a document: a span once it has ended, a crash once the next launch reports it. */
+const sentAt = (event: Serializable<EdotReactNativeDocument>): number => {
+  const [doc] = event.serialize();
+  const time = Number(doc['@timestamp']);
+  if ('kind' in doc) {
+    return time + (doc.duration ?? 0) / 1_000_000;
+  }
+  return Math.max(time, doc.observed_timestamp ?? time);
+};
 
 const ongoingNativeSessions: OngoingSessionStore<EdotReactNativeDocument> = new Map();
 
@@ -883,7 +920,9 @@ const generateSessions = (
             native,
           }),
           model: withVersionCrashes(model, crashes),
-          health: { ...healthProfile, ...versionHealth },
+          health: proposedSignals
+            ? withNativeCaps({ ...healthProfile, ...versionHealth })
+            : { ...healthProfile, ...versionHealth },
         })
       );
       const perMinute = sessionsPerMinute * scale;
@@ -919,7 +958,7 @@ const generateSessions = (
         const screenViews =
           MIN_SCREEN_VIEWS + Math.floor(random() * (MAX_SCREEN_VIEWS - MIN_SCREEN_VIEWS + 1));
         const visits = random() < MULTI_VISIT_RATE ? 2 : 1;
-        const onCellular = random() < healthProfile.cellularRate;
+        const onCellular = random() < versionHealth.cellularRate;
         const networkPick = random();
         if (!profile) {
           return [];
@@ -944,7 +983,7 @@ const generateSessions = (
           proposedSignals,
           previousSessionId,
           random,
-          ...(proposedSignals ? { start: time } : { end: time }),
+          ...(proposedSignals ? { start: time, dwell: NATIVE_DWELL } : { end: time }),
         });
       };
 
@@ -953,6 +992,7 @@ const generateSessions = (
           store: ongoingNativeSessions,
           key: `${runKey}:${serviceName}`,
           maxDuration: MAX_NATIVE_SESSION_MS,
+          releaseTime: sentAt,
           // A session that started before the run is left out whole
           create: ({ time, index }) => (time < from ? [] : createSession(index, time)),
         });

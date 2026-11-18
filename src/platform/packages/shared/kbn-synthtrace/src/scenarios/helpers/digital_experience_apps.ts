@@ -1138,7 +1138,7 @@ const getStart = (events: Array<Serializable<Fields>>): number =>
 interface OngoingSession<TFields extends Fields> {
   /** The time the session is generated for, when it starts. */
   start: number;
-  /** Its events by time, and the next one to write. */
+  /** Its events by release time, and the next one to write. */
   events: Array<{ time: number; event: Serializable<TFields> }>;
   next: number;
 }
@@ -1167,7 +1167,8 @@ const ongoingBrowserSessions: OngoingSessionStore<EdotBrowserDocument> = new Map
  * before a window are in progress, and their events after that are left out. A window that doesn't
  * follow the last one written for `key` starts over: `create` is then called again for the sessions
  * started within `maxDuration`, with `after` set to the window's start, and may return nothing for
- * a session that ended before. Every window has the same events either way.
+ * a session that ended before. Every window has the same events either way. An event is written in
+ * the window of its `releaseTime`, by default its `@timestamp`.
  */
 export const generateOngoingPerMinute = <TFields extends Fields>(
   range: Timerange,
@@ -1177,10 +1178,13 @@ export const generateOngoingPerMinute = <TFields extends Fields>(
     key,
     maxDuration,
     create,
+    releaseTime = getTimestamp,
   }: {
     store: OngoingSessionStore<TFields>;
     key: string;
     maxDuration: number;
+    /** When the event is sent, e.g. a crash reported on the next launch, if not its `@timestamp`. */
+    releaseTime?: (event: Serializable<TFields>) => number;
     create: (session: {
       time: number;
       index: number;
@@ -1210,7 +1214,7 @@ export const generateOngoingPerMinute = <TFields extends Fields>(
       const index = state.nextIndex++;
       const start = timeOf(index);
       const events = create({ time: start, index, after: windowStart })
-        .map((event) => ({ time: getTimestamp(event), event }))
+        .map((event) => ({ time: releaseTime(event), event }))
         .sort((a, b) => a.time - b.time);
       state.sessions.push({ start, events, next: 0 });
     }

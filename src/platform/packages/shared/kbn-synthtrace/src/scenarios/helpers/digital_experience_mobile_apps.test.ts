@@ -325,6 +325,29 @@ describe('digital experience mobile apps', () => {
       expect(installationIds.size).toBe(1);
     });
 
+    it("takes the cellular rate of the installation's version", () => {
+      const weatherDemo = DIGITAL_EXPERIENCE_MOBILE_APPS.find(
+        ({ serviceName }) => serviceName === 'weather-demo-react-native'
+      );
+      if (!weatherDemo) {
+        throw new Error('weather-demo-react-native is missing');
+      }
+      const allCellular = {
+        ...weatherDemo,
+        versions: weatherDemo.versions.map((version) => ({
+          ...version,
+          health: { ...version.health, cellularRate: 1 },
+        })),
+      };
+      // Every log has the network type, except the `exception` span events
+      const networkTypes = new Set(
+        logsOf(collect({ apps: [allCellular] }))
+          .filter(({ event_name: eventName }) => eventName !== 'exception')
+          .map(({ attributes }) => attributes?.['network.connection.type'])
+      );
+      expect(networkTypes).toEqual(new Set(['cell']));
+    });
+
     it('keeps everything within the range', () => {
       const from = range.from.getTime();
       const to = range.to.getTime();
@@ -359,10 +382,10 @@ describe('digital experience mobile apps', () => {
   });
 
   describe('native apps', () => {
-    const collectNative = (timeRange: Timerange = range, scale = 1) =>
+    const collectNative = (timeRange: Timerange = range, scale = 1, from?: number) =>
       generateEdotNativeSessions(timeRange, {
         environment: 'test',
-        from: timeRange.from.getTime(),
+        from: from ?? timeRange.from.getTime(),
         scale,
         platform: 'both',
         withManualSpans: false,
@@ -434,6 +457,52 @@ describe('digital experience mobile apps', () => {
         expect(Number(doc['@timestamp'])).toBeGreaterThanOrEqual(FROM);
         expect(Number(doc['@timestamp'])).toBeLessThan(range.to.getTime());
       });
+    });
+
+    it('writes every document in live mode once the SDK sends it, crashes on the next launch', () => {
+      const start = range.from.getTime();
+      const end = start + 20 * 60_000;
+      const batchMs = 60_000;
+      const sentAt = (doc: EdotReactNativeDocument) =>
+        isSpan(doc)
+          ? Number(doc['@timestamp']) + (doc.duration ?? 0) / 1_000_000
+          : Math.max(Number(doc['@timestamp']), Number(doc.observed_timestamp ?? 0));
+      const batches = Array.from({ length: (end - start) / batchMs }, (_, i) => {
+        const batch = timerange(new Date(start + i * batchMs), new Date(start + (i + 1) * batchMs));
+        return { from: start + i * batchMs, docs: collectNative(batch, 1, start) };
+      });
+
+      const crashes = batches.flatMap(({ docs: batchDocs }) =>
+        logsOf(batchDocs).filter(({ event_name: eventName }) => eventName === 'app.crash')
+      );
+      expect(crashes.length).toBeGreaterThan(0);
+      batches.forEach(({ from, docs: batchDocs }) =>
+        batchDocs.forEach((doc) => {
+          expect(sentAt(doc)).toBeGreaterThanOrEqual(from);
+          expect(sentAt(doc)).toBeLessThan(from + batchMs);
+        })
+      );
+    });
+
+    it('keeps the end of every native session that has time to end within the run', () => {
+      // Native sessions last less than 2 hours, so the ones of the first 15 minutes of a
+      // 2-hour run end in it
+      const twoHours = timerange(range.from, new Date(FROM + 2 * 60 * 60_000));
+      const nativeLogs = logsOf(collectNative(twoHours, 0.5));
+      const sessionsWith = (name: string) =>
+        nativeLogs
+          .filter(({ event_name: eventName }) => eventName === name)
+          .map(({ attributes, '@timestamp': time }) => ({
+            sessionId: attributes?.['session.id'],
+            time: Number(time),
+          }));
+      const ended = new Set(sessionsWith('session.end').map(({ sessionId }) => sessionId));
+      const early = sessionsWith(EVENT_SESSION_START).filter(
+        ({ time }) => time < FROM + 15 * 60_000
+      );
+
+      expect(early.length).toBeGreaterThan(0);
+      early.forEach(({ sessionId }) => expect(ended).toContain(sessionId));
     });
 
     it('rolls the newest version of every app out over the run, without downgrades', () => {

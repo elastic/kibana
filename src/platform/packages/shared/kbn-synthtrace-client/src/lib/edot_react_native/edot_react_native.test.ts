@@ -1385,6 +1385,45 @@ describe('edotReactNative', () => {
         expect(types).not.toContain('com.facebook.react.common.JavascriptException');
       });
 
+      it("leaves JavaScript crashes out of a native app's own crashes too", () => {
+        const model: EdotReactNativeAppModel = {
+          ...NATIVE_MODEL,
+          crashes: {
+            android: [
+              {
+                type: 'com.facebook.react.common.JavascriptException',
+                message: 'TypeError: undefined is not a function',
+              },
+            ],
+          },
+        };
+        const types = Array.from({ length: 20 }, (_, i) =>
+          proposed({
+            platform: 'android',
+            model,
+            seed: `native-own:${i}`,
+            screenViews: 2,
+            health: withHealth({ crashRate: 1 }),
+          })
+        )
+          .flatMap((docs) => named(docs, 'app.crash'))
+          .map(({ attributes }) => attributes?.['exception.type']);
+        expect(types.length).toBeGreaterThan(0);
+        expect(types).not.toContain('com.facebook.react.common.JavascriptException');
+      });
+
+      it('writes no freezes or handled errors for a health profile without their rates', () => {
+        const { anrRate, hangRate, handledErrorRate, ...withoutRates } =
+          MOBILE_HEALTH_PROFILES.critical;
+        for (const platform of ['android', 'ios'] as const) {
+          const docs = proposed({ platform, screenViews: 6, health: withoutRates });
+          expect(logs(docs).filter(({ attributes }) => attributes?.[ATTR_ERROR_KIND])).toEqual([]);
+          expect(logs(docs).filter(({ severity_text: severity }) => severity === 'WARN')).toEqual(
+            []
+          );
+        }
+      });
+
       it('gives native apps native scopes and no React Native root view', () => {
         for (const platform of ['android', 'ios'] as const) {
           const docs = Array.from({ length: 10 }, (_, i) =>

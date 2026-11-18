@@ -24,12 +24,12 @@ export interface MobileHealthProfile {
   errorLogRate: number;
   /** Probability that the app crashes during a visit. */
   crashRate: number;
-  /** Share of screen views of EDOT Android with an ANR, with proposed signals. */
-  anrRate: number;
-  /** Share of screen views of EDOT iOS with a hang, with proposed signals. */
-  hangRate: number;
-  /** Share of screen views on which the app reports a handled exception, with proposed signals. */
-  handledErrorRate: number;
+  /** Share of screen views of EDOT Android with an ANR, with proposed signals; none when unset. */
+  anrRate?: number;
+  /** Share of screen views of EDOT iOS with a hang, with proposed signals; none when unset. */
+  hangRate?: number;
+  /** Share of screen views with a handled exception, with proposed signals; none when unset. */
+  handledErrorRate?: number;
   /** Share of sessions on a cellular connection rather than wifi. */
   cellularRate: number;
 }

@@ -114,7 +114,7 @@ const MINUTE_MS = 60_000;
 export const SESSION_IDLE_TIMEOUT_MS = 30 * MINUTE_MS;
 // EDOT Android also starts a new session after 4 hours
 export const ANDROID_MAX_SESSION_MS = 4 * 60 * MINUTE_MS;
-const DEFAULT_DWELL: Distribution = { median: 15_000, sigma: 0.9 };
+export const DEFAULT_DWELL: Distribution = { median: 15_000, sigma: 0.9 };
 const MIN_DWELL_MS = 1_000;
 // A return to the app takes much less than a cold launch
 const WARM_LAUNCH_FACTOR = 0.25;
@@ -507,10 +507,10 @@ interface PendingCrash {
 /** The crash a visit ends with, described as the platform's crash reporter does. */
 const describeCrash = ({ client, app, random }: SessionContext, crashedAt: number): CrashReport => {
   const { native } = client;
-  const common = COMMON_CRASHES[client.platform].filter(
-    ({ type }) => !native || type !== JAVASCRIPT_EXCEPTION
-  );
-  const templates = [...(app.crashes?.[client.platform] ?? []), ...common];
+  const templates = [
+    ...(app.crashes?.[client.platform] ?? []),
+    ...COMMON_CRASHES[client.platform],
+  ].filter(({ type }) => !native || type !== JAVASCRIPT_EXCEPTION);
   const template = pick(random, templates);
   if (client.platform === MOBILE_PLATFORM.ANDROID) {
     return { ...template, stacktrace: androidStacktraceOf(template, native) };
@@ -651,14 +651,14 @@ const viewScreen = (
     }
 
     const freezeRate =
-      client.platform === MOBILE_PLATFORM.ANDROID ? health.anrRate : health.hangRate;
+      (client.platform === MOBILE_PLATFORM.ANDROID ? health.anrRate : health.hangRate) ?? 0;
     if (random() < freezeRate) {
       const { min, max } = FREEZE_DURATION_MS[client.platform];
       const time = Math.round(between(random, appeared, lastForegroundTime));
       events.push(client.freeze({ durationMs: between(random, min, max) }).timestamp(time));
     }
 
-    if (random() < health.handledErrorRate) {
+    if (random() < (health.handledErrorRate ?? 0)) {
       const template = pick(random, [
         ...(app.handledErrors?.[client.platform] ?? []),
         ...COMMON_HANDLED_ERRORS[client.platform],
