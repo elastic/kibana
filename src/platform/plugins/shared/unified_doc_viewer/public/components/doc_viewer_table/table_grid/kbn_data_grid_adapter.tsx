@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { createDataGridColumnHelper, DataGrid } from '@kbn/discover-data-grid';
 import React, { useMemo } from 'react';
 import type { TableGridModel } from './model';
@@ -26,6 +29,7 @@ export const KbnDataGridAdapter = <TRow extends object>({
   model,
 }: KbnDataGridAdapterProps<TRow>) => {
   const { ariaLabel, columns: modelColumns, getRowId, rows } = model;
+  const styles = useMemoCss(componentStyles);
   const columns = useMemo(() => {
     const columnHelper = createDataGridColumnHelper<TRow>();
 
@@ -46,7 +50,20 @@ export const KbnDataGridAdapter = <TRow extends object>({
       columns={columns}
       rows={rows}
       getRowId={getRowId}
+      css={styles.fieldsGrid}
       data-test-subj="UnifiedDocViewerTableGrid"
     />
   );
+};
+
+const componentStyles = {
+  fieldsGrid: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '.kbnDocViewer__fieldName': {
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+      },
+      '.kbnDocViewer__fieldName_multiFieldBadge': {
+        fontWeight: euiTheme.font.weight.regular,
+      },
+    }),
 };

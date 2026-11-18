@@ -80,7 +80,6 @@ export const getDataGridStyles = (themeContext: UseEuiTheme) => {
       display: 'grid',
       boxSizing: 'border-box',
       inlineSize: '100%',
-      minBlockSize: DEFAULT_DATA_GRID_ROW_HEIGHT,
       backgroundColor: euiTheme.components.dataGridRowBackground,
       borderBlockEnd: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridBorderColor}`,
       '&[data-striped="true"]': {
@@ -99,6 +98,7 @@ export const getDataGridStyles = (themeContext: UseEuiTheme) => {
       position: 'relative',
       boxSizing: 'border-box',
       minInlineSize: 0,
+      minBlockSize: `calc(${lineHeight} + ${cellPadding} * 2)`,
       padding: cellPadding,
       overflowWrap: 'break-word',
       whiteSpace: 'pre-wrap',
