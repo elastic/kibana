@@ -22,6 +22,7 @@ const ALL_CAPABILITIES = {
 };
 
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
+let mockCanReadConnectors = true;
 
 jest.mock('@kbn/core-di-browser', () => {
   const actual = jest.requireActual('react');
@@ -36,6 +37,9 @@ jest.mock('@kbn/core-di-browser', () => {
       }
       if (token === 'uiSettings') {
         return { get: () => mockAlertingV2ExperimentalFeaturesEnabled };
+      }
+      if (token === 'application') {
+        return { capabilities: { actions: { show: mockCanReadConnectors } } };
       }
       if (token === 'settings') {
         return {
@@ -352,6 +356,15 @@ describe('composable pages', () => {
     it('ImportsPage renders when parent route matches', () => {
       renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
       expect(screen.getByTestId('importsPage')).toBeInTheDocument();
+    });
+
+    it('ImportsPage asks for connector access when the user cannot read connectors', () => {
+      mockCanReadConnectors = false;
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.queryByTestId('importsPage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertingRequiredPrivilege-actions')).toBeInTheDocument();
+      mockCanReadConnectors = true;
     });
 
     it('ImportsPage redirects away when experimental features are disabled', () => {
