@@ -106,9 +106,9 @@ export const createPluginScopedServiceAccounts = ({
   };
 
   /**
-   * Copies the changes, keeping only the fields a change has, and checks every copy before any
-   * change is applied, so a malformed batch changes nothing. The delegate gets the copies: what it
-   * applies is what was checked, however the caller's own array changes meanwhile.
+   * Validates every change up front, so one bad change rejects the whole batch. Returns a copy of
+   * each change with only the fields its `op` uses (`serviceAccountId` only for `bind`). The
+   * delegate gets these copies, so later edits to the caller's array cannot alter what was checked.
    */
   const toValidChanges = (
     changes: readonly ServiceAccountWorkloadBindingChange[]
@@ -125,8 +125,8 @@ export const createPluginScopedServiceAccounts = ({
       );
     }
 
-    // Keyed the way a binding is, so two changes to one workload are caught however they are
-    // spelled. Two changes to one workload in one call have no defined order to apply them in.
+    // Reject two changes to the same workload: there is no defined order to apply them in.
+    // The key is the (type, ID) pair a binding is stored under.
     const seen = new Set<string>();
     return changes.map((change) => {
       const copy = copyChange(change);
