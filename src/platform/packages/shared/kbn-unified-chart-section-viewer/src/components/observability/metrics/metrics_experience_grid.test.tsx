@@ -770,6 +770,48 @@ describe('MetricsExperienceGrid', () => {
       // to the selectedDimensions change -- not by the toolbar handler directly.
       expect(onPageChange).not.toHaveBeenCalled();
     });
+
+    it('clears the Discover breakdown field when it is deselected via the toolbar', () => {
+      const onDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [dimensions[0]],
+        onDimensionsChange,
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        onExitFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
+        onMetricsSortChange: jest.fn(),
+        profileId: 'test-profile-id',
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
+        onGridSettingsChange: jest.fn(),
+      });
+
+      const { getByTestId } = render(
+        <MetricsExperienceGrid
+          {...defaultProps}
+          breakdownField="foo"
+          onBreakdownFieldChange={onBreakdownFieldChange}
+        />,
+        { wrapper: TestWrapper }
+      );
+
+      act(() => {
+        getByTestId('metricsExperienceBreakdownSelectorOption-foo').click();
+      });
+
+      expect(onBreakdownFieldChange).toHaveBeenCalledWith(undefined);
+      expect(onDimensionsChange).toHaveBeenCalledWith([]);
+    });
   });
 
   describe('grid settings flyout', () => {
