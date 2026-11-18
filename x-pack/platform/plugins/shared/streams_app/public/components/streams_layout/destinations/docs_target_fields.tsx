@@ -8,20 +8,23 @@
 import React from 'react';
 import { EuiComboBox, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import { writeTargetErrorText } from './write_target_error_text';
+import { ReadOnlyPrepend, useAfterReadOnlyPrependStyles } from './writing_mode_panel';
 import type { DestinationCreationFormErrors } from './types';
 
-const DOCS_INDEX_PLACEHOLDER = i18n.translate('xpack.streams.destinations.docsIndexPlaceholder', {
-  defaultMessage: 'accounting-2026',
-});
+const DOCS_INDEX_PLACEHOLDER = i18n.translate(
+  'xpack.streams.destinations.docsIndexExamplePlaceholder',
+  { defaultMessage: 'e.g. accounting-2026' }
+);
 
 const DOCS_WRITE_PATTERN_PLACEHOLDER = i18n.translate(
-  'xpack.streams.destinations.docsWritePatternPlaceholder',
-  { defaultMessage: 'logs-orders-*' }
+  'xpack.streams.destinations.docsWritePatternExamplePlaceholder',
+  { defaultMessage: 'e.g. logs-orders-*' }
 );
 
 const DOCS_PREFIX_HELP = i18n.translate('xpack.streams.destinations.docsWritePatternsHelpText', {
-  defaultMessage: 'Must start with logs-, metrics- or traces-.',
+  defaultMessage: 'Documents must start with logs-, metrics- or traces-.',
 });
 
 export const DocsIndexField = ({
@@ -38,26 +41,33 @@ export const DocsIndexField = ({
   onBlur: () => void;
 }) => {
   const errorText = writeTargetErrorText('docs', error, false);
+  const afterPrependStyles = useAfterReadOnlyPrependStyles();
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('xpack.streams.destinations.docsIndexLabel', {
-        defaultMessage: 'Documents index',
-      })}
-      helpText={i18n.translate('xpack.streams.destinations.docsIndexHelpText', {
-        defaultMessage:
-          "Any index or data stream name. It is used as entered, with no signal prefix added. It replaces each request's _index, which must still start with logs-, metrics- or traces-. Leave blank to not send documents.",
-      })}
+      helpText={
+        errorText
+          ? undefined
+          : i18n.translate('xpack.streams.destinations.docsIndexHelpText', {
+              defaultMessage:
+                "Any index or data stream name. It is used as entered, with no signal prefix added. It replaces each request's _index, which must still start with logs-, metrics- or traces-. Leave blank to not send documents.",
+            })
+      }
       isInvalid={Boolean(errorText)}
       error={errorText}
     >
       <EuiFieldText
         fullWidth
+        css={afterPrependStyles}
         value={value}
         disabled={disabled}
         isInvalid={Boolean(errorText)}
         onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur}
+        prepend={<ReadOnlyPrepend label={DESTINATION_SIGNAL_LABELS.docs} />}
+        aria-label={i18n.translate('xpack.streams.destinations.docsIndexLabel', {
+          defaultMessage: 'Documents index',
+        })}
         placeholder={DOCS_INDEX_PLACEHOLDER}
         data-test-subj="streamsCreateDestination-docs-index"
       />
@@ -91,15 +101,16 @@ export const DocsWritePatternsField = ({
             values: { pattern, message: writeTargetErrorText('docs', entryError, true) },
           })
         );
-  const label = i18n.translate('xpack.streams.destinations.docsWritePatternsLabel', {
-    defaultMessage: 'Documents write patterns',
+  // Multi-select EuiComboBox ignores `prepend`, so this row keeps a visible label.
+  const label = i18n.translate('xpack.streams.destinations.docsSignalRowLabel', {
+    defaultMessage: 'Documents',
   });
 
   return (
     <EuiFormRow
       fullWidth
       label={label}
-      helpText={DOCS_PREFIX_HELP}
+      helpText={errorLines.length > 0 ? undefined : DOCS_PREFIX_HELP}
       isInvalid={errorLines.length > 0}
       error={errorLines}
     >

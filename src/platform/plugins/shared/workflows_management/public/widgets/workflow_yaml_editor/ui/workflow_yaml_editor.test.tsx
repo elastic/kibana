@@ -44,9 +44,9 @@ let mockYamlEditorOptions: { scrollbar?: { vertical?: string } } | undefined;
 // viewport-tracking code path is exercised without needing the real Monaco environment.
 jest.mock('../../../shared/ui/yaml_editor', () => {
   // require() is mandatory here: jest.mock factories run before ES-import transforms.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { createMockMonacoEditor } = require('../../../shared/test_utils/mock_monaco');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { createElement } = require('react');
   return {
     YamlEditor: ({ value, onChange, editorDidMount, options }: any) => {
@@ -183,6 +183,7 @@ jest.mock('./decorations', () => ({
   useFocusedStepDecoration: jest.fn(),
   useLineDifferencesDecorations: jest.fn(),
   useStepDecorationsInExecution: jest.fn(() => ({ styles: {} })),
+  useStepDurationDecorations: jest.fn(() => ({ styles: {} })),
   useTriggerTypeDecorations: jest.fn(),
   useWorkflowEventsOnDecorations: jest.fn(),
   useWorkflowIdDecorations: jest.fn(),
@@ -855,8 +856,9 @@ steps:
       capturedKeyboardHandlers.save!();
       expect(mockSaveYaml).toHaveBeenCalledTimes(1);
 
-      // Clear the mock call count and simulate save completing (still not loading)
+      // Clear the mock call count and let the save complete (still not loading)
       mockSaveYaml.mockClear();
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
 
       // Second save should also work since isSaving is false
       capturedKeyboardHandlers.save!();

@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
+  - '@kbn/crypto'
   - '@kbn/human-readable-id'
   - '@kbn/spaces-plugin'
   - '@kbn/security-plugin'
@@ -59,6 +60,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/core-http-server-utils'
   - '@kbn/es-errors'
+  - '@kbn/storage-adapter'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'

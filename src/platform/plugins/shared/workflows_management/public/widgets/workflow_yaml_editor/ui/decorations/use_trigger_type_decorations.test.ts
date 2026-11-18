@@ -15,16 +15,13 @@ import {
   applyTriggerTypeDecorations,
   useTriggerTypeDecorations,
 } from './use_trigger_type_decorations';
-
-jest.mock('@kbn/workflows', () => ({
-  ...jest.requireActual('@kbn/workflows'),
-  isTriggerType: jest.fn((type: string) => ['alert', 'manual', 'scheduled'].includes(type)),
-}));
+import { triggerSchemas } from '../../../../trigger_schemas';
 
 jest.mock('../../../../trigger_schemas', () => ({
   triggerSchemas: {
     getTriggerDefinition: jest.fn(() => undefined),
     getRegisteredIds: jest.fn(() => []),
+    getTriggerSchemaOptions: jest.fn(() => ({ includePageTrigger: false })),
   },
 }));
 
@@ -87,6 +84,27 @@ describe('applyTriggerTypeDecorations', () => {
     expect(decorations.length).toBeGreaterThan(0);
     expect(decorations[0].options.inlineClassName).toContain('type-inline-highlight');
     expect(decorations[0].options.inlineClassName).toContain('type-alert');
+  });
+
+  it('decorates the page trigger only with workflowsManagement.pages.enabled', () => {
+    const yamlString = ['name: test', 'triggers:', '  - type: page', 'steps: []'].join('\n');
+    const doc = parseDocument(yamlString, { keepSourceTokens: true });
+    const decorate = () => {
+      const { editor } = createMockEditor(yamlString);
+      applyTriggerTypeDecorations(editor, { current: null }, doc);
+      return (editor.createDecorationsCollection as jest.Mock).mock.calls[0]?.[0] ?? [];
+    };
+
+    expect(decorate()).toEqual([]);
+
+    jest
+      .mocked(triggerSchemas.getTriggerSchemaOptions)
+      .mockReturnValueOnce({ includePageTrigger: true });
+    expect(decorate()).toEqual([
+      expect.objectContaining({
+        options: expect.objectContaining({ inlineClassName: 'type-inline-highlight type-page' }),
+      }),
+    ]);
   });
 
   it('clears existing decorations when document has no triggers', () => {

@@ -18,9 +18,11 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 describe('handleQueuedWorkflowRunAtTaskStart', () => {
   const logger = loggingSystemMock.create().get() as Logger;
   const updateMock = jest.fn().mockResolvedValue(undefined);
+  const getMock = jest.fn();
 
   const workflowExecutionRepository = {
     updateWorkflowExecution: updateMock,
+    getWorkflowExecutionById: getMock,
   } as unknown as WorkflowExecutionRepository;
 
   beforeEach(() => {
@@ -64,6 +66,7 @@ describe('handleQueuedWorkflowRunAtTaskStart', () => {
         settings: { concurrency: { key: 'g1', strategy: 'queue', max: 1 } },
       },
     } as unknown as EsWorkflowExecution;
+    getMock.mockResolvedValue(execution);
 
     const handled = await handleQueuedWorkflowRunAtTaskStart({
       execution,
@@ -98,6 +101,7 @@ describe('handleQueuedWorkflowRunAtTaskStart', () => {
         settings: { concurrency: { key: 'g1', strategy: 'queue', max: 1 } },
       },
     } as unknown as EsWorkflowExecution;
+    getMock.mockResolvedValue(execution);
 
     const handled = await handleQueuedWorkflowRunAtTaskStart({
       execution,

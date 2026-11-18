@@ -16,9 +16,11 @@ import {
   type EdotBrowserClientOptions,
   type EdotBrowserEvent,
   type EdotBrowserExceptionTemplate,
+  type EdotBrowserReplayVisit,
   type EdotBrowserSite,
   type Fields,
   type HealthProfileName,
+  type ReplaySize,
   type Serializable,
   type SynthtraceGenerator,
   type Timerange,
@@ -77,6 +79,34 @@ export interface DigitalExperienceScenarioOpts {
    */
   edgeCases: boolean;
   /**
+   * Share of sessions (0 to 1) recorded for session replay from the start of every page load, like
+   * `replay.sampleRate` of EDOT Browser. A session's replay records carry its `session.id`.
+   */
+  replayRate: number;
+  /**
+   * Share of the other sessions (0 to 1) that start recording when they hit their first uncaught
+   * exception, like `replay.errorSampleRate`. The ones that never hit one have no replay.
+   */
+  errorReplayRate: number;
+  /** How much a recorded session weighs: `light` (~50 KB), `typical` (~0.5 MB) or `heavy` (4 to 5 MB). */
+  replaySize: ReplaySize;
+  /**
+   * How long sessions run: `typical` (1 to 5 page views, seconds to a few minutes), `long` (15 to
+   * 40 page views, mostly 15 to 40 minutes) or `marathon` (60 to 120 page views, mostly 30 minutes
+   * to 2 hours). A session ends at the time it is generated for, so a range shorter than the
+   * session cuts off its start, and replay leaves out the page loads that started before the range.
+   * A session's replay is built in memory before it is written: with `marathon` its bodies weigh
+   * about 2 MB (`light`), 15 MB (`typical`) or 90 MB (`heavy`) at the median, and up to 175 MB.
+   */
+  sessionLength: SessionLength;
+  /**
+   * Start every session at the time it is generated for, instead of ending it there, and write its
+   * events as they happen: in live mode a session then grows minute by minute for as long as it
+   * runs, instead of showing up whole when it ends. Sessions that started before the run's start
+   * are written from there on, so the run starts with the sessions in progress at that time.
+   */
+  ongoingSessions: boolean;
+  /**
    * Multiplies the number of sessions per minute of every app. Fractions of a session add up over
    * time, so a scale below 1 thins out every app in proportion.
    */
@@ -94,6 +124,11 @@ const DEFAULT_SCENARIO_OPTS: Omit<DigitalExperienceScenarioOpts, 'seed'> = {
   includeRawAttribution: false,
   environments: false,
   edgeCases: false,
+  replayRate: 0,
+  errorReplayRate: 0,
+  replaySize: 'typical',
+  sessionLength: 'typical',
+  ongoingSessions: false,
   scale: 1,
 };
 
@@ -897,7 +932,12 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
   },
 ];
 
-type BooleanOptKey = 'withSessionId' | 'includeRawAttribution' | 'environments' | 'edgeCases';
+type BooleanOptKey =
+  | 'withSessionId'
+  | 'includeRawAttribution'
+  | 'environments'
+  | 'edgeCases'
+  | 'ongoingSessions';
 
 /** Parses a boolean scenario option given as a boolean or a `true`/`false` string. */
 export const parseBooleanOption = (key: string, value: unknown, defaultValue: boolean): boolean => {
@@ -916,6 +956,68 @@ export const parseBooleanOption = (key: string, value: unknown, defaultValue: bo
 
 const parseBooleanOpt = (opts: Record<string, unknown> | undefined, key: BooleanOptKey): boolean =>
   parseBooleanOption(key, opts?.[key], DEFAULT_SCENARIO_OPTS[key]);
+
+/** Parses a rate scenario option, a number from 0 to 1 given as a number or a numeric string. */
+export const parseRate = (key: string, value: unknown, defaultValue: number): number => {
+  if (value === undefined) {
+    return defaultValue;
+  }
+  const rate = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+  if (typeof rate !== 'number' || !Number.isFinite(rate) || rate < 0 || rate > 1) {
+    throw new Error(`${key} must be a number from 0 to 1`);
+  }
+  return rate;
+};
+
+/** Parses the `replaySize` scenario option. */
+export const parseReplaySize = (value: unknown, defaultValue: ReplaySize): ReplaySize => {
+  if (value === undefined) {
+    return defaultValue;
+  }
+  const size = edotBrowser.replaySizes.find((replaySize) => replaySize === value);
+  if (size === undefined) {
+    throw new Error(`replaySize must be one of ${edotBrowser.replaySizes.join(', ')}`);
+  }
+  return size;
+};
+
+const HOUR_MS = 60 * 60_000;
+
+// `maxDuration` bounds a session, from its first visit to the end of its last one, with room to
+// spare: an expired session's tab idles for up to 1.5 hours before the visit that ends it, and the
+// longest sessions seen run about 1.6, 2.3 and 3.6 hours. With `ongoingSessions`, the events of a
+// session after it are left out.
+const SESSION_LENGTHS = {
+  typical: { minPageViews: 1, maxPageViews: 5, dwell: undefined, maxDuration: 2 * HOUR_MS },
+  long: {
+    minPageViews: 15,
+    maxPageViews: 40,
+    dwell: { median: 40_000, sigma: 0.8 },
+    maxDuration: 3 * HOUR_MS,
+  },
+  marathon: {
+    minPageViews: 60,
+    maxPageViews: 120,
+    dwell: { median: 40_000, sigma: 0.8 },
+    maxDuration: 5 * HOUR_MS,
+  },
+} as const;
+
+export type SessionLength = keyof typeof SESSION_LENGTHS;
+
+const SESSION_LENGTH_NAMES = Object.keys(SESSION_LENGTHS) as SessionLength[];
+
+/** Parses the `sessionLength` scenario option. */
+export const parseSessionLength = (value: unknown, defaultValue: SessionLength): SessionLength => {
+  if (value === undefined) {
+    return defaultValue;
+  }
+  const length = SESSION_LENGTH_NAMES.find((name) => name === value);
+  if (length === undefined) {
+    throw new Error(`sessionLength must be one of ${SESSION_LENGTH_NAMES.join(', ')}`);
+  }
+  return length;
+};
 
 /** Parses the `scale` scenario option, a positive number. */
 export const parseScale = (value: unknown, defaultValue: number): number => {
@@ -967,13 +1069,19 @@ export const parseDigitalExperienceScenarioOpts = (
     includeRawAttribution: parseBooleanOpt(opts, 'includeRawAttribution'),
     environments: parseBooleanOpt(opts, 'environments'),
     edgeCases: parseBooleanOpt(opts, 'edgeCases'),
+    replayRate: parseRate('replayRate', opts?.replayRate, DEFAULT_SCENARIO_OPTS.replayRate),
+    errorReplayRate: parseRate(
+      'errorReplayRate',
+      opts?.errorReplayRate,
+      DEFAULT_SCENARIO_OPTS.errorReplayRate
+    ),
+    replaySize: parseReplaySize(opts?.replaySize, DEFAULT_SCENARIO_OPTS.replaySize),
+    sessionLength: parseSessionLength(opts?.sessionLength, DEFAULT_SCENARIO_OPTS.sessionLength),
+    ongoingSessions: parseBooleanOpt(opts, 'ongoingSessions'),
     scale: parseScale(opts?.scale, DEFAULT_SCENARIO_OPTS.scale),
     seed: parseSeed(opts?.seed, getDefaultSeed(from)),
   };
 };
-
-const MIN_PAGE_VIEWS = 1;
-const MAX_PAGE_VIEWS = 5;
 
 const MS_PER_MINUTE = 60_000;
 
@@ -1023,6 +1131,101 @@ export const randomUuid = (random: () => number): string =>
 export const getTimestamp = (event: Serializable<Fields>): number =>
   Number(event.serialize()[0]['@timestamp']);
 
+/** The `@timestamp` of the earliest of `events`. */
+const getStart = (events: Array<Serializable<Fields>>): number =>
+  events.reduce((start, event) => Math.min(start, getTimestamp(event)), Infinity);
+
+interface OngoingSession {
+  /** The time the session is generated for, when it starts. */
+  start: number;
+  /** Its events by time, and the next one to write. */
+  events: Array<{ time: number; event: EdotBrowserEvent }>;
+  next: number;
+}
+
+interface OngoingSessions {
+  /** The end of the last window written. The window that starts there carries on from here. */
+  end: number;
+  /** The index of the next session to start. */
+  nextIndex: number;
+  sessions: OngoingSession[];
+}
+
+// Live mode calls the scenario again for every batch of a second or so, so the sessions in progress
+// are kept between batches, by run and app, instead of being simulated again for every batch
+const ongoingSessionsByKey = new Map<string, OngoingSessions>();
+
+/**
+ * Like {@link generatePerMinute}, except that sessions start at their time and run on from there:
+ * every one-second window has the events that the sessions in progress have in it, so live mode
+ * writes a session as it goes, never ahead of the window. Sessions that started up to `maxDuration`
+ * before a window are in progress, and their events after that are left out. A window that doesn't
+ * follow the last one written for `key` starts over: `create` is then called again for the sessions
+ * started within `maxDuration`, with `after` set to the window's start, and may return nothing for
+ * a session that ended before. Every window has the same events either way.
+ */
+export const generateOngoingPerMinute = (
+  range: Timerange,
+  perMinute: number,
+  {
+    key,
+    maxDuration,
+    create,
+  }: {
+    key: string;
+    maxDuration: number;
+    create: (session: { time: number; index: number; after: number }) => EdotBrowserEvent[];
+  }
+): SynthtraceGenerator<EdotBrowserDocument> => {
+  const to = range.to.getTime();
+  // The same numbering and times as generatePerMinute, by absolute time
+  const indexAt = (time: number) => Math.floor((perMinute * time) / MS_PER_MINUTE);
+  const timeOf = (index: number) => Math.ceil(((index + 1) * MS_PER_MINUTE) / perMinute) - 1;
+
+  return range
+    .interval('1s')
+    .generator<EdotBrowserDocument>((windowStart, _index, { stepMilliseconds }) => {
+      const windowEnd = Math.min(windowStart + stepMilliseconds, to);
+      const previous = ongoingSessionsByKey.get(key);
+      const state: OngoingSessions =
+        previous?.end === windowStart
+          ? previous
+          : {
+              end: windowStart,
+              // One more than needed, in case rounding puts a session's time on the other side
+              nextIndex: Math.max(indexAt(windowStart - maxDuration) - 1, 0),
+              sessions: [],
+            };
+
+      while (state.nextIndex < indexAt(windowEnd)) {
+        const index = state.nextIndex++;
+        const start = timeOf(index);
+        const events = create({ time: start, index, after: windowStart })
+          .map((event) => ({ time: getTimestamp(event), event }))
+          .sort((a, b) => a.time - b.time);
+        state.sessions.push({ start, events, next: 0 });
+      }
+
+      const written: EdotBrowserEvent[] = [];
+      for (const session of state.sessions) {
+        const { start, events } = session;
+        while (session.next < events.length && events[session.next].time < windowEnd) {
+          const { time, event } = events[session.next++];
+          if (time >= windowStart && time >= start && time < start + maxDuration) {
+            written.push(event);
+          }
+        }
+      }
+
+      state.end = windowEnd;
+      state.sessions = state.sessions.filter(
+        ({ start, events, next }) => next < events.length && start + maxDuration > windowEnd
+      );
+      ongoingSessionsByKey.set(key, state);
+      return written;
+    });
+};
+
 // EDOT Browser 0.4.0 is the first release that writes session data, 0.3.0 the last one without
 const DISTRO_VERSION_WITH_SESSIONS = '0.4.0';
 const DISTRO_VERSION_WITHOUT_SESSIONS = '0.3.0';
@@ -1035,12 +1238,37 @@ const FOLLOW_UP_SESSION_RATE = 0.1;
 const SAME_TAB_RATE = 0.5;
 const EARLIER_VISIT_PAGE_VIEWS = 2;
 const IDLE_REQUEST_COUNT = 3;
+// Share of the recorded sessions that run with `replay.quality.packEvents`
+const PACKED_SESSION_RATE = 0.15;
+// Shares of the recorded sessions that get each replay edge case, with `edgeCases`
+const MISSING_CHUNK_SESSION_RATE = 0.15;
+const LATE_REPLAY_SESSION_RATE = 0.15;
+
+/**
+ * How a session records, decided once per session as EDOT Browser does: a value from 0 to 1 taken
+ * from the last 8 hex digits of the session ID is under `replayRate` for sessions recorded from the
+ * start, and in the next `errorReplayRate` share of what is left for those recorded from their error.
+ */
+const getReplayTrigger = (
+  sessionId: string,
+  replayRate: number,
+  errorReplayRate: number
+): 'sampled' | 'error' | undefined => {
+  const value = Number.parseInt(sessionId.slice(-8), 16) / 0x100000000;
+  if (value < replayRate) {
+    return 'sampled';
+  }
+  return replayRate < 1 && (value - replayRate) / (1 - replayRate) < errorReplayRate
+    ? 'error'
+    : undefined;
+};
 
 /**
  * One generator per app, and environment of the app, in the catalogue, each producing EDOT Browser
  * sessions over `range`. Without the `environments` option, an app only has the scenario's
  * `environment`, or none for the apps without one, and all of its traffic.
- * Sessions end at the time of their rate tick, so live mode never writes into the future.
+ * Sessions end at the time of their rate tick, so live mode never writes into the future, or with
+ * `ongoingSessions` start there and are written as they go, by {@link generateOngoingPerMinute}.
  * Sessions that started before the run's `from` are cut off there, like traffic at the edge of any
  * window.
  *
@@ -1053,18 +1281,27 @@ const IDLE_REQUEST_COUNT = 3;
  */
 export const generateEdotBrowserSessions = (
   range: Timerange,
-  {
+  opts: DigitalExperienceScenarioOpts & { environment: string; from: number }
+): Array<SynthtraceGenerator<EdotBrowserDocument>> => {
+  const {
     environment,
     from,
     withSessionId,
     includeRawAttribution,
     environments: withEnvironments,
     edgeCases: withEdgeCases,
+    replayRate,
+    errorReplayRate,
+    replaySize,
+    sessionLength,
+    ongoingSessions,
     scale,
     seed,
-  }: DigitalExperienceScenarioOpts & { environment: string; from: number }
-): Array<SynthtraceGenerator<EdotBrowserDocument>> =>
-  DIGITAL_EXPERIENCE_APPS.flatMap(
+  } = opts;
+  const { minPageViews, maxPageViews, dwell, maxDuration } = SESSION_LENGTHS[sessionLength];
+  // Every option changes the sessions, so ongoing sessions are kept apart for each set of them
+  const runKey = JSON.stringify(opts);
+  return DIGITAL_EXPERIENCE_APPS.flatMap(
     ({
       serviceName,
       serviceVersion,
@@ -1112,114 +1349,181 @@ export const generateEdotBrowserSessions = (
           reportResourceTimings: !withoutResourceTimings,
         };
 
-        return generatePerMinute<EdotBrowserDocument>(
-          range,
-          (sessionsPerMinute * scale * weight) / totalWeight,
-          ({ time, index }) => {
-            const random = createSeededRandom(`${seed}:${sessionKey}:${index}`);
-            const pageViews =
-              MIN_PAGE_VIEWS + Math.floor(random() * (MAX_PAGE_VIEWS - MIN_PAGE_VIEWS + 1));
-            const pickedProfile = edotBrowser.pickBrowserProfile(random, browserWeights);
-            // Drawn apart from the session, so that the option doesn't change the rest of its draws
-            const profile =
-              edgeCases?.unidentifiedBrowserRate !== undefined &&
-              createSeededRandom(`${seed}:${sessionKey}:${index}:browser`)() <
-                edgeCases.unidentifiedBrowserRate
-                ? edotBrowser.withoutBrowserDetails(pickedProfile)
-                : pickedProfile;
-            // Everything below is drawn even when it isn't used, so that options and the kind of
-            // session don't change the rest of the draws of the session
-            const [sessionId, previousSessionId, tabId, otherTabId] = Array.from(
-              { length: 4 },
-              () => randomUuid(random)
-            );
-            const visitKind = random();
-            const followsOtherSession = random() < FOLLOW_UP_SESSION_RATE;
-            const sameTab = random() < SAME_TAB_RATE;
-            const gap = random();
+        // The session numbered `index`, ending at `end`, without its events before `notBefore`
+        const createSession = (
+          index: number,
+          end: number,
+          { notBefore, includeReplay }: { notBefore: number; includeReplay: boolean }
+        ): EdotBrowserEvent[] => {
+          const random = createSeededRandom(`${seed}:${sessionKey}:${index}`);
+          const pageViews = minPageViews + Math.floor(random() * (maxPageViews - minPageViews + 1));
+          const pickedProfile = edotBrowser.pickBrowserProfile(random, browserWeights);
+          // Drawn apart from the session, so that the option doesn't change the rest of its draws
+          const profile =
+            edgeCases?.unidentifiedBrowserRate !== undefined &&
+            createSeededRandom(`${seed}:${sessionKey}:${index}:browser`)() <
+              edgeCases.unidentifiedBrowserRate
+              ? edotBrowser.withoutBrowserDetails(pickedProfile)
+              : pickedProfile;
+          // Everything below is drawn even when it isn't used, so that options and the kind of
+          // session don't change the rest of the draws of the session
+          const [sessionId, previousSessionId, tabId, otherTabId] = Array.from({ length: 4 }, () =>
+            randomUuid(random)
+          );
+          const visitKind = random();
+          const followsOtherSession = random() < FOLLOW_UP_SESSION_RATE;
+          const sameTab = random() < SAME_TAB_RATE;
+          const gap = random();
 
-            const client = (options: EdotBrowserClientOptions = {}) =>
-              app.client(profile, { includeRawAttribution, ...options });
-            const simulate = (
-              options: EdotBrowserClientOptions,
-              anchor: { end: number },
-              views: number,
-              resumed: boolean = false
-            ) =>
-              edotBrowser.session({
-                site,
-                health: healthProfile,
-                random,
-                client: client(options),
-                pageViews: views,
-                resumed,
-                ...reporting,
-                ...anchor,
-              });
-            const keep = (events: EdotBrowserEvent[]) =>
-              events.filter((event) => getTimestamp(event) >= from);
-
-            if (!withSessionId) {
-              return keep(simulate({}, { end: time }, pageViews));
+          const client = (options: EdotBrowserClientOptions = {}) =>
+            app.client(profile, { includeRawAttribution, ...options });
+          // The visits of every session, in the tab each happened in: what replay records. A session
+          // that expired has its own ID, so it records, or not, on its own.
+          const visitsBySession = new Map<string, EdotBrowserReplayVisit[]>();
+          const simulate = (
+            options: EdotBrowserClientOptions,
+            anchor: { end: number },
+            views: number,
+            resumed: boolean = false
+          ) => {
+            const visitClient = client(options);
+            const { events, documents } = edotBrowser.sessionWithDocuments({
+              site,
+              health: healthProfile,
+              random,
+              client: visitClient,
+              pageViews: views,
+              dwell,
+              resumed,
+              ...reporting,
+              ...anchor,
+            });
+            if (options.sessionId) {
+              visitsBySession.set(options.sessionId, [
+                ...(visitsBySession.get(options.sessionId) ?? []),
+                { client: visitClient, documents },
+              ]);
             }
-
-            const previous = followsOtherSession ? previousSessionId : undefined;
-            if (visitKind < RESUMED_SESSION_RATE) {
-              // A second visit to a session that is still running, less than 30 minutes after the
-              // first one, in the same tab or in another one
-              const visit = simulate(
-                { sessionId, previousSessionId: previous, tabId: sameTab ? tabId : otherTabId },
-                { end: time },
-                pageViews,
-                true
-              );
-              const firstVisitEnd =
-                Math.min(...visit.map(getTimestamp)) -
-                Math.round((0.05 + 0.9 * gap) * SESSION_IDLE_TIMEOUT_MS);
-              const firstVisit = simulate(
-                { sessionId, previousSessionId: previous, tabId },
-                { end: firstVisitEnd },
-                EARLIER_VISIT_PAGE_VIEWS
-              );
-              return keep([...firstVisit, ...visit]);
+            return events;
+          };
+          const keep = (events: EdotBrowserEvent[]) =>
+            events.filter((event) => getTimestamp(event) >= notBefore);
+          // Replay has a random source of its own per session, so that it never changes the rest of
+          // the data. Called after the visits are simulated. Segments that start before `notBefore`
+          // are left out whole, since a segment without its first FullSnapshot can't play.
+          const withReplay = (events: EdotBrowserEvent[]): EdotBrowserEvent[] => {
+            if (!includeReplay) {
+              return events;
             }
+            return [
+              ...events,
+              ...Array.from(visitsBySession).flatMap(([replaySessionId, visits]) => {
+                const trigger = getReplayTrigger(replaySessionId, replayRate, errorReplayRate);
+                if (!trigger) {
+                  return [];
+                }
+                const replayRandom = createSeededRandom(`${seed}:${replaySessionId}:replay`);
+                const [packDraw, missingChunkDraw, lateDraw] = [
+                  replayRandom(),
+                  replayRandom(),
+                  replayRandom(),
+                ];
+                return edotBrowser.replaySession({
+                  visits,
+                  trigger,
+                  size: replaySize,
+                  random: replayRandom,
+                  packEvents: packDraw < PACKED_SESSION_RATE,
+                  missingChunk: withEdgeCases && missingChunkDraw < MISSING_CHUNK_SESSION_RATE,
+                  startsAfterFirstPage:
+                    withEdgeCases && trigger === 'sampled' && lateDraw < LATE_REPLAY_SESSION_RATE,
+                  notBefore,
+                });
+              }),
+            ];
+          };
 
-            if (visitKind < RESUMED_SESSION_RATE + EXPIRED_SESSION_RATE) {
-              // The session expired while the tab stayed open, sending background requests with no
-              // session ID. The user's return starts a new session that points to the expired one.
-              const visit = simulate(
-                { sessionId, previousSessionId, tabId },
-                { end: time },
-                pageViews
-              );
-              const returnedAt = Math.min(...visit.map(getTimestamp));
-              const expiredFor = Math.round(SESSION_IDLE_TIMEOUT_MS * (1.05 + 2 * gap));
-              const expiredVisit = simulate(
-                { sessionId: previousSessionId, tabId },
-                { end: returnedAt - expiredFor },
-                EARLIER_VISIT_PAGE_VIEWS
-              );
-              const requestInterval = Math.floor(
-                (expiredFor - SESSION_IDLE_TIMEOUT_MS) / IDLE_REQUEST_COUNT
-              );
-              const idleRequests = edotBrowser.idleTab({
-                client: client({ tabId }),
-                site,
-                health: healthProfile,
-                random,
-                start: returnedAt - expiredFor + SESSION_IDLE_TIMEOUT_MS,
-                requestCount: IDLE_REQUEST_COUNT,
-                intervalMs: requestInterval,
-                ...reporting,
-              });
-              return keep([...expiredVisit, ...idleRequests, ...visit]);
-            }
-
-            return keep(
-              simulate({ sessionId, previousSessionId: previous, tabId }, { end: time }, pageViews)
-            );
+          if (!withSessionId) {
+            // Replay records carry the session ID, so there is no replay without one
+            return keep(simulate({}, { end }, pageViews));
           }
+
+          const previous = followsOtherSession ? previousSessionId : undefined;
+          if (visitKind < RESUMED_SESSION_RATE) {
+            // A second visit to a session that is still running, less than 30 minutes after the
+            // first one, in the same tab or in another one
+            const visit = simulate(
+              { sessionId, previousSessionId: previous, tabId: sameTab ? tabId : otherTabId },
+              { end },
+              pageViews,
+              true
+            );
+            const firstVisitEnd =
+              Math.min(...visit.map(getTimestamp)) -
+              Math.round((0.05 + 0.9 * gap) * SESSION_IDLE_TIMEOUT_MS);
+            const firstVisit = simulate(
+              { sessionId, previousSessionId: previous, tabId },
+              { end: firstVisitEnd },
+              EARLIER_VISIT_PAGE_VIEWS
+            );
+            return withReplay(keep([...firstVisit, ...visit]));
+          }
+
+          if (visitKind < RESUMED_SESSION_RATE + EXPIRED_SESSION_RATE) {
+            // The session expired while the tab stayed open, sending background requests with no
+            // session ID. The user's return starts a new session that points to the expired one.
+            const visit = simulate({ sessionId, previousSessionId, tabId }, { end }, pageViews);
+            const returnedAt = Math.min(...visit.map(getTimestamp));
+            const expiredFor = Math.round(SESSION_IDLE_TIMEOUT_MS * (1.05 + 2 * gap));
+            const expiredVisit = simulate(
+              { sessionId: previousSessionId, tabId },
+              { end: returnedAt - expiredFor },
+              EARLIER_VISIT_PAGE_VIEWS
+            );
+            const requestInterval = Math.floor(
+              (expiredFor - SESSION_IDLE_TIMEOUT_MS) / IDLE_REQUEST_COUNT
+            );
+            const idleRequests = edotBrowser.idleTab({
+              client: client({ tabId }),
+              site,
+              health: healthProfile,
+              random,
+              start: returnedAt - expiredFor + SESSION_IDLE_TIMEOUT_MS,
+              requestCount: IDLE_REQUEST_COUNT,
+              intervalMs: requestInterval,
+              ...reporting,
+            });
+            return withReplay(keep([...expiredVisit, ...idleRequests, ...visit]));
+          }
+
+          return withReplay(
+            keep(simulate({ sessionId, previousSessionId: previous, tabId }, { end }, pageViews))
+          );
+        };
+
+        const perMinute = (sessionsPerMinute * scale * weight) / totalWeight;
+        if (ongoingSessions) {
+          return generateOngoingPerMinute(range, perMinute, {
+            key: `${runKey}:${sessionKey}`,
+            maxDuration,
+            create: ({ time, index, after }) => {
+              // The session that ends at `time` without the option, moved to start there. Simulated
+              // once to find its length, without replay, which has a random source of its own.
+              const draft = createSession(index, time, {
+                notBefore: -Infinity,
+                includeReplay: false,
+              });
+              const end = time + (time - getStart(draft));
+              return end < after
+                ? []
+                : createSession(index, end, { notBefore: from, includeReplay: true });
+            },
+          });
+        }
+        return generatePerMinute<EdotBrowserDocument>(range, perMinute, ({ time, index }) =>
+          createSession(index, time, { notBefore: from, includeReplay: true })
         );
       });
     }
   );
+};

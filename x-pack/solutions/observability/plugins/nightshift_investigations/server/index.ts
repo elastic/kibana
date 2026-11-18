@@ -19,6 +19,7 @@ export type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
 } from './types';
+export type { DetectionSnapshotKnowledgeCounts } from './telemetry/detection_snapshot_event';
 
 export {
   alertSnapshotSchema,
