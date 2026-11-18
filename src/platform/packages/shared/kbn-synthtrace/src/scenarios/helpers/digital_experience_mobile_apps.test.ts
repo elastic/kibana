@@ -23,6 +23,7 @@ import { getDefaultSeed } from './digital_experience_apps';
 import {
   DIGITAL_EXPERIENCE_MOBILE_APPS,
   DIGITAL_EXPERIENCE_NATIVE_APPS,
+  MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION,
   generateEdotNativeSessions,
   generateEdotReactNativeSessions,
   parseDigitalExperienceMobileScenarioOpts,
@@ -529,8 +530,10 @@ describe('digital experience mobile apps', () => {
 
     it('rolls the newest version of every app out over the run, without downgrades', () => {
       const hours = 6;
-      const sixHours = timerange(range.from, new Date(FROM + hours * 60 * 60_000));
-      const starts = logsOf(collectNative(sixHours, 0.25)).filter(
+      // One full cycle of the installations after the rollout's deadline, so every one opens the app
+      const cycleHours = MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION / 60;
+      const run = timerange(range.from, new Date(FROM + (hours + cycleHours) * 60 * 60_000));
+      const starts = logsOf(collectNative(run, 0.25)).filter(
         ({ event_name: eventName }) => eventName === EVENT_SESSION_START
       );
       DIGITAL_EXPERIENCE_NATIVE_APPS.forEach(({ serviceName, versions }) => {
@@ -551,6 +554,7 @@ describe('digital experience mobile apps', () => {
         expect(newestShare(0, 0.5)).toBeGreaterThan(initialAdoption - 0.15);
         expect(newestShare(0, 0.5)).toBeLessThan(initialAdoption + 0.2);
         expect(newestShare(5.5, hours)).toBeGreaterThan(0.85);
+        expect(newestShare(hours, hours + cycleHours)).toBe(1);
 
         // An installation never goes back to an older version
         const versionsByInstallation = new Map<unknown, string[]>();
@@ -570,6 +574,30 @@ describe('digital experience mobile apps', () => {
           indexes.slice(1).forEach((index, i) => expect(index).toBeLessThanOrEqual(indexes[i]));
         });
       });
+    });
+
+    it('rejects a rollout of a version other than the newest', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const [newest, previous, ...older] = app.versions;
+      const olderRollout = {
+        ...app,
+        versions: [
+          { ...newest, rollout: undefined },
+          { ...previous, rollout: { initialAdoption: 0.5, hours: 1 } },
+          ...older,
+        ],
+      };
+      expect(() =>
+        generateEdotNativeSessions(range, {
+          environment: 'test',
+          from: FROM,
+          scale: 1,
+          platform: 'both',
+          withManualSpans: false,
+          seed: 'digital-experience-native-test',
+          apps: [olderRollout],
+        })
+      ).toThrow(`${app.serviceName}: only the newest version can roll out`);
     });
 
     it('parses platform, scale and seed only', () => {
