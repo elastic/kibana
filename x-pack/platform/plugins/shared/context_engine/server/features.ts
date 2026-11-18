@@ -48,5 +48,37 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         ui: [uiPrivileges.show],
       },
     },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.contextEngine.featureRegistry.subFeatures.memory', {
+          defaultMessage: 'Memory',
+        }),
+        description: i18n.translate(
+          'xpack.contextEngine.featureRegistry.subFeatures.memoryDescription',
+          {
+            defaultMessage:
+              'Required for every memory API (remember, save event, forget). Lets the holder write and forget the memory of any user in the space. Not included in All. Grant only to trusted applications and API keys.',
+          }
+        ),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'manage_memory',
+                name: i18n.translate(
+                  'xpack.contextEngine.featureRegistry.subFeatures.manageMemory.privilege',
+                  { defaultMessage: 'Manage memory' }
+                ),
+                includeIn: 'none',
+                api: [apiPrivileges.manageMemory],
+                savedObject: { all: [], read: [] },
+                ui: [],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 };

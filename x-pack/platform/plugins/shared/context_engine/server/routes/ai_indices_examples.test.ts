@@ -14,6 +14,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
+import { registerSessionMemoryRoutes } from './session_memory';
 
 interface ExampleMediaType {
   content: { 'application/json': { examples: Record<string, { value: unknown }> } };
@@ -51,16 +52,18 @@ const disabledContext = {
   core: Promise.resolve({ uiSettings: { client: { get: async () => false } } }),
 } as unknown as RequestHandlerContext;
 
+const routerCapturingRoutes = {
+  versioned: {
+    get: captureMethod('GET'),
+    post: captureMethod('POST'),
+    put: captureMethod('PUT'),
+    patch: captureMethod('PATCH'),
+    delete: captureMethod('DELETE'),
+  },
+} as unknown as IRouter;
+
 registerAiIndexRoutes({
-  router: {
-    versioned: {
-      get: captureMethod('GET'),
-      post: captureMethod('POST'),
-      put: captureMethod('PUT'),
-      patch: captureMethod('PATCH'),
-      delete: captureMethod('DELETE'),
-    },
-  } as unknown as IRouter,
+  router: routerCapturingRoutes,
   logger: loggerMock.create(),
   analyticsService: { reportKiWrite: jest.fn() } as never,
   getAiIndexService: jest.fn(),
@@ -72,6 +75,15 @@ registerAiIndexRoutes({
   getAgentBuilder: jest.fn(),
   getWorkflowsManagementApi: jest.fn(),
   getSpaces: jest.fn(),
+});
+
+registerSessionMemoryRoutes({
+  router: routerCapturingRoutes,
+  getSpaces: jest.fn(),
+  getSessionMemoryService: jest.fn(),
+  getAiIndexService: jest.fn(),
+  isMemoryEnabled: async () => false,
+  logger: loggerMock.create(),
 });
 
 const routesWithExamples = registered.flatMap(({ route, opts, handler }) => {
@@ -90,17 +102,24 @@ const examplesOf = ({ content }: ExampleMediaType) =>
     ([name, { value }]) => [name, value] as const
   );
 
+const codeSampleRequest = ({ lang, source }: CodeSample) => {
+  const requestLine =
+    lang === 'curl' ? /-X (\w+) "https:\/\/\$\{KIBANA_URL\}([^"?]+)/ : /^(\w+) kbn:([^\s?]+)/;
+  const [, method, path] = requestLine.exec(source) ?? [];
+  return `${method} ${path}`;
+};
+
 const codeSampleBody = ({ lang, source }: CodeSample) =>
   JSON.parse(
     lang === 'curl' ? /-d '([\s\S]*)'/.exec(source)?.[1] ?? '' : source.slice(source.indexOf('\n'))
   );
 
-describe('AI index route examples', () => {
+describe('route examples', () => {
   it('covers every route that links an example file', () => {
-    expect(routesWithExamples).toHaveLength(7);
+    expect(routesWithExamples).toHaveLength(9);
   });
 
-  describe.each(routesWithExamples)('$route', ({ validation, examples, handler }) => {
+  describe.each(routesWithExamples)('$route', ({ route, validation, examples, handler }) => {
     const responseSchemas = validation.response ?? {};
     const declaredStatuses = Object.keys(responseSchemas).filter((key) => /^\d+$/.test(key));
 
@@ -140,6 +159,11 @@ describe('AI index route examples', () => {
         }
       );
     }
+
+    const routePattern = new RegExp(`^${route.replace(/\{\w+\}/g, '[^/]+')}$`);
+    it.each(examples['x-codeSamples'] ?? [])('$lang code sample calls the route', (sample) => {
+      expect(codeSampleRequest(sample)).toMatch(routePattern);
+    });
 
     if (examples.requestBody) {
       const [[, requestExample]] = examplesOf(examples.requestBody);
