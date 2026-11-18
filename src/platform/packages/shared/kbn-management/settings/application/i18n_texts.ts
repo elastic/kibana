@@ -36,4 +36,7 @@ export const i18nTexts = {
   loadErrorTitle: i18n.translate('management.settings.loadErrorTitle', {
     defaultMessage: 'Unable to load advanced settings',
   }),
+  loadErrorRetryButton: i18n.translate('management.settings.loadErrorRetryButton', {
+    defaultMessage: 'Try again',
+  }),
 };

@@ -24,7 +24,8 @@ import { useSettings } from './use_settings';
  * @param query The {@link Query} to execute for filtering the fields.
  * @param isEnabled When false, no settings are fetched, and there are no fields.
  * @returns An object with every {@link FieldDefinition} in the scope, the subset that matches the
- * query, a loading flag, and the error if the settings failed to load.
+ * query, a loading flag, the error if the settings failed to load, and a function that fetches the
+ * settings again.
  */
 export const useFields = (
   scope: UiSettingsScope,
@@ -35,9 +36,10 @@ export const useFields = (
   filteredFields: FieldDefinition[];
   isLoading: boolean;
   error?: Error;
+  retry: () => void;
 } => {
   const { isCustomSetting, isOverriddenSetting } = useServices();
-  const { settings, isLoading, error } = useSettings(scope, isEnabled);
+  const { settings, isLoading, error, retry } = useSettings(scope, isEnabled);
 
   const allFields = useMemo(
     () =>
@@ -68,5 +70,5 @@ export const useFields = (
     return Query.execute(new Query(Ast.create(clauses), undefined, query.text), allFields);
   }, [allFields, query]);
 
-  return { allFields, filteredFields, isLoading, error };
+  return { allFields, filteredFields, isLoading, error, retry };
 };

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useCallback } from 'react';
 import type { Query } from '@elastic/eui';
 import type { FieldDefinition } from '@kbn/management-settings-types';
 import { useFields } from './use_fields';
@@ -19,7 +20,8 @@ import { useFields } from './use_fields';
  * @param options.includeGlobal When false, global settings are not fetched, and the global field
  * collections are empty.
  * @returns An object with the all and filtered {@link FieldDefinition} arrays for each scope, a
- * loading flag, and the error if either scope failed to load.
+ * loading flag, the error if either scope failed to load, and a function that fetches the failed
+ * scopes again.
  */
 export const useScopeFields = ({
   query,
@@ -34,19 +36,32 @@ export const useScopeFields = ({
   globalFilteredFields: FieldDefinition[];
   isLoading: boolean;
   error?: Error;
+  retry: () => void;
 } => {
   const {
     allFields: spaceAllFields,
     filteredFields: spaceFilteredFields,
     isLoading: spaceLoading,
     error: spaceError,
+    retry: retrySpace,
   } = useFields('namespace', query);
   const {
     allFields: globalAllFields,
     filteredFields: globalFilteredFields,
     isLoading: globalLoading,
     error: globalError,
+    retry: retryGlobal,
   } = useFields('global', query, includeGlobal);
+
+  const retry = useCallback(() => {
+    if (spaceError) {
+      retrySpace();
+    }
+    if (globalError) {
+      retryGlobal();
+    }
+  }, [spaceError, globalError, retrySpace, retryGlobal]);
+
   return {
     spaceAllFields,
     spaceFilteredFields,
@@ -54,5 +69,6 @@ export const useScopeFields = ({
     globalFilteredFields,
     isLoading: spaceLoading || globalLoading,
     error: spaceError ?? globalError,
+    retry,
   };
 };

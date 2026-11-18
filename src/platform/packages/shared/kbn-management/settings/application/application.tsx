@@ -34,6 +34,7 @@ import { useServices } from './services';
 
 export const DATA_TEST_SUBJ_SETTINGS_TITLE = 'managementSettingsTitle';
 export const DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR = 'managementSettingsLoadError';
+export const DATA_TEST_SUBJ_SETTINGS_LOAD_RETRY = 'managementSettingsLoadRetry';
 export const DATA_TEST_SUBJ_SETTINGS_LOADING = 'managementSettingsLoading';
 export const SPACE_SETTINGS_TAB_ID = 'space-settings';
 export const GLOBAL_SETTINGS_TAB_ID = 'global-settings';
@@ -151,6 +152,7 @@ export const SettingsApplication = () => {
     globalFilteredFields,
     isLoading,
     error: loadError,
+    retry,
   } = useScopeFields({ query, includeGlobal: canShowGlobalSettings });
 
   const [requestedTabId, setRequestedTabId] = useState(SPACE_SETTINGS_TAB_ID);
@@ -200,6 +202,13 @@ export const SettingsApplication = () => {
         <KbnDangerCallout
           title={i18nTexts.loadErrorTitle}
           text={loadError.message}
+          actionProps={{
+            primary: {
+              children: i18nTexts.loadErrorRetryButton,
+              onClick: retry,
+              'data-test-subj': DATA_TEST_SUBJ_SETTINGS_LOAD_RETRY,
+            },
+          }}
           data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR}
         />
       </div>

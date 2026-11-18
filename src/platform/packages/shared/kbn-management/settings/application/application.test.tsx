@@ -18,6 +18,7 @@ import {
   SettingsApplication,
   DATA_TEST_SUBJ_SETTINGS_TITLE,
   DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR,
+  DATA_TEST_SUBJ_SETTINGS_LOAD_RETRY,
   DATA_TEST_SUBJ_SETTINGS_LOADING,
   SPACE_SETTINGS_TAB_ID,
   GLOBAL_SETTINGS_TAB_ID,
@@ -194,6 +195,62 @@ describe('Settings application', () => {
     expect(loadError).toHaveTextContent('Unable to load advanced settings');
     expect(loadError).toHaveTextContent('Internal Server Error');
     expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeNull();
+  });
+
+  it('fetches the failed settings again when retrying from the error callout', async () => {
+    const client = uiSettingsServiceMock.createStartContract();
+    client.getAll.mockReturnValue({
+      'test:setting': { name: 'Test setting', type: 'string', value: 'default', userValue: 'saved' },
+    });
+    let namespaceAttempts = 0;
+    let resolveRetry: () => void = () => {};
+    const metadata = {
+      getAll: jest.fn(async (scope: UiSettingsScope): Promise<UiSettingsMetadataState> => {
+        if (scope === 'global') {
+          return {};
+        }
+        namespaceAttempts++;
+        if (namespaceAttempts === 1) {
+          throw new Error('Internal Server Error');
+        }
+        await new Promise<void>((resolve) => {
+          resolveRetry = resolve;
+        });
+        return {
+          'test:setting': {
+            name: 'Test setting',
+            type: 'string',
+            value: 'default',
+            userValue: 'saved',
+          },
+        };
+      }),
+    };
+
+    const { findByTestId, findByDisplayValue, getByTestId, queryByTestId } =
+      renderWithKibanaProvider({ client, metadata });
+
+    const loadError = await findByTestId(DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR);
+    expect(loadError).toHaveTextContent('Internal Server Error');
+
+    act(() => {
+      fireEvent.click(getByTestId(DATA_TEST_SUBJ_SETTINGS_LOAD_RETRY));
+    });
+
+    expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR)).toBeNull();
+    expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_LOADING)).toBeInTheDocument();
+
+    await act(async () => {
+      resolveRetry();
+    });
+
+    expect(await findByDisplayValue('saved')).toBeInTheDocument();
+    expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOADING)).toBeNull();
+    expect(metadata.getAll.mock.calls.map(([scope]) => scope).sort()).toEqual([
+      'global',
+      'namespace',
+      'namespace',
+    ]);
   });
 
   it("doesn't fetch the global settings when they can't be shown", async () => {
