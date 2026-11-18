@@ -10,6 +10,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
+import { DEFAULT_COOKIE_NAME } from '../config';
 import { getDetailedErrorMessage } from '../errors';
 import type { ServiceAccountsServiceStart } from '../service_accounts';
 import type { WorkloadBindingSummary } from '../service_accounts/bindings';
@@ -31,6 +32,9 @@ interface Usage {
   sessionLifespanInMinutes: number;
   sessionCleanupInMinutes: number;
   sessionConcurrentSessionsMaxSessions: number;
+  sessionCookieSecure: boolean;
+  sessionCookieSameSite: string | undefined;
+  sessionCookieNameCustomized: boolean;
   anonymousCredentialType: string | undefined;
   serviceAccounts: ServiceAccountsUsage;
 }
@@ -175,6 +179,26 @@ export function registerSecurityUsageCollector({
           description: 'The maximum number of the concurrent user sessions (0 if not configured).',
         },
       },
+      sessionCookieSecure: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Indicates if session cookies are set with the Secure attribute (configured explicitly, or enabled automatically because Kibana serves TLS).',
+        },
+      },
+      sessionCookieSameSite: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The SameSite attribute configured for session cookies (`Strict`, `Lax` or `None`), or `not_configured` when the setting is not set.',
+        },
+      },
+      sessionCookieNameCustomized: {
+        type: 'boolean',
+        _meta: {
+          description: 'Indicates if the session cookie name differs from the default.',
+        },
+      },
       anonymousCredentialType: {
         type: 'keyword',
         _meta: {
@@ -246,6 +270,9 @@ export function registerSecurityUsageCollector({
           sessionLifespanInMinutes: 0,
           sessionCleanupInMinutes: 0,
           sessionConcurrentSessionsMaxSessions: 0,
+          sessionCookieSecure: false,
+          sessionCookieSameSite: undefined,
+          sessionCookieNameCustomized: false,
           anonymousCredentialType: undefined,
           serviceAccounts: { enabled: false },
         };
@@ -274,6 +301,10 @@ export function registerSecurityUsageCollector({
       const sessionCleanupInMinutes = config.session.cleanupInterval?.asMinutes() ?? 0;
       const sessionConcurrentSessionsMaxSessions =
         config.session.concurrentSessions?.maxSessions ?? 0;
+
+      const sessionCookieSecure = config.secureCookies;
+      const sessionCookieSameSite = config.sameSiteCookies ?? 'not_configured';
+      const sessionCookieNameCustomized = config.cookieName !== DEFAULT_COOKIE_NAME;
 
       const anonProviders = config.authc.providers.anonymous ?? ({} as Record<string, any>);
       const foundProvider = Object.entries(anonProviders).find(
@@ -305,6 +336,9 @@ export function registerSecurityUsageCollector({
         sessionLifespanInMinutes,
         sessionCleanupInMinutes,
         sessionConcurrentSessionsMaxSessions,
+        sessionCookieSecure,
+        sessionCookieSameSite,
+        sessionCookieNameCustomized,
         anonymousCredentialType,
         serviceAccounts: await getServiceAccountsUsage(getServiceAccounts(), logger),
       };

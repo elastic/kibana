@@ -51,30 +51,17 @@ const toCommandExitResult = (error: unknown): HostVmExecResponse => {
   return { exitCode, stdout: stdout ?? '', stderr: stderr ?? '' };
 };
 
-const runOnHost = async (
-  log: ScoutLogger,
-  hostname: string,
-  { command, label, timeoutMs }: { command: string; label: string; timeoutMs: number }
-): Promise<HostVmExecResponse> => {
-  const result = await getHostVmClient(hostname)
-    .exec(command, { silent: true, timeoutMs })
-    .catch(toCommandExitResult);
-
-  log.info(
-    `[edr_real_fleet] ${label} on ${hostname} exited with ${result.exitCode}\nstdout: ${result.stdout}\nstderr: ${result.stderr}`
-  );
-
-  return result;
-};
-
 const REDACTED = '[REDACTED]';
 
+const redact = (text: string, secret?: string): string =>
+  secret ? text.replaceAll(secret, REDACTED) : text;
+
 /**
- * The rethrown execa error carries the full command line, which includes the uninstall
+ * The rethrown execa error carries the full command line, which can include the uninstall
  * token, and it would end up in the CI logs. `stack` embeds the message, so it is redacted too.
  */
-const redactToken = (error: unknown, token: string): unknown => {
-  if (!(error instanceof Error) || !token) {
+const redactError = (error: unknown, secret?: string): unknown => {
+  if (!(error instanceof Error) || !secret) {
     return error;
   }
 
@@ -82,33 +69,76 @@ const redactToken = (error: unknown, token: string): unknown => {
     shortMessage?: string;
     command?: string;
     escapedCommand?: string;
+    stdout?: string;
+    stderr?: string;
   };
-  for (const field of ['message', 'shortMessage', 'command', 'escapedCommand', 'stack'] as const) {
+  for (const field of [
+    'message',
+    'shortMessage',
+    'command',
+    'escapedCommand',
+    'stdout',
+    'stderr',
+    'stack',
+  ] as const) {
     const value = redactable[field];
     if (typeof value === 'string') {
-      redactable[field] = value.replaceAll(token, REDACTED);
+      redactable[field] = redact(value, secret);
     }
   }
 
   return redactable;
 };
 
+/**
+ * Runs `command` on the host. `secret` is replaced by a placeholder in the log line, in the
+ * returned output and in a rethrown error: the agent echoes a rejected token in its output.
+ */
+const runOnHost = async (
+  log: ScoutLogger,
+  hostname: string,
+  {
+    command,
+    label,
+    timeoutMs,
+    secret,
+  }: { command: string; label: string; timeoutMs: number; secret?: string }
+): Promise<HostVmExecResponse> => {
+  const {
+    exitCode,
+    stdout: rawStdout,
+    stderr: rawStderr,
+  } = await getHostVmClient(hostname)
+    .exec(command, { silent: true, timeoutMs })
+    .catch(toCommandExitResult)
+    .catch((error) => {
+      throw redactError(error, secret);
+    });
+
+  const stdout = redact(rawStdout, secret);
+  const stderr = redact(rawStderr, secret);
+  log.info(
+    `[edr_real_fleet] ${label} on ${hostname} exited with ${exitCode}\nstdout: ${stdout}\nstderr: ${stderr}`
+  );
+
+  return { exitCode, stdout, stderr };
+};
+
+/** Runs `elastic-agent uninstall`, with `--uninstall-token` only when a token is given. */
 export const uninstallAgent = async (
   log: ScoutLogger,
   hostname: string,
-  uninstallToken: string
+  uninstallToken?: string
 ): Promise<HostCommandResult> => {
-  try {
-    const { exitCode, stdout, stderr } = await runOnHost(log, hostname, {
-      command: `sudo elastic-agent uninstall -f --uninstall-token ${uninstallToken}`,
-      label: 'elastic-agent uninstall',
-      timeoutMs: UNINSTALL_TIMEOUT_MS,
-    });
+  const tokenFlag = uninstallToken ? ` --uninstall-token ${uninstallToken}` : '';
+  const { exitCode, stdout, stderr } = await runOnHost(log, hostname, {
+    command: `sudo elastic-agent uninstall -f${tokenFlag}`,
+    label: 'elastic-agent uninstall',
+    timeoutMs: UNINSTALL_TIMEOUT_MS,
+    secret: uninstallToken,
+  });
 
-    return { exitCode, output: `${stdout}\n${stderr}` };
-  } catch (error) {
-    throw redactToken(error, uninstallToken);
-  }
+  return { exitCode, output: `${stdout}\n${stderr}` };
 };
 
 /** `absent` when the install directory is missing or empty. */

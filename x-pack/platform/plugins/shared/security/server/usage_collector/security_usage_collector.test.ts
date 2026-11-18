@@ -20,8 +20,11 @@ import type { ServiceAccountsServiceStart } from '../service_accounts';
 import { serviceAccountsServiceMock } from '../service_accounts/service_accounts_service.mock';
 
 describe('Security UsageCollector', () => {
-  const createSecurityConfig = (config: TypeOf<typeof ConfigSchema>) => {
-    return createConfig(config, loggingSystemMock.createLogger(), { isTLSEnabled: true });
+  const createSecurityConfig = (
+    config: TypeOf<typeof ConfigSchema>,
+    { isTLSEnabled = true }: { isTLSEnabled?: boolean } = {}
+  ) => {
+    return createConfig(config, loggingSystemMock.createLogger(), { isTLSEnabled });
   };
 
   const createSecurityLicense = ({
@@ -64,6 +67,9 @@ describe('Security UsageCollector', () => {
     sessionLifespanInMinutes: 43200,
     sessionCleanupInMinutes: 60,
     sessionConcurrentSessionsMaxSessions: 0,
+    sessionCookieSecure: true,
+    sessionCookieSameSite: 'not_configured',
+    sessionCookieNameCustomized: false,
     anonymousCredentialType: undefined,
     serviceAccounts: { enabled: false },
   };
@@ -143,6 +149,9 @@ describe('Security UsageCollector', () => {
       sessionLifespanInMinutes: 0,
       sessionCleanupInMinutes: 0,
       sessionConcurrentSessionsMaxSessions: 0,
+      sessionCookieSecure: false,
+      sessionCookieSameSite: undefined,
+      sessionCookieNameCustomized: false,
       anonymousCredentialType: undefined,
       serviceAccounts: { enabled: false },
     });
@@ -585,6 +594,54 @@ describe('Security UsageCollector', () => {
         sessionCleanupInMinutes: 789,
         sessionConcurrentSessionsMaxSessions: 321,
       });
+    });
+  });
+
+  describe('session cookies', () => {
+    const fetchUsage = async (config: ReturnType<typeof createSecurityConfig>) => {
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true });
+      registerSecurityUsageCollector({ usageCollection, config, license, ...deps });
+
+      return usageCollection.getCollectorByType('security')?.fetch(collectorFetchContext);
+    };
+
+    it.each(['Strict', 'Lax', 'None'] as const)(
+      'reports the configured SameSite attribute (%s)',
+      async (sameSiteCookies) => {
+        const usage = await fetchUsage(
+          createSecurityConfig(ConfigSchema.validate({ sameSiteCookies }))
+        );
+
+        expect(usage).toEqual({ ...DEFAULT_USAGE, sessionCookieSameSite: sameSiteCookies });
+      }
+    );
+
+    it('reports a customized cookie name without reporting the name itself', async () => {
+      const usage = await fetchUsage(
+        createSecurityConfig(ConfigSchema.validate({ cookieName: 'custom-sid' }))
+      );
+
+      expect(usage).toEqual({ ...DEFAULT_USAGE, sessionCookieNameCustomized: true });
+      expect(JSON.stringify(usage)).not.toContain('custom-sid');
+    });
+
+    it('reports that cookies are not secure when TLS is disabled and secure cookies are not configured', async () => {
+      const usage = await fetchUsage(
+        createSecurityConfig(ConfigSchema.validate({}), { isTLSEnabled: false })
+      );
+
+      expect(usage).toEqual({ ...DEFAULT_USAGE, sessionCookieSecure: false });
+    });
+
+    it('reports that cookies are secure when TLS is disabled and secure cookies are configured', async () => {
+      const usage = await fetchUsage(
+        createSecurityConfig(ConfigSchema.validate({ secureCookies: true }), {
+          isTLSEnabled: false,
+        })
+      );
+
+      expect(usage).toEqual({ ...DEFAULT_USAGE, sessionCookieSecure: true });
     });
   });
 

@@ -60,10 +60,10 @@ apiTest.describe(
   () => {
     const { getContext, setup, teardown, cleanupWorkflows } = createServiceAccountSuite();
 
-    apiTest.beforeAll(async ({ apiClient, samlAuth, config, esClient }) => {
-      await setup({ apiClient, samlAuth, config, esClient });
+    apiTest.beforeAll(async ({ apiClient, samlAuth, requestAuth, config, esClient }) => {
+      await setup({ apiClient, samlAuth, requestAuth, config, esClient });
       const optedIn = await apiClient.post('internal/analytics_ftr_helpers/opt_in?consent=true', {
-        headers: getContext().headers,
+        headers: getContext().sessionHeaders,
         responseType: 'json',
       });
       expect(optedIn).toHaveStatusCode(200);
@@ -74,7 +74,7 @@ apiTest.describe(
     apiTest.afterAll(teardown);
 
     apiTest('reports runAs user for a workflow without run_as', async ({ apiClient }) => {
-      const { headers, accountId, create, run, wait } = getContext();
+      const { sessionHeaders, accountId, create, run, wait } = getContext();
       const id = await create(
         apiClient,
         workflowYaml(accountId).replace(`settings:\n  run_as: ${accountId}\n`, '')
@@ -82,7 +82,7 @@ apiTest.describe(
       const execution = await wait(apiClient, await run(apiClient, id));
       expect(execution.effectiveIdentity).toBeUndefined();
 
-      const properties = await getCompletedEventProperties(apiClient, headers, execution.id);
+      const properties = await getCompletedEventProperties(apiClient, sessionHeaders, execution.id);
       expect(properties.runAs).toBe('user');
       expect(properties.runAsInherited).toBeUndefined();
     });
@@ -90,12 +90,16 @@ apiTest.describe(
     apiTest(
       'reports runAs service_account for a workflow bound by its own run_as',
       async ({ apiClient }) => {
-        const { headers, accountId, create, run, wait, expectAccount } = getContext();
+        const { sessionHeaders, accountId, create, run, wait, expectAccount } = getContext();
         const id = await create(apiClient, workflowYaml(accountId));
         const execution = await wait(apiClient, await run(apiClient, id));
         expectAccount(execution, accountId);
 
-        const properties = await getCompletedEventProperties(apiClient, headers, execution.id);
+        const properties = await getCompletedEventProperties(
+          apiClient,
+          sessionHeaders,
+          execution.id
+        );
         expect(properties).toMatchObject({ runAs: 'service_account', runAsInherited: false });
         expect(JSON.stringify(properties)).not.toContain(accountId);
       }

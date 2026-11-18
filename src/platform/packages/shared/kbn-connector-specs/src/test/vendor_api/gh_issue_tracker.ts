@@ -9,7 +9,7 @@
 
 import { spawn } from 'child_process';
 import type { DriftIssue, IssueTracker } from './surface_drift';
-import { DRIFT_ISSUE_LABEL } from './surface_drift';
+import { DRIFT_ISSUE_LABEL } from './drift_issue_marker';
 
 /** Runs `gh api` with an optional JSON body on stdin, and returns its stdout. */
 export type RunGhApi = (args: readonly string[], input?: unknown) => Promise<string>;
@@ -33,13 +33,15 @@ const runGhApi: RunGhApi = (args, input) =>
 interface ApiIssue {
   readonly number: number;
   readonly state: 'open' | 'closed';
+  readonly title: string;
   readonly body: string | null;
   readonly html_url: string;
 }
 
-const toIssue = ({ number, state, body, html_url: url }: ApiIssue): DriftIssue => ({
+const toIssue = ({ number, state, title, body, html_url: url }: ApiIssue): DriftIssue => ({
   number,
   state,
+  title,
   body: body ?? '',
   url,
 });
@@ -52,7 +54,7 @@ export const createGhIssueTracker = (repo: string, ghApi: RunGhApi = runGhApi): 
       '--paginate',
       `repos/${repo}/issues?labels=${DRIFT_ISSUE_LABEL}&state=all&per_page=100`,
       '--jq',
-      '.[] | select(.pull_request == null) | {number, state, body, html_url}',
+      '.[] | select(.pull_request == null) | {number, state, title, body, html_url}',
     ]);
     return output
       .split('\n')
