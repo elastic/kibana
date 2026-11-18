@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/content-management-utils'
   - '@kbn/zod'
+  - '@kbn/ui-callout'
   - '@kbn/umap-webgpu'
 tags:
   - plugin
