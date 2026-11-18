@@ -35,6 +35,7 @@ import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSessionEventsRoutes } from './routes/session_events';
 import { registerMemoryRecallRoutes } from './routes/memory_recall';
+import { recallForRequest } from './memory_recall/recall_for_request';
 import { registerSignalRoutes } from './routes/signals';
 import type {
   FeedbackAnalysisScheduleService,
@@ -345,7 +346,15 @@ export class ContextEnginePlugin
       },
     });
 
-    registerMemoryRecallRoutes({ router, getAiIndexDataReadService, analyticsService });
+    registerMemoryRecallRoutes({
+      router,
+      getAiIndexDataReadService,
+      analyticsService,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+    });
 
     // Read-only Signals routes (reads run as the current user, scoped to the active space).
     registerSignalRoutes({
@@ -535,6 +544,20 @@ export class ContextEnginePlugin
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
       getSessionMemoryService: () => sessionMemoryService,
       getSessionEventsService: () => sessionEventsService,
+      recallMemory: ({ request, body }) => {
+        if (!this.analyticsService) {
+          throw new Error('Analytics service not available — plugin has not set up');
+        }
+        return recallForRequest({
+          request,
+          body,
+          esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+          internalEsClient: coreStart.elasticsearch.client.asInternalUser,
+          space: resolveSpaceId(startDeps.spaces, request),
+          getAiIndexDataReadService: createAiIndexDataReadService,
+          analyticsService: this.analyticsService,
+        });
+      },
     };
   }
 

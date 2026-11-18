@@ -97,9 +97,10 @@ export const contextEngineAiIndexTools = {
   queryAiIndices: `${internalNamespaces.platformContextEngine}.query_ai_indices`,
 } as const;
 
-/** AI-index memory tools, registered by the Context Engine Agent Builder plugin. */
+/** Session memory tools, registered by the Context Engine Agent Builder plugin. */
 export const contextEngineMemoryTools = {
   remember: `${internalNamespaces.platformContextEngine}.remember`,
+  recall: `${internalNamespaces.platformContextEngine}.recall`,
   forget: `${internalNamespaces.platformContextEngine}.forget`,
 } as const;
 

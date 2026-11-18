@@ -31,6 +31,8 @@ describe('memory recall routes', () => {
   let list: jest.Mock;
   let query: jest.Mock;
   let inference: jest.Mock;
+  let internalSearch: jest.Mock;
+  let profileId: string | null;
 
   const createContext = () =>
     ({
@@ -39,8 +41,12 @@ describe('memory recall routes', () => {
           client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
         },
         elasticsearch: {
-          client: { asCurrentUser: { inference: { rerank: inference } } },
+          client: {
+            asCurrentUser: { inference: { rerank: inference } },
+            asInternalUser: { search: internalSearch },
+          },
         },
+        userProfile: { getCurrentProfileId: jest.fn(async () => profileId) },
       }),
     } as unknown as Parameters<RequestHandler>[0]);
 
@@ -57,6 +63,8 @@ describe('memory recall routes', () => {
     list = jest.fn().mockResolvedValue([]);
     query = jest.fn();
     inference = jest.fn();
+    internalSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+    profileId = 'profile-1';
 
     const router = {
       versioned: {
@@ -77,15 +85,43 @@ describe('memory recall routes', () => {
       analyticsService: {
         reportMemoryRecall: jest.fn(),
       } as unknown as ContextEngineAnalyticsService,
+      getSpaces: async () => undefined,
     });
   });
 
-  it('registers a public read route', () => {
+  it('registers a public route that requires the manage memory privilege', () => {
     expect(route.config).toMatchObject({
       path: MEMORY_RECALL_PATH,
       access: 'public',
-      security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.writeContextEngine, apiPrivileges.manageMemory],
+        },
+      },
     });
+  });
+
+  it("scopes the session stores to the caller's profile when user_id is missing", async () => {
+    await callRoute({ query: 'why was checkout slow?', sources: ['session_memory'] });
+
+    expect(internalSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: [{ term: { space: 'default' } }, { term: { user_id: 'profile-1' } }],
+          }),
+        }),
+      })
+    );
+  });
+
+  it('returns 403 when user_id is missing and the caller has no profile', async () => {
+    profileId = null;
+
+    await callRoute({ query: 'why was checkout slow?' });
+
+    expect(response.forbidden).toHaveBeenCalledTimes(1);
+    expect(internalSearch).not.toHaveBeenCalled();
   });
 
   it('returns 404 when the context engine is disabled', async () => {

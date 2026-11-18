@@ -18,6 +18,7 @@ import { createDescribeAiIndexTool } from './describe_ai_index/tool';
 import { createQueryAiIndicesTool } from './query_ai_indices/tool';
 import { createForgetTool } from './forget/tool';
 import { createRememberTool } from './remember/tool';
+import { createRecallTool } from './recall/tool';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -70,6 +71,9 @@ export const registerAgentBuilderTools = ({
       getCoreStart,
       getSecurityStart,
     })
+  );
+  agentBuilder.tools.register(
+    createRecallTool({ getContextEngineStart, getCoreStart, getSecurityStart })
   );
   agentBuilder.tools.register(
     createForgetTool({

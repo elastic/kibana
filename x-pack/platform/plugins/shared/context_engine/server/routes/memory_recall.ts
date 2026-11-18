@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { isResponseError } from '@kbn/es-errors';
 import {
@@ -26,15 +27,21 @@ import { apiPrivileges } from '../../common/features';
 import type { RecallResponse } from '../../common/http_api/memory_recall';
 import { RECALL_SOURCES } from '../../common/http_api/memory_recall';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
-import { createAiIndexRecallStore } from '../memory_recall/ai_index_store';
-import { recall } from '../memory_recall/service';
+import { recallForRequest } from '../memory_recall/recall_for_request';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import type { GetAiIndexDataReadServiceParams } from '../types';
+import { resolveSpaceId } from '../utils/resolve_space_id';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
-const READ_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
+// Demo: the same privileges as the other memory routes, since recall reads any user's session store.
+const MANAGE_MEMORY_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [apiPrivileges.writeContextEngine, apiPrivileges.manageMemory],
+  },
 };
+
+const NO_PROFILE_MESSAGE =
+  'The caller has no user profile, so there is no user to recall for. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.';
 
 const recallBodySchema = schema.object({
   query: schema.string({ minLength: 1, maxLength: MAX_RECALL_QUERY_LENGTH }),
@@ -72,15 +79,17 @@ export const registerMemoryRecallRoutes = ({
   router,
   getAiIndexDataReadService,
   analyticsService,
+  getSpaces,
 }: {
   router: IRouter;
+  getSpaces: () => Promise<SpacesPluginStart | undefined>;
   getAiIndexDataReadService: (params: GetAiIndexDataReadServiceParams) => AiIndexDataReadServiceApi;
   analyticsService: ContextEngineAnalyticsService;
 }) => {
   router.versioned
     .post({
       path: MEMORY_RECALL_PATH,
-      security: READ_SECURITY,
+      security: MANAGE_MEMORY_SECURITY,
       access: 'public',
       summary: 'Recall memory',
       description:
@@ -96,13 +105,21 @@ export const registerMemoryRecallRoutes = ({
         validate: { request: { body: recallBodySchema } },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const { elasticsearch, userProfile } = await ctx.core;
+        const userId =
+          request.body.user_id ?? (await userProfile.getCurrentProfileId()) ?? undefined;
+        if (userId === undefined) {
+          return response.forbidden({ body: { message: NO_PROFILE_MESSAGE } });
+        }
         try {
-          const body: RecallResponse = await recall({
-            esClient,
-            stores: [createAiIndexRecallStore(getAiIndexDataReadService({ esClient, request }))],
+          const body: RecallResponse = await recallForRequest({
+            request,
+            body: { ...request.body, user_id: userId },
+            esClient: elasticsearch.client.asCurrentUser,
+            internalEsClient: elasticsearch.client.asInternalUser,
+            space: resolveSpaceId(await getSpaces(), request),
+            getAiIndexDataReadService,
             analyticsService,
-            request: request.body,
           });
           return response.ok({ body });
         } catch (error) {
