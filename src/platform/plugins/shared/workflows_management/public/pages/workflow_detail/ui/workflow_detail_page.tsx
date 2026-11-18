@@ -41,6 +41,7 @@ import {
   setActiveTab,
   setExecution,
   setIsTestModalOpen,
+  setRemixTemplate,
   setReplayExecutionId,
   setYamlString,
 } from '../../../entities/workflows/store';
@@ -167,7 +168,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // history entry, not the URL, so plain `/create` links and shared URLs
   // fall back to the default YAML. The effect below depends on this value, not
   // on `location.state`, which `useWorkflowUrlState` rewrites on URL updates.
-  const { initialYaml } = location.state ?? {};
+  // A remix also hands over its template, recorded on save as the template origin.
+  const { initialYaml, template: remixTemplate } = location.state ?? {};
+  const remixTemplateSlug = remixTemplate?.slug;
+  const remixTemplateVersion = remixTemplate?.version;
 
   // Load workflow when id changes
   useEffect(() => {
@@ -182,8 +186,16 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     seededRef.current = true;
 
     dispatch(setYamlString(initialYaml || workflowDefaultYaml));
+    // Reset on every create session, so a plain create never inherits an earlier remix.
+    dispatch(
+      setRemixTemplate(
+        initialYaml && remixTemplateSlug && remixTemplateVersion
+          ? { slug: remixTemplateSlug, version: remixTemplateVersion }
+          : undefined
+      )
+    );
     telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
-  }, [loadWorkflow, id, dispatch, telemetry, initialYaml]);
+  }, [loadWorkflow, id, dispatch, telemetry, initialYaml, remixTemplateSlug, remixTemplateVersion]);
 
   // The store tab picks what the editor shows: a run snapshot only once a run is selected.
   // The open execution list alone keeps the editable draft.

@@ -46,6 +46,12 @@ export {
   type ManagedWorkflowTelemetryFields,
 } from './pick_managed_workflow_fields/pick_managed_workflow_fields';
 export {
+  parseTemplateOriginFields,
+  pickTemplateOriginFields,
+  type TemplateOriginFields,
+  type TemplateOriginFieldsSource,
+} from './pick_template_origin_fields/pick_template_origin_fields';
+export {
   isValidWorkflowDocumentVersion,
   pickWorkflowDocumentVersion,
 } from './pick_workflow_document_version/pick_workflow_document_version';

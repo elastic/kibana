@@ -61,14 +61,23 @@ export function registerInstallTemplateRoute(
 
           const template = await libraryService.getTemplate(request.params.slug);
           const { yaml } = renderInstall({ template, values: request.body.values });
+          const { slug, version } = template.metadata;
 
           // The rendered YAML is indistinguishable from a hand-authored one:
           // reuse the same create path as POST /api/workflows/workflow so
           // schema validation, space scoping, and authz apply identically.
+          // The template origin is stored next to it, since the YAML no
+          // longer carries the template metadata.
           const spaceId = spaces.getSpaceId(request);
           let createdWorkflow;
           try {
-            createdWorkflow = await api.createWorkflow({ yaml }, spaceId, request);
+            createdWorkflow = await api.createWorkflow({ yaml }, spaceId, request, {
+              templateOrigin: {
+                templateSlug: slug,
+                templateVersion: version,
+                templateOrigin: 'install',
+              },
+            });
           } catch (error) {
             audit.logWorkflowCreateFailed(request, error);
             throw error;

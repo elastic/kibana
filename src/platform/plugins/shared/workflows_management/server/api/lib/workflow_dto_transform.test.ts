@@ -81,6 +81,27 @@ describe('transformStorageDocumentToWorkflowDto', () => {
     });
   });
 
+  it('maps the template origin when the workflow was created from a template', () => {
+    const source = makeSource({
+      templateSlug: 'triage-alerts',
+      templateVersion: '1.2.0',
+      templateOrigin: 'install',
+    });
+
+    expect(transformStorageDocumentToWorkflowDto('wf-1', source)).toMatchObject({
+      templateSlug: 'triage-alerts',
+      templateVersion: '1.2.0',
+      templateOrigin: 'install',
+    });
+    expect(
+      transformStoragePartialToWorkflowDto('wf-1', {
+        templateSlug: 'custom',
+        templateVersion: null,
+        templateOrigin: 'import',
+      })
+    ).toEqual({ id: 'wf-1', templateSlug: 'custom', templateOrigin: 'import' });
+  });
+
   it('maps workflowUid when the document has one', () => {
     const source = makeSource({ workflowUid: 'uid-current' });
 

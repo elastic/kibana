@@ -14,7 +14,7 @@ import { loadWorkflowThunk } from './load_workflow_thunk';
 import { saveYamlThunk } from './save_yaml_thunk';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
-import { setWorkflow, setYamlString } from '../slice';
+import { setRemixTemplate, setWorkflow, setYamlString } from '../slice';
 
 // Need to mock the loading states to avoid import issues with other mocks
 jest.mock('../utils/loading_states', () => ({
@@ -213,6 +213,51 @@ describe('saveYamlThunk', () => {
       );
       expect(result.type).toBe('detail/saveYamlThunk/rejected');
       expect(result.payload).toBe('Creation failed');
+    });
+
+    it('should save a remixed draft through the library and record its template origin', async () => {
+      const remixedWorkflow: WorkflowDetailDto = {
+        ...mockWorkflow,
+        templateSlug: 'triage-alerts',
+        templateVersion: '1.2.0',
+        templateOrigin: 'remix',
+      };
+      mockWorkflowApi.createWorkflowFromTemplateRemix.mockResolvedValue(remixedWorkflow);
+      store.dispatch(setRemixTemplate({ slug: 'triage-alerts', version: '1.2.0' }));
+
+      const result = await store.dispatch(saveYamlThunk());
+
+      expect(mockWorkflowApi.createWorkflowFromTemplateRemix).toHaveBeenCalledWith({
+        yaml: 'name: New Workflow\nsteps: []',
+        template: { slug: 'triage-alerts', version: '1.2.0' },
+      });
+      expect(mockWorkflowApi.createWorkflow).not.toHaveBeenCalled();
+      expect(mockServices.workflowsManagement.telemetry.reportEvent).toHaveBeenCalledWith(
+        'workflows_workflow_created',
+        expect.objectContaining({
+          workflowId: 'test-workflow-1',
+          templateSlug: 'triage-alerts',
+          templateVersion: '1.2.0',
+          templateOrigin: 'remix',
+        })
+      );
+      // The remix is consumed by the save: a later create starts from scratch.
+      expect(store.getState().detail.remixTemplate).toBeUndefined();
+      expect(result.type).toBe('detail/saveYamlThunk/fulfilled');
+    });
+
+    it('should not record a template origin for a plain create', async () => {
+      mockWorkflowApi.createWorkflow.mockResolvedValue(mockWorkflow);
+
+      await store.dispatch(saveYamlThunk());
+
+      expect(mockWorkflowApi.createWorkflowFromTemplateRemix).not.toHaveBeenCalled();
+      const [, createdEvent] =
+        mockServices.workflowsManagement.telemetry.reportEvent.mock.calls.find(
+          ([eventType]: [string]) => eventType === 'workflows_workflow_created'
+        );
+      expect(createdEvent).not.toHaveProperty('templateSlug');
+      expect(createdEvent).not.toHaveProperty('templateOrigin');
     });
   });
 

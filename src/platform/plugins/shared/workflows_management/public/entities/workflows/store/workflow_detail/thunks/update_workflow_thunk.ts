@@ -72,6 +72,7 @@ export const updateWorkflowThunk = createAsyncThunk<
         isBulkAction: false,
         error: undefined,
         origin: 'workflow_detail',
+        templateOrigin: originalWorkflow,
       });
 
       // Invalidate relevant queries from react-query cache
@@ -125,6 +126,7 @@ export const updateWorkflowThunk = createAsyncThunk<
           isBulkAction: false,
           error: errorObj,
           origin: 'workflow_detail',
+          templateOrigin: originalWorkflow,
         });
       }
 

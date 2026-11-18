@@ -98,6 +98,7 @@ import { WorkflowAccessControlService } from '../services/workflow_access_contro
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import {
   type BulkCreateWorkflowsResult,
+  type CreateWorkflowOptions,
   WorkflowCrudService,
 } from '../services/workflow_crud_service';
 import type {
@@ -468,7 +469,7 @@ export class WorkflowsService {
     workflow: CreateWorkflowCommand,
     spaceId: string,
     request: KibanaRequest,
-    options?: { nameFallback?: string }
+    options?: CreateWorkflowOptions
   ): Promise<WorkflowDetailDto> {
     await this.ensureInitialized();
     return this.crudService.createWorkflow(workflow, spaceId, request, options);

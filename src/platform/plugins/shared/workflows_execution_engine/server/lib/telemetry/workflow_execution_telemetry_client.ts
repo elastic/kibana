@@ -17,6 +17,7 @@ import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
   isWellKnownWorkflowTriggerSource,
+  pickTemplateOriginFields,
   toManagedWorkflowTelemetryFields,
 } from '@kbn/workflows';
 import {
@@ -188,6 +189,7 @@ function buildBaseExecutionTelemetryFields(
     ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
     isTestRun: workflowExecution.isTestRun || false,
     ...managedWorkflowFields,
+    ...pickTemplateOriginFields(workflowExecution),
     ...pickRunAsFields(executionMetadata),
     ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
     ...(executionMetadata.compositionDepth !== undefined && {
@@ -440,6 +442,7 @@ export class WorkflowExecutionTelemetryClient {
       ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
       isTestRun: workflowExecution.isTestRun || false,
       ...managedWorkflowFields,
+      ...pickTemplateOriginFields(workflowExecution),
       ...pickRunAsFields(executionMetadata),
       ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
       ...(executionMetadata.eventChainDepth !== undefined && {

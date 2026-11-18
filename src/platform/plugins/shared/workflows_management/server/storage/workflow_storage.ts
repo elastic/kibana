@@ -10,7 +10,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import type { WorkflowAccessSubject, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowAccessSubject, WorkflowTemplateOrigin, WorkflowYaml } from '@kbn/workflows';
 import { workflowSystemIndex } from './indices';
 
 export const workflowIndexName = workflowSystemIndex('workflows');
@@ -62,6 +62,10 @@ const storageSettings = {
       definitionHash: types.keyword({ index: false }),
       managedTemplateValues: types.object({ enabled: false }),
       originManagedWorkflowId: types.keyword({}),
+      // Workflow Template library template the workflow was created from
+      templateSlug: types.keyword({}),
+      templateVersion: types.keyword({ index: false }),
+      templateOrigin: types.keyword({}),
       // Document lifetime. History reads filter on this; workflowId stays the stable name.
       workflowUid: types.keyword({}),
       lifecycle: types.keyword({}),
@@ -102,6 +106,10 @@ export interface WorkflowProperties extends WorkflowAccessSubject {
   definitionHash?: string | null;
   managedTemplateValues?: Record<string, unknown> | null;
   originManagedWorkflowId?: string | null;
+  /** Workflow Template library slug, or `custom` for a template outside the catalog. */
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
   /** UUID for this document. A new document, including one that reuses `workflowId`, gets a new value. */
   workflowUid?: string;
   lifecycle?: 'static' | 'dynamic' | null;

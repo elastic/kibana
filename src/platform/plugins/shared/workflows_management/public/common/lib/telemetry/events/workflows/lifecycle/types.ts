@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TemplateOriginFields } from '@kbn/workflows';
 import type {
   BaseEditorContextParams,
   BaseResultActionParams,
@@ -50,7 +51,8 @@ export enum WorkflowLifecycleEventTypes {
  */
 export interface ReportWorkflowCreatedActionParams
   extends BaseResultActionParams,
-    BaseEditorContextParams {
+    BaseEditorContextParams,
+    TemplateOriginFields {
   eventName: string;
   /**
    * The workflow ID if creation succeeded. Undefined if creation failed.
@@ -140,7 +142,9 @@ export interface ReportWorkflowCreatedActionParams
 /**
  * Parameters for workflow update attempt telemetry.
  */
-export interface ReportWorkflowUpdatedActionParams extends BaseResultActionParams {
+export interface ReportWorkflowUpdatedActionParams
+  extends BaseResultActionParams,
+    TemplateOriginFields {
   eventName: string;
   workflowId: string;
   /**
@@ -217,7 +221,8 @@ export interface ReportWorkflowClonedActionParams extends BaseResultActionParams
  */
 export interface ReportWorkflowEnabledStateChangedActionParams
   extends BaseResultActionParams,
-    BaseEditorContextParams {
+    BaseEditorContextParams,
+    TemplateOriginFields {
   eventName: string;
   workflowId: string;
   /**

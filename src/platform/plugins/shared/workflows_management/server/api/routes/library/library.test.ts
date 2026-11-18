@@ -28,6 +28,7 @@ const TEMPLATES_PATH = '/internal/workflows/library/templates';
 const TEMPLATE_PATH = '/internal/workflows/library/templates/{slug}';
 const INSTALL_PATH = '/internal/workflows/library/templates/{slug}/install';
 const INSTALL_FROM_YAML_PATH = '/internal/workflows/library/templates/install';
+const REMIX_PATH = '/internal/workflows/library/templates/{slug}/remix';
 const HEALTH_PATH = '/internal/workflows/library/health';
 
 const INSTALLABLE_TEMPLATE = parseTemplateYaml(`template-metadata:
@@ -322,7 +323,14 @@ describe('Library Routes', () => {
       expect(mockApi.createWorkflow).toHaveBeenCalledWith(
         { yaml: expect.stringContaining('connector-id: my-connector-id') },
         'default',
-        request
+        request,
+        {
+          templateOrigin: {
+            templateSlug: 'demo',
+            templateVersion: '1.0.0',
+            templateOrigin: 'install',
+          },
+        }
       );
       const submittedYaml = mockApi.createWorkflow.mock.calls[0][0].yaml;
       expect(submittedYaml).not.toContain('template-metadata');
@@ -433,6 +441,7 @@ describe('Library Routes', () => {
 
     it('should parse the supplied YAML, render it, and create a workflow through the shared create path', async () => {
       setToggle(true);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo' }]);
       mockApi.createWorkflow.mockResolvedValue({ id: 'wf-2' });
 
       const response = httpServerMock.createResponseFactory();
@@ -445,13 +454,58 @@ describe('Library Routes', () => {
       expect(mockApi.createWorkflow).toHaveBeenCalledWith(
         { yaml: expect.stringContaining('connector-id: my-connector-id') },
         'default',
-        request
+        request,
+        {
+          templateOrigin: {
+            templateSlug: 'demo',
+            templateVersion: '1.0.0',
+            templateOrigin: 'import',
+          },
+        }
       );
       const submittedYaml = mockApi.createWorkflow.mock.calls[0][0].yaml;
       expect(submittedYaml).not.toContain('template-metadata');
       expect(submittedYaml).not.toContain('__install__');
       expect(mockAudit.logWorkflowCreated).toHaveBeenCalledWith(request, { id: 'wf-2' });
       expect(response.ok).toHaveBeenCalledWith({ body: { workflowId: 'wf-2' } });
+    });
+
+    it('should store a template that is not in the catalog as custom', async () => {
+      setToggle(true);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'another-template' }]);
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-3' });
+
+      const response = httpServerMock.createResponseFactory();
+      const request = installFromYamlRequest(INSTALLABLE_TEMPLATE.raw, {
+        'demo-connector': 'my-connector-id',
+      });
+
+      await routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(expect.anything(), 'default', request, {
+        templateOrigin: { templateSlug: 'custom', templateOrigin: 'import' },
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: { workflowId: 'wf-3' } });
+    });
+
+    it('should still install, as custom, when the catalog cannot be read', async () => {
+      setToggle(true);
+      mockLibraryService.listTemplates.mockRejectedValue(
+        new LibraryFetchError('upstream down', 'unavailable')
+      );
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-4' });
+
+      const response = httpServerMock.createResponseFactory();
+      const request = installFromYamlRequest(INSTALLABLE_TEMPLATE.raw, {
+        'demo-connector': 'my-connector-id',
+      });
+
+      await routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(expect.anything(), 'default', request, {
+        templateOrigin: { templateSlug: 'custom', templateOrigin: 'import' },
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: { workflowId: 'wf-4' } });
     });
 
     it('should return 400 when the supplied YAML is not a valid template', async () => {
@@ -521,6 +575,107 @@ describe('Library Routes', () => {
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: { message: expect.stringContaining('yaml creation boom') },
+      });
+    });
+  });
+
+  describe(`POST ${REMIX_PATH}`, () => {
+    const REMIXED_YAML = 'name: Remixed demo\nsteps: []\n';
+    const remixRequest = (slug = 'demo', version: string | undefined = '1.0.0') =>
+      httpServerMock.createKibanaRequest({
+        params: { slug },
+        body: { yaml: REMIXED_YAML, ...(version !== undefined ? { version } : {}) },
+      });
+
+    it('should register the route handler', () => {
+      expect(routeHandlers[`POST:${REMIX_PATH}`]).toBeDefined();
+      expect(routeHandlers[`POST:${REMIX_PATH}`].handler).toEqual(expect.any(Function));
+    });
+
+    it('should create the workflow with the remixed catalog template as its origin', async () => {
+      setToggle(true);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo' }]);
+      const createdWorkflow = { id: 'wf-remix', yaml: REMIXED_YAML };
+      mockApi.createWorkflow.mockResolvedValue(createdWorkflow);
+
+      const response = httpServerMock.createResponseFactory();
+      const request = remixRequest();
+
+      await routeHandlers[`POST:${REMIX_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(
+        { yaml: REMIXED_YAML },
+        'default',
+        request,
+        {
+          templateOrigin: {
+            templateSlug: 'demo',
+            templateVersion: '1.0.0',
+            templateOrigin: 'remix',
+          },
+        }
+      );
+      expect(mockAudit.logWorkflowCreated).toHaveBeenCalledWith(request, { id: 'wf-remix' });
+      expect(response.ok).toHaveBeenCalledWith({ body: createdWorkflow });
+    });
+
+    it('should store a remix of a template outside the catalog as custom', async () => {
+      setToggle(true);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo' }]);
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-remix' });
+
+      const response = httpServerMock.createResponseFactory();
+      const request = remixRequest('uploaded-template');
+
+      await routeHandlers[`POST:${REMIX_PATH}`].handler(mockContext, request, response);
+
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(
+        { yaml: REMIXED_YAML },
+        'default',
+        request,
+        {
+          templateOrigin: { templateSlug: 'custom', templateOrigin: 'remix' },
+        }
+      );
+    });
+
+    it('should still create the workflow, without a template origin, when the library is off', async () => {
+      setToggle(false);
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-remix' });
+
+      const response = httpServerMock.createResponseFactory();
+      const request = remixRequest();
+
+      await routeHandlers[`POST:${REMIX_PATH}`].handler(mockContext, request, response);
+
+      expect(mockLibraryService.listTemplates).not.toHaveBeenCalled();
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(
+        { yaml: REMIXED_YAML },
+        'default',
+        request,
+        {
+          templateOrigin: undefined,
+        }
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: { id: 'wf-remix' } });
+    });
+
+    it('should audit the failure and map the error when workflow creation fails', async () => {
+      setToggle(true);
+      mockLibraryService.listTemplates.mockResolvedValue([{ slug: 'demo' }]);
+      const creationError = new Error('remix creation boom');
+      mockApi.createWorkflow.mockRejectedValue(creationError);
+
+      const response = httpServerMock.createResponseFactory();
+      const request = remixRequest();
+
+      await routeHandlers[`POST:${REMIX_PATH}`].handler(mockContext, request, response);
+
+      expect(mockAudit.logWorkflowCreateFailed).toHaveBeenCalledWith(request, creationError);
+      expect(mockAudit.logWorkflowCreated).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: expect.stringContaining('remix creation boom') },
       });
     });
   });

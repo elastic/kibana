@@ -540,6 +540,38 @@ describe('WorkflowExecutionTelemetryClient', () => {
         managedVersion: 3,
       });
     });
+
+    it('should include the template origin when the workflow was created from a template', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        templateSlug: 'triage-alerts',
+        templateVersion: '1.2.0',
+        templateOrigin: 'install',
+      });
+
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        templateSlug: 'triage-alerts',
+        templateVersion: '1.2.0',
+        templateOrigin: 'install',
+      });
+    });
+
+    it('should omit the template origin for workflows not created from a template', () => {
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution: createMockWorkflowExecution({ templateSlug: null }),
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).not.toHaveProperty('templateSlug');
+      expect(eventData).not.toHaveProperty('templateVersion');
+      expect(eventData).not.toHaveProperty('templateOrigin');
+    });
   });
 
   describe('reportWorkflowExecutionFailed', () => {
@@ -879,6 +911,28 @@ describe('WorkflowExecutionTelemetryClient', () => {
         originManagedWorkflowId: 'system-example-greeting',
         managedVersion: 3,
       });
+    });
+
+    it('should include the template origin when present', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'cases.updated',
+        status: ExecutionStatus.SKIPPED,
+        context: {
+          event: { timestamp: '2025-01-01T00:00:00.000Z', spaceId: 'default' },
+          metadata: { eventTriggerId: 'cases.updated' },
+        },
+        templateSlug: 'custom',
+        templateOrigin: 'import',
+      });
+
+      client.reportEventDrivenExecutionSuppressed({
+        workflowExecution,
+        logTriggerEventsEnabled: true,
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({ templateSlug: 'custom', templateOrigin: 'import' });
+      expect(eventData).not.toHaveProperty('templateVersion');
     });
   });
 

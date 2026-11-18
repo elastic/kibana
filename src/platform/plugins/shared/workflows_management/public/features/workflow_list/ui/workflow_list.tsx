@@ -263,6 +263,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
             enabled: !item.enabled,
           },
           workflowDefinition: item.definition ?? undefined,
+          templateOrigin: item,
           skipRefetch: true,
         },
         {

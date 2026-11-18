@@ -366,6 +366,32 @@ describe('buildWorkflowExecutionDocument', () => {
     expect(workflowExecution.workflowUid).toBeUndefined();
   });
 
+  it('copies the template origin of a workflow created from a template', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      workflow: {
+        ...baseWorkflow,
+        templateSlug: 'triage-alerts',
+        templateVersion: '1.2.0',
+        templateOrigin: 'remix',
+      },
+    });
+
+    expect(workflowExecution).toMatchObject({
+      templateSlug: 'triage-alerts',
+      templateVersion: '1.2.0',
+      templateOrigin: 'remix',
+    });
+  });
+
+  it('omits the template origin for a workflow not created from a template', () => {
+    const workflowExecution = buildWorkflowExecutionDocument(baseParams);
+
+    expect(workflowExecution).not.toHaveProperty('templateSlug');
+    expect(workflowExecution).not.toHaveProperty('templateVersion');
+    expect(workflowExecution).not.toHaveProperty('templateOrigin');
+  });
+
   it('copies workflowUid from the workflow document and omits it for an ephemeral run', () => {
     const withDocument = buildWorkflowExecutionDocument({
       ...baseParams,

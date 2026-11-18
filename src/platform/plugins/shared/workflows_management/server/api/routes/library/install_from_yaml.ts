@@ -12,7 +12,7 @@ import { WORKFLOWS_LIBRARY_ENABLED_SETTING_ID } from '@kbn/workflows';
 import { parseTemplateYaml, renderInstall } from '@kbn/workflows-library';
 
 import { mapLibraryError } from './error_mapper';
-import { LibraryDisabledError } from '../../../library';
+import { LibraryDisabledError, type LibraryService, resolveTemplateOrigin } from '../../../library';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_CREATE_SECURITY } from '../utils/route_security';
@@ -35,7 +35,10 @@ const bodySchema = schema.object({
   }),
 });
 
-export function registerInstallFromYamlRoute({ router, api, spaces, audit }: RouteDependencies) {
+export function registerInstallFromYamlRoute(
+  { router, api, spaces, audit, logger }: RouteDependencies,
+  libraryService: LibraryService
+) {
   router.versioned
     .post({
       path: '/internal/workflows/library/templates/install',
@@ -60,6 +63,15 @@ export function registerInstallFromYamlRoute({ router, api, spaces, audit }: Rou
 
           const template = parseTemplateYaml(request.body.yaml, { lenient: true });
           const { yaml } = renderInstall({ template, values: request.body.values });
+          // The uploaded file declares its own slug: keep it only when it
+          // names a catalog template, otherwise store it as `custom`.
+          const templateOrigin = await resolveTemplateOrigin({
+            libraryService,
+            logger,
+            slug: template.metadata.slug,
+            version: template.metadata.version,
+            origin: 'import',
+          });
 
           // The rendered YAML is indistinguishable from a hand-authored one:
           // reuse the same create path as POST /api/workflows/workflow so
@@ -67,7 +79,9 @@ export function registerInstallFromYamlRoute({ router, api, spaces, audit }: Rou
           const spaceId = spaces.getSpaceId(request);
           let createdWorkflow;
           try {
-            createdWorkflow = await api.createWorkflow({ yaml }, spaceId, request);
+            createdWorkflow = await api.createWorkflow({ yaml }, spaceId, request, {
+              templateOrigin,
+            });
           } catch (error) {
             audit.logWorkflowCreateFailed(request, error);
             throw error;

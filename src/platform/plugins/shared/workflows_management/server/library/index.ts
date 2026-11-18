@@ -22,3 +22,6 @@ export type { LibraryHealth, LibrarySourceMode } from './library_cache';
 
 export { LibraryService } from './library_service';
 export type { TemplateFilters } from './library_service';
+
+export { resolveTemplateOrigin } from './resolve_template_origin';
+export type { ResolveTemplateOriginParams } from './resolve_template_origin';

@@ -119,7 +119,10 @@ import {
   getWorkflowDeleteOperation,
   INTERNAL_TEST_WORKFLOW_ID,
 } from '../services/workflow_access_control';
-import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
+import type {
+  BulkCreateWorkflowsResult,
+  CreateWorkflowOptions,
+} from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
@@ -587,9 +590,10 @@ export class WorkflowsManagementApi {
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: Pick<CreateWorkflowOptions, 'templateOrigin'>
   ): Promise<WorkflowDetailDto> {
-    const result = await this.workflowsService.createWorkflow(workflow, spaceId, request);
+    const result = await this.workflowsService.createWorkflow(workflow, spaceId, request, options);
     this.notifySml(result.id, spaceId, 'create', request);
     return result;
   }
@@ -1302,6 +1306,9 @@ export class WorkflowsManagementApi {
         managedBy: existingWorkflow?.managedBy,
         originManagedWorkflowId: existingWorkflow?.originManagedWorkflowId,
         managedVersion: existingWorkflow?.managedVersion,
+        templateSlug: existingWorkflow?.templateSlug,
+        templateVersion: existingWorkflow?.templateVersion,
+        templateOrigin: existingWorkflow?.templateOrigin,
       },
       { isTestRun: true, isEphemeral: Boolean(workflowYaml) }
     );

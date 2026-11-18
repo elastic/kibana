@@ -28,7 +28,9 @@ import {
   type EsWorkflow,
   getWorkflowAccessDecisions,
   NonTerminalExecutionStatuses,
+  pickTemplateOriginFields,
   storedWorkflowAccessControlSchema,
+  type TemplateOriginFields,
   toCustomTriggerSchemaConfigs,
   type UpdatedWorkflowResponseDto,
   type WorkflowDetailDto,
@@ -163,6 +165,13 @@ interface ApplyWorkflowUpdateResult {
 export interface BulkCreateWorkflowsResult {
   created: WorkflowDetailDto[];
   failed: BulkFailureEntry[];
+}
+
+export interface CreateWorkflowOptions {
+  /** Names the document when the YAML cannot carry a `name` key. */
+  nameFallback?: string;
+  /** Workflow Template library template the workflow is created from. */
+  templateOrigin?: TemplateOriginFields;
 }
 
 type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
@@ -857,7 +866,7 @@ export class WorkflowCrudService {
     workflow: CreateWorkflowCommand,
     spaceId: string,
     request: KibanaRequest,
-    options?: { nameFallback?: string }
+    options?: CreateWorkflowOptions
   ): Promise<WorkflowDetailDto> {
     if (workflow.id) {
       validateWorkflowId(workflow.id);
@@ -887,6 +896,7 @@ export class WorkflowCrudService {
       nameFallback: options?.nameFallback,
       logger: this.deps.logger,
     });
+    Object.assign(workflowData, pickTemplateOriginFields(options?.templateOrigin));
 
     const profileId =
       (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined;

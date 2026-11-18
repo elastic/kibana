@@ -16,6 +16,7 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowsCreateRouteTemplate } from '@kbn/workflows-ui';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { LoadingStates } from './utils/loading_states';
 import type { WorkflowZodSchemaType } from '../../../../../common/schema';
@@ -93,6 +94,8 @@ export interface WorkflowDetailState {
   hasYamlSchemaValidationErrors: boolean;
   /** Whether the user has accepted at least one AI proposal in the current editing session */
   aiAssisted: boolean;
+  /** Template a new workflow was remixed from ("Remix with AI"); saving records it as the template origin */
+  remixTemplate?: WorkflowsCreateRouteTemplate;
   /** Connector flyout state */
   connectorFlyout: {
     isOpen: boolean;

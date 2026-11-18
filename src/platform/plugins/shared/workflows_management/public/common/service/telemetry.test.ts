@@ -201,6 +201,30 @@ describe('WorkflowsBaseTelemetry', () => {
       expect(eventData).not.toHaveProperty('origin');
       expect(eventData).not.toHaveProperty('concurrencyMax');
       expect(eventData).not.toHaveProperty('concurrencyStrategy');
+      expect(eventData).not.toHaveProperty('templateSlug');
+      expect(eventData).not.toHaveProperty('templateVersion');
+      expect(eventData).not.toHaveProperty('templateOrigin');
+    });
+
+    it('includes the template origin of a workflow created from a template', () => {
+      telemetry.reportWorkflowCreated({
+        workflowId: 'wf-remix',
+        templateOrigin: {
+          templateSlug: 'triage-alerts',
+          templateVersion: '1.2.0',
+          templateOrigin: 'remix',
+        },
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowCreated,
+        expect.objectContaining({
+          workflowId: 'wf-remix',
+          templateSlug: 'triage-alerts',
+          templateVersion: '1.2.0',
+          templateOrigin: 'remix',
+        })
+      );
     });
 
     it('includes concurrency fields when present in metadata', () => {
@@ -271,6 +295,41 @@ describe('WorkflowsBaseTelemetry', () => {
         WorkflowLifecycleEventTypes.WorkflowUpdated,
         expect.anything()
       );
+    });
+
+    it('includes the template origin on update and enabled state change events', () => {
+      const templateOrigin = {
+        templateSlug: 'custom',
+        templateVersion: null,
+        templateOrigin: 'import' as const,
+      };
+
+      telemetry.reportWorkflowUpdated({
+        workflowId: 'wf-1',
+        workflowUpdate: { yaml: 'updated yaml' },
+        hasValidationErrors: false,
+        validationErrorCount: 0,
+        templateOrigin,
+      });
+      telemetry.reportWorkflowUpdated({
+        workflowId: 'wf-1',
+        workflowUpdate: { enabled: true },
+        hasValidationErrors: false,
+        validationErrorCount: 0,
+        templateOrigin,
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowUpdated,
+        expect.objectContaining({ templateSlug: 'custom', templateOrigin: 'import' })
+      );
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.objectContaining({ templateSlug: 'custom', templateOrigin: 'import' })
+      );
+      jest.mocked(mockClient.reportEvent).mock.calls.forEach(([, eventData]) => {
+        expect(eventData).not.toHaveProperty('templateVersion');
+      });
     });
 
     it('reports WorkflowEnabledStateChanged when enabled changes via YAML update', () => {
