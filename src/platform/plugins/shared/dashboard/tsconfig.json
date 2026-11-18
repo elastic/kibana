@@ -144,7 +144,9 @@
     "@kbn/content-list-page",
     "@kbn/shared-ux-error-boundary",
     "@kbn/content-list",
-    "@kbn/content-list-provider-client"
+    "@kbn/content-list-provider-client",
+    "@kbn/resource-bootstrap-plugin",
+    "@kbn/resource-bootstrap-server"
   ],
   "exclude": ["target/**/*"]
 }

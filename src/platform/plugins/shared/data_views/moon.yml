@@ -18,6 +18,8 @@ project:
   sourceRoot: src/platform/plugins/shared/data_views
 dependsOn:
   - '@kbn/core'
+  - '@kbn/resource-bootstrap-plugin'
+  - '@kbn/resource-bootstrap-server'
   - '@kbn/data-views-types'
   - '@kbn/data-view-validation'
   - '@kbn/usage-collection-plugin'
@@ -38,6 +40,7 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/object-versioning'
   - '@kbn/core-saved-objects-server'
+  - '@kbn/core-saved-objects-utils-server'
   - '@kbn/logging'
   - '@kbn/crypto-browser'
   - '@kbn/core-http-browser'

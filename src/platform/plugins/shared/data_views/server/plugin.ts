@@ -15,6 +15,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { dataViewsServiceFactory } from './data_views_service_factory';
+import { createDataViewKind } from './resource_bootstrap/data_view_kind';
 import { registerRoutes } from './routes';
 import { dataViewSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -51,7 +52,12 @@ export class DataViewsServerPlugin
 
   public setup(
     core: CoreSetup<DataViewsServerPluginStartDependencies, DataViewsServerPluginStart>,
-    { expressions, usageCollection, contentManagement }: DataViewsServerPluginSetupDependencies
+    {
+      expressions,
+      usageCollection,
+      contentManagement,
+      resourceBootstrap,
+    }: DataViewsServerPluginSetupDependencies
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -79,6 +85,8 @@ export class DataViewsServerPlugin
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
     core.deprecations.registerDeprecations(createScriptedFieldsDeprecationsConfig(core));
+
+    resourceBootstrap?.registerResourceKind(createDataViewKind({ core }));
 
     contentManagement.register({
       id: DATA_VIEW_SAVED_OBJECT_TYPE,

@@ -91,6 +91,8 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/core-user-profile-common'
   - '@kbn/core-chrome-browser-components'
+  - '@kbn/resource-bootstrap-plugin'
+  - '@kbn/resource-bootstrap-server'
 tags:
   - plugin
   - prod
