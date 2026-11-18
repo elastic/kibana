@@ -61,7 +61,7 @@ export const recordMaintenanceRunStepCommonDefinition: CommonStepDefinition<
   description: i18n.translate(
     'xpack.contextEngine.workflows.steps.recordMaintenanceRun.description',
     {
-      defaultMessage: 'Count what a memory maintenance run changed, and report it.',
+      defaultMessage: 'Count what a memory maintenance run changed.',
     }
   ),
   category: StepCategory.Kibana,
@@ -72,9 +72,7 @@ export const recordMaintenanceRunStepCommonDefinition: CommonStepDefinition<
     details: i18n.translate(
       'xpack.contextEngine.workflows.steps.recordMaintenanceRun.documentation.details',
       {
-        defaultMessage:
-          'Counts the changes of each kind a run made, or would make, and reports the counts ' +
-          'as telemetry, without any KI text.',
+        defaultMessage: 'Counts the changes of each kind a run made, or would make.',
       }
     ),
   },

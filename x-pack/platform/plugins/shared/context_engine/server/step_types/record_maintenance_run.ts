@@ -19,18 +19,13 @@ const countOf = (changes: MaintenanceChange[], change: MaintenanceChange['change
   changes.filter((candidate) => candidate.change === change).length;
 
 export const getRecordMaintenanceRunStepDefinition = ({
-  analyticsService,
   getAiIndexService,
   isDreamingAvailable,
   checkWritePrivilege,
   logger,
 }: Pick<
   DreamingKiStepDependencies,
-  | 'analyticsService'
-  | 'getAiIndexService'
-  | 'isDreamingAvailable'
-  | 'checkWritePrivilege'
-  | 'logger'
+  'getAiIndexService' | 'isDreamingAvailable' | 'checkWritePrivilege' | 'logger'
 >) =>
   createServerStepDefinition({
     ...recordMaintenanceRunStepCommonDefinition,
@@ -61,11 +56,6 @@ export const getRecordMaintenanceRunStepDefinition = ({
         needs_review: needsReview.length,
         rejected: rejected.length,
       };
-      analyticsService.reportMemoryMaintenanceRun({
-        ai_index_id: aiIndexId,
-        mode,
-        ...output,
-      });
       logger.debug(
         `Memory maintenance of AI index '${aiIndexId}' (${mode}) reviewed ${reviewed} items and changed ${changes.length}`
       );

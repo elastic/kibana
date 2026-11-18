@@ -11,7 +11,6 @@ import type {
   ContextEngineOutcome,
   ReportKiVerificationEventParams,
   ReportKiWriteEventParams,
-  ReportMemoryMaintenanceRunEventParams,
 } from './events';
 import { CONTEXT_ENGINE_EVENT_TYPES, contextEngineServerEbtEvents } from './events';
 
@@ -27,8 +26,8 @@ const KI_EVENT_TYPE_BY_ACTION: Record<KiWriteAction, string> = {
 /**
  * Server-side analytics wrapper for Context Engine telemetry.
  *
- * Owns EBT event type registration and reporting for KI writes,
- * KI verification outcomes and memory maintenance runs.
+ * Owns EBT event type registration and reporting for KI writes
+ * and KI verification outcomes.
  * Payloads never contain KI free text. A reporting failure never
  * propagates to the caller.
  */
@@ -106,17 +105,6 @@ export class ContextEngineAnalyticsService {
       );
     } catch (error) {
       this.logger.debug('Failed to report KI verification telemetry event', { error });
-    }
-  }
-
-  reportMemoryMaintenanceRun(params: ReportMemoryMaintenanceRunEventParams): void {
-    try {
-      this.analytics.reportEvent<ReportMemoryMaintenanceRunEventParams>(
-        CONTEXT_ENGINE_EVENT_TYPES.MemoryMaintenanceRun,
-        params
-      );
-    } catch (error) {
-      this.logger.debug('Failed to report memory maintenance run telemetry event', { error });
     }
   }
 }

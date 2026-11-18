@@ -26,7 +26,6 @@ const input = {
 };
 
 describe('getRecordMaintenanceRunStepDefinition', () => {
-  const telemetry = mockKiStepTelemetry();
   const definition = ({ dreamingAvailable = true, canWrite = true } = {}) =>
     getRecordMaintenanceRunStepDefinition({
       getAiIndexService: () =>
@@ -40,17 +39,15 @@ describe('getRecordMaintenanceRunStepDefinition', () => {
         } as unknown as AiIndexService),
       isDreamingAvailable: async () => dreamingAvailable,
       checkWritePrivilege: async () => canWrite,
-      ...telemetry,
+      ...mockKiStepTelemetry(),
     });
 
-  beforeEach(() => jest.clearAllMocks());
-
-  it('counts the changes of each kind and reports them without any text', async () => {
+  it('counts the changes of each kind', async () => {
     const context = createMockStepContext({ input, esClient: {} });
 
     const { output } = await definition().handler(context);
 
-    const counts = {
+    expect(output).toEqual({
       reviewed: 12,
       written: 3,
       merged: 1,
@@ -60,19 +57,13 @@ describe('getRecordMaintenanceRunStepDefinition', () => {
       tombstoned: 1,
       needs_review: 1,
       rejected: 0,
-    };
-    expect(output).toEqual(counts);
-    expect(telemetry.analyticsService.reportMemoryMaintenanceRun).toHaveBeenCalledWith({
-      ai_index_id: 'support',
-      mode: 'report',
-      ...counts,
     });
   });
 
   it.each([
     ['dreaming is unavailable', { dreamingAvailable: false }],
     ['the user cannot write KIs', { canWrite: false }],
-  ])('reports nothing while %s', async (_, options) => {
+  ])('fails while %s', async (_, options) => {
     const context = createMockStepContext({ input, esClient: {} });
 
     const thrown = await definition(options)
@@ -80,6 +71,5 @@ describe('getRecordMaintenanceRunStepDefinition', () => {
       .catch((error) => error);
 
     expect(thrown).toBeInstanceOf(ExecutionError);
-    expect(telemetry.analyticsService.reportMemoryMaintenanceRun).not.toHaveBeenCalled();
   });
 });
