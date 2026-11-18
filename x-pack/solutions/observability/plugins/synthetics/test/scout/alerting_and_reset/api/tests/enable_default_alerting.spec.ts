@@ -107,7 +107,8 @@ apiTest.describe(
       expect(await putDynamicSettings(apiClient, DYNAMIC_SETTINGS_DEFAULTS)).toHaveStatusCode(200);
       await kbnClient.savedObjects.clean({ types: ['synthetics-monitor-multi-space'] });
       await apiServices.alerting.cleanup.deleteAllConnectors();
-      await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
+      const settingsRes = await putDynamicSettings(apiClient, DYNAMIC_SETTINGS_DEFAULTS);
+      expect(settingsRes).toHaveStatusCode(200);
     });
 
     const addHttpMonitor = async (apiClient: ApiClientFixture) =>
