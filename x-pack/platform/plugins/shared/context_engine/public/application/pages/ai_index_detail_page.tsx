@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import type { AppMenuItemType } from '@kbn/app-menu';
 import { i18n } from '@kbn/i18n';
@@ -20,10 +20,9 @@ import {
   AiIndexCreatedCallout,
   AutomationsPanel,
   ConnectAgentPanel,
-  DescriptionPanel,
   DreamingPanel,
   LockedSectionPanel,
-  SignalsPanel,
+  OverviewPlaceholderPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
@@ -94,10 +93,38 @@ const discoverLinkLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.list
   defaultMessage: 'Open in Discover',
 });
 
-const signalsLockedAriaLabel = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.signals.lockedAriaLabel',
+const failedRunsPlaceholderTitle = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.overview.placeholder.failedRunsTitle',
   {
-    defaultMessage: 'Signals locked. Create an automation above to start collecting signals.',
+    defaultMessage: 'Failed automation runs',
+  }
+);
+
+const summaryCardsPlaceholderTitle = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.overview.placeholder.summaryCardsTitle',
+  {
+    defaultMessage: 'Summary',
+  }
+);
+
+const recentDocumentsPlaceholderTitle = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.overview.placeholder.recentDocumentsTitle',
+  {
+    defaultMessage: 'Recent knowledge documents',
+  }
+);
+
+const documentsChartPlaceholderTitle = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.overview.placeholder.documentsChartTitle',
+  {
+    defaultMessage: 'Knowledge documents over time',
+  }
+);
+
+const learnMorePlaceholderTitle = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.overview.placeholder.learnMoreTitle',
+  {
+    defaultMessage: 'Learn more',
   }
 );
 
@@ -155,18 +182,13 @@ export const AiIndexDetailPage = () => {
   const hasKnowledgeIndicators = hasLoadedKiSummary && summary.total > 0;
   const showKnowledgeIndicatorsTabInHeader = isKnowledgeIndicatorsTab || hasKnowledgeIndicators;
 
-  const {
-    hideEditControls,
-    showOnboardingPanel,
-    showAutomationsPanel,
-    showSignalsSection,
-    showSignalsPanel,
-  } = useAiIndexOverviewSections({
-    aiIndex,
-    isLoading,
-    hasKnowledgeIndicators,
-    isKnowledgeIndicatorsLoading: isKiSummaryLoading,
-  });
+  const { hideEditControls, showOnboardingPanel, showAutomationsPanel } =
+    useAiIndexOverviewSections({
+      aiIndex,
+      isLoading,
+      hasKnowledgeIndicators,
+      isKnowledgeIndicatorsLoading: isKiSummaryLoading,
+    });
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
   const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex?.sources]);
@@ -318,18 +340,36 @@ export const AiIndexDetailPage = () => {
           showMemory={isMemoryEnabled}
         />
       )}
+      <OverviewPlaceholderPanel
+        title={failedRunsPlaceholderTitle}
+        data-test-subj="contextOverviewFailedRunsPlaceholder"
+      />
+      <EuiSpacer size="m" />
       {showOnboardingPanel && (
         <>
           <ConnectAgentPanel prompt={onboardingPrompt} />
           <EuiSpacer size="m" />
         </>
       )}
-      <DescriptionPanel
-        isLoading={isLoading}
-        aiIndex={aiIndex}
-        onSaved={refetch}
-        isManaged={!!aiIndex?.managed}
+      <OverviewPlaceholderPanel
+        title={summaryCardsPlaceholderTitle}
+        data-test-subj="contextOverviewSummaryCardsPlaceholder"
       />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
+          <OverviewPlaceholderPanel
+            title={recentDocumentsPlaceholderTitle}
+            data-test-subj="contextOverviewRecentDocumentsPlaceholder"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <OverviewPlaceholderPanel
+            title={documentsChartPlaceholderTitle}
+            data-test-subj="contextOverviewDocumentsChartPlaceholder"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       {showAutomationsPanel ? (
         <AutomationsPanel
@@ -357,27 +397,10 @@ export const AiIndexDetailPage = () => {
         />
       )}
       <EuiSpacer size="m" />
-      {showSignalsSection &&
-        (showSignalsPanel ? (
-          <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
-        ) : (
-          <LockedSectionPanel
-            data-test-subj="contextSignalsLocked"
-            ariaLabel={signalsLockedAriaLabel}
-            title={
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.signals.title"
-                defaultMessage="Signals"
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.signals.lockedBody"
-                defaultMessage="Create an automation above to start collecting signals."
-              />
-            }
-          />
-        ))}
+      <OverviewPlaceholderPanel
+        title={learnMorePlaceholderTitle}
+        data-test-subj="contextOverviewLearnMorePlaceholder"
+      />
     </>
   );
 
@@ -433,6 +456,7 @@ export const AiIndexDetailPage = () => {
           navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
         }}
         pageTitle={pageTitle}
+        description={aiIndex?.description || undefined}
         menu={headerMenu}
         badges={headerBadges}
         tabs={headerTabs}
