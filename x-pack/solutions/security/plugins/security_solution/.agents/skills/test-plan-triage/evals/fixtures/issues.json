@@ -653,5 +653,11 @@
     "labels": ["Team:Threat Hunting:Investigations"],
     "parent": "elastic/kibana#913800",
     "body": "## Steps to reproduce\n1. Open a timeline and pick a saved query from the query bar picker.\n2. Refresh the page.\n\n## Current behavior\nThe query bar still shows the query text, but the picker shows `No saved query` and `Update query` is disabled.\n\n## Expected behavior\nThe picker keeps the selected saved query after a refresh."
+  },
+  "elastic/kibana#913900": {
+    "title": "[Entity Analytics] Upgrade testing: asset criticality from 9.3 to 9.4",
+    "type": "Task",
+    "labels": ["Team:Entity Analytics"],
+    "body": "Run the upgrade checks for asset criticality between 9.3 and 9.4 and record the results in this issue.\n\n- [ ] Criticality levels assigned in 9.3 are kept after the upgrade\n- [ ] The criticality field still feeds the risk score after the upgrade"
   }
 }

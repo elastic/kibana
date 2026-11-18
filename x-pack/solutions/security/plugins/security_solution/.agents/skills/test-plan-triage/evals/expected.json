@@ -367,5 +367,16 @@
     "comments": [],
     "proposed_comment": true,
     "answer": {"comment_excludes": ["913800"]}
+  },
+  "s39-standalone-upgrade-testing": {
+    "reps": 3,
+    "decision": "no",
+    "rule": "N3",
+    "suggested_level": null,
+    "proposed": [],
+    "labeled": [],
+    "comments": [],
+    "proposed_comment": true,
+    "answer": {"contains": ["standalone"]}
   }
 }
