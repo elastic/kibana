@@ -11,6 +11,9 @@ export type { SavedObjectsClientContract } from './src/saved_objects_client';
 export type {
   ISavedObjectsRepository,
   SavedObjectsFindInternalOptions,
+  SavedObjectsFindResponseWithAcl,
+  SavedObjectsGetInternalOptions,
+  SavedObjectWithAcl,
 } from './src/saved_objects_repository';
 export type {
   MutatingOperationRefreshSetting,

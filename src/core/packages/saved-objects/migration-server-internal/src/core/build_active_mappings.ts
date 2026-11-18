@@ -8,6 +8,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { ACL_FIELD, ACL_MAPPING } from '@kbn/ols';
 import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
@@ -104,6 +105,9 @@ export function getBaseMappings(): IndexMappingSafe {
           },
         },
       },
+      // Object-level security (OLS). `@kbn/ols` owns the mapping, because its rules for reading a
+      // stored ACL and its read filter depend on exactly how Elasticsearch indexes it.
+      [ACL_FIELD]: cloneDeep(ACL_MAPPING),
     },
   };
 }

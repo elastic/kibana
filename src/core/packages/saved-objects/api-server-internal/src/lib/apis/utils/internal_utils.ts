@@ -22,7 +22,9 @@ import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-object
 import {
   decodeRequestVersion,
   encodeHitVersion,
+  readAclFromRawSource,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { projectAcl } from './acl';
 
 export interface GetBulkOperationErrorRawResponse {
   status: number;
@@ -91,6 +93,8 @@ export function getExpectedVersionProperties(version?: string, document?: SavedO
 export interface GetSavedObjectFromSourceOptions {
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: SavedObjectsRawDocParseOptions['migrationVersionCompatibility'];
+  /** Whether the result includes the object's stored ACL. See {@link projectAcl}. */
+  includeAcl?: boolean;
 }
 
 /**
@@ -108,7 +112,10 @@ export function getSavedObjectFromSource<T>(
   type: string,
   id: string,
   doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource },
-  { migrationVersionCompatibility = 'raw' }: GetSavedObjectFromSourceOptions = {}
+  {
+    migrationVersionCompatibility = 'raw',
+    includeAcl = false,
+  }: GetSavedObjectFromSourceOptions = {}
 ): SavedObject<T> {
   const {
     originId,
@@ -132,24 +139,29 @@ export function getSavedObjectFromSource<T>(
     ];
   }
 
-  return {
-    id,
-    type,
-    namespaces,
-    migrationVersion,
-    coreMigrationVersion,
-    typeMigrationVersion,
-    ...(originId && { originId }),
-    ...(updatedAt && { updated_at: updatedAt }),
-    ...(createdAt && { created_at: createdAt }),
-    ...(createdBy && { created_by: createdBy }),
-    ...(updatedBy && { updated_by: updatedBy }),
-    version: encodeHitVersion(doc),
-    attributes: doc._source[type],
-    references: doc._source.references || [],
-    managed,
-    accessControl,
-  };
+  const acl = readAclFromRawSource(doc._source);
+  return projectAcl(
+    {
+      id,
+      type,
+      namespaces,
+      migrationVersion,
+      coreMigrationVersion,
+      typeMigrationVersion,
+      ...(originId && { originId }),
+      ...(updatedAt && { updated_at: updatedAt }),
+      ...(createdAt && { created_at: createdAt }),
+      ...(createdBy && { created_by: createdBy }),
+      ...(updatedBy && { updated_by: updatedBy }),
+      version: encodeHitVersion(doc),
+      attributes: doc._source[type],
+      references: doc._source.references || [],
+      managed,
+      accessControl,
+      ...(acl && { acl }),
+    },
+    includeAcl
+  );
 }
 
 /**

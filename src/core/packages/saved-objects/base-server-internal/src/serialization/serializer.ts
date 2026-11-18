@@ -15,8 +15,10 @@ import type {
   SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { toAclSource } from '@kbn/ols';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
 import { decodeVersion, encodeVersion } from '../version';
+import { readAclFromRawSource } from './acl';
 import type {
   ISavedObjectTypeRegistryInternal,
   SavedObjectTypeRegistry,
@@ -104,6 +106,10 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
         : undefined,
     } = _source;
 
+    // Every type keeps its ACL through migrations and rewrites. Repository APIs leave it out of
+    // their results unless the caller asks for it.
+    const acl = readAclFromRawSource(_source);
+
     const version =
       _seq_no != null || _primary_term != null
         ? encodeVersion(_seq_no!, _primary_term!)
@@ -134,6 +140,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
         _source.accessControl && {
           accessControl: _source.accessControl,
         }),
+      ...(acl && { acl }),
     };
   }
 
@@ -161,6 +168,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       typeMigrationVersion,
       managed,
       accessControl,
+      acl,
     } = savedObj;
     const source = {
       [type]: attributes,
@@ -178,6 +186,8 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(createdAt && { created_at: createdAt }),
       ...(createdBy && { created_by: createdBy }),
       ...(accessControl && { accessControl }),
+      // Written from the normalized ACL, so dotted `acl.*` root keys are not carried over.
+      ...(acl && { acl: toAclSource(acl) }),
     };
     return {
       _id: this.generateRawId(namespace, type, id),

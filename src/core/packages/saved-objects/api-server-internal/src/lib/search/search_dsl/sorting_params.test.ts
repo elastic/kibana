@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ACL_MAPPING } from '@kbn/ols';
 import { getSortingParams, MAX_FIND_SORT_FIELDS } from './sorting_params';
 
 const MAPPINGS = {
@@ -392,6 +393,34 @@ describe('searchDsl/getSortParams', () => {
       expect(() => getSortingParams(MAPPINGS, 'saved', '_shard_doc', 'asc')).toThrowError(
         /_shard_doc requires a point in time/
       );
+    });
+  });
+
+  describe('the stored ACL', () => {
+    const mappingsWithAcl = { properties: { ...MAPPINGS.properties, acl: ACL_MAPPING } };
+
+    it.each(['acl.owner.id', 'acl.general.access', 'acl.entries.added_at'])(
+      'refuses to sort one type by %s',
+      (sortField) => {
+        expect(() => getSortingParams(mappingsWithAcl as any, 'saved', sortField)).toThrowError(
+          `Unable to sort by field ${sortField}`
+        );
+      }
+    );
+
+    it('refuses to sort several types by an ACL field', () => {
+      expect(() =>
+        getSortingParams(mappingsWithAcl as any, ['saved', 'pending'], 'acl.owner.id')
+      ).toThrowError('Unable to sort by field acl.owner.id');
+    });
+
+    it('refuses an ACL field in the sort array', () => {
+      expect(() =>
+        getSortingParams(mappingsWithAcl as any, 'saved', undefined, undefined, undefined, [
+          { field: 'title' },
+          { field: 'acl.owner.id', order: 'asc' },
+        ])
+      ).toThrowError('Unable to sort by field acl.owner.id');
     });
   });
 });

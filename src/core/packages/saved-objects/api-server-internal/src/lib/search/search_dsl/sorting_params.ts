@@ -14,6 +14,7 @@ import type {
   SavedObjectsPitParams,
 } from '@kbn/core-saved-objects-api-server/src/apis';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { matchesAclField } from '../../utils/acl_field';
 
 const TOP_LEVEL_FIELDS = ['_score'];
 
@@ -115,6 +116,7 @@ function buildSortClause(
   const types = Array.isArray(type) ? type : [type];
 
   if (types.length > 1) {
+    assertNotAclField(sortField);
     const rootField = getProperty(mappings, sortField);
     if (!rootField) {
       throw Boom.badRequest(
@@ -136,6 +138,7 @@ function buildSortClause(
   if (!field) {
     // type field does not exist, try checking the root properties
     key = sortField;
+    assertNotAclField(sortField);
     field = getProperty(mappings, sortField);
     if (!field) {
       throw Boom.badRequest(`Unknown sort field ${sortField}`);
@@ -148,4 +151,14 @@ function buildSortClause(
       unmapped_type: field.type,
     },
   };
+}
+
+/**
+ * Refuses to sort on the stored ACL, because the order of results would tell callers who owns an
+ * object and who has access to it.
+ */
+function assertNotAclField(sortField: string) {
+  if (matchesAclField(sortField)) {
+    throw Boom.badRequest(`Unable to sort by field ${sortField}`);
+  }
 }

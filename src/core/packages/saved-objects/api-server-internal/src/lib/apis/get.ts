@@ -10,7 +10,10 @@
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers, type SavedObject } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsGetInternalOptions,
+  SavedObjectsGetOptions,
+} from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { isFoundGetResponse, getSavedObjectFromSource, rawDocExistsInNamespace } from './utils';
 import type { ApiExecutionContext } from './types';
@@ -19,10 +22,11 @@ export interface PerformGetParams {
   type: string;
   id: string;
   options: SavedObjectsGetOptions;
+  internalOptions?: SavedObjectsGetInternalOptions;
 }
 
 export const performGet = async <T>(
-  { type, id, options }: PerformGetParams,
+  { type, id, options, internalOptions = {} }: PerformGetParams,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
   const { common: commonHelper, migration: migrationHelper } = helpers;
@@ -72,6 +76,7 @@ export const performGet = async <T>(
 
   const document = getSavedObjectFromSource<T>(registry, type, id, body, {
     migrationVersionCompatibility,
+    includeAcl: internalOptions.includeAcl,
   });
 
   return await migrationHelper.migrateAndDecryptStorageDocument({

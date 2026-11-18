@@ -243,9 +243,13 @@ export const performFind = async <T = unknown, A = unknown>(
   const savedObjects: SavedObjectsFindResult[] = [];
 
   body.hits.hits.forEach((hit: estypes.SearchHit<SavedObjectsRawDocSource>) => {
-    const obj = serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
-      migrationVersionCompatibility,
-    });
+    const obj = serializerHelper.rawToSavedObject(
+      hit as SavedObjectsRawDoc,
+      {
+        migrationVersionCompatibility,
+      },
+      { includeAcl: internalOptions.includeAcl }
+    );
 
     if (redactTypeMapParams) {
       redactTypeMapParams.objects.push({

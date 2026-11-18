@@ -149,12 +149,13 @@ export const executeUpdate = async <T>(
   // migrate the existing doc to the current version
   let migrated: SavedObject<T>;
   if (preflightDocResult.checkDocFound === 'found') {
+    // The update rewrites the whole document, so it keeps the stored ACL.
     const document = getSavedObjectFromSource<T>(
       registry,
       type,
       id,
       preflightDocResult.rawDocSource!,
-      { migrationVersionCompatibility }
+      { migrationVersionCompatibility, includeAcl: true }
     );
     try {
       migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;

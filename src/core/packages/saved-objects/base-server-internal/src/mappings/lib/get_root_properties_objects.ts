@@ -29,7 +29,8 @@ import { getRootProperties } from './get_root_properties';
  *  @return {EsPropertyMappings}
  */
 
-const omittedRootProps = ['migrationVersion', 'references'];
+// `acl` is an object field, but not a Saved Objects type.
+const omittedRootProps = ['migrationVersion', 'references', 'acl'];
 
 export function getRootPropertiesObjects(mappings: IndexMapping) {
   const rootProperties = getRootProperties(mappings);

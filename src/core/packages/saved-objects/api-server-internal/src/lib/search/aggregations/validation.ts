@@ -9,10 +9,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ObjectType } from '@kbn/config-schema';
-import { isPlainObject, isArray } from 'lodash';
+import { isPlainObject, isArray, castArray } from 'lodash';
+import { ACL_FIELD } from '@kbn/ols';
 
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { getRootFields } from '../../utils';
+import { getRootFields, matchesAclField } from '../../utils';
 import {
   isObjectTypeAttribute,
   rewriteObjectTypeAttribute,
@@ -127,7 +128,50 @@ const validateAggregationType = (
   }
 
   validateAggregationStructure(aggregationSchema, aggregation, context);
-  return validateAndRewriteFieldAttributes(aggregation, context);
+  const rewritten = validateAndRewriteFieldAttributes(aggregation, context);
+  return aggregationType === 'top_hits' ? hideAclFromTopHits(rewritten, context) : rewritten;
+};
+
+/** Source filter patterns that keep the stored ACL out of returned documents. */
+const ACL_SOURCE_EXCLUDES = [ACL_FIELD, `${ACL_FIELD}.*`];
+
+/**
+ * Keeps the stored ACL out of the documents that a `top_hits` aggregation returns. Its field options
+ * are not validated like other aggregation fields, so they are checked for the ACL here, and its
+ * source filter always excludes the ACL.
+ */
+const hideAclFromTopHits = (
+  topHits: Record<string, any>,
+  { currentPath }: ValidationContext
+): Record<string, any> => {
+  const fieldNames: unknown[] = [
+    ...castArray(topHits.docvalue_fields ?? []),
+    ...castArray(topHits.stored_fields ?? []),
+    ...castArray(topHits.sort ?? []).flatMap((sort) =>
+      isPlainObject(sort) ? Object.keys(sort) : [sort]
+    ),
+    ...castArray(topHits.highlight?.fields ?? []).flatMap((fields) =>
+      isPlainObject(fields) ? Object.keys(fields) : []
+    ),
+  ];
+  const aclField = fieldNames.find(
+    (name): name is string => typeof name === 'string' && matchesAclField(name)
+  );
+  if (aclField !== undefined) {
+    throw new Error(`[${currentPath.join('.')}] Invalid attribute path: ${aclField}`);
+  }
+
+  const { _source: source } = topHits;
+  if (source === false) {
+    return topHits;
+  }
+  return {
+    ...topHits,
+    _source: {
+      ...(source === undefined || source === true ? {} : { includes: castArray(source) }),
+      excludes: ACL_SOURCE_EXCLUDES,
+    },
+  };
 };
 
 /**
@@ -179,6 +223,12 @@ const recursiveRewrite = (
   parents: string[]
 ): Record<string, any> => {
   return Object.entries(currentLevel).reduce((memo, [key, value]) => {
+    // `range` keys are field names that are not validated or rewritten, so only the ACL is refused.
+    if (lastParent(parents) === 'range' && matchesAclField(key)) {
+      throw new Error(
+        `[${[...context.currentPath, key].join('.')}] Invalid attribute path: ${key}`
+      );
+    }
     const rewriteKey = isAttributeKey(parents);
     const rewriteValue = isAttributeValue(key, value);
 

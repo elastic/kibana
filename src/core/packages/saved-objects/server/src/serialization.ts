@@ -9,6 +9,7 @@
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-api-server';
+import type { StoredAcl } from '@kbn/ols';
 import type { SavedObjectReference, SavedObjectsRawDocSource } from '..';
 
 /**
@@ -97,6 +98,11 @@ export interface SavedObjectDoc<T = unknown> {
   originId?: string;
   managed?: boolean;
   accessControl?: SavedObjectAccessControl;
+  /**
+   * The object's stored ACL for object-level security (OLS), as Elasticsearch indexes it. Repository
+   * APIs leave it out of their results unless the caller asks for it.
+   */
+  acl?: StoredAcl;
 }
 
 /**

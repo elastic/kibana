@@ -9,6 +9,7 @@
 
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { fieldDefined, hasFilterKeyError } from '../utils/filter_utils';
+import { matchesAclField } from '../../utils/acl_field';
 
 /**
  * Returns true if the given attribute path is a valid root level SO attribute path
@@ -30,7 +31,8 @@ export const isRootLevelAttribute = (
   }
 
   const [type, firstPath, ...otherPaths] = splits;
-  if (allowedTypes.includes(firstPath)) {
+  // Callers cannot aggregate on the stored ACL.
+  if (allowedTypes.includes(firstPath) || matchesAclField([firstPath, ...otherPaths].join('.'))) {
     return false;
   }
   return (

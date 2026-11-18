@@ -8,6 +8,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { ACL_MAPPING } from '@kbn/ols';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { validateAndConvertAggregations } from './validation';
 
 type AggsMap = Record<string, estypes.AggregationsAggregationContainer>;
@@ -538,6 +540,68 @@ describe('validateAndConvertAggregations', () => {
           field: 'type',
         },
       },
+    });
+  });
+});
+
+describe('validateAndConvertAggregations and the stored ACL', () => {
+  const mappingsWithAcl = {
+    properties: { ...mockMappings.properties, acl: ACL_MAPPING },
+  } as unknown as IndexMapping;
+
+  const validate = (aggs: AggsMap) =>
+    validateAndConvertAggregations(['foo'], aggs, mappingsWithAcl);
+
+  it.each(['foo.acl', 'foo.acl.owner.id', 'foo.acl.entries.id', 'acl.owner.id'])(
+    'throws for the ACL field %s',
+    (field) => {
+      expect(() => validate({ aggName: { terms: { field } } })).toThrow(
+        `[aggName.terms.field] Invalid attribute path: ${field}`
+      );
+    }
+  );
+
+  it('throws for the ACL as a range key', () => {
+    expect(() =>
+      validate({
+        aggName: {
+          filters: {
+            filters: {
+              recent: {
+                bool: { filter: [{ range: { 'acl.entries.added_at': { gte: 'now-1d' } } }] },
+              },
+            },
+          },
+        },
+      })
+    ).toThrow('Invalid attribute path: acl.entries.added_at');
+  });
+
+  it.each([
+    ['docvalue_fields', { docvalue_fields: ['acl.owner.id'] }],
+    ['stored_fields', { stored_fields: '*' }],
+    ['sort', { sort: [{ 'acl.general.access': 'asc' }] }],
+    ['highlight', { highlight: { fields: { 'acl.*': {} } } }],
+  ])('throws for the ACL in top_hits %s', (_, topHits) => {
+    expect(() => validate({ top: { top_hits: topHits } })).toThrow(
+      '[top.top_hits] Invalid attribute path'
+    );
+  });
+
+  it('excludes the ACL from the documents that top_hits returns', () => {
+    expect(validate({ top: { top_hits: { size: 1 } } })).toEqual({
+      top: { top_hits: { size: 1, _source: { excludes: ['acl', 'acl.*'] } } },
+    });
+    expect(validate({ top: { top_hits: { _source: true } } })).toEqual({
+      top: { top_hits: { _source: { excludes: ['acl', 'acl.*'] } } },
+    });
+    expect(validate({ top: { top_hits: { _source: ['foo.title', 'acl'] } } })).toEqual({
+      top: {
+        top_hits: { _source: { includes: ['foo.title', 'acl'], excludes: ['acl', 'acl.*'] } },
+      },
+    });
+    expect(validate({ top: { top_hits: { _source: false } } })).toEqual({
+      top: { top_hits: { _source: false } },
     });
   });
 });

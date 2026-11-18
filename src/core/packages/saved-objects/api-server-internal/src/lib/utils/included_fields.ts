@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ACL_FIELD } from '@kbn/ols';
+
 const ROOT_FIELDS = [
   'namespace',
   'namespaces',
@@ -42,10 +44,15 @@ export function includedFields(
   const sourceFields = typeof fields === 'string' ? [fields] : fields;
   const sourceType = typeof type === 'string' ? [type] : type;
 
-  return sourceType
-    .reduce((acc: string[], t) => {
-      acc.push(...sourceFields.map((f) => `${t}.${f}`));
-      return acc;
-    }, [])
-    .concat(ROOT_FIELDS);
+  return (
+    sourceType
+      .reduce((acc: string[], t) => {
+        acc.push(...sourceFields.map((f) => `${t}.${f}`));
+        return acc;
+      }, [])
+      .concat(ROOT_FIELDS)
+      // The stored ACL is not a root field that callers can aggregate on or ask for, so it is only
+      // added here, to keep it on source-filtered reads.
+      .concat(ACL_FIELD)
+  );
 }

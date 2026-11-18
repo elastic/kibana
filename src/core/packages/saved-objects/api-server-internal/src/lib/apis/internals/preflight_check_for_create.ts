@@ -9,6 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import { ACL_FIELD } from '@kbn/ols';
 import {
   type ISavedObjectTypeRegistry,
   type ISavedObjectsSerializer,
@@ -262,7 +263,7 @@ async function bulkGetObjectsAndAliases(
     docsToBulkGet.push({
       _id: serializer.generateRawId(undefined, type, id), // namespace is intentionally undefined because multi-namespace objects don't have a namespace in their raw ID
       _index: getIndexForType(type),
-      _source: ['type', 'namespaces', 'originId', 'accessControl'],
+      _source: ['type', 'namespaces', 'originId', 'accessControl', ACL_FIELD],
     });
     if (checkAliases) {
       for (const space of spaces) {

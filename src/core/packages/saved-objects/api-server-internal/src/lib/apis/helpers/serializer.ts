@@ -19,6 +19,7 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
+import { projectAcl } from '../utils/acl';
 
 export type ISerializerHelper = PublicMethodsOf<SerializerHelper>;
 
@@ -37,9 +38,14 @@ export class SerializerHelper {
     this.serializer = serializer;
   }
 
+  /**
+   * Converts a raw document to a saved object for a repository result. The result has no `acl`
+   * unless the caller sets `includeAcl`.
+   */
   public rawToSavedObject<T = unknown>(
     raw: SavedObjectsRawDoc,
-    options?: SavedObjectsRawDocParseOptions
+    options?: SavedObjectsRawDocParseOptions,
+    { includeAcl = false }: { includeAcl?: boolean } = {}
   ): SavedObject<T> {
     const savedObject = this.serializer.rawToSavedObject(raw, options);
     const { namespace, type } = savedObject;
@@ -47,6 +53,6 @@ export class SerializerHelper {
       savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
     }
 
-    return omit(savedObject, ['namespace']) as SavedObject<T>;
+    return projectAcl(omit(savedObject, ['namespace']), includeAcl) as SavedObject<T>;
   }
 }

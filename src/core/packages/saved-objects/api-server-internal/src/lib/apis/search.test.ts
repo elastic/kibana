@@ -115,6 +115,19 @@ describe('search', () => {
     }
   );
 
+  it.each(['updated_at', 'acl', 'acl.owner.id', 'acl.entries.id'])(
+    'should throw if runtime_mappings shadows the root field %s',
+    async (field) => {
+      await expect(
+        repository.search({
+          namespaces: ['default'],
+          type: ['index-pattern'],
+          runtime_mappings: { [field]: { type: 'keyword' } },
+        })
+      ).rejects.toThrowError(`'runtime_mappings' contains forbidden fields: ${field}`);
+    }
+  );
+
   it('should return an empty response if the search returns 404', async () => {
     client.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(

@@ -152,6 +152,7 @@ describe('find', () => {
               'created_at',
               'created_by',
               'originId',
+              'acl',
             ],
           }),
           expect.anything()

@@ -17,6 +17,7 @@ import {
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { estypes } from '@elastic/elasticsearch';
 import { getReferencesFilter } from './references_filter';
+import { matchesAclField } from '../../utils/acl_field';
 
 type KueryNode = any;
 
@@ -32,9 +33,24 @@ function getTypes(registry: ISavedObjectTypeRegistry, type?: string | string[]) 
 }
 
 /**
+ * Every root field except the stored ACL, as `simple_query_string` field patterns. A search in all
+ * fields uses it instead of `*`, which would also find objects by their owner or grantees.
+ */
+function getAllFieldsExceptAcl(mappings: IndexMapping): string[] {
+  return Object.entries(mappings.properties ?? {}).flatMap(([name, field]) => {
+    if (matchesAclField(name)) {
+      return [];
+    }
+    const hasSubfields = 'properties' in field || 'fields' in field;
+    return hasSubfields ? [name, `${name}.*`] : [name];
+  });
+}
+
+/**
  *  Get the field params based on the types, searchFields, and rootSearchFields
  */
 function getSimpleQueryStringTypeFields(
+  mappings: IndexMapping,
   types: string[],
   searchFields: string[] = [],
   rootSearchFields: string[] = []
@@ -42,7 +58,7 @@ function getSimpleQueryStringTypeFields(
   if (!searchFields.length && !rootSearchFields.length) {
     return {
       lenient: true,
-      fields: ['*'],
+      fields: getAllFieldsExceptAcl(mappings),
     };
   }
 
@@ -50,6 +66,9 @@ function getSimpleQueryStringTypeFields(
   fields.forEach((field) => {
     if (field.indexOf('.') !== -1) {
       throw new Error(`rootSearchFields entry "${field}" is invalid: cannot contain "." character`);
+    }
+    if (matchesAclField(field)) {
+      throw new Error(`rootSearchFields entry "${field}" is invalid: cannot search the ACL`);
     }
   });
 
@@ -251,6 +270,7 @@ export function getQueryParams({
 
     const simpleQueryStringClause = useSimpleQueryStringClause
       ? getSimpleQueryStringClause({
+          mappings,
           search,
           searchFields: simpleQuerySearchFields,
           types,
@@ -464,12 +484,14 @@ const getNestedQueryStringClause = ({
 };
 
 const getSimpleQueryStringClause = ({
+  mappings,
   search,
   types,
   searchFields,
   rootSearchFields,
   defaultSearchOperator,
 }: {
+  mappings: IndexMapping;
   search: string;
   types: string[];
   searchFields?: string[];
@@ -480,7 +502,7 @@ const getSimpleQueryStringClause = ({
     {
       simple_query_string: {
         query: search,
-        ...getSimpleQueryStringTypeFields(types, searchFields, rootSearchFields),
+        ...getSimpleQueryStringTypeFields(mappings, types, searchFields, rootSearchFields),
         ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
       },
     },

@@ -23,3 +23,4 @@ export {
   type GetSavedObjectFromSourceOptions,
 } from './internal_utils';
 export { mergeForUpdate } from './merge_for_update';
+export { projectAcl } from './acl';

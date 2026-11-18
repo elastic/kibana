@@ -1799,3 +1799,81 @@ function setAttr(path: string, value: any) {
       _.isFunction(value) ? value(_.get(doc, path)) : value
     ) as SavedObjectUnsanitizedDoc;
 }
+
+describe('DocumentMigrator and the stored ACL', () => {
+  const storedAcl = {
+    version: [1],
+    owner: { type: ['user'], id: ['u_owner'] },
+    general: { access: ['none'] },
+    entries: [],
+  };
+
+  const createMigrator = (type: Partial<SavedObjectsType>) => {
+    const migrator = new DocumentMigrator({
+      kibanaVersion,
+      typeRegistry: createRegistry(type),
+      log: mockLogger,
+    });
+    migrator.prepareMigrations();
+    return migrator;
+  };
+
+  it('puts back an ACL that a migration drops', () => {
+    const migrator = createMigrator({
+      name: 'dog',
+      migrations: {
+        // Rebuilds the document without knowing about the ACL.
+        '1.2.3': ({ id, type, attributes, references, typeMigrationVersion }) => ({
+          id,
+          type,
+          typeMigrationVersion,
+          attributes: { ...(attributes as object), b: 1 },
+          references,
+        }),
+      },
+    });
+    const actual = migrator.migrate({
+      id: 'smelly',
+      type: 'dog',
+      attributes: {},
+      references: [],
+      typeMigrationVersion: '1.0.0',
+      acl: storedAcl,
+    });
+    expect(actual.attributes).toEqual({ b: 1 });
+    expect(actual.acl).toEqual(storedAcl);
+  });
+
+  it('keeps an ACL that a model version sets', () => {
+    const newAcl = { ...storedAcl, general: { access: ['view'] } };
+    const migrator = createMigrator({
+      name: 'dog',
+      modelVersions: {
+        1: {
+          changes: [
+            {
+              type: 'unsafe_transform',
+              transformFn: (typeSafeGuard) =>
+                typeSafeGuard((doc) => ({ document: { ...doc, acl: newAcl } })),
+            },
+          ],
+        },
+      },
+    });
+    const actual = migrator.migrate({
+      id: 'smelly',
+      type: 'dog',
+      attributes: {},
+      references: [],
+      typeMigrationVersion: '10.0.0',
+      acl: storedAcl,
+    });
+    expect(actual.acl).toEqual(newAcl);
+  });
+
+  it('adds no ACL to a document without one', () => {
+    const migrator = createMigrator({ name: 'dog' });
+    const actual = migrator.migrate({ id: 'smelly', type: 'dog', attributes: {}, references: [] });
+    expect(actual).not.toHaveProperty('acl');
+  });
+});

@@ -532,8 +532,46 @@ describe('#getQueryParams', () => {
             rootSearchFields: undefined,
             mappings,
           });
-          expectResult(result, expect.objectContaining({ lenient: true, fields: ['*'] }));
+          const fields = Object.keys(mappings.properties).flatMap((name) => [name, `${name}.*`]);
+          expectResult(result, expect.objectContaining({ lenient: true, fields }));
         });
+
+        it('searches every root field except the stored ACL when no fields are specified', () => {
+          const result = getQueryParams({
+            registry,
+            search,
+            mappings: {
+              properties: {
+                ...mappings.properties,
+                type: { type: 'keyword' },
+                acl: {
+                  dynamic: false,
+                  properties: { owner: { properties: { id: { type: 'keyword' } } } },
+                },
+              },
+            } as IndexMapping,
+          });
+          const { fields } = result.query.bool.must[0].simple_query_string;
+          expect(fields).toContain('type');
+          expect(fields).not.toContain('*');
+          expect(fields.filter((field: string) => field.startsWith('acl'))).toEqual([]);
+        });
+
+        it.each(['acl', '*', 'a*'])(
+          'throws an error if a raw search field reaches the stored ACL: %s',
+          (rootSearchField) => {
+            expect(() =>
+              getQueryParams({
+                registry,
+                search,
+                rootSearchFields: [rootSearchField],
+                mappings,
+              })
+            ).toThrow(
+              `rootSearchFields entry "${rootSearchField}" is invalid: cannot search the ACL`
+            );
+          }
+        );
 
         it('includes specified search fields for appropriate type/s', () => {
           test({ searchFields: ['title'] });
@@ -836,7 +874,10 @@ describe('#getQueryParams', () => {
         expect(mustClause.length).toBe(1);
         expect(mustClause[0].simple_query_string).toEqual(
           expect.objectContaining({
-            fields: ['*'],
+            fields: Object.keys(nestedFieldMappings.properties).flatMap((name) => [
+              name,
+              `${name}.*`,
+            ]),
             query: 'foo',
             lenient: true,
           })
