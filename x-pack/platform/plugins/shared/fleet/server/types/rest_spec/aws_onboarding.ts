@@ -53,6 +53,12 @@ export const DeleteAwsOnboardingCredentialsRequestSchema = {
   }),
 };
 
+export const GetAwsOnboardingStackRequestSchema = {
+  params: schema.object({
+    stackId: schema.string({ minLength: 1, maxLength: 2048, validate: validateStackArn }),
+  }),
+};
+
 function validateRegion(value: string): string | undefined {
   return /^[a-z0-9-]+$/.test(value) ? undefined : 'must be an AWS region name';
 }

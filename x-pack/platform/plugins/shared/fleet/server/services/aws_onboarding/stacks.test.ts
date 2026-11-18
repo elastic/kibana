@@ -171,6 +171,86 @@ describe('AwsOnboardingStackService.status', () => {
     expect(result.status).toBe('in_progress');
     expect(result.latestEvent).toBeUndefined();
   });
+
+  it("lists each resource's newest status without the stack's own events", async () => {
+    describeStack.mockResolvedValue({
+      StackName: 'elastic-onboarding-x',
+      StackStatus: 'ROLLBACK_IN_PROGRESS',
+    });
+    describeStackEvents.mockResolvedValue([
+      {
+        LogicalResourceId: 'elastic-onboarding-x',
+        ResourceType: 'AWS::CloudFormation::Stack',
+        ResourceStatus: 'ROLLBACK_IN_PROGRESS',
+        Timestamp: new Date('2026-11-17T10:00:20.000Z'),
+      },
+      {
+        LogicalResourceId: 'WiiOidcProvider',
+        ResourceType: 'Custom::WiiOidcProvider',
+        ResourceStatus: 'CREATE_FAILED',
+        ResourceStatusReason: 'Could not connect to the issuer',
+        Timestamp: new Date('2026-11-17T10:00:15.000Z'),
+      },
+      {
+        LogicalResourceId: 'WiiOidcProviderFunction',
+        ResourceType: 'AWS::Lambda::Function',
+        ResourceStatus: 'CREATE_COMPLETE',
+        Timestamp: new Date('2026-11-17T10:00:10.000Z'),
+      },
+      {
+        LogicalResourceId: 'WiiOidcProvider',
+        ResourceType: 'Custom::WiiOidcProvider',
+        ResourceStatus: 'CREATE_IN_PROGRESS',
+        ResourceStatusReason: 'Resource creation Initiated',
+        Timestamp: new Date('2026-11-17T10:00:12.000Z'),
+      },
+      {
+        LogicalResourceId: 'WiiOidcProviderFunction',
+        ResourceType: 'AWS::Lambda::Function',
+        ResourceStatus: 'CREATE_IN_PROGRESS',
+        Timestamp: new Date('2026-11-17T10:00:05.000Z'),
+      },
+      {
+        LogicalResourceId: 'WiiOidcProviderFunctionRole',
+        ResourceType: 'AWS::IAM::Role',
+        ResourceStatus: 'CREATE_COMPLETE',
+        Timestamp: new Date('2026-11-17T10:00:02.000Z'),
+      },
+    ]);
+
+    const result = await new AwsOnboardingStackService().status(stackArn);
+
+    expect(result.resources).toEqual([
+      {
+        logicalId: 'WiiOidcProviderFunctionRole',
+        status: 'CREATE_COMPLETE',
+        updatedAt: '2026-11-17T10:00:02.000Z',
+      },
+      {
+        logicalId: 'WiiOidcProviderFunction',
+        status: 'CREATE_COMPLETE',
+        updatedAt: '2026-11-17T10:00:10.000Z',
+      },
+      {
+        logicalId: 'WiiOidcProvider',
+        status: 'CREATE_FAILED',
+        reason: 'Could not connect to the issuer',
+        updatedAt: '2026-11-17T10:00:15.000Z',
+      },
+    ]);
+  });
+
+  it('lists no resources when the events lookup fails', async () => {
+    describeStack.mockResolvedValue({
+      StackName: 'elastic-onboarding-x',
+      StackStatus: 'CREATE_IN_PROGRESS',
+    });
+    describeStackEvents.mockRejectedValue(new Error('AccessDenied'));
+
+    const result = await new AwsOnboardingStackService().status(stackArn);
+
+    expect(result.resources).toEqual([]);
+  });
 });
 
 describe('AwsOnboardingStackService.update', () => {

@@ -13,13 +13,19 @@ import { isAwsManagedOnboardingEnabled } from '../../services/utils/aws_onboardi
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import { IacProvisionerRequestError, IacProvisionerUnavailableError } from '../../errors';
 
-import { getBootstrapLaunchHandler, getBootstrapTemplateHandler } from './handlers';
+import { awsOnboardingStackService } from '../../services/aws_onboarding';
+
+import {
+  getBootstrapLaunchHandler,
+  getBootstrapTemplateHandler,
+  getStackHandler,
+} from './handlers';
 
 jest.mock('../../services/app_context');
 jest.mock('../../services/aws_onboarding', () => ({
   awsOnboardingCredentialsService: {},
   awsOnboardingDiscoveryService: {},
-  awsOnboardingStackService: {},
+  awsOnboardingStackService: { status: jest.fn() },
   isAwsSdkError: jest.fn(),
   BOOTSTRAP_TEMPLATE_YAML: 'Parameters:\n  ManagementMode:\n    Default: fully-managed\n',
   BOOTSTRAP_TEMPLATE_FILENAME: 'kibana-managed-onboarding-bootstrap.yml',
@@ -223,5 +229,48 @@ describe('getBootstrapTemplateHandler', () => {
         template: 'Parameters:\n  ManagementMode:\n    Default: partially-managed\n',
       },
     });
+  });
+});
+
+describe('getStackHandler', () => {
+  const stackArn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-onboarding-x/id';
+  const request = httpServerMock.createKibanaRequest({ params: { stackId: stackArn } });
+  let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    response = httpServerMock.createResponseFactory();
+    jest.mocked(isAwsManagedOnboardingEnabled).mockResolvedValue(true);
+  });
+
+  it("returns the stack's status and resources", async () => {
+    const status = {
+      status: 'in_progress' as const,
+      stackStatus: 'CREATE_IN_PROGRESS',
+      resources: [
+        {
+          logicalId: 'WiiOidcProviderFunctionRole',
+          status: 'CREATE_COMPLETE',
+          updatedAt: '2026-11-17T10:00:02.000Z',
+        },
+      ],
+    };
+    jest.mocked(awsOnboardingStackService.status).mockResolvedValue(status);
+
+    await getStackHandler({} as any, request as any, response);
+
+    expect(awsOnboardingStackService.status).toHaveBeenCalledWith(stackArn);
+    expect(response.ok).toHaveBeenCalledWith({ body: status });
+  });
+
+  it('answers a stack that no longer exists with not_found instead of a 404', async () => {
+    jest
+      .mocked(awsOnboardingStackService.status)
+      .mockResolvedValue({ status: 'not_found', resources: [] });
+
+    await getStackHandler({} as any, request as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { status: 'not_found', resources: [] } });
+    expect(response.notFound).not.toHaveBeenCalled();
   });
 });

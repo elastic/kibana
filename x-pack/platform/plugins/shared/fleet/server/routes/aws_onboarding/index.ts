@@ -12,6 +12,7 @@ import {
   DeleteAwsOnboardingCredentialsRequestSchema,
   GetAwsOnboardingBootstrapLaunchRequestSchema,
   GetAwsOnboardingBootstrapTemplateRequestSchema,
+  GetAwsOnboardingStackRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
 } from '../../types/rest_spec/aws_onboarding';
 
@@ -20,6 +21,7 @@ import {
   getBootstrapLaunchHandler,
   getBootstrapTemplateHandler,
   getCredentialsHandler,
+  getStackHandler,
   getVerifyHandler,
   putCredentialsHandler,
 } from './handlers';
@@ -120,6 +122,21 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: { request: DeleteAwsOnboardingCredentialsRequestSchema },
       },
       deleteCredentialsHandler
+    );
+
+  router.versioned
+    .get({
+      path: AWS_ONBOARDING_API_ROUTES.STACK_INFO_PATTERN,
+      summary: 'Get a managed CloudFormation stack status',
+      access: 'internal',
+      security: READ_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: { request: GetAwsOnboardingStackRequestSchema },
+      },
+      getStackHandler
     );
 
   router.versioned

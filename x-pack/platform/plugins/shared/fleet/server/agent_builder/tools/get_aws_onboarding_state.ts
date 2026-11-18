@@ -19,6 +19,11 @@ import {
   AWS_ONBOARDING_CREDENTIALS_ATTACHMENT_TYPE,
   type AwsOnboardingCredentialsAttachmentData,
 } from '../../../common/agent_builder/aws_onboarding_credentials_attachment';
+import {
+  AWS_ONBOARDING_STACK_ATTACHMENT_TYPE,
+  type AwsOnboardingStackAttachmentData,
+} from '../../../common/agent_builder/aws_onboarding_stack_attachment';
+import { parseAwsRegionFromArn } from '../../../common/services/cloud_connectors/iac_deployment';
 import type { AwsOnboardingSettingsRequirement } from '../../../common/workflows/steps/settings';
 import type { AwsOnboardingSettingsRequirementOutput } from '../../../common/workflows/steps/settings_requirement';
 import type { AwsOnboardingCredentialsOutput } from '../../../common/workflows/steps/credentials';
@@ -101,6 +106,29 @@ const lastStepExecution = (
 const lastOutput = <T>(execution: WorkflowExecutionDto, stepId: string): T | undefined =>
   lastStepExecution(execution, stepId)?.output as T | undefined;
 
+/** A run creates a new identity's stack or updates a reused one's; the newer step decides. */
+const latestStackRun = (
+  execution: WorkflowExecutionDto
+): {
+  action: 'create' | 'update';
+  run?: WorkflowStepExecutionDto;
+  output?: AwsOnboardingCreateStackOutput | AwsOnboardingUpdateStackOutput;
+} => {
+  const createStackRun = lastStepExecution(execution, 'create_stack');
+  const updateStackRun = lastStepExecution(execution, 'update_stack');
+  const action =
+    updateStackRun &&
+    (!createStackRun || updateStackRun.globalExecutionIndex > createStackRun.globalExecutionIndex)
+      ? 'update'
+      : 'create';
+  const run = action === 'update' ? updateStackRun : createStackRun;
+  return {
+    action,
+    run,
+    output: run?.output as AwsOnboardingCreateStackOutput | AwsOnboardingUpdateStackOutput,
+  };
+};
+
 /**
  * Reads the stack block of the result for one handler call. While the run is active the stack is
  * read live, because the engine output is only as fresh as its last poll; otherwise the engine
@@ -114,19 +142,7 @@ const createStackProgressReader = (handOverMs: number) => {
     execution: WorkflowExecutionDto,
     previous?: StackProgress
   ): Promise<StackProgress> => {
-    // A run creates a new identity's stack or updates a reused one's; the newer step decides.
-    const createStackRun = lastStepExecution(execution, 'create_stack');
-    const updateStackRun = lastStepExecution(execution, 'update_stack');
-    const action =
-      updateStackRun &&
-      (!createStackRun || updateStackRun.globalExecutionIndex > createStackRun.globalExecutionIndex)
-        ? ('update' as const)
-        : ('create' as const);
-    const stackRun = action === 'update' ? updateStackRun : createStackRun;
-    const stackOutput = stackRun?.output as
-      | AwsOnboardingCreateStackOutput
-      | AwsOnboardingUpdateStackOutput
-      | undefined;
+    const { action, run: stackRun, output: stackOutput } = latestStackRun(execution);
     let current = lastOutput<AwsOnboardingStackStatusOutput>(
       execution,
       action === 'update' ? 'stack_status_update' : 'stack_status'
@@ -282,6 +298,63 @@ const syncCredentialsCard = async ({
   return existing.id;
 };
 
+/**
+ * Creates the stack card once per execution, as soon as the run has started its stack. The card
+ * only identifies the stack: the browser reads the status, resources and role ARN live.
+ */
+const syncStackCard = async ({
+  attachments,
+  executionId,
+  execution,
+  resolve,
+  settingsRequirement,
+}: {
+  attachments: AttachmentStateManager;
+  executionId: string;
+  execution: WorkflowExecutionDto;
+  resolve: AwsOnboardingResolveOutput | undefined;
+  settingsRequirement: AwsOnboardingSettingsRequirementOutput | undefined;
+}): Promise<string | undefined> => {
+  const existing = attachments
+    .getActive()
+    .find(
+      (a) =>
+        a.type === AWS_ONBOARDING_STACK_ATTACHMENT_TYPE &&
+        (getLatestVersion(a)?.data as Partial<AwsOnboardingStackAttachmentData> | undefined)
+          ?.execution_id === executionId
+    );
+  if (existing) {
+    return existing.id;
+  }
+
+  const { action, run, output } = latestStackRun(execution);
+  const region = parseAwsRegionFromArn(output?.stack_id);
+  if (!run || !output?.stack_id || !region) {
+    return undefined;
+  }
+  const serviceNames = new Map(
+    (settingsRequirement?.services ?? []).map(({ id, name }) => [id, name])
+  );
+  const data: AwsOnboardingStackAttachmentData = {
+    execution_id: executionId,
+    stack_id: output.stack_id,
+    stack_name: output.stack_name,
+    region,
+    action,
+    for_services: (resolve?.policies ?? []).map(
+      ({ service }) => serviceNames.get(service) ?? service
+    ),
+    ...(action === 'update' && resolve && { adding: resolve.added_policy_templates }),
+    started_at: run.finishedAt ?? execution.startedAt,
+  };
+  const created = await attachments.add({
+    type: AWS_ONBOARDING_STACK_ATTACHMENT_TYPE,
+    data,
+    description: 'Federated Identity stack progress for this run',
+  });
+  return created.id;
+};
+
 export const createGetAwsOnboardingStateTool = ({
   workflowApi,
   waitIntervalMs = DEFAULT_WAIT_INTERVAL_MS,
@@ -381,6 +454,7 @@ export const createGetAwsOnboardingStateTool = ({
       'settings_requirement'
     );
     let cardId: string | undefined;
+    let stackCardId: string | undefined;
     if (attachments) {
       try {
         cardId = await syncCredentialsCard({
@@ -396,6 +470,21 @@ export const createGetAwsOnboardingStateTool = ({
           .warn(`Could not sync the AWS onboarding credentials card: ${e.message}`);
       }
       // Settings are settled in the chat, so no settings card is created.
+      if (stack?.stack_id) {
+        try {
+          stackCardId = await syncStackCard({
+            attachments,
+            executionId,
+            execution,
+            resolve,
+            settingsRequirement,
+          });
+        } catch (e) {
+          appContextService
+            .getLogger()
+            .warn(`Could not create the AWS onboarding stack card: ${e.message}`);
+        }
+      }
     }
 
     return {
@@ -439,6 +528,7 @@ export const createGetAwsOnboardingStateTool = ({
             },
           }),
           ...(stack && { stack: { ...stack, ...(timedOut && { timed_out: true as const }) } }),
+          ...(stackCardId && { stack_card_attachment_id: stackCardId }),
           ...(policies && { policies: policies.policies }),
           ...(hasData && {
             has_data: hasData.has_data,

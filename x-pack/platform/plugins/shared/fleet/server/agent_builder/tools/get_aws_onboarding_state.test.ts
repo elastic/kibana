@@ -656,4 +656,84 @@ describe('get_aws_onboarding_state', () => {
       expect(data.stack).not.toHaveProperty('hand_over');
     });
   });
+
+  describe('stack card', () => {
+    const STACK_ID = 'arn:aws:cloudformation:eu-west-1:123456789012:stack/elastic-onboarding-ab/1';
+    const updatingExecution = {
+      id: 'exec-1',
+      workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
+      status: 'running',
+      startedAt: '2026-11-18T09:58:00Z',
+      workflowDefinition: { name: 'AWS Agentless Onboarding', steps: [] },
+      stepExecutions: [
+        step('settings_requirement', 1, {
+          status: 'completed',
+          output: { services: [{ id: 'guardduty', name: 'Amazon GuardDuty' }] },
+        }),
+        step('resolve', 2, {
+          status: 'completed',
+          output: {
+            policies: [{ service: 'guardduty', name: 'aws-guardduty' }],
+            added_policy_templates: ['guardduty'],
+          },
+        }),
+        step('update_stack', 3, {
+          status: 'completed',
+          output: { stack_id: STACK_ID, stack_name: 'elastic-onboarding-ab' },
+          finishedAt: '2026-11-18T10:00:00Z',
+        }),
+      ],
+    };
+
+    beforeEach(() => {
+      createStatusClient.mockResolvedValue({ client: 'session' });
+      stackStatus.mockResolvedValue({ status: 'in_progress', stackStatus: 'UPDATE_IN_PROGRESS' });
+    });
+
+    it('creates the stack card from the stack step once the run has a stack', async () => {
+      const attachments = createAttachments();
+
+      const { results } = await runWithAttachments(updatingExecution, attachments);
+
+      expect(attachments.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'fleet_aws_onboarding_stack',
+          data: {
+            execution_id: 'exec-1',
+            stack_id: STACK_ID,
+            stack_name: 'elastic-onboarding-ab',
+            region: 'eu-west-1',
+            action: 'update',
+            for_services: ['Amazon GuardDuty'],
+            adding: ['guardduty'],
+            started_at: '2026-11-18T10:00:00Z',
+          },
+        })
+      );
+      expect(results[0].data.stack_card_attachment_id).toBe('att-1');
+    });
+
+    it('returns the existing stack card on a later call without creating another', async () => {
+      const attachments = createAttachments([
+        {
+          id: 'att-7',
+          type: 'fleet_aws_onboarding_stack',
+          versions: [
+            {
+              version: 1,
+              data: { execution_id: 'exec-1', stack_id: STACK_ID },
+              created_at: '2026-11-18T10:00:01Z',
+              content_hash: 'hash-7',
+            },
+          ],
+          current_version: 1,
+        },
+      ]);
+
+      const { results } = await runWithAttachments(updatingExecution, attachments);
+
+      expect(attachments.add).not.toHaveBeenCalled();
+      expect(results[0].data.stack_card_attachment_id).toBe('att-7');
+    });
+  });
 });

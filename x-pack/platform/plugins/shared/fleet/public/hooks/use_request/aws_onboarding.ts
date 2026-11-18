@@ -9,6 +9,7 @@ import type {
   AwsOnboardingCredentialsPublic,
   GetAwsOnboardingBootstrapLaunchResponse,
   GetAwsOnboardingBootstrapTemplateResponse,
+  GetAwsOnboardingStackResponse,
   PutAwsOnboardingCredentialsRequest,
   AwsOnboardingVerifyResponse,
   AwsOnboardingManagementMode,
@@ -32,6 +33,17 @@ export function sendPutAwsOnboardingCredentials(body: PutAwsOnboardingCredential
     path: AWS_ONBOARDING_API_ROUTES.CREDENTIALS_PATTERN,
     version: API_VERSIONS.internal.v1,
     body,
+  });
+}
+
+export function sendGetAwsOnboardingStack(stackId: string) {
+  return sendRequest<GetAwsOnboardingStackResponse>({
+    method: 'get',
+    path: AWS_ONBOARDING_API_ROUTES.STACK_INFO_PATTERN.replace(
+      '{stackId}',
+      encodeURIComponent(stackId)
+    ),
+    version: API_VERSIONS.internal.v1,
   });
 }
 

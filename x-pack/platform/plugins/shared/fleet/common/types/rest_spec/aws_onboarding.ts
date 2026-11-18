@@ -105,6 +105,8 @@ export interface GetAwsOnboardingStackResponse {
   reason?: string;
   /** The newest CloudFormation resource event; `reason` is set only for failed events. */
   latestEvent?: { resource: string; status: string; timestamp: string; reason?: string };
+  /** Each resource's newest event, oldest first; empty when the events could not be read. */
+  resources: Array<{ logicalId: string; status: string; reason?: string; updatedAt: string }>;
   /** Present only when `status` is `complete`. */
   outputs?: {
     roleArn?: string;

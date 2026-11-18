@@ -72,6 +72,35 @@ const toLatestEvent = (
   };
 };
 
+/** The newest event of each resource, excluding the stack's own, sorted oldest first. */
+const toResources = (
+  events: StackEvent[] | undefined
+): GetAwsOnboardingStackResponse['resources'] => {
+  const newestByResource = new Map<
+    string,
+    { logicalId: string; status: string; reason?: string; timestamp: Date }
+  >();
+  for (const event of events ?? []) {
+    const { LogicalResourceId: logicalId, ResourceType, ResourceStatus: status, Timestamp } = event;
+    if (!logicalId || !status || !Timestamp || ResourceType === 'AWS::CloudFormation::Stack') {
+      continue;
+    }
+    const current = newestByResource.get(logicalId);
+    if (!current || Timestamp > current.timestamp) {
+      const reason = status.endsWith('_FAILED') ? event.ResourceStatusReason : undefined;
+      newestByResource.set(logicalId, {
+        logicalId,
+        status,
+        ...(reason ? { reason } : {}),
+        timestamp: Timestamp,
+      });
+    }
+  }
+  return [...newestByResource.values()]
+    .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
+    .map(({ timestamp, ...resource }) => ({ ...resource, updatedAt: timestamp.toISOString() }));
+};
+
 export class AwsOnboardingStackService {
   /** One short-lived provisioning session per operation; fails in partially-managed mode. */
   private async getClient(
@@ -310,7 +339,7 @@ export class AwsOnboardingStackService {
   ): Promise<GetAwsOnboardingStackResponse> {
     const stack = await client.describeStack(stackArn);
     if (!stack) {
-      return { status: 'not_found' };
+      return { status: 'not_found', resources: [] };
     }
     const status = toStackStatus(stack.StackStatus);
     const outputs =
@@ -332,6 +361,7 @@ export class AwsOnboardingStackService {
       stackStatus: stack.StackStatus,
       reason,
       ...(latestEvent ? { latestEvent } : {}),
+      resources: toResources(events),
       ...(outputs ? { outputs } : {}),
     };
   }

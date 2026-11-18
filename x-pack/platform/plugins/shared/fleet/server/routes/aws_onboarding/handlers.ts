@@ -38,6 +38,7 @@ import type {
   DeleteAwsOnboardingCredentialsRequestSchema,
   GetAwsOnboardingBootstrapLaunchRequestSchema,
   GetAwsOnboardingBootstrapTemplateRequestSchema,
+  GetAwsOnboardingStackRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
 } from '../../types/rest_spec/aws_onboarding';
 
@@ -114,6 +115,18 @@ export const deleteCredentialsHandler: FleetRequestHandler<
       : await awsOnboardingStackService.deleteBootstrapStack();
     await awsOnboardingCredentialsService.delete();
     return response.ok({ body: { bootstrapStack } });
+  } catch (error) {
+    return mapError(error, response);
+  }
+};
+
+export const getStackHandler: FleetRequestHandler<
+  TypeOf<typeof GetAwsOnboardingStackRequestSchema.params>
+> = async (context, request, response) => {
+  if (!(await isAwsManagedOnboardingEnabled())) return notEnabled(response);
+  try {
+    const result = await awsOnboardingStackService.status(request.params.stackId);
+    return response.ok({ body: result });
   } catch (error) {
     return mapError(error, response);
   }

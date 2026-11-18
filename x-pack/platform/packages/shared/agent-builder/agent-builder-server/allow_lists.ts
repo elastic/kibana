@@ -469,6 +469,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Fleet
   // New attachment type, pending Agent Builder team review
   'fleet_aws_onboarding_credentials',
+  'fleet_aws_onboarding_stack',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];
