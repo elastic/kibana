@@ -217,7 +217,7 @@ describe('fetchSampleDocuments', () => {
     );
     expect(entityFilteredCall).not.toHaveProperty('unmappedFields');
     expect(BasicPrettyPrinter.print(entityFilteredCall.whereCondition!)).toBe(
-      '(`service.name` != "checkout" OR `service.name` IS NULL)'
+      '((`service.name` NOT IN ("checkout")) OR `service.name` IS NULL)'
     );
 
     expect(getDiverseSampleDocumentsMock).toHaveBeenCalledWith({
@@ -244,6 +244,58 @@ describe('fetchSampleDocuments', () => {
     ]);
     expect(result.filtersCapped).toBe(true);
     expect(result.hasFilteredDocuments).toBe(true);
+  });
+
+  it('excludes grouped values with NOT IN and joins slots with AND', async () => {
+    const features = [
+      createFeature({
+        id: 'checkout',
+        updatedAt: '2026-01-02T00:00:00.000Z',
+        field: 'service.name',
+        value: 'checkout',
+      }),
+      createFeature({
+        id: 'cart',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        field: 'service.name',
+        value: 'cart',
+      }),
+      createFeature({
+        id: 'host',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        field: 'host.name',
+        value: 'host-a',
+      }),
+    ];
+
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      { name: 'service.name', type: 'keyword' },
+      { name: 'host.name', type: 'keyword' },
+    ]);
+    getSampleDocumentsEsqlMock.mockImplementation(async ({ whereCondition }) => ({
+      hits: [createHit(whereCondition ? 'entity-1' : 'random-1')],
+      total: 1,
+    }));
+
+    const result = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features,
+      logger,
+      size: 5,
+      entityFilteredRatio: 0.4,
+      diverseRatio: 0,
+      maxEntityFilters: 2,
+      samplingTimeoutMs: 30_000,
+      iteration: 2,
+    });
+
+    expect(BasicPrettyPrinter.print(getEntityFilteredCall()!.whereCondition!)).toBe(
+      '((`service.name` NOT IN ("checkout", "cart")) OR `service.name` IS NULL) AND ((`host.name` NOT IN ("host-a")) OR `host.name` IS NULL)'
+    );
+    expect(result.filtersCapped).toBe(false);
   });
 
   it('skips entity filters on fields the source does not map or cannot compare', async () => {
@@ -294,7 +346,7 @@ describe('fetchSampleDocuments', () => {
     });
 
     expect(BasicPrettyPrinter.print(getEntityFilteredCall()!.whereCondition!)).toBe(
-      '(`service.name` != "checkout" OR `service.name` IS NULL)'
+      '((`service.name` NOT IN ("checkout")) OR `service.name` IS NULL)'
     );
   });
 
