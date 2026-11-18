@@ -1162,7 +1162,7 @@ describe('runWatchdogWorker', () => {
               startAfterMs: { starting: 60_000, running: 60_000 },
               maxDurationMs: { starting: 100_000, running: 100_000 },
               cooldownMs: { starting: 60_000, running: 60_000 },
-              dir: LONGEST_DIR,
+              diagnosticDir: LONGEST_DIR,
             },
           },
           () => nowUs,
@@ -1266,7 +1266,7 @@ describe('runWatchdogWorker', () => {
     describe('files', () => {
       const DIR = '/diag';
       const startWriting = () => {
-        start({ profiling: { ...profilingData, dir: DIR } });
+        start({ profiling: { ...profilingData, diagnosticDir: DIR } });
         setSlot(Slot.profiling, 1);
       };
       const warnLines = () =>

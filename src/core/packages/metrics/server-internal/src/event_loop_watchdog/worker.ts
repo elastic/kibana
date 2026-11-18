@@ -346,10 +346,10 @@ export const runWatchdogWorker = (
     let path: string | undefined;
     if (summary.samples === 0) {
       file = 'empty';
-    } else if (profiling.dir !== undefined) {
+    } else if (profiling.diagnosticDir !== undefined) {
       file = admission.admit(phase, blockedMs, nowMs);
       if (file === 'admitted') {
-        path = Path.join(profiling.dir, fileName(phase, blockedMs, new Date()));
+        path = Path.join(profiling.diagnosticDir, fileName(phase, blockedMs, new Date()));
       } else if (file === 'in_window') {
         counts.files[phase].inWindow++;
       } else {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { opsConfig } from './ops_config';
+import { opsConfig, PROFILING_DIR_MAX_LENGTH } from './ops_config';
 
 const validate = (eventLoopWatchdog: Record<string, unknown>) =>
   opsConfig.schema.validate({ cGroupOverrides: {}, eventLoopWatchdog }).eventLoopWatchdog;
@@ -104,9 +104,9 @@ describe('ops.eventLoopWatchdog config', () => {
       expect(validate({}).profiling.dir).toBeUndefined();
     });
 
-    it('accepts 1 to 64 characters', () => {
+    it('accepts 1 to PROFILING_DIR_MAX_LENGTH characters', () => {
       expect(validate({ profiling: { dir: '/' } }).profiling.dir).toBe('/');
-      const max = `/${'a'.repeat(63)}`;
+      const max = `/${'a'.repeat(PROFILING_DIR_MAX_LENGTH - 1)}`;
       expect(validate({ profiling: { dir: max } }).profiling.dir).toBe(max);
     });
 
@@ -116,9 +116,13 @@ describe('ops.eventLoopWatchdog config', () => {
       );
     });
 
-    it('rejects more than 64 characters', () => {
-      expect(() => validate({ profiling: { dir: `/${'a'.repeat(64)}` } })).toThrow(
-        '[eventLoopWatchdog.profiling.dir]: value has length [65] but it must have a maximum length of [64].'
+    it('rejects more than PROFILING_DIR_MAX_LENGTH characters', () => {
+      expect(() =>
+        validate({ profiling: { dir: `/${'a'.repeat(PROFILING_DIR_MAX_LENGTH)}` } })
+      ).toThrow(
+        `[eventLoopWatchdog.profiling.dir]: value has length [${
+          PROFILING_DIR_MAX_LENGTH + 1
+        }] but it must have a maximum length of [${PROFILING_DIR_MAX_LENGTH}].`
       );
     });
 

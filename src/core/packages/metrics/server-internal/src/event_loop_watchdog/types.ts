@@ -16,11 +16,13 @@ import type { ProfileSummary } from './profile_summary';
 export type Phase = 'starting' | 'running';
 
 export interface AdmissionLimits {
-  /** Files allowed in the phase's rolling hour before a capture must be a record to be written. */
+  /** Admissions allowed per rolling hour before only record captures are eligible. */
   perHour: number;
-  /** Factor by which a block must exceed the longest its phase wrote to be a record. */
+  /** A record must exceed this multiple of the phase's longest admitted block. */
   minGrowth: number;
-  /** Upper limit on files the phase writes over the worker's lifetime. */
+  /**
+   * Maximum captures admitted for this phase over the worker's lifetime, including failed writes.
+   */
   maxFiles: number;
 }
 
@@ -30,8 +32,11 @@ export interface WatchdogProfilingData {
   startAfterMs: Readonly<Record<Phase, number>>;
   maxDurationMs: Readonly<Record<Phase, number>>;
   cooldownMs: Readonly<Record<Phase, number>>;
-  /** Where profiles are written. Unset when Node has no diagnostic directory. */
-  dir?: string;
+  /**
+   * Profile output directory from `profiling.dir` or Node's `--diagnostic-dir`; unset means no
+   * profile files.
+   */
+  diagnosticDir?: string;
 }
 
 /** Passed to the worker as `workerData.data`. */
@@ -59,7 +64,7 @@ export interface BlockLogMeta extends LogMeta {
 /** Why a capture stopped. */
 export type CaptureStopReason = 'block_ended' | 'max_duration';
 
-/** Whether a capture's profile is written to a file, or why not. */
+/** Whether a capture was admitted for file output, or why no file was attempted. */
 export type ProfileFileOutcome = AdmissionOutcome | 'no_directory' | 'empty';
 
 export interface ProfileLogMeta extends LogMeta {
@@ -127,7 +132,6 @@ export interface ProfilingStats {
   profilingActiveMs: number;
   /** Largest `stopHeartbeatGapMs` of the captures that ended in the period. */
   maxStopHeartbeatGapMs: number;
-  /** File outcomes of admitted or refused captures, per phase. */
   files: Record<Phase, FileCounts>;
 }
 

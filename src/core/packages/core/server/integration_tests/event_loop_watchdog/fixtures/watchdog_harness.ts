@@ -92,7 +92,7 @@ const PROFILING: WatchdogProfilingData = {
   startAfterMs: perPhase(1_000),
   maxDurationMs: perPhase(10_000),
   cooldownMs: perPhase(1_000),
-  dir: process.env.WATCHDOG_PROFILE_DIR,
+  diagnosticDir: process.env.WATCHDOG_PROFILE_DIR,
 };
 
 const create = (workerEntry?: string, profiling = NO_PROFILING) =>
