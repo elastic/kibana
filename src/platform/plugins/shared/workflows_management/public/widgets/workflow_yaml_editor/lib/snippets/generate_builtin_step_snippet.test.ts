@@ -83,18 +83,6 @@ describe('generateBuiltInStepSnippet', () => {
     });
   });
 
-  describe('merge step', () => {
-    it('should generate a merge snippet with sources', () => {
-      const result = generateBuiltInStepSnippet('merge', { full: true, withStepsSection: false });
-      expect(result).toContain('name: merge_step');
-      expect(result).toContain('type: merge');
-      expect(result).toContain('sources:');
-      expect(result).toContain('branch-1');
-      expect(result).toContain('branch-2');
-      expect(result).toContain('name: merge-step');
-    });
-  });
-
   describe('data.set step', () => {
     it('should generate a data.set snippet with variables', () => {
       const result = generateBuiltInStepSnippet('data.set', {

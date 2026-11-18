@@ -67,7 +67,7 @@ const roundContext = (
 
 const synced = () => ({
   status: 'available',
-  outcomes: new Map([['event-1', { severity: 'high' }]]),
+  outcomes: new Map([['event-1', { severity: 'high', episodeId: 'episode-1' }]]),
 });
 const unavailable = (reason: string) => ({ status: 'unavailable', reason });
 

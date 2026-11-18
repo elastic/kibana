@@ -47,8 +47,7 @@ const findRegistrationIssues = (serverStepIds: string[], clientStepIds: string[]
   ];
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/305891
-test.describe.skip(
+test.describe(
   'Workflows Extensions - Custom Step Definitions Client Registration',
   {
     tag: [
