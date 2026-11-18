@@ -490,7 +490,14 @@ The workflows YAML editor uses two in-memory layers to reduce duplicate work whi
 
 ### Step 4: Register in Plugin Setup
 
-Register the step definitions in both server and public plugin setup:
+Register the step definitions in both server and public plugin setup.
+
+> **⚠️ Both registrations are required.** The execution engine reads the **server** registry, but the workflow editor builds its YAML schema, autocomplete, actions menu, and step icons from the **public** registry. A step registered only on the server still runs, but the editor rejects it as an unknown step type. A step registered only on the client shows up in the editor, but workflows using it fail to run.
+>
+> - Your plugin needs a browser side: `"browser": true` in `kibana.jsonc`, with `workflowsExtensions` in `requiredPlugins`. If your plugin is server-only today, add a public entry for the step registration.
+> - If you skip a registration conditionally (see below), apply the same condition on both sides.
+>
+> This is enforced by the [Server and Client Registration Check](#server-and-client-registration-check).
 
 Both `registerStepDefinition` contracts (server and public) accept either a **direct definition** or an **async loader** of the form `() => Promise<Definition | undefined>`. Use the loader form when you need to:
 
@@ -573,13 +580,15 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-Loaders are resolved in the background after setup. The workflows app awaits `workflowsExtensions.isReady()` before rendering, so step definitions are available when the UI runs.
+Public loaders run lazily, the first time `workflowsExtensions.isReady()` is called. The workflows app awaits `isReady()` before rendering, so step definitions are available when the UI runs.
 
 For complete examples of conditional async registration on both sides, see `examples/workflows_extensions_example/server/step_types/index.ts` and `examples/workflows_extensions_example/public/step_types/index.ts`.
 
 ### Step 5: Get Approval
 
 All custom step definitions must be approved by the workflows-eng team. See the [Step Definition Approval Process](#step-definition-approval-process) section below.
+
+Before requesting approval, run the [Server and Client Registration Check](#server-and-client-registration-check) to confirm the step is registered on both sides.
 
 ### Example Implementation
 
@@ -1203,3 +1212,41 @@ node scripts/playwright test --config src/platform/plugins/shared/workflows_exte
 
 The test prints one `echo … > …` command per offending step, ready to copy-paste from your kibana directory.
 
+## Server and Client Registration Check
+
+Every custom step must be registered on **both** the server and the client (see [Step 4](#step-4-register-in-plugin-setup) for why). A Scout UI test enforces this. It compares the step ids in the server registry (from the `internal/workflows_extensions/step_definitions` endpoint) with the step ids in the browser registry, after every async loader has settled. It fails on any step that is missing from either side.
+
+The test runs on stateful and on every serverless project type where workflows are available, because which plugins are enabled (and so which steps are registered) depends on the project. Security Essentials and Observability Logs Essentials are left out: workflows are not available in those tiers.
+
+CI runs it on every PR that changes a file defining or registering a step, in any plugin. Selective testing picks the changed files that contain, add or remove a line with `registerStepDefinition`, `createServerStepDefinition`, `createPollServerStepDefinition`, `createPublicStepDefinition` or `CommonStepDefinition`, see `.buildkite/scripts/steps/test/scout/scout_implicit_consumers.ts`.
+
+The test only checks the steps that are registered with the default configuration. A step behind an experimental flag, a feature flag or a UI setting that is off by default is registered on neither side, so the test can't check it yet. If your step is gated, use the same condition on both sides, and run the registration check locally in the PR that turns the flag on by default: that PR doesn't change any step file, so CI won't select the test for it.
+
+### Running the Registration Check
+
+```bash
+# Start servers and run tests
+node scripts/scout.js run-tests --arch stateful --domain classic --config src/platform/plugins/shared/workflows_extensions/test/scout/ui/playwright.config.ts
+
+# Or start servers separately, then run tests
+node scripts/scout.js start-server --arch stateful --domain classic
+node scripts/playwright test --config src/platform/plugins/shared/workflows_extensions/test/scout/ui/playwright.config.ts --project local
+```
+
+### Fixing a Failure
+
+The test lists every offending step and the side it is missing from:
+
+```
+Found 1 custom step registration issue(s):
+
+Step "my-namespace.myCustomStep" is registered on the server but not on the client: the workflow editor will reject it as an unknown step type. Register it with `workflowsExtensions.registerStepDefinition` in your plugin's public setup().
+```
+
+- **Missing on the client:** register the public definition (`createPublicStepDefinition`) in your plugin's public `setup()`. If your plugin has no browser side, add one.
+- **Missing on the server:** register the server definition (`createServerStepDefinition` or `createPollServerStepDefinition`) in your plugin's server `setup()`.
+- **Conditional registration:** if a loader resolves with `undefined` on one side only, make both sides use the same condition.
+
+### Temporary Exceptions
+
+Steps that were registered on the server only before this check existed are listed in `test/scout/ui/fixtures/client_registration_exceptions.ts`, tracked in [#305608](https://github.com/elastic/kibana/issues/305608). **Do not add new entries** — register the public definition instead. When you register one of those steps on the client, remove it from the list in the same PR; the test fails on an exception for a step that is already registered on both sides.

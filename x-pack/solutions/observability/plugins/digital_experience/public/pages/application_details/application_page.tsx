@@ -13,11 +13,16 @@ import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { APPLICATION_SOURCE } from '../../../common/application_source';
-import type { ApplicationSource } from '../../../common/types/applications';
+import {
+  APPLICATION_TAB_IDS,
+  type ApplicationSource,
+  type ApplicationTabId,
+} from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useApplicationsHref } from '../../hooks/use_applications_href';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { useShareAction } from '../../hooks/use_share_action';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { APPLICATIONS_LABEL, SESSIONS_LABEL } from '../../labels';
@@ -25,11 +30,6 @@ import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
 import { SessionsTab } from '../sessions/sessions_tab';
 import { OtelOverview } from './otel_overview/otel_overview';
-
-/** Tabs of the Application view, in display order. */
-const APPLICATION_TAB_IDS = ['overview', 'sessions', 'errors', 'network'] as const;
-
-export type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
 
 const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
   overview: i18n.translate('xpack.digitalExperience.application.tabs.overview', {
@@ -156,6 +156,7 @@ export function ApplicationPage({
     serviceName,
     source
   );
+  const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
   // Classic RUM has no Errors or Network tab, so their URLs are replaced by the Overview's.
   const isUnsupportedTab =
     source !== APPLICATION_SOURCE.otel && (selectedTab === 'errors' || selectedTab === 'network');
@@ -213,6 +214,7 @@ export function ApplicationPage({
       <AppHeader
         title={serviceName}
         back={{ href: applicationsHref, label: APPLICATIONS_LABEL }}
+        share={shareAction}
         tabs={tabsOf(source).map((id) => ({
           id,
           label: APPLICATION_TAB_LABELS[id],
