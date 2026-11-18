@@ -29,7 +29,7 @@ import {
   setCompressResponse,
   setFlushFix,
 } from '../../../../../common/api/redux_stream/options_slice';
-import { reset } from '../../../../../common/api/redux_stream/data_slice';
+import { reset } from '../../../../../common/api/redux_stream/data_actions';
 
 import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';
