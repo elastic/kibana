@@ -16,6 +16,7 @@ on:
   # the daily flaky test report files and comments with the pipeline's short-lived GitHub App
   # token, whose bot has no repository role
   bots: ['elastic-vault-github-plugin-prod[bot]']
+  status-comment: true
 
 permissions:
   contents: read
@@ -133,8 +134,11 @@ safe-outputs:
         BUILDKITE_API_TOKEN: ${{ '' }}
   noop:
     report-as-issue: false
-  activation-comments: false
+  activation-comments: true
   report-failure-as-issue: false
+  messages:
+    run-started: 'The failed test investigator is investigating this issue. Follow progress in [{workflow_name}]({run_url}).'
+    run-failure: 'The failed test investigator failed before it could report an outcome. Review [{workflow_name}]({run_url}), then rerun it from the Actions tab with this issue number.'
   add-comment:
     max: 1
     target: *issue_number
