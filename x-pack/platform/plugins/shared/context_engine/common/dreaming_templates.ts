@@ -7,9 +7,6 @@
 
 import type { AiIndexDreamingConfig } from './dreaming';
 
-export const MAX_DREAMING_TEMPLATES = 50;
-export const MAX_DREAMING_TEMPLATE_NAME_LENGTH = 256;
-
 /** What a template sets: everything but whether and how often dreaming runs. */
 export type DreamingTemplateConfig = Pick<
   AiIndexDreamingConfig,
@@ -22,12 +19,6 @@ export interface DreamingTemplateSummary {
   description: string;
 }
 
-/** `index.json`. */
-export interface DreamingTemplateIndex {
-  templates: DreamingTemplateSummary[];
-}
-
-/** `<id>.json`. */
 export interface DreamingTemplate {
   /**
    * What the AI index holds and who uses it. It opens the saved instructions, and can be edited

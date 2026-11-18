@@ -14,11 +14,9 @@ import { listDreamingTemplates } from '../api/dreaming_templates';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
-export type { LoadedDreamingTemplate };
-
 const STATIC = { staleTime: Infinity, cacheTime: Infinity } as const;
 
-/** Lists the example dreaming configs, in `index.json` order. */
+/** Lists the example dreaming configs in display order. */
 export const useDreamingTemplates = (): {
   templates: LoadedDreamingTemplate[];
   isLoading: boolean;

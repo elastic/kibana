@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "server/dreaming/templates/*.json",
     "scripts/**/*",
     "test/scout_agent_builder/**/*"
   ],
