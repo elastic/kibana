@@ -20,8 +20,10 @@ const RETRY_INTERVAL_MS = 1_000;
  * metadata transform running, so one worker cannot force-stop that transform, or write metadata,
  * while another seeds or waits on it.
  * Not reentrant: `fn` must not take the lock again. With `acquireTimeoutMs`, waiting for the lock
- * fails after that long instead of waiting indefinitely. Remove this once current-time seeds no
- * longer call stopMetadataTransforms.
+ * fails after that long instead of waiting indefinitely.
+ * Remove this only when both are true: current-time seeds no longer call stopMetadataTransforms,
+ * and the endpoint package's `metadata_current` transform no longer skips metadata docs that
+ * become searchable late (https://github.com/elastic/kibana/issues/306353).
  */
 export const withMetadataTransformLock = async <T>(
   fn: () => Promise<T>,

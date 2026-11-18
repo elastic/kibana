@@ -17,9 +17,10 @@ import {
 } from '../../../../common/endpoint/constants';
 
 /*
- * These diagnostics are kept on purpose. Remove them under the same condition as
- * `with_metadata_transform_lock.ts`: once the endpoint package is fixed, or once current-time
- * seeds no longer stop the metadata transforms.
+ * These diagnostics are kept on purpose. Remove them together with the lock in
+ * `with_metadata_transform_lock.ts`, under the same condition: current-time seeds no longer call
+ * stopMetadataTransforms, and the endpoint package's `metadata_current` transform no longer skips
+ * metadata docs that become searchable late (https://github.com/elastic/kibana/issues/306353).
  */
 
 const PROBE_OPTIONS = { requestTimeout: 5_000, maxRetries: 0 } as const;
