@@ -12,7 +12,7 @@ import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
 import {
   COMMAND_INSTANCE_IDS_MAX,
-  documentNameSchema,
+  documentNameOrArnSchema,
   documentVersionSchema,
   instanceIdSchema,
   toIsoDate,
@@ -36,7 +36,7 @@ const SendCommandInputSchema = lazySchema(() =>
       .describe(
         `The managed nodes to run the command on (1-${COMMAND_INSTANCE_IDS_MAX}), by EC2 instance ID (e.g. i-0123456789abcdef0) or hybrid managed node ID (e.g. mi-0123456789abcdef0). Find them with describeInstanceInformation.`
       ),
-    documentName: documentNameSchema().describe(
+    documentName: documentNameOrArnSchema().describe(
       'The SSM document to run. Use "AWS-RunShellScript" for shell commands on Linux and macOS nodes, or "AWS-RunPowerShellScript" for PowerShell on Windows nodes. Other AWS-owned or custom document names, and document ARNs shared from another account, also work.'
     ),
     parameters: z

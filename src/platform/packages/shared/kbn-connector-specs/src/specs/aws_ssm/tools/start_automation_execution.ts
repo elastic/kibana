@@ -10,7 +10,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
-import { documentNameSchema, documentVersionSchema, uuidSchema } from './shared';
+import { documentNameOrArnSchema, documentVersionSchema, uuidSchema } from './shared';
 
 // StartAutomationExecution's limits for runbook parameters.
 const AUTOMATION_PARAMETER_NAME_MAX_LENGTH = 50;
@@ -20,7 +20,7 @@ const AUTOMATION_PARAMETER_VALUE_MAX_LENGTH = 512;
 
 const StartAutomationExecutionInputSchema = lazySchema(() =>
   z.object({
-    documentName: documentNameSchema().describe(
+    documentName: documentNameOrArnSchema().describe(
       'The Automation runbook to run, e.g. "AWS-RestartEC2Instance". AWS-owned runbooks start with "AWS-"; custom runbook names and runbook ARNs shared from another account also work.'
     ),
     parameters: z

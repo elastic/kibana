@@ -10,11 +10,11 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
-import { documentNameSchema, documentVersionSchema } from './shared';
+import { documentNameOrArnSchema, documentVersionSchema } from './shared';
 
 const GetDocumentInputSchema = lazySchema(() =>
   z.object({
-    name: documentNameSchema().describe(
+    name: documentNameOrArnSchema().describe(
       'The name or ARN of the document, e.g. "AWS-RunShellScript" or "AWS-RestartEC2Instance".'
     ),
     documentVersion: documentVersionSchema()

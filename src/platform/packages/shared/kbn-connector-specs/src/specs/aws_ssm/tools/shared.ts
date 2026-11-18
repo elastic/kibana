@@ -14,9 +14,14 @@ const INSTANCE_ID_PATTERN = /^(i-(\w{8}|\w{17})|mi-\w{17})$/;
 const INSTANCE_ID_MAX_LENGTH = 20;
 // SendCommand and CancelCommand take at most 50 instance IDs.
 export const COMMAND_INSTANCE_IDS_MAX = 50;
-// The patterns SSM's model gives DocumentName and DocumentVersion.
-const DOCUMENT_NAME_PATTERN = /^[a-zA-Z0-9_\-.:/]{3,128}$/;
+// The characters SSM's model allows in a document name or ARN, and the pattern it gives
+// DocumentVersion.
+const DOCUMENT_NAME_PATTERN = /^[a-zA-Z0-9_\-.:/]+$/;
+const DOCUMENT_NAME_MIN_LENGTH = 3;
 const DOCUMENT_NAME_MAX_LENGTH = 128;
+// SSM's model caps a document name or ARN at 128 characters, too short for an ARN, but SSM itself
+// allows 200.
+const DOCUMENT_ARN_MAX_LENGTH = 200;
 const DOCUMENT_VERSION_PATTERN = /^(\$LATEST|\$DEFAULT|[1-9][0-9]*)$/;
 const DOCUMENT_VERSION_MAX_LENGTH = 16;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -75,7 +80,15 @@ export const automationExecutionIdSchema = () =>
 export const documentNameSchema = () =>
   z
     .string()
+    .min(DOCUMENT_NAME_MIN_LENGTH)
     .max(DOCUMENT_NAME_MAX_LENGTH)
+    .regex(DOCUMENT_NAME_PATTERN, 'Must be the name of an SSM document.');
+
+export const documentNameOrArnSchema = () =>
+  z
+    .string()
+    .min(DOCUMENT_NAME_MIN_LENGTH)
+    .max(DOCUMENT_ARN_MAX_LENGTH)
     .regex(DOCUMENT_NAME_PATTERN, 'Must be the name or ARN of an SSM document.');
 
 export const documentVersionSchema = () =>

@@ -63,6 +63,12 @@ describe('AwsSsmConnector', () => {
       { documentName: 'AWS-RestartEC2Instance', parameters: parametersWithKeys(201) },
     ],
     [
+      'getDocument of an ARN longer than 200 characters',
+      'getDocument',
+      { name: `arn:aws:ssm:us-east-1:123456789012:document/${'a'.repeat(156)}` },
+      { name: `arn:aws:ssm:us-east-1:123456789012:document/${'a'.repeat(157)}` },
+    ],
+    [
       'putParameter of a SecureString',
       'putParameter',
       { name: '/myapp/flag', value: 'on', type: 'String' },
