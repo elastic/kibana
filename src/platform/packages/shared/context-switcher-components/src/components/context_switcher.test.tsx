@@ -25,27 +25,6 @@ const buildSpaces = (): SpaceItem[] => [
   { id: 'marketing', name: 'Marketing' },
 ];
 
-const buildEnvironmentContext = (
-  overrides?: Partial<ContextSwitcherProps['environmentContext']>
-) => ({
-  name: 'My Awesome Project',
-  environmentType: 'project' as const,
-  submenuItems: [
-    {
-      id: 'manage',
-      label: 'Manage project',
-      'data-test-subj': 'contextSwitcherSubmenuItem-manage',
-    },
-  ],
-  submenuFooterAction: {
-    id: 'create-project',
-    label: 'Create project',
-    onClick: jest.fn(),
-    'data-test-subj': 'contextSwitcherSubmenuFooterAction-createProject',
-  },
-  ...overrides,
-});
-
 const buildProps = (overrides?: Partial<ContextSwitcherProps>): ContextSwitcherProps => ({
   spaces: {
     active: buildSpaces()[0],
@@ -148,93 +127,32 @@ describe('ContextSwitcher', () => {
     expect(trigger).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('displays environment label when environmentContext is provided with single space', () => {
-    const props = buildProps({ environmentContext: buildEnvironmentContext() });
-    props.spaces.items = [buildSpaces()[0]];
-
-    render(<ContextSwitcher {...props} />);
-
-    const trigger = screen.getByTestId('contextSwitcherTriggerButton');
-    expect(trigger).toHaveTextContent('My Awesome Project');
-    expect(trigger).not.toHaveTextContent('Default');
-  });
-
-  it('displays combined label when environmentContext is provided with multiple spaces', () => {
-    const props = buildProps({ environmentContext: buildEnvironmentContext() });
-
-    render(<ContextSwitcher {...props} />);
-
-    const trigger = screen.getByTestId('contextSwitcherTriggerButton');
-    expect(trigger).toHaveTextContent('My Awesome Project: Default');
-    expect(trigger).toHaveAttribute('data-space-name', 'Default');
-  });
-
-  it('shows two-step navigation when environmentContext is present', async () => {
+  it('opens directly onto the space list', async () => {
     const user = userEvent.setup();
-    const props = buildProps({ environmentContext: buildEnvironmentContext() });
+
+    render(<ContextSwitcher {...buildProps()} />);
+
+    const trigger = screen.getByTestId('contextSwitcherTriggerButton');
+    expect(trigger).toHaveTextContent('Default');
+    await user.click(trigger);
+    await waitForEuiPopoverOpen();
+    expect(screen.queryByTestId('contextSwitcherSpacesSearchInput')).not.toBeInTheDocument();
+    expect(screen.getByTestId('space-default')).toBeInTheDocument();
+    expect(screen.queryByText('My spaces')).not.toBeInTheDocument();
+  });
+
+  it('shows Manage spaces above Create space', async () => {
+    const user = userEvent.setup();
+    const props = buildProps();
+    props.spaces.headerAction = { id: 'manage', label: 'Manage spaces', onClick: jest.fn() };
+    props.spaces.footerAction = { id: 'create', label: 'Create space', onClick: jest.fn() };
 
     render(<ContextSwitcher {...props} />);
 
     await user.click(screen.getByTestId('contextSwitcherTriggerButton'));
     await waitForEuiPopoverOpen();
-    expect(screen.getByTestId('contextSwitcherEnvironmentRow')).toBeInTheDocument();
-    expect(screen.getByTestId('contextSwitcherSpacesRow')).toBeInTheDocument();
-    expect(screen.queryByTestId('space-default')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('space-obs')).not.toBeInTheDocument();
-  });
-
-  it('navigates to environment submenu and back to root', async () => {
-    const user = userEvent.setup();
-    const props = buildProps({ environmentContext: buildEnvironmentContext() });
-
-    render(<ContextSwitcher {...props} />);
-
-    await user.click(screen.getByTestId('contextSwitcherTriggerButton'));
-    await waitForEuiPopoverOpen();
-    await user.click(screen.getByTestId('contextSwitcherEnvironmentRow'));
-    expect(screen.queryByTestId('contextSwitcherEnvironmentRow')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextSwitcherSubmenuBackButton')).toBeInTheDocument();
-
-    // back to root view
-    await user.click(screen.getByTestId('contextSwitcherSubmenuBackButton'));
-    expect(screen.getByTestId('contextSwitcherEnvironmentRow')).toBeInTheDocument();
-    expect(screen.getByTestId('contextSwitcherSpacesRow')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextSwitcherSubmenuBackButton')).not.toBeInTheDocument();
-  });
-
-  it('closes the popover when clicking footer link or submenu footer action', async () => {
-    const user = userEvent.setup();
-    const onFooterLinkClick = jest.fn();
-    const onSubmenuFooterActionClick = jest.fn();
-    const env = buildEnvironmentContext();
-    env.submenuFooterAction = { ...env.submenuFooterAction, onClick: onSubmenuFooterActionClick };
-    const props = buildProps({
-      footerLinks: [
-        { id: 'connection-details', label: 'Connection details', onClick: onFooterLinkClick },
-      ],
-      environmentContext: env,
-    });
-
-    render(<ContextSwitcher {...props} />);
-
-    const trigger = screen.getByTestId('contextSwitcherTriggerButton');
-    await user.click(trigger);
-    await waitForEuiPopoverOpen();
-    expect(trigger).toHaveAttribute('aria-pressed', 'true');
-
-    // close via footer link (root view)
-    await user.click(screen.getByText('Connection details'));
-    expect(onFooterLinkClick).toHaveBeenCalledTimes(1);
-    await waitForEuiPopoverClose();
-    expect(trigger).toHaveAttribute('aria-pressed', 'false');
-    await user.click(trigger);
-    await waitForEuiPopoverOpen();
-
-    // close via submenu footer action (environment submenu)
-    await user.click(screen.getByTestId('contextSwitcherEnvironmentRow'));
-    await user.click(screen.getByTestId('contextSwitcherSubmenuFooterAction-createProject'));
-    expect(onSubmenuFooterActionClick).toHaveBeenCalledTimes(1);
-    await waitForEuiPopoverClose();
-    expect(trigger).toHaveAttribute('aria-pressed', 'false');
+    const manage = screen.getByText('Manage spaces');
+    const create = screen.getByText('Create space');
+    expect(manage.compareDocumentPosition(create) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

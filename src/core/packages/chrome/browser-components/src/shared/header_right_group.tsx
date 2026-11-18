@@ -17,6 +17,8 @@ export interface HeaderRightGroupProps {
   search?: ReactNode;
   help?: ReactNode;
   actions?: ReactNode;
+  /** Icon action rendered immediately before the user menu. */
+  userMenuAction?: ReactNode;
   userMenu?: ReactNode;
 }
 
@@ -64,7 +66,7 @@ const useHeaderRightGroupStyles = () => {
 };
 
 export const HeaderRightGroup = React.memo<HeaderRightGroupProps>(
-  ({ search, help, actions, userMenu }) => {
+  ({ search, help, actions, userMenuAction, userMenu }) => {
     const styles = useHeaderRightGroupStyles();
 
     return (
@@ -82,6 +84,14 @@ export const HeaderRightGroup = React.memo<HeaderRightGroupProps>(
         {actions && (
           <div css={styles.actionsSlot} data-test-subj={CHROME_HEADER_TEST_SUBJECTS.actions}>
             {actions}
+          </div>
+        )}
+        {userMenuAction && (
+          <div
+            css={styles.userMenuSlot}
+            data-test-subj={CHROME_HEADER_TEST_SUBJECTS.userMenuAction}
+          >
+            {userMenuAction}
           </div>
         )}
         {userMenu && (

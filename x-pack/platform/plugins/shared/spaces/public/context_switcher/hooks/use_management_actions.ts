@@ -27,8 +27,8 @@ export const useManagementActions = ({
             headerAction: {
               id: 'manageSpaces',
               'data-test-subj': 'manageSpaces',
-              label: i18n.translate('xpack.spaces.contextSwitcher.manage', {
-                defaultMessage: 'Manage',
+              label: i18n.translate('xpack.spaces.contextSwitcher.manageSpaces', {
+                defaultMessage: 'Manage spaces',
               }),
               onClick: () => application.navigateToApp('management', { path: 'kibana/spaces' }),
             },

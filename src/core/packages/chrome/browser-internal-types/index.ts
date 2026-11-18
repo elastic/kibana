@@ -227,6 +227,9 @@ export interface InternalChromeControls extends ChromeControls {
   globalSearch: ChromeControls['globalSearch'] & {
     get$(): Observable<GlobalSearchConfig | undefined>;
   };
+  headerLogo: ChromeControls['headerLogo'] & {
+    get$(): Observable<ReactNode>;
+  };
   contextSwitcher: ChromeControls['contextSwitcher'] & {
     get$(): Observable<ReactNode>;
   };
@@ -237,6 +240,9 @@ export interface InternalChromeControls extends ChromeControls {
     get$(): Observable<ReactNode>;
   };
   userMenu: ChromeControls['userMenu'] & {
+    get$(): Observable<ReactNode>;
+  };
+  userMenuAction: ChromeControls['userMenuAction'] & {
     get$(): Observable<ReactNode>;
   };
 }

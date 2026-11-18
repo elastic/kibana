@@ -72,6 +72,7 @@ export interface ChromeState {
   globalSearch: State<GlobalSearchConfig | undefined>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
+  headerLogo: State<ReactNode>;
   contextSwitcher: State<ReactNode>;
   projectPicker: State<ReactNode>;
   subscriptionBadge: State<ReactNode>;
@@ -79,6 +80,7 @@ export interface ChromeState {
   inlineAppHeaderOwnerId: number;
   appHeader: State<ChromeAppHeaderConfig | undefined>;
   userMenu: State<ReactNode>;
+  userMenuAction: State<ReactNode>;
 
   /** Help system */
   help: {
@@ -132,12 +134,14 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const aiButton = createState<ReadonlySet<ChromeAiButton>>(new Set());
   const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
+  const headerLogo = createState<ReactNode>(null);
   const contextSwitcher = createState<ReactNode>(null);
   const projectPicker = createState<ReactNode>(null);
   const subscriptionBadge = createState<ReactNode>(null);
   const inlineAppHeader = createState<InlineAppHeaderState | undefined>(undefined);
   const appHeader = createState<ChromeAppHeaderConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
+  const userMenuAction = createState<ReactNode>(null);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
@@ -180,10 +184,12 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       globalMenuLinks: globalHelpMenuLinks,
       menuLinks: helpMenuLinks,
     },
+    headerLogo,
     contextSwitcher,
     projectPicker,
     subscriptionBadge,
     userMenu,
+    userMenuAction,
     feedbackHandler,
     newsfeedHandler,
   };

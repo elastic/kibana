@@ -8,8 +8,13 @@
  */
 
 export { ContextSwitcher } from './src/components/context_switcher';
+export { ProjectMenu } from './src/components/project_menu';
+export { TrialBadge } from './src/components/trial_badge';
+export type { ProjectMenuProps } from './src/components/project_menu';
 export type {
   ContextSwitcherProps,
+  ContextSwitcherVariant,
+  ContextSwitcherProjectSummary,
   ContextSwitcherSpacesConfig,
   ContextSwitcherEnvironmentConfig,
   SpaceItem,

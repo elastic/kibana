@@ -31,7 +31,19 @@ import type {
 } from '../selectable_list';
 
 import { Footer } from '../footer';
-import type { ActionConfig } from '../types';
+import { LinksList } from '../links_list';
+import type { ActionConfig, LinksListItem } from '../types';
+
+const toFooterLink = (action: ActionConfig, iconType: ActionConfig['iconType']): LinksListItem => ({
+  id: action.id,
+  label: action.label,
+  href: action.href,
+  onClick: action.onClick,
+  external: action.external,
+  disabled: action.disabled,
+  iconType: action.iconType ?? iconType,
+  'data-test-subj': action['data-test-subj'],
+});
 
 const BACK_BUTTON_ARIA_LABEL = i18n.translate(
   'contextSwitcherComponents.spacesListView.backButtonAriaLabel',
@@ -41,7 +53,7 @@ const BACK_BUTTON_ARIA_LABEL = i18n.translate(
 );
 export interface SpacesListViewProps {
   readonly id: string;
-  readonly title: string;
+  readonly title?: string;
   readonly headerAction?: ActionConfig;
   readonly items: ReadonlyArray<SelectableListItem>;
   readonly search?: SelectableListSearchConfig;
@@ -49,6 +61,8 @@ export interface SpacesListViewProps {
   readonly loadingMessage?: string;
   readonly noMatchesMessage?: ReactElement;
   readonly footerAction?: ActionConfig;
+  /** Original menu: "Manage" sits in the title and "Create space" stays in the footer. */
+  readonly headerActionInTitle?: boolean;
   readonly onBack?: () => void;
   readonly onSelect: SelectableListProps['onSelect'];
 }
@@ -69,6 +83,7 @@ export const SpacesListView = ({
   loadingMessage,
   noMatchesMessage,
   footerAction,
+  headerActionInTitle = false,
 }: SpacesListViewProps) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -84,81 +99,104 @@ export const SpacesListView = ({
       >
         {({ list, search: searchNode }) => (
           <>
-            <EuiPopoverTitle
-              // Remove separator between title and list
-              css={css`
-                border-bottom: 0;
-                padding-bottom: 0;
-              `}
-            >
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="spaceBetween"
-                gutterSize="s"
-                responsive={false}
+            {(title || onBack || (headerActionInTitle && headerAction)) && (
+              <EuiPopoverTitle
+                css={css`
+                  border-bottom: 0;
+                  padding-bottom: 0;
+                `}
               >
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    {onBack && (
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip content={BACK_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
-                          <EuiButtonIcon
-                            iconType="chevronSingleLeft"
-                            aria-label={BACK_BUTTON_ARIA_LABEL}
-                            color="text"
-                            display="empty"
-                            size="s"
-                            onClick={onBack}
-                            data-test-subj="contextSwitcherSpacesBackButton"
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    )}
-                    <EuiFlexItem
-                      grow={false}
-                      css={
-                        !onBack
-                          ? css`
-                              padding-left: ${euiTheme.size.xs};
-                            `
-                          : undefined
-                      }
-                    >
-                      {title}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                {headerAction && (
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent={headerActionInTitle ? 'spaceBetween' : 'flexStart'}
+                  gutterSize="s"
+                  responsive={false}
+                >
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      size="s"
-                      onClick={headerAction.onClick}
-                      data-test-subj={headerAction['data-test-subj']}
-                      isDisabled={headerAction.disabled}
-                      target={headerAction.external ? '_blank' : undefined}
-                    >
-                      {headerAction.label}
-                    </EuiButtonEmpty>
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                      {onBack && (
+                        <EuiFlexItem grow={false}>
+                          <EuiToolTip content={BACK_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                            <EuiButtonIcon
+                              iconType="chevronSingleLeft"
+                              aria-label={BACK_BUTTON_ARIA_LABEL}
+                              color="text"
+                              display="empty"
+                              size="s"
+                              onClick={onBack}
+                              data-test-subj="contextSwitcherSpacesBackButton"
+                            />
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                      )}
+                      {title && (
+                        <EuiFlexItem
+                          grow={false}
+                          css={
+                            !onBack
+                              ? css`
+                                  padding-left: ${euiTheme.size.xs};
+                                `
+                              : undefined
+                          }
+                        >
+                          {title}
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
                   </EuiFlexItem>
+                  {headerActionInTitle && headerAction && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        onClick={headerAction.onClick}
+                        data-test-subj={headerAction['data-test-subj']}
+                        isDisabled={headerAction.disabled}
+                        target={headerAction.external ? '_blank' : undefined}
+                      >
+                        {headerAction.label}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+                {headerActionInTitle && searchNode && (
+                  <>
+                    <EuiSpacer size="s" />
+                    {searchNode}
+                  </>
                 )}
-              </EuiFlexGroup>
-
-              {searchNode && (
-                <>
-                  <EuiSpacer size="s" />
-                  {searchNode}
-                </>
-              )}
-            </EuiPopoverTitle>
+              </EuiPopoverTitle>
+            )}
+            {!headerActionInTitle && searchNode && (
+              <div
+                css={css`
+                  padding: ${euiTheme.size.xs};
+                `}
+              >
+                {searchNode}
+              </div>
+            )}
             {list}
           </>
         )}
       </SelectableList>
 
-      {footerAction && (
+      {headerActionInTitle && footerAction && (
         <>
           <EuiHorizontalRule margin="xs" />
           <Footer action={footerAction} />
+        </>
+      )}
+
+      {!headerActionInTitle && (headerAction || footerAction) && (
+        <>
+          <EuiHorizontalRule margin="xs" />
+          <LinksList
+            items={[
+              headerAction ? toFooterLink(headerAction, 'gear') : undefined,
+              footerAction ? toFooterLink(footerAction, 'plus') : undefined,
+            ].filter((item): item is LinksListItem => Boolean(item))}
+          />
         </>
       )}
     </>

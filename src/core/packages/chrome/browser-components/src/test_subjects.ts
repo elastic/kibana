@@ -19,6 +19,7 @@ export const CHROME_HEADER_TEST_SUBJECTS = {
   helpButton: 'kbnChromeHeader-helpButton',
   actions: 'kbnChromeHeader-actions',
   userMenu: 'kbnChromeHeader-userMenu',
+  userMenuAction: 'kbnChromeHeader-userMenuAction',
   switcher: 'kbnChromeHeader-switcher',
   projectPicker: 'kbnChromeHeader-projectPicker',
   subscriptionBadge: 'kbnChromeHeader-subscriptionBadge',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -14,6 +14,9 @@ import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import type { EventTracker } from './analytics';
 import type { ConfigType } from './config';
 import { SpacesContextSwitcher } from './context_switcher';
+import { ProjectMenuComponent } from './context_switcher/context_switcher_component';
+import { useContextSwitcherProposal } from './context_switcher/proposal';
+import { ProposalSidebar } from './context_switcher/proposal_sidebar';
 import { SpacesNavControl } from './nav_control';
 import type { SpacesManager } from './spaces_manager';
 
@@ -35,6 +38,45 @@ function SpacesChromeControl({
   isServerless,
 }: SpacesChromeControlProps) {
   const chromeStyle = useChromeStyle();
+  const proposal = useContextSwitcherProposal();
+  const showProjectMenu =
+    chromeStyle === 'project' &&
+    proposal === 'proposal1' &&
+    Boolean(isServerless || cloud?.isCloudEnabled);
+
+  useLayoutEffect(() => {
+    if (!showProjectMenu) {
+      core.chrome.controls.headerLogo.set(undefined);
+      return;
+    }
+
+    core.chrome.controls.headerLogo.set(
+      <ProjectMenuComponent
+        spacesManager={spacesManager}
+        core={core}
+        cloud={cloud}
+        isServerless={isServerless}
+        allowSolutionVisibility={config.allowSolutionVisibility}
+      />
+    );
+
+    return () => {
+      core.chrome.controls.headerLogo.set(undefined);
+    };
+  }, [cloud, config.allowSolutionVisibility, core, isServerless, showProjectMenu, spacesManager]);
+
+  useLayoutEffect(() => {
+    if (chromeStyle !== 'project') {
+      core.chrome.controls.userMenuAction.set(undefined);
+      return;
+    }
+
+    core.chrome.controls.userMenuAction.set(<ProposalSidebar />);
+
+    return () => {
+      core.chrome.controls.userMenuAction.set(undefined);
+    };
+  }, [chromeStyle, core]);
 
   switch (chromeStyle) {
     case 'project':
@@ -45,6 +87,7 @@ function SpacesChromeControl({
           cloud={cloud}
           isServerless={isServerless}
           allowSolutionVisibility={config.allowSolutionVisibility}
+          variant={proposal}
         />
       );
     case 'classic':

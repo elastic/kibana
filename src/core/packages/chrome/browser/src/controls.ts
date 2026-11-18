@@ -61,6 +61,17 @@ export interface ChromeControls {
      */
     set(config?: GlobalSearchConfig): void;
   };
+  /**
+   * Replaces the header logo. Used for the project menu.
+   * Pass `undefined` to restore the Elastic logo.
+   */
+  headerLogo: {
+    /**
+     * Set the header logo content.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
   /** Context switcher content. */
   contextSwitcher: {
     /**
@@ -88,6 +99,16 @@ export interface ChromeControls {
   userMenu: {
     /**
      * Set the user menu content.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
+  /**
+   * Content rendered immediately before the user menu, at the top right of the header.
+   */
+  userMenuAction: {
+    /**
+     * Set the action beside the user menu.
      * Pass `undefined` to remove. Global — persists across app changes.
      */
     set(content?: ReactNode): void;
