@@ -57,7 +57,7 @@ export function hasNoResults$({
       ]) => {
         const dataSource = api.dataSources$?.value?.[0];
         const rangeFilter = rangeFilters?.[0];
-        if (!dataSource || !rangeFilter || ignoreValidations) {
+        if (!dataSource || !rangeFilter || ignoreValidations || !valuesSourceFetchPlan) {
           return false;
         }
         const timeRange = getFetchContextTimeRange(controlFetchContext, useGlobalFilters);

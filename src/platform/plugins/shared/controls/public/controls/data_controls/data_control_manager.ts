@@ -304,7 +304,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       setBlockingError(e);
     }
   }
-  const valuesSourceFetchPlan$ = new BehaviorSubject<ValuesSourceFetchPlan>({ fetchMode: 'dsl' });
+  const valuesSourceFetchPlan$ = new BehaviorSubject<ValuesSourceFetchPlan | undefined>(undefined);
   const valuesSourceFetchPlanSubscription = combineLatest([
     dataControlStateManager.api.valuesSource$,
     dataControlStateManager.api.esqlQuery$,
@@ -312,27 +312,31 @@ export const initializeDataControlManager = async <EditorState extends object = 
     field$,
   ])
     .pipe(
-      map(([valuesSource, esqlQuery, nextDataSources, field]): ValuesSourceFetchPlan => {
-        // A `ControlValuesSource.ESQL` control already has its own user supplied query.
-        if (valuesSource === ControlValuesSource.ESQL) {
-          return { fetchMode: 'esql', query: esqlQuery };
+      map(
+        ([valuesSource, esqlQuery, nextDataSources, field]): ValuesSourceFetchPlan | undefined => {
+          const dataSource = nextDataSources?.[0];
+          // The plan is not known until the data source is loaded
+          if (!dataSource) return undefined;
+          // A `ControlValuesSource.ESQL` control already has its own user supplied query.
+          if (valuesSource === ControlValuesSource.ESQL) {
+            return { fetchMode: 'esql', query: esqlQuery };
+          }
+          // An ES|QL source has no data view to search, so a field control on it runs a generated query.
+          if (isEsqlFilterableSource(dataSource)) {
+            return {
+              fetchMode: 'esql',
+              // The field is not loaded yet when it is undefined
+              query: field
+                ? appendStatsByToQuery(
+                    `FROM ${formatEsqlSources(dataSource.title)}`,
+                    formatEsqlIdentifier(field.name)
+                  )
+                : undefined,
+            };
+          }
+          return { fetchMode: 'dsl' };
         }
-        // An ES|QL source has no data view to search, so a field control on it runs a generated query.
-        const dataSource = nextDataSources?.[0];
-        if (dataSource && isEsqlFilterableSource(dataSource)) {
-          return {
-            fetchMode: 'esql',
-            // The field is not loaded yet when it is undefined
-            query: field
-              ? appendStatsByToQuery(
-                  `FROM ${formatEsqlSources(dataSource.title)}`,
-                  formatEsqlIdentifier(field.name)
-                )
-              : undefined,
-          };
-        }
-        return { fetchMode: 'dsl' };
-      }),
+      ),
       distinctUntilChanged(isEqual)
     )
     .subscribe((resolved) => valuesSourceFetchPlan$.next(resolved));

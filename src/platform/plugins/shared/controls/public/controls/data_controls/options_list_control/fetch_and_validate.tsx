@@ -98,6 +98,11 @@ export function fetchAndValidate$({
         runPastTimeout,
         selectedOptions,
       ]) => {
+        // The data source is not loaded yet
+        if (!valuesSourceFetchPlan) {
+          return { suggestions: [], totalCardinality: 0, isPartial: false };
+        }
+
         let built: BuildOptionsListFetchBodyResult;
         try {
           const sharedArgs = {

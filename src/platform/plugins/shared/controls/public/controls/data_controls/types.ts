@@ -41,7 +41,7 @@ export interface PublishesField {
 export type ValuesSourceFetchPlan = { fetchMode: 'esql'; query?: string } | { fetchMode: 'dsl' };
 
 export interface PublishesValuesSourceFetchPlan {
-  valuesSourceFetchPlan$: PublishingSubject<ValuesSourceFetchPlan>;
+  valuesSourceFetchPlan$: PublishingSubject<ValuesSourceFetchPlan | undefined>;
 }
 
 export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'] &

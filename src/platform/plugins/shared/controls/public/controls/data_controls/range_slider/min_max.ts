@@ -37,7 +37,7 @@ export function minMax$({
   dataSources$: PublishesDataSources['dataSources$'];
   fieldName$: PublishingSubject<string | undefined>;
   useGlobalFilters$: PublishingSubject<boolean | undefined>;
-  valuesSourceFetchPlan$: PublishingSubject<ValuesSourceFetchPlan>;
+  valuesSourceFetchPlan$: PublishingSubject<ValuesSourceFetchPlan | undefined>;
   setIsLoading: (isLoading: boolean) => void;
 }): {
   minMax$: Observable<{ error?: Error; min: number | undefined; max: number | undefined }>;
@@ -68,7 +68,7 @@ export function minMax$({
       ]) => {
         const dataSource = dataSources?.[0];
         const field = dataSource && fieldName ? dataSource.getFieldByName(fieldName) : undefined;
-        if (!dataSource || !field) {
+        if (!dataSource || !field || !valuesSourceFetchPlan) {
           return { max: undefined, min: undefined };
         }
 
