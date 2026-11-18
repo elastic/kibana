@@ -623,6 +623,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.not.objectContaining({ status: ExecutionStatus.COMPLETED })
       );
+      expect(underTest.takeJustFinalizedTerminalState()).toBe(false);
       expect(workflowLogger.logInfo).not.toHaveBeenCalledWith(
         `Workflow execution completed successfully`,
         expect.anything()
@@ -640,6 +641,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
           duration: 14404000,
         })
       );
+      expect(underTest.takeJustFinalizedTerminalState()).toBe(true);
+      expect(underTest.takeJustFinalizedTerminalState()).toBe(false);
 
       // The execution loop saves once more after the flow loop exits, with the status already stored.
       jest.mocked(workflowExecutionState.getWorkflowExecution).mockReturnValue({
@@ -656,6 +659,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       expect(secondUpdate).toEqual(expect.objectContaining({ status: ExecutionStatus.COMPLETED }));
       expect(secondUpdate).not.toHaveProperty('finishedAt');
       expect(secondUpdate).not.toHaveProperty('duration');
+      expect(underTest.takeJustFinalizedTerminalState()).toBe(false);
       expect(workflowLogger.logInfo).toHaveBeenCalledTimes(1);
       expect(workflowLogger.logInfo).toHaveBeenCalledWith(
         'Workflow execution completed successfully',

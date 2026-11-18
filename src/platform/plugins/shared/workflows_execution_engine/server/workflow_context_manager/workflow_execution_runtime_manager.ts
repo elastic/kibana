@@ -79,6 +79,8 @@ export class WorkflowExecutionRuntimeManager {
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
   private terminalStateFinalized: boolean = false;
+  /** Armed with `terminalStateFinalized`, then consumed by the execution loop. */
+  private terminalFinalizationPending: boolean = false;
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
     this.workflowExecutionCursor = workflowExecutionRuntimeManagerInit.workflowExecutionCursor;
@@ -569,9 +571,19 @@ export class WorkflowExecutionRuntimeManager {
 
       this.reportTelemetryIfTerminal(workflowExecution, workflowExecutionUpdate);
       this.terminalStateFinalized = true;
+      this.terminalFinalizationPending = true;
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
+  }
+
+  /** True once, after this runtime first finalizes a terminal status. */
+  public takeJustFinalizedTerminalState(): boolean {
+    if (!this.terminalFinalizationPending) {
+      return false;
+    }
+    this.terminalFinalizationPending = false;
+    return true;
   }
 
   private logWorkflowStart(): void {

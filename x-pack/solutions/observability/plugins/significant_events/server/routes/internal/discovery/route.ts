@@ -16,6 +16,7 @@ import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 
 const discoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
@@ -52,6 +53,7 @@ const discoveryExecuteRoute = createServerRoute({
     server,
     telemetry,
     maintenanceService,
+    logger,
   }): Promise<{ executionId: string | null }> => {
     const { significantEventsDiscoveryClient } = workflowClients;
     if (!significantEventsDiscoveryClient) {
@@ -85,10 +87,18 @@ const discoveryExecuteRoute = createServerRoute({
           }),
       });
       if (isNew) {
-        telemetry.trackSignificantEventsDiscoveryTriggered({
-          workflow_execution_id: executionId,
-          execution_id: executionId,
-          space_id: spaceId,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'discovery triggered telemetry',
+          track: () =>
+            telemetry.trackSignificantEventsDiscoveryTriggered(
+              {
+                workflow_execution_id: executionId,
+                execution_id: executionId,
+                space_id: spaceId,
+              },
+              request
+            ),
         });
       }
       return { executionId };
@@ -161,9 +171,9 @@ const discoveryStartedRoute = createServerRoute({
     params,
     request,
     getScopedClients,
-    getSpaceId,
     server,
     telemetry,
+    logger,
   }): Promise<{ acknowledged: true }> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
@@ -172,11 +182,18 @@ const discoveryStartedRoute = createServerRoute({
       parent_workflow_execution_id: parentExecutionId,
     } = params.body;
 
-    telemetry.trackSignificantEventsDiscoveryStarted({
-      ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
-      workflow_execution_id: discoveryExecutionId,
-      space_id: await getSpaceId(request),
-      alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+    trackTelemetryBestEffort({
+      logger,
+      description: 'discovery started telemetry',
+      track: () =>
+        telemetry.trackSignificantEventsDiscoveryStarted(
+          {
+            ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
+            workflow_execution_id: discoveryExecutionId,
+            alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+          },
+          request
+        ),
     });
     return { acknowledged: true };
   },
@@ -261,16 +278,23 @@ const discoveryCompletedRoute = createServerRoute({
       ? execution.duration ?? undefined
       : Date.now() - Date.parse(execution.startedAt);
 
-    telemetry.trackSignificantEventsDiscoveryCompleted({
-      ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
-      workflow_execution_id: discoveryExecutionId,
-      space_id: spaceId,
-      alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
-      // A step timeout reaches the failure fallback as a `TimeoutError`.
-      outcome: outcome === 'failed' && errorType === 'TimeoutError' ? 'timed_out' : outcome,
-      ...(durationMs !== undefined ? { duration_ms: durationMs } : {}),
-      ...counts,
-      ...(errorMessage ? { error_message: errorMessage } : {}),
+    trackTelemetryBestEffort({
+      logger,
+      description: 'discovery completed telemetry',
+      track: () =>
+        telemetry.trackSignificantEventsDiscoveryCompleted(
+          {
+            ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
+            workflow_execution_id: discoveryExecutionId,
+            alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+            // A step timeout reaches the failure fallback as a `TimeoutError`.
+            outcome: outcome === 'failed' && errorType === 'TimeoutError' ? 'timed_out' : outcome,
+            ...(durationMs !== undefined ? { duration_ms: durationMs } : {}),
+            ...counts,
+            ...(errorMessage ? { error_message: errorMessage } : {}),
+          },
+          request
+        ),
     });
     return { acknowledged: true };
   },

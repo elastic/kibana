@@ -127,25 +127,29 @@ const gaugeConfigMetricOptionsShape = {
   /**
    * Tick marks configuration
    */
-  ticks: z
-    .object({
-      visible: z
-        .boolean()
+  ticks: lazySchema(() =>
+    z
+      .object({
+        visible: z
+          .boolean()
 
-        .default(true)
-        .optional()
-        .meta({ description: 'When `true`, displays tick marks on the gauge.' }),
-      mode: z
-        .union([z.literal('auto'), z.literal('bands')])
+          .default(true)
+          .optional()
+          .meta({ description: 'When `true`, displays tick marks on the gauge.' }),
+        mode: z
+          .union([z.literal('auto'), z.literal('bands')])
 
-        .default('bands')
-        .optional()
-        .meta({ description: 'Tick placement mode.' }),
-    })
-    .strict()
+          .optional()
+          .meta({
+            description:
+              'Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.',
+          }),
+      })
+      .strict()
 
-    .optional()
-    .meta({ description: 'Ticks configuration' }),
+      .optional()
+      .meta({ description: 'Ticks configuration' })
+  ),
 };
 
 export const gaugeConfigSchemaNoESQL = lazySchema(() =>

@@ -10,6 +10,7 @@
 import { type EsWorkflowExecution, ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 
 /** Finalizes an identity failure without overwriting a concurrent cancellation or terminal result. */
 export const finalizeWorkflowIdentityFailure = async ({
@@ -90,7 +91,10 @@ export const finalizeWorkflowIdentityFailure = async ({
       },
       { seqNo, primaryTerm }
     );
-    if (updated) return terminalExecution;
+    if (updated) {
+      await publishFinishedWorkflowExecution(terminalExecution);
+      return terminalExecution;
+    }
   }
   throw new Error(
     `Workflow execution ${workflowRunId} kept changing during identity-failure cleanup.`

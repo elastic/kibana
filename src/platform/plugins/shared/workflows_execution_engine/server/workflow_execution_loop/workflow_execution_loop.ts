@@ -13,6 +13,8 @@ import { executionFlowLoop } from './execution_flow_loop';
 import { flushState, persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 import { emitHitlLifecycle } from '../step/wait_for_input_step/hitl_lifecycle_auditor';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { isWorkflowTaskManagerAbortSignal } from '../workflow_task_shutdown';
 
 const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager aborted the task';
@@ -118,10 +120,23 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   await params.workflowExecutionState.flushWorkflowAndSteps();
   finalStateFlushSpan?.end();
 
+  // The flow loop may have finalized on an earlier saveState. Read the flag once,
+  // after the write, so a later flush of this same run does not publish again.
+  await publishJustFinalizedExecution(workflowRuntime);
+
   const finalLogFlushSpan = apm.startSpan('final flush logs', 'workflow', 'logging');
   await params.eventQueue.flush({
     signal: params.signal,
   });
   finalLogFlushSpan?.end();
   params.signal.removeEventListener('abort', onTaskAbort);
+}
+
+async function publishJustFinalizedExecution(
+  workflowRuntime: WorkflowExecutionRuntimeManager
+): Promise<void> {
+  if (!workflowRuntime.takeJustFinalizedTerminalState()) {
+    return;
+  }
+  await publishFinishedWorkflowExecution(workflowRuntime.getWorkflowExecution());
 }
