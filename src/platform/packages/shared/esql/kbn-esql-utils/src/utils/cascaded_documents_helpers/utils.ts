@@ -222,12 +222,6 @@ export type NodeAggregatedValues = Record<
  */
 const AGGREGATE_FILTERING_FUNCTIONS = [
   'values', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/values
-  'top', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/top
-  'sample', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/sample
-  'first', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/first
-  'earliest', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/earliest
-  'last', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/last
-  'latest', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/latest
 ];
 
 /**
