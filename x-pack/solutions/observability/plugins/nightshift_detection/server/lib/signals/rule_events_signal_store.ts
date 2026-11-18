@@ -185,8 +185,10 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
             ],
           },
         },
-        // Newest first, so a read that hits the limit keeps the most recent baseline.
-        sort: [{ [BUCKET_START_FIELD]: 'desc' }],
+        // Newest first, so a read that hits the limit keeps the most recent baseline. A window read
+        // again stores its readings again under a later scheduled time; the latest write comes
+        // first, and it is the one the dedupe below keeps.
+        sort: [{ [BUCKET_START_FIELD]: 'desc' }, { scheduled_timestamp: 'desc' }],
         runtime_mappings: {
           [BUCKET_START_FIELD]: {
             type: 'date',
@@ -211,12 +213,11 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
       );
     }
 
-    // A window written twice stores each of its signals twice.
+    // A window written twice stores each of its signals twice; the first hit is the latest write.
     const seen = new Set<string>();
     const skipped: string[] = [];
 
-    // Back to oldest first.
-    for (const hit of [...response.hits.hits].reverse()) {
+    for (const hit of response.hits.hits) {
       const parsed = storedDetectionSignalSchema.safeParse(hit._source);
       if (!parsed.success) {
         // A document an older or newer build wrote in another shape must not fail the whole read;
@@ -243,6 +244,9 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
       readings.push({ status, ...(severity !== undefined ? { severity } : {}), ...reading });
       history.set(seriesKey, readings);
     }
+
+    // Back to oldest first.
+    history.forEach((readings) => readings.reverse());
 
     if (skipped.length > 0) {
       // Once per read: every run reads again, so a warning per document would flood the log.

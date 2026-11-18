@@ -30,6 +30,7 @@ function createSignal({
   strategyId = 'error_rate',
   strategyVersion = 1,
   sourceId,
+  writtenAtMinute,
 }: {
   fingerprint: string;
   minute: number;
@@ -38,6 +39,8 @@ function createSignal({
   strategyId?: string;
   strategyVersion?: number;
   sourceId?: string;
+  /** The minute of the run that wrote it; a window read again is written by a later run. */
+  writtenAtMinute?: number;
 }): DetectionSignal {
   const reading: DetectionSignalReading = {
     status: 'breached',
@@ -61,7 +64,10 @@ function createSignal({
     strategyId,
     strategyVersion,
     spaceId,
-    scheduledMinute: reading.bucket_end,
+    scheduledMinute:
+      writtenAtMinute !== undefined
+        ? WINDOW_START + writtenAtMinute * MINUTE_MS
+        : reading.bucket_end,
   });
   if (result.dropped) {
     throw new Error(result.note);
@@ -177,9 +183,17 @@ describe('RuleEventsSignalStore reading from .rule-events', () => {
     expect(history.size).toBe(2);
   });
 
-  it('returns a signal written twice once', async () => {
-    const signal = createSignal({ fingerprint: 'twice', minute: 0, value: 4 });
-    await seed([signal, signal]);
+  it('returns a reading written twice once, as its latest write', async () => {
+    // Read again three minutes later, after late data changed the value. The older copy is
+    // indexed last, so insertion order can't pick the right one.
+    const rewritten = createSignal({
+      fingerprint: 'twice',
+      minute: 0,
+      value: 6,
+      writtenAtMinute: 4,
+    });
+    const first = createSignal({ fingerprint: 'twice', minute: 0, value: 4, writtenAtMinute: 1 });
+    await seed([rewritten, first, first]);
 
     const history = await store.readHistory({
       spaceId: 'default',
@@ -190,6 +204,8 @@ describe('RuleEventsSignalStore reading from .rule-events', () => {
       to: WINDOW_START + MINUTE_MS,
     });
 
-    expect(history.get(getSeriesKey({ fingerprint: 'twice' }))).toHaveLength(1);
+    expect(history.get(getSeriesKey({ fingerprint: 'twice' }))?.map(({ value }) => value)).toEqual([
+      6,
+    ]);
   });
 });
