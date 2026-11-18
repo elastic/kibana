@@ -15,6 +15,7 @@ import { isEqual } from 'lodash';
 import { SERVERLESS_DEFAULT_OUTPUT_ID, outputType } from '../../../common/constants';
 
 import type {
+  FleetRequestHandler,
   DeleteOutputRequestSchema,
   GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
@@ -33,6 +34,7 @@ import { outputService } from '../../services/output';
 import { FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
+import { sanitizeOutput } from '../utils/sanitize_settings_objects';
 
 function ensureNoDuplicateSecrets(output: Partial<Output>) {
   if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
@@ -54,12 +56,15 @@ function ensureNoDuplicateSecrets(output: Partial<Output>) {
   }
 }
 
-export const getOutputsHandler: RequestHandler = async (context, request, response) => {
+export const getOutputsHandler: FleetRequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
+  const fleetContext = await context.fleet;
   const outputs = await outputService.list(soClient);
 
   const body: GetOutputsResponse = {
-    items: outputs.items,
+    items: fleetContext.authz.fleet.readSettings
+      ? outputs.items
+      : outputs.items.map((output) => sanitizeOutput(output)),
     page: outputs.page,
     perPage: outputs.perPage,
     total: outputs.total,
@@ -68,15 +73,16 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
   return response.ok({ body });
 };
 
-export const getOneOuputHandler: RequestHandler<
+export const getOneOuputHandler: FleetRequestHandler<
   TypeOf<typeof GetOneOutputRequestSchema.params>
 > = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
   try {
+    const fleetContext = await context.fleet;
     const output = await outputService.get(soClient, request.params.outputId);
 
     const body: GetOneOutputResponse = {
-      item: output,
+      item: fleetContext.authz.fleet.readSettings ? output : sanitizeOutput(output),
     };
 
     return response.ok({ body });

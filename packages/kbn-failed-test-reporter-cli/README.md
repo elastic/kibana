@@ -14,12 +14,15 @@ since they last passed: at most once a day for each pipeline and branch while th
 (`failing.postedAt` in the issue's metadata), and right away when the issue is closed and was
 updated in the last 30 days, which reopens it.
 
-`REPORT_FAILED_TESTS_PER_TEST_ISSUES=false` keeps it from opening per-test issues: a failure that
-an issue already tracks, per-test or flaky suite, still bumps it, and one that none tracks is
-indexed and written to the failure report but gets no issue, its suite issue comes from
-`report_flaky_test_issues` below once it qualifies as flaky. Unset or `true` (the default) is the
-legacy behaviour, where every new failure opens a per-test issue. It only disables the per-test
-issues: `--report-failing-suites` still files `Failing … suite` issues. Set it in the pipeline env
+`REPORT_FAILED_TESTS_PER_TEST_ISSUES=false` keeps it from opening or updating per-test issues: a
+failure that a suite issue tracks still bumps it, and one that none tracks is indexed and written
+to the failure report but touches no issue, not even a per-test issue about the test. Its suite
+issue comes from `report_flaky_test_issues` below once it qualifies as flaky, or from
+`--report-failing-suites` once it fails every attempt. Both replace the per-test issues with the
+suite issue (see "Which issues count as tracking a test"): the consistent failure check of such a
+job, and the daily report with `--replace-per-test-issues`. Unset or `true` (the default) is the
+legacy behaviour, where every failure opens or updates a per-test issue. It only disables the
+per-test issues: `--report-failing-suites` still files `Failing … suite` issues. Set it in the pipeline env
 next to `REPORT_FAILED_TESTS_TO_GITHUB`, only on pipelines the daily flaky report reads
 (`FLAKY_TESTS_PIPELINES` of `kibana-report-flaky-tests`) and together with `REPORT_FAILING_SUITES`,
 anywhere else a new failure would never get an issue. Flip it back to fall back to the legacy
@@ -67,6 +70,18 @@ the window. Thresholds are checked per branch, so a clean branch cannot hide a f
 branch a test qualified on is recorded as `flakiestBranch`. Tests that never passed in the window
 are consistently failing, not flaky, and are not reported.
 
+With `--judgedTogether` (`FLAKY_TESTS_JUDGED_TOGETHER` in the pipeline: `kibana-on-merge`,
+`kibana-security-solution-on-merge` and `kibana-batch-testing`, which run the same tests in the
+same local environment), only those pipelines' builds are counted together, those the report
+doesn't read ignored. Every
+other pipeline is judged per branch on its own: those running the tests in another environment,
+FIPS mode (`kibana-fips`) and Elastic Cloud (ECH and MKI), with far fewer builds. A test failing 4
+of the 14 FIPS builds on `main` is flaky there, even with 500 clean on-merge builds of `main`.
+Their branch entries carry the pipeline (`byBranch[].pipeline`), and the issue names it: "`main`
+in `kibana-fips`". The issue's `suite.branches` only lists the branch, so `/skip` skips the suite
+on that branch in every pipeline. A pipeline added to the report is judged on its own unless it is
+added to those judged together too.
+
 Breakages don't count as flakiness. A breakage is a run of at least 3 failed builds in a row in one
 pipeline, config and target, a failure that passed on a retry included, with less than a 1% chance
 for a test failing at random as often. A test in a breakage up to its latest build is broken right
@@ -106,12 +121,31 @@ target and by pipeline, and links issues that mention the same file as possibly 
 - An open `failed-test` issue about the test (the per-test issues `report_failed_tests` files),
   about the suite, or about the whole file.
 - A closed one, as long as the test has not failed since it was closed. Once it fails again the
-  closed issue stops counting, and the new suite issue links it as "Previously tracked in #N"
-  (`supersedes` in the summary). Without this, a closed issue would keep the suite silent for up
+  closed issue stops counting, and the new suite issue names it next to its test, in the tests
+  table's "Previously tracked in" column (`supersedes` in the summary). Without this, a closed issue would keep the suite silent for up
   to `--closed-since-days`: once `report_failed_tests` stops writing, its per-test issues get no
   new comments and the stale sweep closes them. The suite's own issue is the exception: it is
   reopened instead (below).
 - Closed issues last updated more than `--closed-since-days` ago (default 365) are not looked at.
+
+With `--replace-per-test-issues` (`FLAKY_TESTS_REPLACE_PER_TEST_ISSUES=true` in the pipeline),
+for when CI no longer updates per-test issues, an open per-test issue doesn't count: the suite gets
+its issue anyway. Once that issue is filed or refreshed, the open per-test issues of its flaky
+tests are closed as its duplicates (`replaced` in the summary). A new issue names each next to
+its test, in the tests table's "Previously tracked in" column, or in a "Previously tracked in #N"
+line for the tests the table has no room for. An existing issue lists them in that line, at the
+end of its text (`suite.previousIssues` in its hidden data), and the comment of the refresh names
+them: one is posted for them even when `--comment-cooldown-days` isn't up. Each per-test issue
+gets a comment: "Now tracked in #M, together with the other tests of its suite. New failures will
+be reported there, so this issue is closed as a duplicate." It is
+closed before the comment is posted, as the failed-test Slack alert and investigator skip
+comments on closed issues; on an open per-test issue they would take the comment for a new
+failure. An issue labelled `skipped-test` is left open and linked as possibly related, as it
+tracks a skip. The consistent failure check of `report_failed_tests` replaces the per-test
+issues of the tests it finds broken the same way, on a job with
+`REPORT_FAILED_TESTS_PER_TEST_ISSUES=false`: a new issue names them next to each test of its list,
+and an existing issue lists them in its line, named by the 🔴 comment, posted for them even when
+the break was posted less than a day ago.
 
 While issues are filed in a sandbox, the issues of `elastic/kibana` count too (`--tracking-repo`,
 default `elastic/kibana`; empty disables it, and it is skipped when it names `--github-repo`
@@ -132,7 +166,8 @@ whole file. A closed one isn't reopened for a block: the block gets an issue of 
   the suite stopped failing on this week.
 - A short comment on where the suite is still flaky is posted when the suite failed since the
   last one, or since the issue was filed, and at least `--comment-cooldown-days` later (default
-  3). Failures in between are covered by the next comment. It has one line per test that failed
+  3), or right away when it replaces per-test issues (above). Failures in between are covered by
+  the next comment. It has one line per test that failed
   there, even a single one, with the test's own numbers on each branch it's flaky on ("`sorts by
   status`: 4% of builds (18 / 441), last failed […]"), and marks the tests the issue has not shown yet, in its
   body or an earlier comment, as "(newly flaky)". On an issue no report has found flaky before, a

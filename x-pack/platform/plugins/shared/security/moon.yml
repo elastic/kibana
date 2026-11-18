@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-security'
   sourceRoot: x-pack/platform/plugins/shared/security
 dependsOn:
+  - '@kbn/scout'
   - '@kbn/cloud-plugin'
   - '@kbn/features-plugin'
   - '@kbn/content-sanitization'
@@ -108,11 +109,13 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - __mocks__/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks: {}
