@@ -8,7 +8,14 @@
  */
 
 import React, { useState, type ReactNode } from 'react';
-import { EuiAccordion, EuiBasicTable, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiBasicTable,
+  EuiLiveAnnouncer,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { importJsonFlyoutStrings } from './import_json_strings';
@@ -113,7 +120,6 @@ export const ImportJsonWarningsCallout = ({
   const warningsSummary =
     getWarningsSummary?.(warnings.length) ??
     importJsonFlyoutStrings.getWarningsSummary(warnings.length);
-
   const missingItems = relatedItems.filter(({ isMissing }) => isMissing === true);
   const uncheckedItems = relatedItems.filter(({ isMissing }) => isMissing === undefined);
   const foundItemsCount = relatedItems.length - missingItems.length - uncheckedItems.length;
@@ -123,6 +129,22 @@ export const ImportJsonWarningsCallout = ({
     uncheckedItems.length
   );
   const hasRelatedItems = missingItems.length > 0 || uncheckedItemsCount > 0;
+  const calloutTitle = hasRelatedItems
+    ? importJsonFlyoutStrings.getReviewWarningsTitle()
+    : importJsonFlyoutStrings.getWarningsTitle();
+  const announcement = [
+    calloutTitle,
+    warnings.length > 0 ? warningsSummary : '',
+    missingItems.length > 0
+      ? getMissingRelatedItemsSummary?.(missingItems.length) ??
+        importJsonFlyoutStrings.getMissingRelatedItemsSummary(missingItems.length)
+      : '',
+    uncheckedItemsCount > 0
+      ? importJsonFlyoutStrings.getRelatedItemsSummary(uncheckedItemsCount)
+      : '',
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   if (!isVisible || (warnings.length === 0 && !hasRelatedItems)) {
     return null;
@@ -131,13 +153,8 @@ export const ImportJsonWarningsCallout = ({
   return (
     <>
       <KbnWarningCallout
-        announceOnMount
         size="s"
-        title={
-          hasRelatedItems
-            ? importJsonFlyoutStrings.getReviewWarningsTitle()
-            : importJsonFlyoutStrings.getWarningsTitle()
-        }
+        title={calloutTitle}
         text={hasRelatedItems ? undefined : warningsSummary}
         data-test-subj={`${dataTestSubjPrefix}Warnings`}
         onDismiss={() => {
@@ -221,6 +238,7 @@ export const ImportJsonWarningsCallout = ({
           </>
         )}
       </KbnWarningCallout>
+      <EuiLiveAnnouncer>{announcement}</EuiLiveAnnouncer>
       <EuiSpacer size="m" />
     </>
   );

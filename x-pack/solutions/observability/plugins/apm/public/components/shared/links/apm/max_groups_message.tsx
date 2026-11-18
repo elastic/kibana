@@ -13,8 +13,16 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 
 export const OTHER_SERVICE_NAME = '_other';
 
-export function MaxGroupsMessage() {
+interface MaxGroupsMessageProps {
+  type: 'services' | 'transactions';
+}
+
+export function MaxGroupsMessage({ type }: MaxGroupsMessageProps) {
   const { docLinks } = useApmPluginContext().core;
+  const troubleshootingHref =
+    type === 'services'
+      ? docLinks.links.apm.troubleshootingTooManyServices
+      : docLinks.links.apm.troubleshootingTooManyTransactions;
 
   return (
     <FormattedMessage
@@ -24,7 +32,7 @@ export function MaxGroupsMessage() {
         apmServerDocs: (
           <EuiLink
             data-test-subj="apmMaxGroupsMessageDocsLink"
-            href={docLinks.links.apm.troubleshootingTooManyTransactions}
+            href={troubleshootingHref}
             target="_blank"
           >
             {i18n.translate('xpack.apm.tooltip.link.apmServerDocs', {

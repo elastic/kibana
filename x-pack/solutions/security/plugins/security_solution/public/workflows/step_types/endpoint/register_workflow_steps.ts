@@ -26,4 +26,21 @@ export const registerEndpointWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./steps').then((m) => m.searchIntegrationKnowledgePublicStepDefinition)
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./steps').then((m) => m.resolveEndpointHostsPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./steps').then((m) => m.getEndpointHostDiagnosticsPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./steps').then((m) => m.getEndpointPackageStatusPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./steps').then((m) => m.getEndpointInventoryCountsPublicStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./steps').then((m) => m.finalizeTroubleshootingDiagnosisPublicStepDefinition)
+  );
 };

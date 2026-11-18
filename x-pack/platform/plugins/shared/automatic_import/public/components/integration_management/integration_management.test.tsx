@@ -39,22 +39,31 @@ jest.mock('react-use/lib/useObservable', () => ({
     typeof obs$?.getValue === 'function' ? obs$.getValue() : undefined,
 }));
 
+const mockAutomaticImportCapabilities = {
+  view: true,
+  create: true,
+  edit: true,
+  delete: true,
+  approve: true,
+};
+
+const mockServices = {
+  application: {
+    navigateToApp: mockNavigateToApp,
+    getUrlForApp: mockGetUrlForApp,
+    navigateToUrl: mockNavigateToUrl,
+    capabilities: { automatic_import: mockAutomaticImportCapabilities },
+  },
+  licensing: {
+    license$: mockLicense$,
+  },
+  telemetry: {
+    reportEvent: mockReportEvent,
+  },
+};
+
 jest.mock('../../common/hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: mockNavigateToApp,
-        getUrlForApp: mockGetUrlForApp,
-        navigateToUrl: mockNavigateToUrl,
-      },
-      licensing: {
-        license$: mockLicense$,
-      },
-      telemetry: {
-        reportEvent: mockReportEvent,
-      },
-    },
-  }),
+  useKibana: () => ({ services: mockServices }),
 }));
 
 jest.mock('../../common', () => ({
@@ -72,21 +81,7 @@ jest.mock('../../common', () => ({
       isLoading: false,
     },
   }),
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: mockNavigateToApp,
-        getUrlForApp: mockGetUrlForApp,
-        navigateToUrl: mockNavigateToUrl,
-      },
-      licensing: {
-        license$: mockLicense$,
-      },
-      telemetry: {
-        reportEvent: mockReportEvent,
-      },
-    },
-  }),
+  useKibana: () => ({ services: mockServices }),
 }));
 
 jest.mock('../telemetry_context', () => ({
@@ -467,5 +462,98 @@ describe('IntegrationManagement telemetry', () => {
       AutomaticImportTelemetryEventType.EditIntegrationPageLoaded,
       expect.objectContaining({ sessionId: 'test-session-id', integrationId: 'int-1' })
     );
+  });
+});
+
+describe('IntegrationManagement privilege gating', () => {
+  const existingIntegration = {
+    integrationId: 'int-1',
+    title: 'Integration 1',
+    description: 'desc',
+    dataStreams: [],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Object.assign(mockAutomaticImportCapabilities, {
+      view: true,
+      create: true,
+      edit: true,
+      delete: true,
+      approve: true,
+    });
+    mockUseGetIntegrationById.mockReturnValue({
+      integration: undefined,
+      isLoading: false,
+      isError: false,
+    });
+  });
+
+  it('renders the create form when the user has the create capability', () => {
+    renderComponent('/create');
+
+    expect(screen.getByTestId('managementContentsMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('automaticImportInsufficientPrivileges')).not.toBeInTheDocument();
+  });
+
+  it('does not report a page load when the create capability is missing', () => {
+    mockAutomaticImportCapabilities.create = false;
+
+    renderComponent('/create');
+
+    expect(mockReportEvent).not.toHaveBeenCalledWith(
+      AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded,
+      expect.anything()
+    );
+  });
+
+  it('does not report a page load when the edit capability is missing', () => {
+    mockAutomaticImportCapabilities.edit = false;
+    mockUseGetIntegrationById.mockReturnValue({
+      integration: existingIntegration,
+      isLoading: false,
+      isError: false,
+    });
+
+    renderComponent('/edit/int-1');
+
+    expect(mockReportEvent).not.toHaveBeenCalledWith(
+      AutomaticImportTelemetryEventType.EditIntegrationPageLoaded,
+      expect.anything()
+    );
+  });
+
+  it('shows an insufficient privileges prompt on create without the create capability', () => {
+    mockAutomaticImportCapabilities.create = false;
+
+    renderComponent('/create');
+
+    expect(screen.getByTestId('automaticImportInsufficientPrivileges')).toBeInTheDocument();
+    expect(screen.queryByTestId('managementContentsMock')).not.toBeInTheDocument();
+  });
+
+  it('shows an insufficient privileges prompt on edit without the edit capability', () => {
+    mockAutomaticImportCapabilities.edit = false;
+    mockUseGetIntegrationById.mockReturnValue({
+      integration: existingIntegration,
+      isLoading: false,
+      isError: false,
+    });
+
+    renderComponent('/edit/int-1');
+
+    expect(screen.getByTestId('automaticImportInsufficientPrivileges')).toBeInTheDocument();
+    expect(screen.queryByTestId('managementContentsMock')).not.toBeInTheDocument();
+  });
+
+  it('navigates back to manage integrations from the insufficient privileges prompt', () => {
+    mockAutomaticImportCapabilities.create = false;
+
+    renderComponent('/create');
+    fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('integrations', {
+      path: '/browse?view=manage',
+    });
   });
 });

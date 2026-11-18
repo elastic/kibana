@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GRID_RESOLUTION } from '../../../../common/constants';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 
 export function getIconSize(resolution: GRID_RESOLUTION) {
   if (resolution === GRID_RESOLUTION.COARSE) {

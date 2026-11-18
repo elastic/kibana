@@ -44,7 +44,7 @@ export interface ImportJsonFlyoutContentProps<SanitizedState> {
   /** Application-specific description shown above the NDJSON note. */
   description?: ReactNode;
   serverValidationErrorTitle: string;
-  serverValidationErrorText?: ReactNode;
+  serverValidationErrorText?: string;
   /** Override the default generic warnings summary. */
   getWarningsSummary?: (count: number) => string;
   /** Override the default summary of related items that don't exist in this cluster or space. */

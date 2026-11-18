@@ -13,6 +13,7 @@ import {
   FEATURE_IDENTIFICATION_AGENT_TYPE_ID,
   featureIdentificationAgentType,
 } from './feature_identification_agent';
+import { assertNightshiftSpace } from '../../../lib/assert_nightshift_space';
 
 export const installFeatureIdentificationAgent = async ({
   agentBuilder,
@@ -23,6 +24,9 @@ export const installFeatureIdentificationAgent = async ({
   spaceId: string;
   availability?: AgentAvailabilityConfig;
 }): Promise<void> => {
+  // Nightshift runs in the default space only, so the feature identification agent must not show up in another
+  // space's Agent Builder.
+  assertNightshiftSpace(spaceId);
   await agentBuilder.agents.ensure({
     spaceId,
     availability,

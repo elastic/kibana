@@ -30,6 +30,7 @@ const GROUP_SELECTOR_OPTION_TEST_SUBJECTS: Record<string, string> = {
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
@@ -313,9 +314,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     getVulnerabilityTable: async () => testSubjects.find('euiDataGrid'),
   };
 
-  const createFlyoutObject = (tableTestSubject: string) => ({
+  // The finding flyout is a system flyout (EuiFlyout) with no dedicated test subject on its
+  // root, so it is located by the EuiFlyout class. Only one flyout is open on the findings page.
+  const createFlyoutObject = (cssSelector: string) => ({
     async getElement() {
-      return await testSubjects.find(tableTestSubject);
+      return await find.byCssSelector(cssSelector);
     },
     async clickTakeActionButton() {
       const element = await this.getElement();
@@ -335,7 +338,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   });
 
-  const misconfigurationsFlyout = createFlyoutObject('rightSection');
+  const misconfigurationsFlyout = createFlyoutObject('.euiFlyout');
 
   const groupSelector = (testSubj = 'group-selector-dropdown') => ({
     async getElement() {

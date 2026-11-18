@@ -26,6 +26,7 @@ const mockDashboardApi = {
   hasOverlays$: new BehaviorSubject<boolean>(false),
   canRemovePanels: jest.fn(() => true),
   removePanels: jest.fn(),
+  groupPanelsInSection: jest.fn(),
   clearSelectedPanels: jest.fn(),
 };
 
@@ -106,6 +107,17 @@ describe('SelectedPanelsToolbar', () => {
       await userEvent.click(screen.getByTestId('dashboardSelectedPanelsRemove'));
 
       expect(mockDashboardApi.removePanels).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Group in collapsible section', () => {
+    it('groups exactly the selected panels and clears the selection', async () => {
+      renderToolbar();
+
+      await userEvent.click(screen.getByTestId('dashboardSelectedPanelsGroupInSection'));
+
+      expect(mockDashboardApi.groupPanelsInSection).toHaveBeenCalledWith(['panel1', 'panel2']);
+      expect(mockDashboardApi.clearSelectedPanels).toHaveBeenCalled();
     });
   });
 

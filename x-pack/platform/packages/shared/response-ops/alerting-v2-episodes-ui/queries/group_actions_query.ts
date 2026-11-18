@@ -10,11 +10,11 @@ import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 export interface GroupActionRow {
   group_hash: string;
   rule_id: string | null;
-  last_deactivate_action: string | null;
+  last_lifecycle_action: string | null;
   last_snooze_action: string | null;
   snoozed_until: string | null;
   last_snooze_actor: string | null;
-  last_deactivate_actor: string | null;
+  last_lifecycle_actor: string | null;
 }
 
 export const buildGroupActionsQuery = (spaceId: string, groupHashes: string[]) => {
@@ -25,11 +25,11 @@ export const buildGroupActionsQuery = (spaceId: string, groupHashes: string[]) =
     .where`group_hash IN (${groupHashLiterals})`
     .where`action_type IN ("deactivate", "activate", "snooze", "unsnooze")`
     .pipe`STATS
-        last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
+        last_lifecycle_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
         last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
         snoozed_until = LAST(expiry, @timestamp) WHERE action_type IN ("snooze"),
         last_snooze_actor = LAST(actor.profile_uid, @timestamp) WHERE action_type == "snooze",
-        last_deactivate_actor = LAST(actor.profile_uid, @timestamp) WHERE action_type == "deactivate"
+        last_lifecycle_actor = LAST(actor.profile_uid, @timestamp) WHERE action_type == "deactivate"
       BY group_hash, rule_id`
-    .keep('group_hash', 'rule_id', 'last_deactivate_action', 'last_snooze_action', 'snoozed_until', 'last_snooze_actor', 'last_deactivate_actor');
+    .keep('group_hash', 'rule_id', 'last_lifecycle_action', 'last_snooze_action', 'snoozed_until', 'last_snooze_actor', 'last_lifecycle_actor');
 };

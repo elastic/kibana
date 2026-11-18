@@ -63,7 +63,6 @@ dependsOn:
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/content-management-tabbed-table-list-view'
-  - '@kbn/content-management-table-list-view-table'
   - '@kbn/shared-ux-prompt-not-found'
   - '@kbn/content-management-content-editor'
   - '@kbn/serverless'
@@ -138,6 +137,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/zod-helpers'
   - '@kbn/as-code-dashboard-schema'
+  - '@kbn/dashboard-constants'
   - '@kbn/change-history'
   - '@kbn/change-history-ui'
   - '@kbn/spaces-plugin'
@@ -145,6 +145,8 @@ dependsOn:
   - '@kbn/content-list-page'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/code-editor-mock'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider-client'
 tags:
   - plugin
   - prod

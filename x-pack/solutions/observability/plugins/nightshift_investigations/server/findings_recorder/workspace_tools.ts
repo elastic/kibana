@@ -6,7 +6,7 @@
  */
 
 import { posix } from 'path';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import type { OutputRedactor } from '../tools/sandbox_bash/output_redactor';
 import {
   RECORDER_FILE_MAX_BYTES,
@@ -82,7 +82,7 @@ export const createRecorderWorkspace = ({
   session,
   redactor,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   redactor: OutputRedactor;
 }): RecorderWorkspace => {
   // A pass reads a file in pages, so the redacted file is kept for the pass instead of fetching

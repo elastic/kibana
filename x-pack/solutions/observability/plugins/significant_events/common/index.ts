@@ -75,6 +75,7 @@ export type {
 export { RELAY_APP_CONNECTION_STATUS } from './slack_app/types';
 export type {
   RelayAppConnectionStatus,
+  SlackAppAvailableChannelsResponse,
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,
   SlackAppConfirmResponse,
@@ -85,6 +86,7 @@ export type {
   SlackAppWorkspace,
   SlackChannelBinding,
   SlackChannelBindingStatus,
+  SlackAvailableChannel,
 } from './slack_app/types';
 
 export type {
@@ -111,12 +113,16 @@ export type { SignificantEventsMaintenanceState } from './maintenance/state_mach
 
 export {
   DEFAULT_RUN_LIMITS,
+  INVESTIGATION_RUN_QUOTA_GROUPS,
+  isInvestigationRunQuotaGroup,
   isRunQuotaReached,
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
   RUN_QUOTA_GROUPS,
 } from './run_quotas';
 export type {
+  InvestigationRunLimitsUpdate,
+  InvestigationRunQuotaGroup,
   RunQuotaConsumeRequest,
   RunQuotaConsumeResponse,
   RunQuotaGroup,

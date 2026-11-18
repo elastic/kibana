@@ -13,7 +13,7 @@ jest.mock('../cancel_workflow_if_requested', () => ({
   cancelWorkflowIfRequested: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { cancelWorkflowIfRequested } = require('../cancel_workflow_if_requested');
 
 describe('processNodeStackMonitoring', () => {

@@ -17,7 +17,9 @@ import {
   isTerminalStatus,
 } from '@kbn/workflows';
 
+import { getConcurrencyGroupLock, withConcurrencyGroupLock } from './concurrency_group_lock';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 /** Covers the narrow window where QUEUED is visible before the dormant task exists. */
@@ -71,14 +73,29 @@ const promoteQueuedRunTaskWithRetry = async (
  * Moves oldest `queued` executions to `pending` and promotes their pre-scheduled
  * `workflow:run` tasks via `runSoon` while slot occupancy is below `concurrency.max`.
  */
-export async function drainConcurrencyQueueSlots(params: {
+interface DrainConcurrencyQueueSlotsParams {
   workflowExecutionRepository: WorkflowExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
   logger: Logger;
   spaceId: string;
   concurrencyGroupKey: string;
   concurrencySettings: ConcurrencySettings;
-}): Promise<void> {
+}
+
+export async function drainConcurrencyQueueSlots(
+  params: DrainConcurrencyQueueSlotsParams
+): Promise<void> {
+  return withConcurrencyGroupLock(
+    getConcurrencyGroupLock(),
+    params.spaceId,
+    params.concurrencyGroupKey,
+    () => drainConcurrencyQueueSlotsUnlocked(params)
+  );
+}
+
+async function drainConcurrencyQueueSlotsUnlocked(
+  params: DrainConcurrencyQueueSlotsParams
+): Promise<void> {
   const {
     workflowExecutionRepository,
     workflowTaskManager,
@@ -134,18 +151,28 @@ export async function drainConcurrencyQueueSlots(params: {
             `Promoted queued execution ${nextQueuedId} is missing id or spaceId; marking skipped`
           );
           const skipTimestamp = new Date().toISOString();
+          const cancellationReason =
+            'Queued promotion failed: execution document missing id or spaceId';
           await workflowExecutionRepository.updateWorkflowExecution(
             {
               id: nextQueuedId,
               status: ExecutionStatus.SKIPPED,
               cancelRequested: true,
-              cancellationReason:
-                'Queued promotion failed: execution document missing id or spaceId',
+              cancellationReason,
               cancelledAt: skipTimestamp,
               cancelledBy: 'system',
             },
             { refresh: 'wait_for' }
           );
+          await publishFinishedWorkflowExecution(execution, {
+            id: nextQueuedId,
+            spaceId: execution.spaceId ?? spaceId,
+            status: ExecutionStatus.SKIPPED,
+            cancelRequested: true,
+            cancellationReason,
+            cancelledAt: skipTimestamp,
+            cancelledBy: 'system',
+          });
         } else {
           const triggeredBy = execution.triggeredBy || 'manual';
 
@@ -174,19 +201,25 @@ export async function drainConcurrencyQueueSlots(params: {
             logger.warn(
               `Promoted queued workflow execution ${nextQueuedId} but failed to runSoon workflow:run (${message}); marking failed`
             );
+            const finishedAt = new Date().toISOString();
+            const executionError = {
+              type: 'QueuePromoteRunSoonError',
+              message: 'Failed to start queued workflow execution due to an unrecoverable error.',
+            };
             await workflowExecutionRepository.updateWorkflowExecution(
               {
                 id: nextQueuedId,
                 status: ExecutionStatus.FAILED,
-                error: {
-                  type: 'QueuePromoteRunSoonError',
-                  message:
-                    'Failed to start queued workflow execution due to an unrecoverable error.',
-                },
-                finishedAt: new Date().toISOString(),
+                error: executionError,
+                finishedAt,
               },
               { refresh: 'wait_for' }
             );
+            await publishFinishedWorkflowExecution(execution, {
+              status: ExecutionStatus.FAILED,
+              error: executionError,
+              finishedAt,
+            });
           }
         }
       }

@@ -85,6 +85,24 @@ export const knownModels: ModelDefinition[] = [
     family: ModelFamily.GPT,
     contextWindow: 1000000,
   },
+  {
+    id: 'gpt-6-sol',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 1050000,
+  },
+  {
+    id: 'gpt-6-luna',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 1050000,
+  },
+  {
+    id: 'gpt-6-astra',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 1050000,
+  },
   // GPT-5 family (specific before general so `gpt-5-mini` doesn't collapse to `gpt-5`).
   {
     id: 'gpt-5.6-luna',
@@ -413,7 +431,21 @@ export const knownModels: ModelDefinition[] = [
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
-  // Claude 5.x
+  // Claude 5.x (5.5 before 5 so `claude-opus-5-5` doesn't collapse to `claude-opus-5`).
+  {
+    id: 'claude-opus-5-5',
+    aliases: ['claude-5.5-opus'],
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 1000000,
+  },
+  {
+    id: 'claude-sonnet-5-5',
+    aliases: ['claude-5.5-sonnet'],
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 1000000,
+  },
   {
     id: 'claude-fable-5-1',
     aliases: ['claude-5.1-fable'],

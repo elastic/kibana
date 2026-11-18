@@ -56,6 +56,41 @@ tags: "${{ inputs.tags }}"  # ✅ Works
 items: "${{ inputs.items | slice: 0, 2 }}"  # ✅ Works with filters
 ```
 
+#### Page inputs
+
+A `page` trigger declares its own `inputs`. Steps read the values a page visitor submitted as `page.inputs.<name>`, not as `inputs.<name>`. `inputs.*` holds only the values of manual runs, API calls, and child runs, so a template shows where its data comes from. A workflow can declare inputs on both its `manual` and `page` triggers.
+
+```yaml
+triggers:
+  - type: page
+    title: Report an incident
+    inputs:
+      properties:
+        summary:
+          type: string
+steps:
+  - name: log
+    type: console
+    with:
+      message: "{{ page.inputs.summary }}"
+```
+
+#### Expressions in provided input values
+
+A caller can pass a `${{ }}` string as an input value when it starts a run. The engine evaluates that value only when the execution's `triggeredBy` is `manual`. Every other `triggeredBy` keeps the value as a literal string, for example child runs (`workflow-step`), scheduled runs, alerts, event triggers, Agent Builder hooks (`agent-builder-hook`), and workflow pages (`page`). A `page` visitor is anonymous, and an expression can read `consts` and the rest of the render context.
+
+The engine records `triggeredBy: manual` when a caller does not set it. This includes runs from the Run API and the UI, and plugin callers that call `runWorkflow` or `executeWorkflow` without `triggeredBy`. A plugin that passes values it does not control, such as LLM output, must set its own `triggeredBy` to keep them literal.
+
+The rule applies only to values the caller provides. Expressions that the workflow author writes still render:
+
+- Input `default` values render for every run.
+- A parent renders the `with.inputs` of a `workflow.execute` or `workflow.executeAsync` step before the child run starts. The child gets the rendered values.
+
+| `triggeredBy` | Provided `"${{ consts.token }}"` becomes |
+|---------------|-----------------------------------------|
+| `manual` | The value of `consts.token` |
+| Any other value | The literal string `"${{ consts.token }}"` |
+
 ### Liquid Tags (`{% %}`)
 
 Control flow and logic. Common tags: `{% if %}`, `{% for %}`, `{% assign %}`, `{% case %}`.

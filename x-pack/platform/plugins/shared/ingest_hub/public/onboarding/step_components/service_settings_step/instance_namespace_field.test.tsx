@@ -116,6 +116,13 @@ describe('InstanceNamespaceField', () => {
     );
   });
 
+  it('shows each note as its own paragraph', () => {
+    renderField({ note: ['First note.', 'Second note.'] });
+    expect(
+      screen.getByTestId('serviceSettings-namespaceField-note').querySelectorAll('p')
+    ).toHaveLength(2);
+  });
+
   it('shows no note by default', () => {
     renderField();
     expect(screen.queryByTestId('serviceSettings-namespaceField-note')).not.toBeInTheDocument();

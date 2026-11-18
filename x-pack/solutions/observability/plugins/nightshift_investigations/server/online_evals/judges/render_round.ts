@@ -6,13 +6,17 @@
  */
 
 import type { EvidenceRound } from '@kbn/evals-plugin/server';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
+import { MessageRole, type Message, type ToolCallArguments } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { keepHeadAndTail } from '../keep_head_and_tail';
 
 /** Tool arguments and results can be large; each one is cut to this many characters. */
 export const MAX_TOOL_FIELD_CHARS = 10_000;
 /**
  * Budget for the rendered tool calls, so the prompt fits the judge model's context window.
- * Tool calls past it are counted but not rendered; the input and the answer always are.
+ * When the calls don't fit, the first and last ones are rendered and those between them are
+ * counted instead (see `keepHeadAndTail`); the input and the answer always are rendered.
  */
 export const MAX_TOOL_CALLS_CHARS = 400_000;
 
@@ -30,6 +34,22 @@ export const truncate = (text: string, maxChars: number): string =>
     ? `${text.slice(0, maxChars)}\n[truncated ${text.length - maxChars} characters]`
     : text;
 
+/**
+ * Cuts text to about `maxChars` by dropping its middle, keeping the start and the end, and puts a
+ * marker with the number of characters cut between them. A command's outcome (stderr, an error
+ * body, an exit code) is usually at the end of its result, so cutting only the end would hide it.
+ */
+export const truncateKeepingEnds = (text: string, maxChars: number): string => {
+  if (text.length <= maxChars) {
+    return text;
+  }
+  const head = Math.floor(maxChars / 2);
+  const tail = maxChars - head;
+  return `${text.slice(0, head)}\n[truncated ${text.length - maxChars} characters]\n${text.slice(
+    text.length - tail
+  )}`;
+};
+
 const stringify = (value: unknown): string => {
   if (value === undefined) {
     return '';
@@ -37,36 +57,116 @@ const stringify = (value: unknown): string => {
   return typeof value === 'string' ? value : JSON.stringify(value);
 };
 
+/** The round's tool calls as numbered sections, and how many were left out to fit the budget. */
+const renderToolCallSections = (
+  round: EvidenceRound,
+  cut: (text: string) => string = (text) => truncate(text, MAX_TOOL_FIELD_CHARS)
+): { sections: string[]; omitted: number } => {
+  const renderedSteps = round.steps.map((step, index) =>
+    [
+      `## Tool call ${index + 1}: ${step.tool_id ?? 'unknown tool'}`,
+      `Arguments:\n${cut(stringify(step.arguments))}`,
+      `Result:\n${cut(stringify(step.result))}`,
+    ].join('\n')
+  );
+  const { headEnd, tailStart, omitted } = keepHeadAndTail(
+    renderedSteps.map(({ length }) => length),
+    MAX_TOOL_CALLS_CHARS
+  );
+  const omittedMarker =
+    omitted > 0 ? [`[${omitted} tool calls omitted here to fit the judge's context]`] : [];
+
+  return {
+    sections: [
+      ...renderedSteps.slice(0, headEnd),
+      ...omittedMarker,
+      ...renderedSteps.slice(tailStart),
+    ],
+    omitted,
+  };
+};
+
+/**
+ * Renders only the round's tool calls, each with its arguments and result, for judges that
+ * audit how the tools were used. Each argument and result is cut to `maxFieldChars` keeping its
+ * start and end. `omitted` counts the calls left out to fit the budget.
+ */
+export const renderToolCalls = (
+  round: EvidenceRound,
+  { maxFieldChars }: { maxFieldChars: number }
+): { text: string; omitted: number } => {
+  const { sections, omitted } = renderToolCallSections(round, (text) =>
+    truncateKeepingEnds(text, maxFieldChars)
+  );
+  return { text: sections.join('\n\n'), omitted };
+};
+
 /**
  * Renders the round as the transcript reference-free judges read: the user input, every tool
  * call with its arguments and result, and the agent's final answer.
  */
-export const renderRound = (round: EvidenceRound): string => {
-  const renderedSteps: string[] = [];
-  let usedChars = 0;
-  let omitted = 0;
-
-  round.steps.forEach((step, index) => {
-    if (usedChars >= MAX_TOOL_CALLS_CHARS) {
-      omitted++;
-      return;
-    }
-    const rendered = [
-      `## Tool call ${index + 1}: ${step.tool_id ?? 'unknown tool'}`,
-      `Arguments:\n${truncate(stringify(step.arguments), MAX_TOOL_FIELD_CHARS)}`,
-      `Result:\n${truncate(stringify(step.result), MAX_TOOL_FIELD_CHARS)}`,
-    ].join('\n');
-    renderedSteps.push(rendered);
-    usedChars += rendered.length;
-  });
-
-  if (omitted > 0) {
-    renderedSteps.push(`[${omitted} more tool calls omitted to fit the judge's context]`);
-  }
-
-  return [
+export const renderRound = (round: EvidenceRound): string =>
+  [
     `## User\n${round.input.message}`,
-    ...renderedSteps,
+    ...renderToolCallSections(round).sections,
     `## Agent final answer\n${round.response.message}`,
   ].join('\n\n');
+
+const toToolCallArguments = (value: unknown): ToolCallArguments => {
+  const serialized = stringify(value);
+  if (serialized.length > MAX_TOOL_FIELD_CHARS) {
+    return { arguments: truncate(serialized, MAX_TOOL_FIELD_CHARS) };
+  }
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as ToolCallArguments)
+    : { value };
+};
+
+/**
+ * Renders the round as the conversation the agent had: the user input, then each tool call as an
+ * assistant message (carrying the agent's note before the call, when it wrote one) followed by its
+ * tool result, then the agent's final answer as an assistant message, unless `includeFinalAnswer`
+ * is false. Tool calls left out to fit the character budget, from the middle of the round, are
+ * counted in `omittedToolCalls`; the kept calls keep their position in their ids.
+ */
+export const renderTraceMessages = (
+  round: EvidenceRound,
+  { includeFinalAnswer = true }: { includeFinalAnswer?: boolean } = {}
+): { messages: Message[]; omittedToolCalls: number } => {
+  const renderedSteps = round.steps.map((step, index) => {
+    // Ids only pair a call with its result. Providers restrict their characters, so don't reuse the agent's.
+    const toolCallId = `call_${index + 1}`;
+    // The same normalization Agent Builder applies to tool names it sends to a provider.
+    const name = sanitizeToolId(step.tool_id ?? 'unknown_tool');
+    const args = toToolCallArguments(step.arguments);
+    const response = truncate(stringify(step.result), MAX_TOOL_FIELD_CHARS) || '(empty)';
+    const note = step.reasoning ? truncate(step.reasoning, MAX_TOOL_FIELD_CHARS) : null;
+    const stepMessages: Message[] = [
+      {
+        role: MessageRole.Assistant,
+        content: note,
+        toolCalls: [{ toolCallId, function: { name, arguments: args } }],
+      },
+      { role: MessageRole.Tool, name, toolCallId, response: { result: response } },
+    ];
+    return {
+      stepMessages,
+      size: JSON.stringify(args).length + response.length + (note?.length ?? 0),
+    };
+  });
+  const { headEnd, tailStart, omitted } = keepHeadAndTail(
+    renderedSteps.map(({ size }) => size),
+    MAX_TOOL_CALLS_CHARS
+  );
+
+  const messages: Message[] = [
+    { role: MessageRole.User, content: round.input.message },
+    ...[...renderedSteps.slice(0, headEnd), ...renderedSteps.slice(tailStart)].flatMap(
+      ({ stepMessages }) => stepMessages
+    ),
+  ];
+  if (includeFinalAnswer) {
+    messages.push({ role: MessageRole.Assistant, content: round.response.message });
+  }
+  return { messages, omittedToolCalls: omitted };
 };

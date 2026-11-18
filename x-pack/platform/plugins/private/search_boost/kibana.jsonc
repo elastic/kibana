@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-boost-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Search boost: balance search performance and cost for the indices and data streams in a serverless Vector DB project",
+  "plugin": {
+    "id": "searchBoost",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchBoost"
+    ],
+    "requiredPlugins": [
+      "management",
+      "features"
+    ],
+    "requiredBundles": []
+  }
+}

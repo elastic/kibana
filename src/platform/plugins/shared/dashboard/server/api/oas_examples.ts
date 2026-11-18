@@ -476,7 +476,7 @@ const dashboardCreateCodeSamples = [
     label: 'Create a dashboard (simple) - cURL',
     method: 'POST',
     path: '/api/dashboards',
-    body: dashboardCreateSimpleBody,
+    body: dashboardCreateSimpleConsoleBody,
   }),
   createConsoleCodeSample({
     lang: 'Console_simple',

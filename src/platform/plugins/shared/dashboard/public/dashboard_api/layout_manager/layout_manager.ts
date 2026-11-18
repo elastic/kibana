@@ -81,8 +81,9 @@ import {
   areLayoutsEqual,
   arePanelLayoutsEqual,
   arePinnedPanelLayoutsEqual,
-} from './are_layouts_equal';
-import { deserializeLayout } from './deserialize_layout';
+} from '../../../common/dashboard_state/layout/are_layouts_equal';
+import { deserializeLayout } from '../../../common/dashboard_state/layout/deserialize_layout';
+import { getLayoutBottomRow, groupPanelsInSection } from './layout_utils';
 import { serializeLayout } from './serialize_layout';
 import {
   isDashboardLayoutPanel,
@@ -315,13 +316,46 @@ export function initializeLayoutManager(
     if (!embeddables?.length) return;
     const first = embeddables[0];
     if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
+    const applyStatePromises: Array<Promise<void>> = [];
+    let anchorId: string | undefined;
 
     const addedPanelIds: string[] = [];
     for (const incomingEmbeddable of embeddables) {
       const { serializedState, size, type } = incomingEmbeddable;
       const uuid = incomingEmbeddable.embeddableId ?? v4();
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
-      const sameType = existingPanel?.type === type;
+      const existingPinnedPanel = layout$.value.pinnedPanels[uuid];
+
+      const sameType = (existingPanel ?? existingPinnedPanel)?.type === type;
+      const nextState = {
+        ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
+        ...serializedState,
+      };
+      currentChildState[uuid] = nextState;
+
+      // A mounted child doesn't re-read currentChildState.
+      const child = children$.value[uuid];
+      if (sameType && child && apiHasSerializableState(child)) {
+        const stateToApply = cloneDeep(nextState);
+        // Apply state after the loop so loading is set first and a synchronous error doesn't stop the remaining panels.
+        applyStatePromises.push(
+          Promise.resolve().then(() => child.applySerializedState(stateToApply))
+        );
+      }
+
+      if (!existingPanel && existingPinnedPanel) {
+        layout$.next({
+          ...layout$.value,
+          pinnedPanels: {
+            ...layout$.value.pinnedPanels,
+            [uuid]: { ...existingPinnedPanel, type },
+          },
+        });
+        continue;
+      }
+
+      // Anchor on the first grid panel that lands, so nothing is placed beside or scrolled to a pinned control.
+      anchorId ??= uuid;
 
       const updatedLayout = existingPanel
         ? {
@@ -343,21 +377,27 @@ export function initializeLayoutManager(
             },
             /**
              * We can assume that all panels being sent as a single package are related; so,
-             * place them close together by grouping them around the first embeddable.
+             * place them close together by grouping them around the first grid embeddable.
              */
-            beside: uuid === first.embeddableId ? undefined : first.embeddableId,
+            beside: uuid === anchorId ? undefined : anchorId,
           });
-      currentChildState[uuid] = {
-        ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
-        ...serializedState,
-      };
 
       layout$.next(updatedLayout);
       addedPanelIds.push(uuid);
     }
     waitForPanelsToSettle(addedPanelIds);
-    trackPanel.setScrollToPanelId(first.embeddableId);
-    trackPanel.setHighlightPanelId(first.embeddableId);
+
+    if (applyStatePromises.length) {
+      childrenStateLoading$.next(true);
+      void Promise.allSettled(applyStatePromises).then(() => {
+        childrenStateLoading$.next(false);
+      });
+    }
+
+    if (anchorId) {
+      trackPanel.setScrollToPanelId(anchorId);
+      trackPanel.setHighlightPanelId(anchorId);
+    }
   };
 
   // --------------------------------------------------------------------------------------
@@ -747,30 +787,26 @@ export function initializeLayoutManager(
       /** Sections */
       addNewSection: () => {
         const currentLayout = layout$.getValue();
-
-        // find the max y so we know where to add the section
-        let maxY = 0;
-        [...Object.values(currentLayout.panels), ...Object.values(currentLayout.sections)].forEach(
-          (widget) => {
-            const { y, h } = { h: 1, ...widget.grid };
-            maxY = Math.max(maxY, y + h);
-          }
-        );
-
-        // add the new section
-        const sections = { ...currentLayout.sections };
-        const newId = v4();
-        sections[newId] = {
-          grid: { y: maxY },
-          title: i18n.translate('dashboard.defaultSectionTitle', {
-            defaultMessage: 'New collapsible section',
-          }),
-          collapsed: false,
-        };
         layout$.next({
           ...currentLayout,
-          sections,
+          sections: {
+            ...currentLayout.sections,
+            [v4()]: {
+              grid: { y: getLayoutBottomRow(currentLayout) },
+              title: getDefaultSectionTitle(),
+              collapsed: false,
+            },
+          },
         });
+        trackPanel.scrollToBottom$.next();
+      },
+      groupPanelsInSection: (panelIds: string[]) => {
+        const updatedLayout = groupPanelsInSection(layout$.getValue(), panelIds, {
+          id: v4(),
+          title: getDefaultSectionTitle(),
+        });
+        if (!updatedLayout) return;
+        layout$.next(updatedLayout);
         trackPanel.scrollToBottom$.next();
       },
       getPanelSection: (uuid: string) => {
@@ -792,6 +828,11 @@ export function initializeLayoutManager(
     },
   };
 }
+
+const getDefaultSectionTitle = () =>
+  i18n.translate('dashboard.defaultSectionTitle', {
+    defaultMessage: 'New collapsible section',
+  });
 
 function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
   if (rawTitle === '') return '';

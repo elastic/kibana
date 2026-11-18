@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import { EuiLiveAnnouncer, EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { ImportJsonErrorDetails } from './import_json_error_details';
 
 interface ImportJsonServerErrorCalloutProps {
   dataTestSubjPrefix: string;
   title: string;
-  text?: ReactNode;
+  text?: string;
   details?: string;
 }
 
@@ -27,16 +27,13 @@ export const ImportJsonServerErrorCallout = ({
   details,
 }: ImportJsonServerErrorCalloutProps) => (
   <>
-    <KbnDangerCallout
-      announceOnMount
-      title={title}
-      data-test-subj={`${dataTestSubjPrefix}ServerError`}
-    >
+    <KbnDangerCallout title={title} data-test-subj={`${dataTestSubjPrefix}ServerError`}>
       {text}
       {details && (
         <ImportJsonErrorDetails dataTestSubjPrefix={dataTestSubjPrefix} details={details} />
       )}
     </KbnDangerCallout>
+    <EuiLiveAnnouncer>{[title, text].filter(Boolean).join(', ')}</EuiLiveAnnouncer>
     <EuiSpacer size="m" />
   </>
 );

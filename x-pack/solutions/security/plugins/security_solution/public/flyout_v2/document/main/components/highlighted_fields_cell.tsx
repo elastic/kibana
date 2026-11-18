@@ -19,10 +19,7 @@ import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
-  HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
-import { isFlyoutLink } from '../../../../flyout/shared/utils/link_utils';
-import { PreviewLink } from '../../../../flyout/shared/components/preview_link';
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 
 const EMPTY_ARRAY: string[] = [];
@@ -35,10 +32,6 @@ export interface HighlightedFieldsCellProps {
    */
   hit?: DataTableRecord;
   /**
-   * Entity id for legacy PreviewLink (v1 expandable flyout).
-   */
-  entityId?: string;
-  /**
    * Highlighted field's name used to know what component to display
    */
   field: string;
@@ -50,21 +43,6 @@ export interface HighlightedFieldsCellProps {
    * Highlighted field's value to display
    */
   values: string[] | null | undefined;
-  /**
-   * Maintain backwards compatibility // TODO remove when possible
-   * Only needed if alerts page flyout (which has OpenFlyoutLink), NOT in EASE alert summary flyout.
-   */
-  scopeId?: string;
-  /**
-   * If true, we show a link for some specific fields.
-   * This is false by default (for EASE alert summary page) and will be true for the alerts page.
-   */
-  showPreview?: boolean;
-  /**
-   * The indexName to be passed to the flyout preview panel
-   * when clicking on "Source event" id
-   */
-  ancestorsIndexName?: string;
   /**
    * Caps the amount of values displayed in the cell.
    * If the limit is reached a "show more" button is being rendered
@@ -85,12 +63,8 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   values,
   field,
   originalField = '',
-  scopeId = '',
-  showPreview = false,
-  ancestorsIndexName,
   displayValuesLimit = 2,
   hit,
-  entityId,
   renderFlyoutLink: RenderFlyoutLink,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
@@ -143,18 +117,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   const renderValue = useCallback(
     (value: string, i: number) => {
       const content =
-        showPreview && isFlyoutLink({ field, scopeId }) ? (
-          <PreviewLink
-            field={field}
-            value={value}
-            entityId={entityId}
-            scopeId={scopeId}
-            data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
-            ancestorsIndexName={ancestorsIndexName}
-          >
-            {value}
-          </PreviewLink>
-        ) : field === AGENT_STATUS_FIELD_NAME ? (
+        field === AGENT_STATUS_FIELD_NAME ? (
           <AgentStatus
             agentId={String(value ?? '')}
             agentType={agentType}
@@ -176,7 +139,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
         </div>
       );
     },
-    [agentType, ancestorsIndexName, field, scopeId, showPreview, hit, entityId, RenderFlyoutLink]
+    [agentType, field, hit, RenderFlyoutLink]
   );
 
   if (values === null) return null;

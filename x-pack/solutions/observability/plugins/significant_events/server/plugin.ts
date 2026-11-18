@@ -17,8 +17,8 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   catchError,
   combineLatest,
@@ -47,16 +47,12 @@ import {
   RELAY_APP_CONNECTION_SO_TYPE,
 } from './lib/slack_app/saved_object';
 import { SlackAppService } from './lib/slack_app/service';
-import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
-  consumeRunQuota,
-  createRunQuotaInternalRepository,
-  dayKey,
-  releaseRunQuota,
-  resolveDailyWindow,
-  runQuotaLedgerSavedObjectType,
-  runQuotaSettingsSavedObjectType,
-} from './lib/run_quotas';
+  createSeveritySync,
+  registerAfterInvestigationHook,
+} from './lib/significant_events/events/severity';
+import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
+import { runQuotaLedgerSavedObjectType, runQuotaSettingsSavedObjectType } from './lib/run_quotas';
 import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
@@ -73,6 +69,7 @@ import { createSignificantEventsAlertingContextResolver } from './lib/significan
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
 
 import { EbtTelemetryService } from './lib/telemetry/ebt';
+import { getDetectionSnapshotKnowledgeCounts } from './lib/telemetry/detection_snapshot_contributor';
 import { significantEventsRouteRepository } from './routes';
 import type {
   GetScopedClients,
@@ -137,6 +134,7 @@ import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboa
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
 import { syncContinuousOnboarding } from './lib/continuous_onboarding/sync_continuous_onboarding';
+import { syncScheduledDiscovery } from './lib/scheduled_discovery/sync_scheduled_discovery';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
@@ -176,6 +174,10 @@ export class SignificantEventsPlugin
       workflowsManagement: plugins.workflowsManagement,
       cloud: plugins.cloud,
       kibanaVersion: this.kibanaVersion,
+      severitySync: createSeveritySync({
+        getAgenticInvestigations: () => this.server?.agenticInvestigations,
+        logger: this.logger,
+      }),
     } as SignificantEventsServer;
     this.server.workflowsManagement = plugins.workflowsManagement;
 
@@ -185,27 +187,38 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
-    plugins.nightshiftInvestigations?.registerInvestigationQuota(async () => {
-      if (!this.server?.core) {
-        throw new Error('Significant Events start services are unavailable');
+    plugins.nightshiftInvestigations?.registerDetectionSnapshotContributor(
+      async ({ spaceId, request, signal }) => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        return getDetectionSnapshotKnowledgeCounts({
+          signal,
+          esClient: coreStart.elasticsearch.client.asInternalUser,
+          rulesClient: await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
+            request,
+            asSpaceId(spaceId)
+          ),
+          space: spaceId,
+          logger: this.logger.get('knowledge_indicators'),
+        });
       }
-      const internalRepository = createRunQuotaInternalRepository(this.server);
-      const date = dayKey(resolveDailyWindow());
-      const { allowed } = await consumeRunQuota({
-        internalRepository,
-        group: 'investigation',
-        date,
-      });
-      return {
-        allowed,
-        release: () => releaseRunQuota({ internalRepository, group: 'investigation', date }),
-      };
-    });
+    );
 
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
 
-    this.ebtTelemetryService.setup(core.analytics);
+    this.ebtTelemetryService.setup(
+      core.analytics,
+      {
+        cpsEnabled: plugins.cps?.getCpsEnabled() ?? false,
+        originProjectId: plugins.cloud?.serverless.projectId,
+        getLinkedProjectIds: async (request) => {
+          const [, pluginsStart] = await core.getStartServices();
+          const linkedProjects = await pluginsStart.cps?.getLinkedProjects(request);
+          return linkedProjects?.map(({ id }) => id);
+        },
+      },
+      this.logger.get('telemetry')
+    );
 
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
@@ -255,6 +268,13 @@ export class SignificantEventsPlugin
         return alertEventsClientPromise;
       };
 
+      let alertActionsClientPromise: Promise<AlertActionsClientApi> | undefined;
+      const getAlertActionsClient = (): Promise<AlertActionsClientApi> => {
+        alertActionsClientPromise ??=
+          pluginsStart.alertingVTwo.getAlertActionsClientWithRequest(request);
+        return alertActionsClientPromise;
+      };
+
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
@@ -263,11 +283,17 @@ export class SignificantEventsPlugin
         logger: this.logger,
         space,
         getAlertEventsClient,
+        getAlertActionsClient,
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
           logger: this.logger,
         }),
+        telemetry: {
+          trackEventStatusChanged: (params) =>
+            this.ebtTelemetryService.getClient().trackEventStatusChanged(params, request),
+          logger: this.logger,
+        },
       });
 
       const getAlertingV2RulesClient = async () =>
@@ -383,6 +409,7 @@ export class SignificantEventsPlugin
           return true;
         },
         getAlertEventsClient,
+        getAlertActionsClient,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
@@ -400,6 +427,7 @@ export class SignificantEventsPlugin
     const workflowClients = createWorkflowClients(
       plugins.workflowsManagement?.management,
       telemetryClient,
+      this.logger,
       async (request) => {
         const [, pluginsStart] = await core.getStartServices();
         return pluginsStart.nightshiftSources.getSourcesClient({ request });
@@ -425,6 +453,20 @@ export class SignificantEventsPlugin
     }
 
     if (plugins.agentBuilder) {
+      registerAfterInvestigationHook({
+        agentBuilder: plugins.agentBuilder,
+        logger: this.logger.get('afterInvestigation'),
+        getDeps: () => {
+          const { getScopedClients, server } = this;
+          if (!getScopedClients || !server) return undefined;
+          return {
+            agenticInvestigations: server.agenticInvestigations,
+            severitySync: server.severitySync,
+            getEventClient: async (request) =>
+              (await getScopedClients({ request })).getEventSearchClient(),
+          };
+        },
+      });
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
       registerSignificantEventsFeatureIdentificationAgentTypes({
         agentBuilder: plugins.agentBuilder,
@@ -570,6 +612,17 @@ export class SignificantEventsPlugin
           syncContinuousOnboarding({
             event,
             workflowService: continuousOnboardingWorkflowService,
+            maintenanceService: this.maintenanceService,
+            getStartServices: async () => {
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              return { coreStart, pluginsStart };
+            },
+            logger: this.logger,
+          }),
+        syncScheduledDiscovery: (event) =>
+          syncScheduledDiscovery({
+            event,
+            workflowService: significantEventsScheduledWorkflowsService,
             maintenanceService: this.maintenanceService,
             getStartServices: async () => {
               const [coreStart, pluginsStart] = await core.getStartServices();
@@ -842,7 +895,7 @@ export class SignificantEventsPlugin
 
   private logFlagOffPauseError(error: unknown): void {
     this.logger.error(
-      `significantEvents: failed to pause after Nightshift was turned off: ${
+      `significantEvents: failed to pause after nightshift was turned off: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

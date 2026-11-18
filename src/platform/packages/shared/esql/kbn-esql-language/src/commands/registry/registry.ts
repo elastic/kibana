@@ -15,6 +15,7 @@ import type {
   ICommandContext,
   ESQLColumnData,
   ESQLCommandSummary,
+  ESQLCommandSummaryContext,
   UnmappedFieldsStrategy,
 } from './types';
 import type { ESQLMessage } from '../definitions/types';
@@ -83,9 +84,14 @@ export interface ICommandMethods<TContext = ICommandContext> {
    * Returns useful information about the command.
    * @param command The parsed Abstract Syntax Tree.
    * @param query The ESQL query string.
+   * @param context The visible LETs and the callback for summarizing nested pipelines.
    * @returns A summary object containing details about the command.
    */
-  summary?: (command: ESQLCommand, query: string) => ESQLCommandSummary;
+  summary?: (
+    command: ESQLCommand,
+    query: string,
+    context: ESQLCommandSummaryContext
+  ) => ESQLCommandSummary;
 }
 
 export interface ICommandMetadata {
@@ -100,7 +106,7 @@ export interface ICommandMetadata {
   type?: 'source' | 'header' | 'processing'; // Optional property to classify the command type
   isTimeseries?: boolean; // Optional property to indicate if the command is a timeseries source command
   requiresTimeseriesSource?: boolean; // Optional property to indicate the command is only available when the source command is TS
-  hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear anywhere in the pipeline
+  hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear before the cursor, in the pipeline or in the query header
   subquerySource?: boolean; // Optional property to indicate if the command can start a subquery expression.
   hiddenWhenQueryContainsSubqueries?: boolean; // Optional property to hide the command when the query contains subqueries.
   docPreserving?: boolean; // Optional property to indicate each output row still maps to one input document, so a full-text WHERE before it can be reused by HIGHLIGHT.

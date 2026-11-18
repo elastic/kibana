@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { EMPTY, startWith } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import type {
   UnknownAttachment,
   ScreenContextAttachmentData,
@@ -61,11 +63,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   screenContext,
   previewBadgeState,
 }) => {
-  const {
-    openCanvas: openCanvasContext,
-    previewedAttachmentKey,
-    setPreviewedAttachmentKey,
-  } = useCanvasContext();
+  const { openCanvas: openCanvasContext, previewedAttachmentKey } = useCanvasContext();
   const { conversationActions } = useConversationContext();
   const agentId = useAgentId();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
@@ -92,6 +90,14 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     attachment.id,
     attachment.versionData?.version
   );
+  const appPreviewState$ = useMemo(
+    () =>
+      (uiDefinition?.getPreviewState$?.(attachment) ?? EMPTY).pipe(
+        startWith<AttachmentPreviewState>('none')
+      ),
+    [uiDefinition, attachment]
+  );
+  const appPreviewState = useObservable(appPreviewState$, 'none');
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -114,11 +120,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         openCanvas,
         openSidebarConversation,
         isCanvas: false,
-        setPreviewBadgeState: (nextPreviewState) => {
-          setPreviewedAttachmentKey(
-            nextPreviewState === 'previewing' ? attachmentPreviewKey : null
-          );
-        },
       }) ?? [],
     [
       uiDefinition,
@@ -127,8 +128,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       agentId,
       updateOrigin,
       openCanvas,
-      setPreviewedAttachmentKey,
-      attachmentPreviewKey,
       openSidebarConversation,
     ]
   );
@@ -144,7 +143,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
 
   const resolvedPreviewBadgeState: AttachmentPreviewState =
-    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
+    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : appPreviewState);
 
   if (!uiDefinition) {
     return null;
