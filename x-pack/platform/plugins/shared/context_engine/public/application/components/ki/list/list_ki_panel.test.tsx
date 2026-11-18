@@ -16,6 +16,10 @@ jest.mock('../../../hooks/use_list_ki', () => ({
   useListKi: (...args: unknown[]) => mockUseListKi(...args),
 }));
 
+jest.mock('../../../hooks/use_list_ki_by_type', () => ({
+  useListKiByType: () => ({}),
+}));
+
 describe('ListKiPanel', () => {
   beforeEach(() => {
     mockUseListKi.mockReturnValue({
@@ -40,12 +44,12 @@ describe('ListKiPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('composes header, body, and footer', () => {
+  it('composes the filters row, the list and the viewer column', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
 
     expect(screen.getByTestId('contextListKiPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('contextListKiSearchBox')).toBeInTheDocument();
-    expect(screen.getByTestId('contextListKiRows')).toBeInTheDocument();
-    expect(screen.getByTestId('contextListKiLoadMoreButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiFilters')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiList')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiViewerColumn')).toBeInTheDocument();
   });
 });
