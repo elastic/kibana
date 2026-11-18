@@ -136,6 +136,7 @@ toc:
           - file: connectors-kibana/one-drive-action-type.md
           - file: connectors-kibana/one-password-action-type.md
           - file: connectors-kibana/opensearch-aws-opensearch-service-action-type.md
+          - file: connectors-kibana/oracle-action-type.md
           - file: connectors-kibana/outlook-action-type.md
           - file: connectors-kibana/pagerduty-mcp-action-type.md
           - file: connectors-kibana/posthog-action-type.md

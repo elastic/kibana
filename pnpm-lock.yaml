@@ -4801,6 +4801,9 @@ importers:
       ora:
         specifier: 4.1.1
         version: 4.1.1
+      oracledb:
+        specifier: 26.0.0
+        version: 26.0.0
       p-limit:
         specifier: 3.1.0
         version: 3.1.0
@@ -6380,6 +6383,9 @@ importers:
       '@types/object-hash':
         specifier: 3.0.6
         version: 3.0.6
+      '@types/oracledb':
+        specifier: 26.0.1
+        version: 26.0.1
       '@types/papaparse':
         specifier: 5.3.16
         version: 5.3.16
@@ -15160,6 +15166,9 @@ packages:
   '@types/object-hash@3.0.6':
     resolution: {integrity: sha512-fOBV8C1FIu2ELinoILQ+ApxcUKz4ngq+IWUYrxSGjXzzjUALijilampwkMgEtJ+h2njAW3pi853QpzNVCHB73w==}
 
+  '@types/oracledb@26.0.1':
+    resolution: {integrity: sha512-+PN2zINSM1vNtRiIz5D2WDboSuMv1YIe66XI3y+X1m4VGz9Ley4yyP65EwnANsBeF1qH/EpKjr5oj6sVIlq8ag==}
+
   '@types/papaparse@5.3.16':
     resolution: {integrity: sha512-T3VuKMC2H0lgsjI9buTB3uuKj3EMD2eap1MOuEQuBQ44EnDx/IkGhU6EwiTf9zG3za4SKlmwKAImdDKdNnCsXg==}
 
@@ -21734,6 +21743,10 @@ packages:
   ora@9.4.1:
     resolution: {integrity: sha512-6VlU9MLXbjVQD04AZCMX28hVtA5bUoadvUqO76MUCVA0ilwJbMiHsITRPfyVm6p/BC0Av/BXMujx39WCe1LEqw==}
     engines: {node: '>=20'}
+
+  oracledb@26.0.0:
+    resolution: {integrity: sha512-ywUqFidj/mPjRjfpOQdzcXT98lhiJzavPCbyPF9JYivcgrpHx7ENj4ZGQDclrpGXeozUBLc5BNXV7yj5qTMxDw==}
+    engines: {node: '>=14.17'}
 
   original-url@1.2.3:
     resolution: {integrity: sha512-BYm+pKYLtS4mVe/mgT3YKGtWV5HzN/XKiaIu1aK4rsxyjuHeTW9N+xVBEpJcY1onB3nccfH0RbzUEoimMqFUHQ==}
@@ -31782,6 +31795,10 @@ snapshots:
 
   '@types/object-hash@3.0.6': {}
 
+  '@types/oracledb@26.0.1':
+    dependencies:
+      '@types/node': 24.10.13
+
   '@types/papaparse@5.3.16':
     dependencies:
       '@types/node': 24.10.13
@@ -39712,6 +39729,8 @@ snapshots:
       log-symbols: 7.0.1
       stdin-discarder: 0.3.2
       string-width: 8.3.0
+
+  oracledb@26.0.0: {}
 
   original-url@1.2.3:
     dependencies:

@@ -45,6 +45,7 @@ lightningcss
 browserslist
 react-day-picker
 mysql2
+oracledb
 mssql
 jszip
 @rsdoctor/rspack-plugin
