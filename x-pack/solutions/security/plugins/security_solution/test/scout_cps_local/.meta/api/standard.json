@@ -104,7 +104,7 @@
     },
     {
       "id": "752be1b1bae5fc6-91eb63f0bdcb98d",
-      "title": "Hunt Watch - index scope and worker coverage across projects drops an absent concrete name instead of blocking the scope",
+      "title": "Hunt Watch - index scope and worker coverage across projects keeps an absent concrete name in the list instead of blocking the scope",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",

@@ -246,7 +246,7 @@ apiTest.describe.serial(
     );
 
     apiTest(
-      'drops an absent concrete name instead of blocking the scope',
+      'keeps an absent concrete name in the list instead of blocking the scope',
       async ({ apiClient }) => {
         const absent = `custom-absent-cps-${RUN}`;
         await setDefaultIndexInSpace({
@@ -265,7 +265,7 @@ apiTest.describe.serial(
           const scope = response.body as HuntIndexScopeResponse;
           expect(scope.status).not.toBe('blocked');
           expect(scope.missing).toContain(absent);
-          expect(scope.index_patterns).not.toContain(absent);
+          expect(scope.index_patterns).toContain(absent);
         } finally {
           await setDefaultIndexInSpace({
             apiClient,
