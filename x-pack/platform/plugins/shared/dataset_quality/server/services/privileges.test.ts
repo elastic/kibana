@@ -109,4 +109,51 @@ describe('DatasetQualityPrivileges', () => {
       expect(esClientMock.security.hasPrivileges).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('getDatasetPrivileges', () => {
+    it('reports read and monitor independently for a concrete data stream', async () => {
+      const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      esClientMock.security.hasPrivileges
+        .mockResolvedValueOnce({
+          has_all_requested: false,
+          cluster: {},
+          index: {
+            'logs-test-default': {
+              read: true,
+              monitor: false,
+              read_failure_store: false,
+              manage_failure_store: false,
+            },
+          },
+          application: {},
+          username: 'test',
+        })
+        .mockResolvedValueOnce({
+          has_all_requested: false,
+          cluster: {},
+          index: {},
+          application: {},
+          username: 'test',
+        });
+
+      const result = await datasetQualityPrivileges.getDatasetPrivileges(
+        esClientMock,
+        ['logs-test-default'],
+        true
+      );
+
+      expect(esClientMock.security.hasPrivileges).toHaveBeenNthCalledWith(1, {
+        index: [
+          {
+            names: 'logs-test-default',
+            privileges: ['read', 'monitor', 'read_failure_store', 'manage_failure_store'],
+          },
+        ],
+      });
+      expect(result.datasetsPrivilages['logs-test-default']).toMatchObject({
+        canRead: true,
+        canMonitor: false,
+      });
+    });
+  });
 });

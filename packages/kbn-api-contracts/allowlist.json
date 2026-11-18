@@ -777,6 +777,14 @@
       "prUrl": "https://github.com/elastic/kibana/pull/300516"
     },
     {
+      "path": "/api/risk_score/engine/schedule_now",
+      "method": "all",
+      "reason": "Intentional removal of the risk engine schedule-now route. On a default 9.4 deployment this operation already returned 400 while Entity Store V2 was on. It was not marked deprecated, and it still ran if that setting was turned off. Approved in elastic/dev#3471.",
+      "approvedBy": "@elastic/security-entity-analytics",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/303438"
+    },
+    {
       "path": "/api/observability/slos",
       "method": "get",
       "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. settings.syncField is nullable in the SLO settings schema (`z.string().nullable().optional()`), so the stored definition and the response can already contain null; the hand-written spec did not document it.",
@@ -991,6 +999,30 @@
       "approvedBy": "@elastic/nightshift-sre-agent-team",
       "oasdiffId": "request-property-any-of-removed",
       "prUrl": "https://github.com/elastic/kibana/pull/303236"
+    },
+    {
+      "path": "/api/spaces/space",
+      "method": "post",
+      "reason": "Intentional: space avatar initials are now limited to 2 graphemes instead of 2 UTF-16 code units, so a value like an emoji with a skin tone modifier is accepted. The schema maxLength is now a 64 code unit size cap, and the 2 character limit is enforced by a grapheme check. Initials stay at most 2 user-visible characters, but clients that validate the response against the old maxLength of 2 can see longer strings.",
+      "approvedBy": "@elastic/kibana-security",
+      "oasdiffId": "response-property-max-length-increased",
+      "prUrl": "https://github.com/elastic/kibana/pull/305167"
+    },
+    {
+      "path": "/api/spaces/space/{id}",
+      "method": "get",
+      "reason": "Intentional: space avatar initials are now limited to 2 graphemes instead of 2 UTF-16 code units, so a value like an emoji with a skin tone modifier is accepted. The schema maxLength is now a 64 code unit size cap, and the 2 character limit is enforced by a grapheme check. Initials stay at most 2 user-visible characters, but clients that validate the response against the old maxLength of 2 can see longer strings.",
+      "approvedBy": "@elastic/kibana-security",
+      "oasdiffId": "response-property-max-length-increased",
+      "prUrl": "https://github.com/elastic/kibana/pull/305167"
+    },
+    {
+      "path": "/api/spaces/space/{id}",
+      "method": "put",
+      "reason": "Intentional: space avatar initials are now limited to 2 graphemes instead of 2 UTF-16 code units, so a value like an emoji with a skin tone modifier is accepted. The schema maxLength is now a 64 code unit size cap, and the 2 character limit is enforced by a grapheme check. Initials stay at most 2 user-visible characters, but clients that validate the response against the old maxLength of 2 can see longer strings.",
+      "approvedBy": "@elastic/kibana-security",
+      "oasdiffId": "response-property-max-length-increased",
+      "prUrl": "https://github.com/elastic/kibana/pull/305167"
     }
   ]
 }

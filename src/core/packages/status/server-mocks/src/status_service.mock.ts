@@ -59,6 +59,7 @@ const createMock = () => {
   const mocked: jest.Mocked<StatusServiceContract> = lazyObject({
     preboot: jest.fn(),
     setup: jest.fn().mockReturnValue(createInternalSetupContractMock()),
+    setReady: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   });

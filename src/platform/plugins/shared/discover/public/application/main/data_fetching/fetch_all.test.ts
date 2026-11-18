@@ -14,6 +14,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import type {
@@ -26,7 +27,6 @@ import { fetchDocuments } from './fetch_documents';
 import { fetchEsql } from './fetch_esql';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
-import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -96,6 +96,12 @@ describe('test fetchAll', () => {
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
     mockfetchEsql.mockReset().mockResolvedValue({ records: [] });
   });
+
+  const setEsqlQuery = (query: { esql: string }) => {
+    deps.internalState.dispatch(
+      internalStateActions.updateAppState({ tabId: deps.getCurrentTab().id, appState: { query } })
+    );
+  };
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
     const stateArr: FetchStatus[] = [];
@@ -256,12 +262,7 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const query = { esql: 'from foo' };
-    deps.internalState.dispatch(
-      internalStateActions.updateAppState({
-        tabId: deps.getCurrentTab().id,
-        appState: { query },
-      })
-    );
+    setEsqlQuery(query);
     const mockEsqlSource = createMockEsqlSource([], [], '@timestamp');
     mockfetchEsql.mockResolvedValue({ records: documents, dataSource: mockEsqlSource });
     fetchAll({
@@ -287,38 +288,100 @@ describe('test fetchAll', () => {
     ]);
   });
 
+  test('finishes loading when ES|QL is canceled before returning results', async () => {
+    const query = { esql: 'from foo' };
+    setEsqlQuery(query);
+    mockfetchEsql.mockRejectedValue(new Error('The query was canceled'));
+    const onFetchRecordsComplete = jest.fn();
+
+    const fetching = fetchAll({ ...deps, onFetchRecordsComplete });
+    deps.abortController.abort(AbortReason.CANCELED);
+    await fetching;
+
+    expect(subjects.documents$.getValue()).toEqual({
+      fetchStatus: FetchStatus.COMPLETE,
+      query,
+    });
+    expect(subjects.totalHits$.getValue()).toEqual({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: undefined,
+    });
+    expect(subjects.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE);
+    expect(onFetchRecordsComplete).not.toHaveBeenCalled();
+  });
+
+  test('does not finish loading when the ES|QL search is replaced', async () => {
+    const query = { esql: 'from foo' };
+    setEsqlQuery(query);
+    mockfetchEsql.mockRejectedValue(new Error('The query was replaced'));
+
+    fetchAll(deps);
+    deps.abortController.abort(AbortReason.REPLACED);
+    await waitForNextTick();
+
+    expect(subjects.documents$.getValue()).toEqual({
+      fetchStatus: FetchStatus.LOADING,
+      query,
+    });
+    expect(subjects.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+    expect(subjects.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+  });
+
   describe('fetchMoreDocuments', () => {
     const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const initialRecords = [records[0], records[1]];
     const moreRecords = [records[2], records[3]];
 
-    const interceptedWarnings = [searchResponseIncompleteWarningLocalCluster];
-
     test('should add more records', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);
       const collectMain = subjectCollector(subjects.main$);
-      mockFetchDocuments.mockResolvedValue({ records: moreRecords, interceptedWarnings });
+
+      const nextPagination = {
+        hasNextPage: () => false,
+        nextPage: jest.fn(),
+        getAllPages: jest.fn(),
+      };
+
+      const mockPagination = {
+        hasNextPage: () => true,
+        nextPage: jest.fn().mockResolvedValue({
+          rawResponse: {
+            hits: {
+              hits: esHitsMockWithSort.slice(2, 4),
+            },
+          },
+          pagination: nextPagination,
+        }),
+        getAllPages: jest.fn(),
+      };
+
       subjects.documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
         result: initialRecords,
+        pagination: mockPagination,
       });
       fetchMoreDocuments(deps);
       await waitForNextTick();
 
+      // later pages continue the first request, so they keep its (absolute) time range
+      expect(mockPagination.nextPage).toHaveBeenCalledTimes(1);
       expect(await collectDocuments()).toEqual([
         { fetchStatus: FetchStatus.UNINITIALIZED },
         {
           fetchStatus: FetchStatus.COMPLETE,
           result: initialRecords,
+          pagination: mockPagination,
         },
         {
           fetchStatus: FetchStatus.LOADING_MORE,
           result: initialRecords,
+          pagination: mockPagination,
         },
         {
           fetchStatus: FetchStatus.COMPLETE,
           result: [...initialRecords, ...moreRecords],
-          interceptedWarnings,
+          interceptedWarnings: [],
+          pagination: nextPagination,
         },
       ]);
       expect(await collectMain()).toEqual([
@@ -331,10 +394,17 @@ describe('test fetchAll', () => {
     test('should handle exceptions', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);
       const collectMain = subjectCollector(subjects.main$);
-      mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
+
+      const mockPagination = {
+        hasNextPage: () => true,
+        nextPage: jest.fn().mockRejectedValue({ msg: 'This query failed' }),
+        getAllPages: jest.fn(),
+      };
+
       subjects.documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
         result: initialRecords,
+        pagination: mockPagination,
       });
       fetchMoreDocuments(deps);
       await waitForNextTick();
@@ -344,14 +414,18 @@ describe('test fetchAll', () => {
         {
           fetchStatus: FetchStatus.COMPLETE,
           result: initialRecords,
+          pagination: mockPagination,
         },
         {
           fetchStatus: FetchStatus.LOADING_MORE,
           result: initialRecords,
+          pagination: mockPagination,
         },
         {
           fetchStatus: FetchStatus.COMPLETE,
           result: initialRecords,
+          interceptedWarnings: undefined,
+          pagination: mockPagination,
         },
       ]);
       expect(await collectMain()).toEqual([
@@ -370,13 +444,7 @@ describe('test fetchAll', () => {
     test('should swallow abort errors', async () => {
       const collect = subjectCollector(subjects.documents$);
       mockfetchEsql.mockRejectedValue({ msg: 'The query was aborted' });
-      const query = { esql: 'from foo' };
-      deps.internalState.dispatch(
-        internalStateActions.updateAppState({
-          tabId: deps.getCurrentTab().id,
-          appState: { query },
-        })
-      );
+      setEsqlQuery({ esql: 'from foo' });
       fetchAll(deps);
       deps.abortController.abort();
       await waitForNextTick();

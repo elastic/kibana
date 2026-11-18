@@ -49,11 +49,6 @@ export interface RecalculateEntityRiskScoreParams {
    * from a fresh RiskScoreDataClient instance in non-HTTP contexts such as tools).
    */
   getWriter: (namespace: string) => Promise<RiskEngineDataWriter>;
-  /**
-   * Whether id-based risk scoring (Entity Store V2) is enabled.
-   * HTTP route callers can derive this from getIsIdBasedRiskScoringEnabled().
-   */
-  idBasedRiskScoringEnabled: boolean;
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
   profiling: PageProfilingOptions;
@@ -73,7 +68,6 @@ export const recalculateEntityRiskScore = async ({
   entityId,
   identifierType,
   getWriter,
-  idBasedRiskScoringEnabled,
   logger,
   alertSampleSizePerShard = DEFAULT_ALERT_SAMPLE_SIZE,
   collectScores = false,
@@ -147,7 +141,6 @@ export const recalculateEntityRiskScore = async ({
         watchlistConfigs,
         calculationRunId,
         writer,
-        idBasedRiskScoringEnabled,
         // The entity was already confirmed to exist in buildScoringContext above, so there's nothing
         // for create-if-missing to do here.
         createMissingEntities: false,
@@ -173,7 +166,6 @@ export const recalculateEntityRiskScore = async ({
       watchlistConfigs,
       calculationRunId,
       writer,
-      idBasedRiskScoringEnabled,
       refresh: 'wait_for',
     });
   }
@@ -194,7 +186,6 @@ export const recalculateEntityRiskScore = async ({
         now,
         calculationRunId,
         watchlistConfigs,
-        idBasedRiskScoringEnabled,
         writer,
         targetEntityIds: [resolutionTargetId],
         alertFilters: resolutionAlertFilters,

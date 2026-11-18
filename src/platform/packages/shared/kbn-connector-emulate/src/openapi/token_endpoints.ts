@@ -25,9 +25,14 @@ const AUTHORIZATION_CODE = 'contract-mock-authorization-code';
 const parseScopes = (value: unknown): string[] =>
   typeof value === 'string' ? value.split(/\s+/).filter(Boolean) : [];
 
+// The Microsoft identity platform's `<resource>/.default` scope grants the permissions configured
+// for the app, which a spec can't tell, so such a token gets the vendor's defaults like one
+// requested without a scope.
+const isDefaultScope = (scope: string): boolean => scope.endsWith('/.default');
+
 // Tokens granted specific scopes carry them, base64url-encoded, so scope checks can read them.
 const withScopes = (token: string, scopes: readonly string[]): string =>
-  scopes.length === 0
+  scopes.length === 0 || scopes.some(isDefaultScope)
     ? token
     : `${token}.${Buffer.from(JSON.stringify(scopes)).toString('base64url')}`;
 
@@ -54,6 +59,15 @@ const scopesOf = (token: string, prefix: string): string[] | undefined => {
  */
 export const grantedScopes = (token: string): readonly string[] | undefined =>
   scopesOf(token, ACCESS_TOKEN);
+
+/**
+ * An access token as the mock's token URLs issue it for `scope` (space-delimited), for code that
+ * stands in for a token exchange, such as a connector's `getToken`. Without a scope, or with a
+ * Microsoft `<resource>/.default` one, the token gets the vendor's defaults, so it isn't scope
+ * checked.
+ */
+export const issueAccessToken = (scope?: string): string =>
+  withScopes(ACCESS_TOKEN, parseScopes(scope));
 
 // RFC 7523, which service accounts (e.g. Google's) use to trade a signed JWT for a token.
 const JWT_BEARER = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
