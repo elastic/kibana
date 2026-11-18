@@ -78,6 +78,10 @@ export const AgentPolicyOverridesRequestSchema = schema.maybe(
             }
           }
         },
+        meta: {
+          description:
+            'Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.',
+        },
       }
     )
   )
