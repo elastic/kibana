@@ -195,6 +195,34 @@ describe('ExportProviderSelector', () => {
     });
   });
 
+  it('should keep a value that an older cached list lacks once the refreshed list has it', async () => {
+    // An earlier load cached a list without `azure-3`; the provider was added to the policy since
+    mockedContext.queryClient.setQueryData(
+      ['get-export-providers', 'agent-1'],
+      [{ id: 'azure-1', type: 'azure_blob', account_name: 'acct1', container: 'dumps' }]
+    );
+    apiMocks.responseProvider.exportProviders.mockReturnValue({
+      data: [
+        { id: 'azure-1', type: 'azure_blob', account_name: 'acct1', container: 'dumps' },
+        { id: 'azure-3', type: 'azure_blob', account_name: 'acct3', container: 'logs' },
+      ],
+    });
+    render('azure-3');
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          value: 'azure-3',
+          store: expect.objectContaining({
+            selectedOption: expect.objectContaining({ id: 'azure-3' }),
+          }),
+        })
+      );
+    });
+    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ value: '' }));
+    expect(renderResult.getByTestId(testId)).toHaveTextContent('azure-3');
+  });
+
   it('should clear the value when a refreshed list no longer has the provider', async () => {
     render('azure-2');
 

@@ -103,6 +103,7 @@ export const ExportProviderSelector = memo<
   const {
     data = [],
     isFetched,
+    isFetching,
     isLoading,
     error,
   } = useGetExportProviders(endpointId, { enabled: shouldRender && endpointId !== '' });
@@ -140,8 +141,9 @@ export const ExportProviderSelector = memo<
     }
 
     // The value can come from the console input history, a pasted command (`--export=<id>`) or an
-    // earlier selection. Keep it only while the host's policy (latest fetched list) has that provider.
-    if (shouldRender && value && isFetched && !error) {
+    // earlier selection. Keep it only while the host's policy has that provider. Check it only once
+    // a fetch has settled: while one runs, `data` may be an older cached list.
+    if (shouldRender && value && isFetched && !isFetching && !error) {
       const provider = data.find(({ id }) => id === value);
 
       if (!provider) {
@@ -150,7 +152,7 @@ export const ExportProviderSelector = memo<
         onChange({ value, valueText, store: { ...state, selectedOption: provider } });
       }
     }
-  }, [data, error, isFetched, onChange, shouldRender, state, value, valueText]);
+  }, [data, error, isFetched, isFetching, onChange, shouldRender, state, value, valueText]);
 
   const {
     services: { notifications },
