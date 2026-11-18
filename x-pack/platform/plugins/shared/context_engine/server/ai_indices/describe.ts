@@ -12,6 +12,7 @@ import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
 import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
 import { buildMemoryExampleQueries } from './memory_example_queries';
+import { describeOntology } from '../ontology/describe_ontology';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
 const MEMORY_KI_TYPE_SET: ReadonlySet<string> = new Set(MEMORY_KI_TYPES);
@@ -127,6 +128,12 @@ export const describeAiIndex = async ({
     userId,
     fields: allFields,
   });
+  const ontology = await describeOntology({
+    esClient,
+    dest: aiIndex.dest,
+    spaceId,
+    kiTypeCounts,
+  });
 
   return renderSections([
     headerSection(aiIndex),
@@ -134,6 +141,7 @@ export const describeAiIndex = async ({
     semanticFieldsSection(semanticFields),
     kiTypeCountsSection(kiTypeCounts),
     tagCountsSection(tagCounts),
+    ontology,
     includeMemory ? memorySection(aiIndex, target) : [],
     exampleQueriesSection(aiIndex.dest, includeMemory),
   ]);

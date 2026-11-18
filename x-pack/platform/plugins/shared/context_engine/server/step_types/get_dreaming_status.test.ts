@@ -7,6 +7,7 @@
 
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import { ontologySourceId } from '../ontology/ids';
 import { getDreamingStatusStepDefinition } from './get_dreaming_status';
 import { createMockStepContext } from './test_utils';
 
@@ -19,12 +20,14 @@ describe('getDreamingStatusStepDefinition', () => {
     canRead = true,
     get = jest.fn().mockResolvedValue({ id: 'support', dreaming, traces: [] }),
     source,
+    sourceId,
   }: {
     contextEngineEnabled?: boolean;
     memoryEnabled?: boolean;
     canRead?: boolean;
     get?: jest.Mock;
-    source?: 'memories' | 'traces' | 'relationships';
+    source?: 'memories' | 'traces' | 'relationships' | 'ontology';
+    sourceId?: string;
   } = {}) =>
     getDreamingStatusStepDefinition({
       getAiIndexService: () => ({ get } as unknown as AiIndexService),
@@ -33,7 +36,11 @@ describe('getDreamingStatusStepDefinition', () => {
       checkReadPrivilege: async () => canRead,
     }).handler(
       createMockStepContext({
-        input: { ai_index_id: 'support', ...(source && { source }) },
+        input: {
+          ai_index_id: 'support',
+          ...(source && { source }),
+          ...(sourceId && { source_id: sourceId }),
+        },
         esClient: {},
       })
     );
@@ -137,6 +144,37 @@ describe('getDreamingStatusStepDefinition', () => {
       run({ source: 'relationships', get: get({ ...withTypes, enabled: false }) })
     ).resolves.toEqual({
       output: { dream: false, reason: "Dreaming is not turned on for AI index 'support'." },
+    });
+  });
+
+  it('describes a source only with ontology discovery on, while the AI index has the source', async () => {
+    const esql = { type: 'esql' as const, value: 'FROM orders' };
+    const get = (config: Record<string, unknown>) =>
+      jest.fn().mockResolvedValue({ id: 'support', dreaming: config, traces: [], sources: [esql] });
+    const ontologyOnly = { enabled: true, ontology: { enabled: true } };
+    const sourceId = ontologySourceId(esql);
+
+    await expect(run({ source: 'ontology', sourceId, get: get(ontologyOnly) })).resolves.toEqual({
+      output: { dream: true },
+    });
+    await expect(
+      run({ source: 'ontology', sourceId: 'gone', get: get(ontologyOnly) })
+    ).resolves.toEqual({
+      output: { dream: false, reason: "AI index 'support' no longer has source 'gone'." },
+    });
+    await expect(run({ source: 'ontology', sourceId, get: get(dreaming) })).resolves.toEqual({
+      output: {
+        dream: false,
+        reason: "Ontology discovery is not turned on for AI index 'support'.",
+      },
+    });
+    await expect(
+      run({ source: 'ontology', sourceId, get: get({ ...ontologyOnly, enabled: false }) })
+    ).resolves.toEqual({
+      output: {
+        dream: false,
+        reason: "Ontology discovery is not turned on for AI index 'support'.",
+      },
     });
   });
 

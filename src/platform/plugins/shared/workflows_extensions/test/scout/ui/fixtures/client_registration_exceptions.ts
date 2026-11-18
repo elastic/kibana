@@ -59,11 +59,17 @@ export const CLIENT_REGISTRATION_EXCEPTIONS: readonly string[] = [
   // @elastic/context-eng — context_engine
   'context-engine.applyDreamChanges',
   'context-engine.applyDreamRelationships',
+  'context-engine.applyOntologyChanges',
+  'context-engine.catalogConnectorSource',
+  'context-engine.catalogOntologySources',
   'context-engine.createKi',
   'context-engine.deleteKi',
   'context-engine.getDreamingStatus',
   'context-engine.getFeedbackContext',
+  'context-engine.readOntologyQueryHistory',
   'context-engine.readTraceTranscripts',
   'context-engine.recordImprovements',
+  'context-engine.sampleConnectorSource',
   'context-engine.updateKi',
+  'context-engine.verifyOntologyJoins',
 ];

@@ -1,0 +1,482 @@
+version: '1'
+name: __NAME__
+description: 'Discovers the ontology of one ES|QL source of a Context Engine AI index: describes each dataset it reads, the business terms its fields store and how they join with the datasets of other sources, as ontology.dataset and ontology.term KIs with verified ES|QL access patterns. Configured entity types take precedence over discovered terms.'
+enabled: false
+tags:
+  - context-engine
+  - dreaming
+  - ontology
+  - scheduled
+settings:
+  timeout: '30m'
+  # One queue per AI index: its sources run one at a time, so a source sees the terms and datasets
+  # the sources before it wrote instead of racing them.
+  concurrency:
+    key: __CONCURRENCY_KEY__
+    strategy: queue
+    max: 1
+consts:
+  ai_index_id: __AI_INDEX_ID__
+  source_id: __SOURCE_ID__
+  connector_id: __CONNECTOR_ID__
+  instructions: __INSTRUCTIONS__
+  entity_types: __ENTITY_TYPES__
+outputs:
+  - name: datasets
+    type: number
+  - name: skipped
+    type: number
+  - name: created
+    type: number
+  - name: updated
+    type: number
+  - name: deleted
+    type: number
+  - name: rejected
+    type: number
+  - name: dropped_access_patterns
+    type: number
+  - name: proposed_entity_types
+    type: array
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+    inputs:
+      additionalProperties: false
+      properties:
+        dry_run:
+          type: boolean
+          default: false
+          description: Report what discovery would write and reject, and write nothing. Each apply step is previewed on its own, so terms of datasets this run would create are reported as not described yet. The run ends cancelled.
+steps:
+  - name: status
+    type: context-engine.getDreamingStatus
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source: ontology
+      source_id: '{{ consts.source_id }}'
+
+  - name: paused
+    type: if
+    condition: '${{ steps.status.output.dream != true }}'
+    steps:
+      - name: skip
+        type: workflow.output
+        status: cancelled
+        with:
+          datasets: 0
+          reason: '{{ steps.status.output.reason }}'
+
+  - name: last_run
+    type: workflow.getLastRun
+    with:
+      default_hours: 168
+      max_hours: 720
+
+  - name: catalog
+    type: context-engine.catalogOntologySources
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source_id: '{{ consts.source_id }}'
+
+  - name: history
+    type: context-engine.readOntologyQueryHistory
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source_id: '{{ consts.source_id }}'
+      datasets: '${{ steps.catalog.output.datasets | map: "name" }}'
+      since: '{{ steps.last_run.output.since }}'
+
+  - name: totals
+    type: data.set
+    with:
+      created: 0
+      updated: 0
+      deleted: 0
+      rejected: 0
+      dropped_access_patterns: 0
+      proposed_terms: []
+      proposed_entity_types: []
+      join_candidates: []
+      would_write: []
+
+  - name: describe
+    type: if
+    condition: '${{ steps.catalog.output.datasets.size > 0 }}'
+    steps:
+      - name: datasets
+        type: foreach
+        foreach: '{{ steps.catalog.output.datasets | json }}'
+        steps:
+          - name: describe_dataset
+            type: ai.prompt
+            connector-id: '{{ consts.connector_id }}'
+            connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '30s'
+            with:
+              prompt: |
+                You describe one dataset that an ES|QL source of an AI index reads, so that agents can query it correctly. You write its description and access patterns, the business terms its fields store, and the fields it could join on with other datasets.
+
+                Write only what the PROFILE, the QUERY HISTORY and the CURRENT description show. Never invent a field, a value or a dataset.
+
+                - description: one sentence on what one row of the dataset is.
+                - content: what the dataset holds, for an agent writing ES|QL against it: its time field and range, the fields that matter and what they mean, the values a filter field takes, and anything that would trip up a query, such as a field that is mostly empty. A short text or list, under 400 words. Keep what the CURRENT content says while the PROFILE still supports it.
+                - access_patterns: up to 5 distinct questions an agent could answer from this dataset. Each has:
+                  - question_type: a short label, such as "orders of a customer".
+                  - esql_template: the query with named ?param placeholders, without quotes, where the filters go.
+                  - esql_example: the same query with literal values from the PROFILE or the QUERY HISTORY. It must run as it is: FROM the dataset name exactly as given, only its fields, string literals in double quotes.
+                  - returns: what the query returns.
+                  Prefer the queries in QUERY HISTORY when they fit: they are what agents ask. Return fewer patterns rather than one you are unsure of; the list you return replaces the current one.
+                - source_round_ids: the round_id of each QUERY HISTORY query an access pattern is based on.
+                {%- if consts.entity_types.size > 0 %}
+                - terms: the ENTITY TYPES this dataset's fields store, and only those. name is the entity type exactly as listed. fields are where it is stored, as <dataset>:<field> with this dataset's name and its fields. attributes map each attribute listed for the type to the field that holds it, as { attribute, field } with field as <dataset>:<field>. Leave out a type the dataset does not store.
+                - proposed_entity_types: business concepts an agent would ask about by name that are none of the ENTITY TYPES, each with a name, a one-sentence description and its fields as <dataset>:<field>. They are reported for a person to add, never stored. An empty list is valid.
+                {%- else %}
+                - terms: the business concepts the fields store that an agent would ask about by name, such as Customer, Order or Error rate. Not every field. Each has a name in Title Case and singular, a one-sentence description, synonyms people use for it, and fields as <dataset>:<field> with this dataset's name and its fields. Use the exact name of an EXISTING TERM for the same concept.
+                - proposed_entity_types: always an empty list; no entity types are configured, so the terms are the proposals.
+                {%- endif %}
+                - join_candidates: fields of this dataset whose values likely match a field of one of the OTHER DATASETS, such as an id another dataset holds. from_dataset is this dataset and from_field one of its fields; to_dataset and to_field are the other side. Only keyword, integer or ip fields. Each is checked against the data before it is kept, so propose only likely ones.
+
+                INSTRUCTIONS:
+
+                {{ consts.instructions }}
+
+                ENTITY TYPES (configured; none when empty):
+                {%- for entity_type in consts.entity_types %}
+                - {{ entity_type.type }}{% if entity_type.description %}: {{ entity_type.description }}{% endif %}{% if entity_type.attributes.size > 0 %} (attributes: {{ entity_type.attributes | join: ', ' }}){% endif %}
+                {%- endfor %}
+
+                DATASET: {{ foreach.item.name }} ({{ foreach.item.kind }})
+                Time field: {{ foreach.item.time_field | default: "none" }}
+                Rows: {{ foreach.item.row_count | default: "unknown" }}
+                Time range: {{ foreach.item.earliest | default: "unknown" }} to {{ foreach.item.latest | default: "unknown" }}
+
+                PROFILE (one field per line; distinct is the number of distinct values in the last 30 days, top_values the most common):
+                {%- for field in foreach.item.fields %}
+                {{ field | json }}
+                {%- endfor %}
+                {%- if foreach.item.omitted_fields > 0 %}
+                ({{ foreach.item.omitted_fields }} more fields not shown)
+                {%- endif %}
+
+                CURRENT (none when empty):
+                {%- if foreach.item.current %}
+                {{ foreach.item.current | json }}
+                {%- endif %}
+
+                QUERY HISTORY (one per line, none when empty):
+                {%- for entry in steps.history.output.queries %}
+                {%- if entry.dataset == foreach.item.name %}
+                {{ entry | pick: "query", "round_id" | json }}
+                {%- endif %}
+                {%- endfor %}
+
+                EXISTING TERMS (one per line, none when empty):
+                {%- for ki in steps.catalog.output.existing %}
+                {%- if ki.type == 'ontology.term' %}
+                {{ ki | pick: "title", "entity_type", "description", "synonyms", "fields" | json }}
+                {%- endif %}
+                {%- endfor %}
+
+                OTHER DATASETS with their keyword, integer and ip fields (one per line, none when empty):
+                {%- for entry in steps.catalog.output.catalog %}
+                {%- unless entry.name == foreach.item.name %}
+                {{ entry.name | json }}:{% for field in entry.fields limit: 200 %}{% if field.type == 'keyword' or field.type == 'long' or field.type == 'integer' or field.type == 'ip' %} {{ field.name }}{% endif %}{% endfor %}
+                {%- endunless %}
+                {%- endfor %}
+                {%- for entry in steps.catalog.output.others %}
+                {{ entry.name | json }}:{% for field in entry.fields limit: 200 %} {{ field.name }}{% endfor %}
+                {%- endfor %}
+              schema:
+                type: object
+                properties:
+                  description:
+                    type: string
+                    description: One sentence on what one row of the dataset is.
+                  content:
+                    type: string
+                    description: What the dataset holds, for an agent writing ES|QL against it.
+                  access_patterns:
+                    type: array
+                    description: Up to 5 questions an agent could answer from the dataset. Replaces the current ones.
+                    items:
+                      type: object
+                      properties:
+                        question_type:
+                          type: string
+                        esql_template:
+                          type: string
+                        esql_example:
+                          type: string
+                        returns:
+                          type: string
+                      required:
+                        - question_type
+                        - esql_template
+                        - esql_example
+                        - returns
+                  source_round_ids:
+                    type: array
+                    items:
+                      type: string
+                  terms:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        synonyms:
+                          type: array
+                          items:
+                            type: string
+                        fields:
+                          type: array
+                          description: Where the term is stored, as <dataset>:<field>.
+                          items:
+                            type: string
+                        attributes:
+                          type: array
+                          description: For an entity type, the field that holds each of its attributes.
+                          items:
+                            type: object
+                            properties:
+                              attribute:
+                                type: string
+                              field:
+                                type: string
+                            required:
+                              - attribute
+                              - field
+                      required:
+                        - name
+                        - fields
+                  proposed_entity_types:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        fields:
+                          type: array
+                          items:
+                            type: string
+                      required:
+                        - name
+                  join_candidates:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        from_dataset:
+                          type: string
+                        from_field:
+                          type: string
+                        to_dataset:
+                          type: string
+                        to_field:
+                          type: string
+                      required:
+                        - from_dataset
+                        - from_field
+                        - to_dataset
+                        - to_field
+                required:
+                  - description
+                  - content
+                  - access_patterns
+                  - source_round_ids
+                  - terms
+                  - proposed_entity_types
+                  - join_candidates
+
+          - name: apply_dataset
+            type: context-engine.applyOntologyChanges
+            with:
+              ai_index_id: '{{ consts.ai_index_id }}'
+              source_id: '{{ consts.source_id }}'
+              catalog: '${{ steps.catalog.output.catalog }}'
+              profiles: '${{ steps.catalog.output.datasets }}'
+              changes:
+                datasets:
+                  - name: '{{ foreach.item.name }}'
+                    description: '${{ steps.describe_dataset.output.content.description }}'
+                    content: '${{ steps.describe_dataset.output.content.content }}'
+                    access_patterns: '${{ steps.describe_dataset.output.content.access_patterns }}'
+                    source_round_ids: '${{ steps.describe_dataset.output.content.source_round_ids }}'
+              dry_run: '${{ inputs.dry_run == true }}'
+
+          - name: tally_dataset
+            type: data.set
+            with:
+              created: '${{ variables.created | plus: steps.apply_dataset.output.created }}'
+              updated: '${{ variables.updated | plus: steps.apply_dataset.output.updated }}'
+              deleted: '${{ variables.deleted | plus: steps.apply_dataset.output.deleted }}'
+              rejected: '${{ variables.rejected | plus: steps.apply_dataset.output.rejected.size }}'
+              dropped_access_patterns: '${{ variables.dropped_access_patterns | plus: steps.apply_dataset.output.dropped_access_patterns }}'
+              proposed_terms: '${{ variables.proposed_terms | concat: steps.describe_dataset.output.content.terms }}'
+              proposed_entity_types: '${{ variables.proposed_entity_types | concat: steps.describe_dataset.output.content.proposed_entity_types }}'
+              join_candidates: '${{ variables.join_candidates | concat: steps.describe_dataset.output.content.join_candidates }}'
+              would_write: '${{ variables.would_write | concat: steps.apply_dataset.output.would_write }}'
+
+  - name: check_joins
+    type: if
+    condition: '${{ variables.join_candidates.size > 0 }}'
+    steps:
+      - name: joins
+        type: context-engine.verifyOntologyJoins
+        with:
+          ai_index_id: '{{ consts.ai_index_id }}'
+          catalog: '${{ steps.catalog.output.catalog | concat: steps.catalog.output.others }}'
+          candidates: '${{ variables.join_candidates }}'
+
+  - name: merge
+    type: if
+    condition: '${{ variables.proposed_terms.size > 0 }}'
+    steps:
+      - name: merge_terms
+        type: ai.prompt
+        connector-id: '{{ consts.connector_id }}'
+        connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+        on-failure:
+          retry:
+            max-attempts: 2
+            delay: '30s'
+        with:
+          prompt: |
+            You merge the business terms found in the datasets of one source of an AI index into its ontology, with one term per concept.
+
+            You are given PROPOSED TERMS (found in the datasets of this source described this run), EXISTING TERMS (already stored, from every source) and the DATASETS of this source.
+
+            Return the terms to create or change:
+            - One term per concept. Two proposals are the same concept when they mean the same thing, under any name and in any dataset: Customer in orders (orders:customer_id) and in customers (customers:id) is one Customer term with both fields.
+            {%- if consts.entity_types.size > 0 %}
+            - Every term is one of the ENTITY TYPES, named exactly as listed. Leave out anything else.
+            {%- else %}
+            - When a concept is an EXISTING TERM, use its exact name.
+            {%- endif %}
+            - fields: every field of this source's DATASETS that stores the term, as <dataset>:<field>, from the PROPOSED TERMS and the EXISTING TERMS. They replace this source's fields of the term; fields of other datasets are kept on their own.
+            - attributes: for an entity type, the field of this source's DATASETS that holds each of its attributes, as { attribute, field }.
+            - Leave out EXISTING TERMS whose fields in this source do not change.
+            - Delete this source's fields of an EXISTING TERM with delete: true when none of its fields in this source still stores it.
+            - name: Title Case and singular, or the entity type as listed. description: one sentence. synonyms: other names people use for it.
+            - An empty list is a valid answer.
+
+            INSTRUCTIONS:
+
+            {{ consts.instructions }}
+
+            ENTITY TYPES (configured; none when empty):
+            {%- for entity_type in consts.entity_types %}
+            - {{ entity_type.type }}{% if entity_type.description %}: {{ entity_type.description }}{% endif %}{% if entity_type.attributes.size > 0 %} (attributes: {{ entity_type.attributes | join: ', ' }}){% endif %}
+            {%- endfor %}
+
+            PROPOSED TERMS (one per line):
+            {%- for term in variables.proposed_terms %}
+            {{ term | json }}
+            {%- endfor %}
+
+            EXISTING TERMS (one per line, none when empty):
+            {%- for ki in steps.catalog.output.existing %}
+            {%- if ki.type == 'ontology.term' %}
+            {{ ki | pick: "title", "entity_type", "description", "synonyms", "fields" | json }}
+            {%- endif %}
+            {%- endfor %}
+
+            DATASETS:
+            {%- for entry in steps.catalog.output.catalog %}
+            {{ entry.name | json }}
+            {%- endfor %}
+          schema:
+            type: object
+            properties:
+              terms:
+                type: array
+                description: Terms to create, change or delete. Leave out terms that do not change.
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    synonyms:
+                      type: array
+                      items:
+                        type: string
+                    fields:
+                      type: array
+                      description: Where the term is stored in this source, as <dataset>:<field>.
+                      items:
+                        type: string
+                    attributes:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          attribute:
+                            type: string
+                          field:
+                            type: string
+                        required:
+                          - attribute
+                          - field
+                    delete:
+                      type: boolean
+                      description: True takes this source's fields off an existing term.
+                  required:
+                    - name
+            required:
+              - terms
+
+  - name: apply_terms
+    type: context-engine.applyOntologyChanges
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source_id: '{{ consts.source_id }}'
+      catalog: '${{ steps.catalog.output.catalog }}'
+      changes: '${{ steps.merge_terms.output.content }}'
+      joins: '${{ steps.joins.output.verified }}'
+      stale: '${{ steps.catalog.output.stale }}'
+      dry_run: '${{ inputs.dry_run == true }}'
+
+  - name: dry_run_result
+    type: if
+    condition: '${{ inputs.dry_run == true }}'
+    steps:
+      - name: dry_run_output
+        type: workflow.output
+        status: cancelled
+        with:
+          datasets: '${{ steps.catalog.output.datasets.size | default: 0 }}'
+          skipped: '${{ steps.catalog.output.skipped.size | default: 0 }}'
+          created: '${{ variables.created | plus: steps.apply_terms.output.created }}'
+          updated: '${{ variables.updated | plus: steps.apply_terms.output.updated }}'
+          deleted: '${{ variables.deleted | plus: steps.apply_terms.output.deleted }}'
+          rejected: '${{ variables.rejected | plus: steps.apply_terms.output.rejected.size }}'
+          dropped_access_patterns: '${{ variables.dropped_access_patterns | plus: steps.apply_terms.output.dropped_access_patterns }}'
+          proposed_entity_types: '${{ variables.proposed_entity_types }}'
+          would_write: '${{ variables.would_write | concat: steps.apply_terms.output.would_write }}'
+          reason: 'Dry run: nothing was written.'
+
+  - name: output_result
+    type: workflow.output
+    with:
+      datasets: '${{ steps.catalog.output.datasets.size | default: 0 }}'
+      skipped: '${{ steps.catalog.output.skipped.size | default: 0 }}'
+      created: '${{ variables.created | plus: steps.apply_terms.output.created }}'
+      updated: '${{ variables.updated | plus: steps.apply_terms.output.updated }}'
+      deleted: '${{ variables.deleted | plus: steps.apply_terms.output.deleted }}'
+      rejected: '${{ variables.rejected | plus: steps.apply_terms.output.rejected.size }}'
+      dropped_access_patterns: '${{ variables.dropped_access_patterns | plus: steps.apply_terms.output.dropped_access_patterns }}'
+      proposed_entity_types: '${{ variables.proposed_entity_types }}'

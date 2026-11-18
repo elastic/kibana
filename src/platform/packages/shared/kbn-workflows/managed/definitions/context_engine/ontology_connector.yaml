@@ -1,0 +1,510 @@
+version: '1'
+name: __NAME__
+description: 'Discovers the ontology of one connector source of a Context Engine AI index: samples its records through its read sub-actions, describes what it holds, the business terms its records store and how they join with the datasets of other sources, as ontology.dataset and ontology.term KIs with verified connector access patterns. Configured entity types take precedence over discovered terms.'
+enabled: false
+tags:
+  - context-engine
+  - dreaming
+  - ontology
+  - scheduled
+settings:
+  timeout: '30m'
+  # One queue per AI index: its sources run one at a time, so a source sees the terms and datasets
+  # the sources before it wrote instead of racing them.
+  concurrency:
+    key: __CONCURRENCY_KEY__
+    strategy: queue
+    max: 1
+consts:
+  ai_index_id: __AI_INDEX_ID__
+  source_id: __SOURCE_ID__
+  connector_id: __CONNECTOR_ID__
+  instructions: __INSTRUCTIONS__
+  entity_types: __ENTITY_TYPES__
+outputs:
+  - name: sampled
+    type: number
+  - name: created
+    type: number
+  - name: updated
+    type: number
+  - name: deleted
+    type: number
+  - name: rejected
+    type: number
+  - name: dropped_access_patterns
+    type: number
+  - name: proposed_entity_types
+    type: array
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+    inputs:
+      additionalProperties: false
+      properties:
+        dry_run:
+          type: boolean
+          default: false
+          description: Sample the connector and report what discovery would write and reject, and write nothing. Each apply step is previewed on its own. The run ends cancelled.
+steps:
+  - name: status
+    type: context-engine.getDreamingStatus
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source: ontology
+      source_id: '{{ consts.source_id }}'
+
+  - name: paused
+    type: if
+    condition: '${{ steps.status.output.dream != true }}'
+    steps:
+      - name: skip
+        type: workflow.output
+        status: cancelled
+        with:
+          sampled: 0
+          reason: '{{ steps.status.output.reason }}'
+
+  - name: last_run
+    type: workflow.getLastRun
+    with:
+      default_hours: 168
+      max_hours: 720
+
+  - name: catalog
+    type: context-engine.catalogConnectorSource
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source_id: '{{ consts.source_id }}'
+
+  - name: unchanged
+    type: if
+    condition: '${{ steps.catalog.output.describe != true }}'
+    steps:
+      - name: skip_unchanged
+        type: workflow.output
+        with:
+          sampled: 0
+          created: 0
+          updated: 0
+          deleted: 0
+          rejected: 0
+          dropped_access_patterns: 0
+          proposed_entity_types: []
+          reason: '{{ steps.catalog.output.skipped }}'
+
+  - name: history
+    type: context-engine.readOntologyQueryHistory
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source_id: '{{ consts.source_id }}'
+      since: '{{ steps.last_run.output.since }}'
+
+  - name: plan_samples
+    type: ai.prompt
+    connector-id: '{{ consts.connector_id }}'
+    connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+    on-failure:
+      retry:
+        max-attempts: 2
+        delay: '30s'
+    with:
+      prompt: |
+        You plan sample calls to learn what records a connector holds, so they can be described for agents.
+
+        Pick up to 5 calls of the READ SUB-ACTIONS that list or search representative records of the main kinds of things the connector holds, such as files and folders, messages and channels, or tickets and users. Prefer calls without narrow filters that return a few records each, with a small page size when a parameter allows one. Use the calls in QUERY HISTORY when they fit: they are what agents ask. Leave out a sub-action that needs an id you do not have.
+
+        Each call has sub_action, exactly as listed, and params: a JSON object of its parameters, valid against its schema.
+
+        INSTRUCTIONS:
+
+        {{ consts.instructions }}
+
+        CONNECTOR: {{ steps.catalog.output.connector.name }} ({{ steps.catalog.output.connector.type }}): {{ steps.catalog.output.connector.description }}
+        {%- if steps.catalog.output.connector.skill %}
+
+        HOW TO USE IT:
+        {{ steps.catalog.output.connector.skill }}
+        {%- endif %}
+
+        READ SUB-ACTIONS (one per line):
+        {%- for tool in steps.catalog.output.tools %}
+        {{ tool | json }}
+        {%- endfor %}
+
+        QUERY HISTORY (one per line, none when empty):
+        {%- for entry in steps.history.output.queries %}
+        {{ entry.query }}
+        {%- endfor %}
+      schema:
+        type: object
+        properties:
+          calls:
+            type: array
+            items:
+              type: object
+              properties:
+                sub_action:
+                  type: string
+                params:
+                  type: string
+                  description: The params as a JSON object.
+              required:
+                - sub_action
+                - params
+        required:
+          - calls
+
+  - name: sample
+    type: context-engine.sampleConnectorSource
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source_id: '{{ consts.source_id }}'
+      calls: '${{ steps.plan_samples.output.content.calls }}'
+
+  - name: describe_connector
+    type: ai.prompt
+    connector-id: '{{ consts.connector_id }}'
+    connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+    on-failure:
+      retry:
+        max-attempts: 2
+        delay: '30s'
+    with:
+      prompt: |
+        You describe one connector source of an AI index, so that agents can read it correctly through its sub-actions. You write its description and access patterns, the business terms its records store, and the record fields it could join on with other datasets.
+
+        Write only what the SAMPLES, the FIELDS, the QUERY HISTORY and the CURRENT description show. Never invent a sub-action, a parameter, a field or a value.
+
+        - description: one sentence on what the connector holds.
+        - content: the kinds of records it holds, what their fields mean, which read sub-action reads which, and what would trip up a call, such as paging, a required parameter or an id another call returns. A short text or list, under 400 words. Keep what the CURRENT content says while the SAMPLES still support it.
+        - connector_access_patterns: up to 5 distinct questions an agent could answer from the connector. Each has:
+          - question_type: a short label, such as "files a person owns".
+          - sub_action: one of the READ SUB-ACTIONS, exactly as listed.
+          - params_template: its params as a JSON object, with ?name placeholders as the values that change.
+          - params_example: the same params with real values from the SAMPLES or the QUERY HISTORY. The call must succeed as it is.
+          - returns: what the call returns.
+          Prefer the calls in QUERY HISTORY when they fit. Return fewer patterns rather than one you are unsure of; the list you return replaces the current one.
+        - source_round_ids: the round_id of each QUERY HISTORY call an access pattern is based on.
+        {%- if consts.entity_types.size > 0 %}
+        - terms: the ENTITY TYPES the records store, and only those. name is the entity type exactly as listed. fields are where it is stored, as {{ steps.catalog.output.datasets[0].name }}:<field> with one of the FIELDS. attributes map each attribute listed for the type to the field that holds it, as { attribute, field } with field in the same form. Leave out a type the connector does not hold.
+        - proposed_entity_types: business concepts an agent would ask about by name that are none of the ENTITY TYPES, each with a name, a one-sentence description and its fields. They are reported for a person to add, never stored. An empty list is valid.
+        {%- else %}
+        - terms: the business concepts the records store that an agent would ask about by name, such as Document, Person or Ticket. Each has a name in Title Case and singular, a one-sentence description, synonyms people use for it, and fields as {{ steps.catalog.output.datasets[0].name }}:<field> with one of the FIELDS. Use the exact name of an EXISTING TERM for the same concept.
+        - proposed_entity_types: always an empty list; no entity types are configured, so the terms are the proposals.
+        {%- endif %}
+        - join_candidates: FIELDS whose values likely match a field of one of the OTHER DATASETS, such as an email or an id an index also holds. from_dataset is {{ steps.catalog.output.datasets[0].name }} and from_field one of the FIELDS; to_dataset and to_field are the other side. Each is checked against the data before it is kept, so propose only likely ones.
+
+        INSTRUCTIONS:
+
+        {{ consts.instructions }}
+
+        ENTITY TYPES (configured; none when empty):
+        {%- for entity_type in consts.entity_types %}
+        - {{ entity_type.type }}{% if entity_type.description %}: {{ entity_type.description }}{% endif %}{% if entity_type.attributes.size > 0 %} (attributes: {{ entity_type.attributes | join: ', ' }}){% endif %}
+        {%- endfor %}
+
+        CONNECTOR: {{ steps.catalog.output.connector.name }} ({{ steps.catalog.output.connector.type }}), dataset {{ steps.catalog.output.datasets[0].name }}: {{ steps.catalog.output.connector.description }}
+
+        READ SUB-ACTIONS (one per line):
+        {%- for tool in steps.catalog.output.tools %}
+        {{ tool | json }}
+        {%- endfor %}
+
+        SAMPLES (one call per line, its result cut short):
+        {%- for sample in steps.sample.output.samples %}
+        {{ sample | json }}
+        {%- endfor %}
+
+        FIELDS (one per line; sample_values are values seen in the samples):
+        {%- for field in steps.sample.output.catalog[0].fields %}
+        {{ field | pick: "name", "type", "sample_values" | json }}
+        {%- endfor %}
+
+        CURRENT (none when empty):
+        {%- if steps.catalog.output.datasets[0].current %}
+        {{ steps.catalog.output.datasets[0].current | json }}
+        {%- endif %}
+
+        QUERY HISTORY (one per line, none when empty):
+        {%- for entry in steps.history.output.queries %}
+        {{ entry | pick: "query", "round_id" | json }}
+        {%- endfor %}
+
+        EXISTING TERMS (one per line, none when empty):
+        {%- for ki in steps.catalog.output.existing %}
+        {%- if ki.type == 'ontology.term' %}
+        {{ ki | pick: "title", "entity_type", "description", "synonyms", "fields" | json }}
+        {%- endif %}
+        {%- endfor %}
+
+        OTHER DATASETS with the fields they join on (one per line, none when empty):
+        {%- for entry in steps.catalog.output.others %}
+        {{ entry.name | json }}:{% for field in entry.fields limit: 200 %} {{ field.name }}{% endfor %}
+        {%- endfor %}
+      schema:
+        type: object
+        properties:
+          description:
+            type: string
+          content:
+            type: string
+          connector_access_patterns:
+            type: array
+            description: Up to 5 questions an agent could answer from the connector. Replaces the current ones.
+            items:
+              type: object
+              properties:
+                question_type:
+                  type: string
+                sub_action:
+                  type: string
+                params_template:
+                  type: string
+                params_example:
+                  type: string
+                returns:
+                  type: string
+              required:
+                - question_type
+                - sub_action
+                - params_template
+                - params_example
+                - returns
+          source_round_ids:
+            type: array
+            items:
+              type: string
+          terms:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                synonyms:
+                  type: array
+                  items:
+                    type: string
+                fields:
+                  type: array
+                  items:
+                    type: string
+                attributes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      attribute:
+                        type: string
+                      field:
+                        type: string
+                    required:
+                      - attribute
+                      - field
+              required:
+                - name
+                - fields
+          proposed_entity_types:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                fields:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - name
+          join_candidates:
+            type: array
+            items:
+              type: object
+              properties:
+                from_dataset:
+                  type: string
+                from_field:
+                  type: string
+                to_dataset:
+                  type: string
+                to_field:
+                  type: string
+              required:
+                - from_dataset
+                - from_field
+                - to_dataset
+                - to_field
+        required:
+          - description
+          - content
+          - connector_access_patterns
+          - source_round_ids
+          - terms
+          - proposed_entity_types
+          - join_candidates
+
+  - name: apply_dataset
+    type: context-engine.applyOntologyChanges
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source_id: '{{ consts.source_id }}'
+      catalog: '${{ steps.sample.output.catalog }}'
+      profiles: '${{ steps.catalog.output.datasets }}'
+      changes:
+        datasets:
+          - name: '{{ steps.catalog.output.datasets[0].name }}'
+            description: '${{ steps.describe_connector.output.content.description }}'
+            content: '${{ steps.describe_connector.output.content.content }}'
+            connector_access_patterns: '${{ steps.describe_connector.output.content.connector_access_patterns }}'
+            source_round_ids: '${{ steps.describe_connector.output.content.source_round_ids }}'
+      dry_run: '${{ inputs.dry_run == true }}'
+
+  - name: check_joins
+    type: if
+    condition: '${{ steps.describe_connector.output.content.join_candidates.size > 0 }}'
+    steps:
+      - name: joins
+        type: context-engine.verifyOntologyJoins
+        with:
+          ai_index_id: '{{ consts.ai_index_id }}'
+          catalog: '${{ steps.sample.output.catalog | concat: steps.catalog.output.others }}'
+          candidates: '${{ steps.describe_connector.output.content.join_candidates }}'
+
+  - name: merge
+    type: if
+    condition: '${{ steps.describe_connector.output.content.terms.size > 0 }}'
+    steps:
+      - name: merge_terms
+        type: ai.prompt
+        connector-id: '{{ consts.connector_id }}'
+        connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+        on-failure:
+          retry:
+            max-attempts: 2
+            delay: '30s'
+        with:
+          prompt: |
+            You merge the business terms found in one connector source of an AI index into its ontology, with one term per concept.
+
+            You are given PROPOSED TERMS (found in this connector this run), EXISTING TERMS (already stored, from every source) and the DATASET of this connector.
+
+            Return the terms to create or change:
+            - One term per concept. A proposal is an EXISTING TERM when it means the same thing under any name: a Person in a drive and a Customer contact in an index can be one term when they are the same people.
+            {%- if consts.entity_types.size > 0 %}
+            - Every term is one of the ENTITY TYPES, named exactly as listed. Leave out anything else.
+            {%- else %}
+            - When a concept is an EXISTING TERM, use its exact name.
+            {%- endif %}
+            - fields: every field of this connector's DATASET that stores the term, as <dataset>:<field>, from the PROPOSED TERMS and the EXISTING TERMS. They replace this connector's fields of the term; fields of other datasets are kept on their own.
+            - attributes: for an entity type, the field that holds each of its attributes, as { attribute, field }.
+            - Leave out EXISTING TERMS whose fields in this connector do not change.
+            - Delete this connector's fields of an EXISTING TERM with delete: true when none of its fields in this connector still stores it.
+            - An empty list is a valid answer.
+
+            INSTRUCTIONS:
+
+            {{ consts.instructions }}
+
+            ENTITY TYPES (configured; none when empty):
+            {%- for entity_type in consts.entity_types %}
+            - {{ entity_type.type }}{% if entity_type.description %}: {{ entity_type.description }}{% endif %}{% if entity_type.attributes.size > 0 %} (attributes: {{ entity_type.attributes | join: ', ' }}){% endif %}
+            {%- endfor %}
+
+            PROPOSED TERMS (one per line):
+            {%- for term in steps.describe_connector.output.content.terms %}
+            {{ term | json }}
+            {%- endfor %}
+
+            EXISTING TERMS (one per line, none when empty):
+            {%- for ki in steps.catalog.output.existing %}
+            {%- if ki.type == 'ontology.term' %}
+            {{ ki | pick: "title", "entity_type", "description", "synonyms", "fields" | json }}
+            {%- endif %}
+            {%- endfor %}
+
+            DATASET: {{ steps.catalog.output.datasets[0].name | json }}
+          schema:
+            type: object
+            properties:
+              terms:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    synonyms:
+                      type: array
+                      items:
+                        type: string
+                    fields:
+                      type: array
+                      items:
+                        type: string
+                    attributes:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          attribute:
+                            type: string
+                          field:
+                            type: string
+                        required:
+                          - attribute
+                          - field
+                    delete:
+                      type: boolean
+                  required:
+                    - name
+            required:
+              - terms
+
+  - name: apply_terms
+    type: context-engine.applyOntologyChanges
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source_id: '{{ consts.source_id }}'
+      catalog: '${{ steps.sample.output.catalog }}'
+      changes: '${{ steps.merge_terms.output.content }}'
+      joins: '${{ steps.joins.output.verified }}'
+      dry_run: '${{ inputs.dry_run == true }}'
+
+  - name: dry_run_result
+    type: if
+    condition: '${{ inputs.dry_run == true }}'
+    steps:
+      - name: dry_run_output
+        type: workflow.output
+        status: cancelled
+        with:
+          sampled: '${{ steps.sample.output.samples.size | default: 0 }}'
+          created: '${{ steps.apply_dataset.output.created | plus: steps.apply_terms.output.created }}'
+          updated: '${{ steps.apply_dataset.output.updated | plus: steps.apply_terms.output.updated }}'
+          deleted: '${{ steps.apply_dataset.output.deleted | plus: steps.apply_terms.output.deleted }}'
+          rejected: '${{ steps.apply_dataset.output.rejected.size | plus: steps.apply_terms.output.rejected.size }}'
+          dropped_access_patterns: '${{ steps.apply_dataset.output.dropped_access_patterns | plus: steps.apply_terms.output.dropped_access_patterns }}'
+          proposed_entity_types: '${{ steps.describe_connector.output.content.proposed_entity_types }}'
+          would_write: '${{ steps.apply_dataset.output.would_write | concat: steps.apply_terms.output.would_write }}'
+          reason: 'Dry run: nothing was written.'
+
+  - name: output_result
+    type: workflow.output
+    with:
+      sampled: '${{ steps.sample.output.samples.size | default: 0 }}'
+      created: '${{ steps.apply_dataset.output.created | plus: steps.apply_terms.output.created }}'
+      updated: '${{ steps.apply_dataset.output.updated | plus: steps.apply_terms.output.updated }}'
+      deleted: '${{ steps.apply_dataset.output.deleted | plus: steps.apply_terms.output.deleted }}'
+      rejected: '${{ steps.apply_dataset.output.rejected.size | plus: steps.apply_terms.output.rejected.size }}'
+      dropped_access_patterns: '${{ steps.apply_dataset.output.dropped_access_patterns | plus: steps.apply_terms.output.dropped_access_patterns }}'
+      proposed_entity_types: '${{ steps.describe_connector.output.content.proposed_entity_types }}'
