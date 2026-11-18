@@ -250,9 +250,11 @@ const toStoredJsonModeSettings = (
 
 /** Converts stored sort pairs, including the legacy single pair, to API sort objects. */
 const fromStoredSort = (
-  sort: DiscoverSessionTabAttributes['sort']
+  sort: DiscoverSessionTabAttributes['sort'] | undefined
 ): DiscoverSessionApiTabBase['sort'] => {
-  const sortInput = sort as SortOrder | SortOrder[];
+  // The raw Saved Objects API persists attributes without applying schema defaults, so a
+  // hand-written session can omit `sort` even though the schema defaults it to [].
+  const sortInput = (sort ?? []) as SortOrder | SortOrder[];
   const normalizedSort: SortOrder[] = isLegacySort(sortInput) ? [sortInput] : sortInput;
 
   return normalizedSort.map((s) => {
