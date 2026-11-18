@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { ObjectType } from '@kbn/config-schema';
+import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { createModelVersionTestMigrator } from '@kbn/core-test-helpers-model-versions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { ruleMappings } from '../rule_mappings';
+import {
+  ruleSavedObjectAttributesSchemaV8,
+  ruleSavedObjectAttributesSchemaV9,
+} from '../schemas/rule_saved_object_attributes';
 import { ruleModelVersions } from './rule_model_versions';
 
 const ruleType: SavedObjectsType = {
@@ -298,6 +302,66 @@ describe('ruleModelVersions', () => {
         (forwardCompatibility.validate(attributes) as { metadata: Record<string, unknown> })
           .metadata.template
       ).toEqual({ id: 'template-1' });
+    });
+  });
+
+  describe('v11 to v12 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: ruleType });
+
+    const createV11RuleDocument = (): SavedObject<
+      TypeOf<typeof ruleSavedObjectAttributesSchemaV8>
+    > =>
+      migrator.migrate({
+        document: createV5RuleDocument({
+          metadata: { name: 'test-rule', tags: ['prod'], template: { id: 'template-1' } },
+          createdBy: { profile_uid: 'author_profile_uid' },
+          updatedBy: { profile_uid: 'editor_profile_uid' },
+        }),
+        fromVersion: 5,
+        toVersion: 11,
+      });
+
+    it('uses schema v9 without mapping changes or backfills', () => {
+      expect(ruleModelVersions['12']?.changes).toEqual([]);
+      expect(ruleModelVersions['12']?.schemas?.create).toBe(ruleSavedObjectAttributesSchemaV9);
+      expect(ruleMappings.properties).not.toHaveProperty('reason');
+    });
+
+    it('leaves existing rules unchanged without adding a reason', () => {
+      const document = createV11RuleDocument();
+      const migrated = migrator.migrate({ document, fromVersion: 11, toVersion: 12 });
+
+      expect(migrated.attributes).toEqual(document.attributes);
+      expect(ruleSavedObjectAttributesSchemaV9.validate(migrated.attributes)).not.toHaveProperty(
+        'reason'
+      );
+    });
+
+    it('retains the reason and ignores future fields in forward compatibility validation', () => {
+      const forwardCompatibility = ruleModelVersions['12']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = {
+        ...createV11RuleDocument().attributes,
+        reason: 'CPU on {{host.name}} was {{cpu_pct}}%.',
+      };
+
+      expect(forwardCompatibility.validate({ ...attributes, future_field: true })).toEqual(
+        ruleSavedObjectAttributesSchemaV9.validate(attributes)
+      );
+    });
+
+    it('strips the reason when rolling back to v11', () => {
+      const document = createV11RuleDocument();
+      const migrated = migrator.migrate({
+        document: {
+          ...document,
+          attributes: { ...document.attributes, reason: 'CPU on {{host.name}} was {{cpu_pct}}%.' },
+        },
+        fromVersion: 12,
+        toVersion: 11,
+      });
+
+      expect(migrated.attributes).toEqual(document.attributes);
     });
   });
 

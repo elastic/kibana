@@ -15,6 +15,7 @@ import {
   ruleSavedObjectAttributesSchemaV6,
   ruleSavedObjectAttributesSchemaV7,
   ruleSavedObjectAttributesSchemaV8,
+  ruleSavedObjectAttributesSchemaV9,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
@@ -255,6 +256,13 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV8.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV8,
+    },
+  },
+  '12': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV9.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV9,
     },
   },
 };
