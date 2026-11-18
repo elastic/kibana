@@ -36,7 +36,6 @@ export const triggerRowSchema = lazySchema(() =>
     presetScheduleSchema.and(
       z.object({
         kind: z.literal('schedule'),
-        scopeQuery: z.string().max(10000).optional(),
       })
     ),
     z

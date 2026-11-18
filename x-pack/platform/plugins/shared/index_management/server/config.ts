@@ -93,6 +93,12 @@ const schemaLatest = schema.object(
       // serverless.vectordb.yml when a replacement is available.
       serverless: schema.boolean({ defaultValue: false }),
     }),
+    showManagedDataStreamsByDefault: offeringBasedSchema({
+      // Managed data streams are hidden by default on vectorDB projects, where they would otherwise
+      // crowd out user-created data streams; refer to the serverless.vectordb.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
   },
   { defaultValue: undefined }
 );
@@ -115,6 +121,7 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     enableFailureStoreRetentionDisabling: true,
     enableIndexMode: true,
     enableVectorCount: true,
+    showManagedDataStreamsByDefault: true,
   },
   schema: schemaLatest,
   deprecations: ({ unused }) => [unused('dev.enableIndexDetailsPage', { level: 'warning' })],

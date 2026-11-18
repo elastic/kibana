@@ -808,3 +808,133 @@ describe('InventoryService.list diagnostics', () => {
     expect(response.took).toBe(400);
   });
 });
+
+describe('InventoryService.plan', () => {
+  const answers = {
+    [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+    [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+  };
+
+  it('sends the probes and no list query', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answerByPattern(esClient, answers, { timeSeries: [OTEL_PATTERN] });
+
+    await service.plan({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    const sent = esClient.esql.query.mock.calls.map(([body]) => body.query);
+    expect(sent.map(patternOf)).toEqual([STATE_PATTERN, OTEL_PATTERN]);
+    expect(sent.every(isProbe)).toBe(true);
+  });
+
+  it('returns the exact probe and list request bodies list sends for the same request', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answerByPattern(esClient, answers, { timeSeries: [OTEL_PATTERN] });
+    const request = { type: 'k8s.deployment', window: WINDOW, limit: 3 };
+
+    await service.list(request);
+    const sentByList = esClient.esql.query.mock.calls.map(([body]) => body);
+    const plan = await service.plan(request);
+
+    expect(plan.probes.map(({ request: body }) => body)).toEqual(
+      sentByList.filter(({ query }) => isProbe(query))
+    );
+    expect(plan.queries.map(({ request: body }) => body)).toEqual(
+      sentByList.filter(({ query }) => !isProbe(query))
+    );
+  });
+
+  it('plans a TS query before the FROM query of a source whose probe found a time-series index', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answerByPattern(esClient, answers, { timeSeries: [OTEL_PATTERN] });
+
+    const plan = await service.plan({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(
+      plan.probes.map(({ indexPattern, hasTimeSeries }) => ({ indexPattern, hasTimeSeries }))
+    ).toEqual([
+      { indexPattern: STATE_PATTERN, hasTimeSeries: false },
+      { indexPattern: OTEL_PATTERN, hasTimeSeries: true },
+    ]);
+    expect(plan.queries.map(({ indexPattern, engine }) => ({ indexPattern, engine }))).toEqual([
+      { indexPattern: STATE_PATTERN, engine: 'FROM' },
+      { indexPattern: OTEL_PATTERN, engine: 'TS' },
+      { indexPattern: OTEL_PATTERN, engine: 'FROM' },
+    ]);
+    expect(plan.errors).toEqual([]);
+  });
+
+  it('reports a failed probe in errors, with no time-series answer and none of its queries', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answerByPattern(esClient, answers, {
+      timeSeries: [OTEL_PATTERN],
+      probeFails: { [STATE_PATTERN]: esError(503, 'timeout_exception', 'timed out') },
+    });
+
+    const plan = await service.plan({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(
+      plan.probes.map(({ indexPattern, hasTimeSeries }) => ({ indexPattern, hasTimeSeries }))
+    ).toEqual([
+      { indexPattern: STATE_PATTERN, hasTimeSeries: null },
+      { indexPattern: OTEL_PATTERN, hasTimeSeries: true },
+    ]);
+    expect(plan.errors).toEqual([
+      { indexPattern: STATE_PATTERN, status: 503, reason: 'timeout_exception: timed out' },
+    ]);
+    expect(plan.queries.map(({ indexPattern, engine }) => ({ indexPattern, engine }))).toEqual([
+      { indexPattern: OTEL_PATTERN, engine: 'TS' },
+      { indexPattern: OTEL_PATTERN, engine: 'FROM' },
+    ]);
+  });
+
+  it.each([
+    ['an unknown type', 'k8s.unknown', [k8sDeploymentOtelAndAgentFixture]],
+    ['a type without a dynamic block', k8sNodeFixture.type, [k8sNodeWithoutDynamic]],
+  ])(
+    'throws InventoryTypeNotFoundError for %s without querying',
+    async (_label, type, definitions) => {
+      const { service, esClient } = createService(definitions);
+
+      await expect(service.plan({ type, window: WINDOW, limit: 10 })).rejects.toMatchObject({
+        name: 'InventoryTypeNotFoundError',
+        statusCode: 404,
+      });
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+    }
+  );
+
+  it('throws InventoryTypeDefinitionError when the definition cannot be turned into queries', async () => {
+    const invalid = {
+      ...k8sDeploymentOtelAndAgentFixture,
+      dynamic: {
+        sources: [{ indexPattern: STATE_PATTERN, attributes: [{ name: 'last_seen', field: 'x' }] }],
+      },
+    };
+    const { service, esClient, logger } = createService([invalid]);
+    answerByPattern(esClient, {});
+
+    await expect(
+      service.plan({ type: 'k8s.deployment', window: WINDOW, limit: 10 })
+    ).rejects.toMatchObject({
+      name: 'InventoryTypeDefinitionError',
+      statusCode: 400,
+      message: expect.stringContaining('Entity type "k8s.deployment" cannot be queried'),
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Entity type "k8s.deployment" cannot be queried')
+    );
+  });
+
+  it('passes the abort signal to every probe', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answerByPattern(esClient, answers);
+    const { signal } = new AbortController();
+
+    await service.plan({ type: 'k8s.deployment', window: WINDOW, limit: 10, signal });
+
+    expect(esClient.esql.query.mock.calls.map(([, options]) => options)).toEqual([
+      { signal },
+      { signal },
+    ]);
+  });
+});

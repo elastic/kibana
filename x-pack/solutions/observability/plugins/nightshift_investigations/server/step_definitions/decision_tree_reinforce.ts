@@ -264,7 +264,8 @@ export const decisionTreeReinforceStepDefinition = ({
       try {
         // Wrapping `runAgent` in `withNightshiftBackgroundSpan` joins the entire reinforcement
         // sub-agent run (`invoke_agent` -> `chat <model>` -> `execute_tool nightshift_*`)
-        // under `T_background` in `traces-agent_builder.otel-<spaceId>`.
+        // to the investigator round's trace when it is known, so it shows in that round's trace
+        // flyout, and to `T_background` otherwise, in `traces-agent_builder.otel-<spaceId>`.
         const { result, sessionState } = await trackBackgroundActivity(
           {
             telemetry,

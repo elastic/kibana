@@ -25,7 +25,8 @@ export const mockUpdatePanelToolCall = (proxy: LlmProxy, esqlQuery: string) => {
       const [, embeddableId] = JSON.stringify(messages).match(EMBEDDABLE_ID_PATTERN) ?? [];
       return createToolCallMessage('custom_content_update_panel', {
         embeddable_id: embeddableId,
-        esqlQuery,
+        // The panel under test already has a first query: this replaces it, as it is.
+        dataQueries: [{ esql: esqlQuery }],
       });
     },
   });
