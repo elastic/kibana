@@ -20,15 +20,19 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { getSignalTargetsWritePatterns } from '@kbn/streams-schema';
+import { DESTINATION_TYPES_WITH_STATS } from '../../stream_management/data_management/stream_detail_canvas/nodes/destination_stats_status';
 import { IngestRateChartContent } from '../../stream_detail_overview/ingest_rate_chart';
 import { DeferredMount } from '../deferred_mount';
 import { DeleteDestinationConfirmation } from './delete_destination_confirmation';
 import { getReadableFailureStoreNames } from './destination_index_stats';
+import { DestinationDeliverySection } from './destination_delivery_section';
 import { DestinationIndicesTable } from './destination_indices_table';
 import { useDestinationIndexStats } from './destinations_context';
+import { FlyoutPanel } from './flyout_panel';
 import { RemoteElasticsearchDestinationDetails } from './remote_elasticsearch_destination_details';
 import { S3DestinationDetails } from './s3_destination_details';
 import type { DestinationDetailActorRef } from './state_machines/destination_detail_state_machine';
@@ -39,6 +43,10 @@ import type {
 import { REMOTE_ELASTICSEARCH_TYPE, type DestinationViewModel } from './types';
 
 const UNIT_DESTINATION_FLYOUT_MAX_WIDTH = 1125;
+
+const CONFIGURATION_TITLE = i18n.translate('xpack.streams.destinations.flyout.configurationTitle', {
+  defaultMessage: 'Configuration',
+});
 
 const DestinationDeleteFooter = ({
   destinationName,
@@ -136,6 +144,9 @@ export const UnitDestinationFlyout = ({
     return [...patterns, ...failureStores].join(',');
   }, [destination, indices]);
 
+  // The types that report collector metrics, which the failures are read from.
+  const hasFailureStats = DESTINATION_TYPES_WITH_STATS.includes(destination.type);
+
   const totals = useMemo(
     () => ({
       docs: sumStat(indices, indexStats?.docs),
@@ -187,9 +198,38 @@ export const UnitDestinationFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {destination.type === 's3' ? (
-          <S3DestinationDetails destination={destination} />
+          <>
+            {hasFailureStats && (
+              <>
+                {/* S3 has no ingest chart, so its panel is the delivery of the flyout. */}
+                <DestinationDeliverySection
+                  destinationId={destination.id}
+                  destinationType={destination.type}
+                  panelRole="delivery"
+                />
+                <EuiSpacer size="l" />
+              </>
+            )}
+            <FlyoutPanel title={CONFIGURATION_TITLE}>
+              <S3DestinationDetails destination={destination} layout="grid" />
+            </FlyoutPanel>
+          </>
         ) : destination.type === REMOTE_ELASTICSEARCH_TYPE ? (
-          <RemoteElasticsearchDestinationDetails destination={destination} />
+          <>
+            {hasFailureStats && (
+              <>
+                <DestinationDeliverySection
+                  destinationId={destination.id}
+                  destinationType={destination.type}
+                  panelRole="delivery"
+                />
+                <EuiSpacer size="l" />
+              </>
+            )}
+            <FlyoutPanel title={CONFIGURATION_TITLE}>
+              <RemoteElasticsearchDestinationDetails destination={destination} layout="grid" />
+            </FlyoutPanel>
+          </>
         ) : (
           <DeferredMount>
             {esqlSource && (
@@ -201,6 +241,17 @@ export const UnitDestinationFlyout = ({
                   isQueryStream={false}
                   isDraft={false}
                   totals={totals}
+                />
+                <EuiSpacer size="l" />
+              </>
+            )}
+            {hasFailureStats && (
+              <>
+                {/* The ingest chart shows the delivery, so the panel adds only the failures to it. */}
+                <DestinationDeliverySection
+                  destinationId={destination.id}
+                  destinationType={destination.type}
+                  panelRole={esqlSource ? 'failures' : 'delivery'}
                 />
                 <EuiSpacer size="l" />
               </>
