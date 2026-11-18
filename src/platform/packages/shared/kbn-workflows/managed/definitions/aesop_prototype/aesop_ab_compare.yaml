@@ -134,6 +134,7 @@ steps:
         {% if inputs.skill_id != blank %}{{ inputs.skill_id }}{% else %}aesop-new-{{ execution.id }}{% endif %}
       target_skill_name: "{{ inputs.new_skill_name | default: 'AESOP skill' }}"
       baseline_scored: false
+      live_failed: false
       experiment_ids: []
       arm_variant_indexes: []
       arm_count: 0
@@ -248,6 +249,18 @@ steps:
       experiment_ids: "${{ variables.experiment_ids | concat: variables.new_ids }}"
       arm_variant_indexes: "${{ variables.arm_variant_indexes | concat: variables.new_markers }}"
 
+  # A named live skill whose arm scored nothing (an unknown id, a failed
+  # run) stops the A/B here. Without it the variants are compared with the
+  # baseline alone, and a proposal can say a variant wins while the live
+  # skill it would replace was never scored.
+  - name: check_live_arm
+    type: data.set
+    with:
+      live_failed: >-
+        ${{ variables.has_live_skill == true
+          and variables.baseline_scored == true
+          and (steps.live_run.output.scores_ingested | default: 0) == 0 }}
+
   # ----------------------------------------------------------------------
   # Variant arms. Each candidate is created as a user skill (POST), so its
   # instructions live in the skills registry like any user skill and the
@@ -258,7 +271,7 @@ steps:
   # ----------------------------------------------------------------------
   - name: run_variants
     type: foreach
-    if: '${{ variables.baseline_scored == true }}'
+    if: '${{ variables.baseline_scored == true and variables.live_failed != true }}'
     foreach: '${{ inputs.variants | json }}'
     steps:
       - name: create_variant
@@ -832,4 +845,4 @@ steps:
       deployed: '${{ variables.deployed }}'
       skill_id: '{{ variables.target_skill_id }}'
       skip_reason: >-
-        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif variables.is_tie == true and steps.propose_tie_pick.error != null %}The tie proposal failed: {{ steps.propose_tie_pick.error.message }}{% elsif variables.is_tie == true and steps.resolve_decision.output.dismissed == true %}The tie proposal was dismissed; every tied arm was rejected.{% elsif variables.is_tie == true and variables.winner_variant == 'live' %}{% if steps.resolve_decision.output.approved == true %}Tied arms; the live skill has the highest mean, so approving the pick changed nothing.{% else %}Tied arms, nothing deployed; the analyst was asked to confirm keeping the live skill.{% endif %}{% elsif variables.deploy_candidate != true and variables.tie_deploy != true %}Rejected: {{ variables.reject_reason }}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}
+        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.live_failed == true %}The live skill arm produced no scores (is `{{ inputs.skill_id }}` a skill id?); the variants were not run, since they could not be compared with the live skill.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif variables.is_tie == true and steps.propose_tie_pick.error != null %}The tie proposal failed: {{ steps.propose_tie_pick.error.message }}{% elsif variables.is_tie == true and steps.resolve_decision.output.dismissed == true %}The tie proposal was dismissed; every tied arm was rejected.{% elsif variables.is_tie == true and variables.winner_variant == 'live' %}{% if steps.resolve_decision.output.approved == true %}Tied arms; the live skill has the highest mean, so approving the pick changed nothing.{% else %}Tied arms, nothing deployed; the analyst was asked to confirm keeping the live skill.{% endif %}{% elsif variables.deploy_candidate != true and variables.tie_deploy != true %}Rejected: {{ variables.reject_reason }}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}

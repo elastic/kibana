@@ -22,7 +22,7 @@ export const AESOP_EXPLORER_WORKFLOW_ID = 'system-security-aesop-explorer';
 export const AESOP_AB_COMPARE_WORKFLOW = {
   id: AESOP_AB_COMPARE_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 12,
+  version: 13,
   billable: false,
   yaml: AESOP_AB_COMPARE_YAML,
   management: {
@@ -137,7 +137,7 @@ export const AESOP_EXPLORER_WORKFLOW = {
   pluginId: 'securitySolution',
   // Bump on every YAML edit: yamlTemplate hashing does not see the imported
   // YAML, so installed instances only re-render on a version bump.
-  version: 12,
+  version: 13,
   billable: false,
   yamlTemplate: ({ mode, intervalMinutes, connectorId, datasetId, abAgentId, investigationId }) =>
     renderTemplate(AESOP_EXPLORER_YAML, {

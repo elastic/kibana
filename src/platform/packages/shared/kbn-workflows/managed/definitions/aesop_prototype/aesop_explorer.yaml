@@ -74,6 +74,26 @@ steps:
       continue: true
 
   # ----------------------------------------------------------------------
+  # The skills in this space, so a candidate's skill_id can be resolved to
+  # a real id before the A/B runs. The agent sees skills by name in its
+  # telemetry and has returned a name where the id belongs; an unknown id
+  # makes the live arm score nothing, and the A/B then never compares the
+  # variants with the live skill. A failed read leaves skill_id as the
+  # agent returned it.
+  # ----------------------------------------------------------------------
+  - name: list_skills
+    type: kibana.request
+    timeout: '30s'
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills'
+      headers:
+        kbn-xsrf: 'true'
+        elastic-api-version: '2023-10-31'
+    on-failure:
+      continue: true
+
+  # ----------------------------------------------------------------------
   # Bounded exploration. Each pass asks the explorer for up to two
   # candidates, records them as findings and hands them to the A/B compare.
   # The agent decides whether another pass is worth it; the limit of three is
@@ -114,7 +134,10 @@ steps:
             Eval datasets the A/B can score a candidate on (id, name, description, examples):
             {{ steps.read_datasets.output.datasets | default: consts.EMPTY_ARRAY | json | truncate: 4000 }}
 
-            Return at most two candidates. A candidate that improves an existing skill sets skill_id to that skill's id; a candidate for a new skill leaves skill_id empty and names the skill. Every candidate also sets dataset_id, required, no default: copy the id of the dataset from the list above whose examples fit the task it improves. Propose only tasks one of the datasets covers: its examples must ask the same kind of question the skill answers, over the same kind of data. A candidate scored on a dataset that does not fit its task is scored out of domain and is wasted, so drop it instead; returning no candidates from a pass is a valid result. Each candidate carries one to three complete variants of the skill's instructions (markdown), a rationale and the evidence behind it. The agent that runs a skill only has ES|QL and does not see the mapping, and it guesses fields that are not there (geo, user_agent, related.ip) when a skill asks for checks the data cannot answer. So read the mapping of every index a skill names, list the fields the skill may use in its text, and do not ask for checks that need a field the index lacks. Read the expected outputs of that dataset's examples too, and write decision rules that reach the verdicts and actions they state: a skill whose facts are right but whose guidance hedges (escalate pending confirmation, monitor, unverified) where the examples give a definite verdict loses on factuality. Set continue_exploring to true only when another pass would look somewhere new.
+            Skills in this space (id = name):
+            {% for skill in steps.list_skills.output.results %}{{ skill.id }} = {{ skill.name }}; {% endfor %}
+
+            Return at most two candidates. A candidate that improves an existing skill sets skill_id to that skill's id from the list above, not its name (traces name a skill by name; the id is what the A/B reads and writes); a candidate for a new skill leaves skill_id empty and names the skill. Every candidate also sets dataset_id, required, no default: copy the id of the dataset from the list above whose examples fit the task it improves. Propose only tasks one of the datasets covers: its examples must ask the same kind of question the skill answers, over the same kind of data. A candidate scored on a dataset that does not fit its task is scored out of domain and is wasted, so drop it instead; returning no candidates from a pass is a valid result. Each candidate carries one to three complete variants of the skill's instructions (markdown), a rationale and the evidence behind it. The agent that runs a skill only has ES|QL and does not see the mapping, and it guesses fields that are not there (geo, user_agent, related.ip) when a skill asks for checks the data cannot answer. So read the mapping of every index a skill names, list the fields the skill may use in its text, and do not ask for checks that need a field the index lacks. Read the expected outputs of that dataset's examples too, and write decision rules that reach the verdicts and actions they state: a skill whose facts are right but whose guidance hedges (escalate pending confirmation, monitor, unverified) where the examples give a definite verdict loses on factuality. Set continue_exploring to true only when another pass would look somewhere new.
           schema:
             type: object
             properties:
@@ -196,12 +219,23 @@ steps:
         type: foreach
         foreach: '${{ steps.explorer_pass.output.structured_output.candidates | default: consts.EMPTY_ARRAY }}'
         steps:
+          # An id that is in the list stays; a name that is in the list
+          # becomes its id; anything else passes through, and the A/B stops
+          # with "the live skill arm produced no scores" instead of comparing
+          # without it.
+          - name: resolve_skill_id
+            type: data.set
+            with:
+              by_id: "${{ steps.list_skills.output.results | default: consts.EMPTY_ARRAY | where: 'id', foreach.item.skill_id | map: 'id' | first | default: '' }}"
+              by_name: "${{ steps.list_skills.output.results | default: consts.EMPTY_ARRAY | where: 'name', foreach.item.skill_id | map: 'id' | first | default: '' }}"
+
           - name: start_ab_compare
             type: workflow.executeAsync
             with:
               workflow-id: system-security-aesop-ab-compare
               inputs:
-                skill_id: '{{ foreach.item.skill_id }}'
+                skill_id: >-
+                  {% if foreach.item.skill_id == blank %}{% elsif steps.resolve_skill_id.output.by_id != blank %}{{ steps.resolve_skill_id.output.by_id }}{% elsif steps.resolve_skill_id.output.by_name != blank %}{{ steps.resolve_skill_id.output.by_name }}{% else %}{{ foreach.item.skill_id }}{% endif %}
                 new_skill_name: '{{ foreach.item.skill_name }}'
                 skill_description: '{{ foreach.item.title | truncate: 1000 }}'
                 # The schema requires dataset_id, so this default is only a
