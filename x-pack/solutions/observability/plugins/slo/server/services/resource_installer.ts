@@ -11,7 +11,7 @@ import type {
   IngestPipeline,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { escapeRegExp } from 'lodash';
+import { escapeRegExp, isEqual } from 'lodash';
 import {
   COMPOSITE_SUMMARY_INDEX_NAME,
   getSLIIndexNamePrefix,
@@ -39,7 +39,11 @@ import {
 import { SLOResourcesNotInstalled } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import type { Rounding } from './sli_routing_state';
-import { computeInitialRoutingState, parseRoutingStateFromMeta } from './sli_routing_state';
+import {
+  computeInitialRoutingState,
+  parseRoutingStateFromMeta,
+  reconcileRoutingState,
+} from './sli_routing_state';
 
 export interface ResourceInstaller {
   install(): Promise<void>;
@@ -125,25 +129,24 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     const current = await this.fetchRoutingPipeline(version);
     const existing = parseRoutingStateFromMeta(current?._meta);
 
-    // The routing state is set once per resources version: a later rounding change is not applied.
-    if (existing && existing.rounding !== this.configuredRounding) {
-      this.logger.warn(
-        `SLO routing pipeline [${name}] keeps rounding [${existing.rounding}], the configured rounding [${this.configuredRounding}] applies from the next resources version`
-      );
-    }
+    // A rounding change applies from the next UTC day, so every document already written keeps its index.
+    const routing = existing
+      ? reconcileRoutingState(existing, this.configuredRounding, this.now())
+      : computeInitialRoutingState({
+          configured: this.configuredRounding,
+          now: this.now(),
+          hasDailyHistory: await hasDailyHistory(version),
+        });
 
-    if (current && existing && isSLIRoutingPipelineCurrent(current, version)) {
+    if (
+      current &&
+      existing &&
+      isEqual(routing, existing) &&
+      isSLIRoutingPipelineCurrent(current, version)
+    ) {
       this.logger.debug(`SLO routing pipeline [${name}] is up to date`);
       return;
     }
-
-    const routing =
-      existing ??
-      computeInitialRoutingState({
-        configured: this.configuredRounding,
-        now: this.now(),
-        hasDailyHistory: await hasDailyHistory(version),
-      });
 
     this.logger.info(`Installing SLO routing pipeline [${name}] with ${JSON.stringify(routing)}`);
     await this.execute(() =>

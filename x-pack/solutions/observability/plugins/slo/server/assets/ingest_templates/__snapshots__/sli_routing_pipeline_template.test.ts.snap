@@ -1,14 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getSLIRoutingPipelineTemplate routes with a cutover guard 1`] = `
+exports[`getSLIRoutingPipelineTemplate routes with the rounding segments 1`] = `
 Object {
   "_meta": Object {
     "description": "SLO SLI index routing",
     "managed": true,
     "managed_by": "observability",
     "routing": Object {
-      "cutover": 1796083200000,
-      "rounding": "M",
+      "segments": Array [
+        Object {
+          "from": null,
+          "rounding": "d",
+        },
+        Object {
+          "from": 1796083200000,
+          "rounding": "M",
+        },
+      ],
     },
     "template_version": 3.6,
     "version": 3.6,
@@ -18,7 +26,7 @@ Object {
   "processors": Array [
     Object {
       "date": Object {
-        "description": "Normalize the timestamp for the cutover guard",
+        "description": "Normalize the timestamp for the rounding segments",
         "field": "@timestamp",
         "formats": Array [
           "UNIX_MS",
@@ -31,75 +39,21 @@ Object {
     },
     Object {
       "script": Object {
-        "description": "Pick the index rounding, honoring the cutover guard",
+        "description": "Pick the index rounding of the timestamp segment",
         "lang": "painless",
         "params": Object {
-          "cutover": 1796083200000,
-          "rounding": "M",
+          "segments": Array [
+            Object {
+              "from": null,
+              "rounding": "d",
+            },
+            Object {
+              "from": 1796083200000,
+              "rounding": "M",
+            },
+          ],
         },
-        "source": "long ms = ZonedDateTime.parse(ctx.slo_routing.timestamp).toInstant().toEpochMilli(); ctx.slo_routing.rounding = (params.cutover != null && ms < params.cutover) ? 'd' : params.rounding;",
-      },
-    },
-    Object {
-      "date_index_name": Object {
-        "date_formats": Array [
-          "UNIX_MS",
-          "ISO8601",
-          "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
-        ],
-        "date_rounding": "{{{slo_routing.rounding}}}",
-        "field": "@timestamp",
-        "index_name_prefix": ".slo-observability.sli-v3.6.",
-      },
-    },
-    Object {
-      "remove": Object {
-        "field": "slo_routing",
-        "ignore_missing": true,
-      },
-    },
-  ],
-}
-`;
-
-exports[`getSLIRoutingPipelineTemplate routes without a cutover guard 1`] = `
-Object {
-  "_meta": Object {
-    "description": "SLO SLI index routing",
-    "managed": true,
-    "managed_by": "observability",
-    "routing": Object {
-      "cutover": null,
-      "rounding": "M",
-    },
-    "template_version": 3.6,
-    "version": 3.6,
-  },
-  "description": "Routes SLO rollup documents to time-based SLI indices",
-  "id": ".slo-observability.sli.routing-v3.6",
-  "processors": Array [
-    Object {
-      "date": Object {
-        "description": "Normalize the timestamp for the cutover guard",
-        "field": "@timestamp",
-        "formats": Array [
-          "UNIX_MS",
-          "ISO8601",
-          "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
-        ],
-        "output_format": "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
-        "target_field": "slo_routing.timestamp",
-      },
-    },
-    Object {
-      "script": Object {
-        "description": "Pick the index rounding, honoring the cutover guard",
-        "lang": "painless",
-        "params": Object {
-          "cutover": null,
-          "rounding": "M",
-        },
-        "source": "long ms = ZonedDateTime.parse(ctx.slo_routing.timestamp).toInstant().toEpochMilli(); ctx.slo_routing.rounding = (params.cutover != null && ms < params.cutover) ? 'd' : params.rounding;",
+        "source": "long ms = ZonedDateTime.parse(ctx.slo_routing.timestamp).toInstant().toEpochMilli(); String rounding = null; for (def segment : params.segments) { if (segment.from == null || ms >= segment.from) { rounding = segment.rounding; } } ctx.slo_routing.rounding = rounding;",
       },
     },
     Object {

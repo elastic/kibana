@@ -82,7 +82,7 @@ const routingPipeline = (version: number, templateVersion: number): IngestPipeli
   _meta: {
     version,
     template_version: templateVersion,
-    routing: { rounding: 'M', cutover: null },
+    routing: { segments: [{ from: null, rounding: 'M' }] },
   },
 });
 

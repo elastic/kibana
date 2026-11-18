@@ -150,65 +150,26 @@ The default settings should be sufficient for most users, but if needed, the fol
 
 Each SLO rollup transform writes to the base SLI index (`.slo-observability.sli-v3.6`) through its own SLI ingest pipeline (`.slo-observability.sli.pipeline-{sloId}-{revision}`). That pipeline calls a shared routing pipeline, one per resources version (`.slo-observability.sli.routing-v3.6`), which routes each document to a time-based index named after its `@timestamp`: `.slo-observability.sli-v3.6.YYYY-MM-DD`.
 
-The routing pipeline is managed by Kibana: the resource installer creates it on startup and the `slo:resources-reconcile-task` task re-installs it every hour when it is missing or outdated. Its `_meta.routing` holds the routing state:
+The routing pipeline is managed by Kibana: the resource installer creates it on startup and the `slo:resources-reconcile-task` task re-installs it every hour when it is missing, outdated, or its routing state does not match `xpack.slo.sliIndexRounding`. Its `_meta.routing.segments` holds the routing state, a list of segments sorted by `from`:
 
-- `rounding`: the index rounding (`M` monthly, `w` weekly or `d` daily).
-- `cutover`: a cutover guard, or `null`. Documents with a `@timestamp` before `cutover` (epoch millis, the first day of a UTC month) keep the daily rounding of the indices written before the routing pipeline existed, so a rollup bucket rewritten later lands in the same index as the original document. It is set only when daily indices exist and the rounding is not `d`.
+- `from`: the epoch millis from which the segment applies, or `null` for the first segment.
+- `rounding`: the index rounding of the documents with a `@timestamp` at or after `from` (`M` monthly, `w` weekly or `d` daily).
 
-The routing state is set once, when the routing pipeline of a resources version is created, and is never changed afterwards.
+A document goes to the index of the last segment starting at or before its `@timestamp`. A segment in effect never changes, so a rollup bucket rewritten later lands in the same index as the original document.
+
+When daily indices already exist, the first segment of a new routing pipeline keeps the daily rounding of the indices written before the routing pipeline existed, and the configured rounding applies from the next UTC month start.
 
 The `slo:resources-reconcile-task` task also migrates the SLI pipelines created before the routing pipeline existed: it replaces their `date_index_name` processor with a call to the routing pipeline of their version.
 
 ### Index rounding
 
-`xpack.slo.sliIndexRounding` (`M`, `w` or `d`, defaults to `M`) sets the rounding of the SLI indices. Clusters with a large SLI volume can use `d` or `w` to keep each index small. The setting is read when the routing pipeline of a resources version is created: a later change is not applied to the existing routing pipeline (Kibana logs a warning) and takes effect with the next resources version. Changing the rounding of an existing routing pipeline would route a rewritten rollup bucket to a different index than the original document and double count it.
+`xpack.slo.sliIndexRounding` (`M`, `w` or `d`, defaults to `M`) sets the rounding of the SLI indices. Clusters with a large SLI volume can use `d` or `w` to keep each index small.
 
-Pick the rounding before the first start on a version that adds a routing pipeline. An SLI index has a single primary shard, which holds at most ~2.1 billion documents. With 1 minute buckets, an SLO instance writes about 44,640 documents per month, 10,080 per week and 1,440 per day, so a monthly index reaches that limit at about 48,000 SLO instances (the sum of the instances of every SLO). At ~1 KB per document, a monthly index passes 40 GB at about 1,000 instances: use `d` above that.
+A rounding change applies from the start of the next UTC day: the next install (on Kibana startup, or the hourly `slo:resources-reconcile-task` run) appends a segment starting then to the routing pipeline of every version. Documents before that time keep their index when the transforms rewrite them, so no document is counted twice. A segment not in effect yet is updated in place by a further change, keeping its start, and dropped when the rounding goes back to the one in effect.
 
-### Switching to daily indices without a resources version bump
+Two roundings can share an index name, e.g. the daily and monthly indices of the first day of a month. Each document still goes to a single index, so this does not count any document twice.
 
-When a monthly index grows too large, the `slo-rollup-global@custom` ingest pipeline can route new SLI documents to daily indices. Every SLI pipeline calls it after the routing pipeline, so the index it sets wins, and Kibana never overwrites it. Route only the documents with a `@timestamp` at or after a fixed switch time (`SWITCH_AT_EPOCH_MS`, e.g. the start of the next UTC hour): a rollup bucket before the switch keeps going to the monthly index when the transform rewrites it, so no document is counted twice.
-
-```
-PUT _ingest/pipeline/slo-rollup-global@custom
-{
-  "description": "Route v3.6 SLI documents to daily indices from SWITCH_AT_EPOCH_MS",
-  "processors": [
-    {
-      "date": {
-        "if": "ctx._index != null && ctx._index.contains('.slo-observability.sli-v3.6.')",
-        "field": "@timestamp",
-        "target_field": "slo_switch_ts",
-        "formats": ["UNIX_MS", "ISO8601", "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
-        "output_format": "epoch_millis"
-      }
-    },
-    {
-      "date_index_name": {
-        "if": "ctx.slo_switch_ts != null && Long.parseLong(ctx.slo_switch_ts) >= SWITCH_AT_EPOCH_MSL",
-        "field": "@timestamp",
-        "index_name_prefix": ".slo-observability.sli-v3.6.",
-        "date_rounding": "d",
-        "date_formats": ["UNIX_MS", "ISO8601", "yyyy-MM-dd'T'HH:mm:ss.SSSXX"]
-      }
-    },
-    {
-      "remove": {
-        "field": "slo_switch_ts",
-        "ignore_missing": true
-      }
-    }
-  ]
-}
-```
-
-- Replace `SWITCH_AT_EPOCH_MS` with a future time in epoch millis, keeping the trailing `L` (e.g. `1797339600000L`). Never move it once set.
-- The condition uses `contains`: at this point `_index` holds the date math expression set by the routing pipeline (`<.slo-observability.sli-v3.6.{2026-12-15||/M{yyyy-MM-dd|UTC}}>`), not the resolved index name.
-- If `slo-rollup-global@custom` already exists, add these processors to it instead of replacing it.
-- The call to `slo-rollup-global@custom` ignores failures: a broken pipeline silently routes to the monthly index. Test it with `POST _ingest/pipeline/slo-rollup-global@custom/_simulate` on a document with `"_index": "<.slo-observability.sli-v3.6.{2026-12-15||/M{yyyy-MM-dd|UTC}}>"` and a `@timestamp` before and after the switch time.
-- The daily indices follow the retention rules below. The monthly index stops growing and is deleted once it ages out.
-- Rollup transforms that failed on a full index must be restarted: `POST _transform/<id>/_stop?force=true`, then `POST _transform/<id>/_start`.
-- The override only matches the `v3.6` prefix, so it stops applying at the next resources version. Set `xpack.slo.sliIndexRounding: d` before upgrading to it.
+An SLI index has a single primary shard, which holds at most ~2.1 billion documents. With 1 minute buckets, an SLO instance writes about 44,640 documents per month, 10,080 per week and 1,440 per day, so a monthly index reaches that limit at about 48,000 SLO instances (the sum of the instances of every SLO). At ~1 KB per document, a monthly index passes 40 GB at about 1,000 instances: use `d` above that. Rollup transforms that failed on a full index must be restarted after the switch: `POST _transform/<id>/_stop?force=true`, then `POST _transform/<id>/_start`.
 
 ### Retention
 

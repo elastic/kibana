@@ -8,18 +8,21 @@
 import { getSLIRoutingPipelineTemplate } from './sli_routing_pipeline_template';
 
 describe('getSLIRoutingPipelineTemplate', () => {
-  it('routes with a cutover guard', () => {
+  it('routes with the rounding segments', () => {
     expect(
-      getSLIRoutingPipelineTemplate(3.6, { rounding: 'M', cutover: 1796083200000 })
+      getSLIRoutingPipelineTemplate(3.6, {
+        segments: [
+          { from: null, rounding: 'd' },
+          { from: 1796083200000, rounding: 'M' },
+        ],
+      })
     ).toMatchSnapshot();
   });
 
-  it('routes without a cutover guard', () => {
-    expect(getSLIRoutingPipelineTemplate(3.6, { rounding: 'M', cutover: null })).toMatchSnapshot();
-  });
-
   it('uses the index prefix and pipeline name of the given version', () => {
-    const template = getSLIRoutingPipelineTemplate(3.7, { rounding: 'M', cutover: null });
+    const template = getSLIRoutingPipelineTemplate(3.7, {
+      segments: [{ from: null, rounding: 'M' }],
+    });
 
     const dateIndexName = template.processors?.find(
       (processor) => processor?.date_index_name !== undefined

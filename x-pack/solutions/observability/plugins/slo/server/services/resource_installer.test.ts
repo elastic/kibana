@@ -44,7 +44,14 @@ jest.mock('../../common/constants', () => {
 });
 
 const NOW = new Date('2026-11-17T10:00:00.000Z');
+const NOV_18 = Date.parse('2026-11-18T00:00:00.000Z');
 const DEC_1 = Date.parse('2026-12-01T00:00:00.000Z');
+const DAILY_HISTORY_GUARD: SliRoutingState = {
+  segments: [
+    { from: null, rounding: 'd' },
+    { from: DEC_1, rounding: 'M' },
+  ],
+};
 
 type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
@@ -260,8 +267,8 @@ describe('resourceInstaller', () => {
       expect(
         esClient.ingest.putPipeline.mock.calls.map(([{ id, _meta: meta }]) => [id, meta?.routing])
       ).toEqual([
-        ['.slo-observability.sli.routing-v3.6', { rounding: 'M', cutover: DEC_1 }],
-        ['.slo-observability.sli.routing-v3.7', { rounding: 'M', cutover: null }],
+        ['.slo-observability.sli.routing-v3.6', DAILY_HISTORY_GUARD],
+        ['.slo-observability.sli.routing-v3.7', { segments: [{ from: null, rounding: 'M' }] }],
       ]);
       // the index listing is shared across versions
       expect(esClient.indices.get).toHaveBeenCalledTimes(1);
@@ -271,10 +278,7 @@ describe('resourceInstaller', () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       mockTemplatesUpToDate(esClient);
       mockRoutingPipelines(esClient, {
-        '.slo-observability.sli.routing-v3.6': routingPipeline(3.6, {
-          rounding: 'M',
-          cutover: DEC_1,
-        }),
+        '.slo-observability.sli.routing-v3.6': routingPipeline(3.6, DAILY_HISTORY_GUARD),
       });
 
       await createInstaller(esClient).install();
@@ -286,36 +290,40 @@ describe('resourceInstaller', () => {
     it('reinstalls the routing pipeline with the same routing when the template version differs', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       mockTemplatesUpToDate(esClient);
-      const routing: SliRoutingState = { rounding: 'M', cutover: DEC_1 };
       mockRoutingPipelines(esClient, {
-        '.slo-observability.sli.routing-v3.6': routingPipeline(3.6, routing, 3.5),
+        '.slo-observability.sli.routing-v3.6': routingPipeline(3.6, DAILY_HISTORY_GUARD, 3.5),
       });
 
       await createInstaller(esClient).install();
 
       expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
       expect(esClient.ingest.putPipeline.mock.calls[0][0]._meta).toEqual(
-        expect.objectContaining({ template_version: SLO_RESOURCES_VERSION, routing })
+        expect.objectContaining({
+          template_version: SLO_RESOURCES_VERSION,
+          routing: DAILY_HISTORY_GUARD,
+        })
       );
     });
 
-    it('keeps the routing state and warns when the configured rounding changed', async () => {
+    it('applies a configured rounding change from the next UTC day', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       mockTemplatesUpToDate(esClient);
       mockRoutingPipelines(esClient, {
         '.slo-observability.sli.routing-v3.6': routingPipeline(3.6, {
-          rounding: 'M',
-          cutover: null,
+          segments: [{ from: null, rounding: 'M' }],
         }),
       });
-      const logger = loggerMock.create();
 
-      await new DefaultResourceInstaller(esClient, logger, 'd', () => NOW).install();
+      await new DefaultResourceInstaller(esClient, loggerMock.create(), 'd', () => NOW).install();
 
-      expect(esClient.ingest.putPipeline).not.toHaveBeenCalled();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('keeps rounding [M], the configured rounding [d]')
-      );
+      expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
+      expect(esClient.ingest.putPipeline.mock.calls[0][0]._meta?.routing).toEqual({
+        segments: [
+          { from: null, rounding: 'M' },
+          { from: NOV_18, rounding: 'd' },
+        ],
+      });
+      expect(esClient.indices.get).not.toHaveBeenCalled();
     });
 
     it('stops at the first routing pipeline that fails', async () => {

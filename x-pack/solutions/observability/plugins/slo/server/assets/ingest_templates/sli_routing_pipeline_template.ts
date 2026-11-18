@@ -19,11 +19,15 @@ import type { SliRoutingState } from '../../services/sli_routing_state';
 
 const TIMESTAMP_FORMATS = ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"];
 
-// Picks the index rounding of a document: daily when its @timestamp is older than the cutover, `rounding` otherwise.
+// Picks the index rounding of a document: the rounding of the last segment starting at or before its @timestamp.
 // Reads the timestamp normalized by the date processor, so every format of TIMESTAMP_FORMATS is supported.
 export const ROUTING_SCRIPT =
   'long ms = ZonedDateTime.parse(ctx.slo_routing.timestamp).toInstant().toEpochMilli(); ' +
-  "ctx.slo_routing.rounding = (params.cutover != null && ms < params.cutover) ? 'd' : params.rounding;";
+  'String rounding = null; ' +
+  'for (def segment : params.segments) { ' +
+  'if (segment.from == null || ms >= segment.from) { rounding = segment.rounding; } ' +
+  '} ' +
+  'ctx.slo_routing.rounding = rounding;';
 
 /** Returns the processor calling the shared routing pipeline of a resources version. */
 export const getSLIRoutingProcessor = (version: number): IngestProcessorContainer => ({
@@ -49,7 +53,7 @@ export const getSLIRoutingPipelineTemplate = (
   processors: [
     {
       date: {
-        description: 'Normalize the timestamp for the cutover guard',
+        description: 'Normalize the timestamp for the rounding segments',
         field: '@timestamp',
         target_field: 'slo_routing.timestamp',
         formats: TIMESTAMP_FORMATS,
@@ -58,9 +62,9 @@ export const getSLIRoutingPipelineTemplate = (
     },
     {
       script: {
-        description: 'Pick the index rounding, honoring the cutover guard',
+        description: 'Pick the index rounding of the timestamp segment',
         lang: 'painless',
-        params: { rounding: routing.rounding, cutover: routing.cutover },
+        params: { segments: routing.segments },
         source: ROUTING_SCRIPT,
       },
     },
