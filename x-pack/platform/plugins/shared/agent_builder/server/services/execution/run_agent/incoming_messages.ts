@@ -33,7 +33,7 @@ export const createIncomingMessages = ({
   runOwnerId,
   logger,
 }: {
-  conversationClient: Required<Pick<ConversationClient, 'getWithVersion' | 'peekVersion'>>;
+  conversationClient: Pick<ConversationClient, 'getWithVersion' | 'peekVersion'>;
   conversationId: string;
   /** The lock holder; a document held by another execution stops delivery for this run. */
   executionId: string;

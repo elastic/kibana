@@ -433,22 +433,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       conversationMetadataWritable: updateConversationMetadata !== undefined,
     });
 
-    const { getWithVersion, peekVersion, getUser } = conversationClient;
     const incomingMessages =
-      storesConversation &&
-      conversationId &&
-      executionId &&
-      getWithVersion &&
-      peekVersion &&
-      getUser
+      storesConversation && conversationId && executionId
         ? createIncomingMessages({
-            conversationClient: {
-              getWithVersion: getWithVersion.bind(conversationClient),
-              peekVersion: peekVersion.bind(conversationClient),
-            },
+            conversationClient,
             conversationId,
             executionId,
-            runOwnerId: currentUserActor(getUser.call(conversationClient)).id,
+            runOwnerId: currentUserActor(conversationClient.getUser()).id,
             logger,
           })
         : undefined;

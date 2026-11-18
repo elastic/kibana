@@ -398,6 +398,9 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     },
     conversationClient: {
       exists: jest.fn().mockResolvedValue(false),
+      getWithVersion: jest.fn(),
+      peekVersion: jest.fn(),
+      getUser: jest.fn().mockReturnValue({ id: 'user-1', username: 'alice' }),
       patchMetadata: jest.fn().mockResolvedValue({ changedFields: [] }),
     },
     executionMode: AgentExecutionMode.conversation,
