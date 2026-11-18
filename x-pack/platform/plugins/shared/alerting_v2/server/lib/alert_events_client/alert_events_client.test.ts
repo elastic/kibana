@@ -664,11 +664,60 @@ describe('AlertEventsClient.bulkCreateSignalEvents', () => {
     expect(result.items.map((item) => item.status)).toEqual(['created', 'failed', 'created']);
     expect(result.items[1]).toEqual({
       status: 'failed',
-      error: { code: 'invalid_signal_event', message: expect.any(String) },
+      error: {
+        code: 'INVALID_SIGNAL_EVENT',
+        message: expect.stringMatching(/^Invalid signal event: /),
+      },
     });
 
     const [call] = storageService.bulkIndexDocs.mock.calls[0];
     expect(call.docs).toHaveLength(2);
+  });
+
+  it('reports both an invalid event and a rejected event in one batch, in input order', async () => {
+    const { client, storageService } = createClient([]);
+    // The invalid event is never sent, so the second document written belongs to event 3.
+    storageService.bulkIndexDocs.mockImplementationOnce(async ({ docs }) => ({
+      attempted: docs.length,
+      docs: [docs[0]],
+      errors: [
+        {
+          code: 'mapper_parsing_exception',
+          message: 'boom',
+          details: { statusCode: 400 },
+          index: '.rule-events',
+          document: docs[1],
+        },
+      ],
+    }));
+
+    const withRuleId = { source: 'datadog', rule_id: 'rule-1' };
+    const result = await client.bulkCreateSignalEvents([
+      { source: 'datadog', fingerprint: 'fp-1' },
+      withRuleId,
+      { source: 'datadog', fingerprint: 'fp-3' },
+    ]);
+
+    expect(result.items).toEqual([
+      { status: 'created', group_hash: sha256('default:datadog:fp-1') },
+      {
+        status: 'failed',
+        error: { code: 'INVALID_SIGNAL_EVENT', message: expect.any(String) },
+      },
+      { status: 'failed', error: { code: 'mapper_parsing_exception', message: 'boom' } },
+    ]);
+    const [call] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(call.docs).toHaveLength(2);
+  });
+
+  it('makes sure the data stream is ready before it writes', async () => {
+    const { client, storageService, resourceManager } = createClient([]);
+
+    await client.bulkCreateSignalEvents([{ source: 'datadog' }]);
+
+    expect(resourceManager.ensureResourceReady.mock.invocationCallOrder[0]).toBeLessThan(
+      storageService.bulkIndexDocs.mock.invocationCallOrder[0]
+    );
   });
 
   it('does not write when every event is invalid', async () => {
@@ -678,7 +727,7 @@ describe('AlertEventsClient.bulkCreateSignalEvents', () => {
     const result = await client.bulkCreateSignalEvents([emptySource]);
 
     expect(result.items).toEqual([
-      { status: 'failed', error: { code: 'invalid_signal_event', message: expect.any(String) } },
+      { status: 'failed', error: { code: 'INVALID_SIGNAL_EVENT', message: expect.any(String) } },
     ]);
     expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
     expect(resourceManager.ensureResourceReady).not.toHaveBeenCalled();

@@ -46,6 +46,13 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 
+/**
+ * The `code` of a bulk item that failed validation. The `code` of an item that
+ * Elasticsearch rejected is the Elasticsearch error type, which is lower case, so this one
+ * is upper case to tell the two apart.
+ */
+const INVALID_SIGNAL_EVENT_ERROR_CODE = 'INVALID_SIGNAL_EVENT';
+
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
 }
@@ -216,7 +223,7 @@ export class AlertEventsClient {
   public async createSignalEvent(event: CreateSignalEventData): Promise<CreateSignalEventResponse> {
     const prepared = this.prepareSignalEvent(event);
     if (!prepared.valid) {
-      throw Boom.badRequest(`Invalid signal event: ${prepared.message}`);
+      throw Boom.badRequest(prepared.message);
     }
 
     // The doc may omit `@timestamp`, so the ingest pipeline must be in place before writing.
@@ -282,7 +289,7 @@ export class AlertEventsClient {
         if (!entry.valid) {
           return {
             status: 'failed',
-            error: { code: 'invalid_signal_event', message: entry.message },
+            error: { code: INVALID_SIGNAL_EVENT_ERROR_CODE, message: entry.message },
           };
         }
         const failure = rejected.get(entry.doc);
@@ -307,7 +314,7 @@ export class AlertEventsClient {
     | { valid: false; message: string } {
     const validation = createSignalEventInternalDataSchema.safeParse(event);
     if (!validation.success) {
-      return { valid: false, message: validation.error.message };
+      return { valid: false, message: `Invalid signal event: ${validation.error.message}` };
     }
 
     const groupHash = getGroupHash(event, this.spaceId);
