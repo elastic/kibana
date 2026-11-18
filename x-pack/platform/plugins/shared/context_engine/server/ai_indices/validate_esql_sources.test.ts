@@ -73,6 +73,7 @@ describe('validateEsqlSources', () => {
     'FROM ai-index-idx-foo::data',
     'FROM "logs-app, ai-index-idx-foo"',
     'FROM ai-index-idx-*, -ai-index-idx-foo',
+    'TS ai-index-idx-foo',
     'LET a = (FROM ai-index-idx-foo); FROM a',
     'FROM logs-app | WHERE id IN (FROM ai-index-idx-foo | KEEP id)',
   ])('rejects a circular source %j', async (value) => {
