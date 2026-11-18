@@ -52,11 +52,35 @@ interface ServiceAccountEntry {
 interface WorkerEntry {
   id: string;
   enabled: boolean;
-  settings?: { serviceAccountId?: string | null; autonomy?: string; scheduleInterval?: string };
+  /** The `WorkerSettings` read shape; it is not writable as is (see `toSettingsWrite`). */
+  settings?: {
+    workerId?: string;
+    serviceAccountId?: string | null;
+    autonomy?: string;
+    scheduleInterval?: string;
+    extras?: Record<string, unknown>;
+  };
   settingsRevision?: number | null;
   workflowId?: string;
   blockingReasons?: string[];
 }
+
+/**
+ * Turns the read shape into a `WorkerSettingsWrite` that puts back exactly what was read. The write
+ * schema is strict, so the read-only `workerId` is dropped (sending it is a 400), and an omitted
+ * write field keeps the stored value, so a missing account is written as `null` to clear the one
+ * the eval set.
+ */
+const toSettingsWrite = (
+  settings: NonNullable<WorkerEntry['settings']>
+): Record<string, unknown> => ({
+  serviceAccountId: settings.serviceAccountId ?? null,
+  ...(settings.autonomy === undefined ? {} : { autonomy: settings.autonomy }),
+  ...(settings.scheduleInterval === undefined
+    ? {}
+    : { scheduleInterval: settings.scheduleInterval }),
+  ...(settings.extras === undefined ? {} : { extras: settings.extras }),
+});
 
 const listServiceAccounts = async (fetch: HttpHandler): Promise<ServiceAccountEntry[]> => {
   const accounts: ServiceAccountEntry[] = [];
@@ -479,6 +503,8 @@ export const enableFloorWorker = async ({
       )}.`
     );
   }
+  /** What `restore` writes back; undefined when the worker had no settings to put back. */
+  const beforeSettings = before.settings ? toSettingsWrite(before.settings) : undefined;
   const enableSettings = {
     serviceAccountId,
     autonomy: 'manual',
@@ -524,7 +550,7 @@ export const enableFloorWorker = async ({
         ? await repairFloorWhileDisabled({
             workflowId,
             enabled: current.enabled,
-            settings: before.settings,
+            settings: beforeSettings,
           })
         : false;
     } catch (error) {
@@ -545,7 +571,7 @@ export const enableFloorWorker = async ({
     if (before.enabled) {
       // Put back the settings the setup replaced.
       await patchFloorSettingsWithRetry(fetch, spaceId, {
-        settings: before.settings,
+        settings: beforeSettings,
         ...(reEnable ? { enabled: true } : {}),
       });
       log.info('[ad-worker] floor worker settings restored');
@@ -556,11 +582,11 @@ export const enableFloorWorker = async ({
       // leaves the worker enabled. Turn it off first (no revision, so it cannot conflict), then put
       // the settings back while it is off.
       await patchFloorWorker(fetch, spaceId, { enabled: false });
-      if (!before.settings) {
+      if (!beforeSettings) {
         log.info('[ad-worker] floor worker disabled again (it had no settings to restore)');
       } else {
         try {
-          await patchFloorSettingsWithRetry(fetch, spaceId, { settings: before.settings });
+          await patchFloorSettingsWithRetry(fetch, spaceId, { settings: beforeSettings });
         } catch (error) {
           throw new Error(
             `Could not put back the floor worker settings in "${spaceId}": the worker was left disabled but its eval settings remain (${errorMessage(

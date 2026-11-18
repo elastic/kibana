@@ -217,6 +217,31 @@ describe('enableFloorWorker', () => {
     expect(written[2].enabled).toBeUndefined();
   });
 
+  it('writes back the read settings in the write shape: no workerId, a missing account cleared', async () => {
+    const { fetch, promise } = run(
+      {
+        enabled: false,
+        settings: {
+          workerId: FLOOR_WORKER_ID,
+          autonomy: 'supervised',
+          scheduleInterval: '30m',
+          extras: { lookback: '1h' },
+        },
+      },
+      { enabled: true, workflowId: 'wf-1' }
+    );
+    await (await promise).restore();
+    expect(patches(fetch)[2]).toEqual({
+      settingsRevision: 3,
+      settings: {
+        serviceAccountId: null,
+        autonomy: 'supervised',
+        scheduleInterval: '30m',
+        extras: { lookback: '1h' },
+      },
+    });
+  });
+
   it('names the disabled-but-eval-settings state when the settings write keeps conflicting', async () => {
     const previous = {
       serviceAccountId: 'sa-old',
