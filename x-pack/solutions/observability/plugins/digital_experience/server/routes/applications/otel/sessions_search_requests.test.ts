@@ -6,13 +6,15 @@
  */
 
 import { ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
-import { getBucketSizeSeconds } from '../../../lib/helpers/time_series';
+import { getHistogramInterval } from '../../../lib/helpers/time_series';
 import { MAX_APPLICATIONS_PER_SOURCE, MAX_ENVIRONMENTS_PER_APPLICATION } from '../constants';
 import { sessionOverlapFilters } from '../../sessions/list_sessions';
 import { sessionsSearch } from './sessions_search_requests';
 
 const START = Date.parse('2021-01-18T12:00:00.000Z');
 const END = Date.parse('2021-01-18T13:00:00.000Z');
+const TIME_ZONE = 'America/New_York';
+const INTERVAL = getHistogramInterval(START, END);
 
 // The part of an aggregation the tests read; the client types it too loosely to navigate.
 interface Aggregation {
@@ -24,17 +26,25 @@ interface Aggregation {
 }
 
 const aggregationsOf = (environment?: string) =>
-  sessionsSearch({ start: START, end: END, environment }).aggs as unknown as Record<
-    string,
-    Aggregation
-  >;
+  sessionsSearch({
+    start: START,
+    end: END,
+    environment,
+    histogram: { interval: INTERVAL, timeZone: TIME_ZONE },
+  }).aggs as unknown as Record<string, Aggregation>;
 
 const inEnvironment = (environment?: string) => aggregationsOf(environment).inEnvironment;
 
 describe('sessionsSearch', () => {
   it('reads the sessions index without hits, failing rather than returning partial results', () => {
-    expect(sessionsSearch({ start: START, end: END })).toMatchObject({
-      index: 'digital-experience-sessions-*',
+    expect(
+      sessionsSearch({
+        start: START,
+        end: END,
+        histogram: { interval: INTERVAL, timeZone: TIME_ZONE },
+      })
+    ).toMatchObject({
+      index: 'digital-experience-sessions-browser-*',
       size: 0,
       track_total_hits: false,
       ignore_unavailable: true,
@@ -45,7 +55,13 @@ describe('sessionsSearch', () => {
   it('matches the sessions that overlap the time range, as the Sessions tab does', () => {
     const range = { start: new Date(START).toISOString(), end: new Date(END).toISOString() };
 
-    expect(sessionsSearch({ start: START, end: END }).query).toEqual({
+    expect(
+      sessionsSearch({
+        start: START,
+        end: END,
+        histogram: { interval: INTERVAL, timeZone: TIME_ZONE },
+      }).query
+    ).toEqual({
       bool: { filter: sessionOverlapFilters(range) },
     });
     expect(sessionOverlapFilters(range)).toEqual([
@@ -111,7 +127,8 @@ describe('sessionsSearch', () => {
       // The latest bucket is not bounded away: sessions that started in it are in the range.
       expect(pageLoadsOverTime.date_histogram).toEqual({
         field: 'start_time',
-        fixed_interval: `${getBucketSizeSeconds(START, END)}s`,
+        fixed_interval: `${INTERVAL.value}s`,
+        time_zone: TIME_ZONE,
         min_doc_count: 0,
         extended_bounds: { min: START, max: END },
       });

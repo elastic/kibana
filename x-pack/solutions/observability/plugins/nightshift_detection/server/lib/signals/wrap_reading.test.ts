@@ -44,8 +44,15 @@ describe('wrapReading', () => {
     const again = wrap();
     const otherSpace = wrap({ spaceId: 'other' });
     const otherStrategy = wrap({ strategyId: 'latency' });
+    const otherSource = wrap({ reading: { ...READING, source_id: 'other-source' } });
 
-    if (first.dropped || again.dropped || otherSpace.dropped || otherStrategy.dropped) {
+    if (
+      first.dropped ||
+      again.dropped ||
+      otherSpace.dropped ||
+      otherStrategy.dropped ||
+      otherSource.dropped
+    ) {
       throw new Error('expected every reading to be wrapped');
     }
 
@@ -53,14 +60,16 @@ describe('wrapReading', () => {
     expect(otherSpace.signal.group_hash).not.toBe(first.signal.group_hash);
     // A fingerprint is unique within its strategy only: two strategies must not share a series.
     expect(otherStrategy.signal.group_hash).not.toBe(first.signal.group_hash);
+    // Two sources with a series of the same name must not share a baseline.
+    expect(otherSource.signal.group_hash).not.toBe(first.signal.group_hash);
   });
 
-  it('pins the group hash to the formula Alerting v2 uses, sha256 of space, source and the strategy-scoped fingerprint', () => {
-    const result = wrap();
+  it('pins the group hash, since a new formula splits every stored series', () => {
+    const result = wrap({ reading: { ...READING, source_id: 'source-1' } });
 
     expect(result).toMatchObject({
       signal: {
-        group_hash: 'b91b1128d775d1331665b0af165d2b930a68450bbbd47f609ae7d11e89f6533e',
+        group_hash: '5952d6f22c536c6cd8db4e92ff8ab95cbf4acdc9f100957fbe4b56e5ffe40669',
       },
     });
   });

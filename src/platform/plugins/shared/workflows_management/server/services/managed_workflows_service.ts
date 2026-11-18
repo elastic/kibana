@@ -1028,6 +1028,7 @@ export class ManagedWorkflowsService {
           managedBy: existing.managedBy,
           originManagedWorkflowId: existing.originManagedWorkflowId,
           managedVersion: existing.managedVersion,
+          workflowUid: existing.workflowUid,
         },
         { spaceId }
       ),
@@ -1353,7 +1354,7 @@ export class ManagedWorkflowsService {
     return { action: 'update', yaml, managedTemplateValues, definitionHash, stored };
   }
 
-  /** Builds the versioned document an install writes, keeping `enabled` and `created_at` on update. */
+  /** Builds the versioned document an install writes, keeping `enabled`, `created_at`, and `workflowUid` on update. */
   private async buildManagedInstallDocument({
     existing,
     ...params
@@ -1374,6 +1375,7 @@ export class ManagedWorkflowsService {
             enabled:
               params.definition.management.enablement === 'enforced' ? undefined : existing.enabled,
             createdAt: existing.created_at,
+            workflowUid: existing.workflowUid,
           }
         : {}),
     });
@@ -1390,6 +1392,7 @@ export class ManagedWorkflowsService {
     now: Date;
     enabled?: boolean;
     createdAt?: string;
+    workflowUid?: string;
   }): Promise<WorkflowProperties> {
     const {
       definition,
@@ -1401,6 +1404,7 @@ export class ManagedWorkflowsService {
       now,
       enabled,
       createdAt,
+      workflowUid,
     } = params;
     const { workflowData } = await this.deps.crudService.prepareWorkflowDocumentForStorage({
       id: workflowDocumentId,
@@ -1424,10 +1428,17 @@ export class ManagedWorkflowsService {
       managedVersion: definition.version,
     };
 
-    return {
+    const document = {
       ...this.applyManagedEnabledState(managedWorkflowData, enabled ?? workflowData.enabled),
       ...(createdAt ? { created_at: createdAt } : {}),
+      ...(workflowUid ? { workflowUid } : {}),
     };
+    // `createdAt` marks an update of an existing document. Prepare always generates a
+    // uid; drop it unless this document already has one so its history stays on workflow id.
+    if (createdAt && !workflowUid) {
+      delete document.workflowUid;
+    }
+    return document;
   }
 
   private resolveOwnedManagedWorkflow(

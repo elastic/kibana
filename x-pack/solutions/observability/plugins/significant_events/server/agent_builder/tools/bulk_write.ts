@@ -6,7 +6,6 @@
  */
 
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/core/server';
 
 export const MAX_BULK_WRITE_ITEMS = 100;
 
@@ -61,23 +60,6 @@ export const getBulkWriteToolErrorCode = (error: Error): BulkWriteToolErrorCode 
     return error.code;
   }
   return 'pre_write_error';
-};
-
-export const trackTelemetryBestEffort = ({
-  track,
-  logger,
-  description,
-}: {
-  track: () => void;
-  logger: Logger;
-  description: string;
-}): void => {
-  try {
-    track();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown telemetry error';
-    logger.warn(`Failed to track ${description}: ${message}`);
-  }
 };
 
 export const assertValidBulkWriteSize = (items: readonly object[]): void => {

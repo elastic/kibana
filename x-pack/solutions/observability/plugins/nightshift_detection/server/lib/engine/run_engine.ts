@@ -199,12 +199,12 @@ export class EngineRunner {
           window: { from, to },
           esClient: this.dataClient,
           history: {
-            readHistory: ({ fingerprints, from: historyFrom, to: historyTo }) =>
+            readHistory: ({ series, from: historyFrom, to: historyTo }) =>
               this.signalStore.readHistory({
                 spaceId,
                 strategy: strategyId,
                 strategyVersion: strategy.descriptor.version,
-                fingerprints,
+                series,
                 from: historyFrom,
                 to: historyTo,
               }),

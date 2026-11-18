@@ -439,7 +439,7 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     const { run, evaluate, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup();
 
     await expect(
-      run({ evaluators: ['a', 'b', 'c', 'd', 'e'].map((name) => ({ name })) })
+      run({ evaluators: ['a', 'b', 'c', 'd', 'e', 'f'].map((name) => ({ name })) })
     ).resolves.toEqual({ output: { scored: false, skip_reason: 'scoring_failed' } });
     expect(evaluate).not.toHaveBeenCalled();
     expect(reportOnlineEvalScore).not.toHaveBeenCalled();

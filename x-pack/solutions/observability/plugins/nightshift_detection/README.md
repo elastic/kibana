@@ -60,9 +60,9 @@ The account's role must exist, and the engine never creates it:
 Each `_tick` answers with its `run_id`, a `status` (`completed`, `busy` when another tick holds the
 space's run lock, `unavailable` when the engine turns off between the route's check and the run; an engine that is off answers 404 before that) and, per strategy, the window it covered, the
 signals it wrote, the minutes it skipped, its notes and its error if it failed. A workflow run that
-shows `busy` is normal while a long tick outlives its minute. The signals are in the hidden data
-stream `.nightshift-detection_engine-detection_signals`, and each strategy's progress in
-`.nightshift-detection_engine-state`. The runs themselves are in the workflow's execution history in
+shows `busy` is normal while a long tick outlives its minute. The signals are in Alerting v2's
+`.rule-events` data stream, with `source: elastic.nightshift_detection_engine`, and each strategy's
+progress in the hidden `nightshift-detection-state` saved objects of the space. The runs themselves are in the workflow's execution history in
 the Workflows app, under the space.
 
 Turning the plugin off leaves the installed workflow calling a route that answers 404 every minute.

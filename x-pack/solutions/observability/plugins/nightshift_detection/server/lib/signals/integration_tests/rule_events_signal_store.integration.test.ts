@@ -14,6 +14,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { DetectionSignal } from '../../../../common/detection_signal';
+import { getSeriesKey } from '../../strategies/series_key';
 import type { DetectionSignalReading } from '../../strategies/types';
 import { RuleEventsSignalStore } from '../rule_events_signal_store';
 import { wrapReading } from '../wrap_reading';
@@ -28,6 +29,7 @@ function createSignal({
   spaceId = 'default',
   strategyId = 'error_rate',
   strategyVersion = 1,
+  sourceId,
 }: {
   fingerprint: string;
   minute: number;
@@ -35,10 +37,12 @@ function createSignal({
   spaceId?: string;
   strategyId?: string;
   strategyVersion?: number;
+  sourceId?: string;
 }): DetectionSignal {
   const reading: DetectionSignalReading = {
     status: 'breached',
     fingerprint,
+    ...(sourceId !== undefined ? { source_id: sourceId } : {}),
     entity: { type: 'service', name: fingerprint },
     bucket_start: WINDOW_START + minute * MINUTE_MS,
     bucket_end: WINDOW_START + (minute + 1) * MINUTE_MS,
@@ -90,7 +94,7 @@ describe('RuleEventsSignalStore reading from .rule-events', () => {
       spaceId: 'default',
       strategy: 'error_rate',
       strategyVersion,
-      fingerprints: ['history-a', 'history-b', 'history-missing'],
+      series: ['history-a', 'history-b', 'history-missing'].map((fingerprint) => ({ fingerprint })),
       from: WINDOW_START,
       to: WINDOW_START + 2 * MINUTE_MS,
     });
@@ -136,12 +140,41 @@ describe('RuleEventsSignalStore reading from .rule-events', () => {
 
     const history = await read();
 
-    expect([...history.keys()].sort()).toEqual(['history-a', 'history-b']);
-    expect(history.get('history-a')?.map(({ value }) => value)).toEqual([1.5, 2.5]);
-    expect(history.get('history-b')?.map(({ value }) => value)).toEqual([7]);
+    const seriesA = getSeriesKey({ fingerprint: 'history-a' });
+    const seriesB = getSeriesKey({ fingerprint: 'history-b' });
+    expect([...history.keys()].sort()).toEqual([seriesA, seriesB].sort());
+    expect(history.get(seriesA)?.map(({ value }) => value)).toEqual([1.5, 2.5]);
+    expect(history.get(seriesB)?.map(({ value }) => value)).toEqual([7]);
+    expect((await read({ strategyVersion: 2 })).get(seriesA)?.map(({ value }) => value)).toEqual([
+      300,
+    ]);
+  });
+
+  it('reads only the requested sources of a fingerprint, a series without a source included', async () => {
+    await seed([
+      createSignal({ fingerprint: 'shared', minute: 0, value: 1, sourceId: 'source-a' }),
+      createSignal({ fingerprint: 'shared', minute: 0, value: 2 }),
+      createSignal({ fingerprint: 'shared', minute: 0, value: 3, sourceId: 'source-b' }),
+    ]);
+
+    const history = await store.readHistory({
+      spaceId: 'default',
+      strategy: 'error_rate',
+      strategyVersion: 1,
+      series: [{ fingerprint: 'shared', source_id: 'source-a' }, { fingerprint: 'shared' }],
+      from: WINDOW_START,
+      to: WINDOW_START + MINUTE_MS,
+    });
+
     expect(
-      (await read({ strategyVersion: 2 })).get('history-a')?.map(({ value }) => value)
-    ).toEqual([300]);
+      [...history.entries()].map(([key, readings]) => [key, readings.map(({ value }) => value)])
+    ).toEqual(
+      expect.arrayContaining([
+        [getSeriesKey({ fingerprint: 'shared', source_id: 'source-a' }), [1]],
+        [getSeriesKey({ fingerprint: 'shared' }), [2]],
+      ])
+    );
+    expect(history.size).toBe(2);
   });
 
   it('returns a signal written twice once', async () => {
@@ -152,11 +185,11 @@ describe('RuleEventsSignalStore reading from .rule-events', () => {
       spaceId: 'default',
       strategy: 'error_rate',
       strategyVersion: 1,
-      fingerprints: ['twice'],
+      series: [{ fingerprint: 'twice' }],
       from: WINDOW_START,
       to: WINDOW_START + MINUTE_MS,
     });
 
-    expect(history.get('twice')).toHaveLength(1);
+    expect(history.get(getSeriesKey({ fingerprint: 'twice' }))).toHaveLength(1);
   });
 });

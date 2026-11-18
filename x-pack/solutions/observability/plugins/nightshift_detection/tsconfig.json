@@ -3,13 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "server/**/*"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["common/**/*", "server/**/*"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/alerting-v2-constants",
     "@kbn/alerting-v2-plugin",
