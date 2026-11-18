@@ -157,7 +157,7 @@ describe('Kubernetes type KIs', () => {
     const result = foldWorkloadRows(
       [
         { kind: 'deployment', member_count: 61, cluster_count: 2, activity: 100 },
-        { kind: 'cronjob', member_count: 1, cluster_count: 1, activity: 1 },
+        { kind: 'cronjob', member_count: 1, cluster_count: 0, unclustered_count: 1, activity: 1 },
         { kind: 'statefulset', member_count: 1, cluster_count: 1, activity: 1 },
         { kind: 'daemonset', member_count: 1, cluster_count: 1, activity: 1 },
       ],
@@ -192,6 +192,9 @@ describe('Kubernetes type KIs', () => {
         }),
       })
     );
+    expect(byId.get('k8s.cronjobs:source-id')?.evidence).toEqual([
+      '1 cronjobs seen in the last hour, with no cluster name reported',
+    ]);
     expect(deployments?.properties).not.toHaveProperty('members');
     expect(deployments?.properties.list_query).toEqual(
       expect.stringContaining('| WHERE kind == "deployment"')
@@ -237,11 +240,21 @@ describe('Kubernetes type KIs', () => {
 
   it('writes one node and one namespace KI for the source, keyed by cluster and name', () => {
     const nodes = foldNodeRows(
-      [{ member_count: 3, cluster_count: 2, os: ['Linux'], cloud_provider: ['gcp'] }],
+      [
+        {
+          member_count: 3,
+          cluster_count: 0,
+          unclustered_count: 3,
+          os: ['Linux'],
+          cloud_provider: ['gcp'],
+        },
+      ],
       foldContext
     ).features[0];
-    const namespaces = foldNamespaceRows([{ member_count: 20, cluster_count: 2 }], foldContext)
-      .features[0];
+    const namespaces = foldNamespaceRows(
+      [{ member_count: 20, cluster_count: 2, unclustered_count: 4 }],
+      foldContext
+    ).features[0];
 
     expect(nodes).toEqual(
       expect.objectContaining({
@@ -275,6 +288,13 @@ describe('Kubernetes type KIs', () => {
         }),
       })
     );
+    expect(nodes?.evidence).toEqual([
+      '3 nodes seen in the last hour, with no cluster name reported',
+    ]);
+    expect(namespaces?.evidence).toEqual([
+      '20 namespaces seen in the last hour across 2 clusters, 4 with no cluster name reported',
+    ]);
+    expect(namespaces?.description).toContain('4 with no cluster name reported');
     expect(namespaces?.properties.list_query).toEqual(
       expect.stringContaining(
         '| STATS last_seen = MAX(@timestamp) BY orchestrator.cluster.name, kubernetes.namespace'
