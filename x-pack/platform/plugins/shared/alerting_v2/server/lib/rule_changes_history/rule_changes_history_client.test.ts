@@ -234,7 +234,7 @@ describe('RuleChangesHistoryClient', () => {
   });
 
   describe('getRuleSnapshot', () => {
-    it('returns the rule id and snapshot without fetching neighbouring entries', async () => {
+    it('returns the rule id and snapshot', async () => {
       const changeHistory = createChangeHistoryMock();
       changeHistory.getEvent.mockResolvedValue(
         createDocument({ id: 'event-1', snapshot: { id: 'rule-1', metadata: { name: 'A' } } })

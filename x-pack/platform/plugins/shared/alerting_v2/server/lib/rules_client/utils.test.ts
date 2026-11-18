@@ -1425,26 +1425,34 @@ describe('isTaskMidRun', () => {
 });
 
 describe('toRestoreRuleData', () => {
-  const ruleConfiguration: CreateRuleData = {
+  const ruleConfiguration = {
     ...baseCreateData,
+    enabled: false,
     metadata: { name: 'restored-rule', description: 'from a snapshot' },
     grouping: { fields: ['host.name'] },
     artifacts: [{ id: 'runbook-1', type: 'runbook', data: { content: 'steps' } }],
-  };
+  } satisfies CreateRuleData;
 
   const snapshot: RuleChangeHistorySnapshot = {
     ...ruleConfiguration,
     id: 'rule-1',
     version: 3,
-    enabled: false,
     created_by: { profile_uid: 'user-1' },
     created_at: '2025-01-01T00:00:00.000Z',
     updated_by: { profile_uid: 'user-2' },
     updated_at: '2025-02-01T00:00:00.000Z',
   };
 
-  it('returns the configuration fields and enabled state, and drops the server-managed fields', () => {
-    expect(toRestoreRuleData(snapshot)).toStrictEqual({ ...ruleConfiguration, enabled: false });
+  it('returns the configuration fields of the snapshot', () => {
+    expect(toRestoreRuleData(snapshot)).toStrictEqual(ruleConfiguration);
+  });
+
+  it('drops server-managed fields such as created_at', () => {
+    const result = toRestoreRuleData(snapshot);
+
+    expect(result).not.toHaveProperty('created_at');
+    expect(result).not.toHaveProperty('updated_by');
+    expect(result).not.toHaveProperty('version');
   });
 
   it('returns data that the PUT rule schema accepts', () => {
