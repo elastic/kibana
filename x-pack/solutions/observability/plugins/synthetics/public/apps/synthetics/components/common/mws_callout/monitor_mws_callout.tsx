@@ -24,7 +24,7 @@ export const MonitorMWsCallout = () => {
     monitor && !isExternalSyntheticsMonitor(monitor)
       ? monitor[ConfigKey.MAINTENANCE_WINDOWS] ?? []
       : [];
-  const { activeMWs, hasPendingChanges, syncInterval } = useHasPendingMwChanges(monitorMWIds);
+  const { activeMWs, hasPendingChanges, isSyncOverdue } = useHasPendingMwChanges(monitorMWIds);
 
   if (!monitor || isExternalSyntheticsMonitor(monitor)) {
     return null;
@@ -38,12 +38,18 @@ export const MonitorMWsCallout = () => {
   // separate callout) to keep the page to a single MW-related box. Only
   // when none apply does the outdated agent get its own callout below.
   if (activeMWs.length) {
-    return <MwsCalloutContent activeMWs={activeMWs} hasOutdatedAgent={hasOutdatedAgent} />;
+    return (
+      <MwsCalloutContent
+        activeMWs={activeMWs}
+        hasOutdatedAgent={hasOutdatedAgent}
+        isSyncOverdue={isSyncOverdue}
+      />
+    );
   }
 
   if (hasPendingChanges) {
     return (
-      <MwsPendingSyncCallout syncInterval={syncInterval} hasOutdatedAgent={hasOutdatedAgent} />
+      <MwsPendingSyncCallout hasOutdatedAgent={hasOutdatedAgent} isSyncOverdue={isSyncOverdue} />
     );
   }
 

@@ -20,10 +20,10 @@ export interface WorkflowExecutionsFullscreenButtonProps {
 export const WorkflowExecutionsFullscreenButton =
   React.memo<WorkflowExecutionsFullscreenButtonProps>(({ isFullscreen, onToggle, buttonRef }) => {
     const label = isFullscreen
-      ? i18n.translate('workflowsManagement.executionsPage.table.exitFullscreen', {
+      ? i18n.translate('workflows.executionsPage.table.exitFullscreen', {
           defaultMessage: 'Exit fullscreen',
         })
-      : i18n.translate('workflowsManagement.executionsPage.table.enterFullscreen', {
+      : i18n.translate('workflows.executionsPage.table.enterFullscreen', {
           defaultMessage: 'Enter fullscreen',
         });
 

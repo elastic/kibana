@@ -8,6 +8,7 @@
 import type {
   EuiBasicTableProps,
   EuiGlobalToastListToast as Toast,
+  EuiTableFieldDataColumnType,
   EuiTableRowCellProps,
   EuiTitleSize,
 } from '@elastic/eui';
@@ -132,11 +133,15 @@ export interface BasicTableProps<T> {
 }
 type Func<T> = (arg: T) => string | number;
 
+// `EuiTableColumnNameTooltipProps` is not re-exported from the EUI package root.
+type NameTooltip = EuiTableFieldDataColumnType<never>['nameTooltip'];
+
 export interface Columns<T, U = T> {
   align?: string;
   field?: string;
   mobileOptions?: EuiTableRowCellProps['mobileOptions'];
   name: string | React.ReactNode;
+  nameTooltip?: NameTooltip;
   render?: (item: T, node: U) => React.ReactNode;
   sortable?: boolean | Func<T>;
   truncateText?: boolean | { lines: number };

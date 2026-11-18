@@ -22,18 +22,8 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
         top: 0,
         zIndex: euiTheme.levels.header,
         borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+        backgroundColor: euiTheme.components.headerBackground,
         padding: euiTheme.size.base,
-        '&:after': {
-          content: '""',
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: `calc(100% - calc(${euiTheme.border.width.thin} * 2))`,
-          height: '100%',
-          zIndex: -1,
-          backgroundColor: euiTheme.components.headerBackground,
-        },
       },
     ]);
   },
@@ -46,5 +36,9 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
     overflowAnchor: 'none',
     scrollbarGutter: 'auto',
     scrollbarWidth: 'thin',
+  }),
+  // Contains the sticky filter box's z-index so the frame's EuiPanel border (`::after`) paints above it.
+  scrollContainer: css({
+    isolation: 'isolate',
   }),
 });

@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/proposals-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-solution'
+  defaultOwner: '@elastic/alertzero-common-layer'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/proposals-plugin'
   description: Moon project for @kbn/proposals-plugin
   channel: ''
-  owner: '@elastic/security-solution'
+  owner: '@elastic/alertzero-common-layer'
   sourceRoot: x-pack/platform/plugins/shared/proposals
 dependsOn:
   - '@kbn/core'
@@ -43,12 +43,15 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/proposals-common'
   - '@kbn/proposals-ui'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -56,6 +59,4 @@ fileGroups:
     - server/**/*
     - integration_tests/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

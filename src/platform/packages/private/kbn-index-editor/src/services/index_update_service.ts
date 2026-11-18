@@ -14,7 +14,8 @@ import type {
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { EsqlSource } from '@kbn/data-source';
 import type {
   DatatableColumn,
   DatatableColumnMeta,
@@ -27,6 +28,7 @@ import {
   Subject,
   Subscription,
   combineLatest,
+  distinctUntilChanged,
   filter,
   firstValueFrom,
   from,
@@ -76,6 +78,8 @@ import type { IndexEditorTelemetryService } from '../telemetry/telemetry_service
 import { reportIndexEditorError } from '../report_error';
 import { RowsVirtualIndexes } from './rows_virtual_indexes';
 import { bulkUpdate, type BulkUpdateOperations } from './bulk_update_service';
+
+const getIndexEsqlQuery = (indexName: string) => esql`FROM ${indexName}`.print();
 
 const DOCS_PER_FETCH = 1000;
 const MAX_COLUMN_PLACEHOLDERS = 4;
@@ -500,6 +504,19 @@ export class IndexUpdateService {
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
+  /** The ES|QL source of the index, with the columns of the table. */
+  public readonly dataSource$: Observable<EsqlSource> = combineLatest([
+    this._indexName$.pipe(
+      filter((indexName): indexName is string => Boolean(indexName)),
+      distinctUntilChanged(),
+      switchMap((indexName) => from(EsqlSource.create({ query: getIndexEsqlQuery(indexName) })))
+    ),
+    this.dataTableColumns$,
+  ]).pipe(
+    map(([esqlSource, columns]) => esqlSource.withColumns(columns)),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
   /**
    * Finds an existing data view or creates a new one based on the index name.
    * Ad-hoc data view should only be created if the index has been saved.
@@ -509,11 +526,9 @@ export class IndexUpdateService {
       throw new Error('Index name is not set');
     }
 
-    const esqlQuery = esql`FROM ${indexName}`.print();
-
     const newDataView = await getESQLAdHocDataview({
       dataViewsService: this.data.dataViews,
-      query: esqlQuery,
+      query: getIndexEsqlQuery(indexName),
       options: {
         allowNoIndex: true,
       },
@@ -1013,11 +1028,11 @@ export class IndexUpdateService {
   public updateDoc(
     id: string,
     update: Record<string, unknown>,
-    columnsMeta: DataTableColumnsMeta = {}
+    columns: readonly DatatableColumn[] = []
   ) {
     const parsedUpdate = Object.entries(update).reduce<Record<string, unknown>>(
       (acc, [key, value]) => {
-        acc[key] = parsePrimitive(value, columnsMeta[key]?.type);
+        acc[key] = parsePrimitive(value, columns.find((column) => column.id === key)?.meta.type);
         return acc;
       },
       {}

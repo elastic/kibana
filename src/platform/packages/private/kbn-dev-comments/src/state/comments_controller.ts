@@ -8,10 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DISPLAY_NAME_STORAGE_KEY, GUIDE_HANDOFF_STORAGE_KEY } from '../constants';
-import { buildAnchor } from '../lib/anchor';
+import { DISPLAY_NAME_STORAGE_KEY, GUIDE_HANDOFF_STORAGE_KEY, TRAIL_MAX_STEPS } from '../constants';
+import { buildAnchor, isIgnored, isInTooltip, isVisible } from '../lib/anchor';
+import { isPassingThrough } from '../lib/pass_through';
 import { createSnapshot } from '../lib/snapshot';
-import { createTrailRecorder } from '../lib/trail';
+import { createTrailRecorder, hoverStepFor } from '../lib/trail';
 import type {
   Comment,
   CommentAuthor,
@@ -29,6 +30,8 @@ export interface PendingComment {
   /** Tells drafts apart: a save only completes the draft it started from. */
   id: number;
   element: Element;
+  /** The element whose hover or focus shows `element`, a tooltip: where focus goes back to after. */
+  revealedBy?: Element;
   anchor: ElementAnchor;
   /** Viewport coordinates of the click, used when `element` leaves the DOM before the comment is saved. */
   point: { x: number; y: number };
@@ -36,8 +39,15 @@ export interface PendingComment {
   route: CommentRoute;
   /** The author's clicks on that page up to the pick, see `Comment.trail`. */
   trail: TrailStep[];
+  /** The screenshot, when taken as the comment was started (what it is about, a tooltip, may not last until the save), or what went wrong. */
+  snapshot?: Promise<NewSnapshot | ScreenshotError>;
   /** The draft is being saved; until that ends it can neither move nor be discarded. */
   saving: boolean;
+}
+
+export interface PickOptions {
+  /** The element whose hovering shows the picked one (a tooltip's trigger): the hover ends the trail, and the screenshot is taken right away. */
+  revealedBy?: Element;
 }
 
 export interface CommentsNotice {
@@ -62,11 +72,17 @@ export interface CommentsState {
   loading: boolean;
   /** When the list was last fetched (ISO): what every comment shown is as of. */
   loadedAt: string | null;
+  /** When a comment was last fetched on its own (ISO), by id, since the list was; see `refresh`. */
+  refreshedAt: Record<string, string>;
+  /** Comments being fetched on their own. */
+  refreshingIds: ReadonlySet<string>;
   /** Why the list could not be fetched the last time, until it is fetched again. */
   loadError: string | null;
   /** Comment mode: the page is not interactable and a click on it starts a comment. */
   active: boolean;
   panelMinimized: boolean;
+  /** The thread the panel shows in place of the list: the fallback for a comment whose element cannot be shown. */
+  panelThreadId: string | null;
   activeThreadId: string | null;
   /** Pin that should take focus once it is rendered: its thread was opened without a pointer. */
   focusPinId: string | null;
@@ -90,18 +106,21 @@ export interface CommentsController {
   dispose(): void;
   /** Fetches the comments again; drafts and the open thread are kept. */
   reload(): Promise<void>;
+  /** Fetches one comment again, on its own; a comment that is gone is taken off the list. */
+  refresh(id: string): Promise<void>;
   /** Leaving comment mode drops any comment being written; while one is being saved, the mode cannot be changed. */
   setActive(active: boolean): void;
   toggleActive(): void;
   setPanelMinimized(minimized: boolean): void;
   /** Starts (or moves) a comment on `element`; `hit` is the innermost element under the pointer, which the pin follows. Ignored while a draft is being saved. */
-  pick(element: Element, point: { x: number; y: number }, hit?: Element): void;
+  pick(
+    element: Element,
+    point: { x: number; y: number },
+    hit?: Element,
+    options?: PickOptions
+  ): void;
   cancelPending(): void;
-  /**
-   * `displayName` signs this and future comments. Failures are reported as a notice
-   * and hand the draft back, including a screenshot that was asked for but could not
-   * be taken: the comment is then posted without one, or not at all, by choice.
-   */
+  /** `displayName` signs this and future comments. A failure, a screenshot that could not be taken included, is reported and hands the draft back. */
   save(text: string, options: { attachScreenshot: boolean; displayName: string }): Promise<void>;
   reply(id: string, text: string, displayName: string): Promise<void>;
   setResolved(id: string, resolved: boolean): Promise<void>;
@@ -110,14 +129,12 @@ export interface CommentsController {
   openThread(id: string | null, options?: { focusPin?: boolean }): void;
   /** Called by a pin once it took the focus requested through `focusPinId`. */
   pinFocused(id: string): void;
-  /**
-   * Opens the page the comment was made on and guides the reader through the
-   * author's clicks; when the host opens the page by loading it anew (it is in
-   * another space), the guide goes on there, with the layer of that page.
-   */
+  /** Opens the page the comment was made on and guides the reader through the author's clicks; a page the host loads anew (another space's) goes on with the guide. */
   guideTo(comment: Comment): Promise<void>;
-  /** Ends the guide; with `found`, opens the comment it led to. */
-  stopGuide(found?: boolean): void;
+  /** Ends the guide; with `found`, opens the comment at its pin, which takes focus unless `focusPin` is false (a tooltip shown for its element's focus would go). */
+  stopGuide(found?: boolean, options?: { focusPin?: boolean }): void;
+  /** Shows the thread in the panel, in place of the list, ending any guide; `null` goes back to the list. */
+  showInPanel(id: string | null): void;
   setOverlayOpen(open: boolean): void;
   dismissNotice(): void;
 }
@@ -127,28 +144,22 @@ const NOTICE_TIMEOUT_MS = 4000;
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-// Storage can be disabled or full (private browsing); the name then lasts for the session only.
-const readStoredDisplayName = (): string => {
+/** Web storage can be disabled or full (private browsing): what it cannot keep is not kept. */
+const withStorage = <T>(action: () => T, fallback: T): T => {
   try {
-    return localStorage.getItem(DISPLAY_NAME_STORAGE_KEY) ?? '';
+    return action();
   } catch {
-    return '';
+    return fallback;
   }
 };
 
-const storeDisplayName = (displayName: string) => {
-  try {
-    localStorage.setItem(DISPLAY_NAME_STORAGE_KEY, displayName);
-  } catch {
-    // see above
-  }
-};
+const readStoredDisplayName = (): string =>
+  withStorage(() => localStorage.getItem(DISPLAY_NAME_STORAGE_KEY) ?? '', '');
 
-/**
- * A guide that was running as the page was left, for the layer of the page
- * loaded next to go on with: the host opens a page in another space by loading
- * it anew, which would otherwise end the guide that asked for it.
- */
+const storeDisplayName = (displayName: string) =>
+  withStorage(() => localStorage.setItem(DISPLAY_NAME_STORAGE_KEY, displayName), undefined);
+
+/** A guide running as the page was left, for the layer of the page loaded next to go on with (the host loads another space's page anew). */
 interface GuideHandoff {
   id: string;
   /** The comment's page; the guide goes on only if that is the page loaded. */
@@ -160,18 +171,16 @@ interface GuideHandoff {
 /** How long the page gets to load before a handoff lapses; a development server takes its time. */
 export const GUIDE_HANDOFF_TTL_MS = 60_000;
 
-// Session storage is this tab's alone, which is where the page load happens; it can be disabled too.
-const storeGuideHandoff = (handoff: GuideHandoff) => {
-  try {
-    sessionStorage.setItem(GUIDE_HANDOFF_STORAGE_KEY, JSON.stringify(handoff));
-  } catch {
-    // see above
-  }
-};
+// In session storage: this tab's alone, where the page load happens.
+const storeGuideHandoff = (handoff: GuideHandoff) =>
+  withStorage(
+    () => sessionStorage.setItem(GUIDE_HANDOFF_STORAGE_KEY, JSON.stringify(handoff)),
+    undefined
+  );
 
-/** The handoff left by the page before, if any; it is for this one page load, so it is taken off. */
-const takeGuideHandoff = (): GuideHandoff | null => {
-  try {
+/** The handoff left by the page before, if any, taken off: it is for this one page load. */
+const takeGuideHandoff = (): GuideHandoff | null =>
+  withStorage(() => {
     const stored = sessionStorage.getItem(GUIDE_HANDOFF_STORAGE_KEY);
     sessionStorage.removeItem(GUIDE_HANDOFF_STORAGE_KEY);
     const handoff = stored ? (JSON.parse(stored) as Partial<GuideHandoff>) : null;
@@ -180,27 +189,42 @@ const takeGuideHandoff = (): GuideHandoff | null => {
       typeof handoff.at === 'number'
       ? (handoff as GuideHandoff)
       : null;
-  } catch {
-    return null;
-  }
-};
+  }, null);
 
 /** Drops the draft, unless it is being saved: a save cannot be discarded. */
 const droppingDraft = (state: CommentsState): Partial<CommentsState> =>
   state.pending?.saving ? {} : { pending: null };
 
+/** Opens the thread at its pin; one shown in the panel gives way: one thread at a time. */
+const openingPin = (id: string, focusPin: boolean): Partial<CommentsState> => ({
+  activeThreadId: id,
+  focusPinId: focusPin ? id : null,
+  panelThreadId: null,
+});
+
+/** Shows the thread in the panel, expanded, in place of the list; one open at its pin gives way. */
+const showingInPanel = (id: string): Partial<CommentsState> => ({
+  panelThreadId: id,
+  panelMinimized: false,
+  activeThreadId: null,
+  focusPinId: null,
+});
+
+/** Opens the new comment's thread at its pin, or in the panel when its tooltip, and so the pin, has gone. */
+const openingNew = (id: string, element: Element): Partial<CommentsState> =>
+  isInTooltip(element) && !(element.isConnected && isVisible(element))
+    ? showingInPanel(id)
+    : openingPin(id, true);
+
 /** A screenshot that was asked for could not be taken; the comment is not saved without it. */
-class ScreenshotError extends Error {}
+export class ScreenshotError extends Error {}
 
 export const createCommentsController = (services: CommentsHostServices): CommentsController => {
   const { api, location } = services;
   const ignoreSelectors = services.ignoreSelectors ?? [];
 
-  // The screenshot shows the page the comment is about, in the state it was picked
-  // in: not what the page became under a draft handed back by a failed save, or
-  // under browser navigation within the same page. The page is checked after the
-  // capture as well as before: it takes a while, and a page that changed under it
-  // may be what the image shows.
+  // The screenshot is of the page the comment was picked on: that is checked
+  // before the capture and, as it takes a while, after it too.
   const takeScreenshot = async (
     draft: PendingComment,
     captureViewport: () => Promise<HTMLCanvasElement>
@@ -231,9 +255,12 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     loaded: false,
     loading: false,
     loadedAt: null,
+    refreshedAt: {},
+    refreshingIds: new Set(),
     loadError: null,
     active: false,
-    panelMinimized: false,
+    panelMinimized: true,
+    panelThreadId: null,
     activeThreadId: null,
     focusPinId: null,
     pending: null,
@@ -248,10 +275,10 @@ export const createCommentsController = (services: CommentsHostServices): Commen
   const trail = createTrailRecorder({
     location,
     ignoreSelectors,
-    // Page clicks in comment mode place pins instead of acting, except while a guide runs.
+    // In comment mode, page clicks place pins instead of acting: except during a guide, or with Alt held.
     isRecording: () => {
       const { active, guide } = store.getState();
-      return !active || guide !== null;
+      return !active || guide !== null || isPassingThrough();
     },
   });
 
@@ -274,16 +301,23 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       comments: state.comments.map((comment) => (comment.id === updated.id ? updated : comment)),
     }));
 
+  const toggled = (ids: ReadonlySet<string>, id: string, member: boolean): ReadonlySet<string> => {
+    const next = new Set(ids);
+    if (member) {
+      next.add(id);
+    } else {
+      next.delete(id);
+    }
+    return next;
+  };
+
   const setBusy = (id: string, busy: boolean) =>
-    store.setState(({ busyIds }) => {
-      const next = new Set(busyIds);
-      if (busy) {
-        next.add(id);
-      } else {
-        next.delete(id);
-      }
-      return { busyIds: next };
-    });
+    store.setState(({ busyIds }) => ({ busyIds: toggled(busyIds, id, busy) }));
+
+  const setRefreshing = (id: string, refreshing: boolean) =>
+    store.setState(({ refreshingIds }) => ({
+      refreshingIds: toggled(refreshingIds, id, refreshing),
+    }));
 
   // Fetches the list; nothing else (drafts, the open thread) is touched, so a refresh is safe at any time.
   const load = async (): Promise<void> => {
@@ -303,6 +337,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
         loaded: true,
         loading: false,
         loadedAt: new Date().toISOString(),
+        refreshedAt: {},
       });
     } catch (error) {
       if (started && sequence === loadSequence) {
@@ -316,6 +351,55 @@ export const createCommentsController = (services: CommentsHostServices): Commen
           })
         );
       }
+    }
+  };
+
+  // Fetches one comment, for its thread: replies made elsewhere show up without the
+  // whole list being fetched. Like `load`, a fetch a write completed under is made again.
+  const refresh = async (id: string): Promise<void> => {
+    if (store.getState().refreshingIds.has(id)) {
+      return;
+    }
+    setRefreshing(id, true);
+    try {
+      let updated: Comment | undefined;
+      let writesBefore: number;
+      do {
+        writesBefore = writes;
+        updated = await api.get(id);
+      } while (started && writes !== writesBefore);
+      if (!started) {
+        return;
+      }
+      if (updated) {
+        store.setState(({ comments, refreshedAt }) => ({
+          comments: comments.map((comment) => (comment.id === id ? updated : comment)),
+          refreshedAt: { ...refreshedAt, [id]: new Date().toISOString() },
+        }));
+        return;
+      }
+      // Gone from the store: so is the thread, whichever way it was shown.
+      store.setState(({ comments, activeThreadId, panelThreadId }) => ({
+        comments: comments.filter((comment) => comment.id !== id),
+        ...(activeThreadId === id ? { activeThreadId: null } : {}),
+        ...(panelThreadId === id ? { panelThreadId: null } : {}),
+      }));
+      notify(
+        'error',
+        i18n.translate('devComments.notice.commentGone', {
+          defaultMessage: 'The comment no longer exists.',
+        })
+      );
+    } catch (error) {
+      notify(
+        'error',
+        i18n.translate('devComments.notice.refreshFailed', {
+          defaultMessage: 'Could not refresh the thread - {message}',
+          values: { message: errorMessage(error) },
+        })
+      );
+    } finally {
+      setRefreshing(id, false);
     }
   };
 
@@ -369,22 +453,21 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     if (pageKey === previous) {
       return;
     }
-    // A guide survives the navigation it asked for (to the comment's page), nothing
-    // else; a draft being saved is kept until the save settles, so that a failure
-    // can hand it back with its text instead of losing it.
+    // Only a guide survives the navigation it asked for; a draft being saved is
+    // kept until the save settles, to be handed back should it fail.
     const guided = guide && comments.find(({ id }) => id === guide.id);
     store.setState((state) => ({
       pageKey,
       activeThreadId: null,
       focusPinId: null,
+      panelThreadId: null,
       guide: guided?.route.pageKey === pageKey ? guide : null,
       ...droppingDraft(state),
     }));
     void load();
   };
 
-  // The guide outlives the page: the host opens a page in another space by loading
-  // it anew, and a reload with a guide under way should not lose it either.
+  // The guide outlives the page: the host loads another space's page anew, and a reload should not lose it either.
   const onPageHide = () => {
     const { guide, comments } = store.getState();
     const comment = guide && comments.find(({ id }) => id === guide.id);
@@ -393,8 +476,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     }
   };
 
-  // ...and goes on, in comment mode, once the comments are here, if the page loaded
-  // is the comment's, soon enough after the one that left it.
+  // ...and goes on, in comment mode, if the page loaded is the comment's, soon enough.
   const resumeGuide = () => {
     const handoff = takeGuideHandoff();
     if (
@@ -406,8 +488,8 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     }
   };
 
-  // Every way out of comment mode (toolbar button, panel, shortcut) ends here; a
-  // draft being saved must not be dropped by any of them, so the mode waits for it.
+  // A draft being saved is dropped by no way out of comment mode: the mode waits.
+  // The panel starts out minimized each time; the list is a click away.
   const setActive = (active: boolean) => {
     if (store.getState().pending?.saving) {
       return;
@@ -418,7 +500,8 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       activeThreadId: null,
       focusPinId: null,
       guide: null,
-      ...(active ? {} : { panelMinimized: false }),
+      panelThreadId: null,
+      ...(active ? {} : { panelMinimized: true }),
     });
   };
 
@@ -454,6 +537,8 @@ export const createCommentsController = (services: CommentsHostServices): Commen
 
     reload: load,
 
+    refresh,
+
     setActive,
 
     toggleActive() {
@@ -464,25 +549,33 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       store.setState({ panelMinimized: minimized });
     },
 
-    pick(element, point, hit) {
+    pick(element, point, hit, { revealedBy } = {}) {
       if (store.getState().pending?.saving) {
         return;
       }
-      // The draft describes the moment of commenting: the element, the page it is on
-      // and the clicks that led there. Saving takes time, during which the page may change.
-      store.setState({
-        pending: {
-          id: ++draftSequence,
-          element,
-          anchor: buildAnchor(element, { point, hit }),
-          point,
-          route: { pageKey: location.getPageKey(), path: location.getPath() },
-          trail: trail.steps(),
-          saving: false,
-        },
-        activeThreadId: null,
-        focusPinId: null,
-      });
+      // The draft is the moment of commenting: the element, its page, and the
+      // clicks that led there, the last of which may be the hover that revealed it.
+      const hoverStep =
+        revealedBy && !isIgnored(revealedBy, ignoreSelectors) ? [hoverStepFor(revealedBy)] : [];
+      const draft: PendingComment = {
+        id: ++draftSequence,
+        element,
+        revealedBy,
+        anchor: buildAnchor(element, { point, hit }),
+        point,
+        route: { pageKey: location.getPageKey(), path: location.getPath() },
+        trail: [...trail.steps(), ...hoverStep].slice(-TRAIL_MAX_STEPS),
+        saving: false,
+      };
+      const { captureViewport } = services;
+      // What shows on hover is gone once the pointer leaves for the composer.
+      if ((revealedBy || isInTooltip(element)) && captureViewport) {
+        draft.snapshot = takeScreenshot(draft, captureViewport).catch(
+          (error): ScreenshotError =>
+            error instanceof ScreenshotError ? error : new ScreenshotError(errorMessage(error))
+        );
+      }
+      store.setState({ pending: draft, activeThreadId: null, focusPinId: null });
     },
 
     cancelPending() {
@@ -512,17 +605,20 @@ export const createCommentsController = (services: CommentsHostServices): Commen
         const { captureViewport } = services;
         const snapshot =
           attachScreenshot && captureViewport
-            ? await takeScreenshot(draft, captureViewport)
+            ? await (draft.snapshot ?? takeScreenshot(draft, captureViewport))
             : undefined;
+        if (snapshot instanceof ScreenshotError) {
+          throw snapshot;
+        }
         const created = await api.create({ ...input, ...(snapshot ? { snapshot } : {}) });
         writes += 1;
-        // The new comment opens with its pin focused, unless the page changed under
-        // the save: its pin is on the page it was made on.
+        // The new comment opens, unless the page changed under the save: its pin
+        // is on the page it was made on.
         store.setState((state) => ({
           comments: [...state.comments, created],
           ...(state.pending?.id === draft.id ? { pending: null } : {}),
           ...(state.pending?.id === draft.id && state.pageKey === draft.route.pageKey
-            ? { activeThreadId: created.id, focusPinId: created.id }
+            ? openingNew(created.id, draft.element)
             : {}),
         }));
       } catch (error) {
@@ -575,11 +671,11 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     },
 
     openThread(id, { focusPin = false } = {}) {
-      store.setState((state) => ({
-        activeThreadId: id,
-        focusPinId: focusPin ? id : null,
-        ...(id ? droppingDraft(state) : {}),
-      }));
+      store.setState((state) =>
+        id
+          ? { ...openingPin(id, focusPin), ...droppingDraft(state) }
+          : { activeThreadId: null, focusPinId: null }
+      );
     },
 
     pinFocused(id) {
@@ -590,8 +686,8 @@ export const createCommentsController = (services: CommentsHostServices): Commen
 
     async guideTo(comment) {
       const { id, route } = comment;
-      // The page is not looked at until the host has opened the comment's one: the
-      // current page may be the same one in another state, with a matching element.
+      // Not until the host has opened the comment's page is it looked at: the
+      // current one may be the same page in another state, element and all.
       const guide: GuideState = { id, navigating: route.path !== location.getPath() };
       store.setState((state) => ({
         guide,
@@ -602,8 +698,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       if (!guide.navigating) {
         return;
       }
-      // Meanwhile the guide may have been stopped, or started over: then neither
-      // the outcome nor, failing, the news of it is this guide's to give any more.
+      // Stopped or started over meanwhile, the guide is no longer this one's to go on with, or to report on.
       const current = () => store.getState().guide === guide;
       try {
         await services.navigateToPath(route.path);
@@ -625,15 +720,22 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       }
     },
 
-    stopGuide(found = false) {
+    stopGuide(found = false, { focusPin = true } = {}) {
       const { guide } = store.getState();
       if (!guide) {
         return;
       }
       store.setState({
         guide: null,
-        ...(found ? { activeThreadId: guide.id, focusPinId: guide.id } : {}),
+        ...(found ? openingPin(guide.id, focusPin) : {}),
       });
+    },
+
+    showInPanel(id) {
+      store.setState((state) => ({
+        guide: null,
+        ...(id ? { ...showingInPanel(id), ...droppingDraft(state) } : { panelThreadId: null }),
+      }));
     },
 
     setOverlayOpen(open) {

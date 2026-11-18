@@ -14,6 +14,8 @@ import type { OnboardingReturnState } from '../package_list_search_form/use_card
 import { rewriteCardUrl } from '../package_list_search_form/use_card_url_rewrite';
 import { findRecommendedMember, orderMembers } from './recommended_variant';
 import { useCollectionCards } from './use_collection_cards';
+import type { TrackTileClick } from './use_track_tile_click';
+import { useTrackTileClick } from './use_track_tile_click';
 
 interface Props {
   /** Group id in the url. */
@@ -24,7 +26,8 @@ interface Props {
 
 const toVariants = (
   members: IntegrationCardItem[],
-  returnState: OnboardingReturnState
+  returnState: OnboardingReturnState,
+  trackTileClick: TrackTileClick
 ): CollectionVariant[] => {
   const recommended = findRecommendedMember(members);
   return orderMembers(members).map((member) => ({
@@ -35,6 +38,12 @@ const toVariants = (
       <CardIcon icons={member.icons} packageName={member.name} version={member.version} size="l" />
     ),
     href: rewriteCardUrl(member, returnState).url,
+    onClick: trackTileClick({
+      tile_id: member.id,
+      surface: 'collection_variant',
+      collection_id: returnState.collection,
+      is_recommended: member === recommended,
+    }),
     badge: member === recommended ? <RecommendedBadge /> : undefined,
     'data-test-subj': `collectionVariantRow-${member.id}`,
   }));
@@ -43,6 +52,7 @@ const toVariants = (
 /** Chooser for the group id in the url. Uses Fleet's full card list so a curated tile still works with no search term. */
 export const CollectionChooser = ({ collection, searchTerm, onClose }: Props) => {
   const collections = useCollectionCards();
+  const trackTileClick = useTrackTileClick();
   const card = collection ? collections.get(collection) : undefined;
 
   if (!collection || !card) return null;
@@ -51,11 +61,15 @@ export const CollectionChooser = ({ collection, searchTerm, onClose }: Props) =>
     <CollectionFlyout
       title={card.title}
       description={card.description}
-      variants={toVariants(card.groupMembers, {
-        category: null,
-        search: searchTerm || undefined,
-        collection,
-      })}
+      variants={toVariants(
+        card.groupMembers,
+        {
+          category: null,
+          search: searchTerm || undefined,
+          collection,
+        },
+        trackTileClick
+      )}
       onClose={onClose}
     />
   );

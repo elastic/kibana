@@ -28,6 +28,11 @@ export interface SeedAd2ScenarioProfileOptions {
  * A bulk request resolves with HTTP 200 even when individual documents were
  * rejected, so a partial seed would otherwise surface as an off-by-N retrieval
  * score instead of a fixture failure.
+ *
+ * The response nests each result under the op key that produced it — `index`
+ * for alerts, `create` for raw events on data streams — so reading only
+ * `item.index` would report zero failures for a fully-rejected `create` batch
+ * (every `item.create` failure would fall through `?? undefined` unseen).
  */
 const assertBulkIndexSucceeded = (response: BulkResponse, label: string): void => {
   if (!response.errors) {
@@ -35,7 +40,7 @@ const assertBulkIndexSucceeded = (response: BulkResponse, label: string): void =
   }
 
   const failures = response.items
-    .map((item) => item.index)
+    .map((item) => item.index ?? item.create)
     .filter((indexResult) => indexResult?.error !== undefined)
     .map(
       (indexResult) =>
@@ -79,8 +84,15 @@ export const seedAd2ScenarioProfile = async (
     assertBulkIndexSucceeded(response, `the ${plan.alerts.length} seeded alerts`);
   }
 
+  // The raw-event indices (`logs-endpoint.events.*-default`) are backed by
+  // data streams, which reject `index` bulk ops outright
+  // (`illegal_argument_exception: only write ops with an op_type of create
+  // are allowed in data streams`). `create` is also the correct semantics
+  // here: every id is derived from this run's marker, so a collision would
+  // mean two runs sharing a marker, which is itself a bug worth surfacing
+  // rather than silently overwriting.
   const rawOperations = plan.rawEvents.flatMap((event) => [
-    { index: { _index: event.index, _id: event.id } },
+    { create: { _index: event.index, _id: event.id } },
     event.source,
   ]);
 
@@ -95,6 +107,7 @@ export const seedAd2ScenarioProfile = async (
     scenarioKeys: plan.scenarioKeys,
     alertCount: plan.alerts.length,
     rawEventCount: plan.rawEvents.length,
+    noiseAlertCount: plan.noiseAlertIds?.length ?? 0,
   };
 };
 

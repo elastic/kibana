@@ -91,7 +91,7 @@ export const PerOsDeviceControlNotifyUserOption = memo<PerOsDeviceControlNotifyU
         )}
         value={userNotificationMessage}
         onChange={handleCustomUserNotification}
-        disabled={!userNotificationSelected || !deviceControl?.enabled || !isEditMode}
+        disabled={!userNotificationSelected || !isEditMode}
         fullWidth={true}
         // One line tall by default to keep the OS row compact; the control stays a textarea so
         // multi-line messages can still be authored and are shown in full when the user resizes.
@@ -102,7 +102,11 @@ export const PerOsDeviceControlNotifyUserOption = memo<PerOsDeviceControlNotifyU
       <CustomNotificationUpsellingComponent />
     ) : null;
 
-    if (!isEnterprise || currentAccessLevel !== DeviceControlAccessLevel.deny_all) {
+    if (
+      !isEnterprise ||
+      !deviceControl?.enabled ||
+      currentAccessLevel !== DeviceControlAccessLevel.deny_all
+    ) {
       return null;
     }
 
@@ -123,7 +127,7 @@ export const PerOsDeviceControlNotifyUserOption = memo<PerOsDeviceControlNotifyU
                   data-test-subj={getTestId('checkbox')}
                   label={NOTIFY_USER_CHECKBOX_LABEL}
                   checked={userNotificationSelected}
-                  disabled={!deviceControl?.enabled || !isEditMode}
+                  disabled={!isEditMode}
                   onChange={handleUserNotificationCheckbox}
                 />
               </EuiFlexItem>

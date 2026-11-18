@@ -44,7 +44,7 @@ describe('useScheduleApi', () => {
       mockUseKibana.mockReturnValue({
         services: {
           featureFlags: {
-            getBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: jest.fn().mockReturnValue(true),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(false),
@@ -79,7 +79,7 @@ describe('useScheduleApi', () => {
       mockUseKibana.mockReturnValue({
         services: {
           featureFlags: {
-            getBooleanValue: jest.fn().mockReturnValue(false),
+            useBooleanValue: jest.fn().mockReturnValue(false),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(true),
@@ -114,7 +114,7 @@ describe('useScheduleApi', () => {
       mockUseKibana.mockReturnValue({
         services: {
           featureFlags: {
-            getBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: jest.fn().mockReturnValue(true),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(true),
@@ -205,7 +205,7 @@ describe('useScheduleApi', () => {
       mockUseKibana.mockReturnValue({
         services: {
           featureFlags: {
-            getBooleanValue: jest.fn().mockReturnValue(false),
+            useBooleanValue: jest.fn().mockReturnValue(false),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(false),
@@ -298,9 +298,9 @@ describe('useScheduleApi', () => {
     it('reads the feature flag with the correct key and a true default (ON by default)', () => {
       renderHook(() => useScheduleApi());
 
-      const { getBooleanValue } = mockUseKibana().services.featureFlags;
+      const { useBooleanValue } = mockUseKibana().services.featureFlags;
 
-      expect(getBooleanValue).toHaveBeenCalledWith(
+      expect(useBooleanValue).toHaveBeenCalledWith(
         'securitySolution.attackDiscoveryWorkflowsEnabled',
         true
       );

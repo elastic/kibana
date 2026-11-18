@@ -32,27 +32,27 @@ export interface TreeStateTagProps {
 const labelFor = (kind: TreeStateTagKind): string => {
   switch (kind) {
     case 'failed':
-      return i18n.translate('workflowsManagement.stepExecutionTreeRow.failedTag', {
+      return i18n.translate('workflows.stepExecutionTreeRow.failedTag', {
         defaultMessage: 'failed',
       });
     case 'running':
-      return i18n.translate('workflowsManagement.stepExecutionTreeRow.runningTag', {
+      return i18n.translate('workflows.stepExecutionTreeRow.runningTag', {
         defaultMessage: 'running',
       });
     case 'latest':
-      return i18n.translate('workflowsManagement.stepExecutionTreeRow.latestTag', {
+      return i18n.translate('workflows.stepExecutionTreeRow.latestTag', {
         defaultMessage: 'latest',
       });
     case 'final':
-      return i18n.translate('workflowsManagement.stepExecutionTreeRow.finalTag', {
+      return i18n.translate('workflows.stepExecutionTreeRow.finalTag', {
         defaultMessage: 'final',
       });
     case 'recovered':
-      return i18n.translate('workflowsManagement.stepExecutionTreeRow.recoveredTag', {
+      return i18n.translate('workflows.stepExecutionTreeRow.recoveredTag', {
         defaultMessage: 'recovered',
       });
     case 'waitingForInput':
-      return i18n.translate('workflowsManagement.stepExecutionTreeRow.waitingForInputTag', {
+      return i18n.translate('workflows.stepExecutionTreeRow.waitingForInputTag', {
         defaultMessage: 'waiting for input',
       });
   }

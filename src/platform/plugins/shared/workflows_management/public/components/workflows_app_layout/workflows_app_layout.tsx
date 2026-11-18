@@ -76,7 +76,7 @@ const WorkflowsAppShellWithSolutionNav = withSolutionNav(WorkflowsAppShell);
 
 /**
  * Adds the Workflows side navigation in classic chrome, where there is otherwise
- * no way to reach the Template Library or the global Executions view. Solution
+ * no way to reach the Template library or the global Executions view. Solution
  * navigation renders those links in its own panel, so the sidebar stays out of it.
  */
 export const WorkflowsAppLayout: React.FC<PropsWithChildren> = ({ children }) => {

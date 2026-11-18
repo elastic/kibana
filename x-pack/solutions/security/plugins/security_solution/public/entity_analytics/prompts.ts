@@ -18,3 +18,9 @@ Start a proactive, hypothesis-driven threat hunt across my security data.
 <Describe a hypothesis, entity, or behavior to focus on — e.g. "possible C2 beaconing from finance hosts over the last 7 days". Leave as-is to hunt broadly across recent suspicious activity.>
 
 Work iteratively with ES|QL: state a testable hypothesis (map it to MITRE ATT&CK where possible), identify the relevant indices and fields, establish a baseline with aggregations, then drill into statistical outliers, rare events, and known IOCs. Summarize findings per entity, classify each as confirmed | suspicious | benign, and recommend concrete next steps — including any detection rules worth operationalizing. Respond in markdown.`;
+
+// Seeds the "Hunt with AI" button on the Entity Analytics page with the latest
+// hunting leads. Left unsent so the analyst can confirm or edit it first.
+export const HUNT_LATEST_LEADS_PROMPT = `Use the security.list_leads tool to get my latest active hunting leads (status: active, sortField: timestamp).
+
+For each lead, summarize the entity involved, why it was flagged as a lead, and a concrete first step to investigate it. Respond in markdown.`;

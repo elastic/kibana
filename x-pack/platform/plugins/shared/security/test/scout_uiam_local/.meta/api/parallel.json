@@ -1,5 +1,5 @@
 {
-  "sha1": "bea40de9cfa9723818922a0ccda7c37fe91ddabb",
+  "sha1": "85efda1b9e3bf6358625c20daf2050ece2e05235",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,8 +21,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -49,8 +47,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -58,6 +54,214 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access_token_errors.spec.ts",
         "line": 59,
         "column": 11
+      }
+    },
+    {
+      "id": "707891280b7c303-861aafec22ece0c",
+      "title": "[NON-MKI] UIAM access checks through Core denies everything to a member without UIAM roles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access.spec.ts",
+        "line": 32,
+        "column": 20
+      }
+    },
+    {
+      "id": "707891280b7c303-0d9f3180284e88b",
+      "title": "[NON-MKI] UIAM access checks through Core denies everything to a Kibana admin without UIAM roles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access.spec.ts",
+        "line": 42,
+        "column": 81
+      }
+    },
+    {
+      "id": "707891280b7c303-85627203707f894",
+      "title": "[NON-MKI] UIAM access checks through Core grants only billing access to a billing admin regardless of project role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access.spec.ts",
+        "line": 46,
+        "column": 12
+      }
+    },
+    {
+      "id": "707891280b7c303-371b7d3f70cd1d4",
+      "title": "[NON-MKI] UIAM access checks through Core denies everything to a project viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access.spec.ts",
+        "line": 61,
+        "column": 25
+      }
+    },
+    {
+      "id": "707891280b7c303-918795d19c2e3ec",
+      "title": "[NON-MKI] UIAM access checks through Core grants everything to an organization admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access.spec.ts",
+        "line": 67,
+        "column": 89
+      }
+    },
+    {
+      "id": "707891280b7c303-345a08cf657d507",
+      "title": "[NON-MKI] UIAM access checks through Core grants everything to an organization admin UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access.spec.ts",
+        "line": 76,
+        "column": 12
+      }
+    },
+    {
+      "id": "707891280b7c303-82f614550add436",
+      "title": "[NON-MKI] UIAM access checks through Core denies everything to a UIAM API key granted by a plain member",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access.spec.ts",
+        "line": 81,
+        "column": 22
+      }
+    },
+    {
+      "id": "707891280b7c303-ce611692cd11625",
+      "title": "[NON-MKI] UIAM access checks through Core rejects a credential that did not come from UIAM",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access.spec.ts",
+        "line": 128,
+        "column": 9
       }
     },
     {
@@ -77,8 +281,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -105,8 +307,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -133,8 +333,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -161,8 +359,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -189,8 +385,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -217,8 +411,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -245,8 +437,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -273,8 +463,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -301,8 +489,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -329,8 +515,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -357,8 +541,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -385,14 +567,50 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_invalidate_session.spec.ts",
         "line": 58,
+        "column": 25
+      }
+    },
+    {
+      "id": "26e841eed7d5649-93028d84c37a40e",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies a session-authenticated request as a user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 18,
+        "column": 1
+      }
+    },
+    {
+      "id": "26e841eed7d5649-fb67ddb14300b0f",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies an external UIAM API key as a UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 46,
         "column": 25
       }
     },
@@ -413,8 +631,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -441,8 +657,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -469,8 +683,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -478,6 +690,44 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
         "line": 91,
         "column": 21
+      }
+    },
+    {
+      "id": "c4c9212de6726a5-25bfdde0cc2a1f6",
+      "title": "[NON-MKI] Genuine Kibana self-call UIAM attestation Kibana-minted internal UIAM API key self-call stamps and the receiver attaches the ES secret",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_self_call_attestation.spec.ts",
+        "line": 77,
+        "column": 21
+      }
+    },
+    {
+      "id": "c4c9212de6726a5-641c7b2f3eba339",
+      "title": "[NON-MKI] Genuine Kibana self-call UIAM attestation Cookie session on the UI Run path (not Task Manager worker) stamps and the acceptUiamOAuth receiver skips exchange",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_self_call_attestation.spec.ts",
+        "line": 112,
+        "column": 7
       }
     },
     {
@@ -497,15 +747,13 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_system_identity.spec.ts",
-        "line": 68,
-        "column": 21
+        "line": 80,
+        "column": 1
       }
     },
     {
@@ -525,14 +773,12 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_system_identity.spec.ts",
-        "line": 75,
+        "line": 85,
         "column": 21
       }
     },
@@ -553,15 +799,13 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_system_identity.spec.ts",
-        "line": 92,
-        "column": 24
+        "line": 98,
+        "column": 12
       }
     },
     {
@@ -581,15 +825,13 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_system_identity.spec.ts",
-        "line": 99,
-        "column": 27
+        "line": 103,
+        "column": 25
       }
     },
     {
@@ -609,15 +851,13 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_system_identity.spec.ts",
-        "line": 109,
-        "column": 14
+        "line": 108,
+        "column": 28
       }
     },
     {
@@ -637,15 +877,13 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_system_identity.spec.ts",
-        "line": 116,
-        "column": 71
+        "line": 121,
+        "column": 14
       }
     },
     {
@@ -665,8 +903,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -693,8 +929,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -721,8 +955,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -749,8 +981,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -777,8 +1007,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -805,8 +1033,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -833,8 +1059,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -861,8 +1085,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -889,8 +1111,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],

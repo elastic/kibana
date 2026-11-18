@@ -16,11 +16,8 @@ export const createSearchHit = (
   _source: source,
 });
 
-export const createKI = (
-  feature: Omit<BaseFeature, 'stream_name' | 'properties'>
-): BaseFeature => ({
+export const createKI = (feature: Omit<BaseFeature, 'properties'>): BaseFeature => ({
   ...feature,
-  stream_name: 'test-stream',
   properties: {},
 });
 

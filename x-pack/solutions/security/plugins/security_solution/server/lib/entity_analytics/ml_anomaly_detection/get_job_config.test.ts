@@ -561,11 +561,11 @@ describe('managed MITRE list caching', () => {
     } as unknown as MlPluginSetup;
   });
 
-  it('caches the managed result so list() is called only once across two requests', async () => {
+  it('calls list() on every request so runtime data changes are always visible', async () => {
     const mockList = makeMockList();
     const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
 
-    // First call — populates cache
+    // First call
     await getJobConfig({
       jobIds: ['test-job'],
       logger,
@@ -574,7 +574,7 @@ describe('managed MITRE list caching', () => {
       soClient,
       mitreDataClient,
     });
-    // Second call — should use cache
+    // Second call — managed results are never cached, so list() is called again.
     mockJobsFn.mockResolvedValue({ jobs: [makeJobWithCustomSettings()] });
     await getJobConfig({
       jobIds: ['test-job'],
@@ -585,14 +585,14 @@ describe('managed MITRE list caching', () => {
       mitreDataClient,
     });
 
-    expect(mockList).toHaveBeenCalledTimes(1);
+    expect(mockList).toHaveBeenCalledTimes(2);
   });
 
-  it('does not cache an empty response and calls list() again on the next request', async () => {
+  it('calls list() again on the next request when the managed collection is empty', async () => {
     const mockList = makeMockList(true /* empty */);
     const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
 
-    // First call — empty result, must NOT be cached
+    // First call — empty result causes degraded-mode fallback.
     await getJobConfig({
       jobIds: ['test-job'],
       logger,
@@ -601,7 +601,7 @@ describe('managed MITRE list caching', () => {
       soClient,
       mitreDataClient,
     });
-    // Second call — should retry list() because the cache was not set
+    // Second call — list() is called again because managed results are never cached.
     mockJobsFn.mockResolvedValue({ jobs: [makeJobWithCustomSettings()] });
     await getJobConfig({
       jobIds: ['test-job'],

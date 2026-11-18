@@ -23,4 +23,41 @@ describe('normalizeCommonRuleFields', () => {
 
     expect(result.investigation_fields).toMatchObject({ field_names: ['field_1', 'field_2'] });
   });
+
+  describe('profile uid fields', () => {
+    it('maps the created and updated profile uids when present', () => {
+      const mockRule: SanitizedRule<RuleParams> = {
+        ...getRuleMock(getQueryRuleParams()),
+        createdByProfileUid: 'created-by-profile-uid',
+        updatedByProfileUid: 'updated-by-profile-uid',
+      };
+
+      const result = normalizeCommonRuleFields(mockRule);
+
+      expect(result.created_by_profile_uid).toEqual('created-by-profile-uid');
+      expect(result.updated_by_profile_uid).toEqual('updated-by-profile-uid');
+    });
+
+    it('omits the profile uids when they are null', () => {
+      const mockRule: SanitizedRule<RuleParams> = {
+        ...getRuleMock(getQueryRuleParams()),
+        createdByProfileUid: null,
+        updatedByProfileUid: null,
+      };
+
+      const result = normalizeCommonRuleFields(mockRule);
+
+      expect(result.created_by_profile_uid).toBeUndefined();
+      expect(result.updated_by_profile_uid).toBeUndefined();
+    });
+
+    it('omits the profile uids when they are absent', () => {
+      const mockRule: SanitizedRule<RuleParams> = getRuleMock(getQueryRuleParams());
+
+      const result = normalizeCommonRuleFields(mockRule);
+
+      expect(result.created_by_profile_uid).toBeUndefined();
+      expect(result.updated_by_profile_uid).toBeUndefined();
+    });
+  });
 });

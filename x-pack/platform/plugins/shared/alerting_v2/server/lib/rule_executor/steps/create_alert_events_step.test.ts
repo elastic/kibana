@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { CreateAlertEventsStep } from './create_alert_events_step';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 import {
   collectStreamResults,
   createPipelineStream,
@@ -30,6 +30,11 @@ describe('CreateAlertEventsStep', () => {
     const config: PluginConfig = {
       enabled: true,
       invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+      retention: {
+        ruleEvents: { enabled: false, dataRetention: '90d' },
+        alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
+      },
+      dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
@@ -42,13 +47,10 @@ describe('CreateAlertEventsStep', () => {
       },
     };
 
-    const pluginConfigAccessor =
-      coreMock.createPluginInitializerContext<PluginConfig>(config).config;
-
     const logger = createLoggerService();
     mockLogger = logger.mockLogger;
 
-    return new CreateAlertEventsStep(logger.loggerService, pluginConfigAccessor);
+    return new CreateAlertEventsStep(logger.loggerService, createConfigServiceMock(config));
   }
 
   beforeEach(() => {
@@ -67,7 +69,6 @@ describe('CreateAlertEventsStep', () => {
     expect(result.state.alertEventsBatch).toHaveLength(2);
 
     expect(result.state.alertEventsBatch?.[0]).toEqual({
-      '@timestamp': expect.any(String),
       scheduled_timestamp: input.scheduledAt,
       rule: { id: rule.id, version: 1 },
       group_hash: expect.any(String),
@@ -79,7 +80,6 @@ describe('CreateAlertEventsStep', () => {
     });
 
     expect(result.state.alertEventsBatch?.[1]).toEqual({
-      '@timestamp': expect.any(String),
       scheduled_timestamp: input.scheduledAt,
       rule: { id: rule.id, version: 1 },
       group_hash: expect.any(String),
@@ -93,7 +93,7 @@ describe('CreateAlertEventsStep', () => {
 
   it('captures rule.version from the rule version', async () => {
     const input = createRuleExecutionInput();
-    const rule = createRuleResponse({ metadata: { version: 5 } });
+    const rule = createRuleResponse({ version: 5 });
     const esqlRowBatch = [{ 'host.name': 'host-a' }];
 
     const state = createRulePipelineState({ input, rule, esqlRowBatch });
@@ -332,7 +332,6 @@ describe('CreateAlertEventsStep', () => {
       buildGroupHash({
         rowDoc: { 'host.name': host },
         groupKeyFields: ['host.name'],
-        fallbackSeed: 'unused',
       });
 
     it('never drops an active group and preserves the active set on state for reuse', async () => {

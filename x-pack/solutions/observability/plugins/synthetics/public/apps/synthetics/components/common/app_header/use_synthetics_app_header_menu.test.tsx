@@ -50,8 +50,14 @@ jest.mock('@kbn/exploratory-view-plugin/public', () => ({
   createExploratoryViewUrl: () => '/app/exploratory-view',
 }));
 
+const settings = { canManagePrivateLocations: true };
+
 jest.mock('../../../contexts', () => ({
-  useSyntheticsSettingsContext: () => ({ basePath: '', isDev: false }),
+  useSyntheticsSettingsContext: () => ({
+    basePath: '',
+    isDev: false,
+    canManagePrivateLocations: settings.canManagePrivateLocations,
+  }),
 }));
 
 jest.mock('../../../hooks', () => ({
@@ -110,6 +116,7 @@ describe('useSyntheticsAppHeaderMenu', () => {
     mockMonitorList.data.absoluteTotal = 2;
     mockOverviewStatus.allConfigs = [{ origin: 'ui' }];
     mockUiSettingsGet.mockReturnValue(true);
+    settings.canManagePrivateLocations = true;
   });
 
   it('puts Alerts first and forces Inspect, Explore data, and Settings into overflow by default', () => {
@@ -154,12 +161,23 @@ describe('useSyntheticsAppHeaderMenu', () => {
     );
   });
 
-  it('omits Create monitor when the listing is empty', () => {
+  it('shows Create monitor when the listing is empty', () => {
     mockMonitorList.data.absoluteTotal = 0;
     mockOverviewStatus.allConfigs = [];
 
     const { result } = renderMenuHook({ showCreateMonitor: true });
-    expect(result.current.menu.primaryActionItem).toBeUndefined();
+    expect(result.current.menu.primaryActionItem).toEqual(
+      expect.objectContaining({
+        id: 'createMonitor',
+        testId: 'syntheticsAddMonitorBtn',
+      })
+    );
+    expect(findItem(result.current.menu.items, 'alerts')).toEqual(
+      expect.objectContaining({
+        disableButton: true,
+        tooltipContent: 'Create a monitor to set up alerts and rules.',
+      })
+    );
   });
 
   it('surfaces Diagnostics alongside Settings when the page asks for it', () => {
@@ -174,6 +192,17 @@ describe('useSyntheticsAppHeaderMenu', () => {
       })
     );
     expect(menu.primaryActionItem).toBeUndefined();
+  });
+
+  it('disables Diagnostics without the private-location manage privilege', () => {
+    settings.canManagePrivateLocations = false;
+    const { result } = renderMenuHook({ showDiagnostics: true });
+
+    expect(findItem(result.current.menu.items, 'diagnostics')).toEqual(
+      expect.objectContaining({
+        disableButton: true,
+      })
+    );
   });
 
   it('uses a page-provided primary action instead of Create monitor', () => {

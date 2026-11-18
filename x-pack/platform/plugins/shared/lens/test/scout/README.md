@@ -20,11 +20,9 @@ lens/test/scout/
 | `core/ui/parallel.playwright.config.ts` | stateful only |
 | `core/ui/playwright.config.ts` | stateful only |
 | `core/api/playwright.config.ts` | all |
-| `smokescreen/ui/parallel.playwright.config.ts` | stateful only, serverless to follow |
+| `smokescreen/ui/parallel.playwright.config.ts` | all |
 | `open_in_lens/ui/parallel.playwright.config.ts` | all |
 | `tsdb/ui/playwright.config.ts` | all |
-
-`smokescreen/` is the only namespace intended to grow beyond stateful: its specs will switch to `tags.deploymentAgnostic` once they have been verified on serverless. See [`smokescreen/README.md`](./smokescreen/README.md) for what belongs there.
 
 ## Running tests
 
@@ -62,7 +60,7 @@ Add `--ui` to any of these to open the Playwright UI runner.
 
 ### Serverless
 
-Only the configs marked `all` in the table above have serverless coverage: `core/api`, `open_in_lens` and `tsdb`. The two `core/ui` configs and `smokescreen` are stateful-only, so they would match nothing here.
+Only the configs marked `all` in the table above have serverless coverage: `core/api`, `smokescreen`, `open_in_lens` and `tsdb`. The two `core/ui` configs are stateful-only, so they would match nothing here.
 
 Start a project type — `search`, `observability_complete` or `security_complete`:
 

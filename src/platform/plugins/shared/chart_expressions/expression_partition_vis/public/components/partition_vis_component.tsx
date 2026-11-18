@@ -27,8 +27,8 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LegendToggle } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-common';
+import { ChartTooltipFooterMessage } from '@kbn/visualizations-components';
 import {
-  ChartTooltipFooterMessage,
   getColumnByAccessor,
   getFilterDrilldownWarningMessage,
   getOverridesFor,
@@ -40,7 +40,7 @@ import type {
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
-import { useKbnPalettes } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes-components';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { consolidateMetricColumns } from '../../common/utils';
@@ -558,7 +558,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               distinctColors: visParams.distinctColors ?? false,
             }}
           >
-            {showToggleLegendElement && (
+            {interactive && showToggleLegendElement && (
               <LegendToggle
                 onClick={toggleLegend}
                 showLegend={showLegend}
@@ -582,7 +582,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendPosition={legendPosition}
                 legendSize={LegendSizeToPixels[visParams.legendSize ?? DEFAULT_LEGEND_SIZE]}
                 legendMaxDepth={visParams.nestedLegend ? undefined : 1}
-                legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
+                legendColorPicker={
+                  props.uiState && props.interactive ? LegendColorPickerWrapper : undefined
+                }
                 flatLegend={flatLegend}
                 legendSort={customLegendSort}
                 legendValues={visParams.legendStats}

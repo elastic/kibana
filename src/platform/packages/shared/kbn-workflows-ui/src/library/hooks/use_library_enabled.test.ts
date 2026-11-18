@@ -10,6 +10,7 @@
 import { renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { WORKFLOWS_LIBRARY_ENABLED_SETTING_ID } from '@kbn/workflows';
 import { useLibraryEnabled } from './use_library_enabled';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -44,7 +45,28 @@ describe('useLibraryEnabled', () => {
     expect(result.current).toBe(false);
   });
 
-  it('defaults to false when the global setting is not overridden', () => {
+  it('uses the enabled default when reading the global setting', () => {
+    const get = jest.fn().mockReturnValue(true);
+    const get$ = jest.fn().mockReturnValue(of(true));
+    jest.mocked(useKibana).mockReturnValue({
+      services: {
+        settings: {
+          globalClient: {
+            get,
+            get$,
+          },
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+
+    const { result } = renderHook(() => useLibraryEnabled());
+
+    expect(result.current).toBe(true);
+    expect(get).toHaveBeenCalledWith(WORKFLOWS_LIBRARY_ENABLED_SETTING_ID, true);
+    expect(get$).toHaveBeenCalledWith(WORKFLOWS_LIBRARY_ENABLED_SETTING_ID, true);
+  });
+
+  it('returns false when the global setting is disabled', () => {
     jest.mocked(useKibana).mockReturnValue({
       services: {
         settings: {

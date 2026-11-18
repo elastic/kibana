@@ -10,25 +10,26 @@ import {
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
+  EuiHorizontalRule,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
+import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useAgentId } from '../../../hooks/use_conversation';
+import { useAgentId, useConversation, useConversationTitle } from '../../../hooks/use_conversation';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useKibana } from '../../../hooks/use_kibana';
 import { appPaths } from '../../../utils/app_paths';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { ActivityLogFlyout } from '../activity_log/activity_log_flyout';
+import { useActivityLog } from '../activity_log/use_activity_log';
 
-const fullscreenLabels = {
-  actions: i18n.translate('xpack.agentBuilder.conversationActions.actions', {
-    defaultMessage: 'More',
-  }),
+const labels = {
   actionsAriaLabel: i18n.translate('xpack.agentBuilder.conversationActions.actionsAriaLabel', {
     defaultMessage: 'More',
   }),
@@ -38,15 +39,6 @@ const fullscreenLabels = {
   genAiSettings: i18n.translate('xpack.agentBuilder.conversationActions.genAiSettings', {
     defaultMessage: 'GenAI Settings',
   }),
-  externalLinkAriaLabel: i18n.translate(
-    'xpack.agentBuilder.conversationActions.externalLinkAriaLabel',
-    {
-      defaultMessage: 'Open in new tab',
-    }
-  ),
-  view: i18n.translate('xpack.agentBuilder.conversationActions.viewSection', {
-    defaultMessage: 'View',
-  }),
   fullScreen: i18n.translate('xpack.agentBuilder.conversationActions.fullScreen', {
     defaultMessage: 'Open in full screen',
   }),
@@ -54,6 +46,21 @@ const fullscreenLabels = {
     'xpack.agentBuilder.conversationActions.fullScreenDisabledTooltip',
     {
       defaultMessage: 'Full-screen mode is available once this conversation has been created.',
+    }
+  ),
+  downloadConversation: i18n.translate(
+    'xpack.agentBuilder.conversationActions.downloadConversation',
+    {
+      defaultMessage: 'Download conversation',
+    }
+  ),
+  activityLog: i18n.translate('xpack.agentBuilder.conversationActions.activityLog', {
+    defaultMessage: 'Activity log',
+  }),
+  activityLogNoActivityTooltip: i18n.translate(
+    'xpack.agentBuilder.conversationActions.activityLogNoActivityTooltip',
+    {
+      defaultMessage: 'No activity has been recorded for this conversation.',
     }
   ),
 };
@@ -76,13 +83,17 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   } = useKibana();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
 
-  const closePopover = () => {
-    setIsPopoverOpen(false);
-  };
+  const { conversation } = useConversation();
+  const { title: conversationTitle } = useConversationTitle();
 
-  const togglePopover = () => {
-    setIsPopoverOpen(!isPopoverOpen);
-  };
+  const closePopover = () => setIsPopoverOpen(false);
+  const {
+    hasActivity,
+    isOpen: isActivityLogOpen,
+    open: openActivityLog,
+    close: closeActivityLog,
+  } = useActivityLog();
+  const togglePopover = () => setIsPopoverOpen((v) => !v);
 
   const handleOpenFullScreen = useCallback(() => {
     if (!application) return;
@@ -98,16 +109,45 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     navigateToAgentBuilderUrl(path, undefined, { entryPointSource: 'inapp_escalation' });
   }, [application, conversationId, onCloseSidebar, agentId, navigateToAgentBuilderUrl]);
 
+  const handleDownloadConversation = useCallback(() => {
+    setIsPopoverOpen(false);
+    const slug =
+      conversationTitle
+        .replace(/[^\p{L}\p{N}]+/gu, '-') // replace non-alphanumeric chars (unicode-aware) with hyphens
+        .replace(/^-|-$/g, '') // strip leading/trailing hyphens
+        .toLowerCase() || DEFAULT_CONVERSATION_TITLE;
+    downloadFileAs(`${slug}.json`, {
+      content: JSON.stringify({ conversation }, null, 2),
+      type: 'application/json',
+    });
+  }, [conversationTitle, conversation]);
+
   const fullScreenMenuItemLabel = useMemo(() => {
     if (conversationId) {
-      return fullscreenLabels.fullScreen;
+      return labels.fullScreen;
     }
     return (
-      <EuiToolTip content={fullscreenLabels.fullScreenDisabledTooltip}>
-        <span tabIndex={0}>{fullscreenLabels.fullScreen}</span>
+      <EuiToolTip content={labels.fullScreenDisabledTooltip}>
+        <span tabIndex={0}>{labels.fullScreen}</span>
       </EuiToolTip>
     );
   }, [conversationId]);
+
+  const exportMenuItems = [
+    <EuiContextMenuItem
+      key="download-conversation"
+      icon="download"
+      disabled={!conversation}
+      onClick={handleDownloadConversation}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.DOWNLOAD_CONVERSATION,
+        detail: 'conversation',
+      })}
+    >
+      {labels.downloadConversation}
+    </EuiContextMenuItem>,
+  ];
 
   const embeddedContextMenuItems = [
     <EuiContextMenuItem
@@ -122,7 +162,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         detail: 'conversation',
       })}
     >
-      {fullscreenLabels.agentDetails}
+      {labels.agentDetails}
     </EuiContextMenuItem>,
     ...(isEmbeddedContext && application
       ? [
@@ -155,54 +195,47 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
               detail: 'conversation',
             })}
           >
-            {fullscreenLabels.genAiSettings}
+            {labels.genAiSettings}
           </EuiContextMenuItem>,
         ]
       : []),
+    ...exportMenuItems,
   ];
 
-  const fullscreenMenuItems = [
+  const activityLogMenuItem = (
     <EuiContextMenuItem
-      key="view-current-agent"
-      icon="info"
-      disabled={!manageAgents}
-      onClick={closePopover}
-      href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
+      key="activity-log"
+      icon="timeline"
+      disabled={!hasActivity}
+      toolTipContent={hasActivity ? undefined : labels.activityLogNoActivityTooltip}
+      data-test-subj="agentBuilderActivityLogMenuItem"
+      onClick={() => {
+        closePopover();
+        openActivityLog();
+      }}
       {...getEbtProps({
         element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.AGENT_DETAILS,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_ACTIVITY_LOG,
         detail: 'conversation',
       })}
     >
-      {fullscreenLabels.agentDetails}
-    </EuiContextMenuItem>,
-    ...(hasAccessToGenAiSettings
-      ? [
-          <EuiContextMenuItem
-            key="agentBuilderSettings"
-            icon="gear"
-            onClick={closePopover}
-            href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
-            data-test-subj="agentBuilderGenAiSettingsButton"
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.GENAI_SETTINGS,
-              detail: 'conversation',
-            })}
-          >
-            {fullscreenLabels.genAiSettings}
-          </EuiContextMenuItem>,
-        ]
-      : []),
-  ];
+      {labels.activityLog}
+    </EuiContextMenuItem>
+  );
 
-  const menuItems = isEmbeddedContext ? embeddedContextMenuItems : fullscreenMenuItems;
+  const menuItems = isEmbeddedContext
+    ? embeddedContextMenuItems
+    : [
+        activityLogMenuItem,
+        <EuiHorizontalRule key="activity-log-divider" margin="none" />,
+        ...exportMenuItems,
+      ];
 
   const buttonProps = {
     iconType: 'boxesVertical' as const,
     color: 'text' as const,
     size: 's' as const,
-    'aria-label': fullscreenLabels.actionsAriaLabel,
+    'aria-label': labels.actionsAriaLabel,
     onClick: togglePopover,
     'data-test-subj': 'agentBuilderMoreActionsButton',
     ...getEbtProps({
@@ -220,10 +253,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downRight"
-        aria-label={fullscreenLabels.actionsAriaLabel}
+        aria-label={labels.actionsAriaLabel}
       >
         <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
+      {isActivityLogOpen && <ActivityLogFlyout onClose={closeActivityLog} />}
     </>
   );
 };

@@ -103,43 +103,26 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
     expect(filter).toContain('"space_id":["{{ variables.spaceId }}","*"]');
   });
 
-  it('holds the evidence script in a data.set step as a block scalar', () => {
-    const scriptStep = findStepByName(workflow.steps, 'set_evidence_script');
-    expect(scriptStep).toBeDefined();
-    const source = scriptStep?.with?.evidence_script;
-    expect(typeof source).toBe('string');
-    // The per-space dedupe guard. A Liquid-mangled body would lose this.
-    expect(source as string).toContain('instanceof List');
-    // Liquid must not consume any of the script source.
-    expect(source as string).not.toContain('{{');
-    expect(source as string).not.toContain('{%');
-  });
+  // The scripted per-space upsert (evidence keying, alert_hits-only assignment) moved into
+  // write_attribution_evidence.test.ts alongside the internal-user write it now requires --
+  // `.kibana-threat-reports` is plugin-owned and hidden, so a plain `elasticsearch.update` step
+  // here would run as whichever identity enabled this workflow and 403 for every non-superuser.
 
-  // evidence is shared with Hunt Watch's writer, which sets a disjoint set
-  // of keys (last_hunt_*, corroborated_rank_score) on the same per-space element.
-  it('only assigns alert_hits keys, never the whole matched element', () => {
-    const source = findStepByName(workflow.steps, 'set_evidence_script')?.with
-      ?.evidence_script as string;
-    expect(source).toMatch(/evidence\[i\]\.alert_hits\s*=/);
-    expect(source).toMatch(/evidence\[i\]\.alert_hits_total\s*=/);
-    // A wholesale `evidence[i] = ...` replace would erase Hunt Watch's
-    // last_hunt_*/corroborated_rank_score keys on that same per-space element.
-    expect(source).not.toMatch(/evidence\[i\]\s*=\s*[^.]/);
-    expect(source).not.toContain('last_hunt');
-  });
-
-  it('writes via elasticsearch.update, not bulk', () => {
-    // Bulk API rejects scripted updates on indices that contain semantic_text
-    // fields (the reports index does). The Update API accepts them.
+  it('writes via an internal route, not a direct elasticsearch step', () => {
     const writeStep = findStepByName(workflow.steps, 'write_evidence');
-    expect(writeStep?.type).toBe('elasticsearch.update');
+    expect(writeStep?.type).toBe('kibana.request');
     expect(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW.yaml).not.toContain('elasticsearch.bulk');
   });
 
-  describe('write_evidence renders a scripted per-space upsert', () => {
+  it('is space-addressed rather than an unconditional default-space call', () => {
+    const writeStep = findStepByName(workflow.steps, 'write_evidence');
+    expect(writeStep?.with?.path).toBe(
+      '/s/{{ workflow.spaceId }}/internal/threat_intel/attribute_alerts_evidence'
+    );
+  });
+
+  describe('write_evidence renders the attribution-evidence request', () => {
     const engine = createWorkflowLiquidEngine();
-    const evidenceScript = findStepByName(workflow.steps, 'set_evidence_script')?.with
-      ?.evidence_script as string;
     const writeStep = findStepByName(workflow.steps, 'write_evidence');
 
     const context = {
@@ -147,40 +130,38 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
         layer1_count: 3,
         layer2_count: 4,
         spaceId: 'space-a',
-        evidence_script: evidenceScript,
       },
+      workflow: { spaceId: 'space-a' },
       foreach: { item: { _id: 'report-1', _index: '.kibana-threat-reports' } },
       now: '2024-06-01T00:00:00.000Z',
     };
 
-    it('renders index, id, retry_on_conflict, and script params', () => {
+    it('renders index, id, and the precomputed evidence fields', () => {
       expect(writeStep).toBeDefined();
       const rendered = renderValueRecursively(engine, writeStep?.with, context) as {
-        index: string;
-        id: string;
-        retry_on_conflict: number;
-        script: { lang: string; source: string; params: Record<string, unknown> };
-        upsert?: unknown;
-        doc?: unknown;
+        method: string;
+        path: string;
+        body: {
+          index: string;
+          id: string;
+          window: string;
+          computedAt: string;
+          iocMatchHits: number;
+          techniqueOverlapHits: number;
+          alertHitsTotal: number;
+        };
       };
 
-      expect(rendered.index).toBe('.kibana-threat-reports');
-      expect(rendered.id).toBe('report-1');
-      // Cross-space concurrency on shared global docs; concurrency.key only
-      // serializes runs within a space.
-      expect(rendered.retry_on_conflict).toBe(3);
-      expect(rendered.doc).toBeUndefined();
-      expect(rendered.upsert).toBeUndefined();
-      expect(rendered.script.lang).toBe('painless');
-      expect(rendered.script.source).toBe(evidenceScript);
-      expect(rendered.script.source).toContain('instanceof List');
-      expect(rendered.script.params).toEqual({
-        space_id: 'space-a',
+      expect(rendered.method).toBe('POST');
+      expect(rendered.path).toBe('/s/space-a/internal/threat_intel/attribute_alerts_evidence');
+      expect(rendered.body).toEqual({
+        index: '.kibana-threat-reports',
+        id: 'report-1',
         window: '7d',
-        computed_at: '2024-06-01T00:00:00.000Z',
-        ioc_match_hits: 3,
-        technique_overlap_hits: 4,
-        alert_hits_total: 7,
+        computedAt: '2024-06-01T00:00:00.000Z',
+        iocMatchHits: 3,
+        techniqueOverlapHits: 4,
+        alertHitsTotal: 7,
       });
     });
   });

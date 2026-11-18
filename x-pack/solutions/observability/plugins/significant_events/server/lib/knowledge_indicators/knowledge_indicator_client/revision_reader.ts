@@ -13,22 +13,69 @@ import {
   type StoredFeatureKnowledgeIndicator,
   type StoredKnowledgeIndicator,
 } from '../data_stream';
-import { combineWhere, inPredicate, IS_NOT_DELETED } from '../esql_helpers';
+import { combineWhere, inPredicate, inSpace, IS_NOT_DELETED } from '../esql_helpers';
 import {
   esqlToObjects,
+  executeCountQuery,
   executeAndDecodeSource,
   pickLatestPerGroup,
   withSort,
   withWhere,
+  type LatestSourceGroupBy,
   type LatestSourceWhereCondition,
 } from '../../significant_events/latest_source_query';
 import { runEsqlQuery } from '../../significant_events/run_esql_query';
-import { ID, KI_TYPE_FEATURE, STREAM_NAME, TYPE } from '../fields';
+import { ID, KI_TYPE_FEATURE, SOURCE_ID, TYPE } from '../fields';
 
 export const REVISION_SIZE_LIMIT = 10_000;
 
+export interface LatestRevisionCursor {
+  sourceId: string;
+  type: string;
+  id: string;
+}
+
+/**
+ * Identity of a knowledge indicator revision within a space. The space filter
+ * must be applied before this grouping: feature ids are derived from
+ * `(source_id, slug)`, so the same source id onboarded in two spaces yields the
+ * same `id` in both and one space's revision would otherwise shadow the other's.
+ */
+const REVISION_GROUP_KEY: LatestSourceGroupBy = [SOURCE_ID, TYPE, ID];
+
+/**
+ * Space-scoped access to raw knowledge indicator revisions. Every query starts
+ * from `inSpace(space)`; nothing in this class can read another space's data.
+ */
 export class RevisionReader {
-  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
+  constructor(
+    private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger,
+    private readonly space: string
+  ) {}
+
+  /** Counts latest revisions, or the distinct values of `distinctColumn` among them. */
+  async countLatestRevisions(
+    where?: LatestSourceWhereCondition,
+    postGroupingWhere?: LatestSourceWhereCondition,
+    distinctColumn?: string
+  ): Promise<number> {
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']).where`${inSpace(
+      this.space
+    )}`;
+    query = withWhere(query, where);
+    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
+    query = withWhere(query, postGroupingWhere);
+    query = (
+      distinctColumn
+        ? query.pipe`STATS total = COUNT_DISTINCT(${esql.col(distinctColumn)})`
+        : query.pipe`STATS total = COUNT(*)`
+    )
+      .keep('total')
+      .limit(1);
+
+    return executeCountQuery({ esClient: this.esClient, query });
+  }
 
   async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,
@@ -36,9 +83,11 @@ export class RevisionReader {
     sort?: ComposerSortShorthand[],
     limit: number = REVISION_SIZE_LIMIT
   ): Promise<StoredKnowledgeIndicator[]> {
-    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']);
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']).where`${inSpace(
+      this.space
+    )}`;
     query = withWhere(query, where);
-    query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
+    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
     query = withWhere(query, postGroupingWhere);
     query = withSort(query, sort);
     // Cap at REVISION_SIZE_LIMIT regardless of the requested limit so a large
@@ -54,22 +103,78 @@ export class RevisionReader {
     return hits;
   }
 
+  async fetchLatestRevisionsPage({
+    where,
+    postGroupingWhere,
+    asOf,
+    after,
+    size,
+  }: {
+    where?: LatestSourceWhereCondition;
+    postGroupingWhere?: LatestSourceWhereCondition;
+    asOf: string;
+    after?: LatestRevisionCursor;
+    size: number;
+  }): Promise<{ hits: StoredKnowledgeIndicator[]; nextCursor?: LatestRevisionCursor }> {
+    if (size < 1 || size >= REVISION_SIZE_LIMIT) {
+      throw new Error(`Revision page size must be between 1 and ${REVISION_SIZE_LIMIT - 1}.`);
+    }
+
+    const atOrBefore = esql.exp`${esql.col('@timestamp')} <= TO_DATETIME(${esql.str(asOf)})`;
+    const afterCursor = after
+      ? esql.exp`${esql.col(SOURCE_ID)} > ${esql.str(after.sourceId)}
+        OR (${esql.col(SOURCE_ID)} == ${esql.str(after.sourceId)}
+          AND ${esql.col(TYPE)} > ${esql.str(after.type)})
+        OR (${esql.col(SOURCE_ID)} == ${esql.str(after.sourceId)}
+          AND ${esql.col(TYPE)} == ${esql.str(after.type)}
+          AND ${esql.col(ID)} > ${esql.str(after.id)})`
+      : undefined;
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']).where`${inSpace(
+      this.space
+    )}`;
+    query = withWhere(query, combineWhere(where, atOrBefore, afterCursor));
+    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
+    query = withWhere(query, postGroupingWhere);
+    query = query
+      .sort([SOURCE_ID, 'ASC'], [TYPE, 'ASC'], [ID, 'ASC'])
+      .keep('_source')
+      .limit(size + 1);
+
+    const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
+    if (hits.length <= size) {
+      return { hits };
+    }
+
+    const page = hits.slice(0, size);
+    const last = page[page.length - 1];
+    return {
+      hits: page,
+      nextCursor: {
+        sourceId: last['source.id'],
+        type: last.type,
+        id: last.id,
+      },
+    };
+  }
+
   /**
-   * Returns the distinct stream names whose latest KI revision satisfies
-   * `postGroupingWhere`. Aggregates on `stream.name` in ES|QL so the
-   * `REVISION_SIZE_LIMIT` cap bounds distinct streams rather than distinct KIs;
+   * Returns the distinct source ids whose latest KI revision satisfies
+   * `postGroupingWhere`. Aggregates on `source.id` in ES|QL so the
+   * `REVISION_SIZE_LIMIT` cap bounds distinct sources rather than distinct KIs;
    * warns if the cap is hit so partial coverage isn't silent.
    */
-  async fetchDistinctStreamNames(
+  async fetchDistinctSourceIds(
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition
   ): Promise<string[]> {
-    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']);
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']).where`${inSpace(
+      this.space
+    )}`;
     query = withWhere(query, where);
-    query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
+    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
     query = withWhere(query, postGroupingWhere);
-    query = query.pipe`STATS __count = COUNT(*) BY streamName = ${esql.col(STREAM_NAME)}`
-      .keep('streamName')
+    query = query.pipe`STATS __count = COUNT(*) BY sourceId = ${esql.col(SOURCE_ID)}`
+      .keep('sourceId')
       .limit(REVISION_SIZE_LIMIT);
 
     // `runEsqlQuery` (not `queryEsql`) so a not-yet-created data stream yields
@@ -79,27 +184,25 @@ export class RevisionReader {
       return [];
     }
 
-    const rows = esqlToObjects<{ streamName?: unknown }>(response);
+    const rows = esqlToObjects<{ sourceId?: unknown }>(response);
 
     if (rows.length >= REVISION_SIZE_LIMIT) {
       this.logger.warn(
-        `Distinct stream enumeration hit REVISION_SIZE_LIMIT (${REVISION_SIZE_LIMIT}); some streams with knowledge indicators may be omitted from this result.`
+        `Distinct source enumeration hit REVISION_SIZE_LIMIT (${REVISION_SIZE_LIMIT}); some sources with knowledge indicators may be omitted from this result.`
       );
     }
 
-    return rows
-      .map((row) => row.streamName)
-      .filter((name): name is string => typeof name === 'string');
+    return rows.map((row) => row.sourceId).filter((id): id is string => typeof id === 'string');
   }
 
   async fetchLatestFeatures(
-    stream: string,
+    sourceId: string,
     ids: string[]
   ): Promise<StoredFeatureKnowledgeIndicator[]> {
     if (ids.length === 0) return [];
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
-      inPredicate(STREAM_NAME, [stream]),
+      inPredicate(SOURCE_ID, [sourceId]),
       inPredicate(ID, ids)
     );
     const docs = await this.fetchLatestRevisions(where, IS_NOT_DELETED);

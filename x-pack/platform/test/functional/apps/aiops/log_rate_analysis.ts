@@ -279,12 +279,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         if (testData.fieldSelectorApplyAvailable) {
           await ml.testExecution.logTestStep('regroup results');
           await aiops.logRateAnalysisPage.clickFieldFilterApplyButton('aiopsFieldFilterButton');
+
+          // Applying the field filter resets the results and re-runs the whole analysis.
+          // Wait for it to complete before reading the regrouped table.
+          await aiops.logRateAnalysisPage.assertAnalysisComplete(
+            testData.analysisType,
+            testData.dataGenerator
+          );
+
           const expectedFilteredAnalysisGroupsTable = orderBy(
             testData.expected.filteredAnalysisGroupsTable,
             'group'
           );
 
-          await retry.tryForTime(30 * 1000, async () => {
+          await retry.tryForTime(60 * 1000, async () => {
             const filteredAnalysisGroupsTable =
               await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
 
@@ -320,11 +328,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/278230
-  describe.skip('log rate analysis', function () {
+  describe('log rate analysis', function () {
     for (const testData of logRateAnalysisTestData) {
-      // Failing: See https://github.com/elastic/kibana/issues/261563
-      describe.skip(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
+      describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {
           await aiops.logRateAnalysisDataGenerator.generateData(testData.dataGenerator);
 

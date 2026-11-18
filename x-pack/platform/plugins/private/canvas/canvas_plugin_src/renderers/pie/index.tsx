@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-// This bit of hackiness is required because this isn't part of the main kibana bundle
-import 'jquery';
-
+import $ from '@kbn/flot-charts';
+import type { FlotDataSeries, FlotPlot } from '@kbn/flot-charts';
 import { debounce } from 'lodash';
 import { RendererStrings } from '../../../i18n';
 import type { Pie } from '../../../public/functions/pie';
@@ -24,10 +23,7 @@ export const pie: RendererFactory<Pie> = () => ({
     config.options.legend.labelBoxBorderColor = 'transparent';
 
     if (config.font) {
-      const labelFormatter = (
-        label: string,
-        slice: jquery.flot.dataSeries & { percent: number }
-      ) => {
+      const labelFormatter = (label: string, slice: FlotDataSeries & { percent: number }) => {
         // font color defaults to slice color if not specified
         const fontSpec = { ...config.font.spec, color: config.font.spec.color || slice.color };
         const labelDiv = document.createElement('div');
@@ -56,7 +52,7 @@ export const pie: RendererFactory<Pie> = () => ({
       config.options.legend.labelFormatter = legendFormatter;
     }
 
-    let plot: jquery.flot.plot;
+    let plot: FlotPlot;
 
     function draw() {
       if (domNode.clientHeight < 1 || domNode.clientWidth < 1) {

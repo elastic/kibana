@@ -8,6 +8,11 @@
  */
 
 import { createSelector } from 'redux-toolkit-v1';
+import { getOmittedStepExecutionsCount } from '../../../../../common';
+import {
+  buildStepDurations,
+  EMPTY_STEP_DURATIONS,
+} from '../../../../shared/lib/build_step_durations';
 import type { RootState } from '../types';
 
 // Selectors
@@ -98,6 +103,11 @@ export const selectReplayExecutionId = createSelector(
   (detail) => detail.replay?.executionId ?? null
 );
 
+export const selectReplayIsTestRun = createSelector(
+  selectDetail,
+  (detail) => detail.replay?.isTestRun === true
+);
+
 export const selectReplayStepExecutionId = createSelector(
   selectDetail,
   (detail) => detail.replay?.stepExecutionId ?? null
@@ -113,6 +123,12 @@ export const selectIsSavingYaml = createSelector(
   (detail) => detail.loading.isSavingYaml
 );
 
+/** Whether a save is being checked or stored; another save can't start until it ends. */
+export const selectIsSaveInProgress = createSelector(
+  selectDetail,
+  (detail) => detail.isCheckingSave || detail.loading.isSavingYaml
+);
+
 export const selectConnectors = createSelector(selectDetail, (detail) => detail.connectors);
 export const selectConnectorsLoadState = createSelector(
   selectDetail,
@@ -123,9 +139,15 @@ export const selectSchema = createSelector(selectDetail, (detail) => detail.sche
 
 export const selectActiveTab = createSelector(selectDetail, (detail) => detail.activeTab);
 export const selectExecution = createSelector(selectDetail, (detail) => detail.execution);
+export const selectExecutionRequest = (state: RootState) => state.detail.executionRequest;
+export const selectExecutionError = (state: RootState) => state.detail.executionError;
 export const selectStepExecutionsTotal = createSelector(
   selectDetail,
   (detail) => detail.stepExecutionsTotal
+);
+export const selectStepExecutionPages = createSelector(
+  selectDetail,
+  (detail) => detail.stepExecutionPages
 );
 export const selectStepExecutions = createSelector(
   selectExecution,
@@ -215,6 +237,61 @@ export const selectEditorWorkflowDefinition = createSelector(
 export const selectEditorYamlLineCounter = createSelector(
   selectEditorComputed,
   (computed) => computed?.yamlLineCounter
+);
+
+/**
+ * True when the YAML currently shown in the editor is the exact snapshot the loaded execution ran.
+ * Used by duration-chip decorations to verify that line numbers from the execution's computed
+ * lookup align with the editor content.
+ *
+ * Covers both tabs:
+ * - Executions tab: `selectEditorYaml` returns `execution.yaml` by construction → always true.
+ * - Workflow tab after a test run: true while the draft still matches what ran; false the moment the
+ *   user makes an edit — at which point chips would be mispositioned anyway.
+ *
+ * `isYamlSynced` is false from the first keystroke, while the editor's debounced `setYamlString`
+ * has not reached the store yet, so chips disappear without waiting for that debounce.
+ */
+export const selectIsEditorYamlExecutionSnapshot = createSelector(
+  selectEditorYaml,
+  selectExecution,
+  selectIsYamlSynced,
+  (editorYaml, execution, isYamlSynced) =>
+    isYamlSynced && execution?.yaml != null && editorYaml === execution.yaml
+);
+
+/**
+ * Step executions the server reported but the detail view has not loaded (see the truncation
+ * callout). Step durations only aggregate the loaded ones, so repeated-step figures undercount
+ * while this is above 0.
+ */
+export const selectOmittedStepExecutionsCount = createSelector(
+  selectStepExecutionsTotal,
+  selectStepExecutionPages,
+  (total, pages) => getOmittedStepExecutionsCount(total, pages.length)
+);
+
+/**
+ * Per-step duration map, populated whenever an execution is loaded in the store.
+ * Covers both the old sidebar (workflow tab + execution open) and the executions tab.
+ * Uses the same allow-list as the flyout tree so numbers always agree.
+ * Aggregates only the loaded step executions; see `selectOmittedStepExecutionsCount`.
+ */
+export const selectStepDurations = createSelector(
+  selectStepExecutions,
+  selectEditorWorkflowLookup,
+  (stepExecutions, lookup) =>
+    stepExecutions?.length && lookup
+      ? buildStepDurations(stepExecutions, lookup.steps)
+      : EMPTY_STEP_DURATIONS
+);
+
+/**
+ * Denominator for the hotspot colour ratio: the execution's total duration in ms.
+ * Returns 0 while the run is still in flight (duration is null), which suppresses all colour.
+ */
+export const selectStepDurationDenominator = createSelector(selectExecution, (execution) =>
+  typeof execution?.duration === 'number' && execution.duration > 0 ? execution.duration : 0
 );
 
 export const selectConnectorFlyout = createSelector(

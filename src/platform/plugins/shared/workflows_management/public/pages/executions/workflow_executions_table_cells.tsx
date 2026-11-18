@@ -65,6 +65,10 @@ const workflowLinkCss = css`
   min-width: 0;
 `;
 
+const runNameCellCss = css`
+  width: 100%;
+`;
+
 const durationCellCss = css`
   font-variant-numeric: tabular-nums;
   width: 100%;
@@ -79,6 +83,22 @@ export const getWorkflowExecutionActionContextFromDto = (
   context: execution.context,
   isTestRun: execution.isTestRun,
 });
+
+export const WorkflowExecutionRunNameCell = ({
+  execution,
+}: {
+  execution: WorkflowExecutionListItemDto;
+}) => {
+  if (!execution.runName) {
+    return null;
+  }
+
+  return (
+    <div css={runNameCellCss}>
+      <EuiTextTruncate text={execution.runName} data-test-subj="executionsTableRunName" />
+    </div>
+  );
+};
 
 export const WorkflowExecutionWorkflowCell = ({
   execution,
@@ -142,7 +162,7 @@ export const WorkflowExecutionWorkflowCell = ({
       {execution.status === ExecutionStatus.WAITING_FOR_INPUT ? (
         <EuiFlexItem grow={false}>
           <EuiBadge color="warning" data-test-subj="workflowExecutionActionRequiredBadge">
-            {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
+            {i18n.translate('workflows.executionListItem.actionRequiredBadge', {
               defaultMessage: 'Action is required',
             })}
           </EuiBadge>
@@ -218,18 +238,15 @@ const WorkflowExecutionTagsContent = ({
             closePopover={close}
             anchorPosition="downLeft"
             panelPaddingSize="s"
-            aria-label={i18n.translate(
-              'workflowsManagement.executionsPage.table.tagsPopoverTitle',
-              {
-                defaultMessage: 'All tags',
-              }
-            )}
+            aria-label={i18n.translate('workflows.executionsPage.table.tagsPopoverTitle', {
+              defaultMessage: 'All tags',
+            })}
             button={
               <EuiBadge
                 color="hollow"
                 onClick={toggle}
                 onClickAriaLabel={i18n.translate(
-                  'workflowsManagement.executionsPage.table.showAllTagsAriaLabel',
+                  'workflows.executionsPage.table.showAllTagsAriaLabel',
                   {
                     defaultMessage: 'Show all {count} tags',
                     values: { count: workflowTags.length },
@@ -242,7 +259,7 @@ const WorkflowExecutionTagsContent = ({
             }
           >
             <EuiPopoverTitle>
-              {i18n.translate('workflowsManagement.executionsPage.table.tagsPopoverTitle', {
+              {i18n.translate('workflows.executionsPage.table.tagsPopoverTitle', {
                 defaultMessage: 'All tags',
               })}
             </EuiPopoverTitle>
@@ -322,7 +339,7 @@ export const WorkflowExecutionDurationCell = ({
       <EuiLoadingSpinner
         size="m"
         data-test-subj="workflowExecutionDurationInProgress"
-        aria-label={i18n.translate('workflowsManagement.executionsPage.duration.inProgress', {
+        aria-label={i18n.translate('workflows.executionsPage.duration.inProgress', {
           defaultMessage: 'In progress',
         })}
       />

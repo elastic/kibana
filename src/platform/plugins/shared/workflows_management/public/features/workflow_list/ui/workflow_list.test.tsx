@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -77,6 +77,14 @@ jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
   }),
 }));
 
+const mockConfirmDisable = jest.fn();
+jest.mock('../../linked_rules/model/use_disable_workflows_confirmation', () => ({
+  useDisableWorkflowsConfirmation: () => ({
+    confirmDisable: mockConfirmDisable,
+    confirmModal: null,
+  }),
+}));
+
 jest.mock('./use_export_with_references', () => ({
   useExportWithReferences: () => ({
     exportModalState: null,
@@ -97,15 +105,16 @@ jest.mock('./workflows_utility_bar', () => ({
   WorkflowsUtilityBar: () => <div data-test-subj="workflows-utility-bar">{'Utility Bar'}</div>,
 }));
 
-jest.mock('../../../components', () => ({
-  WorkflowsEmptyState: ({ onCreateWorkflow }: { onCreateWorkflow?: () => void }) => (
+jest.mock('../../../components', () => {
+  const EmptyState = ({ onStartManually }: { onStartManually?: () => void }) => (
     <div data-test-subj="workflows-empty-state">
-      <button type="button" onClick={onCreateWorkflow}>
+      <button type="button" onClick={onStartManually}>
         {'Create Workflow'}
       </button>
     </div>
-  ),
-}));
+  );
+  return { AgenticFirstEmptyStateLive: EmptyState };
+});
 
 jest.mock('../../../components/workflows_empty_state/workflows_empty_state', () => ({
   WorkflowsEmptyStateReadOnly: () => <div data-test-subj="workflows-empty-state-readonly" />,
@@ -170,12 +179,10 @@ const createMockWorkflowListDto = (
 
 describe('WorkflowList', () => {
   const setSearch = jest.fn();
-  const onCreateWorkflow = jest.fn();
 
   const defaultProps = {
     search: defaultSearch,
     setSearch,
-    onCreateWorkflow,
   };
 
   beforeEach(() => {
@@ -323,6 +330,13 @@ describe('WorkflowList', () => {
       expect(nameLink).toHaveTextContent('My Test Workflow');
     });
 
+    it('renders workflow names as a single link, not a link nested inside a button', () => {
+      renderComponent();
+      const nameLink = screen.getByTestId('workflowNameLink');
+      expect(nameLink.tagName).toBe('A');
+      expect(nameLink.closest('button')).toBeNull();
+    });
+
     it('keeps workflow name links clean while preserving list search params in route state', async () => {
       const user = userEvent.setup();
       const RouteStateProbe = () => {
@@ -442,6 +456,7 @@ describe('WorkflowList', () => {
     });
 
     it('passes workflow definition when toggling enabled from the list', async () => {
+      mockConfirmDisable.mockResolvedValue(true);
       const workflow = createMockWorkflow({
         id: 'wf-toggle',
         enabled: true,
@@ -458,15 +473,37 @@ describe('WorkflowList', () => {
 
       await userEvent.click(screen.getByTestId('workflowToggleSwitch-wf-toggle'));
 
-      expect(mockUpdateWorkflow.mutate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'wf-toggle',
-          workflow: { enabled: false },
-          workflowDefinition: workflow.definition,
-          skipRefetch: true,
-        }),
-        expect.any(Object)
+      expect(mockConfirmDisable).toHaveBeenCalledWith(['wf-toggle']);
+      await waitFor(() =>
+        expect(mockUpdateWorkflow.mutate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'wf-toggle',
+            workflow: { enabled: false },
+            workflowDefinition: workflow.definition,
+            skipRefetch: true,
+          }),
+          expect.any(Object)
+        )
       );
+    });
+
+    it('does not disable the workflow when the user cancels the confirmation', async () => {
+      mockConfirmDisable.mockResolvedValue(false);
+      const workflow = createMockWorkflow({ id: 'wf-toggle', enabled: true });
+
+      mockUseWorkflows.mockReturnValue({
+        data: createMockWorkflowListDto([workflow]),
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      await userEvent.click(screen.getByTestId('workflowToggleSwitch-wf-toggle'));
+
+      await waitFor(() => expect(mockConfirmDisable).toHaveBeenCalledWith(['wf-toggle']));
+      expect(mockUpdateWorkflow.mutate).not.toHaveBeenCalled();
     });
 
     it('renders multiple workflows', () => {

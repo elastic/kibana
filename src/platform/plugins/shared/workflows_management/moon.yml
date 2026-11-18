@@ -17,17 +17,22 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/plugins/shared/workflows_management
 dependsOn:
+  - '@kbn/security-plugin'
+  - '@kbn/ui-callout'
+  - '@kbn/entity-access-control-ui'
+  - '@kbn/entity-access-control'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
+  - '@kbn/crypto'
   - '@kbn/esql-language'
   - '@kbn/esql-types'
   - '@kbn/esql-utils'
+  - '@kbn/esql-server-utils'
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/core-chrome-browser'
-  - '@kbn/core-chrome-browser-context'
   - '@kbn/core-chrome-browser-hooks'
   - '@kbn/shared-ux-page-solution-nav'
   - '@kbn/shared-ux-prompt-not-found'
@@ -40,6 +45,7 @@ dependsOn:
   - '@kbn/human-readable-id'
   - '@kbn/dag-layout'
   - '@kbn/workflows-ui'
+  - '@kbn/inference-connectors'
   - '@kbn/workflows-yaml'
   - '@kbn/zod'
   - '@kbn/code-editor'
@@ -60,6 +66,7 @@ dependsOn:
   - '@kbn/unified-data-table'
   - '@kbn/cell-actions'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/storybook'
   - '@kbn/react-field'
   - '@kbn/storage-adapter'
@@ -74,6 +81,7 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/es-query'
+  - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/data-plugin'
   - '@kbn/rrule'
   - '@kbn/resizable-layout'
@@ -84,6 +92,7 @@ dependsOn:
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/connector-schemas'
   - '@kbn/react-query'
+  - '@kbn/react-hooks'
   - '@kbn/core-http-browser'
   - '@kbn/core-http-server'
   - '@kbn/test-jest-helpers'
@@ -103,9 +112,6 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/share-plugin'
   - '@kbn/core-security-server'
-  - '@kbn/core-user-profile-common'
-  - '@kbn/core-user-profile-server'
-  - '@kbn/core-user-profile-server-mocks'
   - '@kbn/logging'
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/std'
@@ -116,6 +122,8 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/std'
   - '@kbn/core-saved-objects-common'
+  - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/esql-types'
   - '@kbn/esql-language'
   - '@kbn/esql-utils'
@@ -133,12 +141,19 @@ dependsOn:
   - '@kbn/mock-idp-utils'
   - '@kbn/discover-session-constants'
   - '@kbn/ci-stats-reporter'
+  - '@kbn/es'
+  - '@kbn/test-es-server'
+  - '@kbn/core-security-common'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -150,6 +165,4 @@ fileGroups:
     - .storybook/**/*.tsx
     - server/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

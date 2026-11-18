@@ -16,7 +16,6 @@ import { listAttachmentsStepDefinition } from './steps/attachment_list';
 
 export interface AttachmentStepDeps {
   getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
-  isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>;
 }
 
 type AttachmentStepFactory = (deps: AttachmentStepDeps) => ServerStepDefinition;

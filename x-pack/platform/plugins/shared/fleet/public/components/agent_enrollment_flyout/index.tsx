@@ -20,6 +20,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -61,6 +62,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   isIntegrationFlow,
   installedPackagePolicy,
   hideIncomingDataStep,
+  hideViewAgentsButton,
   onAgentPolicyCreated,
   defaultAgentPolicyName,
   forceCreatePolicy,
@@ -190,18 +192,31 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
                   defaultMessage="Enroll in Fleet"
                 />
               </EuiTab>
-              <EuiTab
-                data-test-subj="standaloneTab"
-                isSelected={mode === 'standalone'}
-                onClick={() => setMode('standalone')}
-                // Standalone need read access to agent policies and cannot be used for Fleet Server policies
-                disabled={!authz.fleet.readAgentPolicies || isFleetServerPolicySelected}
+              <EuiToolTip
+                content={
+                  !authz.integrations.readIntegrationPolicies ? (
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollment.standaloneTabMissingPermissionsTooltip"
+                      defaultMessage="Read access to Agent policies and Integrations is required to see the standalone instructions."
+                    />
+                  ) : undefined
+                }
               >
-                <FormattedMessage
-                  id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"
-                  defaultMessage="Run standalone"
-                />
-              </EuiTab>
+                <EuiTab
+                  data-test-subj="standaloneTab"
+                  isSelected={mode === 'standalone'}
+                  onClick={() => setMode('standalone')}
+                  // Standalone needs read access to agent policies and integrations and cannot be used for Fleet Server policies
+                  disabled={
+                    !authz.integrations.readIntegrationPolicies || isFleetServerPolicySelected
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"
+                    defaultMessage="Run standalone"
+                  />
+                </EuiTab>
+              </EuiToolTip>
             </EuiTabs>
           </>
         ) : null}
@@ -239,7 +254,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             isIntegrationFlow={isIntegrationFlow}
             selectedApiKeyId={selectedApiKeyId}
             setSelectedAPIKeyId={setSelectedAPIKeyId}
-            onClickViewAgents={onClose}
+            onClickViewAgents={hideViewAgentsButton ? undefined : onClose}
             installedPackagePolicy={installedPackagePolicy}
             hideIncomingDataStep={hideIncomingDataStep}
             onAgentPolicyCreated={onAgentPolicyCreated}

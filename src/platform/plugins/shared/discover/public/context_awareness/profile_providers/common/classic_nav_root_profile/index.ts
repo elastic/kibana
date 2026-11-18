@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createClassicNavRootProfileProvider } from './profile';
+export { CLASSIC_NAV_ROOT_PROFILE_ID, createClassicNavRootProfileProvider } from './profile';

@@ -17,13 +17,13 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
-import { createEntitySourcesService } from '../../../entity_sources/entity_sources_service';
+import { syncWatchlistInBackground } from '../../../entity_sources/entity_sources_service';
 import {
   WatchlistEntitySourceClient,
   getStreamPatternFor,
   INTEGRATION_TYPES,
   integrationsSourceIndex,
-  oktaLastFullSyncMarkersIndex,
+  getLastFullSyncMarkersIndex,
 } from '../../../entity_sources/infra';
 import { getWatchlistSavedObjectClient } from '../../../shared/utils';
 import type { IntegrationType } from '../../../entity_sources/infra';
@@ -87,27 +87,16 @@ export const createEntitySourceRoute = (
             await watchlistClient.addEntitySourceReference(request.params.watchlist_id, body.id);
 
             // Fire-and-forget sync after new source is linked
-            void (async () => {
-              try {
-                const entitySourcesService = createEntitySourcesService({
-                  esClient: core.elasticsearch.client.asCurrentUser,
-                  soClient,
-                  logger,
-                  namespace,
-                  getStartServices,
-                  hasEncryptionKey,
-                });
-                await entitySourcesService.syncWatchlist(request.params.watchlist_id);
-                logger.info(
-                  `[WatchlistEntitySourceCreate] Background sync completed for watchlist ${request.params.watchlist_id}`
-                );
-              } catch (syncError) {
-                const errorMsg = syncError instanceof Error ? syncError.message : String(syncError);
-                logger.warn(
-                  `[WatchlistEntitySourceCreate] Background sync failed for watchlist ${request.params.watchlist_id}: ${errorMsg}`
-                );
-              }
-            })();
+            void syncWatchlistInBackground({
+              watchlistId: request.params.watchlist_id,
+              logContext: 'WatchlistEntitySourceCreate',
+              esClient: core.elasticsearch.client.asCurrentUser,
+              soClient,
+              logger,
+              namespace,
+              getStartServices,
+              hasEncryptionKey,
+            });
 
             return response.ok({ body });
           } catch (e) {
@@ -144,13 +133,6 @@ const createSourceForType = async (
   }
 
   return client.create(source, request);
-};
-
-const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType): string => {
-  if (integration === 'entityanalytics_ad') {
-    return getStreamPatternFor(integration, namespace);
-  }
-  return oktaLastFullSyncMarkersIndex(namespace);
 };
 
 const buildIntegrationSourceAttributes = (

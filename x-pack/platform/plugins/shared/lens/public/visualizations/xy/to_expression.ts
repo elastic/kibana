@@ -15,7 +15,7 @@ import {
   isManualPointAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { LegendSize } from '@kbn/chart-expressions-common';
+import { LegendSize, LENS_DEFAULT_LEGEND_SIZE } from '@kbn/chart-expressions-common';
 import type {
   AvailableReferenceLineIcon,
   DataDecorationConfigFn,
@@ -34,7 +34,6 @@ import type {
 } from '@kbn/expression-xy-plugin/common';
 
 import {
-  AreaFillOptions,
   LayerTypes,
   FittingFunctions,
   PointVisibilityOptions,
@@ -52,6 +51,7 @@ import type {
   ValidXYDataLayerConfig,
   XYLayerConfig,
 } from './types';
+import { defaultAreaFill } from './types';
 import { getColumnToLabelMap } from './state_helpers';
 import { getDefaultPalette } from './default_palette';
 import { defaultReferenceLineColor } from './color_assignment';
@@ -211,9 +211,18 @@ export const buildXYExpression = (
     }));
 
   // sorting doesn't change anything so we don't sort reference layers (TODO: should we make it work?)
-  const validReferenceLayers = getReferenceLayers(state.layers).filter((layer) =>
-    Boolean(layer.accessors.length)
-  );
+  const validReferenceLayers = getReferenceLayers(state.layers)
+    .map((layer) => {
+      const datasource = datasourceLayers[layer.layerId];
+      if (!datasource?.isTextBasedLanguage()) return layer;
+      return {
+        ...layer,
+        accessors: layer.accessors.filter((accessor) =>
+          datasource.getOperationForColumnId(accessor)
+        ),
+      };
+    })
+    .filter((layer) => Boolean(layer.accessors.length));
 
   const uniqueLabels = getUniqueLabels(state.layers);
   const validAnnotationsLayers = getAnnotationsLayers(state.layers)
@@ -295,9 +304,7 @@ export const buildXYExpression = (
       ? undefined
       : state.legend.position === Position.Top || state.legend.position === Position.Bottom
       ? LegendSize.AUTO
-      : state.legend.legendSize
-      ? state.legend.legendSize
-      : undefined,
+      : state.legend.legendSize ?? LENS_DEFAULT_LEGEND_SIZE,
     layout: state.legend.layout,
     horizontalAlignment:
       state.legend.horizontalAlignment && state.legend.isInside
@@ -347,7 +354,7 @@ export const buildXYExpression = (
     minBarHeight: state.minBarHeight ?? 1,
     fillOpacity: state.fillOpacity ?? 0.3,
     pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
-    areaFill: state.areaFill ?? AreaFillOptions.SOLID,
+    areaFill: state.areaFill ?? defaultAreaFill,
     valueLabels: state.valueLabels ?? 'hide',
     hideEndzones: state.hideEndzones ?? false,
     addTimeMarker:

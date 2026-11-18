@@ -22,10 +22,10 @@ import { css } from '@emotion/react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux-v7';
-import { CodeEditor, monaco } from '@kbn/code-editor';
+import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { InputValidationCallout } from './input_validation_callout';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
@@ -289,7 +289,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         try {
           // First, configure the JSON language service with schema validation
           const currentModel = editor.getModel();
-          monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+          jsonDefaults.setDiagnosticsOptions({
             validate: true,
             allowComments: false,
             enableSchemaRequest: false,
@@ -402,6 +402,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                 >
                   <CodeEditor
                     languageId="json"
+                    chromeOverrides={workflowsEditorChromeOverrides}
                     value={value}
                     width="100%"
                     height="100%"
@@ -424,11 +425,10 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                       renderWhitespace: 'all',
                       wordWrapColumn: 80,
                       wrappingIndent: 'indent',
-                      theme: WORKFLOWS_MONACO_EDITOR_THEME,
                       formatOnType: true,
                       quickSuggestions: false,
                       suggestOnTriggerCharacters: false,
-                      wordBasedSuggestions: false,
+                      wordBasedSuggestions: 'off',
                       parameterHints: {
                         enabled: false,
                       },

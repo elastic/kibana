@@ -19,8 +19,10 @@ import { createWorkflowContextRegistry } from '../../../../common/lib/create_wor
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import {
   selectConnectorsLoadState,
+  selectWorkflow,
   selectWorkflows,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { getCalledWorkflowOutputs } from '../../../entities/workflows/store/workflow_detail/utils/get_called_workflow_outputs';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowEsqlCallbacks } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks';
 
@@ -42,10 +44,14 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
   const connectorsData = useAvailableConnectors();
   const connectorsLoadState = useSelector(selectConnectorsLoadState);
   const workflows = useSelector(selectWorkflows);
+  const isManaged = useSelector(selectWorkflow)?.managed === true;
   const { application, http, data, licensing, workflowsExtensions } = useKibana().services;
   const registry = useMemo(
-    () => createWorkflowContextRegistry(workflowsExtensions),
-    [workflowsExtensions]
+    () =>
+      createWorkflowContextRegistry(workflowsExtensions, (workflowId) =>
+        getCalledWorkflowOutputs(workflows, workflowId)
+      ),
+    [workflows, workflowsExtensions]
   );
   const esqlCallbacks = useWorkflowEsqlCallbacks({
     http,
@@ -65,11 +71,24 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
         deepLinkId: 'triggersActionsConnectors',
         absolute: true,
       }),
+      modelSettingsUrl: application.getUrlForApp('management', {
+        path: '/modelManagement/model_settings',
+        absolute: true,
+      }),
       workflows,
+      isManaged,
       getPropertyHandler,
       esqlCallbacks: esqlCallbacksRef.current,
     }),
-    [application, connectorsData, connectorsLoadState, getPropertyHandler, registry, workflows]
+    [
+      application,
+      connectorsData,
+      connectorsLoadState,
+      getPropertyHandler,
+      registry,
+      workflows,
+      isManaged,
+    ]
   );
 }
 
@@ -79,7 +98,7 @@ export const getWorkflowYamlValidationContextError = (
 ): Error | null =>
   context.connectorTypes.status === 'failed'
     ? new Error(
-        i18n.translate('workflowsManagement.validation.connectorMetadataUnavailable', {
+        i18n.translate('workflows.validation.connectorMetadataUnavailable', {
           defaultMessage: 'Validation unavailable: connectors failed to load',
         }),
         // The underlying reason is usually generic transport text ("Failed to fetch"), so it

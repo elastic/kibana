@@ -22,9 +22,11 @@ import {
   syntheticsMonitorSavedObjectType,
 } from '../../../../../common/types/saved_objects';
 import {
+  DEFAULT_HTTP_ADVANCED_FIELDS,
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
 } from '../../../../../common/constants/monitor_defaults';
+import { ConfigKey } from '../../../../../common/runtime_types';
 import {
   apiTest,
   LOCAL_PUBLIC_LOCATION,
@@ -434,6 +436,8 @@ apiTest.describe(
             project_id: project,
             username: '',
             password: '',
+            [ConfigKey.KERBEROS]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.KERBEROS],
+            [ConfigKey.NTLM]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.NTLM],
             proxy_headers: {},
             'response.include_body': 'always',
             'response.include_headers': false,

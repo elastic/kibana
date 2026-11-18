@@ -42,6 +42,14 @@ export {
 } from './get_proposal_step';
 
 export {
+  SettleIncompleteProposalStepId,
+  settleIncompleteProposalStepCommonDefinition,
+  settleIncompleteProposalStepInputSchema,
+  settleIncompleteProposalStepOutputSchema,
+  settleIncompleteProposalStatusSchema,
+} from './settle_incomplete_proposal_step';
+
+export {
   UpdateProposalStepId,
   updateProposalStepCommonDefinition,
   updateProposalStepInputSchema,

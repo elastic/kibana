@@ -86,13 +86,12 @@ const buildItem = (
   dispatched_at: '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
-  total_rule_count: 1,
-  outcome: 'dispatched',
-  episode_count: 3,
-  episodes: [],
+  rule_count: 1,
+  outcome: 'success',
+  alert_count: 3,
+  alerts: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
-  error: null,
   ...overrides,
 });
 
@@ -207,9 +206,9 @@ describe('PoliciesExecutionHistoryTable', () => {
     renderTable({
       items: [
         buildItem({
-          outcome: 'dispatch_failed',
+          outcome: 'failure',
           failure_reason: 'workflow_not_found',
-          error: { message: 'Workflow not found', stack_trace: null },
+          error: { message: 'Workflow not found' },
         }),
       ],
     });

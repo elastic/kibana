@@ -12,11 +12,10 @@ import { expect } from '@kbn/scout/ui';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
-import { LONG_EXECUTION_TIMEOUT } from '../../fixtures/constants';
+import { EXECUTION_TIMEOUT, LONG_EXECUTION_TIMEOUT } from '../../fixtures/constants';
 import { getLongRunningCancellationWorkflowYaml } from '../../fixtures/workflows';
 
-// Failing: See https://github.com/elastic/kibana/issues/281015
-test.describe.skip('Workflow execution - Cancellation', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Workflow execution - Cancellation', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
@@ -27,7 +26,6 @@ test.describe.skip('Workflow execution - Cancellation', { tag: [...tags.stateful
 
   test('should cancel a single running execution from the execution details panel', async ({
     pageObjects,
-    page,
   }) => {
     const workflowName = `Scout cancel single ${Date.now()}`;
 
@@ -39,9 +37,12 @@ test.describe.skip('Workflow execution - Cancellation', { tag: [...tags.stateful
 
     await pageObjects.workflowEditor.clickRunButton();
 
-    await pageObjects.workflowExecution.waitForExecutionStatus(ExecutionStatus.RUNNING, 5000);
+    await pageObjects.workflowExecution.waitForExecutionStatus(
+      ExecutionStatus.RUNNING,
+      EXECUTION_TIMEOUT
+    );
 
-    await page.testSubj.click('cancelExecutionButton');
+    await pageObjects.workflowExecution.cancelExecution();
 
     await pageObjects.workflowExecution.waitForExecutionStatus(ExecutionStatus.CANCELLED, 5000);
   });
@@ -80,9 +81,9 @@ test.describe.skip('Workflow execution - Cancellation', { tag: [...tags.stateful
     await modal.waitFor({ state: 'visible' });
     await modal.getByRole('button', { name: 'Cancel all' }).click();
 
-    await expect(
-      page.getByText('Cancellation requested for all active executions of this workflow')
-    ).toBeVisible({ timeout: 15_000 });
+    await pageObjects.toasts.waitForToastWithText(
+      'Cancellation requested for all active executions of this workflow'
+    );
 
     await expect
       .poll(

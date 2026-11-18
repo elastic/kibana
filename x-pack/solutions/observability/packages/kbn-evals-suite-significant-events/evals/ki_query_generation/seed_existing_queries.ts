@@ -11,11 +11,11 @@ import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../../src/data_generators/snap
 
 export const seedExistingQueries = async ({
   esClient,
-  streamName,
+  sourceId,
   existingQueries,
 }: {
   esClient: Client;
-  streamName: string;
+  sourceId: string;
   existingQueries: ExistingQuerySummary[];
 }): Promise<void> => {
   await esClient
@@ -23,7 +23,7 @@ export const seedExistingQueries = async ({
       index: KNOWLEDGE_INDICATORS_DATA_STREAM,
       query: {
         bool: {
-          filter: [{ term: { type: 'query' } }, { term: { 'stream.name': streamName } }],
+          filter: [{ term: { type: 'query' } }, { term: { 'source.id': sourceId } }],
         },
       },
       refresh: true,
@@ -49,7 +49,8 @@ export const seedExistingQueries = async ({
         type: 'query',
         title: query.title,
         description: query.description,
-        'stream.name': streamName,
+        'source.id': sourceId,
+        'kibana.space_ids': ['default'],
         query: {
           esql: query.esql,
           query_type: query.type,

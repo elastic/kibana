@@ -34,7 +34,6 @@ import type {
 import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
-import type { WorkplaceAIApp, DeepLinkId as WorkplaceAILink } from '@kbn/deeplinks-workplace-ai';
 import type { VectordbApp, DeepLinkId as VectordbLink } from '@kbn/deeplinks-vectordb';
 import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builder';
 import type { DeepLinkId as ContextEngineLink } from '@kbn/deeplinks-context-engine';
@@ -61,7 +60,6 @@ export type AppId =
   | SecurityApp
   | FleetApp
   | SharedApp
-  | WorkplaceAIApp
   | VectordbApp
   | WorkflowsApp;
 
@@ -76,7 +74,6 @@ export type AppDeepLinkId =
   | SecurityLink
   | FleetLink
   | SharedLink
-  | WorkplaceAILink
   | VectordbLink
   | AgentBuilderLink
   | ContextEngineLink
@@ -90,7 +87,8 @@ export type CloudLinkId =
   | 'billingAndSub'
   | 'deployment'
   | 'deployments'
-  | 'projects';
+  | 'projects'
+  | 'searchPower';
 
 export interface CloudURLs {
   baseUrl?: string;
@@ -100,6 +98,7 @@ export interface CloudURLs {
   projectsUrl?: string;
   performanceUrl?: string;
   usersAndRolesUrl?: string;
+  searchPowerUrl?: string;
 }
 
 export interface CloudLink {
@@ -341,6 +340,12 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
   /** Optional icon for the solution navigation to render in the select dropdown. */
   icon?: IconType;
+  /**
+   * Id of the plugin that owns this navigation tree. When provided, Core (in development builds)
+   * attributes the tree's `link` references to this plugin so implicit navigation dependencies can
+   * be cross-checked against the plugin's manifest (see https://github.com/elastic/kibana/issues/66682).
+   */
+  ownerPluginId?: string;
 }
 
 export type SolutionNavigationDefinitions = {

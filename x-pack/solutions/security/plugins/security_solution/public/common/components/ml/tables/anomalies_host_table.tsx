@@ -65,8 +65,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
 
   const { jobNameById, loading: loadingJobs } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
-  const euidApi = useEntityStoreEuidApi();
-  const euid = euidApi?.euid;
+  const euidApi = useEntityStoreEuidApi() ?? undefined;
 
   const getAnomaliesHostsTableFilterQuerySelector = useMemo(
     () => hostsSelectors.hostsAnomaliesJobIdFilterSelector(),
@@ -114,27 +113,27 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
   const anomaliesInfluencersFilterQuery = useMemo(
     () =>
       buildAnomaliesTableInfluencersFilterQuery({
-        euid,
+        euidApi,
         entityType: 'host',
         isScopedToEntity,
         identityFields,
         fallbackDisplayName: hostName,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [euid, isScopedToEntity, hostName, identitySignature]
+    [euidApi, isScopedToEntity, hostName, identitySignature]
   );
 
   const [loadingTable, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
     skip: querySkip,
-    criteriaFields: getCriteriaFromHostType(type, hostName, identityFields, euid),
+    criteriaFields: getCriteriaFromHostType(type, hostName, identityFields, euidApi),
     filterQuery: anomaliesInfluencersFilterQuery,
     jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
     aggregationInterval: selectedInterval,
   });
 
-  const hosts = convertAnomaliesToHosts(tableData, jobNameById, hostName, identityFields, euid);
+  const hosts = convertAnomaliesToHosts(tableData, jobNameById, hostName, identityFields, euidApi);
 
   const columns = getAnomaliesHostTableColumnsCurated(type, startDate, endDate);
   const pagination = {

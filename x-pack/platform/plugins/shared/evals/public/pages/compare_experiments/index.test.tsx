@@ -6,18 +6,22 @@
  */
 
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import type {
+  ComparisonResult,
   EvaluationExperimentDatasetExample,
   GetEvaluationExperimentDatasetExamplesResponse,
 } from '@kbn/evals-common';
 import { useTraceSpans } from '@kbn/llm-trace-waterfall';
 import {
+  useCompareExperiments,
   useEvalsTraceFetcher,
+  useEvaluationExperiment,
   useExperimentDatasetExamples,
   useExperimentExampleDetails,
 } from '../../hooks/use_evals_api';
-import { ExampleDrilldownFlyout } from '.';
+import { CompareExperimentsPage, ExampleDrilldownFlyout } from '.';
 
 jest.mock('../../hooks/use_evals_api');
 jest.mock('@kbn/llm-trace-waterfall', () => ({
@@ -25,10 +29,88 @@ jest.mock('@kbn/llm-trace-waterfall', () => ({
   useTraceSpans: jest.fn(),
 }));
 
+const mockUseCompareExperiments = jest.mocked(useCompareExperiments);
+const mockUseEvaluationExperiment = jest.mocked(useEvaluationExperiment);
 const mockUseExperimentDatasetExamples = jest.mocked(useExperimentDatasetExamples);
 const mockUseExperimentExampleDetails = jest.mocked(useExperimentExampleDetails);
 const mockUseEvalsTraceFetcher = jest.mocked(useEvalsTraceFetcher);
 const mockUseTraceSpans = jest.mocked(useTraceSpans);
+
+const buildResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
+  datasetId: 'dataset-1',
+  datasetName: 'Dataset 1',
+  evaluatorName: 'quality',
+  sampleSize: 12,
+  meanBaseline: 0.5,
+  meanTarget: 0.7,
+  pValue: 0.2,
+  direction: 'maximize',
+  metricType: 'continuous_bounded',
+  hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 10 },
+  ...overrides,
+});
+
+describe('CompareExperimentsPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseEvaluationExperiment.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as ReturnType<typeof useEvaluationExperiment>);
+    mockUseCompareExperiments.mockReturnValue({
+      data: {
+        results: [
+          buildResult(),
+          buildResult({
+            evaluatorName: 'pass',
+            meanBaseline: 0.5,
+            meanTarget: 0.75,
+            metricType: 'binary',
+            hypothesisTest: {
+              id: 'mcnemar',
+              method: 'mid-p',
+              statistic: 1,
+              discordantPairs: { targetOnly: 4, baselineOnly: 1 },
+            },
+          }),
+        ],
+        pairing: {
+          totalPairs: 24,
+          skippedMissingPairs: 0,
+          skippedNullScores: 0,
+          truncatedBaseline: false,
+          truncatedTarget: false,
+        },
+      },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useCompareExperiments>);
+  });
+
+  it('shows the test behind each row and the discordant pairs of binary rows', () => {
+    render(
+      <MemoryRouter initialEntries={['/compare?baseline=baseline&target=target']}>
+        <CompareExperimentsPage />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole('columnheader', { name: 'Test' })).toBeInTheDocument();
+
+    const qualityRow = screen.getByText('quality').closest('tr');
+    const passRow = screen.getByText('pass').closest('tr');
+    if (!qualityRow || !passRow) {
+      throw new Error('Expected one row per evaluator');
+    }
+    expect(within(qualityRow).getByText('Wilcoxon')).toBeInTheDocument();
+    expect(within(passRow).getByText('McNemar')).toBeInTheDocument();
+
+    fireEvent.mouseOver(within(passRow).getByText('+0.250'));
+    expect(
+      screen.getByText(/4 examples score 1 only in target, 1 example score 1 only in baseline/)
+    ).toBeInTheDocument();
+  });
+});
 
 const buildScore = (
   score: number,

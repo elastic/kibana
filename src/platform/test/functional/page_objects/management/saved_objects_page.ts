@@ -387,6 +387,10 @@ export class SavedObjectsPageObject extends FtrService {
       });
   }
 
+  private async getTableRowTitles() {
+    return (await this.getTableSummary()).map(({ title }) => title).join('\n');
+  }
+
   async clickTableSelectAll() {
     await this.testSubjects.click('checkboxSelectAll');
   }
@@ -398,8 +402,13 @@ export class SavedObjectsPageObject extends FtrService {
   async clickDelete({ confirmDelete = true }: { confirmDelete?: boolean } = {}) {
     await this.testSubjects.click('savedObjectsManagementDelete');
     if (confirmDelete) {
+      const rowsBeforeDelete = await this.getTableRowTitles();
       await this.testSubjects.click('confirmModalConfirmButton', undefined, undefined, 5);
       await this.testSubjects.waitForDeleted('confirmModalConfirmButton');
+      // the table only re-fetches once the delete resolves, so until then it still reports itself loaded with its pre-delete rows
+      await this.retry.waitFor('the table to drop the deleted objects', async () => {
+        return (await this.getTableRowTitles()) !== rowsBeforeDelete;
+      });
       await this.waitTableIsLoaded();
     }
   }

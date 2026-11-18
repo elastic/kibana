@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 const NOTES = i18n.translate('xpack.securitySolution.timeline.notes.notesButtonLabel', {

@@ -14,20 +14,6 @@ import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT } from '../constants';
 import { TestProviders } from '../../../../../common/mock';
 
-const mockOpenRightPanel = jest.fn();
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openRightPanel: mockOpenRightPanel,
-    openFlyout: jest.fn(),
-    closeFlyout: jest.fn(),
-  }),
-}));
-
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => false,
-}));
-
 jest.mock('../../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({
     openEntityFlyout: jest.fn(),
@@ -231,7 +217,7 @@ describe('createGroupStatsRenderer', () => {
 
       expect(stats).toHaveLength(1);
       expect(stats[0].title).toBe('Entities:');
-      expect(stats[0].badge).toEqual({ value: 42, width: 50 });
+      expect(stats[0].badge).toEqual({ value: 42 });
     });
 
     it('returns empty array when doc_count is 0', () => {

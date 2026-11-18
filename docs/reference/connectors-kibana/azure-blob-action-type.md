@@ -11,6 +11,8 @@ applies_to:
 
 The Azure Blob Storage connector integrates with Azure Blob Storage using the [Blob Service REST API](https://learn.microsoft.com/en-us/rest/api/storageservices/blob-service-rest-api). It supports listing containers, listing blobs, retrieving blob content, and getting blob properties. Use it as a data source for federated search.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-azure-blob-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

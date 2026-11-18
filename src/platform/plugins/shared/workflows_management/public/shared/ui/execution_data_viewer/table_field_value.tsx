@@ -43,26 +43,26 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
     switch (reason) {
       case IgnoredReason.IGNORE_ABOVE:
         return multiValue
-          ? i18n.translate('unifiedDocViewer.docView.table.ignored.multiAboveTooltip', {
+          ? i18n.translate('workflows.docView.table.ignored.multiAboveTooltip', {
               defaultMessage: `One or more values in this field are too long and can't be searched or filtered.`,
             })
-          : i18n.translate('unifiedDocViewer.docView.table.ignored.singleAboveTooltip', {
+          : i18n.translate('workflows.docView.table.ignored.singleAboveTooltip', {
               defaultMessage: `The value in this field is too long and can't be searched or filtered.`,
             });
       case IgnoredReason.MALFORMED:
         return multiValue
-          ? i18n.translate('unifiedDocViewer.docView.table.ignored.multiMalformedTooltip', {
+          ? i18n.translate('workflows.docView.table.ignored.multiMalformedTooltip', {
               defaultMessage: `This field has one or more malformed values that can't be searched or filtered.`,
             })
-          : i18n.translate('unifiedDocViewer.docView.table.ignored.singleMalformedTooltip', {
+          : i18n.translate('workflows.docView.table.ignored.singleMalformedTooltip', {
               defaultMessage: `The value in this field is malformed and can't be searched or filtered.`,
             });
       case IgnoredReason.UNKNOWN:
         return multiValue
-          ? i18n.translate('unifiedDocViewer.docView.table.ignored.multiUnknownTooltip', {
+          ? i18n.translate('workflows.docView.table.ignored.multiUnknownTooltip', {
               defaultMessage: `One or more values in this field were ignored by Elasticsearch and can't be searched or filtered.`,
             })
-          : i18n.translate('unifiedDocViewer.docView.table.ignored.singleUnknownTooltip', {
+          : i18n.translate('workflows.docView.table.ignored.singleUnknownTooltip', {
               defaultMessage: `The value in this field was ignored by Elasticsearch and can't be searched or filtered.`,
             });
     }
@@ -84,10 +84,10 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
         <EuiFlexItem>
           <EuiTextColor color="warning">
             {multiValue
-              ? i18n.translate('unifiedDocViewer.docViews.table.ignored.multiValueLabel', {
+              ? i18n.translate('workflows.docViews.table.ignored.multiValueLabel', {
                   defaultMessage: 'Contains ignored values',
                 })
-              : i18n.translate('unifiedDocViewer.docViews.table.ignored.singleValueLabel', {
+              : i18n.translate('workflows.docViews.table.ignored.singleValueLabel', {
                   defaultMessage: 'Ignored value',
                 })}
           </EuiTextColor>
@@ -148,10 +148,10 @@ export const TableFieldValue = ({
   );
 
   const toggleButtonLabel = isCollapsed
-    ? i18n.translate('unifiedDocViewer.docViews.table.viewMoreButton', {
+    ? i18n.translate('workflows.docViews.table.viewMoreButton', {
         defaultMessage: 'View more',
       })
-    : i18n.translate('unifiedDocViewer.docViews.table.viewLessButton', {
+    : i18n.translate('workflows.docViews.table.viewLessButton', {
         defaultMessage: 'View less',
       });
 

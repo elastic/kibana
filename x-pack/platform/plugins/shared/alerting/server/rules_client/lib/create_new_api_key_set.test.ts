@@ -44,6 +44,7 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   getUserName: jest.fn(),
+  getProfileUid: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
@@ -68,6 +69,7 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
 };
 
 const username = 'test';
+const profileUid = 'u_profile_test';
 const attributes: RawRule = {
   enabled: true,
   name: 'rule-name',
@@ -111,18 +113,42 @@ describe('createNewAPIKeySet', () => {
       id: attributes.alertTypeId,
       ruleName: attributes.name,
       username,
+      profileUid,
       shouldUpdateApiKey: true,
     });
     expect(apiKey).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyCreatedByUser: false,
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
     });
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledTimes(1);
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith(
       'Alerting: 123/rule-name',
       undefined
     );
+  });
+
+  test('accepts a UIAM-only result', async () => {
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      uiamResult: { id: '456', name: '456', api_key: 'def' },
+    });
+    const apiKey = await createNewAPIKeySet(rulesClientParams, {
+      id: attributes.alertTypeId,
+      ruleName: attributes.name,
+      username,
+      profileUid,
+      shouldUpdateApiKey: true,
+    });
+    expect(apiKey).toEqual({
+      apiKey: null,
+      apiKeyCreatedByUser: false,
+      apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
+      uiamApiKey: 'NDU2OmRlZg==',
+      uiamApiKeyExternal: false,
+    });
   });
 
   test('forwards refresh to createAPIKey when provided', async () => {
@@ -134,6 +160,7 @@ describe('createNewAPIKeySet', () => {
       id: attributes.alertTypeId,
       ruleName: attributes.name,
       username,
+      profileUid,
       shouldUpdateApiKey: true,
       refresh: false,
     });
@@ -150,12 +177,14 @@ describe('createNewAPIKeySet', () => {
       id: attributes.alertTypeId,
       ruleName: attributes.name,
       username,
+      profileUid,
       shouldUpdateApiKey: true,
     });
     expect(apiKey).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyCreatedByUser: true,
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
     });
     expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledTimes(1);
     expect(rulesClientParams.isAuthenticationTypeAPIKey).toHaveBeenCalledTimes(1);
@@ -169,6 +198,7 @@ describe('createNewAPIKeySet', () => {
           id: attributes.alertTypeId,
           ruleName: attributes.name,
           username,
+          profileUid,
           shouldUpdateApiKey: true,
         })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -184,6 +214,7 @@ describe('createNewAPIKeySet', () => {
           id: attributes.alertTypeId,
           ruleName: attributes.name,
           username,
+          profileUid,
           shouldUpdateApiKey: true,
           errorMessage: 'Error updating rule: could not create API key',
         })
@@ -197,12 +228,14 @@ describe('createNewAPIKeySet', () => {
       id: attributes.alertTypeId,
       ruleName: attributes.name,
       username,
+      profileUid,
       shouldUpdateApiKey: false,
     });
     expect(apiKey).toEqual({
       apiKey: null,
       apiKeyCreatedByUser: null,
       apiKeyOwner: null,
+      apiKeyOwnerProfileUid: null,
     });
   });
 });

@@ -15,7 +15,7 @@ import { Type } from './type';
 
 export class AnyType extends Type<any> {
   constructor(options?: TypeOptions<any>) {
-    super(internals.any().meta({ [META_FIELD_X_OAS_ANY]: true }), options);
+    super(() => internals.any().meta({ [META_FIELD_X_OAS_ANY]: true }), options);
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {

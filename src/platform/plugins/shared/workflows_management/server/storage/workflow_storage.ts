@@ -10,7 +10,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import type { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowAccessSubject, WorkflowYaml } from '@kbn/workflows';
 import { workflowSystemIndex } from './indices';
 
 export const workflowIndexName = workflowSystemIndex('workflows');
@@ -20,6 +20,22 @@ const storageSettings = {
   schema: {
     properties: {
       // ONLY map fields we actively search/filter/aggregate on
+      owner_id: types.keyword({}),
+      access_control: types.object({
+        dynamic: false,
+        properties: {
+          access_mode: types.keyword({}),
+          entries: types.nested({
+            dynamic: false,
+            properties: {
+              type: types.keyword({}),
+              id: types.keyword({}),
+              role: types.keyword({}),
+              added_at: types.date({}),
+            },
+          }),
+        },
+      }),
       name: types.text({
         fields: {
           keyword: { type: 'keyword', ignore_above: 256 },
@@ -35,6 +51,9 @@ const storageSettings = {
       createdBy: types.keyword({}), // We filter by this
       spaceId: types.keyword({}), // We filter by this
       triggerTypes: types.keyword({}), // We filter by trigger subscription (e.g. event-driven)
+      calledWorkflowIds: types.keyword({}), // We look up the workflows that run a workflow
+      // An empty `calledWorkflowIds` isn't indexed, so this tells indexed documents from older ones
+      calledWorkflowIdsIndexed: types.boolean({}),
       managed: types.boolean({}),
       managedBy: types.keyword({}),
       billable: types.boolean({ index: false }),
@@ -43,6 +62,8 @@ const storageSettings = {
       definitionHash: types.keyword({ index: false }),
       managedTemplateValues: types.object({ enabled: false }),
       originManagedWorkflowId: types.keyword({}),
+      // Document lifetime. History reads filter on this; workflowId stays the stable name.
+      workflowUid: types.keyword({}),
       lifecycle: types.keyword({}),
       managedVisibilityContexts: types.keyword({}),
       updated_at: types.date({}), // We sort by this
@@ -57,13 +78,17 @@ const storageSettings = {
   },
 } satisfies IndexStorageSettings;
 
-export interface WorkflowProperties {
+export interface WorkflowProperties extends WorkflowAccessSubject {
   // TODO: we can remove this name, since we use the WorkflowYaml object to get the name
   name: string;
   description?: string;
   enabled: boolean;
   tags: string[];
   triggerTypes: string[];
+  /** Workflows run by `workflow.execute` steps; missing on documents saved before it existed. */
+  calledWorkflowIds?: string[];
+  /** True once `calledWorkflowIds` is set, including when the workflow runs no other workflow. */
+  calledWorkflowIdsIndexed?: boolean;
   yaml: string;
   definition: WorkflowYaml | null;
   createdBy: string;
@@ -77,6 +102,8 @@ export interface WorkflowProperties {
   definitionHash?: string | null;
   managedTemplateValues?: Record<string, unknown> | null;
   originManagedWorkflowId?: string | null;
+  /** UUID for this document. A new document, including one that reuses `workflowId`, gets a new value. */
+  workflowUid?: string;
   lifecycle?: 'static' | 'dynamic' | null;
   managedVisibilityContexts?: string[];
   deleted_at: Date | null;

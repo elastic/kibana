@@ -34,7 +34,7 @@ jest.mock('./yaml_language_service', () => {
         if (!mockState.instance) {
           // Initialize if not already done
           const { configureMonacoYamlSchema } = jest.requireMock('@kbn/monaco');
-          // eslint-disable-next-line require-atomic-updates
+          // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
           mockState.instance = await configureMonacoYamlSchema(schemas);
           // @ts-expect-error - mockState.instance is not typed
         } else if (mockState.instance.update) {
@@ -75,9 +75,7 @@ jest.mock('./yaml_language_service', () => {
 
 // Mock the CodeEditor component
 jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
   return {
-    ...original,
     CodeEditor: (props: CodeEditorProps) => {
       // Use React from the outer scope
       const { useEffect } = jest.requireActual('react');
@@ -486,22 +484,26 @@ describe('YamlEditor', () => {
       expect(onChange).toHaveBeenCalledWith(newValue);
     });
 
-    it('should update internal value when prop value changes', () => {
-      const onChange = jest.fn();
-      const initialValue = 'test: initial';
-      const newPropValue = 'test: from-props';
+    it('should hand a new prop value to the editor before parent effects run', () => {
+      const valuesSeenByParentEffect: string[] = [];
+      const Parent = ({ value }: { value: string }) => {
+        React.useEffect(() => {
+          const textarea = document.querySelector<HTMLTextAreaElement>(
+            '[data-testid="code-editor-textarea"]'
+          );
+          valuesSeenByParentEffect.push(textarea?.value ?? '');
+        }, [value]);
+        return <YamlEditor value={value} onChange={jest.fn()} schemas={null} />;
+      };
 
-      const { container, rerender } = render(
-        <YamlEditor value={initialValue} onChange={onChange} schemas={null} />
-      );
-
-      // Update the value prop
-      rerender(<YamlEditor value={newPropValue} onChange={onChange} schemas={null} />);
+      const { container, rerender } = render(<Parent value="test: initial" />);
+      rerender(<Parent value="test: from-props" />);
 
       const textarea = container.querySelector(
         '[data-testid="code-editor-textarea"]'
       ) as HTMLTextAreaElement;
-      expect(textarea.value).toBe(newPropValue);
+      expect(textarea.value).toBe('test: from-props');
+      expect(valuesSeenByParentEffect).toEqual(['test: initial', 'test: from-props']);
     });
   });
 

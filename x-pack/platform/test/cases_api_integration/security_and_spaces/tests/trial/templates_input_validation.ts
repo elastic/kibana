@@ -9,7 +9,11 @@ import expect from '@kbn/expect';
 import { stringify } from 'yaml';
 
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { deleteAllCaseItems, getSpaceUrlPrefix } from '../../../common/lib/api';
+import {
+  deleteAllCaseItems,
+  getSpaceUrlPrefix,
+  storeTemplateDefinition,
+} from '../../../common/lib/api';
 
 const TEMPLATES_URL = '/internal/cases/templates';
 
@@ -165,6 +169,119 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send({ name: 'First Template' })
           .expect(409);
+      });
+    });
+
+    describe('extractObservables owner rule', () => {
+      const ownersThatCannotAutoExtract = ['cases', 'observability'];
+      const errorMessage = 'Setting extractObservables to true is not allowed';
+
+      const buildDefinitionWithSettings = (extractObservables: boolean) =>
+        stringify({
+          name: 'Settings title',
+          settings: { extractObservables },
+          fields: [{ control: 'INPUT_TEXT', name: 'f', label: 'F', type: 'keyword' }],
+        });
+
+      const buildBody = (owner: string, extractObservables: boolean) => ({
+        name: 'Settings Template',
+        owner,
+        definition: buildDefinitionWithSettings(extractObservables),
+        isEnabled: true,
+      });
+
+      const postTemplate = (body: Record<string, unknown>) =>
+        supertest
+          .post(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}`)
+          .set('kbn-xsrf', 'true')
+          .send(body);
+
+      const putTemplate = (templateId: string, body: Record<string, unknown>) =>
+        supertest
+          .put(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}/${templateId}`)
+          .set('kbn-xsrf', 'true')
+          .send(body);
+
+      const patchTemplate = (templateId: string, body: Record<string, unknown>) =>
+        supertest
+          .patch(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}/${templateId}`)
+          .set('kbn-xsrf', 'true')
+          .send(body);
+
+      const getTemplate = (templateId: string) =>
+        supertest.get(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}/${templateId}`);
+
+      for (const owner of ownersThatCannotAutoExtract) {
+        describe(`owner ${owner}`, () => {
+          it('rejects POST with extractObservables true with a 400', async () => {
+            const { body } = await postTemplate(buildBody(owner, true)).expect(400);
+
+            expect(body.message).to.contain(errorMessage);
+          });
+
+          it('rejects PUT and PATCH with a change to true with a 400 and keeps the stored version', async () => {
+            const { body: created } = await postTemplate(buildBody(owner, false)).expect(200);
+
+            const { body: putBody } = await putTemplate(
+              created.templateId,
+              buildBody(owner, true)
+            ).expect(400);
+            expect(putBody.message).to.contain(errorMessage);
+
+            const { body: patchBody } = await patchTemplate(created.templateId, {
+              definition: buildDefinitionWithSettings(true),
+            }).expect(400);
+            expect(patchBody.message).to.contain(errorMessage);
+
+            const { body: after } = await getTemplate(created.templateId).expect(200);
+            expect(after.templateVersion).to.eql(1);
+          });
+
+          it('accepts a PATCH that does not change the definition and keeps a stored true', async () => {
+            const { body: created } = await postTemplate(buildBody(owner, false)).expect(200);
+            await storeTemplateDefinition({
+              es,
+              templateId: created.templateId,
+              definition: buildDefinitionWithSettings(true),
+            });
+
+            const { body: updated } = await patchTemplate(created.templateId, {
+              description: 'A new description',
+            }).expect(200);
+
+            expect(updated.templateVersion).to.eql(2);
+            expect(updated.definition.settings.extractObservables).to.eql(true);
+          });
+
+          it('rejects a PATCH that moves a stored true to the other blocked owner', async () => {
+            const { body: created } = await postTemplate(buildBody(owner, false)).expect(200);
+            await storeTemplateDefinition({
+              es,
+              templateId: created.templateId,
+              definition: buildDefinitionWithSettings(true),
+            });
+
+            const otherOwner = owner === 'cases' ? 'observability' : 'cases';
+            const { body } = await patchTemplate(created.templateId, {
+              owner: otherOwner,
+            }).expect(400);
+
+            expect(body.message).to.contain(errorMessage);
+          });
+        });
+      }
+
+      describe('owner securitySolution', () => {
+        it('accepts extractObservables true on POST, PUT and PATCH', async () => {
+          const { body: created } = await postTemplate(buildBody('securitySolution', true)).expect(
+            200
+          );
+
+          await putTemplate(created.templateId, buildBody('securitySolution', true)).expect(200);
+          await patchTemplate(created.templateId, {
+            definition: buildDefinitionWithSettings(true),
+          }).expect(200);
+        });
       });
     });
   });

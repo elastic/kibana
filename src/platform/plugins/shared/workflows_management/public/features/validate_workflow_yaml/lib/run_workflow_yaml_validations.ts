@@ -20,6 +20,7 @@ import {
 } from '@kbn/workflows-yaml';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
+import { validateIgnoredFetcherSetting } from './validate_ignored_fetcher_setting';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateParallelFanOut } from './validate_parallel_fan_out';
 import { validateParallelMode } from './validate_parallel_mode';
@@ -76,6 +77,7 @@ export function runWorkflowYamlValidations({
   if (workflowLookup) {
     results.push(
       ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
+      ...validateIgnoredFetcherSetting(workflowLookup, lineCounter),
       ...validateIfConditions(workflowLookup, lineCounter),
       ...validateParallelMode(workflowLookup, lineCounter),
       ...validateParallelFanOut(workflowLookup, lineCounter)

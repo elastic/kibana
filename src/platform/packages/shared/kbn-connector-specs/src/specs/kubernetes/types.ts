@@ -10,6 +10,8 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 const MAX_STRING_LENGTH = 2048;
+// The API server rejects a JSON Patch with more operations than this (`maxJSONPatchOperations`).
+const MAX_JSON_PATCH_OPERATIONS = 10_000;
 
 // =============================================================================
 // Shared field descriptions
@@ -39,7 +41,7 @@ const DRY_RUN_DESCRIPTION =
 // Generic request
 // =============================================================================
 
-export const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
+export const HttpMethodSchema = lazySchema(() => z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']));
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
 
 export const RequestInputSchema = lazySchema(() =>
@@ -74,7 +76,7 @@ export const RequestInputSchema = lazySchema(() =>
       .describe(
         'Optional Content-Type override. Kubernetes PATCH requires one of: ' +
           '"application/strategic-merge-patch+json" (default for PATCH), "application/merge-patch+json", ' +
-          '"application/json-patch+json", or "application/apply-patch+json" for server-side apply.'
+          '"application/json-patch+json", or "application/apply-patch+yaml" for server-side apply (JSON bodies are valid YAML).'
       ),
   })
 );
@@ -256,7 +258,10 @@ export const PatchResourceInputSchema = lazySchema(() =>
     name: z.string().max(MAX_STRING_LENGTH).describe('The name of the resource to patch.'),
     namespace: z.string().max(MAX_STRING_LENGTH).optional().describe(NAMESPACE_DESCRIPTION),
     patch: z
-      .union([z.record(z.string().max(MAX_STRING_LENGTH), z.unknown()), z.array(z.unknown())])
+      .union([
+        z.record(z.string().max(MAX_STRING_LENGTH), z.unknown()),
+        z.array(z.unknown()).max(MAX_JSON_PATCH_OPERATIONS),
+      ])
       .describe(
         'The patch body. A JSON object for strategic-merge/merge patches, or a JSON array of operations ' +
           'for JSON Patch (patchType "json").'

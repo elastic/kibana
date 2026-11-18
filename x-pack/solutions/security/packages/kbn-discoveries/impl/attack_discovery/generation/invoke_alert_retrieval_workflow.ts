@@ -114,11 +114,15 @@ export interface InvokeAlertRetrievalParams {
  * This is a subset of the full API needed for alert retrieval.
  */
 export interface WorkflowsManagementApi {
-  getWorkflow: (workflowId: string, spaceId: string) => Promise<WorkflowDetailDto | null>;
+  getWorkflow: (
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ) => Promise<WorkflowDetailDto | null>;
   getWorkflowExecution: (
     executionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options: { includeInput?: boolean; includeOutput?: boolean; request: KibanaRequest }
   ) => Promise<WorkflowExecutionDto | null>;
   runWorkflow: (
     workflow: WorkflowExecutionEngineModel,
@@ -184,7 +188,7 @@ export const invokeAlertRetrievalWorkflow = async ({
 
   try {
     // Step 1: Get and validate the workflow
-    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
     const validatedWorkflow: ValidatedWorkflow = validateAlertRetrievalWorkflow(
       rawWorkflow,
       workflowId
@@ -251,6 +255,7 @@ export const invokeAlertRetrievalWorkflow = async ({
 
     // Step 5: Poll for completion
     const execution = await pollForWorkflowCompletion({
+      request,
       executionId: workflowRunId,
       isReady: (exec) =>
         exec.stepExecutions.some(

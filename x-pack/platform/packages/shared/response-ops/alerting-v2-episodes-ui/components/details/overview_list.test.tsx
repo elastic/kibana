@@ -70,19 +70,32 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-1');
   });
 
-  it('renders a Tags row with a badge per tag when the group has tags', () => {
+  it('bounds the description column so long values truncate instead of shrinking the titles', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList {...baseProps} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('alertingV2EpisodeDetailsOverviewList')).toHaveStyle({
+      gridTemplateColumns: 'auto minmax(0, 1fr)',
+    });
+  });
+
+  it('renders a Tags row with a badge per tag when the alert has tags', () => {
     render(
       <I18nProvider>
         <AlertEpisodeOverviewList
           {...baseProps}
-          groupAction={{
-            groupHash: 'gh-1',
+          episodeAction={{
+            episodeId: 'ep-1',
             ruleId: 'rule-1',
+            groupHash: 'gh-1',
+            lastAckAction: null,
+            lastAssigneeUid: null,
+            lastAckActor: null,
             lastDeactivateAction: null,
             lastDeactivateActor: null,
-            lastSnoozeAction: null,
-            lastSnoozeActor: null,
-            snoozeExpiry: null,
             tags: ['tag-a', 'tag-b'],
           }}
         />
@@ -193,8 +206,7 @@ describe('AlertEpisodeOverviewList', () => {
             lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
             lastDeactivateActor: null,
             lastSnoozeAction: null,
-            snoozeExpiry: null,
-            tags: [],
+            snoozedUntil: null,
             lastSnoozeActor: null,
           }}
         />
@@ -242,10 +254,9 @@ describe('AlertEpisodeOverviewList', () => {
             ruleId: 'rule-1',
             lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
             lastSnoozeActor: 'user-snoozer',
-            snoozeExpiry: '2030-01-01T00:00:00.000Z',
+            snoozedUntil: '2030-01-01T00:00:00.000Z',
             lastDeactivateAction: null,
             lastDeactivateActor: null,
-            tags: [],
           }}
         />
       </I18nProvider>
@@ -270,10 +281,9 @@ describe('AlertEpisodeOverviewList', () => {
             ruleId: 'rule-1',
             lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
             lastSnoozeActor: 'user-snoozer',
-            snoozeExpiry: null,
+            snoozedUntil: null,
             lastDeactivateAction: null,
             lastDeactivateActor: null,
-            tags: [],
           }}
         />
       </I18nProvider>
@@ -294,10 +304,9 @@ describe('AlertEpisodeOverviewList', () => {
             ruleId: 'rule-1',
             lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
             lastSnoozeActor: 'user-snoozer',
-            snoozeExpiry: '2020-01-01T00:00:00.000Z',
+            snoozedUntil: '2020-01-01T00:00:00.000Z',
             lastDeactivateAction: null,
             lastDeactivateActor: null,
-            tags: [],
           }}
         />
       </I18nProvider>
@@ -307,14 +316,14 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.queryByText('Snoozed until')).not.toBeInTheDocument();
   });
 
-  it('renders View in source system for an absolute http(s) data.alert_url', () => {
+  it('renders View in source system for an absolute http(s) data.source_alert_url', () => {
     render(
       <I18nProvider>
         <AlertEpisodeOverviewList
           {...baseProps}
           groupingData={{
             ...baseProps.groupingData,
-            alert_url: 'https://monitoring.example/alerts/1',
+            source_alert_url: 'https://monitoring.example/alerts/1',
           }}
         />
       </I18nProvider>
@@ -324,7 +333,7 @@ describe('AlertEpisodeOverviewList', () => {
     expect(link).toHaveAttribute('href', 'https://monitoring.example/alerts/1');
   });
 
-  it('does not render a link for javascript: or data: alert_url values', () => {
+  it('does not render a link for javascript: or data: source_alert_url values', () => {
     // Built dynamically so eslint no-script-url does not flag the XSS fixture string.
     const javascriptAlertUrl = ['java', 'script:alert(document.domain)'].join('');
     const { rerender } = render(
@@ -333,7 +342,7 @@ describe('AlertEpisodeOverviewList', () => {
           {...baseProps}
           groupingData={{
             ...baseProps.groupingData,
-            alert_url: javascriptAlertUrl,
+            source_alert_url: javascriptAlertUrl,
           }}
         />
       </I18nProvider>
@@ -348,7 +357,7 @@ describe('AlertEpisodeOverviewList', () => {
           {...baseProps}
           groupingData={{
             ...baseProps.groupingData,
-            alert_url: 'data:text/html,<script>alert(1)</script>',
+            source_alert_url: 'data:text/html,<script>alert(1)</script>',
           }}
         />
       </I18nProvider>

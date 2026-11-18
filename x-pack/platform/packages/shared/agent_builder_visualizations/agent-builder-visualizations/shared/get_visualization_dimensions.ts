@@ -8,7 +8,7 @@
 import { ChartType } from '@kbn/visualization-utils';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
-interface VisualizationDimensions {
+export interface VisualizationDimensions {
   height: number;
   /**
    * Recommended container width for the visualization wrapper.

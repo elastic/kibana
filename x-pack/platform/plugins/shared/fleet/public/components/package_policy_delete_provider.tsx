@@ -22,6 +22,7 @@ import {
 import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../common/constants';
 import type { AgentPolicy, PackagePolicyPackage } from '../types';
 import { sendDeleteAgentlessPolicy } from '../hooks/use_request/agentless_policy';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../common/services/version_specific_policies_utils';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
@@ -80,9 +81,11 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       }
       setIsLoadingAgentsCount(true);
 
-      const kuery = `(${agentPolicies
-        .map((policy) => `${AGENTS_PREFIX}.policy_id:"${policy.id}"`)
-        .join(' or ')})`;
+      const kuery = buildPolicyBaseIdsWithFallbackKuery(
+        agentPolicies.map((policy) => policy.id),
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      );
 
       const request = await sendGetAgents({
         kuery,

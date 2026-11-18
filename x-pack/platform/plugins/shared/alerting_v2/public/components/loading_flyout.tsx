@@ -20,11 +20,15 @@ const FLYOUT_TITLE_ID = 'loadingFlyoutTitle';
 interface Props {
   onClose: () => void;
   type?: EuiFlyoutProps['type'];
+  session?: EuiFlyoutProps['session'];
+  ownFocus?: EuiFlyoutProps['ownFocus'];
 }
 
-export const LoadingFlyout = ({ onClose, type = 'push' }: Props) => (
+export const LoadingFlyout = ({ onClose, type = 'push', session, ownFocus }: Props) => (
   <EuiFlyout
     type={type}
+    session={session}
+    ownFocus={ownFocus}
     size="s"
     onClose={onClose}
     aria-labelledby={FLYOUT_TITLE_ID}

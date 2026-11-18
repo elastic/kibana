@@ -24,7 +24,7 @@ export const getSavedSearchObjectType = (
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
-    icon: 'discoverApp',
+    icon: 'productDiscover',
     defaultSearchField: 'title',
     displayName: SavedSearchTypeDisplayName,
     importableAndExportable: true,

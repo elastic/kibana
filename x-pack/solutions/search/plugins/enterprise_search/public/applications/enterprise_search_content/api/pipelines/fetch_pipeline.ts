@@ -16,7 +16,7 @@ export interface FetchPipelineArgs {
 export type FetchPipelineResponse = Record<string, MlInferencePipeline | undefined>;
 
 export const fetchPipeline = async ({ pipelineName }: FetchPipelineArgs) => {
-  const route = `/internal/enterprise_search/pipelines/${pipelineName}`;
+  const route = `/internal/enterprise_search/pipelines/${encodeURIComponent(pipelineName)}`;
 
   return await HttpLogic.values.http.get<FetchPipelineResponse>(route);
 };

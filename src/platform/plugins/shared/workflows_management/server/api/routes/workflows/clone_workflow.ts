@@ -11,7 +11,7 @@ import path from 'path';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_CLONE_SECURITY } from '../utils/route_security';
+import { assertCanReadManagedWorkflow, WORKFLOW_CLONE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -45,10 +45,11 @@ export function registerCloneWorkflowRoute(deps: RouteDependencies) {
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          const workflow = await api.getWorkflow(id, spaceId);
+          const workflow = await api.getWorkflow(id, spaceId, request);
           if (!workflow) {
             return response.notFound();
           }
+          assertCanReadManagedWorkflow(request, workflow);
           const createdWorkflow = await api.cloneWorkflow(workflow, spaceId, request);
           audit.logWorkflowCloned(request, {
             sourceId: id,

@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './skills';
+export type {
+  AgentBuilderAnalytics,
+  AgentBuilderTracking,
+  CompactionTriggeredEvent,
+  SkillInvokedEvent,
+} from './skills';
 export { toHashedId, toCustomHashedId, normalizeAgentIdForTelemetry } from './hashing';

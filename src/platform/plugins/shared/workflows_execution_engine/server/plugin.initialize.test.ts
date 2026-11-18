@@ -32,6 +32,7 @@ const createPlugin = (): WorkflowsExecutionEnginePlugin => {
   const initializerContext = coreMock.createPluginInitializerContext({
     logging: { console: false },
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+    storage: { source: 'plain_index', dataRetention: '90d' },
   });
   return new WorkflowsExecutionEnginePlugin(initializerContext);
 };
@@ -53,6 +54,20 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
 
     expect(mockDataClientBundleInitSetup).toHaveBeenCalledTimes(1);
     expect(mockDataClientBundleInitStart).not.toHaveBeenCalled();
+  });
+
+  it('registers the workflow execution finished topic', () => {
+    const plugin = createPlugin();
+    const coreSetup = coreMock.createSetup();
+    plugin.setup(coreSetup as any, {
+      taskManager: taskManagerMock.createSetup(),
+      cloud: {} as any,
+      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+    });
+
+    expect(coreSetup.pubsub.registerTopic).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'workflows.executionFinished' })
+    );
   });
 
   it('calls initStart and exposes the execution data access during start', () => {

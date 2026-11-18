@@ -5,45 +5,12 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { zodAsIoTs } from './zod_as_io_ts';
-import { remoteMonitorInfoSchema } from './remote';
-import { ConfigKey } from './monitor_management/config_key';
-import { MonitorTypeCodec } from './monitor_management/monitor_configs';
-import { MonitorServiceLocationCodec } from './monitor_management/locations';
+import type { SchemaOutput } from './schema_output';
+import type { RemoteSyntheticsMonitorCodec } from './schemas/remote_monitor';
 // Type-only import; the runtime value edge is external_monitor -> remote_monitor.
 import type { SelectedSyntheticsMonitor } from './external_monitor';
 
-/**
- * Read-only projection of a Synthetics monitor that has no local saved object.
- * Used for CCS remotes (`${remoteName}:synthetics-*`) and CPS linked-project
- * hits (same `_index` alias prefix, project alias instead of cluster name).
- *
- * This is intentionally a strict, narrow subset of
- * `EncryptedSyntheticsSavedMonitor`. Anything not listed here — enabled flag,
- * schedule, alert config, encrypted params, namespace, project script hash,
- * the SO's full configured locations array — is unavailable for remote
- * monitors and must not be inferred from this type.
- *
- * The `remote` field is REQUIRED (never undefined) and serves as the
- * discriminant for `useSelectedMonitor` consumers: a returned monitor with
- * `monitor.remote` populated is remote, anything else is the local SO. Use the
- * {@link isRemoteSyntheticsMonitor} type guard to narrow.
- *
- * @see useSelectedMonitor — the public consumer
- * @see useExternalMonitor — the hook that synthesizes values of this type from pings
- */
-export const RemoteSyntheticsMonitorCodec = t.type({
-  [ConfigKey.CONFIG_ID]: t.string,
-  [ConfigKey.MONITOR_QUERY_ID]: t.string,
-  [ConfigKey.NAME]: t.string,
-  [ConfigKey.MONITOR_TYPE]: MonitorTypeCodec,
-  [ConfigKey.TAGS]: t.array(t.string),
-  [ConfigKey.LOCATIONS]: t.array(MonitorServiceLocationCodec),
-  remote: zodAsIoTs(remoteMonitorInfoSchema),
-});
-
-export type RemoteSyntheticsMonitor = t.TypeOf<typeof RemoteSyntheticsMonitorCodec>;
+export type RemoteSyntheticsMonitor = SchemaOutput<typeof RemoteSyntheticsMonitorCodec>;
 
 /**
  * Type guard distinguishing remote monitors from local saved objects.

@@ -11,6 +11,7 @@ import { css, type SerializedStyles } from '@emotion/react';
 
 interface EditorPanelStylesParams {
   height: string;
+  euiTheme: EuiThemeComputed;
 }
 
 interface EditorContainerStylesParams {
@@ -42,11 +43,17 @@ export const circleMask = `url('data:image/svg+xml,${encodeSvg(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12"><circle cx="6" cy="6" r="6"/></svg>`
 )}')`;
 
-export const getEditorPanelStyles = ({ height }: EditorPanelStylesParams): SerializedStyles => css`
+export const getEditorPanelStyles = ({
+  height,
+  euiTheme,
+}: EditorPanelStylesParams): SerializedStyles => css`
   height: ${height};
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding-block: ${euiTheme.size.m};
+  padding-inline: 0;
+  border-radius: ${euiTheme.border.radius.panel};
 `;
 
 export const getEditorContainerStyles = ({

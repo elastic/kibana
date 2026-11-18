@@ -9,44 +9,50 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-const MutingRuleConditionSchema = z.object({
-  attribute: z
-    .string()
-    .max(200)
-    .describe(
-      'Alert event attribute to match, e.g. "policyId", "conditionId", "product", "entity.guid", "targetId", or "tags.<name>".'
-    ),
-  operator: z
-    .enum([
-      'ANY',
-      'CONTAINS',
-      'ENDS_WITH',
-      'EQUALS',
-      'IN',
-      'IS_BLANK',
-      'IS_NOT_BLANK',
-      'NOT_CONTAINS',
-      'NOT_ENDS_WITH',
-      'NOT_EQUALS',
-      'NOT_IN',
-      'NOT_STARTS_WITH',
-      'STARTS_WITH',
-    ])
-    .describe('Comparison operator applied to the attribute.'),
-  values: z
-    .array(z.string().max(500))
-    .max(500)
-    .describe('Values to compare the attribute against, e.g. ["123456"].'),
-});
+const MutingRuleConditionSchema = lazySchema(() =>
+  z.object({
+    attribute: z
+      .string()
+      .max(200)
+      .describe(
+        'Alert event attribute to match, e.g. "policyId", "conditionId", "product", "entity.guid", "targetId", or "tags.<name>".'
+      ),
+    operator: z
+      .enum([
+        'ANY',
+        'CONTAINS',
+        'ENDS_WITH',
+        'EQUALS',
+        'IN',
+        'IS_BLANK',
+        'IS_NOT_BLANK',
+        'NOT_CONTAINS',
+        'NOT_ENDS_WITH',
+        'NOT_EQUALS',
+        'NOT_IN',
+        'NOT_STARTS_WITH',
+        'STARTS_WITH',
+      ])
+      .describe('Comparison operator applied to the attribute.'),
+    values: z
+      .array(z.string().max(500))
+      .max(500)
+      .describe('Values to compare the attribute against, e.g. ["123456"].'),
+  })
+);
 
-const MutingRuleConditionGroupSchema = z.object({
-  operator: z.enum(['AND', 'OR']).describe('Boolean operator used to combine the sub-conditions.'),
-  conditions: z
-    .array(MutingRuleConditionSchema)
-    .min(1)
-    .max(20)
-    .describe('Up to 20 sub-conditions combined with the group operator.'),
-});
+const MutingRuleConditionGroupSchema = lazySchema(() =>
+  z.object({
+    operator: z
+      .enum(['AND', 'OR'])
+      .describe('Boolean operator used to combine the sub-conditions.'),
+    conditions: z
+      .array(MutingRuleConditionSchema)
+      .min(1)
+      .max(20)
+      .describe('Up to 20 sub-conditions combined with the group operator.'),
+  })
+);
 
 export const NewRelicAcknowledgeIssueInputSchema = lazySchema(() =>
   z.object({
@@ -76,10 +82,12 @@ export const NewRelicListIssuesInputSchema = lazySchema(() =>
   z.object({
     states: z
       .array(z.enum(['ACTIVATED', 'CREATED', 'DEACTIVATED', 'CLOSED']))
+      .max(4)
       .optional()
       .describe('Filter by issue state. Omit to include all states.'),
     priority: z
       .array(z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']))
+      .max(4)
       .optional()
       .describe('Filter by issue priority.'),
     entityGuids: z
@@ -112,10 +120,12 @@ export const NewRelicListIncidentsInputSchema = lazySchema(() =>
   z.object({
     states: z
       .array(z.enum(['CREATED', 'CLOSED']))
+      .max(2)
       .optional()
       .describe('Filter by incident state.'),
     priority: z
       .array(z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']))
+      .max(4)
       .optional()
       .describe('Filter by incident priority.'),
     entityGuids: z

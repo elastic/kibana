@@ -21,7 +21,9 @@ export const updateConnectorScheduling = async ({
   connectorId,
   scheduling,
 }: UpdateConnectorSchedulingArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/scheduling`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/scheduling`;
 
   await HttpLogic.values.http.post<undefined>(route, {
     body: JSON.stringify(scheduling),

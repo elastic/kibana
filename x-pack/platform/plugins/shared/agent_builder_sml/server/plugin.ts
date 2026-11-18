@@ -95,6 +95,7 @@ export class AgentBuilderSmlPlugin
 
     setupDeps.contextEngine?.registerAiIndex(agentBuilderDefaultAiIndexId, {
       description: smlAiIndexDescription,
+      memory_enabled: false,
       dest: { type: 'index', value: smlIndexName },
       automations: [],
       sources: [],

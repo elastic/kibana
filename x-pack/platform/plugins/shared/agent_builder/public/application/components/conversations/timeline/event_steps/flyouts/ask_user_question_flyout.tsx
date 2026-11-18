@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AskUserQuestionItem, AskUserQuestionAnswer } from '@kbn/agent-builder-common/agents';
+import { useConversationFlyoutSessionProps } from '../../../../../hooks/use_conversation_flyout_session_props';
 import { QuestionAnswerList } from './question_answer_list';
 
 const flyoutTitle = i18n.translate('xpack.agentBuilder.conversation.askUserQuestionFlyout.title', {
@@ -35,6 +36,8 @@ export const AskUserQuestionFlyout: React.FC<AskUserQuestionFlyoutProps> = ({
   questions,
   answers,
 }) => {
+  const flyoutSessionProps = useConversationFlyoutSessionProps(flyoutTitle);
+
   if (!isOpen) return null;
 
   const total = questions.length;
@@ -55,6 +58,7 @@ export const AskUserQuestionFlyout: React.FC<AskUserQuestionFlyoutProps> = ({
       aria-labelledby="askUserQuestionFlyoutTitle"
       size="600px"
       ownFocus={false}
+      {...flyoutSessionProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

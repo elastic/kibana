@@ -23,7 +23,7 @@ function validateDefinition(definition: ServerTriggerDefinition): void {
   if (typeof id !== 'string' || id.length === 0) {
     throw new Error('Trigger definition "id" must be a non-empty string.');
   }
-  if (!TRIGGER_ID_REGEX.test(id)) {
+  if (definition.requiresConnectorId !== true && !TRIGGER_ID_REGEX.test(id)) {
     throw new Error(
       `Trigger id "${id}" must follow namespaced format <namespace>.<event> (e.g. my-namespace.customTrigger).`
     );

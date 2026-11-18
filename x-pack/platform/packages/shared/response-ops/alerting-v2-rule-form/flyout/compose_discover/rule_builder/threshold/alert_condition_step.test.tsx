@@ -71,7 +71,7 @@ const BASE_COMPOSE_VALUES: FormValues = {
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
+  query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],

@@ -119,7 +119,7 @@ describe('getUpdateKiStepDefinition', () => {
         query: kiIdQuery('ki-1'),
         size: 2,
         seq_no_primary_term: true,
-        _source: ['id', 'governance'],
+        _source: true,
       },
       { signal: context.abortSignal }
     );
@@ -134,10 +134,104 @@ describe('getUpdateKiStepDefinition', () => {
         },
         if_seq_no: 5,
         if_primary_term: 1,
-        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );
+  });
+
+  it('does not clear user_id from rendered input', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(
+          searchHit('ai-index-idx-my-ai-index', { ...storedKi, user_id: 'alice' })
+        ),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: { description: 'Updated', user_id: null },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(esClient.update.mock.calls[0][0].doc).toEqual({
+      description: 'Updated',
+      updated_at: expect.any(String),
+      governance: { provenance: { updated_by: mockKiWriter } },
+    });
+  });
+
+  it('rejects a user_id change from rendered input', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(
+          searchHit('ai-index-idx-my-ai-index', { ...storedKi, user_id: 'alice' })
+        ),
+      update: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: { description: 'Updated', user_id: 'bob' },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('ValidationError');
+    expect(esClient.update).not.toHaveBeenCalled();
+  });
+
+  it('waits for the refresh when refresh is true', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: { description: 'Updated' },
+        refresh: true,
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(esClient.update).toHaveBeenCalledWith(expect.objectContaining({ refresh: 'wait_for' }), {
+      signal: context.abortSignal,
+    });
   });
 
   it('sets the lifecycle status when provided', async () => {
@@ -347,7 +441,6 @@ describe('getUpdateKiStepDefinition', () => {
           },
         },
         op_type: 'create',
-        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );

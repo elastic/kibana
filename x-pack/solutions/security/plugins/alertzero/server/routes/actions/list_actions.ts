@@ -9,6 +9,7 @@ import { API_VERSIONS, INTERNAL_API_ACCESS, ALERTZERO_ACTIONS_URL } from '@kbn/a
 import type { ListActionsResponse } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import {
   InvalidCategoriesError,
   readActionCategoriesQueryParam,
@@ -38,11 +39,12 @@ export const registerListActionsRoute = ({
           request: {},
         },
       },
-      async (_context, request, response) => {
+      withAlertZeroEnabled(async (_context, request, response) => {
         try {
           const categories = readActionCategoriesQueryParam(request);
           const body: ListActionsResponse = await getActionsService().list(
             getSpaceId(request),
+            request,
             categories
           );
           return response.ok({ body });
@@ -56,6 +58,6 @@ export const registerListActionsRoute = ({
             body: { message: 'Failed to list actions' },
           });
         }
-      }
+      })
     );
 };

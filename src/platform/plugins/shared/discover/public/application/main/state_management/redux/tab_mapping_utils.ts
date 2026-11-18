@@ -13,14 +13,14 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { isObject, isUndefined, omitBy } from 'lodash';
+import { isEqual, isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
-import { parseControlGroupJson } from './utils';
+import { extractEsqlVariables, parseControlGroupJson } from './utils';
 import { createSearchSource } from '../utils/create_search_source';
 
 export const fromSavedObjectTabToAppState = ({
@@ -77,6 +77,17 @@ export const fromSavedObjectTabToTabState = ({
       ? tab.refreshInterval
       : existingTab?.globalState.refreshInterval,
   };
+  const controlGroupState = tab.controlGroupJson
+    ? parseControlGroupJson(tab.controlGroupJson)
+    : undefined;
+  const existingEsqlVariables = existingTab?.esqlVariables;
+  const savedEsqlVariables = extractEsqlVariables(controlGroupState ?? null);
+  // Reuse the current array when the saved variables are equal. Consumers detect changes by
+  // reference, so a new array would count as a change (e.g. resetting a session would not
+  // refetch the chart).
+  const esqlVariables = isEqual(existingEsqlVariables, savedEsqlVariables)
+    ? existingEsqlVariables
+    : savedEsqlVariables;
 
   return {
     ...DEFAULT_TAB_STATE,
@@ -94,13 +105,12 @@ export const fromSavedObjectTabToTabState = ({
     appState,
     previousAppState: existingTab?.appState ?? appState,
     globalState,
+    esqlVariables,
     attributes: {
       ...DEFAULT_TAB_STATE.attributes,
       timeRestore: tab.timeRestore ?? false,
       visContext: tab.visContext,
-      controlGroupState: tab.controlGroupJson
-        ? parseControlGroupJson(tab.controlGroupJson)
-        : undefined,
+      controlGroupState,
     },
   };
 };

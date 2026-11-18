@@ -135,9 +135,17 @@ async function waitForExecution(
   });
 }
 
+// Suite consistently fails on MKI: https://github.com/elastic/kibana/issues/261499
 spaceTest.describe(
   'Workflow error trigger (workflows.failed)',
-  { tag: tags.deploymentAgnostic },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      '@local-serverless-observability_complete',
+      '@local-serverless-security_complete',
+      '@local-serverless-search',
+    ],
+  },
   () => {
     let workflowsApi: WorkflowsApiService;
     let failingWorkflowId: string;

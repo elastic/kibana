@@ -512,6 +512,114 @@ describe('getContextSchemaForPath', () => {
     expect((context.shape as any).variables).toBeDefined();
     expect(Object.keys((context.shape as any).steps.shape)).toEqual([]);
   });
+
+  describe('data.set variables', () => {
+    const dataSetDefinition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      consts: { output: { data: { status: 'ok' } } },
+      steps: [
+        { name: 'log', type: 'console', with: { message: 'hi' } },
+        { name: 'fetch', type: 'http', with: { url: 'https://example.com', method: 'GET' } },
+        {
+          name: 'set_vars',
+          type: 'data.set',
+          with: {
+            from_const: '${{ consts.output.data }}',
+            from_step: '${{ steps.log.output }}',
+            from_untyped_step: '${{ steps.fetch.output.data }}',
+            from_unresolvable_path: '${{ steps.missing.output }}',
+            from_expression: '${{ consts.output.data | json }}',
+            rendered: '{{ consts.output.data }}',
+            literal: 42,
+          },
+        },
+        { name: 'use', type: 'console', with: { message: '{{ variables.from_const.status }}' } },
+      ],
+    } as unknown as WorkflowYaml;
+
+    const getVariablesSchemaAt = (variablePath: string) =>
+      getSchemaAtPath(
+        getContextSchemaForPath(
+          emptyRegistry,
+          dataSetDefinition,
+          WorkflowGraph.fromWorkflowDefinition(dataSetDefinition),
+          ['steps', 3, 'with', 'message']
+        ),
+        `variables.${variablePath}`
+      ).schema;
+
+    it('resolves the type of a ${{ }} reference from the context', () => {
+      expect(getVariablesSchemaAt('from_const')).toBeInstanceOf(z.ZodObject);
+      expect(getVariablesSchemaAt('from_const.status')).toBeInstanceOf(z.ZodLiteral);
+      expect(getVariablesSchemaAt('from_step')).toBeInstanceOf(z.ZodString);
+    });
+
+    it('falls back to unknown when a ${{ }} reference cannot be typed statically', () => {
+      expect(getVariablesSchemaAt('from_untyped_step')).toBeInstanceOf(z.ZodUnknown);
+      expect(getVariablesSchemaAt('from_untyped_step.foo')).toBeInstanceOf(z.ZodUnknown);
+      expect(getVariablesSchemaAt('from_unresolvable_path')).toBeInstanceOf(z.ZodUnknown);
+      expect(getVariablesSchemaAt('from_expression')).toBeInstanceOf(z.ZodUnknown);
+    });
+
+    it('resolves data.set steps in execution order', () => {
+      const chainedDefinition = {
+        version: '1' as const,
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' as const }],
+        steps: [
+          { name: 'set_source', type: 'data.set', with: { source: { a: 1 }, value: 'text' } },
+          {
+            name: 'set_copy',
+            type: 'data.set',
+            with: { copy: '${{ variables.source }}', value: 42 },
+          },
+          { name: 'use', type: 'console', with: { message: '{{ variables.copy.a }}' } },
+        ],
+      } as unknown as WorkflowYaml;
+      const context = getContextSchemaForPath(
+        emptyRegistry,
+        chainedDefinition,
+        WorkflowGraph.fromWorkflowDefinition(chainedDefinition),
+        ['steps', 2, 'with', 'message']
+      );
+
+      expect(getSchemaAtPath(context, 'variables.copy.a').schema).toBeInstanceOf(z.ZodNumber);
+      expect(getSchemaAtPath(context, 'variables.copy.nope').schema).toBeNull();
+      // The later data.set step overrides the earlier one
+      expect(getSchemaAtPath(context, 'variables.value').schema).toBeInstanceOf(z.ZodNumber);
+    });
+
+    it('resolves a ${{ }} reference through a quoted key that contains a dot', () => {
+      const dottedKeyDefinition = {
+        version: '1' as const,
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' as const }],
+        consts: { obj: { 'b.c': { d: 'hi' } } },
+        steps: [
+          { name: 'set_vars', type: 'data.set', with: { nested: '${{ consts.obj["b.c"] }}' } },
+          { name: 'use', type: 'console', with: { message: '{{ variables.nested.d }}' } },
+        ],
+      } as unknown as WorkflowYaml;
+      const context = getContextSchemaForPath(
+        emptyRegistry,
+        dottedKeyDefinition,
+        WorkflowGraph.fromWorkflowDefinition(dottedKeyDefinition),
+        ['steps', 1, 'with', 'message']
+      );
+
+      expect(getSchemaAtPath(context, 'variables.nested.d').schema).toBeInstanceOf(z.ZodLiteral);
+    });
+
+    it('keeps {{ }} templates as strings and literals as their own type', () => {
+      expect(getVariablesSchemaAt('rendered')).toBeInstanceOf(z.ZodString);
+      expect(getVariablesSchemaAt('literal')).toBeInstanceOf(z.ZodNumber);
+    });
+  });
 });
 
 describe('getContextSchemaForStep', () => {

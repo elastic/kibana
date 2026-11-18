@@ -36,7 +36,9 @@ describe('getAffectedProjectsMoon', () => {
     expect(result).toEqual(new Set(['@kbn/foo']));
     expect(mockExecSync).toHaveBeenCalledWith(
       expect.stringContaining('/repo/node_modules/.bin/moon'),
-      expect.objectContaining({ env: expect.objectContaining({ MOON_BASE: 'resolved-sha' }) })
+      expect.objectContaining({
+        env: expect.objectContaining({ MOON_BASE: 'resolved-sha', MOON_HEAD: 'HEAD' }),
+      })
     );
   });
 

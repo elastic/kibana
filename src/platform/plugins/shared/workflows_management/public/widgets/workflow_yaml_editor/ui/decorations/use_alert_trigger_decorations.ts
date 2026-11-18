@@ -85,6 +85,13 @@ export const useAlertTriggerDecorations = ({
           );
         }
 
+        const alertTriggerHoverMessage: monaco.IMarkdownString = {
+          value: i18n.translate('workflows.workflowDetail.yamlEditor.alertTriggerGlyphTooltip', {
+            defaultMessage:
+              'Alert trigger: This workflow will be executed automatically only when connected to a rule via the "Run Workflow" action.',
+          }),
+        };
+
         const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
           range: new monaco.Range(
             typeRange!.startLineNumber,
@@ -94,15 +101,8 @@ export const useAlertTriggerDecorations = ({
           ),
           options: {
             glyphMarginClassName: 'alert-trigger-glyph',
-            glyphMarginHoverMessage: {
-              value: i18n.translate(
-                'workflows.workflowDetail.yamlEditor.alertTriggerGlyphTooltip',
-                {
-                  defaultMessage:
-                    'Alert trigger: This workflow will be executed automatically only when connected to a rule via the "Run Workflow" action.',
-                }
-              ),
-            },
+            glyphMarginHoverMessage: alertTriggerHoverMessage,
+            hoverMessage: alertTriggerHoverMessage,
           },
         };
 

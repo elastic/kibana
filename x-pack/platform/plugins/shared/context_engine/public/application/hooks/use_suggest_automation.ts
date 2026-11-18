@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { useKibana } from './use_kibana';
+import { useSpaceId } from './use_space_id';
 
 interface UseSuggestAutomationParams {
   aiIndex: GetAiIndexResponse | undefined;
@@ -28,8 +29,9 @@ export const useSuggestAutomation = ({
   onSaved,
 }: UseSuggestAutomationParams): UseSuggestAutomationResult => {
   const {
-    services: { getAgentBuilderIntegration },
+    services: { getAgentBuilderIntegration, spaces },
   } = useKibana();
+  const { spaceId } = useSpaceId(spaces);
 
   const provider = getAgentBuilderIntegration?.()?.suggestAutomation;
 
@@ -54,15 +56,16 @@ export const useSuggestAutomation = ({
   }, [provider, canSuggest, aiIndex?.id]);
 
   const suggestAutomation = useCallback(() => {
-    if (!canSuggest || !aiIndex || !provider) {
+    if (!canSuggest || !aiIndex || !provider || !spaceId) {
       return;
     }
 
     provider.suggestAutomation({
       aiIndex,
+      spaceId,
       onSaved: () => onSavedRef.current(),
     });
-  }, [provider, aiIndex, canSuggest]);
+  }, [provider, aiIndex, canSuggest, spaceId]);
 
   return { canSuggest, suggestAutomation };
 };

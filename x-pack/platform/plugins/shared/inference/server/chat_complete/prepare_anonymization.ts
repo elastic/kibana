@@ -8,15 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type {
-  AnonymizationRule,
-  ChatCompleteAnonymizationTarget,
-  ChatCompleteOptions,
-} from '@kbn/inference-common';
+import type { AnonymizationOutput, ChatCompleteOptions } from '@kbn/inference-common';
+import type { AnonymizationFailureMode, AnonymizationRule } from '@kbn/ai-anonymization-common';
 import { createInferenceRequestError } from '@kbn/inference-common';
-import type { EffectivePolicy } from '@kbn/anonymization-common';
-import { anonymizeMessages } from './anonymization/anonymize_messages';
-import type { RegexWorkerService } from './anonymization/regex_worker_service';
+import { anonymizeMessages } from '@kbn/ai-anonymization-server';
+import type { RegexWorkerService } from '@kbn/ai-anonymization-server';
 import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
 import { ensureReplacementsIndex } from './anonymization/replacements/replacements_index';
 
@@ -31,14 +27,38 @@ interface PrepareAnonymizationOptions {
   usePersistentReplacements?: boolean;
   requireReplacementsEncryptionKey?: boolean;
   saltPromise?: Promise<string | undefined>;
-  resolveEffectivePolicy?: (
-    target?: ChatCompleteAnonymizationTarget
-  ) => Promise<EffectivePolicy | undefined>;
+  onFailurePromise?: Promise<AnonymizationFailureMode>;
   metadata?: ChatCompleteOptions['metadata'];
   system?: ChatCompleteOptions['system'];
   messages: ChatCompleteOptions['messages'];
 }
 
+/**
+ * Logs, on the dedicated `anonymization` logger, how many entities were masked per class. Never
+ * logs entity values or message content, so it is safe to enable while debugging masking.
+ */
+const logMaskingSummary = (
+  logger: Logger,
+  anonymizationRules: AnonymizationRule[],
+  { anonymizations }: AnonymizationOutput
+) =>
+  logger.get('anonymization').debug(() => {
+    const countsByClass = anonymizations.reduce<Record<string, number>>((acc, { entity }) => {
+      acc[entity.class_name] = (acc[entity.class_name] ?? 0) + 1;
+      return acc;
+    }, {});
+    return `Masked ${anonymizations.length} entities with ${
+      anonymizationRules.filter((rule) => rule.enabled).length
+    } enabled rules: ${JSON.stringify(countsByClass)}`;
+  });
+
+/**
+ * Anonymizes a request's system prompt and messages. The `saltPromise`
+ * and persistent-replacements (`replacementsId`) inputs belong to the dormant policy-service
+ * implementation (`ANONYMIZATION_FEATURE_ACTIVE = false`, see `plugin.ts`) and are never set in
+ * practice; only the `anonymizationRules` from the `ai:anonymizationSettings` uiSetting are live.
+ * With no enabled rules, nothing is anonymized and the rest of the pipeline is a no-op.
+ */
 export const prepareAnonymization = async ({
   namespace,
   logger,
@@ -50,13 +70,13 @@ export const prepareAnonymization = async ({
   usePersistentReplacements = true,
   requireReplacementsEncryptionKey = false,
   saltPromise,
-  resolveEffectivePolicy,
+  onFailurePromise,
   metadata,
   system,
   messages,
 }: PrepareAnonymizationOptions) => {
   const salt = await saltPromise;
-  const effectivePolicy = await resolveEffectivePolicy?.(metadata?.anonymization?.target);
+  const onFailure = (await onFailurePromise) ?? 'block';
   if (!usePersistentReplacements) {
     const anonymization = await anonymizeMessages({
       system,
@@ -65,9 +85,11 @@ export const prepareAnonymization = async ({
       regexWorker,
       esClient,
       salt: salt ?? undefined,
-      effectivePolicy,
+      onFailure,
+      logger,
     });
-    return { anonymization, replacementsId: undefined, effectivePolicy };
+    logMaskingSummary(logger, anonymizationRules, anonymization);
+    return { anonymization, replacementsId: undefined };
   }
 
   const carriedReplacementsId = metadata?.anonymization?.replacementsId;
@@ -113,12 +135,15 @@ export const prepareAnonymization = async ({
     regexWorker,
     esClient,
     salt: salt ?? undefined,
-    effectivePolicy,
+    onFailure,
+    logger,
     knownReplacements: (existingReplacements?.replacements ?? []).filter(
       (r): r is { anonymized: string; original: string } =>
         typeof r.anonymized === 'string' && typeof r.original === 'string'
     ),
   });
+
+  logMaskingSummary(logger, anonymizationRules, anonymization);
 
   const replacements = anonymization.anonymizations.map(({ entity }) => ({
     anonymized: entity.mask,
@@ -127,7 +152,7 @@ export const prepareAnonymization = async ({
   const shouldPersistReplacements = Boolean(carriedReplacementsId || replacements.length);
 
   if (!shouldPersistReplacements) {
-    return { anonymization, replacementsId: undefined, effectivePolicy };
+    return { anonymization, replacementsId: undefined };
   }
 
   const encryptionKey = await getReplacementsEncryptionKey();
@@ -174,5 +199,5 @@ export const prepareAnonymization = async ({
     });
   }
 
-  return { anonymization, replacementsId, effectivePolicy };
+  return { anonymization, replacementsId };
 };

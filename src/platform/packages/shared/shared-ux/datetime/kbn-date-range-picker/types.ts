@@ -61,13 +61,16 @@ export interface TimeRangeBoundsOption extends TimeRangeBounds {
   isEditable?: boolean;
 }
 
+/** Zero-based weekday index: 0 for Sunday through 6 for Saturday. */
+export type FirstDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
 /** Calendar-specific configuration options. */
 export interface CalendarOptions {
   /**
-   * First day of the week: 0 for Sunday, 1 for Monday.
+   * First day of the week: 0 for Sunday through 6 for Saturday.
    * @default 0
    */
-  firstDayOfWeek?: 0 | 1;
+  firstDayOfWeek?: FirstDayOfWeek;
 }
 
 export interface TimeRangeTransformOptions {

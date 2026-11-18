@@ -8,12 +8,32 @@
  */
 
 import {
+  evaluatesProvidedInputExpressions,
   getEventDrivenWorkflowTriggerEvidence,
   isEventDrivenWorkflowTriggerSource,
   isWellKnownWorkflowTriggerSource,
+  isWorkflowStepTriggered,
+  WORKFLOW_STEP_TRIGGER_SOURCE,
 } from './well_known_trigger_sources';
 
+describe('isWorkflowStepTriggered', () => {
+  it('returns true for an execution a workflow step started', () => {
+    expect(isWorkflowStepTriggered(WORKFLOW_STEP_TRIGGER_SOURCE)).toBe(true);
+  });
+
+  it.each(['manual', 'scheduled', 'alert', 'cases.updated', undefined])(
+    'returns false for triggeredBy %s',
+    (triggeredBy) => {
+      expect(isWorkflowStepTriggered(triggeredBy)).toBe(false);
+    }
+  );
+});
+
 describe('isWellKnownWorkflowTriggerSource', () => {
+  it('treats the sub-workflow trigger source constant as well known', () => {
+    expect(isWellKnownWorkflowTriggerSource(WORKFLOW_STEP_TRIGGER_SOURCE)).toBe(true);
+  });
+
   it.each(['manual', 'scheduled', 'alert', 'workflow-step'] as const)(
     'returns true for %s',
     (value) => {
@@ -153,5 +173,19 @@ describe('getEventDrivenWorkflowTriggerEvidence', () => {
       eventTriggerId: 'cases.updated',
       eventId: 'nested-id',
     });
+  });
+});
+
+describe('evaluatesProvidedInputExpressions', () => {
+  it.each([
+    ['manual', true],
+    ['page', false],
+    ['workflow-step', false],
+    ['scheduled', false],
+    ['alert', false],
+    ['cases.caseCreated', false],
+    [undefined, false],
+  ])('returns %s → %s', (triggeredBy, expected) => {
+    expect(evaluatesProvidedInputExpressions(triggeredBy)).toBe(expected);
   });
 });

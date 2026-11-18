@@ -96,6 +96,16 @@ export interface UserActivityEvent {
  */
 export type UserActivityMetadata = Record<string, unknown>;
 
+/**
+ * Caller-provided metadata buckets logged under the entry's `kibana.*` fields, one per producer.
+ * New buckets must be declared here, just so we have a record of what fields we can have.
+ * @public
+ */
+export interface UserActivityKibanaMetadata {
+  dashboard?: UserActivityMetadata;
+  security?: UserActivityMetadata;
+}
+
 /** @public */
 export interface TrackUserActionParams {
   /** Custom log message. If omitted, a default message is generated. */
@@ -106,8 +116,8 @@ export interface TrackUserActionParams {
   object: UserActivityObject;
   /** ECS error fields written at the top level of the log entry when provided. */
   error?: UserActivityError;
-  /** Additional bucket of non-standard metadata. */
-  metadata?: UserActivityMetadata;
+  /** Metadata buckets merged into the log entry's `kibana.*` fields; see {@link UserActivityKibanaMetadata}. */
+  kibana?: UserActivityKibanaMetadata;
 }
 
 /**

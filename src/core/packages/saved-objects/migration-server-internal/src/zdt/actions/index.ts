@@ -34,6 +34,7 @@ export {
 
 export { updateIndexMeta, type UpdateIndexMetaParams } from './update_index_meta';
 export { waitForDelay, type WaitForDelayParams } from './wait_for_delay';
+export { waitForUpdateIndexMappingsTask } from './wait_for_update_index_mappings_task';
 
 // alias in case we need to extend it with zdt specific actions/errors
 export type ActionErrorTypeMap = BaseActionErrorTypeMap;

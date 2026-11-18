@@ -9,7 +9,6 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
 import type {
   GetExecutionByIdsItem,
   GetExecutionsByIdsOptions,
@@ -51,25 +50,22 @@ export const getExecutionsByIds = async <TExecution extends { id: string }>({
       : {};
 
   const docs = ids.map((id) => ({ _index: defaultIndex, _id: id, ...sourceFilter }));
-  const response = await retryTransientEsErrors(() => esClient.mget<TExecution>({ docs }), {
-    logger,
-  });
+  const response = await esClient.mget<TExecution>({ docs });
 
   const items: GetExecutionByIdsItem<TExecution>[] = [];
   const itemDocIds = new Set<string>();
 
   for (const doc of response.docs) {
-    if ('found' in doc && doc.found && doc._source) {
-      const source = doc._source as TExecution;
+    if ('found' in doc && doc.found && doc._source && doc._id) {
+      // `_source.includes` can omit `id`; callers key the result by document.id.
+      const source = { ...doc._source, id: doc._id } as TExecution;
       items.push({
         document: source,
         index: doc._index,
         seqNo: doc._seq_no,
         primaryTerm: doc._primary_term,
       });
-      if (doc._id) {
-        itemDocIds.add(doc._id);
-      }
+      itemDocIds.add(doc._id);
     }
   }
 

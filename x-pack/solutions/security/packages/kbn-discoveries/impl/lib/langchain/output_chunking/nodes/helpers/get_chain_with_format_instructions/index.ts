@@ -66,7 +66,7 @@ function reorderJsonSchemaKeys(node: unknown): unknown {
  * The output matches the format that StructuredOutputParser.getFormatInstructions()
  * produces, so downstream prompt handling is unaffected.
  */
-function getFormatInstructionsFromZodV4Schema(schema: ZodType<unknown>): string {
+export const getFormatInstructionsFromZodV4Schema = (schema: ZodType<unknown>): string => {
   const raw = z4.toJSONSchema(schema) as Record<string, unknown>;
 
   // z4.toJSONSchema() emits $schema: "https://json-schema.org/draft/2020-12/schema".
@@ -91,7 +91,26 @@ Here is the JSON Schema instance your output must adhere to. Include the enclosi
 ${JSON.stringify(jsonSchema)}
 \`\`\`
 `;
-}
+};
+
+const STRUCTURED_GENERATION_PROMPT_TEMPLATE = `Answer the user's question as best you can:\n{format_instructions}\n{query}`;
+
+/**
+ * Renders the user message the LangChain prompt below sends to the LLM, for
+ * callers that invoke the model without LangChain but must send the exact same
+ * request (e.g. eval suites).
+ */
+export const getStructuredGenerationPrompt = ({
+  formatInstructions,
+  query,
+}: {
+  formatInstructions: string;
+  query: string;
+}): string =>
+  STRUCTURED_GENERATION_PROMPT_TEMPLATE.replace(
+    '{format_instructions}',
+    () => formatInstructions
+  ).replace('{query}', () => query);
 
 export const getChainWithFormatInstructions = <T extends GraphInsightTypes>({
   llm,
@@ -105,9 +124,7 @@ export const getChainWithFormatInstructions = <T extends GraphInsightTypes>({
   // We replicate its getFormatInstructions() output using z4.toJSONSchema() directly.
   const formatInstructions = getFormatInstructionsFromZodV4Schema(generationSchema);
 
-  const prompt = ChatPromptTemplate.fromTemplate(
-    `Answer the user's question as best you can:\n{format_instructions}\n{query}`
-  );
+  const prompt = ChatPromptTemplate.fromTemplate(STRUCTURED_GENERATION_PROMPT_TEMPLATE);
 
   const chain = prompt.pipe(llm);
   const llmType = llm._llmType();

@@ -16,7 +16,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
  * `group2/config.ts` (flag pinned ON) and asserts the pages are wired,
  * reachable, and render their primary surface.
  *
- * The legacy flag-OFF sections are covered by `configure_legacy.ts`.
+ * The `configure_legacy.ts` file was removed when the legacy UI was deleted.
  */
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');

@@ -29,8 +29,10 @@ import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
-import { WorkflowsManagementFeatureConfig } from './features';
+import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
+import { getWorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { WorkflowPagesService } from './pages/workflow_pages_service';
 import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
@@ -57,8 +59,10 @@ export class WorkflowsPlugin
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
   private workflowsService: WorkflowsService | null = null;
+  private executionDataViewsBootstrap: ExecutionDataViewsBootstrap | null = null;
   private audit: WorkflowManagementAuditLog | null = null;
   private unregisterHitlLifecycleAuditor: (() => void) | null = null;
+  private pagesService?: WorkflowPagesService;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -74,11 +78,31 @@ export class WorkflowsPlugin
 
     registerUISettings(core, plugins);
 
-    plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
+    plugins.features?.registerKibanaFeature(
+      getWorkflowsManagementFeatureConfig({ pagesEnabled: this.config.pages.enabled })
+    );
+
+    // `workflow-page` is a work-in-progress saved object type: it is registered only with
+    // `workflowsManagement.pages.enabled`, so its shape can change until pages graduate.
+    // See docs/extend/key-concepts/saved-objects/validate.md#saved-objects-wip-types-scenario-b.
+    // TODO: register unconditionally when pages graduate.
+    if (this.config.pages.enabled) {
+      this.pagesService = new WorkflowPagesService();
+      this.pagesService.setup({
+        savedObjects: core.savedObjects,
+        encryptedSavedObjects: plugins.encryptedSavedObjects,
+      });
+    }
 
     this.logger.debug('Workflows Management: Creating workflows service');
 
-    const workflowsService = new WorkflowsService(core, plugins, this.logger, this.kibanaVersion);
+    const workflowsService = new WorkflowsService(
+      core,
+      plugins,
+      this.logger,
+      this.kibanaVersion,
+      this.pagesService
+    );
     this.workflowsService = workflowsService;
 
     const api = new WorkflowsManagementApi(workflowsService, this.config.available, this.logger);
@@ -101,7 +125,7 @@ export class WorkflowsPlugin
     }
 
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
-      createWorkflowsClientProvider(workflowsService, this.config, this.logger)
+      createWorkflowsClientProvider(workflowsService, this.config, this.logger, api)
     );
     plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
       createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
@@ -123,6 +147,30 @@ export class WorkflowsPlugin
       workflowsService,
       audit,
     });
+
+    core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(
+      'workflowsManagement',
+      async (_context, request) => {
+        const [coreStart, startPlugins] = await core.getStartServices();
+        if (this.executionDataViewsBootstrap === null) {
+          this.executionDataViewsBootstrap = new ExecutionDataViewsBootstrap(
+            startPlugins.dataViews,
+            this.logger.get('executionDataViewsBootstrap')
+          );
+        }
+
+        const spaceId = spaces.getSpaceId(request);
+        const savedObjectsClient = coreStart.savedObjects
+          .getUnsafeInternalClient()
+          .asScopedToNamespace(spaceId);
+
+        this.executionDataViewsBootstrap.ensureForSpaceFireAndForget(
+          spaceId,
+          savedObjectsClient,
+          coreStart.elasticsearch.client.asInternalUser
+        );
+      }
+    );
 
     if (plugins.inbox) {
       this.logger.debug('Workflows Management: registering inbox provider');
@@ -198,7 +246,7 @@ export class WorkflowsPlugin
     try {
       await this.workflowsService?.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
     } catch (error) {
-      this.logger.warn(
+      this.logger.error(
         'Workflows Management: Failed to complete global orphan cleanup for unregistered workflows',
         { error }
       );

@@ -26,6 +26,18 @@ const SERVICE_MAP_CRITERIA = [
   'Uses a service-map attachment (`observability.service-map`) rather than a generic graph attachment',
 ];
 
+const SCOPED_SERVICE_MAP_CRITERIA = [
+  ...SERVICE_MAP_CRITERIA,
+  'Sets `serviceName` in the attachment data to the service the user asked about, and that service appears in the attachment connections',
+  'Sets `timeRange` in the attachment data to the same start/end used for the get_service_topology call',
+  'Does NOT set `view` to `full`',
+];
+
+const FULL_SERVICE_MAP_CRITERIA = [
+  ...SERVICE_MAP_CRITERIA,
+  'Sets `view` to `full` in the attachment data because the user asked for the whole architecture',
+];
+
 evaluate.describe('Service Map Skill', { tag: tags.serverless.observability.complete }, () => {
   let replayResult: LoadResult;
 
@@ -53,7 +65,7 @@ evaluate.describe('Service Map Skill', { tag: tags.serverless.observability.comp
                 question: 'Show me the service map for checkout',
               },
               output: {
-                criteria: SERVICE_MAP_CRITERIA,
+                criteria: SCOPED_SERVICE_MAP_CRITERIA,
                 expectedTools: ['observability.get_service_topology', 'attachments.add'],
               },
               metadata: {
@@ -89,7 +101,19 @@ evaluate.describe('Service Map Skill', { tag: tags.serverless.observability.comp
                 question: 'Map out the dependencies for the cart service',
               },
               output: {
-                criteria: SERVICE_MAP_CRITERIA,
+                criteria: SCOPED_SERVICE_MAP_CRITERIA,
+                expectedTools: ['observability.get_service_topology', 'attachments.add'],
+              },
+              metadata: {
+                expectedSkill: 'service-map',
+              },
+            },
+            {
+              input: {
+                question: 'Show me the full service map of the whole architecture',
+              },
+              output: {
+                criteria: FULL_SERVICE_MAP_CRITERIA,
                 expectedTools: ['observability.get_service_topology', 'attachments.add'],
               },
               metadata: {

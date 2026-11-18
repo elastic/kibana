@@ -9,6 +9,7 @@
 
 import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
 import {
@@ -100,7 +101,7 @@ describe('registerConnectorEventTriggers', () => {
     expect(registerTriggerDefinition).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'dual.received',
-        title: 'Dual received',
+        title: 'Dual - Dual received',
         description: 'A dual connector event',
         stability: 'tech_preview',
         requiresConnectorId: true,
@@ -120,8 +121,19 @@ describe('registerConnectorEventTriggers', () => {
       ([definition]: [ServerTriggerDefinition]) => definition.id
     );
     expect(registered).toContain('inboundWebhook.received');
+    expect(registered).not.toContain(HITL_SLACK_ACTION_EVENT_ID);
     expect(registered).toHaveLength(
-      Object.values(connectorsSpecs).filter(connectorSpecHasEvents).length
+      Object.values(connectorsSpecs).reduce((count, spec) => {
+        if (!connectorSpecHasEvents(spec) || spec.events === undefined) {
+          return count;
+        }
+        return (
+          count +
+          Object.values(spec.events.definitions).filter(
+            (eventDefinition) => eventDefinition.eventId !== HITL_SLACK_ACTION_EVENT_ID
+          ).length
+        );
+      }, 0)
     );
   });
 });

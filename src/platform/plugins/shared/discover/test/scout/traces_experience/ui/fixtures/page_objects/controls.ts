@@ -16,12 +16,12 @@ export interface TracesControls {
   getSloEventControlSelectedValue(value: string): Locator;
 }
 
-export function createTracesControls(discover: PageObjects['discover']): TracesControls {
-  const sloEventControl = discover.controls.getControlFrame(SLO_EVENT_CONTROL_ID);
+export function createTracesControls(controls: PageObjects['controls']): TracesControls {
+  const sloEventControl = controls.getFrame(SLO_EVENT_CONTROL_ID);
 
   return {
     sloEventControl,
     getSloEventControlSelectedValue: (value: string) =>
-      discover.controls.getControlFrameSelectedValue(SLO_EVENT_CONTROL_ID, value),
+      controls.getFrame(SLO_EVENT_CONTROL_ID).getByText(value),
   };
 }

@@ -7,20 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCallbacks } from '@kbn/esql-types';
+import {
+  collectAllSteps,
+  collectIgnoredKibanaFetcherOccurrences,
+  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  validateStepNameUniqueness,
+} from '@kbn/workflows';
 import type { ValidateWorkflowResponseDto, WorkflowYaml } from '@kbn/workflows';
-import { validateStepNameUniqueness } from '@kbn/workflows';
 import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
-import type { WorkflowContextRegistry } from '@kbn/workflows-yaml';
+import type { CalledWorkflowOutputs, WorkflowContextRegistry } from '@kbn/workflows-yaml';
 import {
   InvalidYamlSchemaError,
   InvalidYamlSyntaxError,
+  isDynamicValue,
+  isRecord,
   parseWorkflowYamlToJSON,
   validateLiquidTemplate,
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import { collectVariableDiagnostics } from './collect_variable_diagnostics';
 import { connectorParamsSchemaResolver } from './connector_params_schema_resolver';
+import { collectEsqlDiagnostics } from './esql_validation/collect_esql_diagnostics';
 import type { TriggerDefinitionForValidateTriggers } from './validate_triggers';
 import { validateTriggers } from './validate_triggers';
 
@@ -41,13 +50,78 @@ export interface ValidateWorkflowYamlOptions {
    * these rules, where the diagnostics are reported rather than enforced.
    */
   variableValidationRegistry?: WorkflowContextRegistry;
+  /**
+   * Loads the outputs of the workflows the definition runs, by id, so the
+   * `variable-validation` rule group checks references to them. Only used with
+   * `variableValidationRegistry`, which it adds them to.
+   */
+  loadCalledWorkflowOutputs?: (
+    workflowIds: string[]
+  ) => Promise<ReadonlyMap<string, CalledWorkflowOutputs>>;
+  /**
+   * Callbacks for the ES|QL validator. Passing them runs the `esql` rule group
+   * over every `elasticsearch.esql.query` step: grammar, plus indices and
+   * fields when `getSources` / `getColumnsFor` are set.
+   *
+   * Omitted by default for the same reason as `variableValidationRegistry`:
+   * ES|QL errors would block create/update, and the cluster checked here can
+   * differ from the one the workflow runs against. Only reporting callers set it.
+   */
+  esqlCallbacks?: ESQLCallbacks;
+  /**
+   * How many ES|QL steps the `esql` rule group validates. The rest are listed
+   * in `notChecked`. Unlimited when omitted.
+   */
+  esqlMaxSteps?: number;
 }
 
-export function validateWorkflowYaml(
+// Ids of the workflows `workflow.execute` steps run, when written out rather than templated.
+const getStaticCalledWorkflowIds = (workflow: WorkflowYaml): string[] => {
+  const ids = collectAllSteps(workflow.steps ?? []).flatMap((step) => {
+    const stepWith: unknown = 'with' in step ? step.with : undefined;
+    if (step.type !== 'workflow.execute' || !isRecord(stepWith)) {
+      return [];
+    }
+    const workflowId = stepWith['workflow-id'];
+    return typeof workflowId === 'string' && workflowId !== '' && !isDynamicValue(workflowId)
+      ? [workflowId]
+      : [];
+  });
+  return [...new Set(ids)];
+};
+
+const CALLED_WORKFLOW_OUTPUTS_NOT_CHECKED =
+  'References to the outputs of called workflows: the called workflows could not be loaded.';
+
+// The registry with the outputs of the workflows the definition runs. Without them when they can't
+// be loaded, so the rest of variable validation still runs.
+const withCalledWorkflowOutputs = async (
+  registry: WorkflowContextRegistry,
+  workflow: WorkflowYaml,
+  loadCalledWorkflowOutputs: ValidateWorkflowYamlOptions['loadCalledWorkflowOutputs']
+): Promise<{ registry: WorkflowContextRegistry; notCheckedReason?: string }> => {
+  const workflowIds = loadCalledWorkflowOutputs ? getStaticCalledWorkflowIds(workflow) : [];
+  if (!loadCalledWorkflowOutputs || workflowIds.length === 0) {
+    return { registry };
+  }
+  try {
+    const outputsById = await loadCalledWorkflowOutputs(workflowIds);
+    return {
+      registry: {
+        ...registry,
+        getCalledWorkflowOutputs: (workflowId) => outputsById.get(workflowId),
+      },
+    };
+  } catch {
+    return { registry, notCheckedReason: CALLED_WORKFLOW_OUTPUTS_NOT_CHECKED };
+  }
+};
+
+export async function validateWorkflowYaml(
   yaml: string,
   zodSchema: z.ZodType,
   options?: ValidateWorkflowYamlOptions
-): ValidateWorkflowResponseDto {
+): Promise<ValidateWorkflowResponseDto> {
   const diagnostics: WorkflowDiagnostic[] = [];
   const notChecked: string[] = [];
   let parsedWorkflow: WorkflowYaml | undefined;
@@ -142,11 +216,29 @@ export function validateWorkflowYaml(
       diagnostics.push({ severity: 'error', message, source: 'graph', ruleId: 'graphBuildError' });
     }
 
+    for (const occurrence of collectIgnoredKibanaFetcherOccurrences(parsedWorkflow.steps)) {
+      diagnostics.push({
+        severity: 'warning',
+        message: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+        source: 'deprecation',
+        path: occurrence.path,
+        ruleId: 'ignoredFetcherSetting',
+      });
+    }
+
     // Variable validation resolves references against the step graph, so it only
     // runs once the graph builds. Same guard the editor applies.
     if (options?.variableValidationRegistry && workflowGraph) {
-      const variableValidation = collectVariableDiagnostics(
+      const calledWorkflowOutputs = await withCalledWorkflowOutputs(
         options.variableValidationRegistry,
+        parsedWorkflow,
+        options.loadCalledWorkflowOutputs
+      );
+      if (calledWorkflowOutputs.notCheckedReason) {
+        notChecked.push(calledWorkflowOutputs.notCheckedReason);
+      }
+      const variableValidation = collectVariableDiagnostics(
+        calledWorkflowOutputs.registry,
         yaml,
         parsedWorkflow,
         workflowGraph
@@ -166,6 +258,16 @@ export function validateWorkflowYaml(
       source: 'liquid',
       ruleId: 'liquidSyntaxError',
     });
+  }
+
+  if (options?.esqlCallbacks) {
+    const esqlValidation = await collectEsqlDiagnostics(
+      yaml,
+      options.esqlCallbacks,
+      options.esqlMaxSteps
+    );
+    diagnostics.push(...esqlValidation.diagnostics);
+    notChecked.push(...esqlValidation.notChecked);
   }
 
   return {

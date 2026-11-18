@@ -25,7 +25,7 @@ export class NavigationalSearchPageObject extends FtrService {
   async ensureSearchOpen() {
     // Poll the modal-open read so a transient re-render of the already-open modal isn't misread as
     // closed, which would click SEARCH_BUTTON — a toggle hidden under the modal's own overlay mask.
-    if (await this.testSubjects.exists(SEARCH_MODAL, { timeout: 2500 })) {
+    if (await this.testSubjects.waitForExists(SEARCH_MODAL, { timeout: 2500 })) {
       return;
     }
     await this.testSubjects.click(SEARCH_BUTTON);
@@ -39,7 +39,7 @@ export class NavigationalSearchPageObject extends FtrService {
   }
 
   async blur() {
-    if (!(await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 }))) {
+    if (!(await this.testSubjects.exists(SEARCH_MODAL))) {
       return;
     }
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -72,7 +72,7 @@ export class NavigationalSearchPageObject extends FtrService {
   }
 
   async isPopoverDisplayed() {
-    return await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 });
+    return await this.testSubjects.exists(SEARCH_MODAL);
   }
 
   async clickOnOption(index: number) {

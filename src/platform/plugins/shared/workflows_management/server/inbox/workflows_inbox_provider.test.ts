@@ -75,7 +75,6 @@ const fakeApi = () => {
     })),
     resumeWorkflowExecution: jest.fn(async () => ({ resumedBy: 'user' })),
     getStepExecution: jest.fn(async () => buildStep()),
-    markStepAsResponded: jest.fn(async () => true),
   };
   return api as jest.Mocked<WorkflowsManagementApi>;
 };
@@ -276,7 +275,7 @@ describe('createWorkflowsInboxProvider', () => {
 
       await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, c);
 
-      expect(api.markStepAsResponded).not.toHaveBeenCalled();
+      expect(api.resumeWorkflowExecution).toHaveBeenCalledTimes(1);
       expect(api.resumeWorkflowExecution).toHaveBeenCalledWith(
         'run-1',
         'default',
@@ -354,7 +353,8 @@ describe('createWorkflowsInboxProvider', () => {
 
       expect(api.getStepExecution).toHaveBeenCalledWith(
         { executionId: 'run-1', id: 'step-exec-1' },
-        'default'
+        'default',
+        expect.objectContaining({ id: '123' })
       );
       // Verify the lookup happens before the resume call so a stale
       // response cannot race past the check.

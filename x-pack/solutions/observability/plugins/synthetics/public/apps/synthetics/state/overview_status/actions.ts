@@ -73,4 +73,8 @@ export const fetchStaleStatusAction = createAsyncAction<
 >('fetchStaleStatusAction');
 
 export const clearOverviewStatusErrorAction = createAction<void>('clearOverviewStatusErrorAction');
+export const cancelOverviewStatusAction = createAction<void>('cancelOverviewStatusAction');
+export const cancelAppendOverviewStatusAction = createAction<void>(
+  'cancelAppendOverviewStatusAction'
+);
 export const initialLoadReported = createAction<void>('initialLoadReported');

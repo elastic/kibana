@@ -28,6 +28,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  getDefaultEuiMarkdownProcessingPlugins,
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
@@ -55,6 +56,47 @@ import {
 } from '../types';
 
 type TabId = 'inputs' | 'outputs' | 'examples';
+
+type MarkdownComponentProps = React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode };
+
+// A div with heading semantics: EuiText (which wraps EuiMarkdownFormat) restyles h1-h6 tags.
+const ExampleHeading = ({ children }: MarkdownComponentProps) => (
+  <>
+    <EuiTitle size="xxxs">
+      <div role="heading" aria-level={4}>
+        {children}
+      </div>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+  </>
+);
+
+/** Markdown renderer for step examples: compact headings and small copyable code blocks. */
+const exampleProcessingPlugins = (() => {
+  const plugins = getDefaultEuiMarkdownProcessingPlugins();
+  const [, rehypeReactConfig] = plugins[1];
+  // Typed as ComponentType, but EUI defines it as a plain function that picks EuiCode or EuiCodeBlock.
+  const renderDefaultCode = rehypeReactConfig.components.code as (
+    props: MarkdownComponentProps
+  ) => React.ReactElement;
+  rehypeReactConfig.components = {
+    ...rehypeReactConfig.components,
+    h1: ExampleHeading,
+    h2: ExampleHeading,
+    h3: ExampleHeading,
+    h4: ExampleHeading,
+    h5: ExampleHeading,
+    h6: ExampleHeading,
+    // Inline code renders as EuiCode, which would pass fontSize to the DOM.
+    code: (props: MarkdownComponentProps) => {
+      const element = renderDefaultCode(props);
+      return element.type === EuiCodeBlock
+        ? React.cloneElement(element, { fontSize: 's' })
+        : element;
+    },
+  };
+  return plugins;
+})();
 
 interface ActionsMenuPreviewPanelProps {
   hoveredOption: ActionOptionData | null;
@@ -340,14 +382,16 @@ function SectionPreviewPanel({
           borderRadius="m"
           css={styles.stepListPanel}
         >
-          {steps.map((step) => (
-            <PreviewStepRow
-              key={step.id}
-              step={step}
-              onClick={() => onStepSelected(step)}
-              onAdd={onAddStep ? () => onAddStep(step) : undefined}
-              onPinPreview={onPinPreview ? () => onPinPreview(step, section) : undefined}
-            />
+          {steps.map((step, idx) => (
+            <React.Fragment key={step.id}>
+              {idx > 0 && <EuiHorizontalRule margin="none" />}
+              <PreviewStepRow
+                step={step}
+                onClick={() => onStepSelected(step)}
+                onAdd={onAddStep ? () => onAddStep(step) : undefined}
+                onPinPreview={onPinPreview ? () => onPinPreview(step, section) : undefined}
+              />
+            </React.Fragment>
           ))}
         </EuiPanel>
       </div>
@@ -393,7 +437,7 @@ function StepDetailPanel({
       color="transparent"
       css={styles.scroll}
     >
-      <EuiTitle size="xxs">
+      <EuiTitle size="xs">
         <h3>{displayTitle}</h3>
       </EuiTitle>
       {displayDescription && (
@@ -476,10 +520,16 @@ function StepDetailPanel({
       </EuiTabs>
 
       <EuiSpacer size="s" />
-      <EuiPanel hasBorder hasShadow={false} paddingSize="none" borderRadius="m">
+      <EuiPanel hasBorder hasShadow={false} paddingSize="none" css={styles.fieldList}>
         {activeTab === 'examples' ? (
           examples.length === 0 ? (
-            <EuiPanel hasShadow={false} paddingSize="m" color="transparent">
+            <EuiPanel
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="m"
+              color="transparent"
+              borderRadius="none"
+            >
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
                   id="workflows.actionsMenu.preview.noExamples"
@@ -491,14 +541,32 @@ function StepDetailPanel({
             examples.map((example, idx) => (
               <React.Fragment key={idx}>
                 {idx > 0 && <EuiHorizontalRule margin="none" />}
-                <EuiPanel hasShadow={false} paddingSize="m" color="transparent">
-                  <EuiMarkdownFormat textSize="xs">{example}</EuiMarkdownFormat>
+                <EuiPanel
+                  hasBorder={false}
+                  hasShadow={false}
+                  paddingSize="m"
+                  color="transparent"
+                  borderRadius="none"
+                >
+                  <EuiMarkdownFormat
+                    textSize="xs"
+                    processingPluginList={exampleProcessingPlugins}
+                    css={styles.exampleMarkdown}
+                  >
+                    {example}
+                  </EuiMarkdownFormat>
                 </EuiPanel>
               </React.Fragment>
             ))
           )
         ) : fields.length === 0 ? (
-          <EuiPanel hasShadow={false} paddingSize="m" color="transparent">
+          <EuiPanel
+            hasBorder={false}
+            hasShadow={false}
+            paddingSize="m"
+            color="transparent"
+            borderRadius="none"
+          >
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 id="workflows.actionsMenu.preview.noFields"
@@ -510,7 +578,13 @@ function StepDetailPanel({
           fields.map((field, idx) => (
             <React.Fragment key={field.name}>
               {idx > 0 && <EuiHorizontalRule margin="none" />}
-              <EuiPanel hasShadow={false} paddingSize="m" color="transparent">
+              <EuiPanel
+                hasBorder={false}
+                hasShadow={false}
+                paddingSize="m"
+                color="transparent"
+                borderRadius="none"
+              >
                 <EuiFlexGroup
                   alignItems="center"
                   justifyContent="spaceBetween"

@@ -10,7 +10,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { CommentsHostServices } from '@kbn/dev-comments';
-import { FormattedRelative } from '@kbn/i18n-react';
+import type { IntlShape } from '@kbn/i18n-react';
 import { isSafeRelativePath, routeFromLocation, type CommentRoute } from '../common';
 import { createCommentsApi } from './comments_api';
 import { captureViewport } from './capture_viewport';
@@ -32,23 +32,20 @@ const removeServerBasePath = (pathname: string, { serverBasePath }: IBasePath): 
     ? pathname.slice(serverBasePath.length)
     : pathname;
 
-/**
- * The current page as a comment's route: within this deployment (no origin, no
- * server base path), space prefix included, so that a comment made in one space
- * is not taken for one on the same page of another, and opens in its own.
- */
+/** The current page as a comment's route: without origin or server base path, but with the space prefix, which makes the same page of another space another page. */
 export const routeOf = (
   { pathname, search, hash }: Pick<Location, 'pathname' | 'search' | 'hash'>,
   basePath: IBasePath
 ): CommentRoute =>
   routeFromLocation({ pathname: removeServerBasePath(pathname, basePath), search, hash });
 
-export const createCommentsHostServices = ({
-  http,
-  application,
-  security,
-}: Pick<CoreStart, 'http' | 'application' | 'security'>): CommentsHostServices => ({
+export const createCommentsHostServices = (
+  { http, application, security }: Pick<CoreStart, 'http' | 'application' | 'security'>,
+  { formatDate }: Pick<IntlShape, 'formatDate'>
+): CommentsHostServices => ({
   api: createCommentsApi(http),
+
+  formatDate: (iso, options) => formatDate(iso, options),
 
   location: {
     getPageKey: () => routeOf(window.location, http.basePath).pageKey,
@@ -59,7 +56,7 @@ export const createCommentsHostServices = ({
     },
   },
 
-  // The path has the space in it (see `routeOf`); core reloads the page for a URL out of the current one.
+  // The path has the space in it (see `routeOf`); core loads the page anew for another space's URL.
   navigateToPath: async (path) => {
     if (!isSafeRelativePath(path)) {
       throw new Error(`Refusing to navigate outside of this deployment: ${path}`);
@@ -75,7 +72,4 @@ export const createCommentsHostServices = ({
   captureViewport,
 
   ignoreSelectors: HOST_IGNORE_SELECTORS,
-
-  // "5 minutes ago" in the UI's locale; the toolbar renders inside core's `I18nProvider`.
-  RelativeTime: FormattedRelative,
 });

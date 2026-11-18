@@ -15,10 +15,14 @@ import {
   buildCssPath,
   getAnchorPoint,
   isExposed,
+  isInTooltip,
   looksGenerated,
   placeAnchor,
   promoteToCommentable,
   resolveAnchor,
+  tooltipAt,
+  tooltipShowing,
+  triggerOf,
 } from './anchor';
 
 const bySubj = (subj: string): Element => query(`[data-test-subj="${subj}"]`);
@@ -272,6 +276,131 @@ describe('anchor', () => {
 
       query('#mask').setAttribute(IGNORE_ATTR, 'true');
       expect(isExposed(query('#target'), point)).toBe(true);
+    });
+
+    it('takes an element hit-testing passes over, one taking no pointer input, for shown', () => {
+      renderPage(`
+        <button id="target" data-rect="0,0,100,100">Go</button>
+        <div id="tip" role="tooltip" style="pointer-events: none" data-rect="0,0,100,100">Goes</div>
+        <div id="mask" data-rect="0,0,2000,2000"></div>
+      `);
+      expect(isExposed(query('#target'), point)).toBe(false);
+      expect(isExposed(query('#tip'), point)).toBe(true);
+    });
+  });
+
+  describe('tooltips', () => {
+    it("finds the tooltip showing: the one the trigger describes itself by if showing, else the nearest within a tooltip's reach of it", () => {
+      renderPage(`
+        <button id="described" aria-describedby="gone own" data-rect="0,500,100,30"><span id="describedText">Go</span></button>
+        <button id="other" data-rect="0,110,100,30">Other</button>
+        <button id="far" data-rect="500,500,100,30">Far</button>
+        <button id="layerButton" aria-describedby="hint" ${IGNORE_ATTR}="true">Layer</button>
+        <div id="gone" role="tooltip" data-rect="0,0,0,0">Gone</div>
+        <div id="own" role="tooltip" data-rect="0,0,100,100">Own</div>
+        <div id="first" role="tooltip" data-rect="0,0,100,100"><p id="firstText">First</p></div>
+        <div id="second" role="tooltip" data-rect="0,50,100,100">Second</div>
+        <div id="hint" role="tooltip" data-rect="0,100,100,100">Of the layer</div>
+        <div id="ignored" role="tooltip" ${IGNORE_ATTR}="true" data-rect="0,0,300,300">Layer</div>
+      `);
+      expect(isInTooltip(query('#firstText'))).toBe(true);
+      expect(isInTooltip(query('#other'))).toBe(false);
+
+      expect(tooltipShowing(query('#describedText'))).toBe(query('#own'));
+      // Without the ARIA link: the second overlaps the button, the first is 10px off, the layer's hint over it does not count.
+      expect(tooltipShowing(query('#other'))).toBe(query('#second'));
+      query('#own').remove();
+      expect(tooltipShowing(query('#described'))).toBeNull();
+      query('#second').setAttribute('data-rect', '0,0,0,0');
+      expect(tooltipShowing(query('#other'))).toBe(query('#first'));
+      expect(tooltipShowing(query('#far'))).toBeNull();
+      query('#first').remove();
+      expect(tooltipShowing(query('#other'))).toBeNull();
+    });
+
+    it('finds the tooltip showing at a point, the latest one of several, what of it is there, and the element that shows it', () => {
+      renderPage(`
+        <button id="target" aria-describedby="second" data-rect="0,0,100,100">Go</button>
+        <button id="layerButton" aria-describedby="hint" ${IGNORE_ATTR}="true">Layer</button>
+        <div id="hidden" role="tooltip" data-rect="0,0,0,0">Hidden</div>
+        <div id="first" role="tooltip" data-rect="0,0,100,100"><p id="firstText" data-rect="0,0,100,50">First</p></div>
+        <div id="second" role="tooltip" data-rect="0,50,100,100"><p id="secondText" data-rect="0,50,100,50">Second</p></div>
+        <div id="hint" role="tooltip" data-rect="0,0,300,300">Of the layer</div>
+        <div id="ignored" role="tooltip" ${IGNORE_ATTR}="true" data-rect="0,0,300,300">Layer</div>
+        <div role="tooltip" data-rect="0,0,0,0">No id</div>
+      `);
+      expect(tooltipAt({ x: 50, y: 25 })).toEqual({
+        tooltip: query('#first'),
+        hit: query('#firstText'),
+      });
+      expect(tooltipAt({ x: 50, y: 75 })).toEqual({
+        tooltip: query('#second'),
+        hit: query('#secondText'),
+      });
+      expect(tooltipAt({ x: 50, y: 125 })).toEqual({
+        tooltip: query('#second'),
+        hit: query('#second'),
+      });
+      expect(tooltipAt({ x: 250, y: 250 })).toBeNull();
+
+      expect(triggerOf(query('#second'))).toBe(query('#target'));
+      expect(triggerOf(query('#first'))).toBeNull();
+      expect(triggerOf(query('[role="tooltip"]:not([id])'))).toBeNull();
+    });
+
+    it('anchors a tooltip, mounted anew in a portal each time it shows, by its text among the tooltips', () => {
+      renderPage(`
+        <button id="save" aria-describedby="i5f3a2b1c-7d8e-4f9a-b0c1-d2e3f4a5b6c7">Save</button>
+        <div data-euiportal="true">
+          <div id="i5f3a2b1c-7d8e-4f9a-b0c1-d2e3f4a5b6c7" role="tooltip" data-rect="0,0,100,40"><div>Saves the rule</div></div>
+        </div>
+      `);
+      const anchor = buildAnchor(query('[role="tooltip"]'));
+      expect(anchor.locators[0]).toEqual({
+        type: 'text',
+        tag: '[role="tooltip"]',
+        value: 'Saves the rule',
+      });
+      expect(resolveAnchor(anchor)).toEqual({ element: query('[role="tooltip"]'), exact: true });
+    });
+
+    it("does not take another tooltip for the one anchored: at its path with other text, or the hint on one of the layer's own buttons", () => {
+      renderPage(`
+        <button id="save" aria-describedby="i5f3a2b1c-7d8e-4f9a-b0c1-d2e3f4a5b6c7">Save</button>
+        <div data-euiportal="true">
+          <div id="i5f3a2b1c-7d8e-4f9a-b0c1-d2e3f4a5b6c7" role="tooltip" data-rect="0,0,100,40">Saves the rule</div>
+        </div>
+      `);
+      const anchor = buildAnchor(query('[role="tooltip"]'));
+      const byPath = {
+        ...anchor,
+        locators: anchor.locators.filter(({ type }) => type === 'cssPath'),
+      };
+      expect(resolveAnchor(byPath)).toEqual({ element: query('[role="tooltip"]'), exact: true });
+
+      // The tooltip is gone; the layer's, on its "back" button, is mounted at the same path.
+      renderPage(`
+        <button id="save">Save</button>
+        <div ${IGNORE_ATTR}="true"><button id="back" aria-describedby="i9a8b7c6d-5e4f-4a3b-9c8d-7e6f5a4b3c2d">Back</button></div>
+        <div data-euiportal="true">
+          <div id="i9a8b7c6d-5e4f-4a3b-9c8d-7e6f5a4b3c2d" role="tooltip" data-rect="0,0,100,40">Back to comments</div>
+        </div>
+      `);
+      expect(resolveAnchor(byPath)).toBeNull();
+      expect(resolveAnchor(anchor)).toBeNull();
+
+      // Even reading the same, it is not the page's.
+      query('#i9a8b7c6d-5e4f-4a3b-9c8d-7e6f5a4b3c2d').textContent = 'Saves the rule';
+      expect(resolveAnchor(byPath)).toBeNull();
+      expect(resolveAnchor(anchor)).toBeNull();
+
+      // Back showing on the page, the tooltip is found by its text, the layer's notwithstanding.
+      document.body.append(
+        Object.assign(document.createElement('div'), {
+          innerHTML: `<div id="pageTip" role="tooltip" data-rect="0,50,100,40">Saves the rule</div>`,
+        })
+      );
+      expect(resolveAnchor(anchor)).toEqual({ element: query('#pageTip'), exact: true });
     });
 
     it('places an anchor at its pin, exposed while the element shows there', () => {

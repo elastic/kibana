@@ -50,5 +50,6 @@ export interface AgentBuilderInternalService {
   eventsService: EventsService;
   isEarsEnabled: boolean;
   isEarsExperimentalEnabled: boolean;
+  isServerless: boolean;
   openSidebarConversation: (options?: OpenSidebarInternalOptions) => OpenConversationSidebarReturn;
 }

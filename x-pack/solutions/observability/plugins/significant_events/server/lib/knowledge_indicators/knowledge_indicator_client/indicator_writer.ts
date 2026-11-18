@@ -21,7 +21,7 @@ import {
   IS_NOT_DELETED,
   olderThan,
 } from '../esql_helpers';
-import { ID, STREAM_NAME } from '../fields';
+import { ID, SOURCE_ID } from '../fields';
 import {
   computeExpiresAt,
   fromStoredFeature,
@@ -38,16 +38,22 @@ import { StatusError } from '../../errors/status_error';
 import type { RevisionReader } from './revision_reader';
 import type { KIBulkOperation, KnowledgeIndicatorDataStreamClient } from './types';
 
+interface DurabilityChange {
+  latest: StoredFeatureKnowledgeIndicator;
+  durable: boolean;
+}
+
 export class IndicatorWriter {
   constructor(
     private readonly dataStreamClient: KnowledgeIndicatorDataStreamClient,
     private readonly logger: Logger,
     private readonly revisionReader: RevisionReader,
-    private readonly ttlDays: number
+    private readonly ttlDays: number,
+    private readonly space: string
   ) {}
 
   async bulk(
-    stream: string,
+    sourceId: string,
     operations: KIBulkOperation[]
   ): Promise<{ applied: number; skipped: number }> {
     if (operations.length === 0) {
@@ -62,16 +68,22 @@ export class IndicatorWriter {
       { excludableLatest, skipped: excludeSkipped },
       { restorableLatest, skipped: restoreSkipped },
       { deletableOps, skipped: deleteSkipped },
+      { durabilityChanges, skipped: durabilitySkipped },
     ] = await Promise.all([
-      this.prepareExcludes(stream, operations),
-      this.prepareRestores(stream, operations),
-      this.prepareDeletes(stream, operations),
+      this.prepareExcludes(sourceId, operations),
+      this.prepareRestores(sourceId, operations),
+      this.prepareDeletes(sourceId, operations),
+      this.prepareDurability(sourceId, operations),
     ]);
 
     const indexOpsCount = operations.filter((op) => 'index' in op).length;
     const totalApplied =
-      indexOpsCount + excludableLatest.length + restorableLatest.length + deletableOps.length;
-    const totalSkipped = excludeSkipped + restoreSkipped + deleteSkipped;
+      indexOpsCount +
+      excludableLatest.length +
+      restorableLatest.length +
+      deletableOps.length +
+      durabilityChanges.length;
+    const totalSkipped = excludeSkipped + restoreSkipped + deleteSkipped + durabilitySkipped;
 
     if (totalApplied === 0) {
       return { applied: 0, skipped: totalSkipped };
@@ -79,11 +91,13 @@ export class IndicatorWriter {
 
     await bulkCreateWithInferenceFallback(this.logger, ({ includeEmbedding }) =>
       this.dataStreamClient.create({
+        space: this.space,
         refresh: 'wait_for',
-        documents: this.buildBulkDocs(stream, operations, {
+        documents: this.buildBulkDocs(sourceId, operations, {
           excludableLatest,
           restorableLatest,
           deletableOps,
+          durabilityChanges,
           includeEmbedding,
           now,
         }) as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
@@ -115,7 +129,7 @@ export class IndicatorWriter {
    * already-excluded ids are skipped (they'd create orphans or churn).
    */
   private async prepareExcludes(
-    stream: string,
+    sourceId: string,
     operations: KIBulkOperation[]
   ): Promise<{ excludableLatest: StoredFeatureKnowledgeIndicator[]; skipped: number }> {
     const excludeOps = operations.filter(
@@ -126,7 +140,7 @@ export class IndicatorWriter {
       return { excludableLatest: [], skipped: 0 };
     }
 
-    const excludeLatest = await this.revisionReader.fetchLatestFeatures(stream, [...excludeIds]);
+    const excludeLatest = await this.revisionReader.fetchLatestFeatures(sourceId, [...excludeIds]);
     const excludableLatest: StoredFeatureKnowledgeIndicator[] = [];
     let skipped = 0;
     for (const id of excludeIds) {
@@ -160,7 +174,7 @@ export class IndicatorWriter {
    * can re-index it with `excluded` cleared and fresh timestamps.
    */
   private async prepareRestores(
-    stream: string,
+    sourceId: string,
     operations: KIBulkOperation[]
   ): Promise<{ restorableLatest: StoredFeatureKnowledgeIndicator[]; skipped: number }> {
     const restoreOps = operations.filter(
@@ -171,7 +185,7 @@ export class IndicatorWriter {
       return { restorableLatest: [], skipped: 0 };
     }
 
-    const restoreLatest = await this.revisionReader.fetchLatestFeatures(stream, [...restoreIds]);
+    const restoreLatest = await this.revisionReader.fetchLatestFeatures(sourceId, [...restoreIds]);
     const restorableLatest: StoredFeatureKnowledgeIndicator[] = [];
     let skipped = 0;
     for (const id of restoreIds) {
@@ -190,6 +204,36 @@ export class IndicatorWriter {
     return { restorableLatest, skipped };
   }
 
+  /** Durability requires a pre-read: the full feature payload is re-indexed with the new expiry. */
+  private async prepareDurability(
+    sourceId: string,
+    operations: KIBulkOperation[]
+  ): Promise<{ durabilityChanges: DurabilityChange[]; skipped: number }> {
+    const durableById = new Map(
+      operations.flatMap((op) =>
+        'durability' in op ? [[op.durability.id, op.durability.durable] as const] : []
+      )
+    );
+    if (durableById.size === 0) {
+      return { durabilityChanges: [], skipped: 0 };
+    }
+
+    const latestDocs = await this.revisionReader.fetchLatestFeatures(sourceId, [
+      ...durableById.keys(),
+    ]);
+    const durabilityChanges: DurabilityChange[] = [];
+    let skipped = 0;
+    for (const [id, durable] of durableById) {
+      const latest = latestDocs.find((doc) => doc.id === id);
+      if (!latest || isComputedFeature(fromStoredFeature(latest))) {
+        skipped += 1;
+        continue;
+      }
+      durabilityChanges.push({ latest, durable });
+    }
+    return { durabilityChanges, skipped };
+  }
+
   /**
    * Delete requires a pre-read so we can skip unknown/non-existent ids
    * rather than writing tombstones for them (which would count as applied).
@@ -199,7 +243,7 @@ export class IndicatorWriter {
    * types and matches on `type:id`, not feature revisions alone.
    */
   private async prepareDeletes(
-    stream: string,
+    sourceId: string,
     operations: KIBulkOperation[]
   ): Promise<{
     deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>>;
@@ -214,7 +258,7 @@ export class IndicatorWriter {
     }
 
     const deleteLatest = await this.revisionReader.fetchLatestRevisions(
-      combineWhere(inPredicate(STREAM_NAME, [stream]), inPredicate(ID, [...deleteIds])),
+      combineWhere(inPredicate(SOURCE_ID, [sourceId]), inPredicate(ID, [...deleteIds])),
       IS_NOT_DELETED
     );
     const presentByTypeId = new Set(deleteLatest.map((doc) => `${doc.type}:${doc.id}`));
@@ -237,18 +281,20 @@ export class IndicatorWriter {
    * inference fallback.
    */
   private buildBulkDocs(
-    stream: string,
+    sourceId: string,
     operations: KIBulkOperation[],
     {
       excludableLatest,
       restorableLatest,
       deletableOps,
+      durabilityChanges,
       includeEmbedding,
       now,
     }: {
       excludableLatest: StoredFeatureKnowledgeIndicator[];
       restorableLatest: StoredFeatureKnowledgeIndicator[];
       deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>>;
+      durabilityChanges: DurabilityChange[];
       includeEmbedding: boolean;
       now: string;
     }
@@ -258,11 +304,22 @@ export class IndicatorWriter {
       if ('index' in op) {
         if ('feature' in op.index) {
           docs.push(
-            toStoredFeature(stream, op.index.feature, includeEmbedding, op.index.feature.expires_at)
+            toStoredFeature({
+              sourceId,
+              feature: op.index.feature,
+              includeEmbedding,
+              expiresAt: op.index.feature.expires_at,
+            })
           );
         } else {
           docs.push(
-            toStoredQuery(stream, op.index.query, includeEmbedding, op.index.query.expires_at)
+            toStoredQuery({
+              space: this.space,
+              sourceId,
+              query: op.index.query,
+              includeEmbedding,
+              expiresAt: op.index.query.expires_at,
+            })
           );
         }
       }
@@ -271,27 +328,47 @@ export class IndicatorWriter {
       const feature = fromStoredFeature(latest);
       const expiresAt = latest.expires_at ? computeExpiresAt(now, this.ttlDays) : undefined;
       docs.push(
-        toStoredFeature(stream, { ...feature, excluded: true }, includeEmbedding, expiresAt)
+        toStoredFeature({
+          sourceId,
+          feature: { ...feature, excluded: true },
+          includeEmbedding,
+          expiresAt,
+        })
       );
     }
     for (const latest of restorableLatest) {
       const feature = fromStoredFeature(latest);
       const expiresAt = latest.expires_at ? computeExpiresAt(now, this.ttlDays) : undefined;
       docs.push(
-        toStoredFeature(stream, { ...feature, excluded: undefined }, includeEmbedding, expiresAt)
+        toStoredFeature({
+          sourceId,
+          feature: { ...feature, excluded: undefined },
+          includeEmbedding,
+          expiresAt,
+        })
+      );
+    }
+    for (const { latest, durable } of durabilityChanges) {
+      docs.push(
+        toStoredFeature({
+          sourceId,
+          feature: fromStoredFeature(latest),
+          includeEmbedding,
+          expiresAt: durable ? undefined : computeExpiresAt(now, this.ttlDays),
+        })
       );
     }
     for (const op of deletableOps) {
-      docs.push(toTombstone(stream, { id: op.delete.id, type: op.delete.type }));
+      docs.push(toTombstone(sourceId, { id: op.delete.id, type: op.delete.type }));
     }
     return docs;
   }
 
   async keepAlivePersistent(
-    stream: string,
+    sourceId: string,
     { lastRefreshedBefore }: { lastRefreshedBefore: string }
   ): Promise<{ refreshed: number }> {
-    const where = inPredicate(STREAM_NAME, [stream]);
+    const where = inPredicate(SOURCE_ID, [sourceId]);
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
       IS_DURABLE_OR_EXCLUDED,
@@ -312,26 +389,30 @@ export class IndicatorWriter {
       for (const doc of latest) {
         if (isStoredFeatureKnowledgeIndicator(doc)) {
           docs.push(
-            toStoredFeature(
-              stream,
-              fromStoredFeature(doc),
+            toStoredFeature({
+              sourceId,
+              feature: fromStoredFeature(doc),
               includeEmbedding,
-              rollExpiresAt(doc.expires_at)
-            )
+              expiresAt: rollExpiresAt(doc.expires_at),
+            })
           );
         } else if (isStoredQueryKnowledgeIndicator(doc)) {
           const link = fromStoredQuery(doc);
+          // The stored `rule_id` is carried over on purpose: a keep-alive must never
+          // recompute it, or the revision would point at a rule that does not exist.
           docs.push(
-            toStoredQuery(
-              stream,
-              { ...link.query, rule_backed: link.rule_backed, rule_id: link.rule_id },
+            toStoredQuery({
+              space: this.space,
+              sourceId,
+              query: { ...link.query, rule_backed: link.rule_backed, rule_id: link.rule_id },
               includeEmbedding,
-              rollExpiresAt(doc.expires_at)
-            )
+              expiresAt: rollExpiresAt(doc.expires_at),
+            })
           );
         }
       }
       return this.dataStreamClient.create({
+        space: this.space,
         refresh: 'wait_for',
         documents: docs as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
       });
@@ -340,16 +421,17 @@ export class IndicatorWriter {
     return { refreshed: latest.length };
   }
 
-  async deleteIndicators(stream: string): Promise<void> {
+  async deleteIndicators(sourceId: string): Promise<void> {
     const latest = await this.revisionReader.fetchLatestRevisions(
-      inPredicate(STREAM_NAME, [stream]),
+      inPredicate(SOURCE_ID, [sourceId]),
       IS_NOT_DELETED
     );
     if (latest.length === 0) {
       return;
     }
-    const tombstones = latest.map((doc) => toTombstone(stream, doc));
+    const tombstones = latest.map((doc) => toTombstone(sourceId, doc));
     const response = await this.dataStreamClient.create({
+      space: this.space,
       refresh: 'wait_for',
       documents: tombstones as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
     });
@@ -358,7 +440,7 @@ export class IndicatorWriter {
       // check a failed tombstone write would resolve as a successful delete.
       const { inference, other } = countRawBulkInferenceErrors(response);
       throw new Error(
-        `Failed to delete indicators for stream "${stream}": ${inference + other}/${
+        `Failed to delete indicators for source "${sourceId}": ${inference + other}/${
           tombstones.length
         } tombstone writes errored`
       );

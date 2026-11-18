@@ -29,7 +29,6 @@
       "searchprofiler",
       "security",
       "serverless",
-      "searchHomepage",
       "share",
       "visualizations",
     ],
@@ -38,7 +37,6 @@
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
-      "searchPlayground",
       "workflowsManagement",
     ],
     "requiredBundles": [

@@ -9,6 +9,7 @@
 
 import { FtrService } from '../ftr_provider_context';
 import type { Cookie } from '../cookie_auth';
+import { getStatefulInternalRequestHeaders } from '../saml_auth/default_request_headers';
 
 const HOME_WELCOME_LOCAL_STORAGE_KEY = 'home:welcome:show';
 const HOME_WELCOME_INTERSTITIAL_TEST_SUBJ = 'homeWelcomeInterstitial';
@@ -129,7 +130,7 @@ export class BrowserAuthService extends FtrService {
       if (sidValue) {
         const { body } = await this.supertestWithoutAuth
           .get('/internal/security/me')
-          .set('kbn-xsrf', 'xxx')
+          .set(getStatefulInternalRequestHeaders())
           .set('Cookie', `sid=${sidValue}`)
           .expect(200);
 
@@ -155,7 +156,7 @@ export class BrowserAuthService extends FtrService {
     }
 
     if (
-      !(await this.testSubjects.exists(HOME_WELCOME_INTERSTITIAL_TEST_SUBJ, {
+      !(await this.testSubjects.waitForExists(HOME_WELCOME_INTERSTITIAL_TEST_SUBJ, {
         timeout: 2_500,
       }))
     ) {

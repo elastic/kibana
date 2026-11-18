@@ -13,7 +13,7 @@ jest.mock('../cancel_workflow_if_requested', () => ({
   cancelWorkflowIfRequested: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { cancelWorkflowIfRequested } = require('../cancel_workflow_if_requested');
 
 describe('processNodeStackMonitoring', () => {
@@ -49,13 +49,14 @@ describe('processNodeStackMonitoring', () => {
           .mockReturnValueOnce(nodeWithoutMonitor),
       },
       workflowExecutionRepository: {},
-      workflowExecutionState: {},
+      workflowExecutionState: { refreshCancelState: jest.fn() },
       workflowLogger: {},
     };
 
     await processNodeStackMonitoring(params as any, monitoredRuntime as any);
 
     expect(monitorFn).toHaveBeenCalledWith(monitoredRuntime);
+    expect(params.workflowExecutionState.refreshCancelState).not.toHaveBeenCalled();
     expect(cancelWorkflowIfRequested).toHaveBeenCalled();
   });
 
@@ -75,12 +76,13 @@ describe('processNodeStackMonitoring', () => {
         create: jest.fn(),
       },
       workflowExecutionRepository: {},
-      workflowExecutionState: {},
+      workflowExecutionState: { refreshCancelState: jest.fn() },
       workflowLogger: {},
     };
 
     await processNodeStackMonitoring(params as any, monitoredRuntime as any);
 
+    expect(params.workflowExecutionState.refreshCancelState).not.toHaveBeenCalled();
     expect(params.nodesFactory.create).not.toHaveBeenCalled();
     expect(cancelWorkflowIfRequested).toHaveBeenCalled();
   });

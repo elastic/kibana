@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -13,47 +13,53 @@ import { MAX_DOCUMENT_ID_LENGTH } from '../common/constants';
 
 export const GetNotesStepId = 'security.getNotes' as const;
 
-export const getNotesInputSchema = z.object({
-  document_id: z
-    .string()
-    .min(1)
-    .max(MAX_DOCUMENT_ID_LENGTH)
-    .describe('The Elasticsearch `_id` of the alert, attack, or document to retrieve notes for.'),
-});
+export const getNotesInputSchema = lazySchema(() =>
+  z.object({
+    document_id: z
+      .string()
+      .min(1)
+      .max(MAX_DOCUMENT_ID_LENGTH)
+      .describe('The Elasticsearch `_id` of the alert, attack, or document to retrieve notes for.'),
+  })
+);
 
-const noteSchema = z.object({
-  note_id: z.string().nullable().optional().describe('The `savedObjectId` of the note.'),
-  text: z.string().nullable().optional().describe('The text content of the note.'),
-  document_id: z
-    .string()
-    .nullable()
-    .optional()
-    .describe('The Elasticsearch `_id` of the document the note is attached to.'),
-  timeline_id: z
-    .string()
-    .nullable()
-    .optional()
-    .describe('The `savedObjectId` of the Timeline the note belongs to, if any.'),
-  created_by: z.string().nullable().optional().describe('The user who created the note.'),
-  created: z
-    .number()
-    .nullable()
-    .optional()
-    .describe('When the note was created, as a 13-digit Epoch timestamp.'),
-  updated_by: z.string().nullable().optional().describe('The user who last updated the note.'),
-  updated: z
-    .number()
-    .nullable()
-    .optional()
-    .describe('When the note was last updated, as a 13-digit Epoch timestamp.'),
-  version: z.string().nullable().optional().describe('The version of the note.'),
-});
+const noteSchema = lazySchema(() =>
+  z.object({
+    note_id: z.string().nullable().optional().describe('The `savedObjectId` of the note.'),
+    text: z.string().nullable().optional().describe('The text content of the note.'),
+    document_id: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('The Elasticsearch `_id` of the document the note is attached to.'),
+    timeline_id: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('The `savedObjectId` of the Timeline the note belongs to, if any.'),
+    created_by: z.string().nullable().optional().describe('The user who created the note.'),
+    created: z
+      .number()
+      .nullable()
+      .optional()
+      .describe('When the note was created, as a 13-digit Epoch timestamp.'),
+    updated_by: z.string().nullable().optional().describe('The user who last updated the note.'),
+    updated: z
+      .number()
+      .nullable()
+      .optional()
+      .describe('When the note was last updated, as a 13-digit Epoch timestamp.'),
+    version: z.string().nullable().optional().describe('The version of the note.'),
+  })
+);
 
-export const getNotesOutputSchema = z.object({
-  success: z.boolean(),
-  total_count: z.number().describe('The total number of notes returned.'),
-  notes: z.array(noteSchema).describe('The notes attached to the document.'),
-});
+export const getNotesOutputSchema = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+    total_count: z.number().describe('The total number of notes returned.'),
+    notes: z.array(noteSchema).describe('The notes attached to the document.'),
+  })
+);
 
 export const getNotesStepCommonDefinition: BaseStepDefinition<
   typeof getNotesInputSchema,

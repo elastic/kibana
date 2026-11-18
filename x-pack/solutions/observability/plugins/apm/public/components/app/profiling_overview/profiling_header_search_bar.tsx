@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { EmbeddableProfilingSearchBar } from '@kbn/observability-shared-plugin/public';
+import {
+  EmbeddableProfilingSearchBar,
+  useProfilingSchemaState,
+} from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { isJavaAgentName as getIsJavaAgentName } from '../../../../common/agent_name';
@@ -23,6 +26,7 @@ export function ProfilingHeaderSearchBar() {
   const { refreshTimeRange } = useTimeRange({ rangeFrom, rangeTo });
   const { agentName } = useApmServiceContext();
   const isJavaAgent = getIsJavaAgentName(agentName);
+  const { schema } = useProfilingSchemaState();
 
   if (isJavaAgent) {
     return <SearchBar showTransactionTypeSelector showEnvironmentFilter />;
@@ -34,6 +38,7 @@ export function ProfilingHeaderSearchBar() {
         kuery={kuery}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
+        schema={schema}
         onQuerySubmit={(next) => {
           push(history, {
             query: {

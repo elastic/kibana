@@ -12,6 +12,7 @@ import { renderHook, act } from '@testing-library/react';
 import { ContentListProvider } from '../../context';
 import type { FindItemsResult, FindItemsParams } from '../../datasource';
 import { useContentListSort } from './use_content_list_sort';
+import type { SortingConfig, SortState } from './types';
 
 describe('useContentListSort', () => {
   const mockFindItems = jest.fn(
@@ -21,17 +22,31 @@ describe('useContentListSort', () => {
     })
   );
 
-  const createWrapper = (options?: {
-    initialSort?: { field: string; direction: 'asc' | 'desc' };
-    sortingDisabled?: boolean;
-  }) => {
-    const { initialSort, sortingDisabled } = options ?? {};
-    const features = sortingDisabled
-      ? { sorting: false as const }
-      : initialSort
-      ? { sorting: { initialSort } }
-      : undefined;
+  const STORAGE_KEY = 'contentList:sort:test-list-listing';
 
+  const getFeatures = ({
+    initialSort,
+    sorting,
+    sortingDisabled,
+  }: {
+    initialSort?: SortState;
+    sorting?: SortingConfig;
+    sortingDisabled?: boolean;
+  } = {}) => {
+    if (sortingDisabled) {
+      return { sorting: false as const };
+    }
+    if (sorting) {
+      return { sorting };
+    }
+    if (initialSort) {
+      return { sorting: { initialSort } };
+    }
+    return undefined;
+  };
+
+  const createWrapper = (options?: Parameters<typeof getFeatures>[0]) => {
+    const features = getFeatures(options);
     return ({ children }: { children: React.ReactNode }) => (
       <ContentListProvider
         id="test-list"
@@ -46,6 +61,7 @@ describe('useContentListSort', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
   });
 
   describe('initial state', () => {
@@ -189,6 +205,64 @@ describe('useContentListSort', () => {
       );
 
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('persistence', () => {
+    it('persists the sort to localStorage as `field:direction`', () => {
+      const { result } = renderHook(() => useContentListSort(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.setSort('updatedAt', 'asc');
+      });
+
+      expect(localStorage.getItem(STORAGE_KEY)).toBe('updatedAt:asc');
+    });
+
+    it('does not persist on mount', () => {
+      renderHook(() => useContentListSort(), { wrapper: createWrapper() });
+
+      expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+    });
+  });
+
+  describe('opening sort', () => {
+    it('opens with the persisted sort instead of the default', () => {
+      localStorage.setItem(STORAGE_KEY, 'updatedAt:asc');
+
+      const { result } = renderHook(() => useContentListSort(), { wrapper: createWrapper() });
+
+      expect(result.current.field).toBe('updatedAt');
+      expect(result.current.direction).toBe('asc');
+    });
+
+    it('prefers the persisted sort over the configured initial sort', () => {
+      localStorage.setItem(STORAGE_KEY, 'updatedAt:asc');
+
+      const { result } = renderHook(() => useContentListSort(), {
+        wrapper: createWrapper({ initialSort: { field: 'title', direction: 'asc' } }),
+      });
+
+      expect(result.current.field).toBe('updatedAt');
+      expect(result.current.direction).toBe('asc');
+    });
+
+    it('ignores a persisted direction the field does not offer', () => {
+      localStorage.setItem(STORAGE_KEY, 'accessedAt:asc');
+
+      const { result } = renderHook(() => useContentListSort(), {
+        wrapper: createWrapper({
+          sorting: {
+            fields: [{ field: 'accessedAt', name: 'Recently viewed', allowedDirections: ['desc'] }],
+            initialSort: { field: 'accessedAt', direction: 'desc' },
+          },
+        }),
+      });
+
+      expect(result.current.field).toBe('accessedAt');
+      expect(result.current.direction).toBe('desc');
     });
   });
 });

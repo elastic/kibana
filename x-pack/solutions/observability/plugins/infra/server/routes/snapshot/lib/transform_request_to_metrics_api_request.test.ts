@@ -6,6 +6,7 @@
  */
 
 import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
+import { withDefaultSnapshotSchema } from './with_default_snapshot_schema';
 import type { InfraSource } from '../../../lib/sources';
 import type { SnapshotRequest } from '../../../../common/http_api';
 import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
@@ -56,6 +57,7 @@ const snapshotRequest: SnapshotRequest = {
   accountId: '',
   region: '',
   includeTimeseries: true,
+  schema: 'ecs',
 };
 
 const metricsApiRequest: MetricsAPIRequest = {
@@ -111,6 +113,38 @@ const metricsApiRequest: MetricsAPIRequest = {
 };
 
 describe('transformRequestToMetricsAPIRequest', () => {
+  test('returns no pod module filter when schema is omitted before the HTTP default', async () => {
+    const requestWithoutSchema: SnapshotRequest = { ...snapshotRequest };
+    delete requestWithoutSchema.schema;
+
+    const result = await transformRequestToMetricsAPIRequest({
+      // Intentional `as ESSearchClient` type assertion as the fixture supplies an empty object at the search-client parameter boundary;
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: requestWithoutSchema,
+      compositeSize: 3000,
+    });
+
+    expect(result.filters).toEqual({ bool: { filter: [] } });
+    expect(result.groupBy).toContain('kubernetes.pod.uid');
+  });
+
+  test('applies the kubernetes module filter when the snapshot route defaults an omitted pod schema to ecs', async () => {
+    const requestWithoutSchema: SnapshotRequest = { ...snapshotRequest };
+    delete requestWithoutSchema.schema;
+
+    const result = await transformRequestToMetricsAPIRequest({
+      // Intentional `as ESSearchClient` type assertion as the fixture supplies an empty object at the search-client parameter boundary;
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: withDefaultSnapshotSchema(requestWithoutSchema),
+      compositeSize: 3000,
+    });
+
+    expect(result.filters).toEqual(metricsApiRequest.filters);
+    expect(result.groupBy).toEqual(['kubernetes.pod.uid']);
+  });
+
   test('returns a MetricsApiRequest for pods with kubernetes module filter', async () => {
     const compositeSize = 3000;
     const result = await transformRequestToMetricsAPIRequest({
@@ -182,6 +216,47 @@ describe('transformRequestToMetricsAPIRequest', () => {
       },
     });
     expect(result.groupBy).toContain('host.name');
+  });
+
+  test('returns a MetricsApiRequest for pods with semconv identity and kubeletstats filter', async () => {
+    const compositeSize = 3000;
+    const semconvPodRequest: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'pod',
+      schema: 'semconv',
+      groupBy: [{ field: 'k8s.namespace.name' }],
+    };
+
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: semconvPodRequest,
+      compositeSize,
+    });
+
+    expect(result.groupBy).toEqual(['k8s.namespace.name', 'k8s.pod.uid']);
+    expect(result.filters).toEqual({
+      bool: {
+        filter: [
+          {
+            term: {
+              'data_stream.dataset': 'kubeletstatsreceiver.otel',
+            },
+          },
+        ],
+      },
+    });
+
+    const metadataMetric = result.metrics.find((metric) => metric.id === '__metadata__');
+    expect(metadataMetric?.aggregations).toEqual({
+      __metadata__: {
+        top_metrics: {
+          metrics: [{ field: 'k8s.pod.name' }],
+          size: 1,
+          sort: { '@timestamp': 'desc' },
+        },
+      },
+    });
   });
 
   test('returns a MetricsApiRequest for containers with multiple module filters', async () => {

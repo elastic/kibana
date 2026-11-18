@@ -1,5 +1,5 @@
 {
-  "sha1": "aec26141c028051ff301ca943a98ff8fcd7d9988",
+  "sha1": "439e23995869ea53bddc0a69f96b0ef4c7ac4f9c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -67,6 +67,58 @@
         "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_privilege_gating.spec.ts",
         "line": 94,
         "column": 59
+      }
+    },
+    {
+      "id": "32f197836c080b3-424c0e7e1d99885",
+      "title": "Discover ES|QL replay cache replays documents and the chart until an explicit refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_replay_cache_esql.spec.ts",
+        "line": 34,
+        "column": 51
+      }
+    },
+    {
+      "id": "53a2dbab1ffadf5-cc6d67ea9c35a54",
+      "title": "Discover replay cache with a changed global context loads fresh results after opening a dashboard with a stored time range",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_replay_cache_global_context.spec.ts",
+        "line": 51,
+        "column": 52
+      }
+    },
+    {
+      "id": "53a2dbab1ffadf5-eb7984682273c90",
+      "title": "Discover replay cache with a changed global context loads fresh results after a dashboard removes a pinned filter",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_replay_cache_global_context.spec.ts",
+        "line": 57,
+        "column": 50
+      }
+    },
+    {
+      "id": "c0aedc9a6273a9f-575ccbea4bc163b",
+      "title": "Discover replay cache replays every tab that was loaded before leaving until an explicit refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_search_sessions/ui/parallel_tests/discover_replay_cache.spec.ts",
+        "line": 34,
+        "column": 70
       }
     },
     {

@@ -31,6 +31,7 @@ import type {
   SnapshotGroupBy,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api/snapshot_api';
+import { preferredSchemaForInventoryView } from '../../../../../common/inventory/preferred_schema_for_inventory_view';
 import { useInventoryViewsContext } from './use_inventory_views';
 
 export const DEFAULT_LEGEND: WaffleLegendOptions = {
@@ -77,12 +78,11 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
     preferredSchema,
   } = savedView.attributes;
 
-  // forces the default view to be set with what the time range metadata endpoint returns
-  const preferredSchemaValue =
-    nodeType === 'host' && savedView.id === staticInventoryViewId
-      ? preferredSchema ?? null
-      : // otherwise, use the preferred schema from the saved view
-        preferredSchema;
+  const preferredSchemaValue = preferredSchemaForInventoryView(
+    nodeType,
+    savedView.id,
+    preferredSchema
+  );
 
   return {
     metric,
@@ -117,19 +117,29 @@ export const useWaffleOptions = () => {
     writeDefaultState: true,
   });
 
-  const [preferredSchema, setPreferredSchema] = useState<DataSchemaFormat | null>(null);
+  // Seed from URL so a remount/reload does not treat the initial null local
+  // state as authoritative and wipe a persisted preferredSchema from the URL.
+  const [preferredSchema, setPreferredSchema] = useState<DataSchemaFormat | null>(
+    urlState.preferredSchema ?? null
+  );
+
+  // Keep Anomaly detection topbar visibility aligned with preferredSchema,
+  // including when that value is restored from the URL on mount.
+  useEffect(() => {
+    updateTopbarMenuVisibilityBySchema(preferredSchema);
+  }, [preferredSchema, updateTopbarMenuVisibilityBySchema]);
 
   const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
       const state = mapInventoryViewToState(currentView);
-      updateTopbarMenuVisibilityBySchema(state.preferredSchema);
       setUrlState(state);
       previousViewId.current = currentView.id;
 
-      setPreferredSchema(currentView?.attributes.preferredSchema ?? null);
+      // Same mapping as URL state — do not seed from the raw saved-object field.
+      setPreferredSchema(state.preferredSchema ?? null);
     }
-  }, [currentView, setUrlState, updateTopbarMenuVisibilityBySchema]);
+  }, [currentView, setUrlState]);
 
   // there is a lot going on with the url state management on this hook
   // when the state resets, many things need to be synchronized
@@ -214,9 +224,8 @@ export const useWaffleOptions = () => {
       // the URL state can't be patched here because when the page reloads via clicking on the side nav
       // this will be called before the hydration of the URL state, causing the page to crash
       setPreferredSchema(schema);
-      updateTopbarMenuVisibilityBySchema(schema);
     },
-    [setPreferredSchema, updateTopbarMenuVisibilityBySchema]
+    [setPreferredSchema]
   );
 
   useEffect(() => {

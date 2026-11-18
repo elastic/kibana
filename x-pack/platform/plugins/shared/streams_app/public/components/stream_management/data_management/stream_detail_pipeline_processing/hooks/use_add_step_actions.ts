@@ -6,19 +6,9 @@
  */
 
 import { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamEnrichmentEvents } from '../state_management/stream_enrichment_state_machine';
 
-const conditionUnsupportedMessage = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.createConditionUnsupportedMessage',
-  { defaultMessage: 'Conditions are not supported in ingest pipelines yet.' }
-);
-
 export const useAddStepActions = () => {
-  const {
-    core: { notifications },
-  } = useKibana();
   const { addProcessor } = useStreamEnrichmentEvents();
 
   const onAddProcessor = useCallback(
@@ -26,10 +16,5 @@ export const useAddStepActions = () => {
     [addProcessor]
   );
 
-  const onAddCondition = useCallback(
-    () => notifications.toasts.addWarning(conditionUnsupportedMessage),
-    [notifications]
-  );
-
-  return { onAddCondition, onAddProcessor };
+  return { onAddProcessor };
 };

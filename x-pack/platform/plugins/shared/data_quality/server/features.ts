@@ -82,6 +82,7 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
   privileges: {
     all: {
       app: [PLUGIN_ID],
+      api: ['bulkGetUserProfiles'],
       savedObject: {
         all: [],
         read: [],

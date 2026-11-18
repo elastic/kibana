@@ -687,6 +687,11 @@ export class SessionService {
     return !!sessionId && this.getSessionId() === sessionId;
   }
 
+  /** Checks whether the session is current or has an unexpired snapshot available to continue. */
+  public hasSession(sessionId: string): boolean {
+    return this.isCurrentSession(sessionId) || this.sessionSnapshots.has(sessionId);
+  }
+
   /**
    * Infers search session options for sessionId using current session state
    *

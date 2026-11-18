@@ -7,11 +7,88 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
-import type { DiscoverSessionApiEsqlTab } from '@kbn/as-code-discover-schema';
+import { UnifiedHistogramSuggestionType, VIEW_MODE } from '@kbn/discover-session-constants';
+import { cloneDeep } from 'lodash';
+import type {
+  DiscoverSessionApiClassicTab,
+  DiscoverSessionApiEsqlTab,
+} from '@kbn/as-code-discover-schema';
 import { getVisContextRequestData } from './get_vis_context_request_data';
 
 describe('getVisContextRequestData', () => {
+  const inlineTab: DiscoverSessionApiClassicTab = {
+    id: 'inline-tab',
+    label: 'Logs',
+    type: 'default',
+    data_source: {
+      type: 'data_view_spec',
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+    },
+    filters: [],
+    sort: [],
+    view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+    hide_chart: false,
+    hide_table: false,
+    chart_interval: 'h',
+    breakdown_field: 'host.name',
+  };
+
+  it('uses the supplied inline ID without changing the API tab', () => {
+    const before = cloneDeep(inlineTab);
+
+    expect(getVisContextRequestData(inlineTab, 'inline-view')).toStrictEqual({
+      dataViewId: 'inline-view',
+      timeField: '@timestamp',
+      timeInterval: 'h',
+      breakdownField: 'host.name',
+    });
+    expect(inlineTab).toStrictEqual(before);
+  });
+
+  it('does not invent an inline ID when none is supplied', () => {
+    expect(getVisContextRequestData(inlineTab)).toStrictEqual({
+      timeField: '@timestamp',
+      timeInterval: 'h',
+      breakdownField: 'host.name',
+    });
+  });
+
+  it('keeps a saved Data View reference instead of the supplied inline ID', () => {
+    expect(
+      getVisContextRequestData(
+        { ...inlineTab, data_source: { type: 'data_view_reference', ref_id: 'saved-view' } },
+        'inline-view'
+      )
+    ).toStrictEqual({
+      dataViewId: 'saved-view',
+      timeInterval: 'h',
+      breakdownField: 'host.name',
+    });
+  });
+
+  it('does not use an inline ID for an ES|QL tab', () => {
+    expect(getVisContextRequestData(createTab({}), 'inline-view')).toStrictEqual({});
+  });
+
+  it('keeps the ES|QL chart fingerprint after switching to an inline Data View', () => {
+    const attributes = createAttributes({
+      layers: { 'layer-1': { index: 'esql-dv' } },
+      dataViews: { 'esql-dv': { type: 'esql', timeFieldName: 'event.ingested' } },
+    });
+
+    expect(
+      getVisContextRequestData(
+        { ...inlineTab, vis_context: createTab(attributes).vis_context },
+        'inline-view'
+      )
+    ).toStrictEqual({
+      dataViewId: 'esql-dv',
+      timeField: 'event.ingested',
+      breakdownField: 'host.name',
+    });
+  });
+
   it('extracts the data view ID and time field from an ES|QL chart', () => {
     const attributes = createAttributes({
       layers: { 'layer-1': { index: 'esql-dv' } },
@@ -30,6 +107,55 @@ describe('getVisContextRequestData', () => {
       dataViews: {
         'unused-esql-dv': { type: 'esql', timeFieldName: 'event.ingested' },
         'esql-dv': { type: 'esql', timeFieldName: '@timestamp' },
+      },
+    });
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+      timeField: '@timestamp',
+    });
+  });
+
+  it('reads the data view ID and time field from the layer when the chart has no spec', () => {
+    const attributes = createAttributes({
+      layers: { 'layer-1': { index: 'esql-dv', timeField: '@timestamp' } },
+    });
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+      timeField: '@timestamp',
+    });
+  });
+
+  it('falls back to the layer time field when the spec has none', () => {
+    const attributes = createAttributes({
+      layers: { 'layer-1': { index: 'esql-dv', timeField: '@timestamp' } },
+      dataViews: { 'esql-dv': { type: 'esql' } },
+    });
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+      timeField: '@timestamp',
+    });
+  });
+
+  it('prefers the spec time field over the layer one', () => {
+    const attributes = createAttributes({
+      layers: { 'layer-1': { index: 'esql-dv', timeField: 'event.ingested' } },
+      dataViews: { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } },
+    });
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+      timeField: '@timestamp',
+    });
+  });
+
+  it('uses the time field of any layer sharing the data view', () => {
+    const attributes = createAttributes({
+      layers: {
+        'layer-1': { index: 'esql-dv' },
+        'layer-2': { index: 'esql-dv', timeField: '@timestamp' },
       },
     });
 
@@ -62,17 +188,32 @@ describe('getVisContextRequestData', () => {
     });
   });
 
+  it('returns the layer data view when the chart has no spec at all', () => {
+    const attributes = {
+      state: { datasourceStates: { textBased: { layers: { 'layer-1': { index: 'esql-dv' } } } } },
+    };
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+    });
+  });
+
+  it('returns the layer data view when the referenced spec is missing', () => {
+    const attributes = createAttributes({
+      layers: { 'layer-1': { index: 'esql-dv' } },
+      dataViews: {},
+    });
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+    });
+  });
+
   it.each([
     { name: 'missing layers', attributes: {} },
     {
       name: 'non-object layers',
       attributes: { state: { datasourceStates: { textBased: { layers: [] } } } },
-    },
-    {
-      name: 'missing data view specs',
-      attributes: {
-        state: { datasourceStates: { textBased: { layers: { 'layer-1': { index: 'esql-dv' } } } } },
-      },
     },
   ])('returns an empty fingerprint for $name', ({ attributes }) => {
     expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({});
@@ -82,11 +223,6 @@ describe('getVisContextRequestData', () => {
     {
       name: 'no referenced data view',
       layers: { 'layer-1': { index: '' } },
-      dataViews: {},
-    },
-    {
-      name: 'missing referenced spec',
-      layers: { 'layer-1': { index: 'esql-dv' } },
       dataViews: {},
     },
     {
@@ -118,11 +254,11 @@ const createAttributes = ({
   layers,
   dataViews,
 }: {
-  layers: Record<string, { index: string }>;
-  dataViews: Record<string, { type: string; timeFieldName?: string }>;
+  layers: Record<string, { index: string; timeField?: string }>;
+  dataViews?: Record<string, { type: string; timeFieldName?: string }>;
 }) => ({
   state: {
     datasourceStates: { textBased: { layers } },
-    adHocDataViews: dataViews,
+    ...(dataViews && { adHocDataViews: dataViews }),
   },
 });

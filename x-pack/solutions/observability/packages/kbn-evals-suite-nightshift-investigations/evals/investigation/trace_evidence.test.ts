@@ -7,7 +7,62 @@
 
 import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolCallStep } from '@kbn/agent-builder-common';
-import { assertAgentTrace, assertSuccessfulSandboxCommand } from './trace_evidence';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  assertAgentTrace,
+  assertSuccessfulSandboxCommand,
+  containsTemplate,
+} from './trace_evidence';
+
+describe('containsTemplate', () => {
+  const template = 'Start.{{load_step}} Middle.\n{{section}}\nEnd.';
+
+  it.each([
+    ['placeholders filled', 'Start. Load trees. Middle.\n<trees/>\nEnd.'],
+    ['placeholders empty', 'Start. Middle.\n\nEnd.'],
+    ['extra text around the prompt', 'Prefix. Start. Middle.\nEnd. Suffix.'],
+  ])('accepts the prompt with %s', (_label, text) => {
+    expect(containsTemplate(text, template)).toBe(true);
+  });
+
+  it.each([
+    ['a missing piece', 'Start. Middle.'],
+    ['pieces out of order', 'End. Start. Middle.'],
+    ['an edited piece', 'Start. Changed.\nEnd.'],
+  ])('rejects %s', (_label, text) => {
+    expect(containsTemplate(text, template)).toBe(false);
+  });
+
+  it('rejects an empty template', () => {
+    expect(containsTemplate('anything', '  ')).toBe(false);
+  });
+
+  it('matches the real investigation prompt with decision trees on and off', () => {
+    const dir = join(
+      REPO_ROOT,
+      'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions'
+    );
+    const raw = readFileSync(join(dir, 'investigator.md.text'), 'utf8');
+    const trees = readFileSync(join(dir, 'decision_trees.text'), 'utf8');
+    const fill = (loadStep: string, section: string) =>
+      raw
+        .replace('{{decision_trees_load_step}}', loadStep)
+        .replace('{{decision_trees_section}}', section);
+
+    const promptTemplate = cleanPrompt(raw);
+    expect(promptTemplate).toContain('{{decision_trees_section}}');
+    expect(containsTemplate(cleanPrompt(fill('', '')), promptTemplate)).toBe(true);
+    expect(
+      containsTemplate(
+        cleanPrompt(fill(' Also check trees.', `\n${trees.trimEnd()}\n`)),
+        promptTemplate
+      )
+    ).toBe(true);
+  });
+});
 
 const toolCall = {
   type: ConversationRoundStepType.toolCall,
@@ -79,7 +134,7 @@ it('accepts a successful sandbox command after recovered tool errors', () => {
 it.each([
   {
     ...toolCall,
-    tool_id: 'platform.streams.investigation_progress_report',
+    tool_id: 'agentic_investigations.set_hypotheses',
     results: [{ ...toolCall.results[0], data: { acknowledged: true } }],
   },
   {

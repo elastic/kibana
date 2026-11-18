@@ -8,5 +8,6 @@
 export class NonPriorityExtractionDisabledError extends Error {
   constructor() {
     super('Non-priority extraction is disabled: dual-process flag is off');
+    this.name = 'NonPriorityExtractionDisabledError';
   }
 }

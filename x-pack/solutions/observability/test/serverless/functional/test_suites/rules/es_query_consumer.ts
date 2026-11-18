@@ -31,17 +31,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   }) {
     it('navigates to the rules page', async () => {
       await retry.try(async () => {
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+        await svlCommonNavigation.sidenav.clickLink({
+          deepLinkId: 'observability-overview:alerts',
+        });
         expect(await testSubjects.exists('manageRulesPageButton')).toBeTruthy();
         await testSubjects.click('manageRulesPageButton');
       });
+      await testSubjects.existOrFail('createRuleButton', { timeout: 10000 });
     });
 
     it('should open the rule creation flyout', async () => {
       await testSubjects.existOrFail('createRuleButton');
       await testSubjects.click('createRuleButton');
-      const isCreateRuleFlyoutVisible = await testSubjects.exists('ruleTypeModal');
-      expect(isCreateRuleFlyoutVisible).toBe(true);
+      await testSubjects.existOrFail('ruleTypeModal', { timeout: 10000 });
     });
 
     it('should click the es query rule type', async () => {
@@ -52,7 +54,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     it('should create a new es query rule', async () => {
       await testSubjects.click('queryFormType_searchSource');
-      await testSubjects.exists('selectDataViewExpression');
+      await testSubjects.existOrFail('selectDataViewExpression');
       const input = await testSubjects.find('ruleDetailsNameInput');
       await input.clearValueWithKeyboard();
       await testSubjects.setValue('ruleDetailsNameInput', ruleName);
@@ -82,11 +84,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(areConsumersEqual).toBe(true);
       });
 
-      await retry.try(async () => {
-        await testSubjects.click('rulePageFooterSaveButton');
-        const doesConfirmModalExist = await testSubjects.exists('confirmModalConfirmButton');
-        expect(doesConfirmModalExist).toBe(true);
-      });
+      await testSubjects.click('rulePageFooterSaveButton');
+      await testSubjects.existOrFail('confirmModalConfirmButton');
       await testSubjects.click('confirmModalConfirmButton');
       const name = await testSubjects.getVisibleText('appHeaderTitle');
       expect(name).toEqual(ruleName);

@@ -29,8 +29,8 @@ export const getConvertFormStateToConfig = <
         acc.ignore_failure = value;
       } else if (field === 'ignore_missing' && fieldOptions.includeIgnoreMissing) {
         acc.ignore_missing = value;
-      } else if (field === 'where' && fieldOptions.includeCondition) {
-        acc.where = value;
+      } else if (field === 'if' && fieldOptions.includeCondition) {
+        acc.if = value;
       } else {
         const fieldConfig = fieldConfigurations.find((config) => config.field === field);
 

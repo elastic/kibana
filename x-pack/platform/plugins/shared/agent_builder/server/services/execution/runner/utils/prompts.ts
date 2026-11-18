@@ -135,12 +135,14 @@ export const createPromptManager = ({
 export const getAgentPromptStorageState = ({
   input,
   conversation,
+  allowResume = true,
 }: {
   input: ConverseInput;
   conversation?: Conversation;
+  allowResume?: boolean;
 }): PromptStorageState => {
   const isResumingRound =
-    conversation !== undefined && getPendingResumeRound(conversation) !== undefined;
+    allowResume && conversation !== undefined && getPendingResumeRound(conversation) !== undefined;
 
   // Create a shallow copy to avoid mutating the original conversation state
   const responses = { ...(conversation?.state?.prompt?.responses ?? {}) };

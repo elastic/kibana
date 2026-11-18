@@ -30,15 +30,18 @@ import {
   ACCESS_CONTROL_MODE_ICON,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { getEbtProps } from '@kbn/ebt-click';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useCanUpdateAgentApprovals } from '../../../../hooks/agents/use_can_update_agent_approvals';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { queryKeys } from '../../../../query_keys';
 import { labels } from '../../../../utils/i18n';
 import { FLYOUT_WIDTH } from '../../common/constants';
 import { AccessSection } from './access_section';
+import { AutoApprovedApisSection } from './auto_approved_apis_section';
 import { CustomInstructionsSection } from './custom_instructions_section';
 import { CustomizationSection } from './customization_section';
 import { IdentificationSection } from './identification_section';
@@ -66,6 +69,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
   const { agentService } = useAgentBuilderServices();
   const { addSuccessToast, addErrorToast } = useToasts();
   const queryClient = useQueryClient();
+  const canUpdateAgentApprovals = useCanUpdateAgentApprovals(agent);
 
   const methods = useForm<EditDetailsFormData>({
     defaultValues: {
@@ -85,6 +89,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         instructions: agent.configuration?.instructions ?? '',
         ai_indices: agent.configuration?.ai_indices ?? [],
         subagent_ids: agent.configuration?.subagent_ids ?? [],
+        auto_approved_apis: agent.configuration?.approvals?.auto_approved_apis ?? {},
       },
     },
     mode: 'onBlur',
@@ -110,6 +115,9 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
           instructions: data.configuration.instructions,
           ai_indices: data.configuration.ai_indices,
           subagent_ids: data.configuration.subagent_ids,
+          ...(canUpdateAgentApprovals && {
+            approvals: { auto_approved_apis: data.configuration.auto_approved_apis },
+          }),
         },
       }),
     onSuccess: () => {
@@ -118,8 +126,11 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       addSuccessToast({ title: flyoutLabels.successToast });
       onClose();
     },
-    onError: () => {
-      addErrorToast({ title: flyoutLabels.errorToast });
+    onError: (error: Error) => {
+      addErrorToast({
+        title: flyoutLabels.errorToast,
+        text: formatAgentBuilderErrorMessage(error),
+      });
     },
   });
 
@@ -177,6 +188,8 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
             <CustomizationSection showWorkflowSection={showWorkflowSection} agentId={agent.id} />
 
             <SubagentsSection agentId={agent.id} />
+
+            <AutoApprovedApisSection agentId={agent.id} canEdit={canUpdateAgentApprovals} />
 
             <EuiHorizontalRule margin="xl" />
             <CustomInstructionsSection />
