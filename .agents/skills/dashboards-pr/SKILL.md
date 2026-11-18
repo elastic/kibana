@@ -20,6 +20,8 @@ Pick the mode from the request:
 
 A Write or Create request switches to Update when the branch already has a PR (see step 2).
 
+Every mode drafts first and touches GitHub only after approval, so word your progress messages as drafting until then: "Drafting a new title and description for #305973. Nothing changes on GitHub until you approve." Say "updating" or "creating" only when running the approved `gh` command.
+
 ## Issue input
 
 The linked issue is the main source for the problem statement and the reproduction steps. First match wins:
