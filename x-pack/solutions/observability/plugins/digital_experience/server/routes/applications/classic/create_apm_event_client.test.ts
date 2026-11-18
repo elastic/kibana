@@ -6,30 +6,32 @@
  */
 
 import { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
-  savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
+import type { ApmIndices } from './create_apm_event_client';
 import { createApmEventClient } from './create_apm_event_client';
 
 jest.mock('@kbn/apm-data-access-plugin/server', () => ({ APMEventClient: jest.fn() }));
 
-const INDICES = { transaction: 'traces-apm*', error: 'logs-apm.error-*' };
+const INDICES: ApmIndices = {
+  transaction: 'traces-apm*',
+  span: 'traces-apm*',
+  error: 'logs-apm.error-*',
+  metric: 'metrics-apm*',
+  onboarding: 'apm-*',
+  sourcemap: 'apm-*',
+};
 
 const setup = (includeFrozen: boolean) => {
-  const apmDataAccess = {
-    getApmIndices: jest.fn().mockResolvedValue(INDICES),
-  } as unknown as ApmDataAccessPluginSetup;
   const uiSettingsClient = uiSettingsServiceMock.createClient();
   uiSettingsClient.get.mockResolvedValue(includeFrozen);
   return {
-    apmDataAccess,
+    indices: INDICES,
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
-    savedObjectsClient: savedObjectsClientMock.create(),
     uiSettingsClient,
     request: httpServerMock.createKibanaRequest(),
   };
@@ -38,12 +40,11 @@ const setup = (includeFrozen: boolean) => {
 describe('createApmEventClient', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("searches the space's APM indices as the current user", async () => {
+  it('searches the given APM indices as the current user', async () => {
     const params = setup(false);
 
     await createApmEventClient(params);
 
-    expect(params.apmDataAccess.getApmIndices).toHaveBeenCalledWith(params.savedObjectsClient);
     expect(APMEventClient).toHaveBeenCalledWith({
       indices: INDICES,
       options: { includeFrozen: false },

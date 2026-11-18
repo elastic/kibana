@@ -31,6 +31,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
   ModelProvider,
+  ModelSource,
   ScopedRunner,
   ToolProvider,
   WritableToolResultStore,
@@ -40,6 +41,7 @@ import type {
   ConversationStateManager,
   SkillsService,
   PluginsService,
+  ConnectorSkillsService,
   RenderersService,
   ConversationEventTypesService,
   ToolManager,
@@ -123,7 +125,8 @@ export interface ExecuteSubAgentParams {
   prompt: string;
   /** Set to run the sub-agent in the background. */
   background?: SubAgentBackgroundOptions;
-  connectorId?: string;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
@@ -140,7 +143,8 @@ export interface CreateSubAgentParams {
   /** Pre-allocated id for the child conversation (assigned by the caller). */
   conversationId: string;
   prompt: string;
-  connectorId?: string;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
@@ -153,7 +157,8 @@ export interface SendToSubAgentParams {
   conversationId: string;
   prompt: string;
   background?: SubAgentBackgroundOptions;
-  connectorId?: string;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   abortSignal?: AbortSignal;
 }
 
@@ -272,9 +277,10 @@ export interface AgentHandlerContext {
    */
   deployment: DeploymentContext;
   /**
-   * The resolved connector ID for this execution, if any.
+   * The model source this execution runs on: an explicit connector or an inference feature.
+   * Undefined when the model comes from the Agent Builder default.
    */
-  defaultConnectorId?: string;
+  defaultModel?: ModelSource;
   /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
@@ -336,6 +342,10 @@ export interface AgentHandlerContext {
    * Plugins service to resolve plugin-contributed skill IDs during execution.
    */
   plugins: PluginsService;
+  /**
+   * Resolves the skills contributed by the types of an agent's connectors.
+   */
+  connectorSkills: ConnectorSkillsService;
   /**
    * Tool manager to manage active tools for the agent.
    */

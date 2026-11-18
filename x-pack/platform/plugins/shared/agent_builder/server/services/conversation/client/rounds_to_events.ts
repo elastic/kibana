@@ -7,6 +7,7 @@
 
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   ConversationRoundAuthor,
   ConversationRoundOrigin,

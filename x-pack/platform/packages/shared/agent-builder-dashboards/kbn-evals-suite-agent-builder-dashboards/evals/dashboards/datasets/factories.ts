@@ -38,7 +38,8 @@ export interface ExampleMetadata {
     | 'enhance'
     | 'discover_results'
     | 'layout_edit'
-    | 'edit_scenario';
+    | 'edit_scenario'
+    | 'ml_panels';
   /** `logs_dissect` is the sample logs index read through a `DISSECT` query attached from Discover. */
   dataSource: 'logs' | 'logs_dissect';
   enhanceMode?: EnhanceMode;
@@ -237,5 +238,25 @@ export const layoutEditExample = ({
     ...(gold.replaceConfirmation
       ? {}
       : { goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID] }),
+  },
+});
+
+/**
+ * Dashboard request for ML anomaly panels, whose config schemas are only in skill references.
+ * `panelConfigTypes` are the panel types the prompt asks for.
+ */
+export const mlPanelExample = ({
+  question,
+  panelConfigTypes,
+}: {
+  question: string;
+  panelConfigTypes: readonly string[];
+}): DashboardDatasetExample => ({
+  input: { question },
+  metadata: { behaviour: 'ml_panels', dataSource: 'logs' } satisfies ExampleMetadata,
+  output: {
+    route: 'dashboard',
+    panelConfigTypes,
+    goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
   },
 });
