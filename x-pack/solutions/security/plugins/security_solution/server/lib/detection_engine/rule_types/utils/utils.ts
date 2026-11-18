@@ -12,7 +12,7 @@ import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
-import type { estypes, TransportResult } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { addSpanLabels } from '@kbn/apm-utils';
 import {
   ALERT_UUID,
@@ -83,9 +83,17 @@ import { SECURITY_NUM_EXCEPTION_ITEMS, SECURITY_QUERY_SPAN_S } from './apm_field
 import { buildTimeRangeFilter } from './build_events_query';
 export const MAX_RULE_GAP_RATIO = 4;
 
+/** Name prefix of partially mounted searchable snapshot indices, which the frozen tier uses. */
+export const PARTIAL_INDEX_PREFIX = 'partial-';
+
+/** The part of a field capabilities response that the timestamp fields validation reads. */
+export interface TimestampFieldCapsResponse {
+  body: Pick<estypes.FieldCapsResponse, 'indices' | 'fields'>;
+}
+
 export const hasTimestampFields = async (args: {
   timestampField: string;
-  timestampFieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
+  timestampFieldCapsResponse: TimestampFieldCapsResponse;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
   foundNoIndices: boolean;
@@ -167,7 +175,9 @@ export const checkForFrozenIndices = async ({
   // Frozen indices start with `partial-`, but it's possible
   // for some regular hot/warm index to start with that prefix as well by coincidence. If we find indices with that naming pattern,
   // we fetch information about the index using ilm explain to verify that they are actually frozen indices.
-  const partialIndices = resolvedQueryIndices.filter((index) => index.startsWith('partial-'));
+  const partialIndices = resolvedQueryIndices.filter((index) =>
+    index.startsWith(PARTIAL_INDEX_PREFIX)
+  );
   if (partialIndices.length <= 0) {
     return [];
   }

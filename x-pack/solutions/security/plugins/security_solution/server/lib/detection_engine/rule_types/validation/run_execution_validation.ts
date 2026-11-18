@@ -10,11 +10,13 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RuleParams } from '../../rule_schema';
+import type { TimestampFieldCapsResponse } from '../utils/utils';
 import {
   hasTimestampFields,
   isMachineLearningParams,
   isThreatParams,
   checkForFrozenIndices,
+  PARTIAL_INDEX_PREFIX,
 } from '../utils/utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 
@@ -37,6 +39,26 @@ export interface RunExecutionValidationResult {
   dateNanosTimestampFields: string[];
   mixedTimestampFields: string[];
 }
+
+interface IndexResolution {
+  matchedIndices: string[];
+  /** The timestamp fields come with the same request that resolved the indices. */
+  timestampFieldCapsResponse: TimestampFieldCapsResponse;
+}
+
+// date_nanos sort values need special handling in search_after pagination
+const getDateNanosTimestampFields = (
+  timestampFields: string[],
+  fieldCapsResponse: TimestampFieldCapsResponse
+): Pick<RunExecutionValidationResult, 'dateNanosTimestampFields' | 'mixedTimestampFields'> => ({
+  dateNanosTimestampFields: timestampFields.filter(
+    (field) => 'date_nanos' in (fieldCapsResponse.body.fields[field] ?? {})
+  ),
+  mixedTimestampFields: timestampFields.filter((field) => {
+    const types = fieldCapsResponse.body.fields[field];
+    return types != null && 'date' in types && 'date_nanos' in types;
+  }),
+});
 
 /**
  * Runs pre-execution validation for a security rule: index pattern resolution,
@@ -79,15 +101,66 @@ export const runExecutionValidation = async (
     : [primaryTimestamp];
   const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
 
-  try {
-    const { matchedIndexPatterns, matchedIndices } = await indexPatterns.getIndexPatternMatches(
-      inputIndex
+  const resolveIndices = async ({
+    patterns,
+    patternsRuntimeMappings,
+    spanName,
+  }: {
+    patterns: string[];
+    patternsRuntimeMappings?: estypes.MappingRuntimeFields;
+    spanName: string;
+  }): Promise<IndexResolution> => {
+    const { matchedIndices, fields } = await withSecuritySpan(spanName, () =>
+      indexPatterns.getMatchedIndices({
+        indexPatterns: patterns,
+        fields: timestampFields,
+        includeUnmapped: true,
+        runtimeMappings: patternsRuntimeMappings,
+      })
     );
 
-    // Collect rule execution metrics
-    ruleExecutionLogger.logMetric('matched_indices_count', matchedIndices?.length);
+    return {
+      matchedIndices,
+      timestampFieldCapsResponse: { body: { indices: matchedIndices, fields } },
+    };
+  };
 
-    if (matchedIndexPatterns.length === 0) {
+  const warnAboutMissingTimestampFields = async (
+    timestampFieldCapsResponse: TimestampFieldCapsResponse
+  ): Promise<void> => {
+    const { warningMessage } = await hasTimestampFields({
+      timestampField: primaryTimestamp,
+      timestampFieldCapsResponse,
+      ruleExecutionLogger,
+    });
+    if (warningMessage) {
+      warnings.push(warningMessage);
+    }
+  };
+
+  let inputIndexResolution: IndexResolution | undefined;
+
+  // The frozen indices request adds a time range filter to the request that resolved the indices, which
+  // can only narrow the result. It only runs when that request found a partially mounted index: without
+  // one there is nothing to find, and after a failure it would fail as well.
+  const shouldCheckFrozenIndices = (): boolean =>
+    inputIndexResolution?.matchedIndices.some((index) => index.startsWith(PARTIAL_INDEX_PREFIX)) ===
+    true;
+
+  try {
+    inputIndexResolution = await resolveIndices({
+      patterns: inputIndex,
+      patternsRuntimeMappings: runtimeMappings,
+      spanName: 'fieldCaps',
+    });
+
+    // Collect rule execution metrics
+    ruleExecutionLogger.logMetric(
+      'matched_indices_count',
+      inputIndexResolution.matchedIndices.length
+    );
+
+    if (inputIndexResolution.matchedIndices.length === 0) {
       warnings.push(
         `Unable to find matching indices for rule ${ruleName}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`
       );
@@ -98,11 +171,15 @@ export const runExecutionValidation = async (
   }
 
   if (isThreatParams(params)) {
-    try {
-      const { matchedIndexPatterns: matchedThreatIndexPatterns } =
-        await indexPatterns.getIndexPatternMatches(params.threatIndex);
+    let threatIndexResolution: IndexResolution | undefined;
 
-      if (matchedThreatIndexPatterns.length === 0) {
+    try {
+      threatIndexResolution = await resolveIndices({
+        patterns: params.threatIndex,
+        spanName: 'fieldCapsThreatIndex',
+      });
+
+      if (threatIndexResolution.matchedIndices.length === 0) {
         warnings.push(
           `Unable to find matching threat indicator indices for rule ${ruleName}. This warning will persist until one of the following occurs: a matching threat index is created or the rule is disabled.`
         );
@@ -112,28 +189,10 @@ export const runExecutionValidation = async (
       warnings.push(`Encountered an error validating threat index patterns: ${exc}`);
     }
 
-    if (!skipExecution) {
+    // A failed index resolution has no timestamp fields to check and its error is already reported
+    if (!skipExecution && threatIndexResolution != null) {
       try {
-        const threatFieldCapsResponse = await withSecuritySpan('fieldCapsThreatIndex', () =>
-          scopedClusterClient.asCurrentUser.fieldCaps(
-            {
-              index: params.threatIndex,
-              fields: timestampFields,
-              include_unmapped: true,
-              ignore_unavailable: true,
-            },
-            { meta: true }
-          )
-        );
-
-        const { warningMessage: missingThreatTimestampWarning } = await hasTimestampFields({
-          timestampField: primaryTimestamp,
-          timestampFieldCapsResponse: threatFieldCapsResponse,
-          ruleExecutionLogger,
-        });
-        if (missingThreatTimestampWarning) {
-          warnings.push(missingThreatTimestampWarning);
-        }
+        await warnAboutMissingTimestampFields(threatIndexResolution.timestampFieldCapsResponse);
       } catch (exc) {
         warnings.push(`Threat index timestamp fields check failed to execute ${exc}`);
       }
@@ -150,42 +209,22 @@ export const runExecutionValidation = async (
     };
   }
 
-  try {
-    const fieldCapsResponse = await withSecuritySpan('fieldCaps', () =>
-      scopedClusterClient.asCurrentUser.fieldCaps(
-        {
-          index: inputIndex,
-          fields: timestampFields,
-          include_unmapped: true,
-          runtime_mappings: runtimeMappings,
-          ignore_unavailable: true,
-        },
-        { meta: true }
-      )
-    );
+  if (inputIndexResolution != null) {
+    try {
+      const { timestampFieldCapsResponse } = inputIndexResolution;
 
-    const { warningMessage: missingTimestampWarning } = await hasTimestampFields({
-      timestampField: primaryTimestamp,
-      timestampFieldCapsResponse: fieldCapsResponse,
-      ruleExecutionLogger,
-    });
-    if (missingTimestampWarning) {
-      warnings.push(missingTimestampWarning);
+      await warnAboutMissingTimestampFields(timestampFieldCapsResponse);
+
+      ({ dateNanosTimestampFields, mixedTimestampFields } = getDateNanosTimestampFields(
+        timestampFields,
+        timestampFieldCapsResponse
+      ));
+    } catch (exc) {
+      warnings.push(`Timestamp fields check failed to execute ${exc}`);
     }
-
-    // date_nanos sort values need special handling in search_after pagination
-    dateNanosTimestampFields = timestampFields.filter(
-      (field) => 'date_nanos' in (fieldCapsResponse.body.fields[field] ?? {})
-    );
-    mixedTimestampFields = timestampFields.filter((field) => {
-      const types = fieldCapsResponse.body.fields[field];
-      return types != null && 'date' in types && 'date_nanos' in types;
-    });
-  } catch (exc) {
-    warnings.push(`Timestamp fields check failed to execute ${exc}`);
   }
 
-  if (!isServerless) {
+  if (!isServerless && shouldCheckFrozenIndices()) {
     try {
       const frozenIndices = await checkForFrozenIndices({
         inputIndices: inputIndex,
