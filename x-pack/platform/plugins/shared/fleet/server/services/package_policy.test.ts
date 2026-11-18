@@ -16898,6 +16898,7 @@ describe('clearStaleInputsForVersions()', () => {
         id,
         type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         references: [],
+        version: 'WzEsMV0=',
         attributes: { inputs_for_versions: caches[id] },
       })),
     }));
@@ -16940,8 +16941,35 @@ describe('clearStaleInputsForVersions()', () => {
     expect(soClient.bulkGet.mock.calls[0][0]!.map((o) => o.id)).toEqual(['a', 'b']);
     expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
     expect(soClient.bulkUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({ id: 'a', attributes: { inputs_for_versions: {} } }),
+      expect.objectContaining({
+        id: 'a',
+        attributes: { inputs_for_versions: {} },
+        version: 'WzEsMV0=',
+      }),
     ]);
+  });
+
+  it('throws when clearing a cache fails, e.g. on a version conflict', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+    soClient.bulkUpdate.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'a',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          error: { statusCode: 409, error: 'Conflict', message: 'Conflict' },
+        },
+      ],
+    } as any);
+
+    await expect(
+      clear(soClient, [
+        {
+          packagePolicyId: 'a',
+          packageInfo: noConditionPackageInfo,
+          assetsMap: noConditionAssetsMap,
+        },
+      ])
+    ).rejects.toThrow('Failed to clear inputs_for_versions of package policies [a]: Conflict');
   });
 
   it('does not write when no cache is stored', async () => {

@@ -454,7 +454,13 @@ export default function (providerContext: FtrProviderContext) {
                   {
                     enabled: true,
                     data_stream: { type: 'logs', dataset: 'abnormal_security.audit' },
-                    vars: { interval: { value: '5m', type: 'text' } },
+                    vars: {
+                      initial_interval: { value: '24h', type: 'text' },
+                      interval: { value: '5m', type: 'text' },
+                      page_size: { value: '100', type: 'text' },
+                      http_client_timeout: { value: '30s', type: 'text' },
+                      tags: { value: ['forwarded', 'abnormal_security-audit'], type: 'text' },
+                    },
                   },
                 ],
               },

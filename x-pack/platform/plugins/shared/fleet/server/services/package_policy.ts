@@ -1006,22 +1006,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           'attempt to read inputs_for_versions of package policy saved objects failed'
         )
       );
-    const staleIds = packagePolicySOs
-      .filter(
-        (so): so is SavedObject<PackagePolicySOAttributes> =>
-          !isSavedObjectErrorResult(so) &&
-          Object.keys(so.attributes?.inputs_for_versions ?? {}).length > 0
-      )
-      .map((so) => so.id);
-    if (staleIds.length === 0) {
+    const stale = packagePolicySOs.filter(
+      (so): so is SavedObject<PackagePolicySOAttributes> =>
+        !isSavedObjectErrorResult(so) &&
+        Object.keys(so.attributes?.inputs_for_versions ?? {}).length > 0
+    );
+    if (stale.length === 0) {
       return false;
     }
-    await soClient
+    // Pass the version so a concurrent edit is not overwritten (conflicts show up as failed results).
+    const { saved_objects: clearResults } = await soClient
       .bulkUpdate<PackagePolicySOAttributes>(
-        staleIds.map((id) => ({
+        stale.map(({ id, version }) => ({
           type: savedObjectType,
           id,
           attributes: { inputs_for_versions: {} },
+          version,
         }))
       )
       .catch(
@@ -1029,6 +1029,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           'attempt to clear inputs_for_versions of package policy saved objects failed'
         )
       );
+    // Bulk operations report per object failures in the results instead of rejecting.
+    const failedClears = clearResults.filter(isSavedObjectErrorResult);
+    if (failedClears.length > 0) {
+      throw new FleetError(
+        `Failed to clear inputs_for_versions of package policies ${failedClears
+          .map(({ id, error }) => `[${id}]: ${error.message}`)
+          .join(', ')}`
+      );
+    }
     return true;
   }
 
