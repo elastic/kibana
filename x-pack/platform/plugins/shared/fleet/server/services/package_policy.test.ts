@@ -5744,6 +5744,30 @@ describe('Package policy service', () => {
           );
         });
       });
+
+      it('bumps the agent policies before throwing when clearing a stale cache partly failed', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+        clearStaleInputsSpy.mockResolvedValue({
+          cleared: true,
+          failure: new Error('clear failed'),
+        });
+
+        await expect(callUpdate(savedObjectsClient, elasticsearchClient)).rejects.toThrow(
+          'clear failed'
+        );
+
+        // The throw comes after the recompute, so it cannot have been skipped.
+        policyIds.forEach((policyId) => {
+          expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
+            savedObjectsClient,
+            elasticsearchClient,
+            policyId,
+            expect.objectContaining({ agentVersionConditionsUnchanged: false })
+          );
+        });
+      });
     });
 
     it('should not persist spaceIds in SO attributes', async () => {
@@ -7544,6 +7568,23 @@ describe('Package policy service', () => {
           expect(flags).toEqual([expected]);
         }
       );
+
+      it('bumps the agent policies before throwing when clearing a stale cache partly failed', async () => {
+        clearStaleInputsSpy.mockResolvedValue({
+          cleared: true,
+          failure: new Error('clear failed'),
+        });
+
+        await expect(bulkUpdateAndGetUnchangedFlags([{}])).rejects.toThrow('clear failed');
+
+        // Without the cleared cache the flag would be true for this unchanged package policy.
+        expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.any(String),
+          expect.objectContaining({ agentVersionConditionsUnchanged: false })
+        );
+      });
 
       it('passes the updated package names to bumpRevision', async () => {
         await bulkUpdateAndGetUnchangedFlags([{}]);
