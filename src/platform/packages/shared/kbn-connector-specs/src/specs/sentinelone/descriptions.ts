@@ -25,7 +25,7 @@ export const ACTION_DESCRIPTIONS = {
     'Download the results file of one script task as base64 content (up to 25 MB).',
   getRemoteScripts: 'List Script Library scripts (id, name, type, OS) by text, ids, OS or scope.',
   fetchAgentFiles:
-    'Ask one agent to upload up to 10 files as an encrypted archive; once activity type 81 shows in getActivities, call downloadAgentFile.',
+    'Ask one agent to upload up to 10 files as an encrypted archive; once the upload shows in getActivities (activity type 80), call downloadAgentFile with that activity id.',
   downloadAgentFile:
     'Download the fetchAgentFiles archive by agentId and activityId as base64 content (up to 25 MB).',
   getActivities:
