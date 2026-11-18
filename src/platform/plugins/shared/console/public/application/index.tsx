@@ -34,10 +34,9 @@ import { ServicesContextProvider, EditorContextProvider, RequestContextProvider 
 import { createApi, createEsHostService } from './lib';
 import type { ConsoleStartServices } from '../types';
 
-const ACTIVE_API_STATUS_ATTRIBUTE = 'data-console-active-api-status';
 // The spec definitions are fetched before React mounts, so the status lives on the mount
 // point rather than on a rendered component.
-const APP_CONTAINER_TEST_SUBJ = 'consoleAppContainer';
+const ACTIVE_API_STATUS_ATTRIBUTE = 'data-console-active-api-status';
 
 const RedirectToShell = () => {
   const location = useLocation();
@@ -79,7 +78,6 @@ export async function renderApp({
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
 
-  element.setAttribute('data-test-subj', APP_CONTAINER_TEST_SUBJ);
   element.setAttribute(ACTIVE_API_STATUS_ATTRIBUTE, 'pending');
   const activeApiLoaded = await loadActiveApi(http);
   element.setAttribute(ACTIVE_API_STATUS_ATTRIBUTE, activeApiLoaded ? 'complete' : 'failed');

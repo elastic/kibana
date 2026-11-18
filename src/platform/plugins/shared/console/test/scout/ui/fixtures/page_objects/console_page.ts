@@ -99,7 +99,7 @@ export class ConsolePage {
   constructor(private readonly page: ScoutPage) {
     this.inputEditor = this.page.getByTestId('consoleMonacoEditor');
     this.inputEditorContainer = this.page.getByTestId('consoleMonacoEditorContainer');
-    this.appContainer = this.page.getByTestId('consoleAppContainer');
+    this.appContainer = this.page.getByTestId('console');
     this.outputEditor = this.page.getByTestId('consoleMonacoOutput');
     this.inputEditorLines = this.inputEditor.locator('.view-lines');
     this.outputEditorContent = this.outputEditor.locator('.monaco-scrollable-element');
