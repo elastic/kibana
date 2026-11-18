@@ -14,6 +14,9 @@ import { getGcpIdToken, parseServiceAccountKey } from '../auth_types/gcp_jwt_hel
 import type { ConnectorSpec } from '../connector_spec';
 import { FirecrawlConnector } from '../specs/firecrawl/firecrawl';
 import { FigmaConnector } from '../specs/figma/figma';
+import type { BuildContext, ClientTypeSpec } from '../lib/clients';
+import { mysqlClientType } from '../lib/clients/mysql';
+import { MysqlConnector } from '../specs/mysql/mysql';
 import { createContractContext } from './create_contract_context';
 
 // Excerpts of the vendors' specs, with the operations and security the tests use.
@@ -295,6 +298,138 @@ describe('createContractContext', () => {
         specs: [firecrawlSpec],
       })
     ).rejects.toThrow('.firecrawl has no auth type basic');
+  });
+
+  describe('getClient', () => {
+    const mysqlConfig = { host: 'db.example.com', port: 3306, database: 'app' };
+    const mysqlSecrets = { username: 'alice', password: 's3cret' };
+
+    // A pool that answers every statement with the same rows, recording what it was sent.
+    const fakeMysql = () => {
+      const statements: string[] = [];
+      const builds: BuildContext[] = [];
+      let terminated = 0;
+      const pool = {
+        query: async (sql: string) => {
+          statements.push(sql);
+          return [[{ Database: 'app' }], []];
+        },
+      };
+      const clientType = {
+        id: 'mysql',
+        build: async (ctx: BuildContext) => {
+          builds.push(ctx);
+          return pool;
+        },
+        terminate: async () => {
+          terminated++;
+        },
+      } as unknown as ClientTypeSpec<never>;
+      return { clientType, statements, builds, terminated: () => terminated };
+    };
+
+    it('throws for client types the test does not provide', async () => {
+      const { runAction } = await createContractContext({
+        connector: MysqlConnector,
+        config: mysqlConfig,
+        specs: [],
+      });
+
+      await expect(runAction('listDatabases', {})).rejects.toThrow(
+        'Client mysql is not available in contract tests'
+      );
+    });
+
+    it('builds provided client types once, with the config and the auth type headers, and terminates them on close', async () => {
+      const mysql = fakeMysql();
+      const { ctx, runAction, close } = await createContractContext({
+        connector: MysqlConnector,
+        config: mysqlConfig,
+        secrets: mysqlSecrets,
+        specs: [],
+        clientTypes: { mysql: mysql.clientType },
+      });
+
+      expect(await runAction('listDatabases', {})).toEqual([{ Database: 'app' }]);
+      await runAction('listDatabases', {});
+      expect(await ctx.getClient('mysql')).toBeDefined();
+
+      expect(mysql.statements).toEqual(['SHOW DATABASES', 'SHOW DATABASES']);
+      expect(mysql.builds).toHaveLength(1);
+      const [build] = mysql.builds;
+      // Parsed with the connector schema, so its defaults apply.
+      expect(build.config).toEqual(expect.objectContaining({ ...mysqlConfig, ssl: 'required' }));
+      expect(await build.credential.getAuthHeaders()).toEqual({
+        Authorization: `Basic ${Buffer.from('alice:s3cret').toString('base64')}`,
+      });
+      expect(() => build.networkSettings.ensureHostnameAllowed('db.example.com')).not.toThrow();
+      expect(build.networkSettings.getProxySettings()).toBeUndefined();
+      await expect(build.platform.resolveSrvHosts('db.example.com', 'mongodb')).rejects.toThrow(
+        "needs an SRV lookup, which contract tests don't make"
+      );
+
+      expect(mysql.terminated()).toBe(0);
+      await close();
+      expect(mysql.terminated()).toBe(1);
+    });
+
+    it('applies network setting overrides, such as TLS settings for a test server', async () => {
+      const mysql = fakeMysql();
+      const { ctx } = await createContractContext({
+        connector: MysqlConnector,
+        config: mysqlConfig,
+        specs: [],
+        clientTypes: { mysql: mysql.clientType },
+        networkSettings: { getSslSettings: () => ({ verificationMode: 'none' }) },
+      });
+
+      await ctx.getClient('mysql');
+
+      const [{ networkSettings, platform, logger }] = mysql.builds;
+      expect(networkSettings.getSslSettings()).toEqual({ verificationMode: 'none' });
+      expect(platform.buildTlsOptions([], logger)).toEqual(
+        expect.objectContaining({ rejectUnauthorized: false })
+      );
+    });
+
+    it('does not terminate a client whose build failed', async () => {
+      const terminate = jest.fn();
+      const { ctx, close } = await createContractContext({
+        connector: MysqlConnector,
+        config: mysqlConfig,
+        specs: [],
+        clientTypes: {
+          mysql: {
+            id: 'mysql',
+            build: async () => {
+              throw new Error('connect ECONNREFUSED');
+            },
+            terminate,
+          },
+        },
+      });
+
+      await expect(ctx.getClient('mysql')).rejects.toThrow('connect ECONNREFUSED');
+      await close();
+      expect(terminate).not.toHaveBeenCalled();
+    });
+
+    it('builds the production client types, which decode the credential they are given', async () => {
+      const { ctx, close } = await createContractContext({
+        connector: MysqlConnector,
+        config: mysqlConfig,
+        secrets: mysqlSecrets,
+        specs: [],
+        clientTypes: { mysql: mysqlClientType },
+      });
+
+      // mysql2 pools connect on their first query, so building opens no connection.
+      const pool = await ctx.getClient('mysql');
+
+      expect(pool).toHaveProperty(['pool', 'config', 'connectionConfig', 'user'], 'alice');
+      expect(pool).toHaveProperty(['pool', 'config', 'connectionConfig', 'host'], 'db.example.com');
+      await close();
+    });
   });
 
   describe('gcp_service_account', () => {
