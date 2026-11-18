@@ -706,9 +706,7 @@ describe('useInvestigateAlert', () => {
     await act(() => result.current.handleInvestigate());
 
     const text = renderDangerText();
-    expect(text).toHaveTextContent(
-      'New investigations stay blocked until the limit is changed.'
-    );
+    expect(text).toHaveTextContent('New investigations stay blocked until the limit is changed.');
     expect(text).not.toHaveTextContent('The limit resets');
     expect(text).toHaveTextContent('Ask an admin to raise the limit.');
   });
