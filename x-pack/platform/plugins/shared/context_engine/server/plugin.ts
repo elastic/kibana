@@ -352,6 +352,7 @@ export class ContextEnginePlugin
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
+      registerAiIndexChangeHandler: (handler) => this.aiIndexChanges.register(handler),
     };
   }
 

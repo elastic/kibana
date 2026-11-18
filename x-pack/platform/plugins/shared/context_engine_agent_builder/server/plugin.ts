@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type {
   ContextEngineAgentBuilderPluginSetup,
   ContextEngineAgentBuilderPluginStart,
@@ -14,6 +20,7 @@ import type {
 } from './types';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
 import { registerContextEngineInferenceFeatures } from './register_inference_features';
+import { createSourceAutomationsChangeHandler } from './automation_templates/source_automations';
 
 export class ContextEngineAgentBuilderPlugin
   implements
@@ -24,7 +31,11 @@ export class ContextEngineAgentBuilderPlugin
       ContextEngineAgentBuilderStartDependencies
     >
 {
-  constructor(_initializerContext: PluginInitializerContext) {}
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   setup(
     coreSetup: CoreSetup<
@@ -38,6 +49,20 @@ export class ContextEngineAgentBuilderPlugin
       agentBuilder: setupDeps.agentBuilder,
       workflowsManagement: setupDeps.workflowsManagement.management,
     });
+
+    const getStartServices = () => coreSetup.getStartServices();
+    setupDeps.contextEngine.registerAiIndexChangeHandler(
+      createSourceAutomationsChangeHandler({
+        logger: this.logger.get('source_automations'),
+        getAiIndexService: async () =>
+          (await getStartServices())[1].contextEngine.getAiIndexService(),
+        getCoreStart: async () => (await getStartServices())[0],
+        getSecurityStart: async () => (await getStartServices())[1].security,
+        getWorkflowsManagement: () => setupDeps.workflowsManagement.management,
+        getScopedEsClient: async (request) =>
+          (await getStartServices())[0].elasticsearch.client.asScoped(request).asCurrentUser,
+      })
+    );
 
     if (setupDeps.searchInferenceEndpoints) {
       registerContextEngineInferenceFeatures(setupDeps.searchInferenceEndpoints);

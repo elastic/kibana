@@ -11,7 +11,9 @@ describe('registerInvestigationsAiIndex', () => {
   it('registers the indicator AI index on the backing index Hunt writes to', () => {
     const registerAiIndex = jest.fn();
 
-    registerInvestigationsAiIndex({ contextEngine: { registerAiIndex } });
+    registerInvestigationsAiIndex({
+      contextEngine: { registerAiIndex, registerAiIndexChangeHandler: jest.fn() },
+    });
 
     expect(registerAiIndex).toHaveBeenCalledTimes(2);
     expect(registerAiIndex).toHaveBeenCalledWith(

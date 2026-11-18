@@ -21,6 +21,7 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowEnablementApi } from './feedback_analysis/schedule';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
+import type { AiIndexChangeHandler } from './ai_indices/changes';
 import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
@@ -28,6 +29,12 @@ import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
   registerAiIndex: (id: string, properties: AiIndexProperties) => void;
+  /**
+   * Runs a handler after an AI index is saved or deleted through the AI index APIs, on behalf of
+   * the request that saved it. Register during setup; a handler that fails is logged and does not
+   * fail the save.
+   */
+  registerAiIndexChangeHandler: (handler: AiIndexChangeHandler) => void;
 }
 
 export interface GetAiIndexDataReadServiceParams {

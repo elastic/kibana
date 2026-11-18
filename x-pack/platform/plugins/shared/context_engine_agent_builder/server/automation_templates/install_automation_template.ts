@@ -124,11 +124,44 @@ export const findInstalledTemplateWorkflowId = async ({
   logger: Logger;
   getAiIndexService: () => Promise<AiIndexService>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
+}): Promise<string | undefined> =>
+  findInstalledTemplateWorkflowIdByName({
+    aiIndexId,
+    spaceId,
+    request,
+    template,
+    name: parseWorkflowNameFromYaml(workflowYaml),
+    logger,
+    getAiIndexService,
+    getWorkflowsManagement,
+  });
+
+/**
+ * Finds the id of the workflow on the AI index installed from the template with exactly this
+ * name, if one exists. A workflow tagged as a different template is never matched.
+ */
+export const findInstalledTemplateWorkflowIdByName = async ({
+  aiIndexId,
+  spaceId,
+  request,
+  template,
+  name: templateName,
+  logger,
+  getAiIndexService,
+  getWorkflowsManagement,
+}: {
+  aiIndexId: string;
+  spaceId: string;
+  request: KibanaRequest;
+  template: AutomationTemplateId;
+  name: string | undefined;
+  logger: Logger;
+  getAiIndexService: () => Promise<AiIndexService>;
+  getWorkflowsManagement: () => WorkflowsManagementApi;
 }): Promise<string | undefined> => {
   const aiIndex = await (await getAiIndexService()).get(aiIndexId, spaceId);
   const workflowsManagement = getWorkflowsManagement();
   const templateTag = AUTOMATION_TEMPLATE_TAGS[template];
-  const templateName = parseWorkflowNameFromYaml(workflowYaml);
 
   for (const automation of aiIndex.automations) {
     if (automation.type !== 'workflow') {
