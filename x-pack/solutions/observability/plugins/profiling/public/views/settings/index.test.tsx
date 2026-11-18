@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { DATA_TEST_SUBJ_SETTING_DEFINITIONS_RETRY } from '@kbn/management-settings-hooks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Settings } from '.';
 
 const mockUseEditableSettings = jest.fn();
 
 jest.mock('@kbn/management-settings-hooks', () => ({
+  ...jest.requireActual('@kbn/management-settings-hooks'),
   useEditableSettings: (...args: unknown[]) => mockUseEditableSettings(...args),
 }));
 
@@ -40,6 +42,7 @@ const editableSettings = {
   fields: {},
   isLoading: false,
   loadError: undefined,
+  retry: jest.fn(),
   unsavedChanges: {},
   handleFieldChange: jest.fn(),
   saveAll: jest.fn(),
@@ -80,6 +83,9 @@ describe('Settings', () => {
     expect(loadError).toHaveTextContent('Unable to load settings');
     expect(loadError).toHaveTextContent('Internal Server Error');
     expect(screen.queryByTestId('profilingSettingsLoading')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId(DATA_TEST_SUBJ_SETTING_DEFINITIONS_RETRY));
+    expect(editableSettings.retry).toHaveBeenCalledTimes(1);
   });
 
   it('shows neither the spinners nor the error callout once the settings have loaded', () => {

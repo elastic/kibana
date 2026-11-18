@@ -110,6 +110,7 @@ const setup = ({
     fields,
     isLoading: false,
     loadError: undefined,
+    retry: jest.fn(),
     handleFieldChange,
     unsavedChanges,
     saveAll: jest.fn(),

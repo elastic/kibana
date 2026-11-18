@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   profilingCo2PerKWH,
@@ -34,7 +33,7 @@ import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { useEditableSettings } from '@kbn/management-settings-hooks';
+import { SettingDefinitionsLoadError, useEditableSettings } from '@kbn/management-settings-hooks';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { BottomBarActions } from './bottom_bar_actions';
@@ -71,6 +70,7 @@ export function Settings() {
     fields,
     isLoading,
     loadError,
+    retry,
     handleFieldChange,
     unsavedChanges,
     saveAll,
@@ -121,11 +121,9 @@ export function Settings() {
         <EuiSpacer />
         {loadError && (
           <>
-            <KbnDangerCallout
-              title={i18n.translate('xpack.profiling.settings.load.error', {
-                defaultMessage: 'Unable to load settings',
-              })}
-              text={loadError.message}
+            <SettingDefinitionsLoadError
+              error={loadError}
+              onRetry={retry}
               data-test-subj="profilingSettingsLoadError"
             />
             <EuiSpacer />

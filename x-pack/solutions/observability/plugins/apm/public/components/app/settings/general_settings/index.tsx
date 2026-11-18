@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   apmServiceGroupMaxNumberOfServices,
   apmMaxNumberOfServices,
@@ -27,7 +26,7 @@ import { isEmpty } from 'lodash';
 import React from 'react';
 import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { useEditableSettings } from '@kbn/management-settings-hooks';
+import { SettingDefinitionsLoadError, useEditableSettings } from '@kbn/management-settings-hooks';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useProfilingPluginSetting } from '../../../../hooks/use_profiling_integration_setting';
 
@@ -74,6 +73,7 @@ export function GeneralSettings() {
     fields,
     isLoading,
     loadError,
+    retry,
     handleFieldChange,
     unsavedChanges,
     saveAll,
@@ -117,11 +117,9 @@ export function GeneralSettings() {
         </EuiFlexGroup>
       )}
       {loadError && (
-        <KbnDangerCallout
-          title={i18n.translate('xpack.apm.apmSettings.load.error', {
-            defaultMessage: 'Unable to load settings',
-          })}
-          text={loadError.message}
+        <SettingDefinitionsLoadError
+          error={loadError}
+          onRetry={retry}
           data-test-subj="apmGeneralSettingsLoadError"
         />
       )}

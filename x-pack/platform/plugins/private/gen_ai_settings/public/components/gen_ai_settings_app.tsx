@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { SettingDefinitionsLoadError } from '@kbn/management-settings-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { isEmpty } from 'lodash';
@@ -71,8 +71,16 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     showChatExperienceSetting,
     showAnonymizationProfilesSection,
   } = useEnabledFeatures();
-  const { fields, isLoading, loadError, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } =
-    useSettingsContext();
+  const {
+    fields,
+    isLoading,
+    loadError,
+    retry,
+    unsavedChanges,
+    isSaving,
+    cleanUnsavedChanges,
+    saveAll,
+  } = useSettingsContext();
 
   // Determine current chat experience (including unsaved changes)
   const chatExperienceField = fields[AI_CHAT_EXPERIENCE_TYPE];
@@ -323,11 +331,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 </EuiFlexGroup>
               )}
               {loadError && (
-                <KbnDangerCallout
-                  title={i18n.translate('xpack.genAiSettings.load.error', {
-                    defaultMessage: 'Unable to load settings',
-                  })}
-                  text={loadError.message}
+                <SettingDefinitionsLoadError
+                  error={loadError}
+                  onRetry={retry}
                   data-test-subj="genAiSettingsLoadError"
                 />
               )}

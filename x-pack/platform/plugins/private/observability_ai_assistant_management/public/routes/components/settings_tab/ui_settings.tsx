@@ -13,10 +13,9 @@ import {
   aiAssistantSearchConnectorIndexPattern,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { useEditableSettings } from '@kbn/management-settings-hooks';
+import { SettingDefinitionsLoadError, useEditableSettings } from '@kbn/management-settings-hooks';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
 import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
 import { useAppContext } from '../../../hooks/use_app_context';
@@ -41,6 +40,7 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
     fields,
     isLoading,
     loadError,
+    retry,
     handleFieldChange,
     unsavedChanges,
     saveAll,
@@ -91,12 +91,9 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
       )}
       {loadError && (
         <>
-          <KbnDangerCallout
-            title={i18n.translate(
-              'xpack.observabilityAiAssistantManagement.editableSettings.loadError',
-              { defaultMessage: 'Unable to load settings' }
-            )}
-            text={loadError.message}
+          <SettingDefinitionsLoadError
+            error={loadError}
+            onRetry={retry}
             data-test-subj="observabilityAiAssistantManagementSettingsLoadError"
           />
           <EuiSpacer />

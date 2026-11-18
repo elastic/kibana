@@ -26,6 +26,7 @@ import {
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { DATA_TEST_SUBJ_SETTING_DEFINITIONS_RETRY } from '@kbn/management-settings-hooks';
 
 // Mock the context hook
 jest.mock('../contexts/enabled_features_context');
@@ -220,6 +221,16 @@ describe('GenAiSettingsApp', () => {
       expect(loadError).toHaveTextContent('Internal Server Error');
       expect(screen.queryByTestId('genAiSettingsLoading')).not.toBeInTheDocument();
       expect(coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
+
+      coreStart.settings.metadata.getAll.mockImplementation(async () =>
+        coreStart.settings.client.getAll()
+      );
+      fireEvent.click(screen.getByTestId(DATA_TEST_SUBJ_SETTING_DEFINITIONS_RETRY));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('genAiSettingsLoadError')).not.toBeInTheDocument();
+      });
+      expect(coreStart.settings.metadata.getAll).toHaveBeenCalledTimes(2);
     });
 
     it('should not show the spinner or the error callout once the settings have loaded', async () => {
