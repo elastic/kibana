@@ -26,7 +26,8 @@
     "@kbn/logging-mocks",
     "@kbn/logging",
     "@kbn/core-http-common",
-    "@kbn/connector-schemas"
+    "@kbn/connector-schemas",
+    "@kbn/actions-plugin"
   ],
   "exclude": ["target/**/*"]
 }
