@@ -60,7 +60,7 @@ export const getOtelApplicationsFromBestSource = async (
   params: GetOtelApplicationsFromBestSourceParams
 ): Promise<SourceApplications> => {
   const { taskManager, sessionsSettings, sessionsReadable, logger, ...searchParams } = params;
-  const { esClient, signal, start, end, environment } = searchParams;
+  const { esClient, signal, start, end, environment, histogram } = searchParams;
 
   if (await sessionsCoverTimeRange(params)) {
     try {
@@ -73,6 +73,7 @@ export const getOtelApplicationsFromBestSource = async (
         start,
         end,
         environment,
+        histogram,
       });
       if (sessionsApplications.applications.length > 0) {
         return sessionsApplications;

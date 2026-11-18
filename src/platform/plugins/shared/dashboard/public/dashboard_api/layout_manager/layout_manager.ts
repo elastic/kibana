@@ -74,8 +74,9 @@ import {
   areLayoutsEqual,
   arePanelLayoutsEqual,
   arePinnedPanelLayoutsEqual,
-} from './are_layouts_equal';
-import { deserializeLayout } from './deserialize_layout';
+} from '../../../common/dashboard_state/layout/are_layouts_equal';
+import { deserializeLayout } from '../../../common/dashboard_state/layout/deserialize_layout';
+import { getLayoutBottomRow, groupPanelsInSection } from './layout_utils';
 import { serializeLayout } from './serialize_layout';
 import {
   isDashboardLayoutPanel,
@@ -715,30 +716,26 @@ export function initializeLayoutManager(
       /** Sections */
       addNewSection: () => {
         const currentLayout = layout$.getValue();
-
-        // find the max y so we know where to add the section
-        let maxY = 0;
-        [...Object.values(currentLayout.panels), ...Object.values(currentLayout.sections)].forEach(
-          (widget) => {
-            const { y, h } = { h: 1, ...widget.grid };
-            maxY = Math.max(maxY, y + h);
-          }
-        );
-
-        // add the new section
-        const sections = { ...currentLayout.sections };
-        const newId = v4();
-        sections[newId] = {
-          grid: { y: maxY },
-          title: i18n.translate('dashboard.defaultSectionTitle', {
-            defaultMessage: 'New collapsible section',
-          }),
-          collapsed: false,
-        };
         layout$.next({
           ...currentLayout,
-          sections,
+          sections: {
+            ...currentLayout.sections,
+            [v4()]: {
+              grid: { y: getLayoutBottomRow(currentLayout) },
+              title: getDefaultSectionTitle(),
+              collapsed: false,
+            },
+          },
         });
+        trackPanel.scrollToBottom$.next();
+      },
+      groupPanelsInSection: (panelIds: string[]) => {
+        const updatedLayout = groupPanelsInSection(layout$.getValue(), panelIds, {
+          id: v4(),
+          title: getDefaultSectionTitle(),
+        });
+        if (!updatedLayout) return;
+        layout$.next(updatedLayout);
         trackPanel.scrollToBottom$.next();
       },
       getPanelSection: (uuid: string) => {
@@ -759,6 +756,11 @@ export function initializeLayoutManager(
     },
   };
 }
+
+const getDefaultSectionTitle = () =>
+  i18n.translate('dashboard.defaultSectionTitle', {
+    defaultMessage: 'New collapsible section',
+  });
 
 function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
   if (rawTitle === '') return '';

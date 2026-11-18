@@ -5,68 +5,80 @@
  * 2.0.
  */
 
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
-import type { KiLifecycleStatus } from '../../../../../common/step_types/ki';
-import type { KiListSummary } from '../../../hooks/use_list_ki';
-import type { ListKiTypeFilter } from './list_ki_helpers';
-import { ListKiSearchBox } from './list_ki_search_box';
-import { ListKiStatusFilter } from './list_ki_status_filter';
-import { ListKiTypeFilter as ListKiTypeFilterButton } from './list_ki_type_filter';
+import { EuiLink, EuiSkeletonTitle, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 
 interface ListKiHeaderProps {
-  searchText: string;
-  submittedQuery: string;
-  isSearchLoading?: boolean;
-  onSearchTextChange: (value: string) => void;
-  onSearchSubmit: (value: string) => void;
-  typeFilter: ListKiTypeFilter;
-  summary: KiListSummary;
-  onTypeFilterChange: (filter: ListKiTypeFilter) => void;
-  statusFilter: KiLifecycleStatus;
-  onStatusFilterChange: (status: KiLifecycleStatus) => void;
-  onSearchSubmitClick: () => void;
+  /** Documents that match the status and search filters. */
+  total: number;
+  /** True only before the first data arrives. */
+  isLoading: boolean;
+  hasError: boolean;
+  discoverHref?: string;
 }
 
-export const ListKiHeader = ({
-  searchText,
-  submittedQuery,
-  isSearchLoading = false,
-  onSearchTextChange,
-  onSearchSubmit,
-  typeFilter,
-  summary,
-  onTypeFilterChange,
-  statusFilter,
-  onStatusFilterChange,
-  onSearchSubmitClick,
-}: ListKiHeaderProps) => {
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem>
-        <ListKiSearchBox
-          value={searchText}
-          submittedQuery={submittedQuery}
-          isLoading={isSearchLoading}
-          onChange={onSearchTextChange}
-          onCommit={onSearchSubmit}
-          onSubmitClick={onSearchSubmitClick}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFilterGroup compressed>
-          <ListKiStatusFilter
-            statusFilter={statusFilter}
-            onStatusFilterChange={onStatusFilterChange}
-          />
+/** The row above the tiles: count and Discover link. */
+export const ListKiHeader = ({ total, isLoading, hasError, discoverHref }: ListKiHeaderProps) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(
+    () => ({
+      row: css({
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'baseline',
+        gap: `${euiTheme.size.xs} ${euiTheme.size.base}`,
+        marginBottom: euiTheme.size.base,
+      }),
+      countSkeleton: css({
+        width: euiTheme.base * 15,
+      }),
+    }),
+    [euiTheme]
+  );
 
-          <ListKiTypeFilterButton
-            typeFilter={typeFilter}
-            summary={summary}
-            onTypeFilterChange={onTypeFilterChange}
+  return (
+    <div css={styles.row} data-test-subj="contextListKiHeader">
+      {isLoading ? (
+        <EuiSkeletonTitle
+          size="xs"
+          css={styles.countSkeleton}
+          data-test-subj="contextListKiHeaderCountLoading"
+        />
+      ) : null}
+      {/* The list shows the error; a count of 0 next to it would be wrong. */}
+      {!isLoading && !hasError ? (
+        <EuiText size="m">
+          <h3 data-test-subj="contextListKiHeaderCount">
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.listKi.headerCount"
+              defaultMessage="{count, plural, one {# Knowledge document} other {# Knowledge documents}}"
+              values={{ count: total }}
+            />
+          </h3>
+        </EuiText>
+      ) : null}
+      {discoverHref ? (
+        <EuiLink
+          href={discoverHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-test-subj="contextListKiHeaderDiscoverLink"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+            action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_LINK,
+          })}
+        >
+          {/* EuiLink adds the external icon itself for target="_blank". */}
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.listKi.headerDiscoverLink"
+            defaultMessage="View raw docs in Discover"
           />
-        </EuiFilterGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiLink>
+      ) : null}
+    </div>
   );
 };
