@@ -1,5 +1,5 @@
 {
-  "sha1": "69937170240957d078498eb9a6c372e219a90841",
+  "sha1": "b4b8009e06a995eae02553e87a4902de9313be01",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -154,12 +154,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
-        "line": 20,
-        "column": 13
+        "line": 19,
+        "column": 8
       }
     },
     {
@@ -544,12 +546,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 79,
-        "column": 23
+        "line": 82,
+        "column": 43
       }
     },
     {
@@ -558,12 +562,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 219,
-        "column": 15
+        "line": 231,
+        "column": 22
       }
     },
     {
@@ -572,12 +578,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 377,
-        "column": 66
+        "line": 390,
+        "column": 22
       }
     },
     {
