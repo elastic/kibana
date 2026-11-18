@@ -8,7 +8,7 @@
  */
 
 import { URL } from 'url';
-import { compareLevels, evaluateAcl, type EntryLevel } from '@kbn/ols';
+import { evaluateAcl, type AclAccess, type EntryAccess } from '@kbn/ols';
 import {
   ACL_SHAPE_FIXTURES,
   FIXTURE_POLICY,
@@ -29,7 +29,10 @@ const TYPE = 'acl_parity';
 /**
  * Levels a fixture's expectations are checked at. `manage` stands for access management.
  */
-const FIXTURE_LEVELS: EntryLevel[] = ['view', 'use', 'edit', 'manage'];
+// Lowest to highest. `@kbn/ols` keeps the order internal, so the test states it.
+const FIXTURE_LEVELS: EntryAccess[] = ['view', 'use', 'edit', 'manage'];
+const grantsAtLeast = (granted: AclAccess, level: EntryAccess) =>
+  FIXTURE_LEVELS.indexOf(granted as EntryAccess) >= FIXTURE_LEVELS.indexOf(level);
 const indexableFixtures = ACL_SHAPE_FIXTURES.map((fixture, index) => ({
   ...fixture,
   policy: fixture.policy ?? FIXTURE_POLICY,
@@ -115,7 +118,7 @@ describe('ACL storage in Saved Objects', () => {
             name,
             probe,
             level,
-            allowed: !!probeLevel && compareLevels(probeLevel, level) >= 0,
+            allowed: !!probeLevel && grantsAtLeast(probeLevel, level),
           });
         }
       }

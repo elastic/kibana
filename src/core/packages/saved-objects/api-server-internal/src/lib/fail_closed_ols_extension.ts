@@ -36,7 +36,7 @@ export const createFailClosedOlsExtension = (
           type,
           buildAclReadFilter({
             policy,
-            level: 'view',
+            access: 'view',
             recoverySpaces: [],
             ordinarySpaces: namespaces,
           })

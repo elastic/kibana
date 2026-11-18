@@ -172,7 +172,7 @@ test.describe.serial('Connector access', { tag: '@local-stateful-classic' }, () 
         headers: ownerHeaders,
         body: {
           version: state.body.version,
-          general_access: 'none',
+          general: { access: 'none' },
           entries: [
             { type: 'user', id: grantee.uid, access: 'use' },
             { type: 'service_account', id: serviceAccountId, access: 'use' },
@@ -252,7 +252,7 @@ test.describe.serial('Connector access', { tag: '@local-stateful-classic' }, () 
         config: {},
         secrets: {},
         acl: {
-          general_access: 'edit',
+          general: { access: 'edit' },
           entries: [{ type: 'user', id: grantee.uid, access: 'use' }],
         },
       },
@@ -297,7 +297,7 @@ test.describe.serial('Connector access', { tag: '@local-stateful-classic' }, () 
     const state = await apiClient.get(accessPath, { headers: ownerHeaders, responseType: 'json' });
     const changed = await apiClient.put(accessPath, {
       headers: ownerHeaders,
-      body: { version: state.body.version, general_access: 'use', entries: [] },
+      body: { version: state.body.version, general: { access: 'use' }, entries: [] },
       responseType: 'json',
     });
     expect(changed.statusCode).toBe(200);
@@ -386,7 +386,7 @@ test.describe.serial('Connector access', { tag: '@local-stateful-classic' }, () 
     const state = await apiClient.get(accessPath, { headers: ownerHeaders, responseType: 'json' });
     await apiClient.put(accessPath, {
       headers: ownerHeaders,
-      body: { version: state.body.version, general_access: 'none', entries: [] },
+      body: { version: state.body.version, general: { access: 'none' }, entries: [] },
     });
 
     await browserAuth.loginAsAdmin();

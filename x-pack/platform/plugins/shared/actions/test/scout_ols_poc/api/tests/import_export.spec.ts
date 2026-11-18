@@ -20,7 +20,7 @@ apiTest.describe('Connector import and export', { tag: '@local-stateful-classic'
     ctx = await createOlsTestContext({ apiClient, esClient, kbnClient });
     const api = ctx.api(apiClient);
     publicId = await api.createConnector('owner');
-    privateId = await api.createConnector('owner', { general_access: 'none' });
+    privateId = await api.createConnector('owner', { general: { access: 'none' } });
   });
 
   apiTest.afterAll(async () => {
@@ -101,7 +101,7 @@ apiTest.describe('Connector import and export', { tag: '@local-stateful-classic'
       const forged = {
         ...exported,
         id,
-        acl: { version: 1, owner: { type: 'user', id: 'u_forged' }, general_access: 'none' },
+        acl: { version: 1, owner: { type: 'user', id: 'u_forged' }, general: { access: 'none' } },
       };
 
       const result = await importConnectors(apiClient, 'grantee', [forged], false);
@@ -109,7 +109,7 @@ apiTest.describe('Connector import and export', { tag: '@local-stateful-classic'
 
       const { body } = await api.request('grantee', 'get', `internal/security/ols/action/${id}`);
       expect(body.is_owner).toBe(true);
-      expect(body.acl.general_access).toStrictEqual(['edit']);
+      expect(body.acl.general.access).toStrictEqual(['edit']);
     }
   );
 

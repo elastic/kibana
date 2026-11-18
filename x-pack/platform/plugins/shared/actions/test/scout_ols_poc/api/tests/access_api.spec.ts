@@ -41,7 +41,7 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
     api: OlsApi,
     persona: Persona,
     id: string,
-    body: { general_access: string; entries: unknown[] },
+    body: { general: { access: string }; entries: unknown[] },
     version?: string
   ) =>
     api.request(persona, 'put', accessPath(id), {
@@ -52,7 +52,7 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
   apiTest('returns the ACL only to people who can manage access', async ({ apiClient }) => {
     const api = ctx.api(apiClient);
     const id = await api.createConnector('owner', {
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ ...ctx.principal('grantee'), access: 'use' }],
     });
 
@@ -93,7 +93,7 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
       const id = await api.createConnector('owner');
 
       const response = await replace(api, 'owner', id, {
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [
           { ...ctx.principal('grantee'), access: 'use' },
           { ...ctx.principal('noActions'), access: 'use' },
@@ -121,32 +121,32 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
   apiTest('allows only the owner or recovery to change access', async ({ apiClient }) => {
     const api = ctx.api(apiClient);
     const id = await api.createConnector('owner', {
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ ...ctx.principal('grantee'), access: 'use' }],
     });
-    const body = { general_access: 'edit', entries: [] };
+    const body = { general: { access: 'edit' }, entries: [] };
 
     expect(await replace(api, 'stranger', id, body)).toHaveStatusCode(404);
     expect(await replace(api, 'grantee', id, body)).toHaveStatusCode(403);
     expect(
-      await replace(api, 'admin', id, { general_access: 'none', entries: [] })
+      await replace(api, 'admin', id, { general: { access: 'none' }, entries: [] })
     ).toHaveStatusCode(200);
   });
 
   apiTest('rejects a stale version, without telling a stranger', async ({ apiClient }) => {
     const api = ctx.api(apiClient);
-    const id = await api.createConnector('owner', { general_access: 'none' });
+    const id = await api.createConnector('owner', { general: { access: 'none' } });
     const { version } = (await getAccess(api, 'owner', id)).body;
     const grantee = { ...ctx.principal('grantee'), access: 'use' };
     expect(
-      await replace(api, 'owner', id, { general_access: 'none', entries: [grantee] }, version)
+      await replace(api, 'owner', id, { general: { access: 'none' }, entries: [grantee] }, version)
     ).toHaveStatusCode(200);
 
     expect(
-      await replace(api, 'owner', id, { general_access: 'none', entries: [] }, version)
+      await replace(api, 'owner', id, { general: { access: 'none' }, entries: [] }, version)
     ).toHaveStatusCode(409);
     expect(
-      await replace(api, 'stranger', id, { general_access: 'none', entries: [] }, version)
+      await replace(api, 'stranger', id, { general: { access: 'none' }, entries: [] }, version)
     ).toHaveStatusCode(404);
   });
 
@@ -157,15 +157,15 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
 
     for (const body of [
       // Connectors can grant only `use`.
-      { general_access: 'none', entries: [{ ...grantee, access: 'edit' }] },
-      { general_access: 'view', entries: [] },
-      { general_access: 'none', entries: [grantee, grantee] },
+      { general: { access: 'none' }, entries: [{ ...grantee, access: 'edit' }] },
+      { general: { access: 'view' }, entries: [] },
+      { general: { access: 'none' }, entries: [grantee, grantee] },
       {
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [{ type: 'user', id: `u_${randomUUID()}`, access: 'use' }],
       },
       {
-        general_access: 'none',
+        general: { access: 'none' },
         entries: Array.from({ length: 101 }, (_, index) => ({
           type: 'user',
           id: `u_${index}`,
@@ -192,13 +192,13 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
 
     expect(
       await replace(api, 'owner', id, {
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [{ type: 'service_account', id: created.body.id, access: 'use' }],
       })
     ).toHaveStatusCode(200);
     expect(
       await replace(api, 'owner', id, {
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [{ type: 'service_account', id: 'kibana/does-not-exist', access: 'use' }],
       })
     ).toHaveStatusCode(400);
@@ -245,7 +245,7 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
 
       const claim = await api.request('stranger', 'post', `${accessPath(id)}/_claim`, {
         version: (await getAccess(api, 'stranger', id)).body.version,
-        general_access: 'none',
+        general: { access: 'none' },
       });
       expect(claim).toHaveStatusCode(200);
 
@@ -288,7 +288,7 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
 
   apiTest('transfers ownership and removes the former owner access', async ({ apiClient }) => {
     const api = ctx.api(apiClient);
-    const id = await api.createConnector('owner', { general_access: 'none' });
+    const id = await api.createConnector('owner', { general: { access: 'none' } });
 
     const transfer = await api.request('owner', 'post', `${accessPath(id)}/_transfer`, {
       version: (await getAccess(api, 'owner', id)).body.version,
@@ -306,7 +306,7 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
     'lets recovery transfer ownership of a connector it cannot edit',
     async ({ apiClient }) => {
       const api = ctx.api(apiClient);
-      const id = await api.createConnector('owner', { general_access: 'none' });
+      const id = await api.createConnector('owner', { general: { access: 'none' } });
 
       const transfer = await api.request('admin', 'post', `${accessPath(id)}/_transfer`, {
         version: (await getAccess(api, 'admin', id)).body.version,
@@ -333,9 +333,9 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
     expect(policy).toHaveStatusCode(200);
     expect(policy.body).toMatchObject({
       enabled: true,
-      general_access_levels: ['none', 'use', 'edit'],
-      default_general_access_level: 'edit',
-      entry_levels: ['use'],
+      general_access: ['none', 'use', 'edit'],
+      default_general_access: 'edit',
+      entry_access: ['use'],
     });
 
     expect(

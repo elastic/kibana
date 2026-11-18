@@ -11,7 +11,7 @@ import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
-import { compareLevels, MAX_ACL_ENTRIES, type Principal } from '@kbn/ols';
+import { MAX_ACL_ENTRIES, type GeneralAccess, type Principal } from '@kbn/ols';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { AccessList, getPrincipalKey } from './access_list';
 import type { AccessCopy } from './copy';
@@ -19,6 +19,11 @@ import { GeneralAccessSelect } from './general_access_select';
 import { PrincipalPicker } from './principal_picker';
 import { ServiceAccountField } from './service_account_field';
 import type { AccessDraft, AccessPolicyResponse, SuggestedUser } from './types';
+
+// General access values from lowest to highest, used only to tell when a change lowers access.
+const GENERAL_ACCESS_ORDER: readonly GeneralAccess[] = ['none', 'view', 'use', 'edit'];
+const isLowered = (next: GeneralAccess, saved: GeneralAccess) =>
+  GENERAL_ACCESS_ORDER.indexOf(next) < GENERAL_ACCESS_ORDER.indexOf(saved);
 
 export interface AccessDraftEditorProps {
   policy: AccessPolicyResponse;
@@ -59,7 +64,7 @@ export const AccessDraftEditor = ({
 }: AccessDraftEditorProps) => {
   // Profiles of users picked in this session, so that new entries show names before saving.
   const [pickedUsers, setPickedUsers] = useState<SuggestedUser[]>([]);
-  const newEntryLevel = policy.entry_levels[0];
+  const newEntryLevel = policy.entry_access[0];
 
   const profilesByUid = useMemo(
     () => new Map([...profiles, ...pickedUsers].map((profile) => [profile.uid, profile])),
@@ -83,7 +88,7 @@ export const AccessDraftEditor = ({
 
   // Named grants stay when general access is lowered. People who had access through them keep it.
   const retainedCount =
-    savedValue && compareLevels(value.general_access, savedValue.general_access) < 0
+    savedValue && isLowered(value.general.access, savedValue.general.access)
       ? value.entries.filter((entry) =>
           savedValue.entries.some((saved) => getPrincipalKey(saved) === getPrincipalKey(entry))
         ).length
@@ -97,9 +102,9 @@ export const AccessDraftEditor = ({
   return (
     <>
       <GeneralAccessSelect
-        allowed={policy.general_access_levels}
-        value={value.general_access}
-        onChange={(generalAccess) => onChange({ ...value, general_access: generalAccess })}
+        allowed={policy.general_access}
+        value={value.general.access}
+        onChange={(generalAccess) => onChange({ ...value, general: { access: generalAccess } })}
         copy={copy}
         isDisabled={isDisabled}
       />
@@ -144,7 +149,7 @@ export const AccessDraftEditor = ({
       ) : null}
       <AccessList
         entries={value.entries}
-        entryLevels={policy.entry_levels}
+        entryLevels={policy.entry_access}
         profiles={profilesByUid}
         warnings={warningKeys}
         copy={copy}

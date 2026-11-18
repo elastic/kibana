@@ -18,10 +18,10 @@ import type { AccessDraft, AccessPolicyResponse, SuggestedUser } from './types';
 
 const POLICY: AccessPolicyResponse = {
   enabled: true,
-  general_access_levels: ['none', 'view', 'use', 'edit'],
-  default_general_access_level: 'use',
-  entry_levels: ['use', 'edit'],
-  operations: { view: { level: 'view' }, use: { level: 'use' }, edit: { level: 'edit' } },
+  general_access: ['none', 'view', 'use', 'edit'],
+  default_general_access: 'use',
+  entry_access: ['use', 'edit'],
+  operations: { view: { access: 'view' }, use: { access: 'use' }, edit: { access: 'edit' } },
 };
 
 const suggestedUser = (
@@ -87,13 +87,13 @@ describe('AccessDraftEditor', () => {
   });
 
   it('adds a picked user with the first entry level of the policy', async () => {
-    render(<Host initialValue={{ general_access: 'use', entries: [] }} />);
+    render(<Host initialValue={{ general: { access: 'use' }, entries: [] }} />);
 
     fireEvent.change(getPickerInput(), { target: { value: 'bob' } });
     await userEvent.click(await screen.findByTestId('accessPanelPrincipalPickerOption-u_bob'));
 
     expect(onChange).toHaveBeenLastCalledWith({
-      general_access: 'use',
+      general: { access: 'use' },
       entries: [{ type: 'user', id: 'u_bob', access: 'use' }],
     });
     expect(screen.getByTestId('accessPanelEntry-u_bob')).toHaveTextContent('Bob Builder');
@@ -104,7 +104,7 @@ describe('AccessDraftEditor', () => {
     render(
       <Host
         initialValue={{
-          general_access: 'use',
+          general: { access: 'use' },
           entries: [{ type: 'service_account', id: 'kibana/x', access: 'use' }],
         }}
       />
@@ -119,17 +119,19 @@ describe('AccessDraftEditor', () => {
       })
     );
 
-    expect(onChange).toHaveBeenLastCalledWith({ general_access: 'use', entries: [] });
+    expect(onChange).toHaveBeenLastCalledWith({ general: { access: 'use' }, entries: [] });
   });
 
   it('adds a typed service account ID', async () => {
-    render(<Host allowServiceAccounts initialValue={{ general_access: 'use', entries: [] }} />);
+    render(
+      <Host allowServiceAccounts initialValue={{ general: { access: 'use' }, entries: [] }} />
+    );
 
     await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), 'kibana/x');
     await userEvent.click(screen.getByTestId('accessPanelServiceAccountAdd'));
 
     expect(onChange).toHaveBeenLastCalledWith({
-      general_access: 'use',
+      general: { access: 'use' },
       entries: [{ type: 'service_account', id: 'kibana/x', access: 'use' }],
     });
     expect(screen.getByTestId('accessPanelEntry-kibana/x')).toHaveTextContent('Service account');
@@ -139,7 +141,9 @@ describe('AccessDraftEditor', () => {
   it.each(['not-a-service-account', 'kibana/x/y', 'kibana/'])(
     'rejects the invalid service account ID %s',
     async (id) => {
-      render(<Host allowServiceAccounts initialValue={{ general_access: 'use', entries: [] }} />);
+      render(
+        <Host allowServiceAccounts initialValue={{ general: { access: 'use' }, entries: [] }} />
+      );
 
       await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), `${id}{enter}`);
 
@@ -153,7 +157,7 @@ describe('AccessDraftEditor', () => {
       <Host
         allowServiceAccounts
         initialValue={{
-          general_access: 'use',
+          general: { access: 'use' },
           entries: [{ type: 'service_account', id: 'kibana/x', access: 'use' }],
         }}
       />
@@ -166,7 +170,7 @@ describe('AccessDraftEditor', () => {
   });
 
   it('searches only people in the people picker', async () => {
-    render(<Host initialValue={{ general_access: 'use', entries: [] }} />);
+    render(<Host initialValue={{ general: { access: 'use' }, entries: [] }} />);
 
     await userEvent.type(getPickerInput(), 'kibana/x{enter}');
 
@@ -177,7 +181,7 @@ describe('AccessDraftEditor', () => {
     render(
       <Host
         initialValue={{
-          general_access: 'use',
+          general: { access: 'use' },
           entries: [{ type: 'service_account', id: 'kibana/x', access: 'use' }],
         }}
       />
@@ -190,7 +194,9 @@ describe('AccessDraftEditor', () => {
 
   it('excludes the owner and existing entries from suggestions', async () => {
     const owner: Principal = { type: 'user', id: 'u_owner' };
-    render(<Host owner={owner} initialValue={{ general_access: 'use', entries: [ALICE_ENTRY] }} />);
+    render(
+      <Host owner={owner} initialValue={{ general: { access: 'use' }, entries: [ALICE_ENTRY] }} />
+    );
 
     await userEvent.click(getPickerInput());
 
@@ -203,7 +209,7 @@ describe('AccessDraftEditor', () => {
   });
 
   it('warns when a picked user cannot use the level of the new entry', async () => {
-    render(<Host initialValue={{ general_access: 'use', entries: [] }} />);
+    render(<Host initialValue={{ general: { access: 'use' }, entries: [] }} />);
 
     fireEvent.change(getPickerInput(), { target: { value: 'victor' } });
     await userEvent.click(await screen.findByTestId('accessPanelPrincipalPickerOption-u_viewer'));
@@ -215,8 +221,8 @@ describe('AccessDraftEditor', () => {
     const bobEntry = { type: 'user' as const, id: 'u_bob', access: 'use' as const };
     render(
       <Host
-        savedValue={{ general_access: 'use', entries: [ALICE_ENTRY] }}
-        initialValue={{ general_access: 'use', entries: [ALICE_ENTRY, bobEntry] }}
+        savedValue={{ general: { access: 'use' }, entries: [ALICE_ENTRY] }}
+        initialValue={{ general: { access: 'use' }, entries: [ALICE_ENTRY, bobEntry] }}
       />
     );
     expect(screen.queryByTestId('accessPanelRetainedGrants')).not.toBeInTheDocument();
@@ -224,7 +230,7 @@ describe('AccessDraftEditor', () => {
     await selectGeneralAccess('none');
 
     expect(onChange).toHaveBeenLastCalledWith({
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [ALICE_ENTRY, bobEntry],
     });
     expect(screen.getByTestId('accessPanelRetainedGrants')).toHaveTextContent(
@@ -235,8 +241,8 @@ describe('AccessDraftEditor', () => {
   it('does not show the retained-grants callout when general access is raised', async () => {
     render(
       <Host
-        savedValue={{ general_access: 'use', entries: [ALICE_ENTRY] }}
-        initialValue={{ general_access: 'use', entries: [ALICE_ENTRY] }}
+        savedValue={{ general: { access: 'use' }, entries: [ALICE_ENTRY] }}
+        initialValue={{ general: { access: 'use' }, entries: [ALICE_ENTRY] }}
       />
     );
 
@@ -251,13 +257,13 @@ describe('AccessDraftEditor', () => {
       id: `u_${index}`,
       access: 'use' as const,
     }));
-    render(<Host initialValue={{ general_access: 'use', entries }} />);
+    render(<Host initialValue={{ general: { access: 'use' }, entries }} />);
 
     expect(getPickerInput()).toBeDisabled();
   });
 
   it('keeps the picker enabled below the entry limit', () => {
-    render(<Host initialValue={{ general_access: 'use', entries: [ALICE_ENTRY] }} />);
+    render(<Host initialValue={{ general: { access: 'use' }, entries: [ALICE_ENTRY] }} />);
 
     expect(getPickerInput()).toBeEnabled();
   });

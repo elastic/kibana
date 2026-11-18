@@ -376,11 +376,14 @@ const ErrorCallout = ({
  * Turns the API's policy into the model's shape, so that the model's rules read stored ACLs.
  */
 const toModelPolicy = (policy: AccessPolicyResponse) => ({
-  generalAccessLevels: policy.general_access_levels,
-  defaultGeneralAccessLevel: policy.default_general_access_level,
-  entryLevels: policy.entry_levels,
+  generalAccess: policy.general_access,
+  defaultGeneralAccess: policy.default_general_access,
+  entryAccess: policy.entry_access,
   operations: Object.fromEntries(
-    Object.entries(policy.operations).map(([name, { level }]) => [name, { level, privileges: {} }])
+    Object.entries(policy.operations).map(([name, { access }]) => [
+      name,
+      { access, privileges: {} },
+    ])
   ),
 });
 
@@ -388,9 +391,9 @@ const toModelPolicy = (policy: AccessPolicyResponse) => ({
  * Returns the editable part of a stored ACL: general access and named entries, without the owner.
  */
 export const toAccessDraft = (policy: AccessPolicyResponse, acl: StoredAcl): AccessDraft => {
-  const { general_access: generalAccess, entries } = readEditableAcl(toModelPolicy(policy), acl);
+  const { general, entries } = readEditableAcl(toModelPolicy(policy), acl);
   return {
-    general_access: generalAccess,
+    general: { access: general.access },
     entries: entries.map(({ type, id, access }) => ({ type, id, access })),
   };
 };

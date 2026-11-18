@@ -51,11 +51,11 @@ const OBJECT_VERSION = encodeHitVersion(SEQ_NO_PROPS);
 
 const OWNER = { type: 'user', id: 'u_owner' };
 /** Restricted: nobody without a principal can see the object. */
-const PRIVATE_ACL = { version: 1, owner: OWNER, general_access: 'none', entries: [] };
+const PRIVATE_ACL = { version: 1, owner: OWNER, general: { access: 'none' }, entries: [] };
 /** Restricted: everybody can see and use the object, nobody else can edit it. */
-const RUN_ONLY_ACL = { version: 1, owner: OWNER, general_access: 'use', entries: [] };
+const RUN_ONLY_ACL = { version: 1, owner: OWNER, general: { access: 'use' }, entries: [] };
 /** Not restricted: everybody can edit the object. */
-const PUBLIC_ACL = { version: 1, owner: OWNER, general_access: 'edit', entries: [] };
+const PUBLIC_ACL = { version: 1, owner: OWNER, general: { access: 'edit' }, entries: [] };
 
 /** The stored form of an ACL, which has no `entries` when there are none. */
 const toStored = ({ entries, ...acl }: Acl) => (entries?.length ? { ...acl, entries } : acl);
@@ -182,7 +182,7 @@ describe('object-level security in the repository', () => {
       expect(result.acl).toEqual({
         version: [1],
         owner: { type: ['user'], id: ['u_owner'] },
-        general_access: ['use'],
+        general: { access: ['use'] },
         entries: [],
       });
       expect(olsExtension.authorizeObjects).toHaveBeenCalledWith(
@@ -273,7 +273,7 @@ describe('object-level security in the repository', () => {
       });
       const expectedFilter = buildAclReadFilter({
         policy: FIXTURE_POLICY,
-        level: 'view',
+        access: 'view',
         recoverySpaces: [],
         ordinarySpaces: ['default'],
       });
@@ -293,7 +293,7 @@ describe('object-level security in the repository', () => {
     it.each([
       ['root search fields', { rootSearchFields: ['acl.owner.id'] }],
       ['sort field', { sortField: 'acl' }],
-      ['sort', { sort: [{ field: 'acl.general_access' }] }],
+      ['sort', { sort: [{ field: 'acl.general.access' }] }],
     ])('rejects ACL %s', async (_, options) => {
       await expect(repository.find({ type: ACL_TYPE, ...options })).rejects.toMatchObject({
         message: expect.stringContaining('ACL fields cannot be searched or sorted'),
@@ -351,7 +351,7 @@ describe('object-level security in the repository', () => {
       const request = client.index.mock.calls[0][0];
       expect(request).toMatchObject({ if_seq_no: 5, if_primary_term: 2 });
       expect(request.document).toMatchObject({
-        acl: { version: 1, owner: OWNER, general_access: 'edit' },
+        acl: { version: 1, owner: OWNER, general: { access: 'edit' } },
       });
       expect(olsExtension.getInitialAcl).not.toHaveBeenCalled();
       expect(result.acl).toEqual(normalizeAclSource({ acl: PUBLIC_ACL }));
@@ -364,7 +364,7 @@ describe('object-level security in the repository', () => {
         repository.create(
           ACL_TYPE,
           { title: 'new' },
-          { id: 'public', overwrite: true, initialAcl: { general_access: 'none' } }
+          { id: 'public', overwrite: true, initialAcl: { general: { access: 'none' } } }
         )
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
       expect(client.index).not.toHaveBeenCalled();
@@ -374,14 +374,14 @@ describe('object-level security in the repository', () => {
       const initialAcl: Acl = {
         version: 1,
         owner: { type: 'user', id: 'u_creator' },
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [],
       };
       olsExtension.getInitialAcl.mockResolvedValue(initialAcl);
       mockCreatePreflight(notFoundDoc(ACL_TYPE, 'new'));
       client.create.mockResponseOnce(mockIndexResponse(ACL_TYPE, 'new'));
 
-      const requested = { general_access: 'none' as const };
+      const requested = { general: { access: 'none' as const } };
       await repository.create(
         ACL_TYPE,
         { title: 'new' },
@@ -400,7 +400,11 @@ describe('object-level security in the repository', () => {
 
     it('rejects initial access for an unregistered type', async () => {
       await expect(
-        repository.create(OTHER_TYPE, { title: 'new' }, { initialAcl: { general_access: 'none' } })
+        repository.create(
+          OTHER_TYPE,
+          { title: 'new' },
+          { initialAcl: { general: { access: 'none' } } }
+        )
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
       expect(client.create).not.toHaveBeenCalled();
     });
@@ -532,11 +536,11 @@ describe('object-level security in the repository', () => {
   });
 
   describe('#changeAcl', () => {
-    const change = { kind: 'replace' as const, general_access: 'none' as const, entries: [] };
+    const change = { kind: 'replace' as const, general: { access: 'none' as const }, entries: [] };
     const next: Acl = {
       version: 1,
       owner: { type: 'user', id: 'u_owner' },
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [],
     };
 
@@ -689,7 +693,7 @@ describe('object-level security in the repository', () => {
     const initialAcl: Acl = {
       version: 1,
       owner: { type: 'user', id: 'u_creator' },
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [],
     };
     const mockPreflight = (...docs: object[]) =>
@@ -743,7 +747,7 @@ describe('object-level security in the repository', () => {
       );
       mockBulkWrites();
 
-      const requested = { general_access: 'none' as const };
+      const requested = { general: { access: 'none' as const } };
       const { saved_objects: savedObjects } = await repository.bulkCreate([
         { type: ACL_TYPE, id: 'hidden', attributes: { title: 'new' } },
         { type: ACL_TYPE, id: 'new', attributes: { title: 'new' }, initialAcl: requested },
@@ -787,7 +791,7 @@ describe('object-level security in the repository', () => {
             type: ACL_TYPE,
             id: 'existing',
             attributes: { title: 'new' },
-            initialAcl: { general_access: 'none' },
+            initialAcl: { general: { access: 'none' } },
           },
           { type: ACL_TYPE, id: 'new', attributes: { title: 'new' } },
         ],
@@ -808,7 +812,7 @@ describe('object-level security in the repository', () => {
         method: 'index',
         action: expect.objectContaining({ if_seq_no: 5, if_primary_term: 2 }),
         source: expect.objectContaining({
-          acl: { version: 1, owner: OWNER, general_access: 'edit' },
+          acl: { version: 1, owner: OWNER, general: { access: 'edit' } },
         }),
       });
       // A new object is never written over one created concurrently, even with overwrite.
@@ -869,7 +873,7 @@ describe('object-level security in the repository', () => {
         }),
       });
       // The full-document rewrite keeps the stored ACL.
-      expect(operations[1].acl).toEqual({ version: 1, owner: OWNER, general_access: 'edit' });
+      expect(operations[1].acl).toEqual({ version: 1, owner: OWNER, general: { access: 'edit' } });
     });
   });
 
@@ -878,7 +882,7 @@ describe('object-level security in the repository', () => {
       const initialAcl: Acl = {
         version: 1,
         owner: { type: 'user', id: 'u_creator' },
-        general_access: 'edit',
+        general: { access: 'edit' },
         entries: [],
       };
       olsExtension.getInitialAcl.mockResolvedValue(initialAcl);

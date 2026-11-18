@@ -356,7 +356,7 @@ describe('collectSavedObjects()', () => {
       const acl = {
         version: 1,
         owner: { type: 'user', id: 'u_owner' },
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [],
       };
       const readStream = createReadStream({ ...obj1, acl }, obj2);

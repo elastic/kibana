@@ -16,7 +16,7 @@ import { userProfileMock } from '../../../../common/model/user_profile.mock';
 import type { UserProfileServiceStartInternal } from '../../../user_profile';
 import { userProfileServiceMock } from '../../../user_profile/user_profile_service.mock';
 
-const POLICY: AccessPolicy = { ...FIXTURE_POLICY, entryLevels: ['view', 'use'] };
+const POLICY: AccessPolicy = { ...FIXTURE_POLICY, entryAccess: ['view', 'use'] };
 
 describe('POST /internal/security/ols/{type}/_suggest_principals', () => {
   let mocks: ReturnType<typeof olsRoutesMock.create>;

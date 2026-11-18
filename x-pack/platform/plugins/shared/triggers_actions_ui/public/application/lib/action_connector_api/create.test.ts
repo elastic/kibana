@@ -155,7 +155,7 @@ describe('createActionConnector', () => {
       id: '123',
     });
     const acl = {
-      general_access: 'none' as const,
+      general: { access: 'none' as const },
       entries: [{ type: 'user' as const, id: 'u_alice', access: 'use' as const }],
     };
 

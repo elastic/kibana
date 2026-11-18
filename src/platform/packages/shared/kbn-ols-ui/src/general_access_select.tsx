@@ -18,10 +18,10 @@ import {
   type EuiSuperSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GeneralAccessLevel } from '@kbn/ols';
+import type { GeneralAccess } from '@kbn/ols';
 import { getGeneralAccessCopy, type AccessCopy } from './copy';
 
-const LEVEL_ICONS: Record<GeneralAccessLevel, string> = {
+const LEVEL_ICONS: Record<GeneralAccess, string> = {
   none: 'lock',
   view: 'eye',
   use: 'users',
@@ -29,9 +29,9 @@ const LEVEL_ICONS: Record<GeneralAccessLevel, string> = {
 };
 
 export interface GeneralAccessSelectProps {
-  allowed: GeneralAccessLevel[];
-  value: GeneralAccessLevel;
-  onChange: (value: GeneralAccessLevel) => void;
+  allowed: GeneralAccess[];
+  value: GeneralAccess;
+  onChange: (value: GeneralAccess) => void;
   copy: AccessCopy;
   isDisabled?: boolean;
 }
@@ -43,7 +43,7 @@ export const GeneralAccessSelect = ({
   copy,
   isDisabled,
 }: GeneralAccessSelectProps) => {
-  const options: Array<EuiSuperSelectOption<GeneralAccessLevel>> = allowed.map((level) => {
+  const options: Array<EuiSuperSelectOption<GeneralAccess>> = allowed.map((level) => {
     const { label, description } = getGeneralAccessCopy(copy, level);
     return {
       value: level,

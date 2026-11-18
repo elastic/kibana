@@ -124,7 +124,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   useEffect(() => {
     if (accessPolicy.data?.enabled) {
       setAccessDraft({
-        general_access: accessPolicy.data.default_general_access_level,
+        general: { access: accessPolicy.data.default_general_access },
         entries: [],
       });
     }

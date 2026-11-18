@@ -27,9 +27,9 @@ apiTest.describe('Connector object-level access', { tag: '@local-stateful-classi
     ctx = await createOlsTestContext({ apiClient, esClient, kbnClient });
     const api = ctx.api(apiClient);
     publicId = await api.createConnector('owner');
-    runOnlyId = await api.createConnector('owner', { general_access: 'use' });
+    runOnlyId = await api.createConnector('owner', { general: { access: 'use' } });
     privateId = await api.createConnector('owner', {
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ ...ctx.principal('grantee'), access: 'use' }],
     });
   });
@@ -248,7 +248,7 @@ apiTest.describe('Connector object-level access', { tag: '@local-stateful-classi
   apiTest('deletes only for people who can edit', async ({ apiClient }) => {
     const api = ctx.api(apiClient);
     const id = await api.createConnector('owner', {
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ ...ctx.principal('grantee'), access: 'use' }],
     });
 

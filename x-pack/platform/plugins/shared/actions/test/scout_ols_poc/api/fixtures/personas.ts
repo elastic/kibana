@@ -58,7 +58,7 @@ export interface OlsApi {
 }
 
 export interface AclInput {
-  general_access: 'none' | 'use' | 'edit';
+  general: { access: 'none' | 'use' | 'edit' };
   entries?: Array<Principal & { access: 'use' }>;
 }
 
@@ -203,7 +203,7 @@ export const createOlsTestContext = async ({
       const { body: state } = await request(persona, 'get', accessPath);
       const response = await request(persona, 'put', accessPath, {
         version: state.version,
-        general_access: acl.general_access,
+        general: { access: acl.general.access },
         entries: acl.entries ?? [],
       });
       if (response.statusCode !== 200) {

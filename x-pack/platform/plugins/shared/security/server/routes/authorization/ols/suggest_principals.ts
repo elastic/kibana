@@ -52,7 +52,7 @@ export function defineSuggestPrincipalsRoute(params: RouteDefinitionParams) {
 
       const uids = new Set(profiles.map(({ uid }) => uid));
       const eligibleLevels = new Map<string, string[]>();
-      for (const level of uids.size > 0 ? policy.entryLevels : []) {
+      for (const level of uids.size > 0 ? policy.entryAccess : []) {
         const { hasPrivilegeUids } = await params.authz
           .checkUserProfilesPrivileges(uids)
           .atSpace(spaceId, { kibana: olsService.getLevelPrivilegeActions(policy, level) });

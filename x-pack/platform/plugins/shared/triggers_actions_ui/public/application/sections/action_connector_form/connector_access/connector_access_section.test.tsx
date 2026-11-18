@@ -16,10 +16,10 @@ import { ConnectorAccessSection } from './connector_access_section';
 
 const POLICY: AccessPolicyResponse = {
   enabled: true,
-  general_access_levels: ['none', 'use', 'edit'],
-  default_general_access_level: 'use',
-  entry_levels: ['use'],
-  operations: { view: { level: 'view' }, execute: { level: 'use' }, edit: { level: 'edit' } },
+  general_access: ['none', 'use', 'edit'],
+  default_general_access: 'use',
+  entry_access: ['use'],
+  operations: { view: { access: 'view' }, execute: { access: 'use' }, edit: { access: 'edit' } },
 };
 
 describe('ConnectorAccessSection', () => {
@@ -37,7 +37,7 @@ describe('ConnectorAccessSection', () => {
       <ConnectorAccessSection
         policy={POLICY}
         value={{
-          general_access: 'none',
+          general: { access: 'none' },
           entries: [
             { type: 'user', id: 'u_alice', access: 'use' },
             { type: 'service_account', id: 'kibana/svc', access: 'use' },
@@ -58,7 +58,7 @@ describe('ConnectorAccessSection', () => {
     appMockRenderer.render(
       <ConnectorAccessSection
         policy={POLICY}
-        value={{ general_access: 'use', entries: [] }}
+        value={{ general: { access: 'use' }, entries: [] }}
         onChange={onChange}
       />
     );
@@ -70,14 +70,14 @@ describe('ConnectorAccessSection', () => {
     await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByTestId('accessPanelGeneralAccessOption-none'));
 
-    expect(onChange).toHaveBeenCalledWith({ general_access: 'none', entries: [] });
+    expect(onChange).toHaveBeenCalledWith({ general: { access: 'none' }, entries: [] });
   });
 
   it('offers no service account field and suggests connector principals', async () => {
     appMockRenderer.render(
       <ConnectorAccessSection
         policy={POLICY}
-        value={{ general_access: 'use', entries: [] }}
+        value={{ general: { access: 'use' }, entries: [] }}
         onChange={onChange}
       />
     );
@@ -95,7 +95,7 @@ describe('ConnectorAccessSection', () => {
     appMockRenderer.render(
       <ConnectorAccessSection
         policy={POLICY}
-        value={{ general_access: 'use', entries: [] }}
+        value={{ general: { access: 'use' }, entries: [] }}
         onChange={onChange}
         isDisabled
       />

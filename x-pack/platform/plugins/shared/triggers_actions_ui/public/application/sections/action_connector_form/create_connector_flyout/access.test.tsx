@@ -29,10 +29,10 @@ const POLICY_PATH = '/internal/security/ols/action/_policy';
 
 const POLICY: AccessPolicyResponse = {
   enabled: true,
-  general_access_levels: ['none', 'use', 'edit'],
-  default_general_access_level: 'use',
-  entry_levels: ['use'],
-  operations: { view: { level: 'view' }, execute: { level: 'use' }, edit: { level: 'edit' } },
+  general_access: ['none', 'use', 'edit'],
+  default_general_access: 'use',
+  entry_access: ['use'],
+  operations: { view: { access: 'view' }, execute: { access: 'use' }, edit: { access: 'edit' } },
 };
 
 const ALICE = {
@@ -155,7 +155,7 @@ describe('CreateConnectorFlyout with object-level security (OLS)', () => {
         secrets: {},
         connector_type_id: actionTypeModel.id,
         acl: {
-          general_access: 'none',
+          general: { access: 'none' },
           entries: [{ type: 'user', id: 'u_alice', access: 'use' }],
         },
       })

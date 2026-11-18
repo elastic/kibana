@@ -3851,7 +3851,7 @@ describe('object-level security', () => {
   const PRIVATE_ACL = {
     version: [1],
     owner: { type: ['user'], id: ['u_owner'] },
-    general_access: ['none'],
+    general: { access: ['none'] },
     entries: [],
   };
   const scopedOls = securityServiceMock.createScopedOls();
@@ -3959,7 +3959,7 @@ describe('object-level security', () => {
   });
 
   test('validates requested access before the pre-save hook, and creates in one request', async () => {
-    const acl = { general_access: 'none' as const, entries: [] };
+    const acl = { general: { access: 'none' as const }, entries: [] };
     scopedOls.validateInitialAcl.mockRejectedValueOnce(
       Boom.badRequest('Access cannot be restricted')
     );

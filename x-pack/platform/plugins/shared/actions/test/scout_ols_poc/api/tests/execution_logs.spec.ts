@@ -34,7 +34,7 @@ apiTest.describe('Connector execution logs and KPIs', { tag: '@local-stateful-cl
     const api = ctx.api(apiClient);
     publicId = await api.createConnector('owner');
     privateId = await api.createConnector('owner', {
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ ...ctx.principal('grantee'), access: 'use' }],
     });
 

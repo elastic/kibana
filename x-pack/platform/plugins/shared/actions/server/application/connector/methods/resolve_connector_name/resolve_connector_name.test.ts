@@ -22,10 +22,10 @@ import { resolveConnectorName } from './resolve_connector_name';
 const PRIVATE_ACL: StoredAcl = {
   version: [1],
   owner: { type: ['user'], id: ['u_owner'] },
-  general_access: ['none'],
+  general: { access: ['none'] },
   entries: [],
 };
-const PUBLIC_ACL: StoredAcl = { ...PRIVATE_ACL, general_access: ['edit'] };
+const PUBLIC_ACL: StoredAcl = { ...PRIVATE_ACL, general: { access: ['edit'] } };
 const INVALID_ACL: StoredAcl = { ...PUBLIC_ACL, version: [] };
 /** Everyone can edit it, and the entry only adds access. */
 const PUBLIC_WITH_ENTRY_ACL: StoredAcl = {
@@ -35,7 +35,7 @@ const PUBLIC_WITH_ENTRY_ACL: StoredAcl = {
   ],
 };
 /** Everyone can run it, but only the owner can edit it. */
-const EVERYONE_RUNS_ACL: StoredAcl = { ...PRIVATE_ACL, general_access: ['use'] };
+const EVERYONE_RUNS_ACL: StoredAcl = { ...PRIVATE_ACL, general: { access: ['use'] } };
 
 const savedConnector = (id: string, name: string, acl?: StoredAcl): SavedObject<RawAction> => ({
   id,

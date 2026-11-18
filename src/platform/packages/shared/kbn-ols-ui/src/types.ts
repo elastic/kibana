@@ -8,12 +8,12 @@
  */
 
 import type {
-  AclLevel,
+  AclAccess,
   AclState,
   AclWarning,
   StoredAcl,
-  EntryLevel,
-  GeneralAccessLevel,
+  EntryAccess,
+  GeneralAccess,
   Principal,
 } from '@kbn/ols';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -23,10 +23,10 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
  */
 export interface AccessPolicyResponse {
   enabled: boolean;
-  general_access_levels: GeneralAccessLevel[];
-  default_general_access_level: GeneralAccessLevel;
-  entry_levels: EntryLevel[];
-  operations: Record<string, { level: EntryLevel }>;
+  general_access: GeneralAccess[];
+  default_general_access: GeneralAccess;
+  entry_access: EntryAccess[];
+  operations: Record<string, { access: EntryAccess }>;
 }
 
 /**
@@ -53,18 +53,18 @@ export interface AccessStateResponse {
 
 export interface SuggestedUser extends UserProfileWithAvatar {
   /** Levels the user's feature privileges let them use. */
-  eligible_levels: EntryLevel[];
+  eligible_levels: EntryAccess[];
 }
 
 export interface AccessDraftEntry extends Principal {
-  access: EntryLevel;
+  access: EntryAccess;
 }
 
 /**
  * Access being edited: general access and named entries. The owner is not part of it.
  */
 export interface AccessDraft {
-  general_access: GeneralAccessLevel;
+  general: { access: GeneralAccess };
   entries: AccessDraftEntry[];
 }
 
@@ -76,4 +76,4 @@ export interface AccessChangeResponse {
 /**
  * Consumer wording for each level, for example "Can run" for a connector's `use` level.
  */
-export type AccessLevelCopy = Partial<Record<AclLevel, { label: string; description: string }>>;
+export type AccessLevelCopy = Partial<Record<AclAccess, { label: string; description: string }>>;

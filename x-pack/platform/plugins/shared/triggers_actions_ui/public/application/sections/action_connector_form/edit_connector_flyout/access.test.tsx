@@ -23,14 +23,14 @@ const OBJECT_PATH = '/internal/security/ols/action/123';
 
 const POLICY: AccessPolicyResponse = {
   enabled: true,
-  general_access_levels: ['none', 'use', 'edit'],
-  default_general_access_level: 'use',
-  entry_levels: ['use'],
+  general_access: ['none', 'use', 'edit'],
+  default_general_access: 'use',
+  entry_access: ['use'],
   operations: {
-    view: { level: 'view' },
-    execute: { level: 'use' },
-    edit: { level: 'edit' },
-    delete: { level: 'edit' },
+    view: { access: 'view' },
+    execute: { access: 'use' },
+    edit: { access: 'edit' },
+    delete: { access: 'edit' },
   },
 };
 
@@ -49,7 +49,7 @@ const ACCESS: AccessStateResponse = {
   acl: {
     version: [1],
     owner: { type: ['user'], id: ['u_owner'] },
-    general_access: ['use'],
+    general: { access: ['use'] },
     entries: [],
   },
   profiles: [],

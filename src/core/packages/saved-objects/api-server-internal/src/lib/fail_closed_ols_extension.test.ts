@@ -39,7 +39,7 @@ const aclWith = (generalAccess: string) =>
     acl: {
       version: 1,
       owner: { type: 'user', id: 'u_owner' },
-      general_access: generalAccess,
+      general: { access: generalAccess },
       entries: [],
     },
   });
@@ -92,7 +92,7 @@ describe('createFailClosedOlsExtension', () => {
       expect(filters.get(ACL_TYPE)).toEqual(
         buildAclReadFilter({
           policy: FIXTURE_POLICY,
-          level: 'view',
+          access: 'view',
           recoverySpaces: [],
           ordinarySpaces: ['default', 'space-a'],
         })
@@ -103,7 +103,7 @@ describe('createFailClosedOlsExtension', () => {
   describe('#getInitialAcl', () => {
     it('refuses to restrict a new object', async () => {
       await expect(
-        extension.getInitialAcl({ type: ACL_TYPE, requested: { general_access: 'none' } })
+        extension.getInitialAcl({ type: ACL_TYPE, requested: { general: { access: 'none' } } })
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
       await expect(
         extension.getInitialAcl({
@@ -116,7 +116,7 @@ describe('createFailClosedOlsExtension', () => {
     it('creates objects without an ACL otherwise', async () => {
       await expect(extension.getInitialAcl({ type: ACL_TYPE })).resolves.toBeUndefined();
       await expect(
-        extension.getInitialAcl({ type: ACL_TYPE, requested: { general_access: 'edit' } })
+        extension.getInitialAcl({ type: ACL_TYPE, requested: { general: { access: 'edit' } } })
       ).resolves.toBeUndefined();
       await expect(extension.getInitialAcl({ type: OTHER_TYPE })).resolves.toBeUndefined();
     });

@@ -37,7 +37,12 @@ const createRegistry = () => {
 
 const PRIVATE_SOURCE = {
   type: ACL_TYPE,
-  acl: { version: 1, owner: { type: 'user', id: 'u_owner' }, general_access: 'none', entries: [] },
+  acl: {
+    version: 1,
+    owner: { type: 'user', id: 'u_owner' },
+    general: { access: 'none' },
+    entries: [],
+  },
 };
 
 describe('OlsHelper', () => {
@@ -125,7 +130,7 @@ describe('OlsHelper', () => {
             acl: {
               version: [1],
               owner: { type: ['user'], id: ['u_owner'] },
-              general_access: ['none'],
+              general: { access: ['none'] },
               entries: [],
             },
           },
@@ -193,15 +198,15 @@ describe('OlsHelper', () => {
       olsExtension.getInitialAcl.mockResolvedValue({
         version: 1,
         owner: { type: 'user', id: 'u_owner' },
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [],
       });
-      const requested = { general_access: 'none' as const };
+      const requested = { general: { access: 'none' as const } };
 
       await expect(helper.getInitialAcl(ACL_TYPE, 'space-a', requested)).resolves.toEqual({
         version: [1],
         owner: { type: ['user'], id: ['u_owner'] },
-        general_access: ['none'],
+        general: { access: ['none'] },
         entries: [],
       });
       expect(olsExtension.getInitialAcl).toHaveBeenCalledWith({
@@ -213,7 +218,7 @@ describe('OlsHelper', () => {
 
     it('rejects requested access for an unregistered type with a bad request', async () => {
       await expect(
-        helper.getInitialAcl(OTHER_TYPE, undefined, { general_access: 'none' })
+        helper.getInitialAcl(OTHER_TYPE, undefined, { general: { access: 'none' } })
       ).rejects.toMatchObject({
         message: expect.stringContaining(
           `Type ${OTHER_TYPE} does not support object-level security (OLS)`
@@ -221,7 +226,9 @@ describe('OlsHelper', () => {
         output: { statusCode: 400 },
       });
       await expect(
-        new OlsHelper({ registry }).getInitialAcl(ACL_TYPE, undefined, { general_access: 'none' })
+        new OlsHelper({ registry }).getInitialAcl(ACL_TYPE, undefined, {
+          general: { access: 'none' },
+        })
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
       expect(olsExtension.getInitialAcl).not.toHaveBeenCalled();
     });
@@ -238,7 +245,7 @@ describe('OlsHelper', () => {
         next: {
           version: 1 as const,
           owner: { type: 'user' as const, id: 'u_owner' },
-          general_access: 'edit' as const,
+          general: { access: 'edit' as const },
           entries: [],
         },
         warnings: [],
@@ -258,7 +265,7 @@ describe('OlsHelper', () => {
         object: {
           type: ACL_TYPE,
           id: '1',
-          acl: expect.objectContaining({ general_access: ['none'] }),
+          acl: expect.objectContaining({ general: { access: ['none'] } }),
         },
         change,
       });

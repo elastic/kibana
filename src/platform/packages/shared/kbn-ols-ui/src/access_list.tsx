@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { EntryLevel, Principal } from '@kbn/ols';
+import type { EntryAccess, Principal } from '@kbn/ols';
 import {
   getUserDisplayName,
   UserAvatar,
@@ -34,13 +34,13 @@ import type { AccessDraftEntry } from './types';
 
 export interface AccessListProps {
   entries: AccessDraftEntry[];
-  entryLevels: EntryLevel[];
+  entryLevels: EntryAccess[];
   /** Known user profiles, by profile UID. A missing profile is shown by its raw ID. */
   profiles: Map<string, UserProfileWithAvatar>;
   /** Entries whose recipients lack the feature privileges for their level. */
   warnings: Set<string>;
   copy: AccessCopy;
-  onChangeLevel?: (entry: AccessDraftEntry, access: EntryLevel) => void;
+  onChangeLevel?: (entry: AccessDraftEntry, access: EntryAccess) => void;
   onRemove?: (entry: AccessDraftEntry) => void;
   isDisabled?: boolean;
 }
@@ -274,7 +274,7 @@ const EntryControls = ({
   isDisabled,
 }: {
   entry: AccessDraftEntry;
-  entryLevels: EntryLevel[];
+  entryLevels: EntryAccess[];
   copy: AccessCopy;
   hasWarning: boolean;
   onChangeLevel?: AccessListProps['onChangeLevel'];
@@ -304,7 +304,7 @@ const EntryControls = ({
             text: getEntryLevelCopy(copy, level).label,
           }))}
           value={entry.access}
-          onChange={(event) => onChangeLevel(entry, event.target.value as EntryLevel)}
+          onChange={(event) => onChangeLevel(entry, event.target.value as EntryAccess)}
           disabled={isDisabled}
           aria-label={i18n.translate('olsUi.accessList.levelLabel', {
             defaultMessage: 'Access level for {name}',

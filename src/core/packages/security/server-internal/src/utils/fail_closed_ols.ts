@@ -64,7 +64,7 @@ export const createFailClosedOls = (typeRegistry: AccessPolicyRegistry): CoreOls
         return policy
           ? buildAclReadFilter({
               policy,
-              level: 'view',
+              access: 'view',
               recoverySpaces: [],
               ordinarySpaces: spaceIds,
             })

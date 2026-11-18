@@ -43,14 +43,14 @@ describe('GET /internal/security/ols/{type}/_policy', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       enabled: true,
-      general_access_levels: FIXTURE_POLICY.generalAccessLevels,
-      default_general_access_level: FIXTURE_POLICY.defaultGeneralAccessLevel,
-      entry_levels: FIXTURE_POLICY.entryLevels,
+      general_access: FIXTURE_POLICY.generalAccess,
+      default_general_access: FIXTURE_POLICY.defaultGeneralAccess,
+      entry_access: FIXTURE_POLICY.entryAccess,
       operations: {
-        view: { level: 'view' },
-        use: { level: 'use' },
-        edit: { level: 'edit' },
-        delete: { level: 'edit' },
+        view: { access: 'view' },
+        use: { access: 'use' },
+        edit: { access: 'edit' },
+        delete: { access: 'edit' },
       },
     });
   });

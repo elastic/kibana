@@ -29,7 +29,7 @@ apiTest.describe(
     apiTest.beforeAll(async ({ apiClient, esClient, kbnClient }) => {
       ctx = await createOlsTestContext({ apiClient, esClient, kbnClient });
       privateId = await ctx.api(apiClient).createConnector('owner', {
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [{ ...ctx.principal('grantee'), access: 'use' }],
       });
     });
@@ -87,7 +87,7 @@ apiTest.describe(
 
         // The owner revokes the grant. Enabling mints a new key for the grantee, which cannot use the
         // connector anymore.
-        await api.setAccess(privateId, { general_access: 'none' });
+        await api.setAccess(privateId, { general: { access: 'none' } });
         const enabled = await api.request(
           'grantee',
           'post',

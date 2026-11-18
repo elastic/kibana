@@ -36,7 +36,7 @@ apiTest.describe('Connector creation with access', { tag: '@local-stateful-class
 
     const { body } = await api.request('owner', 'get', `internal/security/ols/action/${id}`);
     expect(body).toMatchObject({ state: 'valid', restricted: false, is_owner: true });
-    expect(body.acl.general_access).toStrictEqual(['edit']);
+    expect(body.acl.general.access).toStrictEqual(['edit']);
   });
 
   apiTest(
@@ -44,7 +44,7 @@ apiTest.describe('Connector creation with access', { tag: '@local-stateful-class
     async ({ apiClient }) => {
       const api = ctx.api(apiClient);
       const response = await create(api, {
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [{ ...ctx.principal('grantee'), access: 'use' }],
       });
       expect(response).toHaveStatusCode(200);
@@ -70,15 +70,15 @@ apiTest.describe('Connector creation with access', { tag: '@local-stateful-class
     const before = (await api.request('owner', 'get', 'api/actions/connectors')).body.length;
 
     for (const acl of [
-      { general_access: 'view' },
-      { general_access: 'none', entries: [{ ...grantee, access: 'edit' }] },
-      { general_access: 'none', entries: [grantee, grantee] },
+      { general: { access: 'view' } },
+      { general: { access: 'none' }, entries: [{ ...grantee, access: 'edit' }] },
+      { general: { access: 'none' }, entries: [grantee, grantee] },
       {
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [{ type: 'user', id: `u_${randomUUID()}`, access: 'use' }],
       },
       {
-        general_access: 'none',
+        general: { access: 'none' },
         entries: Array.from({ length: 101 }, (_, index) => ({
           type: 'user',
           id: `u_${index}`,
@@ -95,7 +95,7 @@ apiTest.describe('Connector creation with access', { tag: '@local-stateful-class
   apiTest('keeps the creator out of the named entries', async ({ apiClient }) => {
     const api = ctx.api(apiClient);
     const response = await create(api, {
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ ...ctx.principal('owner'), access: 'use' }],
     });
     expect(response).toHaveStatusCode(200);

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { AclChange, EntryLevel } from '@kbn/ols';
+import type { AclChange, EntryAccess } from '@kbn/ols';
 
 import {
   createOlsHandler,
@@ -36,7 +36,7 @@ export function defineChangeAccessRoutes(params: RouteDefinitionParams) {
         params: objectParamsSchema,
         body: schema.object({
           version: versionSchema,
-          general_access: generalAccessSchema,
+          general: schema.object({ access: generalAccessSchema }),
           entries: entriesSchema,
         }),
       },
@@ -44,13 +44,13 @@ export function defineChangeAccessRoutes(params: RouteDefinitionParams) {
       options: { access: 'internal' },
     },
     createOlsHandler(params, async ({ context, request, response }) => {
-      const { version, general_access: generalAccess, entries } = request.body;
+      const { version, general, entries } = request.body;
       return response.ok({
         body: await changeAccess(context, request.params, version, {
           kind: 'replace',
-          general_access: generalAccess,
+          general,
           // Entry levels are checked against the type's policy when the change is prepared.
-          entries: entries.map((entry) => ({ ...entry, access: entry.access as EntryLevel })),
+          entries: entries.map((entry) => ({ ...entry, access: entry.access as EntryAccess })),
         }),
       });
     })
@@ -63,18 +63,18 @@ export function defineChangeAccessRoutes(params: RouteDefinitionParams) {
         params: objectParamsSchema,
         body: schema.object({
           version: versionSchema,
-          general_access: schema.maybe(generalAccessSchema),
+          general: schema.maybe(schema.object({ access: generalAccessSchema })),
         }),
       },
       security: OLS_ROUTE_SECURITY,
       options: { access: 'internal' },
     },
     createOlsHandler(params, async ({ context, request, response }) => {
-      const { version, general_access: generalAccess } = request.body;
+      const { version, general } = request.body;
       return response.ok({
         body: await changeAccess(context, request.params, version, {
           kind: 'claim',
-          general_access: generalAccess,
+          general,
         }),
       });
     })

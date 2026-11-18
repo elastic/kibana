@@ -18,7 +18,7 @@ import {
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EntryLevel, Principal } from '@kbn/ols';
+import type { EntryAccess, Principal } from '@kbn/ols';
 import { getUserDisplayName, UserAvatar } from '@kbn/user-profile-components';
 import type { SuggestedUser } from './types';
 
@@ -35,7 +35,7 @@ export interface PrincipalPickerProps {
   /** Principals that cannot be picked, such as the owner and existing entries. */
   excluded: Principal[];
   /** Level a new entry gets. Users who cannot use it get a warning badge. */
-  level?: EntryLevel;
+  level?: EntryAccess;
   label?: string;
   helpText?: string;
   isDisabled?: boolean;

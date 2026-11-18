@@ -135,7 +135,12 @@ describe('getAllWithAcl()', () => {
     const expectedResult = [
       {
         connector: createMockConnectorFindResult({ id: '1', name: 'test', referencedByCount: 0 }),
-        acl: { version: [1], owner: { type: [], id: [] }, general_access: ['none'], entries: [] },
+        acl: {
+          version: [1],
+          owner: { type: [], id: [] },
+          general: { access: ['none'] },
+          entries: [],
+        },
       },
     ];
     mockGetAllUnsecuredWithAcl.mockResolvedValueOnce(expectedResult);

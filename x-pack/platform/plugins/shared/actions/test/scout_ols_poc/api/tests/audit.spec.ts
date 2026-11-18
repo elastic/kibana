@@ -46,7 +46,7 @@ apiTest.describe('Object-level security audit', { tag: '@local-stateful-classic'
     ctx = await createOlsTestContext({ apiClient, esClient, kbnClient });
     const api = ctx.api(apiClient);
     privateId = await api.createConnector('owner', {
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ ...ctx.principal('grantee'), access: 'use' }],
     });
     connectorName = (await api.request('owner', 'get', `api/actions/connector/${privateId}`)).body
@@ -95,7 +95,7 @@ apiTest.describe('Object-level security audit', { tag: '@local-stateful-classic'
       const api = ctx.api(apiClient);
       const offset = await getAuditOffset();
       expect(await api.request('admin', 'get', 'api/actions/connectors')).toHaveStatusCode(200);
-      await api.setAccess(privateId, { general_access: 'use' });
+      await api.setAccess(privateId, { general: { access: 'use' } });
 
       const records = await readAuditSince(offset, (r) => forObject(r, 'ols_update').length > 0);
       const overrides = records.filter(
@@ -110,7 +110,7 @@ apiTest.describe('Object-level security audit', { tag: '@local-stateful-classic'
 
   apiTest('logs a hidden object only as an object-level denial', async ({ apiClient }) => {
     const api = ctx.api(apiClient);
-    await api.setAccess(privateId, { general_access: 'none' });
+    await api.setAccess(privateId, { general: { access: 'none' } });
     const offset = await getAuditOffset();
 
     // Saved Objects Management reads through the security extension, which audits each read

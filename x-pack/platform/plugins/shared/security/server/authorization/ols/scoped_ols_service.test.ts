@@ -18,8 +18,8 @@ import {
   type AclChange,
   AclChangeError,
   buildAclReadFilter,
-  type EntryLevel,
-  type GeneralAccessLevel,
+  type EntryAccess,
+  type GeneralAccess,
   type Principal,
   type StoredAcl,
 } from '@kbn/ols';
@@ -35,14 +35,14 @@ import { authorizationMock } from '../index.mock';
 const TYPE = 'widget';
 
 const POLICY: AccessPolicy = {
-  generalAccessLevels: ['none', 'use', 'edit'],
-  defaultGeneralAccessLevel: 'edit',
-  entryLevels: ['use'],
+  generalAccess: ['none', 'use', 'edit'],
+  defaultGeneralAccess: 'edit',
+  entryAccess: ['use'],
   operations: {
-    view: { level: 'view', privileges: { savedObject: [{ type: TYPE, operation: 'get' }] } },
-    use: { level: 'use', privileges: { api: ['execute-widget'] } },
-    edit: { level: 'edit', privileges: { savedObject: [{ type: TYPE, operation: 'update' }] } },
-    delete: { level: 'edit', privileges: { savedObject: [{ type: TYPE, operation: 'delete' }] } },
+    view: { access: 'view', privileges: { savedObject: [{ type: TYPE, operation: 'get' }] } },
+    use: { access: 'use', privileges: { api: ['execute-widget'] } },
+    edit: { access: 'edit', privileges: { savedObject: [{ type: TYPE, operation: 'update' }] } },
+    delete: { access: 'edit', privileges: { savedObject: [{ type: TYPE, operation: 'delete' }] } },
   },
 };
 
@@ -64,14 +64,14 @@ const createAcl = ({
   entries = [],
   version = 1,
 }: {
-  generalAccess?: GeneralAccessLevel;
+  generalAccess?: GeneralAccess;
   owner?: Principal;
-  entries?: Array<Principal & { access: EntryLevel }>;
+  entries?: Array<Principal & { access: EntryAccess }>;
   version?: number;
 } = {}): StoredAcl => ({
   version: [version],
   owner: { type: [owner.type], id: [owner.id] },
-  general_access: [generalAccess],
+  general: { access: [generalAccess] },
   entries: entries.map(({ type, id, access }) => ({
     type: [type],
     id: [id],
@@ -500,7 +500,7 @@ describe('ScopedOlsService', () => {
         buildAclReadFilter({
           policy: POLICY,
           principal: OWNER,
-          level: 'view',
+          access: 'view',
           recoverySpaces: ['space-a'],
           ordinarySpaces: ['space-b'],
         })
@@ -528,13 +528,13 @@ describe('ScopedOlsService', () => {
         .getInitialAcl({
           type: TYPE,
           spaceId: 'default',
-          requested: { general_access: 'none', entries: [{ ...GRANTEE, access: 'use' }] },
+          requested: { general: { access: 'none' }, entries: [{ ...GRANTEE, access: 'use' }] },
         });
 
       expect(acl).toEqual({
         version: 1,
         owner: OWNER,
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [{ ...GRANTEE, access: 'use', added_at: expect.any(String) }],
       });
       expect(userProfiles.bulkGet).toHaveBeenCalledWith({ uids: new Set([GRANTEE.id]) });
@@ -553,7 +553,11 @@ describe('ScopedOlsService', () => {
       await expect(
         createOlsService({ enabled: false })
           .asScoped(request)
-          .getInitialAcl({ type: TYPE, spaceId: 'default', requested: { general_access: 'none' } })
+          .getInitialAcl({
+            type: TYPE,
+            spaceId: 'default',
+            requested: { general: { access: 'none' } },
+          })
       ).rejects.toEqual(
         new AclChangeError('bad_request', 'Object-level security (OLS) is disabled.')
       );
@@ -609,7 +613,7 @@ describe('ScopedOlsService', () => {
       const result = await authorizeChange(
         {
           kind: 'replace',
-          general_access: 'use',
+          general: { access: 'use' },
           entries: [{ ...GRANTEE, access: 'use' }],
         },
         PRIVATE_ACL
@@ -619,7 +623,7 @@ describe('ScopedOlsService', () => {
         next: {
           version: 1,
           owner: OWNER,
-          general_access: 'use',
+          general: { access: 'use' },
           entries: [{ ...GRANTEE, access: 'use', added_at: expect.any(String) }],
         },
         warnings: [],
@@ -632,12 +636,15 @@ describe('ScopedOlsService', () => {
     });
 
     it('claims an object without an owner', async () => {
-      const result = await authorizeChange({ kind: 'claim', general_access: 'none' }, undefined);
+      const result = await authorizeChange(
+        { kind: 'claim', general: { access: 'none' } },
+        undefined
+      );
 
       expect(result.next).toEqual({
         version: 1,
         owner: OWNER,
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [],
       });
       expect(getAuditActions()).toEqual(['ols_transfer']);
@@ -661,7 +668,10 @@ describe('ScopedOlsService', () => {
 
       expect(getAuditActions()).toEqual(['ols_transfer', 'ols_admin_override']);
 
-      await authorizeChange({ kind: 'replace', general_access: 'edit', entries: [] }, PRIVATE_ACL);
+      await authorizeChange(
+        { kind: 'replace', general: { access: 'edit' }, entries: [] },
+        PRIVATE_ACL
+      );
       expect(getAuditActions().slice(2)).toEqual(['ols_update', 'ols_admin_override']);
     });
 
@@ -684,7 +694,7 @@ describe('ScopedOlsService', () => {
         authorizeChange(
           {
             kind: 'replace',
-            general_access: 'none',
+            general: { access: 'none' },
             entries: [{ ...GRANTEE, access: 'use' }],
           },
           PRIVATE_ACL
@@ -718,7 +728,7 @@ describe('ScopedOlsService', () => {
       const result = await authorizeChange(
         {
           kind: 'replace',
-          general_access: 'none',
+          general: { access: 'none' },
           entries: [{ ...GRANTEE, access: 'use' }],
         },
         PRIVATE_ACL

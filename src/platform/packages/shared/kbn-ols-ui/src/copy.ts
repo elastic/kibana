@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EntryLevel, GeneralAccessLevel } from '@kbn/ols';
+import type { EntryAccess, GeneralAccess } from '@kbn/ols';
 
 export interface LevelCopy {
   label: string;
@@ -22,13 +22,13 @@ export interface LevelCopy {
 export interface AccessCopy {
   /** Lowercase singular noun for the object, for example "connector". */
   objectNoun: string;
-  generalAccess: Partial<Record<GeneralAccessLevel, LevelCopy>>;
-  entryLevels: Partial<Record<EntryLevel, LevelCopy>>;
+  generalAccess: Partial<Record<GeneralAccess, LevelCopy>>;
+  entryLevels: Partial<Record<EntryAccess, LevelCopy>>;
   /** Short verb phrase per operation for the read-only summary, for example "Run". */
   operations?: Record<string, string>;
 }
 
-const DEFAULT_GENERAL_ACCESS: Record<GeneralAccessLevel, LevelCopy> = {
+const DEFAULT_GENERAL_ACCESS: Record<GeneralAccess, LevelCopy> = {
   none: {
     label: i18n.translate('olsUi.generalAccess.none.label', {
       defaultMessage: 'Only people with access',
@@ -64,7 +64,7 @@ const DEFAULT_GENERAL_ACCESS: Record<GeneralAccessLevel, LevelCopy> = {
   },
 };
 
-const DEFAULT_ENTRY_LEVELS: Record<EntryLevel, LevelCopy> = {
+const DEFAULT_ENTRY_LEVELS: Record<EntryAccess, LevelCopy> = {
   view: {
     label: i18n.translate('olsUi.entryLevel.view.label', { defaultMessage: 'Can view' }),
     description: '',
@@ -85,8 +85,8 @@ const DEFAULT_ENTRY_LEVELS: Record<EntryLevel, LevelCopy> = {
   },
 };
 
-export const getGeneralAccessCopy = (copy: AccessCopy, level: GeneralAccessLevel) =>
+export const getGeneralAccessCopy = (copy: AccessCopy, level: GeneralAccess) =>
   copy.generalAccess[level] ?? DEFAULT_GENERAL_ACCESS[level];
 
-export const getEntryLevelCopy = (copy: AccessCopy, level: EntryLevel) =>
+export const getEntryLevelCopy = (copy: AccessCopy, level: EntryAccess) =>
   copy.entryLevels[level] ?? DEFAULT_ENTRY_LEVELS[level];

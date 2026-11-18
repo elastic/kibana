@@ -340,7 +340,7 @@ describe('getAvailableConnectors', () => {
     const PRIVATE_ACL: StoredAcl = {
       version: [1],
       owner: { type: ['user'], id: ['u_owner'] },
-      general_access: ['none'],
+      general: { access: ['none'] },
       entries: [],
     };
     const connectors = [

@@ -17,7 +17,7 @@ import { scopedOlsServiceMock } from '../authorization/ols/scoped_ols_service.mo
 const ACL: StoredAcl = {
   version: [1],
   owner: { type: ['user'], id: ['u_owner'] },
-  general_access: ['none'],
+  general: { access: ['none'] },
   entries: [],
 };
 
@@ -118,7 +118,7 @@ describe('SavedObjectsOlsExtension', () => {
       const acl = {
         version: 1 as const,
         owner: { type: 'user' as const, id: 'u_owner' },
-        general_access: 'none' as const,
+        general: { access: 'none' as const },
         entries: [],
       };
       olsService.getInitialAcl.mockResolvedValue(acl);
@@ -158,7 +158,7 @@ describe('SavedObjectsOlsExtension', () => {
         next: {
           version: 1 as const,
           owner: { type: 'user' as const, id: 'u_owner' },
-          general_access: 'none' as const,
+          general: { access: 'none' as const },
           entries: [],
         },
         warnings: [],

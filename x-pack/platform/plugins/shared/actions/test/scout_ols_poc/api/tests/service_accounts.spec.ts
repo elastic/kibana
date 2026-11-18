@@ -133,7 +133,7 @@ steps:
   apiTest('runs a restricted connector that the service account may use', async ({ apiClient }) => {
     const api = ctx.api(apiClient);
     const connectorId = await createConnector(api, {
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ type: 'service_account', id: serviceAccountId, access: 'use' }],
     });
 
@@ -150,7 +150,7 @@ steps:
     'refuses a restricted connector without a grant, even when its owner starts the run',
     async ({ apiClient }) => {
       const api = ctx.api(apiClient);
-      const connectorId = await createConnector(api, { general_access: 'none' });
+      const connectorId = await createConnector(api, { general: { access: 'none' } });
 
       const execution = await runAsServiceAccount(apiClient, api, connectorId);
 
@@ -161,7 +161,7 @@ steps:
 
   apiTest('runs a connector that everyone may use', async ({ apiClient }) => {
     const api = ctx.api(apiClient);
-    const connectorId = await createConnector(api, { general_access: 'use' });
+    const connectorId = await createConnector(api, { general: { access: 'use' } });
 
     const execution = await runAsServiceAccount(apiClient, api, connectorId);
 

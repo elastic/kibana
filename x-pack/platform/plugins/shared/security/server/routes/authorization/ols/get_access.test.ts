@@ -18,7 +18,7 @@ import { userProfileServiceMock } from '../../../user_profile/user_profile_servi
 const ACL: StoredAcl = {
   version: [1],
   owner: { type: ['user'], id: ['u_owner'] },
-  general_access: ['none'],
+  general: { access: ['none'] },
   entries: [
     { type: ['user'], id: ['u_grantee'], access: ['use'], added_at: ['2026-10-01T00:00:00Z'] },
     {
@@ -32,7 +32,7 @@ const ACL: StoredAcl = {
 
 const createDecision = (overrides: Partial<AclDecision> = {}): AclDecision => ({
   state: 'valid',
-  level: 'use',
+  access: 'use',
   isOwner: false,
   restricted: true,
   operations: new Set(['view', 'use']),
@@ -111,7 +111,7 @@ describe('GET /internal/security/ols/{type}/{id}', () => {
       version: 'WzEsMV0=',
       attributes: {},
       references: [],
-      acl: { ...ACL, general_access: ['edit'] },
+      acl: { ...ACL, general: { access: ['edit'] } },
     });
     mocks.olsService.evaluate.mockResolvedValue(createDecision({ restricted: true }));
 

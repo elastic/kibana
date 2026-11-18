@@ -30,10 +30,10 @@ import { getRestrictedConnectorIds } from './get_restricted_connector_ids';
 const PRIVATE_ACL: StoredAcl = {
   version: [1],
   owner: { type: ['user'], id: ['u_owner'] },
-  general_access: ['none'],
+  general: { access: ['none'] },
   entries: [],
 };
-const PUBLIC_ACL: StoredAcl = { ...PRIVATE_ACL, general_access: ['use'] };
+const PUBLIC_ACL: StoredAcl = { ...PRIVATE_ACL, general: { access: ['use'] } };
 
 const createContext = ({
   enabled = true,

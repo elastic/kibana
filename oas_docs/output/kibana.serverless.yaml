@@ -173050,15 +173050,21 @@ components:
                   - access
               maxItems: 100
               type: array
-            general_access:
-              description: 'What everyone else in the space can do: nothing, run the connector, or also edit it.'
-              enum:
-                - none
-                - use
-                - edit
-              type: string
+            general:
+              additionalProperties: false
+              type: object
+              properties:
+                access:
+                  description: 'What everyone else in the space can do: nothing, run the connector, or also edit it.'
+                  enum:
+                    - none
+                    - use
+                    - edit
+                  type: string
+              required:
+                - access
           required:
-            - general_access
+            - general
         connector_type_id:
           description: The type of connector.
           maxLength: 64

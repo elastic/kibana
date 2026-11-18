@@ -34,11 +34,11 @@ export function defineGetAccessPolicyRoute(params: RouteDefinitionParams) {
         return response.ok({
           body: {
             enabled: olsService.isEnabled(),
-            general_access_levels: policy.generalAccessLevels,
-            default_general_access_level: policy.defaultGeneralAccessLevel,
-            entry_levels: policy.entryLevels,
+            general_access: policy.generalAccess,
+            default_general_access: policy.defaultGeneralAccess,
+            entry_access: policy.entryAccess,
             operations: Object.fromEntries(
-              Object.entries(policy.operations).map(([name, { level }]) => [name, { level }])
+              Object.entries(policy.operations).map(([name, { access }]) => [name, { access }])
             ),
           },
         });

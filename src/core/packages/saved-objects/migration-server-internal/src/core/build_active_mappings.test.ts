@@ -145,7 +145,7 @@ describe('getBaseMappings', () => {
           properties: {
             version: { type: 'integer', coerce: false },
             owner: { properties: { type: { type: 'keyword' }, id: { type: 'keyword' } } },
-            general_access: { type: 'keyword' },
+            general: { properties: { access: { type: 'keyword' } } },
             entries: {
               type: 'nested',
               properties: {

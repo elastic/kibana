@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EntryLevel } from '../levels';
+import type { EntryAccess } from '../levels';
 import type { Principal } from '../principals';
 
 /**
@@ -18,7 +18,7 @@ export interface AclWarning {
   /** The recipient of the grant. */
   principal: Principal;
   /** The level the grant gives. */
-  level: EntryLevel;
+  level: EntryAccess;
   /** Why the grant can't be fully used: the recipient lacks the level's feature privileges. */
   reason: 'missing_feature_privileges';
 }

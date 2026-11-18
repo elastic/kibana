@@ -2307,7 +2307,7 @@ describe('getAllUnsecuredWithAcl()', () => {
     const acl = {
       version: [1],
       owner: { type: ['user'], id: ['u_owner'] },
-      general_access: ['none'],
+      general: { access: ['none'] },
       entries: [],
     };
     internalSavedObjectsRepository.find.mockResolvedValueOnce({

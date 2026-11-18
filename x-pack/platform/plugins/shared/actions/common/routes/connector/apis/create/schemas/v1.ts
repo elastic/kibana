@@ -56,15 +56,17 @@ const createConnectorRequestBodyFields = {
   acl: schema.maybe(
     schema.object(
       {
-        general_access: schema.oneOf(
-          [schema.literal('none'), schema.literal('use'), schema.literal('edit')],
-          {
-            meta: {
-              description:
-                'What everyone else in the space can do: nothing, run the connector, or also edit it.',
-            },
-          }
-        ),
+        general: schema.object({
+          access: schema.oneOf(
+            [schema.literal('none'), schema.literal('use'), schema.literal('edit')],
+            {
+              meta: {
+                description:
+                  'What everyone else in the space can do: nothing, run the connector, or also edit it.',
+              },
+            }
+          ),
+        }),
         entries: schema.arrayOf(
           schema.object({
             type: schema.oneOf([schema.literal('user'), schema.literal('service_account')]),

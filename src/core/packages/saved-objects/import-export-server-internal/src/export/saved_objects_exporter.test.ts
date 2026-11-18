@@ -1381,7 +1381,7 @@ describe('getSortedObjectsForExport()', () => {
         const acl = {
           version: [1],
           owner: { type: ['user'], id: ['u_owner'] },
-          general_access: ['none'],
+          general: { access: ['none'] },
           entries: [],
         };
         const createSavedObject = (obj: any) => ({ ...obj, attributes: {}, references: [] });

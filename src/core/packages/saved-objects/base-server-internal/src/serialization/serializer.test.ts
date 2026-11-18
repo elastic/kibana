@@ -1509,7 +1509,7 @@ describe('access control lists', () => {
   const storedAcl = {
     version: [1],
     owner: { type: ['user'], id: ['u_owner'] },
-    general_access: ['none'],
+    general: { access: ['none'] },
     entries: [
       { type: ['user'], id: ['u_grantee'], access: ['use'], added_at: ['2026-10-21T00:00:00Z'] },
     ],
@@ -1530,7 +1530,7 @@ describe('access control lists', () => {
           acl: {
             version: 1,
             owner,
-            general_access: 'none',
+            general: { access: 'none' },
             entries: [
               { type: 'user', id: 'u_grantee', access: 'use', added_at: '2026-10-21T00:00:00Z' },
             ],
@@ -1546,16 +1546,16 @@ describe('access control lists', () => {
         _source: {
           type: 'foo',
           foo: {},
-          acl: { version: 1, general_access: 'edit' },
+          acl: { version: 1, general: { access: 'edit' } },
           'acl.owner.id': 'u_owner',
           'acl.owner.type': 'user',
-          'acl.general_access': 'none',
+          'acl.general.access': 'none',
         },
       });
       expect(actual.acl).toEqual({
         version: [1],
         owner: { type: ['user'], id: ['u_owner'] },
-        general_access: ['edit', 'none'],
+        general: { access: ['edit', 'none'] },
         entries: [],
       });
     });
@@ -1576,12 +1576,12 @@ describe('access control lists', () => {
         id: 'bar',
         attributes: {},
         references: [],
-        acl: { ...storedAcl, general_access: ['edit', 'none'] },
+        acl: { ...storedAcl, general: { access: ['edit', 'none'] } },
       });
       expect(actual._source.acl).toEqual({
         version: 1,
         owner: { type: 'user', id: 'u_owner' },
-        general_access: ['edit', 'none'],
+        general: { access: ['edit', 'none'] },
         entries: [
           { type: 'user', id: 'u_grantee', access: 'use', added_at: '2026-10-21T00:00:00Z' },
         ],

@@ -315,13 +315,13 @@ describe('SavedObjectTypeRegistry', () => {
               namespaceType: 'multiple-isolated',
               accessPolicy: {
                 ...FIXTURE_POLICY,
-                generalAccessLevels: ['none', 'edit'],
-                defaultGeneralAccessLevel: 'view',
+                generalAccess: ['none', 'edit'],
+                defaultGeneralAccess: 'view',
               },
             })
           )
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Type typeOLS: Invalid 'accessPolicy'. Default general access \\"view\\" is not one of the allowed levels."`
+          `"Type typeOLS: Invalid 'accessPolicy'. Default general access \\"view\\" is not one of the allowed values."`
         );
       });
 

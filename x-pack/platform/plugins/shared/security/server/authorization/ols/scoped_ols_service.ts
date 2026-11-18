@@ -18,8 +18,7 @@ import {
   type AclObjectDecision,
   type AclWarning,
   buildAclReadFilter,
-  compareLevels,
-  type EntryLevel,
+  type EntryAccess,
   evaluateAcl,
   generalAccessPermits,
   type InitialAccess,
@@ -185,14 +184,14 @@ export class ScopedOlsService implements CoreScopedOlsService {
     }
 
     const principal = await this.getPrincipal();
-    const operationLevel = policy.operations[operation]?.level;
+    const operationAccess = policy.operations[operation]?.access;
     for (const { id, acl } of objectsToCheck) {
       this.reportInvalidAcl(type, id, acl);
 
       let decision = evaluateAcl({ policy, acl, principal });
       if (decision.operations.has(operation)) {
         // Access that relied on ownership or a named grant, rather than on general access.
-        if (operationLevel && compareLevels(operationLevel, 'use') >= 0) {
+        if (operationAccess && operationAccess !== 'view') {
           this.audit({ action: 'ols_access', type, id, spaceId, operation, principal });
         }
         continue;
@@ -294,7 +293,13 @@ export class ScopedOlsService implements CoreScopedOlsService {
       }
     }
 
-    return buildAclReadFilter({ policy, principal, level: 'view', recoverySpaces, ordinarySpaces });
+    return buildAclReadFilter({
+      policy,
+      principal,
+      access: 'view',
+      recoverySpaces,
+      ordinarySpaces,
+    });
   }
 
   /**
@@ -448,7 +453,7 @@ export class ScopedOlsService implements CoreScopedOlsService {
     acl: Acl
   ): Promise<AclWarning[]> {
     const warnings: AclWarning[] = [];
-    for (const level of policy.entryLevels) {
+    for (const level of policy.entryAccess) {
       const entries = acl.entries.filter(
         (entry) => entry.type === 'user' && entry.access === level
       );
@@ -472,11 +477,24 @@ export class ScopedOlsService implements CoreScopedOlsService {
   /**
    * Returns the privilege actions every operation up to `level` needs.
    */
-  public getLevelPrivilegeActions(policy: AccessPolicy, level: EntryLevel) {
+  public getLevelPrivilegeActions(policy: AccessPolicy, level: EntryAccess) {
+    // The engine decides which operations an entry with this access permits, so the order of the
+    // access values stays inside `@kbn/ols`.
+    const { operations: permitted } = evaluateAcl({
+      policy,
+      acl: {
+        version: [1],
+        owner: { type: ['user'], id: [LEVEL_PROBE_OWNER_ID] },
+        general: { access: ['none'] },
+        entries: [{ type: ['user'], id: [LEVEL_PROBE_GRANTEE_ID], access: [level], added_at: [] }],
+      },
+      principal: { type: 'user', id: LEVEL_PROBE_GRANTEE_ID },
+    });
     return [
       ...new Set(
-        Object.values(policy.operations)
-          .filter((operation) => compareLevels(operation.level, level) <= 0)
+        Object.entries(policy.operations)
+          .filter(([name]) => permitted.has(name))
+          .map(([, operation]) => operation)
           .flatMap((operation) => this.getPrivilegeActions(operation))
       ),
     ];
@@ -554,6 +572,11 @@ export class ScopedOlsService implements CoreScopedOlsService {
   }
 }
 
+// Stand-in principals for asking the engine which operations an entry permits. They never reach
+// stored data, so they only need to differ from each other.
+const LEVEL_PROBE_OWNER_ID = 'ols-level-probe-owner';
+const LEVEL_PROBE_GRANTEE_ID = 'ols-level-probe-grantee';
+
 const getRecoveryKey = (type: string, spaceId: string) => `${type}:${spaceId}`;
 
 const describePrincipal = (owner?: StoredAcl['owner']) =>
@@ -571,8 +594,8 @@ const describeAccess = (before: StoredAcl | undefined, after: Acl) => {
         .join(',') || 'none'
     : 'none';
   return (
-    `(general access: ${before?.general_access.join('|') || 'default'} -> ${
-      after.general_access
+    `(general access: ${before?.general.access.join('|') || 'default'} -> ${
+      after.general.access
     }; ` + `entries: ${beforeEntries} -> ${entries(after.entries)})`
   );
 };

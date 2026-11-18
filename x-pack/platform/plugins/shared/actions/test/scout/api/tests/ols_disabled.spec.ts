@@ -89,7 +89,7 @@ apiTest.describe(
       expect(
         await apiClient.put(accessPath, {
           headers: ownerHeaders,
-          body: { version: 'WzEsMV0=', general_access: 'none', entries: [] },
+          body: { version: 'WzEsMV0=', general: { access: 'none' }, entries: [] },
         })
       ).toHaveStatusCode(400);
     });
@@ -107,7 +107,7 @@ apiTest.describe(
             connector_type_id: '.server-log',
             config: {},
             secrets: {},
-            acl: { general_access: 'none' },
+            acl: { general: { access: 'none' } },
           },
         });
         expect(restricted).toHaveStatusCode(400);
@@ -122,7 +122,7 @@ apiTest.describe(
         const storedAcl = {
           version: 1,
           owner: { type: 'user', id: 'u_owner' },
-          general_access: 'none',
+          general: { access: 'none' },
         };
         await esClient.update(
           { index: CONNECTOR_INDEX, id: `action:${id}`, doc: { acl: storedAcl }, refresh: true },

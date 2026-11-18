@@ -11,7 +11,7 @@ import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 
 import { excludeHiddenConnectors, getHiddenConnectorIds } from './hidden_connectors';
 
-const VISIBLE = { term: { 'acl.general_access': 'edit' } };
+const VISIBLE = { term: { 'acl.general.access': 'edit' } };
 
 const hit = (id: string) => ({ _index: '.kibana_alerting_cases', _id: `action:${id}`, sort: [id] });
 

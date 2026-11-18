@@ -28,7 +28,7 @@ import { ensureConnectorsUsable } from './ensure_connectors_usable';
 const ACL: StoredAcl = {
   version: [1],
   owner: { type: ['user'], id: ['u_owner'] },
-  general_access: ['none'],
+  general: { access: ['none'] },
   entries: [],
 };
 const PRINCIPAL: Principal = { type: 'user', id: 'u_owner' };

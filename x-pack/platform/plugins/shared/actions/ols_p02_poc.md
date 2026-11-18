@@ -9,7 +9,7 @@ the root `acl` field of the Saved Object. Levels are cumulative: `none < view < 
 
 What works end to end:
 
-- **Create.** A connector is public by default (`general_access: edit`). The creator is the owner. A private
+- **Create.** A connector is public by default (`general.access: edit`). The creator is the owner. A private
   connector is created in one request with `acl`. No interval exists in which it is public.
 - **List and read.** The list, point reads, `bulkGet`, `resolve` and `find` apply the ACL. Elasticsearch filters
   `find`, so totals, aggregations and pages count only visible objects.

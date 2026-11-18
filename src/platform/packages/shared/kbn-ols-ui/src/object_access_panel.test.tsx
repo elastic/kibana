@@ -30,21 +30,21 @@ const COPY: AccessCopy = { objectNoun: 'connector', generalAccess: {}, entryLeve
 
 const POLICY: AccessPolicyResponse = {
   enabled: true,
-  general_access_levels: ['none', 'view', 'use', 'edit'],
-  default_general_access_level: 'use',
-  entry_levels: ['use', 'edit'],
+  general_access: ['none', 'view', 'use', 'edit'],
+  default_general_access: 'use',
+  entry_access: ['use', 'edit'],
   operations: {
-    view: { level: 'view' },
-    use: { level: 'use' },
-    edit: { level: 'edit' },
-    delete: { level: 'edit' },
+    view: { access: 'view' },
+    use: { access: 'use' },
+    edit: { access: 'edit' },
+    delete: { access: 'edit' },
   },
 };
 
 const ACL: StoredAcl = {
   version: [1],
   owner: { type: ['user'], id: ['u_owner'] },
-  general_access: ['use'],
+  general: { access: ['use'] },
   entries: [
     { type: ['user'], id: ['u_alice'], access: ['use'], added_at: ['2026-01-01T00:00:00Z'] },
     {
@@ -205,7 +205,7 @@ describe('ObjectAccessPanel', () => {
     expect(path).toBe(OBJECT_PATH);
     expect(bodyOf(options)).toEqual({
       version: 'v1',
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ type: 'user', id: 'u_alice', access: 'edit' }],
     });
     expect(toasts.addWarning).not.toHaveBeenCalled();
@@ -311,7 +311,7 @@ describe('ObjectAccessPanel', () => {
       await userEvent.click(screen.getByTestId('accessPanelClaim'));
 
       await waitFor(() => expect(toasts.addSuccess).toHaveBeenCalledWith('You are now the owner.'));
-      expect(postBody('/_claim')).toEqual({ version: 'v1', general_access: 'none' });
+      expect(postBody('/_claim')).toEqual({ version: 'v1', general: { access: 'none' } });
     });
   });
 

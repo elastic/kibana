@@ -35,8 +35,12 @@ Object {
           },
           "type": "nested",
         },
-        "general_access": Object {
-          "type": "keyword",
+        "general": Object {
+          "properties": Object {
+            "access": Object {
+              "type": "keyword",
+            },
+          },
         },
         "owner": Object {
           "properties": Object {
@@ -140,8 +144,12 @@ Object {
           },
           "type": "nested",
         },
-        "general_access": Object {
-          "type": "keyword",
+        "general": Object {
+          "properties": Object {
+            "access": Object {
+              "type": "keyword",
+            },
+          },
         },
         "owner": Object {
           "properties": Object {

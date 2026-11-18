@@ -44,14 +44,14 @@ describe('createOlsApi', () => {
 
   it('replaces access with a PUT carrying the version and the draft', async () => {
     await api.replace('action', 'c/1', 'v1', {
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ type: 'user', id: 'u_alice', access: 'use' }],
     });
 
     expect(http.put).toHaveBeenCalledWith(`${BASE_PATH}/action/c%2F1`, {
       body: JSON.stringify({
         version: 'v1',
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [{ type: 'user', id: 'u_alice', access: 'use' }],
       }),
     });
@@ -62,7 +62,7 @@ describe('createOlsApi', () => {
     await api.claim('action', 'c/1', 'v2');
 
     expect(http.post).toHaveBeenNthCalledWith(1, `${BASE_PATH}/action/c%2F1/_claim`, {
-      body: JSON.stringify({ version: 'v1', general_access: 'none' }),
+      body: JSON.stringify({ version: 'v1', general: { access: 'none' } }),
     });
     expect(http.post).toHaveBeenNthCalledWith(2, `${BASE_PATH}/action/c%2F1/_claim`, {
       body: JSON.stringify({ version: 'v2' }),

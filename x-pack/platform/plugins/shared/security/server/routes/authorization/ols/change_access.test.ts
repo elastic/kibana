@@ -41,7 +41,7 @@ describe('Change access routes', () => {
   const replaceAccess = () =>
     callRoute('put', '/internal/security/ols/{type}/{id}', {
       version: 'WzEsMV0=',
-      general_access: 'none',
+      general: { access: 'none' },
       entries: [{ type: 'user', id: 'u_grantee', access: 'use' }],
     });
 
@@ -56,7 +56,7 @@ describe('Change access routes', () => {
       '1',
       {
         kind: 'replace',
-        general_access: 'none',
+        general: { access: 'none' },
         entries: [{ type: 'user', id: 'u_grantee', access: 'use' }],
       },
       { version: 'WzEsMV0=' }
@@ -66,14 +66,14 @@ describe('Change access routes', () => {
   it('claims an object', async () => {
     const response = await callRoute('post', '/internal/security/ols/{type}/{id}/_claim', {
       version: 'WzEsMV0=',
-      general_access: 'use',
+      general: { access: 'use' },
     });
 
     expect(response.status).toBe(200);
     expect(mocks.savedObjectsClient.changeAcl).toHaveBeenCalledWith(
       'action',
       '1',
-      { kind: 'claim', general_access: 'use' },
+      { kind: 'claim', general: { access: 'use' } },
       { version: 'WzEsMV0=' }
     );
   });
@@ -133,7 +133,7 @@ describe('Change access routes', () => {
     it('requires the object version', () => {
       expect(() =>
         getBodySchema('put', '/internal/security/ols/{type}/{id}').validate({
-          general_access: 'none',
+          general: { access: 'none' },
           entries: [],
         })
       ).toThrow('[version]');

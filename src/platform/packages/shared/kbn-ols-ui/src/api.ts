@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GeneralAccessLevel, Principal } from '@kbn/ols';
+import type { GeneralAccess, Principal } from '@kbn/ols';
 import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
 import type {
   AccessChangeResponse,
@@ -40,9 +40,12 @@ export const createOlsApi = (http: Pick<HttpSetup, 'get' | 'put' | 'post'>) => {
         body: JSON.stringify({ version, ...draft }),
       }),
 
-    claim: (type: string, id: string, version: string, generalAccess?: GeneralAccessLevel) =>
+    claim: (type: string, id: string, version: string, generalAccess?: GeneralAccess) =>
       http.post<AccessChangeResponse>(objectPath(type, id, '/_claim'), {
-        body: JSON.stringify({ version, general_access: generalAccess }),
+        body: JSON.stringify({
+          version,
+          ...(generalAccess ? { general: { access: generalAccess } } : {}),
+        }),
       }),
 
     transfer: (type: string, id: string, version: string, owner: Principal) =>
