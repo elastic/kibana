@@ -450,6 +450,10 @@ export default function (providerContext: FtrProviderContext) {
                 policy_template: 'abnormal_security',
                 type: 'cel',
                 enabled: true,
+                vars: {
+                  url: { value: 'https://api.abnormalplatform.com', type: 'url' },
+                  access_token: { value: 'token', type: 'password' },
+                },
                 streams: [
                   {
                     enabled: true,
