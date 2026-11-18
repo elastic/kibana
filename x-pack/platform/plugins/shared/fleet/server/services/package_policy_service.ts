@@ -181,7 +181,7 @@ export interface PackagePolicyClient {
     assetsMap: PackagePolicyAssetsMap,
     packagePolicy: PackagePolicy,
     agentVersions?: string[]
-  ): Promise<void>;
+  ): Promise<{ cleared: boolean }>;
 
   getByIDs(
     soClient: SavedObjectsClientContract,

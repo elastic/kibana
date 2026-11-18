@@ -329,8 +329,8 @@ function keepsAgentVersionConditions({
   assetsMap: PackagePolicyAssetsMap;
 }): boolean {
   // The update writes the manifest condition, so a stale stored one (left by an upgrade before
-  // #294439) gets cleared. `inputs_for_versions` is only rewritten when `hasAgentVersionCondition`
-  // holds. (Un)assigning changes which agent policies count this package policy's conditions.
+  // #294439) gets cleared. A stale `inputs_for_versions` is cleared by
+  // `compilePackagePolicyForVersions`, which forces a recompute separately. (Un)assigning changes which agent policies count this package policy's conditions.
   return (
     oldPackagePolicy.package?.name === newPackage?.name &&
     oldPackagePolicy.package?.version === newPackage?.version &&
@@ -899,11 +899,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     assetsMap: PackagePolicyAssetsMap,
     packagePolicy: PackagePolicy,
     agentVersions?: string[]
-  ) {
-    // Covers both manifest level (`conditions.agent.version`) and template level conditions, and
-    // checks the `enableVersionSpecificPolicies` feature flag.
+  ): Promise<{ cleared: boolean }> {
+    if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+      return { cleared: false };
+    }
+    // Covers both manifest level (`conditions.agent.version`) and template level conditions.
     if (!hasAgentVersionCondition(packageInfo, assetsMap)) {
-      return;
+      // An upgrade to a package that dropped its agent version condition leaves the cache of the
+      // old version behind. Clear it, otherwise agents keep receiving the stale inputs.
+      return this.clearStaleInputsForVersions(soClient, packagePolicy.id);
     }
     return withActiveSpan(
       'compile-package-policy-versions',
@@ -928,7 +932,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           versionsToCompile = agentVersions.filter((v) => !existingInputsForVersions[v]);
           if (versionsToCompile.length === 0) {
             t.end();
-            return;
+            return { cleared: false };
           }
         } else {
           // Create/update path: compile default common agent versions plus any extra versions already
@@ -963,8 +967,33 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             )
           );
         t.end();
+        return { cleared: false };
       }
     );
+  }
+
+  private async clearStaleInputsForVersions(
+    soClient: SavedObjectsClientContract,
+    packagePolicyId: string
+  ): Promise<{ cleared: boolean }> {
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(
+      savedObjectType,
+      packagePolicyId
+    );
+    if (Object.keys(packagePolicySO.attributes.inputs_for_versions ?? {}).length === 0) {
+      return { cleared: false };
+    }
+    await soClient
+      .update<PackagePolicySOAttributes>(savedObjectType, packagePolicyId, {
+        inputs_for_versions: {},
+      })
+      .catch(
+        catchAndSetErrorStackTrace.withMessage(
+          `attempt to clear inputs_for_versions of package policy saved object failed`
+        )
+      );
+    return { cleared: true };
   }
 
   private async bumpAgentPoliciesRevision(
@@ -2105,7 +2134,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    await this.compilePackagePolicyForVersions(soClient, pkgInfo, assetsMap, newPolicy);
+    const { cleared: clearedInputsForVersions } = await this.compilePackagePolicyForVersions(
+      soClient,
+      pkgInfo,
+      assetsMap,
+      newPolicy
+    );
 
     // Bump revision of all associated agent policies (old and new), unless the
     // caller opted out via `bumpRevision: false` (e.g. silent updates that must
@@ -2130,13 +2164,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ? this.bumpAgentPoliciesRevision({ soClient, esClient }, [...associatedPolicyIds], {
           user: options?.user,
           asyncDeploy: options?.asyncDeploy,
-          agentVersionConditionsUnchanged: keepsAgentVersionConditions({
-            oldPackagePolicy,
-            newPackage: newPolicy.package,
-            newPolicyIds: newPolicy.policy_ids,
-            pkgInfo,
-            assetsMap,
-          }),
+          agentVersionConditionsUnchanged:
+            !clearedInputsForVersions &&
+            keepsAgentVersionConditions({
+              oldPackagePolicy,
+              newPackage: newPolicy.package,
+              newPolicyIds: newPolicy.policy_ids,
+              pkgInfo,
+              assetsMap,
+            }),
           updatedPackageNames: newPolicy.package ? [newPolicy.package.name] : [],
           removeProtectionFn: (policyId) => {
             const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
@@ -2610,12 +2646,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const pkgInfo = packageInfos.get(
         `${updatedPolicy.attributes.package?.name}-${updatedPolicy.attributes.package?.version}`
       )!;
-      await this.compilePackagePolicyForVersions(
+      const { cleared } = await this.compilePackagePolicyForVersions(
         soClient,
         pkgInfo,
         packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!,
         mapPackagePolicySavedObjectToPackagePolicy(updatedPolicy as any)
       );
+      // A cleared cache changes the agent policy's conditions, so they must be recomputed.
+      if (cleared) {
+        agentVersionConditionsUnchanged = false;
+      }
     }
 
     // Bump revision of all associated agent policies (old and new)

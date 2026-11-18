@@ -451,16 +451,22 @@ const createEndpointPackagePolicyWithInputId = (
 };
 
 describe('Package policy service', () => {
+  let compileForVersionsSpy: jest.SpyInstance;
+
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
     jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableVersionSpecificPolicies: true,
     } as any);
+    compileForVersionsSpy = jest
+      .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
+      .mockResolvedValue({ cleared: false });
   });
 
   afterEach(() => {
     appContextService.stop();
+    compileForVersionsSpy.mockRestore();
 
     // `jest.resetAllMocks` breaks a ton of tests in this file 🤷‍♂️
     mockAgentPolicyService.get.mockReset();
@@ -782,7 +788,7 @@ describe('Package policy service', () => {
       const soClient = createSavedObjectClientMock();
       jest
         .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValueOnce({ cleared: false });
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-package-policy',
@@ -872,7 +878,7 @@ describe('Package policy service', () => {
       const soClient = createSavedObjectClientMock();
       jest
         .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValueOnce({ cleared: false });
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-package-policy',
@@ -2456,7 +2462,7 @@ describe('Package policy service', () => {
         const soClient = createSavedObjectClientMock();
         jest
           .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-          .mockResolvedValueOnce(undefined);
+          .mockResolvedValueOnce({ cleared: false });
         soClient.bulkCreate.mockResolvedValueOnce({
           saved_objects: [
             {
@@ -4920,7 +4926,7 @@ describe('Package policy service', () => {
         const savedObjectsClient = createSavedObjectClientMock();
         jest
           .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-          .mockResolvedValueOnce(undefined);
+          .mockResolvedValueOnce({ cleared: false });
         const mockPackagePolicy = createPackagePolicyMock();
 
         (getPackageInfo as jest.Mock).mockResolvedValue({
@@ -5529,7 +5535,7 @@ describe('Package policy service', () => {
         const savedObjectsClient = createSavedObjectClientMock();
         jest
           .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-          .mockResolvedValueOnce(undefined);
+          .mockResolvedValueOnce({ cleared: false });
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         const testPolicyIds = ['test-agent-policy-1', 'test-agent-policy-2'];
 
@@ -7484,7 +7490,7 @@ describe('Package policy service', () => {
       const mockPackageWithAgentVersionCondition = () => {
         jest
           .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-          .mockResolvedValueOnce(undefined);
+          .mockResolvedValueOnce({ cleared: false });
         (getPackageInfo as jest.Mock).mockImplementation(async ({ pkgName, pkgVersion }) => ({
           name: pkgName,
           version: pkgVersion,
@@ -7512,6 +7518,11 @@ describe('Package policy service', () => {
         {
           when: 'a stale stored condition is cleared on the same package version',
           old: { package_agent_version_condition: '>=9.3.0' },
+          expected: false,
+        },
+        {
+          when: 'a stale inputs_for_versions cache was cleared on the same package version',
+          setup: () => compileForVersionsSpy.mockResolvedValue({ cleared: true }),
           expected: false,
         },
         {
@@ -7582,7 +7593,7 @@ describe('Package policy service', () => {
       const savedObjectsClient = createSavedObjectClientMock();
       jest
         .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValueOnce({ cleared: false });
       const mockPackagePolicy = createPackagePolicyMock();
 
       (getPackageInfo as jest.Mock).mockResolvedValue({
@@ -16836,18 +16847,36 @@ describe('compilePackagePolicyForVersions()', () => {
       );
     });
 
-    it('does nothing when there is no manifest or template condition', async () => {
+    it('does nothing when there is no manifest or template condition and no stored cache', async () => {
       const soClient = makeSoClient({});
 
-      await packagePolicyService.compilePackagePolicyForVersions(
+      const result = await packagePolicyService.compilePackagePolicyForVersions(
         soClient,
         mockPackageInfo,
         noConditionAssetsMap,
         mockPackagePolicy
       );
 
+      expect(result).toEqual({ cleared: false });
       expect(mockRecompileInputsWithAgentVersion).not.toHaveBeenCalled();
       expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('clears a stale inputs_for_versions when the package no longer has a condition', async () => {
+      const soClient = makeSoClient({ '9.5': [{ type: 'logfile' }] });
+
+      const result = await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        noConditionAssetsMap,
+        mockPackagePolicy
+      );
+
+      expect(result).toEqual({ cleared: true });
+      expect(mockRecompileInputsWithAgentVersion).not.toHaveBeenCalled();
+      expect(soClient.update).toHaveBeenCalledWith(expect.any(String), 'pkg-policy-1', {
+        inputs_for_versions: {},
+      });
     });
 
     it('does nothing when the feature flag is disabled', async () => {
@@ -16864,6 +16893,7 @@ describe('compilePackagePolicyForVersions()', () => {
       );
 
       expect(mockRecompileInputsWithAgentVersion).not.toHaveBeenCalled();
+      expect(soClient.get).not.toHaveBeenCalled();
       expect(soClient.update).not.toHaveBeenCalled();
     });
   });

@@ -278,7 +278,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       mockPackagePolicyService.findAllForAgentPolicy = jest.fn().mockResolvedValue([]);
       mockPackagePolicyService.compilePackagePolicyForVersions = jest
         .fn()
-        .mockResolvedValue(undefined);
+        .mockResolvedValue({ cleared: false });
       mockedGetPackageInfo.mockResolvedValue({
         name: 'test-package',
         version: '1.0.0',
@@ -1126,7 +1126,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       mockPackagePolicyService.findAllForAgentPolicy = jest.fn().mockResolvedValue([]);
       mockPackagePolicyService.compilePackagePolicyForVersions = jest
         .fn()
-        .mockResolvedValue(undefined);
+        .mockResolvedValue({ cleared: false });
       mockedGetPackageInfo.mockResolvedValue({
         name: 'test-package',
         version: '1.0.0',
