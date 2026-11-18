@@ -149,7 +149,7 @@ describe('judgeCoverage', () => {
   const run = (
     name: string,
     kind: 'LLM' | 'CODE',
-    result?: { score: number | null; label?: string }
+    result?: { score: number | null; label?: string; metadata?: Record<string, unknown> }
   ) => ({
     name,
     kind,
@@ -170,8 +170,20 @@ describe('judgeCoverage', () => {
       ])
     ).toEqual({
       applicable: 4,
-      missing: ['reply_faithfulness', 'reply_vs_baseline', 'reply_vs_baseline'],
+      missing: 3,
+      names: ['reply_faithfulness', 'reply_vs_baseline', 'reply_vs_baseline'],
     });
+  });
+
+  it('counts the failed votes of a pairwise evaluation that still scored', () => {
+    const tally = (win: number, failed: number) => ({ win, loss: 0, tie: 0, failed, reasons: [] });
+    expect(
+      judgeCoverage([
+        run('reply_vs_golden', 'LLM', { score: 1, label: '1W 0L 0T', metadata: tally(1, 3) }),
+        run('reply_vs_golden', 'LLM', { score: 1, label: '4W 0L 0T', metadata: tally(4, 0) }),
+        run('reply_vs_golden', 'LLM', { score: null, label: '0W 0L 0T', metadata: tally(0, 4) }),
+      ])
+    ).toEqual({ applicable: 12, missing: 7, names: ['reply_vs_golden', 'reply_vs_golden'] });
   });
 });
 

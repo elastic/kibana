@@ -38,7 +38,7 @@ const NO_REPLY = { score: null, label: 'n/a', explanation: 'No reply was generat
 
 /**
  * The gates for a reply to the replayed round. Numbers are grounded in what the agent saw, numbers
- * in quoted code also in the recorded queries, and the attachments the reply made and shows are
+ * in quoted queries also in the recorded queries, and the attachments the reply made and shows are
  * checked for numbers as well.
  */
 export const gatesForRound = (
@@ -49,7 +49,11 @@ export const gatesForRound = (
 ) =>
   runReplyGates(reply, type, knownNumbers(replayCorpus(rounds, roundIndex)), {
     queryNumbers: knownNumbers(replayToolParams(rounds, roundIndex)),
-    attachments: attachments.filter((a) => reply.includes(`id="${a.id}"`)).map((a) => a.content),
+    // Only text attachments are prose the model wrote. A chart or visualization is the tool's JSON,
+    // full of query and layout literals that aren't claims, so it isn't checked.
+    attachments: attachments
+      .filter((a) => a.type === 'text' && reply.includes(`id="${a.id}"`))
+      .map((a) => a.content),
   });
 
 const gatesFor = (input: WriteupExample['input'], output: WriteupTaskOutput, reply: string) =>

@@ -103,6 +103,10 @@ export const normalizeNumber = (n: string) => n.replace(/,/g, '');
 
 // Fenced blocks (closed or not) and inline code spans.
 const CODE = /```[\s\S]*?(?:```|$)|`[^`\n]+`/g;
+// An inline span counts as a quoted query only when it reads like one: `LIMIT 1000` does, `1000` doesn't.
+const QUERY_LIKE =
+  /\|\s*[A-Z]+\b|\b(?:FROM|WHERE|LIMIT|STATS|BUCKET|EVAL|KEEP|SORT|DATE_TRUNC|GET|POST|size|interval)\b/;
+const isQuotedQuery = (code: string) => code.startsWith('```') || QUERY_LIKE.test(code);
 
 const ungroundedIn = (text: string, known: Set<string>): string[] =>
   (text.match(NUMBER) ?? [])
@@ -118,17 +122,28 @@ const ungroundedIn = (text: string, known: Set<string>): string[] =>
 
 /**
  * Numbers of two or more digits in `text` that the agent can't have got from what it saw. Prose
- * is checked against `known`; code also against `queryNumbers`, the literals of recorded queries.
+ * and code are checked against `known`; quoted queries also against `queryNumbers`, the literals of
+ * recorded queries.
  */
 export const findUngroundedNumbers = (
   text: string,
   known: Set<string>,
   queryNumbers?: Set<string>
 ): string[] => {
-  const code = (text.match(CODE) ?? []).join('\n');
+  const spans = text.match(CODE) ?? [];
+  // Only quoted queries may repeat a query's literals; other code spans are checked like prose,
+  // so formatting a count as `1000` doesn't ground it.
+  const queries = spans.filter(isQuotedQuery).join('\n');
+  const otherCode = spans.filter((s) => !isQuotedQuery(s)).join('\n');
   const prose = plain(text.replace(CODE, ' '));
-  const codeKnown = queryNumbers?.size ? new Set([...known, ...queryNumbers]) : known;
-  return [...new Set([...ungroundedIn(prose, known), ...ungroundedIn(code, codeKnown)])];
+  const queryKnown = queryNumbers?.size ? new Set([...known, ...queryNumbers]) : known;
+  return [
+    ...new Set([
+      ...ungroundedIn(prose, known),
+      ...ungroundedIn(otherCode, known),
+      ...ungroundedIn(queries, queryKnown),
+    ]),
+  ];
 };
 
 export const splitSentences = (text: string): string[] =>

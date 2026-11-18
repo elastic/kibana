@@ -143,12 +143,12 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
 
       // A judge outage turns every judge score into null; that's a broken run, not a passing one.
       const judged = judgeCoverage(experiment.evaluationRuns);
-      if (judged.missing.length) {
-        log.warning(`${judged.missing.length} of ${judged.applicable} judge calls got no score`);
+      if (judged.missing) {
+        log.warning(`${judged.missing} of ${judged.applicable} judge calls got no answer`);
       }
       expect(
-        judged.applicable ? 1 - judged.missing.length / judged.applicable : 1,
-        `Too few judge calls came back (${judged.missing.length} of ${judged.applicable} missing)`
+        judged.applicable ? 1 - judged.missing / judged.applicable : 1,
+        `Too few judge calls came back (${judged.missing} of ${judged.applicable} missing)`
       ).toBeGreaterThanOrEqual(MIN_JUDGED_RATE);
     }
   );
