@@ -10,7 +10,7 @@ import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { getEbtProps } from '@kbn/ebt-click';
 
-export interface DailyLimitReachedTextProps {
+interface DailyLimitReachedTextProps {
   message: string;
   resetsAt: string;
   /** A reached limit of 0 blocks new starts until it is changed, whatever the reset. */
