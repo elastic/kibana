@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { importKeys } from './query_key_factory';
 
 const CONNECTORS_API_PATH = '/api/actions/connectors';
+const CUSTOM_WEBHOOK_CONNECTOR_TYPE_ID = '.inboundWebhook';
 
 /** The fields of `GET /api/actions/connectors` that the imports list reads. */
 interface ConnectorResponse {
@@ -28,14 +29,15 @@ export interface ImportListItem {
 }
 
 /**
- * Returns the connectors that receive inbound events in the current space. The connectors API
- * cannot filter, so every connector is fetched and filtered here.
+ * Returns the connectors that receive inbound events in the current space, except custom
+ * webhooks. The connectors API cannot filter, so every connector is fetched and filtered here.
  */
 export const fetchImports = async (http: HttpStart): Promise<ImportListItem[]> => {
   const connectors = await http.get<ConnectorResponse[]>(CONNECTORS_API_PATH);
   return connectors
     .filter(
-      ({ is_inbound_events_enabled: isInboundEventsEnabled }) => isInboundEventsEnabled === true
+      ({ connector_type_id: connectorTypeId, is_inbound_events_enabled: isInboundEventsEnabled }) =>
+        isInboundEventsEnabled === true && connectorTypeId !== CUSTOM_WEBHOOK_CONNECTOR_TYPE_ID
     )
     .map(({ id, name, connector_type_id: connectorTypeId }) => ({
       connectorId: id,
@@ -44,7 +46,7 @@ export const fetchImports = async (http: HttpStart): Promise<ImportListItem[]> =
     }));
 };
 
-/** Loads the imports of the current space: its connectors with inbound events turned on. */
+/** Loads the imports of the current space: its non-webhook connectors that receive events. */
 export const useFetchImports = () => {
   const http = useService(CoreStart('http'));
   const { toasts } = useService(CoreStart('notifications'));

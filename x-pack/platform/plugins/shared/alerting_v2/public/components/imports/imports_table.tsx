@@ -19,9 +19,6 @@ import {
 } from '../../queries/imports/import_alert_counts_query';
 
 const CONNECTOR_TYPE_LABELS: Readonly<Record<string, string>> = {
-  '.inboundWebhook': i18n.translate('xpack.alertingV2.imports.list.type.customWebhook', {
-    defaultMessage: 'Custom webhook',
-  }),
   '.datadog': i18n.translate('xpack.alertingV2.imports.list.type.datadog', {
     defaultMessage: 'Datadog',
   }),
