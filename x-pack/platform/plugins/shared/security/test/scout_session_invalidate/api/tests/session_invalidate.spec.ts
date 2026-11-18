@@ -6,7 +6,7 @@
  */
 
 import type { ApiClientFixture, EsClient, ScoutTestConfig } from '@kbn/scout';
-import { apiTest as test } from '@kbn/scout';
+import { tags, apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
@@ -239,71 +239,68 @@ test.describe('Session Invalidate', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
     await assertSessionExpired(apiClient, samlCookie);
   });
 
-  test('only super users should be able to invalidate sessions', async ({
-    apiClient,
-    config,
-    esClient,
-  }) => {
-    const isFips = process.env.TEST_FIPS_MODE === '1';
-    test.skip(isFips, 'Skipped in FIPS mode');
+  test(
+    'only super users should be able to invalidate sessions',
+    { tag: [tags.limit.except.fips] },
+    async ({ apiClient, config, esClient }) => {
+      const { basicCookie, samlCookie } = await createTestSessions(apiClient, config, esClient);
 
-    const { basicCookie, samlCookie } = await createTestSessions(apiClient, config, esClient);
+      const testAuthHeaders = {
+        ...SESSION_API_HEADERS,
+        ...basicAuthHeader(TEST_USERNAME, TEST_PASSWORD),
+      };
 
-    const testAuthHeaders = {
-      ...SESSION_API_HEADERS,
-      ...basicAuthHeader(TEST_USERNAME, TEST_PASSWORD),
-    };
+      const forbidden1 = await apiClient.post('/api/security/session/_invalidate', {
+        headers: testAuthHeaders,
+        body: { match: 'all' },
+      });
+      expect(forbidden1).toHaveStatusCode(403);
 
-    const forbidden1 = await apiClient.post('/api/security/session/_invalidate', {
-      headers: testAuthHeaders,
-      body: { match: 'all' },
-    });
-    expect(forbidden1).toHaveStatusCode(403);
+      const forbidden2 = await apiClient.post('/api/security/session/_invalidate', {
+        headers: testAuthHeaders,
+        body: { match: 'query', query: { provider: { type: 'basic' } } },
+      });
+      expect(forbidden2).toHaveStatusCode(403);
 
-    const forbidden2 = await apiClient.post('/api/security/session/_invalidate', {
-      headers: testAuthHeaders,
-      body: { match: 'query', query: { provider: { type: 'basic' } } },
-    });
-    expect(forbidden2).toHaveStatusCode(403);
+      const forbidden3 = await apiClient.post('/api/security/session/_invalidate', {
+        headers: testAuthHeaders,
+        body: {
+          match: 'query',
+          query: { provider: { type: 'basic' }, username: TEST_USERNAME },
+        },
+      });
+      expect(forbidden3).toHaveStatusCode(403);
 
-    const forbidden3 = await apiClient.post('/api/security/session/_invalidate', {
-      headers: testAuthHeaders,
-      body: {
-        match: 'query',
-        query: { provider: { type: 'basic' }, username: TEST_USERNAME },
-      },
-    });
-    expect(forbidden3).toHaveStatusCode(403);
+      await assertSessionCookie(apiClient, basicCookie, TEST_USERNAME, BASIC_PROVIDER);
+      await assertSessionCookie(apiClient, samlCookie, SAML_USERNAME, SAML_PROVIDER);
 
-    await assertSessionCookie(apiClient, basicCookie, TEST_USERNAME, BASIC_PROVIDER);
-    await assertSessionCookie(apiClient, samlCookie, SAML_USERNAME, SAML_PROVIDER);
+      await putNativeUser(
+        esClient,
+        TEST_USERNAME,
+        TEST_PASSWORD,
+        ['superuser'],
+        'Invalidate Test User'
+      );
 
-    await putNativeUser(
-      esClient,
-      TEST_USERNAME,
-      TEST_PASSWORD,
-      ['superuser'],
-      'Invalidate Test User'
-    );
+      const success = await postSessionInvalidate(
+        apiClient,
+        config,
+        { match: 'all' },
+        testAuthHeaders
+      );
+      expect(success).toHaveStatusCode(200);
+      expect(success.body.total).toBe(2);
 
-    const success = await postSessionInvalidate(
-      apiClient,
-      config,
-      { match: 'all' },
-      testAuthHeaders
-    );
-    expect(success).toHaveStatusCode(200);
-    expect(success.body.total).toBe(2);
+      await assertSessionExpired(apiClient, basicCookie);
+      await assertSessionExpired(apiClient, samlCookie);
 
-    await assertSessionExpired(apiClient, basicCookie);
-    await assertSessionExpired(apiClient, samlCookie);
-
-    await putNativeUser(
-      esClient,
-      TEST_USERNAME,
-      TEST_PASSWORD,
-      ['kibana_admin'],
-      'Invalidate Test User'
-    );
-  });
+      await putNativeUser(
+        esClient,
+        TEST_USERNAME,
+        TEST_PASSWORD,
+        ['kibana_admin'],
+        'Invalidate Test User'
+      );
+    }
+  );
 });

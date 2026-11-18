@@ -1,5 +1,5 @@
 {
-  "sha1": "3baaac318be9b9c2375b75ca2003ef2cef13d8a2",
+  "sha1": "0512072f49ed12ae76d754ade73cf8a2c293226d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -100,7 +100,8 @@
       "title": "Session Invalidate only super users should be able to invalidate sessions",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@limit/except-fips"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_invalidate/api/tests/session_invalidate.spec.ts",
