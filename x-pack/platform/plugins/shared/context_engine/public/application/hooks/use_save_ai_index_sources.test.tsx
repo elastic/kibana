@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
-import type { SelectedSource } from '../components/ai_index_detail/types';
+import type { SelectedSource } from '../components/ai_index_detail/sources/types';
 import { contextEngineQueryKeys } from './query_keys';
 import { useSaveAiIndexSources } from './use_save_ai_index_sources';
 

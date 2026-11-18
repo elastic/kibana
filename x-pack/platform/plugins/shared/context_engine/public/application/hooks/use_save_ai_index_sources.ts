@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { AiIndexProperties, GetAiIndexResponse } from '../../../common/http_api/ai_indices';
-import type { SelectedSource } from '../components/ai_index_detail/types';
+import type { SelectedSource } from '../components/ai_index_detail/sources/types';
 import { toAiIndexSources } from '../utils/sources';
 import { toProperties, useSaveAiIndexField } from './use_save_ai_index_field';
 

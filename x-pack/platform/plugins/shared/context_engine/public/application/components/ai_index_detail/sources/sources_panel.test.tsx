@@ -15,7 +15,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
-import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { createConnectorHttpGetMock, expectConnectorQueriesLoaded } from './connector_test_helpers';
 import { SourcesPanel } from './sources_panel';
 

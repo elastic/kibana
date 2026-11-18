@@ -6,26 +6,22 @@
  */
 
 import { EuiFlexGrid, EuiFlexItem, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import { useCanReadConnectors } from '../../hooks/use_can_read_connectors';
-import { useDataConnectors } from '../../hooks/use_data_connectors';
-import { useSaveAiIndexSources } from '../../hooks/use_save_ai_index_sources';
-import { toSelectedSources } from '../../utils/sources';
+import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
+import { useCanReadConnectors } from '../../../hooks/use_can_read_connectors';
+import { useDataConnectors } from '../../../hooks/use_data_connectors';
+import { useSaveAiIndexSources } from '../../../hooks/use_save_ai_index_sources';
+import { toSelectedSources } from '../../../utils/sources';
 import type { SelectedSource } from './types';
 import { SourceTypePanel } from './source_type_panel';
 import { AddSourceCard } from './add_source_card';
 import { AddConnectorsPanel, AddElasticsearchDataPanel } from './add_sources_panels';
-import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
+import { AiIndexDetailPanelDescription } from '../ai_index_detail_panel_description';
 import { ConnectorSourceGrid } from './connector_source_grid';
 import { ElasticsearchSourceList } from './elasticsearch_source_list';
-import {
-  ADD_CONNECTORS_CARD_DESCRIPTION,
-  ADD_CONNECTORS_TITLE,
-  ADD_ELASTICSEARCH_DATA_CARD_DESCRIPTION,
-  ADD_ELASTICSEARCH_DATA_TITLE,
-} from './sources_panel_copy';
+import { ADD_CONNECTORS_TITLE, ADD_ELASTICSEARCH_DATA_TITLE } from './translations';
 
 type SourcesAddingKind = 'elasticsearch' | 'connector';
 
@@ -90,7 +86,10 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
     !isManaged && addingKind !== 'connector' ? (
       <AddSourceCard
         title={ADD_CONNECTORS_TITLE}
-        description={ADD_CONNECTORS_CARD_DESCRIPTION}
+        description={i18n.translate(
+          'xpack.contextEngine.aiIndexDetail.sources.addConnectorsCardDescription',
+          { defaultMessage: 'Pick or create a connector' }
+        )}
         onClick={() => setAddingKind('connector')}
         data-test-subj="contextAddConnectorsCard"
       />
@@ -145,7 +144,10 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
                 <EuiFlexItem>
                   <AddSourceCard
                     title={ADD_ELASTICSEARCH_DATA_TITLE}
-                    description={ADD_ELASTICSEARCH_DATA_CARD_DESCRIPTION}
+                    description={i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.sources.addElasticsearchDataCardDescription',
+                      { defaultMessage: 'Indices, data streams, aliases or ES|QL' }
+                    )}
                     onClick={() => setAddingKind('elasticsearch')}
                     data-test-subj="contextAddElasticsearchDataCard"
                   />

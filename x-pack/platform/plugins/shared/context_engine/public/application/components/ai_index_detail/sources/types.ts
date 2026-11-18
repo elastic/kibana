@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AiIndexSourceType } from '../../../../common/http_api/ai_indices';
+import type { AiIndexSourceType } from '../../../../../common/http_api/ai_indices';
 
 export type SourceType = AiIndexSourceType;
 

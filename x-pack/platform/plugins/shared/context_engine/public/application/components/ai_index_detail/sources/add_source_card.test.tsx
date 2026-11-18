@@ -9,7 +9,7 @@ import { EuiProvider } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import { AddSourceCard } from './add_source_card';
 
 const renderWithProviders = (ui: React.ReactElement) => render(<EuiProvider>{ui}</EuiProvider>);

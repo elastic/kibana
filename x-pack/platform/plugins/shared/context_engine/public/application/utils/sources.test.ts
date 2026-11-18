@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SelectedSource } from '../components/ai_index_detail/types';
+import type { SelectedSource } from '../components/ai_index_detail/sources/types';
 import {
   createIndexEsqlQuery,
   hasSelectedEsqlQuery,

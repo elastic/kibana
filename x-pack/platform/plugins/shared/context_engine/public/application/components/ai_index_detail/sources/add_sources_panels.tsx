@@ -8,8 +8,8 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useCreateConnectorFlyout } from '../../hooks/use_create_connector_flyout';
-import { createIndexEsqlQuery, hasSelectedEsqlQuery, toEsqlSource } from '../../utils/sources';
+import { useCreateConnectorFlyout } from '../../../hooks/use_create_connector_flyout';
+import { createIndexEsqlQuery, hasSelectedEsqlQuery, toEsqlSource } from '../../../utils/sources';
 import { ConnectorSelect } from './connector_select';
 import {
   ElasticsearchSourcesPanel,
@@ -17,7 +17,7 @@ import {
 } from './elasticsearch_sources_panel';
 import type { SelectedSource } from './types';
 import { AddSourcePanel } from './add_source_panel';
-import { ADD_CONNECTORS_TITLE, ADD_ELASTICSEARCH_DATA_TITLE } from './sources_panel_copy';
+import { ADD_CONNECTORS_TITLE, ADD_ELASTICSEARCH_DATA_TITLE } from './translations';
 
 interface AddPanelProps {
   savedSources: SelectedSource[];

@@ -18,11 +18,11 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
-import { useDataConnectors } from '../../hooks/use_data_connectors';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
+import { useDataConnectors } from '../../../hooks/use_data_connectors';
 import { AddSourceCard } from './add_source_card';
 import { SelectableConnectorCard } from './connector_card';
-import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prompt';
+import { AiIndexDetailPanelEmptyState } from '../ai_index_detail_panel_empty_prompt';
 import { getSourceDisplay } from './source_display';
 
 interface ConnectorSelectProps {

@@ -16,13 +16,3 @@ export const ADD_CONNECTORS_TITLE = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.sources.addConnectorsTitle',
   { defaultMessage: 'Add connectors' }
 );
-
-export const ADD_ELASTICSEARCH_DATA_CARD_DESCRIPTION = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.sources.addElasticsearchDataCardDescription',
-  { defaultMessage: 'Indices, data streams, aliases or ES|QL' }
-);
-
-export const ADD_CONNECTORS_CARD_DESCRIPTION = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.sources.addConnectorsCardDescription',
-  { defaultMessage: 'Pick or create a connector' }
-);

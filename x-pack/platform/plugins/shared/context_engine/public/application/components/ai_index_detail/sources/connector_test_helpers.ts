@@ -6,7 +6,7 @@
  */
 
 import type { QueryClient } from '@kbn/react-query';
-import { contextEngineQueryKeys } from '../../hooks/query_keys';
+import { contextEngineQueryKeys } from '../../../hooks/query_keys';
 
 export const getHttpPath = (pathOrOptions: string | { path: string }): string =>
   typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;

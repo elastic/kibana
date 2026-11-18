@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
-import { useIndices } from '../../hooks/use_indices';
+import { useIndices } from '../../../hooks/use_indices';
 
 const SEARCH_DEBOUNCE_MS = 300;
 

@@ -9,7 +9,7 @@ import { EuiFormRow } from '@elastic/eui';
 import type { AggregateQuery } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import React, { useCallback } from 'react';
-import { isIndexPickerSourceSelected } from '../../utils/sources';
+import { isIndexPickerSourceSelected } from '../../../utils/sources';
 import { IndexMultiSelect } from './index_multi_select';
 import type { SelectedSource } from './types';
 

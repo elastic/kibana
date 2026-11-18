@@ -94,7 +94,7 @@ const mockUseCreateConnectorFlyout = jest.fn(() => ({
   createConnectorFlyout: null,
 }));
 
-jest.mock('../../hooks/use_create_connector_flyout', () => ({
+jest.mock('../../../hooks/use_create_connector_flyout', () => ({
   useCreateConnectorFlyout: () => mockUseCreateConnectorFlyout(),
 }));
 

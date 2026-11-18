@@ -6,7 +6,7 @@
  */
 
 import type { AiIndexSource } from '../../../common/http_api/ai_indices';
-import type { SelectedSource } from '../components/ai_index_detail/types';
+import type { SelectedSource } from '../components/ai_index_detail/sources/types';
 
 /** Converts the selected sources into the shape stored on the AI index. */
 export const toAiIndexSources = (selectedSources: SelectedSource[]): AiIndexSource[] =>
