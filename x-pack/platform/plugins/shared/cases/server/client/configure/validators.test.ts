@@ -476,6 +476,16 @@ describe('validators', () => {
       );
     });
 
+    it('throws for a group-by field that is not a keyword field', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: { casesList: [{ ...customMetric, groupBy: { field: 'case.duration' } }] },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid KPI metrics in request: \\"Critical cases\\": The breakdown needs a keyword field of the cases index. case.duration is not allowed."`
+      );
+    });
+
     it('throws for a field aggregation without a field', () => {
       expect(() =>
         validateKpiMetricsInRequest({

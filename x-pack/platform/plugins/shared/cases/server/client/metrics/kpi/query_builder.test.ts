@@ -6,7 +6,12 @@
  */
 
 import type { CustomKpiMetricConfiguration } from '../../../../common/types/domain';
-import { buildForcedFilters, buildKpiMetricSearch, KPI_METRIC_VALUE_AGG } from './query_builder';
+import {
+  buildForcedFilters,
+  buildKpiMetricSearch,
+  KPI_METRIC_MISSING_AGG,
+  KPI_METRIC_VALUE_AGG,
+} from './query_builder';
 
 const context = { spaceId: 'space-a', owner: 'securitySolution', from: 'now-30d', to: 'now' };
 
@@ -235,6 +240,55 @@ describe('buildKpiMetricSearch', () => {
       expect(() =>
         buildKpiMetricSearch(createMetric({ index: 'activity', dateField: 'closed_at' }), context)
       ).toThrow('The date field closed_at is not allowed for the activity index.');
+    });
+  });
+
+  describe('breakdown', () => {
+    it('builds a terms aggregation with the default size and a missing aggregation', () => {
+      const { body } = buildKpiMetricSearch(
+        createMetric({ query: '', groupBy: { field: 'case.severity' } }),
+        context
+      );
+
+      expect(body.aggs).toEqual({
+        [KPI_METRIC_VALUE_AGG]: { terms: { field: 'case.severity', size: 5 } },
+        [KPI_METRIC_MISSING_AGG]: { missing: { field: 'case.severity' } },
+      });
+    });
+
+    it('uses the size of the metric', () => {
+      const { body } = buildKpiMetricSearch(
+        createMetric({ query: '', groupBy: { field: 'case.tags', size: 3 } }),
+        context
+      );
+
+      expect(body.aggs?.[KPI_METRIC_VALUE_AGG]).toEqual({
+        terms: { field: 'case.tags', size: 3 },
+      });
+    });
+
+    it('keeps the space and owner clauses when the KQL tries to widen the query', () => {
+      const filters = getFilters(
+        createMetric({ query: 'space_id: * or owner: *', groupBy: { field: 'case.severity' } })
+      );
+
+      expect(filters).toHaveLength(4);
+      expect(filters[0]).toEqual({ term: { space_id: 'space-a' } });
+      expect(filters[1]).toEqual({ term: { owner: 'securitySolution' } });
+      expect(filters[3]).toHaveProperty('bool.should');
+    });
+
+    it('builds the same request as before for a metric with no group-by field', () => {
+      expect(buildKpiMetricSearch(createMetric(), context)).toEqual(
+        buildKpiMetricSearch(createMetric({ groupBy: undefined }), context)
+      );
+      expect(buildKpiMetricSearch(createMetric(), context).body.aggs).toBeUndefined();
+    });
+
+    it('throws for a group-by field that is not a keyword field', () => {
+      expect(() =>
+        buildKpiMetricSearch(createMetric({ groupBy: { field: 'case.duration' } }), context)
+      ).toThrow('The breakdown needs a keyword field of the cases index.');
     });
   });
 });

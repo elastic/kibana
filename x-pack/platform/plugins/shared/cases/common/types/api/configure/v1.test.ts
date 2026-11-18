@@ -31,6 +31,7 @@ import {
   MAX_METRICS_PER_PAGE,
   MAX_METRIC_LABEL_LENGTH,
   MAX_METRIC_QUERY_LENGTH,
+  MAX_KPI_BREAKDOWN_SIZE,
 } from '../../../constants';
 import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
@@ -840,6 +841,29 @@ describe('configure', () => {
       const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
       expect(result.success).toBe(false);
     });
+
+    it.each([1, MAX_KPI_BREAKDOWN_SIZE])('accepts the group-by size %s', (size) => {
+      const metric = { ...customMetric, groupBy: { field: 'case.severity', size } };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ casesList: [metric] });
+    });
+
+    it('accepts a group-by field with no size', () => {
+      const metric = { ...customMetric, groupBy: { field: 'case.severity' } };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ casesList: [metric] });
+    });
+
+    it.each([0, MAX_KPI_BREAKDOWN_SIZE + 1, 2.5])(
+      'does not accept the group-by size %s',
+      (size) => {
+        const metric = { ...customMetric, groupBy: { field: 'case.severity', size } };
+        const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+        expect(result.success).toBe(false);
+      }
+    );
 
     it('accepts metrics in the configure request and the patch request', () => {
       const metrics = { casesList: [customMetric] };

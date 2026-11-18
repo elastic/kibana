@@ -20,7 +20,10 @@ import {
 import prettyMilliseconds from 'pretty-ms';
 import { isAnalyticsPredefinedKpiMetric } from '../../../../common/constants';
 import type { KpiMetricResult } from '../../../../common/types/api';
-import type { KpiMetricConfiguration } from '../../../../common/types/domain';
+import type {
+  CustomKpiMetricConfiguration,
+  KpiMetricConfiguration,
+} from '../../../../common/types/domain';
 import { CaseStatuses } from '../../../../common/types/domain';
 import { StatusStats } from '../../status/status_stats';
 import { statuses } from '../../status/config';
@@ -35,6 +38,8 @@ import {
 import { PREDEFINED_LABELS } from '../../kpi_metrics/translations';
 import type { KpiMetricTileProps } from './kpi_metric_tile';
 import { KpiMetricTile } from './kpi_metric_tile';
+import type { KpiBreakdownTileProps } from './kpi_breakdown_tile';
+import { KpiBreakdownTile } from './kpi_breakdown_tile';
 
 const PRETTY_MS_OPTIONS = { compact: true, verbose: false } as const;
 const MTTR_MULTIPLIER = 1000;
@@ -121,6 +126,10 @@ const getResultTileValues = (
     return { ...base, isLoading: isLoadingKpiResults, errorMessage: result.message };
   }
 
+  if (result.type === 'breakdown') {
+    return { ...base, isLoading: isLoadingKpiResults, errorMessage: KPI_METRIC_UNKNOWN };
+  }
+
   return {
     ...base,
     value: result.value,
@@ -129,6 +138,37 @@ const getResultTileValues = (
     isLoading: isLoadingKpiResults,
   };
 };
+
+type KpiBreakdownTileValues = Pick<
+  KpiBreakdownTileProps,
+  'label' | 'result' | 'isLoading' | 'errorMessage'
+>;
+
+const getBreakdownTileValues = (
+  { id, label }: CustomKpiMetricConfiguration,
+  { kpiResults, isLoadingKpiResults = false, isAnalyticsEnabled = false }: CasesMetricsProps
+): KpiBreakdownTileValues => {
+  if (!isAnalyticsEnabled) {
+    return { label, isLoading: false, errorMessage: KPI_METRIC_ANALYTICS_DISABLED };
+  }
+
+  const result = kpiResults?.find((kpiResult) => kpiResult.id === id);
+
+  if (result?.type === 'error') {
+    return { label, isLoading: isLoadingKpiResults, errorMessage: result.message };
+  }
+
+  if (result != null && result.type !== 'breakdown') {
+    return { label, isLoading: isLoadingKpiResults, errorMessage: KPI_METRIC_UNKNOWN };
+  }
+
+  return { label, result, isLoading: isLoadingKpiResults };
+};
+
+const getDateHint = (metric: KpiMetricConfiguration): string | undefined =>
+  metric.kind === 'custom' && metric.dateField === 'closed_at'
+    ? KPI_METRIC_CLOSED_DATE_HINT
+    : undefined;
 
 const getKpiTileValues = (
   metric: KpiMetricConfiguration,
@@ -176,17 +216,22 @@ const CasesMetricsComponent: React.FC<CasesMetricsProps> = (props) => {
         <EuiFlexGrid columns={KPI_TILES_PER_ROW} data-test-subj="cases-kpi-tiles">
           {kpiMetrics.map((metric) => (
             <EuiFlexItem key={metric.id}>
-              <KpiMetricTile
-                {...getKpiTileValues(metric, props)}
-                threshold={metric.threshold}
-                direction={metric.direction}
-                dateHint={
-                  metric.kind === 'custom' && metric.dateField === 'closed_at'
-                    ? KPI_METRIC_CLOSED_DATE_HINT
-                    : undefined
-                }
-                dataTestSubj={`cases-kpi-tile-${metric.id}`}
-              />
+              {metric.kind === 'custom' && metric.groupBy != null ? (
+                <KpiBreakdownTile
+                  {...getBreakdownTileValues(metric, props)}
+                  direction={metric.direction}
+                  dateHint={getDateHint(metric)}
+                  dataTestSubj={`cases-kpi-tile-${metric.id}`}
+                />
+              ) : (
+                <KpiMetricTile
+                  {...getKpiTileValues(metric, props)}
+                  threshold={metric.threshold}
+                  direction={metric.direction}
+                  dateHint={getDateHint(metric)}
+                  dataTestSubj={`cases-kpi-tile-${metric.id}`}
+                />
+              )}
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>

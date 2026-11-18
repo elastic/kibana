@@ -28,6 +28,7 @@ import {
   MAX_METRIC_ID_LENGTH,
   MAX_METRIC_PREDEFINED_ID_LENGTH,
   MAX_METRIC_FIELD_LENGTH,
+  MAX_KPI_BREAKDOWN_SIZE,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringSchema } from '../../../schema';
 import {
@@ -236,7 +237,12 @@ export const CustomKpiMetricRequestSchema = lazySchema(() =>
       })
       .optional(),
     percent: z.boolean().optional(),
-    groupBy: z.object({ field: KpiMetricFieldSchema }).optional(),
+    groupBy: z
+      .object({
+        field: KpiMetricFieldSchema,
+        size: z.number().int().min(1).max(MAX_KPI_BREAKDOWN_SIZE).optional(),
+      })
+      .optional(),
   })
 );
 

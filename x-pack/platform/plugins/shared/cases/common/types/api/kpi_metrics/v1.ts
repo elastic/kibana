@@ -83,7 +83,42 @@ export interface KpiMetricErrorResult {
   message: string;
 }
 
-export type KpiMetricResult = KpiMetricValueResult | KpiMetricErrorResult;
+export interface KpiMetricBreakdownBucket {
+  key: string;
+  count: number;
+  /**
+   * The count of the previous period. Null when the previous count is not known, because the
+   * key can be in the previous "Other" count.
+   */
+  previousCount?: number | null;
+}
+
+export interface KpiMetricBreakdownResult {
+  id: string;
+  type: 'breakdown';
+  field: string;
+  /**
+   * The count of all matching documents
+   */
+  total: number;
+  /**
+   * In the order of Elasticsearch: the count first, then the key
+   */
+  buckets: KpiMetricBreakdownBucket[];
+  /**
+   * The count of the documents with a value that is not in the buckets
+   */
+  otherCount: number;
+  /**
+   * The count of the documents with no value in the field
+   */
+  missingCount: number;
+}
+
+export type KpiMetricResult =
+  | KpiMetricValueResult
+  | KpiMetricBreakdownResult
+  | KpiMetricErrorResult;
 
 export type KpiMetricPreviewResponse = KpiMetricResult;
 

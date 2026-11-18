@@ -87,7 +87,7 @@ export const formatKpiMetricValue = (
   return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
 };
 
-const formatKpiChangePercent = (changePercent: number): string => {
+export const formatKpiChangePercent = (changePercent: number): string => {
   const sign = changePercent > 0 ? '+' : '';
   return `${sign}${changePercent.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`;
 };
@@ -133,6 +133,40 @@ export const getKpiThresholdColor = (
   return isBreached ? 'danger' : 'success';
 };
 
+/**
+ * The label of a KPI tile, with the date hint and the error icons when they are set.
+ */
+export const KpiMetricTileDescription: React.FC<
+  Pick<KpiMetricTileProps, 'label' | 'errorMessage' | 'dateHint' | 'dataTestSubj'>
+> = ({ label, errorMessage, dateHint, dataTestSubj }) => (
+  <>
+    {label}
+    {dateHint != null && (
+      <>
+        {' '}
+        <EuiIconTip
+          type="info"
+          color="subdued"
+          content={dateHint}
+          iconProps={{ 'data-test-subj': `${dataTestSubj}-date-hint` }}
+        />
+      </>
+    )}
+    {errorMessage != null && (
+      <>
+        {' '}
+        <EuiIconTip
+          type="warning"
+          color="subdued"
+          content={errorMessage}
+          aria-label={KPI_METRIC_ERROR_ARIA_LABEL}
+        />
+      </>
+    )}
+  </>
+);
+KpiMetricTileDescription.displayName = 'KpiMetricTileDescription';
+
 const KpiMetricTileComponent: React.FC<KpiMetricTileProps> = ({
   label,
   value,
@@ -151,31 +185,12 @@ const KpiMetricTileComponent: React.FC<KpiMetricTileProps> = ({
 
   const description =
     hasError || dateHint != null ? (
-      <>
-        {label}
-        {dateHint != null && (
-          <>
-            {' '}
-            <EuiIconTip
-              type="info"
-              color="subdued"
-              content={dateHint}
-              iconProps={{ 'data-test-subj': `${dataTestSubj}-date-hint` }}
-            />
-          </>
-        )}
-        {hasError && (
-          <>
-            {' '}
-            <EuiIconTip
-              type="warning"
-              color="subdued"
-              content={errorMessage}
-              aria-label={KPI_METRIC_ERROR_ARIA_LABEL}
-            />
-          </>
-        )}
-      </>
+      <KpiMetricTileDescription
+        label={label}
+        errorMessage={errorMessage}
+        dateHint={dateHint}
+        dataTestSubj={dataTestSubj}
+      />
     ) : (
       label
     );

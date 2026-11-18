@@ -6,7 +6,9 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
+import type { KpiMetricIndex } from '../../../../common/constants';
 import { getKpiField } from '../../../../common/constants';
+import { isKpiExtendedKeywordField } from '../../../../common/utils/kpi_metrics';
 import type {
   CustomKpiMetricConfiguration,
   KpiMetricAggregationType,
@@ -20,19 +22,69 @@ const NUMERIC_AGGREGATIONS: readonly KpiMetricAggregationType[] = [
   'median',
 ];
 
+const isGroupByField = (index: KpiMetricIndex, field: string): boolean =>
+  getKpiField(index, field)?.type === 'keyword' ||
+  (index === 'cases' && isKpiExtendedKeywordField(field));
+
+const getKpiMetricGroupByError = ({
+  index,
+  aggregation,
+  percent,
+  threshold,
+  groupBy,
+}: Pick<
+  CustomKpiMetricConfiguration,
+  'index' | 'aggregation' | 'percent' | 'threshold' | 'groupBy'
+>): string | undefined => {
+  if (groupBy == null) {
+    return;
+  }
+
+  if (!isGroupByField(index, groupBy.field)) {
+    return `The breakdown needs a keyword field of the ${index} index. ${groupBy.field} is not allowed.`;
+  }
+
+  if (aggregation != null && aggregation.type !== 'count') {
+    return 'A breakdown counts the documents. It cannot use an aggregation.';
+  }
+
+  if (percent === true) {
+    return 'A breakdown cannot show a percent.';
+  }
+
+  if (threshold != null) {
+    return 'A breakdown cannot have a threshold.';
+  }
+};
+
 /**
- * Returns an error message when the date field or the aggregation field is not allowed for the index and the aggregation type.
+ * Returns an error message when the date field, the aggregation field, or the breakdown is not allowed for the index and the aggregation type.
  */
 export const getKpiMetricFieldError = ({
   index,
   aggregation,
   percent,
   dateField,
-}: Pick<CustomKpiMetricConfiguration, 'index' | 'aggregation' | 'percent' | 'dateField'>):
-  | string
-  | undefined => {
+  threshold,
+  groupBy,
+}: Pick<
+  CustomKpiMetricConfiguration,
+  'index' | 'aggregation' | 'percent' | 'dateField' | 'threshold' | 'groupBy'
+>): string | undefined => {
   if (dateField != null && index !== 'cases') {
     return `The date field ${dateField} is not allowed for the ${index} index.`;
+  }
+
+  const groupByError = getKpiMetricGroupByError({
+    index,
+    aggregation,
+    percent,
+    threshold,
+    groupBy,
+  });
+
+  if (groupByError != null) {
+    return groupByError;
   }
 
   const isCount = aggregation == null || aggregation.type === 'count';

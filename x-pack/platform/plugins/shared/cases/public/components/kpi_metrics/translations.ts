@@ -278,6 +278,12 @@ export const PREVIEW_VALUE = (value: string) =>
     defaultMessage: 'Value for the last 30 days: {value}',
   });
 
+export const PREVIEW_BREAKDOWN = (values: string) =>
+  i18n.translate('xpack.cases.kpiMetrics.previewBreakdown', {
+    values: { values },
+    defaultMessage: 'Values for the last 30 days: {values}',
+  });
+
 export const PREDEFINED_LABELS: Record<string, string> = {
   open_cases: i18n.translate('xpack.cases.kpiMetrics.predefinedOpenCases', {
     defaultMessage: 'Open cases',

@@ -351,6 +351,62 @@ describe('Cases metrics', () => {
       });
     });
 
+    describe('breakdown', () => {
+      const breakdownMetric: CustomKpiMetricConfiguration = {
+        id: 'severity',
+        kind: 'custom',
+        label: 'Cases by severity',
+        index: 'cases',
+        query: '',
+        display: 'value',
+        groupBy: { field: 'case.severity' },
+      };
+
+      it('shows the breakdown tile for a custom metric with a group-by field', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[breakdownMetric]}
+            kpiResults={[
+              {
+                id: 'severity',
+                type: 'breakdown',
+                field: 'case.severity',
+                total: 22,
+                buckets: [
+                  { key: 'critical', count: 12 },
+                  { key: 'high', count: 10 },
+                ],
+                otherCount: 0,
+                missingCount: 0,
+              },
+            ]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        const tile = await screen.findByTestId('cases-kpi-tile-severity');
+        expect(within(tile).getByText('22')).toBeInTheDocument();
+        expect(within(tile).getByText('Critical')).toBeInTheDocument();
+        expect(within(tile).getByText('High')).toBeInTheDocument();
+      });
+
+      it('shows the error tile for a failed breakdown metric', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[breakdownMetric]}
+            kpiResults={[{ id: 'severity', type: 'error', message: 'bad field' }]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        const tile = await screen.findByTestId('cases-kpi-tile-severity');
+        expect(within(tile).getByText('-')).toBeInTheDocument();
+        expect(within(tile).queryByText('Critical')).not.toBeInTheDocument();
+      });
+    });
+
     it('shows an empty custom tile when analytics is disabled', async () => {
       renderWithTestingProviders(
         <CasesMetrics {...props} kpiMetrics={[customMetric('c1')]} isAnalyticsEnabled={false} />

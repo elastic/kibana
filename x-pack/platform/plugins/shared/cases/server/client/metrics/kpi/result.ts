@@ -8,12 +8,16 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { KpiMetricFormat } from '../../../../common/constants';
 import { getKpiField } from '../../../../common/constants';
-import type { KpiMetricErrorResult, KpiMetricResult } from '../../../../common/types/api';
+import type {
+  KpiMetricBreakdownResult,
+  KpiMetricErrorResult,
+  KpiMetricResult,
+} from '../../../../common/types/api';
 import type {
   CustomKpiMetricConfiguration,
   KpiMetricAggregationType,
 } from '../../../../common/types/domain';
-import { KPI_METRIC_VALUE_AGG } from './query_builder';
+import { KPI_METRIC_MISSING_AGG, KPI_METRIC_VALUE_AGG } from './query_builder';
 
 const MEDIAN_KEY = '50.0';
 
@@ -101,6 +105,34 @@ export const readKpiMetricValue = (
   return readAggregateValue(response.aggregations?.[KPI_METRIC_VALUE_AGG], aggregation.type);
 };
 
+export type KpiBreakdownValues = Pick<
+  KpiMetricBreakdownResult,
+  'total' | 'buckets' | 'otherCount' | 'missingCount'
+>;
+
+const readDocCount = (aggregate: estypes.AggregationsAggregate | undefined): number =>
+  aggregate != null && 'doc_count' in aggregate && typeof aggregate.doc_count === 'number'
+    ? aggregate.doc_count
+    : 0;
+
+/**
+ * Reads the buckets, the "Other" count, and the "No value" count of a breakdown metric.
+ */
+export const readKpiBreakdown = (response: estypes.MsearchMultiSearchItem): KpiBreakdownValues => {
+  const terms = response.aggregations?.[KPI_METRIC_VALUE_AGG];
+  const hasBuckets = terms != null && 'buckets' in terms && Array.isArray(terms.buckets);
+  const buckets: estypes.AggregationsStringTermsBucket[] = hasBuckets ? terms.buckets : [];
+  const otherCount =
+    terms != null && 'sum_other_doc_count' in terms ? terms.sum_other_doc_count ?? 0 : 0;
+
+  return {
+    total: readTotalHits(response),
+    buckets: buckets.map(({ key, doc_count: count }) => ({ key: String(key), count })),
+    otherCount,
+    missingCount: readDocCount(response.aggregations?.[KPI_METRIC_MISSING_AGG]),
+  };
+};
+
 /**
  * Returns true when the search timed out or a shard failed, so the hits and the aggregations can be partial.
  */
@@ -124,6 +156,15 @@ export const mapKpiSearchResponse = (
 
   if (isIncompleteKpiSearchResponse(response)) {
     return toKpiMetricError(metric.id, 'The metric search returned incomplete results.');
+  }
+
+  if (metric.groupBy != null) {
+    return {
+      id: metric.id,
+      type: 'breakdown',
+      field: metric.groupBy.field,
+      ...readKpiBreakdown(response),
+    };
   }
 
   return {

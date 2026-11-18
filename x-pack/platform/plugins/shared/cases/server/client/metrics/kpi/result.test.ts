@@ -6,8 +6,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { KPI_METRIC_VALUE_AGG } from './query_builder';
-import { getKpiMetricFormat, readKpiMetricValue } from './result';
+import { KPI_METRIC_MISSING_AGG, KPI_METRIC_VALUE_AGG } from './query_builder';
+import {
+  getKpiMetricFormat,
+  mapKpiSearchResponse,
+  readKpiBreakdown,
+  readKpiMetricValue,
+} from './result';
 
 const createResponse = (
   aggregate?: estypes.AggregationsAggregate
@@ -98,6 +103,73 @@ describe('readKpiMetricValue', () => {
       };
 
       expect(readKpiMetricValue({ percent: true }, response)).toBeNull();
+    });
+  });
+});
+
+describe('breakdown', () => {
+  const breakdownResponse: estypes.MsearchMultiSearchItem = {
+    ...createResponse(),
+    hits: { total: { value: 42, relation: 'eq' }, hits: [] },
+    aggregations: {
+      [KPI_METRIC_VALUE_AGG]: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 3,
+        buckets: [
+          { key: 'critical', doc_count: 12 },
+          { key: 'high', doc_count: 10 },
+        ],
+      },
+      [KPI_METRIC_MISSING_AGG]: { doc_count: 2 },
+    },
+  };
+
+  it('maps the buckets, the total, the other count, and the missing count', () => {
+    expect(readKpiBreakdown(breakdownResponse)).toEqual({
+      total: 42,
+      buckets: [
+        { key: 'critical', count: 12 },
+        { key: 'high', count: 10 },
+      ],
+      otherCount: 3,
+      missingCount: 2,
+    });
+  });
+
+  it('gives 0 for the other and the missing count when the aggregations are missing', () => {
+    expect(readKpiBreakdown(createResponse())).toEqual({
+      total: 4,
+      buckets: [],
+      otherCount: 0,
+      missingCount: 0,
+    });
+  });
+
+  it('maps a breakdown metric to a breakdown result', () => {
+    expect(
+      mapKpiSearchResponse(
+        {
+          id: 'metric-1',
+          kind: 'custom',
+          label: 'Cases by severity',
+          index: 'cases',
+          query: '',
+          display: 'value',
+          groupBy: { field: 'case.severity' },
+        },
+        breakdownResponse
+      )
+    ).toEqual({
+      id: 'metric-1',
+      type: 'breakdown',
+      field: 'case.severity',
+      total: 42,
+      buckets: [
+        { key: 'critical', count: 12 },
+        { key: 'high', count: 10 },
+      ],
+      otherCount: 3,
+      missingCount: 2,
     });
   });
 });

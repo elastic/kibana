@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { CustomKpiMetricConfiguration } from '../../../../common/types/domain';
-import { KPI_METRIC_VALUE_AGG } from './query_builder';
+import { KPI_METRIC_MISSING_AGG, KPI_METRIC_VALUE_AGG } from './query_builder';
 import { runKpiMetrics } from './run';
 
 const context = { spaceId: 'space-a', owner: 'securitySolution' };
@@ -285,6 +285,113 @@ describe('runKpiMetrics', () => {
 
       expect(msearch.mock.calls[0][0]).toHaveLength(1);
       expect(results).toEqual([{ id: 'a', type: 'value', format: 'number', value: 3 }]);
+    });
+  });
+
+  describe('breakdown previous counts', () => {
+    const breakdownMetric = createMetric({
+      id: 'severity',
+      query: '',
+      groupBy: { field: 'case.severity' },
+    });
+
+    const createBreakdownResponse = (
+      buckets: Array<{ key: string; doc_count: number }>,
+      otherCount: number
+    ) =>
+      createResponse(
+        buckets.reduce((total, { doc_count: count }) => total + count, otherCount),
+        {
+          [KPI_METRIC_VALUE_AGG]: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: otherCount,
+            buckets,
+          },
+          [KPI_METRIC_MISSING_AGG]: { doc_count: 0 },
+        }
+      );
+
+    const currentResponse = createBreakdownResponse(
+      [
+        { key: 'critical', doc_count: 12 },
+        { key: 'high', doc_count: 10 },
+      ],
+      0
+    );
+
+    const runWithPrevious = (previousResponse: estypes.MsearchResponseItem) =>
+      runKpiMetrics({
+        metrics: [breakdownMetric],
+        context: rangeContext,
+        reader: { msearch: jest.fn().mockResolvedValue([currentResponse, previousResponse]) },
+      });
+
+    it('gives a key in the previous buckets its previous count', async () => {
+      const [result] = await runWithPrevious(
+        createBreakdownResponse(
+          [
+            { key: 'high', doc_count: 12 },
+            { key: 'critical', doc_count: 8 },
+          ],
+          0
+        )
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'breakdown',
+          buckets: [
+            { key: 'critical', count: 12, previousCount: 8 },
+            { key: 'high', count: 10, previousCount: 12 },
+          ],
+        })
+      );
+    });
+
+    it('gives an absent key 0 when the previous other count is 0', async () => {
+      const [result] = await runWithPrevious(
+        createBreakdownResponse([{ key: 'critical', doc_count: 8 }], 0)
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          buckets: [
+            { key: 'critical', count: 12, previousCount: 8 },
+            { key: 'high', count: 10, previousCount: 0 },
+          ],
+        })
+      );
+    });
+
+    it('gives an absent key null when the previous other count is more than 0', async () => {
+      const [result] = await runWithPrevious(
+        createBreakdownResponse([{ key: 'critical', doc_count: 8 }], 4)
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          buckets: [
+            { key: 'critical', count: 12, previousCount: 8 },
+            { key: 'high', count: 10, previousCount: null },
+          ],
+        })
+      );
+    });
+
+    it('gives no previous counts when the previous search is incomplete', async () => {
+      const [result] = await runWithPrevious({
+        ...createBreakdownResponse([{ key: 'critical', doc_count: 8 }], 0),
+        timed_out: true,
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          buckets: [
+            { key: 'critical', count: 12 },
+            { key: 'high', count: 10 },
+          ],
+        })
+      );
     });
   });
 });

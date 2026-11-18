@@ -110,6 +110,82 @@ describe('getKpiMetricFieldError', () => {
       ).toBeUndefined();
     });
   });
+
+  describe('group by', () => {
+    it.each(['case.severity', 'case.tags', 'case.assignees.uid'])(
+      'accepts the keyword field %s on the cases index',
+      (field) => {
+        expect(getKpiMetricFieldError({ index: 'cases', groupBy: { field } })).toBeUndefined();
+      }
+    );
+
+    it('accepts a keyword field on the activity index', () => {
+      expect(
+        getKpiMetricFieldError({ index: 'activity', groupBy: { field: 'actor.username' } })
+      ).toBeUndefined();
+    });
+
+    it('rejects a field that is not a keyword field', () => {
+      expect(getKpiMetricFieldError({ index: 'cases', groupBy: { field: 'case.duration' } })).toBe(
+        'The breakdown needs a keyword field of the cases index. case.duration is not allowed.'
+      );
+    });
+
+    it('rejects an unknown field', () => {
+      expect(getKpiMetricFieldError({ index: 'cases', groupBy: { field: 'case.foo' } })).toBe(
+        'The breakdown needs a keyword field of the cases index. case.foo is not allowed.'
+      );
+    });
+
+    it('accepts a keyword extended field on the cases index', () => {
+      expect(
+        getKpiMetricFieldError({
+          index: 'cases',
+          groupBy: { field: 'case.extended_fields.team_as_keyword' },
+        })
+      ).toBeUndefined();
+    });
+
+    it.each([
+      ['cases', 'case.extended_fields.score_as_long'],
+      ['cases', 'case.extended_fields.a.b_as_keyword'],
+      ['activity', 'case.extended_fields.team_as_keyword'],
+    ] as const)('rejects the extended field on the %s index: %s', (index, field) => {
+      expect(getKpiMetricFieldError({ index, groupBy: { field } })).toBe(
+        `The breakdown needs a keyword field of the ${index} index. ${field} is not allowed.`
+      );
+    });
+
+    it('rejects an aggregation that is not a count', () => {
+      expect(
+        getKpiMetricFieldError({
+          index: 'cases',
+          groupBy: { field: 'case.severity' },
+          aggregation: { type: 'avg', field: 'case.duration' },
+        })
+      ).toBe('A breakdown counts the documents. It cannot use an aggregation.');
+    });
+
+    it('rejects a percent', () => {
+      expect(
+        getKpiMetricFieldError({
+          index: 'cases',
+          groupBy: { field: 'case.severity' },
+          percent: true,
+        })
+      ).toBe('A breakdown cannot show a percent.');
+    });
+
+    it('rejects a threshold', () => {
+      expect(
+        getKpiMetricFieldError({
+          index: 'cases',
+          groupBy: { field: 'case.severity' },
+          threshold: { comparator: 'above', value: 10 },
+        })
+      ).toBe('A breakdown cannot have a threshold.');
+    });
+  });
 });
 
 describe('getKpiMetricQueryError', () => {

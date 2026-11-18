@@ -28,7 +28,11 @@ import {
 } from '@elastic/eui';
 import type { KpiMetricIndex } from '../../../common/constants';
 import { KPI_FIELD_CATALOG, PREDEFINED_KPI_METRICS } from '../../../common/constants';
-import type { KpiMetricRequest } from '../../../common/types/api';
+import type {
+  KpiMetricErrorResult,
+  KpiMetricRequest,
+  KpiMetricResult,
+} from '../../../common/types/api';
 import type {
   KpiMetricAggregationType,
   KpiMetricDateField,
@@ -36,6 +40,10 @@ import type {
 } from '../../../common/types/domain';
 import { usePreviewKpiMetric } from '../../containers/use_preview_kpi_metric';
 import { formatKpiMetricValue } from '../all_cases/components/kpi_metric_tile';
+import {
+  formatKpiBreakdownSummary,
+  getKpiBreakdownRows,
+} from '../all_cases/components/kpi_breakdown_tile';
 import type {
   DirectionOption,
   KpiMetricFormState,
@@ -96,6 +104,11 @@ const DIRECTION_OPTIONS: Array<{ value: DirectionOption; text: string }> = [
   { value: 'higher_is_better', text: i18n.DIRECTION_HIGHER_IS_BETTER },
   { value: 'lower_is_better', text: i18n.DIRECTION_LOWER_IS_BETTER },
 ];
+
+const getPreviewText = (result: Exclude<KpiMetricResult, KpiMetricErrorResult>): string =>
+  result.type === 'breakdown'
+    ? i18n.PREVIEW_BREAKDOWN(formatKpiBreakdownSummary(getKpiBreakdownRows(result)))
+    : i18n.PREVIEW_VALUE(formatKpiMetricValue(result.value, result.format));
 
 export interface KpiMetricFlyoutProps {
   metric: KpiMetricRequest | null;
@@ -322,9 +335,7 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
                       </EuiText>
                     ) : (
                       <EuiText size="s" data-test-subj="kpi-metric-preview-value">
-                        {i18n.PREVIEW_VALUE(
-                          formatKpiMetricValue(previewResult.value, previewResult.format)
-                        )}
+                        {getPreviewText(previewResult)}
                       </EuiText>
                     )}
                   </EuiFlexItem>

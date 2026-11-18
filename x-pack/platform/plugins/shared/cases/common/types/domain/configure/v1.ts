@@ -117,6 +117,13 @@ export const KpiMetricDirectionSchema = lazySchema(() =>
   z.enum(['lower_is_better', 'higher_is_better'])
 );
 
+export const KpiMetricGroupBySchema = lazySchema(() =>
+  z.object({
+    field: z.string(),
+    size: z.number().optional(),
+  })
+);
+
 const KpiMetricBaseSchema = lazySchema(() =>
   z.object({
     id: z.string(),
@@ -162,7 +169,10 @@ export const CustomKpiMetricSchema = lazySchema(() =>
      * The query selects the numerator. All cases of the owner in the date range are the denominator.
      */
     percent: z.boolean().optional(),
-    groupBy: z.object({ field: z.string() }).optional(),
+    /**
+     * A breakdown counts the documents for each value of a keyword field. Size is the number of values.
+     */
+    groupBy: KpiMetricGroupBySchema.optional(),
   })
 );
 
@@ -259,6 +269,7 @@ export type KpiMetricThreshold = z.infer<typeof KpiMetricThresholdSchema>;
 export type KpiMetricThresholdUnit = z.infer<typeof KpiMetricThresholdUnitSchema>;
 export type KpiMetricDirection = z.infer<typeof KpiMetricDirectionSchema>;
 export type KpiMetricDateField = z.infer<typeof KpiMetricDateFieldSchema>;
+export type KpiMetricGroupBy = z.infer<typeof KpiMetricGroupBySchema>;
 export type PredefinedKpiMetricConfiguration = z.infer<typeof PredefinedKpiMetricSchema>;
 export type CustomKpiMetricConfiguration = z.infer<typeof CustomKpiMetricSchema>;
 export type KpiMetricConfiguration = z.infer<typeof KpiMetricSchema>;

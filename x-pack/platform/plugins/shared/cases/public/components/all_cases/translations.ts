@@ -220,6 +220,18 @@ export const KPI_METRIC_CHANGE = (change: string) =>
     defaultMessage: '{change} vs. previous period',
   });
 
+export const KPI_BREAKDOWN_OTHER = i18n.translate('xpack.cases.casesStats.kpiBreakdownOther', {
+  defaultMessage: 'Other',
+});
+
+export const KPI_BREAKDOWN_NO_VALUE = i18n.translate('xpack.cases.casesStats.kpiBreakdownNoValue', {
+  defaultMessage: 'No value',
+});
+
+export const KPI_BREAKDOWN_EMPTY = i18n.translate('xpack.cases.casesStats.kpiBreakdownEmpty', {
+  defaultMessage: 'No data',
+});
+
 export const FILTER_ASSIGNEES_ARIA_LABEL = i18n.translate(
   'xpack.cases.allCasesView.filterAssigneesAriaLabel',
   {

@@ -165,6 +165,28 @@ describe('configure', () => {
       expect(result.data).toStrictEqual(request);
     });
 
+    it('keeps the group-by size of a custom metric', () => {
+      const request = {
+        ...defaultRequest,
+        metrics: {
+          casesList: [
+            {
+              id: 'metric-1',
+              kind: 'custom',
+              label: 'Cases by tag',
+              index: 'cases',
+              query: '',
+              display: 'value',
+              groupBy: { field: 'case.tags', size: 3 },
+            },
+          ],
+        },
+      };
+      const result = ConfigurationAttributesSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
+
     it('keeps the unit of a metric threshold', () => {
       const request = {
         ...defaultRequest,

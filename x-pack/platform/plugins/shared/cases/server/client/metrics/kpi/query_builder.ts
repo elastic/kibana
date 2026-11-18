@@ -8,14 +8,17 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { KpiMetricIndex } from '../../../../common/constants';
+import { DEFAULT_KPI_BREAKDOWN_SIZE } from '../../../../common/constants';
 import type {
   CustomKpiMetricConfiguration,
   KpiMetricDateField,
+  KpiMetricGroupBy,
 } from '../../../../common/types/domain';
 import type { CasesAnalyticsV2SearchRequest } from '../../../cases_analytics_v2/reader';
 import { getKpiMetricFieldError } from './validation';
 
 export const KPI_METRIC_VALUE_AGG = 'kpi_value';
+export const KPI_METRIC_MISSING_AGG = 'kpi_missing';
 
 const CASES_DATE_FIELDS: Record<KpiMetricDateField, string> = {
   created_at: 'case.created_at',
@@ -81,6 +84,14 @@ const buildAggregations = (
   return { [KPI_METRIC_VALUE_AGG]: { [type]: { field } } };
 };
 
+const buildBreakdownAggregations = ({
+  field,
+  size = DEFAULT_KPI_BREAKDOWN_SIZE,
+}: KpiMetricGroupBy): Record<string, estypes.AggregationsAggregationContainer> => ({
+  [KPI_METRIC_VALUE_AGG]: { terms: { field, size } },
+  [KPI_METRIC_MISSING_AGG]: { missing: { field } },
+});
+
 /**
  * Builds the search of one custom metric. The admin KQL is parsed into its own clause,
  * next to separate space, owner, and date range clauses, so no admin text can remove them.
@@ -115,7 +126,10 @@ export const buildKpiMetricSearch = (
     };
   }
 
-  const aggs = buildAggregations(metric.aggregation);
+  const aggs =
+    metric.groupBy != null
+      ? buildBreakdownAggregations(metric.groupBy)
+      : buildAggregations(metric.aggregation);
 
   return {
     index: metric.index,

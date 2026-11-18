@@ -31,6 +31,7 @@ export const KPI_FIELD_CATALOG: Record<KpiMetricIndex, readonly KpiFieldCatalogE
     { field: 'case.category', type: 'keyword' },
     { field: 'case.assignees.full_name', type: 'keyword' },
     { field: 'case.assignees.username', type: 'keyword' },
+    { field: 'case.assignees.uid', type: 'keyword' },
     { field: 'case.template.id', type: 'keyword' },
     { field: 'case.created_by.username', type: 'keyword' },
     { field: 'case.closed_by.username', type: 'keyword' },
@@ -126,6 +127,12 @@ export const MAX_KPI_FILTER_CASE_IDS = 10000;
  * The maximum number of alert attachment documents and unique alert ids in one period of an alert metric
  */
 export const MAX_KPI_ALERTS = 10000;
+
+/**
+ * The maximum and the default number of values that a breakdown metric shows
+ */
+export const MAX_KPI_BREAKDOWN_SIZE = 10;
+export const DEFAULT_KPI_BREAKDOWN_SIZE = 5;
 
 export const getKpiField = (
   index: KpiMetricIndex,

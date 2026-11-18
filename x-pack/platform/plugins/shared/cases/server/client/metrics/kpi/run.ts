@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { KpiMetricResult } from '../../../../common/types/api';
+import type { KpiMetricBreakdownResult, KpiMetricResult } from '../../../../common/types/api';
 import type { CustomKpiMetricConfiguration } from '../../../../common/types/domain';
 import type { CasesAnalyticsV2ReaderContract } from '../../../cases_analytics_v2/reader';
 import { getPreviousPeriod } from './period';
@@ -15,6 +15,7 @@ import { buildKpiMetricSearch } from './query_builder';
 import {
   isIncompleteKpiSearchResponse,
   mapKpiSearchResponse,
+  readKpiBreakdown,
   readKpiMetricValue,
   toKpiMetricError,
 } from './result';
@@ -26,15 +27,49 @@ interface PlannedSearch {
   previousRequest?: KpiSearchRequest;
 }
 
-const readPreviousValue = (
-  metric: CustomKpiMetricConfiguration,
+const isCompleteResponse = (
   response: estypes.MsearchResponseItem | undefined
-): number | null => {
-  if (response == null || 'error' in response || isIncompleteKpiSearchResponse(response)) {
-    return null;
+): response is estypes.MsearchMultiSearchItem =>
+  response != null && !('error' in response) && !isIncompleteKpiSearchResponse(response);
+
+/**
+ * A key that is not in the previous buckets has the count 0 only when the previous "Other" count is 0.
+ * Otherwise the key can be in the "Other" count, so its previous count is not known.
+ */
+const addPreviousCounts = (
+  result: KpiMetricBreakdownResult,
+  response: estypes.MsearchMultiSearchItem
+): KpiMetricBreakdownResult => {
+  const previous = readKpiBreakdown(response);
+  const previousCounts = new Map(previous.buckets.map(({ key, count }) => [key, count]));
+  const absentCount = previous.otherCount === 0 ? 0 : null;
+
+  return {
+    ...result,
+    buckets: result.buckets.map((bucket) => ({
+      ...bucket,
+      previousCount: previousCounts.get(bucket.key) ?? absentCount,
+    })),
+  };
+};
+
+const addPreviousPeriod = (
+  metric: CustomKpiMetricConfiguration,
+  result: KpiMetricResult,
+  response: estypes.MsearchResponseItem | undefined
+): KpiMetricResult => {
+  if (result.type === 'value') {
+    return {
+      ...result,
+      previousValue: isCompleteResponse(response) ? readKpiMetricValue(metric, response) : null,
+    };
   }
 
-  return readKpiMetricValue(metric, response);
+  if (result.type === 'breakdown' && isCompleteResponse(response)) {
+    return addPreviousCounts(result, response);
+  }
+
+  return result;
 };
 
 /**
@@ -87,11 +122,8 @@ export const runKpiMetrics = async ({
       const result = mapKpiSearchResponse(metric, responses[responseIndex]);
 
       results[position] =
-        previousRequests.length > 0 && result.type === 'value'
-          ? {
-              ...result,
-              previousValue: readPreviousValue(metric, responses[planned.length + responseIndex]),
-            }
+        previousRequests.length > 0
+          ? addPreviousPeriod(metric, result, responses[planned.length + responseIndex])
           : result;
     });
   } catch (error) {
