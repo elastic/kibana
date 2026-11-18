@@ -1868,6 +1868,16 @@ describe('ConversationClient', () => {
       expect(result.pinned).toBe(true);
     });
 
+    it('writes with refresh wait_for so the pinned lists are up to date on return', async () => {
+      mockGetDocumentResponse(createConversationDocument({ pinnedBy: [] }));
+
+      await client.setPinned('conversation-1', true);
+
+      expect(mockEsClient.index.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ refresh: 'wait_for' })
+      );
+    });
+
     it('keeps updated_at when pinning or unpinning', async () => {
       mockGetDocumentResponse(createConversationDocument({ pinnedBy: [] }));
 
@@ -5369,6 +5379,51 @@ describe('ConversationClient', () => {
       };
       expect(indexed.events).toEqual([...earlierEvents, ...events, concurrentEvent]);
       expect(result.events).toEqual(indexed.events);
+    });
+
+    it('appendEvents bumps updated_at', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: completedTimelineEvents('round-1'),
+        })
+      );
+
+      await client.appendEvents(
+        {
+          id: 'conversation-1',
+          events: [
+            {
+              id: '9c2e0f11-0000-4000-8000-000000000001',
+              type: TimelineEventType.userMessage,
+              created_at: '2026-09-22T10:00:00.000Z',
+              actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+              data: { message: 'Pool limit is now 200' },
+            },
+          ],
+        },
+        { source: 'http_api' }
+      );
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.updated_at).not.toBe(CONVERSATION_UPDATED_AT);
+    });
+
+    it('replaceRoundEvents bumps updated_at', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: startTimelineEvents('round-1'),
+        })
+      );
+
+      await client.replaceRoundEvents(
+        { id: 'conversation-1', roundId: 'round-1', events: completedTimelineEvents('round-1') },
+        { source: 'http_api' }
+      );
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.updated_at).not.toBe(CONVERSATION_UPDATED_AT);
     });
 
     it('leaves legacy conversations rounds-only on an update that records no activity (no events / no schema_version written)', async () => {

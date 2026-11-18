@@ -1351,6 +1351,7 @@ class ConversationClientImpl implements ConversationClient {
       access: 'converse',
       // Per-user state only: never reported to `ai.conversation.updated`.
       emit: false,
+      refresh: 'wait_for',
       fields: (current) =>
         updatePinnedBy({
           userId: this.getUser().id,
