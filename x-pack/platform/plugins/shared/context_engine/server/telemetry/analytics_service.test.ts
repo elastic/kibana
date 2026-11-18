@@ -161,4 +161,32 @@ describe('ContextEngineAnalyticsService', () => {
       expect(logger.debug).toHaveBeenCalled();
     });
   });
+
+  describe('reportMemoryRecall', () => {
+    it('reports a success with its counts', () => {
+      service.reportMemoryRecall({
+        outcome: 'success',
+        totalMs: 310,
+        tokensReturned: 5840,
+        candidatesReranked: 74,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(CONTEXT_ENGINE_EVENT_TYPES.MemoryRecall, {
+        outcome: 'success',
+        total_ms: 310,
+        tokens_returned: 5840,
+        candidates_reranked: 74,
+      });
+    });
+
+    it('reports a failure with its error type', () => {
+      service.reportMemoryRecall({ outcome: 'failure', totalMs: 12, errorType: 'ResponseError' });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(CONTEXT_ENGINE_EVENT_TYPES.MemoryRecall, {
+        outcome: 'failure',
+        total_ms: 12,
+        error_type: 'ResponseError',
+      });
+    });
+  });
 });
