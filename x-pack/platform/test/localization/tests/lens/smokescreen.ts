@@ -907,8 +907,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.filterLegend('jpg');
-      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
-      expect(hasExtensionFilter).to.be(true);
+      await filterBar.expectFilter('extension.raw', 'jpg');
 
       await filterBar.removeFilter('extension.raw');
     });
@@ -937,8 +936,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.filterLegend('jpg');
-      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
-      expect(hasExtensionFilter).to.be(true);
+      await filterBar.expectFilter('extension.raw', 'jpg');
 
       await filterBar.removeFilter('extension.raw');
     });

@@ -1,5 +1,5 @@
 {
-  "sha1": "b7768958a9f1588722135b8d4e8b9f2e8ac8e6f9",
+  "sha1": "e98112552517a4319d04e257535d373659bb92a4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1102,7 +1102,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 164,
+        "line": 165,
         "column": 89
       }
     },
@@ -1118,7 +1118,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 173,
+        "line": 175,
         "column": 11
       }
     },
@@ -1134,7 +1134,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 193,
+        "line": 196,
         "column": 97
       }
     },
@@ -1150,7 +1150,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 203,
+        "line": 206,
         "column": 7
       }
     },
@@ -1166,7 +1166,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 226,
+        "line": 229,
         "column": 7
       }
     },
@@ -1182,7 +1182,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 255,
+        "line": 258,
         "column": 11
       }
     },
@@ -1198,7 +1198,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 270,
+        "line": 273,
         "column": 11
       }
     },
@@ -1214,7 +1214,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 286,
+        "line": 289,
         "column": 11
       }
     },
@@ -1230,7 +1230,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 302,
+        "line": 305,
         "column": 11
       }
     },
@@ -1246,7 +1246,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 318,
+        "line": 321,
         "column": 11
       }
     },
@@ -1262,7 +1262,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 334,
+        "line": 337,
         "column": 11
       }
     },
@@ -1278,7 +1278,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 350,
+        "line": 353,
         "column": 11
       }
     },

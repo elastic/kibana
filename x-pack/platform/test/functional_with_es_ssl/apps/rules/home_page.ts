@@ -50,8 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('Loads the Alerts page but with error', async () => {
         await pageObjects.common.navigateToApp('rules');
-        const exists = await testSubjects.exists('noPermissionPrompt');
-        expect(exists).to.be(true);
+        await testSubjects.existOrFail('noPermissionPrompt');
       });
     });
 

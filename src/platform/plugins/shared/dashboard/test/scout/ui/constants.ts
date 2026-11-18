@@ -82,6 +82,8 @@ export const LENS_BASIC_TIME_RANGE = {
 export const DASHBOARD_SAVED_SEARCH_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
 export const DASHBOARD_DEFAULT_INDEX_TITLE = 'logstash-*';
+export const FEW_PANELS_DASHBOARD_TITLE = 'few panels';
+export const FEW_PANELS_DASHBOARD_PANEL_COUNT = 3;
 
 export const MIGRATION_SMOKE_EXPORTS_DIR =
   'src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/exports';

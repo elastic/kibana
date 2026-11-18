@@ -6,6 +6,7 @@
  */
 
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { BulkDeleteActionSkipResult } from '@kbn/alerting-plugin/common';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
@@ -60,12 +61,13 @@ export interface DeleteRuleArgs {
 }
 
 export interface BulkDeleteRulesArgs {
-  ruleIds: RuleObjectId[];
+  rules: RuleAlertType[];
 }
 
 export interface BulkDeleteRulesReturn {
   rules: RuleAlertType[];
   errors: BulkOperationError[];
+  skipped: BulkDeleteActionSkipResult[];
 }
 
 export interface UpgradePrebuiltRuleArgs {

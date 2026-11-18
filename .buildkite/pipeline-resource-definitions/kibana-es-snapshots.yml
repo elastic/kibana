@@ -144,6 +144,7 @@ spec:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
+        SCOUT_TEST_RUN_SCOPE: 'es-snapshot-verify'
       allow_rebuilds: true
       branch_configuration: main 9.3 9.2 8.19
       default_branch: main

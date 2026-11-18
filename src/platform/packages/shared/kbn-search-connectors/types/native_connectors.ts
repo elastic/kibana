@@ -4140,10 +4140,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 4,
         required: true,
         sensitive: false,
-        tooltip: getEnableDocumentLevelSecurityTooltip(
-          translate('searchConnectors.nativeConnectors.salesforce.name', {
-            defaultMessage: 'Salesforce',
-          })
+        tooltip: translate(
+          'searchConnectors.content.nativeConnectors.salesforce.useDocumentLevelSecurityTooltip',
+          {
+            defaultMessage:
+              'Document level security applies Salesforce object-level Read permissions in Elasticsearch. Every user who can read an object type can access all synced records of that type; record-level sharing is not applied. Access control syncs keep user identities up to date.',
+          }
         ),
         type: BOOLEAN,
         ui_restrictions: [],

@@ -30,6 +30,7 @@ const GROUP_SELECTOR_OPTION_TEST_SUBJECTS: Record<string, string> = {
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const es = getService('es');
@@ -119,15 +120,13 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     async navigateToAction(actionTestSubject: string) {
-      return await retry.try(async () => {
-        await testSubjects.click(actionTestSubject);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        const result = await testSubjects.exists('createPackagePolicy_pageTitle');
-
-        if (!result) {
-          throw new Error('Integration installation page not found');
+      const sourcePath = new URL(await browser.getCurrentUrl()).pathname;
+      await retry.tryForTime(30000, async () => {
+        if (await testSubjects.exists('createPackagePolicy_pageTitle')) return;
+        if (new URL(await browser.getCurrentUrl()).pathname === sourcePath) {
+          await testSubjects.click(actionTestSubject);
         }
+        await testSubjects.existOrFail('createPackagePolicy_pageTitle', { timeout: 5000 });
       });
     },
   });
