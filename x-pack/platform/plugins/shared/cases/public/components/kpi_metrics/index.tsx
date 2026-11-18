@@ -41,7 +41,14 @@ const getMetricDescription = (metric: KpiMetricRequest): string => {
     return i18n.PREDEFINED;
   }
 
-  const { aggregation } = metric;
+  const { aggregation, groupBy } = metric;
+
+  if (groupBy != null) {
+    return [metric.index, i18n.CALCULATION_BREAKDOWN(groupBy.field), metric.query]
+      .filter(Boolean)
+      .join(' · ');
+  }
+
   const countLabel = metric.percent === true ? i18n.CALCULATION_PERCENT : i18n.AGGREGATION_COUNT;
   const calculation =
     aggregation == null || aggregation.type === 'count'

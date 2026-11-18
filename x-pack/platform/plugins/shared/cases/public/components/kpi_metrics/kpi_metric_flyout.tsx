@@ -10,6 +10,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiComboBox,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -27,7 +28,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { KpiMetricIndex } from '../../../common/constants';
-import { KPI_FIELD_CATALOG, PREDEFINED_KPI_METRICS } from '../../../common/constants';
+import {
+  KPI_FIELD_CATALOG,
+  MAX_KPI_BREAKDOWN_SIZE,
+  PREDEFINED_KPI_METRICS,
+} from '../../../common/constants';
 import type {
   KpiMetricErrorResult,
   KpiMetricRequest,
@@ -46,11 +51,14 @@ import {
 } from '../all_cases/components/kpi_breakdown_tile';
 import type {
   DirectionOption,
+  KpiMetricFormErrors,
   KpiMetricFormState,
   ThresholdComparatorOption,
 } from './kpi_metric_form';
 import {
   getFieldOptions,
+  getGroupByFieldOptions,
+  isBreakdownMetric,
   isDurationMetric,
   toKpiMetricFormState,
   toKpiMetricRequest,
@@ -110,6 +118,154 @@ const getPreviewText = (result: Exclude<KpiMetricResult, KpiMetricErrorResult>):
     ? i18n.PREVIEW_BREAKDOWN(formatKpiBreakdownSummary(getKpiBreakdownRows(result)))
     : i18n.PREVIEW_VALUE(formatKpiMetricValue(result.value, result.format));
 
+interface KpiMetricRowsProps {
+  state: KpiMetricFormState;
+  errors: KpiMetricFormErrors;
+  showErrors: boolean;
+  update: (changes: Partial<KpiMetricFormState>) => void;
+}
+
+const KpiMetricGroupByRows: React.FC<KpiMetricRowsProps> = ({
+  state,
+  errors,
+  showErrors,
+  update,
+}) => {
+  const options = useMemo(
+    () => getGroupByFieldOptions(state.index).map((field) => ({ label: field })),
+    [state.index]
+  );
+  const selectedOptions = state.groupByField !== '' ? [{ label: state.groupByField }] : [];
+  const isFieldInvalid = showErrors && errors.groupByField != null;
+  const isSizeInvalid = showErrors && errors.groupBySize != null;
+
+  const onChangeField = useCallback(
+    (groupByField: string) =>
+      update({
+        groupByField,
+        ...(groupByField !== '' && {
+          percent: false,
+          thresholdComparator: 'none' as const,
+          thresholdValue: '',
+        }),
+      }),
+    [update]
+  );
+
+  return (
+    <>
+      <EuiFormRow
+        label={i18n.GROUP_BY}
+        helpText={i18n.GROUP_BY_HELP}
+        fullWidth
+        isInvalid={isFieldInvalid}
+        error={errors.groupByField}
+      >
+        <EuiComboBox
+          fullWidth
+          singleSelection={{ asPlainText: true }}
+          placeholder={i18n.GROUP_BY_PLACEHOLDER}
+          options={options}
+          selectedOptions={selectedOptions}
+          onChange={(selected) => onChangeField(selected[0]?.label ?? '')}
+          onCreateOption={
+            state.index === 'cases' ? (value) => onChangeField(value.trim()) : undefined
+          }
+          isClearable
+          isInvalid={isFieldInvalid}
+          data-test-subj="kpi-metric-group-by"
+        />
+      </EuiFormRow>
+      {state.groupByField !== '' && (
+        <EuiFormRow
+          label={i18n.GROUP_BY_SIZE}
+          helpText={i18n.GROUP_BY_SIZE_HELP}
+          fullWidth
+          isInvalid={isSizeInvalid}
+          error={errors.groupBySize}
+        >
+          <EuiFieldNumber
+            fullWidth
+            min={1}
+            max={MAX_KPI_BREAKDOWN_SIZE}
+            step={1}
+            value={state.groupBySize}
+            onChange={(e) => update({ groupBySize: e.target.value })}
+            isInvalid={isSizeInvalid}
+            data-test-subj="kpi-metric-group-by-size"
+          />
+        </EuiFormRow>
+      )}
+    </>
+  );
+};
+KpiMetricGroupByRows.displayName = 'KpiMetricGroupByRows';
+
+const KpiMetricThresholdRows: React.FC<KpiMetricRowsProps> = ({
+  state,
+  errors,
+  showErrors,
+  update,
+}) => {
+  const isDuration = isDurationMetric(state);
+  const isValueInvalid = showErrors && errors.thresholdValue != null;
+
+  return (
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem>
+        <EuiFormRow label={i18n.THRESHOLD} fullWidth>
+          <EuiSelect
+            fullWidth
+            options={THRESHOLD_OPTIONS}
+            value={state.thresholdComparator}
+            onChange={(e) => {
+              const thresholdComparator =
+                THRESHOLD_OPTIONS.find(({ value }) => value === e.target.value)?.value ?? 'none';
+              update({ thresholdComparator });
+            }}
+            data-test-subj="kpi-metric-threshold-comparator"
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      {state.thresholdComparator !== 'none' && (
+        <>
+          <EuiFlexItem>
+            <EuiFormRow
+              label={i18n.THRESHOLD_VALUE}
+              helpText={isDuration ? i18n.THRESHOLD_DURATION_HELP : undefined}
+              fullWidth
+              isInvalid={isValueInvalid}
+              error={errors.thresholdValue}
+            >
+              <EuiFieldNumber
+                fullWidth
+                value={state.thresholdValue}
+                onChange={(e) => update({ thresholdValue: e.target.value })}
+                isInvalid={isValueInvalid}
+                data-test-subj="kpi-metric-threshold-value"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          {isDuration && (
+            <EuiFlexItem>
+              <EuiFormRow label={i18n.THRESHOLD_UNIT} fullWidth>
+                <EuiSelect
+                  fullWidth
+                  options={THRESHOLD_UNIT_OPTIONS}
+                  value={state.thresholdUnit}
+                  onChange={(e) => update({ thresholdUnit: toThresholdUnit(e.target.value) })}
+                  data-test-subj="kpi-metric-threshold-unit"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          )}
+        </>
+      )}
+    </EuiFlexGroup>
+  );
+};
+KpiMetricThresholdRows.displayName = 'KpiMetricThresholdRows';
+
 export interface KpiMetricFlyoutProps {
   metric: KpiMetricRequest | null;
   isLoading: boolean;
@@ -138,7 +294,7 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
 
   const errors = useMemo(() => validateKpiMetricForm(state), [state]);
   const hasErrors = Object.keys(errors).length > 0;
-  const isDuration = isDurationMetric(state);
+  const isBreakdown = isBreakdownMetric(state);
 
   const update = useCallback(
     (changes: Partial<KpiMetricFormState>) => {
@@ -235,7 +391,12 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
                 value={state.index}
                 onChange={(e) => {
                   const index = INDEX_OPTIONS.find(({ value }) => value === e.target.value)?.value;
-                  update({ index: index ?? 'cases', field: '', dateField: 'created_at' });
+                  update({
+                    index: index ?? 'cases',
+                    field: '',
+                    dateField: 'created_at',
+                    groupByField: '',
+                  });
                 }}
                 data-test-subj="kpi-metric-index"
               />
@@ -281,12 +442,20 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
                   const aggregationType =
                     AGGREGATION_OPTIONS.find(({ value }) => value === e.target.value)?.value ??
                     'count';
-                  update({ aggregationType, field: '' });
+                  update({ aggregationType, field: '', groupByField: '' });
                 }}
                 data-test-subj="kpi-metric-aggregation"
               />
             </EuiFormRow>
             {state.aggregationType === 'count' && (
+              <KpiMetricGroupByRows
+                state={state}
+                errors={errors}
+                showErrors={showErrors}
+                update={update}
+              />
+            )}
+            {state.aggregationType === 'count' && !isBreakdown && (
               <EuiFormRow fullWidth helpText={i18n.PERCENT_HELP}>
                 <EuiSwitch
                   label={i18n.PERCENT}
@@ -345,58 +514,14 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
           </>
         )}
 
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiFormRow label={i18n.THRESHOLD} fullWidth>
-              <EuiSelect
-                fullWidth
-                options={THRESHOLD_OPTIONS}
-                value={state.thresholdComparator}
-                onChange={(e) => {
-                  const thresholdComparator =
-                    THRESHOLD_OPTIONS.find(({ value }) => value === e.target.value)?.value ??
-                    'none';
-                  update({ thresholdComparator });
-                }}
-                data-test-subj="kpi-metric-threshold-comparator"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          {state.thresholdComparator !== 'none' && (
-            <>
-              <EuiFlexItem>
-                <EuiFormRow
-                  label={i18n.THRESHOLD_VALUE}
-                  helpText={isDuration ? i18n.THRESHOLD_DURATION_HELP : undefined}
-                  fullWidth
-                  isInvalid={showErrors && errors.thresholdValue != null}
-                  error={errors.thresholdValue}
-                >
-                  <EuiFieldNumber
-                    fullWidth
-                    value={state.thresholdValue}
-                    onChange={(e) => update({ thresholdValue: e.target.value })}
-                    isInvalid={showErrors && errors.thresholdValue != null}
-                    data-test-subj="kpi-metric-threshold-value"
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              {isDuration && (
-                <EuiFlexItem>
-                  <EuiFormRow label={i18n.THRESHOLD_UNIT} fullWidth>
-                    <EuiSelect
-                      fullWidth
-                      options={THRESHOLD_UNIT_OPTIONS}
-                      value={state.thresholdUnit}
-                      onChange={(e) => update({ thresholdUnit: toThresholdUnit(e.target.value) })}
-                      data-test-subj="kpi-metric-threshold-unit"
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              )}
-            </>
-          )}
-        </EuiFlexGroup>
+        {!isBreakdown && (
+          <KpiMetricThresholdRows
+            state={state}
+            errors={errors}
+            showErrors={showErrors}
+            update={update}
+          />
+        )}
 
         {state.kind === 'custom' && (
           <EuiFormRow label={i18n.DIRECTION} helpText={i18n.DIRECTION_HELP} fullWidth>

@@ -237,6 +237,42 @@ export const CALCULATION_PERCENT = i18n.translate('xpack.cases.kpiMetrics.calcul
   defaultMessage: 'Percent',
 });
 
+export const CALCULATION_BREAKDOWN = (field: string) =>
+  i18n.translate('xpack.cases.kpiMetrics.calculationBreakdown', {
+    values: { field },
+    defaultMessage: 'Count by {field}',
+  });
+
+export const GROUP_BY = i18n.translate('xpack.cases.kpiMetrics.groupBy', {
+  defaultMessage: 'Group by',
+});
+
+export const GROUP_BY_PLACEHOLDER = i18n.translate('xpack.cases.kpiMetrics.groupByPlaceholder', {
+  defaultMessage: 'No grouping',
+});
+
+export const GROUP_BY_HELP = i18n.translate('xpack.cases.kpiMetrics.groupByHelp', {
+  defaultMessage:
+    'Shows the count for each value of the field. A case with more than one value counts once for each value.',
+});
+
+export const GROUP_BY_SIZE = i18n.translate('xpack.cases.kpiMetrics.groupBySize', {
+  defaultMessage: 'Top values',
+});
+
+export const GROUP_BY_SIZE_HELP = i18n.translate('xpack.cases.kpiMetrics.groupBySizeHelp', {
+  defaultMessage: 'Show 1 to 10 values. The tile adds the other values to Other.',
+});
+
+export const GROUP_BY_SIZE_ERROR = i18n.translate('xpack.cases.kpiMetrics.groupBySizeError', {
+  defaultMessage: 'Enter a whole number from 1 to 10.',
+});
+
+export const GROUP_BY_FIELD_ERROR = i18n.translate('xpack.cases.kpiMetrics.groupByFieldError', {
+  defaultMessage:
+    'Select a field from the list, or enter an extended field that ends in _as_keyword.',
+});
+
 export const PERCENT_HELP = i18n.translate('xpack.cases.kpiMetrics.percentHelp', {
   defaultMessage:
     'The metric shows the documents that match the KQL query as a percent of all documents in the date range.',

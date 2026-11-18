@@ -165,4 +165,85 @@ describe('kpi metric form', () => {
       ).toBeUndefined();
     });
   });
+
+  describe('group by', () => {
+    const breakdownMetric: Extract<KpiMetricRequest, { kind: 'custom' }> = {
+      id: 'metric-2',
+      kind: 'custom',
+      label: 'Cases by severity',
+      index: 'cases',
+      query: '',
+      display: 'value',
+      groupBy: { field: 'case.severity', size: 3 },
+    };
+    const newState = toKpiMetricFormState();
+
+    it('reads a saved group-by field and size and saves the same request', () => {
+      const state = toKpiMetricFormState(breakdownMetric);
+
+      expect(state.groupByField).toBe('case.severity');
+      expect(state.groupBySize).toBe('3');
+      expect(toKpiMetricRequest(state, breakdownMetric)).toEqual(breakdownMetric);
+    });
+
+    it('saves size 5 for a new field with no typed size', () => {
+      const request = toKpiMetricRequest({
+        ...newState,
+        label: 'Cases by tag',
+        groupByField: 'case.tags',
+      });
+
+      expect(request).toEqual(
+        expect.objectContaining({ groupBy: { field: 'case.tags', size: 5 } })
+      );
+    });
+
+    it('saves no percent and no threshold for a group-by field', () => {
+      const request = toKpiMetricRequest({
+        ...newState,
+        label: 'Cases by severity',
+        groupByField: 'case.severity',
+        percent: true,
+        thresholdComparator: 'above',
+        thresholdValue: '10',
+      });
+
+      expect(request).not.toHaveProperty('percent');
+      expect(request).not.toHaveProperty('threshold');
+      expect(request).toHaveProperty('groupBy', { field: 'case.severity', size: 5 });
+    });
+
+    it('saves no group-by field when the calculation is not a count', () => {
+      const request = toKpiMetricRequest({
+        ...toKpiMetricFormState(breakdownMetric),
+        aggregationType: 'avg',
+        field: 'case.time_to_resolve',
+      });
+
+      expect(request).not.toHaveProperty('groupBy');
+    });
+
+    it.each(['0', '11', '2.5'])('rejects the size %s', (groupBySize) => {
+      expect(
+        validateKpiMetricForm({ ...toKpiMetricFormState(breakdownMetric), groupBySize }).groupBySize
+      ).toBe('Enter a whole number from 1 to 10.');
+    });
+
+    it('accepts a keyword extended field and rejects another extended field', () => {
+      const validate = (groupByField: string) =>
+        validateKpiMetricForm({ ...toKpiMetricFormState(breakdownMetric), groupByField })
+          .groupByField;
+
+      expect(validate('case.extended_fields.team_as_keyword')).toBeUndefined();
+      expect(validate('case.extended_fields.score_as_long')).toBe(
+        'Select a field from the list, or enter an extended field that ends in _as_keyword.'
+      );
+    });
+
+    it('saves a metric with no group-by field with no change', () => {
+      expect(toKpiMetricRequest(toKpiMetricFormState(closedDateMetric), closedDateMetric)).toEqual(
+        closedDateMetric
+      );
+    });
+  });
 });

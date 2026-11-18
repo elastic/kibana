@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { CustomKpiMetricConfiguration } from '../../../common/types/domain';
 import { noCasesSettingsPermission, renderWithTestingProviders } from '../../common/mock';
@@ -96,8 +96,7 @@ describe('KpiMetricsSettings', () => {
     const metric: CustomKpiMetricConfiguration = {
       ...customMetric('a'),
       direction: 'lower_is_better',
-      percent: true,
-      groupBy: { field: 'case.severity' },
+      groupBy: { field: 'case.severity', size: 5 },
     };
 
     renderWithTestingProviders(
@@ -183,6 +182,63 @@ describe('KpiMetricsSettings', () => {
     expect(await screen.findByTestId('kpi-metric-row-0')).toHaveTextContent(
       'cases · Percent · case.status: closed'
     );
+  });
+
+  describe('group by', () => {
+    it('shows the group-by row for a count and not for an average', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings kpiMetrics={[]} isLoading={false} onSave={onSave} />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-add'));
+      expect(await screen.findByTestId('kpi-metric-group-by')).toBeInTheDocument();
+
+      await userEvent.selectOptions(screen.getByTestId('kpi-metric-aggregation'), 'avg');
+      expect(screen.queryByTestId('kpi-metric-group-by')).not.toBeInTheDocument();
+    });
+
+    it('saves the group-by field with size 5 and no threshold', async () => {
+      const metric: CustomKpiMetricConfiguration = {
+        ...customMetric('a'),
+        threshold: { comparator: 'above', value: 10 },
+      };
+
+      renderWithTestingProviders(
+        <KpiMetricsSettings kpiMetrics={[metric]} isLoading={false} onSave={onSave} />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.type(
+        within(await screen.findByTestId('kpi-metric-group-by')).getByTestId('comboBoxSearchInput'),
+        'case.severity{enter}'
+      );
+
+      expect(await screen.findByTestId('kpi-metric-group-by-size')).toHaveValue(5);
+      expect(screen.queryByTestId('kpi-metric-percent')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-metric-threshold-comparator')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      await waitFor(() =>
+        expect(onSave).toHaveBeenCalledWith([
+          { ...customMetric('a'), groupBy: { field: 'case.severity', size: 5 } },
+        ])
+      );
+    });
+
+    it('describes a saved breakdown metric', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          kpiMetrics={[{ ...customMetric('a'), groupBy: { field: 'case.severity' } }]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      expect(await screen.findByTestId('kpi-metric-row-0')).toHaveTextContent(
+        'cases · Count by case.severity · case.status: closed'
+      );
+    });
   });
 
   describe('date field', () => {

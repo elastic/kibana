@@ -7,7 +7,9 @@
 
 import type { KpiFieldType, KpiMetricIndex } from '../../../common/constants';
 import {
+  DEFAULT_KPI_BREAKDOWN_SIZE,
   KPI_FIELD_CATALOG,
+  MAX_KPI_BREAKDOWN_SIZE,
   MAX_METRIC_LABEL_LENGTH,
   MAX_METRIC_QUERY_LENGTH,
   PREDEFINED_KPI_METRIC_IDS,
@@ -15,6 +17,7 @@ import {
   getPredefinedKpiMetric,
 } from '../../../common/constants';
 import type { KpiMetricRequest } from '../../../common/types/api';
+import { isKpiExtendedKeywordField } from '../../../common/utils/kpi_metrics';
 import type {
   KpiMetricAggregationType,
   KpiMetricDateField,
@@ -44,6 +47,11 @@ export interface KpiMetricFormState {
   thresholdValue: string;
   thresholdUnit: KpiMetricThresholdUnit;
   direction: DirectionOption;
+  /**
+   * The breakdown field of a count. An empty string means no grouping.
+   */
+  groupByField: string;
+  groupBySize: string;
 }
 
 export interface KpiMetricFormErrors {
@@ -51,7 +59,33 @@ export interface KpiMetricFormErrors {
   query?: string;
   field?: string;
   thresholdValue?: string;
+  groupByField?: string;
+  groupBySize?: string;
 }
+
+/**
+ * Returns the keyword catalog fields of the index, the fields that a breakdown can group by.
+ */
+export const getGroupByFieldOptions = (index: KpiMetricIndex): string[] =>
+  KPI_FIELD_CATALOG[index].filter(({ type }) => type === 'keyword').map(({ field }) => field);
+
+export const isBreakdownMetric = (state: KpiMetricFormState): boolean =>
+  state.kind === 'custom' && state.aggregationType === 'count' && state.groupByField !== '';
+
+const isGroupByFieldAllowed = ({ index, groupByField }: KpiMetricFormState): boolean =>
+  getGroupByFieldOptions(index).includes(groupByField) ||
+  (index === 'cases' && isKpiExtendedKeywordField(groupByField));
+
+const toGroupBySize = (value: string): number | undefined => {
+  const size = Number(value);
+
+  return value.trim() !== '' &&
+    Number.isInteger(size) &&
+    size >= 1 &&
+    size <= MAX_KPI_BREAKDOWN_SIZE
+    ? size
+    : undefined;
+};
 
 export const getFieldTypeForAggregation = (
   aggregationType: KpiMetricAggregationType
@@ -145,6 +179,8 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
     thresholdValue: '',
     thresholdUnit: DEFAULT_THRESHOLD_UNIT,
     direction: metric?.direction ?? 'none',
+    groupByField: '',
+    groupBySize: String(DEFAULT_KPI_BREAKDOWN_SIZE),
   };
 
   if (metric == null) {
@@ -168,15 +204,23 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
       aggregationType: metric.aggregation?.type ?? 'count',
       field: metric.aggregation?.field ?? '',
       percent: metric.percent ?? false,
+      groupByField: metric.groupBy?.field ?? '',
+      groupBySize: String(metric.groupBy?.size ?? DEFAULT_KPI_BREAKDOWN_SIZE),
     },
     metric.threshold
   );
 };
 
-export const validateKpiMetricForm = (state: KpiMetricFormState): KpiMetricFormErrors => {
-  const errors: KpiMetricFormErrors = {};
+const validateGroupBy = (state: KpiMetricFormState): KpiMetricFormErrors => ({
+  ...(!isGroupByFieldAllowed(state) && { groupByField: i18n.GROUP_BY_FIELD_ERROR }),
+  ...(toGroupBySize(state.groupBySize) == null && { groupBySize: i18n.GROUP_BY_SIZE_ERROR }),
+});
 
-  if (state.thresholdComparator !== 'none') {
+export const validateKpiMetricForm = (state: KpiMetricFormState): KpiMetricFormErrors => {
+  const isBreakdown = isBreakdownMetric(state);
+  const errors: KpiMetricFormErrors = isBreakdown ? validateGroupBy(state) : {};
+
+  if (state.thresholdComparator !== 'none' && !isBreakdown) {
     const thresholdValue = parseFloat(state.thresholdValue);
 
     if (!Number.isFinite(thresholdValue)) {
@@ -229,14 +273,15 @@ const toThreshold = (state: KpiMetricFormState): KpiMetricThreshold | undefined 
 };
 
 /**
- * Builds the request metric from the form. Keeps the id, the display, and the fields that the form
- * does not edit of an edited metric.
+ * Builds the request metric from the form. Keeps the id and the display of an edited metric.
+ * A breakdown has no percent and no threshold.
  */
 export const toKpiMetricRequest = (
   state: KpiMetricFormState,
   existing?: KpiMetricRequest | null
 ): KpiMetricRequest => {
-  const threshold = toThreshold(state);
+  const isBreakdown = isBreakdownMetric(state);
+  const threshold = isBreakdown ? undefined : toThreshold(state);
   const base = {
     ...(existing?.id != null && { id: existing.id }),
     display: existing?.display ?? ('value' as const),
@@ -248,11 +293,14 @@ export const toKpiMetricRequest = (
     return { ...base, kind: 'predefined', predefinedId: state.predefinedId };
   }
 
-  const existingCustom = existing?.kind === 'custom' ? existing : undefined;
-
   return {
     ...base,
-    ...(existingCustom?.groupBy != null && { groupBy: existingCustom.groupBy }),
+    ...(isBreakdown && {
+      groupBy: {
+        field: state.groupByField,
+        size: toGroupBySize(state.groupBySize) ?? DEFAULT_KPI_BREAKDOWN_SIZE,
+      },
+    }),
     kind: 'custom',
     label: state.label.trim(),
     index: state.index,
@@ -262,6 +310,6 @@ export const toKpiMetricRequest = (
     ...(state.aggregationType !== 'count' && {
       aggregation: { type: state.aggregationType, field: state.field },
     }),
-    ...(state.aggregationType === 'count' && state.percent && { percent: true }),
+    ...(state.aggregationType === 'count' && state.percent && !isBreakdown && { percent: true }),
   };
 };
