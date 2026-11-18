@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { inject, injectable } from 'inversify';
-import type { ChangeHistoryClient, ChangeHistoryDocument } from '@kbn/change-history';
+import type { ChangeHistoryDocument, IChangeHistoryClient } from '@kbn/change-history';
 import type {
   ListRuleChangeHistoryResponse,
   RuleChangeHistoryDetail,
@@ -44,7 +44,7 @@ export interface RuleChangesHistoryClientContract {
 @injectable()
 export class RuleChangesHistoryClient implements RuleChangesHistoryClientContract {
   constructor(
-    @inject(ChangeHistoryClientToken) private readonly changeHistory: ChangeHistoryClient,
+    @inject(ChangeHistoryClientToken) private readonly changeHistory: IChangeHistoryClient,
     @inject(RequestSpaceIdToken) private readonly spaceId: string
   ) {}
 
