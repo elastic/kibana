@@ -9,11 +9,11 @@
 
 import { getFips } from 'crypto';
 import { difference } from 'lodash';
-import { firstValueFrom } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
 import type { Root } from '@kbn/core-root-server-internal';
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
+import { getExposedConfigKeys } from '@kbn/core-plugins-server-internal/src/create_browser_config';
 import { filterUiPlugins } from '@kbn/core-rendering-server-internal/src/filter_ui_plugins';
 
 const EXPOSED_CONFIG_SETTINGS_ERROR = `Actual config settings exposed to the browser do not match the list defined in this test.
@@ -448,6 +448,14 @@ const EXPECTED_ANONYMOUS_EXPOSED_CONFIG_KEYS = [
   'usageCollection.uiCounters.enabled (boolean?)',
 ];
 
+/**
+ * Config keys exposed to the browser by preboot plugins, such as interactive setup.
+ * These pages render before Kibana can authenticate anyone, so keep this list as short as possible.
+ *
+ * The same notes apply as for {@link EXPECTED_EXPOSED_CONFIG_KEYS}.
+ */
+const EXPECTED_PREBOOT_EXPOSED_CONFIG_KEYS: readonly string[] = [];
+
 if (getFips() === 0) {
   describe('config keys exposed to the browser', () => {
     let root: Root;
@@ -482,20 +490,25 @@ if (getFips() === 0) {
       await root?.shutdown();
     });
 
-    const getExposedConfigKeys = async (isAnonymousPage: boolean): Promise<string[]> => {
+    const getExposedConfigKeysForPage = ({
+      pluginType,
+      isAnonymousPage,
+    }: {
+      pluginType: 'preboot' | 'standard';
+      isAnonymousPage: boolean;
+    }): string[] => {
       // eslint-disable-next-line dot-notation
-      const { uiPlugins } = root['server']['discoveredPlugins'].standard;
+      const { uiPlugins } = root['server']['discoveredPlugins'][pluginType];
+      // eslint-disable-next-line dot-notation
+      const configDescriptors = root['server']['plugins']['pluginConfigDescriptors'];
       const exposedConfigKeys: string[] = [];
       for (const [pluginId, { configPath }] of filterUiPlugins({ uiPlugins, isAnonymousPage })) {
-        const browserConfig$ = uiPlugins.browserConfigs.get(pluginId);
-        if (!browserConfig$) {
+        const configDescriptor = configDescriptors.get(pluginId);
+        if (!configDescriptor) {
           continue;
         }
-        const { exposedConfigKeys: pluginExposedConfigKeys } = (await firstValueFrom(
-          browserConfig$
-        )) as { exposedConfigKeys: Record<string, string> };
         const pluginConfigPath = Array.isArray(configPath) ? configPath.join('.') : configPath;
-        for (const [key, type] of Object.entries(pluginExposedConfigKeys)) {
+        for (const [key, type] of Object.entries(getExposedConfigKeys(configDescriptor))) {
           exposedConfigKeys.push(`${pluginConfigPath}.${key} (${type})`);
         }
       }
@@ -505,30 +518,37 @@ if (getFips() === 0) {
     // We don't assert that the actual and expected lists are equal, because test failure messages with large arrays are hard to grok.
     // Instead, we take the difference between the two arrays and assert them separately. That way it's abundantly clear when the test
     // fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
-    const expectNoDifference = (actual: string[], expected: string[]) => {
+    const expectNoDifference = (actual: string[], expected: readonly string[]) => {
       const extra = difference(actual, expected).sort();
       const missing = difference(expected, actual).sort();
-      expect({ extra, missing }).toEqual({ extra: [], missing: [] });
+      try {
+        expect({ extra, missing }).toEqual({ extra: [], missing: [] });
+      } catch (error) {
+        error.message = `${EXPOSED_CONFIG_SETTINGS_ERROR}\n\n${error.message}`;
+        throw error;
+      }
     };
 
-    it('exposes plugin config settings to authenticated users', async () => {
-      const actual = await getExposedConfigKeys(false);
-      try {
-        expectNoDifference(actual, EXPECTED_EXPOSED_CONFIG_KEYS);
-      } catch (error) {
-        error.message = `${EXPOSED_CONFIG_SETTINGS_ERROR}\n\n${error.message}`;
-        throw error;
-      }
+    it('exposes plugin config settings to authenticated users', () => {
+      expectNoDifference(
+        getExposedConfigKeysForPage({ pluginType: 'standard', isAnonymousPage: false }),
+        EXPECTED_EXPOSED_CONFIG_KEYS
+      );
     });
 
-    it('exposes plugin config settings to unauthenticated users', async () => {
-      const actual = await getExposedConfigKeys(true);
-      try {
-        expectNoDifference(actual, EXPECTED_ANONYMOUS_EXPOSED_CONFIG_KEYS);
-      } catch (error) {
-        error.message = `${EXPOSED_CONFIG_SETTINGS_ERROR}\n\n${error.message}`;
-        throw error;
-      }
+    it('exposes plugin config settings to unauthenticated users', () => {
+      expectNoDifference(
+        getExposedConfigKeysForPage({ pluginType: 'standard', isAnonymousPage: true }),
+        EXPECTED_ANONYMOUS_EXPOSED_CONFIG_KEYS
+      );
+    });
+
+    it('exposes preboot plugin config settings to unauthenticated users', () => {
+      // Preboot plugins (such as interactive setup) render before Kibana can authenticate anyone.
+      expectNoDifference(
+        getExposedConfigKeysForPage({ pluginType: 'preboot', isAnonymousPage: false }),
+        EXPECTED_PREBOOT_EXPOSED_CONFIG_KEYS
+      );
     });
   });
 } else {

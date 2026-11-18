@@ -14,11 +14,10 @@ export const createBrowserConfig = <T = unknown>(
   descriptor: PluginConfigDescriptor<T>
 ) => {
   if (!descriptor.exposeToBrowser) {
-    return { browserConfig: {}, exposedConfigKeys: {} };
+    return { browserConfig: {} };
   }
   return {
     browserConfig: recursiveCreateConfig(config, descriptor.exposeToBrowser),
-    exposedConfigKeys: getExposedConfigKeys(descriptor),
   };
 };
 
@@ -41,12 +40,19 @@ const recursiveCreateConfig = <T = unknown>(
 /**
  * Given a plugin descriptor, this function returns an object that contains a flattened list of exposed config keys. This is used for a CI
  * check (`exposed_config_keys.test.ts`) to ensure that consumers don't accidentally expose more config settings to the browser than intended.
+ * Rendering does not call it, so pages never walk the config schema.
  */
-function getExposedConfigKeys<T = unknown>(descriptor: PluginConfigDescriptor<T>) {
-  const schemaStructure = descriptor.schema.getSchemaStructure({ expandConditionals: true });
+export function getExposedConfigKeys<T = unknown>(
+  descriptor: PluginConfigDescriptor<T>
+): Record<string, string> {
+  const { exposeToBrowser, schema } = descriptor;
+  if (!exposeToBrowser) {
+    return {};
+  }
+  const schemaStructure = schema.getSchemaStructure({ expandConditionals: true });
   const flattenedConfigSchema: Record<string, string> = {};
   for (const { path, type } of schemaStructure) {
-    if (checkIsPathExposed(path, descriptor.exposeToBrowser!)) {
+    if (checkIsPathExposed(path, exposeToBrowser)) {
       flattenedConfigSchema[path.join('.')] = type;
     }
   }

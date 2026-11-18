@@ -1029,6 +1029,38 @@ describe('schema structure with expandConditionals', () => {
       { path: ['leafConditional'], type: 'serverless|stateful' },
     ]);
   });
+
+  test('keeps a value-bearing leaf branch at the parent path', () => {
+    const recordOrObject = schema.object({
+      settings: schema.conditional(
+        schema.contextRef('serverless'),
+        true,
+        schema.object({ enabled: schema.boolean() }),
+        schema.recordOf(schema.string(), schema.string())
+      ),
+    });
+
+    expect(recordOrObject.getSchemaStructure({ expandConditionals: true })).toEqual([
+      { path: ['settings'], type: 'record' },
+      { path: ['settings', 'enabled'], type: 'boolean|never' },
+    ]);
+  });
+
+  test('keeps literal dotted keys apart from nested paths', () => {
+    const dottedKeys = schema.object({
+      dotted: schema.conditional(
+        schema.contextRef('dev'),
+        true,
+        schema.object({ 'ui.enabled': schema.boolean() }),
+        schema.object({ ui: schema.object({ enabled: schema.string() }) })
+      ),
+    });
+
+    expect(dottedKeys.getSchemaStructure({ expandConditionals: true })).toEqual([
+      { path: ['dotted', 'ui.enabled'], type: 'boolean|never' },
+      { path: ['dotted', 'ui', 'enabled'], type: 'string|never' },
+    ]);
+  });
 });
 
 describe('#extendsDeep', () => {

@@ -356,7 +356,8 @@ function recursiveGetSchemaStructure(
  * Merges the nested keys of every branch of a conditional schema (`schema.conditional`, `offeringBasedSchema`).
  *
  * Returns an empty array when no branch has nested keys, so the caller falls back to a single leaf entry.
- * A key gets `never` added to its type when one of the branches cannot hold it.
+ * A key gets `never` added to its type when one of the branches cannot hold it. A leaf branch that can hold a
+ * value (such as a record) keeps its own entry at the parent path, so it stays distinct from the nested keys.
  */
 function getConditionalBranchesStructure(
   internalSchema: Schema,
@@ -374,7 +375,7 @@ function getConditionalBranchesStructure(
     const entries = recursiveGetSchemaStructure(branch, path, options);
     const [firstEntry] = entries;
     if (entries.length === 1 && firstEntry.path.length === path.length) {
-      leafTypes.push(firstEntry.type);
+      leafTypes.push(...firstEntry.type.split('|'));
     } else {
       objectBranches.push(entries);
     }
@@ -384,23 +385,30 @@ function getConditionalBranchesStructure(
     return [];
   }
 
-  const typesByPath = new Map<string, { path: string[]; types: string[] }>();
+  // Keyed by the serialized segments, so a literal `a.b` key doesn't merge with the nested `a` -> `b` path.
+  const typesByPath = new Map<string, { path: string[]; types: string[]; branchCount: number }>();
   for (const entries of objectBranches) {
     for (const { path: entryPath, type } of entries) {
-      const pathKey = entryPath.join('.');
-      const existing = typesByPath.get(pathKey) ?? { path: entryPath, types: [] };
-      existing.types.push(type);
+      const pathKey = JSON.stringify(entryPath);
+      const existing = typesByPath.get(pathKey) ?? { path: entryPath, types: [], branchCount: 0 };
+      existing.types.push(...type.split('|'));
+      existing.branchCount++;
       typesByPath.set(pathKey, existing);
     }
   }
 
-  return [...typesByPath.values()].map(({ path: entryPath, types }) => {
-    const missingFromBranch = types.length < objectBranches.length ? ['never'] : [];
-    const allTypes = [...types, ...missingFromBranch, ...leafTypes].flatMap((type) =>
-      type.split('|')
-    );
+  const valueLeafTypes = [...new Set(leafTypes.filter((type) => type !== 'never'))];
+  const parentEntries: SchemaStructureEntry[] = valueLeafTypes.length
+    ? [{ path, type: valueLeafTypes.join('|') }]
+    : [];
+
+  const nestedEntries = [...typesByPath.values()].map(({ path: entryPath, types, branchCount }) => {
+    const isMissingFromBranch = branchCount < objectBranches.length || leafTypes.length > 0;
+    const allTypes = isMissingFromBranch ? [...types, 'never'] : types;
     return { path: entryPath, type: [...new Set(allTypes)].join('|') };
   });
+
+  return [...parentEntries, ...nestedEntries];
 }
 
 /**

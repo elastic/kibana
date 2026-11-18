@@ -8,11 +8,16 @@
  */
 
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
-import { createBrowserConfig } from './create_browser_config';
+import { createBrowserConfig, getExposedConfigKeys } from './create_browser_config';
 import type { TypeOf } from '@kbn/config-schema';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
 
-describe('createBrowserConfig', () => {
+const getBrowserConfigAndExposedKeys = <T>(config: T, descriptor: PluginConfigDescriptor<T>) => ({
+  ...createBrowserConfig(config, descriptor),
+  exposedConfigKeys: getExposedConfigKeys(descriptor),
+});
+
+describe('createBrowserConfig and getExposedConfigKeys', () => {
   it('picks nothing by default', () => {
     const configSchema = schema.object({
       notExposed1: schema.string(),
@@ -32,7 +37,7 @@ describe('createBrowserConfig', () => {
       schema: configSchema,
     };
 
-    const result = createBrowserConfig(config, descriptor);
+    const result = getBrowserConfigAndExposedKeys(config, descriptor);
     expect(result).toEqual({ browserConfig: {}, exposedConfigKeys: {} });
   });
 
@@ -61,7 +66,7 @@ describe('createBrowserConfig', () => {
       },
     };
 
-    const result = createBrowserConfig(config, descriptor);
+    const result = getBrowserConfigAndExposedKeys(config, descriptor);
     expect(result).toEqual({
       browserConfig: {
         exposed1: '1',
@@ -102,7 +107,7 @@ describe('createBrowserConfig', () => {
       },
     };
 
-    const result = createBrowserConfig(config, descriptor);
+    const result = getBrowserConfigAndExposedKeys(config, descriptor);
     expect(result).toEqual({
       browserConfig: {
         exposed1: '1',
@@ -166,7 +171,7 @@ describe('createBrowserConfig', () => {
       },
     };
 
-    const result = createBrowserConfig(config, descriptor);
+    const result = getBrowserConfigAndExposedKeys(config, descriptor);
     expect(result).toEqual({
       browserConfig: {
         exposed1: '1',
@@ -207,7 +212,7 @@ describe('createBrowserConfig', () => {
       },
     };
 
-    const result = createBrowserConfig(
+    const result = getBrowserConfigAndExposedKeys(
       { offering: { exposed1: true, notExposed2: '2' } },
       descriptor
     );
