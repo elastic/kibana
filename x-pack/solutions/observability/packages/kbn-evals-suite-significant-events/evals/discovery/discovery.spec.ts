@@ -129,6 +129,8 @@ evaluate.describe(
           expectReuse?: boolean;
           expectTopologyEventSearch?: boolean;
           seedStatus?: 'inactive';
+          /** Rewrites the seeded event's signals so the event holds the rule only with this verdict. */
+          seedVerdict?: 'off_topic';
           stripSeedTopology?: boolean;
         }
 
@@ -415,6 +417,12 @@ evaluate.describe(
               'a detection starts a new significant event after the prior event closes; the new write must include topology arrays',
             includesPath: (path: string) => path === 'rule-uuid-inactive',
           },
+          {
+            title: 'continuation - active significant event holding the rule only as off_topic',
+            description:
+              'the same rule confirms while an active event holds it only as off_topic; the agent must continue that event instead of opening a second one',
+            includesPath: (path: string) => path === 'rule-uuid-off-topic-holder',
+          },
         ] as const;
 
         for (const continuationSuite of continuationSuites) {
@@ -456,6 +464,11 @@ evaluate.describe(
                     expectReuse: false,
                     seedStatus: 'inactive',
                   },
+                  {
+                    path: 'rule-uuid-off-topic-holder',
+                    sequence: [detections[0], detections[0]],
+                    seedVerdict: 'off_topic',
+                  },
                   ...continuationChains
                     .filter(([path]) => path === 'cascade')
                     .map(
@@ -483,6 +496,7 @@ evaluate.describe(
                   expectReuse: plan.expectReuse,
                   expectTopologyEventSearch: plan.expectTopologyEventSearch,
                   seedStatus: plan.seedStatus,
+                  seedVerdict: plan.seedVerdict,
                   stripSeedTopology: plan.stripSeedTopology,
                 }));
               });
@@ -518,6 +532,7 @@ evaluate.describe(
                           continuation_expect_topology_event_search:
                             run.expectTopologyEventSearch ?? false,
                           continuation_seed_status: run.seedStatus,
+                          continuation_seed_verdict: run.seedVerdict,
                           continuation_without_topology: run.stripSeedTopology,
                         },
                       })),
@@ -668,11 +683,39 @@ evaluate.describe(
 
                         // Seed a SignificantEvent per produced event so event_search resolves it
                         // as an active episode in subsequent cycles.
+                        const seedVerdict = i === 0 ? run.seedVerdict : undefined;
                         for (const event of significantEvents) {
                           if (!event.event_id) continue;
                           const seededEvent: SignificantEvent = {
                             ...event,
                             '@timestamp': event['@timestamp'] ?? new Date().toISOString(),
+                            // An off_topic holder is an event written from a sampled error that is not
+                            // the rule's own failure: its narrative and topology describe another
+                            // failure. Without that mismatch the event would match the confirming
+                            // detection and the run could not tell a continuation from a duplicate.
+                            ...(seedVerdict
+                              ? {
+                                  signals: (event.signals ?? []).map((signal) => ({
+                                    ...signal,
+                                    verdict: seedVerdict,
+                                  })),
+                                  title: 'Batch exporter: HTTP 504 on export requests',
+                                  summary:
+                                    'Export requests to the batch exporter return HTTP 504 after the upstream storage call times out.',
+                                  symptom_hypothesis:
+                                    'The batch exporter calls object storage, and those calls time out, so export requests return HTTP 504.',
+                                  causal_features: [
+                                    {
+                                      feature_id: 'batch-exporter',
+                                      type: 'entity',
+                                      subtype: 'service',
+                                      name: 'batch-exporter',
+                                      source_id: sourceForEvaluation.id,
+                                    },
+                                  ],
+                                  blast_radius: [],
+                                }
+                              : {}),
                             ...(run.stripSeedTopology
                               ? { causal_features: [], blast_radius: [] }
                               : {}),

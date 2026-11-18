@@ -13,7 +13,13 @@ import type {
   ApplicationSummary,
   TimeSeriesPoint,
 } from '../../../common/types/applications';
-import { getApplications } from './get_applications';
+import { getApplications as getApplicationsWithHistogram } from './get_applications';
+
+const HISTOGRAM = { interval: { value: 60, unit: 's' as const }, start: 0, end: 3_600_000 };
+
+const getApplications = (
+  params: Omit<Parameters<typeof getApplicationsWithHistogram>[0], 'histogram'>
+) => getApplicationsWithHistogram({ histogram: HISTOGRAM, ...params });
 
 const app = (
   serviceName: string,
@@ -203,7 +209,11 @@ describe('getApplications', () => {
       logger,
     });
 
-    expect(pageLoadsOverTime).toEqual({ otel, classic });
+    expect(pageLoadsOverTime).toEqual({
+      otel,
+      classic,
+      histogram: HISTOGRAM,
+    });
   });
 
   it('returns no page loads over time for a source that failed', async () => {

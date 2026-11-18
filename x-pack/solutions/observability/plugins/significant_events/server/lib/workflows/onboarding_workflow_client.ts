@@ -6,7 +6,7 @@
  */
 
 import { setTimeout as delay } from 'timers/promises';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
@@ -29,6 +29,7 @@ import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { StatusError } from '../errors/status_error';
 import { isStartedBefore, WorkflowExecutionService } from './workflow_execution_service';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
+import { trackTelemetryBestEffort } from '../telemetry/track_telemetry_best_effort';
 
 const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0 };
 
@@ -272,15 +273,18 @@ export class SignificantEventsKIsOnboardingClient {
     concurrencyKeyPrefix: string;
   }>;
   private readonly telemetry: EbtTelemetryClient;
+  private readonly logger: Logger;
   private readonly getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
 
   constructor({
     managementApi,
     telemetry,
+    logger,
     getSourcesClient,
   }: {
     managementApi: WorkflowsServerPluginSetup['management'];
     telemetry: EbtTelemetryClient;
+    logger: Logger;
     getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
   }) {
     this.workflowExecutionService = new WorkflowExecutionService({
@@ -306,6 +310,7 @@ export class SignificantEventsKIsOnboardingClient {
       concurrencyKeyPrefix,
     }));
     this.telemetry = telemetry;
+    this.logger = logger;
     this.getSourcesClient = getSourcesClient;
   }
 
@@ -338,18 +343,23 @@ export class SignificantEventsKIsOnboardingClient {
       request,
     });
 
-    this.telemetry.trackOnboardingScheduled(
-      {
-        source_id: inputs.sourceId,
-        workflow_execution_id: executionId,
-        execution_id: executionId,
-        workflow_id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-        space_id: request.spaceId,
-        skip_features: inputs.features.skip,
-        skip_queries: inputs.queries.skip,
-      },
-      request
-    );
+    trackTelemetryBestEffort({
+      logger: this.logger,
+      description: 'onboarding scheduled telemetry',
+      track: () =>
+        this.telemetry.trackOnboardingScheduled(
+          {
+            source_id: inputs.sourceId,
+            workflow_execution_id: executionId,
+            execution_id: executionId,
+            workflow_id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+            space_id: request.spaceId,
+            skip_features: inputs.features.skip,
+            skip_queries: inputs.queries.skip,
+          },
+          request
+        ),
+    });
 
     return { executionId };
   }
