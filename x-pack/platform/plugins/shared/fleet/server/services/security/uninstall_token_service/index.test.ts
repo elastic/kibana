@@ -207,6 +207,7 @@ describe('UninstallTokenService', () => {
     soClientMock = appContextService.getSavedObjects().getUnsafeInternalClient({
       excludedExtensions: [SPACES_EXTENSION_ID],
     }) as jest.Mocked<SavedObjectsClientContract>;
+    agentPolicyService.bumpRevision = jest.fn();
     agentPolicyService.deployPolicies = jest.fn();
 
     getAgentPoliciesByIDsMock = jest.fn().mockResolvedValue([]);
@@ -595,6 +596,7 @@ describe('UninstallTokenService', () => {
             const so = getDefaultSO(canEncrypt);
             await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
             expect(soClientMock.bulkCreate).not.toHaveBeenCalled();
+            expect(agentPolicyService.bumpRevision).not.toHaveBeenCalled();
           });
 
           it('does not create new token when calling generateTokensForPolicyIds', async () => {
@@ -625,9 +627,13 @@ describe('UninstallTokenService', () => {
                 },
               },
             ]);
-            expect(agentPolicyService.deployPolicies).toHaveBeenCalledWith(soClientMock, [
-              so.attributes.policy_id,
-            ]);
+            expect(agentPolicyService.bumpRevision).toHaveBeenCalledTimes(1);
+            expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
+              soClientMock,
+              expect.anything(),
+              so.attributes.policy_id
+            );
+            expect(agentPolicyService.deployPolicies).not.toHaveBeenCalled();
           });
 
           it('creates a new token when calling generateTokensForPolicyIds', async () => {
@@ -654,10 +660,15 @@ describe('UninstallTokenService', () => {
                 },
               },
             ]);
-            expect(agentPolicyService.deployPolicies).toHaveBeenCalledWith(soClientMock, [
-              so.attributes.policy_id,
-              so2.attributes.policy_id,
-            ]);
+            expect(agentPolicyService.bumpRevision).toHaveBeenCalledTimes(2);
+            [so.attributes.policy_id, so2.attributes.policy_id].forEach((policyId) =>
+              expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
+                soClientMock,
+                expect.anything(),
+                policyId
+              )
+            );
+            expect(agentPolicyService.deployPolicies).not.toHaveBeenCalled();
           });
 
           it('creates a new token when calling generateTokensForAllPolicies', async () => {
@@ -683,10 +694,8 @@ describe('UninstallTokenService', () => {
                 },
               },
             ]);
-            expect(agentPolicyService.deployPolicies).toHaveBeenCalledWith(soClientMock, [
-              so.attributes.policy_id,
-              so2.attributes.policy_id,
-            ]);
+            expect(agentPolicyService.bumpRevision).toHaveBeenCalledTimes(2);
+            expect(agentPolicyService.deployPolicies).not.toHaveBeenCalled();
           });
         });
       });
