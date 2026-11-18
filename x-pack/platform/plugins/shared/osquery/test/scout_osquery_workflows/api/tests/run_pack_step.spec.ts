@@ -213,6 +213,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
           rows: [{ pid: '1', name: 'systemd', uid: '0' }],
         });
       }
+
       await workflows.waitForEnd(executionId);
 
       // The execution ID comes from the engine's `x-kibana-workflow-execution-id`, not the step.
