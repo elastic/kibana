@@ -66,7 +66,7 @@ function createStore({ requestSpaceId = 'default' }: { requestSpaceId?: string }
     logger
   );
 
-  return { store, createSignalEvent, esClient, logger };
+  return { store, createSignalEvent, alerting, esClient, logger };
 }
 
 describe('RuleEventsSignalStore', () => {
@@ -111,6 +111,22 @@ describe('RuleEventsSignalStore', () => {
       expect(result.failures).toHaveLength(2);
     });
 
+    it('reports every signal as failed when the Alerting v2 client cannot be created', async () => {
+      const { store, alerting } = createStore();
+      jest
+        .mocked(alerting.getAlertEventsClientWithRequest)
+        .mockRejectedValue(new Error('alerting unavailable'));
+
+      const result = await store.write([createSignal()]);
+
+      expect(result).toEqual({
+        written: 0,
+        failures: [
+          { fingerprint: 'checkout', reason: 'could not reach Alerting v2: alerting unavailable' },
+        ],
+      });
+    });
+
     it('fails a signal that Alerting stored in another series than the one it was wrapped for', async () => {
       const { store, createSignalEvent } = createStore();
       createSignalEvent.mockResolvedValue({ group_hash: 'another-space-hash' });
@@ -128,7 +144,12 @@ describe('RuleEventsSignalStore', () => {
     it('counts a signal written twice once and returns each series oldest first', async () => {
       const { store, esClient } = createStore();
       const first = createSignal({ ...READING, bucket_start: 60_000, value: 1 });
-      const second = createSignal({ ...READING, bucket_start: 120_000, value: 2 });
+      const second = createSignal({
+        ...READING,
+        bucket_start: 120_000,
+        bucket_end: 180_000,
+        value: 2,
+      });
       // The search is newest first; the second window was also written a second time.
       esClient.search.mockResolvedValue({
         took: 1,
@@ -180,7 +201,7 @@ describe('RuleEventsSignalStore', () => {
       });
 
       expect(history.get('checkout')).toHaveLength(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('does not parse'));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 stored signals'));
     });
   });
 });

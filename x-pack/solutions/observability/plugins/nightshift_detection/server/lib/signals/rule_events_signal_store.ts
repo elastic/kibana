@@ -14,12 +14,13 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import {
   DETECTION_SIGNAL_SOURCE,
-  detectionSignalSchema,
+  storedDetectionSignalSchema,
   type DetectionSignal,
 } from '../../../common/detection_signal';
 import { DetectionEngineSystemClient } from '../engine/es_client_tokens';
 import type { DetectionSignalReading } from '../strategies/types';
 import type { DetectionSignalStore, WriteSignalsResult } from './signal_store';
+import { getSeriesFingerprint } from './wrap_reading';
 
 const BUCKET_START_FIELD = 'signal.bucket_start';
 /** One history read returns at most this many readings, the newest. */
@@ -29,14 +30,6 @@ const WRITE_CONCURRENCY = 10;
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-
-/**
- * Alerting v2 derives the series from the fingerprint, the space of the request and the source,
- * so the strategy is part of the fingerprint: a fingerprint is unique within its strategy only.
- */
-function getSeriesFingerprint(signal: DetectionSignal): string {
-  return `${signal.data.strategy}:${signal.data.fingerprint}`;
 }
 
 /**
@@ -70,16 +63,24 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
       return { written: 0, failures };
     }
 
-    const requestSpaceId = this.spaces.spacesService.getSpaceId(this.request);
-    if (signals.some((signal) => signal.space_id !== requestSpaceId)) {
-      const reason = `the request is in space ${requestSpaceId}, and a signal of the batch is not`;
-      return {
-        written: 0,
-        failures: signals.map((signal) => ({ fingerprint: signal.data.fingerprint, reason })),
-      };
+    const failAll = (reason: string): WriteSignalsResult => ({
+      written: 0,
+      failures: signals.map((signal) => ({ fingerprint: signal.data.fingerprint, reason })),
+    });
+
+    let requestSpaceId: string;
+    let client: Awaited<ReturnType<AlertingServerStart['getAlertEventsClientWithRequest']>>;
+    try {
+      requestSpaceId = this.spaces.spacesService.getSpaceId(this.request);
+      client = await this.alerting.getAlertEventsClientWithRequest(this.request);
+    } catch (error) {
+      // The run reports failures per signal; a throw here would lose the batch's list.
+      return failAll(`could not reach Alerting v2: ${getErrorMessage(error)}`);
     }
 
-    const client = await this.alerting.getAlertEventsClientWithRequest(this.request);
+    if (signals.some((signal) => signal.space_id !== requestSpaceId)) {
+      return failAll(`the request is in space ${requestSpaceId}, and a signal of the batch is not`);
+    }
 
     for (let start = 0; start < signals.length; start += WRITE_CONCURRENCY) {
       const batch = signals.slice(start, start + WRITE_CONCURRENCY);
@@ -88,7 +89,7 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
           try {
             const { group_hash: groupHash } = await client.createSignalEvent({
               source: signal.source,
-              fingerprint: getSeriesFingerprint(signal),
+              fingerprint: getSeriesFingerprint(signal.data),
               status: signal.status,
               severity: signal.severity,
               timestamp: signal.scheduled_timestamp,
@@ -122,6 +123,7 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
     fingerprints,
     from,
     to,
+    abortSignal,
   }: {
     spaceId: string;
     strategy: string;
@@ -129,6 +131,7 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
     fingerprints: string[];
     from: number;
     to: number;
+    abortSignal?: AbortSignal;
   }): Promise<Map<string, DetectionSignalReading[]>> {
     const history = new Map<string, DetectionSignalReading[]>();
     if (fingerprints.length === 0) {
@@ -137,37 +140,43 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
 
     // `data` is `flattened`, so the bucket start is read from `_source` by a runtime field, the
     // approach of the metric series reader in `significant_events`.
-    const response = await this.esClient.search({
-      index: ALERT_EVENTS_DATA_STREAM,
-      size: MAX_HISTORY_READINGS,
-      track_total_hits: true,
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'signal' } },
-            { term: { source: DETECTION_SIGNAL_SOURCE } },
-            { term: { space_id: spaceId } },
-            { term: { 'data.strategy': strategy } },
-            { term: { 'data.strategy_version': strategyVersion } },
-            { terms: { 'data.fingerprint': fingerprints } },
-            { range: { [BUCKET_START_FIELD]: { gte: from, lt: to, format: 'epoch_millis' } } },
-          ],
+    const response = await this.esClient.search(
+      {
+        index: ALERT_EVENTS_DATA_STREAM,
+        size: MAX_HISTORY_READINGS,
+        track_total_hits: true,
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'signal' } },
+              { term: { source: DETECTION_SIGNAL_SOURCE } },
+              { term: { space_id: spaceId } },
+              // A reading is written after its bucket starts, so this indexed bound never leaves one
+              // out, and it spares the runtime field every document older than the window.
+              { range: { scheduled_timestamp: { gte: from, format: 'epoch_millis' } } },
+              { term: { 'data.strategy': strategy } },
+              { term: { 'data.strategy_version': strategyVersion } },
+              { terms: { 'data.fingerprint': fingerprints } },
+              { range: { [BUCKET_START_FIELD]: { gte: from, lt: to, format: 'epoch_millis' } } },
+            ],
+          },
         },
-      },
-      // Newest first, so a read that hits the limit keeps the most recent baseline.
-      sort: [{ [BUCKET_START_FIELD]: 'desc' }],
-      runtime_mappings: {
-        [BUCKET_START_FIELD]: {
-          type: 'date',
-          script: {
-            source: `
+        // Newest first, so a read that hits the limit keeps the most recent baseline.
+        sort: [{ [BUCKET_START_FIELD]: 'desc' }],
+        runtime_mappings: {
+          [BUCKET_START_FIELD]: {
+            type: 'date',
+            script: {
+              source: `
               def start = params._source?.data?.bucket_start;
               if (start != null) { emit(((Number) start).longValue()); }
             `,
+            },
           },
         },
       },
-    });
+      { signal: abortSignal }
+    );
 
     const total =
       typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value;
@@ -180,14 +189,15 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
 
     // A window written twice stores each of its signals twice.
     const seen = new Set<string>();
+    const skipped: string[] = [];
 
     // Back to oldest first.
     for (const hit of [...response.hits.hits].reverse()) {
-      const parsed = detectionSignalSchema.safeParse(hit._source);
+      const parsed = storedDetectionSignalSchema.safeParse(hit._source);
       if (!parsed.success) {
         // A document an older or newer build wrote in another shape must not fail the whole read;
         // the history is a baseline, and one reading missing from it is not worth stopping a run.
-        this.logger.warn(`Skipped a stored signal that does not parse: ${parsed.error.message}`);
+        skipped.push(parsed.error.message);
         continue;
       }
 
@@ -207,6 +217,13 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
       const { status, severity } = parsed.data;
       readings.push({ status, ...(severity !== undefined ? { severity } : {}), ...reading });
       history.set(reading.fingerprint, readings);
+    }
+
+    if (skipped.length > 0) {
+      // Once per read: every run reads again, so a warning per document would flood the log.
+      this.logger.warn(
+        `Skipped ${skipped.length} stored signals of ${strategy} in [${spaceId}] that do not parse; the first: ${skipped[0]}`
+      );
     }
 
     return history;

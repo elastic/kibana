@@ -40,6 +40,8 @@ export interface DetectionSignalStore {
     fingerprints: string[];
     from: number;
     to: number;
+    /** Stops the search when the run is out of time or cancelled. */
+    abortSignal?: AbortSignal;
   }): Promise<Map<string, DetectionSignalReading[]>>;
 }
 

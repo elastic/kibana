@@ -22,6 +22,9 @@ export interface DetectionStrategyDescriptor {
   /**
    * Bump it when the strategy's logic changes what a reading means. The engine stamps it on every
    * signal, so history written by an older version stays distinguishable.
+   * A bump costs a baseline: the history read leaves older versions out, so every series of the
+   * strategy is `warming_up` until it has enough readings again, and nothing that compares with
+   * normal opens an event meanwhile. Don't bump it for a change that keeps the value comparable.
    */
   version: number;
   name: string;
@@ -57,6 +60,8 @@ export interface SignalHistoryReader {
     fingerprints: string[];
     from: number;
     to: number;
+    /** Stops the search when the run is out of time or cancelled. */
+    abortSignal?: AbortSignal;
   }): Promise<Map<string, DetectionSignalReading[]>>;
 }
 
