@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -539,6 +540,7 @@ const StyledHealthCss = css`
 
 export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
   const [isExpanded, toggle] = useToggle(true);
+  const expandedContentId = useGeneratedHtmlId({ prefix: 'expressionRowContent' });
 
   const { children, setRuleParams, expression, errors, expressionId, remove, canDelete, nodeType } =
     props;
@@ -665,18 +667,16 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiToolTip
-            content={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
-              defaultMessage: 'Expand row.',
-            })}
+            content={isExpanded ? collapseRowLabel : expandRowLabel}
             disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="infraExpressionRowButton"
               iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
               onClick={toggle}
-              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
-                defaultMessage: 'Expand row.',
-              })}
+              aria-label={isExpanded ? collapseRowLabel : expandRowLabel}
+              aria-expanded={isExpanded}
+              aria-controls={isExpanded ? expandedContentId : undefined}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -798,6 +798,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
       </EuiFlexGroup>
       {isExpanded ? (
         <div
+          id={expandedContentId}
           css={css`
             padding: 0 0 0 28px;
           `}
@@ -911,3 +912,11 @@ const metricUnit: Record<string, { label: string }> = {
   rdsLatency: { label: 'ms' },
   custom: { label: '' },
 };
+
+const expandRowLabel = i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+  defaultMessage: 'Expand row.',
+});
+
+const collapseRowLabel = i18n.translate('xpack.infra.metrics.alertFlyout.collapseRowLabel', {
+  defaultMessage: 'Collapse row.',
+});
