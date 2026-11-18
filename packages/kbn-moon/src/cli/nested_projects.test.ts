@@ -17,4 +17,21 @@ describe('findNestedProjects', () => {
       'src/a/b -> src/a/b/c',
     ]);
   });
+
+  it('reports nesting under formerly allowlisted ancestors', () => {
+    expect(
+      findNestedProjects([
+        'src/platform/packages/shared/kbn-esql-resource-browser',
+        'src/platform/packages/shared/kbn-esql-resource-browser/test_plugin',
+        'src/platform/test',
+        'src/platform/test/test_plugin',
+        'x-pack/platform/test',
+        'x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector',
+      ])
+    ).toEqual([
+      'src/platform/packages/shared/kbn-esql-resource-browser -> src/platform/packages/shared/kbn-esql-resource-browser/test_plugin',
+      'src/platform/test -> src/platform/test/test_plugin',
+      'x-pack/platform/test -> x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector',
+    ]);
+  });
 });
