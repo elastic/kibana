@@ -204,19 +204,31 @@ export const InvestigationLimitsSection = ({
             const limit = draftState.draft.limits[group];
             return isValidFiniteInvestigationLimit(limit) ? (
               <p key={group}>
-                {i18n.translate(
-                  'xpack.nightshift.settings.investigationLimits.loweringWarningDescription',
-                  {
-                    defaultMessage:
-                      '{group} has {count, plural, one {# investigation} other {# investigations}} started today. Saving the lower limit of {limit} blocks new investigations it covers until {resetsAt}.',
-                    values: {
-                      group: INVESTIGATION_QUOTA_GROUP_LABELS[group],
-                      count: response.counts[group],
-                      limit,
-                      resetsAt: response.window.resetsAt,
-                    },
-                  }
-                )}
+                {limit === 0
+                  ? i18n.translate(
+                      'xpack.nightshift.settings.investigationLimits.zeroLoweringWarningDescription',
+                      {
+                        defaultMessage:
+                          '{group} has {count, plural, one {# investigation} other {# investigations}} started today. Saving a limit of 0 blocks new investigations it covers until you change the limit or turn off enforcement.',
+                        values: {
+                          group: INVESTIGATION_QUOTA_GROUP_LABELS[group],
+                          count: response.counts[group],
+                        },
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.nightshift.settings.investigationLimits.loweringWarningDescription',
+                      {
+                        defaultMessage:
+                          '{group} has {count, plural, one {# investigation} other {# investigations}} started today. Saving the lower limit of {limit} blocks new investigations it covers until {resetsAt}.',
+                        values: {
+                          group: INVESTIGATION_QUOTA_GROUP_LABELS[group],
+                          count: response.counts[group],
+                          limit,
+                          resetsAt: response.window.resetsAt,
+                        },
+                      }
+                    )}
               </p>
             ) : null;
           })}

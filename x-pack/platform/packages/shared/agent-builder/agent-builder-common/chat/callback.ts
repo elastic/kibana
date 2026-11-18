@@ -7,10 +7,27 @@
 
 import type { SerializedExecutionError } from '../agents/execution_status';
 import type { ChatEvent } from './events';
+import type { SurfacePayload } from './surface_payload';
+import type { ExecutionTerminatedEvent } from './timeline_events';
+
+export interface ChatCallbackToolCall {
+  tool_call_id: string;
+  tool_id: string;
+  intent?: string;
+}
+
+export type ChatCallbackExecutionTerminatedEvent = ExecutionTerminatedEvent & {
+  surface_payload?: SurfacePayload;
+  tool_calls?: ChatCallbackToolCall[];
+};
+
+export type ChatCallbackEvent =
+  | Exclude<ChatEvent, ExecutionTerminatedEvent>
+  | ChatCallbackExecutionTerminatedEvent;
 
 export interface ChatCallbackEventResponse {
   execution_id: string;
-  event: ChatEvent;
+  event: ChatCallbackEvent;
   idempotency_key?: string;
 }
 

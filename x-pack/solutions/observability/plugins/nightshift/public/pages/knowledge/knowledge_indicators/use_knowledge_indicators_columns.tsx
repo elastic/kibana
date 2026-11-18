@@ -40,11 +40,9 @@ import {
   MINIMIZE_DETAILS_ARIA_LABEL,
   OCCURRENCES_TOOLTIP_NAME,
 } from './translations';
+import { getFeatureTypeLabel } from './utils/get_feature_type_label';
 
 const EMPTY_ANNOTATIONS: never[] = [];
-const capitalizeStyle = css`
-  text-transform: capitalize;
-`;
 
 const TITLE_COLUMN_WIDTH = '240px';
 
@@ -162,11 +160,7 @@ export const useKnowledgeIndicatorsColumns = ({
         width: '192px',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind === 'feature') {
-            return (
-              <EuiBadge color="hollow" css={capitalizeStyle}>
-                {ki.feature.type}
-              </EuiBadge>
-            );
+            return <EuiBadge color="hollow">{getFeatureTypeLabel(ki.feature.type)}</EuiBadge>;
           }
           return (
             <EuiBadge color="hollow">

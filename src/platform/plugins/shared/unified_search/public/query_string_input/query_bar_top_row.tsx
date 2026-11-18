@@ -8,7 +8,8 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { selectUnit } from '@formatjs/intl-utils';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
@@ -97,6 +98,11 @@ const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
 
+const formatTimeSinceLoaded = (loadedAt: string): string => {
+  const { value, unit } = selectUnit(new Date(loadedAt), Date.now());
+  return new Intl.RelativeTimeFormat(i18n.getLocale(), { numeric: 'auto' }).format(value, unit);
+};
+
 export const strings = {
   getNeedsUpdatingLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
@@ -130,6 +136,19 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchWithUpdatedQueryAriaLabel', {
       defaultMessage: 'Search with updated query',
     }),
+  getCachedResultsLabel: (loadedAt: string, isSearch: boolean) => {
+    const loadedAgo = formatTimeSinceLoaded(loadedAt);
+
+    return isSearch
+      ? i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cachedResultsSearchLabel', {
+          defaultMessage: 'Updated {loadedAgo}. Search to load the latest data.',
+          values: { loadedAgo },
+        })
+      : i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cachedResultsRefreshLabel', {
+          defaultMessage: 'Updated {loadedAgo}. Refresh to load the latest data.',
+          values: { loadedAgo },
+        });
+  },
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
       defaultMessage: 'All time',
@@ -322,6 +341,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   enableCreateView?: ESQLEditorProps['enableCreateView'];
   useBackgroundSearchButton?: boolean;
   /**
+   * ISO time when the shown results were loaded, set while they are replayed from a client-side cache.
+   * The submit button then signals that the data may be stale.
+   */
+  cachedResultsLoadedAt?: string;
+  /**
    * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
    * to opt out and keep the legacy EuiSuperDatePicker. The new picker is shown
    * only when this resolves to `true` *and* the
@@ -405,6 +429,7 @@ export const QueryBarTopRow = React.memo(
     const isEsqlLayoutStacked = useIsWithinBreakpoints(['xs', 's', 'm']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
+    const [, recomputeCachedResultsAge] = useReducer((count: number) => count + 1, 0);
     const [isCancelling, setIsCancelling] = useState(false);
     const euiThemeContext = useEuiTheme();
     const { euiTheme } = euiThemeContext;
@@ -1197,6 +1222,18 @@ export const QueryBarTopRow = React.memo(
     }
 
     const getSubmitButtonProps = () => {
+      if (props.cachedResultsLoadedAt && !props.isDirty) {
+        return {
+          icon: 'clockCounter' as const,
+          text: shouldRenderESQLUi
+            ? strings.getSearchButtonLabel()
+            : strings.getRefreshButtonLabel(),
+          ariaLabel: strings.getCachedResultsLabel(props.cachedResultsLoadedAt, shouldRenderESQLUi),
+          color: 'warning' as const,
+          fill: false,
+        };
+      }
+
       if (shouldRenderESQLUi) {
         return {
           icon: undefined,
@@ -1241,6 +1278,9 @@ export const QueryBarTopRow = React.memo(
         fill: buttonFill,
       } = getSubmitButtonProps();
       const submitTooltip = buttonAriaLabel;
+      const refreshCachedResultsAge = props.cachedResultsLoadedAt
+        ? recomputeCachedResultsAge
+        : undefined;
       const splitButton = (
         <EuiSplitButton color={buttonColor} fill={buttonFill} size="s">
           <EuiSplitButton.ActionPrimary
@@ -1303,7 +1343,11 @@ export const QueryBarTopRow = React.memo(
       const button = props.customSubmitButton ? (
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          onMouseEnter={refreshCachedResultsAge}
+          onFocus={refreshCachedResultsAge}
+        >
           {props.isLoading && propsOnCancel && renderCancelButton()}
           {(!props.isLoading || !propsOnCancel) && updateButton}
         </EuiFlexItem>

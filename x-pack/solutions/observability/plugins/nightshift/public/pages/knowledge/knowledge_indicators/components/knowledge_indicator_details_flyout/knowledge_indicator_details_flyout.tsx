@@ -31,7 +31,6 @@ import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { AggregatedFeature } from '@kbn/significant-events-schema';
-import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
@@ -60,6 +59,7 @@ import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { KnowledgeIndicatorSourceBadge } from '../knowledge_indicator_source_badge';
 import { getKnowledgeIndicatorSourceId } from '../../utils/get_knowledge_indicator_source_id';
 import { withViewedInstance } from '../../utils/with_viewed_instance';
+import { getFeatureTypeLabel } from '../../utils/get_feature_type_label';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
 
@@ -396,7 +396,7 @@ export function KnowledgeIndicatorDetailsFlyout({
                 <EuiFlexItem>
                   <FlyoutMetadataCard title={TYPE_LABEL}>
                     <EuiBadge color="hollow">
-                      {upperFirst(viewedKnowledgeIndicator.feature.type)}
+                      {getFeatureTypeLabel(viewedKnowledgeIndicator.feature.type)}
                     </EuiBadge>
                   </FlyoutMetadataCard>
                 </EuiFlexItem>

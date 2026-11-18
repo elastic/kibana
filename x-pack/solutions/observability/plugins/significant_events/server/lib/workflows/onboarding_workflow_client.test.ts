@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { parse } from 'yaml';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
@@ -64,6 +65,7 @@ const createClient = (
   const client = new SignificantEventsKIsOnboardingClient({
     managementApi: managementApi as never,
     telemetry: telemetry as never,
+    logger: loggerMock.create(),
     getSourcesClient,
   });
   return { client, managementApi, telemetry };
@@ -231,6 +233,25 @@ describe('SignificantEventsKIsOnboardingClient', () => {
         }),
         request
       );
+    });
+
+    it('returns the executionId when reporting telemetry throws', async () => {
+      const { client, managementApi, telemetry } = createClient();
+      telemetry.trackOnboardingScheduled.mockImplementation(() => {
+        throw new Error('unregistered event type');
+      });
+
+      await expect(
+        client.run({
+          inputs: {
+            sourceId: 'logs.nginx',
+            features: { skip: false, start: 1000, end: 2000 },
+            queries: { skip: false },
+          },
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).resolves.toEqual({ executionId: 'execution-id' });
+      expect(managementApi.runWorkflow).toHaveBeenCalledTimes(1);
     });
 
     it('throws when the workflow is not found', async () => {

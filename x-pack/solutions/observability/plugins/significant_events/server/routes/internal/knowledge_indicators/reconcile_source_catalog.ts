@@ -410,6 +410,7 @@ export const createSourceChangeListener =
     enqueueReconciliation,
     ensurePeriodicReconciliation,
     syncContinuousOnboarding,
+    syncScheduledDiscovery,
   }: {
     enqueueReconciliation: (args: {
       sourceId: string;
@@ -418,6 +419,7 @@ export const createSourceChangeListener =
     }) => Promise<void>;
     ensurePeriodicReconciliation: (request: KibanaRequest) => Promise<void>;
     syncContinuousOnboarding: (event: SourceChangeEvent) => Promise<void>;
+    syncScheduledDiscovery: (event: SourceChangeEvent) => Promise<void>;
   }): SourceChangeListener =>
   async (event) => {
     // Every branch below installs or enables a workflow in the event's space, and Nightshift only
@@ -441,6 +443,7 @@ export const createSourceChangeListener =
       }),
       ensurePeriodicReconciliation(event.request),
       syncContinuousOnboarding(event),
+      syncScheduledDiscovery(event),
     ]);
     const failures = results.flatMap((result) =>
       result.status === 'rejected' ? [result.reason] : []

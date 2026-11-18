@@ -228,6 +228,34 @@ describe('QueryBarTopRowTopRow', () => {
         });
       });
     });
+
+    it.each([
+      { isDirty: false, ariaLabel: /^Updated 2\d seconds ago\. Refresh/, cachedIcon: true },
+      { isDirty: true, ariaLabel: /^Needs updating$/, cachedIcon: false },
+    ])(
+      'should render the cached results state when isDirty is $isDirty',
+      async ({ isDirty, ariaLabel, cachedIcon }) => {
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext({
+            query: kqlQuery,
+            screenTitle: 'Another Screen',
+            isDirty,
+            indexPatterns: [stubIndexPattern],
+            timeHistory: mockTimeHistory,
+            useBackgroundSearchButton: value,
+            cachedResultsLoadedAt: new Date(Date.now() - 20 * 1000).toISOString(),
+          })
+        );
+
+        await waitFor(() => {
+          const submitButton = getByTestId(submitId);
+          expect(submitButton.getAttribute('aria-label')).toMatch(ariaLabel);
+          expect(Boolean(submitButton.querySelector('[data-euiicon-type="clockCounter"]'))).toBe(
+            cachedIcon
+          );
+        });
+      }
+    );
   });
 
   it('does not disable submit, date picker, or fast mode just because the ES|QL query is empty', async () => {
