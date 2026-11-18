@@ -115,8 +115,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         controlFetch$,
         dataSources$: dataControlManager.api.dataSources$,
         fieldName$: dataControlManager.api.fieldName$,
-        esqlQuery$: dataControlManager.api.esqlQuery$,
-        valuesSource$: dataControlManager.api.valuesSource$,
+        valuesSourceFetchPlan$: dataControlManager.api.valuesSourceFetchPlan$,
         useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
         setIsLoading: (isLoading: boolean) => {
           // clear previous loading error on next loading start

@@ -23,6 +23,7 @@ import type { StateManager } from '@kbn/presentation-publishing/state_manager/ty
 
 import type { initializeLabelManager } from '../control_labels';
 import type { HasCustomPrepend } from '../types';
+import type { ValuesSourceFetchPlan } from './utils';
 
 export type DataControlFieldFormatter = TextContextTypeConvert | ((toFormat: any) => string);
 
@@ -31,12 +32,17 @@ export interface PublishesField {
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
+export interface PublishesValuesSourceFetchPlan {
+  valuesSourceFetchPlan$: PublishingSubject<ValuesSourceFetchPlan>;
+}
+
 export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'] &
   Partial<HasCustomPrepend> &
   HasEditCapabilities &
   PublishesDataSources &
   PublishesBlockingError &
   PublishesField &
+  PublishesValuesSourceFetchPlan &
   PublishesDataLoading &
   AppliesFilters &
   HasPanelCapabilities &

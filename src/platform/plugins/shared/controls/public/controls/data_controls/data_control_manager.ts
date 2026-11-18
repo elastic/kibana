@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
   distinctUntilChanged,
   filter,
+  map,
   merge,
   switchMap,
   tap,
@@ -40,6 +41,7 @@ import type { DataControlApi, DataControlFieldFormatter } from './types';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
 import { getControlsTimezone } from '../utils';
+import { resolveValuesSourceFetchPlan, type ValuesSourceFetchPlan } from './utils';
 import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
@@ -301,6 +303,27 @@ export const initializeDataControlManager = async <EditorState extends object = 
       setBlockingError(e);
     }
   }
+  // How `valuesSource$` is executed: with an ES|QL query or a DSL request.
+  const valuesSourceFetchPlan$ = new BehaviorSubject<ValuesSourceFetchPlan>({ fetchMode: 'dsl' });
+  const valuesSourceFetchPlanSubscription = combineLatest([
+    dataControlStateManager.api.valuesSource$,
+    dataControlStateManager.api.esqlQuery$,
+    dataSources$,
+    field$,
+  ])
+    .pipe(
+      map(([valuesSource, esqlQuery, nextDataSources, field]) =>
+        resolveValuesSourceFetchPlan({
+          valuesSource,
+          esqlQuery,
+          dataSource: nextDataSources?.[0],
+          field,
+        })
+      ),
+      distinctUntilChanged(isEqual)
+    )
+    .subscribe((resolved) => valuesSourceFetchPlan$.next(resolved));
+
   const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(
     initialFilter ? [initialFilter] : undefined
   );
@@ -315,6 +338,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       setDataLoading,
       dataSources$,
       field$,
+      valuesSourceFetchPlan$,
       fieldFormatter,
       onEdit,
       appliedFilters$,
@@ -330,6 +354,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       dataViewIdSubscription.unsubscribe();
       fieldNameSubscription.unsubscribe();
       esqlQueryDataSourceSubscription.unsubscribe();
+      valuesSourceFetchPlanSubscription.unsubscribe();
       labelManager.cleanup();
     },
     internalApi: {
