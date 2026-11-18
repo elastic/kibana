@@ -73,9 +73,11 @@ const getSettingsFields = (
     return {};
   }
 
-  const settings = normalizeSettings(mergeSettingDefinitions(definitions, settingsClient.getAll()));
+  const settings = normalizeSettings(
+    mergeSettingDefinitions(pick(definitions, settingsKeys), settingsClient.getAll())
+  );
 
-  return keyBy(getFieldDefinitions(pick(settings, settingsKeys), settingsClient), 'id');
+  return keyBy(getFieldDefinitions(settings, settingsClient), 'id');
 };
 
 /**
