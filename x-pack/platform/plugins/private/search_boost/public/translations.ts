@@ -359,3 +359,144 @@ export const formatMatchesTotal = (
         values: { total: formatTargetCount(type, count), hiddenCount },
       })
     : formatTargetCount(type, count);
+
+export const SETTINGS_TITLE = i18n.translate('xpack.searchBoost.details.settingsTitle', {
+  defaultMessage: 'Settings',
+});
+
+export const USAGE_TITLE = i18n.translate('xpack.searchBoost.details.usageTitle', {
+  defaultMessage: 'Usage',
+});
+
+export const BOOST_TIMELINE_TITLE = i18n.translate('xpack.searchBoost.details.timelineTitle', {
+  defaultMessage: 'Boost phase timeline',
+});
+
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.searchBoost.loadError.title', {
+  defaultMessage: 'Unable to load boost settings',
+});
+
+export const RETRY_LABEL = i18n.translate('xpack.searchBoost.loadError.retryButton', {
+  defaultMessage: 'Try again',
+});
+
+export const NOT_FOUND_BODY = i18n.translate('xpack.searchBoost.details.notFoundBody', {
+  defaultMessage: 'It may have been deleted, or the link may be wrong.',
+});
+
+export const RULE_NOT_FOUND_TITLE = i18n.translate('xpack.searchBoost.ruleDetails.notFoundTitle', {
+  defaultMessage: 'Boost rule not found',
+});
+
+export const BACK_TO_RULES_LABEL = i18n.translate('xpack.searchBoost.ruleDetails.notFoundBack', {
+  defaultMessage: 'Back to boost rules',
+});
+
+export const BOOST_PROFILE_LABEL = i18n.translate('xpack.searchBoost.ruleDetails.profileLabel', {
+  defaultMessage: 'Boost profile',
+});
+
+export const PRIORITY_INFO = i18n.translate('xpack.searchBoost.ruleDetails.priorityInfo', {
+  defaultMessage:
+    'When several rules match the same index or data stream, the highest priority applies.',
+});
+
+export const MATCHES_LABEL = i18n.translate('xpack.searchBoost.ruleDetails.matchesLabel', {
+  defaultMessage: 'Matches',
+});
+
+export const RULE_APPLIES_TO_INFO = i18n.translate('xpack.searchBoost.ruleDetails.appliesToInfo', {
+  defaultMessage: 'What this rule matches, less any that a higher-ranked rule applies to instead.',
+});
+
+export const PROFILE_NOT_FOUND_TITLE = i18n.translate(
+  'xpack.searchBoost.profileDetails.notFoundTitle',
+  {
+    defaultMessage: 'Boost profile not found',
+  }
+);
+
+export const BACK_TO_PROFILES_LABEL = i18n.translate(
+  'xpack.searchBoost.profileDetails.notFoundBack',
+  {
+    defaultMessage: 'Back to boost profiles',
+  }
+);
+
+export const PROFILE_APPLIES_TO_INFO = i18n.translate(
+  'xpack.searchBoost.profileDetails.appliesToInfo',
+  {
+    defaultMessage:
+      'What the rules using this profile match, less any that higher-ranked rules apply other profiles to.',
+  }
+);
+
+export const PROFILE_RULES_TITLE = i18n.translate('xpack.searchBoost.profileDetails.rulesTitle', {
+  defaultMessage: 'Boost rules using this profile',
+});
+
+export const NOT_IN_USE_TITLE = i18n.translate('xpack.searchBoost.profileDetails.notInUseTitle', {
+  defaultMessage: "This profile isn't in use",
+});
+
+export const NOT_IN_USE_READ_ONLY_BODY = i18n.translate(
+  'xpack.searchBoost.profileDetails.notInUseReadOnly',
+  {
+    defaultMessage: 'No boost rules use it yet.',
+  }
+);
+
+export const NOT_IN_USE_BODIES: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.searchBoost.profileDetails.notInUseIndices', {
+    defaultMessage: 'No boost rules use it yet. Create one to boost indices with this profile.',
+  }),
+  data_streams: i18n.translate('xpack.searchBoost.profileDetails.notInUseDataStreams', {
+    defaultMessage:
+      'No boost rules use it yet. Create one to boost data streams with this profile.',
+  }),
+};
+
+export const PROFILE_SETTING_LABELS = {
+  boost: i18n.translate('xpack.searchBoost.profileSettings.boostLabel', {
+    defaultMessage: 'Boost',
+  }),
+  oneExtraCopy: i18n.translate('xpack.searchBoost.profileSettings.oneExtraCopyLabel', {
+    defaultMessage: 'One extra copy',
+  }),
+  prewarm: i18n.translate('xpack.searchBoost.profileSettings.prewarmLabel', {
+    defaultMessage: 'Prewarm',
+  }),
+  pinned: i18n.translate('xpack.searchBoost.profileSettings.pinnedLabel', {
+    defaultMessage: 'Pinned',
+  }),
+};
+
+export const PROFILE_SETTING_DESCRIPTIONS = {
+  oneExtraCopy: i18n.translate('xpack.searchBoost.profileSettings.oneExtraCopyInfo', {
+    defaultMessage: 'Keep one extra copy of the data.',
+  }),
+  prewarm: i18n.translate('xpack.searchBoost.profileSettings.prewarmInfo', {
+    defaultMessage: "Load data into cache ahead of time so the first query doesn't wait.",
+  }),
+  pinned: i18n.translate('xpack.searchBoost.profileSettings.pinnedInfo', {
+    defaultMessage: 'Protect cached data in proportion to min boost.',
+  }),
+};
+
+export const ON_LABEL = i18n.translate('xpack.searchBoost.profileSettings.on', {
+  defaultMessage: 'On',
+});
+
+export const OFF_LABEL = i18n.translate('xpack.searchBoost.profileSettings.off', {
+  defaultMessage: 'Off',
+});
+
+export const SKIPPED_LABEL = i18n.translate('xpack.searchBoost.profileSettings.skipped', {
+  defaultMessage: 'Skipped',
+});
+
+export const formatPeriodBoost = (range: string): string =>
+  i18n.translate('xpack.searchBoost.periodBoost', {
+    defaultMessage: '{range} boost',
+    values: { range },
+  });
