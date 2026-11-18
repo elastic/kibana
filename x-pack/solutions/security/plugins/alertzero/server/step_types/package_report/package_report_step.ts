@@ -10,7 +10,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ActionCatalogClient } from '@kbn/proposals-plugin/server';
-import { packageReportStepCommonDefinition } from '../../../common/step_types/package_report';
+import { packageReportStepCommonDefinition } from '../../../common/workers/continuous_threat_hunt/package_report';
 import type { HuntServices } from '../../services/watches/hunt/types';
 import {
   createAlsoRaisedByAppender,

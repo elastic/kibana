@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_HUNT_TECHNIQUE_IDS } from '../hunt_technique_limit';
-import { convergedProposalSchema, mintSuppressionSchema } from './resolve_proposals';
+import { MAX_HUNT_TECHNIQUE_IDS } from './hunt_technique_limit';
+import { convergedProposalSchema, mintSuppressionSchema } from '../../step_types/resolve_proposals';
 
 export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
 
