@@ -539,7 +539,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
               '12 events, 3 hosts, 1 user',
               '2026-01-01T00:00:00.000Z – 2026-01-02T00:00:00.000Z',
             ],
-            ['T1078.004 Cloud Accounts', 'IOC and behavior', '1 event, 20+ hosts', null],
+            ['T1078.004 Cloud Accounts', 'IOC and behavior', '1 event, 20+ hosts', '—'],
           ],
         },
         {
@@ -570,6 +570,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(valid).toBe(true);
       expect(slack).toContain('203.0.113.10 (destination.ip)');
       expect(slack).toContain('Finding 5');
+      expect(slack).not.toContain('"text":""');
     });
 
     it('shows which hunt confirmed the finding and its reach', async () => {

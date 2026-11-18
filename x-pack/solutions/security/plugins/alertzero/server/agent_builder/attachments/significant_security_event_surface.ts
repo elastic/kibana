@@ -15,6 +15,9 @@ type HuntResult = NonNullable<SignificantSecurityEventAttachmentData['hunt_resul
 
 const MAX_EVIDENCE_ITEMS = 5;
 
+/** Shown in a table cell with no value: Slack takes no cell with empty text. */
+const EMPTY_CELL = '—';
+
 const SEVERITY_LABELS: Record<SignificantSecurityEventAttachmentData['severity'], string> = {
   low: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.surface.severityLow', {
     defaultMessage: 'Low severity',
@@ -112,10 +115,10 @@ const toScope = ({
     .filter((part): part is string => Boolean(part))
     .join(', ');
 
-const toSeen = ({ first_seen: firstSeen, last_seen: lastSeen }: SseDetection): string | null => {
+const toSeen = ({ first_seen: firstSeen, last_seen: lastSeen }: SseDetection): string => {
   const seen = [...new Set([firstSeen, lastSeen].filter(Boolean))];
 
-  return seen.length > 0 ? seen.join(' – ') : null;
+  return seen.length > 0 ? seen.join(' – ') : EMPTY_CELL;
 };
 
 /** One row per detection: what matched, how strong a basis it is, how far it reached, and when. */
