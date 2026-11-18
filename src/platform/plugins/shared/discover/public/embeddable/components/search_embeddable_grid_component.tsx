@@ -141,6 +141,7 @@ export function SearchEmbeddableGridComponent({
     esqlVariables,
     abortSignal,
     isLoadingMore,
+    pagination,
   ] = useBatchedPublishingSubjects(
     api.viewMode$,
     api.dataLoading$,
@@ -160,7 +161,8 @@ export function SearchEmbeddableGridComponent({
     api.defaultDescription$,
     esqlVariables$ ?? emptyEsqlVariables$,
     api.abortSignal$,
-    stateManager.isLoadingMore
+    stateManager.isLoadingMore,
+    stateManager.pagination
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -169,6 +171,9 @@ export function SearchEmbeddableGridComponent({
   const savedSearchFilters = apiFilters;
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
+  // Only offer "Load more" while another page can be loaded, as the Discover app does. A short page
+  // (e.g. hits on a failed shard) never has one, however many hits the total counts.
+  const canFetchMoreRecords = !isEsql && Boolean(pagination?.hasNextPage());
   const renderMode = getDataGridRenderMode(viewMode);
 
   const sort = useMemo(
@@ -486,7 +491,7 @@ export function SearchEmbeddableGridComponent({
       onUpdateJsonModeSettings={onStateEditedProps.onUpdateJsonModeSettings}
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}
-      onFetchMoreRecords={isEsql ? undefined : onFetchMoreRecords}
+      onFetchMoreRecords={canFetchMoreRecords ? onFetchMoreRecords : undefined}
       expandedDoc={expandedDoc}
       initialDocViewerTabId={initialDocViewerTabId}
       docViewerRef={docViewerRef}

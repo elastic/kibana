@@ -151,9 +151,8 @@ describe('saved search embeddable', () => {
             resolve({
               rawResponse: getSearchResponse(nrOfHits).rawResponse,
               pagination: {
-                hasNextPage: false,
+                hasNextPage: jest.fn().mockReturnValue(false),
                 nextPage: jest.fn(async () => null),
-                getAllPages: jest.fn(),
               },
             });
           };
