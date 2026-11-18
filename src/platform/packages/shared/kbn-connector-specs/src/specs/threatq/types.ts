@@ -126,7 +126,6 @@ export const SearchIndicatorsInputSchema = lazySchema(() =>
       .describe(
         'Fields to return, for example ["id", "value", "sources.name"]. Sent in the JSON body.'
       ),
-    with: WithSchema.optional(),
     criteria: QuerySchema.optional().describe(
       'ThreatQ search criteria, for example {"value":{"+contains":"example.com"}}. Supports nested +and and +or operators; at most 20,000 characters.'
     ),
