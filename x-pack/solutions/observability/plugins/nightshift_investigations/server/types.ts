@@ -68,10 +68,6 @@ export interface AutomationBudget {
   release: () => Promise<void>;
 }
 
-export interface NightshiftInvestigationsServerSetup {
-  registerInvestigationQuota: (callback: InvestigationQuotaCallback) => void;
-}
-
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
   isInvestigationAvailable: (request: KibanaRequest) => Promise<boolean>;

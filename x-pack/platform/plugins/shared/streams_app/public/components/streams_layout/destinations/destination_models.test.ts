@@ -9,18 +9,16 @@ import { getSignalTargetsWritePatterns, type StreamsUnit } from '@kbn/streams-sc
 import { getDestinationNameValidationError } from './destination_helpers';
 import { EMPTY_ELASTICSEARCH_DESTINATION_FORM } from './types';
 import {
-  composeStaticIndex,
-  composeStaticIndexesForAll,
+  composeOtelIndex,
   createUnitDestination,
   getConfiguredDestinations,
   getDestinationCreateSpec,
   getDestinationIndices,
-  getStaticIndexRemainder,
   toS3DestinationViewModel,
   validateAutoWritePattern,
   validateDocsWritePattern,
   validateFreeFormIndexName,
-  validateStaticSignalIndex,
+  validateOtelName,
   withUnitDestinations,
 } from './destination_models';
 import { createS3UnitDestination } from './s3_destination_models';
@@ -108,7 +106,7 @@ describe('destination models', () => {
     ).toBeUndefined();
   });
 
-  it('stores a telemetry-scoped index per signal, a description, and a plaintext api_key', () => {
+  it('stores a telemetry-scoped index per signal, a description, and an API key reference', () => {
     expect(
       createUnitDestination({
         id: 'es-app',
@@ -117,7 +115,7 @@ describe('destination models', () => {
         signals: ['logs', 'traces'],
         indexBySignal: { logs: 'logs-app-default', traces: 'traces-app-default' },
         writePatternsBySignal: {},
-        apiKey: 'encoded-key',
+        apiKeyCredential: 'es-app-api-key',
       })
     ).toEqual({
       id: 'es-app',
@@ -128,7 +126,7 @@ describe('destination models', () => {
       config: [
         { name: 'index', telemetry: ['logs'], value: 'logs-app-default' },
         { name: 'index', telemetry: ['traces'], value: 'traces-app-default' },
-        { name: 'api_key', value: 'encoded-key' },
+        { name: 'api_key', value: { credential: 'es-app-api-key' } },
       ],
     });
   });
@@ -142,14 +140,14 @@ describe('destination models', () => {
         signals: ['logs', 'metrics', 'traces'],
         indexBySignal: {},
         writePatternsBySignal: {},
-        apiKey: 'encoded-key',
+        apiKeyCredential: 'es-auto-api-key',
       })
     ).toEqual({
       id: 'es-auto',
       name: 'Auto',
       type: 'elasticsearch',
       supported_telemetry: ['logs', 'metrics', 'traces'],
-      config: [{ name: 'api_key', value: 'encoded-key' }],
+      config: [{ name: 'api_key', value: { credential: 'es-auto-api-key' } }],
     });
   });
 
@@ -161,7 +159,7 @@ describe('destination models', () => {
         signals: ['logs', 'metrics'],
         indexBySignal: {},
         writePatternsBySignal: { logs: ['logs-billing-*'], metrics: ['metrics-billing-*'] },
-        apiKey: 'encoded-key',
+        apiKeyCredential: 'es-billing-api-key',
       })
     ).toEqual({
       id: 'es-billing',
@@ -171,7 +169,7 @@ describe('destination models', () => {
       config: [
         { name: 'write_patterns', telemetry: ['logs'], value: ['logs-billing-*'] },
         { name: 'write_patterns', telemetry: ['metrics'], value: ['metrics-billing-*'] },
-        { name: 'api_key', value: 'encoded-key' },
+        { name: 'api_key', value: { credential: 'es-billing-api-key' } },
       ],
     });
   });
@@ -231,15 +229,17 @@ describe('destination models', () => {
       getDestinationCreateSpec({
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
-        ...composeStaticIndexesForAll('billing-default'),
+        logsIndex: 'logs-billing.otel-default',
+        metricsIndex: 'metrics-billing.otel-default',
+        tracesIndex: 'traces-billing.otel-default',
         docsIndex: 'accounting-2026',
       })
     ).toEqual({
       signals: ['logs', 'metrics', 'traces', 'docs'],
       indexBySignal: {
-        logs: 'logs-billing-default',
-        metrics: 'metrics-billing-default',
-        traces: 'traces-billing-default',
+        logs: 'logs-billing.otel-default',
+        metrics: 'metrics-billing.otel-default',
+        traces: 'traces-billing.otel-default',
         docs: 'accounting-2026',
       },
       writePatternsBySignal: {},
@@ -304,6 +304,7 @@ describe('destination models', () => {
     expect(getSignalTargetsWritePatterns(destination)).toEqual([
       'logs-shared-default',
       'metrics-app-default',
+      'metrics-app.prometheus-default',
     ]);
   });
 
@@ -380,31 +381,12 @@ describe('destination models', () => {
         indexBySignal: { metrics: 'metrics-app-default' },
         writePatternsBySignal: { logs: ['logs-billing-*'] },
       })
-    ).toEqual(['logs-billing-*', 'metrics-app-default', 'traces-*-*']);
-  });
-
-  it('composes a shared remainder onto every signal for All', () => {
-    expect(getStaticIndexRemainder('logs', 'logs-app-default')).toBe('app-default');
-    expect(composeStaticIndex('logs', 'app-default')).toBe('logs-app-default');
-    expect(composeStaticIndex('logs', 'logs-app-default')).toBe('logs-app-default');
-    expect(composeStaticIndexesForAll('app-default')).toEqual({
-      logsIndex: 'logs-app-default',
-      metricsIndex: 'metrics-app-default',
-      tracesIndex: 'traces-app-default',
-    });
-  });
-
-  it('rejects templated names and indexes that do not match the signal pattern', () => {
-    expect(validateStaticSignalIndex('logs', 'logs-{{dataset}}-default')).toBe('template');
-    expect(validateStaticSignalIndex('logs', 'metrics-app-default')).toBe('signalPattern');
-    expect(validateStaticSignalIndex('logs', 'logs-app-default')).toBeUndefined();
-    expect(validateStaticSignalIndex('logs', 'logs-app-')).toBe('signalPattern');
-    expect(validateStaticSignalIndex('logs', 'logs-app-prod-default')).toBe('signalPattern');
-    expect(validateStaticSignalIndex('logs', '')).toBeUndefined();
-    expect(validateStaticSignalIndex('logs', `logs-${'a'.repeat(240)}-default`)).toBeUndefined();
-    expect(validateStaticSignalIndex('logs', `logs-${'a'.repeat(250)}-default`)).toBe(
-      'invalidName'
-    );
+    ).toEqual([
+      'logs-billing-*',
+      'metrics-app-default',
+      'metrics-app.prometheus-default',
+      'traces-*-*',
+    ]);
   });
 
   it('requires auto write patterns to be lowercase signal-dataset-namespace globs', () => {
@@ -545,5 +527,32 @@ describe('S3', () => {
   it('round-trips a prefix through the S3 node', () => {
     const node = createS3UnitDestination({ ...s3Input, prefix: 'archive/' });
     expect(toS3DestinationViewModel(node).prefix).toBe('archive/');
+  });
+});
+
+describe('composeOtelIndex', () => {
+  it('builds the otel data stream name from trimmed parts', () => {
+    expect(composeOtelIndex('metrics', { dataset: ' billing ', namespace: ' default ' })).toBe(
+      'metrics-billing.otel-default'
+    );
+  });
+
+  it('is empty without a dataset, so the signal is not sent', () => {
+    expect(composeOtelIndex('logs', { dataset: ' ', namespace: 'prod' })).toBe('');
+  });
+});
+
+describe('validateOtelName', () => {
+  it.each([
+    [{ dataset: '', namespace: '' }, undefined],
+    [{ dataset: '  ', namespace: 'a b' }, undefined],
+    [{ dataset: 'billing', namespace: 'default' }, undefined],
+    [{ dataset: ' billing ', namespace: ' prod ' }, undefined],
+    [{ dataset: 'billing.otel', namespace: 'default' }, 'typeSuffix'],
+    [{ dataset: 'billing', namespace: ' ' }, 'namespaceRequired'],
+    [{ dataset: 'my-app', namespace: 'default' }, 'hyphen'],
+    [{ dataset: 'billing', namespace: 'a b' }, 'invalidCharacter'],
+  ])('%j -> %s', (name, expected) => {
+    expect(validateOtelName(name)).toBe(expected);
   });
 });

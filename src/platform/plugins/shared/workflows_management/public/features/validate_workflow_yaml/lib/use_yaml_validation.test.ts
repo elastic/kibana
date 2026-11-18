@@ -122,7 +122,7 @@ jest.mock('../../../../common/schema', () => ({
   ...jest.requireActual('../../../../common/schema'),
   getCachedDynamicConnectorTypes: jest.fn(() => ({})),
   getWorkflowZodSchemaLoose: jest.fn(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { z } = require('@kbn/zod/v4');
     // mock actual schema, we only test the name uniqueness validation
     return z

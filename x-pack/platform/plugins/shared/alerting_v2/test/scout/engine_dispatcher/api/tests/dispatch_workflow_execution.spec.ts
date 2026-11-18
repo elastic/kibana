@@ -150,6 +150,8 @@ apiTest.describe(
           state.dispatcher_action_groups_dispatched_per_policy_24hr,
           state.dispatcher_alerts_dispatched_per_policy_24hr,
           state.dispatcher_workflow_executions_per_policy_24hr,
+          // The policy declares no grouping, so the dispatch is recorded under `per_alert`.
+          state.dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr?.per_alert,
         ]) {
           expect(distribution?.p50).toBeGreaterThanOrEqual(1);
           expect(distribution?.p99).toBeGreaterThanOrEqual(1);

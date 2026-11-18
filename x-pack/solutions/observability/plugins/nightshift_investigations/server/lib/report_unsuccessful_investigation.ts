@@ -67,10 +67,16 @@ export const reportUnsuccessfulInvestigation = async (
               const emitter = deps.getTriggerEmitter(source.request);
               const subject = await client.getLifecycleSubject(investigationId);
               if (!emitter || !subject) return;
+              const correlation = await client.getLifecycleCorrelation(
+                investigationId,
+                execution.id
+              );
               // Timeouts remain unsuccessful outcomes for existing failure-trigger subscribers.
               emitter(INVESTIGATION_FAILED_TRIGGER_ID, {
                 investigation_id: investigationId,
+                workflow_execution_id: execution.id,
                 execution_id: execution.id,
+                ...correlation,
                 subject: subject.subject,
                 trigger_type: subject.triggerType,
                 started_at: execution.startedAt || subject.startedAt,

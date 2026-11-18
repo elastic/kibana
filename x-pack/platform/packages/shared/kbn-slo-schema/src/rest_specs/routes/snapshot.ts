@@ -56,10 +56,10 @@ const snapshotSummarySchema = lazySchema(() =>
 
 const snapshotResultBaseSchema = lazySchema(() =>
   z.object({
-    id: z.string().describe('The SLO definition id'),
+    id: z.string().describe('The SLO definition ID'),
     instanceId: z
       .string()
-      .describe("The SLO instance id. '*' represents the default (ungrouped) instance."),
+      .describe("The SLO instance ID. '*' represents the default (ungrouped) instance."),
   })
 );
 
@@ -130,6 +130,7 @@ const dateStringQuerySchema = lazySchema(() =>
   z
     .string()
     .max(MAX_DATE_STRING_LENGTH)
+    .meta({ example: '2025-01-12T10:00:00.000Z' })
     .refine((value) => !isNaN(new Date(value).getTime()), { message: 'Invalid date' })
     .describe(
       'The point in time at which to compute the SLO instance summary (ISO 8601 date-time), for example 2023-01-12T10:03:19.000Z'
@@ -144,9 +145,10 @@ const getSnapshotParamsSchema = lazySchema(() =>
     query: z.object({
       at: dateStringQuerySchema,
       instanceId: allOrAnyString
+        .meta({ example: 'web-01' })
         .optional()
         .describe(
-          "The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `host.name:web-01`) to return that instance only."
+          "The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `web-01`) to return that instance only."
         ),
     }),
   })

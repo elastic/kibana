@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { listAutomationRunsRoute } from './list_automation_runs';
 
@@ -22,6 +23,8 @@ const getAutomationsSoClient = jest.fn().mockReturnValue({
 
 const mockGetWorkflowExecutions = jest.fn();
 const mockSearchStepExecutions = jest.fn();
+const mockBulkGetUserProfiles = jest.fn();
+const logger = loggingSystemMock.createLogger();
 const getWorkflowsManagement = jest.fn().mockReturnValue({
   management: {
     getWorkflowExecutions: mockGetWorkflowExecutions,
@@ -55,11 +58,14 @@ const call = (
     },
     getAutomationsSoClient,
     getWorkflowsManagement,
+    getUserProfileService: async () => ({ bulkGet: mockBulkGetUserProfiles }),
+    logger,
     context: mockContext,
   } as never);
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockBulkGetUserProfiles.mockResolvedValue([]);
   mockBudgetGet.mockRejectedValue(
     SavedObjectsErrorHelpers.createGenericNotFoundError('nightshift-automation-budget', 'auto-1')
   );
@@ -487,3 +493,72 @@ it('returns a truncated failure reason for failed runs only', async () => {
   expect(result.runs[0].error).toBe('x'.repeat(200));
   expect(result.runs[1].error).toBeUndefined();
 });
+
+it('resolves readable manual executors while retaining their stable identities and investigation links', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [
+      { id: 'full-name', triggeredBy: 'nightshift-automation-manual', executedBy: 'u_alice' },
+      { id: 'same-user', triggeredBy: 'manual', executedBy: 'u_alice' },
+      { id: 'username', triggeredBy: 'manual', executedBy: 'u_bob' },
+      { id: 'legacy', triggeredBy: 'manual', executedBy: 'carol' },
+      { id: 'automatic', triggeredBy: 'scheduled', executedBy: 'u_owner' },
+    ].map((execution) => ({ ...execution, status: 'completed' })),
+    total: 5,
+    page: 1,
+    size: 20,
+  });
+  mockBulkGetUserProfiles.mockResolvedValue([
+    {
+      uid: 'u_alice',
+      user: { full_name: 'Alice Smith', email: 'alice@example.com', username: 'alice' },
+    },
+    { uid: 'u_bob', user: { username: 'bob' } },
+  ]);
+  mockSearchStepExecutions.mockResolvedValue({
+    results: [{ workflowRunId: 'full-name', output: { investigation_id: 'investigation-1' } }],
+  });
+
+  const result = await call('auto-1');
+
+  expect(result.runs).toMatchObject([
+    {
+      triggeredBy: 'manual',
+      executedBy: 'u_alice',
+      executedByDisplayName: 'Alice Smith',
+      investigationId: 'investigation-1',
+    },
+    { executedBy: 'u_alice', executedByDisplayName: 'Alice Smith' },
+    { executedBy: 'u_bob', executedByDisplayName: 'bob' },
+    { executedBy: 'carol', executedByDisplayName: 'carol' },
+    { executedBy: 'u_owner', executedByDisplayName: undefined },
+  ]);
+  expect(mockBulkGetUserProfiles).toHaveBeenCalledTimes(1);
+  expect(mockBulkGetUserProfiles).toHaveBeenCalledWith({ uids: new Set(['u_alice', 'u_bob']) });
+});
+
+it.each(['missing', 'failed'])(
+  'keeps history available without exposing a profile UID as a name when lookup is %s',
+  async (lookup) => {
+    mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+    mockGetWorkflowExecutions.mockResolvedValue({
+      results: [
+        { id: 'exec-1', status: 'completed', triggeredBy: 'manual', executedBy: 'u_missing' },
+      ],
+      total: 1,
+      page: 1,
+      size: 20,
+    });
+    if (lookup === 'failed') mockBulkGetUserProfiles.mockRejectedValue(new Error('Unavailable'));
+
+    const result = await call('auto-1');
+
+    expect(result.runs[0]).toMatchObject({
+      id: 'exec-1',
+      status: 'succeeded',
+      executedBy: 'u_missing',
+      executedByDisplayName: undefined,
+    });
+    expect(result.total).toBe(1);
+  }
+);

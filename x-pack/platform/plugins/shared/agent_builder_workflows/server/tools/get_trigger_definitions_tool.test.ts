@@ -13,7 +13,7 @@ import { registerGetTriggerDefinitionsTool } from './get_trigger_definitions_too
 
 type GetRegisteredTriggersApi = Pick<
   WorkflowsServerPluginSetup['management'],
-  'getRegisteredTriggers'
+  'getRegisteredTriggers' | 'getTriggerSchemaOptions'
 >;
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
@@ -34,6 +34,7 @@ describe('registerGetTriggerDefinitionsTool', () => {
   beforeEach(() => {
     mockApi = {
       getRegisteredTriggers: jest.fn().mockResolvedValue([mockCasesTrigger]),
+      getTriggerSchemaOptions: jest.fn().mockReturnValue({ includePageTrigger: false }),
     };
 
     const agentBuilder = {
@@ -59,6 +60,19 @@ describe('registerGetTriggerDefinitionsTool', () => {
     expect(result.results[0].data).toEqual({
       count: 1,
       triggerTypes: [expect.objectContaining({ id: 'manual' })],
+    });
+  });
+
+  it('lists the page trigger only with workflowsManagement.pages.enabled', async () => {
+    const pageLookup = async () =>
+      (await invokeHandler(registeredTool, { triggerType: 'page' }, {})).results[0].data;
+
+    expect(await pageLookup()).toEqual(expect.objectContaining({ error: expect.any(String) }));
+
+    mockApi.getTriggerSchemaOptions.mockReturnValue({ includePageTrigger: true });
+    expect(await pageLookup()).toEqual({
+      count: 1,
+      triggerTypes: [expect.objectContaining({ id: 'page' })],
     });
   });
 });

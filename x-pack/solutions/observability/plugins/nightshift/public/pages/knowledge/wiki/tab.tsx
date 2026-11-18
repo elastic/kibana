@@ -63,7 +63,7 @@ export function WikiTab() {
           <p>
             <FormattedMessage
               id="xpack.nightshift.knowledge.wiki.loadErrorDescription"
-              defaultMessage="The Wiki could not be loaded. Confirm Nightshift investigations are enabled and refresh the page."
+              defaultMessage="The Wiki could not be loaded. Confirm nightshift investigations are enabled and refresh the page."
             />
           </p>
         }

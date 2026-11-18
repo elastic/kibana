@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
 import type { EntityInventoryEntityCategory } from '../../types';
+import { createPublicConfigMock } from '../../mocks';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from '../context/search_context';
 import { useEntityInventoryDataView } from './use_entity_inventory_data_view';
 
@@ -53,7 +54,9 @@ const renderDataViewHook = (entityCategory: EntityInventoryEntityCategory) => {
   (dataViews.create as jest.Mock).mockResolvedValue(dataView);
 
   const wrapper = ({ children }: { children?: React.ReactNode }) => (
-    <KibanaContextProvider services={{ ...coreMock.createStart(), dataViews }}>
+    <KibanaContextProvider
+      services={{ ...coreMock.createStart(), dataViews, config: createPublicConfigMock() }}
+    >
       <EntityInventorySearchProvider entityCategory={entityCategory}>
         {children}
       </EntityInventorySearchProvider>
