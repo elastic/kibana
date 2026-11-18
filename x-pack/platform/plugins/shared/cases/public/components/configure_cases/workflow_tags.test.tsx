@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   MAX_LENGTH_PER_WORKFLOW_TAG,
@@ -54,11 +54,11 @@ describe('WorkflowTags', () => {
     expect(await screen.findByRole('option', { name: 'enrichment' })).toBeInTheDocument();
   });
 
-  it('adds a suggested tag to the configured tags', async () => {
+  it('adds a suggested tag to the configured tags', () => {
     renderWithTestingProviders(<WorkflowTags {...defaultProps} />);
 
-    await userEvent.click(getSearchInput());
-    await userEvent.click(await screen.findByRole('option', { name: 'enrichment' }));
+    fireEvent.click(getSearchInput());
+    fireEvent.click(screen.getByRole('option', { name: 'enrichment' }));
 
     expect(onChange).toHaveBeenCalledWith(['soc-triage', 'enrichment']);
   });
@@ -66,7 +66,9 @@ describe('WorkflowTags', () => {
   it('adds a trimmed custom tag that no workflow carries yet', async () => {
     renderWithTestingProviders(<WorkflowTags {...defaultProps} />);
 
-    await userEvent.type(getSearchInput(), '  new-tag  {enter}');
+    await userEvent.click(getSearchInput());
+    await userEvent.paste('  new-tag  ');
+    await userEvent.keyboard('{enter}');
 
     expect(onChange).toHaveBeenCalledWith(['soc-triage', 'new-tag']);
   });

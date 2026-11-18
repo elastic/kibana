@@ -257,7 +257,7 @@ export const ListClustersInputSchema = lazySchema(() =>
       .string()
       .max(MAX_STRING_LENGTH)
       .optional()
-      .describe('Optional cluster server URL or name filter.'),
+      .describe('Optional cluster server URL filter.'),
     name: z.string().max(MAX_STRING_LENGTH).optional().describe('Optional cluster name filter.'),
   })
 );

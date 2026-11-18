@@ -18,6 +18,7 @@ export {
   ProposedActionStatusBadge,
   type ProposedActionStatusBadgeProps,
 } from './src/needs_review_badge';
+export { ProposalCaption, type ProposalCaptionProps } from './src/proposal_caption';
 export {
   getProposalCaption,
   getProposalDecision,

@@ -25,6 +25,7 @@ export * from './nodejs';
 export * from './notice_file_task';
 export * from './os_packages';
 export * from './package_json';
+export * from './product_docs';
 export * from './assert_file_time';
 export * from './assert_no_uuid';
 export * from './assert_package_entry_points';
@@ -37,3 +38,4 @@ export * from './fetch_agent_versions_list';
 export { InstallChromium } from './install_chromium';
 
 export { CreateDistributionDefaults } from './create_distribution_defaults_task';
+export { BundleFipsProvider } from './fips/bundle_fips_provider_task';

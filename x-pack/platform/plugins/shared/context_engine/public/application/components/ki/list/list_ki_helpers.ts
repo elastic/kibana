@@ -8,10 +8,25 @@
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { i18n } from '@kbn/i18n';
 import type { AiIndexDest } from '../../../../../common/http_api/ai_indices';
+import { KI_STATUSES, type KiStatus } from '../../../../../common/ki_lifecycle_status';
 import { formatKiTypeLabel, noneValueLabel } from '../../../utils/ki_display';
 
 export type ListKiTypeFilter = { kind: 'all'; value: 'all' } | { kind: 'type'; value: string };
 export const ALL_TYPE_FILTER: ListKiTypeFilter = { kind: 'all', value: 'all' };
+
+/** Status filter options: one status, or every status. */
+export type ListKiStatusFilterValue = KiStatus | 'all';
+export const DEFAULT_STATUS_FILTER: ListKiStatusFilterValue = 'active';
+
+/** Statuses the list API is asked for, for one status filter option. */
+export const getStatusesForFilter = (statusFilter: ListKiStatusFilterValue): KiStatus[] => {
+  switch (statusFilter) {
+    case 'all':
+      return [...KI_STATUSES];
+    default:
+      return [statusFilter];
+  }
+};
 
 export const getDiscoverEsqlQuery = (destValue: string): string => `FROM ${destValue} | LIMIT 100`;
 
@@ -31,6 +46,31 @@ export const getListKiTypeFilterLabel = (type: string): string =>
         defaultMessage: 'All',
       })
     : formatKiTypeLabel(type);
+
+export const getListKiStatusFilterLabel = (status: ListKiStatusFilterValue): string => {
+  switch (status) {
+    case 'active':
+      return i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusActive', {
+        defaultMessage: 'Active',
+      });
+    case 'expired':
+      return i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusExpired', {
+        defaultMessage: 'Expired',
+      });
+    case 'all':
+      return i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusAll', {
+        defaultMessage: 'All statuses',
+      });
+    case 'deleted':
+      return i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusDeleted', {
+        defaultMessage: 'Deleted',
+      });
+    case 'verification_failed':
+      return i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusVerificationFailed', {
+        defaultMessage: 'Failed',
+      });
+  }
+};
 
 export const getKiDisplayTitle = (title?: string): string =>
   title !== undefined && title.length > 0 ? title : noneValueLabel;

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { first, firstValueFrom } from 'rxjs';
+import { first, firstValueFrom, skip } from 'rxjs';
 import { DataViewEditorService } from './data_view_editor_service';
 import type { HttpSetup } from '@kbn/core/public';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 jest.mock('./lib', () => ({
@@ -67,6 +68,69 @@ describe('DataViewEditorService', () => {
     });
 
     expect(http.get).toHaveBeenCalledTimes(0);
+  });
+
+  describe('matched indices', () => {
+    let service: DataViewEditorService;
+
+    afterEach(() => service.destroy());
+
+    const forbiddenError = createHttpFetchError(
+      'Forbidden',
+      'Error',
+      undefined,
+      {
+        status: 403,
+      } as Response,
+      {
+        statusCode: 403,
+        error: 'Forbidden',
+        message: 'action [indices:admin/resolve/index] is unauthorized for user [restricted]',
+      }
+    );
+
+    it('should expose a privileges error when the index lookup is forbidden and clear it once it succeeds', async () => {
+      let isForbidden = true;
+      service = createService({
+        getIndices: jest.fn(async () => {
+          if (isForbidden) {
+            throw forbiddenError;
+          }
+          return [{ name: 'tracks', item: {} }];
+        }),
+      });
+
+      service.setIndexPattern('tracks*');
+      const error = await firstValueFrom(
+        service.matchedIndicesError$.pipe(first((value) => value !== undefined))
+      );
+      expect(error?.message).toBe(
+        'action [indices:admin/resolve/index] is unauthorized for user [restricted]'
+      );
+      expect((await firstValueFrom(service.matchedIndices$)).exactMatchedIndices).toEqual([]);
+
+      isForbidden = false;
+      service.setIndexPattern('tracks-2*');
+      await firstValueFrom(
+        service.matchedIndices$.pipe(
+          first(({ exactMatchedIndices }) => exactMatchedIndices.length > 0)
+        )
+      );
+      expect(await firstValueFrom(service.matchedIndicesError$)).toBeUndefined();
+    });
+
+    it('should treat other failures of the index lookup as no matches', async () => {
+      service = createService({
+        getIndices: jest.fn().mockRejectedValue(new Error('Failed to fetch')),
+      });
+
+      service.setIndexPattern('tracks*');
+      // skip the initial state, the next emission is the result of the lookup
+      const matchedIndices = await firstValueFrom(service.matchedIndices$.pipe(skip(1)));
+
+      expect(matchedIndices.exactMatchedIndices).toEqual([]);
+      expect(await firstValueFrom(service.matchedIndicesError$)).toBeUndefined();
+    });
   });
 
   describe('timestamp fields', () => {

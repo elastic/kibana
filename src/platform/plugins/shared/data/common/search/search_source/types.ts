@@ -21,6 +21,7 @@ import type { SearchSource } from './search_source';
 /**
  * search source interface
  * @public
+ * @deprecated Don't use in new code. Use the typed search methods (`data.search.dsl`, `esql`, `eql`, `sql`) instead.
  */
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
@@ -33,12 +34,17 @@ export interface ISearchStartSearchSource
   /**
    * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
    * @param fields
+   * @deprecated Don't use in new code. Use the typed search methods (`data.search.dsl`, `esql`, `eql`, `sql`) instead.
    */
   create: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
 
+  /**
+   * @deprecated Don't use in new code. Use the typed search methods (`data.search.dsl`, `esql`, `eql`, `sql`) instead.
+   */
   createLazy: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
   /**
    * creates empty {@link SearchSource}
+   * @deprecated Don't use in new code. Use the typed search methods (`data.search.dsl`, `esql`, `eql`, `sql`) instead.
    */
   createEmpty: () => ISearchSource;
 }

@@ -103,9 +103,9 @@ const getAnomalyDataFromApi = async ({
       }
 
       const anomaliesWithBaseline = await getEntityAnomalies({
-        entityId: entityIdentifier,
+        entityIds: [entityIdentifier],
         entityType,
-        entityRecord,
+        entityRecords: [entityRecord],
         esClient,
         logger,
         fromMs: fromDate,

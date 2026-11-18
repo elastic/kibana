@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { useEntityAnalyticsRoutes } from '../api';
 
 export const ANOMALY_OVERVIEW_QUERY_KEY = ['POST', 'FETCH_ANOMALY_OVERVIEW'] as const;
@@ -15,6 +16,7 @@ export const ANOMALY_OVERVIEW_QUERY_KEY = ['POST', 'FETCH_ANOMALY_OVERVIEW'] as 
 interface UseAnomalyOverviewParams {
   entityId: string;
   entityType: string;
+  mode?: EntityViewMode;
   from?: number;
   to?: number;
   threatTactics?: string[];
@@ -30,6 +32,7 @@ interface UseAnomalyOverviewParams {
 export const useAnomalyOverview = ({
   entityId,
   entityType,
+  mode,
   from,
   to,
   threatTactics,
@@ -39,17 +42,29 @@ export const useAnomalyOverview = ({
 }: UseAnomalyOverviewParams) => {
   const { fetchAnomalyOverview } = useEntityAnalyticsRoutes();
 
+  // Only the non-default mode is sent, so single-entity requests keep their original shape.
+  const resolvedMode = mode === 'resolved' ? mode : undefined;
   const hasBody =
+    resolvedMode !== undefined ||
     from !== undefined ||
     to !== undefined ||
     (threatTactics && threatTactics.length > 0) ||
     (scoreRanges && scoreRanges.length > 0);
   const body = hasBody
-    ? { from, to, threat_tactics: threatTactics, score_ranges: scoreRanges }
+    ? { mode: resolvedMode, from, to, threat_tactics: threatTactics, score_ranges: scoreRanges }
     : undefined;
 
   return useQuery(
-    [...ANOMALY_OVERVIEW_QUERY_KEY, entityType, entityId, from, to, threatTactics, scoreRanges],
+    [
+      ...ANOMALY_OVERVIEW_QUERY_KEY,
+      entityType,
+      entityId,
+      resolvedMode,
+      from,
+      to,
+      threatTactics,
+      scoreRanges,
+    ],
     ({ signal }) =>
       fetchAnomalyOverview({ entityType, entityId, body, signal, context: executionContext }),
     {

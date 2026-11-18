@@ -7,32 +7,30 @@
 
 import React from 'react';
 import { fireEvent, act } from '@testing-library/react';
-
-import { createFleetTestRendererMock } from '../../../../../../../../mock';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { MultiTextInput } from './multi_text_input';
 
 function renderInput(value = ['value1']) {
-  const renderer = createFleetTestRendererMock();
   const mockOnChange = jest.fn();
   const fieldLabel = 'Hosts';
 
-  const utils = renderer.render(
+  const utils = renderWithI18n(
     <MultiTextInput fieldLabel={fieldLabel} value={value} onChange={mockOnChange} />
   );
 
   return { utils, mockOnChange };
 }
 
-test('it should allow to add a new value', async () => {
+test('it should allow to add a new value', () => {
   const { utils, mockOnChange } = renderInput();
 
-  const addRowEl = await utils.findByText('Add row');
+  const addRowEl = utils.getByText('Add row');
   fireEvent.click(addRowEl);
 
   expect(mockOnChange).toHaveBeenCalledWith(['value1']);
 
-  const inputEl = await utils.findByDisplayValue('');
+  const inputEl = utils.getByDisplayValue('');
   expect(inputEl).toBeDefined();
 
   fireEvent.change(inputEl, { target: { value: 'value2' } });
@@ -49,10 +47,10 @@ test('it should not show the delete button if there only one row', async () => {
   });
 });
 
-test('it should allow to update  existing value', async () => {
+test('it should allow to update  existing value', () => {
   const { utils, mockOnChange } = renderInput(['value1', 'value2']);
 
-  const inputEl = await utils.findByDisplayValue('value1');
+  const inputEl = utils.getByDisplayValue('value1');
   expect(inputEl).toBeDefined();
 
   fireEvent.change(inputEl, { target: { value: 'value1updated' } });

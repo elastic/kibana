@@ -80,7 +80,7 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
     });
 
     test.afterAll(async ({ esClient, log }) => {
@@ -104,9 +104,7 @@ test.describe(
 
       // "Last Activity" belongs to the same fields list, so its presence proves the
       // section finished loading before the integration rows are asserted missing.
-      await expect(
-        page.testSubj.locator('datasetQualityDetailsFieldsList-last_activity')
-      ).toBeVisible();
+      await expect(page.getByTestId('datasetQualityDetailsFieldsList-last_activity')).toBeVisible();
 
       await expect(pageObjects.datasetQualityDetails.getIntegrationRow('integration')).toBeHidden();
       await expect(pageObjects.datasetQualityDetails.getIntegrationRow('version')).toBeHidden();
@@ -157,8 +155,8 @@ test.describe(
 
       await test.step('omits the dashboards action', async () => {
         // The menu renders a skeleton entry while the dashboard list is in flight.
-        await page.testSubj
-          .locator('datasetQualityDetailsIntegrationActionDashboardsLoading')
+        await page
+          .getByTestId('datasetQualityDetailsIntegrationActionDashboardsLoading')
           .waitFor({ state: 'detached' });
 
         await expect(
@@ -198,9 +196,7 @@ test.describe(
       await pageObjects.datasetQualityDetails.openIntegrationActionsMenu();
       await pageObjects.datasetQualityDetails.getIntegrationAction('ViewDashboards').click();
 
-      const dashboardActions = page.testSubj.locator(
-        'datasetQualityDetailsIntegrationActionDashboard'
-      );
+      const dashboardActions = page.getByTestId('datasetQualityDetailsIntegrationActionDashboard');
       await expect.poll(async () => dashboardActions.count()).toBeGreaterThan(0);
 
       const [dashboardTitle] = (await dashboardActions.allInnerTexts()).map((text) => text.trim());

@@ -16,12 +16,13 @@ import type {
   ExecutionTerminatedEvent,
   PromptResponseEvent,
   RoundInput,
-  UserMessageEvent,
+  MessageEvent,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
+  isMessageEvent,
   ZERO_MODEL_USAGE,
   answeredPromptRequestIds,
   interruptionOfTerminal,
@@ -89,7 +90,7 @@ export const eventsToRounds = (allEvents: ConversationEvent[]): ConversationRoun
     const trigger = triggerId ? byId.get(triggerId) : undefined;
 
     // exec_0 is triggered by a user_message; a resume execution by a prompt_response.
-    const isInitial = trigger?.type === TimelineEventType.userMessage;
+    const isInitial = trigger !== undefined && isMessageEvent(trigger);
     const isResume = trigger?.type === TimelineEventType.promptResponse;
     if (!isInitial && !isResume) {
       continue;
@@ -110,7 +111,7 @@ export const eventsToRounds = (allEvents: ConversationEvent[]): ConversationRoun
     const steps =
       stepEvents.length > 0 ? stepsFromEvents(stepEvents) : terminated?.data.steps ?? [];
 
-    const userMessage = isInitial ? (trigger as UserMessageEvent) : undefined;
+    const userMessage = isInitial ? (trigger as MessageEvent) : undefined;
     const resumeInput = isResume ? (trigger as PromptResponseEvent).data.input : undefined;
     const startedEvent = group.find((event) => event.type === TimelineEventType.executionStarted);
     const round: ConversationRound = {
@@ -225,11 +226,11 @@ const stepsFromEvents = (events: ExecutionStepEvent[]): ConversationRoundStep[] 
     .map((event) => event.data.step);
 };
 
-const toRoundInput = (userMessage: UserMessageEvent): RoundInput => userMessage.data;
+const toRoundInput = (userMessage: MessageEvent): RoundInput => userMessage.data;
 
-/** Round authorship carried by a `user_message` actor. */
+/** Round authorship carried by a message actor; an agent carries none. */
 export const authorAndOrigin = (
-  userMessage: UserMessageEvent
+  userMessage: MessageEvent
 ): Pick<ConversationRound, 'author' | 'origin'> => {
   const { actor } = userMessage;
   // Only user/external actors carry round authorship; origin is present for external actors only.
@@ -322,28 +323,4 @@ const interruptedRoundFields = (
     response: { message: '' },
     interruption: interruptionOfTerminal(terminal),
   };
-};
-
-/**
- * Events carry no round feedback, so rounds rebuilt from events take it from the stored rounds by
- * round id. `exceptRoundId` names a round whose events were rewritten: its feedback was about the
- * previous answer and is dropped.
- */
-export const withStoredRoundFeedback = (
-  rounds: ConversationRound[],
-  storedRounds: ConversationRound[],
-  { exceptRoundId }: { exceptRoundId?: string } = {}
-): ConversationRound[] => {
-  const feedbackById = new Map(
-    storedRounds
-      .filter((round) => round.feedback !== undefined && round.id !== exceptRoundId)
-      .map((round) => [round.id, round.feedback!])
-  );
-  if (feedbackById.size === 0) {
-    return rounds;
-  }
-  return rounds.map((round) => {
-    const feedback = feedbackById.get(round.id);
-    return feedback ? { ...round, feedback } : round;
-  });
 };

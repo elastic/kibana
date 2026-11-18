@@ -10,6 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { appContextService } from '../../services';
+import { AgentlessAgentRestrictionError } from '../../errors';
 
 import {
   getAgentStatusForAgentPolicy,
@@ -18,9 +19,14 @@ import {
 } from '../../services/agents/status';
 import { agentPolicyService } from '../../services/agent_policy';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
+import { throwIfAgentInAgentlessPolicy } from '../../services/agents/hosted_agent';
 import { getPackageInfo } from '../../services/epm/packages';
 
-import { getAgentEffectiveConfigHandler, getAgentDataHandler } from './handlers';
+import {
+  getAgentEffectiveConfigHandler,
+  getAgentDataHandler,
+  updateAgentHandler,
+} from './handlers';
 
 import {
   getAgentStatusForAgentPolicyHandler,
@@ -59,6 +65,10 @@ jest.mock('../../services/agent_policy', () => ({
   agentPolicyService: {
     getByIds: jest.fn(),
   },
+}));
+
+jest.mock('../../services/agents/hosted_agent', () => ({
+  throwIfAgentInAgentlessPolicy: jest.fn(),
 }));
 
 jest.mock('../../services/agents/agent_metrics', () => ({
@@ -326,6 +336,44 @@ describe('Handlers', () => {
       await expect(getAgentsHandler(mockContext, request as any, mockResponse)).rejects.toEqual(
         elasticsearchError
       );
+    });
+  });
+
+  describe('updateAgentHandler', () => {
+    const agentId = 'agent1';
+    let mockContext: any;
+    let coreContext: ReturnType<typeof coreMock.createRequestHandlerContext>;
+
+    beforeEach(() => {
+      coreContext = coreMock.createRequestHandlerContext();
+      mockContext = {
+        core: Promise.resolve(coreContext),
+        fleet: Promise.resolve({
+          agentClient: {
+            asCurrentUser: { getAgent: jest.fn().mockResolvedValue({ id: agentId }) },
+          },
+        }),
+      };
+      (throwIfAgentInAgentlessPolicy as jest.Mock).mockReset();
+    });
+
+    it('rejects the update of an agentless agent before writing anything', async () => {
+      (throwIfAgentInAgentlessPolicy as jest.Mock).mockRejectedValue(
+        new AgentlessAgentRestrictionError(`Cannot update agentless agent ${agentId}`)
+      );
+
+      await expect(
+        updateAgentHandler(
+          mockContext,
+          httpServerMock.createKibanaRequest({
+            params: { agentId },
+            body: { tags: ['test'] },
+          }),
+          httpServerMock.createResponseFactory()
+        )
+      ).rejects.toThrow(AgentlessAgentRestrictionError);
+
+      expect(coreContext.elasticsearch.client.asInternalUser.update).not.toHaveBeenCalled();
     });
   });
 

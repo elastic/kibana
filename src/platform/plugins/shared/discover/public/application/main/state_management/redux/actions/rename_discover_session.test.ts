@@ -7,34 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { waitFor } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import { internalStateActions, selectHasUnsavedChanges } from '..';
-import { TABS_LOCAL_STORAGE_KEY } from '../../tabs_storage_manager';
 
 const setup = async ({
   isSaved = true,
   isSavedElsewhere = false,
-  tabsStorageEnabled = false,
-}: { isSaved?: boolean; isSavedElsewhere?: boolean; tabsStorageEnabled?: boolean } = {}) => {
+}: { isSaved?: boolean; isSavedElsewhere?: boolean } = {}) => {
   const services = createDiscoverServicesMock();
-  services.storage = new Storage(localStorage);
   const toolkit = getDiscoverInternalStateMock({
     services,
     persistedDataViews: [dataViewMock],
-    tabsStorageEnabled,
   });
   const persistedDiscoverSession = createDiscoverSessionMock({
     id: 'test-session',
     title: 'Test Session',
     description: 'Test Description',
     tags: ['tag1'],
+    version: 'opened-version',
     tabs: [getPersistedTabMock({ tabId: 'test-tab', dataView: dataViewMock, services })],
   });
 
@@ -49,6 +44,7 @@ const setup = async ({
         ...persistedDiscoverSession,
         description: 'Description saved elsewhere',
         tags: ['tag2'],
+        version: 'saved-elsewhere-version',
         tabs: [
           ...persistedDiscoverSession.tabs,
           getPersistedTabMock({ tabId: 'tab-saved-elsewhere', dataView: dataViewMock, services }),
@@ -58,6 +54,12 @@ const setup = async ({
   jest
     .mocked(services.discoverSessionService.get)
     .mockResolvedValue({ session: latestDiscoverSession, warnings: [] });
+  jest.mocked(services.discoverSessionService.save).mockImplementation(async (session) => ({
+    ...session,
+    id: 'test-session',
+    managed: false,
+    version: 'renamed-version',
+  }));
 
   // Opening the session already remembers it, so only track calls made after setup
   jest.mocked(services.chrome.recentlyAccessed.add).mockClear();
@@ -68,7 +70,6 @@ const setup = async ({
 describe('renameDiscoverSession', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    localStorage.clear();
   });
 
   it('should save the new title with the latest saved version, keeping changes saved elsewhere', async () => {
@@ -115,7 +116,7 @@ describe('renameDiscoverSession', () => {
     });
   });
 
-  it('should add the renamed session to the recently accessed list', async () => {
+  it('should remember the renamed session and adopt its saved version', async () => {
     const { toolkit, services } = await setup();
 
     await toolkit.internalState
@@ -127,6 +128,9 @@ describe('renameDiscoverSession', () => {
       '/app/discover#/view/test-session',
       'Renamed Session',
       'test-session'
+    );
+    expect(toolkit.internalState.getState().persistedDiscoverSession?.version).toBe(
+      'renamed-version'
     );
   });
 
@@ -166,7 +170,7 @@ describe('renameDiscoverSession', () => {
     expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
   });
 
-  it('should keep the title as a draft without saving when the session has never been saved', async () => {
+  it('should do nothing when the session has never been saved', async () => {
     const { toolkit, services } = await setup({ isSaved: false });
 
     await toolkit.internalState
@@ -175,37 +179,5 @@ describe('renameDiscoverSession', () => {
 
     expect(services.discoverSessionService.save).not.toHaveBeenCalled();
     expect(toolkit.internalState.getState().persistedDiscoverSession).toBeUndefined();
-    expect(toolkit.internalState.getState().draftSessionTitle).toBe('Renamed Session');
-  });
-
-  it('should store the draft title together with the tabs of its own session', async () => {
-    const { toolkit, services } = await setup({ isSaved: false, tabsStorageEnabled: true });
-    const { spaceId } = toolkit.internalState.getState();
-    const tabId = toolkit.getCurrentTab().id;
-
-    // Once the session is stored, another Discover window replaces it with its own session
-    await waitFor(() => {
-      expect(services.storage.get(TABS_LOCAL_STORAGE_KEY)?.openTabs).toHaveLength(1);
-    });
-    services.storage.set(TABS_LOCAL_STORAGE_KEY, {
-      userId: 'other-user',
-      spaceId: 'other-space',
-      openTabs: [{ id: 'other-window-tab', label: 'Other window tab' }],
-      closedTabs: [],
-    });
-
-    await toolkit.internalState
-      .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Renamed Session' }))
-      .unwrap();
-
-    await waitFor(() => {
-      expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).draftSessionTitle).toBe(
-        'Renamed Session'
-      );
-    });
-    const storedTabsState = services.storage.get(TABS_LOCAL_STORAGE_KEY);
-    expect(storedTabsState.spaceId).toBe(spaceId);
-    expect(storedTabsState.openTabs).toHaveLength(1);
-    expect(storedTabsState.openTabs[0].id).toBe(tabId);
   });
 });

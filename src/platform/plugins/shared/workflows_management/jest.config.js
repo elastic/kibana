@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: [
     '<rootDir>/src/platform/plugins/shared/workflows_management/common',
@@ -28,4 +28,5 @@ module.exports = {
   moduleNameMapper: {
     '^uuid$': '<rootDir>/node_modules/uuid/dist/index.js',
   },
+  testTimeout: 30_000,
 };

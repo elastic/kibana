@@ -120,22 +120,22 @@ export class ConversationsService {
 
   async submitRoundFeedback({
     conversationId,
-    roundId,
+    executionId,
     vote,
     chips,
     comment,
   }: {
     conversationId: string;
-    roundId: string;
+    executionId: string;
     vote: 'up' | 'down' | null;
     chips?: FeedbackChipId[];
     comment?: string;
   }): Promise<void> {
     await this.http.post(
-      buildPath(`${internalApiPath}/conversations/{conversationId}/rounds/{roundId}/_feedback`, {
-        conversationId,
-        roundId,
-      }),
+      buildPath(
+        `${internalApiPath}/conversations/{conversationId}/executions/{executionId}/_feedback`,
+        { conversationId, executionId }
+      ),
       { body: JSON.stringify({ vote, chips, comment }) }
     );
   }

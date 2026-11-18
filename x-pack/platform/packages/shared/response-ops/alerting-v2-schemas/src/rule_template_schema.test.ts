@@ -10,6 +10,7 @@ import { MAX_TAG_LENGTH, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants'
 import { createRuleDataSchema } from './rule_data_schema';
 import {
   findRuleTemplatesRequestSchema,
+  findRuleTemplatesResponseSchema,
   ruleTemplateDataSchema,
   ruleTemplateIdParamsSchema,
   ruleTemplateTagsParamsSchema,
@@ -269,7 +270,7 @@ describe('rule template create-rule schema coupling', () => {
                   "type": "string",
                 },
                 "name": Object {
-                  "description": "Rule name (must be unique within the space).",
+                  "description": "Rule name.",
                   "maxLength": 256,
                   "minLength": 1,
                   "type": "string",
@@ -677,12 +678,23 @@ describe('rule template create-rule schema coupling', () => {
               "minItems": 1,
               "type": "array",
             },
+            "enabled": Object {
+              "description": "Whether the rule is enabled. Defaults to \`true\` when omitted. A disabled rule is saved but does not run until you enable it.",
+              "type": "boolean",
+            },
             "grouping": Object {
               "allOf": Array [
                 Object {
                   "$ref": "#/definitions/alerting_rule_grouping",
                 },
               ],
+            },
+            "id": Object {
+              "description": "Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, the request fails with HTTP 409 and the existing rule is not changed. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.",
+              "maxLength": 150,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_-]+$",
+              "type": "string",
             },
             "kind": Object {
               "anyOf": Array [
@@ -843,5 +855,33 @@ describe('ruleTemplateTagsResponseSchema', () => {
     { tags: Array.from({ length: TAGS_RESPONSE_LIMIT + 1 }, (_, index) => `tag-${index}`) },
   ])('rejects invalid or oversized responses', (response) => {
     expect(ruleTemplateTagsResponseSchema.safeParse(response).success).toBe(false);
+  });
+});
+
+describe('findRuleTemplatesResponseSchema', () => {
+  const item = { id: 'template-1', ...exampleTemplateAttributes, rule_count: 2 };
+  const page = { items: [item], total: 1, page: 1, per_page: 20 };
+
+  it('accepts templates with a rule count', () => {
+    expect(findRuleTemplatesResponseSchema.parse(page).items[0].rule_count).toBe(2);
+  });
+
+  it('accepts a template that no rule was created from', () => {
+    const emptyPage = { ...page, items: [{ ...item, rule_count: 0 }] };
+
+    expect(findRuleTemplatesResponseSchema.safeParse(emptyPage).success).toBe(true);
+  });
+
+  it('accepts a template without a rule count', () => {
+    const { rule_count: _ruleCount, ...itemWithoutCount } = item;
+    const pageWithoutCount = { ...page, items: [itemWithoutCount] };
+
+    expect(findRuleTemplatesResponseSchema.safeParse(pageWithoutCount).success).toBe(true);
+  });
+
+  it.each([-1, 1.5, '2'])('rejects rule_count %p', (ruleCount) => {
+    const invalidPage = { ...page, items: [{ ...item, rule_count: ruleCount }] };
+
+    expect(findRuleTemplatesResponseSchema.safeParse(invalidPage).success).toBe(false);
   });
 });

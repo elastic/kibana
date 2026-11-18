@@ -13,7 +13,6 @@ import {
   EuiButtonIcon,
   EuiInMemoryTable,
   EuiLink,
-  EuiSpacer,
   EuiTextBlockTruncate,
   EuiToolTip,
 } from '@elastic/eui';
@@ -161,7 +160,6 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
 
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiInMemoryTable<DataSource>
         items={dataSources}
         itemId="name"

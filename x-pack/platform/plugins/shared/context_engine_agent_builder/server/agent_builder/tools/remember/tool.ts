@@ -12,9 +12,12 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { randomUUID } from 'crypto';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
+import {
+  MAX_AI_INDEX_USER_ID_LENGTH,
+  MAX_KI_CONTENT_LENGTH,
+} from '@kbn/context-engine-plugin/common/constants';
 import { MEMORY_KI_TYPES } from '@kbn/context-engine-plugin/common/memory';
 import {
-  MAX_KI_CONTENT_LENGTH,
   MAX_KI_DESCRIPTION_LENGTH,
   MAX_KI_ID_LENGTH,
   MAX_KI_TAG_LENGTH,
@@ -22,9 +25,17 @@ import {
   MAX_KI_TITLE_LENGTH,
 } from '@kbn/context-engine-plugin/common/step_types/ki';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import {
+  getKiRevision,
+  isKiDeleted,
+  putKiRevision,
+  type KiRevision,
+  type KiWriter,
+  type StoredKi,
+} from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { isoDateTime, z } from '@kbn/zod/v4';
+import { isoDateTime, z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
@@ -32,6 +43,7 @@ import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
 import {
   createConversationReferences,
   createMemoryWriter,
+  isMemoryDocument,
   type StoredMemoryDocument,
   updateMemoryProvenance,
 } from '../memory_document';
@@ -39,52 +51,62 @@ import {
 const memoryTypeSchema = z.enum(MEMORY_KI_TYPES);
 const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 
-const rememberSchema = z.object({
-  aiIndexId: aiIndexIdFieldSchema.describe(
-    'The Context Engine AI-index registry ID where the memory will be stored. Use the ID from the agent AI INDICES configuration, not the backing Elasticsearch index or data stream name.'
-  ),
-  id: z
-    .string()
-    .min(1)
-    .max(MAX_KI_ID_LENGTH)
-    .optional()
-    .describe('The id of an existing memory to revise. Omit when creating a new memory.'),
-  sessionId: z
-    .string()
-    .min(1)
-    .max(MAX_KI_ID_LENGTH)
-    .optional()
-    .describe(
-      'For MCP calls only: omit unless continuing a memory session using the sessionId returned by an earlier remember call. Do not invent a value. Agent Builder calls ignore this input and use the current conversation ID.'
+const rememberSchema = lazySchema(() =>
+  z.object({
+    aiIndexId: aiIndexIdFieldSchema.describe(
+      'The Context Engine AI-index registry ID where the memory will be stored. Use the ID from the agent AI INDICES configuration, not the backing Elasticsearch index or data stream name.'
     ),
-  type: memoryTypeSchema.describe(
-    'Use memory.session_fact for a granular fact discovered during a session, or memory.session for a session synthesis. When revising a memory, use its existing type.'
-  ),
-  title: z.string().min(1).max(MAX_KI_TITLE_LENGTH).describe('A short label for the memory'),
-  description: z
-    .string()
-    .min(1)
-    .max(MAX_KI_DESCRIPTION_LENGTH)
-    .describe('A concise description of the memory and its immediate consequence'),
-  content: z
-    .string()
-    .min(1)
-    .max(MAX_KI_CONTENT_LENGTH)
-    .describe('Enough context to use the memory without re-deriving it'),
-  tags: z
-    .array(z.string().min(1).max(MAX_KI_TAG_LENGTH))
-    .max(MAX_KI_TAGS)
-    .optional()
-    .describe(
-      'Optional lowercase index names, feature areas, or tools associated with the memory. When revising, omit to preserve existing tags or pass an empty array to clear them.'
+    id: z
+      .string()
+      .min(1)
+      .max(MAX_KI_ID_LENGTH)
+      .optional()
+      .describe('The id of an existing memory to revise. Omit when creating a new memory.'),
+    sessionId: z
+      .string()
+      .min(1)
+      .max(MAX_KI_ID_LENGTH)
+      .optional()
+      .describe(
+        'For MCP calls only: omit unless continuing a memory session using the sessionId returned by an earlier remember call. Do not invent a value. Agent Builder calls ignore this input and use the current conversation ID.'
+      ),
+    user_id: z
+      .string()
+      .min(1)
+      .max(MAX_AI_INDEX_USER_ID_LENGTH)
+      .optional()
+      .describe(
+        'The user this memory is scoped to; reads that pass a user_id only recall memories with that user_id or none. Omit for a memory shared with every user. When revising, omit or pass the existing value.'
+      ),
+    type: memoryTypeSchema.describe(
+      'Use memory.session_fact for a granular fact discovered during a session, or memory.session for a session synthesis. When revising a memory, use its existing type.'
     ),
-  expires_at: isoDateTime({ offset: true })
-    .nullable()
-    .optional()
-    .describe(
-      'ISO 8601 timestamp after which the memory must not be recalled. UTC (Z) and numeric timezone offsets are accepted. If omitted, this call sets the expiry to 90 days from now, including when revising an existing memory. Set to null to make the memory non-expiring.'
-    ),
-});
+    title: z.string().min(1).max(MAX_KI_TITLE_LENGTH).describe('A short label for the memory'),
+    description: z
+      .string()
+      .min(1)
+      .max(MAX_KI_DESCRIPTION_LENGTH)
+      .describe('A concise description of the memory and its immediate consequence'),
+    content: z
+      .string()
+      .min(1)
+      .max(MAX_KI_CONTENT_LENGTH)
+      .describe('Enough context to use the memory without re-deriving it'),
+    tags: z
+      .array(z.string().min(1).max(MAX_KI_TAG_LENGTH))
+      .max(MAX_KI_TAGS)
+      .optional()
+      .describe(
+        'Optional lowercase index names, feature areas, or tools associated with the memory. When revising, omit to preserve existing tags or pass an empty array to clear them.'
+      ),
+    expires_at: isoDateTime({ offset: true })
+      .nullable()
+      .optional()
+      .describe(
+        'ISO 8601 timestamp after which the memory must not be recalled. UTC (Z) and numeric timezone offsets are accepted. If omitted, this call sets the expiry to 90 days from now, including when revising an existing memory. Set to null to make the memory non-expiring.'
+      ),
+  })
+);
 
 export const createRememberTool = ({
   getAiIndexService,
@@ -124,7 +146,8 @@ export const createRememberTool = ({
     reference, and provenance server-side. For MCP calls, omit sessionId unless continuing with the
     sessionId returned by an earlier remember call. Agent Builder calls ignore sessionId and use
     the current conversation ID. Memory expires 90 days after each write by default; provide
-    expires_at to choose another time, or null to make it non-expiring.
+    expires_at to choose another time, or null to make it non-expiring. Pass user_id when the
+    application scopes memory to a user.
   `,
   schema: rememberSchema,
   handler: async (params, context) => {
@@ -168,80 +191,71 @@ export const createRememberTool = ({
         currentDate.getTime() + DEFAULT_MEMORY_EXPIRATION_MS
       ).toISOString();
       const logicalId = params.id ?? generateId();
-      const writer = createMemoryWriter({
+      const writer: KiWriter = createMemoryWriter({
         toolId: contextEngineMemoryTools.remember,
         runId: runContext.runId,
         agentId: agent?.agentId,
       });
-      let existingBackingIndex: string | undefined;
-      let existingSeqNo: number | undefined;
-      let existingPrimaryTerm: number | undefined;
       let existingDocument: StoredMemoryDocument | undefined;
+      let existingRevision:
+        | Pick<KiRevision, 'index' | 'documentId' | 'seqNo' | 'primaryTerm'>
+        | undefined;
 
       if (params.id) {
-        const searchResponse = await currentUserClient.search<StoredMemoryDocument>({
-          index: aiIndex.dest.value,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          ...(aiIndex.dest.type === 'data_stream'
-            ? {
-                query: { term: { id: params.id } },
-                sort: [{ '@timestamp': 'desc' as const }],
-                size: 1,
-              }
-            : {
-                query: { ids: { values: [params.id] } },
-                seq_no_primary_term: true,
-                size: 2,
-              }),
+        const abortSignal = new AbortController().signal;
+        const revision = await getKiRevision({
+          esClient: currentUserClient,
+          aiIndexId: params.aiIndexId,
+          dest: aiIndex.dest,
+          kiId: params.id,
+          abortSignal,
+          includeSource: true,
         });
 
-        if (aiIndex.dest.type === 'index' && searchResponse.hits.hits.length > 1) {
-          throw new Error(
-            `Memory '${params.id}' exists in multiple indices matched by AI index '${params.aiIndexId}'.`
-          );
-        }
-
-        const [existingHit] = searchResponse.hits.hits;
-        if (!existingHit?._source) {
-          throw new Error(`Memory '${params.id}' was not found in AI index '${params.aiIndexId}'.`);
-        }
-        if (
-          existingHit._source.type !== 'memory.session' &&
-          existingHit._source.type !== 'memory.session_fact'
-        ) {
+        if (!isMemoryDocument(revision.source)) {
           throw new Error(
             `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`
           );
         }
-        if (existingHit._source.type !== params.type) {
+        if (revision.source.type !== params.type) {
           throw new Error(
-            `Memory '${params.id}' has type '${existingHit._source.type}' and cannot be revised as '${params.type}'.`
+            `Memory '${params.id}' has type '${revision.source.type}' and cannot be revised as '${params.type}'.`
           );
         }
-        if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
+        if (isKiDeleted(revision.source)) {
           throw new Error(`Memory '${params.id}' was deleted and cannot be revised.`);
         }
+        if (params.user_id !== undefined && params.user_id !== revision.source.user_id) {
+          throw new Error(`Memory '${params.id}' cannot change its user_id.`);
+        }
 
-        existingBackingIndex = existingHit._index;
-        existingSeqNo = existingHit._seq_no;
-        existingPrimaryTerm = existingHit._primary_term;
-        existingDocument = existingHit._source;
+        existingDocument = revision.source;
+        existingRevision = {
+          index: revision.index,
+          documentId: revision.documentId,
+          seqNo: revision.seqNo,
+          primaryTerm: revision.primaryTerm,
+        };
       }
 
-      const document: StoredMemoryDocument = {
+      let tags: string[] | undefined;
+      if (params.tags !== undefined) {
+        tags = params.tags;
+      } else if (existingDocument?.tags !== undefined) {
+        tags = existingDocument.tags;
+      }
+      const userId = params.user_id ?? existingDocument?.user_id;
+
+      const document: StoredKi = {
         '@timestamp':
           aiIndex.dest.type === 'data_stream' ? now : existingDocument?.['@timestamp'] ?? now,
         id: logicalId,
+        ...(userId !== undefined ? { user_id: userId } : {}),
         type: params.type,
         title: params.title,
         description: params.description,
         content: params.content,
-        ...(params.tags !== undefined
-          ? { tags: params.tags }
-          : existingDocument?.tags !== undefined
-          ? { tags: existingDocument.tags }
-          : {}),
+        ...(tags !== undefined ? { tags } : {}),
         ...(params.expires_at === null
           ? {}
           : {
@@ -266,25 +280,20 @@ export const createRememberTool = ({
       if (
         aiIndex.dest.type === 'index' &&
         existingDocument &&
-        (existingSeqNo === undefined || existingPrimaryTerm === undefined)
+        (existingRevision?.seqNo === undefined || existingRevision?.primaryTerm === undefined)
       ) {
         throw new Error(`Memory '${logicalId}' is missing concurrency metadata.`);
       }
 
-      await currentUserClient.index({
-        index:
-          aiIndex.dest.type === 'index' && existingBackingIndex
-            ? existingBackingIndex
-            : aiIndex.dest.value,
-        ...(aiIndex.dest.type === 'index' && { id: logicalId }),
+      await putKiRevision({
+        esClient: currentUserClient,
+        aiIndexId: params.aiIndexId,
+        dest: aiIndex.dest,
+        kiId: logicalId,
         document,
-        ...(aiIndex.dest.type === 'data_stream' || !existingDocument
-          ? { op_type: 'create' as const }
-          : {
-              if_seq_no: existingSeqNo,
-              if_primary_term: existingPrimaryTerm,
-            }),
-        refresh: 'wait_for',
+        existing: aiIndex.dest.type === 'index' ? existingRevision : undefined,
+        failIfExists: !existingDocument,
+        refresh: true,
       });
 
       return {

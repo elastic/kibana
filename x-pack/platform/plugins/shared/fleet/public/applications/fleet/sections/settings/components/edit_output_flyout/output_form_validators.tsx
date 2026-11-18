@@ -339,6 +339,60 @@ export const validateKafkaOAuth2ClientCertificateKeySecret = toSecretValidator(
   validateKafkaOAuth2ClientCertificateKey
 );
 
+const requiredText = (value: string, message: string) => {
+  if (!value || value.trim() === '') {
+    return [message];
+  }
+};
+
+export function validateKafkaKerberosConfigPath(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosConfigPathIsRequired', {
+      defaultMessage: 'Kerberos configuration file is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosRealm(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosRealmIsRequired', {
+      defaultMessage: 'Realm is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosKeytab(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosKeytabIsRequired', {
+      defaultMessage: 'Keytab file is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosUsername(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosUsernameIsRequired', {
+      defaultMessage: 'Username is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosPassword(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosPasswordIsRequired', {
+        defaultMessage: 'Password is required',
+      }),
+    ];
+  }
+}
+
+export const validateKafkaKerberosPasswordSecret = toSecretValidator(validateKafkaKerberosPassword);
+
 /** A duration in seconds: optional, and a number that is not negative. */
 export function validateKafkaOAuth2Seconds(value: string) {
   if (!value || value.trim() === '') {
@@ -631,4 +685,193 @@ export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }
   if (errors.length) {
     return errors;
   }
+}
+
+const GO_DURATION_UNIT = '(?:ns|us|µs|μs|ms|s|m|h)';
+const GO_DURATION_REGEX = new RegExp(
+  `^(?:0|(?:(?:\\d+(?:\\.\\d*)?|\\.\\d+)${GO_DURATION_UNIT})+)$`
+);
+
+export function validateOtlpEndpoint(value: string) {
+  const endpoint = value?.trim() ?? '';
+  if (!endpoint) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointIsRequired', {
+        defaultMessage: 'Endpoint is required',
+      }),
+    ];
+  }
+  if (/\s/.test(endpoint)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointInvalid', {
+        defaultMessage: 'Endpoint must not contain spaces',
+      }),
+    ];
+  }
+  if (endpoint.length > 2048) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointTooLong', {
+        defaultMessage: 'Endpoint must be at most {max} characters',
+        values: { max: 2048 },
+      }),
+    ];
+  }
+}
+
+/** An optional duration in the Go format used by the collector, such as `5s` or `1m30s`. */
+export function validateOtlpDuration(value: string) {
+  const duration = value?.trim() ?? '';
+  if (!duration) {
+    return;
+  }
+  if (duration.length > 64 || !GO_DURATION_REGEX.test(duration)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpDurationInvalid', {
+        defaultMessage: 'Specify a duration such as {examples}',
+        values: { examples: '500ms, 5s, 1m30s' },
+      }),
+    ];
+  }
+}
+
+/** An optional number of bytes: a whole number that is not negative. */
+export function validateOtlpByteSize(value: string) {
+  const size = value?.trim() ?? '';
+  if (!size) {
+    return;
+  }
+  if (!/^\d+$/.test(size) || !Number.isSafeInteger(Number(size))) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpByteSizeInvalid', {
+        defaultMessage: 'Specify a whole number of bytes, 0 or more',
+      }),
+    ];
+  }
+}
+
+/** An optional whole number that is not negative, such as a number of connections. */
+export function validateOtlpCount(value: string) {
+  const count = value?.trim() ?? '';
+  if (!count) {
+    return;
+  }
+  if (!/^\d+$/.test(count) || !Number.isSafeInteger(Number(count))) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpCountInvalid', {
+        defaultMessage: 'Specify a whole number, 0 or more',
+      }),
+    ];
+  }
+}
+
+const OTLP_COMPRESSION_LEVEL_MIN = -2;
+const OTLP_COMPRESSION_LEVEL_MAX = 9;
+
+/** An optional gzip compression level. */
+export function validateOtlpCompressionLevel(value: string) {
+  const level = value?.trim() ?? '';
+  if (!level) {
+    return;
+  }
+  if (
+    !/^-?\d+$/.test(level) ||
+    Number(level) < OTLP_COMPRESSION_LEVEL_MIN ||
+    Number(level) > OTLP_COMPRESSION_LEVEL_MAX
+  ) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpCompressionLevelInvalid', {
+        defaultMessage: 'Specify a whole number from {min} to {max}',
+        values: { min: OTLP_COMPRESSION_LEVEL_MIN, max: OTLP_COMPRESSION_LEVEL_MAX },
+      }),
+    ];
+  }
+}
+
+const OTLP_HTTP_URL_SCHEMES = ['http:', 'https:'];
+// the proxy schemes that the Go HTTP client supports
+const OTLP_PROXY_URL_SCHEMES = ['http:', 'https:', 'socks5:', 'socks5h:'];
+const OTLP_HTTP_URL_EXAMPLE = 'https://collector.example.com:4318';
+const OTLP_PROXY_URL_EXAMPLE = 'http://proxy.example.com:3128';
+
+/** Validates a URL that is set: at most 2048 characters, with one of the schemes and a host. */
+function validateOtlpUrl(url: string, schemes: string[], example: string) {
+  if (url.length > 2048) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpUrlTooLong', {
+        defaultMessage: 'URL must be at most {max} characters',
+        values: { max: 2048 },
+      }),
+    ];
+  }
+  let isValid = false;
+  if (!/\s/.test(url)) {
+    try {
+      // a value such as `collector:4318` parses as an opaque URL with the `collector:` scheme
+      const { protocol, hostname } = new URL(url);
+      isValid = schemes.includes(protocol) && !!hostname;
+    } catch (e) {
+      isValid = false;
+    }
+  }
+  if (!isValid) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpUrlInvalid', {
+        defaultMessage: 'Specify a URL such as {example}',
+        values: { example },
+      }),
+    ];
+  }
+}
+
+/** The endpoint of an HTTP output: required, and an HTTP or HTTPS URL. */
+export function validateOtlpHttpEndpoint(value: string) {
+  return (
+    validateOtlpEndpoint(value) ??
+    validateOtlpUrl(value.trim(), OTLP_HTTP_URL_SCHEMES, OTLP_HTTP_URL_EXAMPLE)
+  );
+}
+
+/** An optional HTTP or HTTPS URL, such as `https://collector:4318/v1/traces`. */
+export function validateOtlpHttpUrl(value: string) {
+  const url = value?.trim() ?? '';
+  return url ? validateOtlpUrl(url, OTLP_HTTP_URL_SCHEMES, OTLP_HTTP_URL_EXAMPLE) : undefined;
+}
+
+/** An optional proxy URL, such as `http://proxy:3128`. */
+export function validateOtlpProxyUrl(value: string) {
+  const url = value?.trim() ?? '';
+  return url ? validateOtlpUrl(url, OTLP_PROXY_URL_SCHEMES, OTLP_PROXY_URL_EXAMPLE) : undefined;
+}
+
+/** An optional string of at most 256 characters. */
+export function validateOtlpShortString(value: string) {
+  if ((value?.trim() ?? '').length > 256) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpShortStringTooLong', {
+        defaultMessage: 'Must be at most {max} characters',
+        values: { max: 256 },
+      }),
+    ];
+  }
+}
+
+export function validateOtlpHeaders(pairs: Array<{ key: string; value: string }>) {
+  const errors = [...(validateKafkaHeaders(pairs) ?? [])];
+
+  pairs.forEach(({ key, value }, index) => {
+    if (key.length > 256 || value.length > 1000) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.otlpHeaderTooLong', {
+          defaultMessage:
+            'Header names must be at most {maxKey} characters and values at most {maxValue}',
+          values: { maxKey: 256, maxValue: 1000 },
+        }),
+        index,
+        hasKeyError: key.length > 256,
+        hasValueError: value.length > 1000,
+      });
+    }
+  });
+
+  return errors.length ? errors : undefined;
 }

@@ -13,19 +13,26 @@ import { defaultConfig } from '../../default/stateful/base.config';
 // The plugin is disabled by default (xpack.nightshift_investigations.enabled),
 // so its tests run against a config set that turns it on. The workflows_extensions trigger
 // approval test runs on it too, it needs the plugin on so its triggers are in the catalog.
-// Investigations are stored as agentic investigations and propose actions through proposals, both
-// disabled by default too, and they are only available behind the nightshift.enabled feature flag.
+// Investigations are stored as agentic investigations and propose actions through proposals (both
+// on by default in stateful), and they are only available behind the nightshift.enabled feature flag.
 // Semantic Memory is a separate flag that also defaults to false, and the Memory browsing
 // page is silently absent without it, so it is turned on here rather than in each suite.
 
 /**
  * Investigations run on Nightshift's code-owned default model, an EIS inference endpoint this stack
  * does not have. A preconfigured connector under that id points at the LLM endpoint the
- * investigation write path API tests start on this port; it never answers, so their runs stay in
- * progress. Keep both in sync with `NIGHTSHIFT_SCOUT_LLM_PORT` in those tests' fixtures.
+ * investigation API tests start on this port: the write path tests start one that never answers,
+ * so their runs stay in progress, and the online evals tests one that answers every call. Keep
+ * both in sync with `NIGHTSHIFT_SCOUT_LLM_PORT` in those tests' fixtures.
  */
-const NIGHTSHIFT_INVESTIGATION_DEFAULT_MODEL_ID = '.anthropic-claude-4.6-sonnet-chat_completion';
+const NIGHTSHIFT_INVESTIGATION_DEFAULT_MODEL_ID = '.anthropic-claude-5.5-sonnet-chat_completion';
 const NIGHTSHIFT_SCOUT_LLM_PORT = 8095;
+/**
+ * The online evals judges run on their own code-owned default model. It points at the same port,
+ * with its own model name so the online evals tests can answer judge calls apart from the agent.
+ */
+const NIGHTSHIFT_ONLINE_EVALS_JUDGE_MODEL_ID = '.openai-gpt-6-sol-chat_completion';
+const NIGHTSHIFT_SCOUT_JUDGE_MODEL = 'scout-judge';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -35,17 +42,35 @@ export const servers: ScoutServerConfig = {
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.nightshift_investigations.enabled=true',
       '--xpack.nightshift_investigations.memory.enabled=true',
-      '--xpack.agenticInvestigations.enabled=true',
-      '--xpack.proposals.enabled=true',
+      // Investigations only run as the Nightshift agent service account, through the entry point
+      // the suite's global setup installs in the space.
+      '--xpack.security.serviceAccounts.enabled=true',
       '--feature_flags.overrides.nightshift.enabled=true',
+      // Online evals score completed investigation rounds in-process. Scoring stays paused, so
+      // suites whose investigations complete start no scoring runs; the online evals suite
+      // unpauses it at runtime. The flag is NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG in
+      // @kbn/nightshift-shared.
+      '--xpack.evals.enabled=true',
+      '--xpack.evals.mode=runtime',
+      '--feature_flags.overrides.nightshift.onlineEvals.paused=true',
       `--xpack.actions.preconfigured=${JSON.stringify({
         [NIGHTSHIFT_INVESTIGATION_DEFAULT_MODEL_ID]: {
-          name: 'Nightshift Scout unresponsive LLM',
+          name: 'Nightshift Scout LLM',
           actionTypeId: '.gen-ai',
           config: {
             apiProvider: 'OpenAI',
             apiUrl: `http://127.0.0.1:${NIGHTSHIFT_SCOUT_LLM_PORT}/v1/chat/completions`,
             defaultModel: 'gpt-4o',
+          },
+          secrets: { apiKey: 'scout' },
+        },
+        [NIGHTSHIFT_ONLINE_EVALS_JUDGE_MODEL_ID]: {
+          name: 'Nightshift Scout judge LLM',
+          actionTypeId: '.gen-ai',
+          config: {
+            apiProvider: 'OpenAI',
+            apiUrl: `http://127.0.0.1:${NIGHTSHIFT_SCOUT_LLM_PORT}/v1/chat/completions`,
+            defaultModel: NIGHTSHIFT_SCOUT_JUDGE_MODEL,
           },
           secrets: { apiKey: 'scout' },
         },

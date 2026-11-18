@@ -7,6 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AddEditMonitorAPI, isPackagePolicyConflictFailure } from './add_monitor_api';
+import { InvalidNamespaceError } from './invalid_namespace_error';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { ServiceManagedLocations } from '../../../synthetics_service/service_managed_locations';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
@@ -402,6 +403,104 @@ describe('AddNewMonitorsPublicAPI', () => {
         maintenance_windows: [],
         spaces: [],
       });
+    });
+  });
+
+  describe('getMonitorNamespace', () => {
+    const buildApi = (spaceId: string) =>
+      new AddEditMonitorAPI({
+        routeContext: { spaceId },
+        spaceId,
+      } as any);
+
+    it('falls back to the Kibana space namespace when namespace is not explicitly provided', () => {
+      const api = buildApi('test-space');
+      expect(api.getMonitorNamespace('default', false)).toBe('test_space');
+    });
+
+    it('honors an explicitly provided "default" namespace', () => {
+      const api = buildApi('test-space');
+      expect(api.getMonitorNamespace('default', true)).toBe('default');
+    });
+
+    it('honors a custom namespace regardless of whether it was explicitly provided', () => {
+      const api = buildApi('test-space');
+      expect(api.getMonitorNamespace('custom', false)).toBe('custom');
+      expect(api.getMonitorNamespace('custom', true)).toBe('custom');
+    });
+
+    it('throws when the resolved namespace is invalid', () => {
+      const api = buildApi('test-space');
+      expect(() => api.getMonitorNamespace('UPPER_CASE', true)).toThrow(InvalidNamespaceError);
+      expect(() => api.getMonitorNamespace('UPPER_CASE', true)).toThrow(/namespace is invalid/);
+    });
+  });
+
+  describe('hydrateMonitorFields namespace resolution', () => {
+    const buildApi = (
+      spaceId: string,
+      body: Record<string, unknown>,
+      gettingStarted = false,
+      preserveNamespace = false
+    ) => {
+      const request = {
+        query: {
+          ...(gettingStarted ? { gettingStarted } : {}),
+          ...(preserveNamespace ? { preserve_namespace: preserveNamespace } : {}),
+        },
+        body,
+      };
+      return new AddEditMonitorAPI({
+        routeContext: { spaceId, request },
+        spaceId,
+        request,
+      } as any);
+    };
+
+    it('resolves omitted namespace to the Kibana space namespace', () => {
+      const api = buildApi('test-space', { type: 'http' });
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('test_space');
+    });
+
+    it('preserves an explicitly provided "default" namespace', () => {
+      const api = buildApi('test-space', { type: 'http', namespace: 'default' });
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('default');
+    });
+
+    it('keeps the namespace as sent with preserve_namespace', () => {
+      const api = buildApi('test-space', { type: 'http' }, false, true);
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('default');
+    });
+
+    it('rejects an invalid namespace with preserve_namespace', () => {
+      const api = buildApi('test-space', { type: 'http', namespace: '' }, false, true);
+      expect(() =>
+        api.hydrateMonitorFields({
+          newMonitorId: 'id-1',
+          normalizedMonitor: { namespace: '' } as any,
+        })
+      ).toThrow(/namespace is invalid/);
+    });
+
+    it('derives the namespace from the space for the Getting Started flow', () => {
+      const api = buildApi('test-space', { type: 'browser', namespace: 'default' }, true);
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('test_space');
     });
   });
 

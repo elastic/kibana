@@ -19,14 +19,6 @@ export class OnboardingApp {
     return this.page.getByTestId('addDataPageV2');
   }
 
-  /**
-   * V1 landing grid. Kept for the host-flow test that disables Add Data v2
-   * and asserts the legacy page is restored.
-   */
-  public get useCaseGridByTestId() {
-    return this.page.getByTestId('observabilityOnboardingUseCaseGrid');
-  }
-
   integrationTile(id: string) {
     return this.page.getByTestId(`observabilityOnboardingIntegrationTile-${id}`);
   }

@@ -9,10 +9,10 @@ import { EuiProvider } from '@elastic/eui';
 import { screen, within } from '@testing-library/react';
 import React from 'react';
 
+import type { ServiceAccountBoundWorkload } from '@kbn/core-security-common';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { BoundWorkloadsTable } from './bound_workloads_table';
-import type { ServiceAccountBoundWorkload } from '../../service_accounts';
 
 const workload = (workloadId: string): ServiceAccountBoundWorkload => ({
   pluginId: 'workflows',

@@ -18,6 +18,7 @@
     "@kbn/nightshift-shared",
     "@kbn/nightshift-sources-plugin",
     "@kbn/core",
+    "@kbn/std",
     "@kbn/core-pricing-common",
     "@kbn/significant-events-schema",
     "@kbn/agent-builder-common",
@@ -80,6 +81,8 @@
     "@kbn/esql-utils",
     "@kbn/nightshift-investigations-plugin",
     "@kbn/agentic-investigations-plugin",
-    "@kbn/core-elasticsearch-server-mocks"
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/std"
   ]
 }

@@ -9,7 +9,6 @@ import {
   ChatEventType,
   ConversationRoundStepType,
   ToolResultType,
-  TODOS_UPDATED_UI_EVENT,
   type ChatAgentEvent,
   type ConversationRoundStep,
   type ReasoningStep,
@@ -51,12 +50,6 @@ const relevantSkills: ConversationRoundStep = {
   source: 'implicit',
 };
 
-const carriedTodos: ConversationRoundStep = {
-  type: ConversationRoundStepType.updateTodos,
-  todos: [{ content: 'x', status: 'pending' }],
-  carried_over: true,
-};
-
 const modelProvider = (calls: unknown[] = []) =>
   ({ getUsageStats: () => ({ calls }) } as unknown as ModelProvider);
 
@@ -83,7 +76,7 @@ describe('buildInterruptedRound', () => {
   const endTime = new Date('2026-01-01T00:00:02.500Z');
 
   it('builds the steps and the partial summary for a fresh round', () => {
-    const { tracker, ran } = freshTracker([relevantSkills, carriedTodos]);
+    const { tracker, ran } = freshTracker([relevantSkills]);
     ran([stepUpdates.appendToolCall(toolCall('A'))]);
 
     const { steps, summary } = buildInterruptedRound({
@@ -100,7 +93,6 @@ describe('buildInterruptedRound', () => {
     expect(steps.map((step) => step.type)).toEqual([
       ConversationRoundStepType.relevantSkills,
       ConversationRoundStepType.toolCall,
-      ConversationRoundStepType.updateTodos,
     ]);
     expect(steps[1]).toMatchObject({ tool_call_id: 'A', results: [] });
     expect(summary).toEqual({
@@ -146,7 +138,7 @@ describe('buildInterruptedRound', () => {
   });
 
   it('falls back to the seeded steps when the stream failed before any state was streamed', () => {
-    const { tracker } = freshTracker([relevantSkills, carriedTodos]);
+    const { tracker } = freshTracker([relevantSkills]);
 
     const { steps } = buildInterruptedRound({
       tracker,
@@ -156,7 +148,7 @@ describe('buildInterruptedRound', () => {
       mainConnectorId: 'main',
     });
 
-    expect(steps).toEqual([relevantSkills, carriedTodos]);
+    expect(steps).toEqual([relevantSkills]);
   });
 
   it('omits configuration_overrides when absent', () => {
@@ -195,36 +187,6 @@ describe('buildInterruptedRound', () => {
 
     expect(steps).toEqual([
       expect.objectContaining({ tool_call_id: 'A', progression: [{ message: 'halfway' }] }),
-    ]);
-  });
-
-  it('includes a todo_write observed after the last node output', () => {
-    const { tracker, ran } = freshTracker([carriedTodos]);
-    ran([stepUpdates.append(reasoning('planning'))]);
-    tracker.recordEvent({
-      type: ChatEventType.toolUi,
-      data: {
-        tool_call_id: 'todo',
-        tool_id: 'todo_write',
-        custom_event: TODOS_UPDATED_UI_EVENT,
-        data: { todos: [{ content: 'y', status: 'in_progress' }] },
-      },
-    } as ChatAgentEvent);
-
-    const { steps } = buildInterruptedRound({
-      tracker,
-      startTime,
-      endTime,
-      modelProvider: modelProvider(),
-      mainConnectorId: 'main',
-    });
-
-    expect(steps).toEqual([
-      reasoning('planning'),
-      {
-        type: ConversationRoundStepType.updateTodos,
-        todos: [{ content: 'y', status: 'in_progress' }],
-      },
     ]);
   });
 
@@ -326,7 +288,7 @@ describe('buildInterruptedRound', () => {
 describe('getModelUsage', () => {
   const call = (
     connectorId: string,
-    tokens?: { prompt: number; completion: number; cached?: number },
+    tokens?: { prompt: number; completion: number; cached?: number; thinking?: number },
     model?: string
   ) => ({
     connectorId,
@@ -396,6 +358,65 @@ describe('getModelUsage', () => {
     expect(connectors).toEqual([
       { connector_id: 'main', llm_calls: 2, input_tokens: 0, output_tokens: 0 },
     ]);
+  });
+
+  it('counts the thinking tokens as output tokens, as they are not part of the completion', () => {
+    const usage = getModelUsage(
+      {
+        calls: [
+          call('main', { prompt: 100, completion: 8, thinking: 12 }),
+          call('main', { prompt: 100, completion: 5 }),
+          call('fast', { prompt: 10, completion: 1, thinking: 4 }),
+        ],
+      },
+      'main'
+    );
+
+    expect(usage.output_tokens).toBe(30);
+    expect(usage.connectors?.map((connector) => connector.output_tokens)).toEqual([25, 5]);
+  });
+
+  it('reports the thinking tokens as reasoning tokens, only for the connectors that reported them', () => {
+    const usage = getModelUsage(
+      {
+        calls: [
+          call('main', { prompt: 100, completion: 8, thinking: 12 }),
+          call('main', { prompt: 100, completion: 5, thinking: 0 }),
+          call('fast', { prompt: 10, completion: 1 }),
+          call('other', { prompt: 10, completion: 1, thinking: 4 }),
+        ],
+      },
+      'main'
+    );
+
+    expect(usage.reasoning_tokens).toBe(16);
+    expect(usage.connectors?.map((connector) => connector.reasoning_tokens)).toEqual([
+      12,
+      undefined,
+      4,
+    ]);
+    // a connector that never reported them has no field, not a zero
+    expect(usage.connectors?.[1]).not.toHaveProperty('reasoning_tokens');
+  });
+
+  it('counts a reported zero as reported, and omits the reasoning tokens when none was reported', () => {
+    expect(
+      getModelUsage({ calls: [call('main', { prompt: 1, completion: 1, thinking: 0 })] }, 'main')
+        .reasoning_tokens
+    ).toBe(0);
+    expect(
+      getModelUsage({ calls: [call('main', { prompt: 1, completion: 1 })] }, 'main')
+    ).not.toHaveProperty('reasoning_tokens');
+  });
+
+  it('keeps the reasoning tokens as a part of the output tokens', () => {
+    const { output_tokens: outputTokens, reasoning_tokens: reasoningTokens } = getModelUsage(
+      { calls: [call('main', { prompt: 100, completion: 8, thinking: 12 })] },
+      'main'
+    );
+
+    expect(outputTokens).toBe(20);
+    expect(reasoningTokens).toBe(12);
   });
 
   it('omits the breakdown when there was no call', () => {

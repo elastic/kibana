@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
@@ -19,8 +20,12 @@ import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { resolveScopedModel } from './lib/scoped_model';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import type { HuntBehaviorResult } from '../../services/watches/hunt/tier2/types';
+import { withLinkedProjectTwins } from '../../services/watches/hunt/common/cps_scope';
 
-jest.mock('./lib/scoped_model', () => ({ resolveScopedModel: jest.fn() }));
+jest.mock('./lib/scoped_model', () => ({
+  resolveScopedModel: jest.fn(),
+  resolveConfiguredScopedModel: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock('../../services/watches/hunt/tier2/hunt_behavior', () => ({ huntBehavior: jest.fn() }));
 
 const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof resolveScopedModel>;
@@ -36,15 +41,20 @@ const tier2Result: HuntBehaviorResult = {
   next_step: 'no behaviors to corroborate',
 };
 
-const makeDeps = () => {
+const makeDeps = ({ cpsEnabled = false }: { cpsEnabled?: boolean } = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
   const inference = { getDefaultConnector: jest.fn() };
+  const clusterClient = elasticsearchServiceMock.createClusterClient();
+  const scoped = elasticsearchServiceMock.createScopedClusterClient();
+  clusterClient.asScoped.mockReturnValue(scoped);
 
   registerHuntBehaviorRoute({
     router: router as unknown as RouteDependencies['router'],
     logger,
+    getClusterClient: () => clusterClient,
+    isCpsEnabled: () => cpsEnabled,
     getHuntServices: () =>
       ({
         getInference: () => inference,
@@ -53,13 +63,14 @@ const makeDeps = () => {
       } as unknown as ReturnType<RouteDependencies['getHuntServices']>),
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { search: jest.fn() };
-  const asInternalUser = { search: jest.fn() };
   const uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
   const context = {
-    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+    alertzero: Promise.resolve({
+      subscription: 'available',
+      hasRequiredDependencies: true,
+      isSpaceSupported: true,
+    }),
     core: Promise.resolve({
-      elasticsearch: { client: { asCurrentUser, asInternalUser } },
       uiSettings: { client: uiSettingsClient },
     }),
   };
@@ -72,8 +83,8 @@ const makeDeps = () => {
       response: ReturnType<typeof httpServerMock.createResponseFactory>
     ) => Promise<unknown>,
     context,
-    asCurrentUser,
-    asInternalUser,
+    clusterClient,
+    scoped,
     logger,
   };
 };
@@ -99,33 +110,30 @@ describe('registerHuntBehaviorRoute', () => {
     expect(routeConfig.access).toBe('internal');
   });
 
-  it('resolves the frontier and balanced tiers rather than the deployment default', async () => {
+  it('resolves the frontier tier rather than the deployment default', async () => {
     const { handler, context } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
     const featureIds = resolveScopedModelMock.mock.calls.map(([{ featureId }]) => featureId);
-    expect(featureIds).toEqual([
-      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
-      ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
-    ]);
+    expect(featureIds).toEqual([ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID]);
   });
 
-  it('hands extraction the frontier model and ES|QL generation the balanced one', async () => {
+  it('hands both extraction and ES|QL generation the frontier model', async () => {
     const frontier = { connector: { id: 'opus' } } as unknown as ScopedModel;
-    const balanced = { connector: { id: 'sonnet' } } as unknown as ScopedModel;
-    resolveScopedModelMock.mockImplementation(async ({ featureId }) => ({
-      ok: true,
-      model: featureId === ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID ? frontier : balanced,
-    }));
+    resolveScopedModelMock.mockImplementation(async ({ featureId }) =>
+      featureId === ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID
+        ? { ok: true, model: frontier }
+        : { ok: false, reason: 'no_connector', message: 'not a Tier 2 tier' }
+    );
     const { handler, context } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
-    expect(huntBehaviorMock.mock.calls[0][0]).toEqual({ extraction: frontier, esql: balanced });
+    expect(huntBehaviorMock.mock.calls[0][0]).toEqual({ extraction: frontier, esql: frontier });
   });
 
-  it('never resolves the efficient tier, which Tier 2 has no consumer for', async () => {
+  it('never resolves the efficient or balanced tiers, which Tier 2 has no consumer for', async () => {
     const { handler, context } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
@@ -133,31 +141,13 @@ describe('registerHuntBehaviorRoute', () => {
     expect(resolveScopedModelMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID })
     );
-  });
-
-  it('fails with 400 when only the balanced tier is unavailable, rather than running half of Tier 2', async () => {
-    resolveScopedModelMock.mockImplementation(async ({ featureId }) =>
-      featureId === ALERTZERO_BALANCED_INFERENCE_FEATURE_ID
-        ? { ok: false, reason: 'no_connector', message: 'no balanced connector' }
-        : { ok: true, model }
+    expect(resolveScopedModelMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: ALERTZERO_BALANCED_INFERENCE_FEATURE_ID })
     );
-    const { handler, context } = makeDeps();
-    const response = httpServerMock.createResponseFactory();
-
-    await handler(context, requestFor(), response);
-
-    expect(huntBehaviorMock).not.toHaveBeenCalled();
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 400,
-      body: {
-        message: 'no balanced connector',
-        attributes: { tier2_skipped_reason: 'no_connector', unavailable_model_tiers: ['balanced'] },
-      },
-    });
   });
 
   it('runs as the current user so the caller index privileges bound generated ES|QL', async () => {
-    const { handler, context, asCurrentUser, asInternalUser } = makeDeps();
+    const { handler, context, scoped } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
@@ -165,16 +155,35 @@ describe('registerHuntBehaviorRoute', () => {
       { extraction: model, esql: model },
       expect.anything(),
       expect.anything(),
-      asCurrentUser,
+      scoped.asCurrentUser,
       mitreDataClient
     );
-    expect(huntBehaviorMock).not.toHaveBeenCalledWith(
-      { extraction: model, esql: model },
-      expect.anything(),
-      expect.anything(),
-      asInternalUser,
-      mitreDataClient
-    );
+  });
+
+  it('widens the allowed indices to linked projects only when cross-project search is on', async () => {
+    const allowedIndicesOf = async (cpsEnabled: boolean) => {
+      huntBehaviorMock.mockClear();
+      const { handler, context } = makeDeps({ cpsEnabled });
+      await handler(context, requestFor(), httpServerMock.createResponseFactory());
+      return huntBehaviorMock.mock.calls[0][2].allowed_indices;
+    };
+
+    const local = await allowedIndicesOf(false);
+    const widened = await allowedIndicesOf(true);
+
+    expect(local?.length).toBeGreaterThan(0);
+    expect(widened).toEqual(withLinkedProjectTwins(local ?? []));
+    expect(widened).not.toEqual(local);
+    expect(huntBehaviorMock.mock.calls[0][2].cross_project_search).toBe(true);
+  });
+
+  it('scopes the client to the request with the space project routing', async () => {
+    const { handler, context, clusterClient } = makeDeps();
+    const request = requestFor();
+
+    await handler(context, request, httpServerMock.createResponseFactory());
+
+    expect(clusterClient.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
   });
 
   it('returns 503 when the inference plugin is absent', async () => {
@@ -195,7 +204,7 @@ describe('registerHuntBehaviorRoute', () => {
         message: 'inference is not installed',
         attributes: {
           tier2_skipped_reason: 'no_inference_plugin',
-          unavailable_model_tiers: ['balanced', 'frontier'],
+          unavailable_model_tiers: ['frontier'],
         },
       },
     });
@@ -219,7 +228,7 @@ describe('registerHuntBehaviorRoute', () => {
         message: 'no connector configured',
         attributes: {
           tier2_skipped_reason: 'no_connector',
-          unavailable_model_tiers: ['balanced', 'frontier'],
+          unavailable_model_tiers: ['frontier'],
         },
       },
     });
@@ -239,7 +248,7 @@ describe('registerHuntBehaviorRoute', () => {
         message: 'connector store unavailable',
         attributes: {
           tier2_skipped_reason: 'resolution_error',
-          unavailable_model_tiers: ['balanced', 'frontier'],
+          unavailable_model_tiers: ['frontier'],
         },
       },
     });
@@ -263,7 +272,7 @@ describe('registerHuntBehaviorRoute', () => {
         message: 'connector store unavailable',
         attributes: {
           tier2_skipped_reason: 'resolution_error',
-          unavailable_model_tiers: ['balanced', 'frontier'],
+          unavailable_model_tiers: ['frontier'],
         },
       },
     });
@@ -305,6 +314,25 @@ describe('registerHuntBehaviorRoute', () => {
         llm_confidence_threshold: 0.8,
         iocs: [{ type: 'ip', value: '1.2.3.4' }],
       }),
+      expect.anything(),
+      mitreDataClient
+    );
+  });
+
+  it('forwards excluded_iocs to the service when present', async () => {
+    const { handler, context } = makeDeps();
+    const excluded = [{ type: 'ip', value: '169.254.169.254' }];
+
+    await handler(
+      context,
+      requestFor({ iocs: [{ type: 'hash', value: 'abc' }], excluded_iocs: excluded }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(huntBehaviorMock).toHaveBeenCalledWith(
+      { extraction: model, esql: model },
+      expect.anything(),
+      expect.objectContaining({ excluded_iocs: excluded }),
       expect.anything(),
       mitreDataClient
     );

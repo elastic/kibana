@@ -138,9 +138,12 @@ describe('Appearance settings', () => {
       return { ...state, areaFill };
     };
 
-    it('shows Solid as selected when no fill is set', () => {
+    it('shows gradient as selected when no fill is set', () => {
       renderComponent({ state: areaState() });
-      expect(screen.getByRole('button', { name: 'Solid' })).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByRole('button', { name: 'Gradient' })).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
     });
 
     it('saves solid explicitly', () => {

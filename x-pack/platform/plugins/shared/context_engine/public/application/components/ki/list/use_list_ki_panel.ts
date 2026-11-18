@@ -5,112 +5,186 @@
  * 2.0.
  */
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import {
-  INDEX_MANAGEMENT_LOCATOR_ID,
-  type IndexManagementLocatorParams,
-} from '@kbn/index-management-shared-types';
-import { getEbtProps } from '@kbn/ebt-click';
-import { i18n } from '@kbn/i18n';
-import { useLocatorUrl } from '@kbn/share-plugin/public';
-import { useMemo, useState } from 'react';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
-import { isIndexPattern } from '../../../../../common/ai_index_dest';
-import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../../common/constants';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { DEFAULT_KI_PAGE_SIZE } from '../../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
+import type { KiListItem } from '../../../../../common/http_api/knowledge_indicators';
+import { DEFAULT_KI_LIST_SORT, type KiListSort } from '../../../../../common/ki_list_sort';
 import { useListKi } from '../../../hooks/use_list_ki';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useListKiByType } from '../../../hooks/use_list_ki_by_type';
+import { useSelectedKi, type SelectedKi } from '../../../hooks/use_selected_ki';
 import {
   ALL_TYPE_FILTER,
-  getDiscoverEsqlQuery,
-  getIndexManagementLocatorParams,
-  getListKiTypeFilterLabel,
+  DEFAULT_STATUS_FILTER,
+  getStatusesForFilter,
+  type ListKiStatusFilterValue,
   type ListKiTypeFilter,
 } from './list_ki_helpers';
+import { buildListKiGroups, getNextGroupSize } from './list_ki_groups_helpers';
 
-export const useListKiPanel = ({ id: aiIndexId, dest }: GetAiIndexResponse) => {
-  const {
-    services: { share, application },
-  } = useKibana();
+const EMPTY_GROUP_SIZES: Record<string, number> = {};
 
+const isSameKi = (ki: KiListItem, { kiId, index }: SelectedKi): boolean =>
+  ki.id === kiId && (index.length === 0 || ki.index === index);
+
+export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
   const [typeFilter, setTypeFilter] = useState<ListKiTypeFilter>(ALL_TYPE_FILTER);
-  const [size, setSize] = useState(DEFAULT_KI_PAGE_SIZE);
+  const [statusFilter, setStatusFilter] = useState<ListKiStatusFilterValue>(DEFAULT_STATUS_FILTER);
+  const [sort, setSort] = useState<KiListSort>(DEFAULT_KI_LIST_SORT);
+  // What the search box currently displays, updated on every keystroke.
+  const [searchText, setSearchText] = useState('');
+  // The last string that was actually fetched; only changes via submitSearch.
+  const [submittedQuery, setSubmittedQuery] = useState('');
+  // "Show more" page size per type. Reset when a filter changes.
+  const [groupSizes, setGroupSizes] = useState<Record<string, number>>(EMPTY_GROUP_SIZES);
+
+  const resetGroupSizes = () => setGroupSizes(EMPTY_GROUP_SIZES);
 
   const onTypeFilterChange = (filter: ListKiTypeFilter) => {
     setTypeFilter(filter);
-    setSize(DEFAULT_KI_PAGE_SIZE);
+    resetGroupSizes();
   };
+
+  const onStatusFilterChange = (status: ListKiStatusFilterValue) => {
+    setStatusFilter(status);
+    resetGroupSizes();
+  };
+
+  // Sort is not a filter: "Clear filters" keeps it.
+  const onSortChange = (nextSort: KiListSort) => {
+    setSort(nextSort);
+    resetGroupSizes();
+  };
+
+  const submitSearch = useCallback(
+    (value: string) => {
+      const trimmed = value.trim();
+      if (trimmed === submittedQuery) {
+        return;
+      }
+      setSubmittedQuery(trimmed);
+      setGroupSizes(EMPTY_GROUP_SIZES);
+    },
+    [submittedQuery]
+  );
+
+  const hasActiveFilters =
+    typeFilter.kind === 'type' ||
+    statusFilter !== DEFAULT_STATUS_FILTER ||
+    submittedQuery.length > 0;
+
+  const clearFilters = () => {
+    setTypeFilter(ALL_TYPE_FILTER);
+    setStatusFilter(DEFAULT_STATUS_FILTER);
+    setSearchText('');
+    setSubmittedQuery('');
+    resetGroupSizes();
+  };
+
+  const query = submittedQuery.length > 0 ? submittedQuery : undefined;
+  const status = useMemo(() => getStatusesForFilter(statusFilter), [statusFilter]);
 
   const { kis, total, summary, isLoading, isFetching, error } = useListKi({
     aiIndexId,
-    size,
+    size: DEFAULT_KI_PAGE_SIZE,
     type: typeFilter.kind === 'type' ? typeFilter.value : undefined,
+    query,
+    status,
+    sort,
   });
 
-  const typeFilterOptions = useMemo(
+  const groupResults = useListKiByType({
+    aiIndexId,
+    sizesByType: groupSizes,
+    query,
+    status,
+    sort,
+  });
+
+  const groups = useMemo(
     () =>
-      [{ type: ALL_TYPE_FILTER.value, count: summary.total }, ...summary.countsByType].map(
-        ({ type, count }) => ({
-          id: type,
-          label: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.filterType', {
-            defaultMessage: '{typeLabel} ({count})',
-            values: { typeLabel: getListKiTypeFilterLabel(type), count },
-          }),
-          'data-test-subj': `contextListKiFilter-${type}`,
-          ...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
-            action: CONTEXT_ENGINE_UI_EBT.action.listKi.FILTER_TYPE,
-          }),
-        })
-      ),
-    [summary.total, summary.countsByType]
+      buildListKiGroups({
+        kis,
+        total,
+        countsByType: summary.countsByType,
+        typeFilter,
+        groupResults,
+      }),
+    [groupResults, kis, summary.countsByType, total, typeFilter]
   );
 
-  const loadMore = () =>
-    setSize((current) => Math.min(current + DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE));
+  const showMore = useCallback(
+    (type: string, loadedCount: number) => {
+      const groupResult = groupResults[type];
+      // After a failed "Show more" the next size would be the same, so ask again instead.
+      if (groupResult?.isError) {
+        groupResult.retry();
+        return;
+      }
+      setGroupSizes((current) => ({ ...current, [type]: getNextGroupSize(loadedCount) }));
+    },
+    [groupResults]
+  );
 
-  const canOpenDiscover = application.capabilities.discover_v2?.show === true;
-  const discoverHref = useMemo(() => {
-    if (!canOpenDiscover) {
-      return undefined;
+  // Rows in the order the list shows them. The first one opens when nothing is selected.
+  const visibleKis = useMemo(() => groups.flatMap((group) => group.kis), [groups]);
+  const { selectedKi, selectKi } = useSelectedKi();
+
+  // A filter change re-checks the selection once the new list has loaded.
+  const filterKey = `${typeFilter.value}|${statusFilter}|${submittedQuery}`;
+  const checkedFilterKeyRef = useRef(filterKey);
+
+  useEffect(() => {
+    if (isLoading || isFetching) {
+      return;
     }
-    const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
-    return locator?.getRedirectUrl({
-      timeRange: { from: 'now-90d', to: 'now' },
-      query: { esql: getDiscoverEsqlQuery(dest.value) },
-    });
-  }, [canOpenDiscover, dest.value, share?.url?.locators]);
+    const [firstKi] = visibleKis;
+    const filtersChanged = checkedFilterKeyRef.current !== filterKey;
+    checkedFilterKeyRef.current = filterKey;
 
-  const canOpenIndexManagement = application.capabilities.index_management?.monitor === true;
-  const canLinkToIndexManagement = canOpenIndexManagement && !isIndexPattern(dest.value);
-  const indexManagementLocator = canLinkToIndexManagement
-    ? share.url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID)
-    : undefined;
-  const indexManagementUrl = useLocatorUrl(
-    indexManagementLocator,
-    canLinkToIndexManagement
-      ? getIndexManagementLocatorParams(dest)
-      : { page: 'index_details' as const, indexName: '' },
-    undefined,
-    [dest, canLinkToIndexManagement]
-  );
-  const indexManagementHref =
-    canLinkToIndexManagement && indexManagementUrl ? indexManagementUrl : undefined;
+    if (!firstKi) {
+      return;
+    }
+    if (!selectedKi) {
+      selectKi(firstKi, { replace: true });
+      return;
+    }
+    // Deep links keep their document. Only a filter that hides it opens the first one.
+    if (filtersChanged && !visibleKis.some((ki) => isSameKi(ki, selectedKi))) {
+      selectKi(firstKi, { replace: true });
+    }
+  }, [filterKey, isFetching, isLoading, selectKi, selectedKi, visibleKis]);
+
+  // Old links may miss the backing index. Take it from the list when the document is there.
+  const resolvedSelectedKi = useMemo((): SelectedKi | undefined => {
+    if (!selectedKi || selectedKi.index.length > 0) {
+      return selectedKi;
+    }
+    const listedKi = visibleKis.find((ki) => ki.id === selectedKi.kiId);
+    return listedKi ? { kiId: selectedKi.kiId, index: listedKi.index } : selectedKi;
+  }, [selectedKi, visibleKis]);
 
   return {
     aiIndexId,
     typeFilter,
-    typeFilterOptions,
+    summary,
     onTypeFilterChange,
-    kis,
-    total,
-    size,
+    statusFilter,
+    onStatusFilterChange,
+    sort,
+    onSortChange,
+    searchText,
+    submittedQuery,
+    onSearchTextChange: setSearchText,
+    onSearchSubmit: submitSearch,
+    hasActiveFilters,
+    clearFilters,
+    groups,
+    showMore,
+    selectedKi: resolvedSelectedKi,
+    selectKi,
     isLoading,
     isFetching,
     error,
-    discoverHref,
-    indexManagementHref,
-    destValue: dest.value,
-    loadMore,
   };
 };

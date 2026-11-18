@@ -15,35 +15,39 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-
+import type { DashboardChangeSource } from '../../common/change_sources';
 import { getLastSavedState } from '../../common/default_dashboard_state';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializeAccessControlManager } from './access_control_manager';
 import { initializeApproximationManager } from './approximation_manager';
+import { initializeChangeSourceTracker, type LatestChangeBySource } from './change_source_tracker';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
 import { initializeFiltersManager } from './filters_manager';
-import { initializeHistoryManager } from './history_manager';
+import { initializeHistoryManager, type DashboardHistoryState } from './history_manager';
 import { initializeLayoutManager } from './layout_manager';
 import type { DashboardChildren } from './layout_manager/types';
 import { initializePauseFetchManager } from './pause_fetch_manager';
 import { initializeProjectRoutingManager } from './project_routing_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
-import { saveDashboard } from './save_modal/save_dashboard';
+import { generateDashboardNotSavedToast, saveDashboard } from './save_modal/save_dashboard';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
 import { initializeSettingsManager } from './settings_manager';
+import { reportDashboardSaved } from './telemetry/report_dashboard_saved';
 import { initializeTimesliceManager } from './timeslice_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
 import type { DashboardRedirect } from '../dashboard_app/types';
+import { coreServices } from '../services/kibana_services';
 import type {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
   DashboardSaveEvent,
+  DashboardSetStateOptions,
   DashboardUser,
   UserActivity,
 } from './types';
@@ -61,6 +65,7 @@ export function getDashboardApi({
   savedObjectId,
   user,
   isAccessControlEnabled,
+  changedBy,
   viewMode,
 }: {
   creationOptions?: DashboardCreationOptions;
@@ -71,12 +76,14 @@ export function getDashboardApi({
   savedObjectId?: string;
   user?: DashboardUser;
   isAccessControlEnabled?: boolean;
+  changedBy?: readonly DashboardChangeSource[];
   viewMode?: ViewMode;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const onSave$ = new Subject<DashboardSaveEvent>();
+  const changeSourceTracker = initializeChangeSourceTracker(changedBy);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
   const userActivity$ = new Subject<UserActivity>();
 
@@ -152,7 +159,8 @@ export function getDashboardApi({
 
   const approximationManager = initializeApproximationManager(initialState);
 
-  async function setState(state: DashboardState) {
+  async function setState(state: DashboardState, options?: DashboardSetStateOptions) {
+    changeSourceTracker.recordChange(options?.changedBy ?? []);
     await layoutManager.internalApi.reset(state);
     unifiedSearchManager.internalApi.reset(state);
     projectRoutingManager?.internalApi.reset(state);
@@ -205,14 +213,37 @@ export function getDashboardApi({
     approximationManager,
     setState,
     onSave$: onSave$.asObservable(),
+    changeSourceTracker,
   });
 
-  const initialState$ = new Subject<DashboardState>();
+  const publishSave = (
+    saveEvent: DashboardSaveEvent,
+    latestChangeBySource: LatestChangeBySource
+  ) => {
+    // the dashboard is already saved at this point, so do not surface failures as a save error
+    try {
+      const savedChangedBy = changeSourceTracker.markSaved(latestChangeBySource);
+      onSave$.next(saveEvent);
+      reportDashboardSaved({ ...saveEvent, changedBy: savedChangedBy });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Error encountered publishing dashboard save', error);
+    }
+  };
+
+  const getHistoryState = (): DashboardHistoryState => ({
+    ...getState(),
+    latestChangeBySource: changeSourceTracker.getLatestChanges(),
+  });
+  const initialState$ = new Subject<DashboardHistoryState>();
   const historyManager = initializeHistoryManager({
     anyStateChange$,
     hasOverlays$: trackOverlayApi.hasOverlays$,
-    setState,
-    getState,
+    setState: async ({ latestChangeBySource, ...state }) => {
+      changeSourceTracker.restoreLatestChanges(latestChangeBySource);
+      await setState(state);
+    },
+    getState: getHistoryState,
     dataLoading$: combineLatest([
       layoutManager.internalApi.childrenStateLoading$,
       layoutManager.internalApi.childrenLoading$,
@@ -227,7 +258,7 @@ export function getDashboardApi({
 
   if (incomingEmbeddables?.length) {
     // allow incoming embeddables to be undone
-    initialState$.next(getState());
+    initialState$.next(getHistoryState());
     layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
   }
 
@@ -300,11 +331,15 @@ export function getDashboardApi({
       let resolve: ((results: { id: string } | undefined) => void) | undefined;
       const promise = new Promise<{ id: string } | undefined>((_resolve) => (resolve = _resolve));
 
+      let latestChangeBySource: LatestChangeBySource = {};
       openSaveModal({
         description,
         isManaged,
         lastSavedId: savedObjectId$.value,
-        serializeState: getState,
+        serializeState: () => {
+          latestChangeBySource = changeSourceTracker.getLatestChanges();
+          return getState();
+        },
         setTimeRestore: (newTimeRestore: boolean) =>
           settingsManager.api.setSettings({ time_restore: newTimeRestore }),
         setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
@@ -327,11 +362,10 @@ export function getDashboardApi({
             title: savedState.title,
           });
           savedObjectId$.next(id);
-          onSave$.next({
-            previousDashboardId,
-            dashboardId: id,
-            dashboardState: getState(),
-          });
+          publishSave(
+            { previousDashboardId, dashboardId: id, dashboardState: getState() },
+            latestChangeBySource
+          );
           if (redirectTo && redirectRequired) {
             redirectTo({
               id,
@@ -347,25 +381,42 @@ export function getDashboardApi({
 
       return promise;
     },
-    runQuickSave: async () => {
+    runQuickSave: async (options: { restored?: boolean } = {}) => {
       if (isManaged) return;
-      const dashboardState = getState();
-      const previousDashboardId = savedObjectId$.value;
-      const saveResult = await saveDashboard({
-        dashboardState,
-        saveOptions: {},
-        lastSavedId: savedObjectId$.value,
-        accessMode: accessControlManager.api.accessControl$.value?.accessMode,
-      });
+      let latestChangeBySource: LatestChangeBySource;
+      let dashboardState: DashboardState;
+      let previousDashboardId: string | undefined;
+      try {
+        latestChangeBySource = changeSourceTracker.getLatestChanges();
+        dashboardState = getState();
+        previousDashboardId = savedObjectId$.value;
+      } catch (error) {
+        coreServices.notifications.toasts.addDanger(
+          generateDashboardNotSavedToast(settingsManager.api.title$.value ?? '', error.message)
+        );
+        return;
+      }
 
-      if ('error' in saveResult) return;
-      onSave$.next({
-        previousDashboardId,
-        dashboardId: saveResult?.id ?? previousDashboardId,
-        dashboardState,
-      });
+      // do not update the saved object when restoring a dashboard, since this would result in duplicate change history entries
+      const saveResult = options.restored
+        ? undefined
+        : await saveDashboard({
+            dashboardState,
+            saveOptions: {},
+            lastSavedId: savedObjectId$.value,
+            accessMode: accessControlManager.api.accessControl$.value?.accessMode,
+          });
 
-      return;
+      if (saveResult && 'error' in saveResult) return;
+
+      publishSave(
+        {
+          previousDashboardId,
+          dashboardId: saveResult?.id ?? previousDashboardId,
+          dashboardState,
+        },
+        latestChangeBySource
+      );
     },
     savedObjectId$,
     setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),

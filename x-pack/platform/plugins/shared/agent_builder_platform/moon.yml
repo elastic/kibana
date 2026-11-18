@@ -17,6 +17,7 @@ project:
   owner: '@elastic/workchat-eng'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder_platform
 dependsOn:
+  - '@kbn/isomer-components'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/logging'
@@ -39,6 +40,10 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/share-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/isomer-plugin'
+  - '@kbn/deeplinks-agent-builder'
+  - '@kbn/deeplinks-analytics'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/connector-specs'
   - '@kbn/connector-schemas'
@@ -65,6 +70,4 @@ fileGroups:
     - server/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-  jest-config:
-    - jest.config.js
 tasks: {}

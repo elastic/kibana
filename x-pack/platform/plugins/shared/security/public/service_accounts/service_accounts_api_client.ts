@@ -19,7 +19,6 @@ export type {
   DeleteServiceAccountResponse,
   ListServiceAccountWorkloadsResponse,
   ListServiceAccountsResponse,
-  ServiceAccountBoundWorkload,
   ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
 } from '../../common/service_accounts';

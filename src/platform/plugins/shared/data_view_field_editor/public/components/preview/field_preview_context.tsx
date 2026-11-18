@@ -34,6 +34,7 @@ const fieldPreviewContext = createContext<Context | undefined>(undefined);
 
 const defaultParams: Params = {
   name: null,
+  customLabel: null,
   index: null,
   script: null,
   document: null,
@@ -188,7 +189,8 @@ export const FieldPreviewProvider: FC<
             (value: FieldPreview[] | undefined) => fieldPreview$.current.next(value)
           );
         } else {
-          controller.updateSingleFieldPreview(name!, values, type, format);
+          // the preview also runs before a name is set, so default to the same key as the error case
+          controller.updateSingleFieldPreview(name ?? '', values, type, format);
         }
       }
     }

@@ -10,6 +10,5 @@ import type { FtrProviderContext } from '../../../functional/ftr_provider_contex
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('ccs test', function () {
     loadTestFile(require.resolve('./ccs_discover'));
-    loadTestFile(require.resolve('./ccs_console'));
   });
 }

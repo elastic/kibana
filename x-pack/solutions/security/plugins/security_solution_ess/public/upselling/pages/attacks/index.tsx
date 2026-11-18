@@ -7,8 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AttacksUpsellingPage } from '@kbn/security-solution-upselling/pages/attacks';
+import type { UpsellingPageProps } from '@kbn/security-solution-upselling/service';
 import React, { useMemo } from 'react';
 
+import { useKibana } from '../../../common/services';
 import { UpgradeActions } from '../attack_discovery/upgrade_actions';
 import * as i18n from './translations';
 
@@ -16,7 +18,8 @@ import * as i18n from './translations';
  * This component passes self-managed-specific upgrade actions and `i18n` to the
  * platform agnostic `AttacksUpsellingPage` component.
  */
-const AttacksUpsellingPageESSComponent: React.FC = () => {
+const AttacksUpsellingPageESSComponent: React.FC<UpsellingPageProps> = ({ appHeader }) => {
+  const { docLinks } = useKibana().services;
   const actions = useMemo(
     () => (
       <EuiFlexGroup data-test-subj="essActions" justifyContent="center" gutterSize="none">
@@ -31,7 +34,9 @@ const AttacksUpsellingPageESSComponent: React.FC = () => {
   return (
     <AttacksUpsellingPage
       actions={actions}
+      appHeader={appHeader}
       availabilityMessage={i18n.AVAILABILITY_MESSAGE}
+      docLink={docLinks.links.siem.attackDiscovery}
       upgradeMessage={i18n.UPGRADE_MESSAGE}
     />
   );

@@ -13,6 +13,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { EsqlNotificationActionApi } from './esql_notification_action';
 import { EsqlNotificationPopover } from './esql_notification_popover';
@@ -25,9 +26,11 @@ const makeApi = (queries: AggregateQuery[] = []): EsqlNotificationActionApi => (
 
 const renderPopover = (api: EsqlNotificationActionApi) =>
   render(
-    <I18nProvider>
-      <EsqlNotificationPopover api={api} />
-    </I18nProvider>
+    <EuiProvider>
+      <I18nProvider>
+        <EsqlNotificationPopover api={api} />
+      </I18nProvider>
+    </EuiProvider>
   );
 
 const openPopover = async (api: EsqlNotificationActionApi) => {

@@ -10,19 +10,6 @@
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-// Base path for ESQL documentation within the elasticsearch repository
-export const ELASTISEARCH_ESQL_DOCS_BASE_PATH = path.join(
-  'docs',
-  'reference',
-  'query-languages',
-  'esql',
-  'kibana'
-);
-
-// Suffixes for specific elasticsearch ESQL content directories
-export const DEFINITION_DIR_SUFFIX = 'definition';
-export const DOCS_DIR_SUFFIX = 'docs';
-
 // Output directory for the generated files in the @kbn/language-documentation package
 export const OUTPUT_DIR = path.join(
   REPO_ROOT,

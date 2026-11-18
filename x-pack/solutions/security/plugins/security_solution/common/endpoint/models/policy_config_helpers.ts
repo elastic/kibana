@@ -103,6 +103,13 @@ export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => 
     enableValue: true,
   },
   {
+    keyPath: 'attack_surface_reduction.registry_credential_hardening.enabled',
+    osList: [PolicyOperatingSystem.windows],
+    disableValue: false,
+    enableValue: true,
+    optionalOsList: [PolicyOperatingSystem.windows],
+  },
+  {
     keyPath: 'antivirus_registration.enabled',
     osList: [PolicyOperatingSystem.windows],
     disableValue: false,
@@ -241,6 +248,9 @@ const getDisabledWindowsSpecificProtections = (policy: PolicyConfig) => ({
     credential_hardening: {
       enabled: false,
     },
+    ...(policy.windows.attack_surface_reduction.registry_credential_hardening === undefined
+      ? {}
+      : { registry_credential_hardening: { enabled: false } }),
   },
 });
 
@@ -475,6 +485,101 @@ export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
   };
 };
 
+/**
+ * AI Data Collection is configurable only from the per-OS policy form, so it is enabled only when
+ * both feature flags are on.
+ */
+export const isAiDataCollectionEnabled = ({
+  endpointAiDataCollection,
+  perOsPolicySettings,
+}: Pick<ExperimentalFeatures, 'endpointAiDataCollection' | 'perOsPolicySettings'>): boolean =>
+  endpointAiDataCollection && perOsPolicySettings;
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with the `ai_data_collection` block removed from
+ * every OS, so the policy leaves AI event enrichment unset (treated as disabled by Endpoint). Used
+ * when `isAiDataCollectionEnabled` is false.
+ */
+export const removeAiDataCollection = (policy: PolicyConfig): PolicyConfig => {
+  const { ai_data_collection: windowsAiDataCollection, ...windows } = policy.windows;
+  const { ai_data_collection: macAiDataCollection, ...mac } = policy.mac;
+  const { ai_data_collection: linuxAiDataCollection, ...linux } = policy.linux;
+
+  return { ...policy, windows, mac, linux };
+};
+
+/** Leaf field removed from `windows.advanced.kernel.registry_credential_hardening`. */
+const REGISTRY_CREDENTIAL_HARDENING_ADVANCED_FIELD = 'descendants';
+
+/**
+ * Mirrors `removeYaraAdvancedSettingsForOs`: narrows each level before descending into it, prunes
+ * `registry_credential_hardening` once `descendants` is gone, then prunes `kernel` once it is
+ * empty, and otherwise leaves `windows.advanced` untouched.
+ */
+const removeRegistryCredentialHardeningAdvancedSettings = (
+  windowsPolicy: PolicyConfig['windows']
+): PolicyConfig['windows'] => {
+  const { advanced } = windowsPolicy;
+
+  if (!isAdvancedSettings(advanced)) {
+    return windowsPolicy;
+  }
+
+  const kernel = advanced.kernel;
+
+  if (!isAdvancedSettings(kernel)) {
+    return windowsPolicy;
+  }
+
+  const registryCredentialHardening = kernel.registry_credential_hardening;
+
+  if (
+    !isAdvancedSettings(registryCredentialHardening) ||
+    !(REGISTRY_CREDENTIAL_HARDENING_ADVANCED_FIELD in registryCredentialHardening)
+  ) {
+    return windowsPolicy;
+  }
+
+  const remainingRegistryCredentialHardening: AdvancedSettings = {
+    ...registryCredentialHardening,
+  };
+  delete remainingRegistryCredentialHardening[REGISTRY_CREDENTIAL_HARDENING_ADVANCED_FIELD];
+
+  const nextKernel: AdvancedSettings = { ...kernel };
+  if (Object.keys(remainingRegistryCredentialHardening).length > 0) {
+    nextKernel.registry_credential_hardening = remainingRegistryCredentialHardening;
+  } else {
+    delete nextKernel.registry_credential_hardening;
+  }
+
+  const nextAdvanced: AdvancedSettings = { ...advanced };
+  if (Object.keys(nextKernel).length > 0) {
+    nextAdvanced.kernel = nextKernel;
+  } else {
+    delete nextAdvanced.kernel;
+  }
+
+  return { ...windowsPolicy, advanced: nextAdvanced } as PolicyConfig['windows'];
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with the Windows registry credential hardening
+ * field removed, along with its `windows.advanced.kernel.registry_credential_hardening.descendants`
+ * advanced setting, which stays hidden in the UI whenever the feature is unavailable.
+ */
+export const removeRegistryCredentialHardening = (policy: PolicyConfig): PolicyConfig => {
+  const { registry_credential_hardening: registryCredentialHardening, ...attackSurfaceReduction } =
+    policy.windows.attack_surface_reduction;
+
+  return {
+    ...policy,
+    windows: removeRegistryCredentialHardeningAdvancedSettings({
+      ...policy.windows,
+      attack_surface_reduction: attackSurfaceReduction,
+    }),
+  };
+};
+
 export const POLICY_COUPLING_PROTECTIONS = [
   'malware',
   'ransomware',
@@ -524,11 +629,12 @@ export const setProtectionModeAndPopup = ({
 
 export const setBehaviorReputationService = (
   policy: PolicyConfig,
-  value: boolean
+  value: boolean,
+  osList: readonly (keyof UIPolicyConfig)[] = ['windows', 'mac', 'linux']
 ): PolicyConfig => {
-  policy.windows.behavior_protection.reputation_service = value;
-  policy.mac.behavior_protection.reputation_service = value;
-  policy.linux.behavior_protection.reputation_service = value;
+  forEachCouplingOs(osList, (os) => {
+    policy[os].behavior_protection.reputation_service = value;
+  });
   return policy;
 };
 
@@ -722,33 +828,20 @@ export const setDeviceControlSwitch = (policy: PolicyConfig, value: boolean): Po
 
 export const setDeviceControlUsbStorage = (
   policy: PolicyConfig,
-  value: DeviceControlAccessLevel
+  value: DeviceControlAccessLevel,
+  osList: readonly ('windows' | 'mac')[] = ['windows', 'mac']
 ): PolicyConfig => {
-  if (!policy.windows.device_control) {
-    policy.windows.device_control = { enabled: true, usb_storage: value };
-  } else {
-    policy.windows.device_control.usb_storage = value;
-  }
+  for (const os of osList) {
+    const deviceControl = policy[os].device_control;
+    if (!deviceControl) {
+      policy[os].device_control = { enabled: true, usb_storage: value };
+    } else {
+      deviceControl.usb_storage = value;
+    }
 
-  if (!policy.mac.device_control) {
-    policy.mac.device_control = { enabled: true, usb_storage: value };
-  } else {
-    policy.mac.device_control.usb_storage = value;
-  }
-
-  if (value === DeviceControlAccessLevel.deny_all) {
-    if (policy.windows.popup.device_control) {
-      policy.windows.popup.device_control.enabled = true;
-    }
-    if (policy.mac.popup.device_control) {
-      policy.mac.popup.device_control.enabled = true;
-    }
-  } else {
-    if (policy.windows.popup.device_control) {
-      policy.windows.popup.device_control.enabled = false;
-    }
-    if (policy.mac.popup.device_control) {
-      policy.mac.popup.device_control.enabled = false;
+    const popup = policy[os].popup.device_control;
+    if (popup) {
+      popup.enabled = value === DeviceControlAccessLevel.deny_all;
     }
   }
 

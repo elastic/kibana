@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConcurrencySettings, LiquidSettings, WorkflowContext } from '@kbn/workflows';
+import type {
+  ConcurrencySettings,
+  EsWorkflowExecution,
+  LiquidSettings,
+  WorkflowContext,
+} from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   DEFAULT_CONCURRENCY_QUEUE_SIZE,
@@ -15,6 +20,7 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 /**
@@ -97,7 +103,8 @@ export class ConcurrencyManager {
     concurrencySettings: ConcurrencySettings | undefined,
     concurrencyGroupKey: string | null,
     currentExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    currentExecution?: Partial<EsWorkflowExecution>
   ): Promise<boolean> {
     // If no concurrency settings or key, allow execution to proceed
     if (!concurrencySettings || !concurrencyGroupKey) {
@@ -131,11 +138,24 @@ export class ConcurrencyManager {
 
       if (queuedCount >= queueMax) {
         const skipTimestamp = new Date().toISOString();
-        await this.workflowExecutionRepository.updateWorkflowExecution({
+        const cancellationReason = `Queue full (queue-size: ${queueMax})`;
+        await this.workflowExecutionRepository.updateWorkflowExecution(
+          {
+            id: currentExecutionId,
+            status: ExecutionStatus.SKIPPED,
+            cancelRequested: true,
+            cancellationReason,
+            cancelledAt: skipTimestamp,
+            cancelledBy: 'system',
+          },
+          { refresh: true }
+        );
+        await publishFinishedWorkflowExecution(currentExecution, {
           id: currentExecutionId,
+          spaceId,
           status: ExecutionStatus.SKIPPED,
           cancelRequested: true,
-          cancellationReason: `Queue full (queue-size: ${queueMax})`,
+          cancellationReason,
           cancelledAt: skipTimestamp,
           cancelledBy: 'system',
         });
@@ -147,7 +167,7 @@ export class ConcurrencyManager {
           id: currentExecutionId,
           status: ExecutionStatus.QUEUED,
         },
-        { refresh: 'wait_for' }
+        { refresh: true }
       );
       return false;
     }
@@ -170,11 +190,24 @@ export class ConcurrencyManager {
     // Handle 'drop' strategy: mark new execution as SKIPPED if limit is exceeded
     if (strategy === 'drop') {
       const skipTimestamp = new Date().toISOString();
-      await this.workflowExecutionRepository.updateWorkflowExecution({
+      const cancellationReason = `Dropped due to concurrency limit (max: ${maxConcurrency})`;
+      await this.workflowExecutionRepository.updateWorkflowExecution(
+        {
+          id: currentExecutionId,
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason,
+          cancelledAt: skipTimestamp,
+          cancelledBy: 'system',
+        },
+        { refresh: true }
+      );
+      await publishFinishedWorkflowExecution(currentExecution, {
         id: currentExecutionId,
+        spaceId,
         status: ExecutionStatus.SKIPPED,
         cancelRequested: true,
-        cancellationReason: `Dropped due to concurrency limit (max: ${maxConcurrency})`,
+        cancellationReason,
         cancelledAt: skipTimestamp,
         cancelledBy: 'system',
       });
@@ -186,17 +219,19 @@ export class ConcurrencyManager {
       // Calculate how many executions to cancel
       const executionsToCancel = activeCount - maxConcurrency + 1;
 
-      // Cancel the oldest executions (they're already sorted by createdAt ascending)
+      // Cancel the oldest executions (they're already sorted by createdAt ascending).
+      // Leave the status alone. runWorkflow returns before the loop once the document
+      // is already cancelled, so the loop would never publish. The slot stays taken
+      // until that loop writes cancelled.
       const executionIdsToCancel = runningExecutionIds.slice(0, executionsToCancel);
 
-      // Bulk update all executions to cancelled status in a single ES request
       const cancellationTimestamp = new Date().toISOString();
+      const cancellationReason = `Cancelled due to concurrency limit (max: ${maxConcurrency})`;
       await this.workflowExecutionRepository.bulkUpdateWorkflowExecutions(
         executionIdsToCancel.map((id) => ({
           id,
-          status: ExecutionStatus.CANCELLED,
           cancelRequested: true,
-          cancellationReason: `Cancelled due to concurrency limit (max: ${maxConcurrency})`,
+          cancellationReason,
           cancelledAt: cancellationTimestamp,
           cancelledBy: 'system',
         }))

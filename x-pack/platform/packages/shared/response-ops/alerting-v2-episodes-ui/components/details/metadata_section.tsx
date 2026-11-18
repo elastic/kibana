@@ -15,6 +15,7 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleLoaded, isRuleLoading } from '../../types/rule_state';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
 import { AlertEpisodeMetadataTable } from './metadata_table';
+import { createDataContainerDataView } from './prefix_data_view_fields';
 import type { AlertEpisodeMetadataTableProps } from './metadata_table';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -69,11 +70,19 @@ export const AlertEpisodeMetadataSection = ({
     services,
   });
 
-  const { value: dataView, loading: isDataViewLoading } = useAlertingEpisodeSourceDataView({
-    query: isRuleLoaded(ruleState) ? getRootEsqlQuery(ruleState.rule.query) : undefined,
-    dataViews: services.dataViews,
-    http: services.http,
-  });
+  const { value: sourceDataView, loading: isSourceDataViewLoading } =
+    useAlertingEpisodeSourceDataView({
+      query: isRuleLoaded(ruleState) ? getRootEsqlQuery(ruleState.rule.query) : undefined,
+      dataViews: services.dataViews,
+      http: services.http,
+    });
+  const dataView = useMemo(
+    () =>
+      sourceDataView
+        ? createDataContainerDataView(sourceDataView, services.data.fieldFormats)
+        : undefined,
+    [services.data.fieldFormats, sourceDataView]
+  );
 
   const tableDocView = useMemo(
     () => services.unifiedDocViewer.registry.getAll().find((dv) => dv.id === 'doc_view_table'),
@@ -82,7 +91,7 @@ export const AlertEpisodeMetadataSection = ({
 
   const hit = useMemo(() => {
     if (!eventData || !dataView) return undefined;
-    const record = buildDataTableRecord({ _source: eventData.data }, dataView);
+    const record = buildDataTableRecord({ _source: { data: eventData.data } }, dataView);
     // The record is synthesized from the episode's stored `data`, not a real search hit, so it
     // has no real ES metadata. The data view's `metaFields` (`_id`, `_index`, `_score`, `_ignored`)
     // still get merged into `flattened` as `undefined`, rendering as empty rows in the metadata
@@ -113,7 +122,7 @@ export const AlertEpisodeMetadataSection = ({
     isLoadingEpisode ||
     isEventDataLoading ||
     (ruleId && isRuleLoading(ruleState)) ||
-    isDataViewLoading
+    isSourceDataViewLoading
   ) {
     // Shaped like the doc-viewer table: a search input row, then field rows. The panel
     // provides padding because this section renders edge-to-edge in the flyout.

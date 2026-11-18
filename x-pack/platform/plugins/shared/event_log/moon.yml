@@ -34,6 +34,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - server/**/*
@@ -42,6 +43,4 @@ fileGroups:
     - generated/*.json
     - common/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

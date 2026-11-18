@@ -49,9 +49,20 @@ const mockGetInstance = CustomYaraSignaturesApiClient.getInstance as jest.Mock;
 
 const ENTRY_ID = '123-456';
 const ITEM_ID = 'artifact-item-id';
-const SIGNATURE_NOT_FOUND_TOOLTIP = 'YARA signature does not exist.';
+const SIGNATURE_NOT_FOUND_TOOLTIP = 'YARA signature does not exist in the current space.';
+const EXPECTED_FIND_OPTIONS = {
+  perPage: 1,
+  filter: `exception-list-agnostic.id:"exception-list-agnostic:${ENTRY_ID}"`,
+};
 
-const getArtifactMock = jest.fn();
+const findArtifactsMock = jest.fn();
+
+const createFindResponse = (items: Array<{ id: string; item_id: string }>) => ({
+  data: items,
+  page: 1,
+  per_page: 1,
+  total: items.length,
+});
 
 const createHit = (entryId?: string): DataTableRecord =>
   ({
@@ -91,18 +102,18 @@ describe('isCustomYaraSignatureHighlightedField', () => {
 describe('CustomYaraSignatureHighlightedFieldLink', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getArtifactMock.mockResolvedValue({ id: ENTRY_ID, item_id: ITEM_ID });
-    mockGetInstance.mockReturnValue({ get: getArtifactMock });
+    findArtifactsMock.mockResolvedValue(createFindResponse([{ id: ENTRY_ID, item_id: ITEM_ID }]));
+    mockGetInstance.mockReturnValue({ find: findArtifactsMock });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     mockUseUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
-  it('renders a link to the CYS view page when the signature exists', async () => {
+  it('renders a link to the CYS view page when the signature is visible in the active space', async () => {
     const { findByTestId, getByTestId } = renderLink(createHit(ENTRY_ID));
 
     const link = await findByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID);
     expect(mockGetInstance).toHaveBeenCalled();
-    expect(getArtifactMock).toHaveBeenCalledWith(undefined, ENTRY_ID);
+    expect(findArtifactsMock).toHaveBeenCalledWith(EXPECTED_FIND_OPTIONS);
     expect(link).toHaveAttribute(
       'href',
       expect.stringContaining(getCustomYaraSignaturesListPath({ show: 'view', itemId: ITEM_ID }))
@@ -111,8 +122,8 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });
 
-  it('shows an info tooltip instead of the link when the signature cannot be found', async () => {
-    getArtifactMock.mockRejectedValue({ body: { statusCode: 404 } });
+  it('shows an info tooltip instead of the link when the signature is not found in the active space', async () => {
+    findArtifactsMock.mockResolvedValue(createFindResponse([]));
     const { findByTestId, getByTestId, queryByTestId } = renderLink(createHit(ENTRY_ID));
 
     expect(
@@ -122,11 +133,11 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });
 
-  it('renders plain text when looking up the signature fails for another reason', async () => {
-    getArtifactMock.mockRejectedValue({ body: { statusCode: 500 } });
+  it('renders plain text when looking up the signature fails', async () => {
+    findArtifactsMock.mockRejectedValue({ body: { statusCode: 500 } });
     const { getByTestId, queryByTestId, queryByLabelText } = renderLink(createHit(ENTRY_ID));
 
-    await waitFor(() => expect(getArtifactMock).toHaveBeenCalledWith(undefined, ENTRY_ID));
+    await waitFor(() => expect(findArtifactsMock).toHaveBeenCalledWith(EXPECTED_FIND_OPTIONS));
     expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
     expect(queryByLabelText(SIGNATURE_NOT_FOUND_TOOLTIP)).not.toBeInTheDocument();
     expect(
@@ -141,7 +152,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
     const { queryByTestId, getByTestId } = renderLink(createHit(ENTRY_ID));
 
     expect(mockGetInstance).not.toHaveBeenCalled();
-    expect(getArtifactMock).not.toHaveBeenCalled();
+    expect(findArtifactsMock).not.toHaveBeenCalled();
     expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });
@@ -158,7 +169,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
     const { queryByTestId, getByTestId } = renderLink(createHit(ENTRY_ID));
 
     expect(mockGetInstance).not.toHaveBeenCalled();
-    expect(getArtifactMock).not.toHaveBeenCalled();
+    expect(findArtifactsMock).not.toHaveBeenCalled();
     expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });
@@ -167,7 +178,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
     const { queryByTestId, getByTestId } = renderLink(createHit());
 
     expect(mockGetInstance).not.toHaveBeenCalled();
-    expect(getArtifactMock).not.toHaveBeenCalled();
+    expect(findArtifactsMock).not.toHaveBeenCalled();
     expect(queryByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });

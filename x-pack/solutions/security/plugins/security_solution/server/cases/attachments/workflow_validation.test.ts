@@ -34,6 +34,15 @@ describe('attachment workflow validation', () => {
     ).toThrow('Alert workflow origin targets must match the selected alerts.');
   });
 
+  it('rejects alert targets without alert inputs', () => {
+    expect(() =>
+      validateAlertWorkflowTargets({
+        targets: [{ id: 'alert-1' }],
+        inputs: { event: { documents: [{ _id: 'alert-1' }] } },
+      })
+    ).toThrow('Alert attachment workflow origins require selected alert inputs.');
+  });
+
   it('accepts attack targets that match the selected attack inputs', () => {
     expect(() =>
       validateAttackWorkflowTargets({
@@ -65,6 +74,24 @@ describe('attachment workflow validation', () => {
     ).toThrow('Attack attachment workflow origins require selected attack inputs.');
   });
 
+  it('accepts event targets selected through documentIds', () => {
+    expect(() =>
+      validateEventWorkflowTargets({
+        targets: [{ id: 'event-1' }],
+        inputs: { event: { documentIds: [{ _id: 'event-1', _index: 'logs' }] } },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects event targets that do not match the selected documentIds', () => {
+    expect(() =>
+      validateEventWorkflowTargets({
+        targets: [{ id: 'event-1' }],
+        inputs: { event: { documentIds: [{ _id: 'event-2', _index: 'logs' }] } },
+      })
+    ).toThrow('Event workflow origin targets must match the selected documents.');
+  });
+
   it('rejects event targets without document inputs', () => {
     expect(() =>
       validateEventWorkflowTargets({
@@ -72,5 +99,23 @@ describe('attachment workflow validation', () => {
         inputs: {},
       })
     ).toThrow('Event attachment workflow origins require selected document inputs.');
+  });
+
+  it('accepts event targets that match the selected document inputs', () => {
+    expect(() =>
+      validateEventWorkflowTargets({
+        targets: [{ id: 'event-1' }, { id: 'event-2' }],
+        inputs: { event: { documents: [{ _id: 'event-2' }, { _id: 'event-1' }] } },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects event targets that do not match the selected documents', () => {
+    expect(() =>
+      validateEventWorkflowTargets({
+        targets: [{ id: 'event-1' }],
+        inputs: { event: { alertIds: [{ _id: 'event-1' }], documents: [{ _id: 'event-2' }] } },
+      })
+    ).toThrow('Event workflow origin targets must match the selected documents.');
   });
 });

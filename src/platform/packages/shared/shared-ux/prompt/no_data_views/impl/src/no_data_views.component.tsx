@@ -100,10 +100,11 @@ const PromptAddDataViews = ({
 
 const PromptTryEsql = ({
   onTryESQL,
+  isTryESQLDisabled,
   esqlDocLink,
 }: Pick<
   NoDataViewsPromptComponentProps,
-  'onClickCreate' | 'onTryESQL' | 'esqlDocLink' | 'emptyPromptColor'
+  'onClickCreate' | 'onTryESQL' | 'isTryESQLDisabled' | 'esqlDocLink' | 'emptyPromptColor'
 >) => {
   if (!onTryESQL) {
     // we need to handle the case where the Try ES|QL click handler is not set because
@@ -135,7 +136,13 @@ const PromptTryEsql = ({
       icon={icon}
       body={<p>{cardDescription}</p>}
       actions={
-        <EuiButton color="primary" fill data-test-subj="tryESQLLink" onClick={onTryESQL}>
+        <EuiButton
+          color="primary"
+          fill
+          data-test-subj="tryESQLLink"
+          isDisabled={isTryESQLDisabled}
+          onClick={onTryESQL}
+        >
           {i18n.translate('sharedUXPackages.noDataViewsPrompt.tryEsqlButtonLabel', {
             defaultMessage: 'Try ES|QL',
           })}
@@ -154,6 +161,7 @@ export const NoDataViewsPrompt = ({
   canCreateNewDataView,
   dataViewsDocLink,
   onTryESQL,
+  isTryESQLDisabled,
   esqlDocLink,
   emptyPromptColor = 'plain',
 }: NoDataViewsPromptComponentProps) => {
@@ -232,6 +240,7 @@ export const NoDataViewsPrompt = ({
             <PromptTryEsql
               {...{
                 onTryESQL,
+                isTryESQLDisabled,
                 esqlDocLink,
                 emptyPromptColor,
               }}

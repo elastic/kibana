@@ -29,6 +29,9 @@ import type {
   IEsSearchRequest,
   IEsSearchResponse,
   ISearchGeneric,
+  IDslPaginatedSearchOptions,
+  IDslPaginatedSearchParams,
+  ISearchMethods,
 } from '@kbn/search-types';
 import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -89,6 +92,7 @@ import {
   ESQL_ASYNC_SEARCH_STRATEGY,
   SearchMethodsService,
 } from '../../common/search';
+import { getEsQueryConfig } from '../../common/es_query';
 import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
   getShardDelayBucketAgg,
@@ -580,12 +584,18 @@ export class SearchService {
         options: ISearchOptions = {}
       ) => this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options);
 
-      const searchMethodsService = new SearchMethodsService(search as ISearchGeneric);
+      const searchMethodsService = new SearchMethodsService(search as ISearchGeneric, {
+        getEsQueryConfig: async () => {
+          const settings = await deps.uiSettingsClient.getAll();
+          return getEsQueryConfig({ get: (key) => settings[key] });
+        },
+      });
 
       return {
         search,
         dsl: (params, options) => searchMethodsService.dsl(params, options),
-        dslPaginated: (params, options) => searchMethodsService.dslPaginated(params, options),
+        dslPaginated: ((params: IDslPaginatedSearchParams, options?: IDslPaginatedSearchOptions) =>
+          searchMethodsService.dslPaginated(params, options)) as ISearchMethods['dslPaginated'],
         esql: (params, options) => searchMethodsService.esql(params, options),
         eql: (params, options) => searchMethodsService.eql(params, options),
         sql: (params, options) => searchMethodsService.sql(params, options),

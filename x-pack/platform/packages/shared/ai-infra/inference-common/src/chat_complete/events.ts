@@ -142,6 +142,10 @@ export interface ChatCompletionTokenCount {
    * Input tokens served from the prompt cache. Subset of `prompt`, not additive.
    */
   cached?: number;
+  /**
+   * Input tokens written to the prompt cache. Subset of `prompt`, not additive.
+   */
+  cacheWrite?: number;
 }
 
 /**

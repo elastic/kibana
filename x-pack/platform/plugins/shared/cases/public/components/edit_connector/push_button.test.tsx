@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { PushButton } from './push_button';
@@ -51,11 +51,9 @@ describe('PushButton ', () => {
   it('pushed correctly', async () => {
     renderWithTestingProviders(<PushButton {...defaultProps} />);
 
-    await userEvent.click(await screen.findByTestId('push-to-external-service'));
+    fireEvent.click(await screen.findByTestId('push-to-external-service'));
 
-    await waitFor(() => {
-      expect(pushToService).toHaveBeenCalled();
-    });
+    expect(pushToService).toHaveBeenCalled();
   });
 
   it('disables the button', async () => {

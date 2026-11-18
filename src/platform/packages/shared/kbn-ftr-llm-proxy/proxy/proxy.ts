@@ -9,7 +9,7 @@
 
 import { withTimeout as promiseWithTimeout } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import http, { type Server } from 'http';
 import { isString, pull, isFunction } from 'lodash';
 import pRetry from 'p-retry';
@@ -241,7 +241,7 @@ export class LlmProxy {
 }
 
 export async function createLlmProxy(log: ToolingLog) {
-  const port = await getPort({ port: getPort.makeRange(9000, 9100) });
+  const port = await getPort({ port: portNumbers(9000, 9100) });
   log.debug(`Starting LLM Proxy on port ${port}`);
   return new LlmProxy(port, log);
 }

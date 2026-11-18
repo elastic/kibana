@@ -27,7 +27,11 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
     search: jest.fn().mockResolvedValue({ hits: { hits: [{ _id: 'report-1' }] } }),
   };
   const context = {
-    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+    alertzero: Promise.resolve({
+      subscription: 'available',
+      hasRequiredDependencies: true,
+      isSpaceSupported: true,
+    }),
     core: Promise.resolve({
       elasticsearch: { client: { asInternalUser } },
       uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
@@ -144,7 +148,27 @@ describe('registerWriteHuntEvidenceRoute', () => {
 
     await handler(context, requestFor(), response);
 
-    expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { acknowledged: true, settledByCap: false },
+    });
+  });
+
+  it('reports settledByCap when the ledger cap settled a retryable run', async () => {
+    const { handler, context, asInternalUser } = makeDeps();
+    asInternalUser.update.mockResolvedValue({
+      get: { _source: { evidence: [{ space_id: 'default', coverage_pending: false }] } },
+    });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      context,
+      requestFor({ completeness: 'incomplete_retryable', searchedTechniqueIds: ['T1001'] }),
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { acknowledged: true, settledByCap: true },
+    });
   });
 
   it('logs and returns a generic 500 when the write fails', async () => {
@@ -159,5 +183,62 @@ describe('registerWriteHuntEvidenceRoute', () => {
       statusCode: 500,
       body: { message: 'Failed to write hunt evidence' },
     });
+  });
+  it('passes the searched technique ids through to the ledger', async () => {
+    const { handler, context, asInternalUser } = makeDeps();
+
+    await handler(
+      context,
+      requestFor({ searchedTechniqueIds: ['T1001', 'T1002'] }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(asInternalUser.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        script: expect.objectContaining({
+          params: expect.objectContaining({ searched_technique_ids: ['T1001', 'T1002'] }),
+        }),
+      })
+    );
+  });
+
+  it('records a retryable run with no hit as ledger-only', async () => {
+    const { handler, context, asInternalUser } = makeDeps();
+
+    await handler(
+      context,
+      requestFor({ completeness: 'incomplete_retryable', searchedTechniqueIds: ['T1001'] }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(asInternalUser.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        script: expect.objectContaining({
+          params: expect.objectContaining({ stamp: false, coverage_pending: true }),
+        }),
+      })
+    );
+  });
+
+  it('passes the gap reasons through, so an environment gap does not count toward the retry bound', async () => {
+    const { handler, context, asInternalUser } = makeDeps();
+
+    await handler(
+      context,
+      requestFor({
+        completeness: 'incomplete_retryable',
+        searchedTechniqueIds: ['T1001'],
+        retryableReasons: ['index_unavailable'],
+      }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(asInternalUser.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        script: expect.objectContaining({
+          params: expect.objectContaining({ count_run: false }),
+        }),
+      })
+    );
   });
 });

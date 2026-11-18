@@ -1,5 +1,5 @@
 {
-  "sha1": "bba4afa046870a3bd9fc004a4b22f8d55cbfd97d",
+  "sha1": "993a540ea93354623e764f5f4082caf4d1f8e259",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -308,8 +308,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 14,
+        "line": 15,
         "column": 20
+      }
+    },
+    {
+      "id": "98843aa33e8d554-ae6e48a8d1f4eff",
+      "title": "Storage explorer page remembers that the OpenTelemetry callout was dismissed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
+        "line": 17,
+        "column": 28
       }
     },
     {
@@ -322,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 16,
-        "column": 28
+        "line": 34,
+        "column": 18
       }
     },
     {
@@ -336,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 21,
-        "column": 49
+        "line": 39,
+        "column": 13
       }
     },
     {
@@ -350,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 29,
-        "column": 5
+        "line": 45,
+        "column": 11
       }
     },
     {

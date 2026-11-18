@@ -18,11 +18,8 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import {
-  formatFieldStringValueWithHighlights,
-  getIgnoredReason,
-  getDataViewFieldFromDataSource,
-} from '@kbn/discover-utils';
+import { getIgnoredReason, getDataViewFieldFromDataSource } from '@kbn/discover-utils';
+import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils/components';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
 import type { DataSource } from '@kbn/data-source';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
@@ -86,13 +83,14 @@ export const SourceDocumentJsonMode = ({
       }
       // For array items, we wrap the value in an array so it's filtered by using MV_CONTAINS.
       const filterValue = dataSource?.kind === 'esql' && isArrayItem ? [value] : value;
+      const fieldDisplayName = field?.displayName ?? fieldName;
       return [
         {
           id: 'filterFor',
           iconType: 'plusCircle',
           label: i18n.translate('unifiedDataTable.grid.filterForAria', {
             defaultMessage: 'Filter for this {value}',
-            values: { value: fieldName },
+            values: { value: fieldDisplayName },
           }),
           'data-test-subj': `jsonTreeViewerFilterFor-${path.join('.')}`,
           onClick: () => onFilter?.(field, filterValue, '+'),
@@ -102,7 +100,7 @@ export const SourceDocumentJsonMode = ({
           iconType: 'minusCircle',
           label: i18n.translate('unifiedDataTable.grid.filterOutAria', {
             defaultMessage: 'Filter out this {value}',
-            values: { value: fieldName },
+            values: { value: fieldDisplayName },
           }),
           'data-test-subj': `jsonTreeViewerFilterOut-${path.join('.')}`,
           onClick: () => onFilter?.(field, filterValue, '-'),

@@ -38,7 +38,10 @@ const capabilities = (
   trustedDevicesExperimental: true,
   endpointCustomYaraSignatures: true,
   customYaraSignaturesExperimental: true,
+  aiDataCollectionExperimental: true,
   linuxRansomwareProtection: true,
+  endpointRegistryCredentialHardening: true,
+  registryCredentialHardeningExperimental: true,
   endpointProtectionUpdates: true,
   endpointCustomNotification: true,
   serverless: false,
@@ -74,22 +77,22 @@ const weakenedSettingCases: ReadonlyArray<{
     path: 'windows.malware.blocklist',
     value: false,
     setting: 'malware.blocklist',
-    os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
-    text: 'Malware blocklist on Windows, macOS, Linux is turned off.',
+    os: [PolicyOperatingSystem.windows],
+    text: 'Malware blocklist on Windows is turned off.',
   },
   {
     path: 'windows.malware.on_write_scan',
     value: false,
     setting: 'malware.on_write_scan',
-    os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
-    text: 'Scan files upon modification on Windows, macOS, Linux is turned off.',
+    os: [PolicyOperatingSystem.windows],
+    text: 'Scan files upon modification on Windows is turned off.',
   },
   {
     path: 'windows.behavior_protection.reputation_service',
     value: false,
     setting: 'behavior_protection.reputation_service',
-    os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
-    text: 'Reputation service on Windows, macOS, Linux is turned off.',
+    os: [PolicyOperatingSystem.windows],
+    text: 'Reputation service on Windows is turned off.',
     stored: policyFactory({ cloud: true }),
   },
   {
@@ -98,6 +101,13 @@ const weakenedSettingCases: ReadonlyArray<{
     setting: 'attack_surface_reduction.credential_hardening.enabled',
     os: [PolicyOperatingSystem.windows],
     text: 'Credential hardening on Windows is turned off.',
+  },
+  {
+    path: 'windows.attack_surface_reduction.registry_credential_hardening.enabled',
+    value: false,
+    setting: 'attack_surface_reduction.registry_credential_hardening.enabled',
+    os: [PolicyOperatingSystem.windows],
+    text: 'Registry credential hardening on Windows is turned off.',
   },
   {
     path: 'windows.antivirus_registration.mode',
@@ -328,6 +338,34 @@ describe('buildPolicyChangeAssessment', () => {
     });
   });
 
+  it('reports the registry credential hardening gate and marks the change ineligible while the flag is off', () => {
+    const stored = policyFactory();
+    stored.windows.attack_surface_reduction.registry_credential_hardening = { enabled: false };
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [
+        {
+          op: 'set_field',
+          path: 'windows.attack_surface_reduction.registry_credential_hardening.enabled',
+          value: true,
+        },
+      ],
+      {
+        ...capabilities(),
+        registryCredentialHardeningExperimental: false,
+      }
+    );
+
+    expect(assessment.changes[0]?.registry.productFeatureGate).toBe(
+      ProductFeatureSecurityKey.endpointRegistryCredentialHardening
+    );
+    expect(assessment.changes[0]?.eligibility).toEqual({
+      eligible: false,
+      reason: 'registry_credential_hardening_experimental_disabled',
+    });
+  });
+
   it('adds one generic blocker when an unrelated eligible change retains an invalid Device Control state', () => {
     const stored = policyFactory();
     stored.windows.device_control!.usb_storage = DeviceControlAccessLevel.audit;
@@ -435,8 +473,8 @@ describe('buildPolicyChangeAssessment', () => {
       {
         code: 'protection_setting_weakened',
         setting: 'malware.blocklist',
-        os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
-        text: 'Malware blocklist on Windows, macOS, Linux is turned off.',
+        os: [PolicyOperatingSystem.windows],
+        text: 'Malware blocklist on Windows is turned off.',
       },
     ]);
   });

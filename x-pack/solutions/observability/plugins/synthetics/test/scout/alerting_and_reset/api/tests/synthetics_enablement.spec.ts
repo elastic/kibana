@@ -25,7 +25,7 @@ import { apiTest, KIBANA_HEADERS, SYNTHETICS_API_URLS } from '../../../common/fi
  * cluster-privilege list) for a simpler test surface.
  *
  * `isServiceAllowed` is deliberately excluded from response assertions:
- * its value depends on `xpack.uptime.service.manifestUrl` + service
+ * its value depends on `xpack.synthetics.service.manifestUrl` + service
  * credentials in the Kibana config, which differs between Scout stateful
  * (no manifestUrl → `true`) and Scout serverless (manifestUrl set but no
  * credentials → `false`). The FTR suite had `skipMKI` for the same reason.

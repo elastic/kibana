@@ -32,6 +32,7 @@
     "@kbn/serverless",
     "@kbn/utility-types",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/management-settings-components-form",
     "@kbn/licensing-plugin",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/object-utils",
@@ -56,7 +57,9 @@
     "@kbn/es-errors",
     "@kbn/app-header",
     "@kbn/core-chrome-browser-context-mocks",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-test-helpers-model-versions"
   ],
   "exclude": ["target/**/*"]
 }

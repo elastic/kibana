@@ -64,7 +64,9 @@ class DashboardPage {
   }
 
   async goto() {
-    await this.page.gotoApp('securitySolution:entity_analytics');
+    await this.page.gotoApp('securitySolution:entity_analytics', {
+      readyWhen: this.riskScoreTable,
+    });
   }
 
   async enableEntityStore() {

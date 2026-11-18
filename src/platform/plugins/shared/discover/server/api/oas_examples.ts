@@ -68,15 +68,15 @@ const esqlSession = {
 } satisfies DiscoverSessionApiData;
 
 const metricsSession = {
-  title: 'Sample web logs metrics',
+  title: 'Host metrics',
   tabs: [
     {
       id: 'metrics',
       label: 'Metrics',
       type: 'metrics',
-      data_source: { type: 'esql', query: 'TS kibana_sample_data_logstsdb' },
-      dimensions: ['event.dataset'],
-      search_term: 'bytes',
+      data_source: { type: 'esql', query: 'TS metrics-*' },
+      dimensions: ['host.name'],
+      search_term: 'cpu',
       counter_aggregation: 'max',
       gauge_aggregation: 'avg',
       histogram_percentile: 'p95',
@@ -124,13 +124,16 @@ export const createDiscoverSessionOASOperationObject = {
     content: {
       'application/json': {
         examples: {
-          classic: { summary: 'Classic tab with an inline data view', value: classicSession },
-          classic_reference: {
-            summary: 'Classic tab with the existing sample web logs data view',
+          data_view: { summary: 'Data view tab with an inline data view', value: classicSession },
+          data_view_reference: {
+            summary: 'Data view tab with the sample web logs data view',
             value: classicReferenceSession,
           },
           esql: { summary: 'ES|QL tab with requests by extension', value: esqlSession },
-          metrics: { summary: 'Metrics tab using sample time series logs', value: metricsSession },
+          metrics: {
+            summary: 'Metrics tab on a time series data stream (replace `metrics-*` with your own)',
+            value: metricsSession,
+          },
         },
       },
     },

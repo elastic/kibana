@@ -23,7 +23,7 @@ const IGNORED_FOLDERS = ['.buildkite/'];
 
 const IGNORED_PATHS = [
   THIS_PATH,
-  'src/platform/packages/shared/kbn-test/src/jest/run_check_jest_configs_cli.ts',
+  'src/platform/packages/shared/kbn-jest/src/run_check_jest_configs_cli.ts',
   'x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/playwright.config.ts',
   'x-pack/solutions/security/test/cloud_security_posture_functional/config.base.ts',
   'x-pack/solutions/observability/plugins/apm/test/scenarios/agent_config.ts',
@@ -145,7 +145,7 @@ export async function runCheckFtrConfigsCli() {
         // FTR config file should have default export
         try {
           loadingConfigs.push(file);
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
           const exports = require(file);
           const defaultExport = exports.__esModule ? exports.default : exports;
           return !!defaultExport;

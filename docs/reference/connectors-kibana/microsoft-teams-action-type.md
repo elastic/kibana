@@ -17,7 +17,7 @@ Some capabilities of this connector are only available from a certain version:
 
 - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Quick Connect OAuth 2.0.
 - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Send, update, and create actions to post channel and chat messages, edit a message, look up a user, and create a chat.
-- {applies_to}`serverless: unavailable` {applies_to}`stack: preview 9.6+` Workflow events from Microsoft Graph change notifications.
+- {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Workflow events from Microsoft Graph change notifications.
 
 ## Prerequisites [microsoft-teams-prerequisites]
 
@@ -28,7 +28,7 @@ Registering the app and granting admin consent requires a role that can do both,
 In {{kib}}, you need:
 
 - The **Actions and Connectors : All** [privilege](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md), to create and edit connectors.
-- {applies_to}`serverless: unavailable` {applies_to}`stack: preview 9.6+` An Enterprise license, `server.publicBaseUrl` set to the host that Microsoft Graph uses to reach {{kib}}, and `xpack.actions.inboundEvents.enabled` set to `true`, to receive events. Graph must be able to reach a public HTTPS URL. Graph cannot call `localhost`.
+- {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` An Enterprise license and `server.publicBaseUrl` set to the host that Microsoft Graph uses to reach {{kib}}, to receive events. `xpack.actions.inboundEvents.enabled` defaults to `true`. Set it to `false` to turn receive events off. Graph must be able to reach a public HTTPS URL. Graph cannot call `localhost`.
 
 ## Create connectors in {{kib}} [define-microsoft-teams-ui]
 
@@ -232,7 +232,7 @@ The Microsoft Teams connector has the following actions.
 
 ## Receive Microsoft Teams events [microsoft-teams-inbound-events]
 ```{applies_to}
-serverless: unavailable
+serverless: preview
 stack: preview 9.6+
 ```
 
@@ -275,7 +275,7 @@ https://<kibana-host>/s/<space-id>/api/actions/events/.microsoft-teams/<connecto
 
 ## Start a workflow from Microsoft Teams events [microsoft-teams-inbound-howto]
 ```{applies_to}
-serverless: unavailable
+serverless: preview
 stack: preview 9.6+
 ```
 

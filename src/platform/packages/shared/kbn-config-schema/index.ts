@@ -72,10 +72,11 @@ import {
   URIType,
   StreamType,
   Lazy,
+  setLazyConfigSchemaDisabled,
 } from './src/types';
 
 export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
-export { ObjectType, Type };
+export { ObjectType, Type, setLazyConfigSchemaDisabled };
 export type { SchemaValidationOptions } from './src/types';
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';

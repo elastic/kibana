@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
@@ -84,7 +83,6 @@ describe('detectionRulesClient.importRules', () => {
     subject = createDetectionRulesClient({
       actionsClient: actionsClientMock.create(),
       rulesClient,
-      userProfile: userProfileServiceMock.createStart(),
       mlAuthz: buildMlAuthz(),
       rulesAuthz,
       savedObjectsClient,

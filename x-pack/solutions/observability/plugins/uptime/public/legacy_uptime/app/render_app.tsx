@@ -30,7 +30,6 @@ export function renderApp(
     docLinks,
     http: { basePath },
     i18n,
-    theme,
   } = core;
 
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
@@ -39,7 +38,6 @@ export function renderApp(
   );
 
   const canSave = (capabilities.uptime.save ?? false) as boolean;
-  const darkMode = theme.getTheme().darkMode;
 
   const props: UptimeAppProps = {
     isDev,
@@ -49,7 +47,6 @@ export function renderApp(
     i18n,
     startPlugins,
     basePath: basePath.get(),
-    darkMode,
     commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,

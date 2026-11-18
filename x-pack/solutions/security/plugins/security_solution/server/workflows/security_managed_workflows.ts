@@ -8,6 +8,8 @@
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { installSecurityAlertAnalysisWorkflow } from './alert_analysis_workflow/install';
+import type { EndpointWorkflowConsumerFlags } from './endpoint/install';
+import { syncEndpointWorkflows } from './endpoint/install';
 import {
   initSecurityManagedWorkflowsClient,
   type SecurityManagedWorkflowsClient,
@@ -29,6 +31,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   workflowsExtensions,
   logger,
   threatIntelSupplyEnabled,
+  experimentalFeatures,
   bootstrapReady,
   core,
 }: {
@@ -40,6 +43,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
    * managed workflows are uninstalled.
    */
   threatIntelSupplyEnabled: boolean;
+  experimentalFeatures: EndpointWorkflowConsumerFlags;
   /**
    * Resolves after TI bootstrap (templates, migrations, seed). Only awaited when
    * supply is enabled; ignored otherwise.
@@ -84,6 +88,16 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   }
 
   try {
+    await syncEndpointWorkflows({
+      managedWorkflowsClient,
+      experimentalFeatures,
+      logger,
+    });
+  } catch (error) {
+    logger.warn('Failed to install or uninstall the endpoint managed workflows', { error });
+  }
+
+  try {
     await managedWorkflowsClient.ready();
   } catch (error) {
     logger.warn('Failed to mark securitySolution managed workflows ready', { error });
@@ -92,7 +106,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
 
 /**
  * Periodic catch-up for spaces created after boot. Installs only
- * `attribute_alerts_to_reports` per missing space (ingest/enrich are global).
+ * `attribute_alerts_to_reports` per missing space (ingest/enrich live in the default space).
  * Intended to ride the promote_threat_indicators task every 15m.
  */
 export const reconcileThreatIntelAttributeWorkflowsForSpaces = async ({
@@ -118,7 +132,7 @@ export const reconcileThreatIntelAttributeWorkflowsForSpaces = async ({
 };
 
 /**
- * Full TI managed-workflow install (globals + per-space attribute) for every
+ * Full TI managed-workflow install (default-space supply workflows + per-space attribute) for every
  * current space. Used when bootstrap recovers after the boot-time installer
  * skipped TI because `bootstrapReady` had rejected.
  */

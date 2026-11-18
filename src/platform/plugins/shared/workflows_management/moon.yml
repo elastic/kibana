@@ -23,15 +23,16 @@ dependsOn:
   - '@kbn/entity-access-control'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
+  - '@kbn/crypto'
   - '@kbn/esql-language'
   - '@kbn/esql-types'
   - '@kbn/esql-utils'
+  - '@kbn/esql-server-utils'
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/core-chrome-browser'
-  - '@kbn/core-chrome-browser-context'
   - '@kbn/core-chrome-browser-hooks'
   - '@kbn/shared-ux-page-solution-nav'
   - '@kbn/shared-ux-prompt-not-found'
@@ -110,9 +111,6 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/share-plugin'
   - '@kbn/core-security-server'
-  - '@kbn/core-user-profile-common'
-  - '@kbn/core-user-profile-server'
-  - '@kbn/core-user-profile-server-mocks'
   - '@kbn/logging'
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/std'
@@ -144,12 +142,14 @@ dependsOn:
   - '@kbn/test-es-server'
   - '@kbn/core-security-common'
   - '@kbn/core-http-browser-mocks'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -161,6 +161,4 @@ fileGroups:
     - .storybook/**/*.tsx
     - server/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

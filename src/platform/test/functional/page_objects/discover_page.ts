@@ -45,6 +45,11 @@ export class DiscoverPageObject extends FtrService {
   public async navigateToApp(opts: { queryMode: 'classic' | 'esql' }) {
     await this.setQueryMode(opts.queryMode);
     await this.common.navigateToApp(this.APP_ID);
+    // A login prompted by this navigation clears localStorage, dropping the seeded mode.
+    if ((await this.getQueryMode()) !== opts.queryMode) {
+      await this.setQueryMode(opts.queryMode);
+      await this.common.navigateToApp(this.APP_ID);
+    }
   }
 
   /** Ensures that navigation to discover has completed */
@@ -1334,9 +1339,9 @@ export class DiscoverPageObject extends FtrService {
   /**
    * Seeds the persisted query mode in localStorage. Discover ignores `currentMode`
    * unless `defaultMode` matches the resolved default (the `discover.isEsqlDefault`
-   * flag), so `defaultMode` defaults to `'classic'` to match the current application default.
+   * flag), so `defaultMode` defaults to `'esql'` to match the current application default.
    */
-  public async setQueryMode(currentMode: string, defaultMode: string = 'classic') {
+  public async setQueryMode(currentMode: string, defaultMode: string = 'esql') {
     const kibanaUrl = getUrl.noAuth(this.config.get('servers.kibana'), {});
     const currentUrl = await this.browser.getCurrentUrl();
     if (new URL(currentUrl).origin !== new URL(kibanaUrl).origin) {

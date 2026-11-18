@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -21,31 +21,28 @@ const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
 // renders a filled button or a link as a kibana link to setup instructions
 export function SetupInstructionsLink({ buttonFill = false }: { buttonFill?: boolean }) {
   const { core } = useApmPluginContext();
-  return (
-    <EuiLink
-      data-test-subj="apmSetupInstructionsLinkLink"
-      href={core.http.basePath.prepend('/app/apm/tutorial')}
+  const href = core.http.basePath.prepend('/app/apm/tutorial');
+
+  return buttonFill ? (
+    <EuiButton
+      data-test-subj="apmSetupInstructionsLinkButton"
+      size="s"
+      color="primary"
+      fill={buttonFill}
+      iconType="question"
+      href={href}
     >
-      {buttonFill ? (
-        <EuiButton
-          data-test-subj="apmSetupInstructionsLinkButton"
-          size="s"
-          color="primary"
-          fill={buttonFill}
-          iconType="question"
-        >
-          {SETUP_INSTRUCTIONS_LABEL}
-        </EuiButton>
-      ) : (
-        <EuiButtonEmpty
-          data-test-subj="apmSetupInstructionsLinkButton"
-          size="s"
-          color="primary"
-          iconType="indexOpen"
-        >
-          {ADD_DATA_LABEL}
-        </EuiButtonEmpty>
-      )}
-    </EuiLink>
+      {SETUP_INSTRUCTIONS_LABEL}
+    </EuiButton>
+  ) : (
+    <EuiButtonEmpty
+      data-test-subj="apmSetupInstructionsLinkButton"
+      size="s"
+      color="primary"
+      iconType="indexOpen"
+      href={href}
+    >
+      {ADD_DATA_LABEL}
+    </EuiButtonEmpty>
   );
 }

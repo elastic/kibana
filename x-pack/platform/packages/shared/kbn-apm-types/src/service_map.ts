@@ -56,14 +56,117 @@ export interface ServiceMapRawResponse {
   spans: ServiceMapSpan[];
   servicesData: ServicesResponse[];
   anomalies: ServiceAnomaliesResponse;
+  /**
+   * Absent when grouping is off, the map has fewer services than `SERVICE_GROUPING_MIN_SERVICES`
+   * or grouping failed.
+   */
+  serviceGrouping?: ServiceMapGrouping;
+}
+
+/** What a service map grouping strategy groups services by. */
+export type ServiceGroupingSource =
+  | 'savedGroups'
+  | 'service.namespace'
+  | 'kubernetes.namespace'
+  | 'namePrefix'
+  | 'calls';
+
+/** A source that groups services sharing one value. */
+export type AttributeGroupingSource = Exclude<ServiceGroupingSource, 'savedGroups' | 'calls'>;
+
+/** A saved service group the service matches. */
+export interface SavedGroupServiceMapGroup {
+  /** The saved group's id, after `savedGroups:`. It survives renames; the name is in `name`. */
+  id: `savedGroups:${string}`;
+  kind: 'savedGroup';
+  name: string;
+}
+
+/** Services sharing the value of an attribute. */
+export interface AttributeServiceMapGroup {
+  /** The attribute, then its value: `service.namespace:checkout`. */
+  id: `${AttributeGroupingSource}:${string}`;
+  kind: 'attribute';
+  attribute: AttributeGroupingSource;
+  value: string;
+}
+
+/** Services that call each other a lot, named after the busiest of them. */
+export interface CallsServiceMapGroup {
+  /**
+   * The member whose name sorts first, after `calls:`. It stays the same while the members do,
+   * whatever their calls. Not stable across requests in general: it changes when that member
+   * leaves the group or one whose name sorts earlier joins. Can hold any character a service
+   * name can.
+   */
+  id: `calls:${string}`;
+  kind: 'calls';
+  /** The member with the most calls made and received, ties broken by name: the group's label. */
+  busiestService: string;
+}
+
+/** Services called by a large share of the estate, or connected to far more services than most. */
+export interface SharedServiceMapGroup {
+  id: 'shared';
+  kind: 'shared';
+}
+
+/** Services with no calls, or in a small piece of the call graph cut off from the rest. */
+export interface NotConnectedServiceMapGroup {
+  id: 'notConnected';
+  kind: 'notConnected';
+}
+
+/**
+ * A group of services on the map. Ids are the source and a value, `<source>:<value>`, or `shared`
+ * and `notConnected`, so groups of different kinds never share one, even within a strategy.
+ */
+export type ServiceMapGroup =
+  | SavedGroupServiceMapGroup
+  | AttributeServiceMapGroup
+  | CallsServiceMapGroup
+  | SharedServiceMapGroup
+  | NotConnectedServiceMapGroup;
+
+/** One way of grouping the map's services. */
+export interface ServiceGroupingStrategy {
+  source: ServiceGroupingSource;
+  /** Whether this grouping passed the readability checks. */
+  passes: boolean;
+  /** This strategy's own groups. The same id can hold different services in another strategy. */
+  groups: ServiceMapGroup[];
+  /** `assignment[i]` is the index in `groups` of `services[i]`. */
+  assignment: number[];
+}
+
+/** Every grouping the map can show, and the one shown automatically. */
+export interface ServiceMapGrouping {
+  /** Every service on the map, sorted. */
+  services: string[];
+  /** The strategy shown automatically. Always one of `strategies`. */
+  automatic: ServiceGroupingSource;
+  strategies: ServiceGroupingStrategy[];
 }
 
 export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;
+
+/** Stats of a service's main transaction type. */
+export interface ServiceMapServiceStats {
+  transactionType: string;
+  throughput: number;
+  /** `null` when none of the main type's transactions has a known outcome */
+  failedTransactionRate: number | null;
+  /** In microseconds */
+  latency: number | null;
+  requestCount: number;
+}
 
 export interface ServicesResponse {
   [SERVICE_NAME]: string;
   [AGENT_NAME]: string;
   [SERVICE_ENVIRONMENT]: string | null;
+  /** Only set when service map grouping is enabled and the service has transactions */
+  stats?: ServiceMapServiceStats;
 }
 
 export interface ServiceConnectionNode extends ServicesResponse {
@@ -184,6 +287,13 @@ export interface ServiceNodeData extends BaseNodeData {
   alertsByStatus?: Partial<Record<AlertStatus, number>>;
   sloStatus?: SloStatus | 'noSLOs';
   sloCount?: number;
+  /**
+   * Set when the service's throughput is far below the map's median (idle). The map draws it
+   * faded so busy and failing services stand out.
+   */
+  isIdle?: boolean;
+  /** Only set when service map grouping is enabled and the service has transactions */
+  stats?: ServiceMapServiceStats;
 }
 
 export interface DependencyNodeData extends BaseNodeData {
@@ -219,7 +329,32 @@ export interface GroupedNodeData extends BaseNodeData {
   count: number;
 }
 
-export type ServiceMapNodeData = ServiceNodeData | DependencyNodeData | GroupedNodeData;
+/**
+ * A closed service group (2+ services drawn as one node). Distinct from resource
+ * `GroupedNodeData` (`isGrouped`).
+ */
+export interface ServiceGroupNodeData extends BaseNodeData {
+  isService: false;
+  isServiceGroup: true;
+  groupKind: ServiceMapGroup['kind'];
+  memberServiceIds: string[];
+  memberCount: number;
+  /** True when a selected / highlighted service is a member of this closed group */
+  contextHighlight?: boolean;
+  serviceAnomalyStats?: ServiceAnomalyStats;
+  alertsCount?: number;
+  alertsByStatus?: Partial<Record<AlertStatus, number>>;
+  sloStatus?: SloStatus | 'noSLOs';
+  sloCount?: number;
+  /** Rolled up from members when service map grouping / numbers-on-nodes are on */
+  stats?: ServiceMapServiceStats;
+}
+
+export type ServiceMapNodeData =
+  | ServiceNodeData
+  | DependencyNodeData
+  | GroupedNodeData
+  | ServiceGroupNodeData;
 
 export type ServiceMapNode = Node<ServiceMapNodeData>;
 
@@ -237,6 +372,8 @@ export interface ServiceMapEdgeData extends Record<string, unknown> {
   sourceLabel?: string;
   targetLabel?: string;
   resources?: string[];
+  /** The resources behind a grouped edge (edge to a "N resources" node). */
+  groupedConnections?: GroupedConnectionInfo[];
 }
 
 export interface ServiceMapEdge extends Edge<ServiceMapEdgeData> {
@@ -260,4 +397,6 @@ export interface ReactFlowServiceMapResponse {
   edges: ServiceMapEdge[];
   nodesCount: number;
   tracesCount: number;
+  /** Passthrough from the raw map response when grouping produced a result */
+  serviceGrouping?: ServiceMapGrouping;
 }

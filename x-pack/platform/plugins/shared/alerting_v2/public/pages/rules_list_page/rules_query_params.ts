@@ -18,6 +18,9 @@ export const ENABLED_FILTER_ID = 'enabled';
 /** Filter dimension key for the rule kind (mode) filter. */
 export const KIND_FILTER_ID = 'kind';
 
+/** Filter dimension key for the rule template the rules were created from. */
+export const TEMPLATE_FILTER_ID = 'template';
+
 export { TAG_FILTER_ID };
 
 export interface RulesQueryParams {
@@ -35,7 +38,8 @@ export interface RulesQueryParams {
  * Enabled filter values are `'true'` / `'false'` (matching the rules status
  * filter UI). Kind filter values are `'alert'` / `'signal'`. Both are
  * single-select popovers, so only the first included value is honored and
- * exclusions are not offered.
+ * exclusions are not offered. The template filter takes template ids and, like
+ * tags, supports included values (OR) and exclusions (NOT).
  *
  * Narrows filter dimensions with a cast (same pattern as action policies) because
  * `getIncludeExcludeFilter` is not part of `@kbn/content-list-provider`'s public
@@ -45,6 +49,7 @@ export const toRulesQueryParams = (filters: ActiveFilters): RulesQueryParams => 
   const enabled = filters[ENABLED_FILTER_ID] as IncludeExcludeFilter | undefined;
   const kind = filters[KIND_FILTER_ID] as IncludeExcludeFilter | undefined;
   const tags = filters[TAG_FILTER_ID] as IncludeExcludeFilter | undefined;
+  const template = filters[TEMPLATE_FILTER_ID] as IncludeExcludeFilter | undefined;
 
   return {
     filter: buildRulesListFilter({
@@ -52,6 +57,8 @@ export const toRulesQueryParams = (filters: ActiveFilters): RulesQueryParams => 
       kind: kind?.include?.[0],
       tags: tags?.include,
       excludedTags: tags?.exclude,
+      templateIds: template?.include,
+      excludedTemplateIds: template?.exclude,
     }),
     search: filters.search || undefined,
   };

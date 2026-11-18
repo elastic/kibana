@@ -24,12 +24,12 @@ const MAX_AGG_FIELDS = 25;
 const FIELDS_DENY_LIST = new Set(['_id', '_index', '_score', '_source']);
 
 const emptyFieldErrorMessage = () =>
-  i18n.translate('workflowsManagement.getAggs.emptyFieldErrorMessage', {
+  i18n.translate('workflows.getAggs.emptyFieldErrorMessage', {
     defaultMessage: 'Aggregation field cannot be empty.',
   });
 
 const forbiddenFieldErrorMessage = () =>
-  i18n.translate('workflowsManagement.getAggs.forbiddenFieldErrorMessage', {
+  i18n.translate('workflows.getAggs.forbiddenFieldErrorMessage', {
     defaultMessage: 'Field is not allowed for aggregation.',
   });
 

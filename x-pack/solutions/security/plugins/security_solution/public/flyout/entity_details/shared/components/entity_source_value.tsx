@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
@@ -78,6 +79,13 @@ interface TruncatedBadgeListProps {
    * Optional text size to apply to the value text. Defaults to `xs`.
    */
   textSize?: EuiTextProps['size'];
+  /**
+   * Wraps each inline value in a tooltip showing the full value, for cells where the text can be
+   * truncated and must stay readable and focusable.
+   */
+  showValueTooltip?: boolean;
+  /** Content rendered after the overflow badge, pinned to the cell's right edge (e.g. a copy button). */
+  trailing?: ReactNode;
   'data-test-subj'?: string;
 }
 
@@ -100,6 +108,8 @@ export const TruncatedBadgeList = memo(
     formatValue,
     overflowTooltipTitle,
     textSize = 'xs',
+    showValueTooltip = false,
+    trailing,
     'data-test-subj': dataTestSubj,
   }: TruncatedBadgeListProps) => {
     const formattedValues = useMemo(
@@ -127,9 +137,17 @@ export const TruncatedBadgeList = memo(
       >
         {visible.map((value) => (
           <EuiFlexItem grow={false} key={value} css={{ minWidth: 0 }}>
-            <EuiText size={textSize} className="eui-textTruncate">
-              {value}
-            </EuiText>
+            {showValueTooltip ? (
+              <EuiToolTip content={value}>
+                <EuiText size={textSize} className="eui-textTruncate" tabIndex={0}>
+                  {value}
+                </EuiText>
+              </EuiToolTip>
+            ) : (
+              <EuiText size={textSize} className="eui-textTruncate">
+                {value}
+              </EuiText>
+            )}
           </EuiFlexItem>
         ))}
         {hidden.length > 0 && (
@@ -145,6 +163,11 @@ export const TruncatedBadgeList = memo(
                 {DEFAULT_OVERFLOW_LABEL(hidden.length)}
               </EuiBadge>
             </EuiToolTip>
+          </EuiFlexItem>
+        )}
+        {trailing && (
+          <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
+            {trailing}
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
