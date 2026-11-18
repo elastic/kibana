@@ -219,7 +219,7 @@ export const registerDetectionSnapshotTask = ({
         async run() {
           if (!fakeRequest) {
             // No retry can add credentials; the next Nightshift setup reschedules the removed task.
-            throwUnrecoverableError(
+            return throwUnrecoverableError(
               new Error('Detection snapshot telemetry task has no user credentials')
             );
           }
