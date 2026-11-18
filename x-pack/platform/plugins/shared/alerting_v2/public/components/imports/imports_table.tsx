@@ -55,18 +55,22 @@ const getColumns = (
 ];
 
 const SEARCH_LABEL = i18n.translate('xpack.alertingV2.imports.list.searchPlaceholder', {
-  defaultMessage: 'Search by name',
+  defaultMessage: 'Search by name or type',
 });
 
-/** Case-insensitive match on the import name. */
-export const filterImportsByName = (
+/** Case-insensitive match on the import name or its type label. */
+export const filterImports = (
   items: readonly ImportListItem[],
   searchText: string
 ): ImportListItem[] => {
   const needle = searchText.trim().toLowerCase();
   return needle === ''
     ? [...items]
-    : items.filter(({ name }) => name.toLowerCase().includes(needle));
+    : items.filter(
+        ({ name, connectorTypeId }) =>
+          name.toLowerCase().includes(needle) ||
+          getConnectorTypeLabel(connectorTypeId).toLowerCase().includes(needle)
+      );
 };
 
 interface ImportsTableProps {
@@ -89,7 +93,7 @@ export const ImportsTable = ({ items, isLoading, error }: ImportsTableProps) => 
       ),
     [getUrlForApp]
   );
-  const rows = useMemo(() => filterImportsByName(items, searchText), [items, searchText]);
+  const rows = useMemo(() => filterImports(items, searchText), [items, searchText]);
 
   return (
     <>
