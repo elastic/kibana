@@ -231,6 +231,79 @@ describe('Cases metrics', () => {
       expect(screen.queryByTestId('cases-kpi-tile-p1-date-hint')).not.toBeInTheDocument();
     });
 
+    describe('duration unit', () => {
+      const durationMetric = (
+        id: string,
+        threshold: KpiMetricThreshold
+      ): CustomKpiMetricConfiguration => ({
+        id,
+        kind: 'custom',
+        label: `Metric ${id}`,
+        index: 'cases',
+        query: '',
+        display: 'value',
+        aggregation: { type: 'median', field: 'case.time_to_resolve' },
+        threshold,
+      });
+
+      it('shows the value in the threshold unit with the threshold color', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[durationMetric('d1', { comparator: 'above', value: 86400, unit: 'h' })]}
+            kpiResults={[{ id: 'd1', type: 'value', format: 'duration', value: 137752 }]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        const title = within(await screen.findByTestId('cases-kpi-tile-d1')).getByText('38.3 h');
+
+        expect(title.className).toMatch(/danger/);
+      });
+
+      it('shows the same change in percent with and without a unit', async () => {
+        renderWithTestingProviders(
+          <CasesMetrics
+            {...props}
+            kpiMetrics={[
+              {
+                ...durationMetric('unit', { comparator: 'above', value: 86400, unit: 'h' }),
+                direction: 'lower_is_better',
+              },
+              {
+                ...durationMetric('noUnit', { comparator: 'above', value: 86400 }),
+                direction: 'lower_is_better',
+              },
+            ]}
+            kpiResults={[
+              {
+                id: 'unit',
+                type: 'value',
+                format: 'duration',
+                value: 137752,
+                previousValue: 86400,
+              },
+              {
+                id: 'noUnit',
+                type: 'value',
+                format: 'duration',
+                value: 137752,
+                previousValue: 86400,
+              },
+            ]}
+            isAnalyticsEnabled={true}
+          />
+        );
+
+        expect(await screen.findByTestId('cases-kpi-tile-unit-change')).toHaveTextContent(
+          '+59% vs. previous period'
+        );
+        expect(screen.getByTestId('cases-kpi-tile-noUnit-change')).toHaveTextContent(
+          '+59% vs. previous period'
+        );
+      });
+    });
+
     it('shows an empty custom tile when analytics is disabled', async () => {
       renderWithTestingProviders(
         <CasesMetrics {...props} kpiMetrics={[customMetric('c1')]} isAnalyticsEnabled={false} />

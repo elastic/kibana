@@ -196,6 +196,24 @@ export const KPI_METRIC_CLOSED_DATE_HINT = i18n.translate(
   }
 );
 
+export const KPI_METRIC_DURATION_MINUTES = (value: string) =>
+  i18n.translate('xpack.cases.casesStats.kpiMetricDurationMinutes', {
+    values: { value },
+    defaultMessage: '{value} min',
+  });
+
+export const KPI_METRIC_DURATION_HOURS = (value: string) =>
+  i18n.translate('xpack.cases.casesStats.kpiMetricDurationHours', {
+    values: { value },
+    defaultMessage: '{value} h',
+  });
+
+export const KPI_METRIC_DURATION_DAYS = (value: string) =>
+  i18n.translate('xpack.cases.casesStats.kpiMetricDurationDays', {
+    values: { value },
+    defaultMessage: '{value} d',
+  });
+
 export const KPI_METRIC_CHANGE = (change: string) =>
   i18n.translate('xpack.cases.casesStats.kpiMetricChange', {
     values: { change },

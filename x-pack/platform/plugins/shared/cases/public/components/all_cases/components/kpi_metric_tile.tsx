@@ -9,12 +9,31 @@ import React from 'react';
 import { EuiIconTip, EuiLoadingSpinner, EuiStat, EuiText } from '@elastic/eui';
 import prettyMilliseconds from 'pretty-ms';
 import type { KpiMetricFormat } from '../../../../common/constants';
-import type { KpiMetricDirection, KpiMetricThreshold } from '../../../../common/types/domain';
-import { KPI_METRIC_CHANGE, KPI_METRIC_ERROR_ARIA_LABEL } from '../translations';
+import type {
+  KpiMetricDirection,
+  KpiMetricThreshold,
+  KpiMetricThresholdUnit,
+} from '../../../../common/types/domain';
+import {
+  KPI_METRIC_CHANGE,
+  KPI_METRIC_DURATION_DAYS,
+  KPI_METRIC_DURATION_HOURS,
+  KPI_METRIC_DURATION_MINUTES,
+  KPI_METRIC_ERROR_ARIA_LABEL,
+} from '../translations';
 
 const PRETTY_MS_OPTIONS = { compact: true, verbose: false } as const;
 const SECONDS_TO_MS = 1000;
 const EMPTY_VALUE = '-';
+
+const DURATION_UNITS: Record<
+  KpiMetricThresholdUnit,
+  { seconds: number; format: (value: string) => string }
+> = {
+  m: { seconds: 60, format: KPI_METRIC_DURATION_MINUTES },
+  h: { seconds: 3600, format: KPI_METRIC_DURATION_HOURS },
+  d: { seconds: 86400, format: KPI_METRIC_DURATION_DAYS },
+};
 
 export interface KpiMetricTileProps {
   label: string;
@@ -38,12 +57,23 @@ export interface KpiMetricTileProps {
   dataTestSubj: string;
 }
 
+/**
+ * Formats a metric value. A duration with a unit shows in that unit, otherwise in the largest unit.
+ */
 export const formatKpiMetricValue = (
   value: number | null | undefined,
-  format: KpiMetricFormat
+  format: KpiMetricFormat,
+  unit?: KpiMetricThresholdUnit
 ): string => {
   if (value == null) {
     return EMPTY_VALUE;
+  }
+
+  if (format === 'duration' && unit != null) {
+    const { seconds, format: formatDuration } = DURATION_UNITS[unit];
+    return formatDuration(
+      (value / seconds).toLocaleString(undefined, { maximumFractionDigits: 1 })
+    );
   }
 
   if (format === 'duration') {
@@ -150,7 +180,9 @@ const KpiMetricTileComponent: React.FC<KpiMetricTileProps> = ({
       label
     );
 
-  let title: React.ReactNode = hasError ? EMPTY_VALUE : formatKpiMetricValue(value, format);
+  let title: React.ReactNode = hasError
+    ? EMPTY_VALUE
+    : formatKpiMetricValue(value, format, threshold?.unit);
 
   if (isLoading) {
     title = <EuiLoadingSpinner data-test-subj={`${dataTestSubj}-loading-spinner`} />;
