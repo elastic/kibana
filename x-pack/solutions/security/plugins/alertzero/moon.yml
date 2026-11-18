@@ -109,5 +109,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - integration_tests/**/*
     - '!target/**/*'
 tasks: {}

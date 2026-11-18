@@ -88,8 +88,9 @@ export const labelsCmd: Command<void> = {
     const positionals = flagsReader.getPositionals();
     const onlySuites = positionals.length > 0 ? new Set(positionals) : null;
 
+    // Local-only suites are never selected by PR labels, so they get none.
     const suites = readSuiteMetadata(repoRoot, log).filter(
-      (suite) => !onlySuites || onlySuites.has(suite.id)
+      (suite) => !suite.localOnly && (!onlySuites || onlySuites.has(suite.id))
     );
 
     if (suites.length === 0) {

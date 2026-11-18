@@ -32,6 +32,19 @@ describe('upgradeStoredWorkerSettings', () => {
     scheduleInterval: '2h',
   };
 
+  it('Rule Tuning permits only Manual/Assisted and lowers stored Supervised to Assisted', () => {
+    expect(RULE_TUNING_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels).toEqual([
+      'manual',
+      'assisted',
+    ]);
+    expect(
+      upgradeStoredWorkerSettings(RULE_TUNING_WORKER_SETTINGS_DEFAULTS, {
+        ...stored,
+        autonomyLevel: 'supervised',
+      }).autonomyLevel
+    ).toBe('assisted');
+  });
+
   it('fills extras when the document has none', () => {
     expect(upgradeStoredWorkerSettings(RULE_TUNING_WORKER_SETTINGS_DEFAULTS, stored)).toEqual({
       ...stored,

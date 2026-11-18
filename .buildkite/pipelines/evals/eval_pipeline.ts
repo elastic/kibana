@@ -42,6 +42,11 @@ export interface EvalsSuiteMetadataEntry {
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
   specModelGroups?: EvalsSuiteSpecModelGroup[];
+  /**
+   * Runs only through `node scripts/evals` on a developer stack: PR labels, `evals:all`
+   * included, never select it, and `node scripts/evals labels` creates no label for it.
+   */
+  localOnly?: boolean;
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
@@ -303,7 +308,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   }
 
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
-  const evalSuites = readEvalsSuiteMetadata();
+  const evalSuites = readEvalsSuiteMetadata().filter((suite) => !suite.localOnly);
   const runAllEvals = parsedLabels.includes('evals:all');
   const selectedEvalSuites = (
     runAllEvals
