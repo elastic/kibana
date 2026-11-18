@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
+import type { UseFormReturn } from 'react-hook-form';
 import { Controller, FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC } from '../constants';
 import type { CreateSLOForm } from '../types';
@@ -36,8 +37,6 @@ const prefilledValues: CreateSLOForm = {
   },
 };
 
-let setValue: ReturnType<typeof useForm<CreateSLOForm>>['setValue'];
-
 function MetricFilter() {
   const { control } = useFormContext<CreateSLOForm>();
   return (
@@ -59,20 +58,25 @@ function IndicatorForm() {
   return indicatorType === 'sli.metric.custom' ? <MetricFilter /> : null;
 }
 
-function TestForm() {
-  const methods = useForm<CreateSLOForm>({ defaultValues: prefilledValues });
-  setValue = methods.setValue;
+const renderTestForm = (): UseFormReturn<CreateSLOForm> => {
+  let methods!: UseFormReturn<CreateSLOForm>;
 
-  return (
-    <FormProvider {...methods}>
-      <IndicatorForm />
-    </FormProvider>
-  );
-}
+  function TestForm() {
+    methods = useForm<CreateSLOForm>({ defaultValues: prefilledValues });
+    return (
+      <FormProvider {...methods}>
+        <IndicatorForm />
+      </FormProvider>
+    );
+  }
+
+  render(<TestForm />);
+  return methods;
+};
 
 describe('useResetOnIndicatorTypeChange', () => {
   it('does not restore prefilled indicator params when switching back to the same indicator type', () => {
-    render(<TestForm />);
+    const { setValue } = renderTestForm();
     expect(screen.getByTestId('metricFilter')).toHaveTextContent(PREFILLED_FILTER);
 
     act(() => setValue('indicator.type', 'sli.kql.custom'));

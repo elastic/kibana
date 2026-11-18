@@ -7,7 +7,7 @@
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
-export interface Option {
+interface Option {
   label: string;
   value: string;
 }

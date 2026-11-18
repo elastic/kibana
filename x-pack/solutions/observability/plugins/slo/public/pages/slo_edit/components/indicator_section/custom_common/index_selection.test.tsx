@@ -26,11 +26,11 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
   ),
 }));
 
-const renderIndexSelection = () => {
-  const form: { current?: UseFormReturn<CreateSLOForm> } = {};
+const renderIndexSelection = (): UseFormReturn<CreateSLOForm> => {
+  let methods!: UseFormReturn<CreateSLOForm>;
 
   function Wrapper() {
-    const methods = useForm<CreateSLOForm>({
+    methods = useForm<CreateSLOForm>({
       defaultValues: {
         ...SLO_EDIT_FORM_DEFAULT_VALUES,
         indicator: {
@@ -40,7 +40,6 @@ const renderIndexSelection = () => {
       },
       mode: 'all',
     });
-    form.current = methods;
     return (
       <FormProvider {...methods}>
         <IndexSelection />
@@ -49,7 +48,7 @@ const renderIndexSelection = () => {
   }
 
   render(<Wrapper />);
-  return form;
+  return methods;
 };
 
 describe('<IndexSelection />', () => {
@@ -68,11 +67,11 @@ describe('<IndexSelection />', () => {
       refetch: jest.fn(),
     });
     await act(async () => {
-      await form.current?.trigger();
+      await form.trigger();
     });
 
     await waitFor(() => {
-      expect(form.current?.getValues(DATA_VIEW_FIELD)).toBe('dv-id');
+      expect(form.getValues(DATA_VIEW_FIELD)).toBe('dv-id');
       expect(screen.getByTestId('indexSelection')).toHaveAttribute('data-color', 'primary');
     });
   });

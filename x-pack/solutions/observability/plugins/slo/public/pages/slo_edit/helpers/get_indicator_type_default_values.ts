@@ -26,7 +26,7 @@ export const getIndicatorTypeDefaultValues = (
 ): CreateSLOForm => {
   switch (indicatorType) {
     case 'sli.metric.custom':
-      return { ...SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC };
+      return SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC;
     case 'sli.metric.timeslice':
       return {
         ...SLO_EDIT_FORM_DEFAULT_VALUES,
@@ -59,7 +59,7 @@ export const getIndicatorTypeDefaultValues = (
         },
       };
     case 'sli.synthetics.availability':
-      return { ...SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY };
+      return SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY;
     default:
       assertNever(indicatorType);
   }
