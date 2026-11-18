@@ -92,6 +92,7 @@ describe('renderMatrixHtml', () => {
             modelId: 'test-model',
             modelLabel: 'Test Model',
             openSource: false,
+            priced: false,
             cells: [
               {
                 columnId: 'alert',
@@ -106,12 +107,49 @@ describe('renderMatrixHtml', () => {
       },
     };
     const html = renderMatrixHtml(matrixWithCost, mockConfig);
-    expect(html).toContain('Token cost per (model, column)');
+    expect(html).toContain('Token cost per (model, category)');
     expect(html).toContain('tokencost');
-    // 1500 -> "2k" (toFixed(0) rounds 1.5 up), 4000 -> "4k", total 5500 -> "5k"/"6k"
-    expect(html).toContain('>2k</td>');
-    expect(html).toContain('>4k</td>');
+    // Both columns share the "Agent Builder" group: one category bucket summing 1500 + 4000.
+    expect(html).toContain('<th>Agent Builder</th>');
+    expect(html).not.toContain('<th>Alert Analysis</th><th>Threat Hunting</th><th>Total</th>');
+    expect(html).toContain('>6k<br><span class="model-id">unpriced</span></td>');
     expect(html).toContain('in 1,200 / out 300');
+  });
+
+  it('renders the summed USD estimate for priced models, and "partial" when a cell lacks one', () => {
+    const priced = (
+      cells: NonNullable<Matrix['tokenCost']>['models'][number]['cells']
+    ): Matrix => ({
+      ...mockMatrix,
+      tokenCost: {
+        models: [
+          {
+            modelId: 'test-model',
+            modelLabel: 'Test Model',
+            openSource: false,
+            priced: true,
+            cells,
+          },
+        ],
+      },
+    });
+    const full = renderMatrixHtml(
+      priced([
+        { columnId: 'alert', totalMean: 1500, estimatedCostUsd: 0.25 },
+        { columnId: 'threat', totalMean: 4000, estimatedCostUsd: 0.5 },
+      ]),
+      mockConfig
+    );
+    expect(full).toContain('>6k<br>$0.75</td>');
+
+    const partial = renderMatrixHtml(
+      priced([
+        { columnId: 'alert', totalMean: 1500, estimatedCostUsd: 0.25 },
+        { columnId: 'threat', totalMean: 4000 },
+      ]),
+      mockConfig
+    );
+    expect(partial).toContain('>6k<br><span class="model-id">partial</span></td>');
   });
 
   it('omits the token-cost table when matrix.tokenCost is absent', () => {
@@ -841,6 +879,7 @@ describe('round 7 regression: tooltip mins and suite-scoped variants', () => {
             modelId: 'test-model',
             modelLabel: 'Test Model',
             openSource: false,
+            priced: false,
             cells: [
               {
                 columnId: 'alert',

@@ -616,6 +616,31 @@ describe('buildMatrix token axis', () => {
     const matrix = buildMatrix(aggregated, tokenConfig);
     expect(matrix.tokenCost!.models).toEqual([]);
   });
+
+  it('prices cells at the EIS list rate and flags models without a price', () => {
+    const pricedId = 'anthropic-claude-4.5-haiku';
+    const matrix = buildMatrix(
+      [
+        { ...tokenAggregated[0], modelId: pricedId },
+        { ...tokenAggregated[0], modelId: 'z-ai/glm-5.3-flash' },
+      ],
+      parseMatrixConfig({
+        columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
+        models: [
+          { id: pricedId, label: 'Haiku' },
+          { id: 'z-ai/glm-5.3-flash', label: 'GLM flash', openSource: true },
+        ],
+        tokenCost: {},
+      })
+    );
+    const byId = new Map(matrix.tokenCost!.models.map((model) => [model.modelId, model]));
+
+    // Haiku: 100k in * $1.5/M + 2k out * $7/M, input priced uncached.
+    expect(byId.get(pricedId)?.priced).toBe(true);
+    expect(byId.get(pricedId)?.cells[0].estimatedCostUsd).toBeCloseTo(0.164, 6);
+    expect(byId.get('z-ai/glm-5.3-flash')?.priced).toBe(false);
+    expect(byId.get('z-ai/glm-5.3-flash')?.cells[0].estimatedCostUsd).toBeUndefined();
+  });
 });
 
 describe('buildMatrix saturated-evaluator exclusion', () => {

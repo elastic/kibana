@@ -457,5 +457,6 @@
       "label": "GP LLM v2 (EIS)",
       "openSource": false
     }
-  ]
+  ],
+  "tokenCost": {}
 }
