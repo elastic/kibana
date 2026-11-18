@@ -107,11 +107,9 @@ back either slot. The limit is at least 1, and an omitted limit allows unlimited
 To stop automatic investigation starts, disable the automation. Changing the limit takes effect on
 the next attempt.
 
-The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.
-It guides the agent's telemetry filters; it is not an enforced data-access boundary. The optional
-`runtime.timeoutSeconds` bounds the investigation workflow started by that run. When set, the generated
-automation workflow gets an additional 60 seconds for setup and returning the investigation result.
-The stored managed investigation definition and its default timeout are unchanged.
+The optional `runtime.timeoutSeconds` bounds the investigation workflow started by that run. When set,
+the generated automation workflow gets an additional 60 seconds for setup and returning the
+investigation result. The stored managed investigation definition and its default timeout are unchanged.
 
 Only one schedule row is supported per automation. It can coexist with alert rows; each source has a
 separate guarded investigation step. Alert publication opt-in and alert snapshot resolution are

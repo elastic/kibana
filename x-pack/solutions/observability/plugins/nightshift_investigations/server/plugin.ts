@@ -616,6 +616,8 @@ export class NightshiftInvestigationsPlugin
             isPaused: isOnlineEvalsPaused,
             shouldIncludeExplanations,
             telemetry,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
           })
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.

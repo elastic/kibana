@@ -60,6 +60,7 @@ import {
   createAlert,
   createAlertSuppressionRow,
   createDispatcherConfigService,
+  createDispatcherTelemetryMock,
   createWorkflowDetailDto,
   MOCK_KIBANA_BASE_URL,
 } from './fixtures/test_utils';
@@ -166,7 +167,12 @@ function buildDispatcherService(deps: {
   loggerService?: LoggerServiceContract;
 }): DispatcherService {
   const pipeline = new DispatcherPipeline([
-    new FetchAlertsStep(deps.queryService, MOCK_KIBANA_BASE_URL, createDispatcherConfigService()),
+    new FetchAlertsStep(
+      deps.queryService,
+      MOCK_KIBANA_BASE_URL,
+      createDispatcherConfigService(),
+      createDispatcherTelemetryMock()
+    ),
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
     new HydrateAlertDataStep(deps.queryService),

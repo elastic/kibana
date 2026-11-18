@@ -21,6 +21,8 @@
     "@kbn/actions-plugin",
     "@kbn/connector-specs",
     "@kbn/workflows",
+    "@kbn/workflows-topics",
+    "@kbn/core-pubsub-server-mocks",
     "@kbn/entity-access-control",
     "@kbn/task-manager-plugin",
     "@kbn/es-query",
