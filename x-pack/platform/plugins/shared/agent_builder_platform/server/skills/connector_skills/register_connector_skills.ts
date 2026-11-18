@@ -38,11 +38,11 @@ export const createConnectorSkillDefinition = (
   })),
   // Granted per agent at run time from the agent's connectors, so they stay out of the skills
   // library and out of the default capabilities.
-  // The skill tells the model to run workflows, so it is left out when it cannot.
-  requiresWorkflows: true,
+  // A skill that tells the model to run workflows is left out when the caller cannot.
+  requiresWorkflows: skill.usesWorkflows ?? false,
   hidden: true,
   excludeFromElasticCapabilities: true,
-  getRegistryTools: () => [platformCoreTools.executeWorkflow],
+  getRegistryTools: () => (skill.usesWorkflows ? [platformCoreTools.executeWorkflow] : []),
   // Lets the agent find the connector id to run the workflows with, without loading the connector
   // discovery skill first.
   getInlineTools: () => [createListConnectorsTool({ getActionsStart })],

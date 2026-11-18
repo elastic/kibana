@@ -12,7 +12,10 @@ import { CONNECTORS_SKILLS_BASE_PATH } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getAllConnectorSkills, getConnectorSkillRegistryId } from '@kbn/connector-specs';
-import { registerConnectorSkills } from './register_connector_skills';
+import {
+  createConnectorSkillDefinition,
+  registerConnectorSkills,
+} from './register_connector_skills';
 
 const registerSkillsWith = () => {
   const register = jest.fn();
@@ -63,5 +66,18 @@ describe('registerConnectorSkills', () => {
       expect(isAllowedSkillRegistration(skill)).toBe(true);
       await expect(validateSkillDefinition(skill)).resolves.toBeDefined();
     }
+  });
+
+  it('only requires workflows, and grants the executor, for skills that use them', async () => {
+    const deps = { getActionsStart: jest.fn() as unknown as () => Promise<ActionsPluginStart> };
+    const base = { id: 'plain', name: 'connector-plain', description: 'd', content: 'c' };
+
+    const plain = createConnectorSkillDefinition(base, deps);
+    expect(plain.requiresWorkflows).toBe(false);
+    expect(await plain.getRegistryTools?.()).toEqual([]);
+
+    const withWorkflows = createConnectorSkillDefinition({ ...base, usesWorkflows: true }, deps);
+    expect(withWorkflows.requiresWorkflows).toBe(true);
+    expect(await withWorkflows.getRegistryTools?.()).toEqual([platformCoreTools.executeWorkflow]);
   });
 });
