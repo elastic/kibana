@@ -47,12 +47,61 @@ outputs:
     type: boolean
   - name: prior_forget_warning
     type: string
+  - name: skill_retired
+    type: boolean
+  - name: retire_warning
+    type: string
 triggers:
   - type: scheduled
     with:
       every: '__INTERVAL_MINUTES__m'
   - type: manual
 steps:
+  # A retired (deleted) skill leaves this instance scheduled with nothing to
+  # grade, and managed workflows cannot be deleted. A 404 on the skill turns
+  # the monitor off and ends the run; any other read failure keeps monitoring,
+  # so a transient error never disables it.
+  - name: check_skill
+    type: kibana.request
+    timeout: '30s'
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills/{{ consts.SKILL_ID }}'
+      headers:
+        elastic-api-version: '2023-10-31'
+    on-failure:
+      continue: true
+
+  - name: resolve_skill
+    type: data.set
+    with:
+      skill_retired: '${{ steps.check_skill.error != null and steps.check_skill.error.details.status == 404 }}'
+
+  - name: disable_self
+    type: kibana.request
+    if: '${{ steps.resolve_skill.output.skill_retired == true }}'
+    timeout: '30s'
+    with:
+      method: PUT
+      path: '/s/{{ workflow.spaceId }}/api/workflows/workflow/{{ workflow.id }}'
+      headers:
+        kbn-xsrf: 'true'
+        elastic-api-version: '2023-10-31'
+        Content-Type: application/json
+      body:
+        enabled: false
+    on-failure:
+      continue: true
+
+  - name: emit_retired
+    type: workflow.output
+    status: completed
+    if: '${{ steps.resolve_skill.output.skill_retired == true }}'
+    with:
+      skill_retired: true
+      retire_warning: >-
+        {% if steps.disable_self.error != null %}WARNING: skill {{ consts.SKILL_ID }} no longer exists, but this monitor could not disable itself ({{ steps.disable_self.error.message }}); disable it by hand.{% endif %}
+
   # Traces that invoked the skill in the lookback window. Spans carry no
   # skill attribute, so the join is the load_skill tool call: a trace
   # belongs to the skill when a load_skill span resolved it. load_skill
@@ -355,3 +404,4 @@ steps:
       rolled_back: '${{ steps.restore_skill.output != null and steps.restore_skill.error == null }}'
       prior_forget_warning: >-
         {% if steps.forget_prior_content.error != null %}WARNING: the rollback restored the skill but the stored prior content for {{ consts.SKILL_ID }} could not be deleted, so the next tick may propose the same rollback again.{% endif %}
+      skill_retired: false
