@@ -72,8 +72,8 @@ import {
 import {
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW,
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW,
-  ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW,
 } from './endpoint/configuration_troubleshooting';
+import { ENDPOINT_KNOWLEDGE_SEARCH_WORKFLOW } from './endpoint/knowledge_search';
 import { NATIVE_VULN_SCANNER_SCAN_WORKFLOW } from './native_vuln_scanner';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW } from './nightshift_investigations/agent_optimize';
 import {
@@ -154,6 +154,10 @@ export type {
   ContextEngineTraceDreamingBatchWorkflowTemplateValues,
   ContextEngineTraceDreamingWorkflowTemplateValues,
 } from './context_engine';
+export {
+  ENDPOINT_KNOWLEDGE_SEARCH_WORKFLOW,
+  ENDPOINT_KNOWLEDGE_SEARCH_WORKFLOW_ID,
+} from './endpoint/knowledge_search';
 export {
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
@@ -269,8 +273,6 @@ export {
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW_ID,
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW,
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW_ID,
-  ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW,
-  ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW_ID,
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_WORKFLOW_IDS,
 } from './endpoint/configuration_troubleshooting';
 
@@ -386,10 +388,10 @@ export const managedWorkflowDefinitions = [
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW,
   // Installs only when `xpack.nativeVulnScanner.enabled`; the registry entry is inert otherwise.
   NATIVE_VULN_SCANNER_SCAN_WORKFLOW,
-  // Endpoint configuration troubleshooting workflows. security_solution installs
-  // them in start() only while the universal-skill flag is on; registry membership
-  // only makes a definition discoverable by id.
+  // Elastic Defend endpoint workflows. security_solution installs them in start()
+  // only while a consumer flag is on; registry membership only makes a definition
+  // discoverable by id.
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW,
-  ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW,
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW,
+  ENDPOINT_KNOWLEDGE_SEARCH_WORKFLOW,
 ] as const;

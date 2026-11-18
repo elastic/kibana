@@ -14,6 +14,7 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Redirect, useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
+import { KI_NOT_DELETED_STATUSES } from '../../../common/ki_lifecycle_status';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import {
   AiIndexCreatedCallout,
@@ -47,7 +48,7 @@ import {
   CONTEXT_ENGINE_PATHS,
   getAiIndexDetailPath,
   getAiIndexSourcesPath,
-  getAiIndexKnowledgeIndicatorsPath,
+  getAiIndexKnowledgeDocumentsPath,
   getAiIndexSettingsPath,
 } from '../paths';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
@@ -67,7 +68,7 @@ const sourcesTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.s
 const knowledgeIndicatorsTabLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators',
   {
-    defaultMessage: 'Knowledge Indicators',
+    defaultMessage: 'Knowledge documents',
   }
 );
 
@@ -111,7 +112,13 @@ export const AiIndexDetailPage = () => {
   const isSourcesTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSources, exact: true }) !== null;
   const isKnowledgeIndicatorsTab =
-    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators, exact: true }) !== null;
+    useRouteMatch({
+      path: [
+        CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments,
+        CONTEXT_ENGINE_PATHS.detailKnowledgeDocument,
+      ],
+      exact: true,
+    }) !== null;
   const isSettingsTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSettings, exact: true }) !== null;
   const showSettingsTab = isMemoryEnabled;
@@ -139,7 +146,7 @@ export const AiIndexDetailPage = () => {
   const { summary, isLoading: isKiSummaryLoading } = useListKi({
     aiIndexId: aiIndex?.id,
     size: KI_SUMMARY_PAGE_SIZE,
-    lifecycleStatus: ['active'],
+    status: KI_NOT_DELETED_STATUSES,
     enabled: aiIndex !== undefined,
     notifyOnError: true,
   });
@@ -263,8 +270,7 @@ export const AiIndexDetailPage = () => {
         id: 'knowledge_indicators',
         label: knowledgeIndicatorsTabLabel,
         isSelected: isKnowledgeIndicatorsTab,
-        onClick: () =>
-          navigateToContextEngine(getAiIndexKnowledgeIndicatorsPath(resolvedAiIndexId)),
+        onClick: () => navigateToContextEngine(getAiIndexKnowledgeDocumentsPath(resolvedAiIndexId)),
         badge: hasKnowledgeIndicators ? summary.total : undefined,
         'data-test-subj': 'contextAiIndexDetailTab-knowledge_indicators',
       });
@@ -395,7 +401,13 @@ export const AiIndexDetailPage = () => {
       <Route path={CONTEXT_ENGINE_PATHS.detailSources} exact>
         {sourcesPanel}
       </Route>
-      <Route path={CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators} exact>
+      <Route
+        path={[
+          CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments,
+          CONTEXT_ENGINE_PATHS.detailKnowledgeDocument,
+        ]}
+        exact
+      >
         {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detailSettings} exact>

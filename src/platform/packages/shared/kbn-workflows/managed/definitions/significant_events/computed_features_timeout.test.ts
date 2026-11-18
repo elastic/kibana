@@ -64,10 +64,10 @@ describe('Significant Events computed features timeout workflow contracts', () =
     );
   });
 
-  it('owns the default in the onboarding workflow and passes it to the features workflow', () => {
-    expect(findInput(onboarding, 'featuresComputedTimeoutMs')).toEqual(
-      expect.objectContaining({ type: 'number', default: 60000 })
-    );
+  it('forwards the onboarding input to the features workflow without its own default', () => {
+    const input = findInput(onboarding, 'featuresComputedTimeoutMs');
+    expect(input).toEqual(expect.objectContaining({ type: 'number' }));
+    expect(input).not.toHaveProperty('default');
     expect(findStep(onboarding, 'identify_features').with?.inputs).toEqual(
       expect.objectContaining({
         computedFeaturesTimeoutMs: '${{ inputs.featuresComputedTimeoutMs }}',

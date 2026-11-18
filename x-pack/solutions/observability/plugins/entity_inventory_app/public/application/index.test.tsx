@@ -19,7 +19,12 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { EntityInventoryApiClient } from '../inventory_api/client';
 import { createFixtureEntityInventoryApiClient } from '../__fixtures__/inventory_client';
-import { createAppServicesMock, createCoreStartMock, createStartDependenciesMock } from '../mocks';
+import {
+  createAppServicesMock,
+  createCoreStartMock,
+  createPublicConfigMock,
+  createStartDependenciesMock,
+} from '../mocks';
 import { ENTITY_INVENTORY_PAGES } from '../pages';
 import { entityInventoryRouter } from '../routes/config';
 import { EntityInventoryShell, renderApp } from '.';
@@ -248,7 +253,7 @@ describe('renderApp', () => {
 
     let unmount: () => void = () => {};
     act(() => {
-      unmount = renderApp(core, createStartDependenciesMock(), params);
+      unmount = renderApp(core, createStartDependenciesMock(), params, createPublicConfigMock());
     });
 
     expect(core.rendering.addContext).toHaveBeenCalledTimes(1);

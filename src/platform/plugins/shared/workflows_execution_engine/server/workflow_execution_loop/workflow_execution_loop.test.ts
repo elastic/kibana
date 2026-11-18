@@ -9,6 +9,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import { workflowExecutionLoop } from './workflow_execution_loop';
+import { publishWorkflowExecutionFinished } from '../topics/publish_workflow_execution_finished';
 import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
@@ -28,12 +29,17 @@ jest.mock('./persistence_loop', () => ({
   flushState: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('../topics/publish_workflow_execution_finished', () => ({
+  publishWorkflowExecutionFinished: jest.fn().mockResolvedValue(undefined),
+}));
+
 describe('workflowExecutionLoop', () => {
   const createParams = () => ({
     workflowExecutionCursor: createMockWorkflowExecutionCursor(),
     workflowRuntime: {
       saveState: jest.fn().mockResolvedValue(undefined),
       setWorkflowError: jest.fn(),
+      takeJustFinalizedTerminalState: jest.fn().mockReturnValue(false),
       getWorkflowExecution: jest.fn().mockReturnValue({
         id: 'exec-1',
         status: ExecutionStatus.RUNNING,
@@ -64,9 +70,9 @@ describe('workflowExecutionLoop', () => {
     const params = createParams();
     await workflowExecutionLoop(params as any);
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { executionFlowLoop } = require('./execution_flow_loop');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { persistenceLoop, flushState } = require('./persistence_loop');
 
     expect(executionFlowLoop).toHaveBeenCalledWith(params);
@@ -78,13 +84,101 @@ describe('workflowExecutionLoop', () => {
     // Workflow-end cleanup for transient rehydrations (deferred-release pattern).
     expect(params.stepIoService.releaseTransientlyRehydratedOutputs).toHaveBeenCalled();
     expect(params.eventQueue.flush).toHaveBeenCalled();
+    expect(publishWorkflowExecutionFinished).not.toHaveBeenCalled();
+  });
+
+  it('does not publish a waiting_for_input save', async () => {
+    const params = createParams();
+    params.workflowRuntime.getWorkflowExecution.mockReturnValue({
+      id: 'exec-1',
+      workflowId: 'wf-1',
+      spaceId: 'default',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      isTestRun: false,
+    });
+
+    await workflowExecutionLoop(params as any);
+
+    expect(publishWorkflowExecutionFinished).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ExecutionStatus.COMPLETED,
+    ExecutionStatus.FAILED,
+    ExecutionStatus.CANCELLED,
+    ExecutionStatus.TIMED_OUT,
+  ])('publishes %s once after the final flush', async (status) => {
+    const params = createParams();
+    params.workflowRuntime.takeJustFinalizedTerminalState.mockReturnValue(true);
+    params.workflowRuntime.getWorkflowExecution.mockReturnValue({
+      id: 'exec-1',
+      workflowId: 'wf-1',
+      spaceId: 'default',
+      status,
+      finishedAt: '2026-01-01T00:00:00.000Z',
+      isTestRun: false,
+      duration: 1500,
+      triggeredBy: 'manual',
+      error: status === ExecutionStatus.FAILED ? { type: 'Error', message: 'boom' } : null,
+    });
+
+    await workflowExecutionLoop(params as any);
+
+    expect(params.stepIoService.flush).toHaveBeenCalled();
+    expect(publishWorkflowExecutionFinished).toHaveBeenCalledTimes(1);
+    expect(publishWorkflowExecutionFinished).toHaveBeenCalledWith({
+      executionId: 'exec-1',
+      workflowId: 'wf-1',
+      spaceId: 'default',
+      status,
+      finishedAt: '2026-01-01T00:00:00.000Z',
+      isTestRun: false,
+      triggeredBy: 'manual',
+      durationMs: 1500,
+      ...(status === ExecutionStatus.FAILED ? { errorType: 'Error' } : {}),
+    });
+    expect(params.stepIoService.flush.mock.invocationCallOrder[0]).toBeLessThan(
+      jest.mocked(publishWorkflowExecutionFinished).mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not publish when a second flush follows an already-finalized run', async () => {
+    const params = createParams();
+    params.workflowRuntime.takeJustFinalizedTerminalState
+      .mockReturnValueOnce(true)
+      .mockReturnValue(false);
+    params.workflowRuntime.getWorkflowExecution.mockReturnValue({
+      id: 'exec-1',
+      workflowId: 'wf-1',
+      spaceId: 'default',
+      status: ExecutionStatus.COMPLETED,
+      finishedAt: '2026-01-01T00:00:00.000Z',
+      isTestRun: false,
+      duration: 1500,
+      error: null,
+    });
+
+    await workflowExecutionLoop(params as any);
+    await workflowExecutionLoop(params as any);
+
+    expect(params.stepIoService.flush).toHaveBeenCalledTimes(2);
+    expect(publishWorkflowExecutionFinished).toHaveBeenCalledTimes(1);
+    expect(publishWorkflowExecutionFinished).toHaveBeenCalledWith({
+      executionId: 'exec-1',
+      workflowId: 'wf-1',
+      spaceId: 'default',
+      status: ExecutionStatus.COMPLETED,
+      finishedAt: '2026-01-01T00:00:00.000Z',
+      isTestRun: false,
+      durationMs: 1500,
+    });
   });
 
   it('sets workflow error when execution loop throws', async () => {
     const params = createParams();
     const testError = new Error('execution failed');
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { executionFlowLoop } = require('./execution_flow_loop');
     (executionFlowLoop as jest.Mock).mockRejectedValueOnce(testError);
 
@@ -114,7 +208,7 @@ describe('workflowExecutionLoop', () => {
   it('marks Task Manager abort as system cancellation and suppresses workflow log errors', async () => {
     const params = createParams();
     const abortController = new AbortController();
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { flushState } = require('./persistence_loop');
     const loopPromise = workflowExecutionLoop({ ...params, signal: abortController.signal } as any);
     abortController.abort(new WorkflowTaskManagerAbortError());
