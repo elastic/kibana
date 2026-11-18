@@ -18,11 +18,12 @@ import {
   mapStatsResponse,
 } from '../../../services/unit_stats_client/map_stats_response';
 import type {
+  DeliverySeriesView,
   DestinationFailedView,
   DestinationStatsView,
   MappedComponentStats,
 } from '../../../services/unit_stats_client/types';
-import { DestinationFailuresView } from './destination_failures_section';
+import { DestinationDeliveryView } from './destination_delivery_section';
 
 // The chart needs the services of the page, and has tests of its own.
 jest.mock('./delivery_chart', () => ({
@@ -56,11 +57,27 @@ const noFailures: DestinationFailedView = {
   authorization: { rate: 0, unit: '{item}', percentage: 0, breakdown: [] },
 };
 
-const renderView = (props: Partial<React.ComponentProps<typeof DestinationFailuresView>>) =>
+const deliveredSeries: DeliverySeriesView = {
+  bucketMs: 60_000,
+  unit: '{item}',
+  window: { start: '2026-11-16T20:00:00.000Z', end: '2026-11-16T20:05:00.000Z' },
+  points: [
+    {
+      start: '2026-11-16T20:00:00.000Z',
+      total: 40,
+      failed: 0,
+      authentication: 0,
+      authorization: 0,
+    },
+  ],
+};
+
+const renderView = (props: Partial<React.ComponentProps<typeof DestinationDeliveryView>>) =>
   render(
     <I18nProvider>
-      <DestinationFailuresView
+      <DestinationDeliveryView
         destinationType="elasticsearch"
+        panelRole="failures"
         loading={false}
         showTimePicker={false}
         value={undefined}
@@ -69,10 +86,10 @@ const renderView = (props: Partial<React.ComponentProps<typeof DestinationFailur
     </I18nProvider>
   );
 
-const SECTION = 'streamsDestinationFailuresSection';
+const SECTION = 'streamsDestinationDeliverySection';
 const isShown = (testId: string) => screen.queryByTestId(testId) !== null;
 
-describe('DestinationFailuresView', () => {
+describe('DestinationDeliveryView', () => {
   describe('a destination with failures', () => {
     beforeEach(() => renderView({ value: fixtureEntry('authFailures', 'es-dev') }));
 
@@ -139,20 +156,71 @@ describe('DestinationFailuresView', () => {
     expect(within(causes).getByText('SignatureDoesNotMatch')).toBeInTheDocument();
   });
 
-  it('says there are none when the classes report 0', () => {
-    renderView({ value: entryWith(noFailures) });
+  describe('when nothing failed', () => {
+    const healthy = entryWith({ ...noFailures, series: deliveredSeries });
 
-    expect(isShown('streamsDestinationFailuresNone')).toBe(true);
-    expect(isShown('streamsDestinationDeliveryChart')).toBe(false);
-    // A report of 0 is data, so the subtitle can name what the figures are a share of.
-    expect(screen.getByText('Of events for the selected time range')).toBeInTheDocument();
+    it('says so, with no chart, in a failures panel, whatever its series', () => {
+      renderView({ panelRole: 'failures', value: healthy });
+
+      expect(screen.getByTestId('streamsDestinationFailuresNone').textContent).toBe(
+        'No delivery failures in this time range.'
+      );
+      expect(isShown('streamsDestinationDeliveryChart')).toBe(false);
+      // There are no failures to be a share of, so the subtitle names nothing.
+      expect(screen.getByText('For the selected time range')).toBeInTheDocument();
+    });
+
+    it('shows what was delivered, and says nothing about failures, in a delivery panel', () => {
+      renderView({ panelRole: 'delivery', value: healthy });
+
+      expect(isShown('streamsDestinationDeliveryChart')).toBe(true);
+      expect(isShown('streamsDestinationFailuresNone')).toBe(false);
+      expect(isShown('streamsDestinationFailuresAuthentication')).toBe(false);
+    });
+
+    it('says that none failed in a delivery panel that has no series to show', () => {
+      renderView({ panelRole: 'delivery', value: entryWith(noFailures) });
+
+      expect(isShown('streamsDestinationDeliveryChart')).toBe(false);
+      expect(isShown('streamsDestinationFailuresNone')).toBe(true);
+    });
+
+    it('says that none failed in a delivery panel whose series has no points', () => {
+      renderView({
+        panelRole: 'delivery',
+        value: entryWith({ ...noFailures, series: { ...deliveredSeries, points: [] } }),
+      });
+
+      expect(isShown('streamsDestinationDeliveryChart')).toBe(false);
+      expect(isShown('streamsDestinationFailuresNone')).toBe(true);
+    });
   });
 
-  it('says it has no data when the classes report nothing', () => {
-    renderView({ value: entryWith(EMPTY_DESTINATION_FAILED) });
+  it.each(['failures', 'delivery'] as const)(
+    'says that nothing was attempted when the classes report nothing, in a %s panel',
+    (panelRole) => {
+      renderView({ panelRole, value: entryWith(EMPTY_DESTINATION_FAILED) });
 
-    expect(isShown('streamsDestinationFailuresNoData')).toBe(true);
-    expect(isShown('streamsDestinationFailuresNone')).toBe(false);
+      expect(screen.getByTestId('streamsDestinationFailuresNoData').textContent).toBe(
+        'No delivery attempts in this time range.'
+      );
+      expect(isShown('streamsDestinationFailuresNone')).toBe(false);
+    }
+  );
+
+  describe('the title', () => {
+    it('names the failures in a failures panel', () => {
+      renderView({ panelRole: 'failures', value: entryWith(EMPTY_DESTINATION_FAILED) });
+
+      expect(screen.getByRole('heading', { name: 'Delivery failures' })).toBeInTheDocument();
+    });
+
+    it('is neutral in a delivery panel, which shows more than failures', () => {
+      renderView({ panelRole: 'delivery', value: entryWith(EMPTY_DESTINATION_FAILED) });
+
+      expect(screen.getByRole('heading', { name: 'Delivery' })).toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: 'Delivery failures' })).not.toBeInTheDocument();
+    });
   });
 
   it('warns about a part that could not load, and does not say there is no data for it', () => {

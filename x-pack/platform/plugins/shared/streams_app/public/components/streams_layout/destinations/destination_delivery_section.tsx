@@ -119,44 +119,52 @@ function FailureClassCauses({
 }
 
 /**
- * The delivery failures of a destination, for its flyout, over the range of the page's time picker:
- * authentication and authorization, each with its stats and its causes. It follows the ingest chart
- * panel of a local Elasticsearch destination, and its subtitle says what the figures are a share
- * of: `Of events for the selected time range`. `showTimePicker` is for a destination that has no
- * other picker in its flyout.
+ * The delivery of a destination, for its flyout, over the range of the page's time picker. With
+ * failures it shows authentication and authorization, each with its stats and its causes, and
+ * the delivery chart. Its subtitle says what the figures are a share of: `Of events for the
+ * selected time range`.
+ *
+ * The panel has one of two roles. A `failures` panel adds the failures to a flyout that already
+ * shows delivery in a chart above, as a local Elasticsearch destination does. When nothing failed,
+ * it says so. A `delivery` panel is the delivery of the flyout. It has a neutral title, brings its
+ * own time picker, and when nothing failed it shows what was delivered. In both, nothing attempted
+ * is said as such.
  *
  * It is always there, so that the picker is always within reach: a range with no data must not take
- * away the control that changes it. It says so when there is nothing to report, when it has no data,
- * and when it could not load. A part that could not load, next to real values, is a warning above
- * them, as on the Map.
+ * away the control that changes it. It also says when it could not load. A part that could not
+ * load, next to real values, is a warning above them, as on the Map.
  */
-export function DestinationFailuresSection({
+export function DestinationDeliverySection({
   destinationId,
   destinationType,
-  showTimePicker,
+  panelRole,
 }: {
   destinationId: string;
   destinationType: string;
-  showTimePicker: boolean;
+  panelRole: DestinationDeliveryPanelRole;
 }) {
   const { value, loading, error } = useDestinationFailures(destinationId);
   const { updateTimeRange } = useTimeRangeUpdate();
 
   return (
-    <DestinationFailuresView
+    <DestinationDeliveryView
       value={value}
       destinationType={destinationType}
+      panelRole={panelRole}
       loading={loading}
       error={error}
-      showTimePicker={showTimePicker}
+      showTimePicker={panelRole === 'delivery'}
       onBrushEnd={updateTimeRange}
     />
   );
 }
 
-export function DestinationFailuresView({
+export type DestinationDeliveryPanelRole = 'failures' | 'delivery';
+
+export function DestinationDeliveryView({
   value,
   destinationType,
+  panelRole,
   loading,
   error,
   showTimePicker,
@@ -164,6 +172,7 @@ export function DestinationFailuresView({
 }: {
   value: ReturnType<typeof useDestinationFailures>['value'];
   destinationType: string;
+  panelRole: DestinationDeliveryPanelRole;
   loading: boolean;
   error?: Error;
   showTimePicker: boolean;
@@ -249,20 +258,26 @@ export function DestinationFailuresView({
               ))}
           </>
         ) : hasFailureData(failed) ? (
-          <EuiText size="s" color="subdued" data-test-subj="streamsDestinationFailuresNone">
-            <p>
-              {i18n.translate('xpack.streams.destinations.failures.noFailures', {
-                defaultMessage: 'No authentication or authorization failures in this time range.',
-              })}
-            </p>
-          </EuiText>
+          // Nothing failed. A delivery panel shows what was delivered and says nothing about
+          // failures. A failures panel says that none failed.
+          panelRole === 'delivery' && failed.series && failed.series.points.length > 0 ? (
+            <DeliveryChart series={failed.series} onBrushEnd={onBrushEnd} />
+          ) : (
+            <EuiText size="s" color="subdued" data-test-subj="streamsDestinationFailuresNone">
+              <p>
+                {i18n.translate('xpack.streams.destinations.failures.noFailures', {
+                  defaultMessage: 'No delivery failures in this time range.',
+                })}
+              </p>
+            </EuiText>
+          )
         ) : (
           // A part that could not load is already said above, and is not a lack of data.
           partialError === undefined && (
             <EuiText size="s" color="subdued" data-test-subj="streamsDestinationFailuresNoData">
               <p>
                 {i18n.translate('xpack.streams.destinations.failures.noData', {
-                  defaultMessage: 'No delivery data in this time range.',
+                  defaultMessage: 'No delivery attempts in this time range.',
                 })}
               </p>
             </EuiText>
@@ -274,14 +289,20 @@ export function DestinationFailuresView({
 
   return (
     <FlyoutPanel
-      data-test-subj="streamsDestinationFailuresSection"
-      title={i18n.translate('xpack.streams.destinations.failures.title', {
-        defaultMessage: 'Delivery failures',
-      })}
+      data-test-subj="streamsDestinationDeliverySection"
+      title={
+        panelRole === 'failures'
+          ? i18n.translate('xpack.streams.destinations.failures.title', {
+              defaultMessage: 'Delivery failures',
+            })
+          : i18n.translate('xpack.streams.destinations.failures.titleDelivery', {
+              defaultMessage: 'Delivery',
+            })
+      }
       subtitle={
         // What the figures are a share of is said here once, so the stats carry no noun. Without
-        // failure data there is nothing to name, and a placeholder unit would name the wrong thing.
-        failed && !loadError && hasFailureData(failed)
+        // failures there are no figures to name.
+        failed && !loadError && hasDestinationFailures(failed)
           ? getFailureRangeSubtitle(failed)
           : i18n.translate('xpack.streams.destinations.failures.subtitle', {
               defaultMessage: 'For the selected time range',

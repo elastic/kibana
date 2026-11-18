@@ -29,7 +29,7 @@ import { IngestRateChartContent } from '../../stream_detail_overview/ingest_rate
 import { DeferredMount } from '../deferred_mount';
 import { DeleteDestinationConfirmation } from './delete_destination_confirmation';
 import { getReadableFailureStoreNames } from './destination_index_stats';
-import { DestinationFailuresSection } from './destination_failures_section';
+import { DestinationDeliverySection } from './destination_delivery_section';
 import { DestinationIndicesTable } from './destination_indices_table';
 import { useDestinationIndexStats } from './destinations_context';
 import { FlyoutPanel } from './flyout_panel';
@@ -201,11 +201,11 @@ export const UnitDestinationFlyout = ({
           <>
             {hasFailureStats && (
               <>
-                {/* S3 has no ingest chart, so no picker: the section brings its own. */}
-                <DestinationFailuresSection
+                {/* S3 has no ingest chart, so its panel is the delivery of the flyout. */}
+                <DestinationDeliverySection
                   destinationId={destination.id}
                   destinationType={destination.type}
-                  showTimePicker
+                  panelRole="delivery"
                 />
                 <EuiSpacer size="l" />
               </>
@@ -218,10 +218,10 @@ export const UnitDestinationFlyout = ({
           <>
             {hasFailureStats && (
               <>
-                <DestinationFailuresSection
+                <DestinationDeliverySection
                   destinationId={destination.id}
                   destinationType={destination.type}
-                  showTimePicker
+                  panelRole="delivery"
                 />
                 <EuiSpacer size="l" />
               </>
@@ -247,11 +247,11 @@ export const UnitDestinationFlyout = ({
             )}
             {hasFailureStats && (
               <>
-                {/* The ingest chart holds the picker, so the section brings one only without it. */}
-                <DestinationFailuresSection
+                {/* The ingest chart shows the delivery, so the panel adds only the failures to it. */}
+                <DestinationDeliverySection
                   destinationId={destination.id}
                   destinationType={destination.type}
-                  showTimePicker={!esqlSource}
+                  panelRole={esqlSource ? 'failures' : 'delivery'}
                 />
                 <EuiSpacer size="l" />
               </>

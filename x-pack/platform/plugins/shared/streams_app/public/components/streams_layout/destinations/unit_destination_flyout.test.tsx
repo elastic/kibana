@@ -13,7 +13,7 @@ import { UnitDestinationFlyout } from './unit_destination_flyout';
 
 // This test is about the details of a destination. The failures section reads the page's services,
 // the unit of the route and the time filter, none of which it sets up, and it has tests of its own.
-jest.mock('./destination_failures_section', () => ({ DestinationFailuresSection: () => null }));
+jest.mock('./destination_delivery_section', () => ({ DestinationDeliverySection: () => null }));
 
 const renderFlyout = (destination: RemoteElasticsearchDestinationViewModel) =>
   render(
