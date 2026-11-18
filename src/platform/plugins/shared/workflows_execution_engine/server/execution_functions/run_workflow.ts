@@ -9,6 +9,7 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
@@ -307,7 +308,8 @@ export const runWorkflow = async (
     params.spaceId
   );
   if (!execution) {
-    throw new Error('Workflow execution not found.');
+    // A deleted execution is a caller-owned condition, not a Kibana fault.
+    throw createTaskRunError(new Error('Workflow execution not found.'), TaskErrorSource.USER);
   }
   if (isTerminalStatus(execution.status)) {
     await completeIdentityFailureCleanup(execution, {

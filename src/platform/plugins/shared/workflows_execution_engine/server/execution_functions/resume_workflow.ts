@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { completeIdentityFailureCleanup } from './complete_identity_failure_cleanup';
 import { finalizeWorkflowIdentityFailure } from './finalize_workflow_identity_failure';
@@ -221,7 +222,8 @@ export const resumeWorkflow = async (
     params.spaceId
   );
   if (!execution) {
-    throw new Error('Workflow execution not found.');
+    // A deleted execution is a caller-owned condition, not a Kibana fault.
+    throw createTaskRunError(new Error('Workflow execution not found.'), TaskErrorSource.USER);
   }
   if (isTerminalStatus(execution.status)) {
     await completeIdentityFailureCleanup(execution, {
