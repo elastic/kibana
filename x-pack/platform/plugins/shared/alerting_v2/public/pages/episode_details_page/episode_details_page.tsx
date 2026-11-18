@@ -184,10 +184,7 @@ export function EpisodeDetailsPage({
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 
   const actualMainPanel: EpisodeDetailsMainPanel =
-    (mainPanel === 'metadata' && !showRuleDependentUi) ||
-    (mainPanel === 'action_policy_history' && !canReadExecutionHistory)
-      ? 'overview'
-      : mainPanel;
+    mainPanel === 'action_policy_history' && !canReadExecutionHistory ? 'overview' : mainPanel;
 
   const actualSidebarPanel: EpisodeDetailsSidebarPanel =
     sidebarPanel === 'runbook' && !showRuleDependentUi ? 'episode_details' : sidebarPanel;
@@ -284,11 +281,10 @@ export function EpisodeDetailsPage({
     () =>
       getEpisodeHeaderTabs({
         actualMainPanel,
-        showRuleDependentUi,
         showActionPolicyHistory: canReadExecutionHistory,
         onSelect: setMainPanel,
       }),
-    [actualMainPanel, showRuleDependentUi, canReadExecutionHistory]
+    [actualMainPanel, canReadExecutionHistory]
   );
 
   const headerBadges = useMemo(

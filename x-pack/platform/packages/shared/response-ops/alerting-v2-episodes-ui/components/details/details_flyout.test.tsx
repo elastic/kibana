@@ -213,7 +213,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.getByTestId('timelineSectionStub')).toBeInTheDocument();
   });
 
-  it('switches to the metadata tab when the rule is loaded', () => {
+  it('switches to the metadata tab', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     const dataContainerTab = screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata');
     expect(dataContainerTab).toHaveTextContent('Data container');
@@ -234,15 +234,16 @@ describe('AlertEpisodeDetailsFlyout', () => {
     );
   });
 
-  it('hides the metadata tab when the rule is not loaded', () => {
+  it('shows the metadata tab when the rule is not found', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({
       ...baseHeaderData,
       ruleState: { status: RuleStateStatus.not_found, ruleId: 'rule-1' },
     });
 
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata'));
 
-    expect(screen.queryByTestId('alertingV2EpisodeFlyoutTabMetadata')).not.toBeInTheDocument();
+    expect(screen.getByTestId('metadataSectionStub')).toBeInTheDocument();
   });
 
   it('calls onClose when the footer close button is clicked', () => {

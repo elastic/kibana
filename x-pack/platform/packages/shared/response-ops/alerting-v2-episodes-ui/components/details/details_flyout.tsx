@@ -232,10 +232,6 @@ export const AlertEpisodeDetailsFlyout = ({
     setTab(tabId as TabId);
   };
 
-  // Metadata tab is only available when the rule is loaded.
-  // Fall back to overview silently rather than leaving the user on a blank tab.
-  const effectiveTab: TabId = !showRuleDependentTabs && tab === 'metadata' ? 'overview' : tab;
-
   const tabs = [
     {
       id: 'overview' as const,
@@ -247,15 +243,11 @@ export const AlertEpisodeDetailsFlyout = ({
       label: i18n.FLYOUT_TAB_TIMELINE,
       'data-test-subj': 'alertingV2EpisodeFlyoutTabTimeline',
     },
-    ...(showRuleDependentTabs
-      ? [
-          {
-            id: 'metadata' as const,
-            label: i18n.FLYOUT_TAB_METADATA,
-            'data-test-subj': 'alertingV2EpisodeFlyoutTabMetadata',
-          },
-        ]
-      : []),
+    {
+      id: 'metadata' as const,
+      label: i18n.FLYOUT_TAB_METADATA,
+      'data-test-subj': 'alertingV2EpisodeFlyoutTabMetadata',
+    },
   ];
 
   // Header badge data
@@ -320,7 +312,7 @@ export const AlertEpisodeDetailsFlyout = ({
         data-test-subj={FLYOUT_TEST_SUBJ}
         onClose={onClose}
         tabs={tabs}
-        selectedTabId={effectiveTab}
+        selectedTabId={tab}
         onTabChange={handleTabChange}
       >
         <FlyoutTemplate.Header title={titleNode} description={descriptionNode}>
@@ -543,28 +535,23 @@ export const AlertEpisodeDetailsFlyout = ({
             />
           </FlyoutTemplate.Body.TabPanel>
 
-          {/* Metadata tab, only mounted when the rule is loaded */}
-          {showRuleDependentTabs && (
-            <FlyoutTemplate.Body.TabPanel
-              tabId="metadata"
-              data-test-subj={METADATA_PANEL_TEST_SUBJ}
+          {/* Metadata tab. Without a rule the field types are guessed from the data. */}
+          <FlyoutTemplate.Body.TabPanel tabId="metadata" data-test-subj={METADATA_PANEL_TEST_SUBJ}>
+            <Global styles={metadataBodyStyles} />
+            <div
+              className={METADATA_SCOPE_CLASS}
+              css={metadataTabStyles}
+              data-test-subj="alertingV2EpisodeFlyoutMetadataScope"
             >
-              <Global styles={metadataBodyStyles} />
-              <div
-                className={METADATA_SCOPE_CLASS}
-                css={metadataTabStyles}
-                data-test-subj="alertingV2EpisodeFlyoutMetadataScope"
-              >
-                <AlertEpisodeMetadataSection
-                  episodeId={episodeId}
-                  services={services}
-                  decreaseAvailableHeightBy={DOC_VIEWER_FLEX_HEIGHT_SENTINEL}
-                  calloutMarginSize="m"
-                  controlsPaddingSize="m"
-                />
-              </div>
-            </FlyoutTemplate.Body.TabPanel>
-          )}
+              <AlertEpisodeMetadataSection
+                episodeId={episodeId}
+                services={services}
+                decreaseAvailableHeightBy={DOC_VIEWER_FLEX_HEIGHT_SENTINEL}
+                calloutMarginSize="m"
+                controlsPaddingSize="m"
+              />
+            </div>
+          </FlyoutTemplate.Body.TabPanel>
         </FlyoutTemplate.Body>
 
         <FlyoutTemplate.Footer data-test-subj={FLYOUT_FOOTER_TEST_SUBJ}>
