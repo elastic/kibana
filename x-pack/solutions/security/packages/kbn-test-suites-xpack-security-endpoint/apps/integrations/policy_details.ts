@@ -304,7 +304,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         expect(agentFullPolicyUpdated.inputs[0].policy.linux.advanced).to.eql({
-          capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+          capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH,LD_AUDIT',
         });
       });
     });
