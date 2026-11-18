@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { pickBy } from 'lodash';
 import type { Alert } from '../../alert';
 import type { AlertInstanceState, AlertInstanceContext } from '../../types';
 import type { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
-import { setFlapping } from './set_flapping';
+import { setFlapping, setFlappingOnOngoingRecoveredAlerts } from './set_flapping';
 import { setFlappingHistoryAndTrackedAlerts } from './set_flapping_history_and_tracked_alerts';
 import { delayRecoveredFlappingAlerts } from './delay_recovered_flapping_alerts';
 
@@ -51,6 +52,11 @@ export function determineFlappingAlerts<
     ActionGroupIds,
     RecoveryActionGroupId
   >(flappingSettings, newAlerts, activeAlerts, recoveredAlerts, previouslyRecoveredAlerts);
+
+  setFlappingOnOngoingRecoveredAlerts<State, Context>(
+    flappingSettings,
+    pickBy(previouslyRecoveredAlerts, (_, id) => !newAlerts[id])
+  );
 
   alerts = delayRecoveredFlappingAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>(
     flappingSettings,

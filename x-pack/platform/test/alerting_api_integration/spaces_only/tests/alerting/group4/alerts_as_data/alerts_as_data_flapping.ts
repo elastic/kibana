@@ -18,6 +18,7 @@ import {
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_STATUS,
   ALERT_INSTANCE_ID,
+  ALERT_TRACKED,
 } from '@kbn/rule-data-utils';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -335,7 +336,49 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
         // Flapping value for alert doc and task state should be true because alert recovered while flapping
         expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
+        expect(alertDocs[0]._source![ALERT_TRACKED]).to.equal(true);
         expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+      });
+
+      // Run the rule 5 more times
+      for (let i = 0; i < 5; i++) {
+        await runRuleSoon(ruleId);
+        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
+      }
+
+      await retry.try(async () => {
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
+
+        expect(alertDocs.length).to.equal(3);
+        expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertRecoveredInstances.alertA.meta.flappingHistory
+        );
+
+        // Alert is still flapping because its look back window still has a state change
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
+        expect(alertDocs[0]._source![ALERT_TRACKED]).to.equal(true);
+        expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+      });
+
+      // Run the rule 1 more time
+      await runRuleSoon(ruleId);
+      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
+
+      await retry.try(async () => {
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
+
+        expect(alertDocs.length).to.equal(3);
+        expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
+
+        // Alert stops flapping once its look back window has no state changes,
+        // so it leaves task state and its doc is no longer tracked
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(new Array(6).fill(false));
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
+        expect(alertDocs[0]._source![ALERT_TRACKED]).to.equal(false);
+        expect(state.alertRecoveredInstances.alertA).to.be(undefined);
       });
     });
 
