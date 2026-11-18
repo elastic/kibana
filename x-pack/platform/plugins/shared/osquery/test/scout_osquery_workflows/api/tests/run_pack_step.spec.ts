@@ -214,6 +214,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
       });
       expect(query.rows).toHaveLength(1);
     }
+
     await workflows.delete(workflowId);
   });
 
@@ -340,6 +341,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
         agents: { total: 1, responded: 1, failed: 1 },
       });
     }
+
     await workflows.delete(workflowId);
   });
 
