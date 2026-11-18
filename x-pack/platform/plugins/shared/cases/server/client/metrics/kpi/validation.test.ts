@@ -57,6 +57,35 @@ describe('getKpiMetricFieldError', () => {
     ).toBe('The unique count needs a keyword field. case.total_alerts is not a keyword field.');
   });
 
+  it('accepts a unique count on the closer of the case', () => {
+    expect(
+      getKpiMetricFieldError({
+        index: 'cases',
+        aggregation: { type: 'cardinality', field: 'case.closed_by.username' },
+      })
+    ).toBeUndefined();
+  });
+
+  it('accepts a unique count on the attachment ids', () => {
+    expect(
+      getKpiMetricFieldError({
+        index: 'attachments',
+        aggregation: { type: 'cardinality', field: 'attachment.attachment_id' },
+      })
+    ).toBeUndefined();
+  });
+
+  it('rejects an average on the attachment ids', () => {
+    expect(
+      getKpiMetricFieldError({
+        index: 'attachments',
+        aggregation: { type: 'avg', field: 'attachment.attachment_id' },
+      })
+    ).toBe(
+      'The avg aggregation needs a numeric field. attachment.attachment_id is not a numeric field.'
+    );
+  });
+
   describe('date field', () => {
     it('rejects a date field on the activity index', () => {
       expect(getKpiMetricFieldError({ index: 'activity', dateField: 'closed_at' })).toBe(

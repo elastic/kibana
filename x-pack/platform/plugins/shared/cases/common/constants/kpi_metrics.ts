@@ -33,6 +33,8 @@ export const KPI_FIELD_CATALOG: Record<KpiMetricIndex, readonly KpiFieldCatalogE
     { field: 'case.assignees.username', type: 'keyword' },
     { field: 'case.template.id', type: 'keyword' },
     { field: 'case.created_by.username', type: 'keyword' },
+    { field: 'case.closed_by.username', type: 'keyword' },
+    { field: 'case.closed_by.full_name', type: 'keyword' },
     { field: 'case.duration', type: 'numeric', unit: 's' },
     { field: 'case.time_to_acknowledge', type: 'numeric', unit: 's' },
     { field: 'case.time_to_investigate', type: 'numeric', unit: 's' },
@@ -60,6 +62,7 @@ export const KPI_FIELD_CATALOG: Record<KpiMetricIndex, readonly KpiFieldCatalogE
   ],
   attachments: [
     { field: 'attachment.type', type: 'keyword' },
+    { field: 'attachment.attachment_id', type: 'keyword' },
     { field: 'attachment.alert.rule.id', type: 'keyword' },
     { field: 'attachment.alert.rule.name', type: 'keyword' },
     { field: 'attachment.alert.indices', type: 'keyword' },
