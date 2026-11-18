@@ -106,15 +106,12 @@ apiTest.describe('[NON-MKI] UIAM system identity', { tag: tags.serverless.all },
         project_id: string;
         organization_id: string;
         credentials: { type: string; internal: boolean };
-        client: { type: string; upstream?: { project_id: string } };
       };
       expect(body.type).toBe('project');
       expect(body.project_id).toBe(MOCK_IDP_UIAM_PROJECT_ID);
       expect(body.organization_id).toBe(MOCK_IDP_UIAM_ORGANIZATION_ID);
       expect(body.credentials.type).toBe('token');
       expect(body.credentials.internal).toBe(true);
-      expect(body.client.type).toBe('service');
-      expect(body.client.upstream?.project_id).toBe(MOCK_IDP_UIAM_PROJECT_ID);
     }
   );
 

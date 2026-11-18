@@ -38,7 +38,6 @@ export interface RunWorkflowYamlValidationsParams {
   workflowLookup?: WorkflowLookup;
   workflowGraph?: WorkflowGraph;
   workflowDefinition?: WorkflowYaml;
-  warnIgnoredKibanaFetcher?: boolean;
 }
 
 /**
@@ -57,7 +56,6 @@ export function runWorkflowYamlValidations({
   workflowLookup,
   workflowGraph,
   workflowDefinition,
-  warnIgnoredKibanaFetcher = false,
 }: RunWorkflowYamlValidationsParams): YamlValidationResult[] {
   const stepContext =
     workflowGraph && workflowDefinition
@@ -79,7 +77,7 @@ export function runWorkflowYamlValidations({
   if (workflowLookup) {
     results.push(
       ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
-      ...validateIgnoredFetcherSetting(workflowLookup, lineCounter, warnIgnoredKibanaFetcher),
+      ...validateIgnoredFetcherSetting(workflowLookup, lineCounter),
       ...validateIfConditions(workflowLookup, lineCounter),
       ...validateParallelMode(workflowLookup, lineCounter),
       ...validateParallelFanOut(workflowLookup, lineCounter)

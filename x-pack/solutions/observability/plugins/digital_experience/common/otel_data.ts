@@ -15,8 +15,8 @@ export const BROWSER_SDK_LANGUAGE = 'webjs';
 /**
  * An attribute as stored in the OTel indices, e.g. `attributes.session.id`. Queries can use the
  * unprefixed name, which the templates' passthrough objects resolve to the highest-priority
- * scope that maps it; the session queries use the stored fields so that a scope mapping the same
- * name can't change which value a session is keyed on.
+ * scope that maps it; the session summaries group by the stored fields so that a scope mapping
+ * the same name can't change which value a session is keyed on.
  */
 export const attributeField = (name: string): string => `attributes.${name}`;
 /** A resource attribute as stored in the OTel indices, e.g. `resource.attributes.service.name`. */
@@ -40,6 +40,10 @@ export const EVENT_NAVIGATION = 'browser.navigation';
 export const EVENT_CLICK = 'click';
 export const EVENT_USER_ACTION_CLICK = 'browser.user_action.click';
 export const EVENT_RESOURCE_TIMING = 'browser.resource_timing';
+
+/** Page loads and in-app navigations, which sessions count as page views. */
+export const PAGE_VIEW_EVENTS = [EVENT_DOCUMENT_LOAD, EVENT_NAVIGATION] as const;
+export const CLICK_EVENTS = [EVENT_CLICK, EVENT_USER_ACTION_CLICK] as const;
 
 /** Fields of the browser events, not in `@kbn/apm-types`. */
 export const EXCEPTION_STACKTRACE = 'exception.stacktrace';

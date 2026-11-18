@@ -42,8 +42,9 @@ import {
   createBulkWriteValidationError,
   getBulkWriteToolErrorCode,
   MAX_BULK_WRITE_ITEMS,
-  trackTelemetryBestEffort,
 } from '../bulk_write';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
+import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
 import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
@@ -305,7 +306,8 @@ const enrichCausalFeatures = async (
             .map((id) => JSON.stringify(id))
             .join(
               ', '
-            )} is not a Knowledge Indicator id. Copy each feature_id exactly as ki_search returned it (no prefix, no change of case), or leave that node out.`
+            )} is not a Knowledge Indicator id. Copy each feature_id exactly as ki_search returned it (no prefix, no change of case), or leave that node out.`,
+          { reason: 'unresolved_feature_reference', count: unresolved.length }
         );
       }
     }
@@ -379,10 +381,11 @@ export function createEventsWriteTool({
       is born only from evidence that points to an error (a confirms signal or an off_topic row);
       healthy or empty evidence is not written.
       Signals and topology are merged with prior versions. \`severity\` is your verdict under
-      its field contract, decided from the merged confirming signals; the writer stores it as given
-      (an inactive event is low) and returns the stored tier. No-op if the stored severity and
-      status are unchanged (written: false, reason: unchanged_outcome). When no new rule UUIDs are introduced, title and
-      symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
+      its field contract, decided from the merged evidence. The response reports the tier actually
+      stored. No-op if the stored severity and status are unchanged (written: false, reason:
+      unchanged_outcome). When no new rule UUIDs are introduced and no rule moves from another
+      verdict to confirms, title and symptom_hypothesis are frozen to the stored values
+      (narrative_preserved: true is returned).
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
       currently-active events for one that confirms every submitted confirmed rule and shares at
@@ -460,12 +463,19 @@ export function createEventsWriteTool({
           logger
         );
 
+        const eventSearchClient = await getEventSearchClient();
         const data = await eventsWriteBulkHandler({
-          eventSearchClient: await getEventSearchClient(),
+          eventSearchClient,
           inputs: items,
           rejectUnknownEventIds:
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
+          resolveSeverities: (events) =>
+            server.severitySync.resolveSeverities({
+              request,
+              eventClient: eventSearchClient,
+              events,
+            }),
           logger,
         });
 
@@ -524,7 +534,16 @@ export function createEventsWriteTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running events_write: ${message}`);
+        const failure = reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
+          errorLogMessage: `Error running events_write: ${message}`,
+          logger,
+          telemetry,
+          request,
+          runContext: context.runContext,
+          itemCount: toolParams.items.length,
+        });
         // Source ids exist only once the slugs resolved; earlier failures report none.
         (storedItems ?? toolParams.items).forEach((input) => {
           trackTelemetryBestEffort({
@@ -543,7 +562,7 @@ export function createEventsWriteTool({
                   written: false,
                   source_ids: 'source_ids' in input ? input.source_ids : [],
                   ...('source_ids' in input ? detectionRunsOf(input) : {}),
-                  error_message: message,
+                  error_message: toTelemetryErrorMessage(failure, message),
                 },
                 request
               ),

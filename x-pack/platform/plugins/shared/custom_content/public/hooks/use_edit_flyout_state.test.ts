@@ -21,6 +21,7 @@ import {
   sanitizeHtml,
   applyHtmlTheme,
 } from '@kbn/custom-content-renderer';
+import { CUSTOM_CONTENT_MAX_ESQL_QUERIES } from '@kbn/custom-content-common';
 import { getServices } from '../services';
 import { useEditFlyoutState } from './use_edit_flyout_state';
 
@@ -72,11 +73,18 @@ describe('useEditFlyoutState', () => {
   describe('initial state', () => {
     it('initializes draft state from props', () => {
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
-      expect(result.current.draftEsqlQuery).toBe('FROM logs | LIMIT 10');
+      expect(result.current.draftQueries.map(({ text }) => text)).toEqual(['FROM logs | LIMIT 10']);
       expect(result.current.draftTemplate).toBe('hello');
     });
 
-    it('initializes draft state to empty strings when props are undefined', () => {
+    it('keeps every query of the panel, in order', () => {
+      const { result } = renderHook(() =>
+        useEditFlyoutState({ ...baseParams, esqlQueries: ['FROM a', 'FROM b'] })
+      );
+      expect(result.current.draftQueries.map(({ text }) => text)).toEqual(['FROM a', 'FROM b']);
+    });
+
+    it('starts a panel without a query with an empty first one to type into', () => {
       const { result } = renderHook(() =>
         useEditFlyoutState({
           esqlQueries: [],
@@ -92,8 +100,67 @@ describe('useEditFlyoutState', () => {
           onRunPreview: mockOnRunPreview,
         })
       );
-      expect(result.current.draftEsqlQuery).toBe('');
+      expect(result.current.draftQueries.map(({ text }) => text)).toEqual(['']);
       expect(result.current.draftTemplate).toBe('');
+    });
+  });
+
+  describe('editing queries', () => {
+    it('adds a query once the first one is filled in, up to the maximum', () => {
+      const { result } = renderHook(() => useEditFlyoutState(baseParams));
+      expect(result.current.canAddQuery).toBe(true);
+
+      act(() => result.current.addQuery());
+      expect(result.current.draftQueries).toHaveLength(2);
+
+      Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES }).forEach(() =>
+        act(() => result.current.addQuery())
+      );
+      expect(result.current.canAddQuery).toBe(false);
+    });
+
+    it('cannot add a query while the first is empty', () => {
+      const { result } = renderHook(() => useEditFlyoutState({ ...baseParams, esqlQueries: [] }));
+      expect(result.current.canAddQuery).toBe(false);
+    });
+
+    it('reports a blank query that others follow, and keeps it in place', () => {
+      const { result } = renderHook(() =>
+        useEditFlyoutState({ ...baseParams, esqlQueries: ['FROM a', '', 'FROM c'] })
+      );
+      expect(result.current.emptyQueryPosition).toBe(2);
+    });
+
+    it('stops the fetch of a query that is removed', async () => {
+      let signal: AbortSignal | undefined;
+      mockFetchEsqlData.mockImplementation((_s, _h, _q, _t, abortSignal) => {
+        signal = abortSignal;
+        return new Promise(() => {});
+      });
+      const { result } = renderHook(() =>
+        useEditFlyoutState({ ...baseParams, esqlQueries: ['FROM a', 'FROM b'] })
+      );
+      const [, second] = result.current.draftQueries;
+
+      act(() => {
+        result.current.fetchQueryData(second.id);
+      });
+      act(() => result.current.removeQuery(second.id));
+
+      expect(signal?.aborted).toBe(true);
+    });
+
+    it('changes and removes a query by its id', () => {
+      const { result } = renderHook(() =>
+        useEditFlyoutState({ ...baseParams, esqlQueries: ['FROM a', 'FROM b'] })
+      );
+      const [, second] = result.current.draftQueries;
+
+      act(() => result.current.setQueryText(second.id, 'FROM c'));
+      expect(result.current.draftQueries.map(({ text }) => text)).toEqual(['FROM a', 'FROM c']);
+
+      act(() => result.current.removeQuery(second.id));
+      expect(result.current.draftQueries.map(({ text }) => text)).toEqual(['FROM a']);
     });
   });
 
@@ -114,8 +181,8 @@ describe('useEditFlyoutState', () => {
     });
   });
 
-  describe('handleFetchData', () => {
-    it('sets esqlData on success', async () => {
+  describe('fetchQueryData', () => {
+    it('keeps the data of a query on success', async () => {
       const mockResult = {
         columns: [{ name: 'count', type: 'long' }],
         values: [[42]],
@@ -126,50 +193,36 @@ describe('useEditFlyoutState', () => {
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
       await act(async () => {
-        await result.current.handleFetchData();
+        await result.current.fetchQueryData(result.current.draftQueries[0].id);
       });
 
-      expect(result.current.esqlData).toEqual(mockResult);
-      expect(result.current.esqlDataError).toBeNull();
+      expect(result.current.draftQueries[0].esqlData).toEqual(mockResult);
+      expect(result.current.draftQueries[0].esqlDataError).toBeNull();
     });
 
-    it('sets esqlDataError on failure', async () => {
+    it('keeps the error of a query on failure, without touching the others', async () => {
       mockFetchEsqlData.mockRejectedValue(new Error('query failed'));
 
-      const { result } = renderHook(() => useEditFlyoutState(baseParams));
-
-      await act(async () => {
-        await result.current.handleFetchData();
-      });
-
-      expect(result.current.esqlDataError).toBe('query failed');
-      expect(result.current.esqlData).toBeNull();
-    });
-
-    it('does nothing when draftEsqlQuery is empty', async () => {
       const { result } = renderHook(() =>
-        useEditFlyoutState({
-          esqlQueries: [],
-          template: undefined,
-          timeRange: undefined,
-          colorMode: 'LIGHT' as const,
-          euiTheme: mockEuiTheme,
-          isApproximate: false,
-          projectRouting: undefined,
-          query: undefined,
-          filters: undefined,
-          esqlVariables: undefined,
-          onRunPreview: mockOnRunPreview,
-        })
+        useEditFlyoutState({ ...baseParams, esqlQueries: ['FROM a', 'FROM b'] })
       );
 
       await act(async () => {
-        await result.current.handleFetchData();
+        await result.current.fetchQueryData(result.current.draftQueries[1].id);
+      });
+
+      expect(result.current.draftQueries[1].esqlDataError).toBe('query failed');
+      expect(result.current.draftQueries[0].esqlDataError).toBeNull();
+    });
+
+    it('does nothing for an empty query', async () => {
+      const { result } = renderHook(() => useEditFlyoutState({ ...baseParams, esqlQueries: [] }));
+
+      await act(async () => {
+        await result.current.fetchQueryData(result.current.draftQueries[0].id);
       });
 
       expect(mockFetchEsqlData).not.toHaveBeenCalled();
-      expect(result.current.esqlData).toBeNull();
-      expect(result.current.esqlDataError).toBeNull();
     });
   });
 
@@ -188,8 +241,6 @@ describe('useEditFlyoutState', () => {
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
 
-    // The preview has to show what applying the template will: a panel with several queries has
-    // sections that read `queries[1]`, which an unchanged first-query-only preview would blank.
     it('fetches every query of the panel and fills the template with one dataset per query', async () => {
       const columns = [{ name: 'n', type: 'long' }];
       const datasets = [
@@ -224,6 +275,25 @@ describe('useEditFlyoutState', () => {
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
 
+    it("fetches queries added in the editor, not only the panel's own", async () => {
+      const { result } = renderHook(() => useEditFlyoutState(baseParams));
+      act(() => result.current.addQuery());
+      act(() => result.current.setQueryText(result.current.draftQueries[1].id, 'FROM metrics'));
+
+      await act(async () => {
+        await result.current.handleRender();
+      });
+
+      expect(mockFetchEsqlDatasets).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        ['FROM logs | LIMIT 10', 'FROM metrics'],
+        undefined,
+        expect.any(AbortSignal),
+        expect.anything()
+      );
+    });
+
     it('fetches only the first query for a single-query panel, as before', async () => {
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
@@ -249,7 +319,7 @@ describe('useEditFlyoutState', () => {
           esqlQueries: ['FROM logs', 'FROM metrics'],
         })
       );
-      act(() => result.current.setDraftEsqlQuery(''));
+      act(() => result.current.setQueryText(result.current.draftQueries[0].id, ''));
 
       await act(async () => {
         await result.current.handleRender();
@@ -273,7 +343,7 @@ describe('useEditFlyoutState', () => {
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
 
-    it('sets esqlDataError and does not call onRunPreview on fetch failure', async () => {
+    it('sets renderError and does not call onRunPreview on fetch failure', async () => {
       mockFetchEsqlDatasets.mockRejectedValue(new Error('fetch failed'));
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
@@ -282,17 +352,17 @@ describe('useEditFlyoutState', () => {
       });
 
       expect(mockOnRunPreview).not.toHaveBeenCalled();
-      expect(result.current.esqlDataError).toBe('fetch failed');
+      expect(result.current.renderError).toBe('fetch failed');
     });
 
-    it('clears a stale esqlDataError when a subsequent render succeeds', async () => {
+    it('clears a stale renderError when a subsequent render succeeds', async () => {
       mockFetchEsqlDatasets.mockRejectedValueOnce(new Error('fetch failed'));
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
       await act(async () => {
         await result.current.handleRender();
       });
-      expect(result.current.esqlDataError).toBe('fetch failed');
+      expect(result.current.renderError).toBe('fetch failed');
 
       mockFetchEsqlDatasets.mockResolvedValueOnce(noData);
 
@@ -300,7 +370,7 @@ describe('useEditFlyoutState', () => {
         await result.current.handleRender();
       });
 
-      expect(result.current.esqlDataError).toBeNull();
+      expect(result.current.renderError).toBeNull();
       expect(mockOnRunPreview).toHaveBeenCalledTimes(1);
     });
 
@@ -320,7 +390,7 @@ describe('useEditFlyoutState', () => {
       expect(result.current.isRenderLoading).toBe(true);
 
       act(() => {
-        result.current.setDraftEsqlQuery('FROM logs | LIMIT 5');
+        result.current.setQueryText(result.current.draftQueries[0].id, 'FROM logs | LIMIT 5');
       });
 
       await act(async () => {

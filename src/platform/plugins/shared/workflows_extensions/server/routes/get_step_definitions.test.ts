@@ -12,6 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod/v4';
 import { registerGetStepDefinitionsRoute } from './get_step_definitions';
 import { ServerStepRegistry } from '../step_registry';
+import type { ServerStepDefinition } from '../step_registry/types';
 
 describe('registerGetStepDefinitionsRoute', () => {
   const router = httpServiceMock.createRouter();
@@ -57,6 +58,29 @@ describe('registerGetStepDefinitionsRoute', () => {
     expect(steps[1].definitionHash).toBe(steps[2].definitionHash);
     // Hashes are non-empty hex strings
     expect(steps[0].definitionHash).toMatch(/^[a-f0-9]+$/);
+  });
+
+  it('waits for pending async loaders before returning steps', async () => {
+    const stepRegistry = new ServerStepRegistry(logger);
+    const handler = async () => ({ output: {} });
+    stepRegistry.register({ id: 'sync.step', handler } as any);
+    stepRegistry.register(
+      () =>
+        new Promise<ServerStepDefinition>((resolve) => {
+          setTimeout(() => resolve({ id: 'async.step', handler } as any), 0);
+        })
+    );
+
+    const testRouter = httpServiceMock.createRouter();
+    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
+
+    const [, routeHandler] = testRouter.get.mock.calls[0];
+    const response = httpServerMock.createResponseFactory();
+    await routeHandler({} as any, httpServerMock.createKibanaRequest(), response);
+
+    const { body } = response.ok.mock.calls[0][0]!;
+    const { steps } = body as { steps: Array<{ id: string }> };
+    expect(steps.map(({ id }) => id)).toEqual(['async.step', 'sync.step']);
   });
 
   it('returns empty steps array when registry is empty', async () => {
