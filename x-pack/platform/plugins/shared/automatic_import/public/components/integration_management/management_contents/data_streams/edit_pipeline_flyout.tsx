@@ -343,7 +343,7 @@ export const EditPipelineFlyout = ({
             searchFormat="text"
             search={search}
             tableCaption={i18n.EDIT_PIPELINE_FLYOUT.tableCaption}
-            pagination
+            pagination={{ pageSizeOptions: [10, 25, 50, 100] }}
             sorting
           />
         )}

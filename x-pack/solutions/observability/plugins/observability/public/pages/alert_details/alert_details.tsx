@@ -38,7 +38,7 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
-import { usePageReady } from '@kbn/ebt-tools';
+import { usePageReady } from '@kbn/ebt-tools/react';
 import moment from 'moment';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';

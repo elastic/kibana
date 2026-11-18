@@ -14,8 +14,14 @@ import { ResourceTypes } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import {
   INSTALL_TASK_TIMEOUT,
+  anySupersededForced,
+  deferForRepositoryVersion,
+  isStaleRepositoryRequest,
+  isTaskSuperseded,
+  requestTaskStateSchemaByVersion,
   runTaskUnderInstallLock,
   scheduleRequestTask,
+  shouldDeferForRepositoryVersion,
   type InstallLockManager,
   type RequestTaskParams,
 } from './utils';
@@ -41,17 +47,62 @@ export const registerEnsureUpToDateTaskDefinition = ({
       timeout: INSTALL_TASK_TIMEOUT,
       maxAttempts: 5,
       createTaskRunner: ({ taskInstance }) => {
-        const { inferenceId, forceUpdate, requestedAt } =
+        const { inferenceId, forceUpdate, requestedAt, repositoryVersion } =
           taskInstance.params as EnsureUpToDateTaskParams;
         const since = new Date(requestedAt);
         return {
           async run() {
-            const { packageInstaller, logger } = getServices();
+            const { packageInstaller, logger, taskManager: taskManagerStart } = getServices();
+            const { id: taskId, state } = taskInstance;
+            const superseded = async () => {
+              const result = await isTaskSuperseded({ taskManager: taskManagerStart, taskId });
+              if (result) {
+                logger.info(
+                  `Skipping product documentation update for [${inferenceId}]: superseded by a request against a newer artifact repository version`
+                );
+              }
+              return result;
+            };
+            if (await superseded()) {
+              return { state };
+            }
+            if (
+              shouldDeferForRepositoryVersion({
+                requestedVersion: repositoryVersion,
+                localVersion: await packageInstaller.getRepositoryVersion(),
+                requestedAt,
+              })
+            ) {
+              logger.info(
+                `Deferring product documentation update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], newer than this node's`
+              );
+              return deferForRepositoryVersion(state);
+            }
             return runTaskUnderInstallLock({
               lockManager,
+              state,
               metadata: { taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE, inferenceId },
               run: async () => {
-                const superseded = async (
+                // Re-checked under the lock: a newer request may have completed or superseded this
+                // one while it waited, and forced updates are the documented repair path
+                if (await superseded()) {
+                  return;
+                }
+                if (
+                  !forceUpdate &&
+                  isStaleRepositoryRequest({
+                    requestedVersion: repositoryVersion,
+                    installedVersion: await packageInstaller.getInstalledRepositoryVersion({
+                      inferenceId,
+                    }),
+                  })
+                ) {
+                  logger.info(
+                    `Skipping product documentation update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], older than the installed one`
+                  );
+                  return;
+                }
+                const uninstalledSince = async (
                   resourceType: typeof ResourceTypes.productDoc | typeof ResourceTypes.openapiSpec
                 ) => {
                   const result = await packageInstaller.wasUninstalledSince({
@@ -70,7 +121,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
                   inferenceId,
                   forceUpdate,
                 })) {
-                  if (await superseded(ResourceTypes.productDoc)) {
+                  if (await uninstalledSince(ResourceTypes.productDoc)) {
                     return;
                   }
                   // Re-checked under the lock so concurrent update tasks do not install it twice
@@ -81,7 +132,7 @@ export const registerEnsureUpToDateTaskDefinition = ({
                     since,
                   });
                 }
-                if (await superseded(ResourceTypes.openapiSpec)) {
+                if (await uninstalledSince(ResourceTypes.openapiSpec)) {
                   return;
                 }
                 await packageInstaller.ensureOpenApiSpecUpToDate({
@@ -94,30 +145,35 @@ export const registerEnsureUpToDateTaskDefinition = ({
           },
         };
       },
-      stateSchemaByVersion: {},
+      stateSchemaByVersion: requestTaskStateSchemaByVersion,
     },
   });
 };
 
 /**
- * Schedules an update task for this request. A pending update with the same `forceUpdate` for the
- * inference ID is reused, so e.g. every node's startup does not queue its own update.
+ * Schedules an update task for this request. A pending update with the same `forceUpdate` and
+ * repository version for the inference ID is reused, so e.g. every node's startup does not queue its
+ * own update. A forced update superseded by this request is carried over, so a requested repair
+ * still runs.
  */
 export const scheduleEnsureUpToDateTask = ({
   taskManager,
   logger,
   inferenceId,
   forceUpdate,
+  repositoryVersion,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   inferenceId: string;
   forceUpdate?: boolean;
+  repositoryVersion?: string;
 }): Promise<string> => {
   const params: EnsureUpToDateTaskParams = {
     inferenceId,
     forceUpdate,
     requestedAt: new Date().toISOString(),
+    repositoryVersion,
   };
   return scheduleRequestTask({
     taskManager,
@@ -126,5 +182,7 @@ export const scheduleEnsureUpToDateTask = ({
     params,
     reusePending: true,
     matches: (task) => Boolean(task.params.forceUpdate) === Boolean(forceUpdate),
+    mergeSuperseded: (requestParams, superseded) =>
+      anySupersededForced(superseded) ? { ...requestParams, forceUpdate: true } : requestParams,
   });
 };

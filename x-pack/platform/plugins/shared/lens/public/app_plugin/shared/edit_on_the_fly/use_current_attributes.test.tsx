@@ -93,6 +93,81 @@ describe('useCurrentAttributes', () => {
   });
 });
 
+describe('useCurrentAttributes ES|QL ad hoc data views', () => {
+  const esqlReference = { type: 'index-pattern', id: 'esql-id', name: 'layer-reference' };
+  const esqlSpec = { id: 'esql-id', title: 'logs-*', type: 'esql', timeFieldName: '@timestamp' };
+  const textBasedState = {
+    layers: {
+      layer1: {
+        index: 'esql-id',
+        query: { esql: 'FROM logs-*' },
+        columns: [],
+        timeField: '@timestamp',
+      },
+    },
+    indexPatternRefs: [],
+  };
+
+  const getAttributes = (adHocDataViews?: Record<string, unknown>) => {
+    const attributes = {
+      title: 'ES|QL chart',
+      visualizationType: 'testVis',
+      references: [],
+      state: {
+        filters: [],
+        datasourceStates: { textBased: { layers: textBasedState.layers } },
+        visualization: {},
+        ...(adHocDataViews && { adHocDataViews }),
+      },
+    } as unknown as TypedLensSerializedState['attributes'];
+
+    const datasourceMap = mockDatasourceMap();
+    datasourceMap.textBased.getPersistableState.mockImplementation((state) => ({
+      state,
+      references: [esqlReference],
+    }));
+
+    let currentAttributes: TypedLensSerializedState['attributes'] | undefined;
+    renderWithReduxStore(
+      <EditorFrameServiceProvider
+        visualizationMap={mockVisualizationMap()}
+        datasourceMap={datasourceMap}
+      >
+        <CurrentAttributesHarness
+          initialAttributes={attributes}
+          onAttributes={(attrs) => {
+            currentAttributes = attrs;
+          }}
+        />
+      </EditorFrameServiceProvider>,
+      {},
+      {
+        preloadedState: {
+          activeDatasourceId: 'textBased',
+          visualization: { activeId: 'testVis', state: {}, selectedLayerId: null },
+          datasourceStates: { textBased: { isLoading: false, state: textBasedState } },
+          dataViews: {
+            indexPatterns: { 'esql-id': { ...esqlSpec, isPersisted: false, spec: esqlSpec } },
+            indexPatternRefs: [],
+          },
+        },
+      } as never
+    );
+    return currentAttributes!;
+  };
+
+  it.each([
+    ['a persisted spec', { 'esql-id': esqlSpec }],
+    ['no persisted spec', undefined],
+  ])('does not persist the spec of an ES|QL layer, with %s', (_name, persisted) => {
+    const { state, references } = getAttributes(persisted);
+
+    expect(state.adHocDataViews).toEqual({});
+    expect(state.internalReferences).toEqual([esqlReference]);
+    expect(references).toEqual([]);
+  });
+});
+
 describe('getActiveDatasourceIdFromDoc', () => {
   it('ignores empty datasource states baked into persisted panels', () => {
     const doc = {

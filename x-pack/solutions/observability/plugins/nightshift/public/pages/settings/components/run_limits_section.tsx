@@ -10,8 +10,10 @@ import React from 'react';
 import {
   EuiConfirmModal,
   EuiForm,
+  EuiFormRow,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -24,7 +26,6 @@ import {
 } from '../../../components/ui/run_quota_reached_callout';
 import { isFiniteRunLimit, RUN_QUOTA_GROUPS } from './run_limit_draft';
 import { RunLimitRow, RUN_QUOTA_GROUP_LABELS } from './run_limit_row';
-import { RunQuotaExhaustionCallout } from './run_quota_exhaustion_callout';
 import { SettingsSectionRow } from './settings_section';
 import type { RunLimitsForm } from './use_run_limits_form';
 
@@ -32,14 +33,12 @@ export const RunLimitsSection = ({
   groups = RUN_QUOTA_GROUPS,
   form,
   description,
-  exhaustionCallouts,
   onSave,
   onConfirmSave,
 }: {
   groups?: readonly RunQuotaGroup[];
   form: RunLimitsForm;
   description?: ReactNode;
-  exhaustionCallouts: 'automations' | 'groups';
   onSave: () => Promise<void>;
   onConfirmSave: () => Promise<void>;
 }) => {
@@ -51,16 +50,19 @@ export const RunLimitsSection = ({
     saveError,
     updateLimitDraft,
     setLimitEnabled,
+    setInvestigationLimitsEnabled,
     showConfirmation,
     confirmationTitle,
     confirmationButtonText,
     warnings,
     closeConfirmation,
+    sharedSwitch,
   } = form;
   const confirmationModalTitleId = useGeneratedHtmlId({
     prefix: 'saveRunLimitsConfirmationModalTitle',
   });
   const response = quotas.data;
+  const sharedSwitchOn = draftState?.draft.investigationLimitsEnabled === true;
 
   return (
     <>
@@ -101,19 +103,26 @@ export const RunLimitsSection = ({
 
         {!quotas.isLoading && !quotas.isError && response && draftState && (
           <>
-            {exhaustionCallouts === 'automations' ? (
-              <RunQuotaExhaustionCallout
-                enabled={response.enabled}
-                limits={response.limits}
-                counts={response.counts}
-                groups={groups}
-              />
-            ) : null}
-
             <EuiForm component="div">
-              {groups.map((group) => {
+              {sharedSwitch ? (
+                <>
+                  <EuiFormRow>
+                    <EuiSwitch
+                      label={i18n.translate(
+                        'xpack.nightshift.settings.runLimits.sharedEnabledSwitchLabel',
+                        { defaultMessage: 'Enforce daily limits' }
+                      )}
+                      checked={sharedSwitchOn}
+                      disabled={!canManage || isSaving}
+                      onChange={(event) => setInvestigationLimitsEnabled(event.target.checked)}
+                      data-test-subj="nightshiftRunLimitsEnabledSwitch"
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="m" />
+                </>
+              ) : null}
+              {groups.map((group, index) => {
                 const showGroupCallout =
-                  exhaustionCallouts === 'groups' &&
                   isDetectionRunQuotaGroup(group) &&
                   isRunQuotaReached({
                     group,
@@ -124,6 +133,7 @@ export const RunLimitsSection = ({
 
                 return (
                   <React.Fragment key={group}>
+                    {index > 0 && !showGroupCallout ? <EuiSpacer size="l" /> : null}
                     {showGroupCallout ? (
                       <>
                         <EuiSpacer size="m" />
@@ -137,7 +147,10 @@ export const RunLimitsSection = ({
                       limit={draftState.draft.limits[group]}
                       disabled={!canManage || isSaving}
                       onChange={(limit) => updateLimitDraft(group, limit)}
-                      onEnabledChange={(enabled) => setLimitEnabled(group, enabled)}
+                      onEnabledChange={
+                        sharedSwitch ? undefined : (enabled) => setLimitEnabled(group, enabled)
+                      }
+                      sectionEnabled={sharedSwitchOn}
                     />
                   </React.Fragment>
                 );
@@ -167,7 +180,7 @@ export const RunLimitsSection = ({
                   })}
                   text={i18n.translate('xpack.nightshift.settings.runLimits.readOnlyDescription', {
                     defaultMessage:
-                      'Changing daily limits requires the Nightshift Manage and Configure privileges in all spaces.',
+                      'Changing daily limits requires the nightshift Manage and Configure privileges in all spaces.',
                   })}
                 />
               </>

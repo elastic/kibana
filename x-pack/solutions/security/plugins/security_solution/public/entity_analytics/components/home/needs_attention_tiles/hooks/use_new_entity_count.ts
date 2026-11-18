@@ -6,10 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { runEsqlQuery } from '../../queries/run_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
@@ -18,7 +17,6 @@ import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
-import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 export const useNewEntityCount = ({
   spaceId,
@@ -59,20 +57,15 @@ export const useNewEntityCount = ({
     queryKey,
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
-      const searchResult = await runWithTileTimeout(signal, (tileSignal) =>
-        lastValueFrom(
-          data.search.search(
-            { params: { query } },
-            {
-              abortSignal: tileSignal,
-              strategy: 'esql_async',
-              projectRouting: TILE_PROJECT_ROUTING,
-            }
-          )
+      const rawResponse = await runWithTileTimeout(signal, (tileSignal) =>
+        runEsqlQuery(
+          data.search,
+          query,
+          { id: 'needs_attention_tile_new_entity_count', meta: { timeRange } },
+          tileSignal
         )
       );
 
-      const rawResponse = searchResult.rawResponse as unknown as ESQLSearchResponse;
       const row = rawResponse.values?.[0];
       const valueIndex = rawResponse.columns?.findIndex((c) => c.name === 'value') ?? 0;
       const entityIdsIndex = rawResponse.columns?.findIndex((c) => c.name === 'entity_ids') ?? 1;

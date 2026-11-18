@@ -220,6 +220,7 @@ describe('ServiceAccountsApp', () => {
     create.mockRejectedValueOnce(
       Object.assign(new Error('Conflict'), {
         request: {},
+        response: { status: 409 },
         body: { message: 'An account with this name already exists.' },
       })
     );
@@ -231,6 +232,25 @@ describe('ServiceAccountsApp', () => {
     fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
     expect(create).toHaveBeenCalledTimes(2);
     await waitForElementToBeRemoved(() => screen.queryByTestId('createServiceAccountFlyout'));
+  });
+
+  it('reports an unexpected create failure without closing the flyout', async () => {
+    const { create, onError, onCreated, history } = await renderApp();
+    const error = Object.assign(new Error('fetch failed'), {
+      request: {},
+      response: { status: 500 },
+      body: { message: 'fetch failed' },
+    });
+    create.mockRejectedValueOnce(error);
+    await fillForm();
+    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
+
+    await waitFor(() =>
+      expect(onError).toHaveBeenCalledWith(error, 'Unable to create "workflow-runner"')
+    );
+    expect(screen.getByTestId('createServiceAccountFlyout')).toBeVisible();
+    expect(history.location.pathname).toBe('/create');
+    expect(onCreated).not.toHaveBeenCalled();
   });
 
   it('blocks duplicate submissions and closing while creation is pending', async () => {
@@ -428,12 +448,10 @@ describe('ServiceAccountsApp', () => {
       await user.hover(screen.getByText('About role privileges'));
       if (isServerless) {
         expect(await screen.findByText(/An account can only use privileges/)).toBeVisible();
-        expect(screen.getByText(/For cross-project search/)).toBeVisible();
         expect(screen.queryByText(/The account receives the privileges/)).not.toBeInTheDocument();
       } else {
         expect(await screen.findByText(/The account receives the privileges/)).toBeVisible();
         expect(screen.queryByText(/An account can only use privileges/)).not.toBeInTheDocument();
-        expect(screen.queryByText(/For cross-project search/)).not.toBeInTheDocument();
       }
     }
   );

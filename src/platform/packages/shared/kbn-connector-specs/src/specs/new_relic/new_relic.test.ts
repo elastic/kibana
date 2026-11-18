@@ -58,10 +58,10 @@ describe('NewRelic', () => {
     expect(types).toContain('api_key_header');
   });
 
-  it('marks the api_key_header auth type as sandbox capable', () => {
+  it('does not mark the api_key_header auth type as sandbox capable', () => {
     const types = NewRelic.auth?.types ?? [];
     expect(types).toEqual([
-      expect.objectContaining({ type: 'api_key_header', supportsSandbox: true }),
+      expect.objectContaining({ type: 'api_key_header', supportsSandbox: false }),
     ]);
   });
 

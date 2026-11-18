@@ -11,7 +11,8 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const launchDarklySchema = schema.object({
   sdk_key: schema.string({ minLength: 1 }),
-  client_id: schema.string({ minLength: 1 }),
+  // The browser no longer uses a LaunchDarkly client. Existing configs may still set this.
+  client_id: schema.maybe(schema.string({ minLength: 1 })),
   client_log_level: schema.oneOf(
     [
       schema.literal('none'),
@@ -43,12 +44,5 @@ const configSchema = schema.object({
 export type CloudExperimentsConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<CloudExperimentsConfigType> = {
-  exposeToBrowser: {
-    launch_darkly: {
-      client_id: true,
-      client_log_level: true,
-    },
-    metadata_refresh_interval: true,
-  },
   schema: configSchema,
 };

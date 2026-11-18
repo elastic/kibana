@@ -28,8 +28,21 @@ const fetch = jest.fn();
 
 const quotasResponse = (canManage: boolean): RunQuotasResponse => ({
   enabled: true,
-  limits: { detection: 1, investigation: 1, ki_extraction: 1 },
-  counts: { detection: 0, investigation: 0, ki_extraction: 0 },
+  investigationLimitsEnabled: true,
+  limits: {
+    detection: 1,
+    investigation: 1,
+    manual_investigation: 1,
+    total_investigation: 1,
+    ki_extraction: 1,
+  },
+  counts: {
+    detection: 0,
+    investigation: 0,
+    manual_investigation: 0,
+    total_investigation: 0,
+    ki_extraction: 0,
+  },
   window: {
     start: '2026-09-09T00:00:00.000Z',
     resetsAt: '2026-09-10T00:00:00.000Z',

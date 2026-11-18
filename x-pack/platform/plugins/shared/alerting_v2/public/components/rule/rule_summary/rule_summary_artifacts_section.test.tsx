@@ -65,7 +65,7 @@ describe('RuleSummaryArtifactsSection', () => {
     mockCanRead.mockReturnValue(true);
   });
 
-  it('renders dashboards and action policies under the Artifacts accordion', () => {
+  it('renders dashboards and action policies under the Artifacts accordion', async () => {
     renderSection();
 
     expect(screen.getByTestId('ruleSummaryArtifacts')).toHaveTextContent('Artifacts');
@@ -80,18 +80,6 @@ describe('RuleSummaryArtifactsSection', () => {
       'true'
     );
     expect(mockCanRead).toHaveBeenCalledWith('actionPolicies');
-    expect(within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')).toHaveAttribute(
-      'aria-expanded',
-      'false'
-    );
-  });
-
-  it('opens Artifacts when the rule has a dashboard', async () => {
-    renderSection({
-      ...rule,
-      artifacts: [{ id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } }],
-    });
-
     await waitFor(() => {
       expect(
         within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')

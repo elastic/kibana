@@ -25,7 +25,6 @@ import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 import { checkAndFormatPrivileges } from '../../utils/check_and_format_privileges';
-import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { recalculateEntityRiskScore } from '../recalculate_entity_risk_score';
 import { getLookupIndexName } from '../maintainer/lookup/lookup_index';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
@@ -44,13 +43,6 @@ const handler: (
   const coreContext = await context.core;
   const securityConfig = securityContext.getConfig();
   const siemResponse = buildSiemResponse(response);
-
-  if (!securityConfig.experimentalFeatures.entityAnalyticsEntityStoreV2) {
-    return siemResponse.error({
-      statusCode: 400,
-      body: 'Entity Store V2 is not enabled',
-    });
-  }
 
   const { identifier_type: identifierType, entity_id: entityId } = request.body;
 
@@ -104,9 +96,6 @@ const handler: (
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
   try {
-    const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(
-      coreContext.uiSettings.client
-    );
     const riskScoreDataClient = securityContext.getRiskScoreDataClient();
 
     await runWithSpan({
@@ -125,7 +114,6 @@ const handler: (
           entityId,
           identifierType,
           getWriter: (ns) => riskScoreDataClient.getWriter({ namespace: ns }),
-          idBasedRiskScoringEnabled,
           logger,
           telemetry: securityContext.getAnalytics(),
           profiling: {

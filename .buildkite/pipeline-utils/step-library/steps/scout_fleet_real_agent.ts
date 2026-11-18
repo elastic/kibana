@@ -16,7 +16,7 @@ export const scoutFleetRealAgentSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/test/scout_fleet_real_agent.sh',
     label: 'Scout Fleet Real Agent',
     key: 'scout-fleet-real-agent',
-    agents: { ...spotAgent('n2-highmem-4', spotZones.centralFCA), ...pdBalanced },
+    agents: { ...spotAgent('n2-highmem-4', spotZones.n2), ...pdBalanced },
     depends_on: ['build'],
     // One stack with a Docker Fleet Server and Docker Elastic Agents.
     timeout_in_minutes: 60,

@@ -7,151 +7,244 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import type { Row } from '@tanstack/react-table';
-import type { GroupNode } from '../../../store_provider';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { createVirtualizerApi } from './virtualizer_api';
+import { areSameRows, scrollToChildItem } from './utils';
 import type {
   ChildConnectionHandle,
   ChildVirtualizerController,
-  ConnectedChildState,
-} from './child_virtualizer_controller';
-import { useCascadeVirtualizer, type CascadeVirtualizerReturnValue } from '.';
+  UseConnectedChildVirtualizerOptions,
+  UseConnectedChildVirtualizerResult,
+  VirtualizerInstanceType,
+  VirtualizerItem,
+} from './types';
 
-export interface UseConnectedChildVirtualizerOptions<G extends GroupNode> {
-  controller: ChildVirtualizerController;
-  cellId: string;
-  rowIndex: number;
-  rows: Row<G>[];
-  estimatedRowHeight?: number;
-  overscan?: number;
-  /**
-   * When detached, the child uses this element as its own scroll container.
-   * If not provided, the child cannot detach.
-   */
-  privateScrollElement?: React.RefObject<Element | null>;
-}
+/**
+ * How long the position a restoration scrolls to has to stay unchanged before the restoration is finished.
+ * The position keeps moving while the rows above the restored one are measured and the surrounding layout
+ * settles; whether a row has been measured can't be used as the signal, a measurement that matches the
+ * estimate is indistinguishable from none.
+ */
+export const RESTORATION_SETTLE_MS = 200;
 
-export interface UseConnectedChildVirtualizerResult {
-  virtualizer: CascadeVirtualizerReturnValue;
-  handle: ChildConnectionHandle;
-  isActive: boolean;
-  isDetached: boolean;
-}
+/** Upper bound for a restoration whose position never stops moving, the cascade stays hidden until it ends. */
+export const RESTORATION_TIMEOUT_MS = 2000;
 
-const EMPTY_ROWS: Row<GroupNode>[] = [];
-const getActivation = (controller: ChildVirtualizerController, rowIndex: number) =>
-  controller.shouldActivate(rowIndex);
+/**
+ * Subscribes to a value derived from the child virtualizer controller. The selector is read on every
+ * notification, so it has to return a primitive or a value that is stable while nothing changed.
+ */
+export const useControllerValue = <T>(
+  controller: ChildVirtualizerController,
+  selector: (controller: ChildVirtualizerController) => T,
+  serverValue: T
+): T =>
+  useSyncExternalStore(
+    controller.subscribe,
+    () => selector(controller),
+    () => serverValue
+  );
 
-export const useConnectedChildVirtualizer = <G extends GroupNode>({
+/** Connects an independently measured list to the cascade's shared scroll container. */
+export const useConnectedChildVirtualizer = <T extends VirtualizerItem>({
   controller,
   cellId,
   rowIndex,
   rows,
-  estimatedRowHeight,
+  estimatedRowHeight = 65,
   overscan,
+  scrollMarginOffset = 0,
+  scrollPaddingStart = 0,
+  scrollPaddingEnd = 0,
   privateScrollElement,
-}: UseConnectedChildVirtualizerOptions<G>): UseConnectedChildVirtualizerResult => {
-  const isActive = useSyncExternalStore(
-    controller.subscribe,
-    () => getActivation(controller, rowIndex),
-    () => false
+  measurementKey = '',
+}: UseConnectedChildVirtualizerOptions<T>): UseConnectedChildVirtualizerResult => {
+  const isActive = useControllerValue(controller, (c) => c.shouldActivate(cellId), false);
+  const isDetached = useControllerValue(controller, (c) => c.isDetached(cellId), false);
+  const restoreAnchor = useControllerValue<number | null>(
+    controller,
+    (c) => c.getRestoreAnchor(cellId),
+    null
+  );
+  const rootScrollMargin = useControllerValue(
+    controller,
+    (c) => c.getScrollMarginForRow(rowIndex),
+    0
   );
 
-  const [isDetached, setIsDetached] = useState(false);
+  const connectionRef = useRef<ChildConnectionHandle | null>(null);
+  const lastAttachedOffset = useRef(controller.getInitialOffset());
+  const layoutKey = `${measurementKey}:${isDetached}`;
 
-  const childConfig = useMemo(() => controller.getChildConfig(rowIndex), [controller, rowIndex]);
-
-  const persistedAnchor = useMemo(
-    () => controller.getPersistedAnchor(cellId),
-    [controller, cellId]
+  const initialMeasurementsCache = useMemo(
+    () => controller.getMeasurements(cellId, rows, layoutKey),
+    [controller, cellId, rows, layoutKey]
   );
 
-  const handleRef = useRef<ChildConnectionHandle | null>(null);
-
-  if (!handleRef.current) {
-    handleRef.current = controller.connect(cellId, rowIndex);
-  }
-
-  const innerHandle = handleRef.current;
-
-  const wrappedHandle = useMemo<ChildConnectionHandle>(
+  const handle = useMemo<UseConnectedChildVirtualizerResult['handle']>(
     () => ({
-      reportState: innerHandle.reportState,
-      disconnect: innerHandle.disconnect,
-      detachScrollElement() {
-        innerHandle.detachScrollElement();
-        setIsDetached(true);
+      detachScrollElement: () => {
+        if (privateScrollElement?.current) connectionRef.current?.detachScrollElement();
       },
-      reattachScrollElement() {
-        innerHandle.reattachScrollElement();
-        setIsDetached(false);
-      },
+      reattachScrollElement: () => connectionRef.current?.reattachScrollElement(),
     }),
-    [innerHandle]
+    [privateScrollElement]
   );
 
-  useEffect(
-    () => () => {
-      innerHandle.disconnect();
-      handleRef.current = null;
-    },
-    [innerHandle]
-  );
+  const rowIndexRef = useRef(rowIndex);
+  rowIndexRef.current = rowIndex;
 
-  const onStateChange = useCallback<
-    NonNullable<Parameters<typeof useCascadeVirtualizer>[0]['onStateChange']>
-  >(
-    (instance, didRestoreScrollPosition, didStabilize) => {
-      if (!isActive || !didRestoreScrollPosition) return;
-      const range = instance.range;
+  const wasDetached = useRef(isDetached);
 
-      const patch: Partial<ConnectedChildState> = {
-        scrollOffset: instance.scrollOffset ?? 0,
-        range: range ? { startIndex: range.startIndex, endIndex: range.endIndex } : null,
-        totalSize: instance.getTotalSize(),
-        totalItemCount: instance.options.count,
-      };
+  const reportState = useCallback(
+    (instance: VirtualizerInstanceType) => {
+      if (!isActive) return;
 
-      // Only persist the scroll anchor after corrections have converged.
-      // Before stabilization the offset is intermediate and would cause the
-      // persisted anchor to capture a wrong position on disconnect/detach.
-      if (didStabilize) {
-        patch.scrollAnchorItemIndex =
-          instance.getVirtualItemForOffset(instance.scrollOffset!)?.index ?? null;
-        patch.hasStabilized = true;
+      if (!isDetached && !wasDetached.current) {
+        lastAttachedOffset.current = instance.scrollOffset ?? 0;
       }
 
-      innerHandle.reportState(patch);
+      connectionRef.current?.reportState({
+        scrollOffset: instance.scrollOffset ?? 0,
+        range: instance.range
+          ? { startIndex: instance.range.startIndex, endIndex: instance.range.endIndex }
+          : null,
+        totalSize: instance.getTotalSize(),
+        totalItemCount: rows.length,
+        scrollAnchorItemIndex:
+          instance.getVirtualItemForOffset(
+            (instance.scrollOffset ?? 0) + (isDetached ? 0 : scrollPaddingStart)
+          )?.index ?? null,
+        hasStabilized: restoreAnchor === null,
+      });
     },
-    [innerHandle, isActive]
+    [rows.length, isActive, isDetached, restoreAnchor, scrollPaddingStart]
   );
 
-  const getScrollElement = useCallback(() => {
-    if (isDetached && privateScrollElement?.current) {
-      return privateScrollElement.current;
-    }
-    return childConfig.getScrollElement();
-  }, [isDetached, privateScrollElement, childConfig]);
+  const getScrollElement = useCallback(
+    () =>
+      isDetached && privateScrollElement?.current
+        ? privateScrollElement.current
+        : isActive
+        ? controller.getScrollElement()
+        : null,
+    [isDetached, privateScrollElement, controller, isActive]
+  );
 
-  const effectiveRows = isActive ? rows : (EMPTY_ROWS as Row<G>[]);
+  const getItemKey = useCallback((index: number) => rows[index].id, [rows]);
 
-  const scrollMargin = isDetached ? 0 : controller.getScrollMarginForRow(rowIndex);
-
-  const virtualizer = useCascadeVirtualizer<G>({
-    rows: effectiveRows,
-    enableStickyGroupHeader: false,
-    estimatedRowHeight,
-    overscan,
-    isRoot: false,
+  const instance = useVirtualizer({
+    count: isActive ? rows.length : 0,
+    estimateSize: () => estimatedRowHeight,
+    getItemKey,
     getScrollElement,
-    scrollMargin,
-    initialOffset: isDetached ? 0 : childConfig.initialOffset,
-    initialAnchorItemIndex: persistedAnchor ?? undefined,
-    onStateChange,
+    overscan,
+    scrollMargin: isDetached ? 0 : rootScrollMargin + scrollMarginOffset,
+    scrollPaddingStart: isDetached ? 0 : scrollPaddingStart,
+    scrollPaddingEnd: isDetached ? 0 : scrollPaddingEnd,
+    initialOffset: controller.getInitialOffset,
+    initialMeasurementsCache,
+    onChange: reportState,
   });
 
-  return useMemo(
-    () => ({ virtualizer, handle: wrappedHandle, isActive, isDetached }),
-    [virtualizer, wrappedHandle, isActive, isDetached]
-  );
+  useLayoutEffect(() => {
+    const connection = controller.connect(cellId, rowIndexRef.current, instance.cancelScroll);
+    connectionRef.current = connection;
+    return () => {
+      connection.disconnect();
+      connectionRef.current = null;
+    };
+  }, [controller, cellId, instance]);
+
+  // useLayoutEffect(() => connectionRef.current?.reportState({ rowIndex }), [rowIndex]);
+
+  const measure = useCallback(() => {
+    // `measure` only drops the sizes it has cached, so the rows that are rendered are read again straight away
+    instance.measure();
+    instance.elementsCache.forEach((element) => {
+      if (element.isConnected) instance.measureElement(element);
+    });
+  }, [instance]);
+
+  const previousLayout = useRef({ rows, layoutKey });
+  useLayoutEffect(() => {
+    const previous = previousLayout.current;
+    if (!areSameRows(previous.rows, rows) || previous.layoutKey !== layoutKey) measure();
+    previousLayout.current = { rows, layoutKey };
+  }, [measure, rows, layoutKey]);
+
+  useLayoutEffect(() => {
+    if (wasDetached.current === isDetached) return;
+    instance.cancelScroll();
+    instance.scrollToOffset(isDetached ? 0 : lastAttachedOffset.current);
+    wasDetached.current = isDetached;
+  }, [instance, isDetached]);
+
+  const restoration = useRef<{
+    offset?: number;
+    deadline?: number;
+    settleTimer?: ReturnType<typeof setTimeout>;
+  }>({});
+  useLayoutEffect(() => {
+    if (restoreAnchor === null || !isActive || isDetached) return;
+    if (restoreAnchor < 0 || restoreAnchor >= rows.length) {
+      controller.finishRestoration(cellId);
+      return;
+    }
+    instance.getTotalSize();
+    const item = instance.measurementsCache[restoreAnchor];
+    if (!item) return;
+    const offset = item.start - scrollPaddingStart;
+    if (restoration.current.offset === offset) return;
+
+    controller.cancelRootScroll();
+    instance.scrollToOffset(offset, { align: 'start', behavior: 'auto' });
+    restoration.current.offset = offset;
+
+    // The position moved, so the wait for it to settle starts over, without ever going past the deadline
+    const now = Date.now();
+    restoration.current.deadline ??= now + RESTORATION_TIMEOUT_MS;
+    clearTimeout(restoration.current.settleTimer);
+    restoration.current.settleTimer = setTimeout(
+      () => controller.finishRestoration(cellId),
+      Math.min(RESTORATION_SETTLE_MS, restoration.current.deadline - now)
+    );
+  });
+
+  useEffect(() => {
+    const pending = restoration.current;
+    return () => clearTimeout(pending.settleTimer);
+  }, []);
+
+  useLayoutEffect(() => {
+    reportState(instance);
+    return () => {
+      if (isActive)
+        controller.saveMeasurements(cellId, { rows, layoutKey, items: instance.takeSnapshot() });
+    };
+  }, [instance, reportState, controller, cellId, rows, layoutKey, isActive]);
+
+  instance.shouldAdjustScrollPositionOnItemSizeChange = (item) =>
+    restoreAnchor === null && item.start < (instance.scrollOffset ?? 0);
+
+  const virtualizer = useMemo(() => {
+    const scrollToIndex: VirtualizerInstanceType['scrollToIndex'] = (index, options) => {
+      controller.finishRestoration();
+      controller.cancelRootScroll();
+      if (isDetached) instance.scrollToIndex(index, options);
+      else scrollToChildItem(instance, index, options);
+    };
+    // assigned onto the api rather than spread with it, so that its getters keep reading the live instance
+    return Object.assign(createVirtualizerApi(instance), { measure, scrollToIndex });
+  }, [instance, controller, isDetached, measure]);
+
+  return useMemo(() => ({ virtualizer, handle, isDetached }), [virtualizer, handle, isDetached]);
 };

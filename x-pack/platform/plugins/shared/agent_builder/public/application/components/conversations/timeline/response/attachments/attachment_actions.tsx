@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { flushSync } from 'react-dom';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -46,9 +47,30 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
   iconOnly = false,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [loadingLabel, setLoadingLabel] = useState<string | null>(null);
 
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
+  const makeClickHandler = useCallback(
+    (button: ActionButton) => async () => {
+      flushSync(() => setLoadingLabel(button.label));
+      try {
+        const result = button.handler();
+        if (result instanceof Promise) {
+          await result;
+        }
+      } catch {
+        // Errors are the attachment handler's responsibility to surface (e.g. via toasts).
+        // We swallow here so a rejecting handler doesn't create an unhandled promise rejection.
+      } finally {
+        setLoadingLabel(null);
+      }
+    },
+    []
+  );
+
+  const isAnyLoading = loadingLabel !== null;
 
   const mainButton =
     buttons.find(({ type }) => type === ActionButtonType.PRIMARY) ??
@@ -66,14 +88,14 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
             (button): EuiContextMenuPanelItemDescriptor => ({
               name: button.label,
               icon: button.icon,
-              disabled: button.disabled,
+              disabled: button.disabled || isAnyLoading,
               toolTipContent: button.disabled ? button.disabledReason : undefined,
               href: button.href,
               target: button.href && button.openInNewTab ? '_blank' : undefined,
               rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
-              onClick: () => {
+              onClick: async () => {
                 closePopover();
-                button.handler();
+                await makeClickHandler(button)();
               },
             })
           ),
@@ -109,6 +131,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
               iconType="ellipsis"
               aria-label={MORE_ACTIONS_LABEL}
               onClick={togglePopover}
+              isDisabled={isAnyLoading}
               data-test-subj="agentBuilderAttachmentMoreActions"
             />
           </EuiToolTip>
@@ -123,10 +146,13 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
     : isIconOnly
     ? mainButton.label
     : undefined;
+  const isThisLoading = loadingLabel === mainButton.label;
   const mainProps = {
     ...getNavProps(mainButton),
+    onClick: makeClickHandler(mainButton),
     iconType: mainButton.icon,
-    isDisabled: mainButton.disabled,
+    isDisabled: mainButton.disabled || isAnyLoading,
+    isLoading: isThisLoading,
     hasAriaDisabled: Boolean(mainButton.disabled && mainButton.disabledReason),
     'data-test-subj': 'agentBuilderAttachmentPrimaryAction',
   };
@@ -166,6 +192,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
         aria-label={MORE_ACTIONS_LABEL}
         iconType="chevronSingleDown"
         onClick={togglePopover}
+        isDisabled={isAnyLoading}
         popoverProps={popoverProps}
         tooltipProps={{ content: MORE_ACTIONS_LABEL, disableScreenReaderOutput: true }}
         data-test-subj="agentBuilderAttachmentMoreActions"

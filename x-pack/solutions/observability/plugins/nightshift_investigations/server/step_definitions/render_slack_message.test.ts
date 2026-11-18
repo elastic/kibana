@@ -10,7 +10,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { InvestigationLocatorDefinition } from '../../common/locators';
-import type { SlackBlock } from '../lib/notifications/format_investigation_slack_message';
+import { getTestIsomerRuntime } from '../lib/notifications/notification_routing.mock';
+import type { SlackBlock } from '../lib/notifications/investigation_slack_composition';
 import { renderSlackMessageStepDefinition } from './render_slack_message';
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
@@ -29,6 +30,7 @@ const setup = (spaceId = 'default') => {
   const definition = renderSlackMessageStepDefinition({
     investigationLocator: urlService.locators.create(new InvestigationLocatorDefinition()),
     getInvestigationsClient,
+    getIsomerRuntime: getTestIsomerRuntime,
   });
   const context = (input: Record<string, unknown>) =>
     ({
@@ -73,7 +75,6 @@ describe('nightshift.renderSlackMessage step', () => {
       expect(buttonUrl(output.blocks)).toMatch(
         new RegExp(`^https://kibana\\.example${prefix}/app/r\\?`)
       );
-      expect(output.text).toContain(buttonUrl(output.blocks));
     }
   );
 

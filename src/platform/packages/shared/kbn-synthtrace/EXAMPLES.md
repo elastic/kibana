@@ -13,6 +13,7 @@ This document contains all usage examples for `@kbn/synthtrace`. See the [README
   - [Combined Scenarios](#combined-scenarios)
   - [Specialized Scenarios](#specialized-scenarios)
   - [Digital Experience Scenarios](#digital-experience-scenarios)
+  - [Synthetics Scenarios](#synthetics-scenarios)
   - [SRE Incident Scenarios](#sre-incident-scenarios)
 - [Advanced Usage Examples](#advanced-usage-examples)
 
@@ -914,6 +915,8 @@ The data is written through the `otelEsClient`, which indexes documents as-is. I
 
 - `withSessionId` (boolean, default `true`): writes `attributes.session.id`, with the tab ID and `session.start` that come with sessions. Set it to `false` to match EDOT Browser 0.3.0 and earlier, which don't emit them. The apps then report distro version `0.3.0`, and `0.4.0` otherwise.
 - `includeRawAttribution` (boolean, default `false`): writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, as the web-vitals instrumentation does when its experimental `includeRawAttribution` option is on.
+- `environments` (boolean, default `false`): spreads every app over its own environments, with their share of the traffic, instead of the single `Synthtrace: <scenario>` environment. See `digital_experience_browser` for the environments of each app. In `digital_experience_mixed`, the classic RUM app then runs in `production`.
+- `edgeCases` (boolean, default `false`): adds what is far from the usual to the browser apps, to see how the views cope with it: URLs of thousands of characters, stack traces of dozens of frames and one over 8,191 characters, errors with no type, with no stack trace and with an empty one, more than 100 distinct stack traces for one app, browsers that EDOT Browser can't identify, and clicks with no selector. The mobile apps of `digital_experience_mixed` don't have any.
 - `scale` (number, default `1`): multiplies the number of sessions per minute of every app. Fractions of a session add up over time, so a scale below 1 thins out every app in proportion.
 - `seed` (string or number, default the start of the run, `--from` in milliseconds): makes the data reproducible. Every session, with its session, trace and span IDs, browser, page views and events, derives from the seed, its app and its number since the epoch, so the same seed generates the same sessions at the same times, however the time range is split into batches, workers or live batches. The scenarios log the seed they use. Without a seed, runs that start at a different time generate different data, while runs with the same absolute `--from` generate the same sessions. `digital_experience_mixed` generates the browser and mobile apps from the same default seed, so don't run it together with `digital_experience_browser` or `digital_experience_mobile` in one synthtrace invocation. Sessions are spread evenly over time. The classic RUM page loads of `digital_experience_mixed` take their timings from the seed too, but not their document IDs.
 
@@ -923,11 +926,24 @@ Generates EDOT Browser data for five apps in different states of health:
 
 | `service.name`       | Health   | Notes                                               |
 | -------------------- | -------- | --------------------------------------------------- |
-| `storefront-web`     | healthy  | high traffic, good vitals                           |
+| `storefront-web`     | healthy  | high traffic, good vitals, few JS errors            |
 | `checkout-web`       | erroring | failing `POST /api/payment`, frequent JS errors     |
 | `media-portal-web`   | slow     | poor LCP from large images and render-blocking CSS  |
 | `support-center-web` | critical | poor INP/CLS, high error and request failure rate   |
 | `docs-web`           | healthy  | low traffic, mostly desktop, no environment         |
+
+The data is shaped to fill the views of the Digital Experience application details:
+
+- **JS errors:** an exception thrown from one call stack always has the same stack trace, so occurrences add up in groups of type and stack trace. The erroring apps (`checkout-web`, `support-center-web`) have 20 to 25 groups in half an hour, with different counts. The same error from two call paths is two groups, and errors that happen in one environment only (see below) are groups that come and go when you switch it. Stack traces are written the way the browser of the session does: Chromium starts with the error and indents the frames (`at fn (url:line:column)`), Firefox and Safari have no header and write `fn@url:line:column`, so one error is up to three groups. Stacks are 12 frames deep for the errors thrown by the UI framework.
+- **Resources:** every app loads more than 10 different resources: hashed chunk names, fonts, images and third-party scripts, some of them on some page loads only (lazy chunks, `probability` in the site definition). `storefront-web` also loads a long CDN image URL with a query string, to see how long URLs are shortened.
+- **HTTP requests:** `GET /api/recommendations` of `storefront-web` has a slow tail (one request in ten takes ten times as long), `GET /api/orders/<id>` of `storefront-web` is a family of four URLs where some orders are not found (404), `GET /api/user/preferences` of `media-portal-web` often answers 404, and `POST /api/payment` of `checkout-web` fails with 5xx.
+- **Edge cases** (with `edgeCases=true`), modelled on what real sites send:
+  - `storefront-web`: tracking and signed URLs (a Google Analytics 4 collect URL of 830 characters, a pixel of 450, a signed S3 link with a session token of 1,650 and an ad click of 2,160), an image in eight `srcset` widths, a search page with a 250-character URL and a GraphQL persisted query in the query string (580), a request with search state in the URL (4,350), 200 product URLs (`/api/products/<sku>/availability`) that don't fit in a table of ten, pages of a list (`/products?page=2` to `5`), and clicks on elements with a 157 and a 737-character selector, or none.
+  - `checkout-web`: stacks of 10 to 80 frames in a minified bundle, one just under 8,191 characters and one over it (which the `wildcard` field of the data stream leaves out of the index, so its errors are missing from the list), `Maximum call stack size exceeded` with ten identical frames, a Minified React error, a hydration error with a message of several lines, a GraphQL error with JSON in its message, a failed dynamic import with a long URL in its message, frames from a Chrome extension (only in the sessions of Chromium browsers) and anonymous ones, a cross-origin `Script error.` with no stack, `ResizeObserver loop completed with undelivered notifications.` with an empty one, and rejected promises with a plain value, which have no type and no stack.
+  - `media-portal-web`: a percent-encoded Japanese path, a punycode host, a port, an ad click of 2,160 characters, a news URL of 290 characters, an error worded the way Safari does (only in Safari sessions), and 10% of the sessions from a browser with no name, platform or mobile flag.
+  - `support-center-web`: one error with 150 distinct stack traces, more than the 100 groups of a list (use `scale=3` for an hour, or run for several hours), a message in several scripts with an emoji and a zero-width space, an error with an empty message, and 15% of unidentified browsers.
+  - `docs-web`: a 3.8 MB search index, and 30% of unidentified browsers.
+- **Environments** (with `environments=true`): `production` and `staging` carry the traffic, and `preview` of `storefront-web`, `checkout-web` and `media-portal-web` has page loads and requests but no exceptions and no resource timings. `docs-web` has `production` and traffic with no environment at all. `storefront-web` is healthy and has few errors: use a longer range or `scale` to see more of them.
 
 With session IDs, most sessions are a single visit in a new tab. About 15% are a second visit to a session that is still running, in the same tab or in another one. Another 15% come back after the previous session expired: the tab kept sending background requests with `browser.tab.id` but no `session.id`, and the new session points to the expired one with `session.previous_id`. Each session has one `session.start` log. Earlier visits can be up to an hour and a half before the end of their session, so at the start of a run, where data before `--from` is cut off, some sessions have no `session.start` and some `session.previous_id` values point to nothing.
 
@@ -937,6 +953,8 @@ With session IDs, most sessions are a single visit in a new tab. About 15% are a
 node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
 node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=false
 node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts scale=3
+node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts environments=true
+node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts edgeCases=true,scale=3
 node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z --to=2026-10-16T13:00:00Z --scenarioOpts seed=my-seed
 ```
 
@@ -1013,6 +1031,102 @@ node scripts/synthtrace digital_experience_mobile_single_installation --from=now
 node scripts/synthtrace digital_experience_mobile_single_session --from=now-30m --to=now --scenarioOpts platform=ios,health=critical
 node scripts/synthtrace digital_experience_mobile_minimal_app --from=now-30m --to=now
 ```
+
+### Synthetics Scenarios
+
+These scenarios generate check results for Synthetics monitors, so that the Synthetics Overview, Monitors and monitor details pages have data to show.
+
+#### `synthetics_overview`
+
+Generates a mix of HTTP, TCP, ICMP and browser monitors on an existing private location: mostly healthy, plus flapping, always down, and recently failing monitors. HTTP checks carry a status code and response headers, and failed ones a response body. Browser checks are complete journeys with steps, and a failed check fails its second step.
+
+The scenario creates the monitor configurations through the Kibana API in `bootstrap`, and writes the matching check documents. The monitors carry the tag `synthtrace-synthetics_overview`. A re-run deletes the monitors with that tag and creates them again, with the same IDs. The documents of earlier runs stay in Elasticsearch.
+
+**Prerequisite: a private location.** The scenario does not create one, so create it first. It only needs a Fleet agent policy. No Elastic Agent has to run, because synthtrace writes the check documents itself.
+
+- In Kibana: create an agent policy in Fleet, then go to **Synthetics > Settings > Private locations > Add location** and select that policy.
+- Or, to also enroll a real agent, run `node x-pack/scripts/synthetics_private_location.js`. It needs Docker and a Fleet Server configuration in `kibana.yml`, described in the [package README](../../../../../x-pack/packages/kbn-synthetics-private-location/README.md).
+
+With one private location in the Kibana space, the scenario finds it itself. With several, it stops and lists them, because it does not choose for you. Pass the one to use as `privateLocationId` and `privateLocationLabel`, which you can read from:
+
+```sh
+curl -s -u elastic:changeme -H 'elastic-api-version: 2023-10-31' \
+  http://localhost:5601/api/synthetics/private_locations
+```
+
+**Options:**
+
+- `privateLocationId` (string, optional): ID of the private location. Give it together with `privateLocationLabel`, or leave both out.
+- `privateLocationLabel` (string, optional): label of the private location.
+- `monitors` (number, default `8`): number of monitors. Types and outcome patterns cycle through the same sequence.
+- `seed` (string, default `synthtrace`): makes the data reproducible.
+- `spaceId` (string, default `default`): Kibana space to create the monitors in. Monitor ids include the space, so the same scenario in another space creates its own monitors.
+- `deleteMonitorsOnExit` (boolean, default `false`): delete the monitors when the run ends. Reliable for historical runs only; see [Cleaning up](#synthetics-scenarios).
+
+**Usage:**
+
+The scenario calls the Kibana API, so pass `--kibana` when Kibana is not at the default address:
+
+```sh
+node scripts/synthtrace synthetics_overview --from=now-24h --to=now \
+  --target=http://elastic:changeme@localhost:9200 \
+  --kibana=http://elastic:changeme@localhost:5601
+
+node scripts/synthtrace synthetics_overview --live \
+  --target=http://elastic:changeme@localhost:9200 \
+  --kibana=http://elastic:changeme@localhost:5601
+```
+
+To choose the private location when there are several:
+
+```sh
+node scripts/synthtrace synthetics_overview --from=now-24h --to=now \
+  --target=http://elastic:changeme@localhost:9200 \
+  --kibana=http://elastic:changeme@localhost:5601 \
+  --scenarioOpts.privateLocationId=<id> \
+  --scenarioOpts.privateLocationLabel="<label>"
+```
+
+**Notes:**
+
+- Do not use `--clean`: it deletes every `synthetics-*` data stream, not only the data of this scenario.
+- Backfilled data does not appear in the "Last 10 test runs" table of the monitor Overview page. For a monitor younger than 30 days, the page starts its time range at the monitor's `created_at`, and the scenario creates the monitors when it runs, after the backfilled checks. The History page, the Overview and Monitors pages, and the charts show the data. To fill the table, run the scenario with `--live`: it recreates the monitors, and its checks are newer than their creation.
+- With `--from` and `--to`, a check is written at every schedule interval of each monitor (3 minutes for HTTP and TCP, 5 for ICMP, 10 for browser). With `--live`, it is written at the same interval, and the first one is a minute before the start of the run. Outcomes follow the monitor's pattern as the run goes on: flapping monitors keep changing status, and a monitor with a recent outage is down for the whole run.
+- Failed HTTP monitors show "Failed to run steps" instead of a steps list on their step pages. This is how Synthetics treats HTTP monitors.
+
+**Cleaning up:**
+
+The scenario leaves two things behind: the monitors in Kibana and the check documents in Elasticsearch. Both carry the tag `synthtrace-synthetics_overview`. The monitors of a run live in its Kibana space, and the check documents carry `meta.space_id`, so cleanup is limited to that space. The private location, its agent policy and any agent are not created by the scenario, and are not removed.
+
+Nothing is deleted unless you ask for it, so you can look at the data after a run. A new run replaces the monitors of the previous one (same IDs, no duplicates) but keeps the documents, which pile up until you delete them. If an Elastic Agent is enrolled in the agent policy of the private location, it runs the monitors for real, against their made-up targets, and its results mix with the generated ones.
+
+To have the monitors deleted automatically when a historical run (`--from` and `--to`) finishes, start it with `--scenarioOpts.deleteMonitorsOnExit=true`. Then only the documents are left to delete: skip to step 3. A live run only deletes them if it shuts down cleanly after Ctrl+C, which is not guaranteed (a second Ctrl+C, or a worker that does not stop in time, skips it). Don't rely on it for a live run.
+
+Otherwise, and after every live run, clean up in this order:
+
+1. Stop any live run, so that nothing is written after the documents are deleted.
+2. Delete the monitors with the API (this needs `jq`), unless the run did it when it ended. `SPACE` is the `spaceId` of the run (`default` when you did not set one). The default space has no path prefix; any other space is under `/s/$SPACE`:
+
+   ```sh
+   KBN=http://localhost:5601; AUTH=elastic:changeme; SPACE=default
+   PREFIX=; [ "$SPACE" = default ] || PREFIX=/s/$SPACE
+   IDS=$(curl -s -u "$AUTH" "$KBN$PREFIX/api/synthetics/monitors?tags=synthtrace-synthetics_overview&perPage=1000" \
+     -H 'elastic-api-version: 2023-10-31' | jq -c '{ids: [.monitors[] | (.config_id // .id)]}')
+   curl -s -u "$AUTH" -X POST "$KBN$PREFIX/api/synthetics/monitors/_bulk_delete" \
+     -H 'elastic-api-version: 2023-10-31' -H 'kbn-xsrf: true' \
+     -H 'Content-Type: application/json' -d "$IDS"
+   ```
+
+3. Delete the check documents of that space. The tag is the same in every space, so the query also filters on `meta.space_id`. `SPACE` is the `spaceId` of the run. The first line keeps a value you already set, and otherwise uses `default`, so this step works on its own when you skipped step 2. The response has the number of deleted documents:
+
+   ```sh
+   SPACE=${SPACE:-default}
+   curl -s -u elastic:changeme -X POST "http://localhost:9200/synthetics-*/_delete_by_query?refresh=true" \
+     -H 'Content-Type: application/json' \
+     -d "{\"query\":{\"bool\":{\"filter\":[{\"term\":{\"tags\":\"synthtrace-synthetics_overview\"}},{\"term\":{\"meta.space_id\":\"$SPACE\"}}]}}}"
+   ```
+
+To check the result, `GET <kibana>/api/synthetics/monitors?tags=synthtrace-synthetics_overview` in that space should report a `total` of `0`, and `POST <elasticsearch>/synthetics-*/_count` with the same query should return a `count` of `0`.
 
 ### SRE Incident Scenarios
 

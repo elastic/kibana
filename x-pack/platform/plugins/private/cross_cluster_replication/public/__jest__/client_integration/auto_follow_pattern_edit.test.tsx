@@ -15,6 +15,7 @@ import { API_BASE_PATH } from '../../../common/constants';
 const { setup } = pageHelpers.autoFollowPatternEdit;
 
 type SetupEnvironmentReturn = ReturnType<typeof setupEnvironment>;
+type PutCall = [string | { path: string }, { body?: string } | undefined];
 
 describe('Edit Auto-follow pattern', () => {
   let httpRequestsMockHelpers: SetupEnvironmentReturn['httpRequestsMockHelpers'];
@@ -103,7 +104,6 @@ describe('Edit Auto-follow pattern', () => {
         await jest.runOnlyPendingTimersAsync();
       });
 
-      type PutCall = [string | { path: string }, { body?: string } | undefined];
       const putCalls = httpSetup.put.mock.calls as unknown as PutCall[];
       const putCall = putCalls.find(([path]) => {
         const resolved = typeof path === 'string' ? path : path.path;
@@ -122,6 +122,46 @@ describe('Edit Auto-follow pattern', () => {
         leaderIndexPatterns: AUTO_FOLLOW_PATTERN_EDIT.leaderIndexPatterns,
         followIndexPattern: AUTO_FOLLOW_PATTERN_EDIT.followIndexPattern,
       });
+    });
+  });
+
+  describe('when the auto-follow pattern has no follow index pattern', () => {
+    beforeEach(async () => {
+      const { followIndexPattern, ...patternWithoutFollowIndexPattern } = AUTO_FOLLOW_PATTERN_EDIT;
+      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(
+        AUTO_FOLLOW_PATTERN_EDIT_NAME,
+        patternWithoutFollowIndexPattern
+      );
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse([
+        { name: 'cluster-2', seeds: ['localhost:123'], isConnected: true },
+      ]);
+      ({ user } = setup());
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+    });
+
+    test('should leave the prefix and suffix empty', () => {
+      expect(screen.getByTestId('prefixInput')).toHaveValue('');
+      expect(screen.getByTestId('suffixInput')).toHaveValue('');
+    });
+
+    test('should PUT a follow index pattern without "undefined" in it', async () => {
+      httpSetup.put.mockResolvedValue({});
+
+      await user.click(screen.getByTestId('submitButton'));
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+
+      const putEndpoint = `${API_BASE_PATH}/auto_follow_patterns/${AUTO_FOLLOW_PATTERN_EDIT_NAME}`;
+      const putCall = (httpSetup.put.mock.calls as unknown as PutCall[]).find(
+        ([path]) => (typeof path === 'string' ? path : path.path) === putEndpoint
+      );
+
+      expect(putCall).toBeDefined();
+      const body = JSON.parse(putCall![1]!.body!);
+      expect(body.followIndexPattern).toBe('{{leader_index}}');
     });
   });
 

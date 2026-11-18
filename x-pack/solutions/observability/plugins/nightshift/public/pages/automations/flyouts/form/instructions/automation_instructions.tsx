@@ -50,7 +50,7 @@ const labels = {
   schedulePlaceholder: i18n.translate(
     'xpack.nightshift.automations.flyout.scheduledInstructionsPlaceholder',
     {
-      defaultMessage: 'Describe what Nightshift should investigate each time this automation runs…',
+      defaultMessage: 'Describe what nightshift should investigate each time this automation runs…',
     }
   ),
 };
@@ -83,11 +83,13 @@ export const AutomationInstructions = ({
       fullWidth
       label={label}
       labelAppend={
-        <EuiText size="xs" color="subdued">
-          {isScheduled ? labels.required : labels.optional}
-        </EuiText>
+        readOnly ? undefined : (
+          <EuiText size="xs" color="subdued">
+            {isScheduled ? labels.required : labels.optional}
+          </EuiText>
+        )
       }
-      helpText={labels.limit}
+      helpText={readOnly ? undefined : labels.limit}
       isInvalid={!readOnly && Boolean(error)}
       error={readOnly ? undefined : error}
     >

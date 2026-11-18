@@ -60,9 +60,17 @@ export {
   type EdotBrowserClientOptions,
   type EdotBrowserDocument,
   type EdotBrowserEvent,
+  type EdotBrowserExceptionTemplate,
+  type EdotBrowserPage,
+  type EdotBrowserReplayOptions,
+  type EdotBrowserReplayVisit,
+  type EdotBrowserResource,
+  type EdotBrowserSessionDocument,
   type EdotBrowserSite,
+  type EdotBrowserStackFrame,
   type EdotBrowserSpanDocument,
   type HealthProfileName,
+  type ReplaySize,
 } from './src/lib/edot_browser';
 export {
   edotReactNative,
@@ -87,4 +95,8 @@ export {
   type NetworkConnection,
   type NetworkConnectionType,
 } from './src/lib/edot_react_native';
-export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';
+export {
+  syntheticsMonitor,
+  type BrowserJourneyStep,
+  type SyntheticsMonitorDocument,
+} from './src/lib/synthetics';

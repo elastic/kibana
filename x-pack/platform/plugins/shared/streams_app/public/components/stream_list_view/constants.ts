@@ -6,3 +6,4 @@
  */
 
 export const LEGACY_LOGS_CALLOUT_DISMISSED_KEY = 'streams.legacyLogsCallout.dismissed';
+export const NEW_EXPERIENCE_CALLOUT_DISMISSED_KEY = 'streams.newExperienceCallout.dismissed';

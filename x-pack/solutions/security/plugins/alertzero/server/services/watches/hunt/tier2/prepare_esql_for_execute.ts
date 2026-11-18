@@ -45,6 +45,22 @@ const addMetadataToKeepCommands = (root: ESQLAstQueryExpression): void => {
 };
 
 /**
+ * Appends each exclusion (`-*secret*`) to the FROM command's sources so Elasticsearch drops what
+ * the hunt universe excludes at read time, wherever the unqualified `FROM` fans out. Queries that
+ * do not parse or do not start with FROM come back unchanged.
+ */
+export const addFromExclusions = (query: string, excludedIndices: readonly string[]): string => {
+  if (excludedIndices.length === 0) return query;
+  const { root, errors } = Parser.parse(query);
+  if (errors.length > 0 || root.commands[0]?.name !== 'from') return query;
+
+  for (const excluded of excludedIndices) {
+    mutate.commands.from.sources.upsert(root, `-${excluded}`);
+  }
+  return BasicPrettyPrinter.multiline(root, { pipeTab: '' });
+};
+
+/**
  * Upserts `METADATA _id, _index` onto the FROM command and carries those
  * columns through any KEEP that would drop them, via the ES|QL AST rather than
  * string surgery, so pipes inside string literals and multiple KEEPs are safe.
@@ -54,10 +70,17 @@ const addMetadataToKeepCommands = (root: ESQLAstQueryExpression): void => {
  *
  * The row LIMIT is not applied here: `executeEsql` binds it at execute time.
  */
-export const prepareEsqlForExecute = (query: string): string => {
+export const prepareEsqlForExecute = (
+  query: string,
+  { excludedIndices = [] }: { excludedIndices?: readonly string[] } = {}
+): string => {
   const { root, errors } = Parser.parse(query);
   if (errors.length > 0 || root.commands[0]?.name !== 'from') {
     return query;
+  }
+
+  for (const excluded of excludedIndices) {
+    mutate.commands.from.sources.upsert(root, `-${excluded}`);
   }
 
   for (const field of METADATA_FIELDS) {
