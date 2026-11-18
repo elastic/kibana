@@ -5,26 +5,28 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { hashKey } from './key_tags';
 import { buildPatternKeys, describePatternKey } from './pattern_key';
 
 /**
  * The verdict cache: a model verdict for one strict pattern key, kept so that a later alert of the same key can reuse it.
  * This module is pure: alert documents and verdicts in, records and Knowledge Item documents out. The steps do the reading
- * and the writing. This week the cache runs in `shadow` only: a hit is a tag, and the alert is analyzed as before.
+ * and the writing. In `shadow` a hit is a tag, and the alert is analyzed as before. In `on` a hit takes the verdict of the record and skips
+ * analysis, except for the alerts that a guard fires on and a small audit sample, which are analyzed.
  *
  * A record has two runs. Run 1 is the verdict of the first alert of a key that a batch analyzes. Run 2 is the verdict of
  * the first alert of that key in a LATER batch. No alert is analyzed twice. Two confident runs that agree make the record
  * `active`. Runs that disagree make the key `unstable` for a day, with no new record in that time.
  */
 
-/** The switch of the cache. `on` is not built this week, so every value except `shadow` reads as `off`. */
+/** The switch of the cache. Every value except `shadow` and `on` reads as `off`, so a mistyped value cannot reuse a verdict. */
 export const VERDICT_CACHE_FLAG = 'alertzero.triageVerdictCache';
 
-export type VerdictCacheMode = 'off' | 'shadow';
+export type VerdictCacheMode = 'off' | 'shadow' | 'on';
 
 export const toVerdictCacheMode = (value: string): VerdictCacheMode =>
-  value === 'shadow' ? 'shadow' : 'off';
+  value === 'shadow' || value === 'on' ? value : 'off';
 
 export const VERDICT_CACHE_KI_TYPE = 'security.triage_verdict_cache';
 export const VERDICT_CACHE_ID_PREFIX = 'verdict-cache-';
@@ -32,6 +34,26 @@ export const VERDICT_CACHE_PRODUCER = 'alertzero.triage.verdictCache.v1';
 
 /** The tag of an alert that an `active` record covers. In shadow mode the alert is still analyzed. */
 export const TRIAGE_WOULD_REUSE_TAG_PREFIX = 'az:would_reuse:';
+
+/** The tag of an alert that took the verdict of a record in `on` mode: `az:cache_reuse:<record id>`. It is not analyzed. */
+export const TRIAGE_CACHE_REUSE_TAG_PREFIX = 'az:cache_reuse:';
+
+/** The tag of an alert with a cache hit that is analyzed anyway as part of the audit sample: `az:cache_audit:<record id>`. */
+export const TRIAGE_CACHE_AUDIT_TAG_PREFIX = 'az:cache_audit:';
+
+/** Share of the alerts with a cache hit that are analyzed anyway in `on` mode, to measure wrong reuse. */
+export const VERDICT_CACHE_AUDIT_SHARE = 0.05;
+
+/**
+ * Whether an alert with a cache hit is part of the audit sample. The choice is a hash of the alert id, so it is the same on every
+ * sweep and needs no state. The share is the fraction of alerts that are chosen.
+ */
+export const isAuditSample = (
+  alertId: string,
+  share: number = VERDICT_CACHE_AUDIT_SHARE
+): boolean =>
+  Number.parseInt(createHash('sha256').update(alertId).digest('hex').slice(0, 8), 16) / 2 ** 32 <
+  share;
 
 const HOUR_MS = 60 * 60 * 1000;
 

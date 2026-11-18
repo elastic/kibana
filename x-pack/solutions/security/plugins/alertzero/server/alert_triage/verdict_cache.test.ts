@@ -21,6 +21,7 @@ import {
   readCacheRecord,
   recordShadowOutcome,
   toCacheVerdict,
+  isAuditSample,
   toVerdictCacheMode,
   verdictCacheId,
   type BatchAlert,
@@ -81,10 +82,37 @@ const pending = (): VerdictCacheRecord => written(act(undefined, fresh('alert-1'
 const later = (ms: number): Date => new Date(NOW.getTime() + ms);
 
 describe('toVerdictCacheMode', () => {
-  it('turns the cache on in shadow only, and reads every other value, also "on", as off', () => {
+  it('turns the cache on in shadow or on, and reads every other value as off, so that a mistyped value cannot reuse a verdict', () => {
     expect(toVerdictCacheMode('shadow')).toBe('shadow');
-    expect(['on', 'off', '', 'SHADOW', 'true'].map(toVerdictCacheMode)).toEqual(
-      Array(5).fill('off')
+    expect(toVerdictCacheMode('on')).toBe('on');
+    expect(['off', '', 'SHADOW', 'ON', 'true', 'shadow '].map(toVerdictCacheMode)).toEqual(
+      Array(6).fill('off')
+    );
+  });
+});
+
+describe('isAuditSample', () => {
+  const ids = Array.from({ length: 20_000 }, (_unused, i) => `alert-${i}`);
+
+  it('chooses about the share that it is given, by a hash of the alert id', () => {
+    const chosen = ids.filter((id) => isAuditSample(id)).length;
+
+    expect(chosen / ids.length).toBeGreaterThan(0.04);
+    expect(chosen / ids.length).toBeLessThan(0.06);
+    expect(ids.filter((id) => isAuditSample(id, 0.5)).length / ids.length).toBeCloseTo(0.5, 1);
+  });
+
+  it('gives the same answer for the same alert every time, so that a sweep needs no state', () => {
+    expect(ids.slice(0, 200).map((id) => isAuditSample(id))).toEqual(
+      ids.slice(0, 200).map((id) => isAuditSample(id))
+    );
+  });
+
+  it('chooses no alert at a share of 0 and every alert at a share of 1, and a bigger share keeps the alerts of a smaller one', () => {
+    expect(ids.some((id) => isAuditSample(id, 0))).toBe(false);
+    expect(ids.every((id) => isAuditSample(id, 1))).toBe(true);
+    expect(ids.filter((id) => isAuditSample(id, 0.05)).every((id) => isAuditSample(id, 0.2))).toBe(
+      true
     );
   });
 });

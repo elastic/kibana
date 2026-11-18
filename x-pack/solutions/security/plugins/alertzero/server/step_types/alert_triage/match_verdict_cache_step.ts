@@ -11,8 +11,13 @@ import {
   triageMatchVerdictCacheStepCommonDefinition,
   type MatchVerdictCacheStatus,
 } from '../../../common/step_types/alert_triage';
-import { DECISION_MATCH_WORK_BUDGET_MS } from '../../alert_triage/constants';
+import {
+  DECISION_MATCH_WORK_BUDGET_MS,
+  TRIAGE_STRICT_KEY_TAG_PREFIX,
+  TRIAGE_WIDE_KEY_TAG_PREFIX,
+} from '../../alert_triage/constants';
 import { hashCandidates } from '../../alert_triage/fp_decisions';
+import { hashKey } from '../../alert_triage/key_tags';
 import {
   NOVELTY_GUARD,
   NOVELTY_SOURCE_FIELDS,
@@ -21,8 +26,12 @@ import {
   noveltyValuesOfAlert,
 } from '../../alert_triage/novelty_guard';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
+import { buildPatternKeys } from '../../alert_triage/pattern_key';
 import {
+  TRIAGE_CACHE_AUDIT_TAG_PREFIX,
+  TRIAGE_CACHE_REUSE_TAG_PREFIX,
   TRIAGE_WOULD_REUSE_TAG_PREFIX,
+  isAuditSample,
   matchReusableRecords,
   type VerdictCacheMode,
   type VerdictCacheRecord,
@@ -48,6 +57,10 @@ const NOTHING = {
   would_reuse: 0,
   would_reuse_false_positive: 0,
   would_reuse_true_positive: 0,
+  reused: 0,
+  reused_false_positive: 0,
+  reused_true_positive: 0,
+  audit_sampled: 0,
   guard_hits: 0,
   guard_not_checked: 0,
   tag_failures: 0,
@@ -62,8 +75,13 @@ const NOTHING = {
  * picks, so the share of the backlog that reuse would cover can be read from the tags. An alert that carries the tag is left out of
  * later searches, so a sweep does not tag it again.
  *
+ * In `on` an alert that an active record covers takes its verdict: it is tagged with the verdict (`az:false_positive` or
+ * `az:true_positive`), `az:cache_reuse:<record id>` and its key tags, so the planner skips it. Two kinds of alert are analyzed
+ * anyway and keep the would-reuse tag: an alert that a guard fired on, and the audit sample (`az:cache_audit:<record id>`), which
+ * lets every run measure wrong reuse. A failed tag call leaves the alert pending, so it is analyzed.
+ *
  * The decisions are separate: this step does not look at them. With both flags on, an alert that a decision matched can also carry
- * this tag. (shortcut: decisions first is not enforced here; add it when `on` mode of the cache is built.)
+ * this tag. (shortcut: decisions first is not enforced here, because the decisions step runs first and tags what it matches.)
  *
  * It fails open. A step that cannot read the setting, the alerts or the records reports `failed` and tags nothing, so every
  * alert goes through analysis as before.
@@ -80,7 +98,8 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
       });
 
       try {
-        if ((await getMode()) === 'off') return result('off');
+        const mode = await getMode();
+        if (mode === 'off') return result('off');
         if (!(await isContextEngineEnabled(contextManager.getFakeRequest()))) {
           return result('disabled');
         }
@@ -133,7 +152,7 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
             const docById = new Map(found.candidates.map(({ id, doc }) => [id, doc]));
             // The alert is tagged would-reuse first, then this adds one tag per field that the novelty guard fired on. A failed
             // guard tag is counted and does not undo the would-reuse tag.
-            const tagGuardHits = async (alertIds: readonly string[]): Promise<void> => {
+            const tagGuardHits = async (alertIds: readonly string[]): Promise<Set<string>> => {
               const firedBy = new Map<string, string[]>();
               const alertsFired = new Set<string>();
               for (const alertId of alertIds) {
@@ -167,6 +186,46 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
                 }
               }
               totals.guard_hits += alertsFired.size;
+              return alertsFired;
+            };
+
+            // `on`: the alerts that take the verdict of the record are tagged with it. They carry the key tags that the batch would
+            // have written, so grouping and decisions read them like the tags of an analyzed alert.
+            const tagReused = async (
+              recordId: string,
+              verdict: 'false_positive' | 'true_positive',
+              alertIds: string[]
+            ): Promise<boolean> => {
+              if (alertIds.length === 0) return true;
+              const [first] = alertIds;
+              const strictHash = hashes.get(first);
+              const firstDoc = docById.get(first);
+              const wide = firstDoc === undefined ? undefined : buildPatternKeys(firstDoc).wide;
+              try {
+                await tagInChunks(write, {
+                  alertIds,
+                  add: [
+                    `az:${verdict}`,
+                    `${TRIAGE_CACHE_REUSE_TAG_PREFIX}${recordId}`,
+                    ...(strictHash === undefined
+                      ? []
+                      : [`${TRIAGE_STRICT_KEY_TAG_PREFIX}${strictHash}`]),
+                    ...(wide === undefined
+                      ? []
+                      : [`${TRIAGE_WIDE_KEY_TAG_PREFIX}${hashKey(input.space_id, wide)}`]),
+                  ],
+                  remove: [],
+                });
+                return true;
+              } catch (error) {
+                totals.tag_failures++;
+                logger.warn(
+                  `Could not apply the verdict of cache record ${recordId}: ${
+                    error instanceof Error ? error.message : error
+                  }`
+                );
+                return false;
+              }
             };
 
             for (const [recordId, { verdict, alertIds }] of matches) {
@@ -175,14 +234,41 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
                 continue;
               }
               try {
-                await tagInChunks(write, {
-                  alertIds,
-                  add: [`${TRIAGE_WOULD_REUSE_TAG_PREFIX}${recordId}`],
-                  remove: [],
-                });
+                if (mode === 'on') {
+                  const fired = await tagGuardHits(alertIds);
+                  const audit = alertIds.filter((id) => !fired.has(id) && isAuditSample(id));
+                  const auditIds = new Set(audit);
+                  const held = alertIds.filter((id) => fired.has(id) || auditIds.has(id));
+                  const reuse = alertIds.filter((id) => !fired.has(id) && !auditIds.has(id));
+                  // Held alerts are analyzed. They carry the would-reuse tag, and the audit ones a tag of their own.
+                  await tagInChunks(write, {
+                    alertIds: held,
+                    add: [`${TRIAGE_WOULD_REUSE_TAG_PREFIX}${recordId}`],
+                    remove: [],
+                  });
+                  if (audit.length > 0) {
+                    await tagInChunks(write, {
+                      alertIds: audit,
+                      add: [`${TRIAGE_CACHE_AUDIT_TAG_PREFIX}${recordId}`],
+                      remove: [],
+                    });
+                  }
+                  totals.audit_sampled += audit.length;
+                  if (await tagReused(recordId, verdict, reuse)) {
+                    totals.reused += reuse.length;
+                    if (verdict === 'false_positive') totals.reused_false_positive += reuse.length;
+                    else totals.reused_true_positive += reuse.length;
+                  }
+                } else {
+                  await tagInChunks(write, {
+                    alertIds,
+                    add: [`${TRIAGE_WOULD_REUSE_TAG_PREFIX}${recordId}`],
+                    remove: [],
+                  });
+                  await tagGuardHits(alertIds);
+                }
                 recordsMatched.add(recordId);
                 totals.would_reuse += alertIds.length;
-                await tagGuardHits(alertIds);
                 if (verdict === 'false_positive')
                   totals.would_reuse_false_positive += alertIds.length;
                 else totals.would_reuse_true_positive += alertIds.length;

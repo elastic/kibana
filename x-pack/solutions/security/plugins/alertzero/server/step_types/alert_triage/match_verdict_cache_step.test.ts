@@ -7,9 +7,16 @@
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { hashKey } from '../../alert_triage/key_tags';
+import {
+  TRIAGE_STRICT_KEY_TAG_PREFIX,
+  TRIAGE_WIDE_KEY_TAG_PREFIX,
+} from '../../alert_triage/constants';
 import { buildPatternKeys } from '../../alert_triage/pattern_key';
 import {
+  TRIAGE_CACHE_AUDIT_TAG_PREFIX,
+  TRIAGE_CACHE_REUSE_TAG_PREFIX,
   TRIAGE_WOULD_REUSE_TAG_PREFIX,
+  isAuditSample,
   VERDICT_CACHE_TTL_MS,
   buildCacheDocument,
   nextCacheAction,
@@ -98,6 +105,7 @@ const setup = ({
   missingIndex = false,
   unreadable = false,
   tagFailsFor,
+  reuseTagFailsFor,
 }: {
   alerts: Array<[string, Record<string, unknown>]>;
   records?: VerdictCacheRecord[];
@@ -107,6 +115,8 @@ const setup = ({
   unreadable?: boolean;
   /** The tag call for this record id fails. */
   tagFailsFor?: string;
+  /** The call that applies the verdict of this record id (`on` mode) fails. */
+  reuseTagFailsFor?: string;
 }) => {
   const store = new Map(
     records.map((record) => [verdictCacheId(record.keyHash), storedOf(record)])
@@ -120,6 +130,12 @@ const setup = ({
         if (
           tagFailsFor &&
           body?.tags.tags_to_add.includes(`${TRIAGE_WOULD_REUSE_TAG_PREFIX}${tagFailsFor}`)
+        ) {
+          throw new Error('tagging failed');
+        }
+        if (
+          reuseTagFailsFor &&
+          body?.tags.tags_to_add.includes(`${TRIAGE_CACHE_REUSE_TAG_PREFIX}${reuseTagFailsFor}`)
         ) {
           throw new Error('tagging failed');
         }
@@ -365,6 +381,159 @@ describe('triage match verdict cache step', () => {
       expect(search?.[0].body?._source).toEqual(
         expect.arrayContaining(['process.command_line', 'destination.ip', 'process.hash.sha256'])
       );
+    });
+  });
+
+  describe('on mode', () => {
+    const SEEN = { hash: ['aa'] };
+    const recordId = verdictCacheId(hashOf('a.exe'));
+    const alertWithHash = (hash: string) => withProcess({ hash: { sha256: hash } });
+    /** An id of an alert that is in the audit sample, and one that is not. */
+    const auditId = Array.from({ length: 500 }, (_unused, i) => `audit-${i}`).find((id) =>
+      isAuditSample(id)
+    ) as string;
+    const plainIds = Array.from({ length: 500 }, (_unused, i) => `plain-${i}`).filter(
+      (id) => !isAuditSample(id)
+    );
+    const tagsOf = (calls: Array<{ ids: string[]; tags: { tags_to_add: string[] } }>) =>
+      calls.map(({ ids, tags }) => ({ ids, add: tags.tags_to_add }));
+
+    it('gives an alert of an active false positive record the verdict, the reuse tag and the key tags, so that the planner skips it', async () => {
+      const { run, tagCalls } = setup({
+        mode: 'on',
+        alerts: [[plainIds[0], alertWithHash('AA')]],
+        records: [recordOf('a.exe', 'active', 'false_positive', new Date(), SEEN)],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({
+        status: 'ok',
+        would_reuse: 1,
+        reused: 1,
+        reused_false_positive: 1,
+        reused_true_positive: 0,
+        audit_sampled: 0,
+        guard_hits: 0,
+      });
+      const [call] = tagsOf(tagCalls());
+      expect(call.ids).toEqual([plainIds[0]]);
+      expect(call.add).toEqual([
+        'az:false_positive',
+        `${TRIAGE_CACHE_REUSE_TAG_PREFIX}${recordId}`,
+        `${TRIAGE_STRICT_KEY_TAG_PREFIX}${hashOf('a.exe')}`,
+        `${TRIAGE_WIDE_KEY_TAG_PREFIX}${hashKey(
+          'default',
+          buildPatternKeys(alertWithHash('AA')).wide
+        )}`,
+      ]);
+      expect(tagCalls().some(({ tags }) => tags.tags_to_add[0].startsWith('az:would_reuse'))).toBe(
+        false
+      );
+    });
+
+    it('gives an alert of a true positive record the true positive verdict', async () => {
+      const { run, tagCalls } = setup({
+        mode: 'on',
+        alerts: [[plainIds[0], alertWithHash('AA')]],
+        records: [recordOf('a.exe', 'active', 'true_positive', new Date(), SEEN)],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({
+        reused: 1,
+        reused_true_positive: 1,
+        reused_false_positive: 0,
+      });
+      expect(tagsOf(tagCalls())[0].add[0]).toBe('az:true_positive');
+    });
+
+    it('analyzes an alert that a guard fired on: it keeps the would-reuse tag and the guard tag and gets no verdict', async () => {
+      const { run, tagCalls } = setup({
+        mode: 'on',
+        alerts: [
+          [plainIds[0], alertWithHash('AA')],
+          [plainIds[1], alertWithHash('BB')],
+        ],
+        records: [recordOf('a.exe', 'active', 'false_positive', new Date(), SEEN)],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ would_reuse: 2, reused: 1, guard_hits: 1, audit_sampled: 0 });
+      const calls = tagsOf(tagCalls());
+      expect(calls).toContainEqual({ ids: [plainIds[1]], add: ['az:guard_hit:novelty:hash'] });
+      expect(calls).toContainEqual({ ids: [plainIds[1]], add: [`az:would_reuse:${recordId}`] });
+      const verdictCalls = calls.filter(({ add }) => add[0].startsWith('az:false_positive'));
+      expect(verdictCalls.flatMap(({ ids }) => ids)).toEqual([plainIds[0]]);
+    });
+
+    it('analyzes the alerts of the audit sample: they carry the would-reuse tag and an audit tag and get no verdict', async () => {
+      const { run, tagCalls } = setup({
+        mode: 'on',
+        alerts: [
+          [auditId, alertWithHash('AA')],
+          [plainIds[0], alertWithHash('AA')],
+        ],
+        records: [recordOf('a.exe', 'active', 'false_positive', new Date(), SEEN)],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ would_reuse: 2, reused: 1, audit_sampled: 1 });
+      const calls = tagsOf(tagCalls());
+      expect(calls).toContainEqual({ ids: [auditId], add: [`az:would_reuse:${recordId}`] });
+      expect(calls).toContainEqual({
+        ids: [auditId],
+        add: [`${TRIAGE_CACHE_AUDIT_TAG_PREFIX}${recordId}`],
+      });
+      const verdictIds = calls
+        .filter(({ add }) => add[0] === 'az:false_positive')
+        .flatMap(({ ids }) => ids);
+      expect(verdictIds).toEqual([plainIds[0]]);
+    });
+
+    it('leaves an alert pending, so that it is analyzed, when the verdict cannot be applied, and counts the failure', async () => {
+      const { run, warn } = setup({
+        mode: 'on',
+        alerts: [[plainIds[0], alertWithHash('AA')]],
+        records: [recordOf('a.exe', 'active', 'false_positive', new Date(), SEEN)],
+        reuseTagFailsFor: recordId,
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ status: 'ok', would_reuse: 1, reused: 0, tag_failures: 1 });
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('Could not apply the verdict'));
+    });
+
+    it('does not reuse a pending, unstable or expired record, as in shadow mode', async () => {
+      const { run, tagCalls } = setup({
+        mode: 'on',
+        alerts: [[plainIds[0], alertWithHash('AA')]],
+        records: [recordOf('a.exe', 'pending', 'false_positive', new Date(), SEEN)],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ would_reuse: 0, reused: 0 });
+      expect(tagCalls()).toEqual([]);
+    });
+
+    it('reuses nothing in shadow mode: the same alerts only get the would-reuse tag', async () => {
+      const { run, tagCalls } = setup({
+        mode: 'shadow',
+        alerts: [[plainIds[0], alertWithHash('AA')]],
+        records: [recordOf('a.exe', 'active', 'false_positive', new Date(), SEEN)],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ would_reuse: 1, reused: 0, audit_sampled: 0 });
+      expect(tagsOf(tagCalls())).toEqual([
+        { ids: [plainIds[0]], add: [`az:would_reuse:${recordId}`] },
+      ]);
     });
   });
 

@@ -311,6 +311,18 @@ const matchVerdictCacheOutputSchema = lazySchema(() =>
     would_reuse: z.number().describe('Pending alerts that an active record would cover.'),
     would_reuse_false_positive: z.number(),
     would_reuse_true_positive: z.number(),
+    reused: z
+      .number()
+      .describe(
+        'In `on` mode: alerts that took the verdict of a record and skip analysis. They carry `az:cache_reuse:<record id>`.'
+      ),
+    reused_false_positive: z.number(),
+    reused_true_positive: z.number(),
+    audit_sampled: z
+      .number()
+      .describe(
+        'In `on` mode: alerts with a cache hit that are analyzed anyway, to measure wrong reuse.'
+      ),
     guard_hits: z
       .number()
       .describe(

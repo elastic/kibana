@@ -154,8 +154,11 @@ steps:
   #
   #     The flag is `alertzero.triageVerdictCache`. In `shadow` an alert gets
   #     `az:would_reuse:<record id>` and is still analyzed: the tag shows what reuse would do, and
-  #     the batch compares the fresh verdict with the record. With the flag `off` the step does
-  #     nothing. It fails open, like the decisions match above, and waits for the headroom read.
+  #     the batch compares the fresh verdict with the record. In `on` an alert takes the verdict
+  #     of the record (`az:false_positive` or `az:true_positive`, `az:cache_reuse:<record id>`
+  #     and its key tags) and the planner skips it. An alert that a guard fires on, and an audit
+  #     sample of the others, are analyzed. With the flag `off` the step does nothing. It fails
+  #     open, like the decisions match above, and waits for the headroom read.
   # ---------------------------------------------------------------------------
   - name: match_verdict_cache
     type: alertzero.triage.matchVerdictCache
