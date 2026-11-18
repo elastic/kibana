@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getConfiguration, loadConfiguration } from './src/config_loader';
+export {
+  getConfiguration,
+  getBrowserTracingConfiguration,
+  loadConfiguration,
+} from './src/config_loader';
+export type { BrowserTracingConfiguration } from './src/config_loader';
 export { initApm } from './src/init_apm';
 export { shouldInstrumentClient } from './src/rum_agent_configuration';
 export type { ApmConfiguration } from './src/config';

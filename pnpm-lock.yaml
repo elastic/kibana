@@ -439,6 +439,9 @@ importers:
       '@elastic/numeral':
         specifier: 2.5.1
         version: 2.5.1
+      '@elastic/opentelemetry-browser':
+        specifier: 0.5.0
+        version: 0.5.0
       '@elastic/opentelemetry-node':
         specifier: 1.20.0
         version: 1.20.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
@@ -10026,11 +10029,11 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
-
   x-pack/solutions/security/test_helpers/detections-response-ftr-services: {}
 
   x-pack/solutions/security/test_plugins/resolver_test: {}
+
+  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
 
   x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding: {}
 
@@ -11367,6 +11370,9 @@ packages:
   '@elastic/opamp-client-node@0.5.0':
     resolution: {integrity: sha512-1vx6dgnK7smUV5rURC6gQJeVJdvlZCJzm7ssLudZwgEhuEZUspwdHD1TGvn7vObKCFYbHPVG9SL57MvptEy24g==}
     engines: {node: ^18.19.0 || >=20.6.0}
+
+  '@elastic/opentelemetry-browser@0.5.0':
+    resolution: {integrity: sha512-sRvCiYXpj5sG+KcwdqIZGRnVWgRks7hAddQSzK5SJNvCPe0ZW3hMkrYceoZD4GkULiApt8N3Y0q6aYUVa9OVrg==}
 
   '@elastic/opentelemetry-node@1.20.0':
     resolution: {integrity: sha512-/WCA7YiM855/QVxJIcNSiqw4/U5t0TFmPktbelcpT4e1NEosHRS7soQ7k7YMV21MlS2cnFcmvTq9fob59gs/Qw==}
@@ -12881,6 +12887,21 @@ packages:
   '@opentelemetry/api@1.9.1':
     resolution: {integrity: sha512-gLyJlPHPZYdAk1JENA9LeHejZe1Ti77/pTeFm/nMXmQH/HFZlcS/O2XJB+L8fkbrNSqhdtlvjBVjxwUYanNH5Q==}
     engines: {node: '>=8.0.0'}
+
+  '@opentelemetry/browser-api@0.1.0':
+    resolution: {integrity: sha512-EA+F9TBWCb48esI8TiQuFA9RscHy2ZAq3n65AHl/FuxxrxG/LgkuRoWnO3TRE2v+yIqvrMUPChDd8FyW3vWb5g==}
+    peerDependencies:
+      '@opentelemetry/api': ^1.9.1
+
+  '@opentelemetry/browser-instrumentation@0.11.0':
+    resolution: {integrity: sha512-9brrVpA5YQ8k2O2Bq5GwZR2yQ/RXlRzvFUVCJhuBFR4TdAnRRlSP9b6/G7Qv5aXUKjK7EN9PiHPUWteCj3F3SQ==}
+    peerDependencies:
+      '@opentelemetry/api': ^1.9.1
+
+  '@opentelemetry/browser-sdk@0.8.0':
+    resolution: {integrity: sha512-D3gzoF2VO4mIFEN+r9KRleQ+40LuCbmpm0AySfN4O0cCvyQp/a7LwqUXWqEKAEaSKoxBHO39e+RJny89qiFykw==}
+    peerDependencies:
+      '@opentelemetry/api': ^1.9.1
 
   '@opentelemetry/configuration@0.223.0':
     resolution: {integrity: sha512-KgyHXS8weyh+mJWVZ2+3hmu7J4mwU661Y8yQ1PvBAEY7G63X8qfGr6uN61MNJrN+YzP+dC5x6PmBEgdh7x6coQ==}
@@ -25113,6 +25134,9 @@ packages:
     resolution: {integrity: sha512-/Gnggvj9oSrEvJbDyyPtAnxBt5fGQM2iWOKQNu7ie1OxDgK40iZpyV3TKaRiEzVj1oA1UxKnEy9XPXh6PW3eVw==}
     engines: {node: '>= 8'}
 
+  web-vitals@6.2.3:
+    resolution: {integrity: sha512-Dmy+vdO1UPMqXiAtZSNayhl4f794Bxfd94W4HIj2HlYtczEQfEOon969memlcpcHrTuOKLa5baFjX7WbgmOq+A==}
+
   webdriver-bidi-protocol@0.4.3:
     resolution: {integrity: sha512-uuN0goWfxP22B7J/uAgBpOYNPttC+XVseYE+rSY5+rQ+YBeVz/VORw8WbmLVcqW78zNg5A4qnjNXYUWR3il2ig==}
 
@@ -27409,6 +27433,14 @@ snapshots:
       undici: 6.29.1
       uuid: 11.1.1
 
+  '@elastic/opentelemetry-browser@0.5.0':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/api-logs': 0.223.0
+      '@opentelemetry/browser-instrumentation': 0.11.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/browser-sdk': 0.8.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
+
   '@elastic/opentelemetry-node@1.20.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)':
     dependencies:
       '@elastic/opamp-client-node': 0.5.0
@@ -29354,6 +29386,32 @@ snapshots:
       '@opentelemetry/api': 1.9.1
 
   '@opentelemetry/api@1.9.1': {}
+
+  '@opentelemetry/browser-api@0.1.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/api-logs': 0.223.0
+
+  '@opentelemetry/browser-instrumentation@0.11.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/api-logs': 0.223.0
+      '@opentelemetry/browser-api': 0.1.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/semantic-conventions': 1.43.0
+      web-vitals: 6.2.3
+
+  '@opentelemetry/browser-sdk@0.8.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/api-logs': 0.223.0
+      '@opentelemetry/browser-api': 0.1.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/exporter-logs-otlp-http': 0.223.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/exporter-trace-otlp-http': 0.223.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/resources': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-logs': 0.223.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-trace': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/semantic-conventions': 1.43.0
 
   '@opentelemetry/configuration@0.223.0(@opentelemetry/api@1.9.1)':
     dependencies:
@@ -43690,6 +43748,8 @@ snapshots:
   web-streams-polyfill@4.0.0-beta.3: {}
 
   web-streams-polyfill@4.3.0: {}
+
+  web-vitals@6.2.3: {}
 
   webdriver-bidi-protocol@0.4.3: {}
 

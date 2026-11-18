@@ -33,6 +33,27 @@ export const loadConfiguration = (
   return apmConfig;
 };
 
+export interface BrowserTracingConfiguration {
+  url: string;
+  headers?: Record<string, string>;
+}
+
+/**
+ * Returns the EDOT Browser config to inject into the frontend, or `undefined`
+ * when browser tracing is disabled or has no endpoint.
+ */
+export const getBrowserTracingConfiguration = (): BrowserTracingConfiguration | undefined => {
+  if (!apmConfig) {
+    return undefined;
+  }
+  const { enabled, tracing } = apmConfig.getTelemetryConfig();
+  const { enabled: browserEnabled, url, headers } = tracing.browser ?? {};
+  if (!enabled || !browserEnabled || !url) {
+    return undefined;
+  }
+  return { url, headers };
+};
+
 export const getConfiguration = (serviceName: string): AgentConfigOptions | undefined => {
   // integration test runner starts a kibana server that import the module without initializing APM.
   // so we need to check initialization of the config.
