@@ -55,6 +55,39 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
     );
   });
 
+  it('should include the kqlQuery when the filter is a kqlWithFilters object', () => {
+    const url = convertSliApmParamsToApmAppDeeplinkUrl(
+      buildSlo({
+        indicator: buildApmLatencyIndicator({
+          ...DEFAULT_PARAMS,
+          filter: {
+            kqlQuery: 'host.name : "a"',
+            filters: [{ meta: {}, query: { match_phrase: { 'agent.name': 'beats' } } }],
+          },
+        }),
+      })
+    );
+
+    expect(url).toMatchInlineSnapshot(
+      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+host.name+%3A+%22a%22"`
+    );
+  });
+
+  it('should ignore an empty kqlQuery when the filter is a kqlWithFilters object', () => {
+    const url = convertSliApmParamsToApmAppDeeplinkUrl(
+      buildSlo({
+        indicator: buildApmLatencyIndicator({
+          ...DEFAULT_PARAMS,
+          filter: { kqlQuery: '', filters: [] },
+        }),
+      })
+    );
+
+    expect(url).toMatchInlineSnapshot(
+      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22"`
+    );
+  });
+
   it('should return an empty string if all service is passed', () => {
     const url = convertSliApmParamsToApmAppDeeplinkUrl(
       buildSlo({
