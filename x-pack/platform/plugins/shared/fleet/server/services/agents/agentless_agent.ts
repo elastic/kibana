@@ -57,6 +57,7 @@ import {
 
 import { appContextService } from '../app_context';
 import { packagePolicyService } from '../package_policy';
+import { getPackageInfo } from '../epm/packages';
 
 import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
@@ -81,6 +82,14 @@ interface AgentlessAgentErrorHandlingMessages {
       message: string;
     };
   };
+}
+
+/** The integration package sent to agentless-api as `policy_details.package`. */
+interface AgentlessPolicyDetailsPackage {
+  name: string;
+  version: string;
+  policy_template?: string;
+  release?: string;
 }
 
 export interface AgentlessAgentService {
@@ -493,7 +502,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       output_name: Object.keys(fullPolicy?.outputs || {})?.[0], // Agentless policies only have one output
       // OTel integrations have their `otelcol` inputs moved out of `inputs` in the full agent
       // policy, so agentless-api cannot derive the package from `inputs[].meta.package`.
-      // Send it explicitly so the deployment is labelled with the integration name/version.
+      // Send it explicitly so the deployment still gets its integration labels.
       ...(pkg ? { package: pkg } : {}),
     };
   }
@@ -515,20 +524,38 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     };
   }
 
-  /** The (single) non-system integration package of an agentless policy, if any. */
+  /**
+   * The (single) non-system integration package of an agentless policy, if any, with the same
+   * fields a non-OTel policy carries in `inputs[].meta.package`.
+   */
   private async getIntegrationPackage(
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
-  ): Promise<{ name: string; version: string } | undefined> {
+  ): Promise<AgentlessPolicyDetailsPackage | undefined> {
     try {
       const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
         soClient,
         agentPolicyId
       );
-      const pkg = packagePolicies?.find(
+      const packagePolicy = packagePolicies?.find(
         (pp) => pp.package?.name && pp.package.name !== 'system'
-      )?.package;
-      return pkg ? { name: pkg.name, version: pkg.version } : undefined;
+      );
+      if (!packagePolicy?.package) {
+        return undefined;
+      }
+      const pkg = packagePolicy.package;
+
+      // agentless-api labels a deployment from its first integration input only, so use the
+      // policy template of the first enabled input here as well.
+      const policyTemplate = packagePolicy.inputs?.find((input) => input.enabled)?.policy_template;
+      const release = await this.getPackageRelease(soClient, pkg.name, pkg.version);
+
+      return {
+        name: pkg.name,
+        version: pkg.version,
+        ...(policyTemplate ? { policy_template: policyTemplate } : {}),
+        ...(release ? { release } : {}),
+      };
     } catch (error) {
       // Labelling is best effort: never fail the deployment because of it.
       appContextService
@@ -536,6 +563,28 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         .warn(
           `[Agentless API] Could not resolve integration package for ${agentPolicyId}: ${error}`
         );
+      return undefined;
+    }
+  }
+
+  /** The release of a package, or undefined when it cannot be resolved. */
+  private async getPackageRelease(
+    soClient: SavedObjectsClientContract,
+    pkgName: string,
+    pkgVersion: string
+  ): Promise<string | undefined> {
+    try {
+      const packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName,
+        pkgVersion,
+      });
+      return packageInfo?.release;
+    } catch (error) {
+      // Still send the package name and version when only the release is missing.
+      appContextService
+        .getLogger()
+        .warn(`[Agentless API] Could not resolve release of ${pkgName}-${pkgVersion}: ${error}`);
       return undefined;
     }
   }
