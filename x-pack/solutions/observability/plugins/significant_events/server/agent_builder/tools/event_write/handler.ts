@@ -351,12 +351,15 @@ const holdRulesHeldByOtherEvents = async ({
       (status) => status === candidate.status
     );
     const found = isLive
-      ? findRulesHeldByOtherEvents({ candidate, liveEvents }) ??
-        findRulesClaimedInBatch({ candidate, claimedInBatch })
+      ? mergeHeldRules(
+          findRulesHeldByOtherEvents({ candidate, liveEvents }),
+          findRulesClaimedInBatch({ candidate, claimedInBatch })
+        )
       : undefined;
     if (found === undefined) {
-      if (isLive) {
-        extractRuleUuids(confirmedSignals(candidate.input.signals)).forEach((uuid) => {
+      // A reopen can still be set aside by the deactivation hold, so it must not block a later item.
+      if (isLive && !isReopeningCandidate(candidate)) {
+        claimableRuleUuids(candidate).forEach((uuid) => {
           if (!claimedInBatch.has(uuid)) claimedInBatch.set(uuid, candidate.eventId);
         });
       }
@@ -383,6 +386,24 @@ const holdRulesHeldByOtherEvents = async ({
   return stage;
 };
 
+interface HeldRules {
+  holder: { event_id: string };
+  heldRules: HeldRule[];
+}
+
+/** The rules an item confirms, minus the ones its live target already confirms (existing duplicates). */
+const claimableRuleUuids = (candidate: ResolvedWriteCandidate): string[] => {
+  const { latest, input } = candidate;
+  const targetConfirms = new Set(
+    latest !== undefined && latest.status !== ALERT_EPISODE_STATUS.INACTIVE
+      ? extractRuleUuids(confirmedSignals(latest.signals))
+      : []
+  );
+  return extractRuleUuids(confirmedSignals(input.signals)).filter(
+    (uuid) => !targetConfirms.has(uuid)
+  );
+};
+
 /** The rules this item confirms that an earlier item of the batch already confirms on another event. */
 const findRulesClaimedInBatch = ({
   candidate,
@@ -390,8 +411,8 @@ const findRulesClaimedInBatch = ({
 }: {
   candidate: ResolvedWriteCandidate;
   claimedInBatch: Map<string, string>;
-}): { holder: { event_id: string }; heldRules: HeldRule[] } | undefined => {
-  const heldRules = extractRuleUuids(confirmedSignals(candidate.input.signals)).flatMap((uuid) => {
+}): HeldRules | undefined => {
+  const heldRules = claimableRuleUuids(candidate).flatMap((uuid) => {
     const claimant = claimedInBatch.get(uuid);
     return claimant !== undefined && claimant !== candidate.eventId
       ? [{ rule_uuid: uuid, event_id: claimant }]
@@ -399,6 +420,23 @@ const findRulesClaimedInBatch = ({
   });
   const [first] = heldRules;
   return first === undefined ? undefined : { holder: { event_id: first.event_id }, heldRules };
+};
+
+/** Lists the rules held by stored events and by earlier items; the stored holder is the one named. */
+const mergeHeldRules = (
+  stored: { holder: { event_id: string }; heldRules: HeldRule[] } | undefined,
+  inBatch: HeldRules | undefined
+): HeldRules | undefined => {
+  if (stored === undefined) return inBatch;
+  if (inBatch === undefined) return stored;
+  const storedUuids = new Set(stored.heldRules.map(({ rule_uuid: ruleUuid }) => ruleUuid));
+  return {
+    holder: stored.holder,
+    heldRules: [
+      ...stored.heldRules,
+      ...inBatch.heldRules.filter(({ rule_uuid: ruleUuid }) => !storedUuids.has(ruleUuid)),
+    ],
+  };
 };
 
 type ReopeningCandidate = ResolvedWriteCandidate & {
