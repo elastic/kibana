@@ -52,11 +52,6 @@ export interface PutAwsOnboardingCredentialsRequest {
   };
 }
 
-export interface DeleteAwsOnboardingCredentialsRequestQuery {
-  /** Remove the credentials even if the bootstrap stack cannot be deleted (or should be kept). */
-  force?: boolean;
-}
-
 export interface DeleteAwsOnboardingCredentialsResponse {
   /** `skipped` when no bootstrap stack ARN is stored, the stack is already gone, or `force` was set. */
   bootstrapStack: 'deletion_started' | 'skipped';
