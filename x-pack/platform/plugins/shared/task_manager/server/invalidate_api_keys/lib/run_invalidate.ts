@@ -10,6 +10,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 import type { ApiKeyToInvalidate } from '../../saved_objects/schemas/api_key_to_invalidate';
 import { getFindFilter } from './get_find_filter';
 import { getApiKeyIdsToInvalidate } from './get_api_key_ids_to_invalidate';
+import { collectApiKeyIdsProtectedByRunningTasks } from './running_task_api_keys';
 import { PAGE_SIZE } from './constants';
 import { invalidateApiKeysAndDeletePendingApiKeySavedObject } from './invalidate_api_keys_and_delete_so';
 import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
@@ -52,11 +53,15 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
   let totalInvalidated = 0;
 
   const excludedSOIds = new Set<string>();
+  let protectedApiKeyIds = new Set<string>();
+  // One page already protects every document it contains. Scan only when another page exists.
+  let hasScannedRunningTasks = false;
 
   do {
     const filter = getFindFilter({
       removalDelay,
       excludedSOIds: [...excludedSOIds],
+      excludedApiKeyIds: [...protectedApiKeyIds],
       savedObjectType,
     });
     const apiKeysToInvalidate = await savedObjectsClient.find<ApiKeyToInvalidate>({
@@ -67,6 +72,23 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
       perPage: PAGE_SIZE,
       ...(filter.length > 0 ? { filter } : {}),
     });
+
+    if (!hasScannedRunningTasks) {
+      hasScannedRunningTasks = true;
+      if (apiKeysToInvalidate.total > PAGE_SIZE) {
+        // The running-task marker can be on a later page than another document for the same key.
+        protectedApiKeyIds = await collectApiKeyIdsProtectedByRunningTasks({
+          firstPageSavedObjects: apiKeysToInvalidate.saved_objects,
+          total: apiKeysToInvalidate.total,
+          removalDelay,
+          savedObjectsClient,
+          savedObjectType,
+        });
+        if (protectedApiKeyIds.size > 0) {
+          continue;
+        }
+      }
+    }
 
     if (apiKeysToInvalidate.total > 0) {
       const { apiKeyIdsToExclude, apiKeyIdsToInvalidate, uiamApiKeysToInvalidate } =
