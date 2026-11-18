@@ -11,16 +11,10 @@ import { findNestedProjects } from './nested_projects';
 
 describe('findNestedProjects', () => {
   it('returns projects nested inside another project', () => {
-    expect(findNestedProjects(['src/a', 'src/a/b', 'src/a/b/c', 'src/ab'], [])).toEqual([
+    expect(findNestedProjects(['src/a', 'src/a/b', 'src/a/b/c', 'src/ab'])).toEqual([
       'src/a -> src/a/b',
       'src/a -> src/a/b/c',
       'src/a/b -> src/a/b/c',
-    ]);
-  });
-
-  it('ignores allowlisted ancestors', () => {
-    expect(findNestedProjects(['src/a', 'src/a/b', 'src/c', 'src/c/d'], ['src/a'])).toEqual([
-      'src/c -> src/c/d',
     ]);
   });
 });
