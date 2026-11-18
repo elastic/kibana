@@ -6,7 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import type { AvailabilityContext } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
@@ -207,6 +212,64 @@ describe('manageAttachmentsTool', () => {
     expect(attachments.add).toHaveBeenCalledTimes(1);
     const { results } = result as unknown as { results: Array<{ data: Record<string, unknown> }> };
     expect(results[0].data.attachment_ids).toEqual(['att-1']);
+  });
+
+  it('add_alerts stores the rule uuid read from the alert, not the id the model passed', async () => {
+    const theCase = {
+      id: 'case-1',
+      title: 'Test Case',
+      description: 'desc',
+      status: 'open',
+      severity: 'low',
+      owner: 'securitySolution',
+      tags: [],
+      assignees: [],
+      totalAlerts: 1,
+      totalComment: 0,
+      connector: { id: 'none', name: 'none', type: '.none', fields: null },
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_at: null,
+    };
+    casesClient.cases.get.mockResolvedValue(theCase as never);
+    casesClient.attachments.bulkCreateAndGetCase.mockResolvedValue(theCase as never);
+    const esClient = elasticsearchServiceMock.createScopedClusterClient();
+    esClient.asCurrentUser.mget.mockResolvedValue({
+      docs: [
+        {
+          found: true,
+          _source: { kibana: { alert: { rule: { uuid: 'rule-so-id', name: 'My rule' } } } },
+        },
+      ],
+    } as never);
+
+    const tool = buildTool(buildRegistry([]), true);
+    await tool.handler(
+      {
+        mode: 'add_alerts',
+        case_id: 'case-1',
+        alerts: [
+          {
+            alertId: 'alert-1',
+            index: '.alerts-security.alerts-default',
+            rule: { name: 'My rule' },
+          },
+        ],
+      } as never,
+      { ...buildToolContext(), esClient } as unknown as ToolHandlerContext
+    );
+
+    expect(casesClient.attachments.bulkCreateAndGetCase).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      attachments: [
+        expect.objectContaining({
+          attachmentId: ['alert-1'],
+          metadata: {
+            index: ['.alerts-security.alerts-default'],
+            rule: { id: 'rule-so-id', name: 'My rule' },
+          },
+        }),
+      ],
+    });
   });
 });
 
