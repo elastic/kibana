@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import isEqual from 'lodash/isEqual';
+import omit from 'lodash/omit';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { schema } from '@kbn/config-schema';
 import type {
@@ -22,6 +23,7 @@ import type {
 } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import type { TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import {
   ExecutionStatus,
   isTerminalStatus,
@@ -31,6 +33,7 @@ import {
 } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
+  EsWorkflow,
   EsWorkflowExecution,
   WorkflowExecutionEngineModel,
   WorkflowSettings,
@@ -81,6 +84,7 @@ import {
 } from './lib/task_recovery';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
+import { isWorkflowIdentityTaskError } from './lib/workflow_identity_task_error';
 import {
   getExecutionForTaskRunEvent,
   mapExecutionStatusToOutcome,
@@ -110,6 +114,9 @@ import {
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
 import { resolveWorkflowWorkloads } from './service_account_workload_resolver';
+import { publishFinishedWorkflowExecution } from './topics/publish_finished_workflow_execution';
+import { setWorkflowExecutionFinishedPublisher } from './topics/publish_workflow_execution_finished';
+import { workflowExecutionFinishedTopic } from './topics/workflow_execution_finished';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -185,6 +192,17 @@ const WORKFLOW_MINT_RETRY_DELAY_MS = 30_000;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
+
+/** Saved runs take the stored document's lifetime, including none, without mutating the caller model. */
+const workflowWithStoredUid = (
+  workflow: WorkflowExecutionEngineModel,
+  storedWorkflowUid: string | undefined
+): WorkflowExecutionEngineModel => {
+  const withoutCallerUid = omit(workflow, 'workflowUid');
+  return storedWorkflowUid
+    ? { ...withoutCallerUid, workflowUid: storedWorkflowUid }
+    : withoutCallerUid;
+};
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -434,6 +452,9 @@ export class WorkflowsExecutionEnginePlugin
   ) {
     this.logger.debug('Workflows execution engine setup');
 
+    // Before any task can run. Publication does not depend on a consumer being enabled.
+    core.pubsub.registerTopic(workflowExecutionFinishedTopic);
+
     // Register telemetry event schemas
     WorkflowExecutionTelemetryClient.setup(core.analytics);
 
@@ -679,6 +700,11 @@ export class WorkflowsExecutionEnginePlugin
                   space_id: spaceId,
                   outcome: isExhausted ? 'interrupted' : 'failed',
                 });
+                // The execution is already finalized FAILED and cleaned up; a retry could
+                // only fail again or pollute metrics with 'Workflow execution not found'.
+                if (isWorkflowIdentityTaskError(error)) {
+                  throwUnrecoverableError(error);
+                }
                 throw error;
               }
             },
@@ -968,6 +994,11 @@ export class WorkflowsExecutionEnginePlugin
                   space_id: spaceId,
                   outcome: isExhausted ? 'interrupted' : 'failed',
                 });
+                // The execution is already finalized FAILED and cleaned up; a retry could
+                // only fail again or pollute metrics with 'Workflow execution not found'.
+                if (isWorkflowIdentityTaskError(error)) {
+                  throwUnrecoverableError(error);
+                }
                 throw error;
               }
             },
@@ -1250,6 +1281,7 @@ export class WorkflowsExecutionEnginePlugin
                       workflowRepository,
                       workflowExecutionRepository
                     );
+                    await publishFinishedWorkflowExecution(workflowExecution);
                     if (workflowExecution.status === ExecutionStatus.FAILED) {
                       return false;
                     }
@@ -1446,6 +1478,7 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Core setup not available');
     }
     setConcurrencyGroupLock(new LockManagerService(this.coreSetup, this.logger));
+    setWorkflowExecutionFinishedPublisher({ pubsub: coreStart.pubsub, logger: this.logger });
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
@@ -1529,8 +1562,8 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel,
       spaceId: string,
       request: KibanaRequest
-    ): Promise<void> => {
-      if (workflow.isEphemeral) return;
+    ): Promise<EsWorkflow | null> => {
+      if (workflow.isEphemeral) return null;
       const current = await workflowRepository.getWorkflow(workflow.id, spaceId, {
         includeGlobal: true,
         includeDeleted: true,
@@ -1541,6 +1574,7 @@ export class WorkflowsExecutionEnginePlugin
       ) {
         throw new Error('You do not have permission to execute this workflow.');
       }
+      return current;
     };
 
     const createAndPersistWorkflowExecution = async (
@@ -1559,8 +1593,11 @@ export class WorkflowsExecutionEnginePlugin
     }> => {
       const request = getWorkflowOriginalRequest(originalRequest);
       const spaceId = (context.spaceId as string | undefined) || 'default';
-      await ensureExecutionAccess(workflow, spaceId, request);
+      const storedWorkflow = await ensureExecutionAccess(workflow, spaceId, request);
       await ensureWorkflowEnabled(workflow, spaceId);
+      const workflowForExecution = storedWorkflow
+        ? workflowWithStoredUid(workflow, storedWorkflow.workflowUid)
+        : workflow;
       // Before identity resolution, persistence, and the concurrency drain. A standalone
       // delegated-identity run fails at the first inherit step and, with cancel-in-progress,
       // would cancel the space's in-flight run. Parent workflow.execute sets the flag and
@@ -1594,7 +1631,7 @@ export class WorkflowsExecutionEnginePlugin
           : await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client);
 
       const workflowExecution = await buildExecutionDocument({
-        workflow,
+        workflow: workflowForExecution,
         inheritedIdentity,
         spaceId,
         context,
@@ -1633,12 +1670,12 @@ export class WorkflowsExecutionEnginePlugin
               ? options.refresh
               : false,
           });
-
           await ensureBoundExecutionAdmitted(
             workflowExecution,
             workflowRepository,
             workflowExecutionRepository
           );
+          await publishFinishedWorkflowExecution(workflowExecution);
           if (!afterPersist) {
             return 'proceed' as const;
           }
@@ -1914,6 +1951,7 @@ export class WorkflowsExecutionEnginePlugin
           // the execution is written and before the later concurrency drain.
           refuseDelegatedIdentityWorkflow(item.workflow);
           const spaceId = spaceIdFor(item);
+          let workflowForExecution = item.workflow;
           if (!item.workflow.isEphemeral) {
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
             if (
@@ -1927,14 +1965,15 @@ export class WorkflowsExecutionEnginePlugin
             ) {
               throw new Error('You do not have permission to execute this workflow.');
             }
-            if (!state?.enabled) {
+            if (state == null || !state.enabled) {
               throw new Error(
                 `Workflow is disabled: ${item.workflow.id}. Enable the workflow to run it.`
               );
             }
+            workflowForExecution = workflowWithStoredUid(item.workflow, state.workflowUid);
           }
           const workflowExecution = await buildExecutionDocument({
-            workflow: item.workflow,
+            workflow: workflowForExecution,
             spaceId,
             context: item.context,
             defaultTriggeredBy: 'alert',
@@ -1991,6 +2030,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecutionRepository
               );
               succeeded.push(p);
+              await publishFinishedWorkflowExecution(p.workflowExecution);
             } catch (error) {
               results[p.idx] = {
                 status: 'error',
@@ -2066,6 +2106,7 @@ export class WorkflowsExecutionEnginePlugin
                     workflowRepository,
                     workflowExecutionRepository
                   );
+                  await publishFinishedWorkflowExecution(item.workflowExecution);
                   checkedIdx.add(item.idx);
                   const proceed = await this.checkConcurrencyIfNeeded(item.workflowExecution);
                   if (proceed) {
@@ -2199,6 +2240,7 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution.stepId = stepId;
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      await publishFinishedWorkflowExecution(workflowExecution);
 
       if (workflowExecution.status === ExecutionStatus.FAILED) {
         return {
@@ -2396,6 +2438,7 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {
+    setWorkflowExecutionFinishedPublisher(undefined);
     setConcurrencyGroupLock(undefined);
     void this.dataClientBundle.stop();
   }
@@ -2491,7 +2534,8 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.workflowDefinition.settings.concurrency,
         workflowExecution.concurrencyGroupKey,
         workflowExecution.id,
-        workflowExecution.spaceId
+        workflowExecution.spaceId,
+        workflowExecution
       );
 
       if (!canProceed) {

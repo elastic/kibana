@@ -26,6 +26,11 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/storybook'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
+  - '@kbn/data-lifecycle-phases'
 tags:
   - plugin
   - prod

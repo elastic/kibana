@@ -72,7 +72,7 @@ describe('alert_conflict_resolver', () => {
           ruleName,
           ruleType,
         })
-      ).rejects.toThrowError('mget failed');
+      ).rejects.toThrow('mget failed');
     });
 
     test('when bulk fails', async () => {
@@ -93,7 +93,7 @@ describe('alert_conflict_resolver', () => {
           ruleName,
           ruleType,
         })
-      ).rejects.toThrowError('bulk failed');
+      ).rejects.toThrow('bulk failed');
     });
 
     test('when the retried bulk response has an unexpected number of items', async () => {
@@ -115,9 +115,7 @@ describe('alert_conflict_resolver', () => {
           ruleName,
           ruleType,
         })
-      ).rejects.toThrowError(
-        'Unexpected number of bulk response items retried; expecting 2, retried 1'
-      );
+      ).rejects.toThrow('Unexpected number of bulk response items retried; expecting 2, retried 1');
     });
   });
 
@@ -753,7 +751,7 @@ describe('alert_conflict_resolver', () => {
           ruleName,
           ruleType,
         })
-      ).rejects.toThrowError('bulk failed');
+      ).rejects.toThrow('bulk failed');
       expect(esClient.bulk).toHaveBeenCalledTimes(2);
       expect(esClient.bulk.mock.calls[1][0]).toEqual({
         refresh: 'wait_for',

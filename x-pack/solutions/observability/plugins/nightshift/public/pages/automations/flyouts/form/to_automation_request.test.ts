@@ -278,7 +278,7 @@ describe('automation request', () => {
       });
     });
 
-    it('keeps the schedule scope query', () => {
+    it('updates a schedule and keeps the other trigger rows', () => {
       const automation = buildAutomation({
         trigger: {
           rows: [
@@ -286,8 +286,8 @@ describe('automation request', () => {
               kind: 'schedule',
               schedulePreset: 'daily',
               time: '09:00',
-              scopeQuery: 'host:a',
             },
+            { kind: 'alert', ruleNames: ['CPU usage'] },
           ],
         },
       });
@@ -302,17 +302,15 @@ describe('automation request', () => {
           schedulePreset: 'daily',
           time: '10:00',
           timezone: 'UTC',
-          scopeQuery: 'host:a',
         },
+        { kind: 'alert', ruleNames: ['CPU usage'] },
       ]);
     });
 
     it('replaces the rows when the trigger kind changes', () => {
       const automation = buildAutomation({
         trigger: {
-          rows: [
-            { kind: 'schedule', schedulePreset: 'daily', time: '09:00', scopeQuery: 'host:a' },
-          ],
+          rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }],
         },
       });
 

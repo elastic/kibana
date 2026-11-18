@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import type { Logger } from '@kbn/logging';
 import {
   collectIgnoredKibanaFetcherOccurrences,
   IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
-  shouldWarnIgnoredKibanaFetcher,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
 import type { EsWorkflow, EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
@@ -20,6 +20,7 @@ import type { z } from '@kbn/zod/v4';
 
 import { generateWorkflowId } from '../../../common/lib/import';
 import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml';
+import { getCalledWorkflowIds } from '../../../common/lib/workflow_dependents/find_call_sites';
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
 import { INITIAL_WORKFLOW_VERSION } from '../../lib/workflow_version';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
@@ -27,7 +28,6 @@ import type { WorkflowProperties } from '../../storage/workflow_storage';
 /** Persist-time warning for ignored kibana YAML `fetcher` settings. */
 export const logIgnoredKibanaFetcherOnPersist = (params: {
   logger?: Logger;
-  warnIgnoredKibanaFetcher?: boolean;
   steps: WorkflowYaml['steps'] | undefined;
   workflowName: string;
   workflowId?: string;
@@ -37,9 +37,6 @@ export const logIgnoredKibanaFetcherOnPersist = (params: {
     return;
   }
   const ignoredFetcherSteps = collectIgnoredKibanaFetcherOccurrences(steps)
-    .filter((occurrence) =>
-      shouldWarnIgnoredKibanaFetcher(occurrence.stepType, params.warnIgnoredKibanaFetcher ?? false)
-    )
     .map((occurrence) => occurrence.stepName)
     .filter((name): name is string => typeof name === 'string' && name.length > 0);
   if (ignoredFetcherSteps.length === 0) {
@@ -114,7 +111,8 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
   nameFallback?: string;
   logger?: Logger;
-  warnIgnoredKibanaFetcher?: boolean;
+  /** Preserved across a full-document rewrite. Assigned when omitted. */
+  workflowUid?: string;
 }): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> => {
   const {
     id: providedId,
@@ -126,7 +124,7 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     triggerDefinitions,
     nameFallback,
     logger,
-    warnIgnoredKibanaFetcher = false,
+    workflowUid,
   } = params;
 
   const looseMetadata = extractLooseMetadataFields(yaml);
@@ -156,7 +154,6 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
 
   logIgnoredKibanaFetcherOnPersist({
     logger,
-    warnIgnoredKibanaFetcher,
     steps: validation.parsedWorkflow?.steps,
     workflowName: workflowToCreate.name,
     workflowId: id,
@@ -168,6 +165,8 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     enabled: workflowToCreate.enabled,
     tags: workflowToCreate.tags || [],
     triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
+    calledWorkflowIds: getCalledWorkflowIds(workflowToCreate.definition),
+    calledWorkflowIdsIndexed: true,
     yaml,
     definition: workflowToCreate.definition ?? null,
     createdBy: authenticatedUser,
@@ -180,6 +179,7 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     lifecycle: null,
     valid: workflowToCreate.valid,
     deleted_at: null,
+    workflowUid: workflowUid ?? randomUUID(),
     version: INITIAL_WORKFLOW_VERSION,
     created_at: now.toISOString(),
     updated_at: now.toISOString(),
@@ -197,25 +197,16 @@ export const applyYamlUpdate = async (params: {
   zodSchema: z.ZodType;
   triggerDefinitions: Array<{ id: string; eventSchema: z.ZodType }>;
   logger?: Logger;
-  warnIgnoredKibanaFetcher?: boolean;
   workflowId?: string;
 }): Promise<{
   updatedDataPatch: Partial<WorkflowProperties>;
   validationErrors: string[];
   shouldUpdateScheduler: boolean;
 }> => {
-  const {
-    workflowYaml,
-    zodSchema,
-    triggerDefinitions,
-    logger,
-    warnIgnoredKibanaFetcher = false,
-    workflowId,
-  } = params;
+  const { workflowYaml, zodSchema, triggerDefinitions, logger, workflowId } = params;
   const validation = await validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
   logIgnoredKibanaFetcherOnPersist({
     logger,
-    warnIgnoredKibanaFetcher,
     steps: validation.parsedWorkflow?.steps,
     workflowName:
       validation.parsedWorkflow?.name ??
@@ -260,6 +251,27 @@ export const applyYamlUpdate = async (params: {
     validationErrors: [],
     shouldUpdateScheduler: true,
   };
+};
+
+/**
+ * Gives a valid YAML update the workflow's current enabled state when the YAML doesn't set
+ * `enabled` itself, so saving YAML never turns a workflow on or off by omission.
+ */
+export const keepEnabledUnlessDeclared = (
+  workflowYaml: string,
+  { updatedDataPatch, validationErrors }: Awaited<ReturnType<typeof applyYamlUpdate>>,
+  enabled: boolean
+): Partial<WorkflowProperties> => {
+  const { definition } = updatedDataPatch;
+  if (
+    validationErrors.length > 0 ||
+    !updatedDataPatch.valid ||
+    !definition ||
+    workflowYamlDeclaresTopLevelEnabled(workflowYaml)
+  ) {
+    return updatedDataPatch;
+  }
+  return { ...updatedDataPatch, enabled, definition: { ...definition, enabled } };
 };
 
 /**
