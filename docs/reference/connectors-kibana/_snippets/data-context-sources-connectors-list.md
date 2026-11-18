@@ -6,7 +6,7 @@
 - [Argo CD](/reference/connectors-kibana/argocd-action-type.md): Manage GitOps applications in Argo CD — sync, inspect health and resources.
 - [AWS](/reference/connectors-kibana/aws-action-type.md): Send signed requests to any AWS service API, such as IAM, EC2, S3, or CloudWatch Logs.
 - [AWS CloudWatch](/reference/connectors-kibana/aws-cloudwatch-action-type.md): List and suppress alarms, query metrics and Logs Insights, and retrieve log events from AWS CloudWatch.
-- [AWS Systems Manager](/reference/connectors-kibana/aws-ssm-action-type.md): Find managed nodes, check whether their SSM Agent is online, run commands on them, run Automation runbooks, and read Parameter Store values with AWS Systems Manager.
+- [AWS Systems Manager](/reference/connectors-kibana/aws-ssm-action-type.md): Find managed nodes, check whether their SSM Agent is online and what software they run, run commands on them, run Automation runbooks, and read and write Parameter Store values with AWS Systems Manager.
 - [AWS Lambda](/reference/connectors-kibana/aws-lambda-action-type.md): Invoke Lambda functions, list functions, and get function details.
 - [AWS X-Ray](/reference/connectors-kibana/aws-x-ray-action-type.md): Retrieve X-Ray insights, service graphs, and trace summaries and details for distributed tracing.
 - [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.

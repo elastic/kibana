@@ -390,7 +390,7 @@ describe('AwsSsmConnector', () => {
   });
 
   describe('getAutomationExecution', () => {
-    it('returns the status and each step, with no end time while it runs', async () => {
+    it('returns the status and each step with its failure details, with no end time while it runs', async () => {
       mockClient.post.mockResolvedValue({
         data: {
           AutomationExecution: {
@@ -406,6 +406,15 @@ describe('AwsSsmConnector', () => {
                 ExecutionStartTime: 1700000000.5,
                 ExecutionEndTime: 1700000060,
                 Outputs: { InstanceStates: ['stopped'] },
+              },
+              {
+                StepName: 'startInstances',
+                StepStatus: 'Failed',
+                FailureDetails: {
+                  FailureStage: 'InputValidation',
+                  FailureType: 'Permission',
+                  Details: { VerificationErrorMessage: ['The session credentials have expired'] },
+                },
               },
             ],
           },
@@ -431,6 +440,15 @@ describe('AwsSsmConnector', () => {
             stepStatus: 'Success',
             executionEndTime: '2023-11-14T22:14:20.000Z',
             outputs: { InstanceStates: ['stopped'] },
+          },
+          {
+            stepName: 'startInstances',
+            stepStatus: 'Failed',
+            failureDetails: {
+              failureStage: 'InputValidation',
+              failureType: 'Permission',
+              details: { VerificationErrorMessage: ['The session credentials have expired'] },
+            },
           },
         ],
         stepsTruncated: false,

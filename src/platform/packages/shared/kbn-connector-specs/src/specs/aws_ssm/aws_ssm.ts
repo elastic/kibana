@@ -34,7 +34,7 @@ export const AwsSsmConnector: ConnectorSpec = {
     displayName: 'AWS Systems Manager',
     description: i18n.translate('connectorSpecs.awsSsm.metadata.description', {
       defaultMessage:
-        'Inspect AWS Systems Manager nodes, run commands and runbooks, and read Parameter Store values',
+        'Inspect AWS Systems Manager nodes and their inventory, run commands and runbooks, and read and write Parameter Store values',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -91,11 +91,11 @@ export const AwsSsmConnector: ConnectorSpec = {
   skill: [
     '## AWS Systems Manager Connector',
     '',
-    'Use this connector to find and inspect the managed nodes (EC2 instances and hybrid servers running SSM Agent) registered with Systems Manager in the region configured on the connector, to run commands on them, to run Automation runbooks, and to read Parameter Store values.',
+    'Use this connector to find and inspect the managed nodes (EC2 instances and hybrid servers running SSM Agent) registered with Systems Manager in the region configured on the connector, to read their software inventory, to run commands on them, to run Automation runbooks, and to read and write Parameter Store values.',
     '',
     '### Common patterns',
     '- To run a shell command: pick the nodes with `describeInstanceInformation` and `pingStatus: ["Online"]`, call `sendCommand`, then call `getCommandInvocation` for each node until `isFinished` is true.',
-    "- To run an Automation runbook: find it with `listDocuments`, read its parameters and steps with `getDocument`, confirm with the user, call `startAutomationExecution`, then call `getAutomationExecution` until `isFinished` is true. On failure, the failed step's `failureMessage` says why.",
+    "- To run an Automation runbook: find it with `listDocuments`, read its parameters and steps with `getDocument`, confirm with the user, call `startAutomationExecution`, then call `getAutomationExecution` until `isFinished` is true. On failure, the failed step's `failureMessage` or `failureDetails` says why.",
     '- To stop something you started, call `cancelCommand` for a command or `stopAutomationExecution` for a runbook, then read its status again to confirm it was cancelled.',
     '- To see what ran on a node, call `listCommands` with its `instanceId`, then `getCommandInvocation` for the output.',
     '- To check installed software or patches: call `findNodesByInventory` to find the nodes with an application, then `getInventory` on a node for its version. Prefer inventory over running a command when it answers the question.',

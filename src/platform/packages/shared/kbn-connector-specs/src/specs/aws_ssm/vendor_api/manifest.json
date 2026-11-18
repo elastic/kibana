@@ -152,6 +152,11 @@
     "putParameter": [
       {
         "method": "post",
+        "path": "/GetParameter",
+        "source": "ssm"
+      },
+      {
+        "method": "post",
         "path": "/PutParameter",
         "source": "ssm"
       }

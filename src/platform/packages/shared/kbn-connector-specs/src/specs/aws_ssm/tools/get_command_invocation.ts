@@ -63,7 +63,7 @@ export const getCommandInvocation: ActionDefinition<GetCommandInvocationInput> =
   isTool: true,
   scope: 'read',
   description:
-    'Get the result of a command sent with sendCommand on one node: its status (Pending, InProgress, Delayed, Success, Failed, TimedOut, Cancelled, Cancelling), the exit code, standard output (up to 24,000 characters) and standard error (up to 8,000 characters), and when it started and ended. Call again after a few seconds while isFinished is false. Right after sendCommand this can fail with InvocationDoesNotExist for a few seconds; wait and retry.',
+    'Get the result of a command sent with sendCommand on one node: its status (Pending, InProgress, Delayed, Success, Failed, TimedOut, Cancelled, Cancelling), the exit code, standard output and standard error (up to 24,000 characters each), and when it started and ended. Call again after a few seconds while isFinished is false. Right after sendCommand this can fail with InvocationDoesNotExist for a few seconds; wait and retry.',
   input: GetCommandInvocationInputSchema,
   handler: async (ctx, { commandId, instanceId, pluginName }) => {
     const data = await callSsmApi({

@@ -44,6 +44,13 @@ const GetAutomationExecutionResponseSchema = lazySchema(() =>
               ExecutionStartTime: z.number().optional(),
               ExecutionEndTime: z.number().optional(),
               FailureMessage: z.string().optional(),
+              FailureDetails: z
+                .object({
+                  FailureStage: z.string().optional(),
+                  FailureType: z.string().optional(),
+                  Details: z.record(z.string(), z.array(z.string())).optional(),
+                })
+                .optional(),
               Outputs: automationOutputsSchema(),
             })
           )
@@ -58,7 +65,7 @@ export const getAutomationExecution: ActionDefinition<GetAutomationExecutionInpu
   isTool: true,
   scope: 'read',
   description:
-    'Get the progress of an Automation runbook started with startAutomationExecution: its status (e.g. Pending, InProgress, Waiting, Success, Failed, TimedOut, Cancelled), the step it is on, the failure message, the outputs it declares, and each step with its action, status, failure message and outputs (when stepsTruncated is true, only part of the steps are listed). Call again after a few seconds while isFinished is false.',
+    'Get the progress of an Automation runbook started with startAutomationExecution: its status (e.g. Pending, InProgress, Waiting, Success, Failed, TimedOut, Cancelled), the step it is on, the failure message, the outputs it declares, and each step with its action, status, failure message, failure details (stage, type and error messages, which sometimes are the only reason given) and outputs (when stepsTruncated is true, only part of the steps are listed). Call again after a few seconds while isFinished is false.',
   input: GetAutomationExecutionInputSchema,
   handler: async (ctx, { automationExecutionId }) => {
     const data = await callSsmApi({
@@ -97,6 +104,7 @@ export const getAutomationExecution: ActionDefinition<GetAutomationExecutionInpu
           ExecutionStartTime: stepStartTime,
           ExecutionEndTime: stepEndTime,
           FailureMessage: stepFailureMessage,
+          FailureDetails,
           Outputs: stepOutputs,
         }) => ({
           stepName: StepName,
@@ -105,6 +113,11 @@ export const getAutomationExecution: ActionDefinition<GetAutomationExecutionInpu
           executionStartTime: toIsoDate(stepStartTime) ?? null,
           executionEndTime: toIsoDate(stepEndTime) ?? null,
           failureMessage: stepFailureMessage,
+          failureDetails: FailureDetails && {
+            failureStage: FailureDetails.FailureStage,
+            failureType: FailureDetails.FailureType,
+            details: FailureDetails.Details,
+          },
           outputs: stepOutputs,
         })
       ),

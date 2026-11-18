@@ -1,7 +1,7 @@
 ---
 navigation_title: "AWS Systems Manager"
 type: reference
-description: "Use the AWS Systems Manager connector to find and inspect the managed nodes registered with AWS Systems Manager, run commands on them, run Automation runbooks, and read Parameter Store values."
+description: "Use the AWS Systems Manager connector to find and inspect the managed nodes registered with AWS Systems Manager and their inventory, run commands on them, run Automation runbooks, and read and write Parameter Store values."
 applies_to:
   stack: preview 9.7
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # AWS Systems Manager connector [aws-ssm-action-type]
 
-The AWS Systems Manager connector connects directly to the [AWS Systems Manager API](https://docs.aws.amazon.com/systems-manager/latest/APIReference/Welcome.html). It lets an agent find the nodes Systems Manager manages, such as EC2 instances and hybrid servers, check which of them are reachable, run commands on them, run Automation runbooks, and read Parameter Store values, without opening the AWS console.
+The AWS Systems Manager connector connects directly to the [AWS Systems Manager API](https://docs.aws.amazon.com/systems-manager/latest/APIReference/Welcome.html). It lets an agent find the nodes Systems Manager manages, such as EC2 instances and hybrid servers, check which of them are reachable and what software they run, run commands on them, run Automation runbooks, and read and write Parameter Store values, without opening the AWS console.
 
 ::::{note}
 This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
@@ -41,18 +41,18 @@ Authentication
 | `listDocuments` | List the Command documents and Automation runbooks the account can run, with their name, display name, type, owner, platforms, default version, and target resource type. Parameters: `documentType` (`Command`, `Automation`), `owner` (`Self`, `Amazon`, `Private`, `Public`, `ThirdParty`), `namePrefix`, `platformType` (`Linux`, `Windows`), `maxResults` (1-50), `nextToken`. |
 | `getDocument` | Read a document as YAML, including its description, parameters, and steps. Parameters: `name` (required), `documentVersion`. |
 | `sendCommand` | Run an SSM document, such as `AWS-RunShellScript` or `AWS-RunPowerShellScript`, on up to 50 managed nodes. Returns a `commandId` immediately, and the command runs asynchronously. Parameters: `instanceIds` (required, 1-50), `documentName` (required), `parameters` (for example `{ "commands": ["uptime"] }`), `documentVersion`, `comment`, `timeoutSeconds` (30-2592000). |
-| `getCommandInvocation` | Get the status, exit code, standard output (up to 24,000 characters), and standard error (up to 8,000 characters) of a command on one node. Parameters: `commandId` (required), `instanceId` (required), `pluginName` (the step to read, for documents with more than one step). |
+| `getCommandInvocation` | Get the status, exit code, standard output, and standard error (up to 24,000 characters each) of a command on one node. Parameters: `commandId` (required), `instanceId` (required), `pluginName` (the step to read, for documents with more than one step). |
 | `listCommands` | List the commands sent in the last 30 days with their document, parameters (for `AWS-RunShellScript`, the shell commands that ran), comment, target nodes, status, and completion counts. Parameters: `commandId`, `instanceId`, `status`, `documentName`, `invokedAfter`, `invokedBefore` (ISO 8601), `maxResults` (1-50), `nextToken`. |
 | `cancelCommand` | Cancel a command, on every node it was sent to or only on some of them. Nodes that already finished keep their result. Parameters: `commandId` (required), `instanceIds` (1-50). |
 | `startAutomationExecution` | Start an Automation runbook, such as `AWS-RestartEC2Instance`. Returns an `automationExecutionId` immediately, and the runbook runs asynchronously. Parameters: `documentName` (required), `parameters` (for example `{ "InstanceId": ["i-0123456789abcdef0"] }`), `documentVersion`, `clientToken`. |
-| `getAutomationExecution` | Get the status of a runbook execution, the step it is on, its failure message and outputs, and each step with its action, status, failure message, and outputs. Parameters: `automationExecutionId` (required). |
+| `getAutomationExecution` | Get the status of a runbook execution, the step it is on, its failure message and outputs, and each step with its action, status, failure message and details, and outputs. Parameters: `automationExecutionId` (required). |
 | `listAutomationExecutions` | List runbook executions, running and finished, with their runbook, status, who started them, start and end times, current step, and failure message. Parameters: `documentNamePrefix`, `status` (up to 10 statuses), `startTimeAfter`, `startTimeBefore` (ISO 8601), `maxResults` (1-50), `nextToken`. |
 | `stopAutomationExecution` | Cancel a runbook execution. Steps that already ran are not undone. Parameters: `automationExecutionId` (required). |
 | `getParameter` | Read a Parameter Store parameter: its type, value, version, data type, and last modified date. `SecureString` parameters are never decrypted, so their value is returned as null. Parameters: `name` (required, optionally with `:<version>` or `:<label>`). |
 | `putParameter` | Create a `String` or `StringList` Parameter Store parameter, or replace the value of an existing one, and return its new version. `SecureString` parameters cannot be written or overwritten. Parameters: `name`, `value`, `type` (`String`, `StringList`) (all required), `description`, `overwrite` (required to replace an existing value). |
 
 ::::{warning}
-`sendCommand` runs commands with the privileges of SSM Agent on the node, usually root or SYSTEM, and `startAutomationExecution` runs runbooks that change AWS resources. An agent this connector is assigned to can call both without asking for confirmation. Limit what they can run with the IAM policy described in [Get API credentials](#aws-ssm-api-credentials), and assign the connector only to agents that should change your nodes and resources.
+`sendCommand` runs commands with the privileges of SSM Agent on the node, usually root or SYSTEM, `startAutomationExecution` runs runbooks that change AWS resources, and `putParameter` can replace parameter values that applications read. An agent this connector is assigned to can call all three without asking for confirmation. Limit what they can run with the IAM policy described in [Get API credentials](#aws-ssm-api-credentials), and assign the connector only to agents that should change your nodes and resources.
 ::::
 
 ## Connector networking configuration [aws-ssm-connector-networking-configuration]
