@@ -29,7 +29,6 @@ export const EPISODE_KQL_FIELDS: ReadonlyArray<{
   { name: 'alert.id', type: 'keyword' },
   { name: 'alert.status', type: 'keyword' },
   { name: 'rule.id', type: 'keyword' },
-  { name: 'connector.id', type: 'keyword' },
   { name: 'group_hash', type: 'keyword' },
   { name: 'severity', type: 'keyword' },
   { name: 'source', type: 'keyword' },
@@ -67,7 +66,6 @@ const EPISODE_FIELD_EXPRESSIONS: Readonly<Record<string, string>> = {
   'alert.id': '`episode.id`',
   'alert.status': '`episode.status`',
   'rule.id': '`rule.id`',
-  'connector.id': '`connector.id`',
 };
 
 const EPISODE_FIELDS: Readonly<Record<string, Omit<EpisodeKqlField, 'name'>>> = Object.fromEntries(
