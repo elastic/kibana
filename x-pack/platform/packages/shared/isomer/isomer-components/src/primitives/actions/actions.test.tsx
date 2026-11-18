@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { fireEvent, render } from '@testing-library/react';
 import { createIsomerRuntime } from '@elastic/isomer-runtime';
 import { buildJsxShim } from '@elastic/isomer-sdk/author';
 import { componentsPack, componentsPrimitives } from '../../pack';
@@ -128,6 +129,84 @@ describe('actions', () => {
       expect(surfaces.markdown.renderNode(node)).toBe(`[Docs](${URL})`);
       expect(surfaces.text.renderNode(node)).toBe(`Docs: ${URL}`);
       expect(surfaces.markdown.renderNode(links(skills))).toBe('');
+    });
+  });
+
+  describe('buttons that raise an event', () => {
+    const confirm = { name: 'confirm', context: { allow: true } };
+    const approve = { label: 'Delete', event: confirm, danger: true };
+    const cancel = { label: 'Cancel', event: { name: 'confirm', context: { allow: false } } };
+
+    it('take an event instead of a link, but not both', () => {
+      const view = (node: ActionsNode) => validate({ type: 'view', body: [node] });
+
+      expect(view(links(approve, cancel)).valid).toBe(true);
+      expect(view(links({ label: 'Go', event: { name: 'go' } })).valid).toBe(true);
+      expect(view(links({ ...approve, url: URL })).valid).toBe(false);
+      expect(view(links({ ...approve, app: 'discover' })).valid).toBe(false);
+      expect(view(links({ label: 'Go', event: { name: 'not a name' } })).valid).toBe(false);
+    });
+
+    it('carry the event to Slack as action_id and value', () => {
+      expect(surfaces.slack.renderNode(links(approve, cancel)).blocks).toEqual([
+        {
+          type: 'actions',
+          elements: [
+            {
+              type: 'button',
+              text: { type: 'plain_text', text: 'Delete', emoji: true },
+              action_id: 'confirm:0',
+              value: '{"allow":true}',
+              style: 'danger',
+            },
+            {
+              type: 'button',
+              text: { type: 'plain_text', text: 'Cancel', emoji: true },
+              action_id: 'confirm:1',
+              value: '{"allow":false}',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('leave the Slack value out without a context, and the button out when it does not fit', () => {
+      const tooLong = { name: 'confirm', context: { note: 'x'.repeat(2000) } };
+
+      expect(
+        surfaces.slack.renderNode(
+          links({ label: 'Go', event: { name: 'go' } }, { label: 'Big', event: tooLong })
+        ).blocks
+      ).toEqual([
+        {
+          type: 'actions',
+          elements: [
+            {
+              type: 'button',
+              text: { type: 'plain_text', text: 'Go', emoji: true },
+              action_id: 'go:0',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('call the React host with the event on click', () => {
+      const onEvent = jest.fn();
+      const { getByRole } = render(
+        <>{surfaces.react.renderNode(links(approve), { context: { onEvent } })}</>
+      );
+
+      fireEvent.click(getByRole('button', { name: 'Delete' }));
+
+      expect(onEvent).toHaveBeenCalledWith(confirm);
+    });
+
+    it('render as their labels in text and Markdown', () => {
+      const node = links(approve, cancel, { label: 'Docs', url: URL });
+
+      expect(surfaces.markdown.renderNode(node)).toBe(`Delete · Cancel · [Docs](${URL})`);
+      expect(surfaces.text.renderNode(node)).toBe(`Delete\nCancel\nDocs: ${URL}`);
     });
   });
 

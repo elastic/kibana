@@ -37,6 +37,16 @@ const { handles } = isomerDistillery.createStyleModule(
       background: ${color.background.filled.primary};
       color: ${color.text.inverse};
     `,
+    danger: css`
+      border-color: ${color.background.filled.danger};
+      background: ${color.background.filled.danger};
+      color: ${color.text.inverse};
+    `,
+    event: css`
+      background: none;
+      font-family: inherit;
+      cursor: pointer;
+    `,
   })
 );
 
@@ -56,10 +66,24 @@ export const actionsReactRenderer = (
 ) => (
   <p {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>
     {node.buttons.map((button, index) => {
-      const { label, primary } = button;
+      const { label, primary, danger, event } = button;
+      const tone = danger ? handles.danger : primary ? handles.primary : undefined;
+
+      if (event) {
+        return (
+          <button
+            key={index}
+            type="button"
+            className={classNames(context, handles.button, handles.event, tone)}
+            onClick={() => context.onEvent?.(event)}
+          >
+            {oneLine(label)}
+          </button>
+        );
+      }
       // A button the host can't resolve is shown as text, like a URL it can't open.
       const href = reactButtonHref(button, context);
-      const className = classNames(context, handles.button, primary ? handles.primary : undefined);
+      const className = classNames(context, handles.button, tone);
       return href ? (
         <a key={index} href={href} className={className}>
           {oneLine(label)}

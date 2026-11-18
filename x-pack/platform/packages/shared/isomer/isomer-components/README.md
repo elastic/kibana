@@ -20,10 +20,14 @@ Kibana's [Isomer](https://github.com/elastic/isomer) pack of content and layout 
 - `quote`: a quoted passage, such as a conclusion.
   - `{ type: 'quote', text }`, plain text up to 3,000 characters, with line breaks kept. Slack gets one `rich_text` block with a `rich_text_quote`, so the text needs no `mrkdwn` escaping.
   - To title it, put it in a `section`.
-- `actions`: up to 5 link buttons, such as "View Full Investigation".
+- `actions`: up to 5 buttons, such as "View Full Investigation".
   - `{ type: 'actions', buttons: [{ label, url, primary? }] }`. Slack gets an `actions` block of URL buttons, with labels clamped to 75 characters; other surfaces render links.
   - A button takes a Kibana `app` and `path` instead of a `url`, resolved like a `link`'s: Slack joins it onto the render's `baseUrl` and React calls `resolveKibanaPath`. Where it doesn't resolve, Slack drops the button, React shows its label as text, and Text and Markdown leave it out.
   - `url` follows the navigation policy, so a relative path works in React and HTML. Slack can't open one, so it drops that button, and the block when no button is left. For a page in Kibana, give `app` and `path` instead.
+  - A button takes an `event` instead of a link: `{ label, event: { name, context? }, danger? }`, an Isomer `ActionEventRef` the host handles. Slack gets a button with `action_id` `{name}:{index}`, its position in the block, and the JSON of `context` as `value`, and drops a button whose value is past 2,000 characters. React calls the render context's `onEvent`. Text and Markdown show the label. `danger` styles a button that destroys something.
+- `choices`: 1 to 10 options the reader chooses from, for a host that handles the choice.
+  - `{ type: 'choices', name, multiple?, options: [{ label, description?, value }] }`. Slack gets an `actions` block of `radio_buttons`, or `checkboxes` with `multiple`, with `action_id` `{name}:0` and each option's `value`, up to 150 characters. React renders inputs that call `onEvent` with `{ name, context: { value, checked } }`. Text and Markdown render a numbered list.
+  - Slack reports the choice in the interaction's `state.values`. Pair it with an event button in `actions` to submit.
 - `link`: one link, to a page in Kibana or on the web, such as "Open in Discover".
   - `{ type: 'link', label, app, path? }` for a Kibana app path, where `app` is the app's route after `/app/` (such as `security`), not its id (`securitySolutionUI`), or `{ type: 'link', label, url }` for an absolute URL. Slack gets an inline `mrkdwn` link in a `section`, or a `rich_text` link when the escaped URL won't fit one.
   - Each host resolves an app path. React calls `resolveKibanaPath('/app/{app}{path}')` from the render context (`ComponentsRenderContext`), such as `http.basePath.prepend` in the browser. Slack joins `/app/{app}{path}` onto the render's `baseUrl` (`runtime.surfaces.slack.render(composition, { baseUrl })`), keeping its base path and space, so pass the space-aware Kibana URL. Text and Markdown have no host input, so only `url` links render there.
