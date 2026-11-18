@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-http-common'
   - '@kbn/connector-schemas'
+  - '@kbn/actions-plugin'
 tags:
   - plugin
   - prod
