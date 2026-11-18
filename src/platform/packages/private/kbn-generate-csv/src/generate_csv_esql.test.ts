@@ -945,6 +945,40 @@ describe('CsvESQLGenerator', () => {
     `);
   });
 
+  it('tells the user to export less data when the Elasticsearch response is too large', async () => {
+    mockDataClient.search = jest.fn().mockImplementation(() => {
+      // what the search strategy rethrows for the `RequestAbortedError` of the Elasticsearch client
+      throw new Error(
+        'The content length (104867454) is bigger than the maximum allowed string (104857600)'
+      );
+    });
+    const generateCsv = new CsvESQLGenerator(
+      createMockJob({ query: { esql: '' } }),
+      mockConfig,
+      mockTaskInstanceFields,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      new CancellationToken(),
+      mockLogger,
+      stream,
+      jobId
+    );
+
+    const { warnings } = await generateCsv.generateData();
+
+    expect(warnings).toEqual([
+      'The data returned by Elasticsearch is too large to export. Try narrowing your search with filters or use a smaller time range.',
+    ]);
+    expect(mockLogger.error).not.toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'The content length (104867454) is bigger than the maximum allowed string (104857600)',
+      { tags: [jobId] }
+    );
+  });
+
   describe('error codes', () => {
     it('returns the expected error code when authentication expires', async () => {
       mockDataClient.search = jest.fn().mockImplementation(() => {

@@ -34,6 +34,7 @@ import { zipObject } from 'lodash';
 import { CONTENT_TYPE_CSV } from '../constants';
 import { type CsvExportSettings, getExportSettings } from './lib/get_export_settings';
 import { i18nTexts } from './lib/i18n_texts';
+import { isResponseTooLargeError } from './lib/is_response_too_large_error';
 import { MaxSizeStringBuilder } from './lib/max_size_string_builder';
 import { overrideTimeRange } from './lib/override_time_range';
 
@@ -176,16 +177,22 @@ export class CsvESQLGenerator {
 
       await this.generateRows(visibleColumns, rows, builder, settings);
     } catch (err) {
-      this.logger.error(err, { tags: [this.jobId] });
-      if (err instanceof esErrors.ResponseError) {
-        if ([401, 403].includes(err.statusCode ?? 0)) {
-          reportingError = new AuthenticationExpiredError();
-          warnings.push(i18nTexts.authenticationError.partialResultsMessage);
-        } else {
-          warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));
-        }
+      if (isResponseTooLargeError(err)) {
+        // The user can fix this by exporting less data, so it is not logged as an error.
+        this.logger.warn(err.message, { tags: [this.jobId] });
+        warnings.push(i18nTexts.responseTooLargeError);
       } else {
-        warnings.push(i18nTexts.unknownError(err?.message ?? err));
+        this.logger.error(err, { tags: [this.jobId] });
+        if (err instanceof esErrors.ResponseError) {
+          if ([401, 403].includes(err.statusCode ?? 0)) {
+            reportingError = new AuthenticationExpiredError();
+            warnings.push(i18nTexts.authenticationError.partialResultsMessage);
+          } else {
+            warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));
+          }
+        } else {
+          warnings.push(i18nTexts.unknownError(err?.message ?? err));
+        }
       }
     }
 
