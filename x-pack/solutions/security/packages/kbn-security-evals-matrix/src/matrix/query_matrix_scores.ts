@@ -182,11 +182,14 @@ export const scoresByPrefixToDatasets = (
       // non-EIS judge when requireEisJudge is on: without this, a doc whose evaluator
       // omitted its judge model silently contributes to a matrix that claims every
       // score is EIS-graded.
+      // Code evaluators invoke no model, so there is no judge to vet: they stay admitted.
+      const isCodeEvaluator = (doc.evaluator as { kind?: string } | undefined)?.kind === 'code';
       const rejectedEisJudge = Boolean(
         evaluatorName &&
           !rejectedNonQuality &&
           options.requireEisJudge &&
-          (!judgeId || !isEisBacked(judgeId))
+          !isCodeEvaluator &&
+          (!judgeId || !isEisBacked(judgeId, doc.evaluator?.model?.provider))
       );
       const rejectedSelfJudged = Boolean(
         evaluatorName &&
@@ -814,7 +817,7 @@ export const queryMatrixScores = async (
               if (forbidSelfJudged && describeJudge(judgeId, modelId).selfJudged) {
                 return false;
               }
-              return !(requireEis && !isEisBacked(judgeId));
+              return !(requireEis && !isEisBacked(judgeId, doc.evaluator?.model?.provider));
             });
             for (const doc of admittedDocs) {
               const judgeId = doc.evaluator?.model?.id;

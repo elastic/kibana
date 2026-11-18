@@ -7,7 +7,11 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { AD_MIN_ENDPOINT_ALERTS, assertAdDataGate } from './attack_discovery_data_gate';
+import {
+  AD_MAX_ENDPOINT_ALERTS,
+  AD_MIN_ENDPOINT_ALERTS,
+  assertAdDataGate,
+} from './attack_discovery_data_gate';
 
 const log = { info: jest.fn() } as unknown as ToolingLog;
 const WINDOW = {
@@ -42,6 +46,13 @@ describe('assertAdDataGate', () => {
     const { esClient } = clientWith({ endpoint: AD_MIN_ENDPOINT_ALERTS - 1, chrysalis: 0 });
     await expect(assertAdDataGate({ esClient, log, ...WINDOW })).rejects.toThrow(
       `endpoint=${AD_MIN_ENDPOINT_ALERTS - 1}`
+    );
+  });
+
+  it('fails when foreign alerts push the window past the corpus size', async () => {
+    const { esClient } = clientWith({ endpoint: AD_MAX_ENDPOINT_ALERTS + 1, chrysalis: 0 });
+    await expect(assertAdDataGate({ esClient, log, ...WINDOW })).rejects.toThrow(
+      `endpoint=${AD_MAX_ENDPOINT_ALERTS + 1}`
     );
   });
 

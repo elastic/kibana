@@ -226,6 +226,14 @@ describe('eval_pipeline', () => {
       expect(yaml).toContain('EVAL_SUITE_ID: "agent-builder"');
     });
 
+    it('runs the suite when its own label accompanies `evals:all`', () => {
+      const yaml = getEvalPipeline(`evals:all,evals:persona-matrix-parity,${MODELS}`) as string;
+
+      expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix-parity"');
+      expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix"');
+      expect(yaml).toContain('EVAL_SUITE_ID: "agent-builder"');
+    });
+
     it('still runs the suite from its own label', () => {
       const yaml = getEvalPipeline(`evals:persona-matrix-parity,${MODELS}`) as string;
 

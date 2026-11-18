@@ -7,7 +7,7 @@
 
 import type { AgentProfile } from '../agent_profile';
 import { PARITY_DOCS } from './chrysalis_parity_docs';
-import { parityRestampOffset, restamp, seedDocId } from './chrysalis_seed';
+import { getParityEpochMs, parityRestampOffset, restamp, seedDocId } from './chrysalis_seed';
 
 /**
  * The detection rule the external benchmark attached to its rule-editing prompts:
@@ -88,7 +88,7 @@ const flattenWithPrefix = (prefix: string, value: Record<string, unknown>) =>
  * fields, ancestry and reason added, timestamps shifted like the seeded corpus.
  */
 export const buildParityPassthroughAlert = (
-  nowMs: number = Date.now()
+  nowMs: number = getParityEpochMs()
 ): Record<string, unknown> => {
   const { doc, position } = findSimSource();
   const {

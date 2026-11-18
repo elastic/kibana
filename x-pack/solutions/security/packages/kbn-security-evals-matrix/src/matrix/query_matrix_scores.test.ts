@@ -1395,6 +1395,23 @@ describe('round 6 regression: admission and accumulation fixes', () => {
     expect(datasets[0].excludedNonEis).toBe(1);
   });
 
+  it('requireEisJudge keeps judge-less code evaluators in the cell mean', () => {
+    // Regression: FinalAnswerPresent/MinExpectedSteps record no judge model, so they were
+    // dropped as non-EIS and never reached the parity report.
+    const codeDoc = {
+      ...doc('alert-analysis-a', undefined),
+      evaluator: { name: 'FinalAnswerPresent', score: 1, kind: 'code' },
+    } as unknown as EvaluationScoreDocument;
+    const datasets = scoresByPrefixToDatasets([codeDoc], ['alert-analysis'], {
+      requireEisJudge: true,
+    });
+
+    expect(datasets[0].excludedNonEis).toBeFalsy();
+    expect(datasets[0].evaluators).toEqual([
+      expect.objectContaining({ evaluatorName: 'FinalAnswerPresent', mean: 1 }),
+    ]);
+  });
+
   it('accumulates exclusion counts across suites for the same model', async () => {
     // Regression: excludedByModel.set overwrote the prior suite's counts, so a model
     // rejected in two suites reported only the last suite's rejections.

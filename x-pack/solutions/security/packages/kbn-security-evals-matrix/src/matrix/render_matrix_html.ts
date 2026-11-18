@@ -362,14 +362,20 @@ const renderTokenCost = (matrix: Matrix, config: MatrixConfig): string => {
   const header = `<tr><th>Model</th>${buckets
     .map((b) => `<th>${esc(b.label)}</th>`)
     .join('')}<th>Total</th></tr>`;
-  const renderCell = (m: TokenCostModel, cells: TokenCostModel['cells']): string => {
+  const renderCell = (
+    m: TokenCostModel,
+    cells: TokenCostModel['cells'],
+    expectedColumns: number
+  ): string => {
     if (cells.length === 0) return '<td class="cell ok">—</td>';
     const tokens = cells.reduce((sum, c) => sum + c.totalMean, 0);
     const costed = cells.filter((c) => c.estimatedCostUsd !== undefined);
     const cost = costed.reduce((sum, c) => sum + (c.estimatedCostUsd ?? 0), 0);
     const costLabel = !m.priced
       ? '<span class="model-id">unpriced</span>'
-      : costed.length === cells.length
+      : // A column with no token counts never creates a cell, so compare against the
+      // configured columns, not just the observed cells.
+      costed.length === cells.length && cells.length === expectedColumns
       ? esc(formatUsd(cost))
       : '<span class="model-id">partial</span>';
     const title = cells
@@ -396,13 +402,12 @@ const renderTokenCost = (matrix: Matrix, config: MatrixConfig): string => {
       );
       return `<tr><td class="model">${esc(m.modelLabel)}<br><span class="model-id">${esc(
         m.modelId
-      )}</span></td>${bucketCells.map((cells) => renderCell(m, cells)).join('')}${renderCell(
-        m,
-        m.cells
-      )}</tr>`;
+      )}</span></td>${bucketCells
+        .map((cells, i) => renderCell(m, cells, buckets[i].columnIds.length))
+        .join('')}${renderCell(m, m.cells, matrix.columns.length)}</tr>`;
     })
     .join('');
-  return `<details class="methodology tokencost" open><summary>Token cost per (model, category) — summed input + output means per example, native units; $ at EIS list price with every input token uncached (upper bound). Hover for the per-column in/out split.</summary><table class="tokencost"><thead>${header}</thead><tbody>${rows}</tbody></table></details>`;
+  return `<details class="methodology tokencost" open><summary>Token cost per (model, category) — summed input + output means per example, native units; $ at EIS base-tier list rates with every input token billed as uncached (an estimate, not a spending ceiling — long-context tiers and cache writes can cost more). Hover for the per-column in/out split.</summary><table class="tokencost"><thead>${header}</thead><tbody>${rows}</tbody></table></details>`;
 };
 
 const renderSummaryTable = (matrix: Matrix): string => {

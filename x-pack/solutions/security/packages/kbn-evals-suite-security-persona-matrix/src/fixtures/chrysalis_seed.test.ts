@@ -173,6 +173,26 @@ describe('chrysalis_seed', () => {
     });
   });
 
+  describe('parity epoch', () => {
+    it('keeps the inlined-alert epoch fixed at seed time, not at query time', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(Date.parse('2026-11-13T12:00:00.000Z'));
+        const { seedChrysalisAlerts, getParityEpochMs } = loadProfile('parity');
+        await seedChrysalisAlerts({ esClient: asEs(createClient()), log });
+        const seededAt = getParityEpochMs();
+
+        // A later prompt (long matrix run) must still re-stamp relative to the seed instant,
+        // otherwise the prompt's alert drifts away from the seeded corpus.
+        jest.setSystemTime(Date.parse('2026-11-13T14:00:00.000Z'));
+        expect(getParityEpochMs()).toBe(seededAt);
+        expect(seededAt).toBe(Date.parse('2026-11-13T12:00:00.000Z'));
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+  });
+
   describe('cleanupChrysalisAlerts is id-scoped', () => {
     it('deletes only the seeded alert ids, never match_all', async () => {
       const { seedChrysalisAlerts, cleanupChrysalisAlerts } = loadProfile('minimal');

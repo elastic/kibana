@@ -33,10 +33,18 @@ export function deriveRelevanceLabel(
 }
 
 /**
- * True when the task output carries a message list whose latest message is empty or
- * whitespace-only. Outputs without a message list are unknown, not empty.
+ * True when the answer the judge graded is empty. A task output may record that verdict as
+ * `judgedAnswerEmpty` (the stored transcript can keep interior narration the judge never saw);
+ * otherwise the latest message in the message list is checked. Outputs without either are
+ * unknown, not empty.
  */
 export function isAgentResponseEmpty(output: unknown): boolean {
+  const judgedAnswerEmpty = (output as { judgedAnswerEmpty?: unknown } | null | undefined)
+    ?.judgedAnswerEmpty;
+  if (typeof judgedAnswerEmpty === 'boolean') {
+    return judgedAnswerEmpty;
+  }
+
   const messages = (output as { messages?: unknown } | null | undefined)?.messages;
   if (!Array.isArray(messages)) {
     return false;

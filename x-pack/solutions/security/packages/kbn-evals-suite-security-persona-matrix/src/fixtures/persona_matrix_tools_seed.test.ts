@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
@@ -576,6 +577,46 @@ describe('persona_matrix_tools_seed', () => {
         })
       );
       expect(log.warning).not.toHaveBeenCalled();
+    });
+
+    it('deletes only the todo documents written since this run created write-todos', async () => {
+      const mod = await load('parity');
+      const client = createClient();
+      const deleteByQuery = jest.fn(async () => ({}));
+      await mod.seedPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        profile: 'chrysalis-parity',
+      });
+      await mod.cleanupPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        esClient: { deleteByQuery } as unknown as EsClient,
+      });
+      expect(deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: 'persona-matrix-todos',
+          query: { range: { '@timestamp': { gte: expect.any(String) } } },
+        })
+      );
+    });
+
+    it('leaves todo documents alone when write-todos pre-existed (not this run)', async () => {
+      const mod = await load('parity');
+      const client = createClient({ postBehavior: 'conflict' });
+      const deleteByQuery = jest.fn(async () => ({}));
+      await mod.seedPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        profile: 'chrysalis-parity',
+      });
+      await mod.cleanupPersonaMatrixTools({
+        kbnClient: asKbn(client),
+        log,
+        esClient: { deleteByQuery } as unknown as EsClient,
+      });
+      expect(deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('keeps pre-existing tools, workflows and agent (create answered "already exists")', async () => {

@@ -150,11 +150,20 @@ describe('renderMatrixHtml', () => {
       mockConfig
     );
     expect(partial).toContain('>6k<br><span class="model-id">partial</span></td>');
+
+    // A column that reported no token counts creates no cell: the Total must not look complete.
+    const missingColumn = renderMatrixHtml(
+      priced([{ columnId: 'alert', totalMean: 1500, estimatedCostUsd: 0.25 }]),
+      mockConfig
+    );
+    expect(missingColumn).not.toContain('>2k<br>$0.25</td>');
+    expect(missingColumn).toContain('<span class="model-id">partial</span></td></tr>');
   });
 
   it('omits the token-cost table when matrix.tokenCost is absent', () => {
     const html = renderMatrixHtml(mockMatrix, mockConfig);
-    expect(html).not.toContain('Token cost per (model, column)');
+    expect(html).not.toContain('class="tokencost"');
+    expect(html).not.toContain('Token cost per (model, category)');
   });
 
   it('HTML-escapes attacker-influenced reasons and evaluator names in status cells', () => {

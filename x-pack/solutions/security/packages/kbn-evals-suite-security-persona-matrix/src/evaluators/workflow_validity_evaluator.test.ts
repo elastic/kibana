@@ -498,6 +498,29 @@ describe('WorkflowValidity', () => {
       expect(calls).toHaveLength(0);
     });
 
+    it('scores no_yaml when the YAML is only in a promoted interior step', async () => {
+      const { evaluator, calls } = setup({ extractionMode: 'text_only' });
+      const result = await run(
+        evaluator,
+        `\`\`\`yaml\n${YAML}\`\`\``,
+        { validateWorkflow: true },
+        { messageSource: 'last_assistant_step' }
+      );
+      expect(result.label).toBe('no_yaml');
+      expect(calls).toHaveLength(0);
+    });
+
+    it('still reads a promoted step in the default mode', async () => {
+      const { evaluator } = setup();
+      const result = await run(
+        evaluator,
+        `\`\`\`yaml\n${YAML}\`\`\``,
+        { validateWorkflow: true },
+        { messageSource: 'last_assistant_step' }
+      );
+      expect(result.label).not.toBe('no_yaml');
+    });
+
     it('still validates YAML from the answer text', async () => {
       const { evaluator, calls } = setup({ extractionMode: 'text_only' });
       const result = await run(

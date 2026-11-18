@@ -9,7 +9,7 @@ import { parse, stringify } from 'yaml';
 import type { HttpHandler } from '@kbn/core/public';
 import type { Evaluator } from '@kbn/evals';
 import { STUB_CONNECTOR_ID } from '../fixtures/stub_connector';
-import { getAnswerText, isRecord } from './task_output_helpers';
+import { getAnswerText, getClosingAnswer, isRecord } from './task_output_helpers';
 
 export const WORKFLOW_VALIDITY_EVALUATOR_NAME = 'WorkflowValidity';
 
@@ -431,10 +431,12 @@ export const createWorkflowValidityEvaluator = ({
       };
     };
 
-    const yaml = extractWorkflowYaml(
-      getAnswerText(output),
-      extractionMode === 'text_only' ? [] : attachmentsOf(output)
-    );
+    // text_only mirrors the external harness, which scores only a submitted answer: YAML that
+    // sits in a promoted interior step (messageSource 'last_assistant_step') is not one.
+    const yaml =
+      extractionMode === 'text_only'
+        ? extractWorkflowYaml(getClosingAnswer(output), [])
+        : extractWorkflowYaml(getAnswerText(output), attachmentsOf(output));
     if (!yaml) {
       return finish();
     }

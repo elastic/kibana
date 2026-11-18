@@ -307,14 +307,15 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
   const runAllEvals = parsedLabels.includes('evals:all');
-  const selectedEvalSuites = (
-    runAllEvals
-      ? evalSuites.filter((suite) => !suite.excludeFromEvalsAll)
-      : evalSuites.filter((suite) => {
-          const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
-          return labels.some((label) => parsedLabels.includes(label));
-        })
-  ).filter((suite) => !skippedSuiteIds.has(suite.id));
+  // `excludeFromEvalsAll` only removes a suite from the implicit `evals:all` selection; the
+  // suite's own label still opts it in, even when `evals:all` is present on the same PR.
+  const selectedEvalSuites = evalSuites
+    .filter((suite) => {
+      const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
+      const explicitlySelected = labels.some((label) => parsedLabels.includes(label));
+      return explicitlySelected || (runAllEvals && !suite.excludeFromEvalsAll);
+    })
+    .filter((suite) => !skippedSuiteIds.has(suite.id));
   // Model filtering (models:* labels): none => skip (explicit selection required);
   // `models:<group>` => run those groups; aliases (e.g. `models:weekly-eis-models`) expand.
   const rawEvaluationConnectorId = parsedLabels

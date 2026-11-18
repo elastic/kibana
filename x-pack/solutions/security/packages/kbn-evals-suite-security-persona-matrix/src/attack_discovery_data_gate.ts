@@ -12,6 +12,13 @@ import type { ToolingLog } from '@kbn/tooling-log';
 export const AD_MIN_ENDPOINT_ALERTS = 80;
 
 /**
+ * Most alerts AD may read. The restore deletes every alert index before loading the corpus,
+ * and the window is months before any live rule run, so anything past the corpus size is a
+ * foreign writer: without this cap, a partial restore plus unrelated alerts passes the floor.
+ */
+export const AD_MAX_ENDPOINT_ALERTS = 95;
+
+/**
  * Chrysalis signals as the external benchmark identifies them: its passthrough
  * rule, or the simulated target host the agent-builder seeds write to. Any of
  * them in AD's window pollutes the kill-chain ground truth without an error.
@@ -48,8 +55,8 @@ export const assertAdDataGate = async ({
     }),
     esClient.count({ index, query: { bool: { filter: [inWindow, CHRYSALIS_SIGNAL_QUERY] } } }),
   ]);
-  const summary = `endpoint=${endpoint} (min ${AD_MIN_ENDPOINT_ALERTS}), chrysalis=${chrysalis} (max 0)`;
-  if (endpoint < AD_MIN_ENDPOINT_ALERTS || chrysalis > 0) {
+  const summary = `endpoint=${endpoint} (min ${AD_MIN_ENDPOINT_ALERTS}, max ${AD_MAX_ENDPOINT_ALERTS}), chrysalis=${chrysalis} (max 0)`;
+  if (endpoint < AD_MIN_ENDPOINT_ALERTS || endpoint > AD_MAX_ENDPOINT_ALERTS || chrysalis > 0) {
     throw new Error(`Attack Discovery data gate failed in ${index} [${start}, ${end}): ${summary}`);
   }
   log.info(`[attack-discovery] data gate passed: ${summary}`);

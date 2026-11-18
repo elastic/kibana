@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   PARITY_WORKFLOWS,
   PARITY_CASE_TAG,
   CREATE_CASE_WORKFLOW_ID,
+  WRITE_TODOS_WORKFLOW_ID,
+  TODOS_INDEX,
   type ParityWorkflow,
 } from './parity_workflows';
 import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
@@ -206,6 +209,12 @@ const createdWorkflowIds = new Set<string>();
  */
 let parityCaseWindowStart: string | undefined;
 
+/**
+ * When THIS process created the `write-todos` workflow. Todo documents are deleted only
+ * from then on, so a reused Scout stack neither keeps this run's plans nor loses others'.
+ */
+let parityTodosWindowStart: string | undefined;
+
 const CASES_PAGE_SIZE = 100;
 
 /**
@@ -373,6 +382,7 @@ async function createWorkflowIfMissing({
     });
     createdWorkflowIds.add(workflow.id);
     if (workflow.id === CREATE_CASE_WORKFLOW_ID) parityCaseWindowStart = new Date().toISOString();
+    if (workflow.id === WRITE_TODOS_WORKFLOW_ID) parityTodosWindowStart = new Date().toISOString();
     log.info(`[persona-matrix] created workflow '${workflow.id}'`);
   } catch (error) {
     if (isAlreadyExists(error)) {
@@ -603,7 +613,8 @@ export async function seedPersonaMatrixTools({
 export async function cleanupPersonaMatrixTools({
   kbnClient,
   log,
-}: SeedToolsOptions): Promise<void> {
+  esClient,
+}: SeedToolsOptions & { esClient?: EsClient }): Promise<void> {
   for (const id of createdToolIds) {
     await kbnClient
       .request({
@@ -658,6 +669,19 @@ export async function cleanupPersonaMatrixTools({
           );
         }
       });
+  }
+
+  if (esClient && createdWorkflowIds.has(WRITE_TODOS_WORKFLOW_ID) && parityTodosWindowStart) {
+    try {
+      await esClient.deleteByQuery({
+        index: TODOS_INDEX,
+        ignore_unavailable: true,
+        refresh: true,
+        query: { range: { '@timestamp': { gte: parityTodosWindowStart } } },
+      });
+    } catch (error) {
+      log.warning(`[persona-matrix] parity todos cleanup failed: ${error}`);
+    }
   }
 
   // create.case runs the seeded create-case workflow, which tags every case it

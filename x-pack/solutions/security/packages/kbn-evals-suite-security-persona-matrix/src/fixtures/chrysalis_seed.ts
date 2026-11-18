@@ -89,6 +89,18 @@ export function parityRestampOffset(nowMs: number): number {
   return nowMs - loadParityDocs().anchor;
 }
 
+let parityEpochMs: number | undefined;
+
+/**
+ * The instant the parity corpus was (or will be) re-stamped to. Fixed on first use so the
+ * seeded docs and the alert inlined into prompts share one offset for the whole run;
+ * `seedChrysalisAlerts` pins it at seed time.
+ */
+export function getParityEpochMs(): number {
+  parityEpochMs ??= Date.now();
+  return parityEpochMs;
+}
+
 /** Re-stamp all timestamp-like fields relative to `now`, preserving deltas. */
 export function restamp(doc: Record<string, unknown>, offsetMs: number): Record<string, unknown> {
   const walk = (o: unknown): unknown => {
@@ -123,7 +135,8 @@ export async function seedChrysalisAlerts({
   try {
     if (seedProfile === 'parity') {
       const { docs } = loadParityDocs();
-      const offset = parityRestampOffset(Date.now());
+      parityEpochMs = Date.now();
+      const offset = parityRestampOffset(parityEpochMs);
       const byIndex = new Map<string, Array<Record<string, unknown>>>();
       for (const { index, doc } of docs) {
         const list = byIndex.get(index) ?? [];
