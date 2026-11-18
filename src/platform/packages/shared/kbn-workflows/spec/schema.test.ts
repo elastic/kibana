@@ -1566,6 +1566,36 @@ describe('`on-failure` on step schemas', () => {
   });
 });
 
+describe('`resume-as` on HITL step schemas', () => {
+  const cases = [
+    {
+      name: 'waitForInput',
+      schema: WaitForInputStepSchema,
+      step: { name: 's', type: 'waitForInput' },
+    },
+    {
+      name: 'waitForApproval',
+      schema: WaitForApprovalStepSchema,
+      step: { name: 's', type: 'waitForApproval' },
+    },
+  ];
+
+  it.each(cases)('accepts `responder` or no value on the $name step', ({ schema, step }) => {
+    expect(schema.parse({ ...step, 'resume-as': 'responder' })['resume-as']).toBe('responder');
+    expect(schema.parse(step)['resume-as']).toBeUndefined();
+  });
+
+  it.each(cases)(
+    'rejects a templated or unsupported `resume-as` on the $name step',
+    ({ schema, step }) => {
+      expect(schema.safeParse({ ...step, 'resume-as': '{{ inputs.resumeAs }}' }).success).toBe(
+        false
+      );
+      expect(schema.safeParse({ ...step, 'resume-as': 'inherit' }).success).toBe(false);
+    }
+  );
+});
+
 describe('DurationSchema', () => {
   it.each(['1ms', '30s', '5m', '2h', '1d', '1w', '1h30m', '1w2d3h4m5s6ms', '1h500ms'])(
     'accepts %s',

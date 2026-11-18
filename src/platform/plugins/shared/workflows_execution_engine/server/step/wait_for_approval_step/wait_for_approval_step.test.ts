@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type { WaitForApprovalStep } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
 import type { ExecutionError } from '@kbn/workflows/server';
 import { WaitForApprovalStepImpl } from './wait_for_approval_step';
 import type { ConnectorExecutor } from '../../connector_executor';
+import { RESUME_AS_CONTEXT_KEY, withWorkflowResponder } from '../../resume_as_responder';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -21,6 +23,7 @@ import {
   buildWaitForApprovalResumeLinks,
   sendWaitForApprovalNotifications,
 } from '../hitl_notifications/send_wait_for_approval_notifications';
+import { registerHitlLifecycleAuditor } from '../wait_for_input_step/hitl_lifecycle_auditor';
 
 jest.mock('../wait_for_input_step/hitl_external_resume_helpers', () => ({
   ...jest.requireActual('../wait_for_input_step/hitl_external_resume_helpers'),
@@ -478,6 +481,125 @@ describe('WaitForApprovalStepImpl', () => {
     expect(mockBuildWaitForApprovalResumeLinks).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'custom-space' })
     );
+  });
+
+  describe('resume-as: responder', () => {
+    const request = httpServerMock.createKibanaRequest();
+    const answer = {
+      resumeInput: { approved: true },
+      resumedBy: 'u_analyst',
+      pendingInteractiveResume: true,
+      [RESUME_AS_CONTEXT_KEY]: { stepExecutionId: 'test-step-exec-id', responder: null },
+    };
+    const lifecycleAuditor = jest.fn();
+    let unregisterAuditor: () => void;
+
+    beforeEach(() => {
+      node.configuration = { ...node.configuration, 'resume-as': 'responder' };
+      (
+        mockStepExecutionRuntime.contextManager as unknown as { getFakeRequest: jest.Mock }
+      ).getFakeRequest = jest.fn().mockReturnValue(request);
+      lifecycleAuditor.mockClear();
+      unregisterAuditor = registerHitlLifecycleAuditor(lifecycleAuditor);
+    });
+
+    afterEach(() => {
+      unregisterAuditor();
+    });
+
+    const answerWith = (context: Record<string, unknown>) => {
+      mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
+      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+        hitl: { respondedBy: 'analyst', channel: 'inbox' },
+      };
+      mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
+        context,
+      } as unknown as ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>);
+    };
+
+    it('should record the wait so that its answer can continue as the responder', async () => {
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
+        context: {
+          [RESUME_AS_CONTEXT_KEY]: { stepExecutionId: 'test-step-exec-id', responder: null },
+        },
+      });
+    });
+
+    it('should end an earlier responder scope when the wait does not ask for it', async () => {
+      node.configuration = { ...node.configuration, 'resume-as': undefined };
+      mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
+        context: {
+          [RESUME_AS_CONTEXT_KEY]: { stepExecutionId: 'earlier-step', responder: 'u_analyst' },
+        },
+      } as unknown as ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>);
+
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
+        context: { [RESUME_AS_CONTEXT_KEY]: null },
+      });
+    });
+
+    it('should apply the answer as the responder when the run is the person who answered', async () => {
+      answerWith(answer);
+
+      await withWorkflowResponder(request, 'u_analyst', () => underTest.run());
+
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: { approved: true },
+        respondedBy: 'analyst',
+        channel: 'inbox',
+      });
+      expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
+        context: expect.objectContaining({
+          resumeInput: null,
+          pendingInteractiveResume: false,
+          [RESUME_AS_CONTEXT_KEY]: { stepExecutionId: 'test-step-exec-id', responder: 'u_analyst' },
+        }),
+      });
+      expect(lifecycleAuditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'resumed_as_responder',
+          executionId: 'exec-abc',
+          stepExecutionId: 'test-step-exec-id',
+          responder: 'u_analyst',
+        })
+      );
+      expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
+    });
+
+    it.each([
+      ['the run is someone else', answer, 'must run as analyst'],
+      [
+        'the answer came through an external link',
+        { ...answer, pendingInteractiveResume: false, resumedBy: 'external_resume:step-1' },
+        'does not identify who gave it',
+      ],
+    ])('should fail the step without applying the answer when %s', async (_, context, message) => {
+      answerWith(context);
+
+      await underTest.run();
+
+      const error = (mockStepExecutionRuntime.failStep as jest.Mock).mock
+        .calls[0][0] as ExecutionError;
+      expect(error.toSerializableObject()).toEqual({
+        type: 'ResumeAsResponderError',
+        message: expect.stringContaining(message),
+      });
+      expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
+        context: expect.objectContaining({
+          resumeInput: null,
+          [RESUME_AS_CONTEXT_KEY]: { stepExecutionId: 'test-step-exec-id', responder: null },
+        }),
+      });
+      expect(mockStepExecutionRuntime.finishStep).not.toHaveBeenCalled();
+      expect(mockWorkflowRuntime.navigateToNextNode).not.toHaveBeenCalled();
+      expect(lifecycleAuditor).not.toHaveBeenCalled();
+    });
   });
 
   describe('onCancel', () => {
