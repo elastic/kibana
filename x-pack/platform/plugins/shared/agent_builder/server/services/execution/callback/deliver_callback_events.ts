@@ -41,7 +41,7 @@ import type {
   ConversationAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { ConversationService } from '../../conversation';
-import type { SurfacesService } from '../../surfaces';
+import type { SurfaceResponse, SurfacesService } from '../../surfaces';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 
@@ -177,6 +177,7 @@ export const deliverCallbackEvents = ({
               executionTerminatedEvent
                 ? renderSurfacePayload({
                     event: executionTerminatedEvent,
+                    roundCompleteEvent,
                     execution,
                     request,
                     conversationService,
@@ -256,10 +257,23 @@ const readAttachments = async ({
   return attachments;
 };
 
+/** What the run wrote for its reader: its response, or the prompts it paused on after what it had written. */
+const toSurfaceResponse = (
+  outcome: ExecutionTerminatedEvent['data']['outcome'],
+  roundCompleteEvent: RoundCompleteEvent | undefined
+): Pick<SurfaceResponse, 'message' | 'prompts'> =>
+  outcome.type === 'responded'
+    ? { message: outcome.response.message }
+    : {
+        message: roundCompleteEvent?.data.round.response.message ?? '',
+        prompts: outcome.prompts,
+      };
+
 const renderSurfacePayload = async ({
   event: {
     data: { outcome },
   },
+  roundCompleteEvent,
   execution,
   request,
   conversationService,
@@ -267,21 +281,18 @@ const renderSurfacePayload = async ({
   logger,
 }: {
   event: ExecutionTerminatedEvent;
+  roundCompleteEvent: RoundCompleteEvent | undefined;
   execution: ConversationAgentExecution;
   request: KibanaRequest;
   conversationService: ConversationService;
   surfacesService: SurfacesService;
   logger: Logger;
 }): Promise<SurfacePayload | undefined> => {
-  if (outcome.type !== 'responded') {
-    return undefined;
-  }
-
   try {
     const attachments = await readAttachments({ execution, request, conversationService });
 
     return await surfacesService.renderPayload(
-      { message: outcome.response.message, attachments },
+      { ...toSurfaceResponse(outcome, roundCompleteEvent), attachments },
       {
         originType: execution.agentParams.origin?.type,
         agentId: execution.agentId,
