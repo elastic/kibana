@@ -147,6 +147,7 @@ EOF
     SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN="$(vault_get security-labs-contentstack delivery_token || true)"
     if [[ -n "$SECURITY_LABS_CONTENTSTACK_API_KEY" && -n "$SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN" ]]; then
       buildkite-agent redactor add <<<"$SECURITY_LABS_CONTENTSTACK_API_KEY" 2>/dev/null || true
+      buildkite-agent redactor add <<<"$SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN" 2>/dev/null || true
       export SECURITY_LABS_CONTENTSTACK_API_KEY
       export SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN
     else

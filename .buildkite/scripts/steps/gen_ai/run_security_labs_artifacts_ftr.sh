@@ -13,15 +13,6 @@ for var in SECURITY_LABS_CONTENTSTACK_API_KEY SECURITY_LABS_CONTENTSTACK_DELIVER
   fi
 done
 
-# Builds created by the Contentstack publish/unpublish webhook carry its payload in build
-# meta-data. Log which entry triggered the rebuild; every build embeds the full published corpus.
-if buildkite-agent meta-data exists buildkite:webhook 2>/dev/null; then
-  echo "--- Contentstack webhook event"
-  buildkite-agent meta-data get buildkite:webhook \
-    | jq -r '"event=\(.event // "?") module=\(.module // "?") content_type=\(.data.content_type.uid // "?") entry=\(.data.entry.uid // "?") title=\(.data.entry.title // "?")"' \
-    || echo "Unable to parse webhook payload"
-fi
-
 # Artifact version must be unique per publish so same-day updates are not skipped by
 # already-installed clusters. Prefer a caller-provided UTC timestamp (YYYY.MM.DD-HHMMSS);
 # when unset, the FTR/builder defaults to the current UTC timestamp.
@@ -38,3 +29,6 @@ export FTR_EIS_CCM="${FTR_EIS_CCM:-1}"
 
 echo "--- Upload Security Labs KB artifacts to GCS"
 .buildkite/scripts/steps/gen_ai/upload_kb_artifacts.sh
+
+# security_labs_content_gate.sh compares webhook builds against the newest build with this marker.
+buildkite-agent meta-data set security-labs-uploaded true

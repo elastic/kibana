@@ -7,6 +7,7 @@
 
 import { load } from 'cheerio';
 import type { IndexedSecurityLabsDocument } from '../types';
+import contentstackContentTypes from '../contentstack_content_types.json';
 
 /**
  * Path prefix of every Security Labs page on elastic.co. Document slugs are relative to it
@@ -15,20 +16,18 @@ import type { IndexedSecurityLabsDocument } from '../types';
  */
 export const SECURITY_LABS_PATH_PREFIX = '/security-labs/';
 
-/** Contentstack content types that hold Security Labs articles. */
-export const SECURITY_LABS_CONTENT_TYPES: readonly string[] = [
-  'blog_v3',
-  'threat_command',
-  'reports',
-];
-
 /**
- * Entry queries that scope content types shared across the Elastic Labs sites to Security Labs.
- * `blog_v3` also holds Search Labs and Observability Labs posts.
+ * Entry queries that scope content types shared across the Elastic Labs sites to Security Labs
+ * (`blog_v3` also holds Search Labs and Observability Labs posts). Also read by the Buildkite
+ * content gate (`.buildkite/scripts/steps/gen_ai/security_labs_content_gate.sh`).
  */
-export const CONTENTSTACK_CONTENT_TYPE_QUERIES: Readonly<Record<string, object>> = {
-  blog_v3: { blog_sources: { $in_query: { title: 'Security Labs' } } },
-};
+export const CONTENTSTACK_CONTENT_TYPE_QUERIES: Readonly<Record<string, object>> =
+  contentstackContentTypes;
+
+/** Contentstack content types that hold Security Labs articles. */
+export const SECURITY_LABS_CONTENT_TYPES: readonly string[] = Object.keys(
+  CONTENTSTACK_CONTENT_TYPE_QUERIES
+);
 
 /** Reference fields resolved via `include[]` so authors/categories carry their titles and URLs. */
 export const CONTENTSTACK_REFERENCE_FIELDS: readonly string[] = ['author', 'categories'];

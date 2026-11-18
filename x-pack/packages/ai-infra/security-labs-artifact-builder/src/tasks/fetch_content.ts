@@ -67,7 +67,7 @@ const fetchEntriesPage = async ({
   url.searchParams.set('skip', String(skip));
   url.searchParams.set('include_count', 'true');
   const query = CONTENTSTACK_CONTENT_TYPE_QUERIES[contentType];
-  if (query) {
+  if (query && Object.keys(query).length > 0) {
     url.searchParams.set('query', JSON.stringify(query));
   }
   for (const field of CONTENTSTACK_REFERENCE_FIELDS) {
