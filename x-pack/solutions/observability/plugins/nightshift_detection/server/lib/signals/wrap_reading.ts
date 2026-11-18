@@ -50,9 +50,10 @@ export function wrapReading({
   spaceId: string;
   scheduledMinute: number;
 }): WrapReadingResult {
-  const { status, ...data } = reading;
+  const { status, severity, ...data } = reading;
 
   const parsed = detectionSignalSchema.safeParse({
+    ...(severity !== undefined ? { severity } : {}),
     scheduled_timestamp: new Date(scheduledMinute).toISOString(),
     group_hash: getGroupHash({
       spaceId,

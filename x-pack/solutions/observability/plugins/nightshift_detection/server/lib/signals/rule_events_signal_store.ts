@@ -90,6 +90,7 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
               source: signal.source,
               fingerprint: getSeriesFingerprint(signal),
               status: signal.status,
+              severity: signal.severity,
               timestamp: signal.scheduled_timestamp,
               data: signal.data,
             });
@@ -200,7 +201,8 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
       seen.add(key);
 
       const readings = history.get(reading.fingerprint) ?? [];
-      readings.push({ status: parsed.data.status, ...reading });
+      const { status, severity } = parsed.data;
+      readings.push({ status, ...(severity !== undefined ? { severity } : {}), ...reading });
       history.set(reading.fingerprint, readings);
     }
 
