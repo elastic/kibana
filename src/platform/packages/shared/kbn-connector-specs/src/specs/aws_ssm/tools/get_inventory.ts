@@ -69,7 +69,7 @@ export const getInventory: ActionDefinition<GetInventoryInput> = {
         TypeName: typeName,
         Filters: filters ? toInventoryFilters(filters) : undefined,
         MaxResults: maxResults,
-        NextToken: nextToken,
+        NextToken: nextToken || undefined,
       },
     });
     const { CaptureTime, Entries = [], NextToken } = GetInventoryResponseSchema.parse(data);

@@ -27,6 +27,10 @@ import { sendCommand } from './tools/send_command';
 import { startAutomationExecution } from './tools/start_automation_execution';
 import { stopAutomationExecution } from './tools/stop_automation_execution';
 
+// Commercial and GovCloud Regions only: China (`cn-*`) and ISO (`*-iso*`) Regions serve SSM from
+// other domains than the `amazonaws.com` one callSsmApi sends requests to.
+const REGION_PATTERN = /^(?!cn-)(?![a-z]{2}-iso)[a-z]{2}(-[a-z]+)+-\d$/;
+
 /** AWS Systems Manager connector, authenticated with SigV4-signed AWS credentials. */
 export const AwsSsmConnector: ConnectorSpec = {
   metadata: {
@@ -54,7 +58,10 @@ export const AwsSsmConnector: ConnectorSpec = {
         .string()
         .min(1)
         .max(30)
-        .regex(/^[a-z0-9-]+$/, 'Must be a valid AWS region identifier, e.g. us-east-1.')
+        .regex(
+          REGION_PATTERN,
+          'Must be an AWS commercial or GovCloud Region such as us-east-1; China and ISO Regions are not supported.'
+        )
         .describe(
           i18n.translate('connectorSpecs.awsSsm.config.region', {
             defaultMessage: 'AWS Region (e.g., us-east-1, eu-west-1)',

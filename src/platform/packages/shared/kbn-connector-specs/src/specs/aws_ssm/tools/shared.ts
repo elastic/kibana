@@ -26,6 +26,7 @@ const AUTOMATION_EXECUTION_ID_LENGTH = 36;
 export const PARAMETER_NAME_MAX_LENGTH = 2048;
 // SSM documents no length limit for NextToken; this only guards against unbounded input.
 const NEXT_TOKEN_MAX_LENGTH = 4096;
+const TIMESTAMP_MAX_LENGTH = 64;
 // The pattern SSM's model gives an inventory type name.
 const INVENTORY_TYPE_NAME_PATTERN = /^(AWS|Custom):.+$/;
 const INVENTORY_TYPE_NAME_MAX_LENGTH = 100;
@@ -87,8 +88,10 @@ export const nextTokenSchema = () =>
   z
     .string()
     .max(NEXT_TOKEN_MAX_LENGTH)
-    .optional()
+    .nullish()
     .describe('Pagination token from a previous response. Omit to fetch the first page.');
+
+export const timestampSchema = () => z.iso.datetime({ offset: true }).max(TIMESTAMP_MAX_LENGTH);
 
 export const inventoryTypeNameSchema = () =>
   z

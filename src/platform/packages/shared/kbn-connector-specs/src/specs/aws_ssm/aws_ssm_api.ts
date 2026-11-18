@@ -66,7 +66,7 @@ const parseAwsJsonError = (
 };
 
 /** Whether an error thrown by `callSsmApi` is the AWS error with this code, e.g. ParameterNotFound. */
-export const isAwsError = (error: unknown, code: string): boolean =>
+export const isAwsError = ({ error, code }: { error: unknown; code: string }): boolean =>
   isAxiosError<unknown>(error) && parseAwsJsonError(error).code === code;
 
 const toAwsJsonError = ({ target, error }: { target: string; error: unknown }): unknown => {

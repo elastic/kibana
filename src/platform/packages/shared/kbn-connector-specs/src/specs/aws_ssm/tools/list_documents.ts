@@ -19,6 +19,7 @@ const NAME_PREFIX_MAX_LENGTH = 256;
 // Only the document types sendCommand and startAutomationExecution can run.
 const DOCUMENT_TYPES = ['Command', 'Automation'] as const;
 const OWNERS = ['Self', 'Amazon', 'Private', 'Public', 'ThirdParty'] as const;
+// AWS documents only Linux and Windows as PlatformTypes filter values.
 const PLATFORM_TYPES = ['Linux', 'Windows'] as const;
 
 const ListDocumentsInputSchema = lazySchema(() =>
@@ -103,7 +104,7 @@ export const listDocuments: ActionDefinition<ListDocumentsInput> = {
       body: {
         Filters: filters.length > 0 ? filters : undefined,
         MaxResults: maxResults,
-        NextToken: nextToken,
+        NextToken: nextToken || undefined,
       },
     });
     const { DocumentIdentifiers = [], NextToken } = ListDocumentsResponseSchema.parse(data);

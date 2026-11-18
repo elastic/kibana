@@ -22,10 +22,10 @@ const COMMENT_MAX_LENGTH = 100;
 const TIMEOUT_SECONDS_MIN = 30;
 const TIMEOUT_SECONDS_MAX = 2592000;
 // SSM documents no limits for document parameters; these only guard against unbounded input.
-const PARAMETER_NAME_MAX_LENGTH = 255;
-const PARAMETERS_MAX = 50;
-const PARAMETER_VALUES_MAX = 100;
-const PARAMETER_VALUE_MAX_LENGTH = 65536;
+const COMMAND_PARAMETER_NAME_MAX_LENGTH = 255;
+const COMMAND_PARAMETERS_MAX = 50;
+const COMMAND_PARAMETER_VALUES_MAX = 100;
+const COMMAND_PARAMETER_VALUE_MAX_LENGTH = 65536;
 
 const SendCommandInputSchema = lazySchema(() =>
   z.object({
@@ -41,11 +41,13 @@ const SendCommandInputSchema = lazySchema(() =>
     ),
     parameters: z
       .record(
-        z.string().min(1).max(PARAMETER_NAME_MAX_LENGTH),
-        z.array(z.string().max(PARAMETER_VALUE_MAX_LENGTH)).max(PARAMETER_VALUES_MAX)
+        z.string().min(1).max(COMMAND_PARAMETER_NAME_MAX_LENGTH),
+        z
+          .array(z.string().max(COMMAND_PARAMETER_VALUE_MAX_LENGTH))
+          .max(COMMAND_PARAMETER_VALUES_MAX)
       )
-      .refine((parameters) => Object.keys(parameters).length <= PARAMETERS_MAX, {
-        message: `At most ${PARAMETERS_MAX} parameters are allowed.`,
+      .refine((parameters) => Object.keys(parameters).length <= COMMAND_PARAMETERS_MAX, {
+        message: `At most ${COMMAND_PARAMETERS_MAX} parameters are allowed.`,
       })
       .optional()
       .describe(
@@ -89,8 +91,8 @@ const SendCommandResponseSchema = lazySchema(() =>
 );
 
 export const sendCommand: ActionDefinition<SendCommandInput> = {
-  // Agent Builder does not ask for confirmation per call (`scope` is not consulted there), so the
-  // IAM policy on the connector's credentials is the only guard on what this runs.
+  // Agent Builder only labels `destroy` actions for the agent and never asks the user to confirm,
+  // so the IAM policy on the connector's credentials is the only guard on what this runs.
   isTool: true,
   scope: 'destroy',
   description:

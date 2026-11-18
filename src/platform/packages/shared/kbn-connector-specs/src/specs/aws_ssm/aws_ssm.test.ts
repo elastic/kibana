@@ -75,6 +75,44 @@ describe('AwsSsmConnector', () => {
     expect(input.safeParse(invalidInput).success).toBe(false);
   });
 
+  it.each([
+    ['us-east-1', true],
+    ['us-gov-west-1', true],
+    ['cn-north-1', false],
+    ['us-iso-east-1', false],
+  ])('accepts only Regions served from amazonaws.com: %s -> %s', (region, accepted) => {
+    expect(AwsSsmConnector.schema?.safeParse({ region }).success).toBe(accepted);
+  });
+
+  it.each([
+    [
+      'cancelCommand',
+      'CancelCommand',
+      {
+        commandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
+        instanceIds: ['i-1234567890abcdef0'],
+      },
+      { CommandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab', InstanceIds: ['i-1234567890abcdef0'] },
+    ],
+    [
+      'stopAutomationExecution',
+      'StopAutomationExecution',
+      { automationExecutionId: '4105a4fc-f944-11e6-9d32-0123456789ab' },
+      { AutomationExecutionId: '4105a4fc-f944-11e6-9d32-0123456789ab' },
+    ],
+  ])('%s sends %s with its target', async (action, operation, params, body) => {
+    const result = await AwsSsmConnector.actions[action].handler(mockContext, params);
+
+    expect(mockClient.post).toHaveBeenCalledWith(
+      'https://ssm.us-east-1.amazonaws.com/',
+      JSON.stringify(body),
+      expect.objectContaining({
+        headers: expect.objectContaining({ 'X-Amz-Target': `AmazonSSM.${operation}` }),
+      })
+    );
+    expect(result).toEqual({ success: true });
+  });
+
   describe('describeInstanceInformation', () => {
     it('sends each filter under the key SSM expects', async () => {
       await describeInstanceInformation.handler(mockContext, {
@@ -98,6 +136,14 @@ describe('AwsSsmConnector', () => {
       expect(JSON.parse(mockClient.post.mock.calls[1][1])).toEqual({
         Filters: [{ Key: 'tag:Env', Values: ['prod'] }],
       });
+    });
+
+    it('accepts the null nextToken of a last page, and does not send it', async () => {
+      const input = describeInstanceInformation.input.parse({ nextToken: null });
+
+      await describeInstanceInformation.handler(mockContext, input);
+
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({});
     });
 
     it('returns ISO ping dates, and no nextToken on the last page', async () => {

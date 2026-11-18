@@ -66,7 +66,7 @@ export const findNodesByInventory: ActionDefinition<FindNodesByInventoryInput> =
       body: {
         Filters: toInventoryFilters(filters),
         MaxResults: maxResults,
-        NextToken: nextToken,
+        NextToken: nextToken || undefined,
       },
     });
     const { Entities = [], NextToken } = FindNodesByInventoryResponseSchema.parse(data);

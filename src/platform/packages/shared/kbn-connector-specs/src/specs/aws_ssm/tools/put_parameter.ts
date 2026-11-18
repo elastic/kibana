@@ -30,7 +30,9 @@ const PutParameterInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(PARAMETER_VALUE_MAX_LENGTH)
-      .describe('The value to store. For a StringList, separate the items with commas.'),
+      .describe(
+        "The value to store, up to 4,096 characters, or 8,192 if the account's default parameter tier is Advanced or Intelligent-Tiering. For a StringList, separate the items with commas."
+      ),
     type: z
       .enum(WRITABLE_PARAMETER_TYPES)
       .describe('String for a single value, StringList for comma-separated items.'),
@@ -60,10 +62,13 @@ const ExistingParameterSchema = lazySchema(() =>
   z.object({ Parameter: z.object({ Type: z.string().optional() }).optional() })
 );
 
-const getExistingParameterType = async (
-  ctx: ActionContext,
-  name: string
-): Promise<string | undefined> => {
+const getExistingParameterType = async ({
+  ctx,
+  name,
+}: {
+  ctx: ActionContext;
+  name: string;
+}): Promise<string | undefined> => {
   try {
     const data = await callSsmApi({
       ctx,
@@ -72,7 +77,7 @@ const getExistingParameterType = async (
     });
     return ExistingParameterSchema.parse(data).Parameter?.Type;
   } catch (error) {
-    if (isAwsError(error, 'ParameterNotFound')) {
+    if (isAwsError({ error, code: 'ParameterNotFound' })) {
       return undefined;
     }
     throw error;
@@ -87,7 +92,7 @@ export const putParameter: ActionDefinition<PutParameterInput> = {
   input: PutParameterInputSchema,
   handler: async (ctx, { name, value, type, description, overwrite }) => {
     // AWS turns a SecureString overwritten with Type String into a plaintext parameter.
-    if (overwrite && (await getExistingParameterType(ctx, name)) === 'SecureString') {
+    if (overwrite && (await getExistingParameterType({ ctx, name })) === 'SecureString') {
       throw new Error(
         `${name} is a SecureString parameter, which this connector cannot overwrite.`
       );

@@ -15,12 +15,12 @@ import {
   documentNameSchema,
   instanceIdSchema,
   nextTokenSchema,
+  timestampSchema,
   toIsoDate,
   toNextToken,
 } from './shared';
 
 const MAX_RESULTS_MAX = 50;
-const TIMESTAMP_MAX_LENGTH = 64;
 
 const COMMAND_STATUSES = [
   'Pending',
@@ -42,16 +42,10 @@ const ListCommandsInputSchema = lazySchema(() =>
     documentName: documentNameSchema()
       .optional()
       .describe('Only return commands that ran this document, e.g. "AWS-RunShellScript".'),
-    invokedAfter: z
-      .string()
-      .max(TIMESTAMP_MAX_LENGTH)
-      .datetime({ offset: true })
+    invokedAfter: timestampSchema()
       .optional()
       .describe('Only return commands sent after this ISO 8601 time, e.g. 2026-11-01T00:00:00Z.'),
-    invokedBefore: z
-      .string()
-      .max(TIMESTAMP_MAX_LENGTH)
-      .datetime({ offset: true })
+    invokedBefore: timestampSchema()
       .optional()
       .describe('Only return commands sent before this ISO 8601 time.'),
     maxResults: z
@@ -120,7 +114,7 @@ export const listCommands: ActionDefinition<ListCommandsInput> = {
         InstanceId: instanceId,
         Filters: filters.length > 0 ? filters : undefined,
         MaxResults: maxResults,
-        NextToken: nextToken,
+        NextToken: nextToken || undefined,
       },
     });
     const { Commands = [], NextToken } = ListCommandsResponseSchema.parse(data);

@@ -11,12 +11,17 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
 import type { SsmFilter } from './shared';
-import { isAutomationFinished, nextTokenSchema, toIsoDate, toNextToken } from './shared';
+import {
+  isAutomationFinished,
+  nextTokenSchema,
+  timestampSchema,
+  toIsoDate,
+  toNextToken,
+} from './shared';
 
 const MAX_RESULTS_MAX = 50;
 const FILTER_VALUE_MAX_LENGTH = 150;
 const FILTER_VALUES_MAX = 10;
-const TIMESTAMP_MAX_LENGTH = 64;
 
 const AUTOMATION_STATUSES = [
   'Pending',
@@ -39,8 +44,6 @@ const AUTOMATION_STATUSES = [
   'CompletedWithFailure',
   'Exited',
 ] as const;
-
-const timestampSchema = () => z.string().max(TIMESTAMP_MAX_LENGTH).datetime({ offset: true });
 
 const ListAutomationExecutionsInputSchema = lazySchema(() =>
   z.object({
@@ -128,7 +131,7 @@ export const listAutomationExecutions: ActionDefinition<ListAutomationExecutions
       body: {
         Filters: filters.length > 0 ? filters : undefined,
         MaxResults: maxResults,
-        NextToken: nextToken,
+        NextToken: nextToken || undefined,
       },
     });
     const { AutomationExecutionMetadataList = [], NextToken } =

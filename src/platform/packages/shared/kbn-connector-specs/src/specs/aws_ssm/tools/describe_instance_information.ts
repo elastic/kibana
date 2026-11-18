@@ -144,7 +144,7 @@ export const describeInstanceInformation: ActionDefinition<DescribeInstanceInfor
       body: {
         Filters: filters.length > 0 ? filters : undefined,
         MaxResults: maxResults,
-        NextToken: nextToken,
+        NextToken: nextToken || undefined,
       },
     });
     const { InstanceInformationList = [], NextToken } =
