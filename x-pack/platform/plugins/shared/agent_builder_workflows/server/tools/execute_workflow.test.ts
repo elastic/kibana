@@ -110,6 +110,37 @@ describe('executeWorkflowTool', () => {
     });
   });
 
+  describe('availability', () => {
+    const createSecurity = (hasAllRequested: boolean) => () =>
+      ({
+        authz: {
+          actions: { api: { get: (a: string) => `api:${a}` } },
+          checkPrivilegesWithRequest: () => ({
+            atSpace: jest.fn().mockResolvedValue({ hasAllRequested }),
+          }),
+        },
+      } as any);
+    const getAvailability = (getSecurityFn: () => any) =>
+      executeWorkflowTool({
+        workflowsManagement,
+        getSecurity: getSecurityFn,
+      }).availability!.handler({ request: {} as any, uiSettings: {} as any, spaceId: 'default' });
+
+    it('is available to a caller with the execute privilege', async () => {
+      await expect(getAvailability(createSecurity(true))).resolves.toEqual({ status: 'available' });
+    });
+
+    it('is available when security is disabled', async () => {
+      await expect(getAvailability(getSecurity)).resolves.toEqual({ status: 'available' });
+    });
+
+    it('is unavailable to a caller without the execute privilege', async () => {
+      await expect(getAvailability(createSecurity(false))).resolves.toMatchObject({
+        status: 'unavailable',
+      });
+    });
+  });
+
   it.each([{ workflowId: 'wf-1' }, { yaml: 'name: Inline workflow' }, { attachmentId: 'att-1' }])(
     'does not execute %j when the caller lacks execute privilege',
     async (input) => {

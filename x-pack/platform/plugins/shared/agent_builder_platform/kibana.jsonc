@@ -18,7 +18,7 @@
       "triggersActionsUi"
     ],
     "requiredBundles": [],
-    "optionalPlugins": ["agentBuilderWorkflows", "cases", "cloud", "esql", "llmTasks", "security"],
+    "optionalPlugins": ["cases", "cloud", "esql", "llmTasks"],
     "extraPublicDirs": []
   }
 }

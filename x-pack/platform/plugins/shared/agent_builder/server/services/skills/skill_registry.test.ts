@@ -7,6 +7,7 @@
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry, AvailabilityContext } from '@kbn/agent-builder-server';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -93,6 +94,10 @@ const createMockPersistedProvider = (
 const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
     has: jest.fn(async (id: string) => toolIds.includes(id)),
+    get: jest.fn(async (id: string) => {
+      if (!toolIds.includes(id)) throw new Error(`Tool ${id} is not available`);
+      return { id };
+    }),
   } as unknown as ToolRegistry);
 
 describe('createSkillRegistry', () => {
@@ -889,6 +894,47 @@ describe('createSkillRegistry', () => {
 
       expect(await registry.has('agent-builder-traces')).toBe(true);
       expect(await registry.get('agent-builder-traces')).toEqual(tracesSkill);
+    });
+  });
+
+  describe('requiresWorkflows', () => {
+    const workflowSkill = createMockInternalSkillDefinition({
+      id: 'workflow-skill',
+      name: 'workflow-skill',
+      requiresWorkflows: true,
+    });
+    const plainSkill = createMockInternalSkillDefinition({
+      id: 'plain-skill',
+      name: 'plain-skill',
+    });
+
+    const createRegistry = (toolIds: string[]) =>
+      createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([workflowSkill, plainSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(toolIds),
+        experimentalFeaturesEnabled: false,
+      });
+
+    it('keeps the skill when the caller can use execute_workflow', async () => {
+      const registry = createRegistry([platformCoreTools.executeWorkflow]);
+
+      expect(await registry.has('workflow-skill')).toBe(true);
+      expect(await registry.get('workflow-skill')).toBeDefined();
+      expect([...(await registry.bulkGet(['workflow-skill'])).keys()]).toEqual(['workflow-skill']);
+    });
+
+    it('drops the skill when execute_workflow is not usable (disabled or no privilege)', async () => {
+      const registry = createRegistry([]);
+
+      expect(await registry.has('workflow-skill')).toBe(false);
+      expect(await registry.get('workflow-skill')).toBeUndefined();
+      expect((await registry.bulkGet(['workflow-skill'])).size).toBe(0);
+      expect((await registry.list()).map(({ id }) => id)).toEqual(['plain-skill']);
+    });
+
+    it('does not affect skills without the flag', async () => {
+      expect(await createRegistry([]).has('plain-skill')).toBe(true);
     });
   });
 

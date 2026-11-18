@@ -60,17 +60,7 @@ export class AgentBuilderPlatformPlugin
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.actions;
     };
-    const getSecurity = async () => {
-      const [, startDeps] = await coreSetup.getStartServices();
-      return startDeps.security;
-    };
-    registerSkills(
-      setupDeps.agentBuilder,
-      getActionsStart,
-      // Kibana leaves a disabled optional plugin undefined.
-      { workflowsEnabled: setupDeps.agentBuilderWorkflows !== undefined, getSecurity },
-      this.logger
-    );
+    registerSkills(setupDeps.agentBuilder, getActionsStart, this.logger);
 
     const connectorSmlType = createConnectorSmlType({
       getActionSavedObjectsClient: async (request) => {

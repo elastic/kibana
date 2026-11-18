@@ -7,6 +7,7 @@
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry, AvailabilityContext } from '@kbn/agent-builder-server';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import {
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
@@ -99,8 +100,19 @@ export const createSkillRegistry = ({
     return true;
   };
 
+  // `get` throws when the tool is not registered (Workflows disabled) or unavailable to the
+  // caller (no execute privilege).
+  const canExecuteWorkflows = (): Promise<boolean> =>
+    toolRegistry.get(platformCoreTools.executeWorkflow).then(
+      () => true,
+      () => false
+    );
+
   const isAvailable = async (skill: InternalSkillDefinition): Promise<boolean> => {
     if (!isVisible(skill)) {
+      return false;
+    }
+    if (skill.requiresWorkflows && !(await canExecuteWorkflows())) {
       return false;
     }
     if (skill.isAvailable && availabilityContext) {

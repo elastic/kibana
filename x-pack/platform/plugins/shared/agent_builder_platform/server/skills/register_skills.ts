@@ -19,15 +19,11 @@ import { contextEngineSignalsSkill } from './context_engine_signals';
 import { aiIndexSourcesSkill } from './ai_index_sources';
 import { aiIndexAutomationsSkill } from './ai_index_automations';
 import { loadElasticSkills } from './elastic_skills';
-import {
-  registerConnectorSkills,
-  type ConnectorSkillsDeps,
-} from './connector_skills/register_connector_skills';
+import { registerConnectorSkills } from './connector_skills/register_connector_skills';
 
 export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
   getActionsStart: () => Promise<ActionsPluginStart>,
-  connectorSkillsDeps: Pick<ConnectorSkillsDeps, 'workflowsEnabled' | 'getSecurity'>,
   logger: Logger
 ) => {
   agentBuilder.skills.register(graphCreationSkill);
@@ -41,7 +37,7 @@ export const registerSkills = (
   agentBuilder.skills.register(aiIndexSourcesSkill);
   agentBuilder.skills.register(aiIndexAutomationsSkill);
 
-  registerConnectorSkills(agentBuilder, { getActionsStart, ...connectorSkillsDeps });
+  registerConnectorSkills(agentBuilder, { getActionsStart });
 
   loadElasticSkills({ logger: logger.get('elastic-skills') }).forEach((skill) => {
     agentBuilder.skills.register(skill);

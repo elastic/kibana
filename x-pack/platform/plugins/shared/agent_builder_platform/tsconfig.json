@@ -46,7 +46,5 @@
     "@kbn/agent-builder-plugin",
     "@kbn/files-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/agent-builder-tools-base",
-    "@kbn/security-plugin-types-server",
   ]
 }

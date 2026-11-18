@@ -245,6 +245,15 @@ If set to false, or if the workflow does not complete within the timeout, the to
 - Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows
 `),
     schema: executeWorkflowSchema,
+    // Hides the tool from callers who could not run a workflow anyway. The privilege is per user,
+    // so the result cannot be cached.
+    availability: {
+      cacheMode: 'none',
+      handler: async ({ request, spaceId }) =>
+        (await hasWorkflowExecutePrivilege({ security: getSecurity(), request, spaceId }))
+          ? { status: 'available' }
+          : { status: 'unavailable', reason: 'The workflows execute privilege is missing.' },
+    },
     annotations: {
       title: 'Execute Workflow',
       readOnlyHint: false,
