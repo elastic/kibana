@@ -246,6 +246,16 @@ minikube stop && minikube start --driver=docker --memory=4096 --cpus=4
 
 The collector connects via `host.minikube.internal`. Ensure Elasticsearch is running on the host.
 
+### `docker manifest inspect` returns HTTP 500
+
+A saved `docker.elastic.co` login is separate from the Docker Desktop account. If that login is rejected, manifest inspection fails for every tag and the script stops instead of deploying an unpublished version.
+
+```bash
+docker logout docker.elastic.co
+```
+
+Sign in at https://docker-auth.elastic.co/github_auth with a GitHub account in the `elastic` organization, then run `docker login docker.elastic.co` with the username and password shown on that page. Logging out is enough for public images such as `elastic-otel-collector`.
+
 ## Development
 
 Key files:

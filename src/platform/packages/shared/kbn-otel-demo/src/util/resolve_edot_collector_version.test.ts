@@ -118,6 +118,19 @@ describe('resolveEdotCollectorVersion', () => {
     );
   });
 
+  it('stops when the saved docker.elastic.co login is rejected', async () => {
+    const error = Object.assign(new Error('command failed'), {
+      stderr:
+        'Get "https://docker.elastic.co/v2/elastic-agent/elastic-otel-collector/manifests/9.1.0": received unexpected HTTP status: 500 Internal Server Error',
+    });
+    mockExecaCommand.mockRejectedValueOnce(error);
+
+    await expect(resolveEdotCollectorVersion(mockLog as unknown as ToolingLog)).rejects.toThrow(
+      'https://docker-auth.elastic.co/github_auth'
+    );
+    expect(mockExecaCommand).toHaveBeenCalledTimes(1);
+  });
+
   it('should fall back to Kibana version when no image is found', async () => {
     jest.resetModules();
     jest.doMock('@kbn/repo-info', () => ({

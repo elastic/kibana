@@ -30,12 +30,26 @@ export async function resolveEdotCollectorVersion(log: ToolingLog): Promise<stri
     const version = `${major}.${minor}.${patch}`;
     try {
       await execa.command(`docker manifest inspect ${EDOT_IMAGE}:${version}`, {
-        stdio: 'ignore',
         timeout: 10000,
       });
       log.debug(`Found EDOT image: ${EDOT_IMAGE}:${version}`);
       return version;
-    } catch {
+    } catch (error) {
+      if (isRejectedElasticRegistryLogin(error)) {
+        throw new Error(
+          [
+            'docker manifest inspect failed with HTTP 500 from docker.elastic.co.',
+            'The saved registry login is being rejected, so every tag looks missing.',
+            'This login is separate from Docker Desktop.',
+            'Refresh it with GitHub SSO:',
+            '  docker logout docker.elastic.co',
+            '  Sign in at https://docker-auth.elastic.co/github_auth with a GitHub account in the elastic organization.',
+            '  docker login docker.elastic.co',
+            'Use the username and password shown on that page.',
+            'Logging out is enough for public images such as elastic-otel-collector.',
+          ].join('\n')
+        );
+      }
       log.debug(`Image ${EDOT_IMAGE}:${version} not found, trying older version...`);
     }
 
@@ -56,4 +70,19 @@ export async function resolveEdotCollectorVersion(log: ToolingLog): Promise<stri
   const fallback = kibanaPackageJson.version.replace(/-SNAPSHOT$/, '');
   log.warning(`Could not find any EDOT Collector image, falling back to ${fallback}`);
   return fallback;
+}
+
+function isRejectedElasticRegistryLogin(error: unknown): boolean {
+  const text = registryFailureText(error);
+  return text.includes('unexpected HTTP status: 500');
+}
+
+function registryFailureText(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+  const withOutput = error as Error & { stderr?: unknown; stdout?: unknown };
+  return [error.message, withOutput.stderr, withOutput.stdout]
+    .filter((part): part is string => typeof part === 'string')
+    .join('\n');
 }
