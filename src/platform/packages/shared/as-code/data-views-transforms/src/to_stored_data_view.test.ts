@@ -14,17 +14,17 @@ import {
   type AsCodeDataViewSpec,
   type AsCodeSavedDataView,
 } from '@kbn/as-code-data-views-schema';
-import { toDataViewSpec } from './to_data_view_spec';
+import { toStoredDataView } from './to_stored_data_view';
 import type { DataViewSpec } from '@kbn/data-views-types';
 
-describe('toDataViewSpec', () => {
+describe('toStoredDataView', () => {
   it('returns a DataViewSpec, not a string, for an inline spec', () => {
     const dataView: AsCodeDataViewSpec = {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,
       index_pattern: 'my-index-*',
     };
     // type assertion: no narrowing needed because the overload returns DataViewSpec
-    const result: DataViewSpec = toDataViewSpec(dataView);
+    const result: DataViewSpec = toStoredDataView(dataView);
     expect(result).toEqual({ title: 'my-index-*' });
   });
 
@@ -33,7 +33,7 @@ describe('toDataViewSpec', () => {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       ref_id: 'my-data-view-id',
     };
-    const result = toDataViewSpec(dataView);
+    const result = toStoredDataView(dataView);
     expect(result).toBe('my-data-view-id');
   });
 
@@ -50,7 +50,7 @@ describe('toDataViewSpec', () => {
         },
       },
     };
-    const result = toDataViewSpec(dataView);
+    const result = toStoredDataView(dataView);
     expect(result).toEqual({
       title: 'my-index-*',
       timeFieldName: '@timestamp',
@@ -73,7 +73,7 @@ describe('toDataViewSpec', () => {
       time_field: '@timestamp',
       allow_hidden_indices: true,
     };
-    const result = toDataViewSpec(dataView);
+    const result = toStoredDataView(dataView);
     expect(result).toEqual({
       title: 'my-hidden-*',
       timeFieldName: '@timestamp',
@@ -88,7 +88,7 @@ describe('toDataViewSpec', () => {
       time_field: '@timestamp',
       name: 'My logs',
     };
-    const result = toDataViewSpec(dataView);
+    const result = toStoredDataView(dataView);
     expect(result).toEqual({
       title: 'logs-*',
       timeFieldName: '@timestamp',
@@ -102,7 +102,7 @@ describe('toDataViewSpec', () => {
       index_pattern: 'logs-*',
       time_field: '@timestamp',
     };
-    const result = toDataViewSpec(dataView);
+    const result = toStoredDataView(dataView);
     expect(result).not.toHaveProperty('name');
   });
 
@@ -113,7 +113,7 @@ describe('toDataViewSpec', () => {
       field_filters: ['field_a', 'field_b'],
     };
 
-    const result = toDataViewSpec(dataView);
+    const result = toStoredDataView(dataView);
     expect(result).toEqual(
       expect.objectContaining({
         sourceFilters: [{ value: 'field_a' }, { value: 'field_b' }],
@@ -127,7 +127,7 @@ describe('toDataViewSpec', () => {
       index_pattern: 'logs-*',
     };
 
-    const result = toDataViewSpec(dataView);
+    const result = toStoredDataView(dataView);
     expect((result as DataViewSpec).sourceFilters).toBeUndefined();
   });
 
@@ -137,7 +137,7 @@ describe('toDataViewSpec', () => {
       index_pattern: 'logs-*',
       time_field: '@timestamp',
     };
-    const result = toDataViewSpec(dataView);
+    const result = toStoredDataView(dataView);
     expect(result).toEqual({
       title: 'logs-*',
       timeFieldName: '@timestamp',
@@ -159,7 +159,7 @@ describe('toDataViewSpec', () => {
       },
     };
 
-    const result = toDataViewSpec(dataView);
+    const result = toStoredDataView(dataView);
     expect(result).toEqual({
       title: 'logs-*',
       fieldFormats: {
@@ -180,7 +180,7 @@ describe('toDataViewSpec', () => {
       },
     };
 
-    const result = toDataViewSpec(dataView);
+    const result = toStoredDataView(dataView);
     expect(result).toEqual({
       title: 'logs-*',
       runtimeFieldMap: {
@@ -208,7 +208,7 @@ describe('toDataViewSpec', () => {
         },
       };
 
-      const result = toDataViewSpec(dataView);
+      const result = toStoredDataView(dataView);
       expect(result).toEqual({
         id: 'saved-id',
         name: 'Saved logs',
@@ -232,7 +232,7 @@ describe('toDataViewSpec', () => {
         field_filters: ['field_a', 'field_b'],
       };
 
-      const result = toDataViewSpec(dataView);
+      const result = toStoredDataView(dataView);
       expect(result).toEqual(
         expect.objectContaining({
           sourceFilters: [{ value: 'field_a' }, { value: 'field_b' }],
@@ -246,7 +246,7 @@ describe('toDataViewSpec', () => {
         index_pattern: 'logs-*',
       };
 
-      const result = toDataViewSpec(dataView);
+      const result = toStoredDataView(dataView);
       expect(result).toEqual(
         expect.objectContaining({
           title: 'logs-*',

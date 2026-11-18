@@ -10,9 +10,9 @@
 import type { z } from '@kbn/zod';
 import type { AsCodeSavedDataView } from '@kbn/as-code-data-views-schema';
 import {
-  toAsCodeSavedDataView,
+  fromStoredDataViewToAsCodeSavedSchema,
   isCompositeRuntimeField,
-  toDataViewSpec,
+  toStoredDataView,
 } from '@kbn/as-code-data-views-transforms';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import { SavedObjectsErrorHelpers, type SavedObjectsClientContract } from '@kbn/core/server';
@@ -76,7 +76,7 @@ export class DataViewsAsCodeService {
         )
       : [];
 
-    const dataViewAsCode = toAsCodeSavedDataView({
+    const dataViewAsCode = fromStoredDataViewToAsCodeSavedSchema({
       ...dataViewSpec,
       ...(scriptedFields.length > 0 && {
         fields: Object.fromEntries(scriptedFields.map((field) => [field.name, field])),
@@ -102,7 +102,7 @@ export class DataViewsAsCodeService {
   public async create(spec: AsCodeSavedDataView) {
     this.validateFieldFormatTypes(spec);
 
-    const dataViewSpec = toDataViewSpec(spec);
+    const dataViewSpec = toStoredDataView(spec);
 
     const result = await this.dataViewsService.createAndSaveDataViewLazy(dataViewSpec);
 
@@ -124,7 +124,7 @@ export class DataViewsAsCodeService {
 
       // 1. Create a new data view instance from the spec and update it.
       const dataViewInstance = await this.dataViewsService.createFromSpecLazy(
-        toDataViewSpec({ id: resolvedId, ...spec })
+        toStoredDataView({ id: resolvedId, ...spec })
       );
 
       // 2. Update the saved object with the new data view instance.
@@ -147,7 +147,7 @@ export class DataViewsAsCodeService {
     }
 
     const createdDataView = await this.dataViewsService.createAndSaveDataViewLazy(
-      toDataViewSpec({ id, ...spec })
+      toStoredDataView({ id, ...spec })
     );
     return { action: 'created', body: await this.mapDataView(createdDataView) };
   }

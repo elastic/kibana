@@ -6,7 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { toDataViewSpec } from '@kbn/as-code-data-views-transforms';
+import { toStoredDataView as toDataViewSpec } from '@kbn/as-code-data-views-transforms';
 import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { extractReferences } from '../migrations/references';

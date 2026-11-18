@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { toAsCodeSavedDataView, toDataViewSpec } from '@kbn/as-code-data-views-transforms';
+import {
+  fromStoredDataViewToAsCodeSavedSchema,
+  toStoredDataView,
+} from '@kbn/as-code-data-views-transforms';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DataViewsAsCodeService } from './data_views_as_code_service';
@@ -84,7 +87,7 @@ const createService = ({
 };
 
 const getExpectedMappedData = (spec: DataViewSpec) => {
-  const { id: _id, ...data } = toAsCodeSavedDataView(spec);
+  const { id: _id, ...data } = fromStoredDataViewToAsCodeSavedSchema(spec);
   return data;
 };
 
@@ -400,7 +403,7 @@ describe('DataViewsAsCodeService', () => {
       const { service, mockDataViewsService } = createService();
 
       const inputSpec = { id: 'dv-new', index_pattern: 'logs-*', time_field: '@timestamp' };
-      const storedSpec = toDataViewSpec(inputSpec);
+      const storedSpec = toStoredDataView(inputSpec);
 
       const mockDataView = createMockDataViewLazy({
         id: 'dv-new',
@@ -448,7 +451,7 @@ describe('DataViewsAsCodeService', () => {
         time_field: '@timestamp',
         field_filters: ['bytes'],
       };
-      const transformedStoredSpec = toDataViewSpec(inputSpec);
+      const transformedStoredSpec = toStoredDataView(inputSpec);
 
       const mockDataView = createMockDataViewLazy({
         id: 'dv-complex',
@@ -535,7 +538,7 @@ describe('DataViewsAsCodeService', () => {
   describe('upsert', () => {
     const id = 'dv-upsert';
     const inputSpecWithoutId = { index_pattern: 'logs-*', time_field: '@timestamp' };
-    const storedSpec = toDataViewSpec({ id, ...inputSpecWithoutId });
+    const storedSpec = toStoredDataView({ id, ...inputSpecWithoutId });
 
     it('should update a data view when it already exists', async () => {
       const { service, mockDataViewsService, mockSavedObjectsClient } = createService();

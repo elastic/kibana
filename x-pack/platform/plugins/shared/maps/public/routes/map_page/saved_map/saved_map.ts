@@ -16,7 +16,10 @@ import type { ScopedHistory } from '@kbn/core/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { Writable } from '@kbn/utility-types';
 import type { AsCodeDataViewSpec } from '@kbn/as-code-data-views-schema';
-import { toAsCodeDataView, toDataViewSpec } from '@kbn/as-code-data-views-transforms';
+import {
+  fromStoredDataView as toAsCodeEmbeddedDataView,
+  toStoredDataView as toDataViewSpec,
+} from '@kbn/as-code-data-views-transforms';
 import type { MapAttributes } from '../../../../server';
 import {
   APP_ID,
@@ -592,7 +595,7 @@ export class SavedMap {
       .map((dataView) => {
         const spec = dataView.toSpec(false);
         if (!spec.id) throw new Error('Cannot save ad hoc data view without `id`');
-        return { ...(toAsCodeDataView(spec) as AsCodeDataViewSpec), id: spec.id };
+        return { ...(toAsCodeEmbeddedDataView(spec) as AsCodeDataViewSpec), id: spec.id };
       });
   }
 }

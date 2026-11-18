@@ -21,11 +21,17 @@ import {
 } from './to_stored_fields';
 
 // Function overrides to better type the return value depending on the input type
-export function toDataViewSpec(dataView: AsCodeDataViewSpec | AsCodeSavedDataView): DataViewSpec;
-export function toDataViewSpec(dataView: AsCodeDataView): string | DataViewSpec;
+export function toStoredDataView(dataView: AsCodeDataViewSpec | AsCodeSavedDataView): DataViewSpec;
+export function toStoredDataView(dataView: AsCodeDataView): string | DataViewSpec;
 
-/** Converts an as-code data view to a {@link DataViewSpec}. */
-export function toDataViewSpec(
+/**
+ * Convert an as-code data view back to a stored search-source `index` value
+ * (string id for a referenced data view, or inline {@link DataViewSpec} fields).
+ *
+ * @param dataView As-code `data_source` value from classic tab state
+ * @returns Value suitable for `SerializedSearchSourceFields.index`
+ */
+export function toStoredDataView(
   dataView: AsCodeDataView | AsCodeSavedDataView
 ): string | DataViewSpec {
   if ('type' in dataView && dataView.type === AS_CODE_DATA_VIEW_REFERENCE_TYPE)
