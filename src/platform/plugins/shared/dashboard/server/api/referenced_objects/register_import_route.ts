@@ -45,7 +45,7 @@ export const registerImportRoute = (
       ...referencedObjectsRouteConfig.options,
       body: { maxBytes: maxImportPayloadBytes },
     },
-    description: `${TECHNICAL_PREVIEW_NOTE}\n\nImports the objects of a \`POST ${DASHBOARD_API_PATH}/_export\` response, validating each body against its type's public API schema, and returns a result per object.`,
+    description: `${TECHNICAL_PREVIEW_NOTE}\n\nImports the objects of a \`POST ${DASHBOARD_API_PATH}/_export\` response, validating each body against its type's public API schema, and returns a result per object.\n\nWhen an object gets a new ID, only the IDs in its references are rewritten. A Discover session's chart keeps its data view ID inline, so a new copy of a Discover session can lose its chart customization, and Discover rebuilds the default chart.`,
   });
 
   importRoute.addVersion(

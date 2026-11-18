@@ -10,8 +10,6 @@
 import type { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import {
   getModelVersionMapForTypes,
-  getLatestModelVersion,
-  getCurrentVirtualVersion,
   getVirtualVersionMap,
   getLatestMappingsVersionNumber,
   getLatestMappingsModelVersion,
@@ -51,68 +49,6 @@ describe('ModelVersion map utilities', () => {
 
   const dummyMigration = jest.fn();
 
-  describe('getLatestModelVersion', () => {
-    it('returns 0 when no model versions are registered', () => {
-      expect(getLatestModelVersion(buildType({ modelVersions: {} }))).toEqual(0);
-      expect(getLatestModelVersion(buildType({ modelVersions: undefined }))).toEqual(0);
-    });
-
-    it('throws if an invalid version is provided', () => {
-      expect(() =>
-        getLatestModelVersion(
-          buildType({
-            modelVersions: {
-              // @ts-expect-error
-              foo: dummyModelVersion(),
-            },
-          })
-        )
-      ).toThrow();
-    });
-
-    it('returns the latest registered version', () => {
-      expect(
-        getLatestModelVersion(
-          buildType({
-            modelVersions: {
-              '1': dummyModelVersion(),
-              '2': dummyModelVersion(),
-              '3': dummyModelVersion(),
-            },
-          })
-        )
-      ).toEqual(3);
-    });
-
-    it('accepts provider functions', () => {
-      expect(
-        getLatestModelVersion(
-          buildType({
-            modelVersions: () => ({
-              '1': dummyModelVersion(),
-              '2': dummyModelVersion(),
-              '3': dummyModelVersion(),
-            }),
-          })
-        )
-      ).toEqual(3);
-    });
-
-    it('supports unordered maps', () => {
-      expect(
-        getLatestModelVersion(
-          buildType({
-            modelVersions: {
-              '3': dummyModelVersion(),
-              '1': dummyModelVersion(),
-              '2': dummyModelVersion(),
-            },
-          })
-        )
-      ).toEqual(3);
-    });
-  });
-
   describe('getModelVersionMapForTypes', () => {
     it('returns a map with the latest version of the provided types', () => {
       expect(
@@ -142,53 +78,6 @@ describe('ModelVersion map utilities', () => {
         bar: 0,
         dolly: 3,
       });
-    });
-  });
-
-  describe('getCurrentVirtualVersion', () => {
-    it('returns the latest migration if modelVersions are not defined', () => {
-      expect(
-        getCurrentVirtualVersion(
-          buildType({
-            migrations: {
-              '7.17.2': dummyMigration,
-              '8.6.0': dummyMigration,
-            },
-          }),
-          false
-        )
-      ).toEqual('8.6.0');
-    });
-
-    it('returns the default modelVersion (10.0.0) if modelVersions are not defined and we disregard legacy migrations', () => {
-      expect(
-        getCurrentVirtualVersion(
-          buildType({
-            migrations: {
-              '7.17.2': dummyMigration,
-              '8.6.0': dummyMigration,
-            },
-          }),
-          true
-        )
-      ).toEqual('10.0.0');
-    });
-
-    it('returns the virtual version of the latest model version if the type has modelVersions', () => {
-      expect(
-        getCurrentVirtualVersion(
-          buildType({
-            migrations: {
-              '7.17.2': dummyMigration,
-              '8.6.0': dummyMigration,
-            },
-            modelVersions: {
-              1: dummyModelVersion(),
-            },
-          }),
-          false
-        )
-      ).toEqual('10.1.0');
     });
   });
 

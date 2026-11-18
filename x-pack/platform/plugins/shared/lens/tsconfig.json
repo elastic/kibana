@@ -165,7 +165,8 @@
     "@kbn/managed-content-badge",
     "@kbn/core-http-common",
     "@kbn/coloring-components",
-    "@kbn/palettes-components"
+    "@kbn/palettes-components",
+    "@kbn/saved-objects-management-plugin"
   ],
   "exclude": ["target/**/*"]
 }

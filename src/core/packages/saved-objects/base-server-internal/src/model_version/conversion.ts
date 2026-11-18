@@ -8,21 +8,7 @@
  */
 
 import Semver from 'semver';
-import { modelVersionVirtualMajor } from './constants';
-
-/**
- * Returns the virtual version associated with the given model version
- *
- * @example
- * ```
- * modelVersionToVirtualVersion(5); // "10.5.0";
- * modelVersionToVirtualVersion("3"); // "10.3.0";
- * ```
- */
-export const modelVersionToVirtualVersion = (modelVersion: number | string) => {
-  const validatedModelVersion = assertValidModelVersion(modelVersion);
-  return `${modelVersionVirtualMajor}.${validatedModelVersion}.0`;
-};
+import { modelVersionVirtualMajor } from '@kbn/core-saved-objects-utils-server';
 
 /**
  * Return true if the given semver version is a virtual model version.
@@ -61,33 +47,6 @@ export const virtualVersionToModelVersion = (virtualVersion: string): number => 
     throw new Error(`Version is not a virtual model version`);
   }
   return semver.minor;
-};
-
-/**
- * Asserts the provided number or string is a valid model version, and returns it.
- *
- * A valid model version is a positive integer.
- *
- * @example
- * ```
- * assertValidModelVersion("7"); // 7
- * assertValidModelVersion(4); // 4
- * assertValidModelVersion("foo"); // throw
- * assertValidModelVersion("9.7"); // throw
- * assertValidModelVersion("-3"); // throw
- * ```
- */
-export const assertValidModelVersion = (modelVersion: string | number): number => {
-  if (typeof modelVersion === 'string') {
-    modelVersion = parseFloat(modelVersion);
-  }
-  if (!Number.isInteger(modelVersion)) {
-    throw new Error('Model version must be an integer');
-  }
-  if (modelVersion < 0) {
-    throw new Error('Model version cannot be negative');
-  }
-  return modelVersion;
 };
 
 export const assertValidVirtualVersion = (virtualVersion: string): string => {

@@ -13,11 +13,11 @@ import type {
   ISavedObjectTypeRegistry,
   ModelVersionIdentifier,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsTypeValidator } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  SavedObjectsTypeValidator,
   getLatestModelVersion,
   modelVersionToVirtualVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-utils-server';
 import {
   SavedObjectsErrorHelpers,
   type SavedObjectSanitizedDoc,

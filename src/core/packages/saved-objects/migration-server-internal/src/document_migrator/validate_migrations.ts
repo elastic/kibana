@@ -15,10 +15,8 @@ import type {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsModelVersionMap,
 } from '@kbn/core-saved-objects-server';
-import {
-  assertValidModelVersion,
-  globalSwitchToModelVersionAt,
-} from '@kbn/core-saved-objects-base-server-internal';
+import { globalSwitchToModelVersionAt } from '@kbn/core-saved-objects-base-server-internal';
+import { assertValidModelVersion } from '@kbn/core-saved-objects-utils-server';
 import type {
   SavedObjectsModelChange,
   SavedObjectsModelMappingsAdditionChange,

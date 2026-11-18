@@ -16,4 +16,11 @@ export {
   FIND_DEFAULT_PER_PAGE,
 } from './src/saved_objects_utils';
 
+export {
+  modelVersionVirtualMajor,
+  assertValidModelVersion,
+  modelVersionToVirtualVersion,
+  getLatestModelVersion,
+  getCurrentVirtualVersion,
+} from './src/virtual_version';
 export { setsAreEqual, arrayMapsAreEqual, setMapsAreEqual } from './src/saved_objects_test_utils';

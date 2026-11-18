@@ -12,6 +12,7 @@ import { toAsCodeTags, toStoredTags } from '@kbn/as-code-shared-transforms';
 
 import type { LensSavedObject, LensUpdateIn } from '../../../content_management/zod';
 import type { LensCreateRequestBody, LensResponseItem, LensUpdateRequestBody } from './types';
+import type { LensApiConfigLibItemNoESQL } from './schema/common';
 
 /**
  * Converts Lens request data to Lens Config
@@ -36,9 +37,20 @@ export function getLensResponseItem(
   builder: LensConfigBuilder,
   item: LensSavedObject
 ): LensResponseItem {
-  const { id, references, attributes } = item;
-  const meta = getLensResponseItemMeta(item);
+  return {
+    id: item.id,
+    data: getLensApiData(builder, item),
+    meta: getLensResponseItemMeta(item),
+  } satisfies LensResponseItem;
+}
 
+/**
+ * Converts stored Lens attributes and references to the by-reference API body; throws for ES|QL charts.
+ */
+export function getLensApiData(
+  builder: LensConfigBuilder,
+  { attributes, references }: Pick<LensSavedObject, 'attributes' | 'references'>
+): LensApiConfigLibItemNoESQL {
   const { tags } = toAsCodeTags(references);
   const chartData = builder.toAPIFormat({
     references,
@@ -51,11 +63,7 @@ export function getLensResponseItem(
   const data = { ...chartData, tags };
 
   if (isLensDSLConfig(data)) {
-    return {
-      id,
-      data,
-      meta,
-    } satisfies LensResponseItem;
+    return data;
   }
 
   throw new Error('ES|QL charts are not supported in by-ref Lens');

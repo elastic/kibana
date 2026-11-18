@@ -9,10 +9,12 @@
 
 import type {
   ISavedObjectsImporter,
+  ISavedObjectTypeRegistry,
   SavedObject,
   SavedObjectsImportResponse,
   SavedObjectTypeIdTuple,
 } from '@kbn/core/server';
+import { getCurrentVirtualVersion } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
 import { prettifyError } from '@kbn/zod';
 import type { ApiBodyRegistry } from '../api_body_registry';
@@ -63,11 +65,13 @@ const writePendingObjects = async (
 export const importReferencedObjects = async ({
   importer,
   registry,
+  typeRegistry,
   objects,
   mode,
 }: ImportReferencedObjectsRequest & {
   importer: ISavedObjectsImporter;
   registry: ApiBodyRegistry;
+  typeRegistry: ISavedObjectTypeRegistry;
 }): Promise<ImportReferencedObjectsResponse> => {
   const results = new Map<string, ImportResult>();
   const storedObjects: SavedObject[] = [];
@@ -97,7 +101,18 @@ export const importReferencedObjects = async ({
 
     try {
       const { attributes, references } = entry.toStored(parsed.data);
-      storedObjects.push({ type, id, attributes, references });
+      const savedObjectType = typeRegistry.getType(type);
+      storedObjects.push({
+        type,
+        id,
+        attributes,
+        references,
+        // toStored gives the current shape. Without a version, core's importer would run every
+        // migration from the first one, as for a legacy export.
+        ...(savedObjectType && {
+          typeMigrationVersion: getCurrentVirtualVersion(savedObjectType, false),
+        }),
+      });
     } catch (e) {
       addError('transform_failed', e.message);
     }

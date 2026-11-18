@@ -57,16 +57,11 @@ export {
   type FieldListMap,
 } from './src/utils';
 export {
-  modelVersionVirtualMajor,
   initialModelVersion,
   globalSwitchToModelVersionAt,
-  assertValidModelVersion,
   isVirtualModelVersion,
   virtualVersionToModelVersion,
-  modelVersionToVirtualVersion,
   getModelVersionMapForTypes,
-  getLatestModelVersion,
-  getCurrentVirtualVersion,
   getVirtualVersionMap,
   getLatestMappingsVirtualVersionMap,
   type ModelVersionMap,

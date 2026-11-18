@@ -22,6 +22,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { SavedObjectsManagementPluginSetup } from '@kbn/saved-objects-management-plugin/server';
 
 import type {
   TaskManagerSetupContract,
@@ -42,6 +43,7 @@ import type { CustomVisualizationMigrations } from './migrations/types';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
 import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
+import { createLensApiBodyEntry } from './api/api_body_entry';
 import { fetchLensFeatureFlags } from '../common';
 import { registerLensEmbeddableTransforms } from './transforms';
 import { registerLensEmbeddableTransformsForDashboardApp } from './dashboard_app_transforms';
@@ -54,6 +56,7 @@ export interface PluginSetupContract {
   data: DataPluginSetup;
   share?: SharePluginSetup;
   contentManagement: ContentManagementServerSetup;
+  savedObjectsManagement: SavedObjectsManagementPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -123,6 +126,10 @@ export class LensServerPlugin
     );
 
     const builder = new LensConfigBuilder();
+    plugins.savedObjectsManagement.registerApiBodyEntry(
+      LENS_CONTENT_TYPE,
+      createLensApiBodyEntry(builder)
+    );
 
     registerLensAPIRoutes({
       http: core.http,

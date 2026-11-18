@@ -18,8 +18,8 @@ import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 import {
   SavedObjectsSerializer,
   SavedObjectTypeRegistry,
-  modelVersionToVirtualVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-utils-server';
 import { getOutdatedDocumentsQuery } from '@kbn/core-saved-objects-migration-server-internal/src/zdt/utils';
 
 export const logFilePath = Path.join(__dirname, 'outdated_doc_query.test.log');

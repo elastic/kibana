@@ -486,6 +486,7 @@ export { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 export {
   SavedObjectsUtils,
   mergeSavedObjectMigrationMaps,
+  getCurrentVirtualVersion,
 } from '@kbn/core-saved-objects-utils-server';
 export { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 export type { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';

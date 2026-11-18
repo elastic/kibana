@@ -35,6 +35,7 @@
       "kql",
       "contentManagement",
       "expressionLegacyMetricVis",
+      "savedObjectsManagement",
     ],
     "optionalPlugins": [
       "expressionPartitionVis",

@@ -17,8 +17,11 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { SavedObjectsManagementPluginSetup } from '@kbn/saved-objects-management-plugin/server';
+import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { registerRoutes } from './api/register_routes';
+import { createDiscoverSessionApiBodyEntry } from './api/api_body_entry';
 import { changePointGridEmbeddableSchema } from './embeddable/change_point_grid_schema';
 import { getChangePointGridTransforms } from './embeddable/change_point_grid_transforms';
 import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
@@ -60,6 +63,7 @@ export class DiscoverServerPlugin
       data: DataPluginSetup;
       embeddable: EmbeddableSetup;
       home?: HomeServerPluginSetup;
+      savedObjectsManagement: SavedObjectsManagementPluginSetup;
       share?: SharePluginSetup;
       usageCollection?: UsageCollectionSetup;
     }
@@ -72,6 +76,10 @@ export class DiscoverServerPlugin
       core.userActivity,
       this.logger,
       plugins.usageCollection?.createUsageCounter('discover_sessions_api')
+    );
+    plugins.savedObjectsManagement.registerApiBodyEntry(
+      SavedSearchType,
+      createDiscoverSessionApiBodyEntry()
     );
 
     if (plugins.home) {

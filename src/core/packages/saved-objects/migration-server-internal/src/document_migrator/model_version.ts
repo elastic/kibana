@@ -15,11 +15,13 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import {
-  modelVersionToVirtualVersion,
-  assertValidModelVersion,
   buildModelVersionTransformFn,
   convertModelVersionBackwardConversionSchema,
 } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  modelVersionToVirtualVersion,
+  assertValidModelVersion,
+} from '@kbn/core-saved-objects-utils-server';
 import { TransformSavedObjectDocumentError } from '../core';
 import { type Transform, type TransformFn, TransformType, type TypeVersionSchema } from './types';
 

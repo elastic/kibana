@@ -7,21 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  modelVersionVirtualMajor,
-  initialModelVersion,
-  globalSwitchToModelVersionAt,
-} from './constants';
-export {
-  assertValidModelVersion,
-  isVirtualModelVersion,
-  modelVersionToVirtualVersion,
-  virtualVersionToModelVersion,
-} from './conversion';
+export { initialModelVersion, globalSwitchToModelVersionAt } from './constants';
+export { isVirtualModelVersion, virtualVersionToModelVersion } from './conversion';
 export {
   getModelVersionMapForTypes,
-  getLatestModelVersion,
-  getCurrentVirtualVersion,
   getVirtualVersionMap,
   getLatestMappingsVirtualVersionMap,
   type ModelVersionMap,

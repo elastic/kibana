@@ -12,10 +12,8 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SavedObjectsType, SavedObject } from '@kbn/core-saved-objects-server';
-import {
-  modelVersionToVirtualVersion,
-  SavedObjectTypeRegistry,
-} from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-utils-server';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
