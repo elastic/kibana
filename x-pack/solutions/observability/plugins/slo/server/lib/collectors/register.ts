@@ -135,18 +135,20 @@ export function registerSloUsageCollector(
           },
         },
         by_budgeting_method: {
-          DYNAMIC_KEY: {
+          occurrences: {
             type: 'long',
             _meta: {
-              description: 'The number of composite SLOs by budgeting method in the cluster',
+              description:
+                'The number of composite SLOs using the occurrences budgeting method in the cluster',
             },
           },
         },
         by_composite_method: {
-          DYNAMIC_KEY: {
+          weightedAverage: {
             type: 'long',
             _meta: {
-              description: 'The number of composite SLOs by composite method in the cluster',
+              description:
+                'The number of composite SLOs using the weighted average composite method in the cluster',
             },
           },
         },

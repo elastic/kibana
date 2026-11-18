@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { StoredCompositeSLODefinition } from '../../domain/models';
+
 export interface Usage {
   slo: {
     total: number; // deprecated
@@ -43,10 +45,10 @@ export interface Usage {
       disabled: number;
     };
     by_budgeting_method: {
-      [budgeting_method: string]: number;
+      occurrences: number;
     };
     by_composite_method: {
-      [composite_method: string]: number;
+      weightedAverage: number;
     };
     members: {
       min: number;
@@ -56,3 +58,19 @@ export interface Usage {
     };
   };
 }
+
+/**
+ * The telemetry schema parser (`scripts/telemetry_check`) walks the usage type statically and cannot
+ * follow types inferred from zod, so the `by_composite_method` and `by_budgeting_method` keys above
+ * are written by hand. These checks fail to compile when `compositeMethod` or `budgetingMethod`
+ * gain a value the keys do not cover.
+ */
+type AssertCovered<Enum extends Keys, Keys> = Enum;
+export type CompositeBudgetingMethodKeysCheck = AssertCovered<
+  StoredCompositeSLODefinition['budgetingMethod'],
+  keyof Usage['composite']['by_budgeting_method']
+>;
+export type CompositeMethodKeysCheck = AssertCovered<
+  StoredCompositeSLODefinition['compositeMethod'],
+  keyof Usage['composite']['by_composite_method']
+>;

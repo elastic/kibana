@@ -22,8 +22,8 @@ export type GetCompositeSoClient = () => Promise<SavedObjectsClientContract>;
 const getEmptyCompositeUsage = (): Usage['composite'] => ({
   definitions: { total: 0 },
   by_status: { enabled: 0, disabled: 0 },
-  by_budgeting_method: {},
-  by_composite_method: {},
+  by_budgeting_method: { occurrences: 0 },
+  by_composite_method: { weightedAverage: 0 },
   members: { min: 0, avg: 0, max: 0, at_max_count: 0 },
 });
 
@@ -50,10 +50,8 @@ const fetchCompositeUsage = async (
 
         usage.definitions.total += 1;
         usage.by_status[enabled ? 'enabled' : 'disabled'] += 1;
-        usage.by_budgeting_method[budgetingMethod] =
-          (usage.by_budgeting_method[budgetingMethod] ?? 0) + 1;
-        usage.by_composite_method[compositeMethod] =
-          (usage.by_composite_method[compositeMethod] ?? 0) + 1;
+        usage.by_budgeting_method[budgetingMethod] += 1;
+        usage.by_composite_method[compositeMethod] += 1;
 
         totalMembers += membersCount;
         usage.members.min =

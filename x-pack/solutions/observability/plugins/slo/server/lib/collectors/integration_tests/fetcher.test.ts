@@ -136,8 +136,8 @@ describe('SLO usage collector fetcher', () => {
     const emptyCompositeUsage = {
       definitions: { total: 0 },
       by_status: { enabled: 0, disabled: 0 },
-      by_budgeting_method: {},
-      by_composite_method: {},
+      by_budgeting_method: { occurrences: 0 },
+      by_composite_method: { weightedAverage: 0 },
       members: { min: 0, avg: 0, max: 0, at_max_count: 0 },
     };
 
