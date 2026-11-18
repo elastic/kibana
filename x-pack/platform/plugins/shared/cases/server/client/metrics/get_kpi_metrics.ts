@@ -34,6 +34,7 @@ import { combineAuthorizedAndOwnerFilter } from '../utils';
 import {
   isAlertTimeToAcknowledgeMetric,
   runAlertTimeToAcknowledgeMetrics,
+  resolveKpiRange,
   runKpiMetrics,
   toKpiMetricError,
 } from './kpi';
@@ -154,7 +155,12 @@ export const getKpiMetrics = async (
       };
     }
 
-    const context = { spaceId, owner, from, to, caseIds: filteredCases?.ids };
+    const context = {
+      spaceId,
+      owner,
+      ...resolveKpiRange({ from, to }),
+      caseIds: filteredCases?.ids,
+    };
     const [customResults, serverPredefinedResults] = await Promise.all([
       runKpiMetrics({ metrics: customMetrics, context, reader: analyticsV2Reader }),
       runAlertTimeToAcknowledgeMetrics({

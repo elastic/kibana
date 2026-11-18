@@ -7,6 +7,7 @@
 
 export type { KpiQueryContext, KpiSearchRequest } from './query_builder';
 export { buildKpiMetricSearch } from './query_builder';
+export { resolveKpiRange } from './period';
 export { runKpiMetrics } from './run';
 export {
   isAlertTimeToAcknowledgeMetric,

@@ -6,6 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
+import moment from 'moment';
 
 export interface KpiPeriod {
   from: string;
@@ -13,7 +14,44 @@ export interface KpiPeriod {
 }
 
 /**
+ * A moment factory in UTC, as Elasticsearch calculates date math. `dateMath.parse` calls
+ * `momentInstance.isMoment`, so the factory must carry the static functions of moment.
+ */
+const utcMoment: typeof moment = Object.assign(
+  (input?: moment.MomentInput) => moment.utc(input),
+  moment
+);
+
+const isDateMath = (value: string): boolean => value.startsWith('now');
+
+/**
+ * Resolves the date math of the range (for example `now-30d`) to ISO strings from one instant, in UTC.
+ * A date that is not date math stays as it is. Use the result for the current range and for the previous period,
+ * so both come from the same instant and the same time zone.
+ */
+export const resolveKpiRange = (
+  { from, to }: { from?: string; to?: string },
+  now: Date = new Date()
+): { from?: string; to?: string } => {
+  const resolve = (value: string | undefined, roundUp: boolean): string | undefined => {
+    if (value == null || !isDateMath(value)) {
+      return value;
+    }
+
+    const resolved = dateMath.parse(value, { roundUp, forceNow: now, momentInstance: utcMoment });
+
+    return resolved?.isValid() ? resolved.toISOString() : value;
+  };
+
+  return {
+    ...(from != null && { from: resolve(from, false) }),
+    ...(to != null && { to: resolve(to, true) }),
+  };
+};
+
+/**
  * Returns the period of equal length directly before the range, or undefined when the range has no usable start.
+ * The previous period ends 1 ms before the range starts.
  */
 export const getPreviousPeriod = (
   { from, to }: { from?: string; to?: string },
@@ -23,8 +61,11 @@ export const getPreviousPeriod = (
     return;
   }
 
-  const start = dateMath.parse(from, { forceNow: now });
-  const end = to == null ? now : dateMath.parse(to, { roundUp: true, forceNow: now })?.toDate();
+  const start = dateMath.parse(from, { forceNow: now, momentInstance: utcMoment });
+  const end =
+    to == null
+      ? now
+      : dateMath.parse(to, { roundUp: true, forceNow: now, momentInstance: utcMoment })?.toDate();
 
   if (start == null || !start.isValid() || end == null || Number.isNaN(end.getTime())) {
     return;

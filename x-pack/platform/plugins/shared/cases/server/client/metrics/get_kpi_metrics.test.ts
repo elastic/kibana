@@ -126,6 +126,48 @@ describe('getKpiMetrics', () => {
     expect(clientArgs.analyticsV2Reader.msearch.mock.calls[0][0]).toHaveLength(2);
   });
 
+  it('sends the same resolved instants to the current range and to the previous period', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-11-17T14:37:00.000Z'));
+
+    try {
+      const clientArgs = createClientArgs({ casesList: [customMetric] });
+
+      await getKpiMetrics(
+        { owner: 'securitySolution', from: 'now-30d', to: 'now' },
+        clientArgs,
+        casesClient
+      );
+
+      const [[current, previous]] = clientArgs.analyticsV2Reader.msearch.mock.calls[0];
+      expect(current.body.query?.bool?.filter).toEqual(
+        expect.arrayContaining([
+          {
+            range: {
+              'case.created_at': {
+                gte: '2026-10-18T14:37:00.000Z',
+                lte: '2026-11-17T14:37:00.000Z',
+              },
+            },
+          },
+        ])
+      );
+      expect(previous.body.query?.bool?.filter).toEqual(
+        expect.arrayContaining([
+          {
+            range: {
+              'case.created_at': {
+                gte: '2026-09-18T14:37:00.000Z',
+                lte: '2026-10-18T14:36:59.999Z',
+              },
+            },
+          },
+        ])
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('forces the space and the owner of the request on the search', async () => {
     const clientArgs = createClientArgs({ casesList: [customMetric] });
 
