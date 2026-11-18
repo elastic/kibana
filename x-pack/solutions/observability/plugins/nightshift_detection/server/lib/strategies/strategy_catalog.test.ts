@@ -8,6 +8,7 @@
 import { Container } from 'inversify';
 import { TEST_STRATEGY_ID, createTestStrategy } from '../../test_utils/test_strategy';
 import { DuplicateStrategyError } from '../errors/duplicate_strategy_error';
+import { InvalidStrategyScheduleError } from '../errors/invalid_strategy_schedule_error';
 import { DetectionStrategy } from './detection_strategy';
 import { StrategyCatalog } from './strategy_catalog';
 
@@ -34,6 +35,24 @@ describe('StrategyCatalog', () => {
       DuplicateStrategyError
     );
   });
+
+  it.each([
+    { cadence: 0, settle: 0 },
+    { cadence: 1.5, settle: 0 },
+    { cadence: Number.NaN, settle: 0 },
+    { cadence: 1, settle: -1 },
+  ])(
+    'rejects a strategy with a cadence of $cadence and a settle of $settle',
+    ({ cadence, settle }) => {
+      const strategy = createTestStrategy();
+      const unplannable = {
+        ...strategy,
+        descriptor: { ...strategy.descriptor, cadence_minutes: cadence, settle_minutes: settle },
+      };
+
+      expect(() => createCatalog([unplannable])).toThrow(InvalidStrategyScheduleError);
+    }
+  );
 
   it('is empty when no strategy is bound', () => {
     expect(createCatalog([]).list()).toEqual([]);
