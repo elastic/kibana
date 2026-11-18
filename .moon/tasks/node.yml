@@ -23,6 +23,7 @@ tasks:
       - '@group(default)'
       - '!README*'
       - '!jest.config.{js,cjs,json}'
+      - '!vitest.config.ts'
       - '!**/*.test.{js,mjs,ts,tsx}'
       - '!**/*.spec.{js,mjs,ts,tsx}'
       - '!**/__snapshots__/**/*'

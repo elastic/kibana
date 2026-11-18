@@ -29,6 +29,7 @@ export const MOON_CONST = {
   DEFAULT_TOOLCHAIN: 'node',
   TAG_JEST_UNIT: 'jest-unit-tests',
   TAG_JEST_INTEGRATION: 'jest-integration-tests',
+  TAG_VITEST_UNIT: 'vitest-unit-tests',
   TAG_SCOUT: 'scout-tests',
   TAG_DEV: 'dev',
   TAG_PROD: 'prod',

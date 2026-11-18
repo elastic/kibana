@@ -43,6 +43,7 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
     // Step 1: Get all config files and all potential test files
     let configFiles: string[];
     let allTestFiles: string[];
+    let vitestConfigs: string[] = [];
 
     if (configPaths && configPaths.length > 0) {
       // Use provided config paths and get test files separately
@@ -64,7 +65,7 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
       // canaries) are never treated as real tests or orphaned. This mirrors CI's
       // discoverJestUnitConfigs, which already ignores **/__fixtures__/**.
       const combinedResult = await execAsync(
-        `git ls-files -- '*.test.ts' '*.test.tsx' '**/jest.config.js' '**/*/jest.config.js' '**/jest.config.cjs' '**/*/jest.config.cjs' '**/jest.integration.config.js' '**/*/jest.integration.config.js' '**/jest.integration.config.cjs' '**/*/jest.integration.config.cjs' ':(glob,exclude)**/__fixtures__/**'`,
+        `git ls-files -- '*.test.ts' '*.test.tsx' '**/jest.config.js' '**/*/jest.config.js' '**/jest.config.cjs' '**/*/jest.config.cjs' '**/jest.integration.config.js' '**/*/jest.integration.config.js' '**/jest.integration.config.cjs' '**/*/jest.integration.config.cjs' '**/*/vitest.config.ts' ':(glob,exclude)**/__fixtures__/**'`,
         { cwd: REPO_ROOT, maxBuffer: 1024 * 1024 * 10 }
       );
 
@@ -80,6 +81,7 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
 
       configFiles = allFiles.filter((file) => configPattern.test(file));
       allTestFiles = allFiles.filter((file) => testPattern.test(file));
+      vitestConfigs = allFiles.filter((file) => file.endsWith(`${osSep}vitest.config.ts`));
     }
 
     // Step 2: Parse all config files in parallel and apply Jest matching rules using fast heuristic
@@ -174,6 +176,18 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
       });
     });
 
+    // Packages migrated to Vitest own their unit tests; a Jest config matching them too is a duplicate.
+    allTestFiles.forEach((testFile) => {
+      const vitestConfig = findVitestConfig(testFile, vitestConfigs);
+      if (vitestConfig) {
+        finalTestFileToConfigs.set(testFile, [
+          ...(finalTestFileToConfigs.get(testFile) || []),
+          vitestConfig,
+        ]);
+        coveredTestFiles.add(testFile);
+      }
+    });
+
     // Find orphaned test files
     const orphanedTestFiles = allTestFiles.filter((testFile) => !coveredTestFiles.has(testFile));
 
@@ -186,6 +200,16 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
   } catch (error) {
     throw new Error(`Failed to get tests for configs: ${error}`);
   }
+}
+
+/**
+ * The package `vitest.config.ts` that runs a test file, if any. Integration tests stay on Jest.
+ */
+function findVitestConfig(testFile: string, vitestConfigs: string[]): string | undefined {
+  if (testFile.includes(`${osSep}integration_tests${osSep}`)) {
+    return undefined;
+  }
+  return vitestConfigs.find((config) => testFile.startsWith(`${dirname(config)}${osSep}`));
 }
 
 /**

@@ -218,4 +218,46 @@ describe('getJestConfigs', () => {
     expect(result.emptyConfigs).toHaveLength(0);
     expect(result.orphanedTestFiles).toHaveLength(0);
   });
+
+  it('treats unit tests under a vitest.config.ts as covered, but not integration tests', async () => {
+    mockExecResponder = () => ({
+      stdout: [
+        'pkg/a/jest.config.js',
+        'pkg/a/a.test.ts',
+        'pkg/v/vitest.config.ts',
+        'pkg/v/src/v.test.ts',
+        'pkg/v/integration_tests/v.test.ts',
+      ].join('\n'),
+    });
+
+    const { getJestConfigs } = await import('./get_jest_configs');
+    const result = await getJestConfigs();
+
+    expect(result.orphanedTestFiles).toEqual([
+      resolve('/repo', 'pkg/v/integration_tests/v.test.ts'),
+    ]);
+    expect(result.duplicateTestFiles).toHaveLength(0);
+    expect(result.configsWithTests.map(({ config }) => config)).toEqual([
+      resolve('/repo', 'pkg/a/jest.config.js'),
+    ]);
+  });
+
+  it('reports tests claimed by both a Jest config and a vitest.config.ts', async () => {
+    mockExecResponder = () => ({
+      stdout: ['pkg/jest.config.js', 'pkg/v/vitest.config.ts', 'pkg/v/v.test.ts'].join('\n'),
+    });
+
+    const { getJestConfigs } = await import('./get_jest_configs');
+    const result = await getJestConfigs();
+
+    expect(result.duplicateTestFiles).toEqual([
+      {
+        testFile: resolve('/repo', 'pkg/v/v.test.ts'),
+        configs: [
+          resolve('/repo', 'pkg/jest.config.js'),
+          resolve('/repo', 'pkg/v/vitest.config.ts'),
+        ],
+      },
+    ]);
+  });
 });

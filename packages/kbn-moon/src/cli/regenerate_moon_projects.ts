@@ -299,6 +299,7 @@ function applyTestTaskTags(projectConfig: MoonProjectConfig) {
   const tags = [
     hasConfig('**/jest.config.{js,cjs,json}') && MOON_CONST.TAG_JEST_UNIT,
     hasConfig('**/jest.integration.config.{js,cjs,json}') && MOON_CONST.TAG_JEST_INTEGRATION,
+    hasConfig('**/vitest.config.ts') && MOON_CONST.TAG_VITEST_UNIT,
     hasConfig('**/test/scout*/**/*playwright.config.ts') && MOON_CONST.TAG_SCOUT,
   ].filter((tag): tag is string => Boolean(tag));
 

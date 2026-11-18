@@ -692,6 +692,43 @@ describe('run_check', () => {
   const execaCallFor = (script: string) =>
     mockExeca.mock.calls.find(([, args]: [string, string[]]) => args?.includes(script));
 
+  describe('vitest step', () => {
+    const mockVitestResult = (result: { exitCode: number; stdout: string }) =>
+      mockExeca.mockImplementation(async (_node: string, args: string[]) =>
+        args.includes('scripts/vitest')
+          ? { ...result, stderr: '' }
+          : { exitCode: 0, stdout: '', stderr: '' }
+      );
+
+    it('runs the Vitest tests related to the changed files', async () => {
+      mockVitestResult({ exitCode: 0, stdout: '      Tests  12 passed (12)' });
+
+      await handler(createArgs());
+
+      expect(execaCallFor('scripts/vitest')?.[1]).toEqual([
+        'scripts/vitest',
+        'related',
+        '--run',
+        '--passWithNoTests',
+        'packages/foo/src/index.ts',
+      ]);
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('vitest✓ 12 tests');
+    });
+
+    it('reports Vitest failures with a rerun command', async () => {
+      mockVitestResult({ exitCode: 1, stdout: ' FAIL  src/foo.test.ts > breaks' });
+
+      await handler(createArgs());
+
+      expect(process.exitCode).toBe(1);
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('vitest✗ failed');
+      expect(output).toContain('FAIL  src/foo.test.ts > breaks');
+      expect(output).toContain('node scripts/vitest related packages/foo/src/index.ts');
+    });
+  });
+
   describe('tsproj step', () => {
     it('prints "no scoped projects" when only root-level inputs are affected', async () => {
       mockResolveValidationAffectedProjects.mockResolvedValue({

@@ -87,7 +87,8 @@ describe('runCheckJestConfigsCli', () => {
     runCheckJestConfigsCli();
 
     expect(mockRun).toHaveBeenCalledWith(expect.any(Function), {
-      description: 'Check that all test files are covered by one, and only one, Jest config',
+      description:
+        'Check that all test files are covered by one, and only one, Jest or Vitest config',
     });
   });
 
@@ -127,7 +128,7 @@ describe('runCheckJestConfigsCli', () => {
     await expect(runCallback({ log: mockLog })).rejects.toThrow('Test error');
 
     expect(mockLog.error).toHaveBeenCalledWith(
-      'The following test files are not selected by any jest config file:\n - pkg/b/test2.test.ts'
+      'The following test files are not selected by any jest or vitest config file:\n - pkg/b/test2.test.ts'
     );
     expect(mockCreateFailError).toHaveBeenCalledWith(
       'Please resolve the previously logged issues.'
@@ -248,7 +249,7 @@ describe('runCheckJestConfigsCli', () => {
 
     // Should report both missing and multiple configs
     expect(mockLog.error).toHaveBeenCalledWith(
-      'The following test files are not selected by any jest config file:\n - orphan/test3.test.ts'
+      'The following test files are not selected by any jest or vitest config file:\n - orphan/test3.test.ts'
     );
     expect(mockLog.error).toHaveBeenCalledWith(
       expect.stringContaining('The following test files are selected by multiple config files:')
@@ -358,7 +359,7 @@ describe('runCheckJestConfigsCli', () => {
       await expect(runCallback({ log: mockLog })).rejects.toThrow();
 
       expect(mockLog.error).toHaveBeenCalledWith(
-        'The following test files are not selected by any jest config file:\n - test1.test.ts\n - test2.test.ts'
+        'The following test files are not selected by any jest or vitest config file:\n - test1.test.ts\n - test2.test.ts'
       );
     });
   });

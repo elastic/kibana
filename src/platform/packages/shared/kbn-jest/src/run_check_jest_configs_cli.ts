@@ -49,7 +49,7 @@ export async function runCheckJestConfigsCli() {
 
       if (missingConfigs.size) {
         log.error(
-          `The following test files are not selected by any jest config file:\n${fmtList(
+          `The following test files are not selected by any jest or vitest config file:\n${fmtList(
             missingConfigs
           )}`
         );
@@ -122,7 +122,8 @@ export async function runCheckJestConfigsCli() {
       log.success('Checked all jest config files in', fmtMs(performance.now() - start));
     },
     {
-      description: 'Check that all test files are covered by one, and only one, Jest config',
+      description:
+        'Check that all test files are covered by one, and only one, Jest or Vitest config',
     }
   );
 }

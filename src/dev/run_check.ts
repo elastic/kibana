@@ -237,9 +237,13 @@ const runServerImportGraphCheck = async (): Promise<{ passed: boolean; output: s
   };
 };
 
-const runJestTestsDirectly = async (
-  testFiles: string[]
-): Promise<{ testCount: number; passed: boolean; output: string }> => {
+interface DirectTestRun {
+  testCount: number;
+  passed: boolean;
+  output: string;
+}
+
+const runJestTestsDirectly = async (testFiles: string[]): Promise<DirectTestRun> => {
   const execa = (await import('execa')).default;
   const absolutePaths = testFiles.map((f) => Path.resolve(REPO_ROOT, f));
 
@@ -258,6 +262,28 @@ const runJestTestsDirectly = async (
 
   return {
     testCount,
+    passed: result.exitCode === 0,
+    output,
+  };
+};
+
+/** Run the Vitest tests whose import graph reaches any changed file (`vitest related`). */
+const runVitestRelated = async (changedFiles: string[]): Promise<DirectTestRun> => {
+  const execa = (await import('execa')).default;
+  // FORCE_COLOR keeps colour-dependent snapshots stable. NO_COLOR must go: with both set Node emits
+  // a warning, and @kbn/setup-node-env exits non-zero on warnings even when every test passed.
+  const { NO_COLOR, ...env } = process.env;
+  const result = await execa(
+    process.execPath,
+    ['scripts/vitest', 'related', '--run', '--passWithNoTests', ...changedFiles],
+    { cwd: REPO_ROOT, reject: false, extendEnv: false, env: { ...env, FORCE_COLOR: '1' } }
+  );
+
+  const output = [result.stdout, result.stderr].filter(Boolean).join('\n');
+  const testsMatch = stripAnsi(output).match(/Tests\s+.*\((\d+)\)/);
+
+  return {
+    testCount: testsMatch ? parseInt(testsMatch[1], 10) : 0,
     passed: result.exitCode === 0,
     output,
   };
@@ -310,7 +336,7 @@ run(
         baseContext.runContext.kind === 'full' ||
         baseContext.contract.testMode === 'all');
 
-    // Steps run in a fixed order: tsproj → moon → graph → lint → jest → tsc.
+    // Steps run in a fixed order: tsproj → moon → graph → lint → jest → vitest → tsc.
     // @kbn/ts-projects is cached for the process; tsproj autofixes tsconfigs in a
     // subprocess, so lint/tsc must not load TS_PROJECTS until those fixes are on disk.
     // Do not reorder or add top-level imports that pull in @kbn/ts-projects earlier.
@@ -685,6 +711,45 @@ run(
           }
         } catch (error) {
           jestProgress.writeResult(line('jest', '✗', 'failed', jestProgress.elapsed()));
+          errors.push(error instanceof Error ? error : new Error(String(error)));
+        }
+      }
+    }
+
+    // ── vitest ─────────────────────────────────────────────────────────
+
+    {
+      const vitestProgress = startProgress('vitest');
+
+      if (isSkipOrFull) {
+        vitestProgress.writeResult(
+          line('vitest', '—', 'skipped (use scripts/vitest directly)', vitestProgress.elapsed())
+        );
+      } else if (changedFiles.length === 0) {
+        vitestProgress.writeResult(
+          line('vitest', '—', 'no changed files', vitestProgress.elapsed())
+        );
+      } else {
+        try {
+          const result = await runVitestRelated(changedFiles);
+          if (!result.passed) {
+            vitestProgress.writeResult(line('vitest', '✗', 'failed', vitestProgress.elapsed()));
+            writeln('');
+            for (const l of result.output.split('\n').slice(-15)) writeln(`    ${l}`);
+            writeln(`    $ node scripts/vitest related ${changedFiles.join(' ')}`);
+            writeln('');
+            errors.push(new Error('vitest failed'));
+          } else if (result.testCount === 0) {
+            vitestProgress.writeResult(
+              line('vitest', '—', 'no affected tests', vitestProgress.elapsed())
+            );
+          } else {
+            vitestProgress.writeResult(
+              line('vitest', '✓', pluralize(result.testCount, 'test'), vitestProgress.elapsed())
+            );
+          }
+        } catch (error) {
+          vitestProgress.writeResult(line('vitest', '✗', 'failed', vitestProgress.elapsed()));
           errors.push(error instanceof Error ? error : new Error(String(error)));
         }
       }

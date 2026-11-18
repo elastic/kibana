@@ -1,0 +1,35 @@
+$schema: https://moonrepo.dev/schemas/v2/tasks.json
+
+inheritedBy:
+  tags:
+    - vitest-unit-tests
+
+tasks:
+  vitest:
+    command: node
+    tags:
+      - vitest-unit-tests
+    # Through the root config, like CI and `node scripts/vitest`.
+    args:
+      - scripts/vitest.js
+      - '--project'
+      - '$project'
+    deps:
+      - target: '~:test-source-upstream'
+        cacheStrategy: hash
+      - target: 'jest-tooling:hash'
+        cacheStrategy: hash
+    inputs:
+      - '@group(default)'
+      - '!README*'
+      # Other runners own specs and configs; support files can be shared with Vitest.
+      - '!**/*.spec.{js,mjs,ts,tsx}'
+      - '!test/{functional,ftr}/**/*'
+      - '!test/scout*/**/*playwright.config.ts'
+      - '!test/scout*/**/.meta/**/*'
+      - '!**/integration_tests/**/*'
+      - '!**/jest.integration.config.{js,cjs,json}'
+    options:
+      mergeArgs: append
+      cache: false
+      runFromWorkspaceRoot: true
