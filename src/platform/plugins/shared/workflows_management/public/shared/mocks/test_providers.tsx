@@ -29,39 +29,53 @@ interface TestProviderProps {
   initialEntries?: React.ComponentProps<typeof MemoryRouter>['initialEntries'];
 }
 
-export const TestProvider: React.FC<PropsWithChildren<TestProviderProps>> = ({
+/**
+ * Every provider `TestProvider` sets up except `EuiProvider`, for `renderHook` tests that never
+ * render an EUI component and so would pay its theme computation on every mount for nothing.
+ */
+export const HookTestProvider: React.FC<PropsWithChildren<TestProviderProps>> = ({
   children,
   store,
   queryClient,
   services,
   initialEntries,
 }) => {
-  const testStore = store ?? createMockStore();
-  const testQueryClient = queryClient ?? createTestQueryClient();
   const mockServices = services ?? createStartServicesMock();
+  const testStore = store ?? createMockStore(mockServices);
+  const testQueryClient = queryClient ?? createTestQueryClient();
   return (
-    <EuiProvider colorMode="light">
-      <KibanaContextProvider services={mockServices}>
-        <QueryClientProvider client={testQueryClient}>
-          <WorkflowsContextProvider>
-            <WorkflowsUiServicesProvider services={mockServices}>
-              <MemoryRouter initialEntries={initialEntries}>
-                <I18nProviderMock>
-                  <MockAppHeaderProvider chrome={mockServices.chrome}>
-                    <Provider store={testStore}>{children}</Provider>
-                  </MockAppHeaderProvider>
-                </I18nProviderMock>
-              </MemoryRouter>
-            </WorkflowsUiServicesProvider>
-          </WorkflowsContextProvider>
-        </QueryClientProvider>
-      </KibanaContextProvider>
-    </EuiProvider>
+    <KibanaContextProvider services={mockServices}>
+      <QueryClientProvider client={testQueryClient}>
+        <WorkflowsContextProvider>
+          <WorkflowsUiServicesProvider services={mockServices}>
+            <MemoryRouter initialEntries={initialEntries}>
+              <I18nProviderMock>
+                <MockAppHeaderProvider chrome={mockServices.chrome}>
+                  <Provider store={testStore}>{children}</Provider>
+                </MockAppHeaderProvider>
+              </I18nProviderMock>
+            </MemoryRouter>
+          </WorkflowsUiServicesProvider>
+        </WorkflowsContextProvider>
+      </QueryClientProvider>
+    </KibanaContextProvider>
   );
 };
+
+export const TestProvider: React.FC<PropsWithChildren<TestProviderProps>> = (props) => (
+  <EuiProvider colorMode="light">
+    <HookTestProvider {...props} />
+  </EuiProvider>
+);
 
 export const getTestProvider = (params: TestProviderProps): React.FC<PropsWithChildren> => {
   return function WithTestProviders({ children }) {
     return <TestProvider {...params}>{children}</TestProvider>;
+  };
+};
+
+export const getHookTestProvider = (params: TestProviderProps): React.FC<PropsWithChildren> => {
+  return function WithHookTestProviders({ children }) {
+    return <HookTestProvider {...params}>{children}</HookTestProvider>;
   };
 };
