@@ -692,3 +692,257 @@ describe('batches, as Alert Analysis sends them', () => {
     expect(report.alertScores.a).toEqual({ choice: 0.2, benign: 0.2, indicator: 0.2 });
   });
 });
+
+describe('the label and the confidence that the model gives itself', () => {
+  const choiceAnswer = (choice: string, confidence: number, pTp: number) => ({
+    type: 'choice',
+    choice,
+    confidence,
+    probabilities: [
+      { value: 'true_positive', probability: pTp },
+      { value: 'false_positive', probability: 1 - pTp },
+    ],
+  });
+  const withFetch = async (response: unknown, run: () => Promise<void>) => {
+    const mock = jest.fn(async () => ({ ok: true, status: 200, json: async () => response }));
+    const original = global.fetch;
+    global.fetch = mock as unknown as typeof fetch;
+    try {
+      await run();
+    } finally {
+      global.fetch = original;
+    }
+  };
+  const connection = { url: 'https://qa.example', apiKey: 'k', endpoint: '.jev' };
+
+  it('returns the label and the confidence of a choice answer next to the score', async () => {
+    await withFetch(
+      { decision: { answers: { choice: choiceAnswer('true_positive', 0.88, 0.94) } } },
+      async () => {
+        const decision = await makeDecide(connection)('x', 'choice');
+
+        expect(decision.score).toBe(0.94);
+        expect(decision.detail).toEqual({ choice: 'true_positive', confidence: 0.88 });
+      }
+    );
+  });
+
+  it('returns no detail for a yes or no question, which has no label or confidence of its own', async () => {
+    await withFetch({ decision: { answers: { benign: { probability: 0.4 } } } }, async () => {
+      expect((await makeDecide(connection)('x', 'benign')).detail).toBeUndefined();
+    });
+  });
+
+  it('returns the labels and confidences of a batch by position, and nothing for an alert that was not answered', async () => {
+    await withFetch(
+      {
+        decision: {
+          answers: {
+            alert_1: choiceAnswer('false_positive', 0.9, 0.05),
+            alert_3: choiceAnswer('true_positive', 0.5, 0.75),
+          },
+        },
+      },
+      async () => {
+        const { details } = await makeDecideBatch(connection)('x', 'choice', 3);
+
+        expect(details).toEqual([
+          { choice: 'false_positive', confidence: 0.9 },
+          undefined,
+          { choice: 'true_positive', confidence: 0.5 },
+        ]);
+      }
+    );
+  });
+
+  it('collects the details of the choice wording for each repeat, and of no other wording', async () => {
+    const decide: Decide = async (_input, wording) => ({
+      score: 0.2,
+      ms: 1,
+      detail: { choice: 'false_positive', confidence: wording === 'choice' ? 0.7 : 0.1 },
+    });
+
+    const { scored: result } = await scoreAlerts({
+      alerts: [
+        {
+          id: 'a',
+          doc: { 'process.executable': 'C:\\a.exe' },
+          truth: truthOf('false_positive'),
+        },
+      ],
+      decide,
+      repeats: 2,
+      concurrency: 1,
+      pause: async () => undefined,
+    });
+
+    expect(result[0].choiceDetails).toEqual([
+      { choice: 'false_positive', confidence: 0.7 },
+      { choice: 'false_positive', confidence: 0.7 },
+    ]);
+  });
+
+  it('gives each alert of a batch the details of its own position', async () => {
+    const decideBatch: DecideBatch = async (_input, wording, count) => ({
+      scores: Array(count).fill(0.3),
+      ms: 1,
+      details: Array.from({ length: count }, (_unused, index) =>
+        wording === 'choice'
+          ? { choice: 'true_positive', confidence: (index + 1) / 10 }
+          : { choice: 'false_positive', confidence: 0.99 }
+      ),
+    });
+    const alert = (id: string, minute: number): SampleAlert => ({
+      id,
+      doc: {
+        '@timestamp': `2026-11-15T10:0${minute}:00.000Z`,
+        'kibana.alert.rule.uuid': 'A',
+        'process.executable': 'C:\\a.exe',
+      },
+      truth: truthOf('false_positive'),
+    });
+
+    const { scored: result } = await scoreAlertsInBatches({
+      alerts: [alert('first', 1), alert('second', 2)],
+      decideBatch,
+      repeats: 1,
+      concurrency: 1,
+      pause: async () => undefined,
+    });
+
+    const byId = Object.fromEntries(result.map(({ id, choiceDetails }) => [id, choiceDetails]));
+    expect(byId).toEqual({
+      first: [{ choice: 'true_positive', confidence: 0.1 }],
+      second: [{ choice: 'true_positive', confidence: 0.2 }],
+    });
+  });
+
+  it('reports, per alert, the label picked most often, the mean confidence and the attack probability', () => {
+    const report = buildJevReport({
+      alerts: [
+        scored('a', truthOf('true_positive'), 0.8, {
+          choiceDetails: [
+            { choice: 'true_positive', confidence: 0.6 },
+            { choice: 'false_positive', confidence: 0.2 },
+            { choice: 'true_positive', confidence: 0.7 },
+          ],
+        }),
+        scored('b', truthOf('false_positive'), 0.1),
+      ],
+    });
+
+    expect(report.alertAnswers.a).toEqual({
+      choice: 'true_positive',
+      confidence: 0.5,
+      attackProbability: 0.8,
+    });
+    expect(report.alertAnswers.b).toEqual({
+      choice: null,
+      confidence: null,
+      attackProbability: 0.1,
+    });
+  });
+
+  it('takes the first label when two labels occur equally often', () => {
+    const report = buildJevReport({
+      alerts: [
+        scored('t', truthOf('true_positive'), 0.5, {
+          choiceDetails: [
+            { choice: 'false_positive', confidence: 0.5 },
+            { choice: 'true_positive', confidence: 0.5 },
+          ],
+        }),
+      ],
+    });
+
+    expect(report.alertAnswers.t.choice).toBe('false_positive');
+  });
+});
+
+describe('extra fields in the input', () => {
+  const doc = {
+    'kibana.alert.rule.name': 'Rule One',
+    'kibana.alert.reason': '258 events in 5 minutes against a usual 6',
+    'kibana.alert.workflow_tags': ['az:true_positive'],
+    'host.name': 'host-1',
+  };
+
+  it('shows the extra fields after the fields that Alert Analysis shows, and nothing extra by default', () => {
+    const withReason = alertInput(doc, ['kibana.alert.reason']);
+
+    expect(withReason).toContain(
+      '- kibana.alert.reason: 258 events in 5 minutes against a usual 6'
+    );
+    expect(withReason.indexOf('host.name')).toBeLessThan(withReason.indexOf('kibana.alert.reason'));
+    expect(alertInput(doc)).not.toContain('kibana.alert.reason');
+  });
+
+  it('never shows the workflow tags, even when they are asked for, because they can hold a verdict', () => {
+    expect(alertInput(doc, ['kibana.alert.workflow_tags'])).not.toContain('az:true_positive');
+  });
+
+  it('shows a field once, when it is asked for and Alert Analysis shows it already', () => {
+    const input = alertInput(doc, ['host.name', 'host.name']);
+
+    expect(input.match(/- host\.name:/g)).toHaveLength(1);
+  });
+
+  it('leaves out an extra field that the alert does not have', () => {
+    expect(alertInput(doc, ['kibana.alert.threshold_result.count'])).not.toContain(
+      'threshold_result'
+    );
+  });
+
+  it('puts the extra fields in every alert of a batch', () => {
+    const input = batchInput(
+      [doc, { ...doc, 'kibana.alert.reason': 'another reason' }],
+      ['kibana.alert.reason']
+    );
+
+    expect(input).toContain('Alert 1:');
+    expect(input).toContain('258 events in 5 minutes against a usual 6');
+    expect(input).toContain('another reason');
+    expect(batchInput([doc])).not.toContain('258 events');
+  });
+
+  it('sends the extra fields to the model in both modes, and records them in the report', async () => {
+    const seen: string[] = [];
+    const decide: Decide = async (input) => {
+      seen.push(input);
+      return { score: 0.2, ms: 1 };
+    };
+    const sampleAlert: SampleAlert = {
+      id: 'a',
+      doc: { ...doc, 'process.executable': 'C:\\a.exe' },
+      truth: truthOf('false_positive'),
+    };
+
+    await scoreAlerts({
+      alerts: [sampleAlert],
+      decide,
+      repeats: 1,
+      concurrency: 1,
+      extraFields: ['kibana.alert.reason'],
+      pause: async () => undefined,
+    });
+    const batchSeen: string[] = [];
+    await scoreAlertsInBatches({
+      alerts: [sampleAlert],
+      decideBatch: async (input, _wording, count) => {
+        batchSeen.push(input);
+        return { scores: Array(count).fill(0.2), ms: 1 };
+      },
+      repeats: 1,
+      concurrency: 1,
+      extraFields: ['kibana.alert.reason'],
+      pause: async () => undefined,
+    });
+
+    expect(seen.every((input) => input.includes('258 events'))).toBe(true);
+    expect(batchSeen.every((input) => input.includes('258 events'))).toBe(true);
+    expect(
+      buildJevReport({ alerts: [], extraFields: ['kibana.alert.reason'] }).extraFields
+    ).toEqual(['kibana.alert.reason']);
+    expect(buildJevReport({ alerts: [] }).extraFields).toEqual([]);
+  });
+});

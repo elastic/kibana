@@ -24,6 +24,7 @@
  *   QA_ES_URL=... QA_ES_API_KEY=... node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/jev_experiment_cli.js \
  *     --data <sample folder> --out <report.json> [--es http://localhost:9200 --haiku-window <from>,<to> ...] \
  *     [--endpoint .typesafe-jev-1.13_decision] [--repeats 2] [--concurrency 4] [--limit N] [--batch [--batch-size 50]] \
+ *     [--extra-fields kibana.alert.reason,...] \
  *     [--dry-run | --confirm-data-ok]
  *
  * With `--batch` the alerts go to the model the way Alert Analysis sends them to a language model: one call for each batch of
@@ -54,6 +55,9 @@ interface Wording {
 }
 
 interface Answer {
+  /** A choice answer: the label that the model picked, and its own confidence. */
+  choice?: string;
+  confidence?: number;
   probability?: number;
   probabilities?: Array<{ value: string; probability: number }> | Record<string, number>;
 }
@@ -65,6 +69,17 @@ const probabilityOf = (answer: Answer, value: string): number | undefined => {
   }
   return probabilities?.[value];
 };
+
+/** The label and the confidence that the model gave to a choice question, besides the probabilities. */
+export interface ChoiceDetail {
+  choice: string;
+  confidence: number;
+}
+
+const choiceDetailOf = (answer: Answer): ChoiceDetail | undefined =>
+  typeof answer.choice === 'string' && typeof answer.confidence === 'number'
+    ? { choice: answer.choice, confidence: answer.confidence }
+    : undefined;
 
 export const WORDINGS: Readonly<Record<WordingName, Wording>> = {
   choice: {
@@ -140,14 +155,19 @@ const asText = (value: unknown): string | undefined => {
   return text.length > MAX_VALUE_LENGTH ? `${text.slice(0, MAX_VALUE_LENGTH)}...` : text;
 };
 
+/** Never shown to the model, because they can hold verdicts. */
+const HIDDEN_FIELDS: readonly string[] = ['kibana.alert.workflow_tags'];
+
 /**
- * The input of one call: the rule name and the fields that the Alert Analysis prompt reads (`ALERT_ANALYSIS_FIELDS`), so that
- * the model sees what Haiku saw. The workflow tags of the alert are left out, because they can hold verdicts.
+ * The input of one call: the fields that the Alert Analysis prompt reads (`ALERT_ANALYSIS_FIELDS`), so that the model sees what
+ * Haiku saw, and then `extraFields`, to test what more context does. The workflow tags are never shown, because they can hold
+ * verdicts.
  */
-export const alertInput = (doc: Doc): string => {
-  const lines = ALERT_ANALYSIS_FIELDS.filter(
-    (field) => field !== 'kibana.alert.workflow_tags'
-  ).flatMap((field) => {
+export const alertInput = (doc: Doc, extraFields: readonly string[] = []): string => {
+  const fields = [...new Set([...ALERT_ANALYSIS_FIELDS, ...extraFields])].filter(
+    (field) => !HIDDEN_FIELDS.includes(field)
+  );
+  const lines = fields.flatMap((field) => {
     const text = asText(getField(doc as Record<string, unknown>, field));
     return text === undefined ? [] : [`- ${field}: ${text}`];
   });
@@ -172,17 +192,30 @@ export interface ScoredAlert {
   /** `none` for an alert with no strict key, `single` for the only alert of its key in the sample, `repeated` otherwise. */
   keyed: 'none' | 'single' | 'repeated';
   scores: Readonly<Record<WordingName, readonly number[]>>;
+  /** The label and the confidence of the choice wording, one for each repeat that answered. */
+  choiceDetails?: readonly ChoiceDetail[];
 }
 
-const round = (value: number): number => Number(value.toFixed(4));
+/** The value that occurs most often. The first one wins a tie. `null` for an empty list. */
+const mostCommon = (values: readonly string[]): string | null => {
+  const counts = new Map<string, number>();
+  values.forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1));
+  let best: string | null = null;
+  counts.forEach((count, value) => {
+    if (best === null || count > (counts.get(best) ?? 0)) best = value;
+  });
+  return best;
+};
 
-const share = (part: number, whole: number): number | null =>
+export const round = (value: number): number => Number(value.toFixed(4));
+
+export const share = (part: number, whole: number): number | null =>
   whole === 0 ? null : round(part / whole);
 
-const mean = (values: readonly number[]): number =>
+export const mean = (values: readonly number[]): number =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 
-const percentile = (values: readonly number[], fraction: number): number | null => {
+export const percentile = (values: readonly number[], fraction: number): number | null => {
   if (values.length === 0) return null;
   const sorted = [...values].sort((a, b) => a - b);
   return round(sorted[Math.min(sorted.length - 1, Math.floor(fraction * sorted.length))]);
@@ -299,6 +332,8 @@ const segmentReport = (
 export interface JevReport {
   /** `single`: one call for each alert. `batch`: one call for each batch of a rule, as Alert Analysis sends them. */
   mode: 'single' | 'batch';
+  /** Fields that the model saw besides the ones that Alert Analysis shows. */
+  extraFields: string[];
   alerts: number;
   /** Calls to the model, with the retries not counted. */
   calls: number;
@@ -319,6 +354,15 @@ export interface JevReport {
   latencyMs: { p50: number | null; p95: number | null };
   /** The mean attack score of each alert in each wording, so that two runs can be compared alert by alert. */
   alertScores: Record<string, Partial<Record<WordingName, number>>>;
+  /**
+   * What the choice wording answered for each alert: the label that the model picked most often over the repeats, its own
+   * confidence (the mean over the repeats), and the probability of an attack. It lets a run be read as a verdict with a
+   * confidence, like the verdicts of Alert Analysis.
+   */
+  alertAnswers: Record<
+    string,
+    { choice: string | null; confidence: number | null; attackProbability: number }
+  >;
   /** Absolute difference between the two repeats of one alert and one wording. */
   repeatSpread: { p50: number | null; p95: number | null };
   /** Highest minus lowest mean score over the three wordings of one alert. */
@@ -344,6 +388,7 @@ export const buildJevReport = ({
   failedCalls = 0,
   failureReasons = {},
   mode = 'single',
+  extraFields = [],
   calls = 0,
   callLatenciesMs = [],
   haiku = {},
@@ -352,6 +397,7 @@ export const buildJevReport = ({
   failedCalls?: number;
   failureReasons?: Record<string, number>;
   mode?: JevReport['mode'];
+  extraFields?: readonly string[];
   calls?: number;
   callLatenciesMs?: readonly number[];
   /** Verdicts that Haiku gave to the same alerts, by name of the run. */
@@ -420,6 +466,7 @@ export const buildJevReport = ({
 
   return {
     mode,
+    extraFields: [...extraFields],
     alerts: scoredAlerts.length,
     calls,
     failedCalls,
@@ -433,6 +480,19 @@ export const buildJevReport = ({
       scoredAlerts.map(({ id, scores }) => [
         id,
         Object.fromEntries(WORDING_NAMES.map((name) => [name, round(mean(scores[name]))])),
+      ])
+    ),
+    alertAnswers: Object.fromEntries(
+      scoredAlerts.map(({ id, scores, choiceDetails = [] }) => [
+        id,
+        {
+          choice: mostCommon(choiceDetails.map(({ choice }) => choice)),
+          confidence:
+            choiceDetails.length === 0
+              ? null
+              : round(mean(choiceDetails.map(({ confidence }) => confidence))),
+          attackProbability: round(mean(scores.choice)),
+        },
       ])
     ),
     repeatSpread: {
@@ -450,6 +510,7 @@ export const buildJevReport = ({
 export interface Decision {
   score: number;
   ms: number;
+  detail?: ChoiceDetail;
 }
 
 /** Asks the model one wording about one alert. A port, so that tests need no network. */
@@ -463,7 +524,11 @@ export type DecideBatch = (
   input: string,
   wording: WordingName,
   count: number
-) => Promise<{ scores: Array<number | undefined>; ms: number }>;
+) => Promise<{
+  scores: Array<number | undefined>;
+  ms: number;
+  details?: Array<ChoiceDetail | undefined>;
+}>;
 
 interface Connection {
   url: string;
@@ -498,7 +563,8 @@ export const makeDecide = (connection: Connection): Decide => {
     const answer = answers[wording];
     const score = answer === undefined ? undefined : attackScore(answer);
     if (typeof score !== 'number') throw new Error('the answer has no probability');
-    return { score, ms };
+    const detail = choiceDetailOf(answer);
+    return { score, ms, ...(detail ? { detail } : {}) };
   };
 };
 
@@ -510,7 +576,11 @@ export const makeDecideBatch = (connection: Connection): DecideBatch => {
       const answer = answers[batchQuestionName(index)];
       return answer === undefined ? undefined : attackScore(answer);
     });
-    return { scores, ms };
+    const details = Array.from({ length: count }, (_unused, index) => {
+      const answer = answers[batchQuestionName(index)];
+      return answer === undefined ? undefined : choiceDetailOf(answer);
+    });
+    return { scores, ms, details };
   };
 };
 
@@ -554,10 +624,10 @@ const ruleOf = (doc: Doc): string =>
   );
 
 /** The input of a batch: the rule name, then the numbered alerts, each with the fields that Alert Analysis shows. */
-export const batchInput = (docs: readonly Doc[]): string => {
+export const batchInput = (docs: readonly Doc[], extraFields: readonly string[] = []): string => {
   const name = asText(getField(docs[0] as Record<string, unknown>, 'kibana.alert.rule.name'));
   const blocks = docs.map(
-    (doc, index) => `Alert ${index + 1}:\n${alertInput(doc).replace(/^Alert:\n/, '')}`
+    (doc, index) => `Alert ${index + 1}:\n${alertInput(doc, extraFields).replace(/^Alert:\n/, '')}`
   );
   return `${name === undefined ? '' : `Rule: ${name}\n\n`}${blocks.join('\n\n')}`;
 };
@@ -586,7 +656,7 @@ export const planBatches = (
   });
 };
 
-const pool = async <T>(
+export const pool = async <T>(
   items: readonly T[],
   size: number,
   worker: (item: T) => Promise<void>
@@ -624,11 +694,13 @@ interface ScoringOptions {
   alerts: readonly SampleAlert[];
   repeats: number;
   concurrency: number;
+  /** Fields shown to the model besides the ones that Alert Analysis shows. */
+  extraFields?: readonly string[];
   /** A port, so that tests do not wait. */
   pause?: (ms: number) => Promise<void>;
 }
 
-const defaultPause = (ms: number): Promise<void> =>
+export const defaultPause = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Whether the key of an alert is shared with another alert of the sample. */
@@ -652,7 +724,7 @@ const keyedOf = (alerts: readonly SampleAlert[]): Map<string, ScoredAlert['keyed
  * Tries a call up to three times, with a pause that grows. A call that still fails is counted by wording and reason, and
  * the caller gets `undefined`.
  */
-const makeRetrier = (pause: (ms: number) => Promise<void>) => {
+export const makeRetrier = (pause: (ms: number) => Promise<void>) => {
   const tally = { calls: 0, failedCalls: 0, failureReasons: {} as Record<string, number> };
   const withRetry = async <T>(
     wording: WordingName,
@@ -688,6 +760,7 @@ export const scoreAlerts = async ({
   decide,
   repeats,
   concurrency,
+  extraFields = [],
   pause = defaultPause,
 }: ScoringOptions & { decide: Decide }): Promise<ScoringResult> => {
   const keyed = keyedOf(alerts);
@@ -695,17 +768,19 @@ export const scoreAlerts = async ({
   const callLatenciesMs: number[] = [];
   const scored: ScoredAlert[] = [];
   await pool(alerts, concurrency, async ({ id, doc, truth }) => {
-    const input = alertInput(doc);
+    const input = alertInput(doc, extraFields);
     const scores = emptyScores();
+    const choiceDetails: ChoiceDetail[] = [];
     for (const wording of WORDING_NAMES) {
       for (let repeat = 0; repeat < repeats; repeat++) {
         const decision = await withRetry(wording, () => decide(input, wording));
         if (decision === undefined) continue;
         scores[wording].push(decision.score);
         callLatenciesMs.push(decision.ms);
+        if (wording === 'choice' && decision.detail) choiceDetails.push(decision.detail);
       }
     }
-    scored.push({ id, truth, keyed: keyed.get(id) ?? 'none', scores });
+    scored.push({ id, truth, keyed: keyed.get(id) ?? 'none', scores, choiceDetails });
   });
   return { scored, ...tally, callLatenciesMs };
 };
@@ -720,6 +795,7 @@ export const scoreAlertsInBatches = async ({
   decideBatch,
   repeats,
   concurrency,
+  extraFields = [],
   batchSize = ANALYSIS_BATCH_SIZE,
   pause = defaultPause,
 }: ScoringOptions & { decideBatch: DecideBatch; batchSize?: number }): Promise<ScoringResult> => {
@@ -728,8 +804,12 @@ export const scoreAlertsInBatches = async ({
   const callLatenciesMs: number[] = [];
   const scored: ScoredAlert[] = [];
   await pool(planBatches(alerts, batchSize), concurrency, async (batch) => {
-    const input = batchInput(batch.map(({ doc }) => doc));
+    const input = batchInput(
+      batch.map(({ doc }) => doc),
+      extraFields
+    );
     const scores = batch.map(emptyScores);
+    const choiceDetails = batch.map((): ChoiceDetail[] => []);
     for (const wording of WORDING_NAMES) {
       for (let repeat = 0; repeat < repeats; repeat++) {
         const result = await withRetry(wording, () => decideBatch(input, wording, batch.length));
@@ -741,12 +821,20 @@ export const scoreAlertsInBatches = async ({
             tally.failureReasons[label] = (tally.failureReasons[label] ?? 0) + 1;
           } else {
             scores[index][wording].push(score);
+            const detail = result.details?.[index];
+            if (wording === 'choice' && detail) choiceDetails[index].push(detail);
           }
         });
       }
     }
     batch.forEach(({ id, truth }, index) => {
-      scored.push({ id, truth, keyed: keyed.get(id) ?? 'none', scores: scores[index] });
+      scored.push({
+        id,
+        truth,
+        keyed: keyed.get(id) ?? 'none',
+        scores: scores[index],
+        choiceDetails: choiceDetails[index],
+      });
     });
   });
   return { scored, ...tally, callLatenciesMs };
@@ -833,7 +921,8 @@ type ValueFlagKey =
   | 'repeats'
   | 'concurrency'
   | 'limit'
-  | 'batchSize';
+  | 'batchSize'
+  | 'extraFields';
 
 export const main = async (): Promise<void> => {
   const args: Partial<Record<ValueFlagKey, string>> = {
@@ -851,6 +940,7 @@ export const main = async (): Promise<void> => {
     '--concurrency': 'concurrency',
     '--limit': 'limit',
     '--batch-size': 'batchSize',
+    '--extra-fields': 'extraFields',
   };
   const haikuWindows: string[] = [];
   let dryRun = false;
@@ -873,6 +963,7 @@ export const main = async (): Promise<void> => {
   const all = await readSample(data);
   const alerts = limit === undefined ? all : all.slice(0, limit);
   const batchSize = args.batchSize === undefined ? ANALYSIS_BATCH_SIZE : Number(args.batchSize);
+  const extraFields = (args.extraFields ?? '').split(',').filter(Boolean);
   const batches = planBatches(alerts, batchSize);
   const calls = (batch ? batches.length : alerts.length) * WORDING_NAMES.length * repeats;
   process.stdout.write(
@@ -884,7 +975,12 @@ export const main = async (): Promise<void> => {
     const [example] = batch ? batches : [[alerts[0]]];
     process.stdout.write(
       `Example input of the first ${batch ? 'batch' : 'alert'}:\n${
-        batch ? batchInput(example.map(({ doc }) => doc)) : alertInput(example[0].doc)
+        batch
+          ? batchInput(
+              example.map(({ doc }) => doc),
+              extraFields
+            )
+          : alertInput(example[0].doc, extraFields)
       }\n`
     );
     process.stdout.write(
@@ -922,12 +1018,20 @@ export const main = async (): Promise<void> => {
         decideBatch: makeDecideBatch(connection),
         repeats,
         concurrency,
+        extraFields,
         batchSize,
       })
-    : await scoreAlerts({ alerts, decide: makeDecide(connection), repeats, concurrency });
+    : await scoreAlerts({
+        alerts,
+        decide: makeDecide(connection),
+        repeats,
+        concurrency,
+        extraFields,
+      });
   const report = buildJevReport({
     alerts: scored,
     mode: batch ? 'batch' : 'single',
+    extraFields,
     calls: callCount,
     failedCalls,
     failureReasons,
