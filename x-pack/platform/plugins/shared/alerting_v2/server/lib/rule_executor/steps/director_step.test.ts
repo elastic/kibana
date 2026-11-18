@@ -15,6 +15,11 @@ import {
   createRuleResponse,
 } from '../test_utils';
 import { createDirectorService } from '../../director/director.mock';
+import type { DirectorRunResult, DirectorService } from '../../director/director';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
+
+const createStubDirector = (result: DirectorRunResult): DirectorService =>
+  ({ run: jest.fn().mockResolvedValue(result) } as unknown as DirectorService);
 
 describe('DirectorStep', () => {
   const createEmptyEsqlResponse = () => ({
@@ -95,6 +100,61 @@ describe('DirectorStep', () => {
         status: 'pending',
       },
     ]);
+  });
+
+  it('emits episode transition counters grouped by destination status', async () => {
+    const director = createStubDirector({
+      alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+      stats: {
+        newEpisodeIds: [],
+        statusTransitions: [
+          { groupHash: 'g1', episodeId: 'e1', previousStatus: 'inactive', status: 'active' },
+          { groupHash: 'g2', episodeId: 'e2', previousStatus: null, status: 'active' },
+          { groupHash: 'g3', episodeId: 'e3', previousStatus: 'active', status: 'recovering' },
+          { groupHash: 'g4', episodeId: 'e4', previousStatus: 'recovering', status: 'inactive' },
+        ],
+      },
+      previousAlertStateByGroupHash: new Map(),
+    });
+    const step = new DirectorStep(director);
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    // @ts-expect-error: meta is present on the result
+    expect(result.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToActive]: 2,
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToRecovering]: 1,
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToInactive]: 1,
+    });
+  });
+
+  it('does not emit a counter for transitions to pending', async () => {
+    const director = createStubDirector({
+      alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+      stats: {
+        newEpisodeIds: [],
+        statusTransitions: [
+          { groupHash: 'g1', episodeId: 'e1', previousStatus: null, status: 'pending' },
+        ],
+      },
+      previousAlertStateByGroupHash: new Map(),
+    });
+    const step = new DirectorStep(director);
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    // @ts-expect-error: meta is present on the result
+    expect(result.meta?.counters).toEqual({});
   });
 
   it('skips episode tracking for signal rules', async () => {

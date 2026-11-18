@@ -7,8 +7,33 @@
 
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import { DirectorService } from '../../director/director';
+import { DirectorService, type AlertStatusTransition } from '../../director/director';
 import { guardedExpandStep } from '../stream_utils';
+import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../metrics/counters';
+import {
+  alertEpisodeStatus,
+  type AlertEpisodeStatus,
+} from '../../../resources/datastreams/alert_events';
+
+const TRANSITION_COUNTER: Partial<Record<AlertEpisodeStatus, RuleExecutionCounter>> = {
+  [alertEpisodeStatus.active]: RULE_EXECUTION_COUNTERS.episodesTransitionedToActive,
+  [alertEpisodeStatus.recovering]: RULE_EXECUTION_COUNTERS.episodesTransitionedToRecovering,
+  [alertEpisodeStatus.inactive]: RULE_EXECUTION_COUNTERS.episodesTransitionedToInactive,
+};
+
+/** Counts the batch's episode transitions by destination status. */
+const countTransitions = (
+  transitions: readonly AlertStatusTransition[]
+): Partial<Record<RuleExecutionCounter, number>> => {
+  const counters: Partial<Record<RuleExecutionCounter, number>> = {};
+  for (const { status } of transitions) {
+    const counter = TRANSITION_COUNTER[status];
+    if (counter) {
+      counters[counter] = (counters[counter] ?? 0) + 1;
+    }
+  }
+  return counters;
+};
 
 @injectable()
 export class DirectorStep implements RuleExecutionStep {
@@ -53,6 +78,7 @@ export class DirectorStep implements RuleExecutionStep {
           alertStatusTransitions: stats.statusTransitions,
           previousAlertStateByGroupHash,
         },
+        meta: { counters: countTransitions(stats.statusTransitions) },
       };
     });
   }

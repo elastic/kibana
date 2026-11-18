@@ -348,6 +348,7 @@ describe('ExecuteRuleQueryStep', () => {
     // @ts-expect-error: meta is present on the result
     expect(results[0].meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+      [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
     });
   });
 
@@ -364,6 +365,7 @@ describe('ExecuteRuleQueryStep', () => {
     // @ts-expect-error: meta is present on the result
     expect(result.meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 0,
+      [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
     });
   });
 
@@ -383,6 +385,7 @@ describe('ExecuteRuleQueryStep', () => {
     // @ts-expect-error: meta is present on the result
     expect(result.meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+      [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
       [RULE_EXECUTION_COUNTERS.rowsDroppedByLimit]: 1,
     });
 
@@ -413,6 +416,7 @@ describe('ExecuteRuleQueryStep', () => {
     // @ts-expect-error: meta is present on the result
     expect(result.meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+      [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
     });
     expect(mockLogger.debug).not.toHaveBeenCalledWith(
       expect.stringContaining('truncated'),
@@ -474,6 +478,7 @@ describe('ExecuteRuleQueryStep', () => {
       // @ts-expect-error: meta is present on the result
       expect(results[0].meta?.counters).toEqual({
         [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+        [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
       });
 
       expect(results[1].type).toBe('continue');
@@ -481,6 +486,7 @@ describe('ExecuteRuleQueryStep', () => {
       // @ts-expect-error: meta is present on the result
       expect(results[1].meta?.counters).toEqual({
         [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
+        [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
       });
     });
 
@@ -503,12 +509,14 @@ describe('ExecuteRuleQueryStep', () => {
       // @ts-expect-error: meta is present on the result
       expect(results[0].meta?.counters).toEqual({
         [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+        [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
       });
 
       // Second batch: cumulative 3 hits the cap, truncation flagged once.
       // @ts-expect-error: meta is present on the result
       expect(results[1].meta?.counters).toEqual({
         [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
+        [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
         [RULE_EXECUTION_COUNTERS.rowsDroppedByLimit]: 1,
       });
 

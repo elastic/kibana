@@ -26,8 +26,15 @@ const DISABLED_RUN_TEST_TIMEOUT_MS = 150_000;
 const ZEROED_COUNTERS = {
   'metrics.signalsGenerated': 0,
   'metrics.ruleEventsGenerated': 0,
+  'metrics.breachedEventsGenerated': 0,
+  'metrics.recoveredEventsGenerated': 0,
+  'metrics.noDataEventsGenerated': 0,
   'metrics.newEpisodesGenerated': 0,
+  'metrics.episodesTransitionedToActive': 0,
+  'metrics.episodesTransitionedToRecovering': 0,
+  'metrics.episodesTransitionedToInactive': 0,
   'metrics.rowsReturnedByQuery': 0,
+  'metrics.queryBatchesProcessed': 0,
   'metrics.groupsDroppedByLimit': 0,
   'metrics.rowsDroppedByLimit': 0,
 } as const;
@@ -117,7 +124,13 @@ apiTest.describe(
         expect(run['rule.version']).toBe(rule.version);
 
         expect(run['metrics.rowsReturnedByQuery']).toBeGreaterThanOrEqual(1);
+        expect(run['metrics.queryBatchesProcessed']).toBeGreaterThanOrEqual(1);
         expect(run['metrics.newEpisodesGenerated']).toBeGreaterThanOrEqual(1);
+
+        // The run breached, so its persisted events carry `status: 'breached'`.
+        expect(run['metrics.breachedEventsGenerated']).toBeGreaterThanOrEqual(1);
+        expect(run['metrics.recoveredEventsGenerated']).toBe(0);
+        expect(run['metrics.noDataEventsGenerated']).toBe(0);
 
         // `kind: 'alert'` rules persist `type: 'alert'` documents, and the
         // signal counter only counts `type: 'signal'` ones.
@@ -150,7 +163,9 @@ apiTest.describe(
           match: reportedStatus('success'),
         });
 
-        expect(run).toMatchObject(ZEROED_COUNTERS);
+        // The query still runs and streams one (empty) batch, so the batch
+        // counter is 1 even though nothing matched; every other counter is zero.
+        expect(run).toMatchObject({ ...ZEROED_COUNTERS, 'metrics.queryBatchesProcessed': 1 });
         expect(run.reason).toBeUndefined();
       }
     );

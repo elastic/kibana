@@ -55,8 +55,15 @@ export interface ReportedRun {
   'rule.version'?: number;
   'metrics.signalsGenerated'?: number;
   'metrics.ruleEventsGenerated'?: number;
+  'metrics.breachedEventsGenerated'?: number;
+  'metrics.recoveredEventsGenerated'?: number;
+  'metrics.noDataEventsGenerated'?: number;
   'metrics.newEpisodesGenerated'?: number;
+  'metrics.episodesTransitionedToActive'?: number;
+  'metrics.episodesTransitionedToRecovering'?: number;
+  'metrics.episodesTransitionedToInactive'?: number;
   'metrics.rowsReturnedByQuery'?: number;
+  'metrics.queryBatchesProcessed'?: number;
   'metrics.groupsDroppedByLimit'?: number;
   'metrics.rowsDroppedByLimit'?: number;
 }

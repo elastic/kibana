@@ -92,6 +92,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
           const counters: Partial<Record<RuleExecutionCounter, number>> = {
             [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
+            [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
           };
 
           if (!loggedRowsDropped && totalRows >= queryRowLimit) {
