@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { LiveHistoryRow } from '../../../common/api/unified_history/types';
 import type { LiveActionHit } from './map_live_hit_to_row';
 import { buildSourceClause, resolveSource } from './resolve_source';
 
+interface TestClause {
+  term?: Record<string, string | { value: string }>;
+  exists?: { field: string };
+  bool?: { filter?: TestClause | TestClause[]; must_not?: TestClause | TestClause[] };
+}
+
 const matchesClause = (
-  clause: estypes.QueryDslQueryContainer,
+  clause: TestClause,
   document: Record<string, string | string[] | undefined>
 ): boolean => {
   if (clause.term) {
@@ -35,6 +40,7 @@ const matchesClause = (
     if (Object.keys(unsupported).length > 0) {
       throw new Error('Unsupported test bool clause');
     }
+
     const required = Array.isArray(filter) ? filter : [filter];
     const excluded = Array.isArray(must_not) ? must_not : [must_not];
 
@@ -81,7 +87,7 @@ describe.each(['fields', '_source'] as const)('source partition using %s', (repr
 
       expect(resolveSource(hit)).toBe(expected);
       const matchingSources = (['live', 'rule', 'workflow'] as const).filter((source) =>
-        matchesClause(buildSourceClause(source), document)
+        matchesClause(buildSourceClause(source) as TestClause, document)
       );
       expect(matchingSources).toEqual([expected.toLowerCase()]);
     }

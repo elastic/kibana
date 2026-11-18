@@ -66,9 +66,14 @@ const setUpActionsIndex = async (esClient: ElasticsearchClient, logger: Logger):
     return;
   }
 
+  const origin = actionsMapping.properties?.origin;
+  if (!origin) {
+    throw new Error('The actions mapping has no origin definition');
+  }
+
   await esClient.indices.putMapping({
     index: ACTIONS_INDEX_DEFAULT_NS,
-    properties: { origin: actionsMapping.properties?.origin },
+    properties: { origin },
   });
   const missingFields = await checkActionsOriginMappings(esClient);
   if (missingFields.length > 0) {

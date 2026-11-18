@@ -662,6 +662,7 @@ describe('createTransformIndices', () => {
         if (method === 'putMapping') {
           mockEsClient.indices.getFieldMapping.mockResolvedValueOnce({});
         }
+
         mockEsClient.indices[method].mockRejectedValueOnce(error);
         await expect(ensureActionsIndexMappings(esClient, logger)).rejects.toBe(error);
         await expect(ensureActionsIndexMappings(esClient, logger)).resolves.toBeUndefined();
