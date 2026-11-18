@@ -88,6 +88,7 @@ export function initializeFetch({
   const isPausedSubscription = combineLatest([parentPauseFetch, apiPauseFetch])
     .pipe(
       map(([parentPause, apiPause]) => {
+        console.log({ parentPause, apiPause });
         return parentPause || apiPause;
       })
     )

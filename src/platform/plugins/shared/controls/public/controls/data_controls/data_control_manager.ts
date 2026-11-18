@@ -104,7 +104,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
     defaultDataControlState,
     defaultDataControlComparators
   );
-  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(true);
+  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(
+    Boolean(state.required && !willHaveInitialFilter)
+  );
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   function setBlockingError(error: Error | undefined) {
@@ -164,6 +166,10 @@ export const initializeDataControlManager = async <EditorState extends object = 
       }
       dataSources$.next(dataView ? [dataView] : undefined);
     });
+
+  filtersLoading$.subscribe((loading) => {
+    console.log('SET FILTERS LOADING', { loading });
+  });
 
   const defaultFieldLabel$ = new BehaviorSubject<string>(state.field_name ?? '');
   const fieldNameSubscription = combineLatest([
