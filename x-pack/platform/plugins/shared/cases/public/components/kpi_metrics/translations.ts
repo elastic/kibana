@@ -177,9 +177,35 @@ export const THRESHOLD_VALUE = i18n.translate('xpack.cases.kpiMetrics.thresholdV
 export const THRESHOLD_DURATION_HELP = i18n.translate(
   'xpack.cases.kpiMetrics.thresholdDurationHelp',
   {
-    defaultMessage: 'The field is a duration. Enter the value in seconds.',
+    defaultMessage: 'This metric is a duration. Enter the value in the selected unit.',
   }
 );
+
+export const THRESHOLD_VALUE_NON_NEGATIVE = i18n.translate(
+  'xpack.cases.kpiMetrics.thresholdValueNonNegative',
+  {
+    defaultMessage: 'Enter a value of 0 or more.',
+  }
+);
+
+export const THRESHOLD_UNIT = i18n.translate('xpack.cases.kpiMetrics.thresholdUnit', {
+  defaultMessage: 'Unit',
+});
+
+export const THRESHOLD_UNIT_MINUTES = i18n.translate(
+  'xpack.cases.kpiMetrics.thresholdUnitMinutes',
+  {
+    defaultMessage: 'Minutes',
+  }
+);
+
+export const THRESHOLD_UNIT_HOURS = i18n.translate('xpack.cases.kpiMetrics.thresholdUnitHours', {
+  defaultMessage: 'Hours',
+});
+
+export const THRESHOLD_UNIT_DAYS = i18n.translate('xpack.cases.kpiMetrics.thresholdUnitDays', {
+  defaultMessage: 'Days',
+});
 
 export const REQUIRED_LABEL = i18n.translate('xpack.cases.kpiMetrics.requiredLabel', {
   defaultMessage: 'A label is required.',

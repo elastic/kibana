@@ -100,10 +100,16 @@ export const KpiMetricDisplaySchema = lazySchema(() => z.enum(['value', 'trend']
 
 export const KpiMetricDateFieldSchema = lazySchema(() => z.enum(['created_at', 'closed_at']));
 
+export const KpiMetricThresholdUnitSchema = lazySchema(() => z.enum(['m', 'h', 'd']));
+
 export const KpiMetricThresholdSchema = lazySchema(() =>
   z.object({
     comparator: z.enum(['above', 'below']),
     value: z.number(),
+    /**
+     * The unit that the admin selected for a duration threshold. The value is always in seconds.
+     */
+    unit: KpiMetricThresholdUnitSchema.optional(),
   })
 );
 
@@ -250,6 +256,7 @@ export type ObservableTypeConfiguration = z.infer<typeof CaseObservableTypeSchem
 export type WorkflowTagsConfiguration = z.infer<typeof WorkflowTagsConfigurationSchema>;
 export type KpiMetricAggregationType = z.infer<typeof KpiMetricAggregationTypeSchema>;
 export type KpiMetricThreshold = z.infer<typeof KpiMetricThresholdSchema>;
+export type KpiMetricThresholdUnit = z.infer<typeof KpiMetricThresholdUnitSchema>;
 export type KpiMetricDirection = z.infer<typeof KpiMetricDirectionSchema>;
 export type KpiMetricDateField = z.infer<typeof KpiMetricDateFieldSchema>;
 export type PredefinedKpiMetricConfiguration = z.infer<typeof PredefinedKpiMetricSchema>;

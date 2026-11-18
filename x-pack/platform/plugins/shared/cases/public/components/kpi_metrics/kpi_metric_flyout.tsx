@@ -29,7 +29,11 @@ import {
 import type { KpiMetricIndex } from '../../../common/constants';
 import { KPI_FIELD_CATALOG, PREDEFINED_KPI_METRICS } from '../../../common/constants';
 import type { KpiMetricRequest } from '../../../common/types/api';
-import type { KpiMetricAggregationType, KpiMetricDateField } from '../../../common/types/domain';
+import type {
+  KpiMetricAggregationType,
+  KpiMetricDateField,
+  KpiMetricThresholdUnit,
+} from '../../../common/types/domain';
 import { usePreviewKpiMetric } from '../../containers/use_preview_kpi_metric';
 import { formatKpiMetricValue } from '../all_cases/components/kpi_metric_tile';
 import type {
@@ -39,7 +43,7 @@ import type {
 } from './kpi_metric_form';
 import {
   getFieldOptions,
-  isDurationField,
+  isDurationMetric,
   toKpiMetricFormState,
   toKpiMetricRequest,
   validateKpiMetricForm,
@@ -78,6 +82,15 @@ const THRESHOLD_OPTIONS: Array<{ value: ThresholdComparatorOption; text: string 
   { value: 'below', text: i18n.THRESHOLD_BELOW },
 ];
 
+const THRESHOLD_UNIT_OPTIONS: Array<{ value: KpiMetricThresholdUnit; text: string }> = [
+  { value: 'm', text: i18n.THRESHOLD_UNIT_MINUTES },
+  { value: 'h', text: i18n.THRESHOLD_UNIT_HOURS },
+  { value: 'd', text: i18n.THRESHOLD_UNIT_DAYS },
+];
+
+const toThresholdUnit = (value: string): KpiMetricThresholdUnit =>
+  THRESHOLD_UNIT_OPTIONS.find((option) => option.value === value)?.value ?? 'h';
+
 const DIRECTION_OPTIONS: Array<{ value: DirectionOption; text: string }> = [
   { value: 'none', text: i18n.DIRECTION_NONE },
   { value: 'higher_is_better', text: i18n.DIRECTION_HIGHER_IS_BETTER },
@@ -112,6 +125,7 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
 
   const errors = useMemo(() => validateKpiMetricForm(state), [state]);
   const hasErrors = Object.keys(errors).length > 0;
+  const isDuration = isDurationMetric(state);
 
   const update = useCallback(
     (changes: Partial<KpiMetricFormState>) => {
@@ -338,22 +352,38 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
             </EuiFormRow>
           </EuiFlexItem>
           {state.thresholdComparator !== 'none' && (
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.THRESHOLD_VALUE}
-                helpText={isDurationField(state) ? i18n.THRESHOLD_DURATION_HELP : undefined}
-                fullWidth
-                isInvalid={showErrors && errors.thresholdValue != null}
-              >
-                <EuiFieldNumber
+            <>
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={i18n.THRESHOLD_VALUE}
+                  helpText={isDuration ? i18n.THRESHOLD_DURATION_HELP : undefined}
                   fullWidth
-                  value={state.thresholdValue}
-                  onChange={(e) => update({ thresholdValue: e.target.value })}
                   isInvalid={showErrors && errors.thresholdValue != null}
-                  data-test-subj="kpi-metric-threshold-value"
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
+                  error={errors.thresholdValue}
+                >
+                  <EuiFieldNumber
+                    fullWidth
+                    value={state.thresholdValue}
+                    onChange={(e) => update({ thresholdValue: e.target.value })}
+                    isInvalid={showErrors && errors.thresholdValue != null}
+                    data-test-subj="kpi-metric-threshold-value"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              {isDuration && (
+                <EuiFlexItem>
+                  <EuiFormRow label={i18n.THRESHOLD_UNIT} fullWidth>
+                    <EuiSelect
+                      fullWidth
+                      options={THRESHOLD_UNIT_OPTIONS}
+                      value={state.thresholdUnit}
+                      onChange={(e) => update({ thresholdUnit: toThresholdUnit(e.target.value) })}
+                      data-test-subj="kpi-metric-threshold-unit"
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              )}
+            </>
           )}
         </EuiFlexGroup>
 

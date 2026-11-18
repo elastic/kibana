@@ -816,6 +816,25 @@ describe('configure', () => {
       expect(result.data).toStrictEqual({ casesList: [metric] });
     });
 
+    it('accepts hours as the threshold unit', () => {
+      const metric = {
+        ...customMetric,
+        threshold: { comparator: 'above' as const, value: 7200, unit: 'h' as const },
+      };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ casesList: [metric] });
+    });
+
+    it('does not accept seconds as the threshold unit', () => {
+      const metric = {
+        ...customMetric,
+        threshold: { comparator: 'above', value: 7200, unit: 's' },
+      };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(false);
+    });
+
     it('does not accept a date field that is not in the list', () => {
       const metric = { ...customMetric, dateField: 'updated_at' };
       const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });

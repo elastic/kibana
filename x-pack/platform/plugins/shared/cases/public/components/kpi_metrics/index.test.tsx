@@ -220,6 +220,59 @@ describe('KpiMetricsSettings', () => {
     });
   });
 
+  describe('threshold unit', () => {
+    const durationMetric: CustomKpiMetricConfiguration = {
+      ...customMetric('a'),
+      query: '',
+      aggregation: { type: 'median', field: 'case.time_to_resolve' },
+    };
+
+    it('shows the unit select for a duration field and hides it for a count', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          kpiMetrics={[durationMetric, customMetric('b')]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-threshold-comparator'),
+        'above'
+      );
+      expect(screen.getByTestId('kpi-metric-threshold-unit')).toHaveValue('h');
+
+      await userEvent.click(screen.getByTestId('kpi-metric-cancel'));
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-1'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-threshold-comparator'),
+        'above'
+      );
+      expect(screen.getByTestId('kpi-metric-threshold-value')).toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-metric-threshold-unit')).not.toBeInTheDocument();
+    });
+
+    it('saves 3 days in seconds with the unit', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings kpiMetrics={[durationMetric]} isLoading={false} onSave={onSave} />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-threshold-comparator'),
+        'above'
+      );
+      await userEvent.type(screen.getByTestId('kpi-metric-threshold-value'), '3');
+      await userEvent.selectOptions(screen.getByTestId('kpi-metric-threshold-unit'), 'd');
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      expect(onSave).toHaveBeenCalledWith([
+        { ...durationMetric, threshold: { comparator: 'above', value: 259200, unit: 'd' } },
+      ]);
+    });
+  });
+
   describe('Test query', () => {
     it('sends the date field of the unsaved metric', async () => {
       const previewSpy = jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({

@@ -164,6 +164,26 @@ describe('configure', () => {
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(request);
     });
+
+    it('keeps the unit of a metric threshold', () => {
+      const request = {
+        ...defaultRequest,
+        metrics: {
+          casesList: [
+            {
+              id: 'metric-1',
+              kind: 'predefined',
+              predefinedId: 'average_time_to_close',
+              display: 'value',
+              threshold: { comparator: 'above', value: 86400, unit: 'd' },
+            },
+          ],
+        },
+      };
+      const result = ConfigurationAttributesSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
   });
 
   describe('ConfigurationSchema', () => {
