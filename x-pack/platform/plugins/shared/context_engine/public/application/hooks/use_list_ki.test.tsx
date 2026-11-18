@@ -45,7 +45,7 @@ describe('useListKi', () => {
       expect(core.notifications.toasts.addError).toHaveBeenCalledWith(
         requestError,
         expect.objectContaining({
-          title: 'Unable to load Knowledge Indicators',
+          title: 'Unable to load Knowledge documents',
           toastMessage: 'Request timed out',
         })
       );
@@ -114,19 +114,19 @@ describe('useListKi', () => {
       expect.any(String),
       expect.objectContaining({
         query: expect.not.objectContaining({
-          lifecycle_status: expect.anything(),
+          status: expect.anything(),
         }),
       })
     );
   });
 
-  it('passes lifecycleStatus through to the list endpoint when set', async () => {
+  it('passes status through to the list endpoint when set', async () => {
     const core = coreMock.createStart();
     (core.http.get as jest.Mock).mockResolvedValue({ kis: [], total: 0 });
 
     renderUseListKi(core, {
       aiIndexId: 'my-ai-index',
-      lifecycleStatus: ['deleted'],
+      status: ['deleted'],
     });
 
     await waitFor(() => {
@@ -134,7 +134,7 @@ describe('useListKi', () => {
         '/internal/context_engine/ai_index/my-ai-index/kis',
         expect.objectContaining({
           query: expect.objectContaining({
-            lifecycle_status: ['deleted'],
+            status: ['deleted'],
           }),
         })
       );

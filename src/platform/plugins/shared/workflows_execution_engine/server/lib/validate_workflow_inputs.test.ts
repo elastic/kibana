@@ -109,6 +109,28 @@ describe('validateWorkflowInputs', () => {
     expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
   });
 
+  it('validates against a typed additionalProperties schema without properties', async () => {
+    setInputsSchema({
+      type: 'object',
+      additionalProperties: { type: 'string' },
+      required: ['token'],
+    } as JsonModelSchemaType);
+
+    await expect(callValidate(createWorkflowExecution({ inputs: { token: 'abc' } }))).resolves.toBe(
+      true
+    );
+    await expect(callValidate(createWorkflowExecution({ inputs: { token: 1 } }))).resolves.toBe(
+      false
+    );
+    await expect(callValidate(createWorkflowExecution({ inputs: {} }))).resolves.toBe(false);
+    expect(mockRepository.updateWorkflowExecution).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        status: ExecutionStatus.FAILED,
+        error: expect.objectContaining({ message: expect.stringContaining('token') }),
+      })
+    );
+  });
+
   it('should return true when all required inputs are provided', async () => {
     setInputsSchema({
       properties: {
@@ -167,11 +189,34 @@ describe('validateWorkflowInputs', () => {
     expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
       id: executionId,
       status: ExecutionStatus.FAILED,
+      finishedAt: expect.any(String),
       error: {
         type: 'InputValidationError',
         message: expect.stringContaining('Workflow input validation failed'),
       },
     });
+  });
+
+  it('refreshes a failed concurrency-group execution so the next admission does not count it', async () => {
+    setInputsSchema({
+      properties: {
+        name: { type: 'string' },
+      },
+      required: ['name'],
+    });
+
+    const result = await callValidate(
+      createWorkflowExecution({ inputs: {} }, { concurrencyGroupKey: 'group-a' })
+    );
+
+    expect(result).toBe(false);
+    expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: executionId,
+        status: ExecutionStatus.FAILED,
+      }),
+      { refresh: true }
+    );
   });
 
   it('should return false and mark execution as FAILED on type mismatch', async () => {
@@ -499,6 +544,7 @@ describe('validateWorkflowInputs', () => {
     expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
       id: executionId,
       status: ExecutionStatus.FAILED,
+      finishedAt: expect.any(String),
       error: {
         type: 'InputValidationError',
         message: expect.stringContaining('Workflow input validation failed'),

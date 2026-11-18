@@ -15,6 +15,7 @@ import type {
 } from '../engine/response_engine';
 import { isNamedOperationRef, toOperationKey } from '../engine/response_engine';
 import type { ContractCall, Emulator } from './create_emulator_fetch';
+import { createCaptureWindow } from './capture_call';
 import type { OperationDescription } from './describe_operation';
 
 /** Several connectors' emulators behind one `fetch`, e.g. for one Kibana running all of them. */
@@ -156,6 +157,19 @@ export const combineEmulators = (
   const tagPattern = new RegExp(`(?<![\\w-])${TAG_PREFIX}(${connectors.join('|')})(?![\\w-])`);
   const calls: ContractCall[] = [];
   const collected = new Map<string, number>();
+  // Each connector's copies keep their captures only as long as its emulator would.
+  const captureWindows = new Map(
+    connectors.flatMap((connector) => {
+      const limit = emulators[connector].maxCapturedCalls;
+      return limit === undefined ? [] : [[connector, createCaptureWindow(calls, limit)] as const];
+    })
+  );
+  const noteCapture = (index: number) => {
+    const { connector, captured } = calls[index];
+    if (captured && connector !== undefined) {
+      captureWindows.get(connector)?.add(index);
+    }
+  };
 
   // Copies the calls a connector's emulator recorded since the last copy, in its order.
   const collect = (connector: string) => {
@@ -163,6 +177,7 @@ export const combineEmulators = (
     const from = Math.min(collected.get(connector) ?? 0, own.length);
     for (const call of own.slice(from)) {
       calls.push({ ...call, connector });
+      noteCapture(calls.length - 1);
     }
     collected.set(connector, own.length);
   };
@@ -340,12 +355,16 @@ export const combineEmulators = (
         connectors.forEach((name) => emulators[name].reset());
         collected.clear();
         calls.length = 0;
+        captureWindows.forEach((window) => window.clear());
         return;
       }
       emulators[checkConnector(connector)].reset();
       collected.set(connector, 0);
       const kept = calls.filter((call) => call.connector !== connector);
       calls.splice(0, calls.length, ...kept);
+      // The kept calls moved, so the windows note their new indices.
+      captureWindows.forEach((window) => window.clear());
+      calls.forEach((_, index) => noteCapture(index));
     },
   };
 };

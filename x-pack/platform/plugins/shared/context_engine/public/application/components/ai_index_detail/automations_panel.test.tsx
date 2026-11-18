@@ -15,6 +15,7 @@ import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { AiIndexAutomation, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { UseAutomationsEditorResult } from '../../hooks/use_automations_editor';
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
+import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
 import type { UseSuggestAutomationResult } from '../../hooks/use_suggest_automation';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
@@ -23,6 +24,10 @@ import { AutomationsPanel } from './automations_panel';
 
 jest.mock('../../hooks/use_automations_editor', () => ({
   useAutomationsEditor: jest.fn(),
+}));
+
+jest.mock('../../hooks/use_memory_enabled', () => ({
+  useMemoryEnabled: jest.fn(),
 }));
 
 jest.mock('../../hooks/use_suggest_automation', () => ({
@@ -61,6 +66,7 @@ jest.mock('./automation_row', () => ({
 }));
 
 const mockUseAutomationsEditor = jest.mocked(useAutomationsEditor);
+const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 const mockUseSuggestAutomation = jest.mocked(useSuggestAutomation);
 const mockUseWorkflowSummaries = jest.mocked(useWorkflowSummaries);
 
@@ -98,7 +104,6 @@ const summariesResult = (
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
-  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -160,6 +165,7 @@ const oneAutomation: AiIndexAutomation[] = [{ type: 'workflow', value: 'wf-1' }]
 describe('AutomationsPanel', () => {
   beforeEach(() => {
     mockUseAutomationsEditor.mockReturnValue(editorResult());
+    mockUseMemoryEnabled.mockReturnValue(true);
     mockUseSuggestAutomation.mockReturnValue(suggestResult());
     mockUseWorkflowSummaries.mockReturnValue(summariesResult());
   });
@@ -304,6 +310,48 @@ describe('AutomationsPanel', () => {
     renderPanel();
 
     expect(screen.getAllByTestId('contextAiIndexAutomationRow')).toHaveLength(automations.length);
+  });
+
+  describe('dreaming workflows', () => {
+    const dreamingAutomation: AiIndexAutomation = {
+      type: 'workflow',
+      value: 'system-context-engine-dreaming-my-ai-index-0123456789ab',
+    };
+    const automations = [...oneAutomation, dreamingAutomation];
+
+    beforeEach(() => {
+      mockUseAutomationsEditor.mockReturnValue(
+        editorResult({ automations, workflowIds: automations.map(({ value }) => value) })
+      );
+    });
+
+    it('lists them while memory is on', () => {
+      renderPanel();
+
+      expect(screen.getAllByTestId('contextAiIndexAutomationRow')).toHaveLength(2);
+      expect(mockUseWorkflowSummaries).toHaveBeenLastCalledWith(['wf-1', dreamingAutomation.value]);
+    });
+
+    it('hides them while memory is off', () => {
+      mockUseMemoryEnabled.mockReturnValue(false);
+
+      renderPanel();
+
+      expect(screen.getAllByTestId('contextAiIndexAutomationRow')).toHaveLength(1);
+      expect(mockUseWorkflowSummaries).toHaveBeenLastCalledWith(['wf-1']);
+    });
+
+    it('shows the empty prompt while memory is off and only they are attached', () => {
+      mockUseMemoryEnabled.mockReturnValue(false);
+      mockUseAutomationsEditor.mockReturnValue(
+        editorResult({ automations: [dreamingAutomation], workflowIds: [dreamingAutomation.value] })
+      );
+
+      renderPanel();
+
+      expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
+    });
   });
 
   it('passes onDelete to each row so deleteAutomation is called with the workflow id', async () => {

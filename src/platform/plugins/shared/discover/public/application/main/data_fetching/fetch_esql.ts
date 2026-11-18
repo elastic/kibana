@@ -92,7 +92,6 @@ export async function fetchEsql({
     const { datatable } = await data.search.esql(
       {
         query: query.esql,
-        locale: i18n.getLocale(),
         kibanaQueryContext: {
           timeRange: effectiveTimeRange,
           timeField: searchContext.timeField,
