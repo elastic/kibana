@@ -14,3 +14,7 @@ export type HardDeleteOutcome = 'deleted' | 'not_found';
 export type ForgetSessionMemoriesResponse =
   | { mode: 'tombstone'; results: Array<{ id: string; outcome: ForgetOutcome }> }
   | { mode: 'hard_delete'; results: Array<{ id: string; outcome: HardDeleteOutcome }> };
+
+export interface RememberSessionMemoryResponse {
+  id: string;
+}

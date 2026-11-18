@@ -316,7 +316,47 @@ No changes to the Context Engine plugin are required.
 
 ## Session memory
 
-Context Engine can forget session memories over HTTP. The route is public and experimental:
+Context Engine can remember and forget session memories over HTTP. Both routes are public
+and experimental.
+
+### Remember
+
+```
+POST /api/context_engine/memory/_remember
+```
+
+```json
+{
+  "session_id": "8f3c2a1e",
+  "user_id": "jdoe",
+  "ai_index_ids": ["ops-memory"],
+  "content": "checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.",
+  "attributes": { "incident": "INC-4211" }
+}
+```
+
+`session_id` and `content` are required. `id` revises an existing memory: the revision
+replaces it in full and the id is not checked. Without it the route generates one.
+`ai_index_ids` names the AI indices dreaming promotes the memory into, and `attributes` is
+a map of string hints passed through to dreaming. `user_id` is the user the memory is
+about. It defaults to the caller's user profile, and any user in the space can be named.
+A caller without a profile and without `user_id` gets a 403.
+
+The route answers `202` with `{ "id": "..." }` at once and writes in the background,
+because `semantic_text` inference runs inside the index request. The memory is searchable
+only once the write completes. A failed write is not reported in the response. It shows up
+in the Kibana logs and the audit log.
+
+The route needs `contextEngine:write` and `contextEngine:manageMemory`. It returns a 404
+while `contextEngine:enabled` or the memory setting is off. Each AI index in `ai_index_ids`
+must exist in this space (404 otherwise), and the caller needs the Elasticsearch `write`
+privilege on its backing index (403 otherwise). A rejected request writes nothing.
+
+Each request writes one `memory_remember` audit event, when the background write finishes
+or the request is rejected. The event records the authenticated actor in `user.*`, the
+memory's user in `user.target.id`, and the memory in `kibana.saved_object`.
+
+### Forget
 
 ```
 POST /api/context_engine/memory/_forget
@@ -344,8 +384,8 @@ still works after memory is turned off.
 
 The route needs `contextEngine:write` and `contextEngine:manageMemory` for both modes.
 `contextEngine:manageMemory` is not part of All, so an administrator grants it explicitly.
-With it a caller can forget the memories of any user in the space. The future `_remember`
-route will use the same privilege.
+With it a caller can forget the memories of any user in the space. `_remember` uses the
+same privilege.
 
 `user_id` is the subject of the memory, supplied by the caller as the session memory RFC
 describes. It is not checked against the authenticated user, and a mismatch with the

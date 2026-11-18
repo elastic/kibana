@@ -333,6 +333,9 @@ export class ContextEnginePlugin
         const [, , contextEngineStart] = await coreSetup.getStartServices();
         return contextEngineStart.getSessionMemoryService();
       },
+      getAiIndexService,
+      isMemoryEnabled,
+      logger: this.logger.get('session_memory'),
     });
 
     return {
