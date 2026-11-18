@@ -536,15 +536,23 @@ export function serviceAccountAuditEvent({
   const [present, progressive, past] = serviceAccountAuditVerbs[action];
   // An error with an `unknown` outcome is a failure whose cleanup could not be confirmed, so the
   // object of the attempt may still exist.
-  const message = error
-    ? `Failed attempt to ${present} ${doc}${
-        outcome === 'unknown' ? ', which might have been left behind' : ''
-      }`
-    : reason !== undefined
-    ? `Kibana has ${past} ${doc}, because ${serviceAccountAuditReasons[reason]}`
-    : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+  const leftBehindDoc = error && outcome === 'unknown' ? ', which might have been left behind' : '';
+  // A reason means Kibana made the change, whatever the outcome. It stays in every message, so a
+  // record written before the change or for a failed one still says who acted and why.
+  const message =
+    reason !== undefined
+      ? `${
+          error
+            ? `Kibana failed to ${present}`
+            : outcome === 'unknown'
+            ? `Kibana is ${progressive}`
+            : `Kibana has ${past}`
+        } ${doc}${leftBehindDoc}, because ${serviceAccountAuditReasons[reason]}`
+      : error
+      ? `Failed attempt to ${present} ${doc}${leftBehindDoc}`
+      : outcome === 'unknown'
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
 
   const kibana = {
     ...(workload ? { workload } : {}),
