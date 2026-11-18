@@ -280,9 +280,14 @@ describe('digital experience session replay', () => {
 
       it('keeps typical sessions as they were before the option existed', () => {
         // Taken from the output of the scenario before `sessionLength` was added, with the browser
-        // dataset's index names
+        // dataset's index names, and before users, which don't change anything else
         const docs = generate(
-          { replaySize: 'light', seed: 'fingerprint-seed', sessionLength: 'typical' },
+          {
+            replaySize: 'light',
+            seed: 'fingerprint-seed',
+            sessionLength: 'typical',
+            signedInRate: 0,
+          },
           { from: FROM }
         );
         const times = docs.map((doc) => Number(doc['@timestamp']));

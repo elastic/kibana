@@ -30,6 +30,16 @@ const SCOPE_VERSION = '0.8.2';
 
 const HTTP_PORT_FROM_PROTOCOL: Readonly<Record<string, number>> = { 'http:': 80, 'https:': 443 };
 
+/** The signed-in user, as an app passes it to EDOT Browser's `setUser()`. */
+export interface EdotBrowserUser {
+  id: string;
+  email?: string;
+  /** Written as `user.full_name`, which `setUser()` takes as `name`. */
+  fullName?: string;
+  /** The user's organization or tenant, written as `elastic.user.account`. */
+  account?: string;
+}
+
 export interface EdotBrowserClientOptions {
   /** Written as `attributes.session.id` on every log and span when set. */
   sessionId?: string;
@@ -40,6 +50,11 @@ export interface EdotBrowserClientOptions {
    * without `sessionId` too, like the telemetry of a tab whose session expired.
    */
   tabId?: string;
+  /**
+   * Written as `attributes.user.*` on every log and span, like EDOT Browser's `setUser()` does. It
+   * isn't tied to the session, so a tab whose session expired keeps it.
+   */
+  user?: EdotBrowserUser;
   /**
    * Writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, like the
    * experimental `includeRawAttribution` option of the web-vitals instrumentation. Off by default.
@@ -139,12 +154,26 @@ export class EdotBrowserClient {
     return Boolean(this.options.sessionId);
   }
 
-  private get sessionAttributes(): Record<string, string> {
-    const { sessionId, previousSessionId, tabId } = this.options;
+  /** The same browser once the app has called `setUser()`, or `clearUser()` without a user. */
+  public withUser(user?: EdotBrowserUser): EdotBrowserClient {
+    return new EdotBrowserClient(this.resourceAttributes, { ...this.options, user });
+  }
+
+  /** What EDOT Browser's span and log processors add to every record: the session and the user. */
+  private get processorAttributes(): Record<string, string> {
+    const { sessionId, previousSessionId, tabId, user } = this.options;
     return {
       ...(sessionId ? { 'session.id': sessionId } : {}),
       ...(sessionId && previousSessionId ? { 'session.previous_id': previousSessionId } : {}),
       ...(tabId ? { 'browser.tab.id': tabId } : {}),
+      ...(user
+        ? {
+            'user.id': user.id,
+            ...(user.email ? { 'user.email': user.email } : {}),
+            ...(user.fullName ? { 'user.full_name': user.fullName } : {}),
+            ...(user.account ? { 'elastic.user.account': user.account } : {}),
+          }
+        : {}),
     };
   }
 
@@ -159,7 +188,7 @@ export class EdotBrowserClient {
       .severity(severityNumber)
       .scope(scope)
       .addResourceAttributes({ ...this.resourceAttributes })
-      .addAttributes({ ...attributes, ...this.sessionAttributes });
+      .addAttributes({ ...attributes, ...this.processorAttributes });
   }
 
   private log(
@@ -178,7 +207,8 @@ export class EdotBrowserClient {
 
   /**
    * A record of the replay logger. Its scope version is the version of EDOT Browser, it has no
-   * severity and, like every record of the SDK, the session attributes of the log processor.
+   * severity and, like every record of the SDK, the session and user attributes of the log
+   * processors.
    */
   private replayLog(eventName: string, attributes: Record<string, unknown>): EdotLog {
     const distroVersion = this.resourceAttributes['telemetry.distro.version'];
@@ -189,7 +219,7 @@ export class EdotBrowserClient {
         ...(typeof distroVersion === 'string' ? { version: distroVersion } : {}),
       })
       .addResourceAttributes({ ...this.resourceAttributes })
-      .addAttributes({ ...attributes, ...this.sessionAttributes });
+      .addAttributes({ ...attributes, ...this.processorAttributes });
   }
 
   /**
@@ -461,7 +491,7 @@ export class EdotBrowserClient {
         ...(requestBodySize !== undefined ? { 'http.request.body.size': requestBodySize } : {}),
         ...(statusCode !== undefined ? { 'http.response.status_code': statusCode } : {}),
         ...(isError && resolvedErrorType ? { 'error.type': resolvedErrorType } : {}),
-        ...this.sessionAttributes,
+        ...this.processorAttributes,
       },
     });
   }

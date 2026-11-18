@@ -74,6 +74,17 @@
  *   first FullSnapshot (the player drops it and carries on from the next one), and a share starts
  *   recording with its second page
  *
+ * Users: a share of the sessions of every app has a signed-in user, the others are anonymous. Like
+ * EDOT Browser's `setUser()` (elastic/elastic-otel-rum-js#125), the user is written as
+ * `attributes.user.id`, `user.email` and `user.full_name` (some users have no email or name), and
+ * `elastic.user.account` for the B2B apps (support-center-web and docs-web):
+ * - storefront-web 35% of sessions, checkout-web 80%, media-portal-web 20%, support-center-web 75%
+ *   and docs-web 10%
+ * - users come back: an app has about 240 users per session a minute, a few of them with most of
+ *   the sessions
+ * - a quarter of the signed-in sessions start anonymous and sign in on their second page load
+ * - the tab keeps the user once its session expires
+ *
  * Scenario options:
  * - withSessionId (boolean, default: true): write `attributes.session.id`, with the tab ID
  *   and `session.start` that come with sessions. Set to false to match EDOT Browser 0.3.0 and
@@ -107,6 +118,8 @@
  *   when it ends. The run starts with the sessions in progress at `--from`: each run, and each
  *   worker, first simulates the sessions started up to 2, 3 or 5 hours before it (`typical`, `long`
  *   or `marathon`) to find them, and keeps the ones in progress in memory
+ * - signedInRate (number from 0 to 1, default: each app's share above): share of sessions with a
+ *   signed-in user in every app. Users need sessions: with `withSessionId=false` there are none
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible
@@ -119,6 +132,7 @@
  *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts replayRate=0.3,errorReplayRate=0.5
  *   node scripts/synthtrace digital_experience_browser --from=now-3h --to=now --scenarioOpts replayRate=1,sessionLength=marathon,scale=0.05
  *   node scripts/synthtrace digital_experience_browser --live --scenarioOpts sessionLength=long,ongoingSessions=true
+ *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts signedInRate=1
  */
 
 import type { Scenario } from '../cli/scenario';

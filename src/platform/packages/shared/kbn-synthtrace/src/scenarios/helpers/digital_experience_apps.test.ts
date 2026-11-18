@@ -171,6 +171,17 @@ describe('digital experience apps', () => {
         'edgeCases must be true or false'
       );
     });
+
+    it('keeps the share of signed-in sessions of each app unless set', () => {
+      expect(parseDigitalExperienceScenarioOpts(undefined, FROM).signedInRate).toBeUndefined();
+      expect(parseDigitalExperienceScenarioOpts({ signedInRate: '0.5' }, FROM).signedInRate).toBe(
+        0.5
+      );
+      expect(parseDigitalExperienceScenarioOpts({ signedInRate: 0 }, FROM).signedInRate).toBe(0);
+      expect(() => parseDigitalExperienceScenarioOpts({ signedInRate: 2 }, FROM)).toThrow(
+        'signedInRate must be a number from 0 to 1'
+      );
+    });
   });
 
   describe('generateEdotBrowserSessions', () => {
@@ -221,6 +232,117 @@ describe('digital experience apps', () => {
           expect(Number(doc['@timestamp'])).toBeGreaterThanOrEqual(shortRange.from.getTime());
           expect(Number(doc['@timestamp'])).toBeLessThan(shortRange.to.getTime());
         });
+      });
+    });
+
+    describe('users', () => {
+      const generate = (opts: { withSessionId?: boolean; signedInRate?: number } = {}) =>
+        generateEdotBrowserSessions(timerange(at(0), at(1800)), {
+          ...parseDigitalExperienceScenarioOpts({ seed: 'users', ...opts }, FROM),
+          environment: 'test',
+          from: FROM,
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
+        );
+      const userOf = (doc: EdotBrowserDocument) => doc.attributes?.['user.id'];
+      const docs = generate();
+      // The users of each session, from its records that have one
+      const sessionUsers = (all: EdotBrowserDocument[], serviceName: string) => {
+        const users = new Map<unknown, Set<unknown>>();
+        all
+          .filter((doc) => doc.resource?.attributes?.['service.name'] === serviceName)
+          .forEach((doc) => {
+            const sessionId = doc.attributes?.['session.id'];
+            if (sessionId === undefined) {
+              return;
+            }
+            const sessionUserIds = users.get(sessionId) ?? new Set();
+            if (userOf(doc) !== undefined) {
+              sessionUserIds.add(userOf(doc));
+            }
+            users.set(sessionId, sessionUserIds);
+          });
+        return [...users.values()];
+      };
+
+      it('signs in about the share of sessions of each app, with a single user per session', () => {
+        DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName, signedInRate }) => {
+          const sessions = sessionUsers(docs, serviceName);
+          const signedIn = sessions.filter((users) => users.size > 0).length / sessions.length;
+
+          expect(Math.abs(signedIn - signedInRate)).toBeLessThan(0.2);
+          sessions.forEach((users) => expect(users.size).toBeLessThanOrEqual(1));
+        });
+      });
+
+      it('brings users back to several sessions', () => {
+        const sessions = sessionUsers(docs, 'checkout-web').filter((users) => users.size > 0);
+        const users = new Set(sessions.flatMap((sessionUserIds) => [...sessionUserIds]));
+
+        expect(users.size).toBeLessThan(sessions.length);
+      });
+
+      it('signs some users in during the session, after the first page load', () => {
+        const checkout = docs.filter(
+          (doc) => doc.resource?.attributes?.['service.name'] === 'checkout-web'
+        );
+        const signedInSessions = new Set(
+          checkout.filter(userOf).map((doc) => doc.attributes?.['session.id'])
+        );
+        const signingIn = new Set(
+          checkout
+            .filter((doc) => !userOf(doc) && signedInSessions.has(doc.attributes?.['session.id']))
+            .map((doc) => doc.attributes?.['session.id'])
+        );
+
+        expect(signingIn.size).toBeGreaterThan(0);
+        expect(signingIn.size).toBeLessThan(signedInSessions.size);
+      });
+
+      it('writes the account of the users of B2B apps only', () => {
+        const accountOf = (doc: EdotBrowserDocument) => doc.attributes?.['elastic.user.account'];
+        DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName, accounts }) => {
+          const signedIn = docs.filter(
+            (doc) => doc.resource?.attributes?.['service.name'] === serviceName && userOf(doc)
+          );
+
+          expect(signedIn.length).toBeGreaterThan(0);
+          signedIn.forEach((doc) =>
+            accounts
+              ? expect(accounts).toContain(accountOf(doc))
+              : expect(accountOf(doc)).toBeUndefined()
+          );
+        });
+      });
+
+      it('gives the same user the same details in every session', () => {
+        const details = new Map<unknown, string>();
+        docs.filter(userOf).forEach(({ resource, attributes = {} }) => {
+          const key = `${resource?.attributes?.['service.name']}:${attributes['user.id']}`;
+          const userDetails = JSON.stringify([
+            attributes['user.email'],
+            attributes['user.full_name'],
+            attributes['elastic.user.account'],
+          ]);
+          expect(details.get(key) ?? userDetails).toBe(userDetails);
+          details.set(key, userDetails);
+        });
+
+        const withName = docs.filter((doc) => doc.attributes?.['user.full_name']);
+        expect(withName.length).toBeGreaterThan(0);
+        expect(withName.length).toBeLessThan(docs.filter(userOf).length);
+      });
+
+      it('signs in the share of sessions of every app that signedInRate sets', () => {
+        expect(generate({ signedInRate: 0 }).some(userOf)).toBe(false);
+        const allSignedIn = generate({ signedInRate: 1 });
+        DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName }) =>
+          sessionUsers(allSignedIn, serviceName).forEach((users) => expect(users.size).toBe(1))
+        );
+      });
+
+      it('keeps every session anonymous without session IDs', () => {
+        expect(generate({ withSessionId: false }).some(userOf)).toBe(false);
       });
     });
 
@@ -318,12 +440,21 @@ describe('digital experience apps', () => {
           },
           attributes: Object.fromEntries(
             Object.entries(attributes ?? {}).filter(
-              ([key]) => !['session.id', 'session.previous_id', 'browser.tab.id'].includes(key)
+              ([key]) =>
+                ![
+                  'session.id',
+                  'session.previous_id',
+                  'browser.tab.id',
+                  'user.id',
+                  'user.email',
+                  'user.full_name',
+                  'elastic.user.account',
+                ].includes(key)
             )
           ),
         });
         // Without session IDs a session is a single visit. With them, some get more visits, an idle
-        // tab and a session.start log, and all get session attributes.
+        // tab and a session.start log, all get session attributes and some get a user.
         const withSessionIds = new Set(sorted(generate('seed-a').map(asWithoutSessions)));
 
         expect(withoutSessionIds.length).toBeGreaterThan(0);

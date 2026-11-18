@@ -11,6 +11,7 @@ import type { OtelLogDocument } from '../otel_logs';
 import type { Serializable } from '../serializable';
 import type {
   EdotBrowserClient,
+  EdotBrowserUser,
   HttpInstrumentation,
   NavigationTimingType,
   ResourceTimingValues,
@@ -158,6 +159,12 @@ export type EdotBrowserSessionOptions = SessionAnchor & {
    * resources, so they take as long: only the timing entries are left out.
    */
   reportResourceTimings?: boolean;
+  /**
+   * The user signs in during the session: page loads from `atDocument` on (counted from 0) carry
+   * the user, like an app that calls `setUser()` after its login page. A session with fewer page
+   * loads signs in on its last one.
+   */
+  signIn?: { user: EdotBrowserUser; atDocument: number };
   random?: () => number;
 };
 
@@ -986,6 +993,7 @@ export const sessionWithDocuments = (
     resumed = false,
     reportExceptions = true,
     reportResourceTimings = true,
+    signIn,
     random = Math.random,
   } = options;
   if (site.pages.length === 0) {
@@ -1004,9 +1012,16 @@ export const sessionWithDocuments = (
   const duration = documents.length ? documents[documents.length - 1].hiddenAt : 0;
   const start = options.start !== undefined ? options.start : options.end - duration;
 
+  const signedIn: SessionContext | undefined = signIn && {
+    ...ctx,
+    client: client.withUser(signIn.user),
+  };
+  const signInDocument = signIn ? Math.min(signIn.atDocument, documents.length - 1) : Infinity;
   const simulated = documents
     .map((document) => shiftDocument(document, start))
-    .map((document) => simulateDocument(ctx, document));
+    .map((document, index) =>
+      simulateDocument(signedIn && index >= signInDocument ? signedIn : ctx, document)
+    );
 
   return {
     events: [

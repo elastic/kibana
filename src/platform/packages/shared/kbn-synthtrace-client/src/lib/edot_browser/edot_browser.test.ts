@@ -571,6 +571,42 @@ describe('edotBrowser', () => {
         expect(attributes).not.toHaveProperty(['session.previous_id'])
       );
     });
+
+    it('stamps the user on logs and spans like setUser()', () => {
+      const signals = (userClient: ReturnType<typeof createClient>) => [
+        ...userClient.exception({ type: 'Error', message: 'boom', stacktrace: '' }).serialize(),
+        ...userClient
+          .httpRequest({ method: 'GET', url: 'https://api.example.com/', statusCode: 200 })
+          .serialize(),
+      ];
+      const anonymous = createClient('session-1');
+      const signedIn = anonymous.withUser({
+        id: 'usr_1',
+        email: 'ada@example.com',
+        fullName: 'Ada Lovelace',
+        account: 'acme',
+      });
+
+      signals(signedIn).forEach(({ attributes }) =>
+        expect(attributes).toMatchObject({
+          'session.id': 'session-1',
+          'user.id': 'usr_1',
+          'user.email': 'ada@example.com',
+          'user.full_name': 'Ada Lovelace',
+          'elastic.user.account': 'acme',
+        })
+      );
+      signals(signedIn.withUser({ id: 'usr_2' })).forEach(({ attributes }) => {
+        expect(attributes).toMatchObject({ 'user.id': 'usr_2' });
+        expect(attributes).not.toHaveProperty(['user.email']);
+      });
+      // `clearUser()`, and the client it came from, which is unchanged
+      [signedIn.withUser(), anonymous].forEach((userClient) =>
+        signals(userClient).forEach(({ attributes }) =>
+          expect(attributes).not.toHaveProperty(['user.id'])
+        )
+      );
+    });
   });
 
   describe('planDocuments', () => {
@@ -1162,6 +1198,32 @@ describe('edotBrowser', () => {
 
       it('sends nothing for a site without GET requests', () => {
         expect(idleTab({ ...SITE, pages: [{ path: '/' }] })).toEqual([]);
+      });
+    });
+
+    it('stamps the user from the page load where the user signs in', () => {
+      const { documents, events } = edotBrowser.sessionWithDocuments({
+        end: TIMESTAMP,
+        client: createClient('abc'),
+        site: SITE,
+        health: HEALTH_PROFILES.healthy,
+        pageViews: 3,
+        hardNavigationRate: 1,
+        random: seededRandom(1),
+        signIn: { user: { id: 'usr_1' }, atDocument: 1 },
+      });
+      const docs = events.flatMap((event) => event.serialize());
+      const [firstLoad, secondLoad] = documents.map(({ start }) => start);
+
+      expect(documents.length).toBeGreaterThan(1);
+      docs.forEach((doc) => {
+        const at = Number(doc['@timestamp']);
+        if (at < secondLoad) {
+          expect(at).toBeGreaterThanOrEqual(firstLoad);
+          expect(doc.attributes).not.toHaveProperty(['user.id']);
+        } else {
+          expect(doc.attributes?.['user.id']).toBe('usr_1');
+        }
       });
     });
 
