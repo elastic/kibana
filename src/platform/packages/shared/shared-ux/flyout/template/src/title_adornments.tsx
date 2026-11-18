@@ -38,7 +38,7 @@ export const renderTitleLoading = (isLoading: boolean, loadingLabel?: string): R
     <EuiLoadingSpinner
       size="m"
       data-test-subj={TITLE_LOADING_TEST_SUBJ}
-      {...(loadingLabel !== undefined && { 'aria-label': loadingLabel })}
+      aria-label={loadingLabel}
     />
   ) : null;
 
