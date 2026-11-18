@@ -10,6 +10,7 @@ import { ToolResultType, isToolCallStep } from '@kbn/agent-builder-common';
 import {
   createScenario,
   expectAppendOnly,
+  messageText,
   messagesText,
   type ScenarioAttachmentType,
   type ScenarioTool,
@@ -47,6 +48,15 @@ const attachAlert: ScenarioTool = {
 
 const definitionCount = (text: string, toolId: string) =>
   (text.match(new RegExp(`"tool_id":\\s*"${toolId}"`, 'g')) ?? []).length;
+
+/**
+ * The attachment events of a message with the dynamic tool definitions they carry, as the model
+ * reads them. Timestamps are masked: an attachment is created at the time the test runs.
+ */
+const renderedAttachmentEvents = (text: string) =>
+  (
+    text.match(/<conversation_event[\s\S]*<\/(?:conversation_event|dynamic_tools)>/)?.[0] ?? ''
+  ).replace(/timestamp="[^"]*"/g, 'timestamp="[timestamp]"');
 
 describe('the tools an attachment type exposes (getTools)', () => {
   it('are dynamic tools, described after the attachment event and called through execute_dynamic_tool', async () => {
@@ -162,5 +172,66 @@ describe('the tools an attachment type exposes (getTools)', () => {
 
     expect(definitionCount(messagesText(calls[0]), 'get_alert_details')).toBe(1);
     expect(definitionCount(messagesText(calls[1]), 'get_alert_details')).toBe(1);
+  });
+
+  it('are rendered in a <dynamic_tools> block after the first attachment event of the type', async () => {
+    const scenario = createScenario({
+      unselectedTools: [getAlertDetails],
+      attachmentTypes: [alertType],
+    });
+
+    const { calls } = await scenario.turn(
+      {
+        message: 'Compare these alerts',
+        attachments: [
+          { id: 'alert-a1', type: 'alert', data: { alert_id: 'a1' } },
+          { id: 'alert-a2', type: 'alert', data: { alert_id: 'a2' } },
+        ],
+      },
+      ['Two alerts.']
+    );
+
+    expect(renderedAttachmentEvents(messageText(calls[0].messages[0]))).toBe(
+      `<conversation_event type="attachment_added" timestamp="[timestamp]">
+  <attachment attachment_id="alert-a1" attachment_type="alert" version="1" actor="user" source="chat_input" />
+</conversation_event>
+<dynamic_tools>{"tool_id":"get_alert_details","description":"Fetches the details of an alert by id.","parameters":{"type":"object","properties":{"alert_id":{"type":"string"}},"required":["alert_id"]}}</dynamic_tools>
+<conversation_event type="attachment_added" timestamp="[timestamp]">
+  <attachment attachment_id="alert-a2" attachment_type="alert" version="1" actor="user" source="chat_input" />
+</conversation_event>`
+    );
+  });
+
+  it('are not described when the agent already has them in its tool list', async () => {
+    const searchAlerts: ScenarioTool = {
+      id: 'search_alerts',
+      description: 'Searches alerts.',
+      schema: z.object({ query: z.string() }),
+      handler: () => ({ results: [{ type: ToolResultType.other, data: { total: 0 } }] }),
+    };
+    const scenario = createScenario({
+      // the agent's configuration selects `search_alerts`, so it is in the native tool list
+      tools: [searchAlerts],
+      unselectedTools: [getAlertDetails],
+      attachmentTypes: [{ ...alertType, tools: ['search_alerts', 'get_alert_details'] }],
+    });
+
+    const { calls } = await scenario.turn(
+      {
+        message: 'What is this alert?',
+        attachments: [{ id: 'alert-a1', type: 'alert', data: { alert_id: 'a1' } }],
+      },
+      ['An alert.']
+    );
+
+    expect(calls[0].tools).toHaveProperty('search_alerts');
+    expect(calls[0].tools).not.toHaveProperty('get_alert_details');
+    // only the tool the agent cannot call natively is described
+    expect(renderedAttachmentEvents(messageText(calls[0].messages[0]))).toBe(
+      `<conversation_event type="attachment_added" timestamp="[timestamp]">
+  <attachment attachment_id="alert-a1" attachment_type="alert" version="1" actor="user" source="chat_input" />
+</conversation_event>
+<dynamic_tools>{"tool_id":"get_alert_details","description":"Fetches the details of an alert by id.","parameters":{"type":"object","properties":{"alert_id":{"type":"string"}},"required":["alert_id"]}}</dynamic_tools>`
+    );
   });
 });

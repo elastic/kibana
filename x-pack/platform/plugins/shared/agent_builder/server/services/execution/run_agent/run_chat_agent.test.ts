@@ -1786,6 +1786,8 @@ describe('runDefaultAgentMode attachment bound tools', () => {
       attachmentStateManager: context.attachmentStateManager,
       attachmentsService: context.attachments,
       formatContext: { request: context.request, spaceId: context.spaceId },
+      toolProvider: context.toolProvider,
+      isNativeTool: expect.any(Function),
       logger: context.logger,
     });
     // only attachment events: the timeline's, then the incoming message's
@@ -1830,6 +1832,17 @@ describe('runDefaultAgentMode attachment bound tools', () => {
     expect(sync.mock.invocationCallOrder[0]).toBeGreaterThan(
       context.toolManager.addTools.mock.invocationCallOrder.at(-1)!
     );
+  });
+
+  it('tells the attachment tools which tool ids the tool manager binds natively', async () => {
+    const { context } = await run();
+    const [{ isNativeTool }] = AttachmentBoundToolsMock.mock.calls[0];
+    context.toolManager.hasExecutableTool.mockImplementation(
+      (toolId: string) => toolId === 'native.tool'
+    );
+
+    expect(isNativeTool('native.tool')).toBe(true);
+    expect(isNativeTool('other.tool')).toBe(false);
   });
 
   describe('when a tool batch produces attachment events', () => {

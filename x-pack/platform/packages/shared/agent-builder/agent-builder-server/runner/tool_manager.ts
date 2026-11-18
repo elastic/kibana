@@ -107,6 +107,12 @@ export interface ToolManager {
   getExecutable(toolId: string): ExecutableTool | undefined;
 
   /**
+   * Whether a tool was added under the given internal id with an `executable` input, so is bound
+   * natively: the model calls it directly. False for dynamic tools and unknown ids.
+   */
+  hasExecutableTool(toolId: string): boolean;
+
+  /**
    * Gets the internal tool IDs of the dynamic tools, for persistence.
    * @returns array of internal tool IDs
    */
@@ -117,6 +123,12 @@ export interface ToolManager {
    * ids.
    */
   getDynamicTool(toolId: string): ExecutableToolWithOrigin | undefined;
+
+  /**
+   * Whether a tool added with a `dynamic` input is registered under the given internal id. False
+   * for natively bound and unknown ids.
+   */
+  hasDynamicTool(toolId: string): boolean;
 
   /**
    * Lists the tools added with a `dynamic` input.

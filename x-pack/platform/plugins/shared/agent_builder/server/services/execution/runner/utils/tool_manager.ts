@@ -143,6 +143,10 @@ export class ToolManager implements IToolManager {
     return this.executableTools.get(toolId) ?? this.dynamicToolRegistry.get(toolId);
   }
 
+  public hasExecutableTool(toolId: string): boolean {
+    return this.executableTools.has(toolId);
+  }
+
   /**
    * Gets the summarizer function for a tool by its internal tool ID.
    * Returns undefined if the tool is not found or has no summarizer.
@@ -153,6 +157,10 @@ export class ToolManager implements IToolManager {
 
   public getDynamicTool(toolId: string): ExecutableToolWithOrigin | undefined {
     return this.dynamicToolRegistry.get(toolId);
+  }
+
+  public hasDynamicTool(toolId: string): boolean {
+    return this.dynamicToolRegistry.has(toolId);
   }
 
   public listDynamicTools(): ExecutableToolWithOrigin[] {
@@ -226,7 +234,7 @@ export class ToolManager implements IToolManager {
   private addDynamicTools(input: DynamicToolInput): void {
     const tools = Array.isArray(input.tools) ? input.tools : [input.tools];
     // ids bound natively are skipped: the model calls those directly
-    this.dynamicToolRegistry.register(tools.filter((tool) => !this.executableTools.has(tool.id)));
+    this.dynamicToolRegistry.register(tools.filter((tool) => !this.hasExecutableTool(tool.id)));
     return;
   }
 }

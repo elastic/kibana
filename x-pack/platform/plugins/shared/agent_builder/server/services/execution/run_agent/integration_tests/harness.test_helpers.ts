@@ -145,7 +145,8 @@ export const expectAppendOnly = (calls: ModelCall[]): void => {
   });
 };
 
-const messageText = (message: Message): string => {
+/** The text of one message as the model reads it. */
+export const messageText = (message: Message): string => {
   switch (message.role) {
     case MessageRole.User:
       return typeof message.content === 'string'

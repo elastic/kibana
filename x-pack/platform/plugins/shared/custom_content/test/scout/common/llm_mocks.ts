@@ -43,15 +43,26 @@ export const mockTemplateGeneration = (proxy: LlmProxy, template: string) => {
     .completeAfterIntercept();
 };
 
-export const mockToolCall = (
+const EXECUTE_DYNAMIC_TOOL = 'execute_dynamic_tool';
+
+/**
+ * A call to a dynamic tool, which the model reaches through `execute_dynamic_tool`. The tools an
+ * attachment type exposes (`getTools`) are dynamic: their definitions arrive in the conversation
+ * rather than in the tool list, and `tool_id` is the tool's id as the definition gives it.
+ */
+export const createDynamicToolCallMessage = (toolId: string, params: Record<string, unknown>) =>
+  createToolCallMessage(EXECUTE_DYNAMIC_TOOL, { tool_id: toolId, params });
+
+/** Answers the user's message with a dynamic tool call. */
+export const mockDynamicToolCall = (
   proxy: LlmProxy,
-  toolName: string,
-  toolArg: Record<string, unknown>
+  toolId: string,
+  params: Record<string, unknown>
 ) => {
   void proxy.interceptors.userMessage({
-    name: 'agent:tool_call',
+    name: `agent:${EXECUTE_DYNAMIC_TOOL}:${toolId}`,
     when: ({ messages }) => !isTitleGenerationRequest(messages),
-    response: createToolCallMessage(toolName, toolArg),
+    response: createDynamicToolCallMessage(toolId, params),
   });
 };
 

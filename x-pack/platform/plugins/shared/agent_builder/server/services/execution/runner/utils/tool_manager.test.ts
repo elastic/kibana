@@ -895,4 +895,67 @@ describe('ToolManager', () => {
       expect(content).toEqual(JSON.stringify({ results: hugeResults }));
     });
   });
+
+  describe('hasExecutableTool', () => {
+    it('is true for a natively bound tool', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('native-1'),
+        logger: mockLogger,
+      });
+
+      expect(toolManager.hasExecutableTool('native-1')).toBe(true);
+    });
+
+    it('is false for a dynamic tool', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.dynamic,
+        tools: [createMockExecutableTool('dynamic-1')],
+      });
+
+      expect(toolManager.hasExecutableTool('dynamic-1')).toBe(false);
+    });
+
+    it('is false for an unknown id', () => {
+      expect(toolManager.hasExecutableTool('unknown')).toBe(false);
+    });
+  });
+
+  describe('hasDynamicTool', () => {
+    const addDynamic = (id: string) =>
+      toolManager.addTools({
+        type: ToolManagerToolType.dynamic,
+        tools: [createMockExecutableTool(id)],
+      });
+
+    it('is true for a dynamic tool', async () => {
+      await addDynamic('dynamic-1');
+
+      expect(toolManager.hasDynamicTool('dynamic-1')).toBe(true);
+    });
+
+    it('is false for a natively bound tool, also when a dynamic tool is added under its id', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('native-1'),
+        logger: mockLogger,
+      });
+
+      await addDynamic('native-1');
+
+      expect(toolManager.hasDynamicTool('native-1')).toBe(false);
+    });
+
+    it('is false for a dynamic tool once it is removed', async () => {
+      await addDynamic('dynamic-1');
+
+      toolManager.removeDynamicTools(['dynamic-1']);
+
+      expect(toolManager.hasDynamicTool('dynamic-1')).toBe(false);
+    });
+
+    it('is false for an unknown id', () => {
+      expect(toolManager.hasDynamicTool('unknown')).toBe(false);
+    });
+  });
 });

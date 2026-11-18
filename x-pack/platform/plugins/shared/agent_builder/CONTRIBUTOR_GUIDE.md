@@ -442,23 +442,34 @@ in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lis
 
 (Kibana will fail to start otherwise, with an explicit error message explaining what to do)
 
-#### Tools bound to an attachment
+#### Tools exposed by attachments
 
-The object returned by `format` can implement `getBoundedTools` to give the agent tools tied to one
-attachment (for example a tool fetching the details of the attached host). Unlike the tools listed by
-`getTools`, which the attachment type declares and which are bound natively, bound tools are
-[dynamic tools](#tools-exposed-by-skills-and-attachments): their definitions are rendered after the
+An attachment type can give the agent tools in two ways:
+
+- **Type tools:** `getTools`, on the type definition, lists the ids of tools from the tool registry that go
+  with the type (for example a tool searching alerts, for an alert attachment). They are available while at
+  least one attachment of the type is active.
+- **Bound tools:** `getBoundedTools`, on the object returned by `format`, defines tools tied to one attachment
+  (for example a tool fetching the details of the attached host). They are available while that attachment is
+  active, at its current version.
+
+Both are [dynamic tools](#tools-exposed-by-skills-and-attachments): their definitions are rendered after the
 attachment event that makes them available, and the agent calls them through `execute_dynamic_tool`.
 Adding an attachment therefore never changes the agent's native tool list.
 
-- The definitions are rendered from the attachment version the event announces, so keep each tool's
-  description and schema a function of that version's data: anything else (time, live lookups) would change
-  an already-rendered block and invalidate the prompt cache.
+- The definitions of bound tools are rendered from the attachment version the event announces, so keep each
+  tool's description and schema a function of that version's data: anything else (time, live lookups) would
+  change an already-rendered block and invalidate the prompt cache.
+- The definitions of type tools are rendered once, after the first attachment event of the type, however many
+  attachments of the type follow.
+- A type tool the agent already has in its native tool list (selected in its configuration, for example
+  `execute_esql` for the default agent) stays a native tool: it is not described again and the agent keeps
+  calling it directly.
 - A tool added or changed during a run (for example by `attachments.add`) is callable from the next model call.
   Deleting an attachment, or updating it to a version that binds fewer tools, makes the dropped tools
-  uncallable from the next model call.
-- Bound tool ids are not scoped to the attachment: when two active attachments of one type bind the same
-  tool id, the last one wins.
+  uncallable from the next model call. Type tools are dropped with the last active attachment of the type.
+- Bound tool ids are not scoped to the attachment: when two active attachments bind the same tool id, the
+  last one wins, and a bound tool wins over a type tool with the same id.
 
 #### `getAgentDescription` — describing inline rendering to the agent
 
@@ -1585,8 +1596,8 @@ agentBuilder.skills.register({
 
 ### Tools exposed by skills and attachments
 
-Tools a skill exposes (`getRegistryTools`, `getInlineTools`) and tools bound to an attachment
-(`getBoundedTools`, see [Tools bound to an attachment](#tools-bound-to-an-attachment)) are **dynamic tools**.
+Tools a skill exposes (`getRegistryTools`, `getInlineTools`) and tools an attachment exposes
+(`getTools`, `getBoundedTools`, see [Tools exposed by attachments](#tools-exposed-by-attachments)) are **dynamic tools**.
 They are never added to the model's native tool list, which stays fixed for the whole run so the
 prompt cache prefix stays valid. Instead:
 

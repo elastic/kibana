@@ -171,19 +171,20 @@ describe('selectTools', () => {
       jest.mocked(createAttachmentTools).mockClear();
     });
 
-    it('leaves out the generic attachment tools but keeps type tools when off', async () => {
+    it('leaves out the generic attachment tools and the type tools when off', async () => {
       const ids = await selectStaticToolIds({ attachmentToolsEnabled: false });
 
       expect(createAttachmentTools).not.toHaveBeenCalled();
       expect(ids.filter((id) => genericAttachmentToolIds.includes(id))).toEqual([]);
-      expect(ids).toEqual(expect.arrayContaining(['text.type_tool']));
+      expect(ids).not.toContain('text.type_tool');
     });
 
-    it('adds the generic attachment tools when on', async () => {
+    it('adds the generic attachment tools but not the type tools when on', async () => {
       const ids = await selectStaticToolIds({ attachmentToolsEnabled: true });
 
       expect(createAttachmentTools).toHaveBeenCalledTimes(1);
-      expect(ids).toEqual(expect.arrayContaining(['attachments.read', 'text.type_tool']));
+      expect(ids).toContain('attachments.read');
+      expect(ids).not.toContain('text.type_tool');
     });
   });
 
@@ -378,10 +379,11 @@ describe('selectTools attachment bound tools', () => {
     expect(ids(result.dynamicTools)).not.toContain('attachment.bound');
   });
 
-  it('keeps the tools of the attachment type native and those of skills dynamic', async () => {
+  it('leaves out the tools of the attachment type too and keeps those of skills dynamic', async () => {
     const result = await select();
 
-    expect(ids(result.staticTools)).toContain('text.type_tool');
+    expect(ids(result.staticTools)).not.toContain('text.type_tool');
+    expect(ids(result.dynamicTools)).not.toContain('text.type_tool');
     expect(ids(result.dynamicTools)).toContain('skill.inline');
   });
 });

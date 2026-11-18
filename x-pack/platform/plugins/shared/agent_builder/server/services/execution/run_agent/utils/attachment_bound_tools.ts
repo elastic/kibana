@@ -11,13 +11,14 @@ import { TimelineEventType, ToolOrigin } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { getVersion, toAttachment } from '@kbn/agent-builder-common/attachments';
 import { renderDynamicToolDefinition } from '@kbn/agent-builder-genai-utils/langchain';
-import type { ExecutableTool } from '@kbn/agent-builder-server';
+import type { ExecutableTool, ToolProvider } from '@kbn/agent-builder-server';
 import type {
   AttachmentFormatContext,
   AttachmentStateManager,
 } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentsService, ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
+import { pickTools } from './select_tools';
 
 /**
  * The tools an attachment binds to itself at one of its versions (`getBoundedTools`), ready to run.
@@ -73,17 +74,24 @@ const announcedVersion = (event: AttachmentTimelineEvent): number | undefined =>
 
 const versionKey = (attachmentId: string, version: number): string => `${attachmentId}@${version}`;
 
-/** The attachment versions the events announce, by key. */
+interface AnnouncedVersion {
+  attachmentId: string;
+  version: number;
+  type: string;
+}
+
+/** The attachment versions the events announce, by key, in event order. */
 const announcedVersions = (
   events: readonly AttachmentTimelineEvent[]
-): Map<string, { attachmentId: string; version: number }> => {
-  const announced = new Map<string, { attachmentId: string; version: number }>();
+): Map<string, AnnouncedVersion> => {
+  const announced = new Map<string, AnnouncedVersion>();
   for (const event of events) {
     const version = announcedVersion(event);
     if (version !== undefined) {
       announced.set(versionKey(event.data.attachment_id, version), {
         attachmentId: event.data.attachment_id,
         version,
+        type: event.data.attachment_type,
       });
     }
   }
@@ -94,28 +102,48 @@ export interface AttachmentBoundToolsOptions {
   attachmentStateManager: AttachmentStateManager;
   attachmentsService: AttachmentsService;
   formatContext: AttachmentFormatContext;
+  toolProvider: ToolProvider;
+  /**
+   * Whether the agent has the tool in its native tool list. It calls such a tool directly, so a
+   * type tool it has natively is neither described nor registered as a dynamic tool. Asked when
+   * the definitions are read, not in `prepare`, which runs before the run adds its native tools.
+   */
+  isNativeTool: (toolId: string) => boolean;
   logger?: Logger;
 }
 
 /**
- * The tools bound to a run's attachments, resolved once per attachment version and used two ways:
+ * The tools a run's attachments make available, as dynamic tools: the ones bound to one attachment
+ * version (`getBoundedTools`) and the registry tools its type declares (`getTools`). Used two ways:
  *
  * - `prepare` and `get` give the definitions an attachment event renders. Rendering is synchronous
  *   but resolving needs the async `format()`, so `prepare` resolves beforehand and `get` reads what
- *   was resolved. An event's definitions come from the version it announces, not the latest one,
- *   so the event renders the same on every prompt build.
+ *   was resolved. An event's bound definitions come from the version it announces, not the latest
+ *   one, and a type tool is described once, by the first prepared event of a type declaring it, so
+ *   the event renders the same on every prompt build.
  * - `sync` keeps the tools of the active attachments registered as dynamic tools: it registers the
- *   tools bound to the attachments active now and removes the ones registered before that are no
- *   longer bound (a deleted attachment, a version replaced by one binding fewer tools).
+ *   tools bound to the attachments active now and the tools of their types, and removes the ones
+ *   registered before that are no longer available (a deleted attachment, a version replaced by one
+ *   binding fewer tools, the last attachment of a type gone).
+ *
+ * A type tool the agent already has in its native tool list stays native: it is left out of both.
  */
 export class AttachmentBoundTools {
-  /** The tools of each attachment version, resolved once. */
+  /** The bound tools of each attachment version, resolved once. */
   private readonly tools = new Map<string, Promise<ExecutableTool[]>>();
   /**
-   * Rendered definitions by attachment version; undefined for a version that binds no tool whose
-   * definition renders.
+   * Rendered bound definitions by attachment version; undefined for a version that binds no tool
+   * whose definition renders.
    */
   private readonly definitions = new Map<string, DynamicToolDefinition[] | undefined>();
+  /** The registry tools each attachment type declares, resolved once. */
+  private readonly typeTools = new Map<string, Promise<ExecutableTool[]>>();
+  /** The rendered definitions of each type's tools, resolved once. */
+  private readonly typeDefinitions = new Map<string, Promise<DynamicToolDefinition[]>>();
+  /** The rendered definitions of each type's tools, once resolved, for the synchronous `get`. */
+  private readonly renderedTypeDefinitions = new Map<string, DynamicToolDefinition[]>();
+  /** The attachment version (by key) whose event describes each type tool, by tool id. */
+  private readonly typeToolOwners = new Map<string, string>();
   /** The ids of the tools `sync` registered last. */
   private registeredIds = new Set<string>();
   /** The attachment versions the events given to `prepare` announced, by key. */
@@ -127,42 +155,80 @@ export class AttachmentBoundTools {
   async prepare(events: readonly AttachmentTimelineEvent[]): Promise<void> {
     const announcedAttachmentVersions = announcedVersions(events);
     announcedAttachmentVersions.keys().forEach((key) => this.announced.add(key));
-    await Promise.all(
-      announcedAttachmentVersions
-        .values()
-        .map(({ attachmentId, version }) => this.resolveVersionDefinitions(attachmentId, version))
-    );
+    const types = new Set(announcedAttachmentVersions.values().map(({ type }) => type));
+    await Promise.all([
+      Promise.all(
+        announcedAttachmentVersions
+          .values()
+          .map(({ attachmentId, version }) => this.resolveVersionDefinitions(attachmentId, version))
+      ),
+      Promise.all(types.values().map((type) => this.resolveTypeDefinitions(type))),
+    ]);
+    // A type tool not described yet is described by the first of these events whose type declares
+    // it: events are prepared in timeline order, so the owner is the same on every prompt build.
+    announcedAttachmentVersions.forEach(({ type }, key) => {
+      this.renderedTypeDefinitions.get(type)?.forEach((definition) => {
+        if (!this.typeToolOwners.has(definition.tool_id)) {
+          this.typeToolOwners.set(definition.tool_id, key);
+        }
+      });
+    });
   }
 
   /** The definitions the event carries; undefined when it carries none or was not prepared. */
   get(event: AttachmentTimelineEvent): DynamicToolDefinition[] | undefined {
     const version = announcedVersion(event);
-    return version === undefined
-      ? undefined
-      : this.definitions.get(versionKey(event.data.attachment_id, version));
+    if (version === undefined) {
+      return undefined;
+    }
+    const key = versionKey(event.data.attachment_id, version);
+    const bound = this.definitions.get(key) ?? [];
+    const owned = (this.renderedTypeDefinitions.get(event.data.attachment_type) ?? []).filter(
+      (definition) =>
+        this.typeToolOwners.get(definition.tool_id) === key &&
+        !this.options.isNativeTool(definition.tool_id)
+    );
+    const carried = [...bound, ...owned];
+    return carried.length > 0 ? carried : undefined;
   }
 
   /**
-   * The definitions of the tools bound to the attachments active now that no event announces at
-   * their current version: neither one in `events` nor one `prepare` saw. A conversation stored
-   * before attachment events existed carries its attachments on its messages, with no event to
-   * render their definitions after. Resolve this when the prompt is built: a tool that updates or
-   * deletes such an attachment during the run changes the answer.
+   * The definitions of the tools the attachments active now make available that no event
+   * describes: the tools bound to an attachment at its current version that neither an event in
+   * `events` nor one `prepare` saw announces, and the tools of the active types no prepared event
+   * owns. A conversation stored before attachment events existed carries its attachments on its
+   * messages, with no event to render their definitions after. Resolve this when the prompt is
+   * built: a tool that updates or deletes such an attachment during the run changes the answer.
    */
   async unannouncedDefinitions(
     events: readonly AttachmentTimelineEvent[]
   ): Promise<DynamicToolDefinition[]> {
     const announced = announcedVersions(events);
-    const unannounced = this.options.attachmentStateManager.getActive().filter((attachment) => {
+    const active = this.options.attachmentStateManager.getActive();
+    const unannounced = active.filter((attachment) => {
       const key = versionKey(attachment.id, attachment.current_version);
       return !announced.has(key) && !this.announced.has(key);
     });
-    const definitions = await Promise.all(
-      unannounced.map((attachment) =>
-        this.resolveVersionDefinitions(attachment.id, attachment.current_version)
-      )
+    const types = new Set(active.map((attachment) => attachment.type));
+    const [bound, typeDefinitions] = await Promise.all([
+      Promise.all(
+        unannounced.map((attachment) =>
+          this.resolveVersionDefinitions(attachment.id, attachment.current_version)
+        )
+      ),
+      Promise.all(types.values().map((type) => this.resolveTypeDefinitions(type))),
+    ]);
+    const unowned = new Map(
+      typeDefinitions
+        .flat()
+        .filter(
+          (definition) =>
+            !this.typeToolOwners.has(definition.tool_id) &&
+            !this.options.isNativeTool(definition.tool_id)
+        )
+        .map((definition) => [definition.tool_id, definition])
     );
-    return definitions.flatMap((rendered) => rendered ?? []);
+    return bound.flatMap((rendered) => rendered ?? []).concat(unowned.values().toArray());
   }
 
   private async resolveVersionDefinitions(
@@ -179,22 +245,34 @@ export class AttachmentBoundTools {
     return this.definitions.get(key);
   }
 
-  /** Registers the tools bound to the active attachments and removes the ones no longer bound. */
+  /**
+   * Registers the tools the active attachments make available and removes the ones no longer
+   * available.
+   */
   async sync(toolManager: ToolManager): Promise<void> {
     const active = this.options.attachmentStateManager.getActive();
-    const tools = (
-      await Promise.all(
+    const types = new Set(active.map((attachment) => attachment.type));
+    const [typeTools, boundTools] = await Promise.all([
+      Promise.all(types.values().map((type) => this.resolveTypeTools(type))),
+      Promise.all(
         active.map((attachment) => this.resolve(attachment.id, attachment.current_version))
-      )
-    ).flat();
+      ),
+    ]);
+    // A registry tool several types declare is one tool: registered once. One the agent has
+    // natively is called directly, so it is not registered.
+    const registryTools = new Map(
+      typeTools
+        .flat()
+        .filter((tool) => !this.options.isNativeTool(tool.id))
+        .map((tool) => [tool.id, { ...tool, origin: ToolOrigin.registry }])
+    );
+    // Bound tools are not registry entries, so they are inline tools
+    const inlineTools = boundTools.flat().map((tool) => ({ ...tool, origin: ToolOrigin.inline }));
     // `Promise.all` keeps the attachment order, so on an id clash the last attachment's tool wins
+    const tools = registryTools.values().toArray().concat(inlineTools);
     const ids = new Set(tools.map((tool) => tool.id));
     toolManager.removeDynamicTools([...this.registeredIds].filter((id) => !ids.has(id)));
-    // Bound tools are not registry entries, so they are inline tools
-    await toolManager.addTools({
-      type: ToolManagerToolType.dynamic,
-      tools: tools.map((tool) => ({ ...tool, origin: ToolOrigin.inline })),
-    });
+    await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools });
     this.registeredIds = ids;
   }
 
@@ -216,6 +294,46 @@ export class AttachmentBoundTools {
       return [];
     }
     return resolveAttachmentBoundTools({ attachment, version, attachmentsService, formatContext });
+  }
+
+  /** The registry tools the type declares (`getTools`); an unknown type or id yields none. */
+  private resolveTypeTools(type: string): Promise<ExecutableTool[]> {
+    let tools = this.typeTools.get(type);
+    if (!tools) {
+      tools = this.pickTypeTools(type);
+      this.typeTools.set(type, tools);
+    }
+    return tools;
+  }
+
+  private async pickTypeTools(type: string): Promise<ExecutableTool[]> {
+    const { attachmentsService, toolProvider, formatContext } = this.options;
+    const toolIds = attachmentsService.getTypeDefinition(type)?.getTools?.() ?? [];
+    if (toolIds.length === 0) {
+      return [];
+    }
+    return pickTools({
+      toolProvider,
+      selection: [{ tool_ids: toolIds }],
+      request: formatContext.request,
+    });
+  }
+
+  private resolveTypeDefinitions(type: string): Promise<DynamicToolDefinition[]> {
+    let definitions = this.typeDefinitions.get(type);
+    if (!definitions) {
+      definitions = this.renderTypeDefinitions(type);
+      this.typeDefinitions.set(type, definitions);
+    }
+    return definitions;
+  }
+
+  private async renderTypeDefinitions(type: string): Promise<DynamicToolDefinition[]> {
+    const tools = await this.resolveTypeTools(type);
+    const definitions = await Promise.all(tools.map((tool) => this.renderDefinition(tool)));
+    const rendered = definitions.filter((def): def is DynamicToolDefinition => def !== undefined);
+    this.renderedTypeDefinitions.set(type, rendered);
+    return rendered;
   }
 
   private async render(

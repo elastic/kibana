@@ -254,12 +254,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
   const pendingRound = pendingTurn?.compatRound;
-  // The tools bound to an attachment are announced by its events.
+  // The tools an attachment makes available are announced by its events.
   const attachmentFormatContext = { request, spaceId: context.spaceId };
   const attachmentBoundTools = new AttachmentBoundTools({
     attachmentStateManager: context.attachmentStateManager,
     attachmentsService: attachments,
     formatContext: attachmentFormatContext,
+    toolProvider,
+    isNativeTool: (toolId) => toolManager.hasExecutableTool(toolId),
     logger,
   });
   const runAttachmentEvents = new RunAttachmentEvents({

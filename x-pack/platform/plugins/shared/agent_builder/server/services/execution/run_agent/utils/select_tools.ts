@@ -60,16 +60,9 @@ export const selectTools = async ({
 }): Promise<SelectToolsResult> => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
-  // create tool selection for attachments types
-  const attachmentTypes = conversation.attachmentTypes.map((type) => type.type);
-  const attachmentToolIds = getToolsForAttachmentTypes(attachmentTypes, attachmentsService);
-  const attachmentToolSelection: ToolSelection = {
-    tool_ids: attachmentToolIds,
-  };
-
-  // Only the five generic attachment tools are gated. Tools an attachment type declares (getTools)
-  // are selected separately and stay; tools bound to one attachment (getBoundedTools) are registered
-  // apart, see `AttachmentBoundTools`.
+  // Only the five generic attachment tools are gated. The tools an attachment type declares
+  // (getTools) and the ones bound to one attachment (getBoundedTools) are dynamic tools, registered
+  // apart as attachments come and go, see `AttachmentBoundTools`.
   const versionedAttachmentTools = capabilities.attachmentTools
     ? createVersionedAttachmentTools({ attachmentsService, formatContext, runner })
     : [];
@@ -79,10 +72,9 @@ export const selectTools = async ({
   const hasMemoryEnabledAiIndex =
     aiIndexCatalog?.some(({ memoryEnabled }) => memoryEnabled) ?? false;
 
-  // pick tools from provider (from agent config and attachment-type tools)
+  // pick tools from provider (from agent config)
   const staticRegistryTools = await pickTools({
     selection: [
-      attachmentToolSelection,
       ...agentConfiguration.tools,
       ...(agentConfiguration.enable_elastic_capabilities
         ? [{ tool_ids: defaultAgentToolIds }]
@@ -198,23 +190,6 @@ export const builtinToolToExecutable = ({
       });
     },
   };
-};
-
-const getToolsForAttachmentTypes = (
-  attachmentTypes: string[],
-  attachmentsService: AttachmentsService
-): string[] => {
-  const tools = new Set<string>();
-
-  for (const type of attachmentTypes) {
-    const definition = attachmentsService.getTypeDefinition(type);
-    if (definition && definition.getTools) {
-      const definitionTools = definition.getTools();
-      definitionTools.forEach((toolId) => tools.add(toolId));
-    }
-  }
-
-  return [...tools];
 };
 
 export const pickTools = async ({
