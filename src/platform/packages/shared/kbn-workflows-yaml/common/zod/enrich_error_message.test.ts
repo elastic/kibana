@@ -195,4 +195,34 @@ describe('enrichErrorMessage', () => {
       expect(result).toEqual({ enriched: true, message });
     });
   });
+
+  describe('union option descriptions', () => {
+    it('deduplicates identical union branch descriptions', () => {
+      const schema = z.object({
+        with: z.union([
+          z.object({
+            id: z.string(),
+            index: z.string(),
+            document: z.record(z.string(), z.unknown()).optional(),
+          }),
+          z.object({
+            id: z.string(),
+            index: z.string(),
+            document: z.record(z.string(), z.unknown()).optional(),
+          }),
+          z.object({
+            index: z.string(),
+            document: z.record(z.string(), z.unknown()).optional(),
+          }),
+        ]),
+      });
+
+      const result = enrichErrorMessage(['with'], 'Invalid input', 'invalid_union', { schema });
+      const idIndexBranches = result.message.match(/object with: id, index/g) ?? [];
+
+      expect(result.message).toContain('with must be one of:');
+      expect(idIndexBranches).toHaveLength(1);
+      expect(result.message).toContain('document?');
+    });
+  });
 });
