@@ -86,7 +86,10 @@ describe('createDetectionSnapshotSources', () => {
       },
     } as unknown as Awaited<ReturnType<typeof esClient.search>>);
 
-    await expect(sources.getAlertActivity('marketing', ['datadog', 'datadog'])).resolves.toEqual({
+    const { signal } = new AbortController();
+    await expect(
+      sources.getAlertActivity('marketing', ['datadog', 'datadog'], signal)
+    ).resolves.toEqual({
       significant_events_24h: 3,
       external_alerts_24h: 7,
       external_sources_active_24h: 2,
@@ -98,6 +101,7 @@ describe('createDetectionSnapshotSources', () => {
     ];
     expect(index).toBe('.rule-events');
     expect(esClient.search.mock.calls[0][0]).toMatchObject({ allow_partial_search_results: false });
+    expect(esClient.search.mock.calls[0][1]).toEqual({ signal });
     expect(query).toEqual({
       bool: {
         filter: [
@@ -122,7 +126,9 @@ describe('createDetectionSnapshotSources', () => {
     const { sources, esClient } = setup();
     esClient.search.mockResponse({} as Awaited<ReturnType<typeof esClient.search>>);
 
-    await expect(sources.getAlertActivity('default', [])).resolves.toEqual({
+    await expect(
+      sources.getAlertActivity('default', [], new AbortController().signal)
+    ).resolves.toEqual({
       significant_events_24h: 0,
       external_alerts_24h: 0,
       external_sources_active_24h: 0,

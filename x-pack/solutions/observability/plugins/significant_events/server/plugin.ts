@@ -179,9 +179,10 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
     plugins.nightshiftInvestigations?.registerDetectionSnapshotContributor(
-      async ({ spaceId, request }) => {
+      async ({ spaceId, request, signal }) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         return getDetectionSnapshotKnowledgeCounts({
+          signal,
           esClient: coreStart.elasticsearch.client.asInternalUser,
           rulesClient: await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
             request,

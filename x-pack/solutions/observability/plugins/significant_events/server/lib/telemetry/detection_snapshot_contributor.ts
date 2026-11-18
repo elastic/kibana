@@ -18,10 +18,12 @@ const RULE_IDS_PER_QUERY = 500;
 
 const countEnabledRules = async (
   rulesClient: Pick<RulesClientApi, 'findRules'>,
-  ruleIds: string[]
+  ruleIds: string[],
+  signal: AbortSignal
 ): Promise<number> => {
   let enabled = 0;
   for (let start = 0; start < ruleIds.length; start += RULE_IDS_PER_QUERY) {
+    signal.throwIfAborted();
     const ids = ruleIds.slice(start, start + RULE_IDS_PER_QUERY);
     const { total } = await rulesClient.findRules({
       filter: `enabled: true and (${ids.map((id) => `id: "${id}"`).join(' or ')})`,
@@ -38,11 +40,13 @@ export const getDetectionSnapshotKnowledgeCounts = async ({
   rulesClient,
   space,
   logger,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   rulesClient: Pick<RulesClientApi, 'findRules'>;
   space: string;
   logger: Logger;
+  signal: AbortSignal;
 }): Promise<DetectionSnapshotKnowledgeCounts> => {
   const reader = new IndicatorReader(new RevisionReader(esClient, logger, space));
   const [features, queries, ruleBackedQueries, { status }] = await Promise.all([
@@ -51,13 +55,14 @@ export const getDetectionSnapshotKnowledgeCounts = async ({
     reader.getRuleBackedQueryLinks(),
     new RuleEventsClient({ esClient, space }).countFacets(),
   ]);
+  signal.throwIfAborted();
   const ruleIds = [...new Set(ruleIdsFromQueryLinks(ruleBackedQueries))];
 
   return {
     knowledge_indicators_features: features,
     knowledge_indicators_queries: queries,
     significant_event_rules: ruleIds.length,
-    significant_event_rules_active: await countEnabledRules(rulesClient, ruleIds),
+    significant_event_rules_active: await countEnabledRules(rulesClient, ruleIds, signal),
     significant_events_total: status.active + status.recovering + status.inactive,
     significant_events_open: status.active + status.recovering,
   };

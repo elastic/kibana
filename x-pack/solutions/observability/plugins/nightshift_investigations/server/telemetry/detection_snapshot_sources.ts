@@ -119,53 +119,56 @@ export const createDetectionSnapshotSources = ({
     });
   },
 
-  getAlertActivity: async (spaceId, connectorSources) => {
+  getAlertActivity: async (spaceId, connectorSources, signal) => {
     const alerts = { cardinality: { field: 'alert.id' } };
     const distinctConnectorSources = [...new Set(connectorSources)];
-    const { aggregations } = await esClient.search<unknown, AlertActivityAggregations>({
-      index: ALERT_EVENTS_DATA_STREAM,
-      size: 0,
-      ignore_unavailable: true,
-      // A shard failure must fail the space rather than report an undercount.
-      allow_partial_search_results: false,
-      query: {
-        bool: {
-          filter: [
-            { term: { space_id: spaceId } },
-            { range: { '@timestamp': { gte: 'now-24h' } } },
-          ],
-        },
-      },
-      aggs: {
-        significant_events: {
-          filter: { term: { source: SIGNIFICANT_EVENTS_ALERT_SOURCE } },
-          aggs: { alerts },
-        },
-        external: {
-          // Alerting v2 reserves `elastic.` for Elastic-produced events.
-          filter: {
-            bool: {
-              must_not: [
-                { term: { source: UNIVERSAL_ALERT_SOURCE } },
-                { prefix: { source: 'elastic.' } },
-              ],
-            },
+    const { aggregations } = await esClient.search<unknown, AlertActivityAggregations>(
+      {
+        index: ALERT_EVENTS_DATA_STREAM,
+        size: 0,
+        ignore_unavailable: true,
+        // A shard failure must fail the space rather than report an undercount.
+        allow_partial_search_results: false,
+        query: {
+          bool: {
+            filter: [
+              { term: { space_id: spaceId } },
+              { range: { '@timestamp': { gte: 'now-24h' } } },
+            ],
           },
-          aggs: { alerts, sources: { cardinality: { field: 'source' } } },
         },
-        ...(distinctConnectorSources.length > 0
-          ? {
-              connector_sources: {
-                terms: {
-                  field: 'source',
-                  include: distinctConnectorSources,
-                  size: distinctConnectorSources.length,
-                },
+        aggs: {
+          significant_events: {
+            filter: { term: { source: SIGNIFICANT_EVENTS_ALERT_SOURCE } },
+            aggs: { alerts },
+          },
+          external: {
+            // Alerting v2 reserves `elastic.` for Elastic-produced events.
+            filter: {
+              bool: {
+                must_not: [
+                  { term: { source: UNIVERSAL_ALERT_SOURCE } },
+                  { prefix: { source: 'elastic.' } },
+                ],
               },
-            }
-          : {}),
+            },
+            aggs: { alerts, sources: { cardinality: { field: 'source' } } },
+          },
+          ...(distinctConnectorSources.length > 0
+            ? {
+                connector_sources: {
+                  terms: {
+                    field: 'source',
+                    include: distinctConnectorSources,
+                    size: distinctConnectorSources.length,
+                  },
+                },
+              }
+            : {}),
+        },
       },
-    });
+      { signal }
+    );
     return {
       activeConnectorSources: (aggregations?.connector_sources?.buckets ?? []).map(
         ({ key }) => key
@@ -176,9 +179,14 @@ export const createDetectionSnapshotSources = ({
     };
   },
 
-  countMemoryPages: async (spaceId) => {
+  countMemoryPages: async (spaceId, signal) => {
     if (!isMemoryEnabled) return undefined;
-    const { total } = await createMemoryStore({ esClient, logger, spaceId }).listPaginated({
+    const { total } = await createMemoryStore({
+      esClient,
+      logger,
+      spaceId,
+      signal,
+    }).listPaginated({
       filter: 'active',
       size: 1,
     });
@@ -204,5 +212,5 @@ export const createDetectionSnapshotSources = ({
     };
   },
 
-  getKnowledgeCounts: async (spaceId) => contributor?.({ spaceId, request }),
+  getKnowledgeCounts: async (spaceId, signal) => contributor?.({ spaceId, request, signal }),
 });

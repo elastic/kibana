@@ -22,6 +22,8 @@ export interface DetectionSnapshotKnowledgeCounts {
 export type DetectionSnapshotContributor = (params: {
   spaceId: string;
   request: KibanaRequest;
+  /** Aborted when the task run times out or Kibana shuts down. */
+  signal: AbortSignal;
 }) => Promise<DetectionSnapshotKnowledgeCounts>;
 
 export interface DetectionSnapshotEvent extends Partial<DetectionSnapshotKnowledgeCounts> {

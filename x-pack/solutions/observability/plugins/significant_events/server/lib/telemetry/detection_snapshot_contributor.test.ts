@@ -37,6 +37,7 @@ const setup = (ruleIds: string[]) => {
       rulesClient: { findRules },
       space: 'default',
       logger: loggingSystemMock.createLogger(),
+      signal: new AbortController().signal,
     });
   return { findRules, run };
 };

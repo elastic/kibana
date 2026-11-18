@@ -9,6 +9,7 @@ import type { AnalyticsServiceStart, KibanaRequest, Logger } from '@kbn/core/ser
 import {
   TaskCost,
   TaskPriority,
+  throwUnrecoverableError,
   type TaskManagerSetupContract,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -30,6 +31,7 @@ export const DETECTION_SNAPSHOT_TASK_TYPE = 'nightshiftInvestigations:detectionS
 export const DETECTION_SNAPSHOT_TASK_ID = 'nightshift-investigations:detection-snapshot-telemetry';
 const TASK_INTERVAL = '24h';
 const TASK_TIMEOUT = '10m';
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const RULES_PAGE_SIZE = 500;
 // The saved objects result window.
 const MAX_SCANNED_RULES = 10_000;
@@ -51,7 +53,8 @@ export interface DetectionSnapshotSources {
   listExternalConnectorSources: (spaceId: string) => Promise<string[]>;
   getAlertActivity: (
     spaceId: string,
-    connectorSources: readonly string[]
+    connectorSources: readonly string[],
+    signal: AbortSignal
   ) => Promise<
     Pick<
       DetectionSnapshotEvent,
@@ -59,12 +62,15 @@ export interface DetectionSnapshotSources {
     > & { activeConnectorSources: string[] }
   >;
   /** `undefined` when Semantic Memory is disabled. */
-  countMemoryPages: (spaceId: string) => Promise<number | undefined>;
+  countMemoryPages: (spaceId: string, signal: AbortSignal) => Promise<number | undefined>;
   getSettings: (
     spaceId: string
   ) => Promise<Pick<DetectionSnapshotEvent, 'custom_context_snippets' | 'sandbox_allowlist_hosts'>>;
   /** `undefined` when the Significant Events plugin is not installed. */
-  getKnowledgeCounts: (spaceId: string) => Promise<DetectionSnapshotKnowledgeCounts | undefined>;
+  getKnowledgeCounts: (
+    spaceId: string,
+    signal: AbortSignal
+  ) => Promise<DetectionSnapshotKnowledgeCounts | undefined>;
 }
 
 export interface DetectionSnapshotTaskDeps {
@@ -130,11 +136,12 @@ const collectSpaceSnapshot = async (
     knowledgeCounts,
   ] = await Promise.all([
     countRules(spaceId, toRuleMatchers(automations), sources.findEligibleRules, signal),
-    sources.getAlertActivity(spaceId, connectorSources),
-    sources.countMemoryPages(spaceId),
+    sources.getAlertActivity(spaceId, connectorSources, signal),
+    sources.countMemoryPages(spaceId, signal),
     sources.getSettings(spaceId),
     // Optional in the event, so a failure omits the counts rather than the snapshot.
-    sources.getKnowledgeCounts(spaceId).catch((error) => {
+    sources.getKnowledgeCounts(spaceId, signal).catch((error) => {
+      if (signal.aborted) throw error;
       logger.warn(`Failed to read the knowledge counts of space [${spaceId}]: ${error.message}`);
       return undefined;
     }),
@@ -157,21 +164,35 @@ const collectSpaceSnapshot = async (
   };
 };
 
+// A fixed order drops the same tail spaces on every timeout, and a timed-out run saves no task state.
+const rotateDaily = (spaceIds: readonly string[]): string[] => {
+  const sorted = [...spaceIds].sort();
+  const offset = Math.floor(Date.now() / MS_PER_DAY) % Math.max(sorted.length, 1);
+  return [...sorted.slice(offset), ...sorted.slice(0, offset)];
+};
+
 /** Reports one snapshot event per space that has Nightshift set up. */
 export const reportDetectionSnapshots = async (
   { analytics, sources, logger }: DetectionSnapshotTaskDeps,
   signal: AbortSignal
 ): Promise<void> => {
-  const spaceIds = await sources.listSpaceIds();
-  for (const spaceId of spaceIds) {
-    signal.throwIfAborted();
+  const spaceIds = rotateDaily(await sources.listSpaceIds());
+  for (const [index, spaceId] of spaceIds.entries()) {
     try {
+      signal.throwIfAborted();
       const snapshot = await collectSpaceSnapshot(spaceId, sources, logger, signal);
       // Do not report an event when cancellation races completed reads.
       signal.throwIfAborted();
       analytics.reportEvent(NIGHTSHIFT_DETECTION_SNAPSHOT_EVENT, snapshot);
     } catch (error) {
-      if (signal.aborted) throw error;
+      if (signal.aborted) {
+        logger.warn(
+          `Detection snapshot aborted: ${spaceIds.length - index} of ${
+            spaceIds.length
+          } space(s) not reported`
+        );
+        return;
+      }
       // A partial snapshot would read as zeros, so a space that fails reports nothing this run.
       logger.warn(`Failed to snapshot space [${spaceId}]: ${error.message}`);
     }
@@ -192,13 +213,15 @@ export const registerDetectionSnapshotTask = ({
       description:
         'Reports the current per-space counts of rules, automations, alert sources and knowledge via EBT.',
       timeout: TASK_TIMEOUT,
-      maxAttempts: 1,
       cost: TaskCost.Normal,
       priority: TaskPriority.Maintenance,
       createTaskRunner: ({ taskInstance, fakeRequest, signal }) => ({
         async run() {
           if (!fakeRequest) {
-            throw new Error('Detection snapshot telemetry task has no user credentials');
+            // No retry can add credentials; the next Nightshift setup reschedules the removed task.
+            throwUnrecoverableError(
+              new Error('Detection snapshot telemetry task has no user credentials')
+            );
           }
           await reportDetectionSnapshots(await getDeps(fakeRequest), signal);
           return { state: taskInstance.state };

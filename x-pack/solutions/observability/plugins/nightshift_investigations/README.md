@@ -492,4 +492,5 @@ installed or its read fails, in which case the rest of the event is still sent. 
 number of queries per space, plus one query per 500 eligible rules when an automation filters by
 rule (none when no automation has an alert trigger, or one has no rule filter) and one per 500
 Significant Event rules. A space where any other read fails sends no event for that run, so a
-missing day is never a row of zeros.
+missing day is never a row of zeros. A run that times out reports the spaces it reached; the space a
+run starts from rotates daily, so a timeout does not skip the same spaces every day.

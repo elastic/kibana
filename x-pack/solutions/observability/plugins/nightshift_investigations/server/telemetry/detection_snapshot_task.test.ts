@@ -52,10 +52,13 @@ const setup = ({
   const logger = loggingSystemMock.createLogger();
   const run = (signal = new AbortController().signal) =>
     reportDetectionSnapshots({ analytics, sources, logger }, signal);
-  return { sources, analytics, run };
+  return { sources, analytics, logger, run };
 };
 
 describe('reportDetectionSnapshots', () => {
+  beforeEach(() => jest.spyOn(Date, 'now').mockReturnValue(0));
+  afterEach(() => jest.restoreAllMocks());
+
   it('counts the rules enabled automations match as wired in', async () => {
     const { analytics, run } = setup({
       automations: [
@@ -198,12 +201,43 @@ describe('reportDetectionSnapshots', () => {
     ]);
   });
 
-  it('reports nothing once Task Manager aborts the run', async () => {
-    const { analytics, run } = setup();
-    const controller = new AbortController();
-    controller.abort();
+  it('starts from a different space each day', async () => {
+    const { analytics, run } = setup({ spaceIds: ['c', 'a', 'b'] });
+    jest.spyOn(Date, 'now').mockReturnValue(4 * 24 * 60 * 60 * 1000);
 
-    await expect(run(controller.signal)).rejects.toThrow();
-    expect(analytics.reportEvent).not.toHaveBeenCalled();
+    await run();
+
+    expect(analytics.reportEvent.mock.calls.map(([, event]) => event.space_id)).toEqual([
+      'b',
+      'c',
+      'a',
+    ]);
+  });
+
+  it('passes the abort signal to the reads', async () => {
+    const { sources, run } = setup();
+    const { signal } = new AbortController();
+
+    await run(signal);
+
+    expect(sources.getAlertActivity).toHaveBeenCalledWith('default', expect.anything(), signal);
+    expect(sources.countMemoryPages).toHaveBeenCalledWith('default', signal);
+    expect(sources.getKnowledgeCounts).toHaveBeenCalledWith('default', signal);
+  });
+
+  it('stops and logs the spaces left on abort', async () => {
+    const { sources, analytics, logger, run } = setup({ spaceIds: ['a', 'b', 'c'] });
+    const controller = new AbortController();
+    sources.countMemoryPages.mockResolvedValueOnce(undefined).mockImplementationOnce(async () => {
+      controller.abort();
+      throw new Error('aborted');
+    });
+
+    await run(controller.signal);
+
+    expect(analytics.reportEvent.mock.calls.map(([, event]) => event.space_id)).toEqual(['a']);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Detection snapshot aborted: 2 of 3 space(s) not reported'
+    );
   });
 });
