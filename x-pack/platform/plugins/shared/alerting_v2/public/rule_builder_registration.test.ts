@@ -23,6 +23,7 @@ const definition = {
   stepTitle: 'Logs',
   createDefaultState: () => ({}),
   renderStep: () => null,
+  renderRecoveryStep: () => null,
   parseState: () => null,
 };
 

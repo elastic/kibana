@@ -159,12 +159,11 @@ export const getSteps = (
    * Pass a component (or registry render function). RecoveryConditionStep mounts
    * it with createElement so hook-using recovery content keeps its own fiber.
    */
-  const renderCustomRecovery =
-    definition && definition.renderRecoveryStep
-      ? (props: CustomRecoveryRenderProps) => (
-          <BuilderRecoveryStepHost definition={definition} {...props} />
-        )
-      : EsqlRecoveryContent;
+  const renderCustomRecovery = definition
+    ? (props: CustomRecoveryRenderProps) => (
+        <BuilderRecoveryStepHost definition={definition} {...props} />
+      )
+    : EsqlRecoveryContent;
 
   return { steps, renderCustomRecovery };
 };

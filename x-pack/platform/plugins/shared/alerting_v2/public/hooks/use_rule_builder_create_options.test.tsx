@@ -29,6 +29,7 @@ const earlierBuilder = {
   },
   createDefaultState: () => ({}),
   renderStep: () => null,
+  renderRecoveryStep: () => null,
   parseState: () => null,
 };
 
@@ -45,6 +46,7 @@ const laterBuilder = {
   },
   createDefaultState: () => ({}),
   renderStep: () => null,
+  renderRecoveryStep: () => null,
   parseState: () => null,
 };
 

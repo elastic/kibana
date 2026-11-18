@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { AlertingV2PublicStart } from './types';
+import type { AlertingV2PublicSetup, AlertingV2PublicStart } from './types';
+
+const createSetupContract = (): AlertingV2PublicSetup => ({
+  registerRuleBuilder: jest.fn(),
+});
 
 const createStartContract = (): AlertingV2PublicStart => ({
   CreateRuleOptionsFlyout: jest.fn(() => null),
@@ -20,5 +24,6 @@ const createStartContract = (): AlertingV2PublicStart => ({
 
 /** Mocks of the Alerting v2 public contracts, for consumers' tests. */
 export const alertingV2PluginMock = {
+  createSetupContract,
   createStartContract,
 };

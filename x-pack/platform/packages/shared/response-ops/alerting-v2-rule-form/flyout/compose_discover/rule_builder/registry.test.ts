@@ -46,6 +46,7 @@ describe('RuleBuilderRegistry', () => {
         stepTitle: 'Empty',
         createDefaultState: () => ({}),
         renderStep: () => null,
+        renderRecoveryStep: () => null,
         parseState: () => null,
       })
     ).toThrow(/non-empty/);
@@ -63,6 +64,7 @@ describe('RuleBuilderRegistry', () => {
       },
       createDefaultState: () => ({}),
       renderStep: () => null,
+      renderRecoveryStep: () => null,
       parseState: () => null,
     });
 
@@ -76,6 +78,7 @@ describe('RuleBuilderRegistry', () => {
         stepTitle: 'Again',
         createDefaultState: () => ({}),
         renderStep: () => null,
+        renderRecoveryStep: () => null,
         parseState: () => null,
       })
     ).toThrow(/already registered/);
@@ -88,6 +91,7 @@ describe('RuleBuilderRegistry', () => {
       stepTitle: 'Scoped',
       createDefaultState: () => ({}),
       renderStep: () => null,
+      renderRecoveryStep: () => null,
       parseState: () => null,
     });
 
