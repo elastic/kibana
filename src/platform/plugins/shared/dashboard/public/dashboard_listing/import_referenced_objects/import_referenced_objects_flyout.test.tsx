@@ -144,8 +144,67 @@ describe('ImportReferencedObjectsFlyout', () => {
     ]);
   });
 
+  it('asks for a decision on each conflict, then shows the results of both calls', async () => {
+    const importObjects = jest
+      .fn()
+      .mockResolvedValueOnce({
+        success: false,
+        results: [
+          { type: 'dashboard', id: 'sales', destination_id: 'sales', status: 'conflict' },
+          { type: 'dashboard', id: 'ops', destination_id: 'ops-in-space', status: 'conflict' },
+          { type: 'index-pattern', id: 'logs', destination_id: 'logs', status: 'created' },
+        ],
+        warnings: [],
+      } satisfies ImportReferencedObjectsResponse)
+      .mockResolvedValueOnce({
+        success: true,
+        results: [
+          { type: 'dashboard', id: 'sales', destination_id: 'sales', status: 'skipped' },
+          { type: 'dashboard', id: 'ops', destination_id: 'ops-in-space', status: 'overwritten' },
+        ],
+        warnings: [],
+      } satisfies ImportReferencedObjectsResponse);
+    const { onImportComplete } = renderFlyout({ importObjects });
+
+    await chooseFile(EXPORT_FILE);
+    await userEvent.click(screen.getByRole('button', { name: 'Import' }));
+
+    expect(
+      await screen.findByText('2 objects already exist. Choose what to do with each one.')
+    ).toBeInTheDocument();
+    const sales = screen.getByRole('group', { name: 'dashboard sales' });
+    const ops = screen.getByRole('group', { name: 'dashboard ops' });
+    expect(within(sales).getByLabelText('Skip')).toBeChecked();
+    expect(within(ops).getByLabelText('Skip')).toBeChecked();
+    await userEvent.click(within(ops).getByLabelText('Overwrite'));
+    await userEvent.click(screen.getByRole('button', { name: 'Finish import' }));
+
+    expect(importObjects).toHaveBeenLastCalledWith({
+      objects: OBJECTS,
+      mode: 'request_action',
+      decisions: [
+        { type: 'dashboard', id: 'sales', destination_id: 'sales', action: 'skip' },
+        { type: 'dashboard', id: 'ops', destination_id: 'ops-in-space', action: 'overwrite' },
+      ],
+    });
+    const table = await screen.findByTestId('importReferencedObjectsResults');
+    const rows = within(table).getAllByRole('row').slice(1);
+    expect(rows.map((row) => row.textContent)).toEqual([
+      expect.stringContaining('Skipped'),
+      expect.stringContaining('Overwritten'),
+      expect.stringContaining('Created'),
+    ]);
+    expect(screen.getByText('2 of 3 objects imported')).toBeInTheDocument();
+    expect(onImportComplete).toHaveBeenCalledTimes(2);
+  });
+
   it('shows a result for every object', async () => {
-    const { onImportComplete } = renderFlyout();
+    const { onImportComplete } = renderFlyout({
+      importObjects: jest.fn().mockResolvedValue({
+        ...IMPORT_RESPONSE,
+        results: IMPORT_RESPONSE.results.filter(({ status }) => status !== 'conflict'),
+      }),
+    });
 
     await chooseFile(EXPORT_FILE);
     await userEvent.click(screen.getByRole('button', { name: 'Import' }));
@@ -154,10 +213,9 @@ describe('ImportReferencedObjectsFlyout', () => {
     const rows = within(table).getAllByRole('row').slice(1);
     expect(rows.map((row) => row.textContent)).toEqual([
       expect.stringContaining('Created'),
-      expect.stringContaining('Conflict'),
       expect.stringContaining("Saved objects of type [map] can't be imported."),
     ]);
-    expect(screen.getByText('1 of 3 objects imported')).toBeInTheDocument();
+    expect(screen.getByText('1 of 2 objects imported')).toBeInTheDocument();
     expect(onImportComplete).toHaveBeenCalled();
   });
 

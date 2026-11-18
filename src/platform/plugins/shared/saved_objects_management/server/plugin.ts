@@ -63,7 +63,7 @@ export class SavedObjectsManagementPlugin
           request,
           roots,
         }),
-      importReferencedObjects: ({ client, objects, mode }) =>
+      importReferencedObjects: ({ client, objects, mode, decisions }) =>
         importReferencedObjects({
           client,
           importer: core.savedObjects.createImporter(client),
@@ -71,6 +71,7 @@ export class SavedObjectsManagementPlugin
           typeRegistry: core.savedObjects.getTypeRegistry(),
           objects,
           mode,
+          decisions,
         }),
     };
   }

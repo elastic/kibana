@@ -29,6 +29,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { SavedObjectTypeIdTuple } from '@kbn/core/public';
 import { getClientErrorMessage } from '@kbn/as-code-import-flyout-component';
 import type {
   ImportReferencedObjectsRequest,
@@ -45,6 +46,22 @@ import { importReferencedObjectsStrings as strings } from './_import_referenced_
 
 type ImportMode = ImportReferencedObjectsRequest['mode'];
 type ImportResult = ImportReferencedObjectsResponse['results'][number];
+type DecisionAction = NonNullable<ImportReferencedObjectsRequest['decisions']>[number]['action'];
+
+const toKey = ({ type, id }: SavedObjectTypeIdTuple) => `${type}:${id}`;
+
+const mergeResponses = (
+  first: ImportReferencedObjectsResponse,
+  decided: ImportReferencedObjectsResponse
+): ImportReferencedObjectsResponse => {
+  const decidedResults = new Map(decided.results.map((result) => [toKey(result), result]));
+  const results = first.results.map((result) => decidedResults.get(toKey(result)) ?? result);
+  return {
+    success: results.every(({ status }) => status !== 'conflict' && status !== 'error'),
+    results,
+    warnings: [...first.warnings, ...decided.warnings],
+  };
+};
 
 interface ImportReferencedObjectsFlyoutProps {
   titleId: string;
@@ -59,6 +76,7 @@ const STATUS_COLORS: Record<ImportResult['status'], string> = {
   overwritten: 'success',
   reused: 'hollow',
   conflict: 'warning',
+  skipped: 'default',
   error: 'danger',
 };
 
@@ -95,12 +113,14 @@ export const ImportReferencedObjectsFlyout = ({
   onImportComplete,
 }: ImportReferencedObjectsFlyoutProps) => {
   const modeGroupId = useGeneratedHtmlId({ prefix: 'importReferencedObjectsMode' });
+  const conflictGroupPrefix = useGeneratedHtmlId({ prefix: 'importReferencedObjectsDecision' });
   const [objects, setObjects] = useState<ImportReferencedObjectsRequest['objects']>();
   const [fileError, setFileError] = useState<string>();
   const [mode, setMode] = useState<ImportMode>('request_action');
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string>();
   const [response, setResponse] = useState<ImportReferencedObjectsResponse>();
+  const [decisions, setDecisions] = useState<Map<string, DecisionAction>>();
 
   const onFileChange = async (files: FileList | null) => {
     setObjects(undefined);
@@ -121,7 +141,12 @@ export const ImportReferencedObjectsFlyout = ({
     setIsImporting(true);
     setImportError(undefined);
     try {
-      setResponse(await importObjects({ objects, mode }));
+      const imported = await importObjects({ objects, mode });
+      setResponse(imported);
+      const conflicts = imported.results.filter(({ status }) => status === 'conflict');
+      if (mode === 'request_action' && conflicts.length > 0) {
+        setDecisions(new Map(conflicts.map((conflict) => [toKey(conflict), 'skip'])));
+      }
       onImportComplete();
     } catch (error) {
       setImportError(getClientErrorMessage(error) ?? strings.getGenericErrorText());
@@ -129,6 +154,81 @@ export const ImportReferencedObjectsFlyout = ({
       setIsImporting(false);
     }
   };
+
+  const onFinish = async () => {
+    if (!objects || !response || !decisions) return;
+    setIsImporting(true);
+    setImportError(undefined);
+    try {
+      const decided = await importObjects({
+        objects,
+        mode,
+        decisions: response.results.flatMap(({ type, id, destination_id: destinationId }) => {
+          const action = decisions.get(toKey({ type, id }));
+          return action ? [{ type, id, destination_id: destinationId, action }] : [];
+        }),
+      });
+      setResponse(mergeResponses(response, decided));
+      setDecisions(undefined);
+      onImportComplete();
+    } catch (error) {
+      setImportError(getClientErrorMessage(error) ?? strings.getGenericErrorText());
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const renderImportError = () =>
+    importError && (
+      <>
+        <KbnDangerCallout
+          title={strings.getErrorTitle()}
+          data-test-subj="importReferencedObjectsError"
+        >
+          {importError}
+        </KbnDangerCallout>
+        <EuiSpacer size="m" />
+      </>
+    );
+
+  const renderConflicts = (conflicts: ImportResult[], pending: Map<string, DecisionAction>) => (
+    <>
+      {renderImportError()}
+      <KbnWarningCallout
+        title={strings.getConflictsTitle(conflicts.length)}
+        text={<p>{strings.getConflictsDescription()}</p>}
+        data-test-subj="importReferencedObjectsConflicts"
+      />
+      <EuiSpacer size="m" />
+      {conflicts.map(({ type, id }) => {
+        const key = toKey({ type, id });
+        const optionId = (action: DecisionAction) => `${conflictGroupPrefix}-${key}-${action}`;
+        return (
+          <React.Fragment key={key}>
+            <EuiRadioGroup
+              legend={{ children: `${type} ${id}` }}
+              name={`${conflictGroupPrefix}-${key}`}
+              idSelected={optionId(pending.get(key) ?? 'skip')}
+              onChange={(selected) =>
+                setDecisions(
+                  new Map(pending).set(
+                    key,
+                    selected === optionId('overwrite') ? 'overwrite' : 'skip'
+                  )
+                )
+              }
+              options={[
+                { id: optionId('overwrite'), label: strings.getOverwriteActionLabel() },
+                { id: optionId('skip'), label: strings.getSkipActionLabel() },
+              ]}
+              data-test-subj="importReferencedObjectsDecision"
+            />
+            <EuiSpacer size="m" />
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
 
   const renderResults = ({ success, results }: ImportReferencedObjectsResponse) => {
     const importedCount = results.filter(
@@ -200,17 +300,7 @@ export const ImportReferencedObjectsFlyout = ({
         <p>{strings.getDescription()}</p>
       </EuiText>
       <EuiSpacer size="m" />
-      {importError && (
-        <>
-          <KbnDangerCallout
-            title={strings.getErrorTitle()}
-            data-test-subj="importReferencedObjectsError"
-          >
-            {importError}
-          </KbnDangerCallout>
-          <EuiSpacer size="m" />
-        </>
-      )}
+      {renderImportError()}
       <EuiForm fullWidth>
         <EuiFormRow
           fullWidth
@@ -250,6 +340,15 @@ export const ImportReferencedObjectsFlyout = ({
     </>
   );
 
+  const renderBody = () => {
+    if (!response) return renderForm();
+    if (!decisions) return renderResults(response);
+    return renderConflicts(
+      response.results.filter((result) => decisions.has(toKey(result))),
+      decisions
+    );
+  };
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -263,7 +362,7 @@ export const ImportReferencedObjectsFlyout = ({
           size="s"
         />
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{response ? renderResults(response) : renderForm()}</EuiFlyoutBody>
+      <EuiFlyoutBody>{renderBody()}</EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -271,6 +370,18 @@ export const ImportReferencedObjectsFlyout = ({
               {response ? strings.getCloseButtonLabel() : strings.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
+          {decisions && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                isLoading={isImporting}
+                onClick={onFinish}
+                data-test-subj="importReferencedObjectsFinishButton"
+              >
+                {strings.getFinishButtonLabel()}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
           {!response && (
             <EuiFlexItem grow={false}>
               <EuiButton

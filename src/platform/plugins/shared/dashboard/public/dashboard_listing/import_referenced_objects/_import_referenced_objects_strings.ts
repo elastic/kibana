@@ -124,6 +124,9 @@ export const importReferencedObjectsStrings = {
       conflict: i18n.translate('dashboard.importReferencedObjects.status.conflict', {
         defaultMessage: 'Conflict',
       }),
+      skipped: i18n.translate('dashboard.importReferencedObjects.status.skipped', {
+        defaultMessage: 'Skipped',
+      }),
       error: i18n.translate('dashboard.importReferencedObjects.status.error', {
         defaultMessage: 'Error',
       }),
@@ -131,6 +134,29 @@ export const importReferencedObjectsStrings = {
   getConflictMessage: () =>
     i18n.translate('dashboard.importReferencedObjects.conflictMessage', {
       defaultMessage: 'Already exists, left unchanged.',
+    }),
+  getConflictsTitle: (count: number) =>
+    i18n.translate('dashboard.importReferencedObjects.conflictsTitle', {
+      defaultMessage:
+        '{count, plural, one {# object already exists. Choose what to do with it.} other {# objects already exist. Choose what to do with each one.}}',
+      values: { count },
+    }),
+  getConflictsDescription: () =>
+    i18n.translate('dashboard.importReferencedObjects.conflictsDescription', {
+      defaultMessage:
+        'Objects without a conflict have been imported. Overwrite replaces the existing object with the one in the file, and Skip leaves it unchanged.',
+    }),
+  getOverwriteActionLabel: () =>
+    i18n.translate('dashboard.importReferencedObjects.overwriteActionLabel', {
+      defaultMessage: 'Overwrite',
+    }),
+  getSkipActionLabel: () =>
+    i18n.translate('dashboard.importReferencedObjects.skipActionLabel', {
+      defaultMessage: 'Skip',
+    }),
+  getFinishButtonLabel: () =>
+    i18n.translate('dashboard.importReferencedObjects.finishButtonLabel', {
+      defaultMessage: 'Finish import',
     }),
   getCancelButtonLabel: () =>
     i18n.translate('dashboard.importReferencedObjects.cancelButtonLabel', {
