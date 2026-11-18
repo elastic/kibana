@@ -70,6 +70,18 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-1');
   });
 
+  it('bounds the description column so long values truncate instead of shrinking the titles', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList {...baseProps} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('alertingV2EpisodeDetailsOverviewList')).toHaveStyle({
+      gridTemplateColumns: 'auto minmax(0, 1fr)',
+    });
+  });
+
   it('renders a Tags row with a badge per tag when the alert has tags', () => {
     render(
       <I18nProvider>

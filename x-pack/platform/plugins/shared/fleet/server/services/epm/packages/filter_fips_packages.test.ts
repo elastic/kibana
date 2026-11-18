@@ -56,6 +56,16 @@ describe('filterOutNonFipsPolicyTemplates', () => {
     expect(filterOutNonFipsPolicyTemplates([pkg])).toHaveLength(0);
   });
 
+  it('drops a package listed as FIPS incompatible even if its templates are not flagged', () => {
+    const connectors = makePkg('elastic_connectors', [makeTemplate('github', undefined)]);
+    expect(filterOutNonFipsPolicyTemplates([connectors])).toHaveLength(0);
+  });
+
+  it('drops a package listed as FIPS incompatible even without policy templates', () => {
+    expect(filterOutNonFipsPolicyTemplates([makePkg('elastic_connectors')])).toHaveLength(0);
+    expect(filterOutNonFipsPolicyTemplates([makePkg('elastic_connectors', [])])).toHaveLength(0);
+  });
+
   it('handles a mixed list: drops non-FIPS packages, keeps and trims partially-FIPS packages, keeps no-template packages', () => {
     const allBad = makePkg('all-bad', [makeTemplate('x', false)]);
     const mixed = makePkg('mixed', [makeTemplate('ok', undefined), makeTemplate('bad', false)]);
@@ -89,5 +99,17 @@ describe('isPackageFipsIncompatible', () => {
     expect(
       isPackageFipsIncompatible([makeTemplate('a', false), makeTemplate('b', undefined)])
     ).toBe(false);
+  });
+
+  it('returns true for a package listed as FIPS incompatible, whatever its templates', () => {
+    expect(isPackageFipsIncompatible(undefined, 'elastic_connectors')).toBe(true);
+    expect(isPackageFipsIncompatible([makeTemplate('a', undefined)], 'elastic_connectors')).toBe(
+      true
+    );
+    expect(isPackageFipsIncompatible([makeTemplate('a', true)], 'elastic_connectors')).toBe(true);
+  });
+
+  it('does not use the name list for other packages', () => {
+    expect(isPackageFipsIncompatible([makeTemplate('a', undefined)], 'other_package')).toBe(false);
   });
 });
