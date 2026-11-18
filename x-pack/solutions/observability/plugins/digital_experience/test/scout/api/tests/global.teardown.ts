@@ -7,6 +7,7 @@
 
 import { globalTeardownHook } from '@kbn/scout-oblt';
 import { deleteOtelRumData } from '../../common/fixtures/otel_rum_data';
+import { deleteTimeZoneData } from '../../common/fixtures/time_zone_data';
 import { FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { DIGITAL_EXPERIENCE_DISABLED_TAGS, DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
@@ -17,6 +18,7 @@ globalTeardownHook(
   { tag: DIGITAL_EXPERIENCE_TAGS },
   async ({ esClient }) => {
     await deleteOtelRumData(esClient);
+    await deleteTimeZoneData(esClient);
   }
 );
 

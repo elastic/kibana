@@ -3394,7 +3394,12 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
       {
         investigation_id: 'inv-1',
         message: expect.stringContaining('An alert in this investigation has recovered.'),
-        context: { source: 'alert', follow_up: 'alert_recovered', entry_point: 'alert_recovery' },
+        context: {
+          source: 'alert',
+          follow_up: 'alert_recovered',
+          entry_point: 'alert_recovery',
+          alert_rule_type: 'apm.transaction_duration',
+        },
       },
       mockRequest,
       'nightshift-investigations'
@@ -3405,6 +3410,42 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
     expect(investigationQuotaCallback).not.toHaveBeenCalled();
     expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      "prefers the event's rule type for online evals over the stored alert's",
+      'apm.transaction_duration',
+      { rule_type_id: 'apm.error_rate' },
+      'apm.transaction_duration',
+    ],
+    [
+      'takes the rule type for online evals from the stored alert when the event has none',
+      '',
+      { rule_type_id: 'apm.error_rate' },
+      'apm.error_rate',
+    ],
+    [
+      "ignores the stored alert's placeholder rule type",
+      '',
+      { rule_type_id: 'unknown' },
+      undefined,
+    ],
+    ['sends no rule type for online evals when neither has one', '', { id: 'alert-1' }, undefined],
+  ])('%s', async (_, ruleTypeId, snapshot, expected) => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+    withConversations(makeConversation({ id: 'inv-1', status: 'open' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([{ ...makeStoredSubject(), snapshot }]);
+
+    await makeClient().followUpRecoveredAlert({ ...RECOVERY, ruleTypeId });
+
+    const [, , { context }] = mockManagement.runWorkflow.mock.calls[0];
+    expect(context).toEqual({
+      source: 'alert',
+      follow_up: 'alert_recovered',
+      entry_point: 'alert_recovery',
+      ...(expected ? { alert_rule_type: expected } : {}),
+    });
   });
 
   it('follows up only the most recently updated open investigation holding the alert', async () => {
