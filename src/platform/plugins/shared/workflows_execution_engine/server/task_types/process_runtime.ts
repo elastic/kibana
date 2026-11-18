@@ -194,21 +194,18 @@ export const createWorkflowRuntimeFromHost = async (
     },
   });
   stops.push(stop);
+  // `connectorTypes` is the only kind checked here: every process registers every connector type
+  // unconditionally (packs never narrow it), so Kibana having one a process lacks is a genuine
+  // build/registration gap and every run of this process should decline. Step and trigger
+  // definitions are deliberately narrowed by packs per process, so comparing them against Kibana's
+  // full registries here would decline every run of every pack-scoped process, not just the runs
+  // that actually need what is missing; `assertRunnableInProcessPreflight` below already declines
+  // exactly those runs, scoped to the one workflow definition being run.
   const checkParity = createParityGuard({
     taskType: 'workflow',
     logger,
     expected: host.parity,
-    hooks: [
-      { kind: 'connectorTypes', getIds: getActionTypeIds },
-      {
-        kind: 'workflow.steps',
-        getIds: () => workflowsExtensions.getAllStepDefinitions().map(({ id }) => id),
-      },
-      {
-        kind: 'workflow.triggers',
-        getIds: () => workflowsExtensions.getAllTriggerDefinitions().map(({ id }) => id),
-      },
-    ],
+    hooks: [{ kind: 'connectorTypes', getIds: getActionTypeIds }],
   });
 
   // Steps: the internal ones (registered with the registry), and what the plugins contribute, which

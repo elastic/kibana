@@ -166,11 +166,10 @@ export class WorkflowsExtensionsServerPlugin
         );
       },
       getTaskProcessSettings: () => this.taskProcessSettings,
-      getTaskProcessParity: () => ({
-        ...this.taskProcessParity,
-        'workflow.steps': () => this.stepRegistry.getAll().map(({ id }) => id),
-        'workflow.triggers': () => this.triggerRegistry.list().map(({ id }) => id),
-      }),
+      // Step and trigger definitions are deliberately narrowed by packs per task process, so they
+      // are not sent here: nothing compares a process's own registrations against Kibana's full
+      // registries for these two kinds (see the comment on `process_runtime.ts`'s `checkParity`).
+      getTaskProcessParity: () => ({ ...this.taskProcessParity }),
       getManagedWorkflowPluginIds: () => Array.from(this.managedWorkflowPluginIds),
     };
   }
