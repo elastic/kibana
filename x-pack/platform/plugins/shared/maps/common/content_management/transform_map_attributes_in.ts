@@ -28,8 +28,8 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
       ...mapState,
       ...(mapState.adHocDataViews
         ? {
-            adHocDataViews: mapState.adHocDataViews.map((adHocDataView) =>
-              toDataViewSpec(adHocDataView)
+            adHocDataViews: mapState.adHocDataViews.map((asCodeDataView) =>
+              toDataViewSpec(asCodeDataView)
             ),
           }
         : {}),
