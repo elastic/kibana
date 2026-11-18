@@ -430,9 +430,9 @@ export class SavedMap {
       throw new Error('Invalid usage, must await whenReady before calling save');
     }
 
-    let storeAttributes: Awaited<ReturnType<SavedMap['_getStoreAttributes']>>;
+    let serializedAttributes: Omit<MapAttributes, 'title' | 'description'>;
     try {
-      storeAttributes = await this._getStoreAttributes();
+      serializedAttributes = await this._serializeAttributes();
     } catch (e) {
       getToasts().addDanger({
         title: i18n.translate('xpack.maps.topNav.saveErrorTitle', {
@@ -449,7 +449,7 @@ export class SavedMap {
     this._attributes = {
       title: newTitle,
       ...(newDescription ? { description: newDescription } : {}),
-      ...storeAttributes,
+      ...serializedAttributes,
     };
 
     let mapEmbeddableState: MapEmbeddableState | undefined;
@@ -549,11 +549,14 @@ export class SavedMap {
     return;
   }
 
-  private async _getStoreAttributes() {
+  /**
+   * Reads the current map state from the redux store and returns it in REST API shape.
+   */
+  private async _serializeAttributes(): Promise<Omit<MapAttributes, 'title' | 'description'>> {
     const state: MapStoreState = this._store.getState();
     const mapSettings = getMapSettings(state);
     return {
-      adHocDataViews: await this._getAdHocDataViews(),
+      adHocDataViews: await this._serializeAdHocDataViews(),
       center: getMapCenter(state),
       filters: getFilters(state),
       isLayerTOCOpen: getIsLayerTOCOpen(state),
@@ -573,7 +576,7 @@ export class SavedMap {
     };
   }
 
-  private async _getAdHocDataViews() {
+  private async _serializeAdHocDataViews() {
     const dataViewIds: string[] = [];
     getLayerList(this._store.getState())
       // exclude adhoc data views from ESQL sources

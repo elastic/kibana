@@ -89,7 +89,7 @@ describe('SavedMap.save', () => {
     const savedMap = new SavedMap({ mapEmbeddableState });
     await savedMap.whenReady();
     jest
-      .spyOn(savedMap as any, '_getAdHocDataViews')
+      .spyOn(savedMap as any, '_serializeAdHocDataViews')
       .mockRejectedValue(new Error('Cannot save ad hoc data view without `id`'));
 
     await expect(
