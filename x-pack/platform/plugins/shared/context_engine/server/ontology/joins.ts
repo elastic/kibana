@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   MAX_ONTOLOGY_JOIN_CANDIDATES,
   MIN_ONTOLOGY_JOIN_OVERLAP,
+  MIN_ONTOLOGY_JOIN_SAMPLE,
   ONTOLOGY_JOIN_SAMPLE_SIZE,
 } from '../../common/ontology';
 import type { OntologyCatalogEntry } from '../../common/step_types/catalog_ontology_sources';
@@ -32,6 +33,7 @@ const INTEGER_TYPES: ReadonlySet<string> = new Set([
 /** The family of field types whose values can be compared, or none for a type joins don't use. */
 const joinFamilyOf = (type: string): string | undefined => {
   if (KEYWORD_TYPES.has(type)) return 'keyword';
+  if (type === 'double') return undefined;
   if (INTEGER_TYPES.has(type)) return 'integer';
   if (type === 'ip') return 'ip';
   return undefined;
@@ -50,6 +52,39 @@ const keyOf = (candidate: OntologyJoinCandidate): string => {
     `${candidate.to_dataset}\u0000${candidate.to_field}`,
   ].sort();
   return ends.join('\u0001');
+};
+
+const swap = ({
+  from_dataset: fromDataset,
+  from_field: fromField,
+  to_dataset: toDataset,
+  to_field: toField,
+}: OntologyJoinCandidate): OntologyJoinCandidate => ({
+  from_dataset: toDataset,
+  from_field: toField,
+  to_dataset: fromDataset,
+  to_field: fromField,
+});
+
+/** Up to {@link ONTOLOGY_JOIN_SAMPLE_SIZE} distinct values of the from field of an index dataset. */
+const sampleValues = async (
+  esClient: ElasticsearchClient,
+  { from_dataset: dataset, from_field: name }: OntologyJoinCandidate,
+  abortSignal?: AbortSignal
+): Promise<Array<string | number>> => {
+  const field = quoteField(name);
+  const { rows } = await runEsql(
+    esClient,
+    `FROM ${quoteSource(
+      dataset
+    )} | WHERE ${field} IS NOT NULL | STATS BY ${field} | LIMIT ${ONTOLOGY_JOIN_SAMPLE_SIZE}`,
+    abortSignal
+  );
+  return rows
+    .map(([value]) => value)
+    .filter(
+      (value): value is string | number => typeof value === 'string' || typeof value === 'number'
+    );
 };
 
 /** How many of the sampled values the dataset's field holds. */
@@ -79,7 +114,7 @@ const countMatches = async (
 /**
  * Keeps the join candidates whose fields hold the same values: at least
  * {@link MIN_ONTOLOGY_JOIN_OVERLAP} of up to {@link ONTOLOGY_JOIN_SAMPLE_SIZE} distinct `from`
- * values must be in the `to` field.
+ * values must be in the `to` field. A connector side is checked with the values its samples hold.
  */
 export const verifyOntologyJoins = async ({
   esClient,
@@ -104,18 +139,25 @@ export const verifyOntologyJoins = async ({
       rejected.push({ candidate: JSON.stringify(raw).slice(0, 200), reason: 'malformed' });
       continue;
     }
-    const candidate = parsed.data;
-    const label = labelOf(candidate);
-    const reject = (reason: string) => rejected.push({ candidate: label, reason });
-    if (seen.has(keyOf(candidate))) {
+    const proposed = parsed.data;
+    const reject = (reason: string) => rejected.push({ candidate: labelOf(proposed), reason });
+    if (seen.has(keyOf(proposed))) {
       reject('listed twice');
       continue;
     }
-    seen.add(keyOf(candidate));
-    if (candidate.from_dataset === candidate.to_dataset) {
+    seen.add(keyOf(proposed));
+    if (proposed.from_dataset === proposed.to_dataset) {
       reject('joins a dataset to itself');
       continue;
     }
+    const fromEntry = datasets.get(proposed.from_dataset);
+    const toEntry = datasets.get(proposed.to_dataset);
+    if (fromEntry?.kind === 'connector' && toEntry?.kind === 'connector') {
+      reject('cannot check a join between two connectors');
+      continue;
+    }
+    // A connector cannot be searched by value: its sampled values are checked against the index.
+    const candidate = toEntry?.kind === 'connector' ? swap(proposed) : proposed;
     const fromField = datasets
       .get(candidate.from_dataset)
       ?.fields.find(({ name }) => name === candidate.from_field);
@@ -131,7 +173,12 @@ export const verifyOntologyJoins = async ({
       reject(`cannot join a ${fromField.type} field to a ${toField.type} field`);
       continue;
     }
-    if (!fromField.aggregatable || !toField.searchable || !toField.aggregatable) {
+    const fromConnector = datasets.get(candidate.from_dataset)?.kind === 'connector';
+    if (
+      (!fromConnector && !fromField.aggregatable) ||
+      !toField.searchable ||
+      !toField.aggregatable
+    ) {
       reject('a field is not searchable and aggregatable');
       continue;
     }
@@ -142,22 +189,15 @@ export const verifyOntologyJoins = async ({
     checked++;
 
     try {
-      const field = quoteField(candidate.from_field);
-      const { rows } = await runEsql(
-        esClient,
-        `FROM ${quoteSource(
-          candidate.from_dataset
-        )} | WHERE ${field} IS NOT NULL | STATS BY ${field} | LIMIT ${ONTOLOGY_JOIN_SAMPLE_SIZE}`,
-        abortSignal
-      );
-      const values = rows
-        .map(([value]) => value)
-        .filter(
-          (value): value is string | number =>
-            typeof value === 'string' || typeof value === 'number'
+      const values = fromConnector
+        ? fromField.sample_values ?? []
+        : await sampleValues(esClient, candidate, abortSignal);
+      if (values.length < (fromConnector ? MIN_ONTOLOGY_JOIN_SAMPLE : 1)) {
+        reject(
+          fromConnector
+            ? `fewer than ${MIN_ONTOLOGY_JOIN_SAMPLE} sampled values to check`
+            : 'the from field holds no values'
         );
-      if (values.length === 0) {
-        reject('the from field holds no values');
         continue;
       }
       const matched = await countMatches(esClient, candidate, values, abortSignal);

@@ -9,7 +9,6 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
-  CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
@@ -46,8 +45,8 @@ import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
 export interface DreamingScheduleService {
   /**
-   * Installs and enables the dreaming workflows of an AI index that dreams, each only while the
-   * part of the config it builds is on, and removes the others.
+   * Installs and enables the dreaming and trace dreaming workflows of an AI index that dreams,
+   * and removes them from one that does not.
    */
   reconcile(params: {
     aiIndex: AiIndexItem;
@@ -77,21 +76,9 @@ export const traceDreamingBatchWorkflowIdFor = (aiIndexId: string, spaceId: stri
 export const relationshipsWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
   `${CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
 
-/** The id of the workflow that discovers the ontology of an AI index's ES|QL sources. */
-export const ontologyWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
-  `${CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
-
-/** Whether an AI index has dreaming on and configured to build facts or entities. */
-export const dreamsOnMemories = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
-  dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
-
-/** Whether an AI index has dreaming on with ontology discovery turned on. */
-export const discoversOntology = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
-  dreaming?.enabled === true && dreaming.ontology?.enabled === true;
-
 /** Whether an AI index has dreaming on and configured to build something. */
-export const shouldDream = (aiIndex: { dreaming?: AiIndexDreamingConfig }): boolean =>
-  dreamsOnMemories(aiIndex) || discoversOntology(aiIndex);
+export const shouldDream = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
+  dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
 
 /** The dreaming workflow template values for an AI index. */
 export const dreamingTemplateValuesFor = (
@@ -121,35 +108,24 @@ const DREAMING_WORKFLOWS = [
     label: 'dreaming',
     workflowIdFor: dreamingWorkflowIdFor,
     attach: true,
-    installFor: dreamsOnMemories,
   },
   {
     definitionId: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
     label: 'the trace dreaming batch workflow',
     workflowIdFor: traceDreamingBatchWorkflowIdFor,
     attach: false,
-    installFor: dreamsOnMemories,
   },
   {
     definitionId: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
     label: 'trace dreaming',
     workflowIdFor: traceDreamingWorkflowIdFor,
     attach: true,
-    installFor: dreamsOnMemories,
   },
   {
     definitionId: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
     label: 'relationships',
     workflowIdFor: relationshipsWorkflowIdFor,
     attach: true,
-    installFor: dreamsOnMemories,
-  },
-  {
-    definitionId: CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID,
-    label: 'ontology discovery',
-    workflowIdFor: ontologyWorkflowIdFor,
-    attach: true,
-    installFor: discoversOntology,
   },
 ] as const;
 
@@ -238,17 +214,6 @@ export const createDreamingScheduleService = ({
       const values = dreamingTemplateValuesFor(aiIndex, dreaming, spaceId);
       const client = await getManagedWorkflowsClient();
       for (const workflow of DREAMING_WORKFLOWS) {
-        if (!workflow.installFor(aiIndex)) {
-          await uninstall(workflow, aiIndexId, spaceId, request);
-          if (workflow.attach && !aiIndex.managed) {
-            await getAiIndexService().removeAutomation(
-              aiIndexId,
-              spaceId,
-              automationFor(workflow, aiIndexId, spaceId)
-            );
-          }
-          continue;
-        }
         await client.install(workflow.definitionId, {
           spaceId,
           workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),

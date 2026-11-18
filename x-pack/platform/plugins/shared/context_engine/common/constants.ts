@@ -21,8 +21,6 @@ export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{a
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
 export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
-/** Sets whether a person reviewed an ontology KI: `draft` or `certified`. */
-export const AI_INDEX_KI_ONTOLOGY_STATUS_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_ontology_status`;
 /**
  * A static segment wins over `{kiId}`, so `GET` can't read a KI whose id is exactly `_groups`.
  * `PATCH`, `DELETE` and `_restore` still reach it.

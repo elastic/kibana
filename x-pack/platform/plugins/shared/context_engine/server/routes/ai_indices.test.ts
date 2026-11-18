@@ -6,7 +6,6 @@
  */
 
 jest.mock('../ai_indices/ki_write');
-jest.mock('../ontology/set_status');
 
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
@@ -21,13 +20,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from '../ai_indices/ki_write';
-import {
-  KiConflictError,
-  KiDeletedError,
-  KiNotFoundError,
-  KiValidationError,
-} from '../ai_indices/errors';
-import { setOntologyStatus } from '../ontology/set_status';
+import { KiConflictError, KiDeletedError, KiNotFoundError } from '../ai_indices/errors';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { registerAiIndexRoutes } from './ai_indices';
 import {
@@ -53,7 +46,6 @@ import {
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_GROUPS_PATH,
-  AI_INDEX_KI_ONTOLOGY_STATUS_PATH,
   AI_INDEX_KI_RESTORE_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_PATH,
@@ -440,10 +432,6 @@ describe('ai indices routes', () => {
       security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
     });
     expect(getRoute('POST', AI_INDEX_KI_RESTORE_PATH).config).toMatchObject({
-      access: 'internal',
-      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
-    });
-    expect(getRoute('PUT', AI_INDEX_KI_ONTOLOGY_STATUS_PATH).config).toMatchObject({
       access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
     });
@@ -2111,57 +2099,6 @@ describe('ai indices routes', () => {
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: new KiNotFoundError('customer_support', 'missing').message },
       });
-    });
-  });
-
-  describe('PUT /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}/_ontology_status', () => {
-    it('sets the review status of an ontology KI', async () => {
-      aiIndexService.get.mockResolvedValue(aiIndexItem);
-      jest
-        .mocked(setOntologyStatus)
-        .mockResolvedValue({ id: 'ontology-term--customer', result: 'updated' });
-      jest.mocked(buildKiApiWriter).mockReturnValue({
-        uri: 'api://context_engine.ki.update',
-        metadata: { space_id: defaultSpaceId },
-      });
-
-      await callRoute('PUT', AI_INDEX_KI_ONTOLOGY_STATUS_PATH, {
-        params: { aiIndexId: 'customer_support', kiId: 'ontology-term--customer' },
-        body: { status: 'certified' },
-      });
-
-      expect(setOntologyStatus).toHaveBeenCalledWith(
-        expect.objectContaining({ search: esSearch }),
-        expect.objectContaining({
-          aiIndexId: 'customer_support',
-          dest: aiIndexItem.dest,
-          kiId: 'ontology-term--customer',
-          status: 'certified',
-        })
-      );
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({ action: 'ki_update', outcome: 'success' }),
-        })
-      );
-      expect(response.ok).toHaveBeenCalledWith({
-        body: { id: 'ontology-term--customer', status: 'updated' },
-      });
-    });
-
-    it('returns 400 for a KI that is not an ontology KI', async () => {
-      aiIndexService.get.mockResolvedValue(aiIndexItem);
-      const error = new KiValidationError(
-        "KI 'ki-1' in AI index 'customer_support' is not an ontology dataset or term"
-      );
-      jest.mocked(setOntologyStatus).mockRejectedValue(error);
-
-      await callRoute('PUT', AI_INDEX_KI_ONTOLOGY_STATUS_PATH, {
-        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
-        body: { status: 'draft' },
-      });
-
-      expect(response.badRequest).toHaveBeenCalledWith({ body: { message: error.message } });
     });
   });
 

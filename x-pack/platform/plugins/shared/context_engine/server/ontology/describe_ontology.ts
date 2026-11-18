@@ -8,53 +8,75 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexDest, KiTypeCount } from '../../common/http_api/ai_indices';
 import {
+  ONTOLOGY_CONNECTOR_ACCESS_PATTERNS_ATTRIBUTE,
   ONTOLOGY_DATASET_KI_TYPE,
+  ONTOLOGY_ENTITY_TYPE_ATTRIBUTE,
   ONTOLOGY_FIELDS_ATTRIBUTE,
   ONTOLOGY_SYNONYMS_ATTRIBUTE,
+  ONTOLOGY_TERM_KI_TYPE,
   isOntologyKiType,
 } from '../../common/ontology';
 import { accessPatternsOf } from '../dreaming/access_patterns';
 import type { DreamedKi } from '../dreaming/dreamed_ki';
-import { ontologyStatusOf, readOntologyKis } from './existing';
+import { readOntologyKis, stringsOf } from './existing';
 
 /** Ontology entries the describe block lists. */
 export const MAX_DESCRIBED_ONTOLOGY_KIS = 30;
 const MAX_LISTED_VALUES = 5;
-
-const stringsOf = (value: unknown): string[] =>
-  Array.isArray(value)
-    ? value.filter((entry): entry is string => typeof entry === 'string')
-    : typeof value === 'string'
-    ? [value]
-    : [];
 
 const listed = (values: string[]): string =>
   values.length > MAX_LISTED_VALUES
     ? `${values.slice(0, MAX_LISTED_VALUES).join(', ')}, …`
     : values.join(', ');
 
+const exampleOf = (ki: DreamedKi): string | undefined => {
+  const [pattern] = accessPatternsOf(ki);
+  if (pattern) {
+    return pattern.esql_example;
+  }
+  const [call] = stringsOf(ki.attributes?.[ONTOLOGY_CONNECTOR_ACCESS_PATTERNS_ATTRIBUTE]);
+  if (!call) {
+    return undefined;
+  }
+  try {
+    const {
+      connector_id: connectorId,
+      sub_action: subAction,
+      params_example: params,
+    } = JSON.parse(call) as { connector_id?: string; sub_action?: string; params_example?: string };
+    return `execute_connector_sub_action {"connectorId":"${connectorId}","subAction":"${subAction}","params":${params}}`;
+  } catch {
+    return undefined;
+  }
+};
+
 const lineOf = (ki: DreamedKi): string => {
-  const status = ontologyStatusOf(ki);
   if (ki.type === ONTOLOGY_DATASET_KI_TYPE) {
-    const [pattern] = accessPatternsOf(ki);
+    const example = exampleOf(ki);
     return [
-      `[${status}] dataset ${ki.title}${ki.description ? `: ${ki.description}` : ''}`,
-      ...(pattern ? [`  Example: ${pattern.esql_example}`] : []),
+      `dataset ${ki.title}${ki.description ? `: ${ki.description}` : ''}`,
+      ...(example ? [`  Example: ${example}`] : []),
     ].join('\n');
   }
   const synonyms = stringsOf(ki.attributes?.[ONTOLOGY_SYNONYMS_ATTRIBUTE]);
   const fields = stringsOf(ki.attributes?.[ONTOLOGY_FIELDS_ATTRIBUTE]);
-  return `[${status}] term ${ki.title}${synonyms.length > 0 ? ` (also ${listed(synonyms)})` : ''}${
-    fields.length > 0 ? `: ${listed(fields)}` : ''
-  }`;
+  const entityType = ki.attributes?.[ONTOLOGY_ENTITY_TYPE_ATTRIBUTE];
+  return `${typeof entityType === 'string' ? `entity type ${entityType}` : `term ${ki.title}`}${
+    synonyms.length > 0 ? ` (also ${listed(synonyms)})` : ''
+  }${fields.length > 0 ? `: ${listed(fields)}` : ''}`;
 };
 
+/** Datasets first, then the configured entity types, then terms discovered while onboarding. */
 const rank = (ki: DreamedKi): number =>
-  (ontologyStatusOf(ki) === 'certified' ? 0 : 2) + (ki.type === ONTOLOGY_DATASET_KI_TYPE ? 0 : 1);
+  ki.type === ONTOLOGY_DATASET_KI_TYPE
+    ? 0
+    : typeof ki.attributes?.[ONTOLOGY_ENTITY_TYPE_ATTRIBUTE] === 'string'
+    ? 1
+    : 2;
 
 /**
- * The ontology section of the describe block: the datasets and terms ontology discovery found,
- * certified first. Empty, without a query, when the type counts show no ontology KI.
+ * The ontology section of the describe block: the datasets and terms ontology discovery found.
+ * Empty, without a query, when the type counts show no ontology KI.
  */
 export const describeOntology = async ({
   esClient,
@@ -71,7 +93,7 @@ export const describeOntology = async ({
     return [];
   }
   const kis = (await readOntologyKis({ esClient, dest, spaceId })).filter(
-    ({ type }) => type !== 'memory.relationship'
+    ({ type }) => type === ONTOLOGY_DATASET_KI_TYPE || type === ONTOLOGY_TERM_KI_TYPE
   );
   if (kis.length === 0) {
     return [];
@@ -81,7 +103,7 @@ export const describeOntology = async ({
   );
   const shown = sorted.slice(0, MAX_DESCRIBED_ONTOLOGY_KIS);
   return [
-    `Ontology (datasets and business terms discovered from the ES|QL sources; certified entries were reviewed by a person${
+    `Ontology (the datasets the sources read and the business terms they store${
       sorted.length > shown.length ? `; showing ${shown.length} of ${sorted.length}` : ''
     })`,
     ...shown.map(lineOf),

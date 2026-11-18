@@ -16,17 +16,18 @@ import { catalogOntologySources } from '../ontology/catalog';
 import type { DreamingStepDependencies } from './helpers';
 import { getAiIndexForStep } from './ontology_helpers';
 
-const EMPTY: CatalogOntologySourcesOutput = {
+const emptyFor = (sourceId: string, error: string): CatalogOntologySourcesOutput => ({
   datasets: [],
   catalog: [],
+  others: [],
   skipped: [],
   stale: [],
   existing: [],
-  sources: [],
-};
+  source: { id: sourceId, type: 'esql', value: '', datasets: 0, error },
+});
 
 /**
- * Catalogs and profiles the datasets the ES|QL sources of an AI index read from, as the workflow
+ * Catalogs and profiles the datasets one ES|QL source of an AI index reads from, as the workflow
  * user, so the run sees only the data its user may read.
  */
 export const getCatalogOntologySourcesStepDefinition = (
@@ -37,14 +38,18 @@ export const getCatalogOntologySourcesStepDefinition = (
     ...catalogOntologySourcesStepCommonDefinition,
     handler: async (context) => {
       const { spaceId } = context.contextManager.getContext().workflow;
-      const { ai_index_id: aiIndexId, max_datasets: maxDatasets } = context.input;
+      const {
+        ai_index_id: aiIndexId,
+        source_id: sourceId,
+        max_datasets: maxDatasets,
+      } = context.input;
       const aiIndex = await getAiIndexForStep(deps, {
         request: context.contextManager.getFakeRequest(),
         aiIndexId,
         spaceId,
       });
       if (!aiIndex) {
-        return { output: EMPTY };
+        return { output: emptyFor(sourceId, 'Context Engine or its memory setting is off.') };
       }
       const config = resolveOntologyConfig(aiIndex.dreaming?.ontology);
       if (!config.enabled) {
@@ -56,6 +61,7 @@ export const getCatalogOntologySourcesStepDefinition = (
       const output = await catalogOntologySources({
         esClient: context.contextManager.getScopedEsClient(),
         aiIndex,
+        sourceId,
         spaceId,
         config,
         maxDatasets: maxDatasets ?? MAX_ONTOLOGY_DATASETS_PER_RUN,

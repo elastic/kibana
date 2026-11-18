@@ -25,18 +25,25 @@ import { getCatalogOntologySourcesStepDefinition } from './catalog_ontology_sour
 import { getReadOntologyQueryHistoryStepDefinition } from './read_ontology_query_history';
 import { getVerifyOntologyJoinsStepDefinition } from './verify_ontology_joins';
 import { getApplyOntologyChangesStepDefinition } from './apply_ontology_changes';
+import {
+  getCatalogConnectorSourceStepDefinition,
+  getSampleConnectorSourceStepDefinition,
+} from './connector_ontology';
+import type { OntologyStepExtras } from './ontology_helpers';
 
 /** Registers the KI, feedback analysis, dreaming and ontology discovery workflow steps. */
 export const registerStepDefinitions = ({
   workflowsExtensions,
   feedbackAnalysis,
   dreaming,
+  ontology,
   verifyKi,
   ...deps
 }: DreamingKiStepDependencies & {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   feedbackAnalysis: FeedbackAnalysisStepDependencies;
   dreaming: DreamingStepDependencies;
+  ontology: OntologyStepExtras;
   verifyKi: VerifyKi;
 }): void => {
   workflowsExtensions.registerStepDefinition(getCreateKiStepDefinition({ ...deps, verifyKi }));
@@ -51,5 +58,13 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getCatalogOntologySourcesStepDefinition(dreaming));
   workflowsExtensions.registerStepDefinition(getReadOntologyQueryHistoryStepDefinition(dreaming));
   workflowsExtensions.registerStepDefinition(getVerifyOntologyJoinsStepDefinition(dreaming));
-  workflowsExtensions.registerStepDefinition(getApplyOntologyChangesStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(
+    getCatalogConnectorSourceStepDefinition({ ...dreaming, ...ontology })
+  );
+  workflowsExtensions.registerStepDefinition(
+    getSampleConnectorSourceStepDefinition({ ...dreaming, ...ontology })
+  );
+  workflowsExtensions.registerStepDefinition(
+    getApplyOntologyChangesStepDefinition({ ...deps, ...ontology })
+  );
 };

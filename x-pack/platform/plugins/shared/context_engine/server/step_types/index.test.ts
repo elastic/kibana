@@ -42,6 +42,7 @@ describe('registerStepDefinitions', () => {
         isMemoryEnabled: async () => true,
         checkReadPrivilege: async () => true,
       },
+      ontology: { getActions: jest.fn() },
     });
 
     expect(definitions.map((definition) => definition.id)).toEqual([
@@ -57,6 +58,8 @@ describe('registerStepDefinitions', () => {
       'context-engine.catalogOntologySources',
       'context-engine.readOntologyQueryHistory',
       'context-engine.verifyOntologyJoins',
+      'context-engine.catalogConnectorSource',
+      'context-engine.sampleConnectorSource',
       'context-engine.applyOntologyChanges',
     ]);
   });

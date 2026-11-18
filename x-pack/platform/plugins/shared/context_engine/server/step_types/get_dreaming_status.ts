@@ -13,7 +13,9 @@ import {
 } from '../../common/step_types/get_dreaming_status';
 import { dreamingTypesOf } from '../../common/dreaming';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
-import { discoversOntology, dreamsOnMemories } from '../dreaming/schedule';
+import { discoversOntology } from '../../common/ontology';
+import { shouldDream } from '../dreaming/schedule';
+import { findSource } from './ontology_helpers';
 import type { DreamingStepDependencies } from './helpers';
 
 export const getDreamingStatusStepDefinition = ({
@@ -26,7 +28,7 @@ export const getDreamingStatusStepDefinition = ({
     ...getDreamingStatusStepCommonDefinition,
     handler: async (context) => {
       const { spaceId } = context.contextManager.getContext().workflow;
-      const { ai_index_id: aiIndexId, source = 'memories' } = context.input;
+      const { ai_index_id: aiIndexId, source = 'memories', source_id: sourceId } = context.input;
       if (!(await checkReadPrivilege(context.contextManager.getFakeRequest(), spaceId))) {
         throw new ExecutionError({
           type: 'PermissionError',
@@ -49,12 +51,12 @@ export const getDreamingStatusStepDefinition = ({
           if (!discoversOntology(aiIndex)) {
             return skip(`Ontology discovery is not turned on for AI index '${aiIndexId}'.`);
           }
-          if (!aiIndex.sources.some(({ type }) => type === 'esql')) {
-            return skip(`AI index '${aiIndexId}' has no ES|QL sources to discover.`);
+          if (sourceId !== undefined && !findSource(aiIndex, sourceId)) {
+            return skip(`AI index '${aiIndexId}' no longer has source '${sourceId}'.`);
           }
           return { output: { dream: true } };
         }
-        if (!dreamsOnMemories(aiIndex)) {
+        if (!shouldDream(aiIndex)) {
           return skip(`Dreaming is not turned on for AI index '${aiIndexId}'.`);
         }
         if (source === 'traces' && aiIndex.traces.length === 0) {

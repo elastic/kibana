@@ -11,7 +11,8 @@ import DREAMING_YAML from './dreaming.yaml';
 import TRACE_DREAMING_YAML from './dreaming_traces.yaml';
 import TRACE_DREAMING_BATCH_YAML from './dreaming_traces_batch.yaml';
 import FEEDBACK_ANALYSIS_YAML from './feedback_analysis.yaml';
-import ONTOLOGY_YAML from './ontology.yaml';
+import ONTOLOGY_CONNECTOR_YAML from './ontology_connector.yaml';
+import ONTOLOGY_ESQL_YAML from './ontology_esql.yaml';
 import RELATIONSHIPS_YAML from './relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
@@ -190,29 +191,58 @@ export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineRelationshipsWorkflowTemplateValues>;
 
-export const CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID = 'system-context-engine-ontology';
+export const CONTEXT_ENGINE_ONTOLOGY_ESQL_WORKFLOW_ID = 'system-context-engine-ontology-esql';
+export const CONTEXT_ENGINE_ONTOLOGY_CONNECTOR_WORKFLOW_ID =
+  'system-context-engine-ontology-connector';
 
-/** The same config as dreaming, which ontology discovery runs alongside on the same schedule. */
-export type ContextEngineOntologyWorkflowTemplateValues =
-  ContextEngineDreamingWorkflowTemplateValues;
+/** The dreaming config, and the source of the AI index one ontology discovery instance describes. */
+export interface ContextEngineOntologyWorkflowTemplateValues
+  extends ContextEngineDreamingWorkflowTemplateValues {
+  /** A hash of the source's type and value. */
+  sourceId: string;
+  /** The source's ES|QL query, or its connector id. */
+  sourceValue: string;
+}
+
+const renderOntologyTemplate = (
+  template: string,
+  label: string,
+  values: ContextEngineOntologyWorkflowTemplateValues
+): string =>
+  renderJsonTemplate(template, {
+    __NAME__: `Ontology discovery (${label}): ${values.aiIndexId} ${values.sourceId}`,
+    __AI_INDEX_ID__: values.aiIndexId,
+    // Shared by every source of the AI index, which queue on it.
+    __CONCURRENCY_KEY__: `context-engine-ontology-${values.instanceKey}`,
+    __SOURCE_ID__: values.sourceId,
+    __INTERVAL_MINUTES__: values.intervalMinutes,
+    __CONNECTOR_ID__: values.connectorId,
+    __INSTRUCTIONS__: values.instructions,
+    __ENTITY_TYPES__: values.entityTypes,
+  });
 
 /**
- * Discovers the ontology of the ES|QL sources of one AI index: describes the datasets they read,
- * the business terms their fields store and how they join.
+ * Discovers the ontology of one ES|QL source of an AI index: describes the datasets it reads, the
+ * business terms their fields store and how they join with the datasets of other sources.
  */
-export const CONTEXT_ENGINE_ONTOLOGY_WORKFLOW = {
-  id: CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID,
+export const CONTEXT_ENGINE_ONTOLOGY_ESQL_WORKFLOW = {
+  id: CONTEXT_ENGINE_ONTOLOGY_ESQL_WORKFLOW_ID,
   pluginId: 'contextEngine',
   version: 1,
   billable: false,
-  yamlTemplate: (values) =>
-    renderJsonTemplate(ONTOLOGY_YAML, {
-      __NAME__: `Ontology discovery: ${values.aiIndexId}`,
-      __AI_INDEX_ID__: values.aiIndexId,
-      __CONCURRENCY_KEY__: `context-engine-ontology-${values.instanceKey}`,
-      __INTERVAL_MINUTES__: values.intervalMinutes,
-      __CONNECTOR_ID__: values.connectorId,
-      __INSTRUCTIONS__: values.instructions,
-    }),
+  yamlTemplate: (values) => renderOntologyTemplate(ONTOLOGY_ESQL_YAML, 'ES|QL', values),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineOntologyWorkflowTemplateValues>;
+
+/**
+ * Discovers the ontology of one connector source of an AI index: samples its records through its
+ * read sub-actions and describes what it holds, the terms its records store and how they join.
+ */
+export const CONTEXT_ENGINE_ONTOLOGY_CONNECTOR_WORKFLOW = {
+  id: CONTEXT_ENGINE_ONTOLOGY_CONNECTOR_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) => renderOntologyTemplate(ONTOLOGY_CONNECTOR_YAML, 'connector', values),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineOntologyWorkflowTemplateValues>;

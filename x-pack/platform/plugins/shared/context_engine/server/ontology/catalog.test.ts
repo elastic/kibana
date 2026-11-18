@@ -11,7 +11,7 @@ import { resolveOntologyConfig } from '../../common/ontology';
 import { describeAiIndexFields } from '../ai_indices/describe_fields';
 import type { AiIndexField } from '../ai_indices/types';
 import { catalogOntologySources, fingerprintOf } from './catalog';
-import { datasetKiId, esqlSourceId } from './ids';
+import { datasetKiId, ontologySourceId, sourceUri } from './ids';
 
 jest.mock('../ai_indices/describe_fields');
 
@@ -37,6 +37,8 @@ const aiIndex = (sources: AiIndexItem['sources']): AiIndexItem => ({
 });
 
 const ORDERS_SOURCE = { type: 'esql' as const, value: 'FROM orders, logs-* | LIMIT 10' };
+const SOURCE_ID = ontologySourceId(ORDERS_SOURCE);
+const cites = (sourceId = SOURCE_ID) => [{ uri: sourceUri(sourceId), relation: 'derived_from' }];
 
 interface MockClient {
   resolveIndex: jest.Mock;
@@ -106,10 +108,12 @@ const run = (
   client: MockClient,
   {
     sources = [ORDERS_SOURCE],
+    sourceId = SOURCE_ID,
     config = { enabled: true },
     maxDatasets = 10,
   }: {
     sources?: AiIndexItem['sources'];
+    sourceId?: string;
     config?: Parameters<typeof resolveOntologyConfig>[0];
     maxDatasets?: number;
   } = {}
@@ -117,6 +121,7 @@ const run = (
   catalogOntologySources({
     esClient: client.client,
     aiIndex: aiIndex(sources),
+    sourceId,
     spaceId: 'default',
     config: resolveOntologyConfig(config),
     maxDatasets,
@@ -141,32 +146,83 @@ describe('catalogOntologySources', () => {
     });
   });
 
-  it('catalogs the data streams and indices a source reads, leaving out backing and hidden indices', async () => {
+  it('catalogs the data streams and indices its source reads, leaving out backing and hidden indices', async () => {
     const client = mockClient();
 
-    const output = await run(client);
+    const output = await run(client, {
+      sources: [{ type: 'esql', value: 'FROM other' }, ORDERS_SOURCE],
+    });
 
+    expect(client.resolveIndex).toHaveBeenCalledTimes(1);
     expect(client.resolveIndex).toHaveBeenCalledWith(
       expect.objectContaining({ name: ['orders', 'logs-*'], expand_wildcards: 'open' }),
       expect.anything()
     );
     expect(output.catalog).toEqual([
-      {
-        name: 'logs-app-default',
-        kind: 'data_stream',
-        source_ids: [esqlSourceId(ORDERS_SOURCE.value)],
-        fields: [],
-      },
+      { name: 'logs-app-default', kind: 'data_stream', source_ids: [SOURCE_ID], fields: [] },
       {
         name: 'orders',
         kind: 'index',
-        source_ids: [esqlSourceId(ORDERS_SOURCE.value)],
+        source_ids: [SOURCE_ID],
         fields: catalogFieldsOf(ordersFields),
       },
     ]);
-    expect(output.sources).toEqual([
-      { id: esqlSourceId(ORDERS_SOURCE.value), value: ORDERS_SOURCE.value, datasets: 2 },
+    expect(output.source).toEqual({
+      id: SOURCE_ID,
+      type: 'esql',
+      value: ORDERS_SOURCE.value,
+      datasets: 2,
+    });
+  });
+
+  it('lists the index datasets other sources described, with their join fields', async () => {
+    const client = mockClient([
+      {
+        id: datasetKiId('customers'),
+        type: 'ontology.dataset',
+        title: 'customers',
+        attributes: {
+          'ontology.index': 'customers',
+          'ontology.kind': 'index',
+          'ontology.join_fields': ['id:keyword'],
+        },
+        references: cites('crm'),
+      },
+      {
+        id: datasetKiId('connector:drive'),
+        type: 'ontology.dataset',
+        title: 'Drive',
+        attributes: { 'ontology.index': 'connector:drive', 'ontology.kind': 'connector' },
+        references: cites('drive'),
+      },
     ]);
+
+    const { others } = await run(client);
+
+    expect(others).toEqual([
+      {
+        name: 'customers',
+        kind: 'index',
+        source_ids: ['crm'],
+        fields: [{ name: 'id', type: 'keyword', searchable: true, aggregatable: true }],
+      },
+    ]);
+  });
+
+  it('reads nothing for a source the AI index no longer has, or one without FROM', async () => {
+    const client = mockClient();
+    const row = { type: 'esql' as const, value: 'ROW a = 1' };
+
+    const gone = await run(client, { sourceId: 'gone' });
+    const noFrom = await run(client, { sources: [row], sourceId: ontologySourceId(row) });
+
+    expect(client.resolveIndex).not.toHaveBeenCalled();
+    expect(gone.source).toEqual(
+      expect.objectContaining({ error: 'The AI index has no such ES|QL source any more.' })
+    );
+    expect(noFrom.source).toEqual(
+      expect.objectContaining({ error: 'The source query has no FROM to read.' })
+    );
   });
 
   it('profiles a new dataset, skipping top values of fields whose names look sensitive', async () => {
@@ -221,38 +277,35 @@ describe('catalogOntologySources', () => {
     });
   });
 
-  it('skips unchanged and certified datasets, and re-profiles changed or stale ones', async () => {
-    const fingerprint = fingerprintOf(catalogFieldsOf(ordersFields));
+  it("skips unchanged datasets, and re-profiles changed, stale or other sources' ones", async () => {
+    const described = (
+      name: string,
+      attributes: Record<string, unknown>,
+      sourceId = SOURCE_ID
+    ) => ({
+      id: datasetKiId(name),
+      type: 'ontology.dataset',
+      title: name,
+      attributes: {
+        'ontology.index': name,
+        'ontology.profiled_at': '2026-11-17T12:00:00.000Z',
+        ...attributes,
+      },
+      references: cites(sourceId),
+    });
     const client = mockClient([
-      {
-        id: datasetKiId('orders'),
-        type: 'ontology.dataset',
-        title: 'orders',
-        attributes: {
-          'ontology.index': 'orders',
-          'ontology.fingerprint': fingerprint,
-          'ontology.profiled_at': '2026-11-17T12:00:00.000Z',
-        },
-      },
-      {
-        id: datasetKiId('logs-app-default'),
-        type: 'ontology.dataset',
-        title: 'logs-app-default',
-        attributes: { 'ontology.index': 'logs-app-default', 'ontology.status': 'certified' },
-      },
+      described('orders', { 'ontology.fingerprint': fingerprintOf(catalogFieldsOf(ordersFields)) }),
+      described('logs-app-default', { 'ontology.fingerprint': fingerprintOf([]) }, 'other'),
     ]);
 
     const fresh = await run(client);
-    expect(fresh.datasets).toEqual([]);
-    expect(fresh.skipped).toEqual([
-      { name: 'logs-app-default', reason: 'certified' },
-      { name: 'orders', reason: 'unchanged' },
+    expect(fresh.datasets.map(({ name, reason }) => [name, reason])).toEqual([
+      ['logs-app-default', 'refresh'],
     ]);
+    expect(fresh.skipped).toEqual([{ name: 'orders', reason: 'unchanged' }]);
 
     const later = await run(client, { config: { enabled: true, refresh_interval: '12h' } });
-    expect(later.datasets.map(({ name, reason }) => [name, reason])).toEqual([
-      ['orders', 'refresh'],
-    ]);
+    expect(later.datasets.map(({ name }) => name)).toEqual(['logs-app-default', 'orders']);
   });
 
   it('defers datasets over the per-run cap, new ones first', async () => {
@@ -264,26 +317,27 @@ describe('catalogOntologySources', () => {
     expect(skipped).toEqual([{ name: 'orders', reason: 'deferred to a later run' }]);
   });
 
-  it('reports dataset KIs no source reads any more as stale, but none when a source failed', async () => {
-    const gone = {
-      id: datasetKiId('old'),
+  it('reports the datasets it described but no longer reads as stale, none when it failed', async () => {
+    const dataset = (name: string, sourceId: string) => ({
+      id: datasetKiId(name),
       type: 'ontology.dataset',
-      title: 'old',
-      attributes: { 'ontology.index': 'old' },
-    };
-    const client = mockClient([gone]);
+      title: name,
+      attributes: { 'ontology.index': name },
+      references: cites(sourceId),
+    });
+    const client = mockClient([dataset('old', SOURCE_ID), dataset('theirs', 'other')]);
 
     expect((await run(client)).stale).toEqual([datasetKiId('old')]);
 
     client.resolveIndex.mockRejectedValueOnce(new Error('cluster unavailable'));
     const failed = await run(client);
     expect(failed.stale).toEqual([]);
-    expect(failed.sources).toEqual([
-      expect.objectContaining({ datasets: 0, error: 'cluster unavailable' }),
-    ]);
+    expect(failed.source).toEqual(
+      expect.objectContaining({ datasets: 0, error: 'cluster unavailable' })
+    );
   });
 
-  it('reports a source without FROM, and a profile query that fails, without stopping', async () => {
+  it('reports a profile query that fails without stopping the others', async () => {
     const client = mockClient();
     client.esql.mockImplementation(async ({ query }: { query: string }) => {
       if (query.includes('COUNT_DISTINCT')) {
@@ -292,17 +346,8 @@ describe('catalogOntologySources', () => {
       return esqlResponse(['row_count'], [[1]]);
     });
 
-    const output = await run(client, {
-      sources: [
-        ORDERS_SOURCE,
-        { type: 'esql', value: 'ROW a = 1' },
-        { type: 'connector', value: 'c' },
-      ],
-    });
+    const output = await run(client);
 
-    expect(output.sources[1]).toEqual(
-      expect.objectContaining({ datasets: 0, error: 'The source query has no FROM to read.' })
-    );
     expect(output.datasets.find(({ name }) => name === 'orders')?.errors).toEqual([
       'distinct counts: boom',
     ]);

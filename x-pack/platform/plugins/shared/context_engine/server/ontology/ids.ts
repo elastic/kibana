@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AiIndexSource } from '../../common/http_api/ai_indices';
+import { SOURCE_URI_PREFIX } from '../../common/ontology';
 import { shortHash, slugify } from '../dreaming/ids';
 
 /**
@@ -17,10 +19,13 @@ export const datasetKiId = (name: string): string =>
 /** The KI id of a term: names that differ only in case or punctuation are the same term. */
 export const termKiId = (name: string): string => `ontology-term--${slugify(name)}`;
 
-/** A stable id for an ES|QL source, from its query: reordering the sources keeps it. */
-export const esqlSourceId = (query: string): string => shortHash(query.trim());
+/** A stable id for a source of an AI index, from its type and value: reordering sources keeps it. */
+export const ontologySourceId = ({ type, value }: Pick<AiIndexSource, 'type' | 'value'>): string =>
+  shortHash(type, value.trim());
 
-const ESQL_SOURCE_URI_PREFIX = 'esql-source://';
+/** The URI an ontology KI cites a source of the AI index by. */
+export const sourceUri = (sourceId: string): string => `${SOURCE_URI_PREFIX}${sourceId}`;
 
-/** The URI an ontology KI cites the ES|QL source it was discovered from by. */
-export const esqlSourceUri = (sourceId: string): string => `${ESQL_SOURCE_URI_PREFIX}${sourceId}`;
+/** The source id a `source://` URI cites, if it is one. */
+export const sourceIdFromUri = (uri: string): string | undefined =>
+  uri.startsWith(SOURCE_URI_PREFIX) ? uri.slice(SOURCE_URI_PREFIX.length) : undefined;

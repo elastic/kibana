@@ -14,6 +14,7 @@ import {
   MAX_ONTOLOGY_DATASET_NAME_LENGTH,
   MAX_ONTOLOGY_HISTORY_ROUNDS,
 } from '../ontology';
+import { sourceIdSchema } from './catalog_ontology_sources';
 import { aiIndexIdSchema } from './ki';
 
 export const READ_ONTOLOGY_QUERY_HISTORY_STEP_ID =
@@ -24,10 +25,14 @@ const MAX_TIMESTAMP_LENGTH = 64;
 export const readOntologyQueryHistoryInputSchema = lazySchema(() =>
   z.object({
     ai_index_id: aiIndexIdSchema,
+    source_id: sourceIdSchema,
     datasets: z
       .array(z.string().min(1).max(MAX_ONTOLOGY_DATASET_NAME_LENGTH))
       .max(MAX_ONTOLOGY_DATASETS)
-      .describe('The datasets to keep queries for: a query is kept when its FROM names one'),
+      .default([])
+      .describe(
+        'For an ES|QL source, the datasets to keep queries for: a query is kept when its FROM names one. Ignored for a connector source, whose calls are kept.'
+      ),
     since: z
       .string()
       .max(MAX_TIMESTAMP_LENGTH)
@@ -48,7 +53,9 @@ export const readOntologyQueryHistoryInputSchema = lazySchema(() =>
 export const ontologyHistoryQuerySchema = lazySchema(() =>
   z.object({
     dataset: z.string(),
-    query: z.string(),
+    query: z
+      .string()
+      .describe('The ES|QL query, or the connector call as {subAction, params} JSON'),
     round_id: z.string().describe('The round the query was run in, as trace:<trace id>'),
   })
 );
@@ -59,7 +66,9 @@ export const readOntologyQueryHistoryOutputSchema = lazySchema(() =>
   z.object({
     queries: z
       .array(ontologyHistoryQuerySchema)
-      .describe('ES|QL queries agents ran on the datasets, deduplicated, newest kept per dataset'),
+      .describe(
+        'ES|QL queries agents ran on the datasets, or calls they made on the connector, deduplicated, newest kept per dataset'
+      ),
     rounds: z.number().describe('Rounds scanned'),
     sources: z
       .array(
@@ -87,7 +96,8 @@ export const readOntologyQueryHistoryStepCommonDefinition: CommonStepDefinition<
   description: i18n.translate(
     'xpack.contextEngine.workflows.steps.readOntologyQueryHistory.description',
     {
-      defaultMessage: 'Collect the ES|QL queries agents ran on the datasets of an AI index.',
+      defaultMessage:
+        'Collect the ES|QL queries or connector calls agents ran on one source of an AI index.',
     }
   ),
   category: StepCategory.Kibana,
@@ -100,9 +110,10 @@ export const readOntologyQueryHistoryStepCommonDefinition: CommonStepDefinition<
       {
         defaultMessage:
           'Reads the agent rounds the trace sources of the AI index found since the given time, ' +
-          'as the workflow user, and keeps the ES|QL queries their tool calls ran whose FROM ' +
-          'names one of the datasets. Returns nothing when the AI index has no trace sources or ' +
-          'ontology discovery does not read query history.',
+          'as the workflow user. For an ES|QL source it keeps the ES|QL queries their tool calls ' +
+          'ran whose FROM names one of the datasets; for a connector source, the sub-action calls ' +
+          'agents made on that connector. Returns nothing when the AI index has no trace sources ' +
+          'or ontology discovery does not read query history.',
       }
     ),
   },

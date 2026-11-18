@@ -42,6 +42,8 @@ import { createFeedbackAnalysisChangeHandler } from './feedback_analysis/change_
 import { createDreamingChangeHandler } from './dreaming/change_handler';
 import type { DreamingScheduleService, DreamingWorkflowsApi } from './dreaming/schedule';
 import { createDreamingScheduleService } from './dreaming/schedule';
+import { createOntologyChangeHandler } from './ontology/change_handler';
+import { createOntologyScheduleService, type OntologyScheduleService } from './ontology/schedule';
 import { AiIndexChangeNotifier } from './ai_indices/changes';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
@@ -83,6 +85,7 @@ export class ContextEnginePlugin
   private esClient?: ElasticsearchClient;
   private scheduleService?: FeedbackAnalysisScheduleService;
   private dreamingScheduleService?: DreamingScheduleService;
+  private ontologyScheduleService?: OntologyScheduleService;
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
   private workflowsManagement?: WorkflowEnablementApi;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
@@ -250,6 +253,14 @@ export class ContextEnginePlugin
         return this.dreamingScheduleService;
       }, isDreamingAvailable)
     );
+    this.aiIndexChanges.register(
+      createOntologyChangeHandler(() => {
+        if (!this.ontologyScheduleService) {
+          throw new Error('Ontology schedule service not available — plugin has not started');
+        }
+        return this.ontologyScheduleService;
+      }, isDreamingAvailable)
+    );
 
     const isGlobalSettingEnabled = async (request: KibanaRequest, settingId: string) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -336,6 +347,12 @@ export class ContextEnginePlugin
         isContextEngineEnabled,
         isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
         checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
+      },
+      ontology: {
+        getActions: async () => {
+          const [, startDeps] = await coreSetup.getStartServices();
+          return startDeps.actions;
+        },
       },
     });
 
@@ -467,6 +484,16 @@ export class ContextEnginePlugin
         startDeps.workflowsExtensions.initManagedWorkflowsClient(CONTEXT_ENGINE_WORKFLOW_OWNER),
       getWorkflowsManagement: () => this.workflowsManagementApiPromise,
       getAiIndexService: () => aiIndexService,
+    });
+
+    this.ontologyScheduleService = createOntologyScheduleService({
+      logger: this.logger,
+      getManagedWorkflowsClient: () =>
+        startDeps.workflowsExtensions.initManagedWorkflowsClient(CONTEXT_ENGINE_WORKFLOW_OWNER),
+      getWorkflowsManagement: () => this.workflowsManagementApiPromise,
+      getAiIndexService: () => aiIndexService,
+      getScopedEsClient: async (request) =>
+        coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
     });
 
     const soClient = coreStart.savedObjects.createInternalRepository();

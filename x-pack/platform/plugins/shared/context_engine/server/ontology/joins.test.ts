@@ -138,4 +138,69 @@ describe('verifyOntologyJoins', () => {
       },
     ]);
   });
+  it('checks a connector side with the values its samples hold, from either side', async () => {
+    const drive: OntologyCatalogEntry = {
+      name: 'connector:drive-1',
+      kind: 'connector',
+      source_ids: [],
+      fields: [
+        {
+          name: 'searchFiles.files.ownerId',
+          type: 'keyword',
+          searchable: false,
+          aggregatable: false,
+          sample_values: ['c1', 'c2', 'c3'],
+        },
+        {
+          name: 'searchFiles.files.size',
+          type: 'long',
+          searchable: false,
+          aggregatable: false,
+          sample_values: [1],
+        },
+      ],
+    };
+    const { client, esql, search } = mockClient({ values: [], matched: 3 });
+
+    const output = await verifyOntologyJoins({
+      esClient: client,
+      catalog: [...catalog, drive],
+      candidates: [
+        {
+          from_dataset: 'customers',
+          from_field: 'id',
+          to_dataset: 'connector:drive-1',
+          to_field: 'searchFiles.files.ownerId',
+        },
+        {
+          from_dataset: 'connector:drive-1',
+          from_field: 'searchFiles.files.size',
+          to_dataset: 'orders',
+          to_field: 'qty',
+        },
+      ],
+    });
+
+    expect(output.verified).toEqual([
+      {
+        from_dataset: 'connector:drive-1',
+        from_field: 'searchFiles.files.ownerId',
+        to_dataset: 'customers',
+        to_field: 'id',
+        overlap: 1,
+        sampled: 3,
+      },
+    ]);
+    expect(output.rejected).toEqual([
+      {
+        candidate: 'connector:drive-1.searchFiles.files.size = orders.qty',
+        reason: 'fewer than 3 sampled values to check',
+      },
+    ]);
+    expect(esql).not.toHaveBeenCalled();
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'customers', query: { terms: { id: ['c1', 'c2', 'c3'] } } }),
+      expect.anything()
+    );
+  });
 });

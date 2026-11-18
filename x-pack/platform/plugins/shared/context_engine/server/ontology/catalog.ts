@@ -36,8 +36,8 @@ import type { DreamedKi } from '../dreaming/dreamed_ki';
 import { shortHash } from '../dreaming/ids';
 import { formatErrorMessage } from '../utils/format_es_error';
 import { fromSourcesOf, quoteField, quoteSource, runEsql, firstRow } from './esql';
-import { ontologyStatusOf, readOntologyKis, toExistingOntologyKi } from './existing';
-import { datasetKiId, esqlSourceId } from './ids';
+import { otherDatasetsOf, readOntologyKis, sourceIdsOf, toExistingOntologyKi } from './existing';
+import { datasetKiId, ontologySourceId } from './ids';
 
 const CONTAINER_FIELD_TYPES: ReadonlySet<string> = new Set(['object', 'nested']);
 const DATE_FIELD_TYPES: ReadonlySet<string> = new Set(['date', 'date_nanos']);
@@ -65,11 +65,6 @@ const MINUTE_MS = 60 * 1000;
 type CatalogField = OntologyCatalogEntry['fields'][number];
 type ProfileField = OntologyDatasetProfile['fields'][number];
 type ProfileValue = string | number | boolean | null;
-
-interface ResolvedDataset {
-  kind: OntologyCatalogEntry['kind'];
-  sourceIds: Set<string>;
-}
 
 const errorOf = (label: string, error: unknown): string =>
   `${label}: ${formatErrorMessage(error)}`.slice(0, MAX_ERROR_LENGTH);
@@ -323,13 +318,26 @@ export const profileDataset = async ({
   };
 };
 
+const emptyCatalog = (
+  source: CatalogOntologySourcesOutput['source']
+): CatalogOntologySourcesOutput => ({
+  datasets: [],
+  catalog: [],
+  others: [],
+  skipped: [],
+  stale: [],
+  existing: [],
+  source,
+});
+
 /**
- * Catalogs the datasets the ES|QL sources of an AI index read from, and profiles the ones to
- * describe this run. Reads as the given client's user; writes nothing.
+ * Catalogs the datasets one ES|QL source of an AI index reads, and profiles the ones to describe
+ * this run. Reads as the given client's user; writes nothing.
  */
 export const catalogOntologySources = async ({
   esClient,
   aiIndex,
+  sourceId,
   spaceId,
   config,
   maxDatasets,
@@ -338,42 +346,51 @@ export const catalogOntologySources = async ({
 }: {
   esClient: ElasticsearchClient;
   aiIndex: AiIndexItem;
+  sourceId: string;
   spaceId: string;
   config: ResolvedOntologyConfig;
   maxDatasets: number;
   now?: Date;
   abortSignal?: AbortSignal;
 }): Promise<CatalogOntologySourcesOutput> => {
-  const sources: CatalogOntologySourcesOutput['sources'] = [];
-  const skipped: CatalogOntologySourcesOutput['skipped'] = [];
-  const resolved = new Map<string, ResolvedDataset>();
-  let sourceFailed = false;
-
-  for (const { type, value } of aiIndex.sources) {
-    if (type !== 'esql') {
-      continue;
-    }
-    const id = esqlSourceId(value);
-    const targets = fromSourcesOf(value);
-    if (targets.length === 0) {
-      sourceFailed = true;
-      sources.push({ id, value, datasets: 0, error: 'The source query has no FROM to read.' });
-      continue;
-    }
-    try {
-      const datasets = await resolveDatasets(esClient, targets, abortSignal);
-      for (const [name, kind] of datasets) {
-        const dataset = resolved.get(name) ?? { kind, sourceIds: new Set<string>() };
-        dataset.sourceIds.add(id);
-        resolved.set(name, dataset);
-      }
-      sources.push({ id, value, datasets: datasets.size });
-    } catch (error) {
-      sourceFailed = true;
-      sources.push({ id, value, datasets: 0, error: formatErrorMessage(error) });
-    }
+  const source = aiIndex.sources.find(
+    (candidate) => candidate.type === 'esql' && ontologySourceId(candidate) === sourceId
+  );
+  if (!source) {
+    return emptyCatalog({
+      id: sourceId,
+      type: 'esql',
+      value: '',
+      datasets: 0,
+      error: 'The AI index has no such ES|QL source any more.',
+    });
+  }
+  const { value } = source;
+  const targets = fromSourcesOf(value);
+  if (targets.length === 0) {
+    return emptyCatalog({
+      id: sourceId,
+      type: 'esql',
+      value,
+      datasets: 0,
+      error: 'The source query has no FROM to read.',
+    });
+  }
+  let resolved: Map<string, OntologyCatalogEntry['kind']>;
+  try {
+    resolved = await resolveDatasets(esClient, targets, abortSignal);
+  } catch (error) {
+    return emptyCatalog({
+      id: sourceId,
+      type: 'esql',
+      value,
+      datasets: 0,
+      error: formatErrorMessage(error),
+    });
   }
 
+  const skipped: CatalogOntologySourcesOutput['skipped'] = [];
+  let fieldsFailed = false;
   const names = [...resolved.keys()].sort();
   for (const name of names.slice(MAX_ONTOLOGY_DATASETS)) {
     skipped.push({ name, reason: `over the cap of ${MAX_ONTOLOGY_DATASETS} datasets` });
@@ -381,16 +398,16 @@ export const catalogOntologySources = async ({
   const catalog: OntologyCatalogEntry[] = [];
   const omittedFields = new Map<string, number>();
   for (const name of names.slice(0, MAX_ONTOLOGY_DATASETS)) {
-    const dataset = resolved.get(name);
-    if (!dataset) {
+    const kind = resolved.get(name);
+    if (!kind) {
       continue;
     }
     try {
       const { fields, omitted } = await readCatalogFields(esClient, name);
-      catalog.push({ name, kind: dataset.kind, source_ids: [...dataset.sourceIds].sort(), fields });
+      catalog.push({ name, kind, source_ids: [sourceId], fields });
       omittedFields.set(name, omitted);
     } catch (error) {
-      sourceFailed = true;
+      fieldsFailed = true;
       skipped.push({ name, reason: errorOf('reading its fields failed', error) });
     }
   }
@@ -410,15 +427,11 @@ export const catalogOntologySources = async ({
     const current = byId.get(id);
     const fingerprint = fingerprintOf(entry.fields);
     const profiledAt = current?.attributes?.[ONTOLOGY_PROFILED_AT_ATTRIBUTE];
-    if (current && ontologyStatusOf(current) === 'certified') {
-      skipped.push({ name: entry.name, reason: 'certified' });
-      continue;
-    }
     const reason: Candidate['reason'] | undefined = !current
       ? 'new'
       : current.attributes?.[ONTOLOGY_FINGERPRINT_ATTRIBUTE] !== fingerprint
       ? 'mapping_changed'
-      : isOlderThan(profiledAt, refreshMinutes, now)
+      : isOlderThan(profiledAt, refreshMinutes, now) || !sourceIdsOf(current).includes(sourceId)
       ? 'refresh'
       : undefined;
     if (!reason) {
@@ -457,13 +470,16 @@ export const catalogOntologySources = async ({
     );
   }
 
-  const stale = sourceFailed
+  const stale = fieldsFailed
     ? []
     : existingKis
-        .filter(({ type, attributes }) => {
-          const index = attributes?.[ONTOLOGY_INDEX_ATTRIBUTE];
+        .filter((ki) => {
+          const index = ki.attributes?.[ONTOLOGY_INDEX_ATTRIBUTE];
           return (
-            type === ONTOLOGY_DATASET_KI_TYPE && typeof index === 'string' && !resolved.has(index)
+            ki.type === ONTOLOGY_DATASET_KI_TYPE &&
+            typeof index === 'string' &&
+            !resolved.has(index) &&
+            sourceIdsOf(ki).includes(sourceId)
           );
         })
         .map(({ id }) => id);
@@ -471,9 +487,10 @@ export const catalogOntologySources = async ({
   return {
     datasets,
     catalog,
+    others: otherDatasetsOf(existingKis, new Set(resolved.keys())),
     skipped,
     stale,
     existing: existingKis.map(toExistingOntologyKi),
-    sources,
+    source: { id: sourceId, type: 'esql', value, datasets: resolved.size },
   };
 };

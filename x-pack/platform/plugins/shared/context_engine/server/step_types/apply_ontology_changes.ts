@@ -19,7 +19,9 @@ import { createVerifyEsql } from '../dreaming/access_patterns';
 import type { PlannedWrite } from '../dreaming/apply';
 import type { DreamedKi } from '../dreaming/dreamed_ki';
 import { applyOntologyChanges } from '../ontology/apply';
+import { dreamingTypesOf } from '../../common/dreaming';
 import type { DreamingKiStepDependencies } from './helpers';
+import { connectorCallerFor, findSource, type OntologyStepExtras } from './ontology_helpers';
 import {
   assertDreamingAvailable,
   assertKiWritePrivilege,
@@ -33,7 +35,8 @@ export const getApplyOntologyChangesStepDefinition = (
     isDreamingAvailable,
     checkWritePrivilege,
     logger,
-  }: DreamingKiStepDependencies,
+    getActions,
+  }: DreamingKiStepDependencies & OntologyStepExtras,
   { getCurrentDate = () => new Date() }: { getCurrentDate?: () => Date } = {}
 ) =>
   createServerStepDefinition({
@@ -47,6 +50,7 @@ export const getApplyOntologyChangesStepDefinition = (
 
       const {
         ai_index_id: aiIndexId,
+        source_id: sourceId,
         catalog,
         profiles,
         joins,
@@ -81,6 +85,18 @@ export const getApplyOntologyChangesStepDefinition = (
         });
       }
 
+      const source = findSource(aiIndex, sourceId);
+      if (!source) {
+        throw new ExecutionError({
+          type: 'ValidationError',
+          message: `AI index '${aiIndexId}' has no source '${sourceId}' any more`,
+        });
+      }
+      const connector =
+        source.type === 'connector'
+          ? await connectorCallerFor(getActions, request, source.value)
+          : undefined;
+
       const esClient = context.contextManager.getScopedEsClient();
       const planned = dryRun ? new Map<string, PlannedWrite>() : undefined;
       const result = await applyOntologyChanges(
@@ -90,6 +106,12 @@ export const getApplyOntologyChangesStepDefinition = (
           dest: aiIndex.dest,
           writer: kiWriterFromContext(stepContext),
           spaceId,
+          sourceId,
+          entityTypes: dreamingTypesOf(aiIndex.dreaming ?? { enabled: false }).entities,
+          ...(connector && {
+            connectorId: source.value,
+            verifyConnectorCall: connector.verify,
+          }),
           verifyEsql: createVerifyEsql({ esClient, logger, abortSignal: context.abortSignal }),
           abortSignal: context.abortSignal,
           dryRun: planned,

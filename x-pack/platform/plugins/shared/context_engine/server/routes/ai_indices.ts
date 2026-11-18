@@ -32,7 +32,6 @@ import {
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_GROUPS_PATH,
-  AI_INDEX_KI_ONTOLOGY_STATUS_PATH,
   AI_INDEX_KI_RESTORE_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_PATH,
@@ -123,8 +122,6 @@ import {
   restoreKiResponseSchema,
 } from './schemas/ai_indices_schema';
 import { dreamingConfigSchema, dreamingResponseSchema } from './schemas/dreaming_schema';
-import { ontologyStatusBodySchema } from './schemas/ontology_schema';
-import { setOntologyStatus } from '../ontology/set_status';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
@@ -1095,73 +1092,6 @@ export const registerAiIndexRoutes = ({
               kiId,
               error,
             })
-          );
-          return handleAiIndexError(error, response, logger);
-        }
-      })
-    );
-
-  router.versioned
-    .put({
-      path: AI_INDEX_KI_ONTOLOGY_STATUS_PATH,
-      security: WRITE_SECURITY,
-      access: 'internal',
-      summary: 'Review an ontology Knowledge Indicator',
-      description:
-        'Sets whether a person reviewed an ontology dataset or term: `certified` keeps ontology discovery from changing it, `draft` lets discovery update it again. Fails with a 400 if the KI is not an ontology KI, a 404 if it does not exist, or a 409 if it is soft-deleted.',
-    })
-    .addVersion(
-      {
-        version: AI_INDEX_INTERNAL_API_VERSION,
-        validate: {
-          request: {
-            params: kiIdParamsSchema,
-            body: ontologyStatusBodySchema,
-          },
-          response: {
-            200: {
-              body: updateKiResponseSchema,
-              description: 'The review status was set.',
-            },
-            400: { body: errorResponseSchema, description: 'The KI is not an ontology KI.' },
-            404: { body: errorResponseSchema, description: 'The KI or AI index does not exist.' },
-            409: {
-              body: errorResponseSchema,
-              description: 'The KI is soft-deleted or was modified concurrently.',
-            },
-          },
-        },
-      },
-      withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const auditLogger = (await ctx.core).security.audit.logger;
-        const { aiIndexId, kiId } = request.params;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
-        try {
-          const { output } = await withKiWriteTelemetry({
-            action: 'update',
-            aiIndexId,
-            analyticsService,
-            logger,
-            run: async (setManaged) => {
-              const { dest, managed } = await getAiIndexService().get(aiIndexId, spaceId);
-              setManaged(managed);
-              const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-              const result = await setOntologyStatus(esClient, {
-                aiIndexId,
-                dest,
-                kiId,
-                status: request.body.status,
-                writer: buildKiApiWriter('update', spaceId),
-              });
-              return { output: result };
-            },
-          });
-          auditLogger.log(kiAuditEvent({ action: AiIndexAuditAction.KI_UPDATE, aiIndexId, kiId }));
-          const body: UpdateKiResponse = { id: output.id, status: output.result };
-          return response.ok({ body });
-        } catch (error) {
-          auditLogger.log(
-            kiAuditEvent({ action: AiIndexAuditAction.KI_UPDATE, aiIndexId, kiId, error })
           );
           return handleAiIndexError(error, response, logger);
         }
