@@ -49,6 +49,12 @@ interface EsqlResponse {
  */
 const TOOL_SPAN_LIMIT = 10_000;
 
+/**
+ * Derived from the OTel span status: no tracer sets `gen_ai.tool.call.failed`, and ES|QL
+ * rejects the whole query when KEEP names an unmapped column.
+ */
+const TOOL_FAILED_COLUMN = 'tool_failed';
+
 const assertSafeEsqlString = (value: string): string => {
   // Values are interpolated into ES|QL string literals, so reject anything
   // that could break out of one.
@@ -88,7 +94,8 @@ FROM ${indexPattern}
 | EVAL tool_id = COALESCE(attributes.gen_ai.tool.name, name)
 | WHERE tool_id IS NOT NULL
   ${excludeClause}
-| KEEP @timestamp, tool_id${includeFailures ? ', attributes.gen_ai.tool.call.failed' : ''}
+  ${includeFailures ? `| EVAL ${TOOL_FAILED_COLUMN} = status.code == "Error"` : ''}
+| KEEP @timestamp, tool_id${includeFailures ? `, ${TOOL_FAILED_COLUMN}` : ''}
 | LIMIT ${TOOL_SPAN_LIMIT}
 `.trim();
 };
@@ -127,9 +134,7 @@ const parseToolIds = (response: EsqlResponse): string[] => {
 
 const parseFailedToolIds = (response: EsqlResponse): string[] => {
   const toolCol = response.columns.findIndex((column) => column.name === 'tool_id');
-  const failedCol = response.columns.findIndex(
-    (column) => column.name === 'attributes.gen_ai.tool.call.failed'
-  );
+  const failedCol = response.columns.findIndex((column) => column.name === TOOL_FAILED_COLUMN);
   if (toolCol === -1 || failedCol === -1) {
     return [];
   }
@@ -171,7 +176,7 @@ export interface ReadAgentToolCallsFromTracesParams {
   indexPattern?: string;
   /** Tool names to drop from the ordered sequence (default: filestore.read). */
   excludeToolIds?: string[];
-  /** When true, also return tools whose `gen_ai.tool.call.failed` flag is set. */
+  /** When true, also return tools whose span ended with OTel status `Error`. */
   includeFailures?: boolean;
 }
 

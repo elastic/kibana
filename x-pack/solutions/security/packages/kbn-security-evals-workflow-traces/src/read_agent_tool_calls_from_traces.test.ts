@@ -33,7 +33,7 @@ describe('readAgentToolCallsFromTraces', () => {
   it('joins on gen_ai.conversation.id and filters to TOOL spans', async () => {
     const client = mockClient([
       {
-        columns: [{ name: 'tool_id' }, { name: 'attributes.gen_ai.tool.call.failed' }],
+        columns: [{ name: 'tool_id' }, { name: 'tool_failed' }],
         values: [['platform.core.search', false]],
       },
     ]);
@@ -56,7 +56,7 @@ describe('readAgentToolCallsFromTraces', () => {
   it('queries every conversation id for multi-agent workflows', async () => {
     const client = mockClient([
       {
-        columns: [{ name: 'tool_id' }, { name: 'attributes.gen_ai.tool.call.failed' }],
+        columns: [{ name: 'tool_id' }, { name: 'tool_failed' }],
         values: [
           ['platform.core.search', false],
           ['platform.core.esql', false],
@@ -85,7 +85,7 @@ describe('readAgentToolCallsFromTraces', () => {
   it('returns ordered tool ids and optional failures', async () => {
     const client = mockClient([
       {
-        columns: [{ name: 'tool_id' }, { name: 'attributes.gen_ai.tool.call.failed' }],
+        columns: [{ name: 'tool_id' }, { name: 'tool_failed' }],
         values: [
           ['platform.core.search', false],
           ['platform.core.esql', true],
@@ -217,16 +217,14 @@ describe('readAgentToolCallsFromTraces', () => {
 
     const query = (client.transport.request.mock.calls[0][0] as { body: { query: string } }).body
       .query;
-    // Unmapped on real traces indices until a span sets it; naming it in KEEP
-    // makes ES|QL reject the whole query.
-    expect(query).not.toContain('attributes.gen_ai.tool.call.failed');
+    expect(query).not.toContain('tool_failed');
     expect(query).toContain('| KEEP @timestamp, tool_id');
   });
 
   it('asks for the failure column only when failures are requested', async () => {
     const client = mockClient([
       {
-        columns: [{ name: 'tool_id' }, { name: 'attributes.gen_ai.tool.call.failed' }],
+        columns: [{ name: 'tool_id' }, { name: 'tool_failed' }],
         values: [['platform.core.esql', true]],
       },
     ]);
@@ -240,7 +238,11 @@ describe('readAgentToolCallsFromTraces', () => {
 
     const query = (client.transport.request.mock.calls[0][0] as { body: { query: string } }).body
       .query;
-    expect(query).toContain('attributes.gen_ai.tool.call.failed');
+    // Never name a custom failure attribute: it is unmapped on real traces indices,
+    // and ES|QL rejects the whole query when KEEP references an unmapped column.
+    expect(query).not.toContain('attributes.gen_ai.tool.call.failed');
+    expect(query).toContain('| EVAL tool_failed = status.code == "Error"');
+    expect(query).toContain('| KEEP @timestamp, tool_id, tool_failed');
     expect(result.failedToolCallIds).toEqual(['platform.core.esql']);
   });
 
