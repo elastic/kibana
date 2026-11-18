@@ -244,11 +244,13 @@ describe('agent policy overrides with OpenTelemetry collector keys', () => {
     ).toThrow('receivers overrides is not allowed');
   });
 
-  it('are rejected in kibana.yml preconfigured policies', () => {
+  // kibana.yml is validated at startup: rejecting them would stop Kibana from starting after an
+  // upgrade. They are stripped when the full agent policy is built instead.
+  it('are accepted in kibana.yml preconfigured policies', () => {
     expect(() =>
       PreconfiguredAgentPoliciesSchema.validate([
         { ...basePolicy, id: 'preconfigured', overrides: storedOverrides },
       ])
-    ).toThrow('receivers overrides is not allowed');
+    ).not.toThrow();
   });
 });
