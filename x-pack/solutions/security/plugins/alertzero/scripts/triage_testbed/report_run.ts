@@ -33,6 +33,7 @@ import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
+import { buildCacheSection, cacheNote, readCacheData, type CacheSection } from './report_cache';
 import type { Classification, TruthRecord } from './fake_llm';
 import { parseAlertIds } from './fake_llm';
 
@@ -83,12 +84,16 @@ export interface TaggedAlert {
   id: string;
   timestamp: string;
   tags: string[];
+  severity?: string;
+  /** True when the alert has a building block type. */
+  buildingBlock?: boolean;
 }
 
 export type Truth = ReadonlyMap<string, TruthRecord>;
 
 export type VerdictCounts = Record<string, number>;
 
+/** Set only when the verdict cache steps ran in the window (the flag `alertzero.triageVerdictCache` is `shadow`). */
 export interface Scorecard {
   verdicts: { analyzed: number; analyzedInMetric: number; truthToVerdict: VerdictCounts };
   excludedRules: Record<string, { analyzed: number; truthToVerdict: VerdictCounts }>;
@@ -130,6 +135,7 @@ export interface Scorecard {
       shareAtOrAboveCacheThreshold: number | null;
     }
   >;
+  verdictCache?: CacheSection;
 }
 
 export type ScorecardDiff = Record<
@@ -608,6 +614,8 @@ interface StepExecutionSource {
 interface AlertSource {
   '@timestamp': string;
   'kibana.alert.workflow_tags'?: string[];
+  'kibana.alert.severity'?: string;
+  'kibana.alert.building_block_type'?: string;
 }
 
 export interface RunData {
@@ -688,7 +696,12 @@ export const readRun = async (
   const alertHits = await fetchAll<AlertSource>(request, alertIndex, {
     sort: [{ '@timestamp': 'asc' }, { 'kibana.alert.uuid': 'asc' }],
     query: { prefix: { 'kibana.alert.workflow_tags': 'az:' } },
-    _source: ['@timestamp', 'kibana.alert.workflow_tags'],
+    _source: [
+      '@timestamp',
+      'kibana.alert.workflow_tags',
+      'kibana.alert.severity',
+      'kibana.alert.building_block_type',
+    ],
   });
   return {
     calls,
@@ -698,6 +711,8 @@ export const readRun = async (
       id: hit._id,
       timestamp: hit._source['@timestamp'],
       tags: hit._source['kibana.alert.workflow_tags'] ?? [],
+      severity: hit._source['kibana.alert.severity'],
+      buildingBlock: hit._source['kibana.alert.building_block_type'] !== undefined,
     })),
   };
 };
@@ -792,12 +807,22 @@ export const main = async (): Promise<void> => {
     ? resolveExcludedRules(args.data, args.excludeRules.split(';'))
     : { uuids: new Set<string>(), names: [] };
   const scorecard = buildScorecard({ ...run, truth, excludeRules: excluded.uuids });
+  const cacheData = await readCacheData(request, args);
+  if (cacheData.steps.length > 0) {
+    scorecard.verdictCache = buildCacheSection({
+      ...cacheData,
+      alerts: run.alerts,
+      truth,
+      analyzedAlerts: scorecard.verdicts.analyzed,
+    });
+  }
   const exclusionNote = excluded.names.length
     ? `Left out of the wrong-verdict metric (reported apart under excludedRules): ${excluded.names.join(
         '; '
       )}. Reason: ${args.excludeReason}`
     : '';
-  const note = [args.note, exclusionNote].filter(Boolean).join(' ');
+  const cacheSentence = scorecard.verdictCache ? cacheNote(scorecard.verdictCache) : '';
+  const note = [args.note, exclusionNote, cacheSentence].filter(Boolean).join(' ');
 
   const connectorIds = scorecard.costAndTokens.connectorIds;
   if (args.connectorId) {
