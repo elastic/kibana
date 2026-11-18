@@ -9,9 +9,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AttributeFilter } from './attribute_filter';
-import { useAttributeValues } from './use_attribute_values';
+import { useAttributeValues } from '../hooks/use_attribute_values';
 
-jest.mock('./use_attribute_values');
+jest.mock('../hooks/use_attribute_values');
 
 const mockUseAttributeValues = useAttributeValues as jest.MockedFunction<typeof useAttributeValues>;
 

@@ -6,11 +6,11 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { getEntityInventoryAttributeValues } from '../../mock_inventory_api/get_attribute_values';
+import { getEntityInventoryAttributeValues } from '../../../mock_inventory_api/get_attribute_values';
 import type {
   EntityInventoryAttributeValuesParams,
   EntityInventoryAttributeValuesResponse,
-} from '../../inventory_api_types';
+} from '../../../inventory_api_types';
 
 export const useAttributeValues = (params: EntityInventoryAttributeValuesParams) => {
   // TODO: the implementation is temporary. Replace the mock call and the loading state with a `useQuery` that calls the real route in https://github.com/elastic/observability-dev/issues/6355

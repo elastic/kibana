@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
+import type { EntityInventoryTypeDefinition } from '../../../inventory_api_types';
 import { getAttributeNamesInScope, getCategories, getTypesOfCategory } from './get_filter_controls';
 
 export interface FilterControlsSelection {
@@ -52,7 +52,9 @@ export const normalizeSelection = ({
     category: pageCategory ? undefined : category,
     type,
     attributes: Object.fromEntries(
-      Object.entries(selection.attributes).filter(([name]) => attributeNames.includes(name))
+      Object.entries(selection.attributes).filter(
+        ([name, values]) => attributeNames.includes(name) && values.length > 0
+      )
     ),
   };
 };

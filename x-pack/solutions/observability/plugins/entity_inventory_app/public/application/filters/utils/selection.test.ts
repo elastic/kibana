@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { typesFixture as types } from './__fixtures__/types';
+import { typesFixture as types } from '../../__fixtures__/types';
 import { EMPTY_SELECTION, isSelectionEmpty, normalizeSelection } from './selection';
 
 describe('normalizeSelection', () => {
@@ -63,6 +63,16 @@ describe('normalizeSelection', () => {
         selection: { category: 'databases', attributes: {} },
       }).category
     ).toBeUndefined();
+  });
+
+  it('drops an attribute that has no selected values', () => {
+    expect(
+      normalizeSelection({
+        types,
+        pageCategory: 'hosts',
+        selection: { attributes: { 'os.type': [], 'cloud.provider': ['aws'] } },
+      })
+    ).toEqual({ category: undefined, type: undefined, attributes: { 'cloud.provider': ['aws'] } });
   });
 
   it('ignores the selected category on a page that is for a category', () => {

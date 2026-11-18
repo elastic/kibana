@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { omit } from 'lodash';
+import React, { useEffect, useMemo } from 'react';
+import { isEqual, isUndefined, omit, omitBy } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
@@ -15,17 +15,17 @@ import {
   ENTITY_INVENTORY_EBT_ACTIONS,
   ENTITY_INVENTORY_EBT_DETAILS,
   ENTITY_INVENTORY_EBT_ELEMENTS,
-} from '../../ebt_constants';
+} from '../../../ebt_constants';
 import type {
   EntityInventoryAttributeValuesParams,
   EntityInventoryTypeDefinition,
-} from '../../inventory_api_types';
+} from '../../../inventory_api_types';
 import { AttributeFilter } from './attribute_filter';
 import { FilterSelect } from './filter_select';
-import { getFilterControls, getTypesInScope } from './get_filter_controls';
-import { EMPTY_SELECTION, isSelectionEmpty, normalizeSelection } from './selection';
-import type { FilterControlsSelection } from './selection';
-import type { FilterOption } from './get_filter_controls';
+import { getFilterControls, getTypesInScope } from '../utils/get_filter_controls';
+import { EMPTY_SELECTION, isSelectionEmpty, normalizeSelection } from '../utils/selection';
+import type { FilterControlsSelection } from '../utils/selection';
+import type { FilterOption } from '../utils/get_filter_controls';
 import {
   ALL_CATEGORIES_LABEL,
   ALL_TYPES_LABEL,
@@ -33,7 +33,7 @@ import {
   CLEAR_FILTERS_LABEL,
   TYPES_ERROR_MESSAGE,
   TYPE_FILTER_LABEL,
-} from './translations';
+} from '../translations';
 
 interface EntityInventoryFilterControlsProps {
   typeDefinitions: EntityInventoryTypeDefinition[];
@@ -74,9 +74,28 @@ export function EntityInventoryFilterControls({
   error,
   pageCategory,
   timeRange,
-  selection,
+  selection: currentSelection,
   onSelectionChange,
 }: EntityInventoryFilterControlsProps) {
+  // The selection can come from the URL, so what this page cannot show is left out of what the
+  // controls use. Before the types are known every attribute would look unknown.
+  const isReady = !isLoading && !error;
+  const selection = useMemo(
+    () =>
+      isReady
+        ? normalizeSelection({ types: typeDefinitions, pageCategory, selection: currentSelection })
+        : currentSelection,
+    [currentSelection, isReady, pageCategory, typeDefinitions]
+  );
+
+  // The selection is shared with the rest of the page (for example the data view of the search
+  // bar), so the clean one is written back instead of staying only in what is drawn here.
+  useEffect(() => {
+    if (!isEqual(omitBy(selection, isUndefined), omitBy(currentSelection, isUndefined))) {
+      onSelectionChange(selection);
+    }
+  }, [currentSelection, onSelectionChange, selection]);
+
   if (error) {
     return <KbnDangerCallout announceOnMount size="s" title={TYPES_ERROR_MESSAGE} />;
   }

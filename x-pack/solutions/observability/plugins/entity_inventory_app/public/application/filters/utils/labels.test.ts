@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { typesFixture as types } from './__fixtures__/types';
+import { typesFixture as types } from '../../__fixtures__/types';
 import { getAttributeLabel } from './labels';
 
 describe('getAttributeLabel', () => {

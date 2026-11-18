@@ -8,11 +8,20 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { typesFixture as types } from './__fixtures__/types';
+import { typesFixture as types } from '../../__fixtures__/types';
 import { EntityInventoryFilterControls } from './entity_inventory_filter_controls';
 
-jest.mock('./use_attribute_values', () => ({
-  useAttributeValues: () => ({ values: ['one', 'two'], invalidSelections: [], isLoading: false }),
+const mockUseAttributeValues = jest.fn(
+  (_params: { attribute: string; filters?: Record<string, string[]> }) => ({
+    values: ['one', 'two'],
+    invalidSelections: [],
+    isLoading: false,
+  })
+);
+
+jest.mock('../hooks/use_attribute_values', () => ({
+  useAttributeValues: (params: { attribute: string; filters?: Record<string, string[]> }) =>
+    mockUseAttributeValues(params),
 }));
 
 const CATEGORY_FILTER = 'entityInventoryCategoryFilter';
@@ -165,5 +174,36 @@ describe('EntityInventoryFilterControls', () => {
 
     expect(screen.getByText('The filters could not be loaded')).toBeInTheDocument();
     expect(screen.queryByTestId(CATEGORY_FILTER)).not.toBeInTheDocument();
+  });
+
+  describe('the filters sent to the other dropdowns', () => {
+    beforeEach(() => mockUseAttributeValues.mockClear());
+
+    const filtersSentTo = (attribute: string) =>
+      mockUseAttributeValues.mock.calls
+        .map(([params]) => params)
+        .filter((params) => params.attribute === attribute)
+        .map(({ filters }) => filters ?? {});
+
+    it('includes the selections of the other attribute filters of the view', () => {
+      renderControls({
+        pageCategory: 'hosts',
+        selection: { attributes: { 'cloud.provider': ['aws'] } },
+      });
+
+      expect(filtersSentTo('os.type')).toContainEqual({ 'cloud.provider': ['aws'] });
+    });
+
+    it('leaves out an attribute that has no filter in the view', () => {
+      renderControls({
+        pageCategory: 'hosts',
+        selection: { attributes: { 'cloud.provider': ['aws'], 'not.in.the.view': ['x'] } },
+      });
+
+      const sent = filtersSentTo('os.type');
+      expect(sent.length).toBeGreaterThan(0);
+      sent.forEach((filters) => expect(filters).not.toHaveProperty('not.in.the.view'));
+      expect(sent).toContainEqual({ 'cloud.provider': ['aws'] });
+    });
   });
 });
