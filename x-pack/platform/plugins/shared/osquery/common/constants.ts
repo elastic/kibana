@@ -38,7 +38,6 @@ export const OSQUERY_MAX_AGENTS_HEADER = 'x-osquery-max-agents';
 
 export const OSQUERY_DISPATCH_SOURCE_HEADER = 'x-osquery-dispatch-source';
 export const OSQUERY_DISPATCH_WORKFLOW_ID_HEADER = 'x-osquery-dispatch-workflow-id';
-export const OSQUERY_DISPATCH_EXECUTION_ID_HEADER = 'x-osquery-dispatch-execution-id';
 export const OSQUERY_DISPATCH_SOURCES = ['workflow'] as const;
 
 export const API_VERSIONS = {

@@ -9,12 +9,12 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CoreStart, RequestHandler } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
+import { EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER } from '@kbn/workflows-extensions/server';
 import {
   API_VERSIONS,
   OSQUERY_MAX_AGENTS_HEADER,
   OSQUERY_DISPATCH_SOURCE_HEADER,
   OSQUERY_DISPATCH_WORKFLOW_ID_HEADER,
-  OSQUERY_DISPATCH_EXECUTION_ID_HEADER,
 } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -438,7 +438,7 @@ describe('createLiveQueryRoute', () => {
     const body = { saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] };
     const idHeaders = {
       [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: 'workflow-1',
-      [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: 'execution-1',
+      [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1',
     };
 
     it.each([
@@ -448,7 +448,7 @@ describe('createLiveQueryRoute', () => {
         'IDs at the length limit',
         {
           [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: 'w'.repeat(256),
-          [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: 'e'.repeat(256),
+          [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'e'.repeat(256),
         },
         'w'.repeat(256),
         'e'.repeat(256),
@@ -461,13 +461,16 @@ describe('createLiveQueryRoute', () => {
       ],
       [
         'an oversized execution ID',
-        { ...idHeaders, [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: 'e'.repeat(257) },
+        { ...idHeaders, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'e'.repeat(257) },
         'workflow-1',
         undefined,
       ],
       [
         'empty IDs',
-        { [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: '', [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: '' },
+        {
+          [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: '',
+          [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: '',
+        },
         undefined,
         undefined,
       ],
@@ -475,7 +478,7 @@ describe('createLiveQueryRoute', () => {
         'whitespace-only IDs',
         {
           [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: '   ',
-          [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: '\t',
+          [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: '\t',
         },
         undefined,
         undefined,
@@ -484,9 +487,28 @@ describe('createLiveQueryRoute', () => {
         'repeated IDs',
         {
           [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: ['workflow-1', 'workflow-2'],
-          [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: ['execution-1', 'execution-2'],
+          [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: ['execution-1', 'execution-2'],
         },
         undefined,
+        undefined,
+      ],
+      [
+        // Node joins a repeated header into one comma-separated string.
+        'comma-joined repeated IDs',
+        {
+          [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: 'workflow-1, workflow-2',
+          [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1, execution-2',
+        },
+        undefined,
+        undefined,
+      ],
+      [
+        'the execution ID only in a step-supplied osquery header',
+        {
+          [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: 'workflow-1',
+          'x-osquery-dispatch-execution-id': 'execution-1',
+        },
+        'workflow-1',
         undefined,
       ],
     ])('dispatches with %s', async (_name, headers, workflowId, executionId) => {
@@ -509,6 +531,8 @@ describe('createLiveQueryRoute', () => {
       ['an unknown source', 'unknown', true],
       ['a different case', 'Workflow', true],
       ['an empty source', '', true],
+      ['a whitespace-only source', '   ', true],
+      ['an oversized source', 'w'.repeat(257), true],
       ['a repeated source', ['workflow', 'workflow'], true],
       ['a comma-joined source', 'workflow, workflow', true],
       ['the feature disabled', 'workflow', false],

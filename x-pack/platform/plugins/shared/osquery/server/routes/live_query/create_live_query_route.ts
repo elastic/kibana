@@ -12,6 +12,7 @@ import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER } from '@kbn/workflows-extensions/server';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createLiveQueryRequestBodySchema } from '../../../common/api';
 import {
@@ -19,7 +20,6 @@ import {
   OSQUERY_MAX_AGENTS_HEADER,
   OSQUERY_DISPATCH_SOURCE_HEADER,
   OSQUERY_DISPATCH_WORKFLOW_ID_HEADER,
-  OSQUERY_DISPATCH_EXECUTION_ID_HEADER,
   OSQUERY_DISPATCH_SOURCES,
 } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
@@ -245,8 +245,10 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
                 dispatchWorkflowId: traceIdFromHeader(
                   request.headers[OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]
                 ),
+                // The workflow engine's `callKibanaApi` sets this on every call and drops any
+                // value a step tries to supply, so the step does not send its own copy.
                 dispatchExecutionId: traceIdFromHeader(
-                  request.headers[OSQUERY_DISPATCH_EXECUTION_ID_HEADER]
+                  request.headers[EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]
                 ),
               }
             : {};
@@ -315,7 +317,14 @@ export const maxAgentsFromHeader = (
   return Math.min(...values.map(Number));
 };
 
+/**
+ * A single workflow or execution ID, or `undefined`. Node joins a repeated header into `"a, b"`,
+ * and real IDs never contain a comma, so a comma means a repeated header and the value is ignored.
+ */
 const traceIdFromHeader = (header: string | string[] | undefined): string | undefined =>
-  typeof header === 'string' && header.trim().length > 0 && header.length <= 256
+  typeof header === 'string' &&
+  header.trim().length > 0 &&
+  header.length <= 256 &&
+  !header.includes(',')
     ? header
     : undefined;

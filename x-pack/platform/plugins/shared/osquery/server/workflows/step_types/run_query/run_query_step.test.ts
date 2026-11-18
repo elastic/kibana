@@ -10,7 +10,6 @@ import {
   OSQUERY_MAX_AGENTS_HEADER,
   OSQUERY_DISPATCH_SOURCE_HEADER,
   OSQUERY_DISPATCH_WORKFLOW_ID_HEADER,
-  OSQUERY_DISPATCH_EXECUTION_ID_HEADER,
 } from '../../../../common/constants';
 import {
   DEADLINE_READ_GRACE_POLLS,
@@ -125,7 +124,6 @@ describe('osquery.runQuery step', () => {
           [OSQUERY_MAX_AGENTS_HEADER]: String(TARGET_AGENT_LIMIT),
           [OSQUERY_DISPATCH_SOURCE_HEADER]: 'workflow',
           [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: 'workflow-1',
-          [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: 'execution-1',
         },
         body: {
           query: SAVED_QUERY.query,

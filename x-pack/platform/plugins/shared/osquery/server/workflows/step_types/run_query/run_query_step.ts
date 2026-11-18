@@ -82,10 +82,9 @@ export const runQueryStepDefinition = createPollServerStepDefinition({
     const savedQuery = await resolveSavedQuery(contextManager, input.saved_query);
     await assertCanReadLiveQueries(contextManager);
 
-    const { workflow, execution } = contextManager.getContext();
+    const { workflow } = contextManager.getContext();
     const dispatched = await dispatchLiveQuery({
       workflowId: workflow.id,
-      executionId: execution.id,
       contextManager,
       logger,
       fields: dispatchFields(savedQuery),
