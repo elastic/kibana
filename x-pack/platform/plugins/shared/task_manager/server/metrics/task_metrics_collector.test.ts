@@ -24,7 +24,7 @@ describe('TaskManagerMetricsCollector', () => {
     clock.restore();
   });
 
-  test('includes late task type registrations in the metrics query', async () => {
+  test('intializes the metrics collector with the provided interval and emits events at each interval', async () => {
     mockTaskStore.aggregate.mockResolvedValueOnce({
       took: 1,
       timed_out: false,
@@ -105,13 +105,12 @@ describe('TaskManagerMetricsCollector', () => {
     });
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
-    const taskTypes = new Set(['taskType1', 'taskType2', 'taskType3', 'taskType4']);
 
     const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
       logger,
       pollInterval,
       store: mockTaskStore,
-      getTaskTypes: () => Array.from(taskTypes),
+      getTaskTypes: () => ['taskType1', 'taskType2', 'taskType3', 'taskType4'],
       excludedTypes: new Set(['taskType4', 'taskType5']),
     });
     const handler = jest.fn();
@@ -242,15 +241,10 @@ describe('TaskManagerMetricsCollector', () => {
       },
       type: 'TASK_MANAGER_METRIC',
     });
-    taskTypes.add('lateRegisteredTaskType');
     clock.tick(halfInterval);
 
     await new Promise((resolve) => setImmediate(resolve));
     expect(mockTaskStore.aggregate).toHaveBeenCalledTimes(2);
-    expect(mockTaskStore.aggregate.mock.calls[1][0].query).toHaveProperty(
-      'bool.filter[0].bool.must[0].bool.must[0].terms',
-      { 'task.taskType': ['taskType1', 'taskType2', 'taskType3', 'lateRegisteredTaskType'] }
-    );
     expect(handler).toHaveBeenCalledTimes(2);
     expect(handler).toHaveBeenCalledWith({
       event: {
@@ -281,6 +275,43 @@ describe('TaskManagerMetricsCollector', () => {
       },
       type: 'TASK_MANAGER_METRIC',
     });
+  });
+
+  test('includes task types registered after start in the next collection cycle', async () => {
+    mockTaskStore.aggregate.mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: {
+        overallOverdueByHistogram: { buckets: [] },
+        byTaskType: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+      },
+    });
+    const pollInterval = 100;
+    const taskTypes = new Set(['taskType1']);
+
+    const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
+      logger,
+      pollInterval,
+      store: mockTaskStore,
+      getTaskTypes: () => Array.from(taskTypes),
+      excludedTypes: new Set(),
+    });
+    taskManagerMetricsCollector.events.subscribe(jest.fn());
+
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(mockTaskStore.aggregate).toHaveBeenCalledTimes(1);
+
+    taskTypes.add('lateRegisteredTaskType');
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(mockTaskStore.aggregate).toHaveBeenCalledTimes(2);
+    expect(mockTaskStore.aggregate.mock.calls[1][0].query).toHaveProperty(
+      'bool.filter[0].bool.must[0].bool.must[0].terms',
+      { 'task.taskType': ['taskType1', 'lateRegisteredTaskType'] }
+    );
   });
 
   test('emits empty metric when querying for data fails and continues to query on interval', async () => {

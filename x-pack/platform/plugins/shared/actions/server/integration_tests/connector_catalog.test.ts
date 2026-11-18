@@ -36,7 +36,6 @@ jest.mock('../plugin', () => {
   return { ...actual, ActionsPlugin: CapturingActionsPlugin };
 });
 
-// The shipped `.abuseipdb` type is registered in-tree, so the seeded copy needs its own id.
 const CATALOG_TYPE_ID = '.declarative-abuseipdb';
 const CONNECTOR_ID = 'catalog-spec-connector';
 const EVENT_LOG_INDEX = '.kibana-event-log-*';

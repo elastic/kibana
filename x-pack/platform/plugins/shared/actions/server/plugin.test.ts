@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
-import { BehaviorSubject, of, Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { defer } from '@kbn/kibana-utils-plugin/common';
 import { z } from '@kbn/zod/v4';
@@ -662,7 +662,7 @@ describe('Actions Plugin', () => {
       });
 
       it('unsubscribes from the connector catalog feature flag on stop', async () => {
-        const connectorCatalogEnabled$ = new BehaviorSubject(false);
+        const connectorCatalogEnabled$ = new Subject<boolean>();
         coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
 
         await plugin.setup(coreSetup, pluginsSetup);

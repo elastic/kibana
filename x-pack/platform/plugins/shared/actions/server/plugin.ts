@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
@@ -341,7 +340,6 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
-  private connectorCatalogFeatureFlagSubscription?: Subscription;
   private setupContract?: PluginSetupContract;
   private connectorCatalog?: ConnectorCatalogHandle;
   private resolveCatalogReady: () => void = () => {};
@@ -653,15 +651,7 @@ export class ActionsPlugin
       );
     }
 
-    // The handle must exist first, because the first flag value can arrive synchronously.
     const connectorCatalog = this.startConnectorCatalog(core);
-    this.connectorCatalogFeatureFlagSubscription = core.featureFlags
-      .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
-      .subscribe({
-        next: (isConnectorCatalogEnabled: boolean) =>
-          connectorCatalog.onFlagValue(isConnectorCatalogEnabled),
-        error: (error: unknown) => connectorCatalog.onFlagError(error),
-      });
 
     const {
       logger,
@@ -1224,10 +1214,11 @@ export class ActionsPlugin
     };
   };
 
-  /** Creates the catalog handle. The flag subscription in `start()` drives it. */
+  /** Starts the first catalog load, driven by the catalog flag. */
   private startConnectorCatalog(core: CoreStart): ConnectorCatalogHandle {
     const { setupContract, actionTypeRegistry, logger } = this;
     const handle = startConnectorCatalog({
+      isEnabled$: core.featureFlags.getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false),
       storage: createConnectorCatalogStorage({
         esClient: core.elasticsearch.client.asInternalUser,
         logger,
@@ -1337,8 +1328,6 @@ export class ActionsPlugin
   };
 
   public stop() {
-    this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
-    this.connectorCatalogFeatureFlagSubscription = undefined;
     this.connectorCatalog?.stop();
     if (this.licenseState) {
       this.licenseState.clean();
