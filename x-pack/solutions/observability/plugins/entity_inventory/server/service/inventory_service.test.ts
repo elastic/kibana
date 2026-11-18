@@ -53,7 +53,7 @@ describe('InventoryService.listTypes', () => {
           'kubernetes.deployment.name',
         ],
         columns: [
-          { name: 'entity.id', kind: 'id' },
+          { name: 'entity.id', kind: 'id', label: 'ID' },
           { name: 'k8s.cluster.name', kind: 'identity' },
           { name: 'k8s.namespace.name', kind: 'identity' },
           { name: 'k8s.deployment.name', kind: 'identity' },
@@ -65,7 +65,7 @@ describe('InventoryService.listTypes', () => {
           { name: 'paused', kind: 'attribute' },
           { name: 'app', kind: 'attribute' },
           { name: 'resource_id', kind: 'attribute' },
-          { name: 'last_seen', kind: 'last_seen' },
+          { name: 'last_seen', kind: 'last_seen', label: 'Last seen' },
         ],
         sources: [
           {
@@ -75,6 +75,31 @@ describe('InventoryService.listTypes', () => {
           { indexPattern: 'metrics-k8sclusterreceiver.otel-*' },
         ],
       },
+    ]);
+  });
+
+  it('labels the columns of an identity field and an attribute from the display labels', async () => {
+    const labelled = {
+      ...k8sDeploymentOtelAndAgentFixture,
+      dynamic: {
+        ...k8sDeploymentOtelAndAgentFixture.dynamic,
+        displayLabels: [
+          { name: 'kubernetes.namespace', label: 'Namespace' },
+          { name: 'available_replicas', label: 'Available replicas' },
+        ],
+      },
+    };
+    const { service } = createService([labelled]);
+
+    const {
+      types: [type],
+    } = await service.listTypes();
+
+    expect(type.columns.filter(({ label }) => label !== undefined)).toEqual([
+      { name: 'entity.id', kind: 'id', label: 'ID' },
+      { name: 'kubernetes.namespace', kind: 'identity', label: 'Namespace' },
+      { name: 'available_replicas', kind: 'attribute', label: 'Available replicas' },
+      { name: 'last_seen', kind: 'last_seen', label: 'Last seen' },
     ]);
   });
 
@@ -394,7 +419,7 @@ describe('InventoryService.list', () => {
     expect(response).not.toHaveProperty('documentFilterWarnings');
   });
 
-  it('returns the same columns as listTypes for the type', async () => {
+  it('returns the same columns as listTypes for the type, without the labels', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(
       esClient,
@@ -410,7 +435,7 @@ describe('InventoryService.list', () => {
       types: [type],
     } = await service.listTypes();
 
-    expect(columns).toEqual(type.columns);
+    expect(columns).toEqual(type.columns.map(({ name, kind }) => ({ name, kind })));
   });
 
   it.each([
