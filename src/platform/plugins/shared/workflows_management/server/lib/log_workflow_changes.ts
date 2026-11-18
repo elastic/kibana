@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import pMap from 'p-map';
 import type { ObjectChange } from '@kbn/change-history';
 import type { Logger } from '@kbn/core/server';
 import { DEFAULT_MAX_RETRIES, DEFAULT_RETRY_DELAY_MS, delayMs } from '@kbn/occ';
@@ -96,6 +97,7 @@ const logWorkflowChangesForAction = async ({
   spaceId,
   correlationId,
   restoreMetadata,
+  workflowUid,
   logger,
   maxRetries,
   retryDelayMs,
@@ -106,26 +108,37 @@ const logWorkflowChangesForAction = async ({
   spaceId: string;
   correlationId?: string;
   restoreMetadata?: WorkflowRestoreMetadata;
+  workflowUid?: string;
   logger: Logger;
   maxRetries: number;
   retryDelayMs: number;
 }): Promise<void> => {
+  const metadata = {
+    ...(workflowUid ? { workflowUid } : {}),
+    ...(restoreMetadata
+      ? {
+          restore: {
+            eventId: restoreMetadata.eventId,
+          },
+        }
+      : {}),
+  };
   const logOpts: ScopedLogChangeHistoryOptions = {
     action,
     spaceId,
     ...(action === WorkflowChangeHistoryAction.workflowRestore ? { refresh: 'wait_for' } : {}),
     ...(correlationId ? { correlationId } : {}),
-    ...(restoreMetadata
+    ...(restoreMetadata || workflowUid
       ? {
           data: {
-            event: {
-              reason: formatRestoreHistoryComment(restoreMetadata.sequence),
-            },
-            metadata: {
-              restore: {
-                eventId: restoreMetadata.eventId,
-              },
-            },
+            ...(restoreMetadata
+              ? {
+                  event: {
+                    reason: formatRestoreHistoryComment(restoreMetadata.sequence),
+                  },
+                }
+              : {}),
+            ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
           },
         }
       : {}),
@@ -189,18 +202,36 @@ export const logWorkflowChanges = async ({
   const actionGroups = groupWorkflowsByAction(workflows, action, getAction);
 
   for (const [groupAction, groupWorkflows] of actionGroups) {
-    const changes = toObjectChanges(groupWorkflows, timestamp, logger);
-    await logWorkflowChangesForAction({
-      changes,
-      action: groupAction,
-      scopedChangeHistory,
-      spaceId,
-      correlationId,
-      restoreMetadata:
-        groupAction === WorkflowChangeHistoryAction.workflowRestore ? restoreMetadata : undefined,
-      logger,
-      maxRetries,
-      retryDelayMs,
-    });
+    const workflowsByUid = new Map<string | undefined, typeof groupWorkflows>();
+    for (const workflow of groupWorkflows) {
+      const workflowUid = workflow.document.workflowUid;
+      const group = workflowsByUid.get(workflowUid) ?? [];
+      group.push(workflow);
+      workflowsByUid.set(workflowUid, group);
+    }
+
+    // One request per workflowUid, up to 10 at a time.
+    await pMap(
+      [...workflowsByUid],
+      async ([workflowUid, uidWorkflows]) => {
+        const changes = toObjectChanges(uidWorkflows, timestamp, logger);
+        await logWorkflowChangesForAction({
+          changes,
+          action: groupAction,
+          scopedChangeHistory,
+          spaceId,
+          correlationId,
+          restoreMetadata:
+            groupAction === WorkflowChangeHistoryAction.workflowRestore
+              ? restoreMetadata
+              : undefined,
+          workflowUid,
+          logger,
+          maxRetries,
+          retryDelayMs,
+        });
+      },
+      { concurrency: 10 }
+    );
   }
 };

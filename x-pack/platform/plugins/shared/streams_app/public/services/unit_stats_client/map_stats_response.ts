@@ -74,16 +74,26 @@ const hasSourceData = ({ acceptedRate }: SourceStatsView): boolean => acceptedRa
 /**
  * The one place that decides what a result means. A component error is an error, except
  * `not_found`, which is no data. A `0` is data. `null` is never data.
+ *
+ * An error next to real values means only a part of the stats could not be read, for example the
+ * failure rates of a destination. That component is `ready`, and keeps its error for the UI to show.
  */
 const classify = <TStats>(
   stats: TStats,
   hasData: (stats: TStats) => boolean,
   error?: StreamsUnit.StatsError
 ): MappedComponentStats<TStats> => {
-  if (error && error.code !== NOT_FOUND_ERROR_CODE) {
-    return { status: 'error', stats, error };
+  // `not_found` is no data, so it is not a failure.
+  const failure = error?.code === NOT_FOUND_ERROR_CODE ? undefined : error;
+
+  if (failure && !hasData(stats)) {
+    return { status: 'error', stats, error: failure };
   }
-  return { status: hasData(stats) ? 'ready' : 'noData', stats };
+  return {
+    status: hasData(stats) ? 'ready' : 'noData',
+    stats,
+    ...(failure ? { error: failure } : {}),
+  };
 };
 
 /** A destination that the response leaves out shows as no data. */
