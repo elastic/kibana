@@ -1166,7 +1166,14 @@ describe('runScriptAndWait', () => {
     it('bounds the wait by elapsed time, including the time of the status requests', async () => {
       request.mockResolvedValueOnce(launched).mockImplementation(slowStatus);
       const result = await run('runScriptAndWait', { ...script, waitSeconds: 10 });
-      expect(result).toEqual(expect.objectContaining({ parentTaskId: '55', timedOut: true }));
+      expect(result).toEqual(
+        expect.objectContaining({
+          parentTaskId: '55',
+          timedOut: true,
+          // the tasks seen by the status read at 5 s are kept when the budget ends before another read
+          tasks: [{ id: '61', status: 'in_progress' }],
+        })
+      );
       expect((timers.sleep as jest.Mock).mock.calls).toEqual([[5000], [4000]]);
       expect(now).toBe(10_000);
       // the status request gets the remaining budget as its timeout

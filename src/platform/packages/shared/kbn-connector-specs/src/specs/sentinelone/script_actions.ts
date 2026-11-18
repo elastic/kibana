@@ -276,7 +276,8 @@ export const scriptActions: ConnectorSpec['actions'] = {
         if (remaining <= 0) break;
         await timers.sleep(Math.min(SCRIPT_POLL_INTERVAL_MS, remaining));
         const read = await readScriptTasks(ctx, parentTaskId, deadline);
-        tasks = read.tasks;
+        // a read cut short by the budget never replaces the tasks of an earlier complete read
+        if (read.complete || tasks.length === 0) tasks = read.tasks;
         const finished =
           read.complete &&
           tasks.length > 0 &&
