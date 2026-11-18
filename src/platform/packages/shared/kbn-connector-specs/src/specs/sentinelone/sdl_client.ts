@@ -10,7 +10,7 @@
 import type { AxiosError, RawAxiosRequestHeaders } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import { getAuthHeaders, getConsoleOrigin, withRetry } from './client';
-import { MAX_RESPONSE_BYTES, REQUEST_TIMEOUT_MS } from './constants';
+import { REQUEST_TIMEOUT_MS } from './constants';
 
 /** The Singularity Data Lake API lives on the console host, beside the management API. */
 export const SDL_API_PREFIX = '/sdl/v2/api';
@@ -188,8 +188,8 @@ const normalizeError = (error: unknown, token: string): unknown => {
 };
 
 /**
- * Sends one request to the Singularity Data Lake API with the connector's retry policy, timeout and
- * response cap, and returns the body and the response headers.
+ * Sends one request to the Singularity Data Lake API with the connector's retry policy and timeout
+ * (the response size follows the Kibana Actions limit), and returns the body and the response headers.
  */
 export const sdlRequest = async <T>(
   ctx: ActionContext,
@@ -211,7 +211,6 @@ export const sdlRequest = async <T>(
         ...(body !== undefined ? { data: body } : {}),
         headers: requestHeaders,
         timeout: REQUEST_TIMEOUT_MS,
-        maxContentLength: MAX_RESPONSE_BYTES,
       })
       .catch((error: unknown) => {
         throw normalizeError(error, token);

@@ -60,6 +60,21 @@ describe('config and auth', () => {
     expect(() => getConsoleOrigin(makeCtx({ url: 'ftp://t.example' }, {}))).toThrow('https');
   });
 
+  it('requires https, except for a loopback host', () => {
+    expect(() => getConsoleOrigin(makeCtx({ url: 'http://t.sentinelone.net' }, {}))).toThrow(
+      'must use https'
+    );
+    expect(getConsoleOrigin(makeCtx({ url: 'https://t.sentinelone.net' }, {}))).toBe(
+      'https://t.sentinelone.net'
+    );
+    expect(getConsoleOrigin(makeCtx({ url: 'http://localhost:18080' }, {}))).toBe(
+      'http://localhost:18080'
+    );
+    expect(getConsoleOrigin(makeCtx({ url: 'http://127.0.0.1:18080/' }, {}))).toBe(
+      'http://127.0.0.1:18080'
+    );
+  });
+
   it('sends Authorization: ApiToken and suppresses the raw token header', () => {
     expect(getAuthHeaders(ctx)).toEqual({ Authorization: 'ApiToken tok', token: false });
     expect(getAuthHeaders(makeCtx({}, { token: 'ApiToken tok ' }))).toEqual({
@@ -219,7 +234,9 @@ describe('error messages', () => {
     const error = Object.assign(new Error('maxContentLength size of 26214400 exceeded'), {
       isAxiosError: true,
     });
-    expect(toSentinelOneError('getAgents', error).message).toContain('larger than 25 MB');
+    expect(toSentinelOneError('getAgents', error).message).toContain(
+      'xpack.actions.maxResponseContentLength'
+    );
   });
 });
 

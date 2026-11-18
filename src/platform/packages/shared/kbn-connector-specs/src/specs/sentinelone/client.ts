@@ -80,6 +80,9 @@ const STATUS_TEXT: Record<number, string> = {
   504: 'Gateway Timeout',
 };
 
+/** Hosts on the same machine (local emulators): the only hosts that may use plain http. */
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
+
 /** Returns the console origin from the connector config (the connector adds the API path). */
 export const getConsoleOrigin = (ctx: ActionContext): string => {
   const raw = typeof ctx.config?.url === 'string' ? ctx.config.url.trim() : '';
@@ -92,7 +95,8 @@ export const getConsoleOrigin = (ctx: ActionContext): string => {
   } catch {
     throw new Error(`SentinelOne tenant URL is not a valid URL: ${raw}`);
   }
-  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+  const isLoopbackHttp = parsed.protocol === 'http:' && LOOPBACK_HOSTS.has(parsed.hostname);
+  if (parsed.protocol !== 'https:' && !isLoopbackHttp) {
     throw new Error('SentinelOne tenant URL must use https.');
   }
   return parsed.origin;
@@ -179,7 +183,7 @@ export const toSentinelOneError = (action: string, error: unknown, isDownload = 
     return new Error(
       isDownload
         ? FILE_TOO_LARGE_MESSAGE
-        : `SentinelOne ${action} response is larger than 25 MB; narrow the request (for example a smaller limit)`
+        : `SentinelOne ${action} response is larger than the Kibana Actions response size limit (xpack.actions.maxResponseContentLength); narrow the request (for example a smaller limit)`
     );
   }
   const status = err.response?.status;
@@ -253,12 +257,14 @@ export interface SentinelOneRequest {
   params?: QueryParams;
   body?: unknown;
   mutating: boolean;
+  /** Request timeout in ms; defaults to REQUEST_TIMEOUT_MS. */
+  timeoutMs?: number;
 }
 
 /** Sends one SentinelOne API request and returns the response body. */
 export const s1Request = async <T = SentinelOneBody>(
   ctx: ActionContext,
-  { action, method, path, params, body, mutating }: SentinelOneRequest
+  { action, method, path, params, body, mutating, timeoutMs }: SentinelOneRequest
 ): Promise<T> => {
   const url = `${getConsoleOrigin(ctx)}${API_PREFIX}${path}`;
   const headers = getAuthHeaders(ctx);
@@ -269,8 +275,7 @@ export const s1Request = async <T = SentinelOneBody>(
       params: toQuery(params),
       ...(body !== undefined ? { data: body } : {}),
       headers,
-      timeout: REQUEST_TIMEOUT_MS,
-      maxContentLength: MAX_RESPONSE_BYTES,
+      timeout: timeoutMs ?? REQUEST_TIMEOUT_MS,
     })
   );
   return (response.data ?? {}) as T;

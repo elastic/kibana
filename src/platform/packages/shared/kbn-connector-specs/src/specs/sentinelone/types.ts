@@ -1734,7 +1734,7 @@ export const RunScriptAndWaitInputSchema = lazySchema(() =>
       .max(240)
       .optional()
       .describe(
-        'How long the connector waits for completion, 10 to 240 seconds (connector-side bound that keeps one call within the action execution time limit) Default 120.'
+        'How long the connector waits for completion, 10 to 240 seconds (connector-side bound that keeps one call within the action execution time limit) Default 100.'
       ),
   })
 );

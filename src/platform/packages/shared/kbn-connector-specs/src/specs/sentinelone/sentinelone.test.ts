@@ -9,6 +9,7 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
+import { ApiKeyHeaderAuth } from '../../auth_types/api_key_header';
 import { timers } from './client';
 import { SentinelOne } from './sentinelone';
 
@@ -115,9 +116,10 @@ describe('SentinelOne (v2) spec', () => {
         params: { limit: 1 },
         headers: AUTH,
         timeout: 60_000,
-        maxContentLength: 25 * 1024 * 1024,
       })
     );
+    // JSON requests keep the Kibana Actions response size limit (only downloads set their own cap)
+    expect(request.mock.calls[0][0]).not.toHaveProperty('maxContentLength');
   });
 
   it('test handler fails on a rejected token', async () => {
@@ -1143,6 +1145,120 @@ describe('runScriptAndWait', () => {
     expect(request).toHaveBeenCalledTimes(3);
   });
 
+  describe('with a simulated clock', () => {
+    let now: number;
+    beforeEach(() => {
+      now = 0;
+      jest.spyOn(Date, 'now').mockImplementation(() => now);
+      jest.spyOn(timers, 'sleep').mockImplementation(async (ms: number) => {
+        now += ms;
+      });
+    });
+    const launched = { status: 200, data: { data: { affected: 1, parentTaskId: '55' } } };
+    const slowStatus = () => {
+      now += 1000; // each status request takes 1 s
+      return Promise.resolve({
+        status: 200,
+        data: listBody([{ id: '61', status: 'in_progress' }]),
+      });
+    };
+
+    it('bounds the wait by elapsed time, including the time of the status requests', async () => {
+      request.mockResolvedValueOnce(launched).mockImplementation(slowStatus);
+      const result = await run('runScriptAndWait', { ...script, waitSeconds: 10 });
+      expect(result).toEqual(expect.objectContaining({ parentTaskId: '55', timedOut: true }));
+      expect((timers.sleep as jest.Mock).mock.calls).toEqual([[5000], [4000]]);
+      expect(now).toBe(10_000);
+      // the status request gets the remaining budget as its timeout
+      expect(request.mock.calls[1][0]).toEqual(expect.objectContaining({ timeout: 5000 }));
+    });
+
+    it('returns timedOut, not an error, when a status request is cut by the remaining budget', async () => {
+      request.mockResolvedValueOnce(launched).mockImplementation((config: { timeout: number }) => {
+        if (config.timeout < 60_000) {
+          now += config.timeout;
+          return Promise.reject(
+            Object.assign(new Error('timeout exceeded'), {
+              isAxiosError: true,
+              code: 'ECONNABORTED',
+            })
+          );
+        }
+        return slowStatus();
+      });
+      const result = await run('runScriptAndWait', { ...script, waitSeconds: 12 });
+      expect(result).toEqual(expect.objectContaining({ parentTaskId: '55', timedOut: true }));
+    });
+
+    it('still fails on a status request error that is not caused by the budget', async () => {
+      request
+        .mockResolvedValueOnce(launched)
+        .mockRejectedValueOnce(
+          httpError(401, { errors: [{ code: 4010010, title: 'Unauthorized' }] })
+        );
+      await expect(run('runScriptAndWait', { ...script, waitSeconds: 12 })).rejects.toThrow(
+        'Status code: 401'
+      );
+    });
+
+    it('waits 100 seconds by default', async () => {
+      request.mockResolvedValueOnce(launched).mockImplementation(slowStatus);
+      const { agentIds, scriptId, taskDescription } = script;
+      const result = await run('runScriptAndWait', { agentIds, scriptId, taskDescription });
+      expect(result).toEqual(expect.objectContaining({ timedOut: true }));
+      expect(now).toBe(100_000);
+    });
+  });
+
+  it('reads every status page before deciding that the run is finished', async () => {
+    request
+      .mockResolvedValueOnce({ status: 200, data: { data: { affected: 2, parentTaskId: '55' } } })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: listBody([{ id: '61', status: 'completed' }], 'c2'),
+      })
+      .mockResolvedValueOnce({ status: 200, data: listBody([{ id: '62', status: 'in_progress' }]) })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: listBody([{ id: '61', status: 'completed' }], 'c2'),
+      })
+      .mockResolvedValueOnce({ status: 200, data: listBody([{ id: '62', status: 'completed' }]) })
+      .mockResolvedValueOnce({ status: 200, data: { data: { data: { downloadLinks: [] } } } });
+    const result = await run('runScriptAndWait', { ...script, waitSeconds: 30 });
+    expect(result).toEqual(
+      expect.objectContaining({
+        timedOut: false,
+        tasks: [
+          { id: '61', status: 'completed' },
+          { id: '62', status: 'completed' },
+        ],
+      })
+    );
+    expect(request.mock.calls[2][0]).toEqual(
+      expect.objectContaining({ params: { parentTaskId: '55', limit: 1000, cursor: 'c2' } })
+    );
+    expect(request).toHaveBeenCalledTimes(6);
+  });
+
+  it('stops reading status pages when the cursor does not move, without duplicate tasks', async () => {
+    request
+      .mockResolvedValueOnce({ status: 200, data: { data: { affected: 1, parentTaskId: '55' } } })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: listBody([{ id: '61', status: 'completed' }], 'same'),
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: listBody([{ id: '61', status: 'completed' }], 'same'),
+      })
+      .mockResolvedValueOnce({ status: 200, data: { data: { data: { downloadLinks: [] } } } });
+    const result = await run('runScriptAndWait', { ...script, waitSeconds: 30 });
+    expect(result).toEqual(
+      expect.objectContaining({ timedOut: false, tasks: [{ id: '61', status: 'completed' }] })
+    );
+    expect(request).toHaveBeenCalledTimes(4);
+  });
+
   it('[C-edge-pending-remote-script-execution-requires] does not poll a pending execution that needs approval', async () => {
     request.mockResolvedValueOnce({
       status: 200,
@@ -1380,25 +1496,24 @@ describe('V1 parity', () => {
     expect(t.type).toBe('api_key_header');
     expect(t.defaults?.headerField).toBe('token');
   });
-  it('[C-v1-594] secrets without the token are rejected', async () => {
-    request.mockRejectedValue(httpError(401, {}));
+  it('[C-v1-594] secrets without the token are rejected before any request', async () => {
     const test = SentinelOne.test as unknown as {
       handler: (c: ActionContext) => Promise<{ ok: boolean }>;
     };
-    const res = await test
-      .handler({ ...ctx, secrets: {} } as unknown as ActionContext)
-      .catch(() => ({ ok: false }));
-    expect(res.ok).toBe(false);
+    await expect(test.handler({ ...ctx, secrets: {} } as unknown as ActionContext)).rejects.toThrow(
+      'SentinelOne connector is missing the API token.'
+    );
+    expect(request).not.toHaveBeenCalled();
   });
-  it('[C-v1-595] secrets with unknown properties are rejected', () => {
-    const t = SentinelOne.auth?.types?.[0] as { type: string };
-    expect(t.type).toBe('api_key_header');
-    expect(() =>
-      (configSchema() as { parse: (v: unknown) => unknown }).parse({
-        url: 'https://api.sentinelone.com',
-        token: 'x',
-      })
-    ).toThrow();
+  // Intended change: V1 rejected unknown secret properties; the V2 secrets schema comes from the shared
+  // api_key_header auth type, which requires the token and drops unknown properties instead.
+  it('[C-v1-595] the secrets schema requires a non-empty token and drops unknown properties', () => {
+    const secretsSchema = ApiKeyHeaderAuth.normalizeSchema?.({ headerField: 'token' }) as {
+      parse: (v: unknown) => unknown;
+    };
+    expect(() => secretsSchema.parse({})).toThrow();
+    expect(() => secretsSchema.parse({ token: '' })).toThrow();
+    expect(secretsSchema.parse({ token: 'x', unknownProp: 'value' })).toEqual({ token: 'x' });
   });
 
   it('[C-v1-596] getRemoteScripts validates an empty object', () => {

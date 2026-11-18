@@ -172,7 +172,6 @@ describe('runQuery', () => {
       },
       headers: { Authorization: BEARER, token: false },
       timeout: 60_000,
-      maxContentLength: 25 * 1024 * 1024,
     });
     expect(remove).toEqual(
       expect.objectContaining({

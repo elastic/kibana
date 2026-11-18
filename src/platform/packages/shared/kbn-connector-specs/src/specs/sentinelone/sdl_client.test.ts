@@ -92,7 +92,6 @@ describe('sdlRequest', () => {
         token: false,
       },
       timeout: 60_000,
-      maxContentLength: 25 * 1024 * 1024,
     });
   });
 
