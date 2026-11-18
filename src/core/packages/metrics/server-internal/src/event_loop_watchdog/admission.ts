@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ADMISSION_LIMITS, ROLLING_HOUR_MS } from './constants';
 import type { Phase } from './types';
 
 export interface AdmissionLimits {
@@ -17,14 +18,6 @@ export interface AdmissionLimits {
   /** Upper limit on files the phase writes over the worker's lifetime. */
   maxFiles: number;
 }
-
-/** Length of the rolling hour, in the worker's monotonic milliseconds. */
-export const ROLLING_HOUR_MS = 60 * 60 * 1000;
-
-export const ADMISSION_LIMITS: Readonly<Record<Phase, Readonly<AdmissionLimits>>> = {
-  starting: { perHour: 5, minGrowth: 1, maxFiles: 10 },
-  running: { perHour: 5, minGrowth: 1.25, maxFiles: 100 },
-};
 
 export type AdmissionOutcome = 'admitted' | 'in_window' | 'file_limit';
 

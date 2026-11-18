@@ -290,24 +290,6 @@ export const runWatchdogWorker = (
       .finally(() => endCapture(current));
   };
 
-  const admitProfile = (
-    phase: Phase,
-    blockedMs: number,
-    nowMs: number
-  ): { file: ProfileFileOutcome; path?: string } => {
-    if (profiling.dir === undefined) {
-      return { file: 'no_directory' };
-    }
-    const admitted = admission.admit(phase, blockedMs, nowMs);
-    if (admitted !== 'admitted') {
-      return { file: admitted };
-    }
-    return {
-      file: admitted,
-      path: Path.join(profiling.dir, fileName(phase, blockedMs, new Date())),
-    };
-  };
-
   const writeProfile = async (phase: Phase, path: string, profile: CpuProfile) => {
     try {
       await Fs.writeFile(path, JSON.stringify(prepareProfile(profile, root)));
@@ -364,8 +346,16 @@ export const runWatchdogWorker = (
       stopHeartbeatGapMs = Math.max(current.stopHeartbeatGapMs, heartbeatGapMs(nowMs));
       counts.maxStopHeartbeatGapMs = Math.max(counts.maxStopHeartbeatGapMs, stopHeartbeatGapMs);
     }
-    const { file, path } =
-      summary.samples > 0 ? admitProfile(phase, blockedMs, nowMs) : { file: 'empty' as const };
+    let file: ProfileFileOutcome = 'no_directory';
+    let path: string | undefined;
+    if (summary.samples === 0) {
+      file = 'empty';
+    } else if (profiling.dir !== undefined) {
+      file = admission.admit(phase, blockedMs, nowMs);
+      if (file === 'admitted') {
+        path = Path.join(profiling.dir, fileName(phase, blockedMs, new Date()));
+      }
+    }
     const countKey = FILE_COUNT_KEYS[file];
     if (countKey) {
       counts.files[phase][countKey]++;
