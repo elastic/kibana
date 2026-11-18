@@ -9,12 +9,14 @@ import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -131,26 +133,50 @@ const Line: React.FC<{
   </EuiFlexGroup>
 );
 
+/**
+ * One line per step: glyph, a fixed-width label and the status beside it. Finished and pending
+ * steps are subdued so the step in progress, or the one that failed, is where the eye lands.
+ * `details` (resource rows, a warning) hang under the status, indented like a timeline.
+ */
 const Row: React.FC<{
   title: string;
   state: GlyphState;
   testSubj: string;
   children: React.ReactNode;
-}> = ({ title, state, testSubj, children }) => (
-  <EuiFlexItem data-test-subj={testSubj}>
-    <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <Glyph state={state} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTitle size="xxxs">
-          <h5>{title}</h5>
-        </EuiTitle>
-        {children}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlexItem>
-);
+  details?: React.ReactNode;
+}> = ({ title, state, testSubj, children, details }) => {
+  const { euiTheme } = useEuiTheme();
+  const emphasized = state === 'in_progress' || state === 'failed';
+  const label = css`
+    flex: 0 0 ${euiTheme.base * 9}px;
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+  const detailBlock = css`
+    margin-left: calc(${euiTheme.size.l} + ${euiTheme.size.xs});
+    padding-left: ${euiTheme.size.s};
+    border-left: ${euiTheme.border.thin};
+  `;
+  return (
+    <EuiFlexItem data-test-subj={testSubj}>
+      <EuiFlexGroup gutterSize="xs" alignItems="baseline" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <Glyph state={state} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={label}>
+          <EuiText size="s" color={emphasized ? undefined : 'subdued'}>
+            {title}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s" color={emphasized ? undefined : 'subdued'}>
+            {children}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {details && <div css={detailBlock}>{details}</div>}
+    </EuiFlexItem>
+  );
+};
 
 const toResourceState = (status: string | undefined): GlyphState => {
   if (!status) return 'pending';
@@ -294,6 +320,30 @@ const StackRow: React.FC<{
     text = failedWith(stack.reason ?? error);
   }
 
+  const details = phase === 'in_progress' && (
+    <>
+      {isUpdate && data.adding && data.adding.length > 0 && (
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('xpack.fleet.awsOnboardingRunCard.stack.adding', {
+            defaultMessage: 'Adding: {templates}',
+            values: { templates: data.adding.join(', ') },
+          })}
+        </EuiText>
+      )}
+      {toResourceRows(stack.resources).map(({ logicalId, label, resource }) => (
+        <Line
+          key={logicalId}
+          size="xs"
+          state={toResourceState(resource?.status)}
+          testSubj={`awsOnboardingRunCardResource-${logicalId}`}
+        >
+          {label}
+          {resource?.reason && ` · ${resource.reason}`}
+        </Line>
+      ))}
+    </>
+  );
+
   return (
     <Row
       title={i18n.translate('xpack.fleet.awsOnboardingRunCard.stack.title', {
@@ -301,44 +351,24 @@ const StackRow: React.FC<{
       })}
       state={phase}
       testSubj="awsOnboardingRunCardStack"
+      details={details || undefined}
     >
-      <EuiText size="s">{text}</EuiText>
-      {phase === 'in_progress' && (
-        <>
-          {isUpdate && data.adding && data.adding.length > 0 && (
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.fleet.awsOnboardingRunCard.stack.adding', {
-                defaultMessage: 'Adding: {templates}',
-                values: { templates: data.adding.join(', ') },
-              })}
-            </EuiText>
-          )}
-          {toResourceRows(stack.resources).map(({ logicalId, label, resource }) => (
-            <Line
-              key={logicalId}
-              size="xs"
-              state={toResourceState(resource?.status)}
-              testSubj={`awsOnboardingRunCardResource-${logicalId}`}
-            >
-              {label}
-              {resource?.reason && ` · ${resource.reason}`}
-            </Line>
-          ))}
-        </>
-      )}
+      {text}
       {/* A failed stack must be read and deleted in the console before a retry. */}
       {(phase === 'complete' || phase === 'failed') && stack.stack_id && (
-        <EuiButtonEmpty
-          size="xs"
-          flush="left"
-          target="_blank"
-          href={getConsoleUrl(getStackRegion(stack.stack_id, data.region), stack.stack_id)}
-          data-test-subj="awsOnboardingRunCardConsoleLink"
-        >
-          {i18n.translate('xpack.fleet.awsOnboardingRunCard.stack.consoleLink', {
-            defaultMessage: 'Open in CloudFormation',
-          })}
-        </EuiButtonEmpty>
+        <>
+          {' · '}
+          <EuiLink
+            external
+            target="_blank"
+            href={getConsoleUrl(getStackRegion(stack.stack_id, data.region), stack.stack_id)}
+            data-test-subj="awsOnboardingRunCardConsoleLink"
+          >
+            {i18n.translate('xpack.fleet.awsOnboardingRunCard.stack.consoleLink', {
+              defaultMessage: 'CloudFormation',
+            })}
+          </EuiLink>
+        </>
       )}
     </Row>
   );
@@ -371,7 +401,7 @@ const ConnectorRow: React.FC<{ connector: AwsOnboardingRunProgress['connector'] 
       state={phase === 'reused' ? 'complete' : phase}
       testSubj="awsOnboardingRunCardConnector"
     >
-      <EuiText size="s">{text}</EuiText>
+      {text}
     </Row>
   );
 };
@@ -398,19 +428,15 @@ const PoliciesRow: React.FC<{ policies: AwsOnboardingRunProgress['policies']; er
       state={phase}
       testSubj="awsOnboardingRunCardPolicies"
     >
-      {phase === 'pending' ? (
-        <EuiText size="s">
-          {i18n.translate('xpack.fleet.awsOnboardingRunCard.policies.pending', {
+      {phase === 'pending'
+        ? i18n.translate('xpack.fleet.awsOnboardingRunCard.policies.pending', {
             defaultMessage: 'Waiting',
-          })}
-        </EuiText>
-      ) : (
-        items.map(({ service, name }) => (
-          <EuiText key={service} size="s" data-test-subj={`awsOnboardingRunCardPolicy-${service}`}>
-            {`${name ?? service} · ${itemText[phase]}`}
-          </EuiText>
-        ))
-      )}
+          })
+        : items.map(({ service, name }) => (
+            <div key={service} data-test-subj={`awsOnboardingRunCardPolicy-${service}`}>
+              {`${name ?? service} · ${itemText[phase]}`}
+            </div>
+          ))}
     </Row>
   );
 };
@@ -463,7 +489,7 @@ const DataRow: React.FC<{
       state={state}
       testSubj="awsOnboardingRunCardData"
     >
-      <EuiText size="s">{text}</EuiText>
+      {text}
     </Row>
   );
 };
@@ -509,8 +535,13 @@ export const AwsOnboardingRunCard: React.FC<{ data: AwsOnboardingRunAttachmentDa
   const badge = progress ? getBadge(progress) : undefined;
 
   return (
-    <>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiPanel paddingSize="m" hasBorder={false} color="transparent">
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h4>
@@ -519,64 +550,69 @@ export const AwsOnboardingRunCard: React.FC<{ data: AwsOnboardingRunAttachmentDa
               })}
             </h4>
           </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.fleet.awsOnboardingRunCard.subtitle', {
+              defaultMessage: '{region} · {services}',
+              values: { region, services: forServices.join(', ') },
+            })}
+          </EuiText>
         </EuiFlexItem>
-        {badge && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={badge.color} data-test-subj="awsOnboardingRunCardBadge">
-              {badge.label}
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
-        {elapsed && (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued" data-test-subj="awsOnboardingRunCardElapsed">
-              {elapsed}
-            </EuiText>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.fleet.awsOnboardingRunCard.subtitle', {
-          defaultMessage: '{region} · {services}',
-          values: { region, services: forServices.join(', ') },
-        })}
-      </EuiText>
-
-      <EuiPanel paddingSize="m" hasBorder={false}>
-        {run.isLoading && <EuiLoadingSpinner size="m" />}
-
-        {run.isError && !progress && (
-          <KbnWarningCallout
-            announceOnMount={false}
-            size="s"
-            data-test-subj="awsOnboardingRunCardError"
-            title={(run.error as Error).message}
-          />
-        )}
-
-        {progress && (
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <StackRow stack={progress.stack} error={progress.error} data={data} />
-            <ConnectorRow connector={progress.connector} />
-            <PoliciesRow policies={progress.policies} error={progress.error} />
-            <DataRow ingest={progress.ingest} items={progress.policies.items} />
-            {progress.dashboard_path && (
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <EuiLink
-                    href={http.basePath.prepend(progress.dashboard_path)}
-                    data-test-subj="awsOnboardingRunCardDashboardLink"
-                  >
-                    {i18n.translate('xpack.fleet.awsOnboardingRunCard.dashboardLink', {
-                      defaultMessage: 'Open the AWS dashboard',
-                    })}
-                  </EuiLink>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {elapsed && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="awsOnboardingRunCardElapsed">
+                  {elapsed}
                 </EuiText>
               </EuiFlexItem>
             )}
+            {badge && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={badge.color} data-test-subj="awsOnboardingRunCardBadge">
+                  {badge.label}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
-        )}
-      </EuiPanel>
-    </>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="s" />
+
+      {run.isLoading && <EuiLoadingSpinner size="m" />}
+
+      {run.isError && !progress && (
+        <KbnWarningCallout
+          announceOnMount={false}
+          size="s"
+          data-test-subj="awsOnboardingRunCardError"
+          title={(run.error as Error).message}
+        />
+      )}
+
+      {progress && (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <StackRow stack={progress.stack} error={progress.error} data={data} />
+          <ConnectorRow connector={progress.connector} />
+          <PoliciesRow policies={progress.policies} error={progress.error} />
+          <DataRow ingest={progress.ingest} items={progress.policies.items} />
+          {progress.dashboard_path && (
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="xs" />
+              <div>
+                <EuiButton
+                  size="s"
+                  href={http.basePath.prepend(progress.dashboard_path)}
+                  data-test-subj="awsOnboardingRunCardDashboardLink"
+                >
+                  {i18n.translate('xpack.fleet.awsOnboardingRunCard.dashboardLink', {
+                    defaultMessage: 'Open the AWS dashboard',
+                  })}
+                </EuiButton>
+              </div>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
+    </EuiPanel>
   );
 };
