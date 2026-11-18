@@ -68,7 +68,7 @@ describe('RuleCreateOptionsFlyout', () => {
     };
   });
 
-  it('renders the flyout with create rule options', () => {
+  it('renders the flyout with create rule options', async () => {
     renderFlyout();
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('RuleCreateOptionsFlyout', () => {
     );
     expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
     expect(screen.getByText('With AI Agent')).toBeInTheDocument();
-    expect(screen.getByText('Threshold rule')).toBeInTheDocument();
+    expect(await screen.findByText('Threshold rule')).toBeInTheDocument();
     expect(screen.queryByText(/welcome to the new alerting experience/i)).not.toBeInTheDocument();
   });
 

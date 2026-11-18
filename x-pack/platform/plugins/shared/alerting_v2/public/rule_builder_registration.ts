@@ -56,6 +56,9 @@ export const attachRuleBuilderRegistry = (
   return next;
 };
 
+export const getAttachedRuleBuilderRegistry = (): RuleBuilderRegistryContract | undefined =>
+  registry;
+
 export const applyRuleBuilderRegistrations = (): Promise<RuleBuilderRegistryContract> => {
   if (!applying) {
     applying = import('./rule_builder_registry').then(

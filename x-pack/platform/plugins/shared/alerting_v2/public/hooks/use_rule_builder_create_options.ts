@@ -7,13 +7,17 @@
 
 import { useEffect, useState } from 'react';
 import type { RuleBuilderCreateCard } from '@kbn/alerting-v2-rule-form';
-import { applyRuleBuilderRegistrations } from '../rule_builder_registration';
-import { ruleBuilderRegistry } from '../rule_builder_registry';
+import {
+  applyRuleBuilderRegistrations,
+  getAttachedRuleBuilderRegistry,
+} from '../rule_builder_registration';
 
 export type { RuleBuilderCreateCard };
 
 export const useRuleBuilderCreateOptions = (): RuleBuilderCreateCard[] => {
-  const [options, setOptions] = useState(() => ruleBuilderRegistry.getCreateOptions());
+  const [options, setOptions] = useState<RuleBuilderCreateCard[]>(
+    () => getAttachedRuleBuilderRegistry()?.getCreateOptions() ?? []
+  );
 
   useEffect(() => {
     let cancelled = false;
