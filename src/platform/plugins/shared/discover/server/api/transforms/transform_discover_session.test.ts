@@ -130,7 +130,7 @@ describe('discover session API transforms', () => {
     },
   };
 
-  it('preserves inline identity, filter references and the chart fingerprint internally', () => {
+  it('preserves inline identity, filter references and chart attributes internally', () => {
     const data: DiscoverSessionInternalData = {
       ...apiData,
       tabs: [
@@ -177,12 +177,7 @@ describe('discover session API transforms', () => {
     expect(attributes.tabs[0].attributes.visContext).toStrictEqual({
       suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
       attributes: classicApiTab.vis_context?.attributes,
-      requestData: {
-        dataViewId: 'inline-id',
-        timeField: '@timestamp',
-        timeInterval: 'h',
-        breakdownField: 'host.name',
-      },
+      requestData: {},
     });
 
     const storedBeforeRead = cloneDeep({ attributes, references });
@@ -703,11 +698,7 @@ describe('discover session API transforms', () => {
               },
               visContext: {
                 suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
-                requestData: {
-                  dataViewId: '6972ccae5b7ff51c24c1129b58e8dc6d56649983d2bb717806063e2da57e0c20',
-                  timeField: '@timestamp',
-                  breakdownField: 'transaction.id',
-                },
+                requestData: {},
                 attributes: (discoverSessionApiData.tabs[1] as DiscoverSessionApiData['tabs'][1])
                   .vis_context!.attributes,
               },
@@ -855,11 +846,7 @@ describe('discover session API transforms', () => {
 
       expect(attributes.tabs[0].attributes.visContext).toEqual({
         suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
-        requestData: {
-          dataViewId: 'logs-data-view',
-          timeInterval: 'h',
-          breakdownField: 'host.name',
-        },
+        requestData: {},
         attributes: {
           visualizationType: 'lnsXY',
           state: { foo: 'bar' },
@@ -902,7 +889,7 @@ describe('discover session API transforms', () => {
     });
   });
 
-  describe('visContext requestData extraction', () => {
+  describe('visContext conversion without fingerprint extraction', () => {
     const [classicTab, esqlTab] = apiData.tabs;
 
     const buildEsqlVisContext = ({
@@ -930,7 +917,7 @@ describe('discover session API transforms', () => {
       transformDiscoverSessionIn({ ...apiData, tabs: [tab] }).attributes.tabs[0].attributes
         .visContext;
 
-    it('extracts the fingerprint from the chart blob for ES|QL tabs', () => {
+    it('preserves ES|QL chart attributes without extracting their fingerprint', () => {
       const layers = { 'layer-1': { index: 'esql-dv' } };
       const adHocDataViews = { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } };
 
@@ -943,11 +930,7 @@ describe('discover session API transforms', () => {
         })
       ).toEqual({
         suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
-        requestData: {
-          dataViewId: 'esql-dv',
-          timeField: '@timestamp',
-          breakdownField: 'host.name',
-        },
+        requestData: {},
         attributes: histogramVisContext.attributes,
       });
 
@@ -958,15 +941,12 @@ describe('discover session API transforms', () => {
       });
       expect(getStoredVisContext({ ...esqlTab, vis_context: lensVisContext })).toEqual({
         suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
-        requestData: {
-          dataViewId: 'esql-dv',
-          timeField: '@timestamp',
-        },
+        requestData: {},
         attributes: lensVisContext.attributes,
       });
     });
 
-    it('preserves a dormant ES|QL fingerprint on classic tabs without inheriting timeInterval', () => {
+    it('preserves a dormant ES|QL chart on classic tabs without rebuilding its fingerprint', () => {
       const visContext = buildEsqlVisContext({
         layers: { 'layer-1': { index: 'esql-dv' } },
         adHocDataViews: { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } },
@@ -974,16 +954,12 @@ describe('discover session API transforms', () => {
 
       expect(getStoredVisContext({ ...classicTab, vis_context: visContext })).toEqual({
         suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
-        requestData: {
-          dataViewId: 'esql-dv',
-          timeField: '@timestamp',
-          breakdownField: 'host.name',
-        },
+        requestData: {},
         attributes: visContext.attributes,
       });
     });
 
-    it('extracts the fingerprint without a time field and omits an empty breakdown field', () => {
+    it('preserves chart attributes without a time field', () => {
       const visContext = buildEsqlVisContext({
         layers: { 'layer-1': { index: 'esql-dv' } },
         adHocDataViews: { 'esql-dv': { type: 'esql' } },
@@ -993,12 +969,12 @@ describe('discover session API transforms', () => {
         getStoredVisContext({ ...esqlTab, breakdown_field: '', vis_context: visContext })
       ).toStrictEqual({
         suggestionType: visContext.suggestion_type,
-        requestData: { dataViewId: 'esql-dv' },
+        requestData: {},
         attributes: visContext.attributes,
       });
     });
 
-    it('falls back when the blob is not a recognizable ES|QL chart', () => {
+    it('preserves opaque chart attributes without deriving a fallback fingerprint', () => {
       const unrecognizable = {
         suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL as const,
         attributes: { visualizationType: 'lnsXY', state: { foo: 'bar' } },
@@ -1010,7 +986,11 @@ describe('discover session API transforms', () => {
           breakdown_field: 'host.name',
           vis_context: unrecognizable,
         })
-      ).toEqual(expect.objectContaining({ requestData: { breakdownField: 'host.name' } }));
+      ).toStrictEqual({
+        suggestionType: unrecognizable.suggestion_type,
+        attributes: unrecognizable.attributes,
+        requestData: {},
+      });
 
       const wrongDataViewType = buildEsqlVisContext({
         layers: { 'layer-1': { index: 'a-persisted-dv' } },
@@ -1362,11 +1342,7 @@ describe('discover session API transforms', () => {
     expect(reverted.attributes.tabs[1].attributes.headerRowHeight).toBeUndefined();
     expect(reverted.attributes.tabs[0].attributes.visContext).toEqual({
       suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
-      requestData: {
-        dataViewId: 'logs-data-view',
-        timeInterval: 'h',
-        breakdownField: 'host.name',
-      },
+      requestData: {},
       attributes: {
         visualizationType: 'lnsXY',
         state: { foo: 'bar' },
