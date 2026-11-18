@@ -26,9 +26,14 @@ jest.mock('@kbn/apm-config-loader', () => {
   };
 });
 
+jest.mock('@opentelemetry/resources', () => {
+  const actual = jest.requireActual('@opentelemetry/resources');
+  return { ...actual, resourceFromAttributes: jest.fn(actual.resourceFromAttributes) };
+});
+
 import { REPO_ROOT, PKG_JSON } from '@kbn/repo-info';
 import { ApmConfiguration } from '@kbn/apm-config-loader/src/config';
-import { resources } from '@elastic/opentelemetry-node/sdk';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { initTelemetry } from '..';
 
 describe('initTelemetry', () => {
@@ -116,7 +121,7 @@ describe('initTelemetry', () => {
       loadConfiguration.mockImplementationOnce(() => apmConfig);
       getConfiguration.mockImplementationOnce(() => apmConfig.getConfig('test-service'));
 
-      const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
+      const resourceFromAttributesSpy = jest.mocked(resourceFromAttributes);
 
       initTelemetry([], REPO_ROOT, false, 'test-service');
 
@@ -143,7 +148,7 @@ describe('initTelemetry', () => {
         environment: 'staging',
       }));
 
-      const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
+      const resourceFromAttributesSpy = jest.mocked(resourceFromAttributes);
 
       initTelemetry([], REPO_ROOT, false, 'my-worker');
 
@@ -169,7 +174,7 @@ describe('initTelemetry', () => {
         },
       }));
 
-      const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
+      const resourceFromAttributesSpy = jest.mocked(resourceFromAttributes);
 
       initTelemetry([], REPO_ROOT, false, 'test-service');
 

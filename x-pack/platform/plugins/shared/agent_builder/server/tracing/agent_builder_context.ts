@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { api } from '@elastic/opentelemetry-node/sdk';
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { context as otelContext, createContextKey, propagation } from '@opentelemetry/api';
 import { isInferenceSpan, CONVERSATION_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
+import type { Context } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/sdk-trace';
 import type { TracingPrivacySettings } from './privacy_settings';
 
 export const AGENT_BUILDER_OWNER_BAGGAGE_KEY = 'kibana.agent_builder';
@@ -19,20 +19,18 @@ export const DATA_STREAM_NAMESPACE_ATTR = 'data_stream.namespace';
 const TRACING_PRIVACY_SETTINGS_KEY = createContextKey('agent_builder.tracing_privacy_settings');
 
 export const setPrivacySettingsOnContext = (
-  ctx: api.Context,
+  ctx: Context,
   settings: TracingPrivacySettings
-): api.Context => ctx.setValue(TRACING_PRIVACY_SETTINGS_KEY, settings);
+): Context => ctx.setValue(TRACING_PRIVACY_SETTINGS_KEY, settings);
 
-export const getPrivacySettingsFromContext = (
-  ctx: api.Context
-): TracingPrivacySettings | undefined => {
+export const getPrivacySettingsFromContext = (ctx: Context): TracingPrivacySettings | undefined => {
   const value = ctx.getValue(TRACING_PRIVACY_SETTINGS_KEY);
   return typeof value === 'object' && value !== null && 'enabled' in value
     ? (value as TracingPrivacySettings)
     : undefined;
 };
 
-export function getSpaceIdFromContext(parentContext: api.Context): string {
+export function getSpaceIdFromContext(parentContext: Context): string {
   const value = propagation.getBaggage(parentContext)?.getEntry(SPACE_ID_BAGGAGE_KEY)?.value;
   return value && value.length > 0 ? value : 'default';
 }
@@ -70,7 +68,7 @@ export const withAgentBuilderContext = <T>(
  * Checks whether a span originates from Agent Builder by inspecting baggage
  * and verifying it is an inference span.
  */
-export const isAgentBuilderSpan = (span: tracing.Span, parentContext: api.Context): boolean => {
+export const isAgentBuilderSpan = (span: Span, parentContext: Context): boolean => {
   const baggage = propagation.getBaggage(parentContext);
   const isFromAgentBuilder =
     baggage?.getEntry(AGENT_BUILDER_OWNER_BAGGAGE_KEY)?.value === AGENT_BUILDER_OWNER_BAGGAGE_VALUE;

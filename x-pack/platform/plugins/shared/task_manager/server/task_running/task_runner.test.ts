@@ -28,7 +28,6 @@ import { mockLogger } from '../test_utils';
 import { throwRetryableError, throwUnrecoverableError } from './errors';
 import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
@@ -39,6 +38,11 @@ import { configMock } from '../config.mock';
 import { EsApiKeyStrategy } from '../api_key_strategy';
 import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
 import { asSpaceId } from '@kbn/core-spaces-common';
+import {
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+  TracerProvider,
+} from '@opentelemetry/sdk-trace';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -74,13 +78,13 @@ describe('TaskManagerRunner', () => {
     setLabel: jest.fn(),
   };
 
-  let otelExporter: tracing.InMemorySpanExporter;
-  let otelProvider: tracing.BasicTracerProvider;
+  let otelExporter: InMemorySpanExporter;
+  let otelProvider: TracerProvider;
 
   beforeAll(() => {
-    otelExporter = new tracing.InMemorySpanExporter();
-    otelProvider = new tracing.BasicTracerProvider({
-      spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+    otelExporter = new InMemorySpanExporter();
+    otelProvider = new TracerProvider({
+      spanProcessors: [new SimpleSpanProcessor({ exporter: otelExporter })],
     });
     trace.setGlobalTracerProvider(otelProvider);
   });
