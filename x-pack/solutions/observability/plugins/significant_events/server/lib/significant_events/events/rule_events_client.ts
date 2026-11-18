@@ -1057,19 +1057,15 @@ export class RuleEventsClient {
 
   /**
    * The episode (`alert.id`) of each event's latest version: its current episode. An event whose
-   * latest version has no episode id is absent. Nothing is read while the index does not exist yet.
+   * latest version has no episode id is absent.
    */
   async findCurrentEpisodeIdsByEventIds(eventIds: string[]): Promise<Map<string, string>> {
+    const latest = await this.findLatestWithEpisodeByEventIds(eventIds);
     const episodeIds = new Map<string, string>();
-    try {
-      (await this.findLatestWithEpisodeByEventIds(eventIds)).forEach(({ episodeId }, eventId) => {
-        if (episodeId) episodeIds.set(eventId, episodeId);
-      });
-      return episodeIds;
-    } catch (error) {
-      if (isIndexNotFoundError(error)) return episodeIds;
-      throw error;
-    }
+    latest.forEach(({ episodeId }, eventId) => {
+      if (episodeId) episodeIds.set(eventId, episodeId);
+    });
+    return episodeIds;
   }
 
   private async findLatestWithEpisodeByEventIds(

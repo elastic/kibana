@@ -1142,15 +1142,24 @@ describe('RuleEventsClient', () => {
     });
 
     it.each(['findCurrentEpisodeIdsByEventIds', 'findEventIdsByEpisodeIds'] as const)(
-      '%s reads nothing for no ids, and nothing when the index does not exist yet',
+      '%s reads nothing for no ids',
+      async (method) => {
+        const { client, query } = createClient(async () => sourceResponse([]));
+
+        expect((await client[method]([])).size).toBe(0);
+        expect(query).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each(['findCurrentEpisodeIdsByEventIds', 'findEventIdsByEpisodeIds'] as const)(
+      '%s returns an empty map when the index does not exist yet',
       async (method) => {
         const { client, query } = createClient(async () => {
           throw new Error('verification_exception: Unknown index [.rule-events]');
         });
 
-        expect((await client[method]([])).size).toBe(0);
-        expect(query).not.toHaveBeenCalled();
         expect((await client[method](['id-1'])).size).toBe(0);
+        expect(query).toHaveBeenCalled();
       }
     );
 
