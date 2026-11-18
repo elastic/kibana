@@ -103,6 +103,7 @@ export const importPluginOverrides: OxlintOverride[] = [
       '**/playwright.v2.config.ts',
       '**/*.playwright.config.ts',
       '**/parallel.playwright.config.ts',
+      '**/vitest.config.ts',
       'x-pack/platform/packages/shared/isomer/isomer-components/isomer_studio.config.ts',
       'x-pack/platform/packages/shared/isomer/isomer-components/isomer_studio_fonts.ts',
     ],

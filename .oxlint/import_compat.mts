@@ -56,7 +56,7 @@ const DEV_FILE_PATTERNS = [
   'mock.{js,ts,tsx}',
   '_stubs.{js,ts,tsx}',
   '{testHelpers,test_helper,test_utils}.{js,ts,tsx}',
-  '{postcss,webpack,cypress}.config.{js,ts}',
+  '{postcss,webpack,cypress,vitest}.config.{js,ts}',
 ];
 
 /** Glob patterns which describe dev-only code. */
