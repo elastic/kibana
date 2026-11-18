@@ -131,4 +131,15 @@ describe('clampTimeRange', () => {
       isValid: false,
     });
   });
+
+  it.each([
+    ['now-1y/d', 'now'],
+    ['2019-01-01T00:00:00.000Z', '2020-06-30T00:00:00.000Z'],
+  ])('leaves %s to %s unchanged without a maximum', (from, to) => {
+    expect(clampTimeRange({ from, to }, Infinity, NOW)).toEqual({
+      range: { from, to },
+      wasClamped: false,
+      isValid: true,
+    });
+  });
 });

@@ -17,6 +17,7 @@ import type {
 const seconds = (value: number | null) => ({ value, unit: 's' });
 const items = (value: number | null) => ({ value, unit: '{item}' });
 const perSecond = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
+const percent = (value: number | null) => ({ value, unit: '%' });
 
 const META: StreamsUnit.StatsMeta = {
   window: { start: '2026-10-27T12:00:00.000Z', end: '2026-10-27T12:15:00.000Z' },
@@ -40,7 +41,13 @@ const destinationResult = ({
       rate: perSecond(eventsRate),
       series: { bucket_ms: series.bucketMs, points: series.points },
     },
-    failed: { rate: perSecond(failedRate) },
+    // The client does not read the failure classes yet, so they have no data here.
+    failed: {
+      rate: perSecond(failedRate),
+      percentage: percent(null),
+      authentication: { rate: perSecond(null), percentage: percent(null) },
+      authorization: { rate: perSecond(null), percentage: percent(null) },
+    },
   },
 });
 

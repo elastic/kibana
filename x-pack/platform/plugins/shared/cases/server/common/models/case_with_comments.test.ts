@@ -763,11 +763,13 @@ describe('CaseCommentModel', () => {
         new Set(['alert-id-1'])
       );
 
-      await model.bulkCreate({
+      const { attachments } = await model.bulkCreate({
         attachments: [{ id: 'comment-1', ...unifiedAlertComment }],
       });
 
       expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+      // The add-to-existing-case modal reads an empty result as "nothing was added".
+      expect(attachments).toEqual([]);
     });
 
     it('remove alerts from multiple attachments', async () => {
@@ -1513,11 +1515,13 @@ describe('CaseCommentModel', () => {
         new Set(['attack-id-1'])
       );
 
-      await model.bulkCreate({
+      const { attachments } = await model.bulkCreate({
         attachments: [{ id: 'comment-1', ...unifiedAttackComment }],
       });
 
       expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+      // The add-to-existing-case modal reads an empty result as "nothing was added".
+      expect(attachments).toEqual([]);
     });
 
     it('drops an attack that is already attached to the case on createComment', async () => {

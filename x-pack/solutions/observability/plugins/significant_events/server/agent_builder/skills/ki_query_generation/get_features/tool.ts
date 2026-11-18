@@ -24,6 +24,8 @@ import {
 } from '../../../utils/resolve_source_slugs';
 import { assertCanReadSignificantEvents } from '../../../../routes/utils/assert_can_manage_significant_events';
 import type { SignificantEventsServer } from '../../../../types';
+import type { EbtTelemetryClient } from '../../../../lib/telemetry/ebt';
+import { reportToolFailure } from '../../../tools/tool_failure';
 
 export const SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID = 'platform.sig_events.ki_features_get';
 
@@ -59,10 +61,12 @@ export const createGetFeaturesTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   getScopedClients: GetScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }): BuiltinSkillBoundedTool<typeof getFeaturesSchema> => {
   return {
     id: SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID,
@@ -100,7 +104,16 @@ export const createGetFeaturesTool = ({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        logger.warn(`Get features failed: ${message}`);
+        reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID,
+          errorLogMessage: `Get features failed: ${message}`,
+          errorLogLevel: 'warn',
+          logger,
+          telemetry,
+          request: context.request,
+          runContext: context.runContext,
+        });
         return {
           results: [{ type: ToolResultType.error, data: { message } }],
         };
