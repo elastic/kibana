@@ -62,7 +62,10 @@ export const buildAttributePredicate = (
       params.push({ [param]: raw });
       return `?${param}`;
     });
-    predicates.push(`TO_STRING(${quoteIdentifier(field)}) IN (${placeholders.join(', ')})`);
+    const matches = placeholders.map(
+      (placeholder) => `MV_CONTAINS(TO_STRING(${quoteIdentifier(field)}), ${placeholder})`
+    );
+    predicates.push(matches.length === 1 ? matches[0] : `(${matches.join(' OR ')})`);
   }
 
   return { predicate: predicates.length > 0 ? predicates.join(' AND ') : undefined, params };

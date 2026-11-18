@@ -128,7 +128,9 @@ describe('buildAttributeValuesQuery', () => {
   it('adds the other selections and their parameters', () => {
     const query = build(3, 'cluster', { paused: ['true'] });
 
-    expect(query?.esql).toContain('    AND TO_STRING(`kubernetes.deployment.paused`) IN (?a0v0)');
+    expect(query?.esql).toContain(
+      '    AND MV_CONTAINS(TO_STRING(`kubernetes.deployment.paused`), ?a0v0)'
+    );
     expect(query?.params).toEqual([{ from: window.from }, { to: window.to }, { a0v0: 'true' }]);
   });
 

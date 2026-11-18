@@ -221,7 +221,7 @@ describe('listAttributeValues', () => {
 
       expect(valuesQueries(esClient)).toHaveLength(2);
       valuesQueries(esClient).forEach(({ query, params }) => {
-        expect(query).toContain('TO_STRING(`orchestrator.cluster.name`) IN (?a0v0)');
+        expect(query).toContain('MV_CONTAINS(TO_STRING(`orchestrator.cluster.name`), ?a0v0)');
         expect(params).toContainEqual({ a0v0: 'eu' });
       });
     });

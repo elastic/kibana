@@ -15,14 +15,20 @@ import {
   generateAttributeValuesQueries,
   planSources,
 } from '../../../../server/inventory/generator';
+import type { AttributeSelections } from '../../../../server/inventory/generator';
+import type { QueryEngine } from '../../../../common';
 
 // Unlike the other specs, this one does not call the route: no registered definition labels an
 // attribute yet, so the route cannot reach the labels. It runs the generated values query of a
-// labelled attribute, built by the real generator, against Elasticsearch on a throwaway index, to
-// check what only Elasticsearch decides, such as how a multi-value field is grouped and mapped.
+// labelled attribute, built by the real generator, against Elasticsearch on throwaway indices, to
+// check what only Elasticsearch decides, such as how a multi-value field is grouped, mapped and
+// selected. The same documents are in a standard index, read by the `FROM` plan, and in a
+// time-series index, read by the `TS` plan, and every case runs on both.
 // Move the cases to the route spec when a registered definition uses `valueLabels`.
-// A name of its own per run, so runs that share a deployment never delete each other's index.
-const INDEX = `scout-entity-inventory-value-labels-${randomUUID()}`;
+// A name of its own per run, so runs that share a deployment never delete each other's indices.
+const PREFIX = `scout-entity-inventory-value-labels-${randomUUID()}`;
+const STANDARD_INDEX = `${PREFIX}-standard`;
+const TSDS_INDEX = `${PREFIX}-tsds`;
 const WINDOW = { from: '2026-11-01T09:00:00.000Z', to: '2026-11-01T11:00:00.000Z' };
 
 const definition: EntityDefinitionWithoutId = {
@@ -32,77 +38,145 @@ const definition: EntityDefinitionWithoutId = {
   dynamic: {
     sources: [
       {
-        indexPattern: INDEX,
+        indexPattern: `${PREFIX}-*`,
         attributes: [
           {
             name: 'arch',
             field: 'host.architecture',
             valueLabels: { aarch64: 'arm64', arm: 'arm64' },
           },
+          { name: 'os', field: 'host.os.type' },
         ],
       },
     ],
-    suggestedFilters: ['arch'],
+    suggestedFilters: ['arch', 'os'],
   },
 };
 
+const mappings = (hostName: Record<string, unknown>) => ({
+  properties: {
+    '@timestamp': { type: 'date' as const },
+    'host.name': hostName,
+    'host.architecture': { type: 'keyword' as const },
+    'host.os.type': { type: 'keyword' as const },
+  },
+});
+
 apiTest.describe(
-  'Value labels in the attribute values query',
+  'Value labels and selections in the attribute values query',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest.beforeAll(async ({ esClient }) => {
       await esClient.indices.create({
-        index: INDEX,
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            'host.name': { type: 'keyword' },
-            'host.architecture': { type: 'keyword' },
+        index: STANDARD_INDEX,
+        mappings: mappings({ type: 'keyword' }),
+      });
+      // A plain time-series index with explicit bounds, as the archive of the other specs does: a
+      // time-series data stream sets its bounds around the current time and rejects these timestamps.
+      await esClient.indices.create({
+        index: TSDS_INDEX,
+        settings: {
+          index: {
+            mode: 'time_series',
+            routing_path: ['host.name'],
+            time_series: {
+              start_time: '2026-11-01T00:00:00.000Z',
+              end_time: '2026-11-02T00:00:00.000Z',
+            },
           },
         },
+        mappings: mappings({ type: 'keyword', time_series_dimension: true }),
       });
+
+      // Only `multi` reads as `arm64` and only `multi` is on Linux, so a query that drops or skips
+      // a multi-value document changes what the cases below see.
       const at = '2026-11-01T10:00:00.000Z';
+      const documents = [
+        { 'host.name': 'multi', 'host.architecture': ['aarch64', 'arm'], 'host.os.type': 'linux' },
+        { 'host.name': 'other', 'host.architecture': 'x86', 'host.os.type': 'windows' },
+      ];
       await esClient.bulk({
         refresh: 'wait_for',
-        operations: [
-          { index: { _index: INDEX } },
-          { '@timestamp': at, 'host.name': 'multi', 'host.architecture': ['aarch64', 'arm'] },
-          { index: { _index: INDEX } },
-          { '@timestamp': at, 'host.name': 'single', 'host.architecture': 'aarch64' },
-          { index: { _index: INDEX } },
-          { '@timestamp': at, 'host.name': 'other', 'host.architecture': 'x86' },
-        ],
+        operations: [STANDARD_INDEX, TSDS_INDEX].flatMap((index) =>
+          documents.flatMap((document) => [
+            { index: { _index: index } },
+            { '@timestamp': at, ...document },
+          ])
+        ),
       });
     });
 
     apiTest.afterAll(async ({ esClient }) => {
-      await esClient.indices.delete({ index: INDEX, ignore_unavailable: true });
+      await esClient.indices.delete({
+        index: [STANDARD_INDEX, TSDS_INDEX],
+        ignore_unavailable: true,
+      });
     });
 
-    const valuesOf = async (esClient: Parameters<typeof executeEsql>[0], limit: number) => {
-      const plans = planSources(definition, [{ hasTimeSeries: false }]);
-      const [query] = generateAttributeValuesQueries(definition, plans, {
-        attribute: 'arch',
-        selections: {},
+    const valuesOf = async (
+      esClient: Parameters<typeof executeEsql>[0],
+      engine: QueryEngine,
+      {
+        attribute,
+        selections = {},
+        limit = 100,
+      }: { attribute: string; selections?: AttributeSelections; limit?: number }
+    ) => {
+      const plans = planSources(definition, [{ hasTimeSeries: true }]);
+      const queries = generateAttributeValuesQueries(definition, plans, {
+        attribute,
+        selections,
         window: WINDOW,
         limit,
       });
+      const query = queries[plans.findIndex((plan) => plan.engine === engine)];
       if (query === undefined) {
-        throw new Error('the labelled attribute produced no query');
+        throw new Error(`the ${attribute} attribute produced no ${engine} query`);
       }
       const { rows } = await executeEsql(esClient, query);
       return rows.map((row) => row[ATTRIBUTE_VALUE_COLUMN]);
     };
 
-    apiTest(
-      'groups the raw values of one label, also in a multi-value field',
-      async ({ esClient }) => {
-        expect(await valuesOf(esClient, 100)).toStrictEqual(['arm64', 'x86']);
-      }
-    );
+    (['TS', 'FROM'] as const).forEach((engine) => {
+      apiTest(
+        `through the ${engine} plan: groups the raw values of one label, also in a multi-value field`,
+        async ({ esClient }) => {
+          expect(await valuesOf(esClient, engine, { attribute: 'arch' })).toStrictEqual([
+            'arm64',
+            'x86',
+          ]);
+        }
+      );
 
-    apiTest('applies the limit to the labels, not to the raw values', async ({ esClient }) => {
-      expect(await valuesOf(esClient, 1)).toStrictEqual(['arm64']);
+      apiTest(
+        `through the ${engine} plan: applies the limit to the labels, not to the raw values`,
+        async ({ esClient }) => {
+          expect(await valuesOf(esClient, engine, { attribute: 'arch', limit: 1 })).toStrictEqual([
+            'arm64',
+          ]);
+        }
+      );
+
+      apiTest(
+        `through the ${engine} plan: narrows by a selection on a single-value field`,
+        async ({ esClient }) => {
+          expect(
+            await valuesOf(esClient, engine, { attribute: 'arch', selections: { os: ['linux'] } })
+          ).toStrictEqual(['arm64']);
+        }
+      );
+
+      apiTest(
+        `through the ${engine} plan: keeps a multi-value document when its field is selected`,
+        async ({ esClient }) => {
+          expect(
+            await valuesOf(esClient, engine, {
+              attribute: 'os',
+              selections: { arch: ['arm64'] },
+            })
+          ).toStrictEqual(['linux']);
+        }
+      );
     });
   }
 );

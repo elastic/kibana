@@ -44,7 +44,8 @@ describe('buildAttributePredicate', () => {
 
   it('reads the selected attribute from the field its source declares, with the values as parameters', () => {
     expect(buildAttributePredicate(fromSecondSource, columns, { cluster: ['eu', 'us'] })).toEqual({
-      predicate: 'TO_STRING(`orchestrator.cluster.name`) IN (?a0v0, ?a0v1)',
+      predicate:
+        '(MV_CONTAINS(TO_STRING(`orchestrator.cluster.name`), ?a0v0) OR MV_CONTAINS(TO_STRING(`orchestrator.cluster.name`), ?a0v1))',
       params: [{ a0v0: 'eu' }, { a0v1: 'us' }],
     });
   });
@@ -54,7 +55,7 @@ describe('buildAttributePredicate', () => {
       buildAttributePredicate(fromSecondSource, columns, { cluster: ['eu'], paused: ['true'] })
     ).toEqual({
       predicate:
-        'TO_STRING(`orchestrator.cluster.name`) IN (?a0v0) AND TO_STRING(`kubernetes.deployment.paused`) IN (?a1v0)',
+        'MV_CONTAINS(TO_STRING(`orchestrator.cluster.name`), ?a0v0) AND MV_CONTAINS(TO_STRING(`kubernetes.deployment.paused`), ?a1v0)',
       params: [{ a0v0: 'eu' }, { a1v0: 'true' }],
     });
   });
@@ -64,7 +65,7 @@ describe('buildAttributePredicate', () => {
       expect(
         buildAttributePredicate(plan, columns, { 'kubernetes.namespace': ['default'] })
       ).toEqual({
-        predicate: 'TO_STRING(`kubernetes.namespace`) IN (?a0v0)',
+        predicate: 'MV_CONTAINS(TO_STRING(`kubernetes.namespace`), ?a0v0)',
         params: [{ a0v0: 'default' }],
       });
     });
@@ -83,7 +84,8 @@ describe('buildAttributePredicate', () => {
       expect(
         buildAttributePredicate(labelledPlan, labelledColumns, { phase: ['running'] })
       ).toEqual({
-        predicate: 'TO_STRING(`k8s.pod.phase`) IN (?a0v0, ?a0v1)',
+        predicate:
+          '(MV_CONTAINS(TO_STRING(`k8s.pod.phase`), ?a0v0) OR MV_CONTAINS(TO_STRING(`k8s.pod.phase`), ?a0v1))',
         params: [{ a0v0: '2' }, { a0v1: 'running' }],
       });
     });
@@ -91,7 +93,7 @@ describe('buildAttributePredicate', () => {
     it('selects an unmapped value as itself', () => {
       expect(buildAttributePredicate(labelledPlan, labelledColumns, { phase: ['failed'] })).toEqual(
         {
-          predicate: 'TO_STRING(`k8s.pod.phase`) IN (?a0v0)',
+          predicate: 'MV_CONTAINS(TO_STRING(`k8s.pod.phase`), ?a0v0)',
           params: [{ a0v0: 'failed' }],
         }
       );
