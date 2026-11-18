@@ -8,8 +8,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-// Longest SLO time window (90d) plus a one day buffer.
-const SLI_RETENTION_PERIOD_MIN_DAYS = 91;
+// Longest SLO time window and transform backfill (90d) plus a one day buffer.
+export const SLI_MAX_LOOKBACK_DAYS = 91;
 
 export const configSchema = schema.object({
   sloOrphanSummaryCleanUpTaskEnabled: schema.boolean({ defaultValue: true }),
@@ -24,8 +24,8 @@ export const configSchema = schema.object({
   sliRetentionPeriod: schema.duration({
     defaultValue: '180d',
     validate: (value) => {
-      if (value.asDays() < SLI_RETENTION_PERIOD_MIN_DAYS) {
-        return `must be at least ${SLI_RETENTION_PERIOD_MIN_DAYS} days`;
+      if (value.asDays() < SLI_MAX_LOOKBACK_DAYS) {
+        return `must be at least ${SLI_MAX_LOOKBACK_DAYS} days`;
       }
     },
   }),

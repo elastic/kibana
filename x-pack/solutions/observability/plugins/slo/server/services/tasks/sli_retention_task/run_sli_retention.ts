@@ -22,8 +22,8 @@ interface Dependencies {
   retentionMs: number;
 }
 
-const parseDocsCount = (value: string | null | undefined): number | undefined => {
-  if (value === null || value === undefined || value === '') {
+const parseDocsCount = (value?: string | null): number | undefined => {
+  if (!value) {
     return undefined;
   }
   const count = Number(value);
@@ -98,8 +98,14 @@ const fetchTransformDestIndices = async ({
   signal,
 }: Pick<Dependencies, 'esClient' | 'logger' | 'signal'>): Promise<Set<string> | undefined> => {
   try {
-    const { count, transforms } = await esClient.transform.getTransform(
-      { transform_id: 'slo-*', size: TRANSFORMS_PAGE_SIZE, allow_no_match: true },
+    const { count, transforms = [] } = await esClient.transform.getTransform(
+      {
+        transform_id: 'slo-*',
+        size: TRANSFORMS_PAGE_SIZE,
+        allow_no_match: true,
+        // Only the destination indices are read: skip the multi-KB transform configs.
+        filter_path: 'count,transforms.dest.index',
+      },
       { signal }
     );
     if (count > transforms.length) {

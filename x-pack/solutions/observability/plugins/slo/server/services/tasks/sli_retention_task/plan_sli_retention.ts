@@ -5,23 +5,25 @@
  * 2.0.
  */
 
+import { SLI_MAX_LOOKBACK_DAYS } from '../../../../common/config';
 import { SLO_RESOURCES_VERSION_MAJOR } from '../../../../common/constants';
+import { startOfNextUtcMonth } from '../../sli_routing_state';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-// Longest transform backfill (90d) plus a one day buffer: no write targets an older index.
-export const EMPTY_INDEX_MIN_AGE_MS = 91 * DAY_MS;
+// No transform backfill writes to an index older than this.
+const EMPTY_INDEX_MIN_AGE_MS = SLI_MAX_LOOKBACK_DAYS * DAY_MS;
 
 // Matches the SLI indices of SLI_DESTINATION_INDEX_PATTERN, capturing their resources version.
 const SLI_INDEX_REGEX_SOURCE = `^\\.slo-observability\\.sli-v(${SLO_RESOURCES_VERSION_MAJOR}(?:\\.\\d+)?)`;
 const DATED_INDEX_REGEX = new RegExp(`${SLI_INDEX_REGEX_SOURCE}\\.(\\d{4})-(\\d{2})-(\\d{2})$`);
 const BASE_INDEX_REGEX = new RegExp(`${SLI_INDEX_REGEX_SOURCE}$`);
 
-export interface SliIndex {
+interface SliIndex {
   index: string;
   docsCount: number | undefined;
 }
 
-export interface SliRetentionPlan {
+interface SliRetentionPlan {
   agedOut: string[];
   emptyDated: string[];
   emptyOldBase: string[];
@@ -53,7 +55,7 @@ const getPeriodEnd = (index: string): number | undefined => {
     return undefined;
   }
 
-  return day === 1 ? Date.UTC(year, month, 1) : start + 7 * DAY_MS;
+  return day === 1 ? startOfNextUtcMonth(startDate) : start + 7 * DAY_MS;
 };
 
 /** Selects the SLI indices to delete: dated indices older than the retention period, old empty dated indices, and empty base indices of previous versions. */
