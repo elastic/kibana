@@ -9,7 +9,8 @@
 
 /** What is kept of a result set so two runs can be compared without holding every row. */
 export interface QueryResultsSummary {
-  columns: string[];
+  /** The name and type of every column, since the same values in another type are another result. */
+  columns: Array<{ name: string; type: string }>;
   rowCount: number;
   /** Fingerprint of the rows, ignoring their order. */
   rowsFingerprint: string;
@@ -61,7 +62,7 @@ const hash = (text: string): string => {
 
 /** Summarizes the columns and values of an ES|QL response. */
 export function summarizeResults(response: {
-  columns?: Array<{ name?: string }>;
+  columns?: Array<{ name?: string; type?: string }>;
   values?: unknown[][];
 }): QueryResultsSummary | undefined {
   if (!Array.isArray(response.columns) || !Array.isArray(response.values)) {
@@ -70,7 +71,10 @@ export function summarizeResults(response: {
 
   const rows = response.values.map((row) => row.map(normalizeValue).join('\u001f'));
   return {
-    columns: response.columns.map((column) => column.name ?? ''),
+    columns: response.columns.map((column) => ({
+      name: column.name ?? '',
+      type: column.type ?? '',
+    })),
     rowCount: rows.length,
     rowsFingerprint: hash([...rows].sort().join('\u001e')),
     orderedFingerprint: hash(rows.join('\u001e')),
@@ -87,7 +91,10 @@ export function compareResults(
   }
   if (
     baseline.columns.length !== current.columns.length ||
-    baseline.columns.some((name, index) => name !== current.columns[index])
+    baseline.columns.some(
+      ({ name, type }, index) =>
+        name !== current.columns[index].name || type !== current.columns[index].type
+    )
   ) {
     return { kind: 'differentColumns' };
   }

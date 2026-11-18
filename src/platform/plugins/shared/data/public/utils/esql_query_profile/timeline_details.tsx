@@ -74,7 +74,7 @@ const OperatorTooltip = ({
     <div>
       {operator.timeReported
         ? i18n.translate('data.inspector.queryProfile.stripTooltipTiming', {
-            defaultMessage: '{time} CPU, {share} of this driver',
+            defaultMessage: '{time}, {share} of this driver',
             values: { time, share },
           })
         : i18n.translate('data.inspector.queryProfile.stripTooltipNoTime', {
@@ -107,8 +107,8 @@ const OperatorDetails = ({
       <EuiSpacer size="s" />
       <Stats>
         <Stat
-          label={i18n.translate('data.inspector.queryProfile.operatorCpuLabel', {
-            defaultMessage: 'CPU time',
+          label={i18n.translate('data.inspector.queryProfile.operatorTimeStatLabel', {
+            defaultMessage: 'Time',
           })}
           value={operatorTimeLabel(operator)}
         />
@@ -273,8 +273,8 @@ const DriverDetails = ({
       <EuiText size="xs" color="subdued">
         <p>
           <FormattedMessage
-            id="data.inspector.queryProfile.driverCpuDescription"
-            defaultMessage="CPU time inside {driver}. These widths are not wall-clock time."
+            id="data.inspector.queryProfile.driverOperatorTimeDescription"
+            defaultMessage="Operator time inside {driver}. These widths are not wall-clock time."
             values={{ driver: driver.label }}
           />
         </p>

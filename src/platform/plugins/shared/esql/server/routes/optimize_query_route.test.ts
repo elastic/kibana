@@ -121,7 +121,7 @@ describe('registerOptimizeQueryRoute', () => {
     });
   });
 
-  it('does not offer the original query back, even when it is reformatted', async () => {
+  it('does not offer the original query back, even when it is reformatted, nor the reason for a change that is not there', async () => {
     const { handler, requestHandlerContext, request, response } = buildMocks();
     resolveConnectorId.mockResolvedValue('connector-1');
     modelReturning({
@@ -133,7 +133,7 @@ describe('registerOptimizeQueryRoute', () => {
     await handler(requestHandlerContext, request, response);
 
     expect(response.ok).toHaveBeenCalledWith({
-      body: { query: null, reason: 'Looks faster.' },
+      body: { query: null, reason: 'The suggestion did not change the query.' },
     });
   });
 

@@ -11,7 +11,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AggregatedOperator } from './types';
 
-/** The kinds of work that the CPU breakdown tells apart, in the order they are shown. */
+/** The kinds of work that the operator time breakdown tells apart, in the order they are shown. */
 const OPERATOR_CATEGORIES = [
   'read',
   'filter_and_limit',
@@ -52,7 +52,7 @@ export const operatorCategoryLabel = (category: OperatorCategory): string =>
 export interface CpuBreakdownEntry {
   category: OperatorCategory;
   nanos: number;
-  /** Share of the categorized CPU time, from 0 to 1. */
+  /** Share of the categorized operator time, from 0 to 1. */
   share: number;
 }
 
@@ -78,7 +78,7 @@ export const operatorCategory = (title: string): OperatorCategory => {
   return 'other';
 };
 
-/** Operator CPU time grouped by kind of work. Operators that report no time are left out. */
+/** Operator time grouped by kind of work. Operators that report no time are left out. */
 export const summarizeCpuByCategory = (operators: AggregatedOperator[]): CpuBreakdownEntry[] => {
   const totals = new Map<OperatorCategory, number>();
   operators.forEach((operator) => {

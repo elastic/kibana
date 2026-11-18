@@ -19,7 +19,7 @@ export interface CommandHeat {
    * a command of the main query.
    */
   subquery?: number;
-  /** Share of all operator CPU time, from 0 to 1. */
+  /** Share of all operator time, from 0 to 1. */
   share: number;
   /** Short names of the operators attributed here, slowest first. */
   operators: string[];
@@ -28,7 +28,7 @@ export interface CommandHeat {
 export interface QueryHeat {
   /** The commands in the order they are written, with those of subqueries in place. */
   commands: CommandHeat[];
-  /** Share of the operator CPU time that no command explains, such as the final output. From 0 to 1. */
+  /** Share of the operator time that no command explains, such as the final output. From 0 to 1. */
   unattributedShare: number;
   /** True when the query has subqueries, so the commands belong to different queries. */
   hasSubqueries: boolean;
@@ -85,11 +85,11 @@ const listEntries = (commands: QueryCommand[]): Entry[] => {
   });
 };
 
-/** The CPU time found for one command, while the operators are being attributed. */
+/** The operator time found for one command, while the operators are being attributed. */
 interface CommandAccumulator {
   entry: Entry;
   nanos: number;
-  /** CPU time by short operator name. */
+  /** Operator time by short operator name. */
   operatorNanos: Map<string, number>;
 }
 
@@ -109,7 +109,7 @@ const commandAt = (
     );
 
 /**
- * Attributes operator CPU time to the commands of a query. Every operator names the plan node it
+ * Attributes operator time to the commands of a query. Every operator names the plan node it
  * was built from, and every plan node of the query names the command it came from, by its place in
  * the query. Operators with no such place, such as the final output, are left out.
  */

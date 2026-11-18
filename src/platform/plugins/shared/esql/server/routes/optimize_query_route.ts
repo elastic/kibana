@@ -47,6 +47,9 @@ const OptimizeQuerySchema = lazySchema(() =>
     .describe('A faster, equivalent ES|QL query, or the reason none was found.')
 );
 
+/** What is said when the model claims an improvement but gives back nothing new. */
+const NOT_CHANGED_REASON = 'The suggestion did not change the query.';
+
 const SYSTEM_PROMPT = `You review the performance of ES|QL queries using a profile from Elasticsearch.
 
 You are given a query and a summary of how it ran: the time spent in each operator, how many rows each operator received and emitted, how long drivers waited, and the physical plan.
@@ -60,7 +63,7 @@ Work in two steps.
 Judge equivalence only by what the query computes, never by what it might have been meant to compute. A rewrite is safe when you can show the result is mathematically identical. If you cannot, set canImprove to false.
 
 Rewrites that are safe when their conditions hold:
-- Collapse two aggregations. When a STATS groups by a set of keys and a following STATS groups by a subset of those keys, the pair can be one STATS grouped by the subset only if the outer function combines the inner results exactly: SUM of COUNT(*) is COUNT(*), SUM of SUM is SUM, MIN of MIN is MIN, MAX of MAX is MAX. AVG of AVG, COUNT of a grouped column and COUNT_DISTINCT are not safe. A grouping key that exists only to be summed away is dropped, and its field is then no longer read at all, which removes both the grouping and the cost of reading that field.
+- Collapse two aggregations. When a STATS groups by a set of keys and a following STATS groups by a subset of those keys, the pair can be one STATS grouped by the subset only if the outer function combines the inner results exactly: MIN of MIN is MIN and MAX of MAX is MAX. SUM of COUNT(*) is COUNT(*) and SUM of SUM is SUM only when every dropped grouping key is single-valued, because ES|QL puts a row in every group of a multivalued key, so the inner counts add up to more than the rows. You cannot see the mapping, so a dropped key is single-valued only when the query makes it so, for example with MV_FIRST, MV_MIN or MV_MAX or a function that returns one value; otherwise do not collapse a SUM, or say in the reason that the rewrite assumes the dropped key is single-valued. AVG of AVG, COUNT of a grouped column and COUNT_DISTINCT are not safe. A grouping key that exists only to be summed away is dropped, and its field is then no longer read at all, which removes both the grouping and the cost of reading that field.
 - Move a WHERE that only uses grouping keys from after a STATS to before it, and move a WHERE before an EVAL that it does not depend on.
 - Remove columns, EVALs and sorts whose results are never used, unless they change the output.
 - Compute a repeated expression once instead of several times.
@@ -138,9 +141,12 @@ export const registerOptimizeQueryRoute = (
             signal: getRequestAbortedSignal(request.events.aborted$),
           });
 
+        const query = result.canImprove ? toUsableQuery(result.query, queryString) : null;
         const body: OptimizeQueryResponse = {
-          query: result.canImprove ? toUsableQuery(result.query, queryString) : null,
-          reason: result.reason.trim(),
+          query,
+          // The reason of a model that said it could improve the query describes an improvement
+          // that is not there when it gave back the same query, so it is not passed on.
+          reason: result.canImprove && !query ? NOT_CHANGED_REASON : result.reason.trim(),
         };
         return response.ok({ body });
       } catch (error) {

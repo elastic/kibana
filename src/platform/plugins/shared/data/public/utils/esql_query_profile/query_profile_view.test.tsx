@@ -195,11 +195,11 @@ describe('QueryProfileView', () => {
     );
   });
 
-  it('breaks the CPU time down by kind of work', async () => {
+  it('breaks the operator time down by kind of work', async () => {
     renderProfileOf(QUERY, search);
 
     const breakdown = await screen.findByTestId('esqlQueryProfileCpuBreakdown');
-    expect(breakdown).toHaveTextContent('CPU time by kind of work');
+    expect(breakdown).toHaveTextContent('Operator time by kind of work');
     expect(breakdown).toHaveTextContent('Read 60%');
     expect(breakdown).toHaveTextContent('Aggregate and sort 40%');
   });
@@ -340,7 +340,7 @@ describe('QueryProfileView', () => {
   });
 
   describe('by command', () => {
-    it('shows each command of the query with its share of the CPU time', async () => {
+    it('shows each command of the query with its share of the operator time', async () => {
       renderProfileOf(QUERY, search);
 
       await userEvent.click(await screen.findByTestId('esqlQueryProfileByCommandTab'));
@@ -493,6 +493,24 @@ describe('QueryProfileView faster query suggestion', () => {
 
     await screen.findByTestId('esqlQueryProfileDuration');
     expect(screen.queryByTestId('esqlQueryProfileSuggest')).not.toBeInTheDocument();
+  });
+
+  it('keeps the suggestion and says what failed when running it fails', async () => {
+    const { esql, post } = setup({ columns, values });
+    post.mockResolvedValue({ query: SUGGESTED, reason: 'Only x is needed.' });
+
+    await userEvent.click(await screen.findByTestId('esqlQueryProfileSuggest'));
+    await screen.findByTestId('esqlQueryProfileProfileSuggestion');
+    esql.mockRejectedValueOnce(new Error('Unknown column [y]'));
+    await userEvent.click(screen.getByTestId('esqlQueryProfileProfileSuggestion'));
+
+    expect(await screen.findByText('Unable to run the suggested query')).toBeInTheDocument();
+    expect(screen.getByText('Unknown column [y]')).toBeInTheDocument();
+    expect(screen.getByText(SUGGESTED)).toBeInTheDocument();
+    expect(screen.getByTestId('esqlQueryProfileSuggestionReason')).toHaveTextContent(
+      'Only x is needed.'
+    );
+    expect(screen.getByTestId('esqlQueryProfileProfileSuggestion')).toBeInTheDocument();
   });
 
   it('warns when the suggested query does not return the same results', async () => {

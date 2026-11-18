@@ -27,7 +27,7 @@ describe('operatorCategory', () => {
 });
 
 describe('summarizeCpuByCategory', () => {
-  it('sums CPU time by category and returns shares in a stable order', () => {
+  it('sums operator time by category and returns shares in a stable order', () => {
     const breakdown = summarizeCpuByCategory([
       operator('HashAggregation', 3),
       operator('ValuesSourceReader', 4),

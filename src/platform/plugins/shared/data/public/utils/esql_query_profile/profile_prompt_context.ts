@@ -44,7 +44,7 @@ export function buildProfileContext(view: QueryProfileView): string {
   if (timed.length > 0) {
     lines.push(
       '',
-      'Operators by CPU time, summed over all drivers (CPU times do not add up to the total time):'
+      'Operators by the time spent inside them, summed over all drivers (this can include waiting for reads, and does not add up to the total time):'
     );
     timed.forEach((operator) => {
       const detail = operator.detail ? ` ${truncate(operator.detail, MAX_DETAIL_LENGTH)}` : '';

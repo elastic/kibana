@@ -23,7 +23,7 @@ const MAX_COMMAND_LENGTH = 90;
 /** Time in steps that belong to no command is only mentioned when it is at least this share. */
 const MIN_UNATTRIBUTED_SHARE = 0.01;
 
-/** The share of the CPU time that belongs to each command of the query. */
+/** The share of the operator time that belongs to each command of the query. */
 export const computeCommandHeat = (view: QueryProfileView, query: string): QueryHeat =>
   mapOperatorsToCommands({
     query,
@@ -148,7 +148,7 @@ const GroupHeading = ({ subquery, isFirst }: { subquery?: number; isFirst: boole
   </>
 );
 
-/** The query, one command per row, with the share of the operator CPU time that belongs to it. */
+/** The query, one command per row, with the share of the operator time that belongs to it. */
 export const ByCommandTab = ({ heat }: { heat: QueryHeat }) => {
   return (
     <div data-test-subj="esqlQueryProfileByCommand">
@@ -156,7 +156,7 @@ export const ByCommandTab = ({ heat }: { heat: QueryHeat }) => {
         <p>
           <FormattedMessage
             id="data.inspector.queryProfile.byCommandDescription"
-            defaultMessage="CPU time of the operators that Elasticsearch built for each command. The planner can merge a command into another step, such as a filter into the search, so a command can show little time."
+            defaultMessage="Time of the operators that Elasticsearch built for each command. The planner can merge a command into another step, such as a filter into the search, so a command can show little time."
           />
         </p>
       </EuiText>
@@ -176,7 +176,7 @@ export const ByCommandTab = ({ heat }: { heat: QueryHeat }) => {
             <p>
               <FormattedMessage
                 id="data.inspector.queryProfile.unattributedDescription"
-                defaultMessage="{share} of the CPU time is in steps that belong to no command."
+                defaultMessage="{share} of the operator time is in steps that belong to no command."
                 values={{ share: formatShare(heat.unattributedShare) }}
               />
             </p>

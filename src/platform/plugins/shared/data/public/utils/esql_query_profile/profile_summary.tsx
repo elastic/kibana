@@ -144,8 +144,8 @@ const CpuByKind = ({ view }: { view: QueryProfileView }) => {
       <EuiText size="xs">
         <strong>
           <FormattedMessage
-            id="data.inspector.queryProfile.cpuBreakdownTitle"
-            defaultMessage="CPU time by kind of work"
+            id="data.inspector.queryProfile.operatorTimeBreakdownTitle"
+            defaultMessage="Operator time by kind of work"
           />
         </strong>
       </EuiText>
@@ -175,8 +175,8 @@ const CpuByKind = ({ view }: { view: QueryProfileView }) => {
       <EuiText size="xs" color="subdued">
         <p>
           <FormattedMessage
-            id="data.inspector.queryProfile.cpuTimeDescription"
-            defaultMessage="Operator times are CPU time summed across drivers, so they will not add up to the total query time."
+            id="data.inspector.queryProfile.operatorTimeDescription"
+            defaultMessage="Operator time is the time spent inside each operator, which can include waiting for reads. It is summed across drivers, so it will not add up to the total query time."
           />
         </p>
       </EuiText>
@@ -184,7 +184,7 @@ const CpuByKind = ({ view }: { view: QueryProfileView }) => {
   );
 };
 
-/** The total time, how it splits between planning and execution, and the CPU time by kind of work. */
+/** The total time, how it splits between planning and execution, and the operator time by kind of work. */
 export const ProfileSummary = ({ view }: { view: QueryProfileView }) => (
   <>
     <DurationSummary view={view} />

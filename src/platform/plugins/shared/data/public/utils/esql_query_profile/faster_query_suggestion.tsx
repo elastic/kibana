@@ -36,19 +36,22 @@ type Stage =
   | { kind: 'idle' }
   | { kind: 'suggesting' }
   | { kind: 'noSuggestion'; reason: string }
-  | { kind: 'suggested'; query: string; reason: string }
+  | { kind: 'suggested'; query: string; reason: string; error?: string }
   | { kind: 'profiling'; query: string; reason: string }
   | { kind: 'compared'; query: string; reason: string; view: QueryProfileView }
   | { kind: 'error'; message: string; isNoConnector: boolean };
 
-const failedWith = (caught: unknown): Stage => ({
-  kind: 'error',
-  message: readRequestErrorMessage(
+const failureMessage = (caught: unknown): string =>
+  readRequestErrorMessage(
     caught,
     i18n.translate('data.inspector.queryProfile.suggestionFailedMessage', {
       defaultMessage: 'Something went wrong while checking the suggested query.',
     })
-  ),
+  );
+
+const failedWith = (caught: unknown): Stage => ({
+  kind: 'error',
+  message: failureMessage(caught),
   isNoConnector: caught instanceof AiRequestFailure && caught.isNoConnector,
 });
 
@@ -99,7 +102,7 @@ const describeVerdict = (verdict: ResultsVerdict): string => {
     case 'differentColumns':
       return i18n.translate('data.inspector.queryProfile.differentColumnsLabel', {
         defaultMessage:
-          'The columns differ from the original query, so this is not an equivalent query.',
+          'The columns or their types differ from the original query, so this is not an equivalent query.',
       });
     case 'differentRowCount':
       return i18n.translate('data.inspector.queryProfile.differentRowCountLabel', {
@@ -199,12 +202,22 @@ function SuggestedQuery({
       <EuiSpacer size="s" />
       {stage.kind === 'suggested' && (
         <>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="data.inspector.queryProfile.suggestionNotRunDescription"
-              defaultMessage="This query has not been run. The AI can be wrong, so check that it returns the same results."
+          {stage.error ? (
+            <KbnDangerCallout
+              announceOnMount
+              title={i18n.translate('data.inspector.queryProfile.suggestionRunFailedTitle', {
+                defaultMessage: 'Unable to run the suggested query',
+              })}
+              text={<p>{stage.error}</p>}
             />
-          </EuiText>
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="data.inspector.queryProfile.suggestionNotRunDescription"
+                defaultMessage="This query has not been run. The AI can be wrong, so check that it returns the same results."
+              />
+            </EuiText>
+          )}
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -421,8 +434,9 @@ export function FasterQuerySuggestion({
         setStage({ kind: 'compared', query, reason, view });
       }
     } catch (caught: unknown) {
+      // The suggestion stays, with what went wrong, so that it can be copied or tried again.
       if (!signal.aborted) {
-        setStage(failedWith(caught));
+        setStage({ kind: 'suggested', query, reason, error: failureMessage(caught) });
       }
     }
   };

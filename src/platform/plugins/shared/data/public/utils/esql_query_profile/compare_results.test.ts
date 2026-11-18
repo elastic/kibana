@@ -55,6 +55,14 @@ describe('compareResults', () => {
     expect(verdict).toMatchObject({ kind: 'same' });
   });
 
+  it('tells a column apart by its type, since the same values in another type are another result', () => {
+    const asLong = summarizeResults({ columns: [{ name: 'n', type: 'long' }], values: [[1]] });
+    const asDouble = summarizeResults({ columns: [{ name: 'n', type: 'double' }], values: [[1]] });
+
+    expect(compareResults(asLong, asDouble)).toEqual({ kind: 'differentColumns' });
+    expect(compareResults(asLong, asLong)).toMatchObject({ kind: 'same' });
+  });
+
   it('tells large integers apart, such as timestamps that differ in the last digits', () => {
     const verdict = compareResults(
       response(['t'], [[1_700_000_000_123]]),
