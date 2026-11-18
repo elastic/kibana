@@ -10,6 +10,7 @@ import {
   FieldsMetadataClient,
   ecsFlatNameToRootFieldsetName,
   isDirectChildFieldName,
+  pickFleetCapabilities,
 } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
@@ -398,6 +399,62 @@ describe('FieldsMetadataClient class', () => {
       });
 
       const fieldInstance = await clientWithouthPrivileges.getByName('mysql.slowlog.filesort');
+
+      expect(integrationFieldsExtractor).not.toHaveBeenCalled();
+      expect(fieldInstance).toBeUndefined();
+    });
+
+    it('should not resolve the field from an integration if the fleet capabilities are missing (Fleet disabled)', async () => {
+      const clientWithoutFleetCapabilities = FieldsMetadataClient.create({
+        capabilities: {},
+        logger,
+        ecsFieldsRepository,
+        integrationFieldsRepository,
+        metadataFieldsRepository,
+        otelFieldsRepository,
+        streamsFieldsRepository,
+      });
+
+      const fieldInstance =
+        await clientWithoutFleetCapabilities.getByName('mysql.slowlog.filesort');
+
+      expect(integrationFieldsExtractor).not.toHaveBeenCalled();
+      expect(fieldInstance).toBeUndefined();
+    });
+
+    it('should not resolve the field from an integration if only one of the fleet capabilities is present', async () => {
+      const clientWithPartialFleetCapabilities = FieldsMetadataClient.create({
+        capabilities: { fleet: { read: true } },
+        logger,
+        ecsFieldsRepository,
+        integrationFieldsRepository,
+        metadataFieldsRepository,
+        otelFieldsRepository,
+        streamsFieldsRepository,
+      });
+
+      const fieldInstance =
+        await clientWithPartialFleetCapabilities.getByName('mysql.slowlog.filesort');
+
+      expect(integrationFieldsExtractor).not.toHaveBeenCalled();
+      expect(fieldInstance).toBeUndefined();
+    });
+
+    it('should not resolve the field from an integration if a fleet capability entry is not a boolean read flag', async () => {
+      // The entry type allows `.read` to be a nested privilege map, not just a
+      // boolean; a truthiness check would treat such a map as "has read
+      // permission". Only the boolean `true` grants it.
+      const clientWithNonBooleanRead = FieldsMetadataClient.create({
+        capabilities: { fleet: { read: { nested: true } }, fleetv2: { read: true } },
+        logger,
+        ecsFieldsRepository,
+        integrationFieldsRepository,
+        metadataFieldsRepository,
+        otelFieldsRepository,
+        streamsFieldsRepository,
+      });
+
+      const fieldInstance = await clientWithNonBooleanRead.getByName('mysql.slowlog.filesort');
 
       expect(integrationFieldsExtractor).not.toHaveBeenCalled();
       expect(fieldInstance).toBeUndefined();
@@ -796,6 +853,30 @@ describe('isDirectChildFieldName', () => {
     expect(isDirectChildFieldName('host', 'host')).toBe(false);
     expect(isDirectChildFieldName('host', 'hostname')).toBe(false);
     expect(isDirectChildFieldName('host', 'other.host.name')).toBe(false);
+  });
+});
+
+describe('pickFleetCapabilities', () => {
+  it('returns undefined entries when the resolved capabilities carry no fleet keys', () => {
+    expect(pickFleetCapabilities({ navLinks: {}, management: {}, catalogue: {} })).toEqual({
+      fleet: undefined,
+      fleetv2: undefined,
+    });
+  });
+
+  it('passes the fleet entries through when they are present', () => {
+    expect(
+      pickFleetCapabilities({
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        fleet: { all: true, read: true },
+        fleetv2: { all: true, agents_read: true },
+      })
+    ).toEqual({
+      fleet: { all: true, read: true },
+      fleetv2: { all: true, agents_read: true },
+    });
   });
 });
 
