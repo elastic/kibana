@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
-import type { BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   FetchContext,
@@ -19,7 +19,6 @@ import type {
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { max, min } from 'lodash';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import type { ValuesSourceFetchPlan } from '../types';
@@ -72,41 +71,32 @@ export function minMax$({
         if (!dataSource || !field) {
           return { max: undefined, min: undefined };
         }
-        const esqlQuery =
-          valuesSourceFetchPlan.fetchMode === 'esql' ? valuesSourceFetchPlan.query : undefined;
+
         const timeRange = getFetchContextTimeRange(controlFetchContext, useGlobalFilters);
 
         try {
           setIsLoading(true);
           const abortController = new AbortController();
           prevRequestAbortController = abortController;
-          if (esqlQuery !== undefined) {
-            return await getEsqlMinMax({
-              abortSignal: abortController.signal,
-              esqlQuery,
-              timeRange,
-              esqlVariables: controlFetchContext.esqlVariables,
-              // Pre-filter the ES|QL pipeline by the dashboard's fetch context, so it mirrors how
-              // field-based controls inherit the filter bar.
-              esqlPreFilter: buildESQLPreFilter({
+          return valuesSourceFetchPlan.fetchMode === 'esql'
+            ? await getEsqlMinMax({
+                abortSignal: abortController.signal,
+                esqlQuery: valuesSourceFetchPlan.query,
+                dataSource,
                 fetchContext: controlFetchContext,
                 useGlobalFilters,
-                dataSource,
                 timeRange,
-                esqlQuery,
-              }),
-            });
-          }
-          return await getDslMinMax({
-            abortSignal: abortController.signal,
-            dataSource,
-            field,
-            query: isOfAggregateQueryType(controlFetchContext.query)
-              ? undefined
-              : controlFetchContext.query,
-            timeRange,
-            filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
-          });
+              })
+            : await getDslMinMax({
+                abortSignal: abortController.signal,
+                dataSource,
+                field,
+                query: isOfAggregateQueryType(controlFetchContext.query)
+                  ? undefined
+                  : controlFetchContext.query,
+                timeRange,
+                filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
+              });
         } catch (error) {
           return { error, max: undefined, min: undefined };
         }
@@ -131,23 +121,36 @@ export function minMax$({
 export async function getEsqlMinMax({
   abortSignal,
   esqlQuery,
+  dataSource,
+  fetchContext,
+  useGlobalFilters,
   timeRange,
-  esqlVariables,
-  esqlPreFilter,
 }: {
   abortSignal: AbortSignal;
-  esqlQuery: string;
+  esqlQuery?: string;
+  dataSource: FilterableSource;
+  fetchContext: FetchContext;
+  useGlobalFilters: boolean | undefined;
   timeRange?: TimeRange;
-  esqlVariables?: ESQLControlVariable[];
-  esqlPreFilter?: { bool: BoolQuery };
 }): Promise<{ min: number | undefined; max: number | undefined }> {
+  // An ES|QL control without a query yet has no values to fetch
+  if (!esqlQuery) return { min: undefined, max: undefined };
+
   const result = await getESQLSingleColumnValues({
     query: esqlQuery,
     timeRange,
-    filter: esqlPreFilter,
+    // Pre-filter the ES|QL pipeline by the dashboard's fetch context, so it mirrors how
+    // field-based controls inherit the filter bar.
+    filter: buildESQLPreFilter({
+      fetchContext,
+      useGlobalFilters,
+      dataSource,
+      timeRange,
+      esqlQuery,
+    }),
     signal: abortSignal,
     search: dataService.search.search,
-    esqlVariables: esqlVariables ?? [],
+    esqlVariables: fetchContext.esqlVariables ?? [],
     timezone: getControlsTimezone(),
   });
   if (getESQLSingleColumnValues.isNumericResult(result)) {
