@@ -4213,6 +4213,9 @@ importers:
       '@kbn/workflows-management-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/workflows_management
+      '@kbn/workflows-topics':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-workflows-topics
       '@kbn/workflows-ui':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-ui
@@ -5249,6 +5252,9 @@ importers:
       '@kbn/check-saved-objects-cli':
         specifier: workspace:*
         version: link:packages/kbn-check-saved-objects-cli
+      '@kbn/check-server-import-graph-cli':
+        specifier: workspace:*
+        version: link:packages/kbn-check-server-import-graph-cli
       '@kbn/ci-stats-core':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ci-stats-core
@@ -7047,6 +7053,8 @@ importers:
 
   packages/kbn-check-saved-objects-cli: {}
 
+  packages/kbn-check-server-import-graph-cli: {}
+
   packages/kbn-ci-stats-performance-metrics: {}
 
   packages/kbn-ci-stats-shipper-cli: {}
@@ -8508,6 +8516,8 @@ importers:
   src/platform/packages/shared/kbn-workflows: {}
 
   src/platform/packages/shared/kbn-workflows-library: {}
+
+  src/platform/packages/shared/kbn-workflows-topics: {}
 
   src/platform/packages/shared/kbn-workflows-ui: {}
 

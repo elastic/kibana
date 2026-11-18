@@ -123,6 +123,12 @@ export const selectIsSavingYaml = createSelector(
   (detail) => detail.loading.isSavingYaml
 );
 
+/** Whether a save is being checked or stored; another save can't start until it ends. */
+export const selectIsSaveInProgress = createSelector(
+  selectDetail,
+  (detail) => detail.isCheckingSave || detail.loading.isSavingYaml
+);
+
 export const selectConnectors = createSelector(selectDetail, (detail) => detail.connectors);
 export const selectConnectorsLoadState = createSelector(
   selectDetail,
