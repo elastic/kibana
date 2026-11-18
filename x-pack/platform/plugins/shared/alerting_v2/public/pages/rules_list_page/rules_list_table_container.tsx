@@ -29,6 +29,12 @@ import { UpdateApiKeyConfirmationModal } from '../../components/rule/modals/upda
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
 import type { RuleContentListItem } from './rules_data_source';
 import { toRulesQueryParams } from './rules_query_params';
+import {
+  RULES_LIST_DEFAULT_SORT,
+  SORT_FIELD_TO_COLUMN_ID,
+  type RulesListColumnId,
+} from './rules_list_columns';
+import { useRulesListVisibleColumns } from './use_rules_list_visible_columns';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
 
 const API_SORT_TO_TABLE_FIELD: Record<string, RulesListTableSortField> = {
@@ -70,6 +76,16 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const items = contentItems.map((item) => (item as RuleContentListItem).rule);
 
   const tableSortField = API_SORT_TO_TABLE_FIELD[sortField];
+
+  const { visibleColumnIds, setVisibleColumnIds } = useRulesListVisibleColumns();
+
+  const onVisibleColumnIdsChange = (ids: RulesListColumnId[]) => {
+    setVisibleColumnIds(ids);
+    const sortedColumnId = SORT_FIELD_TO_COLUMN_ID[sortField];
+    if (sortedColumnId && !ids.includes(sortedColumnId)) {
+      setSort(RULES_LIST_DEFAULT_SORT.field, RULES_LIST_DEFAULT_SORT.direction);
+    }
+  };
 
   const onTableChange = ({ page: tablePage, sort }: Criteria<RuleApiResponse>) => {
     if (sort) {
@@ -244,6 +260,8 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         }
         isBulkTogglingEnabled={bulkEnableMutation.isLoading || bulkDisableMutation.isLoading}
         onTableChange={onTableChange}
+        visibleColumnIds={visibleColumnIds}
+        onVisibleColumnIdsChange={onVisibleColumnIdsChange}
       />
       {expandedRule ? (
         <RuleSummaryFlyout

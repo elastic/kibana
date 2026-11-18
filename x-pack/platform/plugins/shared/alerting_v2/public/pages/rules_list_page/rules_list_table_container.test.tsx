@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { ContentListProvider } from '@kbn/content-list';
 import { contentListQueryClient } from '@kbn/content-list-provider';
 import { I18nProvider } from '@kbn/i18n-react';
 import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RulesListTableContainer } from './rules_list_table_container';
+import { RULES_LIST_VISIBLE_COLUMNS_STORAGE_KEY } from './rules_list_columns';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
 
 const mockRuleSummaryFlyout = ({ rule }: { rule: { id: string } }) => (
@@ -169,6 +170,7 @@ describe('RulesListTableContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     contentListQueryClient.clear();
+    localStorage.clear();
     mockToRulesQueryParams.mockReturnValue({ filter: undefined, search: undefined });
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
@@ -963,6 +965,65 @@ describe('RulesListTableContainer', () => {
       expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('40 Selected');
       expect(screen.getByTestId('checkboxSelectRow-rule-3')).toBeChecked();
       expect(screen.getByTestId('checkboxSelectRow-rule-4')).toBeChecked();
+    });
+  });
+
+  describe('column visibility', () => {
+    const openColumnSelector = async () => {
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+      await screen.findByTestId('dataGridColumnSelectorSearch');
+    };
+
+    it('persists the visible columns to localStorage', async () => {
+      renderContainer();
+      await waitForRules();
+      await openColumnSelector();
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorToggleColumnVisibility-source'));
+
+      expect(
+        JSON.parse(localStorage.getItem(RULES_LIST_VISIBLE_COLUMNS_STORAGE_KEY) ?? 'null')
+      ).toEqual(['tags', 'routingTags', 'kind', 'enabled']);
+      expect(screen.queryByRole('columnheader', { name: /Source/ })).not.toBeInTheDocument();
+    });
+
+    it('restores the visible columns from localStorage on mount', async () => {
+      localStorage.setItem(RULES_LIST_VISIBLE_COLUMNS_STORAGE_KEY, JSON.stringify(['kind']));
+
+      renderContainer();
+      await waitForRules();
+
+      expect(screen.getByRole('columnheader', { name: /Outcome/ })).toBeInTheDocument();
+      expect(screen.queryByRole('columnheader', { name: /Source/ })).not.toBeInTheDocument();
+    });
+
+    it('falls back to the default sort when the sorted column is hidden', async () => {
+      renderContainer();
+      await waitForRules();
+
+      fireEvent.click(
+        within(screen.getByRole('columnheader', { name: /Outcome/ })).getByRole('button')
+      );
+      await waitFor(() => {
+        expect(screen.getByRole('columnheader', { name: /Outcome/ })).toHaveAttribute(
+          'aria-sort',
+          'ascending'
+        );
+      });
+      expect(screen.getByRole('columnheader', { name: /Name/ })).toHaveAttribute(
+        'aria-sort',
+        'none'
+      );
+
+      await openColumnSelector();
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorToggleColumnVisibility-kind'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('columnheader', { name: /Name/ })).toHaveAttribute(
+          'aria-sort',
+          'ascending'
+        );
+      });
     });
   });
 });
