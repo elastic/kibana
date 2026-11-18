@@ -20,8 +20,8 @@ const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
 
 const createAppenderMock = (name: string) => {
   const appenderMock: MockedKeys<DisposableAppender> = {
-    append: jest.fn(),
-    dispose: jest.fn(),
+    append: vi.fn(),
+    dispose: vi.fn(),
   };
 
   return toTuple(name, appenderMock);
@@ -55,7 +55,7 @@ describe('RewriteAppender', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
@@ -133,7 +133,7 @@ describe('RewriteAppender', () => {
       expect(() => {
         appender.append(createLogRecord());
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Rewrite Appender could not find appender key \\"oops\\". Be sure \`appender.addAppender()\` was called before \`appender.append()\`."`
+        `[Error: Rewrite Appender could not find appender key "oops". Be sure \`appender.addAppender()\` was called before \`appender.append()\`.]`
       );
     });
   });

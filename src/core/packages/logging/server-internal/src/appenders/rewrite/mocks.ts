@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
 import type { RewritePolicy } from './policies/policy';
 
 const createPolicyMock = () => {
-  const mock: jest.Mocked<RewritePolicy> = {
-    rewrite: jest.fn((x) => x),
+  const mock: Mocked<RewritePolicy> = {
+    rewrite: vi.fn((x) => x),
   };
   return mock;
 };

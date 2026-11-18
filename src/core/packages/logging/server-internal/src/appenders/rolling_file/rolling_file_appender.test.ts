@@ -96,10 +96,14 @@ describe('RollingFileAppender', () => {
     createRetentionPolicyMock.mockReturnValue(retention);
 
     context = rollingFileAppenderMocks.createContext('file-path');
-    RollingFileContextMock.mockImplementation(() => context);
+    RollingFileContextMock.mockImplementation(function () {
+      return context;
+    });
 
     fileManager = rollingFileAppenderMocks.createFileManager();
-    RollingFileManagerMock.mockImplementation(() => fileManager);
+    RollingFileManagerMock.mockImplementation(function () {
+      return fileManager;
+    });
 
     appender = new RollingFileAppender(config);
   });

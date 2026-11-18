@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, MockInstance } from 'vitest';
 import {
   makeMockResource,
   mockBatchLogRecordProcessor,
@@ -20,6 +21,7 @@ import {
   mockShutdown,
 } from './otel_appender.test.mocks';
 
+import { createRequire } from 'module';
 import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
 import { metrics, trace, type Attributes } from '@opentelemetry/api';
@@ -29,6 +31,28 @@ import { OtelAppender } from './otel_appender';
 import { RetryingLogRecordExporter } from './retrying_log_exporter';
 import { Layouts } from '../../layouts/layouts';
 import { JsonLayout } from '../../layouts/json_layout';
+
+// `OtelAppender` loads the exporters lazily with `require()`, which `vi.mock` cannot intercept.
+// Seed Node's require cache instead, and drop the entries so later test files get the real modules.
+const nodeRequire = createRequire(__filename);
+const exporterPaths = [
+  '@opentelemetry/exporter-logs-otlp-http',
+  '@opentelemetry/exporter-logs-otlp-proto',
+  '@opentelemetry/exporter-logs-otlp-grpc',
+].map((id) => nodeRequire.resolve(id));
+
+beforeAll(() => {
+  for (const path of exporterPaths) {
+    const exports = { OTLPLogExporter: mockOTLPLogExporter };
+    nodeRequire.cache[path] = { id: path, filename: path, loaded: true, exports } as NodeModule;
+  }
+});
+
+afterAll(() => {
+  for (const path of exporterPaths) {
+    delete nodeRequire.cache[path];
+  }
+});
 
 const validConfig = {
   type: 'otel' as const,
@@ -47,8 +71,8 @@ const makeRecord = (overrides = {}) => ({
 });
 
 describe('OtelAppender', () => {
-  let mockLayoutFormat: jest.SpyInstance;
-  let mockLayoutsCreate: jest.SpyInstance;
+  let mockLayoutFormat: MockInstance;
+  let mockLayoutsCreate: MockInstance;
 
   beforeEach(() => {
     mockEmit.mockReset();
@@ -61,12 +85,12 @@ describe('OtelAppender', () => {
     mockMergeResource.mockClear();
     mockGetConfiguration.mockClear();
     const originalLayoutsCreate = Layouts.create;
-    mockLayoutsCreate = jest.spyOn(Layouts, 'create').mockImplementation((opts) => {
+    mockLayoutsCreate = vi.spyOn(Layouts, 'create').mockImplementation((opts) => {
       const layout = originalLayoutsCreate(opts);
-      mockLayoutFormat = jest.spyOn(layout, 'format');
+      mockLayoutFormat = vi.spyOn(layout, 'format');
       return layout;
     });
-    jest.mocked(trace.setSpanContext).mockClear();
+    vi.mocked(trace.setSpanContext).mockClear();
   });
 
   afterEach(() => {
@@ -559,7 +583,7 @@ describe('OtelAppender', () => {
       // returns the given entries, so we can assert what survives the allowlist/denylist filter.
       const wireResourceWithRawAttributes = (rawAttributes: Array<[string, unknown]>) => {
         const resourceWithKnownRaw = makeMockResource('known');
-        (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue(rawAttributes);
+        (resourceWithKnownRaw.getRawAttributes as Mock).mockReturnValue(rawAttributes);
         const r1 = makeMockResource('r1', {});
         r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
         mockMergeResource.mockReturnValueOnce(r1);
@@ -647,7 +671,7 @@ describe('OtelAppender', () => {
     // returns the given entries (mirrors the includeResources wiring above).
     const wireResource = (rawAttributes: Array<[string, unknown]>) => {
       const resourceWithKnownRaw = makeMockResource('known');
-      (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue(rawAttributes);
+      (resourceWithKnownRaw.getRawAttributes as Mock).mockReturnValue(rawAttributes);
       const r1 = makeMockResource('r1', {});
       r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
       mockMergeResource.mockReturnValueOnce(r1);
@@ -973,7 +997,7 @@ describe('OtelAppender', () => {
       });
 
       it('runs after meta flattening for pattern layout (sees flattened meta and log.logger)', () => {
-        const transformAttributes = jest.fn((attributes: Attributes): Attributes => attributes);
+        const transformAttributes = vi.fn((attributes: Attributes): Attributes => attributes);
         const appender = new OtelAppender({ ...validConfig, transformAttributes });
         appender.append(makeRecord({ meta: { http: { method: 'GET' } } }));
 
@@ -987,7 +1011,7 @@ describe('OtelAppender', () => {
       });
 
       it('with JSON layout: runs on attributes without the flattened meta (meta is in the body)', () => {
-        const transformAttributes = jest.fn((attributes: Attributes): Attributes => attributes);
+        const transformAttributes = vi.fn((attributes: Attributes): Attributes => attributes);
         const appender = new OtelAppender({
           ...validConfig,
           layout: { type: 'json' },
@@ -1023,7 +1047,7 @@ describe('OtelAppender', () => {
         'host.name': 'my-host',
         'service.version': '9.0.0',
       });
-      (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue([
+      (resourceWithKnownRaw.getRawAttributes as Mock).mockReturnValue([
         ['service.name', 'kibana'],
         ['host.name', 'my-host'],
         ['service.version', '9.0.0'],
@@ -1054,7 +1078,7 @@ describe('OtelAppender', () => {
     it('does not shape the resource when an explicit includeResources allowlist is set', () => {
       // The allowlist fully governs the resource: dropResourceAttributes is ignored for it.
       const resourceWithKnownRaw = makeMockResource('known', {});
-      (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue([
+      (resourceWithKnownRaw.getRawAttributes as Mock).mockReturnValue([
         ['service.name', 'serverless-kibana'],
         ['service.type', 'kibana'],
       ]);
@@ -1083,19 +1107,19 @@ describe('OtelAppender', () => {
     });
 
     it('resolves even if shutdown hangs (timeout guard)', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       mockShutdown.mockReturnValue(new Promise(() => {})); // never resolves
       const appender = new OtelAppender(validConfig);
 
       const disposePromise = appender.dispose();
-      jest.runAllTimers();
+      vi.runAllTimers();
       await expect(disposePromise).resolves.toBeUndefined();
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('does not produce an unhandled rejection when shutdown rejects after the timeout', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       let rejectShutdown!: (err: Error) => void;
       mockShutdown.mockReturnValue(
         new Promise<void>((_, rej) => {
@@ -1105,14 +1129,14 @@ describe('OtelAppender', () => {
       const appender = new OtelAppender(validConfig);
 
       const disposePromise = appender.dispose();
-      jest.runAllTimers();
+      vi.runAllTimers();
       await expect(disposePromise).resolves.toBeUndefined();
 
       // Rejecting the shutdown promise after dispose() has already returned should not
       // surface as an unhandled rejection because .catch(() => {}) is attached.
       expect(() => rejectShutdown(new Error('late shutdown failure'))).not.toThrow();
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

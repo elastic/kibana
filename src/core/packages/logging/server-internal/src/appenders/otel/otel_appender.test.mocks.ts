@@ -7,23 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockEmit = jest.fn();
-export const mockShutdown = jest.fn();
-export const mockGetLogger = jest.fn(() => ({ emit: mockEmit }));
-export const mockLoggerProvider = jest.fn(() => ({
-  getLogger: mockGetLogger,
-  shutdown: mockShutdown,
-}));
-export const mockBatchLogRecordProcessor = jest.fn();
-export const mockOTLPLogExporter = jest.fn();
+import type { Mock } from 'vitest';
+export const mockEmit: Mock = vi.fn();
+export const mockShutdown: Mock = vi.fn();
+export const mockGetLogger: Mock = vi.fn(() => ({ emit: mockEmit }));
+// Constructed with `new`, so the implementation must be a `function`, not an arrow.
+export const mockLoggerProvider: Mock = vi.fn(function () {
+  return { getLogger: mockGetLogger, shutdown: mockShutdown };
+});
+export const mockBatchLogRecordProcessor: Mock = vi.fn();
+export const mockOTLPLogExporter: Mock = vi.fn();
 
-export const mockResourceFromAttributes = jest.fn();
+export const mockResourceFromAttributes: Mock = vi.fn();
 
 export interface MockResource {
   type: string;
   attributes: Record<string, unknown>;
-  merge: jest.Mock<MockResource>;
-  getRawAttributes: jest.Mock<Array<[string, unknown]>>;
+  merge: Mock<() => MockResource>;
+  getRawAttributes: Mock<() => Array<[string, unknown]>>;
 }
 
 export const makeMockResource = (
@@ -32,34 +33,34 @@ export const makeMockResource = (
 ): MockResource => ({
   type: label,
   attributes,
-  merge: jest.fn(() => makeMockResource('merged-resource')),
-  getRawAttributes: jest.fn(() => Object.entries(attributes)),
+  merge: vi.fn(() => makeMockResource('merged-resource')),
+  getRawAttributes: vi.fn(() => Object.entries(attributes)),
 });
 
-export const mockMergeResource = jest.fn(() => makeMockResource('merged-resource'));
-export const mockDetectResources = jest.fn(() => ({
+export const mockMergeResource: Mock = vi.fn(() => makeMockResource('merged-resource'));
+export const mockDetectResources: Mock = vi.fn(() => ({
   type: 'detected-resource',
   merge: mockMergeResource,
 }));
 
-jest.mock('@opentelemetry/sdk-logs', () => ({
+vi.mock('@opentelemetry/sdk-logs', () => ({
   LoggerProvider: mockLoggerProvider,
   BatchLogRecordProcessor: mockBatchLogRecordProcessor,
 }));
 
-jest.mock('@opentelemetry/exporter-logs-otlp-http', () => ({
+vi.mock('@opentelemetry/exporter-logs-otlp-http', () => ({
   OTLPLogExporter: mockOTLPLogExporter,
 }));
 
-jest.mock('@opentelemetry/exporter-logs-otlp-grpc', () => ({
+vi.mock('@opentelemetry/exporter-logs-otlp-grpc', () => ({
   OTLPLogExporter: mockOTLPLogExporter,
 }));
 
-jest.mock('@opentelemetry/exporter-logs-otlp-proto', () => ({
+vi.mock('@opentelemetry/exporter-logs-otlp-proto', () => ({
   OTLPLogExporter: mockOTLPLogExporter,
 }));
 
-jest.mock('@elastic/opentelemetry-node/sdk', () => ({
+vi.mock('@elastic/opentelemetry-node/sdk', () => ({
   resources: {
     detectResources: mockDetectResources,
     resourceFromAttributes: mockResourceFromAttributes,
@@ -70,8 +71,8 @@ jest.mock('@elastic/opentelemetry-node/sdk', () => ({
   },
 }));
 
-jest.mock('@opentelemetry/api', () => {
-  const actual = jest.requireActual('@opentelemetry/api');
+vi.mock('@opentelemetry/api', async () => {
+  const actual = await vi.importActual('@opentelemetry/api');
   // actual.trace is a class instance whose methods (getTracer, etc.) live on the prototype,
   // not as own enumerable properties. A plain spread ({ ...actual.trace }) only copies own
   // properties, silently stripping all prototype methods. We preserve the prototype chain
@@ -80,7 +81,7 @@ jest.mock('@opentelemetry/api', () => {
   const mockTrace = Object.create(Object.getPrototypeOf(actual.trace));
   Object.assign(mockTrace, actual.trace, {
     // Override ROOT_CONTEXT with a stable string so tests can assert the exact value passed to setSpanContext.
-    setSpanContext: jest.fn((_ctx: unknown, spanCtx: unknown) => ({ spanContext: spanCtx })),
+    setSpanContext: vi.fn((_ctx: unknown, spanCtx: unknown) => ({ spanContext: spanCtx })),
   });
   return {
     ...actual,
@@ -89,8 +90,8 @@ jest.mock('@opentelemetry/api', () => {
   };
 });
 
-export const mockGetConfiguration = jest.fn();
-jest.mock('@kbn/apm-config-loader', () => ({
+export const mockGetConfiguration: Mock = vi.fn();
+vi.mock('@kbn/apm-config-loader', () => ({
   getConfiguration: mockGetConfiguration,
 }));
 
@@ -98,11 +99,11 @@ jest.mock('@kbn/apm-config-loader', () => ({
 // @kbn/metrics. Those packages load heavy OTel SDK modules (tracers, exporters, etc.)
 // at require-time that are unrelated to what otel_appender.ts actually uses
 // (buildOtelResources). Mocking them here keeps those module graphs from loading.
-jest.mock('@kbn/tracing', () => ({
-  initTracing: jest.fn(),
-  LateBindingSpanProcessor: { get: jest.fn() },
-  OTLPSpanProcessor: jest.fn(),
+vi.mock('@kbn/tracing', () => ({
+  initTracing: vi.fn(),
+  LateBindingSpanProcessor: { get: vi.fn() },
+  OTLPSpanProcessor: vi.fn(),
 }));
-jest.mock('@kbn/metrics', () => ({
-  initMetrics: jest.fn(),
+vi.mock('@kbn/metrics', () => ({
+  initMetrics: vi.fn(),
 }));

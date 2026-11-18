@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('../../layouts/layouts', () => {
-  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
-  const { schema } = require('@kbn/config-schema');
+import type { Mock } from 'vitest';
+vi.mock('../../layouts/layouts', async () => {
+  const { schema } = await import('@kbn/config-schema');
   return {
     Layouts: {
       configSchema: schema.object({
@@ -19,6 +19,6 @@ jest.mock('../../layouts/layouts', () => {
   };
 });
 
-export const mockCreateWriteStream = jest.fn();
-export const mockMkdirSync = jest.fn();
-jest.mock('fs', () => ({ createWriteStream: mockCreateWriteStream, mkdirSync: mockMkdirSync }));
+export const mockCreateWriteStream: Mock = vi.fn();
+export const mockMkdirSync: Mock = vi.fn();
+vi.mock('fs', () => ({ createWriteStream: mockCreateWriteStream, mkdirSync: mockMkdirSync }));

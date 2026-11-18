@@ -38,7 +38,7 @@ test('`schema` throws if `root` logger does not have appenders configured.', () 
       },
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[root.appenders]: array size is [0], but cannot be smaller than [1]"`
+    `[Error: [root.appenders]: array size is [0], but cannot be smaller than [1]]`
   );
 });
 
@@ -213,7 +213,7 @@ test('fails if loggers use unknown appenders.', () => {
   });
 
   expect(() => new LoggingConfig(validateConfig)).toThrowErrorMatchingInlineSnapshot(
-    `"Logger \\"some.nested.context\\" contains unsupported appender key \\"unknown\\"."`
+    `[Error: Logger "some.nested.context" contains unsupported appender key "unknown".]`
   );
 });
 

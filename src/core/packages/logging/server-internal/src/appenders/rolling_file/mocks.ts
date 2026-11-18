@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Layout } from '@kbn/logging';
 import type { RollingFileContext } from './rolling_file_context';
@@ -16,49 +17,49 @@ import type { RollingStrategy } from './strategies/strategy';
 import type { RetentionPolicy } from './retention/retention_policy';
 
 const createContextMock = (filePath: string = 'kibana.log') => {
-  const mock: jest.Mocked<RollingFileContext> = {
+  const mock: Mocked<RollingFileContext> = {
     currentFileSize: 0,
     currentFileTime: 0,
     filePath,
-    refreshFileInfo: jest.fn(),
-    getOrderedRolledFiles: jest.fn(),
-    setOrderedRolledFileFn: jest.fn(),
+    refreshFileInfo: vi.fn(),
+    getOrderedRolledFiles: vi.fn(),
+    setOrderedRolledFileFn: vi.fn(),
   };
   return mock;
 };
 
 const createStrategyMock = () => {
-  const mock: jest.Mocked<RollingStrategy> = {
-    rollout: jest.fn(),
+  const mock: Mocked<RollingStrategy> = {
+    rollout: vi.fn(),
   };
   return mock;
 };
 
 const createPolicyMock = () => {
-  const mock: jest.Mocked<TriggeringPolicy> = {
-    isTriggeringEvent: jest.fn(),
+  const mock: Mocked<TriggeringPolicy> = {
+    isTriggeringEvent: vi.fn(),
   };
   return mock;
 };
 
 const createLayoutMock = () => {
-  const mock: jest.Mocked<Layout> = {
-    format: jest.fn(),
+  const mock: Mocked<Layout> = {
+    format: vi.fn(),
   };
   return mock;
 };
 
 const createFileManagerMock = () => {
-  const mock: jest.Mocked<PublicMethodsOf<RollingFileManager>> = {
-    write: jest.fn(),
-    closeStream: jest.fn(),
+  const mock: Mocked<PublicMethodsOf<RollingFileManager>> = {
+    write: vi.fn(),
+    closeStream: vi.fn(),
   };
   return mock;
 };
 
 const createRetentionPolicyMock = () => {
-  const mock: jest.Mocked<RetentionPolicy> = {
-    apply: jest.fn(),
+  const mock: Mocked<RetentionPolicy> = {
+    apply: vi.fn(),
   };
   return mock;
 };

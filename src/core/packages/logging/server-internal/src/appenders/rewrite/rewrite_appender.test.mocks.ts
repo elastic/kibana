@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
 import { schema } from '@kbn/config-schema';
 
-export const createRewritePolicyMock = jest.fn();
-jest.doMock('./policies', () => ({
+export const createRewritePolicyMock: Mock = vi.fn();
+vi.doMock('./policies', () => ({
   rewritePolicyConfigSchema: schema.any(),
   createRewritePolicy: createRewritePolicyMock,
 }));

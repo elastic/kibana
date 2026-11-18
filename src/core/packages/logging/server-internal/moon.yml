@@ -30,13 +30,14 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/security-hardening'
   - '@kbn/telemetry'
+  - '@kbn/vitest'
 tags:
   - shared-server
   - package
   - prod
   - group-platform
   - private
-  - jest-unit-tests
+  - vitest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'

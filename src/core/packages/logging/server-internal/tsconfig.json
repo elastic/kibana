@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
-      "jest",
+      "vitest/globals",
       "node"
     ]
   },
@@ -24,6 +24,7 @@
     "@kbn/utility-types",
     "@kbn/security-hardening",
     "@kbn/telemetry",
+    "@kbn/vitest",
   ],
   "exclude": [
     "target/**/*",

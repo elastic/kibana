@@ -8,12 +8,12 @@
  */
 
 import { EcsVersion } from '@elastic/ecs';
-import { test as fcTest, fc } from '@fast-check/jest';
+import { test as fcTest, fc } from '@fast-check/vitest';
 import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
 
-jest.spyOn(process, 'uptime').mockReturnValue(10);
+vi.spyOn(process, 'uptime').mockReturnValue(10);
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));
 const records: LogRecord[] = [

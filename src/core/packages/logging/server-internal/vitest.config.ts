@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/jest/jest_node',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/core/packages/logging/server-internal'],
-};
+import { defineConfig, mergeConfig } from 'vitest/config';
+import preset from '@kbn/vitest/node_preset';
+
+export default mergeConfig(preset, defineConfig({ test: { root: import.meta.dirname } }));

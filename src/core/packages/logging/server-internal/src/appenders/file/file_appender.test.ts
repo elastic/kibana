@@ -94,7 +94,7 @@ test('file stream is created only once and only after first `append()` is called
 });
 
 test('`append()` correctly formats records and pushes them to the file.', () => {
-  const mockStreamWrite = jest.fn();
+  const mockStreamWrite = vi.fn();
   mockCreateWriteStream.mockReturnValue({ write: mockStreamWrite });
 
   const records: LogRecord[] = [
@@ -146,8 +146,8 @@ test('`dispose()` succeeds even if stream is not created.', async () => {
 });
 
 test('`dispose()` closes stream.', async () => {
-  const mockStreamEndFinished = jest.fn();
-  const mockStreamEnd = jest.fn(async (callback) => {
+  const mockStreamEndFinished = vi.fn();
+  const mockStreamEnd = vi.fn(async (callback) => {
     // It's required to make sure `dispose` waits for `end` to complete.
     await tickMs(100);
     mockStreamEndFinished();
@@ -191,10 +191,10 @@ describe('write failures', () => {
 
   const createMockStream = () => {
     const stream = Object.assign(new EventEmitter(), {
-      write: jest.fn(),
+      write: vi.fn(),
       destroyed: false,
-      destroy: jest.fn(),
-      end: jest.fn((cb?: () => void) => cb?.()),
+      destroy: vi.fn(),
+      end: vi.fn((cb?: () => void) => cb?.()),
     });
     stream.destroy.mockImplementation(() => {
       stream.destroyed = true;
@@ -219,10 +219,10 @@ describe('write failures', () => {
     });
 
     it.each(['not-a-function', 42, true, null])(
-      'ignores a non-function %p, leaving stream errors unhandled',
+      'ignores a non-function %o, leaving stream errors unhandled',
       (onWriteError) => {
         const stream = createMockStream();
-        const onSpy = jest.spyOn(stream, 'on');
+        const onSpy = vi.spyOn(stream, 'on');
         mockCreateWriteStream.mockReturnValue(stream);
 
         new FileAppender(
@@ -237,7 +237,7 @@ describe('write failures', () => {
 
     it('does not subscribe to stream errors, leaving them unhandled as before', () => {
       const stream = createMockStream();
-      const onSpy = jest.spyOn(stream, 'on');
+      const onSpy = vi.spyOn(stream, 'on');
       mockCreateWriteStream.mockReturnValue(stream);
 
       new FileAppender({ format: () => '' }, 'mock://path/file.log').append(record);
@@ -251,7 +251,7 @@ describe('write failures', () => {
       mockMkdirSync.mockImplementation(() => {
         throw enospc();
       });
-      const onWriteError = jest.fn();
+      const onWriteError = vi.fn();
 
       const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', onWriteError);
 
@@ -262,7 +262,7 @@ describe('write failures', () => {
     it('reports an asynchronous stream failure instead of crashing the process', () => {
       const stream = createMockStream();
       mockCreateWriteStream.mockReturnValue(stream);
-      const onWriteError = jest.fn();
+      const onWriteError = vi.fn();
 
       const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', onWriteError);
       appender.append(record);
@@ -277,7 +277,7 @@ describe('write failures', () => {
       const failed = createMockStream();
       const reopened = createMockStream();
       mockCreateWriteStream.mockReturnValueOnce(failed).mockReturnValue(reopened);
-      const onWriteError = jest.fn();
+      const onWriteError = vi.fn();
 
       const appender = new FileAppender(
         { format: () => 'formatted' },
@@ -300,7 +300,7 @@ describe('write failures', () => {
       const failed = createMockStream();
       const reopened = createMockStream();
       mockCreateWriteStream.mockReturnValueOnce(failed).mockReturnValue(reopened);
-      const onWriteError = jest.fn();
+      const onWriteError = vi.fn();
 
       const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', onWriteError);
       appender.append(record);
@@ -314,7 +314,7 @@ describe('write failures', () => {
     it('lets a layout failure through instead of blaming the file', () => {
       const stream = createMockStream();
       mockCreateWriteStream.mockReturnValue(stream);
-      const onWriteError = jest.fn();
+      const onWriteError = vi.fn();
       const boom = new Error('Converting circular structure to JSON');
 
       const appender = new FileAppender(
@@ -346,7 +346,7 @@ describe('write failures', () => {
           },
         },
         'mock://path/file.log',
-        jest.fn()
+        vi.fn()
       );
 
       expect(() => appender.append(record)).toThrow();

@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('../../layouts/layouts', () => {
-  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
-  const { schema } = require('@kbn/config-schema');
+vi.mock('../../layouts/layouts', async () => {
+  const { schema } = await import('@kbn/config-schema');
   return {
     Layouts: {
       configSchema: schema.object({
@@ -40,7 +39,7 @@ test('`configSchema` creates correct schema.', () => {
 });
 
 test('`append()` correctly formats records and pushes them to console.', () => {
-  jest.spyOn(unsafeConsole, 'log').mockImplementation(() => {
+  vi.spyOn(unsafeConsole, 'log').mockImplementation(() => {
     // noop
   });
 
