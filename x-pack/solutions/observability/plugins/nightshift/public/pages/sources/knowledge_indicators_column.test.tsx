@@ -9,7 +9,6 @@ import React from 'react';
 import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SignificantEventsWorkflowStatus, type Feature } from '@kbn/significant-events-schema';
-import { FEATURES_QUERY_KEY } from '../../data/query_keys';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 
 const mockFetch = jest.fn<Promise<{ features: Feature[] }>, []>();
@@ -90,7 +89,7 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     await screen.findByText('1');
   });
 
-  it('retains the count and pauses after failure, then resumes after a successful retry', async () => {
+  it('retains the count and retries failures slowly without repeated toasts, then resumes polling', async () => {
     mockFetch.mockResolvedValue({ features: initialFeatures });
     renderColumn();
     await screen.findByText('2');
@@ -101,18 +100,25 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
 
     const requestsAfterFailure = mockFetch.mock.calls.length;
-    await advanceTime(60_000);
+    await advanceTime(59_000);
     expect(mockFetch).toHaveBeenCalledTimes(requestsAfterFailure);
     expect(mockAddError).toHaveBeenCalledTimes(1);
 
+    await advanceTime(1_000);
+    expect(mockFetch).toHaveBeenCalledTimes(requestsAfterFailure + 1);
+    expect(mockAddError).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('2')).toBeInTheDocument();
+
     mockFetch.mockResolvedValue({ features: [createFeature('orders')] });
-    await act(async () => {
-      await queryClient.invalidateQueries({ queryKey: FEATURES_QUERY_KEY });
-    });
+    await advanceTime(60_000);
     await screen.findByText('1');
 
     mockFetch.mockResolvedValue({ features: [] });
     await advanceTime(10_000);
     await screen.findByText('—');
+
+    mockFetch.mockRejectedValue(new Error('Another feature fetch failure'));
+    await advanceTime(10_000);
+    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(2));
   });
 });

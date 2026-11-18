@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { isComputedFeature, type Feature } from '@kbn/significant-events-schema';
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
 import { useKibana } from '../../hooks/use_kibana';
 import { FEATURES_QUERY_KEY } from '../query_keys';
+
+const ERROR_REFETCH_INTERVAL_MS = 60_000;
 
 export const useStreamFeatures = (
   sourceId: string,
@@ -23,6 +25,7 @@ export const useStreamFeatures = (
 ) => {
   const { significantEventsRepositoryClient } = useKibana().services.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
+  const reportedErrorSourceId = useRef<string>();
 
   const fetchFeatures = async ({ signal: querySignal }: QueryFunctionContext) => {
     return significantEventsRepositoryClient.fetch('GET /internal/streams/{sourceId}/features', {
@@ -41,9 +44,23 @@ export const useStreamFeatures = (
   const { data, isLoading, error, refetch } = useQuery<{ features: Feature[] }, Error>({
     queryKey: [...FEATURES_QUERY_KEY, sourceId, ...deps],
     queryFn: fetchFeatures,
-    onError: showFetchErrorToast,
+    onError: (fetchError) => {
+      if (!refetchInterval || reportedErrorSourceId.current !== sourceId) {
+        reportedErrorSourceId.current = sourceId;
+        showFetchErrorToast(fetchError);
+      }
+    },
+    onSuccess: () => {
+      reportedErrorSourceId.current = undefined;
+    },
     enabled,
-    refetchInterval: (_data, query) => (query.state.status === 'error' ? false : refetchInterval),
+    refetchInterval: (_data, query) => {
+      if (!refetchInterval || query.state.status !== 'error') {
+        return refetchInterval;
+      }
+
+      return Math.max(refetchInterval, ERROR_REFETCH_INTERVAL_MS);
+    },
     refetchIntervalInBackground: false,
   });
 
