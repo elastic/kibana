@@ -252,26 +252,27 @@ export function defineRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> => {
       const { type, id } = req.params;
-      const { attributes, version, references } = req.body;
-      const options = { version, references };
+      const { attributes, references } = req.body;
 
-      const [{ savedObjects }] = await core.getStartServices();
+      const [{ savedObjects, elasticsearch }, { spaces }] = await core.getStartServices();
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
         includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
       });
-      const savedAlert = await savedObjectsWithAlerts.get<RawRule>(type, id);
-      const result = await retryIfConflicts(
-        logger,
-        `/api/alerts_fixture/saved_object/${type}/${id}`,
-        async () => {
-          return await savedObjectsWithAlerts.update(
-            type,
-            id,
-            { ...savedAlert.attributes, ...attributes },
-            options
-          );
-        }
-      );
+      // makes sure that the object exists in the space of the request
+      await savedObjectsWithAlerts.get<RawRule>(type, id);
+
+      // The attributes are written directly to Elasticsearch. Tests use this route to tamper with a
+      // stored object, for example to make its encrypted attributes impossible to decrypt, and an
+      // update through the saved objects client keeps the encrypted attributes decryptable.
+      const spaceId = spaces?.spacesService.getSpaceId(req) ?? DEFAULT_SPACE_ID;
+      const namespace = spaceId === DEFAULT_SPACE_ID ? undefined : spaceId;
+      const result = await elasticsearch.client.asInternalUser.update({
+        index: savedObjects.getIndexForType(type),
+        id: savedObjects.createSerializer().generateRawId(namespace, type, id),
+        doc: { [type]: attributes, ...(references ? { references } : {}) },
+        refresh: true,
+        retry_on_conflict: 3,
+      });
       return res.ok({ body: result });
     }
   );

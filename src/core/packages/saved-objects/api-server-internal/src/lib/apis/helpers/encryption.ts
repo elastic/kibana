@@ -18,6 +18,7 @@ import type {
   AuthorizationTypeMap,
   ISavedObjectsSecurityExtension,
   ISavedObjectsEncryptionExtension,
+  SavedObjectsUpdateEncryptionRequirements,
 } from '@kbn/core-saved-objects-server';
 
 export type IEncryptionHelper = PublicMethodsOf<EncryptionHelper>;
@@ -54,6 +55,51 @@ export class EncryptionHelper {
       descriptor,
       attributes as Record<string, unknown>
     ) as unknown as T;
+  }
+
+  /**
+   * Decrypts all encrypted attributes of a stored object, throwing if any of them cannot be decrypted.
+   */
+  async optionallyDecryptAttributes<T>(
+    type: string,
+    id: string,
+    namespaceOrNamespaces: string | string[] | undefined,
+    attributes: T
+  ): Promise<T> {
+    if (!this.encryptionExtension?.isEncryptableType(type)) {
+      return attributes;
+    }
+    const namespace = Array.isArray(namespaceOrNamespaces)
+      ? namespaceOrNamespaces[0]
+      : namespaceOrNamespaces;
+    const descriptor = { type, id, namespace };
+    return this.encryptionExtension.decryptAttributes(
+      descriptor,
+      attributes as Record<string, unknown>
+    ) as unknown as T;
+  }
+
+  /**
+   * Returns how encryption must be handled when the attributes of a partial update are merged into a stored object.
+   */
+  getUpdateEncryptionRequirements<T>(
+    type: string,
+    attributes: T
+  ): SavedObjectsUpdateEncryptionRequirements {
+    if (!this.encryptionExtension?.isEncryptableType(type)) {
+      return { decryptCurrent: false, encryptRequirement: 'none' };
+    }
+    return this.encryptionExtension.getUpdateEncryptionRequirements(
+      type,
+      attributes as Record<string, unknown>
+    );
+  }
+
+  /**
+   * Returns the names of the encrypted attributes of a type, or an empty set if the type is not encryptable.
+   */
+  getEncryptedAttributes(type: string): ReadonlySet<string> {
+    return this.encryptionExtension?.getEncryptedAttributes(type) ?? new Set<string>();
   }
 
   async optionallyDecryptAndRedactSingleResult<T, A extends string>(

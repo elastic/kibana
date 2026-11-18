@@ -10,6 +10,7 @@ import type {
   ISavedObjectsEncryptionExtension,
   ISavedObjectTypeRegistry,
   SavedObject,
+  SavedObjectsUpdateEncryptionRequirements,
 } from '@kbn/core-saved-objects-server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
@@ -93,5 +94,32 @@ export class SavedObjectsEncryptionExtension implements ISavedObjectsEncryptionE
     };
     const user = await this._getCurrentUser();
     return this._service.encryptAttributes(normalizedDescriptor, attributes, { user });
+  }
+
+  getUpdateEncryptionRequirements(
+    type: string,
+    updatedAttributes: Record<string, unknown>
+  ): SavedObjectsUpdateEncryptionRequirements {
+    return this._service.getUpdateEncryptionRequirements(type, updatedAttributes);
+  }
+
+  async decryptAttributes<T extends Record<string, unknown>>(
+    descriptor: EncryptedObjectDescriptor,
+    attributes: T
+  ): Promise<T> {
+    if (!this._service.isRegistered(descriptor.type)) {
+      return attributes;
+    }
+
+    const { type, id, namespace } = descriptor;
+
+    const normalizedDescriptor = {
+      type,
+      id,
+      namespace: getDescriptorNamespace(this._baseTypeRegistry, type, namespace),
+    };
+    const user = await this._getCurrentUser();
+    // Unlike `decryptOrStripResponseAttributes`, a decryption failure is thrown to the caller.
+    return this._service.decryptAttributes(normalizedDescriptor, attributes, { user });
   }
 }

@@ -26,7 +26,7 @@ import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-
 import type { CreateRequest, IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { isValidRequest } from '../utils';
-import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';
+import { getCurrentTime, getSavedObjectFromSource, mergeAndEncryptForUpdate } from './utils';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
@@ -282,22 +282,17 @@ export const executeUpdate = async <T>(
     // therefor we can safely process with the "standard" update sequence.
 
     const mergeAttributes = options.mergeAttributes ?? true;
-    const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
+    const updatedAttributes = await mergeAndEncryptForUpdate({
+      encryptionHelper,
+      logger,
       type,
       id,
       namespace,
-      attributes
-    );
-
-    const updatedAttributes = mergeAttributes
-      ? mergeForUpdate({
-          targetAttributes: {
-            ...(migrated!.attributes as Record<string, unknown>),
-          },
-          updatedAttributes: encryptedUpdatedAttributes,
-          typeMappings: typeDefinition.mappings,
-        })
-      : encryptedUpdatedAttributes;
+      storedAttributes: migrated!.attributes as Record<string, unknown>,
+      updatedAttributes: attributes,
+      typeMappings: typeDefinition.mappings,
+      mergeAttributes,
+    });
 
     const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
       ...migrated!,

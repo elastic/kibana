@@ -95,9 +95,12 @@ This is a runtime check, not a lint rule — there is no comment or config that 
 
 ## Partial Update Safety
 
-**Critical:** Partial updates (`savedObjectsClient.update` or `savedObjectsRepository.update`) on ESOs must **never** modify encrypted attributes or AAD-included attributes. Doing so corrupts the object, making it permanently undecryptable.
+Changing an encrypted or AAD-included attribute requires re-encryption against the complete object. Which partial updates are safe depends on the API:
 
-**Required pattern:** Create a type-safe partial update helper that strips encrypted and AAD attributes:
+- **`update` and `bulkUpdate`** (Saved Objects client or repository) are safe for any attribute when attributes are merged (the default). Each merges the provided attributes into the stored object and encrypts the result, decrypting the stored object first when the update provides an AAD attribute or only some of the encrypted attributes. If the stored object cannot be decrypted, the update still succeeds: it logs a warning and keeps the encrypted attributes it does not replace exactly as stored, so they stay undecryptable until an update provides every encrypted attribute. With `mergeAttributes: false` the provided attributes replace the stored ones, so provide the entire object.
+- **Direct Elasticsearch writes** do not re-encrypt. Limit them to attributes that are neither encrypted nor AAD-included; any other direct write makes the object permanently undecryptable.
+
+**Optional pattern:** A type-safe partial update helper that strips encrypted and AAD attributes avoids the cost of decrypting and re-encrypting the object on frequent updates:
 
 ```ts
 export const MyTypeAttributesToEncrypt = ['secrets'];
@@ -121,8 +124,6 @@ export async function partiallyUpdateMyType(
   await savedObjectsClient.update('my_encrypted_type', id, safeAttributes, options);
 }
 ```
-
-Any code that calls `savedObjectsClient.update` or `savedObjectsRepository.update` on an ESO type must verify that encrypted and AAD attributes are excluded from the update payload.
 
 ## Accessing Decrypted Data
 
@@ -281,9 +282,9 @@ When working with ESO-related code, verify:
    - [ ] `dangerouslyExposeValue` is only used with documented justification
 
 2. **Partial update safety**
-   - [ ] No `savedObjectsClient.update` calls modify encrypted or AAD attributes
-   - [ ] A type-safe partial update helper exists that strips unsafe attributes
-   - [ ] The `NotPartiallyUpdatable` type is kept in sync with the ESO registration
+   - [ ] No direct Elasticsearch write modifies encrypted or AAD attributes
+   - [ ] No `update` or `bulkUpdate` call with `mergeAttributes: false` provides less than the entire object
+   - [ ] Any `NotPartiallyUpdatable` type is kept in sync with the ESO registration
 
 3. **Model version migrations**
    - [ ] `createModelVersion` is used when encrypted or AAD attributes change

@@ -2596,3 +2596,67 @@ describe('#__dangerousClone', () => {
     expect(clone.getRegisteredTypes()).toEqual(['type-a']);
   });
 });
+
+describe('#getUpdateEncryptionRequirements', () => {
+  const NO_ENCRYPTION = { decryptCurrent: false, encryptRequirement: 'none' };
+  const ENCRYPT_ONLY = { decryptCurrent: false, encryptRequirement: 'post-merge' };
+  const DECRYPT_AND_ENCRYPT = { decryptCurrent: true, encryptRequirement: 'post-merge' };
+
+  beforeEach(() => {
+    service.registerType({
+      type: 'known-type-1',
+      attributesToEncrypt: new Set(['secretOne', 'secretTwo']),
+      attributesToIncludeInAAD: new Set(['aadOne', 'aadTwo']),
+    });
+  });
+
+  it('requires nothing for types that are not registered', () => {
+    expect(
+      service.getUpdateEncryptionRequirements('unknown-type', { secretOne: 'one', aadOne: 'one' })
+    ).toEqual(NO_ENCRYPTION);
+  });
+
+  it.each([
+    ['no attributes', {}, NO_ENCRYPTION],
+    ['only attributes that are neither encrypted nor in AAD', { other: 'x' }, NO_ENCRYPTION],
+    [
+      'encrypted and AAD attributes that are `undefined`',
+      { other: 'x', secretOne: undefined, aadOne: undefined },
+      NO_ENCRYPTION,
+    ],
+    ['an AAD attribute only', { aadOne: 'x' }, DECRYPT_AND_ENCRYPT],
+    ['all AAD attributes only', { aadOne: 'x', aadTwo: 'y' }, DECRYPT_AND_ENCRYPT],
+    ['an AAD attribute that is `null`', { aadOne: null }, DECRYPT_AND_ENCRYPT],
+    ['some of the encrypted attributes', { secretOne: 'x' }, DECRYPT_AND_ENCRYPT],
+    [
+      'some of the encrypted attributes, the others being `undefined`',
+      { secretOne: 'x', secretTwo: undefined },
+      DECRYPT_AND_ENCRYPT,
+    ],
+    [
+      'some of the encrypted attributes and all AAD attributes',
+      { secretOne: 'x', aadOne: 'x', aadTwo: 'y' },
+      DECRYPT_AND_ENCRYPT,
+    ],
+    ['all encrypted attributes', { secretOne: 'x', secretTwo: 'y' }, ENCRYPT_ONLY],
+    [
+      'all encrypted attributes, some being `null`',
+      { secretOne: 'x', secretTwo: null },
+      ENCRYPT_ONLY,
+    ],
+    [
+      'all encrypted attributes and some AAD attributes',
+      { secretOne: 'x', secretTwo: 'y', aadOne: 'x' },
+      ENCRYPT_ONLY,
+    ],
+    [
+      'all encrypted attributes and all AAD attributes',
+      { secretOne: 'x', secretTwo: 'y', aadOne: 'x', aadTwo: 'y' },
+      ENCRYPT_ONLY,
+    ],
+  ])('when the update supplies %s', (_, updatedAttributes, expected) => {
+    expect(service.getUpdateEncryptionRequirements('known-type-1', updatedAttributes)).toEqual(
+      expected
+    );
+  });
+});
