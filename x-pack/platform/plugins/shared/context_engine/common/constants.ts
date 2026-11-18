@@ -21,6 +21,28 @@ export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{a
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
 export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
+export const SESSION_MEMORY_FORGET_PATH = `${PUBLIC_API_PATH}/memory/_forget`;
+export const SESSION_MEMORY_REMEMBER_PATH = `${PUBLIC_API_PATH}/memory/_remember`;
+
+export const MAX_SESSION_MEMORY_FORGET_IDS = 100;
+export const MAX_SESSION_MEMORY_ID_LENGTH = 256;
+export const MAX_SESSION_MEMORY_USER_ID_LENGTH = 1024;
+export const MAX_SESSION_MEMORY_SESSION_ID_LENGTH = 256;
+export const MAX_SESSION_MEMORY_AI_INDEX_IDS = 100;
+export const MAX_SESSION_MEMORY_ATTRIBUTES = 50;
+export const MAX_SESSION_MEMORY_ATTRIBUTE_KEY_LENGTH = 256;
+export const MAX_SESSION_MEMORY_ATTRIBUTE_VALUE_LENGTH = 1024;
+export const SESSION_EVENTS_SAVE_PATH = `${PUBLIC_API_PATH}/memory/_save_event`;
+
+export const MAX_SESSION_EVENTS_BODY_BYTES = 10 * 1024 * 1024;
+export const MAX_SESSION_EVENTS_PER_REQUEST = 1000;
+export const MAX_SESSION_EVENT_ID_LENGTH = 256;
+export const MAX_SESSION_EVENT_USER_ID_LENGTH = 1024;
+export const MAX_SESSION_EVENT_TOOL_NAME_LENGTH = 256;
+export const MAX_SESSION_EVENT_TOOL_CALLS = 128;
+export const MAX_SESSION_EVENT_AI_INDEX_IDS = 100;
+export const MAX_SESSION_EVENT_TIMESTAMP_LENGTH = 64;
+export const MAX_SESSION_EVENT_TEXT_LENGTH = 1024 * 1024;
 /**
  * A static segment wins over `{kiId}`, so `GET` can't read a KI whose id is exactly `_groups`.
  * `PATCH`, `DELETE` and `_restore` still reach it.
@@ -175,3 +197,18 @@ export const AGENT_BUILDER_TRACES_INDEX_PREFIX = 'traces-agent_builder.otel-';
 /** The Agent Builder OTel traces index name for a given Kibana space. */
 export const buildAgentBuilderTracesIndexName = (spaceId: string): string =>
   `${AGENT_BUILDER_TRACES_INDEX_PREFIX}${spaceId}`;
+
+/** Recall API (public): one ranked result over session events, session memory and AI indices. */
+export const MEMORY_RECALL_PATH = `${PUBLIC_API_PATH}/memory/_recall`;
+export const MAX_RECALL_QUERY_LENGTH = 4096;
+export const MAX_RECALL_USER_ID_LENGTH = 512;
+export const MAX_RECALL_SESSION_ID_LENGTH = 512;
+export const MAX_RECALL_SESSION_IDS = 100;
+export const MIN_RECALL_MAX_TOKENS = 1000;
+export const MAX_RECALL_MAX_TOKENS = 25000;
+export const DEFAULT_RECALL_MAX_TOKENS = 6000;
+/** Share of `max_tokens` held for the user's pinned session memories. */
+export const RECALL_RESERVED_TOKENS = 400;
+/** Candidates each store sends to the reranker. */
+export const RECALL_CANDIDATES = { session_events: 20, session_memory: 20, ai_index: 50 } as const;
+export const RECALL_RERANK_INFERENCE_ID = '.jina-reranker-v3';
