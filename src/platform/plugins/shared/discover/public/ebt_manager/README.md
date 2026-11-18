@@ -100,7 +100,7 @@ Tracks cascaded document expansion/collapse, opt-out, and open-in-new-tab action
 | `eventName`        | `keyword`            | Cascade action.                                                           |
 | `tabId`            | `keyword`            | ID of the tab where the cascade interaction occurred.                     |
 | `nodeId`           | `keyword` (optional) | ID of the cascaded document node, when applicable.                        |
-| `exclusionReason`  | `keyword` (optional) | Why the cascade was withheld, e.g. `timeseries_multiple_stats`, `timeseries_stats_in_fork`. |
+| `exclusionReason`  | `keyword` (optional) | Why the cascade was withheld, e.g. `timeseries_multiple_stats`, `timeseries_stats_in_fork`, `group_field_renamed_after_stats`. |
 
 ### `discover_in_dashboard`
 

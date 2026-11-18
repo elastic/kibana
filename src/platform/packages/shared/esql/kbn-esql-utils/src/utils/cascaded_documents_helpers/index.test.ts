@@ -334,10 +334,41 @@ describe('cascaded documents helpers utils', () => {
           'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | KEEP count',
           'group_field_stripped_by_keep',
         ],
+        [
+          'a RENAME command gives the grouping option another name',
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | RENAME clientip AS ip',
+          'group_field_renamed_after_stats',
+        ],
+        [
+          'a RENAME command gives the grouping option another name with the assignment syntax',
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | RENAME ip = clientip',
+          'group_field_renamed_after_stats',
+        ],
       ])('reports why no metadata was produced when %s', (_, queryString, exclusionReason) => {
         const result = getESQLStatsQueryMeta(queryString);
         expect(result.groupByFields).toEqual([]);
         expect(result.exclusionReason).toBe(exclusionReason);
+      });
+
+      it('still produces metadata when the RENAME precedes the STATS command', () => {
+        // the records then carry the new name, which is also the name the STATS command declares,
+        // so the cascade looks the group up by a name the records hold
+        const result = getESQLStatsQueryMeta(
+          'FROM kibana_sample_data_logs | RENAME clientip AS ip | STATS count = COUNT(*) BY ip'
+        );
+
+        expect(result.exclusionReason).toBeUndefined();
+        expect(result.groupByFields.map(({ field }) => field)).toEqual(['ip']);
+      });
+
+      it('still produces metadata when a RENAME targets an aggregate rather than the grouping option', () => {
+        // the aggregate's cell goes blank, but the grouping the cascade is built on still resolves
+        const result = getESQLStatsQueryMeta(
+          'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | RENAME count AS total'
+        );
+
+        expect(result.exclusionReason).toBeUndefined();
+        expect(result.groupByFields.map(({ field }) => field)).toEqual(['clientip']);
       });
 
       it('withholds the cascade experience from TS queries that declare multiple STATS commands', () => {

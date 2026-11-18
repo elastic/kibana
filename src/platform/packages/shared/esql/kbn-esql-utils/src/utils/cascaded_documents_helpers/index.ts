@@ -40,6 +40,7 @@ import { extractCategorizeTokens } from '../extract_categorize_tokens';
 import { getOperator } from '../append_to_query/utils';
 import {
   convertTimeseriesCommandNodeToFrom,
+  getArgsFromRenameFunction,
   hasTimeseriesInfoCommand,
 } from '../query_parsing_helpers';
 import {
@@ -117,6 +118,13 @@ export const ESQL_STATS_QUERY_META_EXCLUSION_REASON = {
   UNSUPPORTED_GROUPING_FUNCTION: 'unsupported_grouping_function',
   /** A KEEP command strips the grouping option from the resulting records. */
   GROUP_FIELD_STRIPPED_BY_KEEP: 'group_field_stripped_by_keep',
+  /**
+   * A RENAME command gives the grouping option another name in the resulting records.
+   * The records then carry the new name while the cascade looks the group up by the name the
+   * STATS command declared, so every record collapses into a single "not set" group whose
+   * documents resolve to none.
+   */
+  GROUP_FIELD_RENAMED_AFTER_STATS: 'group_field_renamed_after_stats',
   /**
    * A TS source query declaring more than one STATS command,
    * see {@link getUnsupportedTimeseriesCascadeShape} for why this cannot be resolved.
@@ -313,6 +321,33 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
       // we found a keep command that strips the current group field from the resulting records,
       // so we break out of the loop as that invalidates the possibility of grouping by the current group field
       groupingExclusionReason = ESQL_STATS_QUERY_META_EXCLUSION_REASON.GROUP_FIELD_STRIPPED_BY_KEEP;
+      break;
+    }
+
+    // a rename command after the declaring stats command leaves the records holding the new name
+    // while the cascade looks the group up by the name the stats command declared, so the lookup
+    // misses on every record and the rows collapse into a single group that resolves to no documents
+    const offendingRenameCommand = esqlQuery.ast.commands
+      .slice(groupDeclarationStatsCommandIndex)
+      .some(
+        (cmd) =>
+          cmd.name === 'rename' &&
+          cmd.args.some((arg) => {
+            if (!isFunctionExpression(arg)) {
+              return false;
+            }
+
+            // RENAME accepts both "old AS new" and "new = old", which hold their operands in
+            // opposite order, so the helper is what tells us which side is being renamed away
+            const { original } = getArgsFromRenameFunction(arg);
+
+            return original && removeBackticks(original.name) === removeBackticks(groupFieldName);
+          })
+      );
+
+    if (offendingRenameCommand) {
+      groupingExclusionReason =
+        ESQL_STATS_QUERY_META_EXCLUSION_REASON.GROUP_FIELD_RENAMED_AFTER_STATS;
       break;
     }
 
