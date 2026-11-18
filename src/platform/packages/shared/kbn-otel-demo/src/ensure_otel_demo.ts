@@ -268,7 +268,7 @@ export async function deployDemo({
     });
   }
 
-  // Resolve the collector before tearing down, so a registry login failure leaves
+  // Resolve the collector before tearing down, so a resolution failure leaves
   // the running demo in place. Scenario image builds above follow the same rule.
   let collectorImage: string;
   if (useVanillaCollector) {

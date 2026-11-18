@@ -9,6 +9,8 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
+import { existsSync } from 'fs';
+import { join } from 'path';
 import { resolveEdotCollectorVersion } from './resolve_edot_collector_version';
 
 jest.mock('execa', () => ({
@@ -118,17 +120,41 @@ describe('resolveEdotCollectorVersion', () => {
     );
   });
 
-  it('stops when the saved docker.elastic.co login is rejected', async () => {
+  it('inspects manifests with an empty Docker config and removes it afterwards', async () => {
+    let dockerConfigDir: string | undefined;
+    mockExecaCommand.mockImplementation((_command, options) => {
+      const configDir = options?.env?.DOCKER_CONFIG;
+      if (typeof configDir !== 'string') {
+        throw new Error('DOCKER_CONFIG was not set');
+      }
+      expect(existsSync(configDir)).toBe(true);
+      expect(existsSync(join(configDir, 'config.json'))).toBe(false);
+      dockerConfigDir = configDir;
+      // execa.command returns a thenable child process. The caller only awaits it.
+      return Promise.resolve(mockExecaResult) as ReturnType<typeof execa.command>;
+    });
+
+    const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
+
+    if (!dockerConfigDir) {
+      throw new Error('DOCKER_CONFIG was not set');
+    }
+    expect(version).toBe('9.1.0');
+    expect(dockerConfigDir).toEqual(expect.stringContaining('edot-collector-docker-config-'));
+    expect(existsSync(dockerConfigDir)).toBe(false);
+  });
+
+  it('keeps walking when the registry returns HTTP 500', async () => {
     const error = Object.assign(new Error('command failed'), {
       stderr:
         'Get "https://docker.elastic.co/v2/elastic-agent/elastic-otel-collector/manifests/9.1.0": received unexpected HTTP status: 500 Internal Server Error',
     });
-    mockExecaCommand.mockRejectedValueOnce(error);
+    mockExecaCommand.mockRejectedValueOnce(error).mockResolvedValueOnce(mockExecaResult);
 
-    await expect(resolveEdotCollectorVersion(mockLog as unknown as ToolingLog)).rejects.toThrow(
-      'https://docker-auth.elastic.co/github_auth'
-    );
-    expect(mockExecaCommand).toHaveBeenCalledTimes(1);
+    const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
+
+    expect(version).toBe('9.0.0');
+    expect(mockExecaCommand).toHaveBeenCalledTimes(2);
   });
 
   it('should fall back to Kibana version when no image is found', async () => {
