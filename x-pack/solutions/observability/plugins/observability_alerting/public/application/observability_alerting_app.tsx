@@ -288,11 +288,7 @@ export const ObservabilityAlertingApp = ({
         </Route>
         <Route path={OBSERVABILITY_ALERTING_IMPORTS_PATH}>
           <EuiPageSection paddingSize="m">
-            <ImportsPage
-              coreStart={coreStart}
-              setBreadcrumbs={setBreadcrumbs}
-              hostApp={hostApp}
-            />
+            <ImportsPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp} />
           </EuiPageSection>
         </Route>
         <Redirect to={OBSERVABILITY_ALERTING_ALERTS_PATH} />
