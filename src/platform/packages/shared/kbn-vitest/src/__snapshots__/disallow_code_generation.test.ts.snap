@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`code generation from strings > reads existing snapshot files 1`] = `
+Object {
+  "snapshot": "read with node:vm",
+}
+`;

@@ -321,6 +321,9 @@ overrides:
 
 pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
 
+patchedDependencies:
+  vitest@5.1.0: a030d92a29d8d3145fce643d1dee9efe31c7966f28e5f8d34f635d049b2e9b4a
+
 importers:
 
   .:
@@ -5194,7 +5197,7 @@ importers:
         version: 2.1.1(@jest/expect@29.7.0(supports-color@10.2.2))(@jest/globals@29.7.0(supports-color@10.2.2))
       '@fast-check/vitest':
         specifier: 0.5.0
-        version: 0.5.0(vitest@5.1.0(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)))
+        version: 0.5.0(vitest@5.1.0(patch_hash=a030d92a29d8d3145fce643d1dee9efe31c7966f28e5f8d34f635d049b2e9b4a)(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)))
       '@hey-api/openapi-ts':
         specifier: 0.90.10
         version: 0.90.10(typescript@6.0.3)
@@ -6214,7 +6217,7 @@ importers:
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: 7.0.1
-        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@5.1.0(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)))
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@5.1.0(patch_hash=a030d92a29d8d3145fce643d1dee9efe31c7966f28e5f8d34f635d049b2e9b4a)(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)))
       '@testing-library/react':
         specifier: 16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -6934,7 +6937,7 @@ importers:
         version: 8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)
       vitest:
         specifier: 5.1.0
-        version: 5.1.0(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+        version: 5.1.0(patch_hash=a030d92a29d8d3145fce643d1dee9efe31c7966f28e5f8d34f635d049b2e9b4a)(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
       vscode-languageserver-textdocument:
         specifier: 1.0.16
         version: 1.0.16
@@ -28113,10 +28116,10 @@ snapshots:
     optionalDependencies:
       '@jest/expect': 29.7.0(supports-color@10.2.2)
 
-  '@fast-check/vitest@0.5.0(vitest@5.1.0(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)))':
+  '@fast-check/vitest@0.5.0(vitest@5.1.0(patch_hash=a030d92a29d8d3145fce643d1dee9efe31c7966f28e5f8d34f635d049b2e9b4a)(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)))':
     dependencies:
       fast-check: 4.10.2
-      vitest: 5.1.0(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+      vitest: 5.1.0(patch_hash=a030d92a29d8d3145fce643d1dee9efe31c7966f28e5f8d34f635d049b2e9b4a)(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
 
   '@floating-ui/core@1.8.0':
     dependencies:
@@ -31605,7 +31608,7 @@ snapshots:
       lodash: 4.18.1
       redent: 3.0.0
 
-  '@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.1)(vitest@5.1.0(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)))':
+  '@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.1)(vitest@5.1.0(patch_hash=a030d92a29d8d3145fce643d1dee9efe31c7966f28e5f8d34f635d049b2e9b4a)(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)))':
     dependencies:
       '@adobe/css-tools': 4.5.0
       '@testing-library/dom': 10.4.1
@@ -31615,7 +31618,7 @@ snapshots:
       picocolors: 1.1.1
       redent: 3.0.0
     optionalDependencies:
-      vitest: 5.1.0(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+      vitest: 5.1.0(patch_hash=a030d92a29d8d3145fce643d1dee9efe31c7966f28e5f8d34f635d049b2e9b4a)(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
 
   '@testing-library/react@16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
@@ -44054,7 +44057,7 @@ snapshots:
       tsx: 4.23.15
       yaml: 2.9.1
 
-  vitest@5.1.0(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)):
+  vitest@5.1.0(patch_hash=a030d92a29d8d3145fce643d1dee9efe31c7966f28e5f8d34f635d049b2e9b4a)(@opentelemetry/api@1.9.1)(@types/node@24.10.13)(jsdom@20.0.1(supports-color@10.2.2))(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/mocker': 5.1.0(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(vite@8.3.8(@types/node@24.10.13)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.104.0)(sass@1.104.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))

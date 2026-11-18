@@ -1,0 +1,20 @@
+diff --git a/dist/chunks/rawSnapshot.DqSiqIEx.js b/dist/chunks/rawSnapshot.DqSiqIEx.js
+index 1ded4513c676f584f6c1db4ffedabc42adcbb709..f0eae2dc4fa43b60a7863afb8dd1117559f5c8f1 100644
+--- a/dist/chunks/rawSnapshot.DqSiqIEx.js
++++ b/dist/chunks/rawSnapshot.DqSiqIEx.js
+@@ -1,3 +1,4 @@
++import { runInThisContext } from 'node:vm';
+ import { f as isObject, h as getCallLastIndex } from './pathe.M-eThtNZ.zq3TM4NT.js';
+ import { p as positionToOffset, o as offsetToLineNumber, l as lineSplitRE } from './offset.Dy-5Fdfn.js';
+ import { g as getDefaultExportFromCjs, f as format } from './index.D0heQG4v.js';
+@@ -82,7 +83,9 @@ function keyToTestName(key) {
+ function evaluateSnapshotFile(filepath, content) {
+ 	const data = Object.create(null);
+ 	try {
+-		new Function("exports", content)(data);
++		// Kibana: Vitest workers run with --disallow-code-generation-from-strings, which blocks
++		// new Function(). node:vm compiles the file as a script, which the flag allows.
++		runInThisContext(`(function (exports) {\n${content}\n})`, { filename: filepath })(data);
+ 	} catch (cause) {
+ 		throw new Error(`Invalid snapshot file, please manually fix or delete it: ${filepath}`, { cause });
+ 	}

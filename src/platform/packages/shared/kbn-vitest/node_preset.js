@@ -38,9 +38,13 @@ module.exports = {
       '**/target/**',
     ],
     retry: process.env.CI ? 3 : 0,
+    // Kibana runs with --disallow-code-generation-from-strings, so eval() and new Function()
+    // throw in production. Test workers get the same V8 flag, unlike Jest, which can only shim
+    // eval and Function. The flag is process-wide, so it needs the `forks` pool.
+    pool: 'forks',
+    execArgv: ['--disallow-code-generation-from-strings'],
     setupFiles: [
       Path.resolve(SETUP_DIR, 'jest_global.js'),
-      Path.resolve(KBN_JEST_DIR, 'src/setup/disallow_code_generation.js'),
       Path.resolve(SETUP_DIR, 'mocks.moment_timezone.js'),
     ],
     snapshotFormat: {

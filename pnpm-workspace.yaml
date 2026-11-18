@@ -1752,5 +1752,14 @@ packages:
   - 'x-pack/solutions/vectordb/test'
 # END GENERATED PACKAGES
 
+# Local patches to dependencies, created with `pnpm patch` / `pnpm patch-commit`. pnpm fails
+# the install when a patch no longer applies, so bumping a patched dependency means redoing its
+# patch. The distributable build drops this block (see render_pnpm_workspace.ts), so only
+# dev dependencies belong here.
+patchedDependencies:
+  # Vitest workers run with --disallow-code-generation-from-strings, and Vitest reads snapshot
+  # files with new Function(). The patch reads them with node:vm instead.
+  vitest@5.1.0: patches/vitest@5.1.0.patch
+
 # Keep a last field entry, because a trailing comment might be removed by some parsers.
 lockfile: true
