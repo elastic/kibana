@@ -11,6 +11,7 @@ import DREAMING_YAML from './dreaming.yaml';
 import TRACE_DREAMING_YAML from './dreaming_traces.yaml';
 import TRACE_DREAMING_BATCH_YAML from './dreaming_traces_batch.yaml';
 import FEEDBACK_ANALYSIS_YAML from './feedback_analysis.yaml';
+import ONTOLOGY_YAML from './ontology.yaml';
 import RELATIONSHIPS_YAML from './relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
@@ -188,3 +189,30 @@ export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineRelationshipsWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID = 'system-context-engine-ontology';
+
+/** The same config as dreaming, which ontology discovery runs alongside on the same schedule. */
+export type ContextEngineOntologyWorkflowTemplateValues =
+  ContextEngineDreamingWorkflowTemplateValues;
+
+/**
+ * Discovers the ontology of the ES|QL sources of one AI index: describes the datasets they read,
+ * the business terms their fields store and how they join.
+ */
+export const CONTEXT_ENGINE_ONTOLOGY_WORKFLOW = {
+  id: CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) =>
+    renderJsonTemplate(ONTOLOGY_YAML, {
+      __NAME__: `Ontology discovery: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __CONCURRENCY_KEY__: `context-engine-ontology-${values.instanceKey}`,
+      __INTERVAL_MINUTES__: values.intervalMinutes,
+      __CONNECTOR_ID__: values.connectorId,
+      __INSTRUCTIONS__: values.instructions,
+    }),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineOntologyWorkflowTemplateValues>;

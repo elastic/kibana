@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
@@ -21,6 +22,7 @@ import type { DreamingWorkflowsApi } from './schedule';
 import {
   createDreamingScheduleService,
   dreamingWorkflowIdFor,
+  ontologyWorkflowIdFor,
   relationshipsWorkflowIdFor,
   shouldDream,
   traceDreamingBatchWorkflowIdFor,
@@ -308,6 +310,66 @@ describe('createDreamingScheduleService', () => {
     });
   });
 
+  describe('ontology discovery', () => {
+    const ontologyWorkflowId = `${CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID}-${suffix}`;
+
+    it('is installed and attached only while ontology discovery is on', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({ dreaming: { ...dreaming, ontology: { enabled: true } } }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(ontologyWorkflowIdFor('support', SPACE)).toBe(ontologyWorkflowId);
+      expect(client.install.mock.calls.map(([definitionId]) => definitionId)).toContain(
+        CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID
+      );
+      expect(aiIndexService.addAutomation).toHaveBeenCalledWith('support', SPACE, {
+        type: 'workflow',
+        value: ontologyWorkflowId,
+      });
+
+      client.install.mockClear();
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+      expect(client.install.mock.calls.map(([definitionId]) => definitionId)).not.toContain(
+        CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID
+      );
+      expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID, {
+        spaceId: SPACE,
+        workflowIdSuffix: suffix,
+      });
+      expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('support', SPACE, {
+        type: 'workflow',
+        value: ontologyWorkflowId,
+      });
+    });
+
+    it('runs without fact or entity types, leaving the memory workflows uninstalled', async () => {
+      const ontologyOnly = aiIndex({ dreaming: { enabled: true, ontology: { enabled: true } } });
+      expect(shouldDream(ontologyOnly)).toBe(true);
+
+      await createService(workflowsManagement).reconcile({
+        aiIndex: ontologyOnly,
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.install.mock.calls.map(([definitionId]) => definitionId)).toEqual([
+        CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID,
+      ]);
+      expect(client.uninstall.mock.calls.map(([definitionId]) => definitionId)).toEqual([
+        CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+      ]);
+    });
+  });
+
   it('refuses to install a workflow it could not enable', async () => {
     await expect(
       createService(undefined).reconcile({ aiIndex: aiIndex(), spaceId: SPACE, request })
@@ -350,7 +412,7 @@ describe('createDreamingScheduleService', () => {
       SPACE,
       request
     );
-    expect(client.uninstall).toHaveBeenCalledTimes(6);
+    expect(client.uninstall).toHaveBeenCalledTimes(7);
   });
 
   it('does not cancel runs when the uninstall fails for another reason', async () => {

@@ -45,6 +45,32 @@ describe('dreamingConfigSchema', () => {
     ).toEqual({ enabled: false, facts: null, entities: null, relationships: null });
   });
 
+  it('accepts an ontology discovery block, and validates its refresh interval', () => {
+    const ontology = {
+      enabled: true,
+      value_samples: false,
+      query_history: true,
+      refresh_interval: '7d',
+    };
+    expect(dreamingConfigSchema.validate({ enabled: true, ontology })).toEqual({
+      enabled: true,
+      ontology,
+    });
+    expect(dreamingConfigSchema.validate({ enabled: true, ontology: null })).toEqual({
+      enabled: true,
+      ontology: null,
+    });
+    expect(() =>
+      dreamingConfigSchema.validate({
+        enabled: true,
+        ontology: { enabled: true, refresh_interval: '5m' },
+      })
+    ).toThrow('Must be at least 15 minutes.');
+    expect(() =>
+      dreamingConfigSchema.validate({ enabled: true, ontology: { enabled: true, extra: 1 } })
+    ).toThrow();
+  });
+
   it('rejects a relationship type name that is not lowercase letters, digits and underscores', () => {
     expect(() =>
       dreamingConfigSchema.validate({ ...config, relationships: [{ type: 'Lives In' }] })

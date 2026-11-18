@@ -26,6 +26,7 @@ import {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+  CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
@@ -43,6 +44,7 @@ import {
 import CONTEXT_ENGINE_DREAMING_YAML from './definitions/context_engine/dreaming.yaml';
 import CONTEXT_ENGINE_TRACE_DREAMING_YAML from './definitions/context_engine/dreaming_traces.yaml';
 import CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_traces_batch.yaml';
+import CONTEXT_ENGINE_ONTOLOGY_YAML from './definitions/context_engine/ontology.yaml';
 import CONTEXT_ENGINE_RELATIONSHIPS_YAML from './definitions/context_engine/relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
@@ -113,6 +115,17 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
     entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
     relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
+  },
+  [CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    memoriesIndex: 'ai-index-idx-my-ai-index',
+    intervalMinutes: 60,
+    connectorId: 'my-connector',
+    instructions: 'Describe what orders "hold".\nIgnore {{ test }} indices.',
+    factTypes: [],
+    entityTypes: [],
+    relationshipTypes: [],
   },
   [CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID]: {
     aiIndexId: 'my-ai-index',
@@ -257,6 +270,7 @@ function createContentFingerprint(content: string): string {
 it.each([
   [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '5:2fc422ee'],
   [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '1:a86208ac'],
+  [CONTEXT_ENGINE_ONTOLOGY_WORKFLOW_ID, CONTEXT_ENGINE_ONTOLOGY_YAML, '1:e9cf2a3b'],
   [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_TRACE_DREAMING_YAML, '5:53938616'],
   [
     CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,

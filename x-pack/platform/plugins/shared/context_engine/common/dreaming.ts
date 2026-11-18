@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AiIndexOntologyConfig } from './ontology';
+
 /** What fact, entity and attribute names may be made of. */
 export const DREAMING_TYPE_PATTERN = /^[a-z0-9_]+$/;
 
@@ -109,6 +111,8 @@ export interface AiIndexDreamingConfig {
    * also link to the entities they are about, with the built-in `about` type.
    */
   relationships?: DreamingRelationshipType[] | null;
+  /** Ontology discovery over the AI index's ES|QL sources. Missing or off: not built. */
+  ontology?: AiIndexOntologyConfig | null;
 }
 
 /** The parts of a dreaming config that say what it builds. */
@@ -150,12 +154,14 @@ export const dreamingTypesOf = ({
  * dreaming runs on its schedule.
  */
 export const isDreamingConfigured = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
-  dreaming !== undefined && (dreaming.enabled || dreamingBuildsAnything(dreaming));
+  dreaming !== undefined &&
+  (dreaming.enabled || dreamingBuildsAnything(dreaming) || dreaming.ontology?.enabled === true);
 
 const DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES: readonly string[] = [
   'system-context-engine-dreaming-',
   'system-context-engine-trace-dreaming-',
   'system-context-engine-relationships-',
+  'system-context-engine-ontology-',
 ];
 
 /** Whether an automation is one of the workflows dreaming attaches to an AI index. */

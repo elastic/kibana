@@ -13,7 +13,7 @@ import {
 } from '../../common/step_types/get_dreaming_status';
 import { dreamingTypesOf } from '../../common/dreaming';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
-import { shouldDream } from '../dreaming/schedule';
+import { discoversOntology, dreamsOnMemories } from '../dreaming/schedule';
 import type { DreamingStepDependencies } from './helpers';
 
 export const getDreamingStatusStepDefinition = ({
@@ -45,7 +45,16 @@ export const getDreamingStatusStepDefinition = ({
       }
       try {
         const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
-        if (!shouldDream(aiIndex)) {
+        if (source === 'ontology') {
+          if (!discoversOntology(aiIndex)) {
+            return skip(`Ontology discovery is not turned on for AI index '${aiIndexId}'.`);
+          }
+          if (!aiIndex.sources.some(({ type }) => type === 'esql')) {
+            return skip(`AI index '${aiIndexId}' has no ES|QL sources to discover.`);
+          }
+          return { output: { dream: true } };
+        }
+        if (!dreamsOnMemories(aiIndex)) {
           return skip(`Dreaming is not turned on for AI index '${aiIndexId}'.`);
         }
         if (source === 'traces' && aiIndex.traces.length === 0) {

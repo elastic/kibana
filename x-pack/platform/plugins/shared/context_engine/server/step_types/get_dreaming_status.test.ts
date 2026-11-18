@@ -24,7 +24,7 @@ describe('getDreamingStatusStepDefinition', () => {
     memoryEnabled?: boolean;
     canRead?: boolean;
     get?: jest.Mock;
-    source?: 'memories' | 'traces' | 'relationships';
+    source?: 'memories' | 'traces' | 'relationships' | 'ontology';
   } = {}) =>
     getDreamingStatusStepDefinition({
       getAiIndexService: () => ({ get } as unknown as AiIndexService),
@@ -135,6 +135,51 @@ describe('getDreamingStatusStepDefinition', () => {
     });
     await expect(
       run({ source: 'relationships', get: get({ ...withTypes, enabled: false }) })
+    ).resolves.toEqual({
+      output: { dream: false, reason: "Dreaming is not turned on for AI index 'support'." },
+    });
+  });
+
+  it('discovers the ontology only with ontology discovery on and an ES|QL source', async () => {
+    const esql = { type: 'esql', value: 'FROM orders' };
+    const get = (config: Record<string, unknown>, sources: unknown[] = [esql]) =>
+      jest.fn().mockResolvedValue({ id: 'support', dreaming: config, traces: [], sources });
+    const ontologyOnly = { enabled: true, ontology: { enabled: true } };
+
+    await expect(run({ source: 'ontology', get: get(ontologyOnly) })).resolves.toEqual({
+      output: { dream: true },
+    });
+    await expect(
+      run({ source: 'ontology', get: get(ontologyOnly, [{ type: 'connector', value: 'c' }]) })
+    ).resolves.toEqual({
+      output: { dream: false, reason: "AI index 'support' has no ES|QL sources to discover." },
+    });
+    await expect(run({ source: 'ontology', get: get(dreaming) })).resolves.toEqual({
+      output: {
+        dream: false,
+        reason: "Ontology discovery is not turned on for AI index 'support'.",
+      },
+    });
+    await expect(
+      run({ source: 'ontology', get: get({ ...ontologyOnly, enabled: false }) })
+    ).resolves.toEqual({
+      output: {
+        dream: false,
+        reason: "Ontology discovery is not turned on for AI index 'support'.",
+      },
+    });
+  });
+
+  it('does not dream on memories when only ontology discovery is on', async () => {
+    await expect(
+      run({
+        get: jest.fn().mockResolvedValue({
+          id: 'support',
+          dreaming: { enabled: true, ontology: { enabled: true } },
+          traces: [],
+          sources: [],
+        }),
+      })
     ).resolves.toEqual({
       output: { dream: false, reason: "Dreaming is not turned on for AI index 'support'." },
     });

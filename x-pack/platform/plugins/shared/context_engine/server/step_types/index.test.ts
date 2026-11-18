@@ -54,6 +54,10 @@ describe('registerStepDefinitions', () => {
       'context-engine.readTraceTranscripts',
       'context-engine.applyDreamChanges',
       'context-engine.applyDreamRelationships',
+      'context-engine.catalogOntologySources',
+      'context-engine.readOntologyQueryHistory',
+      'context-engine.verifyOntologyJoins',
+      'context-engine.applyOntologyChanges',
     ]);
   });
 });

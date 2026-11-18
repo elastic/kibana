@@ -21,6 +21,10 @@ import {
   RESERVED_ENTITY_ATTRIBUTE_KEYS,
   validateDreamingTypes,
 } from '../../../common/dreaming';
+import {
+  DEFAULT_ONTOLOGY_REFRESH_INTERVAL,
+  MAX_ONTOLOGY_REFRESH_INTERVAL_LENGTH,
+} from '../../../common/ontology';
 import { validateDreamingInterval } from '../../../common/validation';
 
 const validateType = (value: string): string | undefined =>
@@ -148,6 +152,48 @@ export const dreamingConfigSchema = schema.object(
             meta: {
               description:
                 'Relationship types between the entities dreaming builds, each stored as a `memory.relationship` KI. When set, facts also link to the entities they are about with the built-in `about` type, which cannot be configured. Omitted or empty: no relationships.',
+            },
+          }
+        )
+      )
+    ),
+    ontology: schema.maybe(
+      schema.nullable(
+        schema.object(
+          {
+            enabled: schema.boolean({
+              meta: { description: 'Whether ontology discovery runs on the dreaming schedule.' },
+            }),
+            value_samples: schema.maybe(
+              schema.boolean({
+                meta: {
+                  description:
+                    'Profile the top values of low-cardinality keyword fields, skipping fields whose names look sensitive. The values become text that every reader of the AI Index can see. Defaults to `true`.',
+                },
+              })
+            ),
+            query_history: schema.maybe(
+              schema.boolean({
+                meta: {
+                  description:
+                    "Read the ES|QL queries agents ran from the AI Index's trace sources. Defaults to `true`.",
+                },
+              })
+            ),
+            refresh_interval: schema.maybe(
+              schema.string({
+                maxLength: MAX_ONTOLOGY_REFRESH_INTERVAL_LENGTH,
+                validate: validateDreamingInterval,
+                meta: {
+                  description: `Re-profile a dataset whose mapping did not change after this long, for example \`7d\`. Defaults to \`${DEFAULT_ONTOLOGY_REFRESH_INTERVAL}\`.`,
+                },
+              })
+            ),
+          },
+          {
+            meta: {
+              description:
+                'Ontology discovery: describes the datasets behind the ES|QL sources of the AI Index, the business terms they store, and how they join. Omitted or null: off.',
             },
           }
         )
