@@ -9,9 +9,12 @@
 
 const mockUnifiedDataTable = jest.fn<void, [Record<string, unknown>]>();
 const mockGroupBySelectorMount = jest.fn();
+const mockGetColumnsConfiguration = jest.fn(() => ({}));
+const mockColumnsConfigurationAccessor = () => mockGetColumnsConfiguration;
 
 jest.mock('@kbn/unified-data-table', () => ({
   DEFAULT_PAGINATION_MODE: 'multiPage',
+  DataLoadingState: { loaded: 'loaded' },
   renderCustomToolbar: jest.fn(),
   UnifiedDataTable: (props: Record<string, unknown>) => {
     mockUnifiedDataTable(props);
@@ -24,7 +27,7 @@ jest.mock('../../context_awareness', () => ({
     if (key === 'getRowIndicatorProvider') return () => () => () => undefined;
     if (key === 'getRowAdditionalLeadingControls') return () => (controls: unknown) => controls;
     if (key === 'getPaginationConfig') return () => () => ({ paginationMode: 'multiPage' });
-    if (key === 'getColumnsConfiguration') return () => () => ({});
+    if (key === 'getColumnsConfiguration') return mockColumnsConfigurationAccessor;
     return () => () => undefined;
   }),
 }));
@@ -48,6 +51,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
 import { DiscoverGrid, type DiscoverGridProps } from './discover_grid';
 
@@ -73,6 +77,35 @@ const baseProps = {
   sampleSizeState: 500,
   onUpdateSampleSize: jest.fn(),
 };
+
+describe('DiscoverGrid column configuration', () => {
+  it('updates the profile with column selection and width changes', () => {
+    const props: DiscoverGridProps = {
+      ...baseProps,
+      ariaLabelledBy: 'results',
+      loadingState: DataLoadingState.loaded,
+      onSetColumns: jest.fn(),
+      showTimeCol: false,
+    };
+    const { rerender } = render(<DiscoverGrid {...props} columns={['count', 'Pattern']} />);
+    expect(mockGetColumnsConfiguration).toHaveBeenLastCalledWith({
+      columns: ['count', 'Pattern'],
+      settings: undefined,
+    });
+
+    rerender(<DiscoverGrid {...props} columns={['count']} />);
+    expect(mockGetColumnsConfiguration).toHaveBeenLastCalledWith({
+      columns: ['count'],
+      settings: undefined,
+    });
+
+    const columns = ['count'];
+    rerender(<DiscoverGrid {...props} columns={columns} />);
+    const settings = { columns: { count: { width: 280 } } };
+    rerender(<DiscoverGrid {...props} columns={columns} settings={settings} />);
+    expect(mockGetColumnsConfiguration).toHaveBeenLastCalledWith({ columns, settings });
+  });
+});
 
 describe('DiscoverGrid renderMode', () => {
   beforeEach(() => {

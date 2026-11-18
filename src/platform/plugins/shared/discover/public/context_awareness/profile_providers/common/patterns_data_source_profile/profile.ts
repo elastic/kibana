@@ -41,13 +41,24 @@ export const createPatternsDataSourceProfileProvider = (
   profile: {
     getColumnsConfiguration:
       (prev, { context }) =>
-      () => {
-        const previous = prev();
+      (displayParams) => {
+        const previous = prev(displayParams);
         const configuration: CustomGridColumnsConfiguration = { ...previous };
+        const { columns = [], settings } = displayParams ?? {};
+        const automaticColumns = columns.filter((name) => !settings?.columns?.[name]?.width);
+        const hasAutomaticColumn = automaticColumns.some(
+          (name) => !context.metricColumns.includes(name) || settings?.columns?.[name] !== undefined
+        );
+        const fillColumn = hasAutomaticColumn ? undefined : automaticColumns.at(-1);
+
         for (const name of context.metricColumns) {
           configuration[name] = (params) => {
             const column = previous[name]?.(params) ?? params.column;
-            if (params.columnSettings !== undefined || column.initialWidth !== undefined) {
+            if (
+              name === fillColumn ||
+              params.columnSettings !== undefined ||
+              column.initialWidth !== undefined
+            ) {
               return column;
             }
             return { ...column, initialWidth: 150 };

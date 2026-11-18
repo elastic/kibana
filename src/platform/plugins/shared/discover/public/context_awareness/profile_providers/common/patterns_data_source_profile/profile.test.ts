@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
+import type {
+  CustomGridColumnsConfiguration,
+  UnifiedDataTableProps,
+} from '@kbn/unified-data-table';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { SolutionType } from '../../../profiles';
@@ -19,7 +22,10 @@ const query =
 
 const getConfiguration = async (
   esql = query,
-  previous: CustomGridColumnsConfiguration = {}
+  previous: CustomGridColumnsConfiguration = {},
+  display: { columns: string[]; settings?: UnifiedDataTableProps['settings'] } = {
+    columns: ['count', 'trend', 'average', 'Pattern'],
+  }
 ): Promise<CustomGridColumnsConfiguration> => {
   const provider = createPatternsDataSourceProfileProvider({
     ...createProfileProviderSharedServicesMock(),
@@ -36,10 +42,74 @@ const getConfiguration = async (
   return provider.profile.getColumnsConfiguration(() => previous, {
     context: resolution.context,
     toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
-  })();
+  })(display);
 };
 
 describe('Patterns profile column widths', () => {
+  it('leaves the only result column automatic after KEEP count', async () => {
+    const configuration = await getConfiguration(
+      query + ' | KEEP count',
+      {},
+      { columns: ['count'] }
+    );
+    expect(configuration.count({ column: { id: 'count' } }).initialWidth).toBeUndefined();
+  });
+
+  it('recomputes the filling column when Pattern is removed or restored', async () => {
+    for (const columns of [['count', 'Pattern'], ['count'], ['count', 'Pattern']]) {
+      const configuration = await getConfiguration(query, {}, { columns });
+      expect(configuration.count({ column: { id: 'count' } }).initialWidth).toBe(
+        columns.includes('Pattern') ? 150 : undefined
+      );
+    }
+  });
+
+  it('leaves the final unsized metric automatic when only metrics are displayed', async () => {
+    const configuration = await getConfiguration(query, {}, { columns: ['trend', 'count'] });
+    expect(configuration.trend({ column: { id: 'trend' } }).initialWidth).toBe(150);
+    expect(configuration.count({ column: { id: 'count' } }).initialWidth).toBeUndefined();
+  });
+
+  it('keeps a metric automatic when the pattern has an explicit width', async () => {
+    const configuration = await getConfiguration(
+      query,
+      {},
+      {
+        columns: ['count', 'Pattern'],
+        settings: { columns: { Pattern: { width: 300 } } },
+      }
+    );
+    expect(configuration.count({ column: { id: 'count' } }).initialWidth).toBeUndefined();
+  });
+
+  it('preserves an explicit width even when it is the only visible column', async () => {
+    const configuration = await getConfiguration(
+      query,
+      {},
+      {
+        columns: ['count'],
+        settings: { columns: { count: { width: 280 } } },
+      }
+    );
+    const column = { id: 'count', initialWidth: 280 };
+    expect(configuration.count({ column, columnSettings: { width: 280 } })).toBe(column);
+  });
+
+  it('uses a reset metric to fill the grid while retaining defaults for other metrics', async () => {
+    const configuration = await getConfiguration(
+      query,
+      {},
+      {
+        columns: ['count', 'trend'],
+        settings: { columns: { count: {} } },
+      }
+    );
+    expect(
+      configuration.count({ column: { id: 'count' }, columnSettings: {} }).initialWidth
+    ).toBeUndefined();
+    expect(configuration.trend({ column: { id: 'trend' } }).initialWidth).toBe(150);
+  });
+
   it('sizes count and sparkline aliases without configuring other result columns', async () => {
     const configuration = await getConfiguration();
     expect(Object.keys(configuration)).toEqual(['count', 'trend']);

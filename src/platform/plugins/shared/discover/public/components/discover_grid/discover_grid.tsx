@@ -81,8 +81,11 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     const getColumnsConfigurationAccessor = useProfileAccessor('getColumnsConfiguration');
 
     const customGridColumnsConfiguration = useMemo(() => {
-      return getColumnsConfigurationAccessor(() => ({}))();
-    }, [getColumnsConfigurationAccessor]);
+      return getColumnsConfigurationAccessor(() => ({}))({
+        columns: props.columns,
+        settings: props.settings,
+      });
+    }, [getColumnsConfigurationAccessor, props.columns, props.settings]);
 
     const cascadeGroupingChangeHandler = useCallback(
       (cascadeGrouping: string[]) => {

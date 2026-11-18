@@ -270,6 +270,8 @@ columns: [
 
 Each callback receives the column and its persisted `columnSettings`. When supplying an `initialWidth`, preserve existing widths and settings; an empty settings object can represent an explicit reset to automatic sizing. Customized default widths expose the grid's **Reset width** action.
 
+The accessor receives the displayed column names and grid settings. Use these to retain an automatically sized column when applying defaults, without overriding widths explicitly saved by the user.
+
 **Screenshot:**
 ![Columns configuration example](./docs/extension_points/get_columns_configuration.png)
 
