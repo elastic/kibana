@@ -243,6 +243,7 @@ describe('renderInvestigationSlackMessage', () => {
     const details = detailsOf(message);
 
     expect(details).toContain('Proposed actions');
+    expect(details).toContain('Roll back payments-api to v1.41');
     expect(details.indexOf('Roll back payments-api to v1.41')).toBeLessThan(
       details.indexOf('Raise the pool limit')
     );
