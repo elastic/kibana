@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { DETECTION_SIGNAL_SOURCE, detectionSignalSchema } from './detection_signal';
+import {
+  DETECTION_SIGNAL_SOURCE,
+  detectionSignalSchema,
+  storedDetectionSignalSchema,
+} from './detection_signal';
 
 const SIGNAL = {
   scheduled_timestamp: '2026-11-13T10:00:00.000Z',
@@ -80,5 +84,14 @@ describe('detectionSignalSchema', () => {
     expect(detectionSignalSchema.safeParse({ ...SIGNAL, rule: { id: 'rule-1' } }).success).toBe(
       false
     );
+  });
+});
+
+describe('storedDetectionSignalSchema', () => {
+  it('reads a stored signal that has a field Alerting v2 added, dropping the field', () => {
+    const parsed = storedDetectionSignalSchema.parse({ ...SIGNAL, tags: ['added-later'] });
+
+    expect(parsed).not.toHaveProperty('tags');
+    expect(parsed.data.fingerprint).toBe('checkout');
   });
 });

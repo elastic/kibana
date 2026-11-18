@@ -5,11 +5,24 @@
  * 2.0.
  */
 
-import { alertEventSchema } from '@kbn/alerting-v2-schemas';
+import { alertEventSchema, MAX_FINGERPRINT_LENGTH } from '@kbn/alerting-v2-schemas';
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /** `source` of every signal the engine writes. */
 export const DETECTION_SIGNAL_SOURCE = 'elastic.nightshift_detection_engine';
+
+/**
+ * Longest free-text value in `data`. `data` is `flattened`, so each string is indexed as one
+ * keyword, and Lucene rejects the whole document when a term is over 32,766 bytes. At most 3 UTF-8
+ * bytes per UTF-16 unit keeps 10,000 units under that.
+ */
+const MAX_TEXT_LENGTH = 10_000;
+const MAX_STRATEGY_ID_LENGTH = 128;
+/**
+ * Alerting v2 takes the series fingerprint as `<strategy>:<fingerprint>` and refuses one over
+ * `MAX_FINGERPRINT_LENGTH`, so a reading's own part leaves room for the strategy id.
+ */
+const MAX_READING_FINGERPRINT_LENGTH = MAX_FINGERPRINT_LENGTH - MAX_STRATEGY_ID_LENGTH - 1;
 
 /**
  * What a signal can be about. Closed now because the history read skips a stored signal that no
@@ -34,29 +47,32 @@ export const detectionSignalReadingSchema = lazySchema(() =>
      * Identifies the series within the strategy; the engine hashes it into the group hash. It must
      * be the same on every run for the same thing, or each run starts a new series.
      */
-    fingerprint: z.string().min(1),
-    rule_id: z.string().optional(),
-    source_id: z.string().optional(),
-    entity: z.object({ type: z.enum(DETECTION_ENTITY_TYPES), name: z.string().min(1) }),
+    fingerprint: z.string().min(1).max(MAX_READING_FINGERPRINT_LENGTH),
+    rule_id: z.string().max(MAX_TEXT_LENGTH).optional(),
+    source_id: z.string().max(MAX_TEXT_LENGTH).optional(),
+    entity: z.object({
+      type: z.enum(DETECTION_ENTITY_TYPES),
+      name: z.string().min(1).max(MAX_TEXT_LENGTH),
+    }),
     /** Start of the span the reading is about, in epoch milliseconds. */
-    bucket_start: z.number(),
+    bucket_start: z.number().int(),
     /** End of the span the reading is about, in epoch milliseconds. */
-    bucket_end: z.number(),
+    bucket_end: z.number().int(),
     /**
      * What was measured. Left out only on a `no_data` reading: a placeholder would end up in the
      * series' history as if it had been measured.
      */
     value: z.number().optional(),
-    unit: z.string(),
-    title: z.string(),
-    description: z.string(),
+    unit: z.string().max(MAX_TEXT_LENGTH),
+    title: z.string().max(MAX_TEXT_LENGTH),
+    description: z.string().max(MAX_TEXT_LENGTH),
     /** 0 to 100. */
     importance: z.number().min(0).max(100),
     /**
      * The ES|QL query that reproduces the reading. Required: the judge cites only rows the engine
      * ran, and a reading without a query could never be confirmed, only marked inconclusive.
      */
-    evidence_esql: z.string().min(1),
+    evidence_esql: z.string().min(1).max(MAX_TEXT_LENGTH),
     /** A supporting reading may join an open event but never opens one. */
     role: z.enum(['primary', 'supporting']),
     /** Whether the judge should compare the reading with what is normal for the series. */
@@ -66,31 +82,53 @@ export const detectionSignalReadingSchema = lazySchema(() =>
   })
 );
 
+const signalObjectSchema = lazySchema(() =>
+  alertEventSchema.omit({ rule: true }).extend({
+    '@timestamp': z.string().optional(),
+    type: z.literal('signal'),
+    source: z.literal(DETECTION_SIGNAL_SOURCE),
+    data: detectionSignalReadingSchema.extend({
+      strategy: z.string().min(1).max(MAX_STRATEGY_ID_LENGTH),
+      /** `version` of the strategy's descriptor when the reading was made. */
+      strategy_version: z.number().int().min(1),
+    }),
+  })
+);
+
+function withReadingChecks<
+  Schema extends z.ZodType<{
+    status: string;
+    data: { value?: number; bucket_start: number; bucket_end: number };
+  }>
+>(schema: Schema): Schema {
+  return schema
+    .refine((signal) => signal.status === 'no_data' || signal.data.value !== undefined, {
+      message: 'a breached or recovered reading needs a value',
+      path: ['data', 'value'],
+    })
+    .refine((signal) => signal.data.bucket_end > signal.data.bucket_start, {
+      message: 'a bucket ends after it starts',
+      path: ['data', 'bucket_end'],
+    });
+}
+
 /**
  * A detection signal in the `.rule-events` shape: the alert event schema narrowed to what the
  * engine writes. It has no `rule`, and no `@timestamp` until `.rule-events` sets it from the schedule time.
  * `severity` is set only by strategies that report a severity decided elsewhere, such as an
  * external alert's, so the severity floor can read it without looking into `details`.
+ * Strict, so an engine bug that adds a field fails here instead of being stored.
  */
-export const detectionSignalSchema = alertEventSchema
-  .omit({ rule: true })
-  .extend({
-    '@timestamp': lazySchema(() => z.string().optional()),
-    type: lazySchema(() => z.literal('signal')),
-    source: lazySchema(() => z.literal(DETECTION_SIGNAL_SOURCE)),
-    data: lazySchema(() =>
-      detectionSignalReadingSchema.extend({
-        strategy: z.string().min(1),
-        /** `version` of the strategy's descriptor when the reading was made. */
-        strategy_version: z.number().int().min(1),
-      })
-    ),
-  })
-  .strict()
-  .refine((signal) => signal.status === 'no_data' || signal.data.value !== undefined, {
-    message: 'a breached or recovered reading needs a value',
-    path: ['data', 'value'],
-  });
+export const detectionSignalSchema = lazySchema(() =>
+  withReadingChecks(signalObjectSchema.strict())
+);
+
+/**
+ * A detection signal as read back from `.rule-events`. Unlike {@link detectionSignalSchema} it
+ * drops unknown fields instead of failing: Alerting v2 owns the document, and a field it adds to
+ * every stored signal must not make the history read skip all of them.
+ */
+export const storedDetectionSignalSchema = lazySchema(() => withReadingChecks(signalObjectSchema));
 
 /** One reading of one series in one bucket, as stored. */
 export type DetectionSignal = z.infer<typeof detectionSignalSchema>;
