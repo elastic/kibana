@@ -22,6 +22,7 @@ import {
   ProposalForbiddenError,
   ProposalInvalidActionInputError,
   ProposalInvalidGateError,
+  ProposalInvalidIdError,
   ProposalLookupTruncatedError,
   ProposalNotFoundError,
 } from './errors';
@@ -29,6 +30,8 @@ import type { CreateProposalParams, ReleaseGateParams } from './proposals_servic
 import { ProposalsService } from './proposals_service';
 
 const SPACE_ID = 'default';
+const GATE_CALLER = { workflowId: 'system-create-proposal', executionId: 'exec-1' };
+const RESOLVE_CALLER = { workflowId: 'system-resolve-proposal', executionId: 'exec-2' };
 const EXECUTION_ID = 'exec-1';
 const request = httpServerMock.createKibanaRequest();
 
@@ -945,6 +948,28 @@ describe('ProposalsService', () => {
       expect(attachmentsClient.create).not.toHaveBeenCalled();
     });
 
+    it.each([
+      ['an empty', ''],
+      ['a longer than routable', 'x'.repeat(257)],
+    ])('refuses %s id, writing nothing', async (_label, id) => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await expect(
+        service.create(idParams({ id }), { spaceId: SPACE_ID, request })
+      ).rejects.toBeInstanceOf(ProposalInvalidIdError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('accepts an id as long as the routes allow', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.create(idParams({ id: 'x'.repeat(256) }), { spaceId: SPACE_ID, request });
+
+      expect(storage.index).toHaveBeenCalledWith(expect.objectContaining({ id: 'x'.repeat(256) }));
+    });
+
     it('is a conflict as far as routes and workflows are concerned', async () => {
       const storage = createStorage();
       storage.index.mockRejectedValue(conflict());
@@ -1503,7 +1528,8 @@ describe('ProposalsService', () => {
           decidedBy: analyst('analyst'),
           decisionMode: 'manual',
         },
-        SPACE_ID
+        SPACE_ID,
+        GATE_CALLER
       );
 
       expect(proposal.decision).toBe('approved');
@@ -1530,7 +1556,8 @@ describe('ProposalsService', () => {
             dismissReason: 'duplicate',
             rationale: 'customer secret text',
           },
-          SPACE_ID
+          SPACE_ID,
+          GATE_CALLER
         );
 
         expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -1556,7 +1583,8 @@ describe('ProposalsService', () => {
 
         await service.update(
           { id: 'proposal-1', decision: 'approved', status: 'executing', decisionMode: 'auto' },
-          SPACE_ID
+          SPACE_ID,
+          GATE_CALLER
         );
 
         expect(analytics.reportEvent).toHaveBeenCalledWith(
@@ -1569,8 +1597,8 @@ describe('ProposalsService', () => {
         const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
         const { service, analytics } = createService(storage);
 
-        await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
-        await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
+        await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID, GATE_CALLER);
+        await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID, GATE_CALLER);
 
         expect(analytics.reportEvent).not.toHaveBeenCalled();
       });
@@ -1580,7 +1608,11 @@ describe('ProposalsService', () => {
         const { service, analytics } = createService(storage);
 
         await expect(
-          service.update({ id: 'proposal-1', decision: 'dismissed', status: 'no_action' }, SPACE_ID)
+          service.update(
+            { id: 'proposal-1', decision: 'dismissed', status: 'no_action' },
+            SPACE_ID,
+            GATE_CALLER
+          )
         ).rejects.toThrow(ProposalConflictError);
 
         expect(analytics.reportEvent).not.toHaveBeenCalled();
@@ -1592,7 +1624,11 @@ describe('ProposalsService', () => {
         const { service, analytics } = createService(storage);
 
         await expect(
-          service.update({ id: 'proposal-1', decision: 'approved', status: 'executing' }, SPACE_ID)
+          service.update(
+            { id: 'proposal-1', decision: 'approved', status: 'executing' },
+            SPACE_ID,
+            GATE_CALLER
+          )
         ).rejects.toThrow();
 
         expect(analytics.reportEvent).not.toHaveBeenCalled();
@@ -1607,7 +1643,8 @@ describe('ProposalsService', () => {
 
         const proposal = await service.update(
           { id: 'proposal-1', decision: 'approved', status: 'executing' },
-          SPACE_ID
+          SPACE_ID,
+          GATE_CALLER
         );
 
         expect(proposal.decision).toBe('approved');
@@ -1618,7 +1655,11 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
       const { service } = createService(storage);
 
-      const proposal = await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
+      const proposal = await service.update(
+        { id: 'proposal-1', status: 'succeeded' },
+        SPACE_ID,
+        GATE_CALLER
+      );
 
       expect(proposal.status).toBe('succeeded');
     });
@@ -1639,7 +1680,7 @@ describe('ProposalsService', () => {
         // The target differs from the settled status on purpose: re-writing the
         // same one is the idempotent case, covered separately below.
         await expect(
-          service.update({ id: 'proposal-1', status: target }, SPACE_ID)
+          service.update({ id: 'proposal-1', status: target }, SPACE_ID, GATE_CALLER)
         ).rejects.toThrow(ProposalConflictError);
         expect(storage.index).not.toHaveBeenCalled();
       }
@@ -1652,7 +1693,11 @@ describe('ProposalsService', () => {
       // `chartsSummary` reads `decidedAt` as the "closed" event. A malfunction
       // settling a proposal `expired` while its deadline is still in the future
       // would otherwise read as open until that deadline arrived.
-      const proposal = await service.update({ id: 'proposal-1', status: 'expired' }, SPACE_ID);
+      const proposal = await service.update(
+        { id: 'proposal-1', status: 'expired' },
+        SPACE_ID,
+        GATE_CALLER
+      );
 
       expect(proposal.decidedAt).toEqual(expect.any(String));
       // Settled, but nobody decided it.
@@ -1665,7 +1710,11 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      const proposal = await service.update({ id: 'proposal-1', rationale: 'Noted' }, SPACE_ID);
+      const proposal = await service.update(
+        { id: 'proposal-1', rationale: 'Noted' },
+        SPACE_ID,
+        GATE_CALLER
+      );
 
       expect(proposal.decidedAt).toBeUndefined();
     });
@@ -1680,7 +1729,11 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      const proposal = await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
+      const proposal = await service.update(
+        { id: 'proposal-1', status: 'succeeded' },
+        SPACE_ID,
+        GATE_CALLER
+      );
 
       // Write-once: the moment it stopped awaiting does not change because the
       // action later finished.
@@ -1697,7 +1750,8 @@ describe('ProposalsService', () => {
       // about recording it.
       const proposal = await service.update(
         { id: 'proposal-1', status: 'failed', executionError: 'clone unavailable' },
-        SPACE_ID
+        SPACE_ID,
+        GATE_CALLER
       );
 
       expect(proposal.status).toBe('failed');
@@ -1711,7 +1765,7 @@ describe('ProposalsService', () => {
       // `approved` + `pending` is not a legal pair, so an approval has to say
       // what happens next in the same call.
       await expect(
-        service.update({ id: 'proposal-1', decision: 'approved' }, SPACE_ID)
+        service.update({ id: 'proposal-1', decision: 'approved' }, SPACE_ID, GATE_CALLER)
       ).rejects.toThrow(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
     });
@@ -1722,7 +1776,7 @@ describe('ProposalsService', () => {
 
       // A terminal row with no successor would still read as live.
       await expect(
-        service.update({ id: 'proposal-1', status: 'superseded' }, SPACE_ID)
+        service.update({ id: 'proposal-1', status: 'superseded' }, SPACE_ID, GATE_CALLER)
       ).rejects.toThrow(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
     });
@@ -1733,7 +1787,8 @@ describe('ProposalsService', () => {
 
       const proposal = await service.update(
         { id: 'proposal-1', decision: 'dismissed', status: 'no_action' },
-        SPACE_ID
+        SPACE_ID,
+        GATE_CALLER
       );
 
       expect(proposal.decision).toBe('dismissed');
@@ -1747,7 +1802,7 @@ describe('ProposalsService', () => {
       // Independent of the status guard: this proposal is still `pending`, so
       // only the decision's own immutability can refuse a second approver.
       await expect(
-        service.update({ id: 'proposal-1', decision: 'dismissed' }, SPACE_ID)
+        service.update({ id: 'proposal-1', decision: 'dismissed' }, SPACE_ID, GATE_CALLER)
       ).rejects.toThrow(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
     });
@@ -1760,7 +1815,8 @@ describe('ProposalsService', () => {
       // lets `clone` mark a failed original as superseded.
       const proposal = await service.update(
         { id: 'proposal-1', rationale: 'Retried as a new proposal' },
-        SPACE_ID
+        SPACE_ID,
+        GATE_CALLER
       );
 
       expect(proposal.rationale).toBe('Retried as a new proposal');
@@ -1779,7 +1835,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ decision, status: 'pending' }));
       const { service } = createService(storage);
 
-      const proposal = await service.update({ id: 'proposal-1', status }, SPACE_ID);
+      const proposal = await service.update({ id: 'proposal-1', status }, SPACE_ID, GATE_CALLER);
 
       expect(proposal.status).toBe(status);
       expect(proposal.decision).toBe(decision);
@@ -1802,9 +1858,9 @@ describe('ProposalsService', () => {
       // `dismissed` + `executing` would claim an action is running for a
       // proposal that was declined; `expired` means nobody answered, which a
       // decision contradicts.
-      await expect(service.update({ id: 'proposal-1', status }, SPACE_ID)).rejects.toThrow(
-        ProposalConflictError
-      );
+      await expect(
+        service.update({ id: 'proposal-1', status }, SPACE_ID, GATE_CALLER)
+      ).rejects.toThrow(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
     });
 
@@ -1814,9 +1870,9 @@ describe('ProposalsService', () => {
 
       // An on-failure handler that fires before creation succeeded resolves its
       // template to ''. Elasticsearch would answer with an opaque shard failure.
-      await expect(service.update({ id: '', status: 'expired' }, SPACE_ID)).rejects.toBeInstanceOf(
-        ProposalNotFoundError
-      );
+      await expect(
+        service.update({ id: '', status: 'expired' }, SPACE_ID, GATE_CALLER)
+      ).rejects.toBeInstanceOf(ProposalNotFoundError);
 
       expect(storage.search).not.toHaveBeenCalled();
     });
@@ -1827,7 +1883,8 @@ describe('ProposalsService', () => {
 
       const proposal = await service.update(
         { id: 'proposal-1', status: 'failed', executionError: 'action exploded' },
-        SPACE_ID
+        SPACE_ID,
+        GATE_CALLER
       );
 
       expect(proposal.status).toBe('failed');
@@ -1840,7 +1897,11 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      const proposal = await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
+      const proposal = await service.update(
+        { id: 'proposal-1', status: 'succeeded' },
+        SPACE_ID,
+        GATE_CALLER
+      );
 
       expect(proposal.rationale).toBe('Looks right');
     });
@@ -4553,6 +4614,76 @@ describe('ProposalsService — gateless proposals', () => {
 
       expect(workflowsApi.getWorkflowExecutionStatuses).not.toHaveBeenCalled();
     });
+
+    describe('an approval whose run was never recorded', () => {
+      const MARKED_AT = '2026-09-01T00:02:00.000Z';
+      const unrecorded = () =>
+        released({ resolveExecutionId: undefined, gateReleasedAt: MARKED_AT });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('lifts the mark once it has stayed undecided too long', async () => {
+        jest.useFakeTimers({ now: Date.parse(MARKED_AT) + 5 * 60 * 1000 + 1 });
+        const storage = createStorage(unrecorded());
+        const { service } = createService(storage);
+
+        const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+        expect(proposal.status).toBe('pending');
+        expect(proposal.gateReleasedAt).toBeUndefined();
+        expect(proposal.rationale).toBeUndefined();
+        expect(storage.index).toHaveBeenCalledWith(expect.objectContaining({ if_seq_no: 7 }));
+      });
+
+      it('leaves a recent one to the run it started', async () => {
+        jest.useFakeTimers({ now: Date.parse(MARKED_AT) + 60 * 1000 });
+        const storage = createStorage(unrecorded());
+        const { service } = createService(storage);
+
+        const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+        expect(proposal.gateReleasedAt).toBe(MARKED_AT);
+        expect(storage.index).not.toHaveBeenCalled();
+      });
+
+      it('leaves one the run already decided', async () => {
+        jest.useFakeTimers({ now: Date.parse(MARKED_AT) + 60 * 60 * 1000 });
+        const storage = createStorage({
+          ...unrecorded(),
+          decision: 'approved',
+          status: 'executing',
+          decidedBy: analyst('decider'),
+        });
+        const { service } = createService(storage);
+
+        const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+        expect(proposal.status).toBe('executing');
+        expect(storage.index).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('clone', () => {
+    it('refuses a gateless proposal, which has no gate to re-offer it through', async () => {
+      const storage = createStorage(
+        gateless({
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          category: 'tune',
+          decision: 'approved',
+          status: 'failed',
+          resolveExecutionId: 'exec-2',
+        })
+      );
+      const { service } = createService(storage);
+
+      await expect(service.clone({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
   });
 
   describe('releaseGate', () => {
@@ -4684,7 +4815,7 @@ describe('ProposalsService — gateless proposals', () => {
       const { service } = createService(storage);
 
       await expect(
-        service.update({ id: 'proposal-1', status: 'expired' }, SPACE_ID)
+        service.update({ id: 'proposal-1', status: 'expired' }, SPACE_ID, GATE_CALLER)
       ).rejects.toBeInstanceOf(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
     });
@@ -4696,7 +4827,11 @@ describe('ProposalsService — gateless proposals', () => {
       const { service } = createService(storage);
 
       await expect(
-        service.update({ id: 'proposal-1', decision: 'approved', status: 'executing' }, SPACE_ID)
+        service.update(
+          { id: 'proposal-1', decision: 'approved', status: 'executing' },
+          SPACE_ID,
+          RESOLVE_CALLER
+        )
       ).rejects.toBeInstanceOf(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
     });
@@ -4720,13 +4855,46 @@ describe('ProposalsService — gateless proposals', () => {
           decidedBy: analyst('decider'),
           decisionMode: 'manual',
         },
-        SPACE_ID
+        SPACE_ID,
+        RESOLVE_CALLER
       );
 
       expect(updated).toMatchObject({
         decision: 'approved',
         status: 'executing',
         decidedBy: analyst('decider'),
+      });
+    });
+
+    describe('a write from anything but the resolve run the approval started', () => {
+      const approved = gateless({
+        actionWorkflowId: 'system-alertzero-action-create-rule',
+        category: 'tune',
+        gateReleasedAt: '2026-09-01T00:02:00.000Z',
+        resolveExecutionId: 'exec-2',
+      });
+
+      it.each([
+        ['another workflow', { workflowId: 'some-workflow', executionId: 'exec-2' }],
+        ['another resolve run', { workflowId: 'system-resolve-proposal', executionId: 'exec-3' }],
+      ])('refuses %s', async (_label, caller) => {
+        const storage = createStorage(approved);
+        const { service } = createService(storage);
+
+        await expect(
+          service.update({ id: 'proposal-1', status: 'expired' }, SPACE_ID, caller)
+        ).rejects.toBeInstanceOf(ProposalConflictError);
+        expect(storage.index).not.toHaveBeenCalled();
+      });
+
+      it('refuses another workflow before the run is recorded', async () => {
+        const storage = createStorage({ ...approved, resolveExecutionId: undefined });
+        const { service } = createService(storage);
+
+        await expect(
+          service.update({ id: 'proposal-1', status: 'expired' }, SPACE_ID, GATE_CALLER)
+        ).rejects.toBeInstanceOf(ProposalConflictError);
+        expect(storage.index).not.toHaveBeenCalled();
       });
     });
 
@@ -4752,7 +4920,7 @@ describe('ProposalsService — gateless proposals', () => {
         storage.index.mockRejectedValueOnce(versionConflict());
         const { service } = createService(storage);
 
-        const updated = await service.update(decide, SPACE_ID);
+        const updated = await service.update(decide, SPACE_ID, RESOLVE_CALLER);
 
         expect(updated).toMatchObject({
           decision: 'approved',
@@ -4778,7 +4946,7 @@ describe('ProposalsService — gateless proposals', () => {
         storage.index.mockRejectedValueOnce(versionConflict());
         const { service } = createService(storage);
 
-        const updated = await service.update(decide, SPACE_ID);
+        const updated = await service.update(decide, SPACE_ID, RESOLVE_CALLER);
 
         expect(updated).toMatchObject({ status: 'executing', resolveExecutionId: 'exec-2' });
         expect(storage.search).toHaveBeenCalledTimes(3);
@@ -4789,11 +4957,23 @@ describe('ProposalsService — gateless proposals', () => {
         const storage = createStorage({ ...released, decision: 'approved', status: 'executing' });
         const { service } = createService(storage);
 
-        await expect(service.update(decide, SPACE_ID)).rejects.toBeInstanceOf(
+        await expect(service.update(decide, SPACE_ID, RESOLVE_CALLER)).rejects.toBeInstanceOf(
           ProposalConflictError
         );
         expect(storage.search).toHaveBeenCalledTimes(1);
         expect(storage.index).not.toHaveBeenCalled();
+      });
+
+      it('does not re-apply the write when the record names another run', async () => {
+        const storage = createStorage(released);
+        reloadAs(storage, { ...released, resolveExecutionId: 'exec-3' });
+        storage.index.mockRejectedValueOnce(versionConflict());
+        const { service } = createService(storage);
+
+        await expect(service.update(decide, SPACE_ID, RESOLVE_CALLER)).rejects.toBeInstanceOf(
+          ProposalConflictError
+        );
+        expect(storage.index).toHaveBeenCalledTimes(1);
       });
 
       it('still conflicts when anything else landed', async () => {
@@ -4802,7 +4982,7 @@ describe('ProposalsService — gateless proposals', () => {
         storage.index.mockRejectedValueOnce(versionConflict());
         const { service } = createService(storage);
 
-        await expect(service.update(decide, SPACE_ID)).rejects.toBeInstanceOf(
+        await expect(service.update(decide, SPACE_ID, RESOLVE_CALLER)).rejects.toBeInstanceOf(
           ProposalConflictError
         );
         expect(storage.index).toHaveBeenCalledTimes(1);

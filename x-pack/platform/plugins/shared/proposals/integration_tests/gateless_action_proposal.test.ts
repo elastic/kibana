@@ -46,6 +46,26 @@ describe('gateless action proposal approval', () => {
     expect(proposal.resolveExecutionId).toBe('resolve-proposal-1');
   });
 
+  it('runs the action with the approved input and settles the proposal as succeeded', async () => {
+    const actionInputs = fixture.succeedAction(ACTION_WORKFLOW_ID);
+    const { id } = await fixture.seedGatelessProposal({
+      actionWorkflowId: ACTION_WORKFLOW_ID,
+      actionInput: { ruleId: 'rule-1' },
+    });
+
+    await fixture.releaseGate(id, true);
+
+    expect(actionInputs()).toEqual([{ actionInput: { ruleId: 'rule-1' } }]);
+    const proposal = fixture.onlyProposal();
+    expect(proposal).toMatchObject({
+      decision: 'approved',
+      decisionMode: 'manual',
+      status: 'succeeded',
+      resolveExecutionId: 'resolve-proposal-1',
+    });
+    expect(proposal.executionError).toBeUndefined();
+  });
+
   it('records no clone: a gateless proposal has no gate to re-offer it on', async () => {
     const { id } = await fixture.seedGatelessProposal({ actionWorkflowId: ACTION_WORKFLOW_ID });
 

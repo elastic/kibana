@@ -51,14 +51,31 @@ export const RETRY_WAIT_MS = 30_000;
 
 const awaitingRetrySince = new Map<string, number>();
 
-/** Whether this read of the proposal shows its decision, or no decision can follow. */
+/**
+ * Whether this read of the proposal shows its decision, or no decision can follow. A gateless
+ * proposal read as undecided without a release mark has none on its way: the server lifts the
+ * mark of an approval whose resolve run ended without deciding it.
+ */
 export const isDecisionShown = (
-  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'> | undefined
+  proposal:
+    | (Pick<Proposal, 'decision' | 'status' | 'supersededBy'> &
+        Partial<Pick<Proposal, 'gate' | 'gateReleasedAt'>>)
+    | undefined
 ): boolean =>
   proposal !== undefined &&
   (Boolean(proposal.decision) ||
     isTerminal(proposal.status) ||
-    proposal.supersededBy !== undefined);
+    proposal.supersededBy !== undefined ||
+    (isGatelessProposal(proposal) && proposal.gateReleasedAt === undefined));
+
+/** Whether this read of the proposal shows that it can no longer be decided as it was shown. */
+const hasMovedOn = (
+  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy' | 'gateReleasedAt'>
+): boolean =>
+  Boolean(proposal.decision) ||
+  isTerminal(proposal.status) ||
+  proposal.supersededBy !== undefined ||
+  proposal.gateReleasedAt !== undefined;
 
 /**
  * A gateless proposal someone approved whose decision is not written yet. Reading it again is what
@@ -71,7 +88,10 @@ const isBeingDecided = (proposal: Pick<Proposal, 'gate' | 'status' | 'gateReleas
   proposal.gateReleasedAt !== undefined;
 
 const hasUnseenDecision = (
-  proposal: Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>
+  proposal: Pick<
+    Proposal,
+    'id' | 'decision' | 'status' | 'supersededBy' | 'gate' | 'gateReleasedAt'
+  >
 ): boolean => inFlightDecisions.hasUnseen(proposal.id) && !isDecisionShown(proposal);
 
 /** Running, or failed with no retry yet for up to `RETRY_WAIT_MS`. Poll while this is true. */
@@ -257,24 +277,54 @@ const invalidateProposals = (queryClient: ReturnType<typeof useQueryClient>) => 
   return queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
 };
 
-/**
- * A 409 means the proposal moved on without this read of it: someone else decided it, or it
- * settled. Nothing polls a proposal this tab did not decide, so the stale copy would keep offering
- * a decision that can no longer be made. Awaited, so the mutation's error is shown beside the
- * current state rather than ahead of it.
- */
-const refreshOnConflict = async (
-  queryClient: ReturnType<typeof useQueryClient>,
-  error: unknown
-): Promise<void> => {
-  if (isHttpFetchError(error) && error.response?.status === 409) {
-    await invalidateProposals(queryClient);
-  }
-};
-
 /** How often, and for how long, to poll for the decision before giving up on it. */
 const DECISION_POLL_INTERVAL_MS = 750;
 const DECISION_POLL_MAX_ATTEMPTS = 8;
+
+/**
+ * Polls the proposal until a read of it satisfies `isDone`, for at most
+ * `DECISION_POLL_MAX_ATTEMPTS` reads. A failed read counts as not done yet.
+ */
+const pollProposal = async (
+  http: HttpSetup,
+  id: string,
+  isDone: (proposal: ProposalWithMetadata) => boolean
+): Promise<void> => {
+  for (let attempt = 0; attempt < DECISION_POLL_MAX_ATTEMPTS; attempt++) {
+    try {
+      const proposal = await http.get<ProposalWithMetadata>(
+        `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}`,
+        { version: PROPOSALS_API_VERSION }
+      );
+      if (isDone(proposal)) {
+        return;
+      }
+    } catch {
+      // Treated the same as "not done yet".
+    }
+    await new Promise((resolve) => setTimeout(resolve, DECISION_POLL_INTERVAL_MS));
+  }
+};
+
+/**
+ * A 409 means the proposal moved on without this read of it: someone else decided it, or it
+ * settled. Nothing polls a proposal this tab did not decide, so the stale copy would keep offering
+ * a decision that can no longer be made. The refetch is awaited, so the mutation's error is shown
+ * beside the current state rather than ahead of it. The write that won can still be unsearchable
+ * then, so the proposal is polled until a read shows it moved on, and refetched once more.
+ */
+const refreshOnConflict = async (
+  http: HttpSetup,
+  queryClient: ReturnType<typeof useQueryClient>,
+  error: unknown,
+  id: string
+): Promise<void> => {
+  if (!isHttpFetchError(error) || error.response?.status !== 409) {
+    return;
+  }
+  await invalidateProposals(queryClient);
+  void pollProposal(http, id, hasMovedOn).then(() => invalidateProposals(queryClient));
+};
 
 /**
  * `/approve` and `/dismiss` only resume the gate — see their route handlers for why the decision
@@ -292,22 +342,8 @@ const DECISION_POLL_MAX_ATTEMPTS = 8;
  * swallow it and keep polling on the same schedule rather than rejecting, which would otherwise
  * surface "could not be recorded" for a decision the gate had already released.
  */
-const waitForDecision = async (http: HttpSetup, id: string): Promise<void> => {
-  for (let attempt = 0; attempt < DECISION_POLL_MAX_ATTEMPTS; attempt++) {
-    try {
-      const proposal = await http.get<ProposalWithMetadata>(
-        `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}`,
-        { version: PROPOSALS_API_VERSION }
-      );
-      if (proposal.decision) {
-        return;
-      }
-    } catch {
-      // Treated the same as "not decided yet" — see the best-effort note above.
-    }
-    await new Promise((resolve) => setTimeout(resolve, DECISION_POLL_INTERVAL_MS));
-  }
-};
+const waitForDecision = (http: HttpSetup, id: string): Promise<void> =>
+  pollProposal(http, id, (proposal) => Boolean(proposal.decision));
 
 /** Waits for the decision, then marks it unseen until a read of the proposal shows it. */
 const settleDecision = async (http: HttpSetup, kind: DecisionKind, id: string): Promise<void> => {
@@ -335,7 +371,7 @@ export const useApproveProposal = () => {
       await settleDecision(services.http!, 'approve', id);
       await invalidateProposals(queryClient);
     },
-    onError: (error) => refreshOnConflict(queryClient, error),
+    onError: (error, { id }) => refreshOnConflict(services.http!, queryClient, error, id),
     onSettled: (_data, _error, { id }) => inFlightDecisions.end('approve', id),
   });
 };
@@ -356,7 +392,7 @@ export const useDismissProposal = () => {
       await settleDecision(services.http!, 'decline', id);
       await invalidateProposals(queryClient);
     },
-    onError: (error) => refreshOnConflict(queryClient, error),
+    onError: (error, { id }) => refreshOnConflict(services.http!, queryClient, error, id),
     onSettled: (_data, _error, { id }) => inFlightDecisions.end('decline', id),
   });
 };
@@ -380,7 +416,7 @@ export const useReopenProposal = () => {
     onSuccess: async () => {
       await invalidateProposals(queryClient);
     },
-    onError: (error) => refreshOnConflict(queryClient, error),
+    onError: (error, { id }) => refreshOnConflict(services.http!, queryClient, error, id),
   });
 };
 

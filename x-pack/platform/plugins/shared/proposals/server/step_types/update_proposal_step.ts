@@ -78,7 +78,8 @@ export const getUpdateProposalStepDefinition = ({
             rationale: input.rationale,
             executionError: input.executionError,
           },
-          spaceId
+          spaceId,
+          { workflowId: workflowContext.workflow.id, executionId: workflowContext.execution.id }
         );
 
         return {

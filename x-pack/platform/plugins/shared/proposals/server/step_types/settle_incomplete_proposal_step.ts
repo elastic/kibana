@@ -34,7 +34,8 @@ export const getSettleIncompleteProposalStepDefinition = ({
           settleIncompleteProposalStepCommonDefinition.inputSchema,
           context.input
         );
-        const spaceId = context.contextManager.getContext().workflow.spaceId;
+        const { workflow, execution } = context.contextManager.getContext();
+        const { spaceId } = workflow;
         const service = getProposalsService();
 
         // Same adopt the loop does before every write: a revision appended
@@ -54,7 +55,8 @@ export const getSettleIncompleteProposalStepDefinition = ({
             status,
             executionError: input.executionError,
           },
-          spaceId
+          spaceId,
+          { workflowId: workflow.id, executionId: execution.id }
         );
 
         return {

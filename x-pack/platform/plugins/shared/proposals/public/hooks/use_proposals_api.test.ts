@@ -220,6 +220,38 @@ describe('isInFlux', () => {
       })
     ).toBe(false);
   });
+
+  it('stops tracking a gateless approval once the server lifts its mark undecided', () => {
+    inFlightDecisions.markUnseen('approve', 'lifted-1');
+
+    expect(isInFlux({ id: 'lifted-1', status: 'pending', gate: 'none' })).toBe(false);
+  });
+
+  it('keeps tracking a gated approval the proposal does not show yet', () => {
+    inFlightDecisions.markUnseen('approve', 'gated-1');
+
+    expect(isInFlux({ id: 'gated-1', status: 'pending', gate: 'workflow' })).toBe(true);
+  });
+});
+
+describe('isDecisionShown', () => {
+  it('is true for a gateless proposal with no decision on its way', () => {
+    expect(isDecisionShown({ status: 'pending', gate: 'none' })).toBe(true);
+  });
+
+  it('is false for a gateless proposal whose approval is being resolved', () => {
+    expect(
+      isDecisionShown({
+        status: 'pending',
+        gate: 'none',
+        gateReleasedAt: '2026-01-01T00:00:00.000Z',
+      })
+    ).toBe(false);
+  });
+
+  it('is false for an undecided gated proposal', () => {
+    expect(isDecisionShown({ status: 'pending', gate: 'workflow' })).toBe(false);
+  });
 });
 
 describe('useConversationProposals', () => {
@@ -697,6 +729,46 @@ describe('useApproveProposal', () => {
 
     await expect(result.current.mutateAsync({ id: 'p-1', body: {} })).rejects.toThrow('HTTP 409');
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
+  });
+
+  it('refetches again once the decision that won is searchable', async () => {
+    jest.useFakeTimers();
+    try {
+      const http = makeHttp();
+      http.post.mockRejectedValue(makeHttpFetchError(409));
+      // The write that won is not searchable at first, so the proposal still reads as decidable.
+      http.get
+        .mockResolvedValueOnce({ id: 'p-1', status: 'pending', gate: 'none' })
+        .mockResolvedValue({
+          id: 'p-1',
+          status: 'pending',
+          gate: 'none',
+          gateReleasedAt: '2026-01-01T00:00:00.000Z',
+        });
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+
+      const { Wrapper, queryClient } = createWrapper();
+      const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+      const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+      await act(async () => {
+        await expect(result.current.mutateAsync({ id: 'p-1', body: {} })).rejects.toThrow(
+          'HTTP 409'
+        );
+      });
+      expect(invalidateSpy).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(10_000);
+      });
+
+      expect(http.get).toHaveBeenCalledTimes(2);
+      expect(invalidateSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('does not refetch the proposals for a failure that is not a conflict', async () => {

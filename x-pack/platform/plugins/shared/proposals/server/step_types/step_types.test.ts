@@ -21,6 +21,8 @@ import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
 const EXECUTION_ID = 'exec-1';
 const SPACE_ID = 'space-a';
+const WORKFLOW_ID = 'system-resolve-proposal';
+const CALLER = { workflowId: WORKFLOW_ID, executionId: EXECUTION_ID };
 const FAKE_REQUEST = { fake: true } as never;
 
 /** The step identifies the actor from the execution's own fake request. */
@@ -56,7 +58,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     contextManager: {
       getContext: jest.fn().mockReturnValue({
         execution: { id: EXECUTION_ID, executedBy: 'worker-user' },
-        workflow: { spaceId: SPACE_ID },
+        workflow: { id: WORKFLOW_ID, spaceId: SPACE_ID },
       }),
       getScopedEsClient: jest.fn(),
       getFakeRequest: jest.fn().mockReturnValue(FAKE_REQUEST),
@@ -616,7 +618,8 @@ describe('proposals.updateProposal step', () => {
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'proposal-1', status: 'succeeded' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
     expect(result.output).toEqual({
       proposalId: 'proposal-1',
@@ -643,7 +646,8 @@ describe('proposals.updateProposal step', () => {
     // the request is the better attribution, and any workflow can pass a name.
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: resolvedUser }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
   });
 
@@ -671,7 +675,8 @@ describe('proposals.updateProposal step', () => {
     });
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: workerUser, decisionMode: 'auto' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
   });
 
@@ -697,7 +702,8 @@ describe('proposals.updateProposal step', () => {
         decidedBy: { username: 'analyst', fullName: null, email: null },
         decisionMode: 'manual',
       }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
   });
 
@@ -720,7 +726,8 @@ describe('proposals.updateProposal step', () => {
       expect.objectContaining({
         decidedBy: { username: 'analyst', fullName: null, email: null },
       }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
   });
 
@@ -733,7 +740,8 @@ describe('proposals.updateProposal step', () => {
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: undefined, decisionMode: undefined }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
     expect(resolveUser).not.toHaveBeenCalled();
     expect(resolveWorkerUser).not.toHaveBeenCalled();
@@ -764,7 +772,8 @@ describe('proposals.updateProposal step', () => {
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ executionError: 'action exploded' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
   });
 
@@ -1029,7 +1038,8 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(service.get).toHaveBeenCalledWith('proposal-2', SPACE_ID, FAKE_REQUEST);
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'proposal-2', status: 'expired', executionError: 'timed out' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
     expect(result.output).toEqual({
       proposalId: 'proposal-2',
@@ -1051,7 +1061,8 @@ describe('proposals.settleIncompleteProposal step', () => {
 
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'expired' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
   });
 
@@ -1072,7 +1083,8 @@ describe('proposals.settleIncompleteProposal step', () => {
 
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'failed' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
     expect(result.output?.status).toBe('failed');
     expect(result.output?.decision).toBe('approved');
@@ -1093,7 +1105,8 @@ describe('proposals.settleIncompleteProposal step', () => {
 
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'failed' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
   });
 

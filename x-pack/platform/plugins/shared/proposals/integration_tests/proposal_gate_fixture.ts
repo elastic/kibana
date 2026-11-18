@@ -174,7 +174,10 @@ export interface ProposalGateFixture {
    */
   seedProposal: (params: { id?: string }) => Promise<{ id: string }>;
   /** Creates a gateless proposal through the real service, as a producer with no gate would. */
-  seedGatelessProposal: (params: { actionWorkflowId?: string }) => Promise<{ id: string }>;
+  seedGatelessProposal: (params: {
+    actionWorkflowId?: string;
+    actionInput?: Record<string, unknown>;
+  }) => Promise<{ id: string }>;
   /** Decides a proposal through the real service, as the decision route does. */
   releaseGate: (id: string, approved: boolean) => Promise<Proposal>;
   /** Reads a proposal through the real service, settling it on read as the routes do. */
@@ -221,6 +224,11 @@ export interface ProposalGateFixture {
   setActionMetadata: (actionMetadata: Record<string, unknown>) => void;
   /** Makes the action workflow unreadable, as a transient API failure would. */
   failActionLookup: () => void;
+  /**
+   * Installs `actionWorkflowId` as an action a gateless approval's resolve run
+   * can start, and that completes at once. Returns the inputs of each run.
+   */
+  succeedAction: (actionWorkflowId: string) => () => Array<Record<string, unknown>>;
 }
 
 export const createProposalGateFixture = (): ProposalGateFixture => {
@@ -299,12 +307,12 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
   });
 
   const update = service.update.bind(service);
-  jest.spyOn(service, 'update').mockImplementation(async (params, spaceId) => {
+  jest.spyOn(service, 'update').mockImplementation(async (params, spaceId, caller) => {
     if (failingStatus !== undefined && params.status === failingStatus) {
       failingStatus = undefined;
       throw new Error(`Failed to write status ${params.status}`);
     }
-    return update(params, spaceId);
+    return update(params, spaceId, caller);
   });
 
   const privileges: ProposalPrivilegesChecker = {
@@ -358,7 +366,11 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
   const runResolution = async (
     inputs?: Record<string, unknown>
   ): Promise<{ workflowExecutionId: string }> => {
-    await resolveEngine.runWorkflow({ workflowYaml: resolveWorkflowYaml, inputs });
+    await resolveEngine.runWorkflow({
+      workflowYaml: resolveWorkflowYaml,
+      inputs,
+      workflowId: RESOLVE_PROPOSAL_WORKFLOW_ID,
+    });
     const execution =
       resolveEngine.workflowExecutionRepositoryMock.workflowExecutions.get(FIXTURE_EXECUTION_ID)!;
     if (!isTerminalStatus(execution.status)) {
@@ -457,7 +469,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       );
       return { id: created.id };
     },
-    seedGatelessProposal: async ({ actionWorkflowId }) => {
+    seedGatelessProposal: async ({ actionWorkflowId, actionInput }) => {
       const created = await service.create(
         {
           gate: 'none',
@@ -467,6 +479,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
           confidence: 'medium',
           category: 'tune',
           ...(actionWorkflowId !== undefined && { actionWorkflowId }),
+          ...(actionInput !== undefined && { actionInput }),
         },
         { spaceId: 'fake_space_id', request: httpServerMock.createKibanaRequest() }
       );
@@ -555,6 +568,64 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     },
     failActionLookup: () => {
       workflowsApi.getWorkflow.mockRejectedValue(new Error('workflows API unavailable'));
+    },
+    succeedAction: (actionWorkflowId) => {
+      const actionYaml = [
+        'name: Stub action',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: noop',
+        '    type: console',
+        '    with:',
+        '      message: done',
+      ].join('\n');
+      jest
+        .mocked(resolveEngine.dependencies.coreStart.elasticsearch.client.asInternalUser.search)
+        .mockImplementation((async (params: unknown) =>
+          searchResponse(
+            JSON.stringify(params).includes(actionWorkflowId)
+              ? [
+                  {
+                    _index: '.workflows',
+                    _id: actionWorkflowId,
+                    _source: {
+                      name: 'Stub action',
+                      enabled: true,
+                      valid: true,
+                      managed: true,
+                      tags: ['action'],
+                      yaml: actionYaml,
+                      definition: parse(actionYaml),
+                    },
+                  },
+                ]
+              : []
+          )) as never);
+
+      // Already completed when the resolve run reads it back, so the run's
+      // `workflow.execute` step completes without parking on the child.
+      const actionInputs: Array<Record<string, unknown>> = [];
+      resolveEngine.workflowsExecutionEngineMock.executeWorkflow.mockImplementation(
+        async (_workflow: unknown, { inputs }: { inputs?: Record<string, unknown> }) => {
+          actionInputs.push(inputs ?? {});
+          const workflowExecutionId = `action-${actionInputs.length}`;
+          resolveEngine.workflowExecutionRepositoryMock.workflowExecutions.set(
+            workflowExecutionId,
+            {
+              id: workflowExecutionId,
+              spaceId: 'fake_space_id',
+              workflowId: actionWorkflowId,
+              status: ExecutionStatus.COMPLETED,
+              context: { output: { done: true } },
+              stepExecutionIds: [],
+            } as never
+          );
+          return { workflowExecutionId };
+        }
+      );
+      return () => [...actionInputs];
     },
   };
 };

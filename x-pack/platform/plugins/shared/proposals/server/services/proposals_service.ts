@@ -65,6 +65,7 @@ import {
   ProposalForbiddenError,
   ProposalInvalidActionInputError,
   ProposalInvalidGateError,
+  ProposalInvalidIdError,
   ProposalLookupTruncatedError,
   ProposalNotFoundError,
   ProposalWriteConflictError,
@@ -109,6 +110,12 @@ export interface UpdateProposalParams {
   dismissReason?: DismissReason;
   rationale?: string;
   executionError?: string;
+}
+
+/** The workflow execution a write through `update` comes from. */
+export interface ProposalWorkflowCaller {
+  workflowId: string;
+  executionId: string;
 }
 
 export interface ProposalsServiceDeps {
@@ -159,8 +166,19 @@ const gateEndedError = (status: ExecutionStatus): string =>
 const resolveEndedError = (status: ExecutionStatus): string =>
   `The resolve execution ended as ${status} before it settled the proposal.`;
 
+/** The longest proposal id the routes accept (`routes/shared.ts`), so the longest a caller may choose. */
+const MAX_PROPOSAL_ID_LENGTH = 256;
+
 /** How many times an approval re-reads the proposal to record its resolve run. */
 const RECORD_RESOLVE_EXECUTION_ATTEMPTS = 3;
+
+/**
+ * How long a gateless approval may stay undecided without its resolve run on
+ * record before a read lifts its mark. The run is recorded within a second;
+ * past this, recording gave up, and a run that then ended without deciding
+ * would leave a mark nothing follows up.
+ */
+const UNRECORDED_RELEASE_TIMEOUT_MS = 5 * 60 * 1000;
 
 /**
  * Delays between reloads while a write that won a race is not yet searchable.
@@ -187,6 +205,27 @@ interface Settlement {
 const isReleasedGatelessAction = (
   proposal: Pick<Proposal, 'actionWorkflowId' | 'gateReleasedAt'>
 ) => proposal.actionWorkflowId !== undefined && proposal.gateReleasedAt !== undefined;
+
+/**
+ * Whether `caller` is the resolve run a gateless approval started. Until the
+ * approval has recorded that run, any run of the resolve workflow is taken for
+ * it: its `system-` id is reserved, and the run can write before it is recorded.
+ */
+const isOwningResolveRun = (
+  proposal: Pick<Proposal, 'actionWorkflowId' | 'gateReleasedAt' | 'resolveExecutionId'>,
+  { workflowId, executionId }: ProposalWorkflowCaller
+): boolean =>
+  isReleasedGatelessAction(proposal) &&
+  workflowId === RESOLVE_PROPOSAL_WORKFLOW_ID &&
+  (proposal.resolveExecutionId === undefined || proposal.resolveExecutionId === executionId);
+
+/** An undecided gateless approval whose resolve run went unrecorded for too long. */
+const isUnrecordedRelease = (proposal: Proposal, now: number): boolean =>
+  isGatelessProposal(proposal) &&
+  proposal.status === 'pending' &&
+  proposal.gateReleasedAt !== undefined &&
+  proposal.resolveExecutionId === undefined &&
+  now - Date.parse(proposal.gateReleasedAt) > UNRECORDED_RELEASE_TIMEOUT_MS;
 
 /** Whether the only write between two loads was the approval recording its resolve run. */
 const isOnlyResolveExecutionRecorded = (
@@ -249,6 +288,14 @@ export class ProposalsService {
     params: CreateProposalParams,
     { spaceId, user, request }: { spaceId: string; user?: ProposalUser; request: KibanaRequest }
   ): Promise<ProposalWithMetadata> {
+    if (
+      params.id !== undefined &&
+      (params.id.length === 0 || params.id.length > MAX_PROPOSAL_ID_LENGTH)
+    ) {
+      throw new ProposalInvalidIdError(
+        `A proposal id must be 1 to ${MAX_PROPOSAL_ID_LENGTH} characters long`
+      );
+    }
     const id = params.id ?? uuidv4();
     // Omission is the gated path, so a document written before the field
     // existed and a caller that never heard of it mean the same thing.
@@ -907,19 +954,22 @@ export class ProposalsService {
    * so a second approver cannot reattribute the first one's call. Both live
    * here rather than in the workflow YAML so they hold for every caller.
    */
-  async update(params: UpdateProposalParams, spaceId: string): Promise<Proposal> {
+  async update(
+    params: UpdateProposalParams,
+    spaceId: string,
+    caller: ProposalWorkflowCaller
+  ): Promise<Proposal> {
     const stored = await this.load(params.id, spaceId);
 
     // This is the gate workflow's entry point, behind `proposals.updateProposal`
-    // and `proposals.settleIncompleteProposal`, and any workflow holding
-    // `manage_proposals` can call either on any id. A gateless proposal has no
+    // and `proposals.settleIncompleteProposal`, and any workflow can call the
+    // latter on any id without `manage_proposals`. A gateless proposal has no
     // workflow to advance it, so a write arriving here is addressed to the
-    // wrong record — unless its approval started the resolve run that now owns
-    // it, which is what the release mark on an action proposal says. The
-    // direct path writes through `applyUpdate` instead.
-    if (isGatelessProposal(stored.proposal) && !isReleasedGatelessAction(stored.proposal)) {
+    // wrong record — unless it comes from the resolve run its approval started.
+    // The direct path writes through `applyUpdate` instead.
+    if (isGatelessProposal(stored.proposal) && !isOwningResolveRun(stored.proposal, caller)) {
       throw new ProposalConflictError(
-        `Proposal [${params.id}] is not owned by a workflow, so a workflow cannot update it`
+        `Proposal [${params.id}] is not owned by this workflow execution, so it cannot update it`
       );
     }
 
@@ -935,9 +985,13 @@ export class ProposalsService {
       // The approval that started this run records the run on the proposal
       // once it has started, and that write can land between this load and
       // this write. It changes nothing the guards read, so the update is
-      // re-applied to the record it produced; any other change still conflicts.
+      // re-applied to the record it produced, provided it recorded this run;
+      // any other change still conflicts.
       const current = await this.loadNewerThan(params.id, spaceId, stored);
-      if (!isOnlyResolveExecutionRecorded(stored.proposal, current.proposal)) {
+      if (
+        !isOnlyResolveExecutionRecorded(stored.proposal, current.proposal) ||
+        !isOwningResolveRun(current.proposal, caller)
+      ) {
         throw error;
       }
       return this.applyUpdate(current, params);
@@ -1046,6 +1100,12 @@ export class ProposalsService {
     request: KibanaRequest
   ): Promise<string> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+
+    if (isGatelessProposal(proposal)) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] cannot be cloned: it has no gate execution to re-offer it through`
+      );
+    }
 
     // Asserted here rather than left to the caller, because this is reachable
     // as a registered step: any workflow could otherwise re-open a succeeded
@@ -1856,7 +1916,9 @@ export class ProposalsService {
    * A gateless action proposal is followed through the resolve run its
    * approval started instead. That run never parks, so it ending is not by
    * itself a problem — only ending with the proposal unsettled is. Nothing
-   * else would expire a gateless proposal, so it never is here either.
+   * else would expire a gateless proposal, so it never is here either. An
+   * approval whose run never got recorded is lifted once it has stayed
+   * undecided for `UNRECORDED_RELEASE_TIMEOUT_MS`.
    */
   private async settleOrphans(
     proposals: Proposal[],
@@ -1865,6 +1927,8 @@ export class ProposalsService {
   ): Promise<Proposal[]> {
     const settlements = new Map<string, Settlement>();
     const awaitingRun: Array<{ proposal: Proposal; executionId: string }> = [];
+    const now = Date.now();
+    const unrecorded = proposals.filter((proposal) => isUnrecordedRelease(proposal, now));
     for (const proposal of proposals) {
       const executionId = isGatelessProposal(proposal)
         ? proposal.resolveExecutionId
@@ -1886,17 +1950,55 @@ export class ProposalsService {
       }
     }
 
-    if (settlements.size === 0) {
+    if (settlements.size === 0 && unrecorded.length === 0) {
       return proposals;
     }
-    const settled = new Map(
-      await asyncMapWithLimit(
+    const settled = new Map([
+      ...(await asyncMapWithLimit(
         [...settlements],
         10,
         async ([id, settlement]) => [id, await this.settleOrphan(id, settlement, spaceId)] as const
-      )
-    );
+      )),
+      ...(await asyncMapWithLimit(
+        unrecorded,
+        10,
+        async ({ id, gateReleasedAt }) =>
+          [id, await this.liftUnrecordedRelease(id, gateReleasedAt, spaceId)] as const
+      )),
+    ]);
     return proposals.map((proposal) => settled.get(proposal.id) ?? proposal);
+  }
+
+  /**
+   * Lifts the mark of an approval whose resolve run was never recorded, while
+   * it is still the same undecided approval. A run that turns up afterwards
+   * finds no mark and is refused by `update`.
+   */
+  private async liftUnrecordedRelease(
+    id: string,
+    gateReleasedAt: string | undefined,
+    spaceId: string
+  ): Promise<Proposal | undefined> {
+    try {
+      const stored = await this.load(id, spaceId);
+      const { proposal } = stored;
+      if (
+        proposal.gateReleasedAt !== gateReleasedAt ||
+        !isUnrecordedRelease(stripRanks(proposal), Date.now())
+      ) {
+        return stripRanks(proposal);
+      }
+      return await this.liftRelease(stored);
+    } catch (error) {
+      if (error instanceof ProposalConflictError) {
+        this.deps.logger.debug(`Proposal [${id}] moved before its approval could be lifted`);
+      } else {
+        this.deps.logger.warn(
+          `Could not lift the unrecorded approval of proposal [${id}]: ${error}`
+        );
+      }
+      return undefined;
+    }
   }
 
   /** The terminal status of each readable gate execution among `executionIds`. */
