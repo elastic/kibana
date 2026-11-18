@@ -36,10 +36,9 @@ export const ONGOING_FAST_REPEATS_UNTIL_MS = 12_000;
 /** CPU profiler sampling interval in microseconds: about 99 Hz. */
 export const SAMPLING_INTERVAL_US = 10_101;
 
-/** Length of the rolling hour, in the worker's monotonic milliseconds. */
-export const ROLLING_HOUR_MS = 60 * 60 * 1000;
+export const ROLLING_HOUR_MS = 60 * 60_000;
 
-export const ADMISSION_LIMITS: Readonly<Record<Phase, Readonly<AdmissionLimits>>> = {
+export const ADMISSION_LIMITS: Readonly<Record<Phase, AdmissionLimits>> = {
   starting: { perHour: 5, minGrowth: 1, maxFiles: 10 },
   running: { perHour: 5, minGrowth: 1.25, maxFiles: 100 },
 };

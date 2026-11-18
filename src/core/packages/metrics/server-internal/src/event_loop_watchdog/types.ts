@@ -24,6 +24,8 @@ export interface AdmissionLimits {
   maxFiles: number;
 }
 
+export type AdmissionOutcome = 'admitted' | 'in_window' | 'file_limit';
+
 export interface WatchdogProfilingData {
   startAfterMs: Readonly<Record<Phase, number>>;
   maxDurationMs: Readonly<Record<Phase, number>>;
@@ -58,7 +60,7 @@ export interface BlockLogMeta extends LogMeta {
 export type CaptureStopReason = 'block_ended' | 'max_duration';
 
 /** Whether a capture's profile is written to a file, or why not. */
-export type ProfileFileOutcome = 'admitted' | 'in_window' | 'file_limit' | 'no_directory' | 'empty';
+export type ProfileFileOutcome = AdmissionOutcome | 'no_directory' | 'empty';
 
 export interface ProfileLogMeta extends LogMeta {
   kibana: {

@@ -8,38 +8,33 @@
  */
 
 import { ADMISSION_LIMITS, ROLLING_HOUR_MS } from './constants';
-import type { AdmissionLimits, Phase } from './types';
-
-export type AdmissionOutcome = 'admitted' | 'in_window' | 'file_limit';
+import type { AdmissionOutcome, Phase } from './types';
 
 interface PhaseState {
-  /** Monotonic times of the phase's newest admissions in the rolling hour, at most `perHour`. */
+  /**
+   * Newest admission times, up to `perHour`; stale timestamps are filtered before the
+   * rolling-hour check.
+   */
   admittedTimes: number[];
   longestAdmittedMs: number;
   admitted: number;
 }
 
+const newPhaseState = (): PhaseState => ({ admittedTimes: [], longestAdmittedMs: 0, admitted: 0 });
+
 /**
- * Decides which captures are written to the diagnostics directory. Files there may be uploaded and
- * deleted at any time, so a written file is never replaced. Each phase has its own limits and
- * state: a capture is admitted if its phase admitted fewer than `perHour` captures in the rolling
- * hour, or its block is a record (longer than `minGrowth` times the longest its phase admitted).
- * `maxFiles` is an upper limit on the rest.
- *
- * An admitted capture counts at once, so a write that then fails still uses its slot. Times are
- * the worker's monotonic milliseconds, so the rolling hour is immune to wall-clock steps.
+ * Admits profile captures for file output independently per phase. Allows `perHour` admissions
+ * per rolling hour; after that, a block must exceed `minGrowth` times the longest admitted block.
+ * `maxFiles` caps lifetime admissions, and a failed write still consumes a slot.
  */
 export class WriteAdmission {
   private readonly phases: Record<Phase, PhaseState> = {
-    starting: { admittedTimes: [], longestAdmittedMs: 0, admitted: 0 },
-    running: { admittedTimes: [], longestAdmittedMs: 0, admitted: 0 },
+    starting: newPhaseState(),
+    running: newPhaseState(),
   };
 
-  constructor(
-    private readonly limits: Readonly<Record<Phase, Readonly<AdmissionLimits>>> = ADMISSION_LIMITS
-  ) {}
+  constructor(private readonly limits = ADMISSION_LIMITS) {}
 
-  /** Decides whether a capture in `phase` whose block lasted `blockedMs` is written at `nowMs`. */
   public admit(phase: Phase, blockedMs: number, nowMs: number): AdmissionOutcome {
     const { perHour, minGrowth, maxFiles } = this.limits[phase];
     const state = this.phases[phase];
@@ -50,7 +45,8 @@ export class WriteAdmission {
     if (inRollingHour.length >= perHour && blockedMs <= state.longestAdmittedMs * minGrowth) {
       return 'in_window';
     }
-    // The newest `perHour` times are enough to tell whether `perHour` admissions fall in the hour.
+    // Only the newest `perHour` timestamps matter; if these have aged out, fewer than `perHour`
+    // admissions remain in the hour.
     state.admittedTimes = [...inRollingHour, nowMs].slice(-perHour);
     state.longestAdmittedMs = Math.max(state.longestAdmittedMs, blockedMs);
     state.admitted++;
