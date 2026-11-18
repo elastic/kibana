@@ -9,9 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect, useRouteMatch } from 'react-router-dom';
-import { ImportsPage } from '../pages/imports_page/imports_page';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { areAlertingV2ImportsEnabled } from '@kbn/alerting-v2-utils';
+import { ImportsPage } from '../pages/imports_page/imports_page';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
 /**

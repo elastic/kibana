@@ -26,9 +26,7 @@ describe('ImportsTable', () => {
       <I18nProvider>
         <ImportsTable
           isLoading={false}
-          items={[
-            { connectorId: 'connector/1', name: 'Datadog one', connectorTypeId: '.datadog' },
-          ]}
+          items={[{ connectorId: 'connector/1', name: 'Datadog one', connectorTypeId: '.datadog' }]}
         />
       </I18nProvider>
     );
