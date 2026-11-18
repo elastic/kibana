@@ -7,7 +7,6 @@
 
 import type { BoostProfileType } from './types';
 
-/** Elastic-managed boost profile names per type, ordered by cost. */
 const MANAGED_PROFILE_NAMES = {
   indices: ['_on_demand_indices', '_performant_indices', '_high_availability_indices'],
   data_streams: [
