@@ -18,7 +18,7 @@ import {
   getExemptApiType,
   getMockResponses,
   getOauthEmulation,
-  getRecordedApiType,
+  getRecordedApiTypes,
 } from './connector_coverage';
 import type { VendorApiManifest } from '../manifest';
 
@@ -31,9 +31,17 @@ const spec = (id: string, actions: string[], events: string[] = []): ConnectorSp
       : {}),
   } as unknown as ConnectorSpec);
 
-const manifest = (...formats: string[]): VendorApiManifest =>
+const manifest = (...formats: string[]): VendorApiManifest => manifestWithUnmatched({}, ...formats);
+
+const mcpRequest = { method: 'post', path: '/mcp', reason: 'The vendor MCP server' };
+
+const manifestWithUnmatched = (
+  unmatched: Record<string, Array<{ method: string; path: string; reason: string }>>,
+  ...formats: string[]
+): VendorApiManifest =>
   ({
     operations: {},
+    unmatched,
     sources: Object.fromEntries(
       formats.map((format, index) => [
         `v${index}`,
@@ -86,13 +94,46 @@ describe('getExemptApiType', () => {
   });
 });
 
-describe('getRecordedApiType', () => {
+describe('getRecordedApiTypes', () => {
   it('maps Markdown formats to markdown', () => {
-    expect(getRecordedApiType(manifest('brave-markdown'))).toBe('markdown');
+    expect(getRecordedApiTypes(manifest('brave-markdown'))).toEqual(['markdown']);
   });
 
-  it('uses the most common source format', () => {
-    expect(getRecordedApiType(manifest('swagger', 'openapi', 'openapi'))).toBe('openapi');
+  it('lists each source format once', () => {
+    expect(getRecordedApiTypes(manifest('swagger', 'openapi', 'openapi'))).toEqual([
+      'openapi',
+      'swagger',
+    ]);
+  });
+
+  it('adds mcp when actions call an MCP server no source describes', () => {
+    expect(
+      getRecordedApiTypes(manifestWithUnmatched({ callTool: [mcpRequest] }, 'graphql'))
+    ).toEqual(['graphql', 'mcp']);
+  });
+
+  it.each(['/mcp', '/mcp/', '/api/2.0/mcp/sql'])('reads %s as an MCP server', (path) => {
+    expect(
+      getRecordedApiTypes(manifestWithUnmatched({ callTool: [{ ...mcpRequest, path }] }, 'openapi'))
+    ).toContain('mcp');
+  });
+
+  it('keeps mcp once when the source is already MCP', () => {
+    expect(getRecordedApiTypes(manifestWithUnmatched({ callTool: [mcpRequest] }, 'mcp'))).toEqual([
+      'mcp',
+    ]);
+  });
+
+  it('ignores unmatched requests to other endpoints', () => {
+    const request = { method: 'get', path: '/v1/mcpx', reason: 'The spec omits it' };
+
+    expect(getRecordedApiTypes(manifestWithUnmatched({ list: [request] }, 'openapi'))).toEqual([
+      'openapi',
+    ]);
+  });
+
+  it('reports other for a manifest without sources', () => {
+    expect(getRecordedApiTypes(manifest())).toEqual(['other']);
   });
 });
 
@@ -107,7 +148,7 @@ describe('buildCoverageDocument', () => {
     ).toMatchObject({
       connector_id: '.drive',
       direction: 'outbound',
-      api_type: 'discovery',
+      api_types: ['discovery'],
       emulated: true,
       drift_protection: 'full',
     });
@@ -123,7 +164,7 @@ describe('buildCoverageDocument', () => {
     ).toMatchObject({
       connector_id: '.sql',
       direction: 'outbound',
-      api_type: 'database',
+      api_types: ['database'],
       emulated: false,
       drift_protection: 'none',
       exemption_reason: 'Talks to the database through a driver',
@@ -136,7 +177,7 @@ describe('buildCoverageDocument', () => {
     ).toMatchObject({
       connector_id: '.threatq',
       direction: 'outbound',
-      api_type: 'unexplained',
+      api_types: ['unexplained'],
       emulated: false,
       drift_protection: 'none',
     });
@@ -261,7 +302,7 @@ describe('buildCoverageDocument facts', () => {
       mock_responses: 'emulator_responses',
       realistic_mocks: true,
       spec_directory: 'specs/example',
-      api_type: 'openapi',
+      api_types: ['openapi'],
       emulated: true,
       drift_protection: 'full',
     });

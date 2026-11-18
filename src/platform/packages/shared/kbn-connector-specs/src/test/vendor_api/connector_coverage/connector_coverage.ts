@@ -75,7 +75,8 @@ export type MockResponses = 'recordings' | 'emulator_responses' | 'fixtures' | '
 export interface ConnectorCoverageDocument {
   readonly connector_id: string;
   readonly direction: CoverageDirection;
-  readonly api_type: CoverageApiType;
+  /** Every kind of vendor API the connector calls; most have one. */
+  readonly api_types: readonly CoverageApiType[];
   /** Every auth type the connector accepts, e.g. `bearer` or `oauth_authorization_code`. */
   readonly auth_methods: readonly string[];
   readonly auth_summary: string;
@@ -282,15 +283,26 @@ export const getMockResponses = ({
   return emulated ? 'generated' : 'none';
 };
 
-/** The API type of a recorded connector: its sources' format, or the most used one if mixed. */
-export const getRecordedApiType = (manifest: VendorApiManifest): CoverageApiType => {
-  const counts = new Map<CoverageApiType, number>();
-  for (const { format } of Object.values(manifest.sources)) {
-    const type: CoverageApiType = isMarkdownFormat(format) ? 'markdown' : format;
-    counts.set(type, (counts.get(type) ?? 0) + 1);
-  }
-  const [mostUsed] = [...counts.entries()].sort(([, a], [, b]) => b - a)[0] ?? [];
-  return mostUsed ?? 'other';
+// An MCP server's endpoint, such as `/mcp`, `/mcp/` or `/api/2.0/mcp/sql`.
+const MCP_PATH = /(^|\/)mcp(\/|$)/i;
+
+/**
+ * The API types of a recorded connector: the format of each of its sources, plus `mcp` when
+ * actions call an MCP server that no source describes (the manifest acknowledges those requests
+ * as `unmatched`). A connector with several kinds of API, like monday.com's GraphQL and MCP,
+ * lists them all.
+ */
+export const getRecordedApiTypes = (manifest: VendorApiManifest): CoverageApiType[] => {
+  const types = new Set<CoverageApiType>(
+    Object.values(manifest.sources).map(({ format }) =>
+      isMarkdownFormat(format) ? 'markdown' : format
+    )
+  );
+  const callsMcp = Object.values(manifest.unmatched ?? {}).some((requests) =>
+    requests.some(({ path }) => MCP_PATH.test(path))
+  );
+  if (callsMcp) types.add('mcp');
+  return types.size > 0 ? [...types].sort() : ['other'];
 };
 
 export const buildCoverageDocument = ({
@@ -324,14 +336,14 @@ export const buildCoverageDocument = ({
   if (manifest) {
     return {
       ...base,
-      api_type: getRecordedApiType(manifest),
+      api_types: getRecordedApiTypes(manifest),
       emulated: true,
       drift_protection: 'full',
     };
   }
   return {
     ...base,
-    api_type: exemptionReason ? getExemptApiType(exemptionReason) : 'unexplained',
+    api_types: [exemptionReason ? getExemptApiType(exemptionReason) : 'unexplained'],
     emulated: false,
     drift_protection: 'none',
     ...(exemptionReason ? { exemption_reason: exemptionReason } : {}),
