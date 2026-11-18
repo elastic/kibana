@@ -36,8 +36,9 @@ const isStamped = (event: ConversationEvent): event is SteerMessageEvent =>
  */
 
 /**
- * Maximum steers admitted per execution. Each stays in the prompt for the rest of the run, so with
- * `STEER_MESSAGE_MAX_LENGTH` this bounds the extra context.
+ * Maximum steers admitted per execution, in total: a steer settles only when its execution ends,
+ * and the conversation cannot tell which ones the live run has read. Each stays in the prompt for
+ * the rest of the run, so with `STEER_MESSAGE_MAX_LENGTH` this bounds the extra context.
  */
 export const STEERS_PER_RUN_MAX = 5;
 

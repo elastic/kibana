@@ -913,6 +913,7 @@ class ConversationClientImpl implements ConversationClient {
                   : 'no_active_execution',
             });
           }
+          // Five per run in total, read or not: what the run has read is in the execution document.
           if (pendingSteersFor(currentEvents, held).length >= STEERS_PER_RUN_MAX) {
             throw new SteerSignal({ kind: 'too_many_pending' });
           }

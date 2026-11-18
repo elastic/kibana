@@ -493,7 +493,7 @@ export const createTooManyPendingSteersError = ({
 }): AgentBuilderTooManyPendingSteersError => {
   return new AgentBuilderError(
     AgentBuilderErrorCode.tooManyPendingSteers,
-    `Conversation ${conversationId} has too many pending steers for its active execution`,
+    `Conversation ${conversationId} already has the maximum number of messages for its active execution`,
     { ...meta, conversationId, statusCode: 429 }
   );
 };

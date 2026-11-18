@@ -7,7 +7,7 @@
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
-import { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
+import { AgentBuilderErrorCode, STEERS_PER_RUN_MAX } from '@kbn/agent-builder-common';
 import type { UserMessageEvent } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import type { SteerConversationResponse } from '../../../common/http_api/conversations';
@@ -20,7 +20,8 @@ const labels = {
     defaultMessage: 'Messages cannot be sent to a running agent in a public conversation.',
   }),
   tooManyPending: i18n.translate('xpack.agentBuilder.conversationInput.steer.tooManyPending', {
-    defaultMessage: 'The agent already has several unread messages. Wait for it to catch up.',
+    defaultMessage: 'You can send up to {max} messages to a running agent. Wait for it to finish.',
+    values: { max: STEERS_PER_RUN_MAX },
   }),
 };
 
