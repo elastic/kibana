@@ -348,6 +348,27 @@ describe('WorkflowDetailHeader', () => {
     expect(setHighlightDiff).toHaveBeenCalledTimes(1);
   });
 
+  it('includes the visible badge text in the unsaved changes badge accessible name', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    expect(result.getByTestId('workflowUnsavedChangesBadge')).toHaveAccessibleName(
+      'Unsaved changes, show diff highlighting'
+    );
+  });
+
+  it('does not make the unsaved changes badge a toggle for a new workflow', () => {
+    mockUseParams.mockReturnValue({});
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    const badge = result.getByTestId('workflowUnsavedChangesBadge');
+    expect(badge).toHaveTextContent('Unsaved changes');
+    expect(badge.tagName).not.toBe('BUTTON');
+  });
+
   it('keeps the enabled toggle editable for managed workflows', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isManaged: true,

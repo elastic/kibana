@@ -240,7 +240,7 @@ export const ensureManagedOrphanDisablePreservesBinding = ({
     !isEqual(document, applyWorkflowVersion(mutateWorkflowToDisabled(previous), previous))
   ) {
     throw Boom.forbidden(
-      'Managed orphan cleanup may only disable the managed workflow the sweep observed.'
+      'The managed workflow may only be switched off, and must still be the one that was observed.'
     );
   }
 };

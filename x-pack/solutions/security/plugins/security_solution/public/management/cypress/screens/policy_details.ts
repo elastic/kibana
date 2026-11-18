@@ -19,7 +19,7 @@ export const visitPolicyDetailsPage = (policyId: string) => {
   loadPage(`${APP_POLICIES_PATH}/${policyId}`);
 
   cy.getByTestSubj('policyDetailsPage').should('exist');
-  cy.get('#settings').should('exist'); // waiting for Policy Settings tab
+  cy.getByTestSubj('policySettingsTab').should('exist'); // waiting for Policy Settings tab
 };
 
 export const savePolicyForm = () => {

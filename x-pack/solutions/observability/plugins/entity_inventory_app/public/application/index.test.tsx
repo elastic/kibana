@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { createMemoryHistory } from 'history';
 import type { History } from 'history';
@@ -17,11 +17,37 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { createCoreStartMock, createStartDependenciesMock } from '../mocks';
+import type { EntityInventoryApiClient } from '../inventory_api/client';
+import { createFixtureEntityInventoryApiClient } from '../__fixtures__/inventory_client';
+import {
+  createAppServicesMock,
+  createCoreStartMock,
+  createPublicConfigMock,
+  createStartDependenciesMock,
+} from '../mocks';
 import { ENTITY_INVENTORY_PAGES } from '../pages';
 import { entityInventoryRouter } from '../routes/config';
-import { ENTITY_LIST_PLACEHOLDER } from './translations';
+import type { EntityDataGridProps } from './components/entity_table/entity_data_grid';
 import { EntityInventoryShell, renderApp } from '.';
+
+// The shell tests check which tables it shows, when it requests the types and that the column
+// choices outlive a page change, not how a grid renders, which `entity_data_grid.test.tsx` covers.
+// The real grid is slow to mount in jsdom, so the stub shows the choices it was given and lets a
+// test make one.
+jest.mock('./components/entity_table/entity_data_grid', () => ({
+  EntityDataGrid: ({ entityType, preferences, onPreferencesChange }: EntityDataGridProps) => (
+    <div
+      data-test-subj="entityInventoryTable"
+      data-entity-type={entityType.type}
+      data-visible-columns={preferences.visibleColumns?.join(',')}
+    >
+      <button
+        data-test-subj="entityInventoryTableStubChooseColumns"
+        onClick={() => onPreferencesChange({ visibleColumns: ['host.name'] })}
+      />
+    </div>
+  ),
+}));
 
 const PageTemplate = (({ children }: { children: React.ReactNode }) => (
   <div>{children}</div>
@@ -29,14 +55,15 @@ const PageTemplate = (({ children }: { children: React.ReactNode }) => (
 
 const APP_BASE_PATH = '/app/entity-inventory';
 
-const renderShell = (history: History) => {
+const renderShell = (
+  history: History,
+  inventoryApi: EntityInventoryApiClient = createFixtureEntityInventoryApiClient()
+) => {
   render(
     <I18nProvider>
       <EuiProvider>
         <MockAppHeaderProvider>
-          <KibanaContextProvider
-            services={{ ...createCoreStartMock(), ...createStartDependenciesMock() }}
-          >
+          <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
             <RouterProvider history={history} router={entityInventoryRouter}>
               <EntityInventoryShell PageTemplate={PageTemplate} />
             </RouterProvider>
@@ -47,9 +74,9 @@ const renderShell = (history: History) => {
   );
 };
 
-const renderShellAt = (path: string) => {
+const renderShellAt = (path: string, inventoryApi?: EntityInventoryApiClient) => {
   const history = createMemoryHistory({ initialEntries: [path] });
-  renderShell(history);
+  renderShell(history, inventoryApi);
 
   return { history };
 };
@@ -57,7 +84,7 @@ const renderShellAt = (path: string) => {
 describe('EntityInventoryShell', () => {
   it.each(ENTITY_INVENTORY_PAGES)(
     'renders the page shell and title for the entity category of $path',
-    ({ entityCategory, path, title }) => {
+    async ({ entityCategory, path, title }) => {
       renderShellAt(path);
 
       expect(screen.getByTestId('entityInventoryPageShell')).toHaveAttribute(
@@ -66,11 +93,150 @@ describe('EntityInventoryShell', () => {
       );
       expect(screen.getByRole('heading', { name: title })).toBeInTheDocument();
       expect(screen.getByTestId('mockSearchBar')).toBeInTheDocument();
-      expect(screen.getByTestId('entityInventoryPlaceholder')).toHaveTextContent(
-        ENTITY_LIST_PLACEHOLDER
-      );
+      await waitFor(() => expect(screen.queryByTestId('entityInventoryTableLoading')).toBeNull());
     }
   );
+
+  it('lists one section per type on the all resources page, in the order of the types response', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const { types } = await fixtureClient.getTypes({});
+    const reversedTypes = [...types].reverse();
+    renderShellAt('/all-resources', {
+      ...fixtureClient,
+      getTypes: async () => ({ types: reversedTypes }),
+    });
+
+    await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+    expect(
+      screen
+        .getAllByTestId('entityInventoryTypeSection')
+        .map((section) => section.getAttribute('data-entity-type'))
+    ).toEqual(reversedTypes.map(({ type }) => type));
+    expect(screen.queryByTestId('entityInventoryTypeNotAvailable')).not.toBeInTheDocument();
+  });
+
+  it.each(['/hosts', '/kubernetes', '/all-resources'])(
+    'shows one error with a retry and no sections on %s when the types request fails',
+    async (path) => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      const getEntities = jest.fn(fixtureClient.getEntities);
+      renderShellAt(path, {
+        getTypes: () => Promise.reject(new Error('Types failed')),
+        getEntities,
+      });
+
+      expect(await screen.findByTestId('entityInventoryTableError')).toHaveTextContent(
+        'Types failed'
+      );
+      expect(screen.getAllByTestId('entityInventoryTableError')).toHaveLength(1);
+      expect(screen.getByTestId('entityInventoryTableRetry')).toBeInTheDocument();
+      expect(screen.queryByTestId('entityInventoryTypeSection')).not.toBeInTheDocument();
+      expect(getEntities).not.toHaveBeenCalled();
+    }
+  );
+
+  it('says a page type missing from the types response is not available, without listing it', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const { types } = await fixtureClient.getTypes({});
+    const getEntities = jest.fn(() => Promise.reject(new Error('Request failed')));
+    renderShellAt('/kubernetes', {
+      getTypes: async () => ({ types: types.filter(({ type }) => type === 'host') }),
+      getEntities,
+    });
+
+    expect(await screen.findByTestId('entityInventoryTypeNotAvailable')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableError')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTypeSection')).not.toBeInTheDocument();
+    expect(getEntities).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['/hosts', 'host'],
+    ['/kubernetes', 'k8s.deployment'],
+  ])('renders the results table of the page %s for the type %s', async (path, entityType) => {
+    renderShellAt(path);
+
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      entityType
+    );
+  });
+
+  it('requests the entity types once while moving between pages, and renders each page from that response', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const getTypes = jest.fn(fixtureClient.getTypes);
+    const { history } = renderShellAt('/hosts', { ...fixtureClient, getTypes });
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'host'
+    );
+
+    act(() => history.push('/kubernetes'));
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'k8s.deployment'
+    );
+
+    act(() => history.push('/all-resources'));
+    await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+
+    act(() => history.push('/hosts'));
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'host'
+    );
+    expect(getTypes).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the column choices of a type while another page is open', async () => {
+    const { history } = renderShellAt('/hosts');
+    expect(await screen.findByTestId('entityInventoryTable')).not.toHaveAttribute(
+      'data-visible-columns'
+    );
+    fireEvent.click(screen.getByTestId('entityInventoryTableStubChooseColumns'));
+    expect(screen.getByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-visible-columns',
+      'host.name'
+    );
+
+    act(() => history.push('/kubernetes'));
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'k8s.deployment'
+    );
+    expect(screen.getByTestId('entityInventoryTable')).not.toHaveAttribute('data-visible-columns');
+    act(() => history.push('/hosts'));
+
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-visible-columns',
+      'host.name'
+    );
+  });
+
+  it('requests the entity types once more on a retry after the types request fails, and not again on a page change', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const getTypes = jest
+      .fn(fixtureClient.getTypes)
+      .mockRejectedValueOnce(new Error('Types failed'));
+    const { history } = renderShellAt('/hosts', { ...fixtureClient, getTypes });
+    expect(await screen.findByTestId('entityInventoryTableError')).toBeInTheDocument();
+    expect(getTypes).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('entityInventoryTableRetry'));
+
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'host'
+    );
+    expect(getTypes).toHaveBeenCalledTimes(2);
+
+    act(() => history.push('/kubernetes'));
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'k8s.deployment'
+    );
+    expect(getTypes).toHaveBeenCalledTimes(2);
+  });
 
   it.each(['/', '/unknown'])('redirects the path %s to all resources', (path) => {
     const { history } = renderShellAt(path);
@@ -105,7 +271,7 @@ describe('renderApp', () => {
 
     let unmount: () => void = () => {};
     act(() => {
-      unmount = renderApp(core, createStartDependenciesMock(), params);
+      unmount = renderApp(core, createStartDependenciesMock(), params, createPublicConfigMock());
     });
 
     expect(core.rendering.addContext).toHaveBeenCalledTimes(1);

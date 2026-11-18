@@ -142,6 +142,9 @@ export class ActionsClientLlm extends LLM {
           temperature: this.temperature,
           modelName: this.model,
           timeout: this.#timeout,
+          ...(this.telemetryMetadata != null
+            ? { metadata: { connectorTelemetry: this.telemetryMetadata } }
+            : {}),
         });
 
         // raw response for .inference/EIS connectors (via the inference client's chatComplete):

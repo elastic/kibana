@@ -448,38 +448,15 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       <EuiHorizontalRule margin="m" />
       <EuiFlexGroup
         alignItems="center"
-        justifyContent={isEditMode ? 'spaceBetween' : 'flexEnd'}
+        justifyContent="spaceBetween"
         gutterSize="l"
         responsive={false}
       >
-        {isEditMode && (
-          <EuiFlexItem grow={false}>
-            <EuiButton fill color="danger" onClick={() => setIsModalVisible(true)}>
-              {i18n.ARCHIVE}
-            </EuiButton>
-            {isModalVisible && (
-              <EuiConfirmModal
-                aria-labelledby={modalTitleId}
-                title={i18n.ARCHIVE_TITLE}
-                titleProps={{ id: modalTitleId }}
-                onCancel={() => setIsModalVisible(false)}
-                onConfirm={() => {
-                  setIsModalVisible(false);
-                  archiveMaintenanceWindow(
-                    { maintenanceWindowId: maintenanceWindowId!, archive: true },
-                    { onSuccess }
-                  );
-                }}
-                cancelButtonText={i18n.CANCEL}
-                confirmButtonText={i18n.ARCHIVE_TITLE}
-                defaultFocusedButton="confirm"
-                buttonColor="danger"
-              >
-                <p>{i18n.ARCHIVE_CALLOUT_SUBTITLE}</p>
-              </EuiConfirmModal>
-            )}
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={onCancel} data-test-subj="cancelMaintenanceWindow">
+            {i18n.BACK}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
         {isSaveWithoutScopeModalVisible && (
           <EuiConfirmModal
             aria-labelledby={saveWithoutScopeModalTitleId}
@@ -518,11 +495,34 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onCancel} size="s" data-test-subj="cancelMaintenanceWindow">
-                {i18n.CANCEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {isEditMode && (
+              <EuiFlexItem grow={false}>
+                <EuiButton color="primary" onClick={() => setIsModalVisible(true)}>
+                  {i18n.ARCHIVE}
+                </EuiButton>
+                {isModalVisible && (
+                  <EuiConfirmModal
+                    aria-labelledby={modalTitleId}
+                    title={i18n.ARCHIVE_TITLE}
+                    titleProps={{ id: modalTitleId }}
+                    onCancel={() => setIsModalVisible(false)}
+                    onConfirm={() => {
+                      setIsModalVisible(false);
+                      archiveMaintenanceWindow(
+                        { maintenanceWindowId: maintenanceWindowId!, archive: true },
+                        { onSuccess }
+                      );
+                    }}
+                    cancelButtonText={i18n.CANCEL}
+                    confirmButtonText={i18n.ARCHIVE_TITLE}
+                    defaultFocusedButton="confirm"
+                    buttonColor="danger"
+                  >
+                    <p>{i18n.ARCHIVE_CALLOUT_SUBTITLE}</p>
+                  </EuiConfirmModal>
+                )}
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <SubmitButton isLoading={isCreateLoading || isUpdateLoading} editMode={isEditMode} />
             </EuiFlexItem>

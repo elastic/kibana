@@ -16,6 +16,8 @@ import { ExecutionStatus, pickManagedWorkflowFields } from '@kbn/workflows';
 import { markExecutionFailedTaskRecovery, taskRecoveryMessages } from '../lib/task_recovery';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
+import type { WorkflowExecutionForInputRendering } from '../workflow_context_manager/build_workflow_context';
 
 export interface CheckAndSkipScheduledExecutionResult {
   skipped: boolean;
@@ -38,6 +40,7 @@ export interface CheckExistingScheduledExecutionOptions {
    * Optional: whether TM still has idle/claiming/running work for this execution scope.
    */
   hasActiveTaskForExecution?: (executionId: string) => Promise<boolean>;
+  getRunName?: (execution: WorkflowExecutionForInputRendering) => string | undefined;
 }
 
 /**
@@ -129,7 +132,9 @@ export async function checkAndSkipIfExistingScheduledExecution(
         existingExecution.id,
         {
           message: taskRecoveryMessages.scheduledStale,
-        }
+        },
+        {},
+        existingExecution
       );
       return { skipped: false };
     }
@@ -168,7 +173,8 @@ export async function checkAndSkipIfExistingScheduledExecution(
           {
             message: taskRecoveryMessages.scheduledAbandonedPending,
           },
-          { refresh: 'wait_for' }
+          { refresh: 'wait_for' },
+          existingExecution
         );
         return { skipped: false };
       }
@@ -187,10 +193,11 @@ export async function checkAndSkipIfExistingScheduledExecution(
     );
     const workflowCreatedAt = new Date();
     const skippedExecutionId = generateUuid();
-    const skippedExecution: Partial<EsWorkflowExecution> = {
+    const skippedExecution: WorkflowExecutionForInputRendering = {
       id: skippedExecutionId,
       spaceId,
       workflowId: workflow.id,
+      ...(workflow.workflowUid ? { workflowUid: workflow.workflowUid } : {}),
       ...pickManagedWorkflowFields(workflow),
       isTestRun: workflow.isTestRun,
       workflowDefinition: workflow.definition,
@@ -215,7 +222,9 @@ export async function checkAndSkipIfExistingScheduledExecution(
       cancelledAt: workflowCreatedAt.toISOString(),
       cancelledBy: 'system',
     };
+    skippedExecution.runName = options.getRunName?.(skippedExecution);
     await workflowExecutionRepository.createWorkflowExecution(skippedExecution);
+    await publishFinishedWorkflowExecution(skippedExecution);
     return { skipped: true, workflowExecutionId: skippedExecutionId };
   }
 

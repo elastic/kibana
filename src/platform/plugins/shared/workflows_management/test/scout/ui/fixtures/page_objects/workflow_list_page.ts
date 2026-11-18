@@ -104,7 +104,7 @@ export class WorkflowListPage {
   /** Returns workflow names in current table order (visible page only). */
   async getVisibleWorkflowNamesInOrder(): Promise<string[]> {
     await this.page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
-    const links = this.page.testSubj.locator('workflowListTable workflowNameLink');
+    const links = this.page.testSubj.locator('workflowListTable > workflowNameLink');
     const texts = await links.allTextContents();
     return texts.map((t) => t.trim());
   }

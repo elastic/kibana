@@ -51,6 +51,8 @@ interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'versio
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
   isDisabled?: boolean;
+  /** Set once the user has reviewed and confirmed the breaking changes of the upgrade. */
+  acknowledgeBreakingChanges?: boolean;
 }
 
 /*
@@ -86,6 +88,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   version,
   startServices,
   isDisabled = false,
+  acknowledgeBreakingChanges = false,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
 
@@ -167,9 +170,9 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   }, [history, getPath, name, version]);
 
   const handleClickUpdate = useCallback(async () => {
-    await installPackage({ name, version, title, isUpgrade: true });
+    await installPackage({ name, version, title, isUpgrade: true, acknowledgeBreakingChanges });
     navigateToNewSettingsPage();
-  }, [installPackage, name, title, version, navigateToNewSettingsPage]);
+  }, [installPackage, name, title, version, acknowledgeBreakingChanges, navigateToNewSettingsPage]);
 
   const upgradePackagePoliciesMutation = useUpgradePackagePoliciesMutation();
 
@@ -181,7 +184,13 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     setIsUpdateModalVisible(false);
     setIsUpgradingPackagePolicies(true);
 
-    const hasUpgraded = await installPackage({ name, version, title, isUpgrade: true });
+    const hasUpgraded = await installPackage({
+      name,
+      version,
+      title,
+      isUpgrade: true,
+      acknowledgeBreakingChanges,
+    });
     //  If install package failed do not upgrade package policies
     if (!hasUpgraded) {
       setIsUpgradingPackagePolicies(false);
@@ -246,6 +255,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       try {
         await upgradePackagePoliciesMutation.mutateAsync({
           packagePolicyIds: packagePolicyIdsToUpdate,
+          acknowledgeBreakingChanges,
         });
         notifications.toasts.addSuccess({
           title: toMountPoint(
@@ -291,7 +301,9 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
         return;
       }
       try {
-        const results = await sendBulkUpgradeAgentlessPolicies(agentlessIdsToUpgrade);
+        const results = await sendBulkUpgradeAgentlessPolicies(agentlessIdsToUpgrade, {
+          acknowledgeBreakingChanges,
+        });
         const failed = results.filter((result) => !result.success);
         if (failed.length > 0) {
           // The response carries per-policy failure details — surface them so the operator can
@@ -377,6 +389,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     name,
     version,
     title,
+    acknowledgeBreakingChanges,
     upgradePackagePoliciesMutation,
     packagePolicyIds,
     agentlessPolicyIds,

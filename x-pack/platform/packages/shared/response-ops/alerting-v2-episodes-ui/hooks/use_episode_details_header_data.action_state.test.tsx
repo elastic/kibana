@@ -59,19 +59,19 @@ const mockEpisodeAction = (episodeId: string, ruleId: string): AlertEpisodeActio
   last_ack_action: null,
   last_assignee_uid: null,
   last_ack_actor: null,
-  last_deactivate_action: null,
-  last_deactivate_actor: null,
+  last_lifecycle_action: null,
+  last_lifecycle_actor: null,
   last_tags: null,
 });
 
 const mockGroupAction = (ruleId: string | null): GroupActionRow => ({
   group_hash: GROUP_HASH,
   rule_id: ruleId,
-  last_deactivate_action: null,
+  last_lifecycle_action: null,
   last_snooze_action: 'snooze',
   snoozed_until: SNOOZED_UNTIL,
   last_snooze_actor: 'user-1',
-  last_deactivate_actor: null,
+  last_lifecycle_actor: null,
 });
 
 const renderHeaderData = (episodeId: string) =>

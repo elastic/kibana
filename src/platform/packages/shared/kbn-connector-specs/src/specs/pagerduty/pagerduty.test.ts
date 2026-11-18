@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import axios from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import { PagerdutyConnector } from './pagerduty';
 
@@ -517,7 +518,7 @@ describe('PagerdutyConnector', () => {
         expect.objectContaining({
           params: { query: 'production' },
           headers: { Accept: 'application/vnd.pagerduty+json;version=2' },
-          paramsSerializer: { indexes: null },
+          paramsSerializer: { indexes: false },
         })
       );
       expect(result).toEqual({ services: [{ id: 'PSVC01', name: 'Prod DB' }] });
@@ -531,8 +532,12 @@ describe('PagerdutyConnector', () => {
         'https://api.pagerduty.com/services',
         expect.objectContaining({
           params: { 'team_ids[]': ['T1', 'T2'] },
-          paramsSerializer: { indexes: null },
+          paramsSerializer: { indexes: false },
         })
+      );
+      const [url, config] = mockClientGet.mock.lastCall;
+      expect(decodeURIComponent(axios.getUri({ url, ...config }))).toBe(
+        'https://api.pagerduty.com/services?team_ids[]=T1&team_ids[]=T2'
       );
     });
   });

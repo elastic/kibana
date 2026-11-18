@@ -8,7 +8,7 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { preemptibleAgent, retry } from '../presets.ts';
+import { retry, spotAgent, spotZones } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const buildCloudFipsImageSteps = (): readonly Step[] => [
@@ -16,7 +16,7 @@ export const buildCloudFipsImageSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/fips/build_cloud_fips_image.sh',
     label: 'Build Cloud FIPS Image',
     key: 'build_cloud_fips_image',
-    agents: preemptibleAgent('n2-standard-2'),
+    agents: spotAgent('n2-standard-2', spotZones.n2),
     depends_on: ['build'],
     timeout_in_minutes: 60,
     soft_fail: true,

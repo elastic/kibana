@@ -8,7 +8,7 @@
 import React from 'react';
 import type { IBasePath } from '@kbn/core-http-browser';
 import moment from 'moment';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
@@ -392,10 +392,37 @@ describe('ApprovalContent', () => {
       expect(screen.queryByTestId('approvalContent-reopen')).not.toBeInTheDocument();
     });
 
-    it('disables Mark as not applied when read-only', () => {
+    it('disables Mark as not applied when read-only', async () => {
       renderContent({ proposal: appliedTodo, onReopen: jest.fn(), readOnly: true });
 
-      expect(screen.getByTestId('approvalContent-reopen')).toBeDisabled();
+      const reopen = screen.getByTestId('approvalContent-reopen');
+      expect(reopen).toHaveAttribute('aria-disabled', 'true');
+      act(() => reopen.focus());
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        "You don't have the required privileges to apply or decline proposals."
+      );
+    });
+
+    it('explains read-only Mark as applied and Decline with a shared tooltip', async () => {
+      renderContent({
+        proposal: todoProposal,
+        readOnly: true,
+        onDismiss: jest.fn(),
+      });
+
+      const confirm = screen.getByTestId('approvalContent-confirm');
+      const dismiss = screen.getByTestId('approvalContent-dismiss');
+      expect(confirm).toHaveAttribute('aria-disabled', 'true');
+      expect(dismiss).toHaveAttribute('aria-disabled', 'true');
+
+      act(() => dismiss.focus());
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        "You don't have the required privileges to apply or decline proposals."
+      );
+      act(() => confirm.focus());
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        "You don't have the required privileges to apply or decline proposals."
+      );
     });
 
     it('records the application through onApprove when Mark as applied is clicked', async () => {

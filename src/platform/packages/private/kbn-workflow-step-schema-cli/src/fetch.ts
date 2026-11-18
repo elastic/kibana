@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { timeoutSignal } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { KIBANA_API_VERSION } from './constants';
@@ -69,29 +70,36 @@ const kibanaGet = async (connection: KibanaConnection, path: string): Promise<Js
     headers.Authorization = authHeader;
   }
 
-  let response: Response;
+  const deadline = timeoutSignal(REQUEST_TIMEOUT_MS);
   try {
-    response = await fetch(url, {
-      method: 'GET',
-      headers,
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-  } catch (error) {
-    const name = error instanceof Error ? error.name : '';
-    if (name === 'AbortError' || name === 'TimeoutError') {
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'GET',
+        headers,
+        signal: deadline,
+      });
+    } catch (error) {
+      const name = error instanceof Error ? error.name : '';
+      if (name === 'AbortError' || name === 'TimeoutError') {
+        throw new Error(
+          `GET ${url} timed out after ${REQUEST_TIMEOUT_MS}ms - is Kibana reachable at ${connection.kibanaUrl}?`
+        );
+      }
+      throw error;
+    }
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
       throw new Error(
-        `GET ${url} timed out after ${REQUEST_TIMEOUT_MS}ms - is Kibana reachable at ${connection.kibanaUrl}?`
+        `GET ${url} failed: ${response.status} ${response.statusText} ${text}`.trim()
       );
     }
-    throw error;
-  }
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    throw new Error(`GET ${url} failed: ${response.status} ${response.statusText} ${text}`.trim());
+    return (await response.json()) as JsonObject;
+  } finally {
+    deadline.dispose();
   }
-
-  return (await response.json()) as JsonObject;
 };
 
 export interface KibanaBuildInfo {

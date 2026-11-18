@@ -21,7 +21,7 @@ export const securitySolutionGenAiEvalsSteps = (): readonly Step[] => [
         command: '.buildkite/scripts/steps/test/ftr_configs.sh',
         env: {
           FTR_CONFIG:
-            'x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts',
+            'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts',
           FTR_CONFIG_GROUP_KEY: 'ftr-security-solution-gen-ai-evaluations',
           FTR_SECURITY_GEN_AI: '1',
         },
@@ -29,7 +29,7 @@ export const securitySolutionGenAiEvalsSteps = (): readonly Step[] => [
         key: 'security-solution-gen-ai-evaluations',
         timeout_in_minutes: 50,
         parallelism: 1,
-        agents: spotAgent('n2-standard-4', spotZones.centralFCA),
+        agents: spotAgent('n2-standard-4', spotZones.n2),
         retry: retry.agentLossOrAnyOnce,
       }),
     ],

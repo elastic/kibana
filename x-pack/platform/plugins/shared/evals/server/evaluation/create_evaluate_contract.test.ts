@@ -105,6 +105,24 @@ describe('createEvaluateContract', () => {
       });
     });
 
+    it("keeps the agent's note on a tool call", async () => {
+      const { evaluate, evaluationService } = setup();
+      const round = {
+        ...ROUND,
+        steps: [{ tool_id: 'search_logs', reasoning: 'Checking the 14:00 deploy', result: {} }],
+      };
+
+      await evaluate({
+        request,
+        evaluators: [{ name: 'groundedness', connector_id: 'judge-connector' }],
+        evidence: { round },
+      });
+
+      expect(evaluationService.evaluate).toHaveBeenCalledWith(
+        expect.objectContaining({ evidence: { round, referenceData: undefined } })
+      );
+    });
+
     it('rejects a round missing the response', async () => {
       const { evaluate, evaluationService } = setup();
 

@@ -31,6 +31,7 @@ import {
   useFocusedStepDecoration,
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
+  useStepDurationDecorations,
   useTriggerTypeDecorations,
   useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
@@ -48,7 +49,6 @@ import { StepActions } from './step_actions';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
-import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { StepInfo } from '../../../entities/workflows/store';
 import {
   selectEditorFocusedStepInfo,
@@ -66,7 +66,7 @@ import {
   selectHasChanges,
   selectHighlightedStepId,
   selectIsExecutionsTab,
-  selectIsSavingYaml,
+  selectIsSaveInProgress,
   selectStepExecutions,
   selectWorkflow,
   selectWorkflowDefinition,
@@ -83,6 +83,8 @@ import type {
   EditorCommand,
   JumpToStepEntry,
 } from '../../../features/actions_menu_popover/types';
+import { useDisableWorkflowsConfirmation } from '../../../features/linked_rules/model/use_disable_workflows_confirmation';
+import { useSaveYamlWithConfirmation } from '../../../features/linked_rules/model/use_save_yaml_with_confirmation';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
@@ -234,8 +236,9 @@ export const WorkflowYAMLEditor = ({
     setStabilityBadgeThemeContext(euiThemeContext);
   }, [euiThemeContext]);
 
-  const saveYaml = useSaveYaml();
-  const isSaving = useSelector(selectIsSavingYaml);
+  const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
+  const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
+  const isSaving = useSelector(selectIsSaveInProgress);
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
@@ -325,6 +328,7 @@ export const WorkflowYAMLEditor = ({
   const styles = useWorkflowEditorStyles();
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
+  const { styles: stepDurationStyles } = useStepDurationDecorations(editorRef.current);
 
   useDynamicTypeIcons(connectorsData);
 
@@ -487,7 +491,7 @@ export const WorkflowYAMLEditor = ({
           if (isSavingRef.current || isReadOnlyYamlRef.current) {
             return;
           }
-          saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
+          saveYaml().then((confirmed) => confirmed && dispatch(setIsTestModalOpen(true)));
         },
       };
     },
@@ -937,8 +941,8 @@ export const WorkflowYAMLEditor = ({
   );
 
   const editorWrapperCss = useMemo(
-    () => css([styles.container, stepExecutionStyles]),
-    [styles.container, stepExecutionStyles]
+    () => css([styles.container, stepExecutionStyles, stepDurationStyles]),
+    [styles.container, stepExecutionStyles, stepDurationStyles]
   );
 
   return (
@@ -961,6 +965,7 @@ export const WorkflowYAMLEditor = ({
         onJumpToStep={handleJumpToStep}
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
+      {disableConfirmModal}
       {/* Floating Elasticsearch step actions — anchored to the focused
           step's line in the Monaco editor, so they're meaningless (and
           visually orphaned) when the graph view replaces the editor body. */}

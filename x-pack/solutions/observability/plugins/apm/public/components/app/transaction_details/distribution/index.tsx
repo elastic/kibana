@@ -28,6 +28,7 @@ import type { TransactionTab } from '../waterfall_with_summary/transaction_tabs'
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
 import type { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 import { isDiscoverDefaultLogColumns } from './get_trace_logs_columns';
+import { isValidSampleIndex } from '../is_valid_sample_index';
 
 interface TransactionDistributionProps {
   onChartSelection: (event: XYBrushEvent) => void;
@@ -46,7 +47,7 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: { rangeFrom, rangeTo, showCriticalPath },
+    query: { rangeFrom, rangeTo, showCriticalPath, sampleIndex },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
@@ -62,17 +63,32 @@ export function TransactionDistribution({
 
   const traceSamples = traceSamplesFetchResult.data?.traceSamples;
 
+  const selectedSampleIndex = useMemo(() => {
+    if (!traceSamples || !isValidSampleIndex(sampleIndex, traceSamples)) {
+      return undefined;
+    }
+    const sampleAtIndex = traceSamples[sampleIndex];
+    const matchesUrlIds =
+      sampleAtIndex.traceId === traceId && sampleAtIndex.transactionId === transactionId;
+    return matchesUrlIds ? sampleIndex : undefined;
+  }, [sampleIndex, traceSamples, traceId, transactionId]);
+
   // Derive the selected sample from the URL so the pagination index stays in
   // sync with browser back/forward navigation. Passing `selectedSample` (even
   // as `null`) puts `WaterfallWithSummary` into its controlled mode, where the
   // index is derived from the URL instead of from local click-only state.
-  const selectedSample = useMemo(
-    () =>
+  // Prefer the validated index when present so paired samples are kept distinct;
+  // fall back to matching by identifier for URLs without a usable `sampleIndex`.
+  const selectedSample = useMemo(() => {
+    if (traceSamples && isValidSampleIndex(selectedSampleIndex, traceSamples)) {
+      return traceSamples[selectedSampleIndex];
+    }
+    return (
       traceSamples?.find(
         (sample) => sample.traceId === traceId && sample.transactionId === transactionId
-      ) ?? null,
-    [traceSamples, traceId, transactionId]
-  );
+      ) ?? null
+    );
+  }, [traceSamples, traceId, transactionId, selectedSampleIndex]);
 
   const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
     start,
@@ -112,13 +128,14 @@ export function TransactionDistribution({
   );
 
   const onSampleClick = useCallback(
-    (sample: { transactionId: string; traceId: string }) => {
+    (sample: { transactionId: string; traceId: string }, index: number) => {
       history.push({
         ...history.location,
         search: fromQuery({
           ...toQuery(history.location.search),
           transactionId: sample.transactionId,
           traceId: sample.traceId,
+          sampleIndex: index,
         }),
       });
     },
@@ -218,6 +235,7 @@ export function TransactionDistribution({
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
           traceSamples={traceSamples}
           selectedSample={selectedSample}
+          selectedSampleIndex={selectedSampleIndex}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
