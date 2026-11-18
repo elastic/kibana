@@ -11,6 +11,7 @@ import {
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
   SESSIONS_TASK_ID,
+  type SessionsStatus,
 } from '../../../../common/sessions';
 import { OTEL_APPS } from './constants';
 
@@ -49,20 +50,34 @@ const at = (startMs: number, offsetMs: number) => new Date(startMs + offsetMs).t
 
 const sessionId = (index: number) => `dx-session-${String(index + 1).padStart(2, '0')}`;
 
+/** How long after the first session the one at `index` starts. */
+export const sessionStartOffsetMs = (index: number): number => {
+  return index * 4 * 60 * SECOND_MS;
+};
+
+/** The pages the session at `index` loads, one page load each. */
+export const sessionJourney = (index: number): string[] => {
+  return index === 0 ? [...DETAILED_SESSION.pages] : ['/', `/products/${index}`];
+};
+
 /** A summary as the summaries task writes it. */
-const summaryOf = (sessionsStartMs: number, index: number) => {
+const summaryOf = (
+  sessionsStartMs: number,
+  index: number,
+  { id = sessionId(index), environment = 'production' }: { id?: string; environment?: string } = {}
+) => {
   const isDetailed = index === 0;
-  const startMs = index * 4 * 60 * SECOND_MS;
+  const startMs = sessionStartOffsetMs(index);
   const durationMs = isDetailed ? 150 * SECOND_MS : (index + 1) * 10 * SECOND_MS;
   const errorCount = index < SESSIONS_WITH_JS_ERRORS ? index + 1 : 0;
-  const journey = isDetailed ? [...DETAILED_SESSION.pages] : ['/', `/products/${index}`];
+  const journey = sessionJourney(index);
   const firefox = index % 3 === 2;
   const user = isDetailed ? DETAILED_SESSION.user : null;
   const userAgent = firefox
     ? { browser: 'Firefox', browser_version: '131', os: 'Linux' }
     : { browser: 'Chrome', browser_version: '130', os: 'macOS' };
   return {
-    session: { id: sessionId(index) },
+    session: { id },
     service: { name: SESSIONS_APP },
     start_time: at(sessionsStartMs, startMs),
     end_time: at(sessionsStartMs, startMs + durationMs),
@@ -74,7 +89,7 @@ const summaryOf = (sessionsStartMs: number, index: number) => {
     js_error_count: errorCount,
     http_request_count: 2,
     http_failed_request_count: index % 4 === 0 ? 1 : 0,
-    environment: 'production',
+    environment,
     // The detailed session's raw events have one click.
     click_count: isDetailed ? 1 : index,
     bounced: false,
@@ -136,6 +151,14 @@ const rawEventId = (index: number) => `dx-session-event-${index}`;
 
 const RAW_EVENT_IDS = rawEventsOfDetailedSession(0).map((_, index) => rawEventId(index));
 
+const enableSessions = async (kbnClient: KbnClient): Promise<void> => {
+  await kbnClient.request({
+    method: 'POST',
+    path: '/internal/digital_experience/sessions/enable',
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+  });
+};
+
 /**
  * Sets sessions up as the system user, then writes the mock summaries straight to the sessions
  * index. The summaries task never rewrites them: their raw events have no
@@ -143,11 +166,7 @@ const RAW_EVENT_IDS = rawEventsOfDetailedSession(0).map((_, index) => rawEventId
  */
 export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
   const sessionsStartMs = Date.now() - DAY_MS;
-  await kbnClient.request({
-    method: 'POST',
-    path: '/internal/digital_experience/sessions/enable',
-    headers: { 'x-elastic-internal-origin': 'kibana' },
-  });
+  await enableSessions(kbnClient);
 
   const summaries = Array.from({ length: SESSION_COUNT }, (_, index) =>
     summaryOf(sessionsStartMs, index)
@@ -173,6 +192,31 @@ export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClien
   }
 };
 
+/**
+ * Runs the summaries task now instead of at its next interval; a run already in progress counts.
+ * The route answers 200 with the error, so it is thrown here.
+ */
+export const runSessionsTask = async (kbnClient: KbnClient) => {
+  const { data } = await kbnClient.request<{ error?: string }>({
+    method: 'POST',
+    path: `/internal/ftr/task_manager/${encodeURIComponent(SESSIONS_TASK_ID)}/run_soon`,
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+  });
+  if (data.error && !data.error.includes('as it is currently running')) {
+    throw new Error(`Could not run the summaries task: ${data.error}`);
+  }
+};
+
+/** Whether sessions are set up: the summaries task is scheduled, as the route reads it. */
+const areSessionsInstalled = async (kbnClient: KbnClient): Promise<boolean> => {
+  const { data } = await kbnClient.request<SessionsStatus>({
+    method: 'GET',
+    path: '/internal/digital_experience/sessions/status',
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+  });
+  return data.installed;
+};
+
 /** Removes the summaries task, which also invalidates its API key; a missing task is fine. */
 export const removeSessionsTask = async (kbnClient: KbnClient) => {
   await kbnClient.request({
@@ -183,9 +227,7 @@ export const removeSessionsTask = async (kbnClient: KbnClient) => {
   });
 };
 
-/** Removes the sessions setup and the mock sessions, leaving the rest of the data streams. */
-export const deleteSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
-  await removeSessionsTask(kbnClient);
+const deleteSessionsIndices = async (esClient: EsClient) => {
   // Test clusters refuse wildcard deletes (`action.destructive_requires_name`), so by name.
   const indices = Object.keys(
     await esClient.indices.get({
@@ -197,14 +239,113 @@ export const deleteSessionsData = async (esClient: EsClient, kbnClient: KbnClien
   if (indices.length > 0) {
     await esClient.indices.delete({ index: indices });
   }
+};
+
+const deleteSessionsTemplate = async (esClient: EsClient) => {
   await esClient.indices.deleteIndexTemplate(
     { name: SESSIONS_INDEX_TEMPLATE_NAME },
     { ignore: [404] }
   );
+};
+
+/** Removes the sessions setup and the mock sessions, leaving the rest of the data streams. */
+export const deleteSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
+  await removeSessionsTask(kbnClient);
+  await deleteSessionsIndices(esClient);
+  await deleteSessionsTemplate(esClient);
   await esClient.deleteByQuery({
     index: RAW_EVENTS_INDEX,
     query: { ids: { values: RAW_EVENT_IDS } },
     refresh: true,
     ignore_unavailable: true,
   });
+};
+
+/** Mock sessions a suite owns: their own ids and environment, so it reads and deletes only them. */
+export interface OwnedSessions {
+  idPrefix: string;
+  environment: string;
+  count: number;
+}
+
+const ownedSessionIds = ({ idPrefix, count }: OwnedSessions): string[] => {
+  return Array.from({ length: count }, (_, index) => {
+    return `${idPrefix}-${index}`;
+  });
+};
+
+/** What `setUpOwnedSessions` created, so `deleteOwnedSessions` removes only that. */
+export interface OwnedSessionsSetup {
+  createdTask: boolean;
+  createdIndex: boolean;
+  createdTemplate: boolean;
+}
+
+/** Sets sessions up when they aren't, resolving to what it created for `deleteOwnedSessions`. */
+export const setUpOwnedSessions = async (
+  esClient: EsClient,
+  kbnClient: KbnClient
+): Promise<OwnedSessionsSetup> => {
+  const setup: OwnedSessionsSetup = {
+    createdTask: !(await areSessionsInstalled(kbnClient)),
+    createdIndex: !(await esClient.indices.exists({ index: SESSIONS_INDEX })),
+    createdTemplate: !(await esClient.indices.existsIndexTemplate({
+      name: SESSIONS_INDEX_TEMPLATE_NAME,
+    })),
+  };
+  if (setup.createdTask) {
+    await enableSessions(kbnClient);
+  }
+  return setup;
+};
+
+/** Writes `sessions` from a day ago, resolving to when the first one starts. */
+export const ingestOwnedSessions = async (
+  esClient: EsClient,
+  sessions: OwnedSessions
+): Promise<number> => {
+  const sessionsStartMs = Date.now() - DAY_MS;
+  const { errors, items } = await esClient.bulk({
+    refresh: 'wait_for',
+    operations: ownedSessionIds(sessions).flatMap((id, index) => {
+      return [
+        { index: { _index: SESSIONS_INDEX, _id: id } },
+        summaryOf(sessionsStartMs, index, { id, environment: sessions.environment }),
+      ];
+    }),
+  });
+  if (errors) {
+    const failure = items.find((item) => {
+      return item.index?.error;
+    });
+    throw new Error(`Could not ingest the owned sessions: ${JSON.stringify(failure)}`);
+  }
+  return sessionsStartMs;
+};
+
+/**
+ * Deletes `sessions`, also after a partial ingest, and the parts of the sessions setup that
+ * `setUpOwnedSessions` created; without `setup`, as when it failed, only the sessions.
+ */
+export const deleteOwnedSessions = async (
+  esClient: EsClient,
+  kbnClient: KbnClient,
+  sessions: OwnedSessions,
+  setup: OwnedSessionsSetup | undefined
+): Promise<void> => {
+  await esClient.deleteByQuery({
+    index: SESSIONS_INDEX,
+    query: { ids: { values: ownedSessionIds(sessions) } },
+    refresh: true,
+    ignore_unavailable: true,
+  });
+  if (setup?.createdTask) {
+    await removeSessionsTask(kbnClient);
+  }
+  if (setup?.createdIndex) {
+    await deleteSessionsIndices(esClient);
+  }
+  if (setup?.createdTemplate) {
+    await deleteSessionsTemplate(esClient);
+  }
 };

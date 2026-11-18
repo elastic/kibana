@@ -25,7 +25,6 @@ import {
   DEFAULT_EVENTS_SEARCH_TO,
 } from '../../../lib/significant_events/events';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
-import { trackTelemetryBestEffort } from '../bulk_write';
 import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import {
   EVENT_SEARCH_DEFAULT_PER_PAGE,
@@ -41,6 +40,7 @@ import {
   type SourceCatalog,
 } from '../../utils/resolve_source_slugs';
 import { sourceSlugsSchema } from '../../utils/stored_source_fields';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 
 export const SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID = platformSignificantEventsTools.searchEvent;
 
@@ -275,8 +275,15 @@ export function createSearchEventsTool({
         const catalog = await loadSourceCatalog(sourcesClient);
         const filterSources = slugs ? resolveSourcesBySlugOrId(catalog, slugs) : [];
 
+        const eventSearchClient = await getEventSearchClient();
         const data = await searchEventsToolHandler({
-          eventSearchClient: await getEventSearchClient(),
+          eventSearchClient,
+          reconcileSeverities: (rows) =>
+            server.severitySync.reconcileRows({
+              rows,
+              request,
+              eventClient: eventSearchClient,
+            }),
           params: {
             ...searchParams,
             source_ids: slugs ? filterSources.map((source) => source.id) : undefined,

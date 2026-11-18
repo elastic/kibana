@@ -12,7 +12,7 @@ import { chunk } from 'lodash';
 import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import {
@@ -34,6 +34,7 @@ import {
   type WorkflowDetailDto,
   type WorkflowYaml,
 } from '@kbn/workflows';
+import type { ManagedFilter } from '@kbn/workflows/server';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
@@ -91,8 +92,8 @@ import {
   applyFieldUpdates,
   applyYamlUpdate,
   getTriggerTypesFromDefinition,
+  keepEnabledUnlessDeclared,
   prepareWorkflowDocumentFromYaml,
-  workflowYamlDeclaresTopLevelEnabled,
 } from '../api/lib/workflow_prepare';
 import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
@@ -118,6 +119,7 @@ import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks'
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
+const MAX_IDS_PER_SEARCH = 10_000;
 const INDEX_CALLED_WORKFLOW_IDS_BATCH_SIZE = 500;
 const TOCTOU_MAX_RETRIES = 5;
 
@@ -820,29 +822,35 @@ export class WorkflowCrudService {
       includeDeleted?: boolean;
       includeGlobal?: boolean;
       accessControlFilter?: estypes.QueryDslQueryContainer;
+      managedFilter?: ManagedFilter;
+      /** False to fail rather than miss the workflows on unavailable shards. */
+      allowPartialResults?: boolean;
     }
   ): Promise<WorkflowPartialDetailDto[]> {
-    if (ids.length === 0) {
-      return [];
+    const workflows: WorkflowPartialDetailDto[] = [];
+    // A search returns at most `index.max_result_window` (10,000 by default) hits.
+    for (const idsChunk of chunk(ids, MAX_IDS_PER_SEARCH)) {
+      const { must, must_not } = buildWorkflowFilters({
+        ids: idsChunk,
+        space: { id: spaceId, includeGlobal: options?.includeGlobal ?? true },
+        deleted: options?.includeDeleted ? 'all' : 'not_deleted',
+        managed: options?.managedFilter,
+      });
+
+      const response = await this.deps.workflowStorage.getClient().search({
+        query: { bool: { must, must_not, filter: options?.accessControlFilter } },
+        _source: source ? [...new Set([...source, 'access_control'])] : true,
+        size: idsChunk.length,
+        track_total_hits: false,
+        ...(options?.allowPartialResults === false ? { allow_partial_search_results: false } : {}),
+      });
+
+      for (const hit of response.hits.hits) {
+        storedWorkflowAccessControlSchema.parse(hit._source?.access_control);
+        workflows.push(transformStoragePartialToWorkflowDto(hit._id, hit._source));
+      }
     }
-
-    const { must, must_not } = buildWorkflowFilters({
-      ids,
-      space: { id: spaceId, includeGlobal: options?.includeGlobal ?? true },
-      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
-    });
-
-    const response = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must, must_not, filter: options?.accessControlFilter } },
-      _source: source ? [...new Set([...source, 'access_control'])] : true,
-      size: ids.length,
-      track_total_hits: false,
-    });
-
-    return response.hits.hits.map((hit) => {
-      storedWorkflowAccessControlSchema.parse(hit._source?.access_control);
-      return transformStoragePartialToWorkflowDto(hit._id, hit._source);
-    });
+    return workflows;
   }
 
   async createWorkflow(
@@ -1154,25 +1162,12 @@ export class WorkflowCrudService {
     let shouldUpdateScheduler = false;
 
     const workflowYaml = workflow.yaml;
-    const zodSchema = workflowYaml
-      ? await this.deps.validationService.getWorkflowZodSchema({ loose: false }, spaceId, request)
+    const yamlUpdate = workflowYaml
+      ? await this.prepareYamlUpdate(workflowYaml, id, spaceId, request, {
+          logger: this.deps.logger,
+        })
       : undefined;
-    const triggerDefinitions = workflowYaml
-      ? this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? []
-      : undefined;
-    const yamlResult =
-      workflowYaml && zodSchema && triggerDefinitions
-        ? {
-            workflowYaml,
-            ...(await applyYamlUpdate({
-              workflowYaml,
-              zodSchema,
-              triggerDefinitions,
-              logger: this.deps.logger,
-              workflowId: id,
-            })),
-          }
-        : undefined;
+    const yamlResult = workflowYaml && yamlUpdate ? { workflowYaml, ...yamlUpdate } : undefined;
 
     let previousVersion: number | undefined;
     const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
@@ -1197,26 +1192,15 @@ export class WorkflowCrudService {
           updatedData = {
             ...updatedData,
             yaml: yamlResult.workflowYaml,
-            ...yamlResult.updatedDataPatch,
+            ...keepEnabledUnlessDeclared(
+              yamlResult.workflowYaml,
+              yamlResult,
+              workflow.enabled ?? existingSource.enabled
+            ),
           };
           validationErrors.length = 0;
           validationErrors.push(...yamlResult.validationErrors);
           shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
-
-          if (
-            yamlResult.validationErrors.length === 0 &&
-            yamlResult.updatedDataPatch.valid &&
-            updatedData.definition &&
-            !workflowYamlDeclaresTopLevelEnabled(yamlResult.workflowYaml)
-          ) {
-            const resolvedEnabled =
-              workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
-            updatedData.enabled = resolvedEnabled;
-            const currentDefinition = updatedData.definition;
-            if (currentDefinition) {
-              updatedData.definition = { ...currentDefinition, enabled: resolvedEnabled };
-            }
-          }
         } else if (!workflowYaml) {
           const fieldResult = applyFieldUpdates(workflow, existingSource);
           updatedData = { ...updatedData, ...fieldResult.patch };
@@ -1264,6 +1248,49 @@ export class WorkflowCrudService {
       },
       finalData,
     };
+  }
+
+  // Resolves to undefined when the schema to validate against is unavailable.
+  private async prepareYamlUpdate(
+    workflowYaml: string,
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest,
+    logging: { logger?: Logger } = {}
+  ): Promise<Awaited<ReturnType<typeof applyYamlUpdate>> | undefined> {
+    const zodSchema = await this.deps.validationService.getWorkflowZodSchema(
+      { loose: false },
+      spaceId,
+      request
+    );
+    if (!zodSchema) {
+      return undefined;
+    }
+    return applyYamlUpdate({
+      workflowYaml,
+      zodSchema,
+      triggerDefinitions: this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [],
+      workflowId,
+      ...logging,
+    });
+  }
+
+  /**
+   * Returns the definition that saving `yaml` over the given workflow would store, or null when it
+   * would be stored invalid.
+   */
+  async getDefinitionToStore(
+    yaml: string,
+    { id, enabled }: { id: string; enabled: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<EsWorkflow['definition'] | null> {
+    const yamlResult = await this.prepareYamlUpdate(yaml, id, spaceId, request);
+    if (!yamlResult) {
+      return null;
+    }
+    const { valid, definition } = keepEnabledUnlessDeclared(yaml, yamlResult, enabled);
+    return valid ? definition ?? null : null;
   }
 
   async updateWorkflow(
@@ -1541,6 +1568,7 @@ export class WorkflowCrudService {
     options?: {
       force?: boolean;
       acknowledgeAclLoss?: boolean;
+      purgeExecutions?: boolean;
       profileId?: string;
       request?: KibanaRequest;
       isAdmin?: boolean;
@@ -1574,6 +1602,7 @@ export class WorkflowCrudService {
           }
         : {}),
       force: options?.force ?? false,
+      purgeExecutions: options?.purgeExecutions,
       acknowledgeAclLoss: options?.acknowledgeAclLoss ?? false,
       assertCanDelete: (workflow, id) =>
         assertWorkflowOperation(
@@ -1660,7 +1689,12 @@ export class WorkflowCrudService {
     });
     if (!versioned) return false;
     ensureManagedOrphanUnchanged({ document: versioned.source, orphan, spaceId });
-    const result = await this.deleteWorkflowDocuments([id], spaceId, { force: true }, versioned);
+    const result = await this.deleteWorkflowDocuments(
+      [id],
+      spaceId,
+      { force: true, purgeExecutions: false },
+      versioned
+    );
     if (result.deleted !== 1) {
       throw new Error(result.failures[0]?.error ?? 'Workflow deletion failed.');
     }
@@ -1802,16 +1836,21 @@ export class WorkflowCrudService {
     prepared: WorkflowProperties,
     existing: WorkflowProperties
   ): WorkflowProperties {
-    return applyWorkflowVersion(
-      {
-        ...prepared,
-        created_at: existing.created_at,
-        createdBy: existing.createdBy,
-        owner_id: existing.owner_id,
-        access_control: existing.access_control,
-      },
-      existing
-    );
+    const document: WorkflowProperties = {
+      ...prepared,
+      created_at: existing.created_at,
+      createdBy: existing.createdBy,
+      owner_id: existing.owner_id,
+      access_control: existing.access_control,
+    };
+    // A rewrite generates a uid. Keep the stored one, and leave a document that
+    // never had one linked by workflow id.
+    if (existing.workflowUid) {
+      document.workflowUid = existing.workflowUid;
+    } else {
+      delete document.workflowUid;
+    }
+    return applyWorkflowVersion(document, existing);
   }
 
   private async executeBulkOverwrite(

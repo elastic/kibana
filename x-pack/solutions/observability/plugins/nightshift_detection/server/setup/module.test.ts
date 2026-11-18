@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { Logger, OnSetup, OnStart, PluginStart } from '@kbn/core-di';
-import { CoreSetup, CoreStart, Request } from '@kbn/core-di-server';
+import { CoreSetup, CoreStart, PluginInitializer, Request } from '@kbn/core-di-server';
 import type { DetectionSignal } from '../../common/detection_signal';
 import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
@@ -27,6 +27,9 @@ import { SpaceRunLock } from '../lib/engine/space_run_lock';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
 import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
+import { DetectionAccountService } from '../lib/service_account/detection_account';
+import { DetectionSetupService } from '../lib/service_account/setup_service';
+import { DETECTION_ENGINE_WORKLOAD_TYPE } from '../lib/service_account/workload';
 
 function createContainer() {
   const core = coreMock.createStart();
@@ -52,6 +55,11 @@ function createContainer() {
   container.bind(PluginStart('alertingVTwo')).toConstantValue(alerting);
   container.bind(PluginStart('spaces')).toConstantValue(spaces);
   container.bind(CoreStart('pricing')).toConstantValue(core.pricing);
+  container.bind(CoreStart('security')).toConstantValue(core.security);
+  container.bind(CoreSetup('security')).toConstantValue(coreSetup.security);
+  container
+    .bind(PluginInitializer('env'))
+    .toConstantValue(coreMock.createPluginInitializerContext().env);
   container.bind(PluginStart('licensing')).toConstantValue(licensingMock.createStart());
   // What the `_tick` route binds for each tick.
   container
@@ -87,6 +95,8 @@ describe('module', () => {
     container.get(DetectionSignalStore);
     container.get(DetectionStateClient);
     container.get(SpaceRunLock);
+    container.get(DetectionAccountService);
+    container.get(DetectionSetupService);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
 
@@ -94,6 +104,10 @@ describe('module', () => {
       NIGHTSHIFT_DETECTION_TIERED_FEATURES
     );
     expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(detectionStateSavedObjectType);
+    // Without the registration, every `bindWorkload` of the engine is refused at runtime.
+    expect(coreSetup.security.serviceAccounts.registerWorkloadType).toHaveBeenCalledWith(
+      expect.objectContaining({ type: DETECTION_ENGINE_WORKLOAD_TYPE })
+    );
     // Engine indices are written as kibana_system, never as the requesting user.
     expect(container.get(DetectionEngineSystemClient)).toBe(
       core.elasticsearch.client.asInternalUser

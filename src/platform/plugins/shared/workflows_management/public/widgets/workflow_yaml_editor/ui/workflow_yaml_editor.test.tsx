@@ -856,8 +856,9 @@ steps:
       capturedKeyboardHandlers.save!();
       expect(mockSaveYaml).toHaveBeenCalledTimes(1);
 
-      // Clear the mock call count and simulate save completing (still not loading)
+      // Clear the mock call count and let the save complete (still not loading)
       mockSaveYaml.mockClear();
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
 
       // Second save should also work since isSaving is false
       capturedKeyboardHandlers.save!();

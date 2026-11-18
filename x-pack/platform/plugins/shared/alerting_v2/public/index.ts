@@ -21,6 +21,7 @@ import { createStartContract } from './start_contract';
 import { registerOnSetup } from './setup';
 
 export type {
+  AlertingV2AlertsProviderProps,
   AlertingV2PublicStart,
   CreateRuleOptionsFlyoutLegacyItem,
   AlertingV2PageProps,

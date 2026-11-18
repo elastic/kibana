@@ -7,9 +7,11 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import {
   operatorFallbackAssessmentNote,
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  type Severity,
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import {
@@ -86,6 +88,7 @@ export async function eventsWriteBulkHandler({
   inputs,
   rejectUnknownEventIds,
   inactiveLookbackMs = DEFAULT_INACTIVE_LOOKBACK_MS,
+  resolveSeverities,
   logger,
 }: {
   /** Reads prior versions and live events from `.rule-events`, and writes each new version. */
@@ -95,6 +98,13 @@ export async function eventsWriteBulkHandler({
   rejectUnknownEventIds?: boolean;
   /** How long a closed series stays reusable by a batch it covers (default 48 h). */
   inactiveLookbackMs?: number;
+  /**
+   * The severity each existing event should have (see `SeveritySync.resolveSeverities`), which wins
+   * over the agent's. Without it a write keeps the agent's severity.
+   */
+  resolveSeverities?: (
+    events: Array<{ eventId: string; storedSeverity: Severity }>
+  ) => Promise<Map<string, Severity>>;
   logger?: Logger;
 }): Promise<EventsWriteBulkResult[]> {
   const timestamp = new Date().toISOString();
@@ -142,9 +152,25 @@ export async function eventsWriteBulkHandler({
     logger,
   });
 
-  // Facts (merged signals/topology, decided severity) are derived once per candidate,
-  // so the no-op check and the final document agree on the same severity.
-  const eventsFacts = held.kept.map((candidate) => computeEventFacts({ candidate, timestamp }));
+  // Facts are derived once per candidate so the no-op check and the final document agree.
+  // Only an existing event with an open episode can have an investigation that governs it; a new one
+  // takes the agent's severity. An event that stays closed keeps its stored severity, as the
+  // write-through and the page read leave it alone. One that reopens starts a new episode, and the
+  // latest version still names the closed one, so the closed episode's investigation is not its own:
+  // it takes the agent's severity, rated from its new evidence.
+  const existingEvents = held.kept.flatMap(({ eventId, latest }) =>
+    latest && latest.status !== ALERT_EPISODE_STATUS.INACTIVE
+      ? [{ eventId, storedSeverity: latest.severity }]
+      : []
+  );
+  const resolved = existingEvents.length ? await resolveSeverities?.(existingEvents) : undefined;
+  const eventsFacts = held.kept.map((candidate) =>
+    computeEventFacts({
+      candidate,
+      timestamp,
+      resolvedSeverity: resolved?.get(candidate.eventId),
+    })
+  );
   const changed = keepChanged({ facts: eventsFacts });
 
   [known, decided, held, changed].forEach(({ skipped }) =>
