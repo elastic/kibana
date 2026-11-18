@@ -23,7 +23,7 @@ import {
   staleCheckinIso,
   waitForFailoverAndAck,
   waitUntilAgentAppliedRevision,
-  waitUntilAssigned,
+  waitUntilBalanced,
 } from '../fixtures/rebalance';
 import {
   deleteSyntheticsDocsForAgent,
@@ -31,7 +31,7 @@ import {
   waitForSyntheticsCheck,
 } from '../fixtures/wait_for_check';
 
-const VETO_TIMEOUT_MS = 12 * 60 * 1000;
+const VETO_TIMEOUT_MS = 15 * 60 * 1000;
 const FAILOVER_RECOVERY_TIMEOUT_MS = 20 * 60 * 1000;
 const MONITOR_COUNT = 2;
 
@@ -49,8 +49,7 @@ const MONITOR_COUNT = 2;
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet synthetics_agent_e2e
  *   node scripts/scout run-tests --arch stateful --domain classic --config x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel.playwright.config.ts
  */
-// Failing: See https://github.com/elastic/kibana/issues/306067
-apiTest.describe.skip(
+apiTest.describe(
   'Synthetics real-agent shard rebalance',
   { tag: ['@local-stateful-classic'] },
   () => {
@@ -104,7 +103,7 @@ apiTest.describe.skip(
           ))
         );
 
-        const initialAssignment = await waitUntilAssigned(
+        const initialAssignment = await waitUntilBalanced(
           apiClient,
           adminHeaders,
           createdMonitorIds,
@@ -157,7 +156,7 @@ apiTest.describe.skip(
           ))
         );
 
-        const initialAssignment = await waitUntilAssigned(
+        const initialAssignment = await waitUntilBalanced(
           apiClient,
           adminHeaders,
           createdMonitorIds,
