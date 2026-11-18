@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient, KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import type { ActionOrigin } from '../../../../server/handlers/action/action_origin';
 import {
   answerQuery,
   apiTest,
@@ -22,6 +23,7 @@ import {
   deleteSavedQuery,
   deleteSystemIndicesUser,
   indexFakeAgents,
+  OSQUERY_ACTIONS_INDEX,
   stepOf,
   takeDispatchedActionIds,
   workflowsClient,
@@ -199,19 +201,30 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
       });
       await workflows.waitForEnd(executionId);
 
-      const history = async (sourceFilters?: string) => {
-        const { data } = await kbnClient.request<{
-          data: Array<{ actionId?: string; source: string }>;
-        }>({
-          method: 'GET',
-          path: `/api/osquery/history?pageSize=100${
-            sourceFilters ? `&sourceFilters=${sourceFilters}` : ''
-          }`,
-          headers: { 'elastic-api-version': '2023-10-31' },
-        });
+      const stored = await systemEs.search<{ origin?: ActionOrigin }>({
+        index: OSQUERY_ACTIONS_INDEX,
+        query: { term: { action_id: state.action_id } },
+      });
+      expect(stored.hits.hits).toHaveLength(1);
+      expect(stored.hits.hits[0]._source?.origin).toStrictEqual({
+        type: 'workflow',
+        execution_id: executionId,
+      });
 
-        return data.data.filter((row) => row.actionId === state.action_id);
-      };
+      const fieldMappings = await systemEs.indices.getFieldMapping({
+        index: OSQUERY_ACTIONS_INDEX,
+        fields: ['origin.type', 'origin.execution_id'],
+      });
+      expect(Object.keys(fieldMappings)).not.toHaveLength(0);
+      for (const { mappings } of Object.values(fieldMappings)) {
+        expect(mappings['origin.type']?.mapping?.type).toMatchObject({ type: 'keyword' });
+        expect(mappings['origin.execution_id']?.mapping?.execution_id).toMatchObject({
+          type: 'keyword',
+        });
+      }
+
+      const history = (sourceFilters?: string) =>
+        historyRows(kbnClient, state.action_id, sourceFilters);
 
       expect(await history()).toMatchObject([{ source: 'Workflow' }]);
       expect(await history('workflow')).toMatchObject([{ source: 'Workflow' }]);
@@ -251,9 +264,23 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
         data: { action_id: string; queries: Array<{ action_id: string }> };
       };
       try {
+        const stored = await systemEs.search<{ origin?: ActionOrigin }>({
+          index: OSQUERY_ACTIONS_INDEX,
+          query: { term: { action_id: action.action_id } },
+        });
+        expect(stored.hits.hits).toHaveLength(1);
+        expect(stored.hits.hits[0]._source?.origin).toStrictEqual({
+          type: 'workflow',
+          execution_id: executionId,
+        });
+        expect(await historyRows(kbnClient, action.action_id)).toMatchObject([
+          { source: 'Workflow' },
+        ]);
         expect(await historyRows(kbnClient, action.action_id, 'workflow')).toMatchObject([
           { source: 'Workflow' },
         ]);
+        expect(await historyRows(kbnClient, action.action_id, 'live')).toHaveLength(0);
+        expect(await historyRows(kbnClient, action.action_id, 'rule')).toHaveLength(0);
       } finally {
         await deleteDispatchedActions(systemEs, actionIdsOf(action));
       }
@@ -273,6 +300,8 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
           'kbn-xsrf': 'true',
           'elastic-api-version': '2023-10-31',
           'x-kibana-workflow-execution-id': 'forged-execution',
+          'x-osquery-dispatch-source': 'workflow',
+          'x-osquery-dispatch-workflow-id': 'wf-forged',
         },
         body: { saved_query_id: SAVED_QUERY, agent_ids: [AGENT_A.id] },
         responseType: 'json',
@@ -284,7 +313,15 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
       };
 
       try {
+        const stored = await systemEs.search<{ origin?: ActionOrigin }>({
+          index: OSQUERY_ACTIONS_INDEX,
+          query: { term: { action_id: action.action_id } },
+        });
+        expect(stored.hits.hits).toHaveLength(1);
+        expect(stored.hits.hits[0]._source).toBeDefined();
+        expect(Object.keys(stored.hits.hits[0]._source ?? {})).not.toContain('origin');
         expect(await historyRows(kbnClient, action.action_id)).toMatchObject([{ source: 'Live' }]);
+        expect(await historyRows(kbnClient, action.action_id, 'workflow')).toHaveLength(0);
       } finally {
         await deleteDispatchedActions(systemEs, actionIdsOf(action));
       }
