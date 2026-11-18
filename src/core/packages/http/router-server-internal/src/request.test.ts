@@ -14,6 +14,7 @@ jest.mock('uuid', () => ({
 import type { RouteOptions } from '@hapi/hapi';
 import { hapiMocks } from '@kbn/hapi-mocks';
 import type { FakeRawRequest, RouteSecurity } from '@kbn/core-http-server';
+import type { TenantId } from '@kbn/core-tenants-server';
 import { CoreKibanaRequest } from './request';
 import { schema } from '@kbn/config-schema';
 import {
@@ -572,6 +573,18 @@ describe('CoreKibanaRequest', () => {
         expect(kibanaRequest.isFakeRequest).toBe(false);
       });
     });
+
+    describe('tenantId property', () => {
+      it('uses the request.app.tenantId property if present', () => {
+        const request = hapiMocks.createRequest({ app: { tenantId: 'project-b' as TenantId } });
+        expect(CoreKibanaRequest.from(request).tenantId).toEqual('project-b');
+      });
+
+      it('is undefined if request.app.tenantId is not present', () => {
+        const request = hapiMocks.createRequest({ app: {} });
+        expect(CoreKibanaRequest.from(request).tenantId).toBeUndefined();
+      });
+    });
   });
 
   describe('using fake requests', () => {
@@ -582,6 +595,13 @@ describe('CoreKibanaRequest', () => {
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.isFakeRequest).toBe(true);
+      });
+    });
+
+    describe('tenantId', () => {
+      it('uses the tenantId of the fake request', () => {
+        const request: FakeRawRequest = { headers: {}, tenantId: 'project-b' as TenantId };
+        expect(CoreKibanaRequest.from(request).tenantId).toEqual('project-b');
       });
     });
 

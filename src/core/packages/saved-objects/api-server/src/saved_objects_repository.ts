@@ -8,6 +8,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { TenantId } from '@kbn/core-tenants-server';
 import type { SavedObjectsRawDocSource } from '..';
 import type {
   SavedObjectsBaseOptions,
@@ -587,6 +588,12 @@ export interface ISavedObjectsRepository {
    * namespace.
    */
   getCurrentNamespace(namespace?: string): string | undefined;
+
+  /**
+   * Returns the tenant the repository reads and writes, when multi-tenancy is enabled and the repository was created
+   * for a request that targets a tenant. Returns `undefined` for the home cluster.
+   */
+  getTenantId?(): TenantId | undefined;
 
   /**
    * Returns a new Saved Objects repository scoped to the specified namespace.

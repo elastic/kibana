@@ -18,16 +18,20 @@ export type MockAuthenticationProviderOptions = ReturnType<
 >;
 
 export function mockAuthenticationProviderOptions(options?: { name: string; uiam?: boolean }) {
+  const client = elasticsearchServiceMock.createClusterClient();
+  const tokens = { refresh: jest.fn(), invalidate: jest.fn() };
   return {
     getServerBaseURL: () => 'https://test-hostname:1234',
-    client: elasticsearchServiceMock.createClusterClient(),
+    client,
+    getInternalClient: jest.fn().mockReturnValue(client.asInternalUser),
     logger: loggingSystemMock.create().get(),
     basePath: httpServiceMock.createBasePath(
       '/mock-server-basepath',
       'https://test-hostname:1234/mock-server-basepath'
     ),
     getRequestOriginalURL: jest.fn(),
-    tokens: { refresh: jest.fn(), invalidate: jest.fn() },
+    tokens,
+    getTokens: jest.fn().mockReturnValue(tokens),
     uiam: options?.uiam ? uiamServiceMock.create() : undefined,
     name: options?.name ?? 'basic1',
     urls: {

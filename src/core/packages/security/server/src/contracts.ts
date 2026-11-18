@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Crypto } from '@elastic/node-crypto';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreFipsService } from './fips';
 import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
 import type { CoreAuthorizationService } from './authz';
@@ -79,4 +81,9 @@ export interface SecurityServiceStart {
    * The {@link CoreServiceAccountsService | service accounts service}
    */
   serviceAccounts: CoreServiceAccountsService;
+  /**
+   * Returns the crypto for the session encryption key of a tenant, such as `request.tenantId`.
+   * @internal
+   */
+  getTenantSessionCrypto?: (tenantId: NonNullable<KibanaRequest['tenantId']>) => Crypto;
 }

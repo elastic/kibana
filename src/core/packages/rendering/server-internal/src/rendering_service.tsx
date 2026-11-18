@@ -62,6 +62,7 @@ type RenderOptions =
       featureFlags?: never;
       customBranding?: never;
       userSettings?: never;
+      getTenantProjectName?: never;
     });
 
 const themeVersion: ThemeVersion = 'v8';
@@ -114,6 +115,7 @@ export class RenderingService {
     customBranding,
     userSettings,
     i18n,
+    getTenantProjectName,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     this.airgapped = await firstValueFrom(
       this.coreContext.configService.atPath<boolean>('airgapped')
@@ -151,6 +153,7 @@ export class RenderingService {
         customBranding,
         userSettings,
         i18n,
+        getTenantProjectName,
       }),
     };
   }
@@ -191,7 +194,10 @@ export class RenderingService {
       customBranding,
       userSettings,
       i18n,
+      getTenantProjectName,
     } = renderOptions;
+    const tenantProjectName =
+      request.tenantId === undefined ? undefined : getTenantProjectName?.(request.tenantId);
 
     const env = {
       mode: this.coreContext.env.mode,
@@ -402,7 +408,8 @@ export class RenderingService {
             return {
               id,
               plugin,
-              config: browserConfig,
+              config:
+                id === 'cloud' ? withProjectName(browserConfig, tenantProjectName) : browserConfig,
               ...(includeExposedConfigKeys && { exposedConfigKeys }),
             };
           })
@@ -457,6 +464,19 @@ export class RenderingService {
     }
   }
 }
+
+// Stopgap until plugins can declare per-tenant config: one Kibana serves several projects,
+// so the project name shown in the browser has to come from the request's tenant.
+const withProjectName = (
+  browserConfig: Record<string, unknown>,
+  projectName: string | undefined
+): Record<string, unknown> => {
+  if (projectName === undefined) {
+    return browserConfig;
+  }
+  const serverless = (browserConfig.serverless as Record<string, unknown> | undefined) ?? {};
+  return { ...browserConfig, serverless: { ...serverless, project_name: projectName } };
+};
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {
   const browserConfig = uiPlugins.browserConfigs.get(pluginId);

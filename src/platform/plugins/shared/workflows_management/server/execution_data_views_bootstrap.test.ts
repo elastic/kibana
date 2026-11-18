@@ -252,6 +252,39 @@ describe('ExecutionDataViewsBootstrap', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('duplicate data view'));
   });
 
+  it('bootstraps a space separately for each tenant', async () => {
+    const dataViewsService = {
+      get: jest.fn().mockRejectedValue(Object.assign(new Error('not found'), { statusCode: 404 })),
+      create: jest.fn().mockImplementation(async (spec: { id: string }) => ({ id: spec.id })),
+      createSavedObject: jest.fn(),
+    };
+    const dataViewsPlugin = createDataViewsPlugin(dataViewsService);
+    const bootstrap = new ExecutionDataViewsBootstrap(dataViewsPlugin, loggerMock.create());
+    const tenantBSavedObjectsClient = {} as SavedObjectsClientContract;
+    const tenantBEsClient = {} as ElasticsearchClient;
+
+    bootstrap.ensureForSpaceFireAndForget('default', savedObjectsClient, esClient, 'project-a');
+    await flushPromises();
+    bootstrap.ensureForSpaceFireAndForget(
+      'default',
+      tenantBSavedObjectsClient,
+      tenantBEsClient,
+      'project-b'
+    );
+    await flushPromises();
+    bootstrap.ensureForSpaceFireAndForget('default', savedObjectsClient, esClient, 'project-a');
+    await flushPromises();
+
+    expect(dataViewsPlugin.dataViewsServiceFactory).toHaveBeenCalledTimes(2);
+    expect(dataViewsPlugin.dataViewsServiceFactory).toHaveBeenNthCalledWith(
+      2,
+      tenantBSavedObjectsClient,
+      tenantBEsClient,
+      undefined,
+      true
+    );
+  });
+
   it('does not cache a failed bootstrap', async () => {
     const dataViewsService = {
       get: jest

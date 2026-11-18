@@ -8,6 +8,7 @@
 import nodeCrypto from '@elastic/node-crypto';
 import crypto from 'crypto';
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -69,7 +70,7 @@ describe('Session', () => {
         { isTLSEnabled: false }
       ),
       sessionCookie: mockSessionCookie,
-      sessionIndex: mockSessionIndex,
+      getSessionIndex: () => mockSessionIndex,
       audit: mockAuditServiceSetup,
     });
   });
@@ -858,7 +859,7 @@ describe('Session', () => {
           { isTLSEnabled: false }
         ),
         sessionCookie: mockSessionCookie,
-        sessionIndex: mockSessionIndex,
+        getSessionIndex: () => mockSessionIndex,
         audit: auditServiceMock.create(),
       });
 
@@ -899,7 +900,7 @@ describe('Session', () => {
             { isTLSEnabled: false }
           ),
           sessionCookie: mockSessionCookie,
-          sessionIndex: mockSessionIndex,
+          getSessionIndex: () => mockSessionIndex,
           audit: auditServiceMock.create(),
         });
 
@@ -975,7 +976,7 @@ describe('Session', () => {
           { isTLSEnabled: false }
         ),
         sessionCookie: mockSessionCookie,
-        sessionIndex: mockSessionIndex,
+        getSessionIndex: () => mockSessionIndex,
         audit: auditServiceMock.create(),
       });
 
@@ -1032,7 +1033,7 @@ describe('Session', () => {
             { isTLSEnabled: false }
           ),
           sessionCookie: mockSessionCookie,
-          sessionIndex: mockSessionIndex,
+          getSessionIndex: () => mockSessionIndex,
           audit: auditServiceMock.create(),
         });
       });
@@ -1178,7 +1179,7 @@ describe('Session', () => {
             { isTLSEnabled: false }
           ),
           sessionCookie: mockSessionCookie,
-          sessionIndex: mockSessionIndex,
+          getSessionIndex: () => mockSessionIndex,
           audit: auditServiceMock.create(),
         });
 
@@ -1225,7 +1226,7 @@ describe('Session', () => {
             { isTLSEnabled: false }
           ),
           sessionCookie: mockSessionCookie,
-          sessionIndex: mockSessionIndex,
+          getSessionIndex: () => mockSessionIndex,
           audit: auditServiceMock.create(),
         });
 
@@ -1381,6 +1382,78 @@ describe('Session', () => {
           usernameHash: 'eb28536c8ead72bf81a0a9226e38fc9bad81f5e07c2081bb801b2a5c8842924e',
         },
       });
+    });
+  });
+
+  describe('with tenant session keys', () => {
+    const tenantCrypto = nodeCrypto({ encryptionKey: 'b'.repeat(32) });
+    const homeCrypto = nodeCrypto({ encryptionKey: mockEncryptionKey });
+    const sessionValue = {
+      username: 'user',
+      userProfileId: 'uid',
+      provider: { type: 'basic', name: 'basic1' },
+      state: 'some-state',
+    };
+    let getTenantCrypto: jest.Mock;
+    let tenantSession: Session;
+    beforeEach(() => {
+      getTenantCrypto = jest.fn();
+      tenantSession = new Session({
+        logger: loggingSystemMock.createLogger(),
+        config: createConfig(
+          ConfigSchema.validate({ encryptionKey: mockEncryptionKey }),
+          loggingSystemMock.createLogger(),
+          { isTLSEnabled: false }
+        ),
+        sessionCookie: mockSessionCookie,
+        getSessionIndex: () => mockSessionIndex,
+        getTenantCrypto,
+        audit: auditServiceMock.create(),
+      });
+      mockSessionIndex.create.mockImplementation(async (value) => ({
+        ...value,
+        metadata: { primaryTerm: 1, sequenceNumber: 1 },
+      }));
+    });
+
+    const createSession = async (
+      request: ReturnType<typeof httpServerMock.createKibanaRequest>
+    ) => {
+      await tenantSession.create(request, sessionValue);
+      const [[{ content }]] = mockSessionIndex.create.mock.calls;
+      const [[, { aad }]] = mockSessionCookie.set.mock.calls;
+      return { content, aad };
+    };
+
+    it("encrypts and decrypts content with the tenant's key", async () => {
+      getTenantCrypto.mockReturnValue(tenantCrypto);
+      const request = Object.assign(httpServerMock.createKibanaRequest(), {
+        tenantId: 'project-b' as KibanaRequest['tenantId'],
+      });
+
+      const { content, aad } = await createSession(request);
+
+      expect(getTenantCrypto).toHaveBeenCalledWith('project-b');
+      await expect(tenantCrypto.decrypt(content, aad)).resolves.toBe(
+        JSON.stringify({ username: 'user', userProfileId: 'uid', state: 'some-state' })
+      );
+      await expect(homeCrypto.decrypt(content, aad)).rejects.toThrow();
+
+      mockSessionCookie.get.mockResolvedValue(sessionCookieMock.createValue({ aad }));
+      mockSessionIndex.get.mockResolvedValue(sessionIndexMock.createValue({ content }));
+      await expect(tenantSession.get(request)).resolves.toMatchObject({
+        error: null,
+        value: { username: 'user', userProfileId: 'uid', state: 'some-state' },
+      });
+    });
+
+    it('uses the configured key for requests without a tenant', async () => {
+      const { content, aad } = await createSession(httpServerMock.createKibanaRequest());
+
+      expect(getTenantCrypto).not.toHaveBeenCalled();
+      await expect(homeCrypto.decrypt(content, aad)).resolves.toBe(
+        JSON.stringify({ username: 'user', userProfileId: 'uid', state: 'some-state' })
+      );
     });
   });
 

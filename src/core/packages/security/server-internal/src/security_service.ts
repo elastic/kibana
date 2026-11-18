@@ -116,12 +116,17 @@ export class SecurityService
     };
   }
 
-  public start(): InternalSecurityServiceStart {
+  public start({
+    getTenantSessionCrypto,
+  }: Pick<
+    InternalSecurityServiceStart,
+    'getTenantSessionCrypto'
+  > = {}): InternalSecurityServiceStart {
     if (!this.securityApi) {
       this.log.warn('Security API was not registered, using default implementation');
     }
     const apiContract = this.securityApi ?? getDefaultSecurityImplementation();
-    return convertSecurityApi(apiContract, this.workloadTypes);
+    return { ...convertSecurityApi(apiContract, this.workloadTypes), getTenantSessionCrypto };
   }
 
   public stop() {

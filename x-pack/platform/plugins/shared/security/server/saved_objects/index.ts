@@ -39,11 +39,7 @@ export function setupSavedObjects({
       ({ request, includedHiddenTypes, extensions }) => {
         return new SavedObjectsClient(
           authz.mode.useRbacForRequest(request)
-            ? repositoryFactory.createInternalRepository(
-                includedHiddenTypes,
-                extensions,
-                request.serverTiming
-              )
+            ? repositoryFactory.createInternalRepository(includedHiddenTypes, extensions, request)
             : repositoryFactory.createScopedRepository(request, includedHiddenTypes, extensions)
         );
       }

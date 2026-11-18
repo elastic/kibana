@@ -374,5 +374,15 @@ describe('SecurityService', function () {
 
       expect(startContract).toEqual(convertedContract);
     });
+
+    it("exposes the tenants' session crypto", () => {
+      convertSecurityApiMock.mockReturnValue({ stub: true });
+      const getTenantSessionCrypto = jest.fn();
+
+      service.setup();
+      const startContract = service.start({ getTenantSessionCrypto });
+
+      expect(startContract).toEqual({ stub: true, getTenantSessionCrypto });
+    });
   });
 });

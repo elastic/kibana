@@ -1,0 +1,7 @@
+# Local dev passwords and keys only. Put real credentials in a *.local.yml file, which git ignores.
+# project-a's encryptionKey matches the dev default, so the home project keeps its key.
+# Every tenant needs both encryptionKey (saved objects) and securityEncryptionKey (sessions).
+# projectName is optional. It's the name the serverless project picker shows.
+project-a: { hosts: ['http://localhost:9200'], username: kibana_system, password: changeme-a, encryptionKey: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, securityEncryptionKey: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA, projectName: project-a }
+project-b: { hosts: ['http://localhost:9201'], username: kibana_system, password: changeme-b, encryptionKey: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb, securityEncryptionKey: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB, projectName: project-b }
+project-c: { hosts: ['http://localhost:9202'], username: kibana_system, password: changeme-c, encryptionKey: cccccccccccccccccccccccccccccccc, securityEncryptionKey: CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC, projectName: project-c }
