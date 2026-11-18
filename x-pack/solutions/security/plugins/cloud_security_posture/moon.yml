@@ -67,6 +67,8 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/spaces-plugin'
   - '@kbn/cloud-security-posture-common'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/workflows'
   - '@kbn/cloud-security-posture'
   - '@kbn/analytics'
   - '@kbn/management-settings-ids'
