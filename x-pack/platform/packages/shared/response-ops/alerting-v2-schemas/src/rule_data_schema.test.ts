@@ -19,6 +19,8 @@ import {
   isStateTransitionAllowed,
   isRoutingTagsAllowedForKind,
   ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+  isReasonAllowedForKind,
+  REASON_SIGNAL_RULE_MESSAGE,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
@@ -41,6 +43,7 @@ import {
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_PER_PAGE,
+  MAX_REASON_TEMPLATE_LENGTH,
 } from './constants';
 
 const validRuleFields = {
@@ -68,6 +71,148 @@ const composedQuery = {
 
 // Parses as a string but not as ES|QL, so it reaches the parser and fails there.
 const UNPARSEABLE_ESQL = 'WHERE (';
+
+const reasonSchemaCases = [
+  { api: 'create', schema: createRuleDataSchema, payload: validCreateData },
+  { api: 'PUT', schema: putRuleDataSchema, payload: validCreateData },
+  { api: 'PATCH', schema: updateRuleDataSchema, payload: {} },
+  {
+    api: 'response',
+    schema: ruleResponseSchema,
+    payload: {
+      ...validCreateData,
+      id: 'rule-1',
+      version: 1,
+      enabled: true,
+      created_by: null,
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_by: null,
+      updated_at: '2026-01-01T00:00:00.000Z',
+    },
+  },
+];
+
+describe.each(reasonSchemaCases)('$api reason template', ({ schema, payload }) => {
+  it('accepts omission without adding a value', () => {
+    expect(schema.parse(payload)).not.toHaveProperty('reason');
+  });
+
+  it('preserves the original unresolved template and surrounding whitespace', () => {
+    const reason = '  CPU on {{host.name}} was {{cpu_pct}}%.\n';
+
+    expect(schema.parse({ ...payload, reason })).toMatchObject({ reason });
+  });
+
+  it('accepts the maximum length', () => {
+    const reason = 'a'.repeat(MAX_REASON_TEMPLATE_LENGTH);
+
+    expect(schema.parse({ ...payload, reason })).toMatchObject({ reason });
+  });
+
+  it.each(['', ' ', '\t\n', 'a'.repeat(MAX_REASON_TEMPLATE_LENGTH + 1), 42])(
+    'rejects an invalid reason: %p',
+    (reason) => {
+      expect(schema.safeParse({ ...payload, reason }).success).toBe(false);
+    }
+  );
+});
+
+describe('reason template clearing and inheritance', () => {
+  it.each(reasonSchemaCases.filter(({ api }) => api !== 'PATCH'))(
+    'rejects null in $api',
+    ({ schema, payload }) => {
+      expect(schema.safeParse({ ...payload, reason: null }).success).toBe(false);
+    }
+  );
+
+  it('accepts PATCH null as a clearing instruction', () => {
+    expect(updateRuleDataSchema.parse({ reason: null })).toEqual({ reason: null });
+  });
+
+  it.each([
+    { api: 'create', schema: createRuleDataSchema },
+    { api: 'PUT', schema: putRuleDataSchema },
+  ])('rejects a reason on a signal rule in $api', ({ schema }) => {
+    const result = schema.safeParse({ ...validSignalCreateData, reason: 'Match on {{host.name}}' });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({ path: ['reason'], message: REASON_SIGNAL_RULE_MESSAGE }),
+    ]);
+  });
+
+  it.each([
+    { api: 'create', schema: createRuleDataSchema },
+    { api: 'PUT', schema: putRuleDataSchema },
+  ])('accepts a signal rule without a reason in $api', ({ schema }) => {
+    expect(schema.parse(validSignalCreateData)).not.toHaveProperty('reason');
+  });
+
+  it('rejects a reason on a signal rule in bulk create', () => {
+    const result = bulkCreateRulesRequestSchema.safeParse({
+      items: [{ ...validSignalCreateData, reason: 'Match on {{host.name}}' }],
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({
+        path: ['items', 0, 'reason'],
+        message: REASON_SIGNAL_RULE_MESSAGE,
+      }),
+    ]);
+  });
+
+  it('accepts a signal rule without a reason in bulk create', () => {
+    expect(
+      bulkCreateRulesRequestSchema.parse({ items: [validSignalCreateData] }).items[0]
+    ).not.toHaveProperty('reason');
+  });
+
+  it('inherits the reason contract in bulk-create items', () => {
+    const reason = 'CPU on {{host.name}} was {{cpu_pct}}%.';
+
+    expect(
+      bulkCreateRulesRequestSchema.parse({ items: [{ ...validCreateData, reason }] }).items[0]
+    ).toMatchObject({ reason });
+    expect(
+      bulkCreateRulesRequestSchema.safeParse({ items: [{ ...validCreateData, reason: null }] })
+        .success
+    ).toBe(false);
+  });
+
+  it.each([
+    { schema: createRuleDataSchema, contract: 'Omit to leave it unset.' },
+    { schema: putRuleDataSchema, contract: 'clear it when replacing an existing rule' },
+    {
+      schema: updateRuleDataSchema,
+      contract: 'Omit to preserve the current value; send null to clear it.',
+    },
+    { schema: ruleResponseSchema, contract: 'Absent when no reason template is set.' },
+  ])('documents the reason omission and clearing contract: $contract', ({ schema, contract }) => {
+    const json = inlineRootJsonSchemaRef(
+      z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' })
+    );
+
+    expect(json).toMatchObject({
+      properties: { reason: { description: expect.stringContaining(contract) } },
+    });
+  });
+});
+
+describe('isReasonAllowedForKind', () => {
+  it('accepts an alert reason template', () => {
+    expect(isReasonAllowedForKind({ kind: 'alert', reason: 'CPU on {{host.name}}' })).toBe(true);
+  });
+
+  it('treats omitted and null reasons as absent on a signal rule', () => {
+    expect(isReasonAllowedForKind({ kind: 'signal' })).toBe(true);
+    expect(isReasonAllowedForKind({ kind: 'signal', reason: null })).toBe(true);
+  });
+
+  it('rejects a configured reason on a signal rule', () => {
+    expect(isReasonAllowedForKind({ kind: 'signal', reason: 'CPU on {{host.name}}' })).toBe(false);
+  });
+});
 
 describe('createRuleDataSchema', () => {
   describe('valid payloads', () => {
@@ -1919,6 +2064,7 @@ describe('rule field immutability classification', () => {
         "metadata",
         "no_data",
         "query",
+        "reason",
         "recovery",
         "schedule",
         "state_transition",
