@@ -10,7 +10,7 @@
  * the same generated alerts and with nothing from the run before. In this order:
  *
  * 1. Cancel every workflow execution that has not finished (waiting reviews and proposals would otherwise stay for 72 hours).
- * 2. Delete the proposals and the investigation impact records (plain indices).
+ * 2. Delete the proposals and the investigation impact records (plain indices), and the verdict cache records (only those documents of the decisions index: the decisions stay).
  * 3. Delete the notes that sit on alerts with an `az:` tag, through the notes API (the saved-object index is restricted).
  * 4. Delete the conversations whose title starts with "Alert Triage", through the Agent Builder API (restricted index).
  * 5. Delete every alert of the alert index and write the generated day again (`replay_alerts_cli.js --backfill`).
@@ -27,6 +27,8 @@
 
 import { execFileSync } from 'child_process';
 import path from 'path';
+import { TRIAGE_DECISIONS_AI_INDEX_DEST } from '../../common/step_types/triage_decisions_index';
+import { VERDICT_CACHE_KI_TYPE } from '../../server/alert_triage/verdict_cache';
 
 export interface ResetArgs {
   data: string;
@@ -42,6 +44,7 @@ export interface ResetReport {
   dryRun: boolean;
   unfinishedExecutions?: number;
   plainDocuments?: Record<string, number>;
+  verdictCacheRecords?: number;
   taggedAlerts?: number;
   notes?: number;
   conversations?: number;
@@ -164,14 +167,24 @@ export const main = async (): Promise<void> => {
     let round = first;
     for (let attempt = 0; attempt < 20 && round.hits.hits.length > 0; attempt++) {
       for (const hit of round.hits.hits) {
-        await kibana<undefined>(
-          'POST',
-          `/api/workflows/executions/${hit._source.id}/cancel`,
-          undefined,
-          {
-            'elastic-api-version': '2023-10-31',
-          }
-        );
+        // A cancel can fail because the execution is running right now (Task Manager answers 500). The execution stays
+        // unfinished, so the next round finds it again, and the check at the end fails if it never ends.
+        try {
+          await kibana<undefined>(
+            'POST',
+            `/api/workflows/executions/${hit._source.id}/cancel`,
+            undefined,
+            {
+              'elastic-api-version': '2023-10-31',
+            }
+          );
+        } catch (error) {
+          process.stderr.write(
+            `cancel of ${hit._source.id} failed, tries again: ${
+              error instanceof Error ? error.message.slice(0, 160) : error
+            }\n`
+          );
+        }
       }
       await sleep(3000);
       round = await searchUnfinished();
@@ -185,6 +198,20 @@ export const main = async (): Promise<void> => {
   for (const index of plainIndices) {
     plainDocuments[index] = (await es<Count>('GET', `/${index}/_count`)).count;
   }
+
+  // The verdict cache keeps its records in the index of the decisions. A record of an earlier run would match the alerts of the
+  // next one (the key hash is the same), so a run must not start with records. A missing index means none.
+  const cacheQuery = { query: { term: { type: VERDICT_CACHE_KI_TYPE } } };
+  const cacheIndex = TRIAGE_DECISIONS_AI_INDEX_DEST.value;
+  const countCacheRecords = async (): Promise<number> => {
+    try {
+      return (await es<Count>('POST', `/${cacheIndex}/_count`, cacheQuery)).count;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('failed with 404')) return 0;
+      throw error;
+    }
+  };
+  report.verdictCacheRecords = await countCacheRecords();
 
   // 3. Notes on alerts that carry an az: tag.
   const tagged = await es<IdSearch>('POST', `/${args.index}/_search`, {
@@ -229,6 +256,13 @@ export const main = async (): Promise<void> => {
     await es<undefined>('POST', `/${index}/_delete_by_query?refresh=true&conflicts=proceed`, {
       query: { match_all: {} },
     });
+  }
+  if (report.verdictCacheRecords > 0) {
+    await es<undefined>(
+      'POST',
+      `/${cacheIndex}/_delete_by_query?refresh=true&conflicts=proceed`,
+      cacheQuery
+    );
   }
   for (let i = 0; i < noteIds.length; i += 100) {
     await kibana<undefined>(
@@ -289,6 +323,7 @@ export const main = async (): Promise<void> => {
   for (const index of plainIndices) {
     after[index] = (await es<Count>('GET', `/${index}/_count`)).count;
   }
+  after.verdictCacheRecords = await countCacheRecords();
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   // Fail loud: anything of the run that is still there means the next run does not start clean.
   const dirty = Object.entries(after).filter(([key, count]) => key !== 'alerts' && count !== 0);

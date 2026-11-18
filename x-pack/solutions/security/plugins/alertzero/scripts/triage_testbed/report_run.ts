@@ -8,7 +8,7 @@
 /**
  * The report of one run of the Alert Triage worker: the fixed scorecard of the plan ("Measure against a baseline"),
  * computed from what the run left in Elasticsearch, the truth file of the generated data, and the model calls.
- * It writes `notes/runs/<run id>.json` and appends ONE row to the scorecard ledger in `notes/results.md`. It never
+ * It writes `notes/results/runs/<run id>.json` and appends ONE row to the scorecard ledger `notes/results/ledger.md`. It never
  * overwrites a row: a run id that is already in the ledger is an error. A run that failed or stopped early also
  * gets a row (`--note`).
  *
@@ -171,8 +171,8 @@ interface RunReport {
   comparedToBaseline?: { runId: string; differences: ScorecardDiff };
 }
 
-// The notes folder sits next to the worktree: <on-week>/notes. `--notes-dir` overrides it.
-const DEFAULT_NOTES_DIR = path.resolve(__dirname, '../../../../../../../../notes');
+// The results folder sits next to the worktree: <on-week>/notes/results (it holds `results.md`, `ledger.md` and `runs/`). `--notes-dir` overrides it.
+const DEFAULT_NOTES_DIR = path.resolve(__dirname, '../../../../../../../../notes/results');
 const FAKE_CONNECTOR_NOTE = 'fake';
 const VERDICT_TAGS: Readonly<Record<string, ShortVerdict>> = {
   'az:false_positive': 'fp',
@@ -853,7 +853,7 @@ export const main = async (): Promise<void> => {
   if (fs.existsSync(reportFile))
     throw new Error(`${reportFile} exists: reports are never overwritten`);
   if (args.ledger) {
-    const ledgerFile = path.join(args.notesDir, 'results.md');
+    const ledgerFile = path.join(args.notesDir, 'ledger.md');
     const row = ledgerRow({
       runId: args.runId,
       date: report.generatedAt.slice(0, 10),
@@ -865,10 +865,11 @@ export const main = async (): Promise<void> => {
       scorecard,
       note,
     });
-    fs.writeFileSync(
-      ledgerFile,
-      appendLedgerRow(fs.readFileSync(ledgerFile, 'utf8'), row, args.runId)
-    );
+    // The ledger has a file of its own, so that its rows stay in one table. A missing file starts with the header.
+    const current = fs.existsSync(ledgerFile)
+      ? fs.readFileSync(ledgerFile, 'utf8')
+      : '# Results ledger\n';
+    fs.writeFileSync(ledgerFile, appendLedgerRow(current, row, args.runId));
   }
   fs.writeFileSync(reportFile, JSON.stringify(report, null, 2));
   process.stdout.write(`${JSON.stringify({ reportFile, ...report }, null, 2)}\n`);

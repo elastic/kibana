@@ -25,7 +25,7 @@
  * Usage:
  *   node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/fit_rule_model_cli.js --id <name> \
  *     --runs '<from>,<to>;<from>,<to>;...' --data <folder with truth.ndjson> --es http://localhost:9200 \
- *     --expect-cluster elasticsearch --connector-id <the real connector> --base-config <config json> [--notes-dir <dir>]
+ *     --expect-cluster elasticsearch --connector-id <the real connector> --base-config <config json> [--notes-dir <the results folder with ledger.md and runs/>]
  */
 
 import fs from 'fs';
@@ -311,7 +311,7 @@ const REQUIRED_ARGS = [
 export const main = async (): Promise<void> => {
   const partial: Partial<FitRuleModelArgs> = {
     alertIndex: '.alerts-security.alerts-default',
-    notesDir: path.resolve(__dirname, '../../../../../../../../notes'),
+    notesDir: path.resolve(__dirname, '../../../../../../../../notes/results'),
   };
   for (let i = 2; i < process.argv.length; i++) {
     const key = FLAGS[process.argv[i]];
