@@ -57,8 +57,9 @@ const ALLOWED_CALLERS = [
   /jest-snapshot/,
   // Jest's own environment uses new Function() for code generation. Dev-only, this is OK.
   /jest-environment/,
-  // Vitest's runtime (e.g. snapshot file evaluation) uses new Function(). Dev-only, this is OK.
-  /node_modules[\\/](vitest|@vitest)[\\/]/,
+  // Vitest reads snapshot files with new Function(). Dev-only, this is OK. Match only that chunk:
+  // every test body runs under @vitest/runner frames, so a broader match would allow any caller.
+  /node_modules[\\/]vitest[\\/]dist[\\/]chunks[\\/]rawSnapshot\./,
   // kbn-handlebars tests intentionally exercise the eval-based Handlebars compiler
   // to verify parity with the safe AST-based replacement. The CSP probe
   // (kbnUnsafeEvalTest) is blocked separately above, so this exception only
