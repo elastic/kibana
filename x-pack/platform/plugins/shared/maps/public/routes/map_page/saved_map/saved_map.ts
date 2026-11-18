@@ -430,12 +430,26 @@ export class SavedMap {
       throw new Error('Invalid usage, must await whenReady before calling save');
     }
 
+    let storeAttributes: Awaited<ReturnType<SavedMap['_getStoreAttributes']>>;
+    try {
+      storeAttributes = await this._getStoreAttributes();
+    } catch (e) {
+      getToasts().addDanger({
+        title: i18n.translate('xpack.maps.topNav.saveErrorTitle', {
+          defaultMessage: `Error saving ''{title}''`,
+          values: { title: newTitle },
+        }),
+        text: e.message,
+      });
+      return;
+    }
+
     const prevTitle = this._attributes.title;
     const prevDescription = this._attributes.description;
     this._attributes = {
       title: newTitle,
       ...(newDescription ? { description: newDescription } : {}),
-      ...(await this._getStoreAttributes()),
+      ...storeAttributes,
     };
 
     let mapEmbeddableState: MapEmbeddableState | undefined;
@@ -575,7 +589,8 @@ export class SavedMap {
       })
       .map((dataView) => {
         const spec = dataView.toSpec(false);
-        return { ...(fromStoredDataView(spec) as AsCodeDataViewSpec), id: spec.id! };
+        if (!spec.id) throw new Error('Cannot save ad hoc data view without `id`');
+        return { ...(fromStoredDataView(spec) as AsCodeDataViewSpec), id: spec.id };
       });
   }
 }

@@ -6,6 +6,7 @@
  */
 
 const mockDataViewCreate = jest.fn();
+const mockAddDanger = jest.fn();
 
 jest.mock('../../../kibana_services', () => ({
   getMapsCapabilities: () => ({ save: true }),
@@ -18,6 +19,7 @@ jest.mock('../../../kibana_services', () => ({
   }),
   getUsageCollection: () => null,
   getIndexPatternService: () => ({ create: (...args: any[]) => mockDataViewCreate(...args) }),
+  getToasts: () => ({ addDanger: mockAddDanger }),
 }));
 
 jest.mock('../../../licensed_features', () => ({
@@ -75,6 +77,35 @@ describe('SavedMap.whenReady adhoc data views', () => {
     await savedMap.whenReady();
 
     expect(mockDataViewCreate).not.toHaveBeenCalled();
+  });
+});
+
+describe('SavedMap.save', () => {
+  test('should show error toast and not throw when ad hoc data views can not be read', async () => {
+    mockAddDanger.mockReset();
+    const mapEmbeddableState: MapByValueState = {
+      attributes: { title: 'test map' } as MapByValueState['attributes'],
+    };
+    const savedMap = new SavedMap({ mapEmbeddableState });
+    await savedMap.whenReady();
+    jest
+      .spyOn(savedMap as any, '_getAdHocDataViews')
+      .mockRejectedValue(new Error('Cannot save ad hoc data view without `id`'));
+
+    await expect(
+      savedMap.save({
+        newTitle: 'new title',
+        newDescription: '',
+        newCopyOnSave: false,
+        saveByReference: true,
+        history: {} as any,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(mockAddDanger).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'Cannot save ad hoc data view without `id`' })
+    );
+    expect(savedMap.getAttributes().title).toBe('test map');
   });
 });
 
