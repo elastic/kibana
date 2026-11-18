@@ -6,9 +6,10 @@
  */
 
 import { randomUUID } from 'crypto';
-import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { execFileSync } from 'child_process';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { dirname, join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { MessageRole } from '@kbn/inference-common';
 import { buildReplay } from './replay';
@@ -18,6 +19,7 @@ import {
   createWriteupTask,
   fillKnowledge,
   loadPromptArm,
+  resolvePromptCommit,
   replayReply,
 } from './task';
 import type { WriteupExample } from './types';
@@ -253,5 +255,35 @@ describe('loadPromptArm', () => {
     expect(() => loadPromptArm(undefined, root)).toThrow(
       INVESTIGATOR_PROMPT_PATH.split('/').at(-1)
     );
+  });
+
+  it('reads a git ref at the commit it names now, and says which', () => {
+    const root = mkdtempSync(join(tmpdir(), 'writeup-git-'));
+    const git = (...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim();
+    const commitPrompt = (text: string) => {
+      mkdirSync(dirname(join(root, INVESTIGATOR_PROMPT_PATH)), { recursive: true });
+      writeFileSync(join(root, INVESTIGATOR_PROMPT_PATH), text);
+      git('add', '.');
+      git('commit', '-q', '-m', text);
+      return git('rev-parse', 'HEAD');
+    };
+    git('init', '-q');
+    const base = commitPrompt('main prompt');
+    git('update-ref', 'refs/remotes/origin/main', base);
+    const head = commitPrompt('branch prompt');
+
+    expect(loadPromptArm('HEAD~1', root)).toMatchObject({
+      label: `HEAD~1@${base.slice(0, 10)}`,
+      prompt: 'main prompt',
+    });
+    expect(resolvePromptCommit('merge-base', root)).toBe(base);
+    expect(loadPromptArm('merge-base', root).prompt).toBe('main prompt');
+    expect(loadPromptArm('HEAD', root).label).toBe(`HEAD@${head.slice(0, 10)}`);
+    expect(() => resolvePromptCommit('no-such-ref', root)).toThrow();
+    rmSync(root, { recursive: true, force: true });
   });
 });

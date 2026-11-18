@@ -56,7 +56,7 @@ export const fillKnowledge = (prompt: string, section: string): string =>
 export const WRITEUP_DATA_DIR = join(REPO_ROOT, 'data', 'nightshift_writeup');
 
 export interface PromptArm {
-  /** `current`, a git ref, or a file name. */
+  /** `current`, a file name, or a git ref with the commit it resolved to (`origin/main@1a2b3c4d5e`). */
   label: string;
   prompt: string;
   hash: string;
@@ -66,9 +66,21 @@ export const hashText = (text: string): string =>
   createHash('sha256').update(text).digest('hex').slice(0, 12);
 
 /**
+ * The commit a prompt spec names. `merge-base` is where this checkout branched from `origin/main`,
+ * the baseline a branch's change should be compared against.
+ */
+export const resolvePromptCommit = (spec: string, repoRoot = REPO_ROOT): string => {
+  const git = (...args: string[]) =>
+    execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8' }).trim();
+  return spec === 'merge-base'
+    ? git('merge-base', 'HEAD', 'origin/main')
+    : git('rev-parse', '--verify', `${spec}^{commit}`);
+};
+
+/**
  * The investigator prompt to replay with. Without a spec it is the working tree's, so the eval
- * measures the checkout it runs from. A spec is a prompt file, or else a git ref whose prompt is
- * read with `git show`.
+ * measures the checkout it runs from. A spec is a prompt file, or else a git ref (or `merge-base`)
+ * whose prompt is read with `git show` at the commit it resolves to.
  */
 export const loadPromptArm = (spec?: string, repoRoot = REPO_ROOT): PromptArm => {
   const fromTree = (path: string) => readFileSync(join(repoRoot, path), 'utf8');
@@ -84,9 +96,11 @@ export const loadPromptArm = (spec?: string, repoRoot = REPO_ROOT): PromptArm =>
     label = spec.split('/').at(-1)!;
     prompt = readFileSync(resolve(spec), 'utf8');
   } else {
-    label = spec;
-    prompt = fromRef(spec, INVESTIGATOR_PROMPT_PATH);
-    section = (name) => fromRef(spec, knowledgeSectionPath(name));
+    // A ref like `origin/main` moves, so read the prompt at the commit it names now and say which.
+    const commit = resolvePromptCommit(spec, repoRoot);
+    label = `${spec}@${commit.slice(0, 10)}`;
+    prompt = fromRef(commit, INVESTIGATOR_PROMPT_PATH);
+    section = (name) => fromRef(commit, knowledgeSectionPath(name));
   }
   const knowledge = prompt.match(/\{\{knowledge_(wiki|cortex)_section\}\}/)?.[1] as
     | 'wiki'

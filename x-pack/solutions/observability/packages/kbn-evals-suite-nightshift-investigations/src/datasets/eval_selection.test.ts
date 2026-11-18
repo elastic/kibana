@@ -70,6 +70,34 @@ describe('resolveEvalSelection', () => {
     });
   });
 
+  it('runs only the writeup eval when the dataset name is writeup data', () => {
+    for (const name of ['nightshift/writeup-orca-v1', '~/private/c0.json']) {
+      expect(resolveEvalSelection({ NIGHTSHIFT_DATASET_NAME: name })).toEqual({
+        ...NONE,
+        runWriteup: true,
+      });
+    }
+  });
+
+  it('rejects writeup data in a run that also runs trace-only investigations', () => {
+    for (const NIGHTSHIFT_DATASETS of ['all', 'trace-only,writeup']) {
+      expect(() =>
+        resolveEvalSelection({
+          ...WITH_SANDBOX,
+          NIGHTSHIFT_DATASETS,
+          NIGHTSHIFT_DATASET_NAME: 'nightshift/writeup-orca-v1',
+        })
+      ).toThrow('Select writeup on its own');
+    }
+  });
+
+  it('runs only the writeup eval on the writeup shard, without credentials', () => {
+    expect(resolveEvalSelection({ EVAL_SHARD_ID: 'writeup' })).toEqual({
+      ...NONE,
+      runWriteup: true,
+    });
+  });
+
   it('combines evals in one list', () => {
     expect(
       resolveEvalSelection({

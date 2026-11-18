@@ -10,6 +10,7 @@ import { join } from 'path';
 import { expect } from '@playwright/test';
 import { selectEvaluators, tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
+import { isWriteupDatasetFile } from '../../src/datasets/eval_selection';
 import { ORCA_WRITEUP_RELEASE, guardValidatedExamples, loadWriteupDataset } from './datasets';
 import { goldensByCase, goldensDirFor, readGoldens } from './goldens';
 import { createWriteupEvaluators } from './evaluators';
@@ -30,14 +31,8 @@ const MIN_REPLY_RATE = 0.8;
 /** Judge calls that came back with a score, of those with something to judge. */
 const MIN_JUDGED_RATE = 0.8;
 
-const parseVotes = (value = process.env.NIGHTSHIFT_WRITEUP_VOTES): number => {
-  if (!value) return 2;
-  const votes = Number(value);
-  if (!Number.isInteger(votes) || votes < 1) {
-    throw new Error(`NIGHTSHIFT_WRITEUP_VOTES must be a positive integer, got "${value}"`);
-  }
-  return votes;
-};
+/** Judge votes per pairwise comparison, each asked in both orders. */
+const VOTES = 2;
 
 evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () => {
   evaluate(
@@ -57,7 +52,7 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
       const goldens = goldensByCase(readGoldens(goldensDirFor(dataset.name)), dataset.examples, {
         everyRecordedRound: dataset.name === ORCA_WRITEUP_RELEASE.name,
       });
-      const votes = parseVotes();
+      const votes = VOTES;
       // The checkout's prompt unless NIGHTSHIFT_WRITEUP_PROMPT names another (a git ref or a file).
       const arm = loadPromptArm(process.env.NIGHTSHIFT_WRITEUP_PROMPT);
       const baselineSpec = process.env.NIGHTSHIFT_WRITEUP_BASELINE_PROMPT;
@@ -80,8 +75,8 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
           goldens,
         })
       );
-      const cache =
-        process.env.NIGHTSHIFT_WRITEUP_CACHE === 'off' ? undefined : createGenerationCache();
+      // Keyed by round, model, prompt and repetition; delete the cache folder to regenerate.
+      const cache = createGenerationCache();
       // The executor fetches a stored dataset again; check what it runs against what was validated.
       const guarded = guardValidatedExamples(
         dataset.examples,
@@ -92,7 +87,7 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
           name: 'Nightshift writeup',
           datasets: [dataset],
           // A stored dataset runs as stored; only a conversations file is upserted.
-          trustUpstreamDataset: !process.env.NIGHTSHIFT_WRITEUP_EXAMPLES_FILE,
+          trustUpstreamDataset: !isWriteupDatasetFile(process.env.NIGHTSHIFT_DATASET_NAME ?? ''),
           concurrency,
           metadata: {
             concurrency,

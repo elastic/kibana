@@ -168,13 +168,14 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
 });
 
 describe('Nightshift CI coverage', () => {
-  it('runs the Customer-0 stored datasets alongside isolated ORCA and reinforcement specs', () => {
+  it('runs the Customer-0 stored datasets alongside isolated ORCA, writeup and reinforcement specs', () => {
     const suite = suites.find(({ id }) => id === 'nightshift-investigations');
     expect(suite?.ciLabels).toEqual(['evals:nightshift-investigations']);
     expect(suite?.shards?.map(({ id }) => id)).toEqual([
       'customer0-golden',
       'customer0-connector-probes',
       'orcabench',
+      'writeup',
       'reinforcement',
     ]);
     const files = suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [];
@@ -182,6 +183,7 @@ describe('Nightshift CI coverage', () => {
       'evals/investigation/stored.spec.ts',
       'evals/connector_probe/stored.spec.ts',
       'evals/investigation/orcabench.spec.ts',
+      'evals/writeup/writeup.spec.ts',
       'evals/reinforcement/reinforcement.spec.ts',
     ]);
     const configPath = suite?.configPath;

@@ -32,6 +32,16 @@ export const REINFORCEMENT_DATASET_ID = 'reinforcement';
  */
 export const WRITEUP_DATASET_ID = 'writeup';
 
+/**
+ * Whether `NIGHTSHIFT_DATASET_NAME` names writeup data: a stored dataset called `nightshift/writeup-…`,
+ * or a conversations file (a `.json` path). Either one selects the writeup eval on its own.
+ */
+export const isWriteupDatasetName = (name: string): boolean =>
+  name.startsWith('nightshift/writeup-') || isWriteupDatasetFile(name);
+
+/** A writeup conversations file rather than a stored dataset's name. */
+export const isWriteupDatasetFile = (name: string): boolean => name.endsWith('.json');
+
 const ALL_DATASETS = 'all';
 const EVAL_IDS: readonly string[] = [
   INVESTIGATION_DATASET_ID,
@@ -128,6 +138,18 @@ export const resolveEvalSelection = (
       storedDatasetIds: [],
     };
   }
+  // The writeup shard replays recorded rounds; it runs no investigation, so it needs no sandbox.
+  if (env.EVAL_SHARD_ID === WRITEUP_DATASET_ID) {
+    return {
+      runInvestigations: false,
+      runOrca: false,
+      runConnectorProbes: false,
+      runWikiOptimize: false,
+      runWriteup: true,
+      runReinforcement: false,
+      storedDatasetIds: [],
+    };
+  }
   const orca = env.EVAL_SHARD_ID === 'orcabench' || env.NIGHTSHIFT_DATASETS?.trim() === 'orcabench';
   if (orca) {
     if (!env.SANDBOX_API_KEY) throw new Error('ORCA investigations require SANDBOX_API_KEY');
@@ -177,10 +199,18 @@ export const resolveEvalSelection = (
       'Run reinforcement on its own Scout server; it enables decision trees on the server'
     );
   }
+  const datasetName = env.NIGHTSHIFT_DATASET_NAME?.trim();
+  const writeupData = datasetName ? isWriteupDatasetName(datasetName) : false;
   const requested =
     env.NIGHTSHIFT_DATASETS?.trim() ||
-    (env.NIGHTSHIFT_DATASET_NAME ? INVESTIGATION_DATASET_ID : undefined);
+    (datasetName ? (writeupData ? WRITEUP_DATASET_ID : INVESTIGATION_DATASET_ID) : undefined);
   const ids = parseRequestedIds(requested);
+  if (writeupData && (!ids || ids.includes(INVESTIGATION_DATASET_ID))) {
+    throw new Error(
+      `NIGHTSHIFT_DATASET_NAME=${datasetName} is writeup data, but NIGHTSHIFT_DATASETS=${requested} also ` +
+        'runs trace-only investigations, which would read it too. Select writeup on its own.'
+    );
+  }
   const requiresSandbox = (selected: string) => {
     // Playwright resolves this on every run; a reused Scout server never reloads its config.
     if (!env.SANDBOX_API_KEY) {

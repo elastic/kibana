@@ -178,6 +178,11 @@
           "specFiles": ["evals/investigation/orcabench.spec.ts"]
         },
         {
+          "id": "writeup",
+          "judge": "eis-openai-gpt-6-sol",
+          "specFiles": ["evals/writeup/writeup.spec.ts"]
+        },
+        {
           "id": "reinforcement",
           "judge": "eis-openai-gpt-6-sol",
           "specFiles": ["evals/reinforcement/reinforcement.spec.ts"]
