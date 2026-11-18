@@ -19,6 +19,9 @@ import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import apm from 'elastic-apm-node';
+import semverMajor from 'semver/functions/major';
+import semverPrerelease from 'semver/functions/prerelease';
+import semverValid from 'semver/functions/valid';
 
 import {
   AgentlessAgentCreateOverProvisionedError,
@@ -57,7 +60,6 @@ import {
 
 import { appContextService } from '../app_context';
 import { packagePolicyService } from '../package_policy';
-import { getPackageInfo } from '../epm/packages';
 
 import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
@@ -90,6 +92,18 @@ interface AgentlessPolicyDetailsPackage {
   version: string;
   policy_template?: string;
   release?: string;
+}
+
+/**
+ * The release of a package version, or undefined when the version is not valid semver.
+ * Mirrors the rule Fleet applies when a package manifest has no `release`
+ * (see `epm/archive/parse.ts`).
+ */
+function getReleaseFromPackageVersion(version: string): 'beta' | 'ga' | undefined {
+  if (!semverValid(version)) {
+    return undefined;
+  }
+  return semverPrerelease(version) || semverMajor(version) < 1 ? 'beta' : 'ga';
 }
 
 export interface AgentlessAgentService {
@@ -548,7 +562,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       // agentless-api labels a deployment from its first integration input only, so use the
       // policy template of the first enabled input here as well.
       const policyTemplate = packagePolicy.inputs?.find((input) => input.enabled)?.policy_template;
-      const release = await this.getPackageRelease(soClient, pkg.name, pkg.version);
+      const release = getReleaseFromPackageVersion(pkg.version);
 
       return {
         name: pkg.name,
@@ -563,28 +577,6 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         .warn(
           `[Agentless API] Could not resolve integration package for ${agentPolicyId}: ${error}`
         );
-      return undefined;
-    }
-  }
-
-  /** The release of a package, or undefined when it cannot be resolved. */
-  private async getPackageRelease(
-    soClient: SavedObjectsClientContract,
-    pkgName: string,
-    pkgVersion: string
-  ): Promise<string | undefined> {
-    try {
-      const packageInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName,
-        pkgVersion,
-      });
-      return packageInfo?.release;
-    } catch (error) {
-      // Still send the package name and version when only the release is missing.
-      appContextService
-        .getLogger()
-        .warn(`[Agentless API] Could not resolve release of ${pkgName}-${pkgVersion}: ${error}`);
       return undefined;
     }
   }
