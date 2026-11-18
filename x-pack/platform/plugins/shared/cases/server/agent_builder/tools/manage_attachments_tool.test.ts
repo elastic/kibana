@@ -233,13 +233,16 @@ describe('manageAttachmentsTool', () => {
     casesClient.cases.get.mockResolvedValue(theCase as never);
     casesClient.attachments.bulkCreateAndGetCase.mockResolvedValue(theCase as never);
     const esClient = elasticsearchServiceMock.createScopedClusterClient();
-    esClient.asCurrentUser.mget.mockResolvedValue({
-      docs: [
-        {
-          found: true,
-          _source: { kibana: { alert: { rule: { uuid: 'rule-so-id', name: 'My rule' } } } },
-        },
-      ],
+    esClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'alert-1',
+            _index: '.internal.alerts-security.alerts-default-000001',
+            _source: { kibana: { alert: { rule: { uuid: 'rule-so-id', name: 'My rule' } } } },
+          },
+        ],
+      },
     } as never);
 
     const tool = buildTool(buildRegistry([]), true);
