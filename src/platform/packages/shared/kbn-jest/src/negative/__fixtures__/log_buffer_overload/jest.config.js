@@ -18,6 +18,8 @@ module.exports = {
     '<rootDir>/src/platform/packages/shared/kbn-jest/src/negative/__fixtures__/log_buffer_overload',
   ],
   testEnvironment: 'node',
+  // Same Jest 30 / Node 24 webstream workaround as the shared preset.
+  testEnvironmentOptions: { globalsCleanup: 'off' },
   testMatch: ['**/*.test.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],
   transform: {
