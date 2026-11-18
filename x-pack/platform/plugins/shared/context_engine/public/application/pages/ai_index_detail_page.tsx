@@ -14,6 +14,7 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Redirect, useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
+import { KI_NOT_DELETED_STATUSES } from '../../../common/ki_lifecycle_status';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import {
   AiIndexCreatedCallout,
@@ -145,7 +146,7 @@ export const AiIndexDetailPage = () => {
   const { summary, isLoading: isKiSummaryLoading } = useListKi({
     aiIndexId: aiIndex?.id,
     size: KI_SUMMARY_PAGE_SIZE,
-    status: ['active'],
+    status: KI_NOT_DELETED_STATUSES,
     enabled: aiIndex !== undefined,
     notifyOnError: true,
   });
