@@ -505,10 +505,17 @@ export class WorkflowContextManager {
       referencedVariableSegments.flatMap((path) => (typeof path[0] === 'string' ? [path[0]] : []))
     );
 
+    // Snapshot variables were loaded with the batch. An input write leaves them in place.
+    const variables = referencedRoots.has('variables')
+      ? this.snapshot
+        ? { ...this.snapshot.variables }
+        : this.getVariables()
+      : {};
+
     const stepContext: StepContext = {
       ...this.buildWorkflowContext(),
       steps: {},
-      variables: referencedRoots.has('variables') ? this.getVariables() : {},
+      variables,
     };
 
     if (referencedRoots.has('steps')) {

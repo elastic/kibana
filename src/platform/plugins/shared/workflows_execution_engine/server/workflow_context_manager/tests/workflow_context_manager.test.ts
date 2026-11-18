@@ -2292,6 +2292,75 @@ describe('WorkflowContextManager', () => {
       expect(underTest.renderValueAccordingToContext('{{ steps.step_a.output }}')).toBe(output);
     });
 
+    it('keeps narrowed variable rendering on the snapshot after an input write', async () => {
+      const variableWorkflow: WorkflowYaml = {
+        name: 'Test Workflow',
+        version: '1',
+        description: 'Variable snapshot test workflow',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'send',
+            type: 'console',
+            with: { message: '{{ variables.connector_id }}' },
+          } as ConnectorStep,
+        ],
+      };
+      const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(variableWorkflow);
+      const node = workflowExecutionGraph
+        .getAllNodes()
+        .find((candidate) => candidate.stepId === 'send');
+      expect(node).toBeDefined();
+
+      let ioVersion = 0;
+      const stepIoService = {
+        readBatch: jest.fn(async (ids: readonly string[], type: 'input' | 'output' | 'error') => {
+          const values = new Map<string, unknown>();
+          if (type === 'output' && ids.includes('exec-set')) {
+            values.set('exec-set', { connector_id: 'conn-123' });
+          }
+          return values;
+        }),
+      } as unknown as StepIoService;
+      const workflowExecutionState = {
+        getWorkflowExecution: jest.fn().mockReturnValue({
+          id: 'exec-1',
+          workflowId: 'wf-1',
+          spaceId: 'default',
+          createdAt: '2023-01-01T00:00:00.000Z',
+          startedAt: '2023-01-01T00:00:00.000Z',
+          workflowDefinition: variableWorkflow,
+          scopeStack: [],
+        }),
+        getDataSetStepExecutions: jest.fn().mockReturnValue([{ id: 'exec-set' }]),
+        getDataSetStepExecutionCount: jest.fn().mockReturnValue(1),
+        getStepIoVersion: jest.fn(() => ioVersion),
+        getStepIo: jest.fn().mockReturnValue(undefined),
+        getLatestStepExecution: jest.fn().mockReturnValue(undefined),
+      } as unknown as WorkflowExecutionState;
+
+      const underTest = new WorkflowContextManager({
+        templateEngine: new WorkflowTemplatingEngine(),
+        node: node as AtomicGraphNode,
+        stackFrames: [],
+        workflowExecutionGraph,
+        workflowExecutionState,
+        stepIoService,
+        esClient: {} as any,
+        dependencies,
+        fakeRequest: {} as KibanaRequest,
+        coreStart: {} as CoreStart,
+      });
+
+      await underTest.prepareContext();
+      ioVersion = 1;
+
+      expect(underTest.renderValueAccordingToContext('{{ variables.connector_id }}')).toBe(
+        'conn-123'
+      );
+    });
+
     it('fetches a step named only by a handler condition', async () => {
       const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
       const node = workflowExecutionGraph
