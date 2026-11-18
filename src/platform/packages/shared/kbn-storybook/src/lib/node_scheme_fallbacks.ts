@@ -11,6 +11,12 @@ import webpack from 'webpack';
 import type { Configuration } from 'webpack';
 import nodeStdlibBrowser from 'node-stdlib-browser';
 
+// `node-stdlib-browser` has no `util/types` entry. jest-util only reads it in `isError`, when the
+// browser lacks `Error.isError`, so the `util` polyfill's type checks are enough.
+const NODE_SCHEME_EXTRAS: Record<string, string> = {
+  'node:util/types': require.resolve('util/support/types'),
+};
+
 /** Resolves `node:` builtins (required by Jest 30's jest-util via the preview's jest-mock) to browser polyfills. */
 export const withNodeSchemeFallbacks = (config: Configuration): Configuration => ({
   ...config,
@@ -18,15 +24,10 @@ export const withNodeSchemeFallbacks = (config: Configuration): Configuration =>
     ...(config.plugins ?? []),
     new webpack.NormalModuleReplacementPlugin(/^node:/, (resource: { request: string }) => {
       const request = resource.request as keyof typeof nodeStdlibBrowser;
-      resource.request = nodeStdlibBrowser[request] ?? resource.request.slice('node:'.length);
+      resource.request =
+        NODE_SCHEME_EXTRAS[request] ??
+        nodeStdlibBrowser[request] ??
+        resource.request.slice('node:'.length);
     }),
   ],
-  resolve: {
-    ...config.resolve,
-    fallback: {
-      ...config.resolve?.fallback,
-      // jest-util only reads `util/types` in `isError`, when the browser lacks `Error.isError`.
-      'util/types': false,
-    },
-  },
 });
