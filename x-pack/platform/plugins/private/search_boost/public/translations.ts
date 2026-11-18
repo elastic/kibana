@@ -10,7 +10,7 @@ import type { BoostProfileType } from '../common/types';
 
 export const SEARCH_BOOST_PAGE_DESCRIPTION = i18n.translate('xpack.searchBoost.page.description', {
   defaultMessage:
-    'Balance search performance and cost for the indices and data streams in this project.',
+    'Project-wide defaults determine the search resources allocated to your indices and data streams. Create boost rules to override those defaults with a different boost profile for specific indices or data streams.',
 });
 
 export const MATCHING_INDICES_TITLE = i18n.translate('xpack.searchBoost.matchingIndicesTitle', {
@@ -71,6 +71,18 @@ export const getHiddenDataStreams = (count: number) =>
     defaultMessage: '{count, plural, one {# hidden data stream} other {# hidden data streams}}',
     values: { count },
   });
+
+export const LOADING_LABEL = i18n.translate('xpack.searchBoost.page.loading', {
+  defaultMessage: 'Loading boost settings…',
+});
+
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.searchBoost.page.loadErrorTitle', {
+  defaultMessage: 'Unable to load boost settings',
+});
+
+export const TRY_AGAIN_LABEL = i18n.translate('xpack.searchBoost.page.tryAgain', {
+  defaultMessage: 'Try again',
+});
 
 export const PROFILE_TYPE_LABELS: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.searchBoost.profileType.indices', { defaultMessage: 'Indices' }),

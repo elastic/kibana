@@ -31,6 +31,9 @@ dependsOn:
   - '@kbn/content-list-provider'
   - '@kbn/content-list-toolbar'
   - '@kbn/data-lifecycle-phases'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/react-query'
+  - '@kbn/shared-ux-router'
 tags:
   - plugin
   - prod
