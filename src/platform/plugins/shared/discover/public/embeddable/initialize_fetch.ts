@@ -173,6 +173,17 @@ export function initializeFetch({
   let abortController: AbortController | undefined;
   let cachedEsqlSource: { identity: string; source: EsqlSource } | undefined;
 
+  // `showWarnings` reports the warnings of every request the adapter retains, so a result that
+  // sent a request already reports the full set (the first page and every page loaded since)
+  const collectWarnings = (): SearchResponseWarning[] => {
+    const warnings: SearchResponseWarning[] = [];
+    discoverServices.data.search.showWarnings(inspectorAdapters.requests, (warning) => {
+      warnings.push(warning);
+      return true; // suppress the default behaviour
+    });
+    return warnings;
+  };
+
   const observables = [fetch$(api), api.savedSearch$, api.dataSources$, refreshTrigger$] as const;
 
   const fetchSubscription = combineLatest(observables)
@@ -329,11 +340,7 @@ export function initializeFetch({
               executionContext,
             }
           );
-          const interceptedWarnings: SearchResponseWarning[] = [];
-          discoverServices.data.search.showWarnings(inspectorAdapters.requests, (warning) => {
-            interceptedWarnings.push(warning);
-            return true; // suppress the default behaviour
-          });
+          const interceptedWarnings = collectWarnings();
 
           return {
             warnings: interceptedWarnings,
@@ -372,7 +379,7 @@ export function initializeFetch({
 
   const fetchMore = async () => {
     const currentPagination = stateManager.pagination.getValue();
-    if (!currentPagination?.hasNextPage || stateManager.isLoadingMore.getValue()) {
+    if (!currentPagination?.hasNextPage() || stateManager.isLoadingMore.getValue()) {
       return;
     }
 
@@ -404,6 +411,9 @@ export function initializeFetch({
 
       stateManager.rows.next([...stateManager.rows.getValue(), ...moreRecords]);
       stateManager.pagination.next(nextPageResult.pagination);
+      // This page sent a request, so its warnings replace the current ones. A page that sent none
+      // (nothing left to load) returned above, which keeps them, e.g. a shard failure callout.
+      api.fetchWarnings$.next(collectWarnings());
     } catch (error) {
       if (!moreAbortController.signal.aborted) {
         setSearchError(error);
