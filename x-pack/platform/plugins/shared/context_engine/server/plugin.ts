@@ -345,7 +345,19 @@ export class ContextEnginePlugin
       },
     });
 
-    registerMemoryRecallRoutes({ router, getAiIndexDataReadService, analyticsService });
+    registerMemoryRecallRoutes({
+      router,
+      getAiIndexDataReadService,
+      getSessionStoreClient: async () => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return coreStart.elasticsearch.client.asInternalUser;
+      },
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      analyticsService,
+    });
 
     // Read-only Signals routes (reads run as the current user, scoped to the active space).
     registerSignalRoutes({

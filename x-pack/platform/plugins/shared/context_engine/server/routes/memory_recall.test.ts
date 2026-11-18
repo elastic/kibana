@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandler } from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { Type } from '@kbn/config-schema';
 import { MEMORY_RECALL_PATH } from '../../common/constants';
@@ -31,6 +31,7 @@ describe('memory recall routes', () => {
   let list: jest.Mock;
   let query: jest.Mock;
   let inference: jest.Mock;
+  let sessionSearch: jest.Mock;
 
   const createContext = () =>
     ({
@@ -41,6 +42,7 @@ describe('memory recall routes', () => {
         elasticsearch: {
           client: { asCurrentUser: { inference: { rerank: inference } } },
         },
+        userProfile: { getCurrentProfileId: jest.fn().mockResolvedValue('profile-1') },
       }),
     } as unknown as Parameters<RequestHandler>[0]);
 
@@ -57,6 +59,7 @@ describe('memory recall routes', () => {
     list = jest.fn().mockResolvedValue([]);
     query = jest.fn();
     inference = jest.fn();
+    sessionSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
 
     const router = {
       versioned: {
@@ -74,17 +77,24 @@ describe('memory recall routes', () => {
     registerMemoryRecallRoutes({
       router,
       getAiIndexDataReadService: () => ({ list, query, describe: jest.fn() }),
+      getSessionStoreClient: async () =>
+        ({ search: sessionSearch } as unknown as ElasticsearchClient),
+      getSpaces: async () => undefined,
       analyticsService: {
         reportMemoryRecall: jest.fn(),
       } as unknown as ContextEngineAnalyticsService,
     });
   });
 
-  it('registers a public read route', () => {
+  it('registers a public route that requires the manage memory privilege', () => {
     expect(route.config).toMatchObject({
       path: MEMORY_RECALL_PATH,
       access: 'public',
-      security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.writeContextEngine, apiPrivileges.manageMemory],
+        },
+      },
     });
   });
 
@@ -116,5 +126,19 @@ describe('memory recall routes', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: { results: [], took_ms: expect.any(Number), tokens: 0 },
     });
+  });
+
+  it("searches the session stores as the caller's profile in the current space", async () => {
+    await callRoute({
+      query: 'why was checkout slow?',
+      sources: ['session_memory', 'session_events'],
+    });
+
+    expect(sessionSearch).toHaveBeenCalledTimes(2);
+    for (const [{ query: esQuery }] of sessionSearch.mock.calls) {
+      expect(esQuery.bool.filter).toEqual(
+        expect.arrayContaining([{ term: { space: 'default' } }, { term: { user_id: 'profile-1' } }])
+      );
+    }
   });
 });
