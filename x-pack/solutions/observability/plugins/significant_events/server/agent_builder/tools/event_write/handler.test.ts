@@ -2133,7 +2133,7 @@ describe('eventsWriteBulkHandler — a rule held by another live event', () => {
       expect(results[0]).toMatchObject({ written: true, event_id: targetId, status: 'inactive' });
     });
 
-    it('does not check a rule the live target already holds, so an existing duplicate still writes', async () => {
+    it('does not check a rule the live target already confirms, so an existing duplicate still writes', async () => {
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientWith({
           live: [holder('holder-a', 'rule-r')],
@@ -2146,6 +2146,26 @@ describe('eventsWriteBulkHandler — a rule held by another live event', () => {
 
       expect(results[0]).toMatchObject({ written: true, event_id: targetId });
       expect(writtenDocs()).toHaveLength(1);
+    });
+
+    it('holds a write that re-confirms a rule the live target holds as refutes while another event confirms it', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith({
+          live: [holder('holder-a', 'rule-r')],
+          stored: target({
+            status: 'recovering',
+            signals: [makeDetectionSignal({ ruleUuid: 'rule-r', verdict: 'refutes' })],
+          }),
+        }),
+        inputs: [{ ...continuationWith('rule-r'), severity: 'critical' }],
+      });
+
+      expect(results[0]).toMatchObject({
+        written: false,
+        reason: 'rule_held_by_event',
+        existing_event_id: 'holder-a',
+      });
+      expect(writtenDocs()).toHaveLength(0);
     });
 
     it('writes an item with no rules without reading holders', async () => {

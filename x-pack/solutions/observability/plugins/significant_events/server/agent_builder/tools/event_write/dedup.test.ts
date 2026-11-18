@@ -681,10 +681,8 @@ describe('findRulesHeldByOtherEvents', () => {
     ).toEqual([{ rule_uuid: 'rule-a', event_id: 'holder' }]);
   });
 
-  it('exempts a rule the live target already holds, whatever its verdict', () => {
-    const latest = liveEvent('target', [makeSignal('rule-a', 'refutes')], {
-      status: 'recovering',
-    });
+  it('exempts a rule the live target already confirms, so an existing duplicate can still write', () => {
+    const latest = liveEvent('target', [makeSignal('rule-a')]);
 
     expect(
       findRulesHeldByOtherEvents({
@@ -693,6 +691,63 @@ describe('findRulesHeldByOtherEvents', () => {
       })
     ).toBeUndefined();
   });
+
+  it.each<[DetectionSignal['verdict'], DetectionSignal['verdict']]>([
+    ['refutes', 'refutes'],
+    ['refutes', 'off_topic'],
+    ['off_topic', 'inconclusive'],
+    ['inconclusive', 'refutes'],
+  ])(
+    'exempts a rule the live target holds as %s for a write whose verdict is %s',
+    (targetVerdict, incomingVerdict) => {
+      const latest = liveEvent('target', [makeSignal('rule-a', targetVerdict)], {
+        status: 'recovering',
+      });
+
+      expect(
+        findRulesHeldByOtherEvents({
+          candidate: candidateFor({ ruleUuids: ['rule-a'], latest, verdict: incomingVerdict }),
+          liveEvents: [liveEvent('holder', [makeSignal('rule-a')])],
+        })
+      ).toBeUndefined();
+    }
+  );
+
+  it('holds a write that carries a confirming and a refuting row for a rule the target holds as refutes', () => {
+    const latest = liveEvent('target', [makeSignal('rule-a', 'refutes')], {
+      status: 'recovering',
+    });
+    const candidate = candidateFor({ ruleUuids: ['rule-a'], latest });
+
+    expect(
+      findRulesHeldByOtherEvents({
+        candidate: {
+          ...candidate,
+          input: {
+            ...candidate.input,
+            signals: [makeSignal('rule-a', 'refutes'), makeSignal('rule-a', 'confirms')],
+          },
+        },
+        liveEvents: [liveEvent('holder', [makeSignal('rule-a')])],
+      })?.heldRules
+    ).toEqual([{ rule_uuid: 'rule-a', event_id: 'holder' }]);
+  });
+
+  it.each<DetectionSignal['verdict']>(['refutes', 'off_topic', 'inconclusive'])(
+    'holds a write that confirms a rule the live target holds as %s while another event confirms it',
+    (verdict) => {
+      const latest = liveEvent('target', [makeSignal('rule-a', verdict)], {
+        status: 'recovering',
+      });
+
+      expect(
+        findRulesHeldByOtherEvents({
+          candidate: candidateFor({ ruleUuids: ['rule-a'], latest }),
+          liveEvents: [liveEvent('holder', [makeSignal('rule-a')])],
+        })?.heldRules
+      ).toEqual([{ rule_uuid: 'rule-a', event_id: 'holder' }]);
+    }
+  );
 
   it('gives a closed series no exemption for the rules it holds', () => {
     const latest = liveEvent('target', [makeSignal('rule-a')], { status: 'inactive' });

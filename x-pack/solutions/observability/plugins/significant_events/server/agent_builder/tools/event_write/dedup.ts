@@ -388,7 +388,8 @@ const isLiveStatus = (status: SignificantEvent['status']): boolean =>
  * It returns the item's incoming rules that another live event confirms, whatever the incoming
  * verdict is, or `undefined` when none is. A rule counts only when the holder's latest verdict for
  * it is `confirms`, so `refutes`, `off_topic` and `inconclusive` holders never block. A live target
- * is exempt for the rules it already holds, so an existing duplicate can still write; a closed
+ * is exempt for the rules it already confirms, so an existing duplicate can still write, and for the
+ * rules it holds without confirming as long as the incoming verdict does not confirm them; a closed
  * series being reopened is not live and has no exemption. The newest holder is `holder`.
  */
 export const findRulesHeldByOtherEvents = ({
@@ -399,11 +400,16 @@ export const findRulesHeldByOtherEvents = ({
   liveEvents: SignificantEvent[];
 }): RulesHeldByOtherEvents | undefined => {
   const { latest, eventId, input } = candidate;
-  const alreadyInTarget =
-    latest !== undefined && isLiveStatus(latest.status)
-      ? new Set(extractRuleUuids(latest.signals))
-      : new Set<string>();
-  const checked = extractRuleUuids(input.signals).filter((uuid) => !alreadyInTarget.has(uuid));
+  const targetSignals =
+    latest !== undefined && isLiveStatus(latest.status) ? latest.signals : undefined;
+  const targetHolds = new Set(extractRuleUuids(targetSignals));
+  const targetConfirms = new Set(extractRuleUuids(confirmedSignals(targetSignals)));
+  const incomingConfirms = new Set(extractRuleUuids(confirmedSignals(input.signals)));
+  // A write that confirms a rule the target only holds non-confirming would make it a second
+  // confirmed member, so only the target's own confirmed rules and non-confirming writes are exempt.
+  const isExempt = (uuid: string): boolean =>
+    targetConfirms.has(uuid) || (targetHolds.has(uuid) && !incomingConfirms.has(uuid));
+  const checked = extractRuleUuids(input.signals).filter((uuid) => !isExempt(uuid));
   if (checked.length === 0) return undefined;
 
   const others = liveEvents

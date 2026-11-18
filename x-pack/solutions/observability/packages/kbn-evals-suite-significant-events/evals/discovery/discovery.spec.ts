@@ -700,8 +700,9 @@ evaluate.describe(
                         // Seed a SignificantEvent per produced event so event_search resolves it
                         // as an active episode in subsequent cycles.
                         const seedVerdict = i === 0 ? run.seedVerdict : undefined;
-                        // A second live event on the same topology that holds no rule, so a topology
-                        // search returns an event that does not hold the detection's rule.
+                        // A second live event on the same topology that confirms a different rule. It
+                        // passes the prompt's confirming-signal pre-check, so a topology search returns
+                        // an eligible event that does not hold the detection's rule.
                         const competingEvents: SignificantEvent[] =
                           i === 0 && run.seedCompetingEvent
                             ? significantEvents
@@ -711,7 +712,22 @@ evaluate.describe(
                                   ...event,
                                   event_id: `${event.event_id}-competing`,
                                   title: 'Competing event on the same topology',
-                                  signals: [],
+                                  signals: (event.signals ?? []).flatMap((signal) =>
+                                    signal.type === 'detection'
+                                      ? [
+                                          {
+                                            ...signal,
+                                            verdict: 'confirms' as const,
+                                            metadata: {
+                                              ...signal.metadata,
+                                              rule_uuid: `${
+                                                signal.metadata.rule_uuid ?? 'rule'
+                                              }-competing`,
+                                            },
+                                          },
+                                        ]
+                                      : []
+                                  ),
                                 }))
                             : [];
                         for (const event of [...significantEvents, ...competingEvents]) {
