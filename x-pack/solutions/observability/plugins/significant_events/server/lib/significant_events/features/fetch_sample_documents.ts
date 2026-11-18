@@ -9,9 +9,11 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
-import { getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { getEsqlColumnSchema, getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
 import { conditionToESQLFilterAst } from '@kbn/nightshift-shared';
+import { type Condition, getConditionFields } from '@kbn/streamlang';
+import { partition } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import { timeoutSignal } from '@kbn/std';
 import { getEntityFilters } from './get_entity_filters';
@@ -169,9 +171,6 @@ export async function fetchSampleDocuments({
 
     const entityFilteredSize = Math.round(size * entityFilteredRatio);
     const diverseSize = Math.round(size * diverseRatio);
-    const whereCondition = conditionToESQLFilterAst({
-      and: entityFilters.map((filter) => ({ not: filter })),
-    });
 
     const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
       await Promise.all([
@@ -185,14 +184,14 @@ export async function fetchSampleDocuments({
             },
           },
           () =>
-            getSampleDocumentsEsql({
+            fetchEntityFilteredDocuments({
               esClient,
               index,
               start,
               end,
               sampleSize: entityFilteredSize,
-              whereCondition,
-              unmappedFields: 'LOAD',
+              entityFilters,
+              logger,
               abortSignal: samplingSignal,
             })
         ).catch((err) => {
@@ -257,7 +256,10 @@ export async function fetchSampleDocuments({
       () =>
         `Sampled ${documents.length} documents (${
           bucketCounts['entity-filtered']
-        } entity-filtered, ${bucketCounts.diverse} diverse, ${bucketCounts.random} random). ${
+        } entity-filtered, ${bucketCounts.diverse} diverse of which ${Math.max(
+          0,
+          bucketCounts.diverse - diverseSize
+        )} backfilled unused entity-filtered slots, ${bucketCounts.random} random). ${
           entityFilters.length
         } entity filters applied (${
           features.length - entityFilters.length
@@ -275,6 +277,72 @@ export async function fetchSampleDocuments({
   }
 }
 
+/**
+ * Runs the entity-filtered arm on the filters the source can evaluate from its mappings.
+ *
+ * Deliberately no `SET unmapped_fields="LOAD"`: when a filter field is unmapped in some
+ * backing indices, LOAD parses `_source` for every document there, and the arm's count
+ * query does it over the whole window. On wildcard logs sources that turned a 3 s query
+ * into a timeout that only surfaced as a warning (elastic/nightshift-program#2273).
+ * Filters on fields with no mapping at all are skipped; the diverse and random arms backfill.
+ */
+async function fetchEntityFilteredDocuments({
+  esClient,
+  index,
+  start,
+  end,
+  sampleSize,
+  entityFilters,
+  logger,
+  abortSignal,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  start: number;
+  end: number;
+  sampleSize: number;
+  entityFilters: Condition[];
+  logger: Logger;
+  abortSignal: AbortSignal;
+}): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
+  // No time range here: a request-level range narrows the lookup to indices with data in the
+  // window, while the sampling query's WHERE does not, so the two could disagree on a column's type.
+  const columns = await getEsqlColumnSchema({ esClient, index, signal: abortSignal });
+  // A type conflict across backing indices surfaces as `unsupported`, which no comparison accepts.
+  const queryableFields = new Set(
+    columns.filter(({ type }) => type !== 'unsupported').map(({ name }) => name)
+  );
+  const [queryableFilters, skippedFilters] = partition(entityFilters, (filter) =>
+    getConditionFields(filter).every(({ name }) => queryableFields.has(name))
+  );
+
+  if (skippedFilters.length > 0) {
+    logger.debug(
+      () =>
+        `Skipped ${
+          skippedFilters.length
+        } entity filters on fields that are unmapped or have conflicting types in [${index}]:\n${JSON.stringify(
+          skippedFilters
+        )}`
+    );
+  }
+  if (queryableFilters.length === 0) {
+    return EMPTY_SAMPLE;
+  }
+
+  return getSampleDocumentsEsql({
+    esClient,
+    index,
+    start,
+    end,
+    sampleSize,
+    whereCondition: conditionToESQLFilterAst({
+      and: queryableFilters.map((filter) => ({ not: filter })),
+    }),
+    abortSignal,
+  });
+}
+
 function mergeDocuments(
   prioritizedHits: Array<{
     hits: Array<SearchHit<Record<string, unknown>>>;
@@ -290,17 +358,18 @@ function mergeDocuments(
   const result: Array<SearchHit<Record<string, unknown>>> = [];
   const bucketCounts = { 'entity-filtered': 0, diverse: 0, random: 0 };
 
-  for (let i = 0; i < prioritizedHits.length; i++) {
-    const { hits, cap, label } = prioritizedHits[i];
-    let added = 0;
+  // Cumulative: a bucket's unused slots carry to the next.
+  let limit = 0;
+  for (const { hits, cap, label } of prioritizedHits) {
+    limit = Math.min(limit + cap, totalSize);
+    const countBefore = result.length;
     for (const hit of hits) {
-      if (added >= cap || result.length >= totalSize) break;
+      if (result.length >= limit) break;
       if (hit._id && seen.has(hit._id)) continue;
       if (hit._id) seen.add(hit._id);
       result.push(hit);
-      added++;
     }
-    bucketCounts[label] = added;
+    bucketCounts[label] = result.length - countBefore;
   }
 
   return { documents: result, bucketCounts };

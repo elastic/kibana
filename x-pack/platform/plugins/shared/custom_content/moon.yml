@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/i18n-react'
   - '@kbn/inspector-plugin'
+  - '@kbn/unified-tabs'
 tags:
   - plugin
   - prod

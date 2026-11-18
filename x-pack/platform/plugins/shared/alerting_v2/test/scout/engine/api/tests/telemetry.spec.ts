@@ -291,5 +291,19 @@ apiTest.describe('Alerting V2 Telemetry', { tag: testData.API_ENGINE_TAG }, () =
     expectDistribution(state.dispatcher_throttle_ratio_per_policy_24hr);
     expect(state.dispatcher_uncovered_rules_count_24hr).toBeGreaterThanOrEqual(0);
     expect(typeof state.dispatcher_dispatch_failures_count_by_reason_24hr).toBe('object');
+    const throttledByStrategy =
+      state.dispatcher_action_groups_throttled_count_by_strategy_24hr ?? {};
+    for (const [strategy, count] of Object.entries(throttledByStrategy)) {
+      expect(['on_status_change', 'per_status_interval', 'time_interval', 'every_time']).toContain(
+        strategy
+      );
+      expect(count).toBeGreaterThanOrEqual(0);
+    }
+    const byGroupingMode =
+      state.dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr ?? {};
+    for (const [mode, distribution] of Object.entries(byGroupingMode)) {
+      expect(['per_alert', 'per_field', 'all']).toContain(mode);
+      expectDistribution(distribution);
+    }
   });
 });

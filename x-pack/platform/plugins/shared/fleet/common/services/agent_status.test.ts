@@ -7,7 +7,61 @@
 
 import type { Agent } from '../types';
 
-import { isStuckInUpdating } from './agent_status';
+import { hasPendingUnenroll, isStuckInUpdating } from './agent_status';
+
+describe('hasPendingUnenroll', () => {
+  it('should return false if no unenroll was ever started', () => {
+    const agent = {
+      active: true,
+      status: 'online',
+    } as Agent;
+
+    expect(hasPendingUnenroll(agent)).toBe(false);
+  });
+
+  it('should return true if an unenroll was started and not acknowledged', () => {
+    const agent = {
+      active: true,
+      status: 'unenrolling',
+      unenrollment_started_at: '2022-11-21T12:27:24Z',
+    } as Agent;
+
+    expect(hasPendingUnenroll(agent)).toBe(true);
+  });
+
+  it('should return false if the unenroll was acknowledged', () => {
+    const agent = {
+      active: false,
+      status: 'unenrolled',
+      unenrollment_started_at: '2022-11-21T12:27:24Z',
+      unenrolled_at: '2022-11-21T12:29:11Z',
+    } as Agent;
+
+    expect(hasPendingUnenroll(agent)).toBe(false);
+  });
+
+  it('should return false if the agent was force unenrolled', () => {
+    // A forced unenroll writes `unenrolled_at` without ever starting one.
+    const agent = {
+      active: false,
+      status: 'unenrolled',
+      unenrolled_at: '2022-11-21T12:29:11Z',
+    } as Agent;
+
+    expect(hasPendingUnenroll(agent)).toBe(false);
+  });
+
+  it('should not read agent.status, which masks a stalled unenroll', () => {
+    // An agent sent an UNENROLL that then goes dark reports `offline`, not `unenrolling`.
+    const agent = {
+      active: true,
+      status: 'offline',
+      unenrollment_started_at: '2022-11-21T12:27:24Z',
+    } as Agent;
+
+    expect(hasPendingUnenroll(agent)).toBe(true);
+  });
+});
 
 describe('isStuckInUpdating', () => {
   it('should return true if agent is active and in failed upgrade state', () => {

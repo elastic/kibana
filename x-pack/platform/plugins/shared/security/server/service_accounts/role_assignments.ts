@@ -9,11 +9,12 @@ import type { CloudProjectContext } from './types';
 import type { UiamRoleAssignments } from '../uiam';
 
 /**
- * The Cloud role UIAM defines for granting application roles across an organization and nothing
+ * The Cloud role UIAM defines for granting application roles on projects of one type and nothing
  * else. Sending any other `role_id` would also ask for control-plane privileges, which a Kibana
  * workload has no use for.
  */
-const ORGANIZATION_APPLICATION_ONLY_ROLE = 'organization-application-only';
+const getApplicationOnlyRoleId = (projectType: CloudProjectContext['projectType']): string =>
+  `${projectType}-application-only`;
 
 /**
  * Builds the role assignments Kibana sends when creating a UIAM service account with the given
@@ -21,23 +22,24 @@ const ORGANIZATION_APPLICATION_ONLY_ROLE = 'organization-application-only';
  * assignments as its ceiling, so the account can never do more than its creator could when it
  * was created.
  *
- * The assignment is scoped to the whole organization, not to this project alone, so the account
- * can take part in cross-project search the way a user with the same roles would. On each linked
- * project, of any type, the named roles apply if they exist there, and the creator's own reach
- * there is the ceiling. A per-project selection would become project-scoped entries alongside
- * this one.
+ * The assignment covers this project only. The roles do not apply on linked projects, so the
+ * account does not take part in cross-project search.
  */
 export const buildRoleAssignments = (
-  { organizationId }: Pick<CloudProjectContext, 'organizationId'>,
+  { organizationId, projectId, projectType }: CloudProjectContext,
   roles: string[]
 ): UiamRoleAssignments => ({
-  organization: [
-    {
-      role_id: ORGANIZATION_APPLICATION_ONLY_ROLE,
-      organization_id: organizationId,
-      application_roles: roles,
-    },
-  ],
+  project: {
+    [projectType]: [
+      {
+        role_id: getApplicationOnlyRoleId(projectType),
+        organization_id: organizationId,
+        all: false,
+        project_ids: [projectId],
+        application_roles: roles,
+      },
+    ],
+  },
 });
 
 /**

@@ -9,6 +9,7 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
+import { isRecentInvestigationStart } from './recent_investigation_start';
 import { useTriggerEventInvestigation } from './use_trigger_event_investigation';
 
 jest.mock('../../hooks/use_kibana');
@@ -25,7 +26,10 @@ const renderTrigger = (onTriggered?: jest.Mock) => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  return renderHook(() => useTriggerEventInvestigation({ onTriggered }), { wrapper });
+  return {
+    queryClient,
+    ...renderHook(() => useTriggerEventInvestigation({ onTriggered }), { wrapper }),
+  };
 };
 
 describe('useTriggerEventInvestigation', () => {
@@ -42,7 +46,8 @@ describe('useTriggerEventInvestigation', () => {
 
   it("starts an investigation of the event's alert, keyed by its episode id", async () => {
     const onTriggered = jest.fn();
-    const { result } = renderTrigger(onTriggered);
+    const { result, queryClient } = renderTrigger(onTriggered);
+    expect(isRecentInvestigationStart(queryClient)).toBe(false);
 
     act(() => result.current.triggerInvestigation({ event_id: 'evt-1', episode_id: 'episode-1' }));
 
@@ -52,6 +57,8 @@ describe('useTriggerEventInvestigation', () => {
         episode_id: 'episode-1',
       })
     );
+    // The events list polls from now on, so the row moves to "In progress" without a reload.
+    expect(isRecentInvestigationStart(queryClient)).toBe(true);
     expect(investigationsFetch).toHaveBeenCalledTimes(1);
     expect(investigationsFetch).toHaveBeenCalledWith('POST /internal/nightshift/investigations', {
       params: { body: { subject: { type: 'alert', ids: ['episode-1'] } } },

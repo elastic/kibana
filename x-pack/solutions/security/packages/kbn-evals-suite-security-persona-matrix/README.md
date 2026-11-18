@@ -25,6 +25,15 @@ designed for multi-model comparison and persona-driven reporting.
 - **Criteria** — generic rubric (Relevance, Clarity, Accuracy, Completeness)
 - **Trace-based** — input tokens, output tokens, cached tokens, tool calls, latency
 
+## Rubric judges (opt-in)
+
+Set `PERSONA_MATRIX_RUBRIC_JUDGE=1` to add two 1–10 LLM judges that use the published benchmark's rubric:
+
+- **PersonaRubric** — grades each persona example against its category's expected tools and red flags plus the shared scenario ground truth. An answer with no tool call is capped at the rubric's no-tool-call ceiling. The judge also sees the workflow YAML read back from the conversation, and when the trace is too large it keeps every call's tool id, keeps params whole while they fit, and shortens tool results evenly first.
+- **AdAxesRubric** — grades Attack Discovery output on coverage, accuracy, correlation and actionability, with an overall score. The judge sees only the discoveries and the 8-intrusion answer key, not the alerts, so accuracy is graded against the key; indicators the key does not cover count as unverifiable, not fabricated.
+
+Each one adds a judge call per example, so both are off by default. A malformed verdict gets one retry, so an example costs at most 2 judge calls. A failed or malformed verdict scores `unavailable` and never drops the example. Every result that reached the judge records `judge_calls` in its metadata, so a retried verdict can be told apart; an example skipped before any call (nothing to grade, or over the size cap) has none. Both judges are listed in `excludeEvaluators` in the matrix configs: their scores are stored per example but are not part of the cell means.
+
 ## Fixtures
 
 - **Chrysalis alerts** — seeds 3 sample alerts before evaluation, cleaned up after
@@ -38,7 +47,7 @@ With reasoning models, a single tool result can embed megabytes (for example a s
 | `PERSONA_MATRIX_JUDGE_RESULT_CAP` | Max chars kept per tool result. Larger results are replaced by a stub that states the original size, followed by the first N chars. |
 | `PERSONA_MATRIX_JUDGE_PAYLOAD_BUDGET` | Max chars for the whole judge payload. After the per-result cap, the largest remaining results are trimmed first, each keeping the longest prefix that lets the whole payload fit. If the untouched fields (answer, errors, params) alone exceed the budget, the payload is still over it; that is logged and recorded as `overBudget` in the trim report. |
 
-Only the judge-facing copy is trimmed; all three judges (correctness, groundedness, Criteria) read the same capped copy. Tool ids, params, the final answer, errors and the trace id are untouched, and the stored transcript stays verbatim. Every trim is logged and recorded as `judgePayloadTrim` on the example output, so a trimmed score is distinguishable from an untrimmed one. Scores from runs with a cap set are not strictly comparable with uncapped runs.
+Only the judge-facing copy is trimmed; every persona judge (correctness, groundedness, Criteria and, when enabled, PersonaRubric) reads the same capped copy. Tool ids, params, the final answer, errors and the trace id are untouched, and the stored transcript stays verbatim. Every trim is logged and recorded as `judgePayloadTrim` on the example output, so a trimmed score is distinguishable from an untrimmed one. Scores from runs with a cap set are not strictly comparable with uncapped runs.
 
 ## Seed profiles (`SEED_PROFILE`)
 

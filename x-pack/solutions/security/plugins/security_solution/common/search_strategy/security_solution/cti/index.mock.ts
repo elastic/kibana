@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type { EventEnrichmentRequestOptions } from '../../../api/search_strategy';
 
@@ -145,4 +146,17 @@ export const buildEventEnrichmentMock = (
   'threat.indicator.first_seen': ['2021-05-28T18:33:29.000Z'],
   'threat.indicator.type': ['file'],
   ...overrides,
+});
+
+/**
+ * Hard-coded copy of `IOC_TRANSFORM_SOURCE_QUERY`, so tests fail if the query changes unintentionally.
+ */
+export const buildTransformSourceExclusionMock = (): estypes.QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      { term: { 'labels.is_ioc_transform_source': 'true' } },
+      { term: { 'labels.is_transform_source': 'true' } },
+    ],
+    minimum_should_match: 1,
+  },
 });

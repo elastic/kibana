@@ -12,6 +12,10 @@ xpack.nightshiftSources.enabled: true
 xpack.nightshift_investigations.enabled: true
 xpack.agenticInvestigations.enabled: true
 xpack.proposals.enabled: true
+# Nightshift online evals: in-process judges only, no Evals app, routes or privileges.
+# The mode stays at its `runtime` default rather than being set here: this tier file loads
+# after a project's own config, so setting it would override projects that need `full`.
+xpack.evals.enabled: true
 
 xpack.features.overrides:
   infrastructure.name: 'Infrastructure'

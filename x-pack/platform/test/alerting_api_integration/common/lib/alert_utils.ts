@@ -884,8 +884,8 @@ function getAlwaysFiringRuleWithSystemAction(reference: string) {
          * connector adapter. Setting it here it will lead to a 400 error by the
          * rules API as only the connector adapter can set the injected property.
          *
-         * Adapter: x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
-         * Connector type: x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/action_types.ts
+         * Adapter: x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/connector_adapters.ts
+         * Connector type: x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/action_types.ts
          */
         params: { myParam: 'param from rule action', index: ES_TEST_INDEX_NAME, reference },
       },

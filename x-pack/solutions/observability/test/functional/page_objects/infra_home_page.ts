@@ -91,8 +91,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async getFirstNode() {
-      const nodes = await testSubjects.findAll('nodeContainer');
-      return nodes[0];
+      return testSubjects.find('nodeContainer');
     },
 
     async clickOnFirstNode() {

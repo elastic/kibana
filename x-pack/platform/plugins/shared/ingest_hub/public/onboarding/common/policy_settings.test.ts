@@ -12,6 +12,9 @@ import {
   getPolicySettingsUpdate,
   getPolicyVarSettings,
   getPolicyVarSettingsUpdate,
+  getReroutePermissions,
+  parseCustomFields,
+  serializeCustomFields,
   supportsPolicySetting,
 } from './policy_settings';
 
@@ -22,9 +25,16 @@ describe('policy settings', () => {
     expect(supportsPolicySetting('output_id', 'ecf')).toBe(false);
   });
 
+  it('applies the condition to agent-based deploys only', () => {
+    expect(supportsPolicySetting('condition', 'agent_based')).toBe(true);
+    expect(supportsPolicySetting('condition', 'managed_integration')).toBe(false);
+    expect(supportsPolicySetting('condition', 'ecf')).toBe(false);
+  });
+
   describe('compactPolicySettings', () => {
     it('leaves out empty settings', () => {
       expect(compactPolicySettings({ output_id: '' })).toEqual({});
+      expect(compactPolicySettings({ condition: '   ' })).toEqual({});
       expect(compactPolicySettings({ output_id: 'logstash-1' })).toEqual({
         output_id: 'logstash-1',
       });
@@ -39,6 +49,16 @@ describe('policy settings', () => {
       });
       expect(getPolicySettings({ output_id: '' }, 'agent_based')).toEqual({});
       expect(getPolicySettings({ output_id: 'logstash-1' }, 'managed_integration')).toEqual({});
+    });
+
+    it('gives a new agent-based policy the condition, unless it is blank', () => {
+      const condition = '${host.platform} == "linux"';
+      expect(getPolicySettings({ output_id: 'logstash-1', condition }, 'agent_based')).toEqual({
+        output_id: 'logstash-1',
+        condition,
+      });
+      expect(getPolicySettings({ condition: '  ' }, 'agent_based')).toEqual({});
+      expect(getPolicySettings({ condition }, 'managed_integration')).toEqual({});
     });
 
     it('leaves out a value of the wrong type read back from the saved object', () => {
@@ -61,6 +81,12 @@ describe('policy settings', () => {
     it('clears a setting set back to empty', () => {
       expect(getPolicySettingsUpdate({ output_id: '' }, 'agent_based')).toEqual({
         output_id: null,
+      });
+    });
+
+    it('clears a condition set back to blank', () => {
+      expect(getPolicySettingsUpdate({ condition: ' ' }, 'agent_based')).toEqual({
+        condition: null,
       });
     });
 
@@ -91,8 +117,29 @@ describe('policy settings', () => {
       ).toBe(true);
     });
 
+    it('is dirty when the condition changed', () => {
+      expect(
+        detectPolicySettingsDrift(
+          { condition: '${host.platform} == "linux"' },
+          { condition: '${host.platform} == "windows"' },
+          'agent_based'
+        )
+      ).toBe(true);
+      expect(
+        detectPolicySettingsDrift({}, { condition: '${host.platform} == "linux"' }, 'agent_based')
+      ).toBe(true);
+      expect(
+        detectPolicySettingsDrift(
+          { condition: '${host.platform} == "linux"' },
+          {},
+          'managed_integration'
+        )
+      ).toBe(false);
+    });
+
     it('treats an empty setting and an absent one alike', () => {
       expect(detectPolicySettingsDrift({ output_id: '' }, undefined, 'agent_based')).toBe(false);
+      expect(detectPolicySettingsDrift({ condition: '  ' }, undefined, 'agent_based')).toBe(false);
     });
 
     it('ignores a value of the wrong type, as the deploy does', () => {
@@ -175,6 +222,233 @@ describe('policy settings', () => {
         )
       ).toBe(true);
       expect(detectPolicySettingsDrift({ proxy_url: 'http://p:1' }, {}, 'ecf')).toBe(false);
+    });
+  });
+
+  describe('additional_datastreams_permissions (a list)', () => {
+    const key = 'additional_datastreams_permissions';
+
+    it('applies to agent-based and managed integration deploys, not ECF', () => {
+      expect(supportsPolicySetting(key, 'agent_based')).toBe(true);
+      expect(supportsPolicySetting(key, 'managed_integration')).toBe(true);
+      expect(supportsPolicySetting(key, 'ecf')).toBe(false);
+    });
+
+    it('is a top-level package policy field, sent to a new policy of both methods', () => {
+      const settings = { [key]: ['logs-a-default', 'metrics-b-default'] };
+      expect(getPolicySettings(settings, 'agent_based')).toEqual(settings);
+      expect(getPolicySettings(settings, 'managed_integration')).toEqual(settings);
+      expect(getPolicyVarSettings(settings, 'agent_based')).toEqual({});
+      expect(getPolicySettings(settings, 'ecf')).toEqual({});
+    });
+
+    it('trims entries and drops blank and repeated ones', () => {
+      expect(
+        compactPolicySettings({ [key]: [' logs-a-default ', '', 'logs-a-default', '  '] })
+      ).toEqual({ [key]: ['logs-a-default'] });
+    });
+
+    it('reads the list for Step 2, and anything else as no permissions', () => {
+      expect(getReroutePermissions({ [key]: ['logs-a-default'] })).toEqual(['logs-a-default']);
+      expect(getReroutePermissions({})).toEqual([]);
+      expect(getReroutePermissions(undefined)).toEqual([]);
+      // The saved object is an open record, so an API write can leave these.
+      expect(getReroutePermissions({ [key]: 'logs-a-default' })).toEqual([]);
+      expect(getReroutePermissions({ [key]: ['logs-a-default', 1] })).toEqual([]);
+      expect(getReroutePermissions({ [key]: null })).toEqual([]);
+    });
+
+    it('treats an empty list as empty', () => {
+      expect(compactPolicySettings({ [key]: [] })).toEqual({});
+      expect(getPolicySettings({ [key]: [] }, 'agent_based')).toEqual({});
+    });
+
+    it('leaves out a value of the wrong type read back from the saved object', () => {
+      expect(getPolicySettings({ [key]: 'logs-a-default' }, 'agent_based')).toEqual({});
+      expect(getPolicySettings({ [key]: ['logs-a-default', 1] }, 'agent_based')).toEqual({});
+    });
+
+    it('clears the list on update with an empty list, which both Fleet APIs accept', () => {
+      expect(getPolicySettingsUpdate({ [key]: [] }, 'agent_based')).toEqual({ [key]: [] });
+      expect(getPolicySettingsUpdate({ [key]: [] }, 'managed_integration')).toEqual({ [key]: [] });
+    });
+
+    it('sends the chosen list on update, and leaves it alone when never set', () => {
+      expect(getPolicySettingsUpdate({ [key]: [' logs-a-default '] }, 'agent_based')).toEqual({
+        [key]: ['logs-a-default'],
+      });
+      expect(getPolicySettingsUpdate({}, 'managed_integration')).toEqual({});
+    });
+
+    it('marks the deployment dirty when only the list changed', () => {
+      expect(detectPolicySettingsDrift({ [key]: ['logs-a-default'] }, {}, 'agent_based')).toBe(
+        true
+      );
+      expect(
+        detectPolicySettingsDrift(
+          { [key]: [] },
+          { [key]: ['logs-a-default'] },
+          'managed_integration'
+        )
+      ).toBe(true);
+    });
+
+    it('ignores the order of the list, but still sends it in the order chosen', () => {
+      expect(
+        detectPolicySettingsDrift(
+          { [key]: ['logs-b-default', 'logs-a-default'] },
+          { [key]: ['logs-a-default', 'logs-b-default'] },
+          'agent_based'
+        )
+      ).toBe(false);
+      expect(
+        detectPolicySettingsDrift(
+          { [key]: ['logs-b-default', 'logs-a-default'] },
+          { [key]: ['logs-a-default'] },
+          'agent_based'
+        )
+      ).toBe(true);
+      expect(
+        getPolicySettingsUpdate({ [key]: ['logs-b-default', 'logs-a-default'] }, 'agent_based')
+      ).toEqual({ [key]: ['logs-b-default', 'logs-a-default'] });
+    });
+
+    it('is not dirty for the same list entered differently, or an empty list and none', () => {
+      expect(
+        detectPolicySettingsDrift(
+          { [key]: [' logs-a-default ', 'logs-a-default'] },
+          { [key]: ['logs-a-default'] },
+          'agent_based'
+        )
+      ).toBe(false);
+      expect(detectPolicySettingsDrift({ [key]: [] }, {}, 'agent_based')).toBe(false);
+      expect(detectPolicySettingsDrift({ [key]: ['logs-a-default'] }, {}, 'ecf')).toBe(false);
+    });
+  });
+
+  describe('global_data_tags (custom fields, stored as JSON text)', () => {
+    const key = 'global_data_tags';
+    const fields = [
+      { name: 'team', value: 'platform' },
+      { name: 'env', value: 'prod' },
+    ];
+    const stored = serializeCustomFields(fields);
+
+    it('applies to managed integration deploys only', () => {
+      expect(supportsPolicySetting(key, 'managed_integration')).toBe(true);
+      expect(supportsPolicySetting(key, 'agent_based')).toBe(false);
+      expect(supportsPolicySetting(key, 'ecf')).toBe(false);
+    });
+
+    it('is sent to a new managed integration policy as the list Fleet takes', () => {
+      expect(getPolicySettings({ [key]: stored }, 'managed_integration')).toEqual({
+        [key]: fields,
+      });
+      expect(getPolicyVarSettings({ [key]: stored }, 'managed_integration')).toEqual({});
+    });
+
+    it('sends a value of digits only as a number, like Fleet, and keeps the stored text', () => {
+      const numeric = serializeCustomFields([
+        { name: 'priority', value: '1' },
+        { name: 'code', value: '007' },
+        { name: 'build', value: '1a' },
+        { name: 'version', value: '1.5' },
+        { name: 'neg', value: '-1' },
+      ]);
+      expect(getPolicySettings({ [key]: numeric }, 'managed_integration')).toEqual({
+        [key]: [
+          { name: 'priority', value: 1 },
+          { name: 'code', value: 7 },
+          { name: 'build', value: '1a' },
+          { name: 'version', value: '1.5' },
+          { name: 'neg', value: '-1' },
+        ],
+      });
+      expect(getPolicySettingsUpdate({ [key]: numeric }, 'managed_integration')[key]).toEqual(
+        (getPolicySettings({ [key]: numeric }, 'managed_integration') as Record<string, unknown>)[
+          key
+        ]
+      );
+      expect(compactPolicySettings({ [key]: numeric })).toEqual({ [key]: numeric });
+    });
+
+    it('keeps a number too large to hold exactly as text instead of losing digits', () => {
+      const big = '12345678901234567890';
+      expect(
+        getPolicySettings(
+          { [key]: serializeCustomFields([{ name: 'id', value: big }]) },
+          'managed_integration'
+        )
+      ).toEqual({ [key]: [{ name: 'id', value: big }] });
+    });
+
+    it('is not sent to agent-based or ECF, which would reject or ignore it', () => {
+      expect(getPolicySettings({ [key]: stored }, 'agent_based')).toEqual({});
+      expect(getPolicySettings({ [key]: stored }, 'ecf')).toEqual({});
+    });
+
+    it('trims names and values and drops blank rows', () => {
+      const messy = serializeCustomFields([
+        { name: ' team ', value: ' platform ' },
+        { name: '', value: '' },
+      ]);
+      expect(compactPolicySettings({ [key]: messy })).toEqual({
+        [key]: serializeCustomFields([{ name: 'team', value: 'platform' }]),
+      });
+    });
+
+    it('treats an empty list and only blank rows as empty', () => {
+      expect(compactPolicySettings({ [key]: '[]' })).toEqual({});
+      expect(
+        compactPolicySettings({ [key]: serializeCustomFields([{ name: ' ', value: '' }]) })
+      ).toEqual({});
+      expect(getPolicySettings({ [key]: '[]' }, 'managed_integration')).toEqual({});
+    });
+
+    it('leaves out a value that is not a list of fields, read back from the saved object', () => {
+      expect(getPolicySettings({ [key]: 'not json' }, 'managed_integration')).toEqual({});
+      expect(getPolicySettings({ [key]: '{"name":"a"}' }, 'managed_integration')).toEqual({});
+      expect(getPolicySettings({ [key]: '[{"name":"a"}]' }, 'managed_integration')).toEqual({});
+      expect(getPolicySettings({ [key]: ['a=b'] }, 'managed_integration')).toEqual({});
+    });
+
+    it('reads the fields for Step 2, and anything else as none', () => {
+      expect(parseCustomFields(stored)).toEqual(fields);
+      expect(parseCustomFields(undefined)).toEqual([]);
+      expect(parseCustomFields('not json')).toEqual([]);
+      expect(parseCustomFields('[1]')).toEqual([]);
+    });
+
+    it('clears the fields on update with an empty list', () => {
+      expect(getPolicySettingsUpdate({ [key]: '[]' }, 'managed_integration')).toEqual({
+        [key]: [],
+      });
+    });
+
+    it('sends the chosen fields on update, and leaves them alone when never set', () => {
+      expect(getPolicySettingsUpdate({ [key]: stored }, 'managed_integration')).toEqual({
+        [key]: fields,
+      });
+      expect(getPolicySettingsUpdate({}, 'managed_integration')).toEqual({});
+      expect(getPolicySettingsUpdate({ [key]: stored }, 'agent_based')).toEqual({});
+    });
+
+    it('marks the deployment dirty when only the fields changed', () => {
+      expect(detectPolicySettingsDrift({ [key]: stored }, {}, 'managed_integration')).toBe(true);
+      expect(
+        detectPolicySettingsDrift({ [key]: '[]' }, { [key]: stored }, 'managed_integration')
+      ).toBe(true);
+    });
+
+    it('does not mark it dirty for a blank row or untrimmed text, or for another method', () => {
+      expect(
+        detectPolicySettingsDrift(
+          { [key]: serializeCustomFields([...fields, { name: '', value: '' }]) },
+          { [key]: stored },
+          'managed_integration'
+        )
+      ).toBe(false);
+      expect(detectPolicySettingsDrift({ [key]: stored }, {}, 'agent_based')).toBe(false);
     });
   });
 });

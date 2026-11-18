@@ -66,3 +66,5 @@ export {
   updateTestOAuthConnection,
   deleteTestOAuthConnection,
 } from './cosmos_db_seeder';
+
+export { exchangeUiamServiceAccountToken } from './exchange_uiam_service_account_token';

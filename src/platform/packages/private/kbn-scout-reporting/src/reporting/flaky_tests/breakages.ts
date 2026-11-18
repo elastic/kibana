@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { scopeKey, type JudgedScope } from './judged_scope';
+
 /** One build of a test in one setup. */
 export interface SetupBuild {
   /** Unique across pipelines, unlike the build number. */
@@ -20,16 +22,17 @@ export interface SetupBuild {
   failedAt?: Date;
 }
 
-/** A test's builds in one setup (pipeline, config file and Scout target) on one branch, oldest first. */
-export interface SetupBuilds {
-  branch: string;
+/**
+ * A test's builds in one setup (pipeline, config file and Scout target) on one branch, oldest
+ * first, with the pipeline when it is judged on its own.
+ */
+export interface SetupBuilds extends JudgedScope {
   setup: string;
   builds: SetupBuild[];
 }
 
 /** Failed builds in a row, one after the other in a setup, too many to be chance. */
-export interface Breakage {
-  branch: string;
+export interface Breakage extends JudgedScope {
   setup: string;
   builds: SetupBuild[];
   /** Whether it runs up to the newest build of the setup: the test is broken right now. */
@@ -55,7 +58,7 @@ export const chanceOfFailingInARow = (builds: number, rate: number, length: numb
  * builds that a test failing at random as often would show less than `MAX_BREAKAGE_CHANCE` of
  * the time. A test that failed in every build is broken whatever the chance.
  */
-export const findBreakages = ({ branch, setup, builds }: SetupBuilds): Breakage[] => {
+export const findBreakages = ({ branch, pipeline, setup, builds }: SetupBuilds): Breakage[] => {
   const rate = builds.filter((build) => build.failed).length / builds.length;
   const breakages: Breakage[] = [];
   let start = 0;
@@ -71,6 +74,7 @@ export const findBreakages = ({ branch, setup, builds }: SetupBuilds): Breakage[
     ) {
       breakages.push({
         branch,
+        ...(pipeline ? { pipeline } : {}),
         setup,
         builds: builds.slice(start, end),
         ongoing: end === builds.length,
@@ -81,32 +85,36 @@ export const findBreakages = ({ branch, setup, builds }: SetupBuilds): Breakage[
   return breakages;
 };
 
-/** How many builds ran a test on a branch, and how many of them failed it. */
-export interface BranchCounts {
-  branch: string;
+/**
+ * How many builds ran a test on a branch, of a pipeline when it is judged on its own, and how many
+ * of them failed it.
+ */
+export interface BranchCounts extends JudgedScope {
   builds: number;
   failedBuilds: number;
 }
 
 /**
  * The per-branch counts leaving out the breakages. Every build in a breakage failed the test, so
- * each one is taken off both counts of its branch, once however many setups it broke in.
+ * each one is taken off both counts of its branch, once however many setups it broke in. A
+ * breakage in a pipeline judged on its own is taken off that pipeline's counts.
  */
-export const branchCountsWithout = (
-  counts: readonly BranchCounts[],
+export const branchCountsWithout = <T extends BranchCounts>(
+  counts: readonly T[],
   breakages: readonly Breakage[]
-): BranchCounts[] => {
-  const excludedByBranch = new Map<string, Set<string>>();
-  for (const { branch, builds } of breakages) {
-    const excluded = excludedByBranch.get(branch) ?? new Set();
-    for (const { buildId } of builds) {
+): T[] => {
+  const excludedByScope = new Map<string, Set<string>>();
+  for (const breakage of breakages) {
+    const key = scopeKey(breakage);
+    const excluded = excludedByScope.get(key) ?? new Set();
+    for (const { buildId } of breakage.builds) {
       excluded.add(buildId);
     }
-    excludedByBranch.set(branch, excluded);
+    excludedByScope.set(key, excluded);
   }
-  return counts.map(({ branch, builds, failedBuilds }) => {
-    const excluded = excludedByBranch.get(branch)?.size ?? 0;
-    return { branch, builds: builds - excluded, failedBuilds: failedBuilds - excluded };
+  return counts.map((row) => {
+    const excluded = excludedByScope.get(scopeKey(row))?.size ?? 0;
+    return { ...row, builds: row.builds - excluded, failedBuilds: row.failedBuilds - excluded };
   });
 };
 
