@@ -653,7 +653,8 @@ describe('useInvestigateAlert', () => {
     await act(() => result.current.handleInvestigate());
 
     const text = renderDangerText();
-    expect(text).toHaveTextContent(DAILY_LIMIT_MESSAGE);
+    // The server's fragment ends as a sentence, like the lines after it.
+    expect(text).toHaveTextContent(`${DAILY_LIMIT_MESSAGE}.`);
     expect(text).toHaveTextContent('The limit resets in 5 hours.');
     expect(text).not.toHaveTextContent('Ask an admin');
     expect(screen.getByRole('link', { name: 'Change limits' })).toHaveAttribute(

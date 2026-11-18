@@ -31,7 +31,18 @@ export function DailyLimitReachedText({
   return (
     <>
       <EuiText size="s">
-        <p>{message}</p>
+        <p>
+          {/* The server's refusal is a sentence fragment; the lines below are full sentences. */}
+          {message.endsWith('.') ? (
+            message
+          ) : (
+            <FormattedMessage
+              id="xpack.observability.alerts.investigationLimitReachedSentence"
+              defaultMessage="{message}."
+              values={{ message }}
+            />
+          )}
+        </p>
         <p>
           {blockedUntilChanged ? (
             <FormattedMessage
