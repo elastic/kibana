@@ -376,22 +376,32 @@ describe('eventsWriteBulkHandler, severity resolved from investigations', () => 
     expect(resolveSeverities).not.toHaveBeenCalled();
   });
 
-  it("stores the investigation's severity when a closed event reopens", async () => {
-    const resolveSeverities = jest.fn().mockResolvedValue(new Map([['checkout-stable', 'medium']]));
+  it.each<[string, Partial<EventsWriteInput>]>([
+    ['an explicit active status', { status: 'active' }],
+    [
+      'a breach the lifecycle turns into active',
+      { status: undefined, signals: [makeDetectionSignal({ ruleUuid: 'rule-new' })] },
+    ],
+  ])(
+    "rates a closed event that reopens from the writer's own evidence, not its old investigation (%s)",
+    async (_name, input) => {
+      const resolveSeverities = jest
+        .fn()
+        .mockResolvedValue(new Map([['checkout-stable', 'medium']]));
 
-    await eventsWriteBulkHandler({
-      eventSearchClient: clientWith(
-        makeStoredEvent('checkout-stable', { severity: 'low', status: 'inactive' })
-      ),
-      inputs: [{ ...baseInput, event_id: 'checkout-stable', status: 'active', severity: 'high' }],
-      resolveSeverities,
-    });
+      await eventsWriteBulkHandler({
+        eventSearchClient: clientWith(
+          makeStoredEvent('checkout-stable', { severity: 'low', status: 'inactive' })
+        ),
+        inputs: [{ ...baseInput, event_id: 'checkout-stable', severity: 'high', ...input }],
+        resolveSeverities,
+      });
 
-    expect(resolveSeverities).toHaveBeenCalledWith([
-      { eventId: 'checkout-stable', storedSeverity: 'low' },
-    ]);
-    expect(writtenDocs()[0].severity).toBe('medium');
-  });
+      // A reopen is a new episode with no investigation yet; the closed episode's one is not its own.
+      expect(resolveSeverities).not.toHaveBeenCalled();
+      expect(writtenDocs()[0].severity).toBe('high');
+    }
+  );
 
   it("stores the severity a person set on the investigation when the stored copy and the agent's still hold the old one", async () => {
     const [result] = await write(
