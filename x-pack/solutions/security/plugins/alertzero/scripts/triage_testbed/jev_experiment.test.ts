@@ -9,15 +9,22 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import {
+  ANALYSIS_BATCH_SIZE,
   WORDING_NAMES,
   alertInput,
   areaUnderCurve,
+  batchInput,
+  batchQuestions,
   buildJevReport,
   makeDecide,
+  makeDecideBatch,
+  planBatches,
   readSample,
   scoreAlerts,
+  scoreAlertsInBatches,
   type AlertTruthRecord,
   type Decide,
+  type DecideBatch,
   type SampleAlert,
   type ScoredAlert,
   type WordingName,
@@ -39,7 +46,6 @@ const scored = (
   truth,
   keyed: 'repeated',
   scores: { choice: [score, score], benign: [score, score], indicator: [score, score] },
-  latenciesMs: [100, 200],
   ...extra,
 });
 
@@ -223,9 +229,9 @@ describe('buildJevReport: segments and references', () => {
       alerts: [
         scored('s', truthOf('false_positive'), 0, {
           scores: { choice: [0.1, 0.3], benign: [0.5, 0.5], indicator: [0.9, 0.9] },
-          latenciesMs: [100, 300],
         }),
       ],
+      callLatenciesMs: [100, 300],
     });
 
     expect(report.repeatSpread.p95).toBe(0.2);
@@ -309,7 +315,7 @@ describe('scoreAlerts', () => {
       if (wording === 'indicator') throw new Error('the model answered 429');
       return { score: 0.2, ms: 5 };
     };
-    const pause = jest.fn(async () => undefined);
+    const pause = jest.fn(async (_ms: number) => undefined);
 
     const {
       scored: result,
@@ -441,5 +447,248 @@ describe('readSample', () => {
 
     fs.writeFileSync(path.join(folder, 'truth.ndjson'), '');
     await expect(readSample(folder)).rejects.toThrow('has no truth record');
+  });
+});
+
+describe('batches, as Alert Analysis sends them', () => {
+  const doc = (rule: string, minute: number, extra: Record<string, unknown> = {}) => ({
+    '@timestamp': `2026-11-15T10:${String(minute).padStart(2, '0')}:00.000Z`,
+    'kibana.alert.rule.uuid': rule,
+    'kibana.alert.rule.name': `Rule ${rule}`,
+    process: { executable: `C:\\${rule}.exe`, command_line: `${rule}.exe -x ${minute}` },
+    ...extra,
+  });
+  const sample = (id: string, rule: string, minute: number): SampleAlert => ({
+    id,
+    doc: doc(rule, minute),
+    truth: truthOf('false_positive'),
+  });
+
+  it('uses the batch size of the analysis workflow', () => {
+    expect(ANALYSIS_BATCH_SIZE).toBe(50);
+  });
+
+  describe('planBatches', () => {
+    it('makes one batch for each rule, in the order in which the rules first appear, with the alerts oldest first and then by id', () => {
+      const batches = planBatches([
+        sample('b-2', 'B', 5),
+        sample('a-1', 'A', 9),
+        sample('b-1', 'B', 5),
+        sample('a-2', 'A', 1),
+      ]);
+
+      expect(batches.map((batch) => batch.map(({ id }) => id))).toEqual([
+        ['b-1', 'b-2'],
+        ['a-2', 'a-1'],
+      ]);
+    });
+
+    it('splits a rule into consecutive batches of at most the batch size, and keeps the order', () => {
+      const alerts = Array.from({ length: 5 }, (_unused, i) => sample(`a-${i}`, 'A', i));
+
+      const batches = planBatches(alerts, 2);
+
+      expect(batches.map((batch) => batch.map(({ id }) => id))).toEqual([
+        ['a-0', 'a-1'],
+        ['a-2', 'a-3'],
+        ['a-4'],
+      ]);
+    });
+
+    it('never mixes two rules in one batch', () => {
+      const batches = planBatches([sample('a', 'A', 1), sample('b', 'B', 1)], 50);
+
+      expect(batches).toHaveLength(2);
+    });
+  });
+
+  describe('batchInput and batchQuestions', () => {
+    it('numbers the alerts under the name of the rule, without repeating the "Alert:" header of a single alert', () => {
+      const input = batchInput([doc('A', 1), doc('A', 2)]);
+
+      expect(input.startsWith('Rule: Rule A\n\nAlert 1:\n')).toBe(true);
+      expect(input).toContain('\n\nAlert 2:\n');
+      expect(input).not.toContain('Alert:\n');
+      expect(input).toContain('A.exe -x 1');
+      expect(input).toContain('A.exe -x 2');
+    });
+
+    it('asks one question for each alert, names the alert in it and keeps the wording of the question', () => {
+      const questions = batchQuestions('choice', 3);
+
+      expect(Object.keys(questions)).toEqual(['alert_1', 'alert_2', 'alert_3']);
+      expect(questions.alert_2.instructions.startsWith('Judge Alert 2 only')).toBe(true);
+      expect(questions.alert_2).toMatchObject({ type: 'choice' });
+      expect(batchQuestions('indicator', 1).alert_1).toMatchObject({ type: 'predicate' });
+    });
+  });
+
+  describe('scoreAlertsInBatches', () => {
+    const alerts = [
+      sample('a-1', 'A', 1),
+      sample('a-2', 'A', 2),
+      sample('a-3', 'A', 3),
+      sample('b-1', 'B', 1),
+    ];
+    const noPause = async (_ms: number) => undefined;
+
+    it('makes one call for each batch, wording and repeat, and gives each alert the score of its position', async () => {
+      const decideBatch = jest.fn<ReturnType<DecideBatch>, Parameters<DecideBatch>>(
+        async (_input, _wording, count) => ({
+          scores: Array.from({ length: count }, (_unused, index) => (index + 1) / 10),
+          ms: 7,
+        })
+      );
+
+      const result = await scoreAlertsInBatches({
+        alerts,
+        decideBatch,
+        repeats: 2,
+        concurrency: 2,
+        pause: noPause,
+      });
+
+      expect(decideBatch).toHaveBeenCalledTimes(2 * WORDING_NAMES.length * 2);
+      expect(result).toMatchObject({ calls: 12, failedCalls: 0 });
+      expect(result.callLatenciesMs).toHaveLength(12);
+      const byId = Object.fromEntries(result.scored.map(({ id, scores }) => [id, scores.choice]));
+      expect(byId).toEqual({
+        'a-1': [0.1, 0.1],
+        'a-2': [0.2, 0.2],
+        'a-3': [0.3, 0.3],
+        'b-1': [0.1, 0.1],
+      });
+    });
+
+    it('sends the alerts of a batch in one text, in the order of the batch', async () => {
+      const inputs: string[] = [];
+      const decideBatch: DecideBatch = async (input, _wording, count) => {
+        inputs.push(input);
+        return { scores: Array(count).fill(0.5), ms: 1 };
+      };
+
+      await scoreAlertsInBatches({
+        alerts: [sample('late', 'A', 9), sample('early', 'A', 1)],
+        decideBatch,
+        repeats: 1,
+        concurrency: 1,
+        pause: noPause,
+      });
+
+      expect(inputs[0].indexOf('A.exe -x 1')).toBeLessThan(inputs[0].indexOf('A.exe -x 9'));
+    });
+
+    it('marks the keys like the single mode does', async () => {
+      const result = await scoreAlertsInBatches({
+        alerts,
+        decideBatch: async (_input, _wording, count) => ({ scores: Array(count).fill(0.5), ms: 1 }),
+        repeats: 1,
+        concurrency: 1,
+        pause: noPause,
+      });
+
+      expect(
+        result.scored.every(({ keyed }) => ['single', 'repeated', 'none'].includes(keyed))
+      ).toBe(true);
+    });
+
+    it('leaves every alert of a batch without a score when its call fails three times, and counts one failed call', async () => {
+      const decideBatch: DecideBatch = async (_input, wording, count) => {
+        if (wording === 'indicator') throw new Error('the model answered 429');
+        return { scores: Array(count).fill(0.2), ms: 1 };
+      };
+
+      const result = await scoreAlertsInBatches({
+        alerts: [sample('a-1', 'A', 1), sample('a-2', 'A', 2)],
+        decideBatch,
+        repeats: 1,
+        concurrency: 1,
+        pause: noPause,
+      });
+
+      expect(result.failedCalls).toBe(1);
+      expect(result.failureReasons).toEqual({ 'indicator: the model answered 429': 1 });
+      expect(result.scored.map(({ scores }) => scores.indicator)).toEqual([[], []]);
+      expect(result.scored.map(({ scores }) => scores.choice)).toEqual([[0.2], [0.2]]);
+    });
+
+    it('counts an alert that the model did not answer, and leaves only that alert without a score', async () => {
+      const decideBatch: DecideBatch = async (_input, _wording, count) => ({
+        scores: Array.from({ length: count }, (_unused, index) => (index === 1 ? undefined : 0.4)),
+        ms: 1,
+      });
+
+      const result = await scoreAlertsInBatches({
+        alerts: [sample('a-1', 'A', 1), sample('a-2', 'A', 2), sample('a-3', 'A', 3)],
+        decideBatch,
+        repeats: 1,
+        concurrency: 1,
+        pause: noPause,
+      });
+
+      expect(result.failureReasons['choice: no answer for an alert in the batch']).toBe(1);
+      const byId = Object.fromEntries(result.scored.map(({ id, scores }) => [id, scores.choice]));
+      expect(byId).toEqual({ 'a-1': [0.4], 'a-2': [], 'a-3': [0.4] });
+    });
+  });
+
+  describe('makeDecideBatch', () => {
+    const withFetch = async (response: unknown, run: (mock: jest.Mock) => Promise<void>) => {
+      const mock = jest.fn(async () => ({ ok: true, status: 200, json: async () => response }));
+      const original = global.fetch;
+      global.fetch = mock as unknown as typeof fetch;
+      try {
+        await run(mock);
+      } finally {
+        global.fetch = original;
+      }
+    };
+    const decideBatch = makeDecideBatch({
+      url: 'https://qa.example',
+      apiKey: 'k',
+      endpoint: '.jev',
+    });
+
+    it('sends all alerts and one question for each in one request, and reads each answer by its name', async () => {
+      const answers = {
+        alert_1: { probabilities: [{ value: 'true_positive', probability: 0.9 }] },
+        alert_3: { probabilities: [{ value: 'true_positive', probability: 0.1 }] },
+      };
+
+      await withFetch({ decision: { answers } }, async (mock) => {
+        const { scores } = await decideBatch('the batch', 'choice', 3);
+
+        expect(scores).toEqual([0.9, undefined, 0.1]);
+        expect(mock).toHaveBeenCalledTimes(1);
+        const [, init] = mock.mock.calls[0] as unknown as [string, { body: string }];
+        const body = JSON.parse(init.body);
+        expect(body.input).toBe('the batch');
+        expect(Object.keys(body.task_settings.questions)).toEqual([
+          'alert_1',
+          'alert_2',
+          'alert_3',
+        ]);
+      });
+    });
+
+    it('turns a "benign" answer into an attack score, like the single mode', async () => {
+      await withFetch({ decision: { answers: { alert_1: { probability: 0.8 } } } }, async () => {
+        const { scores } = await decideBatch('x', 'benign', 1);
+
+        expect(scores[0]).toBeCloseTo(0.2);
+      });
+    });
+  });
+
+  it('reports the mode, the calls, the time of a call and the score of each alert', () => {
+    const report = buildJevReport({
+      alerts: [scored('a', truthOf('false_positive'), 0.2)],
+      mode: 'batch',
+      calls: 6,
+      callLatenciesMs: [100, 400],
+    });
+
+    expect(report).toMatchObject({ mode: 'batch', calls: 6, latencyMs: { p95: 400 } });
+    expect(report.alertScores.a).toEqual({ choice: 0.2, benign: 0.2, indicator: 0.2 });
   });
 });

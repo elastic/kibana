@@ -23,7 +23,11 @@
  * Usage:
  *   QA_ES_URL=... QA_ES_API_KEY=... node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/jev_experiment_cli.js \
  *     --data <sample folder> --out <report.json> [--es http://localhost:9200 --haiku-window <from>,<to> ...] \
- *     [--endpoint .typesafe-jev-1.13_decision] [--repeats 2] [--concurrency 4] [--limit N] [--dry-run | --confirm-data-ok]
+ *     [--endpoint .typesafe-jev-1.13_decision] [--repeats 2] [--concurrency 4] [--limit N] [--batch [--batch-size 50]] \
+ *     [--dry-run | --confirm-data-ok]
+ *
+ * With `--batch` the alerts go to the model the way Alert Analysis sends them to a language model: one call for each batch of
+ * one rule (at most 50 alerts, in order of time), one question for each alert. Without it, each alert is its own call.
  */
 
 import fs from 'fs';
@@ -168,7 +172,6 @@ export interface ScoredAlert {
   /** `none` for an alert with no strict key, `single` for the only alert of its key in the sample, `repeated` otherwise. */
   keyed: 'none' | 'single' | 'repeated';
   scores: Readonly<Record<WordingName, readonly number[]>>;
-  latenciesMs: readonly number[];
 }
 
 const round = (value: number): number => Number(value.toFixed(4));
@@ -294,7 +297,11 @@ const segmentReport = (
 };
 
 export interface JevReport {
+  /** `single`: one call for each alert. `batch`: one call for each batch of a rule, as Alert Analysis sends them. */
+  mode: 'single' | 'batch';
   alerts: number;
+  /** Calls to the model, with the retries not counted. */
+  calls: number;
   failedCalls: number;
   /** Failed calls by wording and reason. */
   failureReasons: Record<string, number>;
@@ -308,7 +315,10 @@ export interface JevReport {
       harmlessHashUpdates: { alerts: number; meanScore: number | null; inBenignLane: number };
     }
   >;
+  /** The time of one call. In batch mode a call holds a whole batch. */
   latencyMs: { p50: number | null; p95: number | null };
+  /** The mean attack score of each alert in each wording, so that two runs can be compared alert by alert. */
+  alertScores: Record<string, Partial<Record<WordingName, number>>>;
   /** Absolute difference between the two repeats of one alert and one wording. */
   repeatSpread: { p50: number | null; p95: number | null };
   /** Highest minus lowest mean score over the three wordings of one alert. */
@@ -333,11 +343,17 @@ export const buildJevReport = ({
   alerts,
   failedCalls = 0,
   failureReasons = {},
+  mode = 'single',
+  calls = 0,
+  callLatenciesMs = [],
   haiku = {},
 }: {
   alerts: readonly ScoredAlert[];
   failedCalls?: number;
   failureReasons?: Record<string, number>;
+  mode?: JevReport['mode'];
+  calls?: number;
+  callLatenciesMs?: readonly number[];
   /** Verdicts that Haiku gave to the same alerts, by name of the run. */
   haiku?: Readonly<Record<string, ReadonlyMap<string, string>>>;
 }): JevReport => {
@@ -402,13 +418,23 @@ export const buildJevReport = ({
     })
   ) as JevReport['perWording'];
 
-  const latencies = scoredAlerts.flatMap(({ latenciesMs }) => latenciesMs);
   return {
+    mode,
     alerts: scoredAlerts.length,
+    calls,
     failedCalls,
     failureReasons,
     perWording,
-    latencyMs: { p50: percentile(latencies, 0.5), p95: percentile(latencies, 0.95) },
+    latencyMs: {
+      p50: percentile(callLatenciesMs, 0.5),
+      p95: percentile(callLatenciesMs, 0.95),
+    },
+    alertScores: Object.fromEntries(
+      scoredAlerts.map(({ id, scores }) => [
+        id,
+        Object.fromEntries(WORDING_NAMES.map((name) => [name, round(mean(scores[name]))])),
+      ])
+    ),
     repeatSpread: {
       p50: percentile(repeatDifferences, 0.5),
       p95: percentile(repeatDifferences, 0.95),
@@ -429,33 +455,135 @@ export interface Decision {
 /** Asks the model one wording about one alert. A port, so that tests need no network. */
 export type Decide = (input: string, wording: WordingName) => Promise<Decision>;
 
-export const makeDecide = ({
-  url,
-  apiKey,
-  endpoint,
-}: {
+/**
+ * Asks the model one wording about every alert of a batch in one call. It returns the score of each alert by position, and
+ * `undefined` for an alert that the model did not answer.
+ */
+export type DecideBatch = (
+  input: string,
+  wording: WordingName,
+  count: number
+) => Promise<{ scores: Array<number | undefined>; ms: number }>;
+
+interface Connection {
   url: string;
   apiKey: string;
   endpoint: string;
-}): Decide => {
+}
+
+/** One call to the decision endpoint. Throws, without the key in the message, when the model does not answer. */
+const postDecision = async (
+  { url, apiKey, endpoint }: Connection,
+  input: string,
+  questions: Record<string, Question>
+): Promise<{ answers: Record<string, Answer>; ms: number }> => {
+  const started = Date.now();
+  const response = await fetch(`${url}/_inference/decision/${encodeURIComponent(endpoint)}`, {
+    method: 'POST',
+    headers: { Authorization: `ApiKey ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ input, task_settings: { questions } }),
+  });
+  const ms = Date.now() - started;
+  const body = (await response.json().catch(() => ({}))) as {
+    decision?: { answers?: Record<string, Answer> };
+  };
+  if (!response.ok) throw new Error(`the model answered ${response.status}`);
+  return { answers: body.decision?.answers ?? {}, ms };
+};
+
+export const makeDecide = (connection: Connection): Decide => {
   return async (input, wording) => {
     const { question, attackScore } = WORDINGS[wording];
-    const started = Date.now();
-    const response = await fetch(`${url}/_inference/decision/${encodeURIComponent(endpoint)}`, {
-      method: 'POST',
-      headers: { Authorization: `ApiKey ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input, task_settings: { questions: { [wording]: question } } }),
-    });
-    const ms = Date.now() - started;
-    const body = (await response.json().catch(() => ({}))) as {
-      decision?: { answers?: Record<string, Answer> };
-    };
-    if (!response.ok) throw new Error(`the model answered ${response.status}`);
-    const answer = body.decision?.answers?.[wording];
+    const { answers, ms } = await postDecision(connection, input, { [wording]: question });
+    const answer = answers[wording];
     const score = answer === undefined ? undefined : attackScore(answer);
     if (typeof score !== 'number') throw new Error('the answer has no probability');
     return { score, ms };
   };
+};
+
+export const makeDecideBatch = (connection: Connection): DecideBatch => {
+  return async (input, wording, count) => {
+    const { attackScore } = WORDINGS[wording];
+    const { answers, ms } = await postDecision(connection, input, batchQuestions(wording, count));
+    const scores = Array.from({ length: count }, (_unused, index) => {
+      const answer = answers[batchQuestionName(index)];
+      return answer === undefined ? undefined : attackScore(answer);
+    });
+    return { scores, ms };
+  };
+};
+
+// ---------------------------------------------------------------------------------------------
+// Batches, as Alert Analysis makes them
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Alerts per call to the model. The value of `consts.batch_size` in `alert_analysis_workflow.yaml`: Alert Analysis makes one
+ * call per batch of at most this many alerts, and a rule that has more alerts is split into consecutive batches.
+ */
+export const ANALYSIS_BATCH_SIZE = 50;
+
+export const batchQuestionName = (index: number): string => `alert_${index + 1}`;
+
+/**
+ * The Jev endpoint takes one text and answers each question once about that text, so a batch holds all its alerts in one
+ * text and asks one question per alert. Each question names its alert and tells the model to ignore the others.
+ */
+export const batchQuestions = (wording: WordingName, count: number): Record<string, Question> =>
+  Object.fromEntries(
+    Array.from({ length: count }, (_unused, index) => {
+      const { question } = WORDINGS[wording];
+      return [
+        batchQuestionName(index),
+        {
+          ...question,
+          instructions: `Judge Alert ${index + 1} only, and ignore the other alerts in the input. ${
+            question.instructions
+          }`,
+        },
+      ];
+    })
+  );
+
+const ruleOf = (doc: Doc): string =>
+  String(
+    getField(doc as Record<string, unknown>, 'kibana.alert.rule.uuid') ??
+      getField(doc as Record<string, unknown>, 'kibana.alert.rule.name') ??
+      'unknown'
+  );
+
+/** The input of a batch: the rule name, then the numbered alerts, each with the fields that Alert Analysis shows. */
+export const batchInput = (docs: readonly Doc[]): string => {
+  const name = asText(getField(docs[0] as Record<string, unknown>, 'kibana.alert.rule.name'));
+  const blocks = docs.map(
+    (doc, index) => `Alert ${index + 1}:\n${alertInput(doc).replace(/^Alert:\n/, '')}`
+  );
+  return `${name === undefined ? '' : `Rule: ${name}\n\n`}${blocks.join('\n\n')}`;
+};
+
+/**
+ * The batches of a sample, as the Alert Triage worker plans them: one batch per rule, in the order of the alerts (oldest first,
+ * then by id), split into consecutive batches of at most `size` alerts.
+ */
+export const planBatches = (
+  alerts: readonly SampleAlert[],
+  size: number = ANALYSIS_BATCH_SIZE
+): SampleAlert[][] => {
+  const byRule = new Map<string, SampleAlert[]>();
+  for (const alert of alerts) {
+    byRule.set(ruleOf(alert.doc), [...(byRule.get(ruleOf(alert.doc)) ?? []), alert]);
+  }
+  const timestampOf = ({ doc }: SampleAlert): number =>
+    Date.parse(String(getField(doc as Record<string, unknown>, '@timestamp') ?? '')) || 0;
+  return [...byRule.values()].flatMap((group) => {
+    const ordered = [...group].sort(
+      (a, b) => timestampOf(a) - timestampOf(b) || a.id.localeCompare(b.id)
+    );
+    return Array.from({ length: Math.ceil(ordered.length / size) }, (_unused, index) =>
+      ordered.slice(index * size, (index + 1) * size)
+    );
+  });
 };
 
 const pool = async <T>(
@@ -482,78 +610,146 @@ export interface SampleAlert {
 const RETRY_ATTEMPTS = 3;
 const RETRY_PAUSE_MS = 1000;
 
-/**
- * Scores every alert: each wording `repeats` times. A call is tried up to three times, with a pause that grows. A call that
- * still fails is counted by wording and reason, and its score is left out. `pause` is a port, so that tests do not wait.
- */
-export const scoreAlerts = async ({
-  alerts,
-  decide,
-  repeats,
-  concurrency,
-  pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
-}: {
-  alerts: readonly SampleAlert[];
-  decide: Decide;
-  repeats: number;
-  concurrency: number;
-  pause?: (ms: number) => Promise<void>;
-}): Promise<{
+export interface ScoringResult {
   scored: ScoredAlert[];
+  /** Calls to the model, and how many of them failed. */
+  calls: number;
   failedCalls: number;
   failureReasons: Record<string, number>;
-}> => {
-  const keyCounts = new Map<string, number>();
+  /** The time of each call that worked. */
+  callLatenciesMs: number[];
+}
+
+interface ScoringOptions {
+  alerts: readonly SampleAlert[];
+  repeats: number;
+  concurrency: number;
+  /** A port, so that tests do not wait. */
+  pause?: (ms: number) => Promise<void>;
+}
+
+const defaultPause = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Whether the key of an alert is shared with another alert of the sample. */
+const keyedOf = (alerts: readonly SampleAlert[]): Map<string, ScoredAlert['keyed']> => {
   const keyOf = (doc: Doc): string | undefined =>
     buildPatternKeys(doc as Record<string, unknown>).strict;
+  const counts = new Map<string, number>();
   for (const { doc } of alerts) {
     const key = keyOf(doc);
-    if (key !== undefined) keyCounts.set(key, (keyCounts.get(key) ?? 0) + 1);
+    if (key !== undefined) counts.set(key, (counts.get(key) ?? 0) + 1);
   }
-  let failedCalls = 0;
-  const failureReasons: Record<string, number> = {};
-  const callWithRetry = async (
-    input: string,
-    wording: WordingName
-  ): Promise<Decision | undefined> => {
+  return new Map(
+    alerts.map(({ id, doc }) => {
+      const key = keyOf(doc);
+      return [id, key === undefined ? 'none' : (counts.get(key) ?? 0) > 1 ? 'repeated' : 'single'];
+    })
+  );
+};
+
+/**
+ * Tries a call up to three times, with a pause that grows. A call that still fails is counted by wording and reason, and
+ * the caller gets `undefined`.
+ */
+const makeRetrier = (pause: (ms: number) => Promise<void>) => {
+  const tally = { calls: 0, failedCalls: 0, failureReasons: {} as Record<string, number> };
+  const withRetry = async <T>(
+    wording: WordingName,
+    call: () => Promise<T>
+  ): Promise<T | undefined> => {
+    tally.calls++;
     let reason = '';
     for (let attempt = 1; attempt <= RETRY_ATTEMPTS; attempt++) {
       try {
-        return await decide(input, wording);
+        return await call();
       } catch (error) {
         reason = error instanceof Error ? error.message : 'unknown error';
         if (attempt < RETRY_ATTEMPTS) await pause(RETRY_PAUSE_MS * attempt);
       }
     }
-    failedCalls++;
+    tally.failedCalls++;
     const label = `${wording}: ${reason}`;
-    failureReasons[label] = (failureReasons[label] ?? 0) + 1;
+    tally.failureReasons[label] = (tally.failureReasons[label] ?? 0) + 1;
     return undefined;
   };
+  return { tally, withRetry };
+};
 
+const emptyScores = (): Record<WordingName, number[]> => ({
+  choice: [],
+  benign: [],
+  indicator: [],
+});
+
+/** Scores every alert on its own: each wording `repeats` times, one call for each. */
+export const scoreAlerts = async ({
+  alerts,
+  decide,
+  repeats,
+  concurrency,
+  pause = defaultPause,
+}: ScoringOptions & { decide: Decide }): Promise<ScoringResult> => {
+  const keyed = keyedOf(alerts);
+  const { tally, withRetry } = makeRetrier(pause);
+  const callLatenciesMs: number[] = [];
   const scored: ScoredAlert[] = [];
   await pool(alerts, concurrency, async ({ id, doc, truth }) => {
     const input = alertInput(doc);
-    const scores: Record<WordingName, number[]> = { choice: [], benign: [], indicator: [] };
-    const latenciesMs: number[] = [];
+    const scores = emptyScores();
     for (const wording of WORDING_NAMES) {
       for (let repeat = 0; repeat < repeats; repeat++) {
-        const decision = await callWithRetry(input, wording);
+        const decision = await withRetry(wording, () => decide(input, wording));
         if (decision === undefined) continue;
         scores[wording].push(decision.score);
-        latenciesMs.push(decision.ms);
+        callLatenciesMs.push(decision.ms);
       }
     }
-    const key = keyOf(doc);
-    scored.push({
-      id,
-      truth,
-      keyed: key === undefined ? 'none' : (keyCounts.get(key) ?? 0) > 1 ? 'repeated' : 'single',
-      scores,
-      latenciesMs,
+    scored.push({ id, truth, keyed: keyed.get(id) ?? 'none', scores });
+  });
+  return { scored, ...tally, callLatenciesMs };
+};
+
+/**
+ * Scores the alerts in batches, as Alert Analysis sends them: one call holds a batch of one rule (at most `batchSize`
+ * alerts) and asks one question per alert. Each wording is asked `repeats` times for each batch. A failed call leaves all
+ * alerts of the batch without a score for that repeat. An alert that the model does not answer is counted in the failure reasons.
+ */
+export const scoreAlertsInBatches = async ({
+  alerts,
+  decideBatch,
+  repeats,
+  concurrency,
+  batchSize = ANALYSIS_BATCH_SIZE,
+  pause = defaultPause,
+}: ScoringOptions & { decideBatch: DecideBatch; batchSize?: number }): Promise<ScoringResult> => {
+  const keyed = keyedOf(alerts);
+  const { tally, withRetry } = makeRetrier(pause);
+  const callLatenciesMs: number[] = [];
+  const scored: ScoredAlert[] = [];
+  await pool(planBatches(alerts, batchSize), concurrency, async (batch) => {
+    const input = batchInput(batch.map(({ doc }) => doc));
+    const scores = batch.map(emptyScores);
+    for (const wording of WORDING_NAMES) {
+      for (let repeat = 0; repeat < repeats; repeat++) {
+        const result = await withRetry(wording, () => decideBatch(input, wording, batch.length));
+        if (result === undefined) continue;
+        callLatenciesMs.push(result.ms);
+        result.scores.forEach((score, index) => {
+          if (score === undefined) {
+            const label = `${wording}: no answer for an alert in the batch`;
+            tally.failureReasons[label] = (tally.failureReasons[label] ?? 0) + 1;
+          } else {
+            scores[index][wording].push(score);
+          }
+        });
+      }
+    }
+    batch.forEach(({ id, truth }, index) => {
+      scored.push({ id, truth, keyed: keyed.get(id) ?? 'none', scores: scores[index] });
     });
   });
-  return { scored, failedCalls, failureReasons };
+  return { scored, ...tally, callLatenciesMs };
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -629,7 +825,15 @@ export const readHaikuVerdicts = async (
   return verdicts;
 };
 
-type ValueFlagKey = 'data' | 'out' | 'es' | 'endpoint' | 'repeats' | 'concurrency' | 'limit';
+type ValueFlagKey =
+  | 'data'
+  | 'out'
+  | 'es'
+  | 'endpoint'
+  | 'repeats'
+  | 'concurrency'
+  | 'limit'
+  | 'batchSize';
 
 export const main = async (): Promise<void> => {
   const args: Partial<Record<ValueFlagKey, string>> = {
@@ -646,14 +850,17 @@ export const main = async (): Promise<void> => {
     '--repeats': 'repeats',
     '--concurrency': 'concurrency',
     '--limit': 'limit',
+    '--batch-size': 'batchSize',
   };
   const haikuWindows: string[] = [];
   let dryRun = false;
   let confirmed = false;
+  let batch = false;
   for (let i = 2; i < process.argv.length; i++) {
     const arg = process.argv[i];
     if (arg === '--dry-run') dryRun = true;
     else if (arg === '--confirm-data-ok') confirmed = true;
+    else if (arg === '--batch') batch = true;
     else if (arg === '--haiku-window') haikuWindows.push(process.argv[++i]);
     else if (flags[arg]) args[flags[arg]] = process.argv[++i];
     else throw new Error(`unknown argument ${arg}`);
@@ -665,10 +872,21 @@ export const main = async (): Promise<void> => {
 
   const all = await readSample(data);
   const alerts = limit === undefined ? all : all.slice(0, limit);
-  const calls = alerts.length * WORDING_NAMES.length * repeats;
-  process.stdout.write(`${alerts.length} alerts, ${calls} calls to ${endpoint}\n`);
+  const batchSize = args.batchSize === undefined ? ANALYSIS_BATCH_SIZE : Number(args.batchSize);
+  const batches = planBatches(alerts, batchSize);
+  const calls = (batch ? batches.length : alerts.length) * WORDING_NAMES.length * repeats;
+  process.stdout.write(
+    `${alerts.length} alerts, ${
+      batch ? `${batches.length} batches of at most ${batchSize}, ` : ''
+    }${calls} calls to ${endpoint}\n`
+  );
   if (dryRun || !confirmed) {
-    process.stdout.write(`Example input of the first alert:\n${alertInput(alerts[0].doc)}\n`);
+    const [example] = batch ? batches : [[alerts[0]]];
+    process.stdout.write(
+      `Example input of the first ${batch ? 'batch' : 'alert'}:\n${
+        batch ? batchInput(example.map(({ doc }) => doc)) : alertInput(example[0].doc)
+      }\n`
+    );
     process.stdout.write(
       dryRun
         ? 'Dry run: nothing was sent.\n'
@@ -690,13 +908,32 @@ export const main = async (): Promise<void> => {
     }
   }
 
-  const { scored, failedCalls, failureReasons } = await scoreAlerts({
-    alerts,
-    decide: makeDecide({ url, apiKey, endpoint: endpoint ?? '' }),
-    repeats,
-    concurrency: Number(args.concurrency),
+  const connection = { url, apiKey, endpoint: endpoint ?? '' };
+  const concurrency = Number(args.concurrency);
+  const {
+    scored,
+    calls: callCount,
+    failedCalls,
+    failureReasons,
+    callLatenciesMs,
+  } = batch
+    ? await scoreAlertsInBatches({
+        alerts,
+        decideBatch: makeDecideBatch(connection),
+        repeats,
+        concurrency,
+        batchSize,
+      })
+    : await scoreAlerts({ alerts, decide: makeDecide(connection), repeats, concurrency });
+  const report = buildJevReport({
+    alerts: scored,
+    mode: batch ? 'batch' : 'single',
+    calls: callCount,
+    failedCalls,
+    failureReasons,
+    callLatenciesMs,
+    haiku,
   });
-  const report = buildJevReport({ alerts: scored, failedCalls, failureReasons, haiku });
   fs.writeFileSync(out, `${JSON.stringify(report, null, 2)}\n`);
   process.stdout.write(
     `${report.alerts} alerts scored, ${failedCalls} calls failed ${JSON.stringify(
