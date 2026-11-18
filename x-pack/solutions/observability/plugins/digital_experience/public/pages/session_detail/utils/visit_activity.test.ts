@@ -86,6 +86,20 @@ describe('buildVisitActivity', () => {
     ]);
   });
 
+  it('keeps the axis origin when a search leaves out the rows before it', () => {
+    const events = [event('page_view', 0), event('click', 800, 'button.buy')];
+    const requests = [request('/app.js', 50), request('/api/buy', 900, { initiatorType: 'fetch' })];
+
+    const all = buildVisitActivity(SOFT_VISIT, events, requests, ALL);
+    const searched = buildVisitActivity(SOFT_VISIT, events, requests, {
+      ...ALL,
+      search: 'api/buy',
+    });
+
+    expect(searched.rows).toHaveLength(1);
+    expect(searched.originMs).toBe(all.originMs);
+  });
+
   it('counts a page load from its navigation start, with its milestones', () => {
     const activity = buildVisitActivity(
       {

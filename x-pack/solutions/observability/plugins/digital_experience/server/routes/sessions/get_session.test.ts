@@ -228,6 +228,20 @@ describe('buildPageVisits', () => {
     ]);
   });
 
+  it('ends the last visit at the newest request when that is newer than the summary and the events', () => {
+    const visits = buildPageVisits(events, startMs, at(10_000), at(12_500));
+
+    expect(visits.at(-1)).toEqual(
+      expect.objectContaining({ endTime: at(12_500), durationMs: 7_500 })
+    );
+  });
+
+  it('keeps the summary end when requests are older than it', () => {
+    const visits = buildPageVisits(events, startMs, at(10_000), at(8_000));
+
+    expect(visits.at(-1)?.endTime).toBe(at(10_000));
+  });
+
   it('opens a visit for a page view with no URL, rather than leaving its events on the page before', () => {
     const visits = buildPageVisits(
       [

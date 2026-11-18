@@ -20,6 +20,7 @@ const resourceTiming = ({
   fetchStart,
   responseEnd,
   restricted = false,
+  reusedConnection = false,
   transferSize = 2048,
   decodedBodySize = 8192,
   spanId,
@@ -30,6 +31,8 @@ const resourceTiming = ({
   fetchStart: number;
   responseEnd: number;
   restricted?: boolean;
+  /** No DNS or connecting: those timestamps equal `fetchStart`, with the request sent later. */
+  reusedConnection?: boolean;
   transferSize?: number;
   decodedBodySize?: number;
   spanId?: string;
@@ -39,12 +42,24 @@ const resourceTiming = ({
   'attributes.url.full': [url],
   'attributes.browser.resource_timing.initiator_type': [initiatorType],
   'attributes.browser.resource_timing.fetch_start': [fetchStart],
-  'attributes.browser.resource_timing.domain_lookup_start': [restricted ? 0 : fetchStart + 1],
-  'attributes.browser.resource_timing.domain_lookup_end': [restricted ? 0 : fetchStart + 11],
-  'attributes.browser.resource_timing.connect_start': [restricted ? 0 : fetchStart + 11],
-  'attributes.browser.resource_timing.connect_end': [restricted ? 0 : fetchStart + 41],
-  'attributes.browser.resource_timing.secure_connection_start': [restricted ? 0 : fetchStart + 21],
-  'attributes.browser.resource_timing.request_start': [restricted ? 0 : fetchStart + 41],
+  'attributes.browser.resource_timing.domain_lookup_start': [
+    restricted ? 0 : fetchStart + (reusedConnection ? 0 : 1),
+  ],
+  'attributes.browser.resource_timing.domain_lookup_end': [
+    restricted ? 0 : fetchStart + (reusedConnection ? 0 : 11),
+  ],
+  'attributes.browser.resource_timing.connect_start': [
+    restricted ? 0 : fetchStart + (reusedConnection ? 0 : 11),
+  ],
+  'attributes.browser.resource_timing.connect_end': [
+    restricted ? 0 : fetchStart + (reusedConnection ? 0 : 41),
+  ],
+  'attributes.browser.resource_timing.secure_connection_start': [
+    restricted ? 0 : reusedConnection ? 0 : fetchStart + 21,
+  ],
+  'attributes.browser.resource_timing.request_start': [
+    restricted ? 0 : fetchStart + (reusedConnection ? 50 : 41),
+  ],
   'attributes.browser.resource_timing.response_start': [restricted ? 0 : responseEnd - 20],
   'attributes.browser.resource_timing.response_end': [responseEnd],
   'attributes.browser.resource_timing.transfer_size': [restricted ? 0 : transferSize],
@@ -170,6 +185,31 @@ describe('buildRequests', () => {
       connect: 30,
       tls: 20,
       waiting: 219,
+      download: 20,
+    });
+  });
+
+  it('counts the wait before a request is sent on a reused connection as queueing', () => {
+    const { requests } = buildRequests(
+      [
+        navigationTiming({ originMs: ORIGIN_MS }),
+        resourceTiming({
+          emittedAt: ORIGIN_MS + 1_600,
+          url: 'https://shop.example.com/app.js',
+          fetchStart: 320,
+          responseEnd: 600,
+          reusedConnection: true,
+        }),
+      ],
+      visits(100)
+    );
+
+    expect(requests.find(({ url }) => url.endsWith('app.js'))?.phases).toEqual({
+      queued: 50,
+      dns: 0,
+      connect: 0,
+      tls: 0,
+      waiting: 210,
       download: 20,
     });
   });

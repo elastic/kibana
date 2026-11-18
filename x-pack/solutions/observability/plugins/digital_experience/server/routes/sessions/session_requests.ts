@@ -329,11 +329,15 @@ const phasesOf = ({
   responseEnd,
 }: Timings): SessionRequestPhases => {
   const span = (start: number, end: number) => (start > 0 && end > start ? end - start : 0);
-  const firstPhaseStart = [domainLookupStart, connectStart, requestStart].find((t) => t > 0) ?? 0;
+  const dns = span(domainLookupStart, domainLookupEnd);
+  const connect = span(connectStart, connectEnd);
+  // Everything before the request is sent that is not DNS or connecting, as on a reused
+  // connection, where those timestamps all equal `fetchStart` and the wait is still real.
+  const stalled = requestStart > fetchStart ? requestStart - fetchStart - dns - connect : 0;
   return {
-    queued: span(fetchStart, firstPhaseStart),
-    dns: span(domainLookupStart, domainLookupEnd),
-    connect: span(connectStart, connectEnd),
+    queued: Math.max(0, stalled),
+    dns,
+    connect,
     tls: span(secureConnectionStart, connectEnd),
     waiting: span(requestStart, responseStart),
     download: span(responseStart, responseEnd),

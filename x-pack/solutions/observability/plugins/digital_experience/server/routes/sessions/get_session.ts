@@ -210,7 +210,9 @@ export const buildTimeline = (
 export const buildPageVisits = (
   events: OtelEventFields[],
   sessionStartMs: number,
-  sessionEnd: string
+  sessionEnd: string,
+  /** The newest request record: a session can be active with nothing but background fetches. */
+  latestRequestTime?: string
 ): SessionPageVisit[] => {
   const visits: SessionPageVisit[] = [];
   let current: SessionPageVisit | undefined;
@@ -283,11 +285,15 @@ export const buildPageVisits = (
     }
   }
   // Raw events can be newer than the summary, which is as fresh as the task's last run.
+  const lastActivityMs = Math.max(
+    lastEventTime ? Date.parse(lastEventTime) || -Infinity : -Infinity,
+    latestRequestTime ? Date.parse(latestRequestTime) || -Infinity : -Infinity
+  );
   const sessionEndMs = Date.parse(sessionEnd);
   const endsAfterSummary =
-    lastEventTime !== undefined &&
-    (!Number.isFinite(sessionEndMs) || Date.parse(lastEventTime) > sessionEndMs);
-  close(endsAfterSummary && lastEventTime ? lastEventTime : sessionEnd);
+    Number.isFinite(lastActivityMs) &&
+    (!Number.isFinite(sessionEndMs) || lastActivityMs > sessionEndMs);
+  close(endsAfterSummary ? new Date(lastActivityMs).toISOString() : sessionEnd);
   return visits;
 };
 
@@ -386,7 +392,15 @@ export const getSession = async (
   const events = fieldsOf(eventsResponse);
   const requestEvents = fieldsOf(requestsResponse);
   const sessionStartMs = sessionStartOf(startMs, events);
-  const pageVisits = buildPageVisits(events, sessionStartMs, session.endTime);
+  const latestRequestMs = Math.max(
+    ...requestEvents.map((event) => timestampMsOf(event) ?? -Infinity)
+  );
+  const pageVisits = buildPageVisits(
+    events,
+    sessionStartMs,
+    session.endTime,
+    Number.isFinite(latestRequestMs) ? new Date(latestRequestMs).toISOString() : undefined
+  );
   const { requests, loads } = buildRequests(requestEvents, pageVisits);
 
   return {

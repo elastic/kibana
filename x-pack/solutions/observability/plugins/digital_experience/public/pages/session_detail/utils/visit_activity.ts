@@ -291,10 +291,6 @@ const milestonesOf = (load: SessionPageLoad | null): LoadMilestone[] => {
 };
 
 /**
- * The requests and events of a page visit as rows in time order, on one axis: requests as bars,
- * events as instants, repeated requests folded, and the page load milestones.
- */
-/**
  * Keys that stay the same when a filter drops other rows, unlike an index, so that what the user
  * expanded stays expanded: what identifies the row, and a count for exact repeats of it.
  */
@@ -307,6 +303,10 @@ const uniqueKeys = () => {
   };
 };
 
+/**
+ * The requests and events of a page visit as rows in time order, on one axis: requests as bars,
+ * events as instants, repeated requests folded, and the page load milestones.
+ */
 export const buildVisitActivity = (
   visit: Pick<SessionPageVisit, 'startTime' | 'load'>,
   events: SessionTimelineEvent[],
@@ -347,9 +347,12 @@ export const buildVisitActivity = (
 
   const milestones = milestonesOf(visit.load);
   const visitStartMs = Date.parse(visit.load?.navigationStart ?? visit.startTime);
+  // From everything the visit holds, not the rows the filters leave, so that searching doesn't
+  // shift the offsets and the bars.
   const originMs = Math.min(
     Number.isFinite(visitStartMs) ? visitStartMs : Infinity,
-    ...rows.map(({ startMs }) => startMs)
+    ...requests.map(({ startTime }) => Date.parse(startTime)).filter(Number.isFinite),
+    ...events.map(({ timestamp }) => Date.parse(timestamp)).filter(Number.isFinite)
   );
   const origin = Number.isFinite(originMs) ? originMs : 0;
   const placedMilestones = milestones.map((milestone) => ({
