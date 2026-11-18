@@ -92,15 +92,19 @@ describe('buildConnectorEnv', () => {
     expect(secretValues).toEqual([BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue']);
   });
 
-  it('leaves the selectedActions allowlist out of the env', () => {
-    const { env } = buildConnectorEnv({
+  it('leaves selectedActions out of the env and retains hosts without auth headers', () => {
+    const hosts = ['localhost'];
+    const { env, allowedHosts, secretEnvKeys } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
       actionTypeId: '.elasticsearch',
       config: { url: 'http://localhost:9200', authType: 'basic', selectedActions: ['_test'] },
       headers: {},
-      hosts: ['localhost'],
+      hosts,
     });
 
+    hosts.push('other.example.com');
+    expect(allowedHosts).toEqual(['localhost']);
+    expect(secretEnvKeys).toEqual([]);
     expect(env).toEqual({
       CONNECTOR_ID,
       CONNECTOR_TYPE: '.elasticsearch',
@@ -110,7 +114,7 @@ describe('buildConnectorEnv', () => {
   });
 
   it('marks every header env var, and no config env var, as a secret bound to the hosts', () => {
-    const { secretEnvKeys } = buildConnectorEnv({
+    const { secretEnvKeys, allowedHosts } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
       actionTypeId: '.github',
       config: { serverUrl: 'https://api.githubcopilot.com/mcp/' },
@@ -118,6 +122,7 @@ describe('buildConnectorEnv', () => {
       hosts: ['api.github.com', 'api.githubcopilot.com'],
     });
 
+    expect(allowedHosts).toEqual(['api.github.com', 'api.githubcopilot.com']);
     expect(secretEnvKeys).toEqual([
       {
         key: 'CONNECTOR_HEADER_AUTHORIZATION',
@@ -248,6 +253,7 @@ describe('createConnectorCredentialResolver', () => {
       },
       secretValues: [BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue'],
       secretEnvKeys: [{ key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] }],
+      allowedHosts: ['api.github.com'],
     });
     expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: CONNECTOR_ID });
     expect(actionsClient.get).not.toHaveBeenCalled();
@@ -316,6 +322,7 @@ describe('createConnectorCredentialResolver', () => {
       secretEnvKeys: [
         { key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.example.com'] },
       ],
+      allowedHosts: ['api.example.com'],
     });
     expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: 'saved-object-1' });
     // The same call redacts the full header and the bare token from the command output.
