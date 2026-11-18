@@ -9,10 +9,9 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
-import type { Option } from '../../helpers/create_options';
-import { createOptionsFromFields } from '../../helpers/create_options';
+import { useSearchableFieldOptions } from '../../hooks/use_searchable_field_options';
 import type { CreateSLOForm } from '../../types';
 
 interface Props {
@@ -28,11 +27,7 @@ const placeholder = i18n.translate('xpack.slo.sloEdit.timestampField.placeholder
 export function TimestampFieldSelector({ fields, isDisabled, isLoading }: Props) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const formState = useFormState({ control, name: 'indicator.params.timestampField' });
-  const [options, setOptions] = useState<Option[]>(createOptionsFromFields(fields));
-
-  useEffect(() => {
-    setOptions(createOptionsFromFields(fields));
-  }, [fields]);
+  const { options, onSearchChange } = useSearchableFieldOptions(fields);
 
   return (
     <EuiFormRow
@@ -68,11 +63,7 @@ export function TimestampFieldSelector({ fields, isDisabled, isLoading }: Props)
               }}
               singleSelection={{ asPlainText: true }}
               options={options}
-              onSearchChange={(searchValue: string) => {
-                setOptions(
-                  createOptionsFromFields(fields, ({ value }) => value.includes(searchValue))
-                );
-              }}
+              onSearchChange={onSearchChange}
               selectedOptions={
                 !!fields && !!field.value ? [{ value: field.value, label: field.value }] : []
               }

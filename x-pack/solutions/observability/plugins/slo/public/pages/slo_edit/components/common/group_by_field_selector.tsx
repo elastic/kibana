@@ -10,10 +10,9 @@ import { EuiComboBox, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
-import type { Option } from '../../helpers/create_options';
-import { createOptionsFromFields } from '../../helpers/create_options';
+import { useSearchableFieldOptions } from '../../hooks/use_searchable_field_options';
 import type { CreateSLOForm } from '../../types';
 import { OptionalText } from './optional_text';
 
@@ -30,11 +29,7 @@ const placeholder = i18n.translate('xpack.slo.sloEdit.groupBy.placeholder', {
 export function GroupByFieldSelector({ indexFields, isDisabled, isLoading }: Props) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const formState = useFormState({ control, name: 'groupBy' });
-  const [options, setOptions] = useState<Option[]>(createOptionsFromFields(indexFields));
-
-  useEffect(() => {
-    setOptions(createOptionsFromFields(indexFields));
-  }, [indexFields]);
+  const { options, onSearchChange } = useSearchableFieldOptions(indexFields);
 
   const getSelectedItems = (value: string | string[]) => {
     const values = [value].flat();
@@ -90,11 +85,7 @@ export function GroupByFieldSelector({ indexFields, isDisabled, isLoading }: Pro
                 field.onChange([ALL_VALUE]);
               }}
               options={options}
-              onSearchChange={(searchValue: string) => {
-                setOptions(
-                  createOptionsFromFields(indexFields, ({ value }) => value.includes(searchValue))
-                );
-              }}
+              onSearchChange={onSearchChange}
               selectedOptions={!!indexFields && !!field.value ? getSelectedItems(field.value) : []}
             />
           );
