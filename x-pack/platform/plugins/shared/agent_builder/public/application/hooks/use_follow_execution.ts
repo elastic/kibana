@@ -22,7 +22,9 @@ import {
   isRoundCompleteEvent,
   isBackgroundAgentCompleteEvent,
   isInterimAnswerEvent,
+  isMessageDeliveredEvent,
   createInterimAnswerStep,
+  createDeliveredMessageStep,
 } from '@kbn/agent-builder-common';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 
@@ -128,6 +130,8 @@ export const useFollowExecution = (executionId: string | null): UseFollowExecuti
           } else if (isInterimAnswerEvent(event)) {
             setSteps((prev) => [...prev, createInterimAnswerStep(event.data)]);
             setStreamingMessage('');
+          } else if (isMessageDeliveredEvent(event)) {
+            setSteps((prev) => [...prev, createDeliveredMessageStep(event.data)]);
           } else if (isMessageChunkEvent(event)) {
             setStreamingMessage((prev) => prev + event.data.text_chunk);
           } else if (isMessageCompleteEvent(event)) {
