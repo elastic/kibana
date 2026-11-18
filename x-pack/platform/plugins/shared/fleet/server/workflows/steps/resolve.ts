@@ -68,7 +68,7 @@ const disableUnansweredStreams = (
 
 type PlannedIdentity = Pick<
   AwsOnboardingResolveOutput,
-  'identity_name' | 'stack_action' | 'stack_id' | 'cloud_connector_id'
+  'identity_name' | 'stack_action' | 'stack_id' | 'template_sha' | 'cloud_connector_id'
 > & { covered: RenderIacTemplateIntegration[] };
 
 /**
@@ -93,7 +93,7 @@ const planIdentity = (
   return {
     identity_name: reused.name,
     stack_action: reused.updatable ? 'update' : 'none',
-    ...(reused.updatable && { stack_id: reused.stack_id }),
+    ...(reused.updatable && { stack_id: reused.stack_id, template_sha: reused.template_sha }),
     cloud_connector_id: reused.id,
     covered: reused.covered_integrations,
   };

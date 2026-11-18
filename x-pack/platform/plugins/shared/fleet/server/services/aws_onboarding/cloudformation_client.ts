@@ -12,6 +12,7 @@ import {
   DescribeStackEventsCommand,
   DescribeStacksCommand,
   GetTemplateSummaryCommand,
+  UpdateStackCommand,
 } from '@aws-sdk/client-cloudformation';
 import type { Parameter, Stack, StackEvent } from '@aws-sdk/client-cloudformation';
 
@@ -65,6 +66,30 @@ export class AwsCloudFormationClient {
     return result.StackId;
   }
 
+  /** Returns the stack id, or undefined when CloudFormation reports there is nothing to update. */
+  public async updateStack(args: {
+    stackArn: string;
+    templateUrl: string;
+    parameters: Parameter[];
+  }): Promise<string | undefined> {
+    try {
+      const result = await this.client.send(
+        new UpdateStackCommand({
+          StackName: args.stackArn,
+          TemplateURL: args.templateUrl,
+          Parameters: args.parameters,
+          Capabilities: ['CAPABILITY_NAMED_IAM'],
+        })
+      );
+      return result.StackId ?? args.stackArn;
+    } catch (error) {
+      if (isNoUpdatesError(error)) {
+        return undefined;
+      }
+      throw error;
+    }
+  }
+
   /** Starts deletion; false when the stack is already gone. */
   public async deleteStack(stackArn: string): Promise<boolean> {
     try {
@@ -100,6 +125,9 @@ export class AwsCloudFormationClient {
 
 const getAwsErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
+
+const isNoUpdatesError = (error: unknown): boolean =>
+  getAwsErrorMessage(error).includes('No updates are to be performed');
 
 const isStackNotFoundError = (error: unknown): boolean =>
   (error as { name?: string })?.name === 'ValidationError' &&

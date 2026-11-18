@@ -149,6 +149,7 @@ export const awsOnboardingListIdentitiesStepDefinition = createServerStepDefinit
           id: connector.id,
           name: connector.name,
           ...(stackId && { stack_id: stackId, stack_region: arnField(stackId, 3) }),
+          ...(connector.iac_key && { template_sha: connector.iac_key }),
           created_at: connector.created_at,
           ...updatability(stackId, credentials.region, stackNamePrefix),
           covered_integrations: covered,

@@ -187,8 +187,8 @@ steps:
           message: "The plan was not approved."
           reason: "plan_rejected"
 
-  # A new identity gets its stack and connector here. Reusing an identity skips this branch
-  # and creates the policies on the reused connector.
+  # A new identity gets its stack and connector here. A reused identity skips this branch: the
+  # next one updates its stack when the run can, and the policies go on the reused connector.
   - name: stack_branch
     type: if
     condition: "${{ steps.resolve.output.stack_action == 'create' }}"
@@ -201,7 +201,7 @@ steps:
       - name: create_stack
         type: fleet.awsOnboardingCreateStack
         with:
-          integrations: "${{ steps.resolve.output.integrations }}"
+          integrations: "${{ steps.resolve.output.stack_integrations }}"
           parameters: "${{ steps.cloud_context.output.parameters }}"
 
       # Do-while: the first status check always runs, then the loop repeats while the stack is
@@ -247,11 +247,75 @@ steps:
           blueprint_id: "${{ steps.create_stack.output.blueprint_id }}"
           blueprint_version: "${{ steps.create_stack.output.blueprint_version }}"
 
+  # A reused identity whose stack the run can update gets its role's permissions widened to
+  # cover the new services. The role, and so the connector's role ARN, stay the same.
+  - name: stack_update_branch
+    type: if
+    condition: "${{ steps.resolve.output.stack_action == 'update' }}"
+    steps:
+      - name: cloud_context_update
+        type: fleet.awsOnboardingCloudContext
+        with:
+          overrides: "${{ inputs.stack_parameter_overrides }}"
+
+      - name: update_stack
+        type: fleet.awsOnboardingUpdateStack
+        with:
+          stack_id: "{{ steps.resolve.output.stack_id }}"
+          integrations: "${{ steps.resolve.output.stack_integrations }}"
+          template_sha: "${{ steps.resolve.output.template_sha }}"
+          parameters: "${{ steps.cloud_context_update.output.parameters }}"
+
+      # Nothing to wait for when the stack already grants what the run needs.
+      - name: poll_update
+        type: if
+        condition: "${{ steps.update_stack.output.no_changes != true }}"
+        steps:
+          # Do-while, as for a new stack: 15s interval, at most 60 attempts, 15 minutes.
+          - name: poll_stack_update
+            type: while
+            condition: "${{ steps.stack_status_update.output.status == 'in_progress' }}"
+            max-iterations:
+              limit: 60
+              on-limit: fail
+            timeout: 15m
+            steps:
+              - name: stack_status_update
+                type: fleet.awsOnboardingStackStatus
+                with:
+                  stack_id: "{{ steps.update_stack.output.stack_id }}"
+              - name: stack_delay_update
+                type: if
+                condition: "${{ steps.stack_status_update.output.status == 'in_progress' }}"
+                steps:
+                  - name: stack_wait_update
+                    type: wait
+                    with:
+                      duration: 15s
+
+          - name: fail_stack_update
+            type: if
+            condition: "${{ steps.stack_status_update.output.status != 'complete' }}"
+            steps:
+              - name: stop_stack_update
+                type: workflow.fail
+                with:
+                  message: "The CloudFormation stack update did not complete: {{ steps.stack_status_update.output.reason }}"
+                  reason: "stack_failed"
+
+      - name: update_connector
+        type: fleet.awsOnboardingUpdateConnector
+        with:
+          cloud_connector_id: "{{ steps.resolve.output.cloud_connector_id }}"
+          template_sha: "${{ steps.update_stack.output.template_sha }}"
+          blueprint_id: "${{ steps.update_stack.output.blueprint_id }}"
+          blueprint_version: "${{ steps.update_stack.output.blueprint_version }}"
+
   - name: create_policies
     type: fleet.awsOnboardingCreatePolicies
     with:
       policies: "${{ steps.resolve.output.policies }}"
-      cloud_connector_id: "{{ steps.create_connector.output.cloud_connector_id | default: steps.resolve.output.cloud_connector_id }}"
+      cloud_connector_id: "{{ steps.create_connector.output.cloud_connector_id | default: steps.update_connector.output.cloud_connector_id | default: steps.resolve.output.cloud_connector_id }}"
 
   # Do-while: the first check always runs. 20s interval, at most 60 attempts, 20 minutes.
   - name: wait_for_data
@@ -288,5 +352,5 @@ steps:
       has_data: "${{ steps.has_data.output.has_data }}"
       policies_with_data: "${{ steps.has_data.output.policies_with_data }}"
       policies_without_data: "${{ steps.has_data.output.policies_without_data }}"
-      cloud_connector_id: "{{ steps.create_connector.output.cloud_connector_id | default: steps.resolve.output.cloud_connector_id }}"
+      cloud_connector_id: "{{ steps.create_connector.output.cloud_connector_id | default: steps.update_connector.output.cloud_connector_id | default: steps.resolve.output.cloud_connector_id }}"
       dashboard_path: "/app/dashboards#/view/aws-fac28650-7349-11e9-816b-07687310a99a"

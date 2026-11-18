@@ -26,6 +26,8 @@ export const awsOnboardingIdentitySchema = lazySchema(() =>
     name: z.string(),
     stack_id: z.string().optional(),
     stack_region: z.string().optional(),
+    /** Digest of the template the stack was last rendered from; sent back on the next render. */
+    template_sha: z.string().optional(),
     created_at: z.string(),
     /** Whether the run can update the identity's CloudFormation stack. */
     updatable: z.boolean(),

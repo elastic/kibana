@@ -6,6 +6,9 @@
  */
 
 import { appContextService } from '../app_context';
+import { iacProvisionerService } from '../iac_provisioner';
+import { buildIacProvisionerIntegrations } from '../iac_provisioner_integrations';
+import { isIacProvisionerEnabled } from '../utils/iac_provisioner';
 
 import { AwsCloudFormationClient } from './cloudformation_client';
 import { awsOnboardingCredentialsService } from './credentials';
@@ -13,6 +16,14 @@ import { assumeOnboardingRole } from './sts';
 import { AwsOnboardingStackService } from './stacks';
 
 jest.mock('../app_context');
+jest.mock('../iac_provisioner', () => ({
+  iacProvisionerService: { renderTemplate: jest.fn() },
+}));
+jest.mock('../iac_provisioner_integrations', () => ({
+  buildIacProvisionerIntegrations: jest.fn(),
+  isBuildError: jest.fn(),
+}));
+jest.mock('../utils/iac_provisioner');
 jest.mock('./cloudformation_client');
 jest.mock('./credentials', () => ({
   awsOnboardingCredentialsService: { getDecrypted: jest.fn() },
@@ -21,6 +32,8 @@ jest.mock('./sts');
 
 const describeStack = jest.fn();
 const describeStackEvents = jest.fn();
+const getDeclaredParameterKeys = jest.fn();
+const updateStack = jest.fn();
 const warn = jest.fn();
 
 const stackArn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-onboarding-x/id';
@@ -157,5 +170,95 @@ describe('AwsOnboardingStackService.status', () => {
 
     expect(result.status).toBe('in_progress');
     expect(result.latestEvent).toBeUndefined();
+  });
+});
+
+describe('AwsOnboardingStackService.update', () => {
+  const integrations = [
+    { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }] },
+  ];
+  const rendered = {
+    artifactUrl: 'https://example.com/rendered-template',
+    templateSha: 'sha-2',
+    render: true,
+    blueprint: { id: 'wif', version: '4' },
+  };
+  const update = (templateSha?: string) =>
+    new AwsOnboardingStackService().update({
+      soClient: {} as any,
+      stackArn,
+      integrations,
+      ...(templateSha && { templateSha }),
+      parameters: { ElasticResourceId: 'project-1' },
+    });
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest
+      .mocked(appContextService.getLogger)
+      .mockReturnValue({ get: () => ({ info: jest.fn() }) } as any);
+    jest
+      .mocked(awsOnboardingCredentialsService.getDecrypted)
+      .mockResolvedValue({ stackNamePrefix: 'elastic-onboarding' } as any);
+    jest.mocked(assumeOnboardingRole).mockResolvedValue({} as any);
+    jest.mocked(isIacProvisionerEnabled).mockResolvedValue(true);
+    jest.mocked(buildIacProvisionerIntegrations).mockResolvedValue({ integrations } as any);
+    jest.mocked(iacProvisionerService.renderTemplate).mockResolvedValue(rendered);
+    jest
+      .mocked(AwsCloudFormationClient)
+      .mockImplementation(() => ({ describeStack, getDeclaredParameterKeys, updateStack } as any));
+    describeStack.mockResolvedValue({ StackName: 'elastic-onboarding-x' });
+    getDeclaredParameterKeys.mockResolvedValue(['ElasticResourceId']);
+    updateStack.mockResolvedValue(stackArn);
+  });
+
+  it("renders with the identity's stored template digest", async () => {
+    await update('sha-1');
+
+    expect(iacProvisionerService.renderTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ integrations, templateSha: 'sha-1' })
+    );
+  });
+
+  it('updates the stack and names it from CloudFormation', async () => {
+    const result = await update('sha-1');
+
+    expect(updateStack).toHaveBeenCalledWith({
+      stackArn,
+      templateUrl: rendered.artifactUrl,
+      parameters: [{ ParameterKey: 'ElasticResourceId', ParameterValue: 'project-1' }],
+    });
+    expect(result).toEqual({
+      stackId: stackArn,
+      stackName: 'elastic-onboarding-x',
+      template: { source: 'iacp', templateSha: 'sha-2', blueprint: { id: 'wif', version: '4' } },
+      noChanges: false,
+    });
+  });
+
+  it('reports no changes when CloudFormation has nothing to update', async () => {
+    updateStack.mockResolvedValue(undefined);
+
+    const result = await update('sha-1');
+
+    expect(result.noChanges).toBe(true);
+  });
+
+  it('reports no changes without updating when the stored template digest still matches', async () => {
+    jest.mocked(iacProvisionerService.renderTemplate).mockResolvedValue({
+      templateSha: 'sha-1',
+      render: false,
+      blueprint: { id: 'wif', version: '4' },
+    });
+
+    const result = await update('sha-1');
+
+    expect(updateStack).not.toHaveBeenCalled();
+    expect(result).toEqual(
+      expect.objectContaining({
+        noChanges: true,
+        template: expect.objectContaining({ templateSha: 'sha-1' }),
+      })
+    );
   });
 });

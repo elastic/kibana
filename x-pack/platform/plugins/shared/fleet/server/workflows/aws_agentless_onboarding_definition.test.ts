@@ -51,6 +51,7 @@ describe('AWS agentless onboarding workflow definition', () => {
       'approve_plan',
       'fail_plan_rejected',
       'stack_branch',
+      'stack_update_branch',
       'create_policies',
       'wait_for_data',
       'done',
@@ -84,10 +85,28 @@ describe('AWS agentless onboarding workflow definition', () => {
     ]);
   });
 
+  it('routes update runs through update_stack and update_connector', () => {
+    const branch = findStep(definition, 'stack_update_branch');
+
+    expect(branch.type).toBe('if');
+    expect(branch.condition).toBe("${{ steps.resolve.output.stack_action == 'update' }}");
+    expect(branch.steps?.map(({ name }) => name)).toEqual([
+      'cloud_context_update',
+      'update_stack',
+      'poll_update',
+      'update_connector',
+    ]);
+    const poll = findStep(branch as { steps: StepNode[] }, 'poll_update');
+    expect(poll.condition).toBe('${{ steps.update_stack.output.no_changes != true }}');
+    expect(poll.steps?.map(({ name }) => name)).toEqual(['poll_stack_update', 'fail_stack_update']);
+  });
+
   it('creates the policies on the new connector or on the reused one', () => {
-    expect(findStep(definition, 'create_policies').with?.cloud_connector_id).toBe(
-      '{{ steps.create_connector.output.cloud_connector_id | default: steps.resolve.output.cloud_connector_id }}'
-    );
+    const connectorId =
+      '{{ steps.create_connector.output.cloud_connector_id | default: steps.update_connector.output.cloud_connector_id | default: steps.resolve.output.cloud_connector_id }}';
+
+    expect(findStep(definition, 'create_policies').with?.cloud_connector_id).toBe(connectorId);
+    expect(findStep(definition, 'done').with?.cloud_connector_id).toBe(connectorId);
   });
 
   it('fails the run when the plan is not approved', () => {

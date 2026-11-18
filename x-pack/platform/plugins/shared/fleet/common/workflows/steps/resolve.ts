@@ -72,6 +72,8 @@ export const awsOnboardingResolveOutputSchema = lazySchema(() =>
     stack_action: z.enum(['create', 'update', 'none']),
     /** The reused identity's stack; set on update only. */
     stack_id: z.string().optional(),
+    /** The reused identity's stored template digest; set on update only, when it has one. */
+    template_sha: z.string().optional(),
     /** The reused identity's connector; set on reuse only. */
     cloud_connector_id: z.string().optional(),
     /** Policy templates and inputs the run adds to what the identity's role covers. */

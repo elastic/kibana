@@ -488,12 +488,36 @@ describe('get_aws_onboarding_state', () => {
 
       expect(stackStatus).toHaveBeenCalledTimes(1);
       expect(data.stack).toEqual({
+        action: 'create',
         stack_id: STACK_ID,
         status: 'in_progress',
         stack_status: 'CREATE_IN_PROGRESS',
         latest_event: event('WiiOidcProvider'),
         progress_key: KEY,
       });
+    });
+
+    it("reads the reused identity's stack live while the run is updating it", async () => {
+      stackStatus.mockResolvedValue({
+        status: 'in_progress',
+        stackStatus: 'UPDATE_IN_PROGRESS',
+        latestEvent: event('Role', 'UPDATE_IN_PROGRESS'),
+      });
+
+      const data = await runWait([
+        runningExecution([
+          step('update_stack', 3, { status: 'completed', output: { stack_id: STACK_ID } }),
+        ]),
+      ]);
+
+      expect(stackStatus).toHaveBeenCalledWith({ client: 'session' }, STACK_ID);
+      expect(data.stack).toEqual(
+        expect.objectContaining({
+          action: 'update',
+          stack_id: STACK_ID,
+          stack_status: 'UPDATE_IN_PROGRESS',
+        })
+      );
     });
 
     it('does not read the stack live once the run has completed', async () => {

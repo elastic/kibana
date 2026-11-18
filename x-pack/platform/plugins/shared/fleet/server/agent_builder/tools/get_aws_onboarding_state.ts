@@ -27,6 +27,7 @@ import type { AwsOnboardingListIdentitiesOutput } from '../../../common/workflow
 import type { AwsOnboardingResolveOutput } from '../../../common/workflows/steps/resolve';
 import type { AwsOnboardingCreateStackOutput } from '../../../common/workflows/steps/create_stack';
 import type { AwsOnboardingStackStatusOutput } from '../../../common/workflows/steps/stack_status';
+import type { AwsOnboardingUpdateStackOutput } from '../../../common/workflows/steps/update_stack';
 import type { AwsOnboardingCreatePoliciesOutput } from '../../../common/workflows/steps/create_policies';
 import type { AwsOnboardingHasDataOutput } from '../../../common/workflows/steps/has_data';
 
@@ -59,6 +60,8 @@ const STACK_HAND_OVER_MS = 300_000;
 
 interface StackProgress {
   stack?: {
+    /** Whether the run is creating a new identity's stack or updating a reused one's. */
+    action: 'create' | 'update';
     stack_id?: string;
     status?: AwsOnboardingStackStatusOutput['status'];
     stack_status?: string;
@@ -111,14 +114,28 @@ const createStackProgressReader = (handOverMs: number) => {
     execution: WorkflowExecutionDto,
     previous?: StackProgress
   ): Promise<StackProgress> => {
+    // A run creates a new identity's stack or updates a reused one's; the newer step decides.
     const createStackRun = lastStepExecution(execution, 'create_stack');
-    const createStack = createStackRun?.output as AwsOnboardingCreateStackOutput | undefined;
-    let current = lastOutput<AwsOnboardingStackStatusOutput>(execution, 'stack_status');
+    const updateStackRun = lastStepExecution(execution, 'update_stack');
+    const action =
+      updateStackRun &&
+      (!createStackRun || updateStackRun.globalExecutionIndex > createStackRun.globalExecutionIndex)
+        ? ('update' as const)
+        : ('create' as const);
+    const stackRun = action === 'update' ? updateStackRun : createStackRun;
+    const stackOutput = stackRun?.output as
+      | AwsOnboardingCreateStackOutput
+      | AwsOnboardingUpdateStackOutput
+      | undefined;
+    let current = lastOutput<AwsOnboardingStackStatusOutput>(
+      execution,
+      action === 'update' ? 'stack_status_update' : 'stack_status'
+    );
 
-    if (isActive(execution) && createStack?.stack_id) {
+    if (isActive(execution) && stackOutput?.stack_id) {
       try {
         client ??= awsOnboardingStackService.createStatusClient();
-        const live = await awsOnboardingStackService.statusWith(await client, createStack.stack_id);
+        const live = await awsOnboardingStackService.statusWith(await client, stackOutput.stack_id);
         current = {
           status: live.status,
           stack_status: live.stackStatus,
@@ -139,18 +156,19 @@ const createStackProgressReader = (handOverMs: number) => {
       }
     }
 
-    if (!createStack && !current) {
+    if (!stackOutput && !current) {
       return {};
     }
     const progressKey = `${current?.stack_status ?? ''}|${current?.latest_event?.resource ?? ''}:${
       current?.latest_event?.status ?? ''
     }`;
-    const createdAt = createStackRun?.finishedAt ? Date.parse(createStackRun.finishedAt) : NaN;
-    const handOver = current?.status === 'in_progress' && Date.now() - createdAt > handOverMs;
+    const startedAt = stackRun?.finishedAt ? Date.parse(stackRun.finishedAt) : NaN;
+    const handOver = current?.status === 'in_progress' && Date.now() - startedAt > handOverMs;
     return {
       progressKey,
       stack: {
-        stack_id: createStack?.stack_id,
+        action,
+        stack_id: stackOutput?.stack_id,
         status: current?.status,
         stack_status: current?.stack_status,
         reason: current?.reason,

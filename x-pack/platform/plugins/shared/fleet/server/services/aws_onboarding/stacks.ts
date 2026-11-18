@@ -31,8 +31,13 @@ import { awsOnboardingCredentialsService } from './credentials';
 import { assumeOnboardingRole } from './sts';
 
 interface ResolvedTemplate {
-  templateUrl: string;
+  /** Undefined only when a stored template digest still matches: the stack already runs it. */
+  templateUrl?: string;
   info: AwsOnboardingTemplateInfo;
+}
+
+interface UpdateAwsOnboardingStackResult extends CreateAwsOnboardingStackResponse {
+  noChanges: boolean;
 }
 
 const COMPLETE_STATUSES = new Set(['CREATE_COMPLETE', 'UPDATE_COMPLETE']);
@@ -88,6 +93,7 @@ export class AwsOnboardingStackService {
     soClient: SavedObjectsClientContract;
     integrations: RenderIacTemplateIntegration[];
     templateUrl?: string;
+    templateSha?: string;
   }): Promise<ResolvedTemplate> {
     if (await isIacProvisionerEnabled()) {
       // Same resolution as the render route: attaches each package's installed version.
@@ -103,18 +109,20 @@ export class AwsOnboardingStackService {
           provider: AWS_CLOUD_PROVIDER,
           workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
           integrations: built.integrations,
+          ...(args.templateSha && { templateSha: args.templateSha }),
         });
+        const info: AwsOnboardingTemplateInfo = {
+          source: 'iacp',
+          templateSha: rendered.templateSha,
+          blueprint: rendered.blueprint,
+        };
+        if (args.templateSha && !rendered.render) {
+          return { info };
+        }
         if (!rendered.artifactUrl) {
           throw new FleetError('IaC Provisioner rendered a template without an artifact URL');
         }
-        return {
-          templateUrl: rendered.artifactUrl,
-          info: {
-            source: 'iacp',
-            templateSha: rendered.templateSha,
-            blueprint: rendered.blueprint,
-          },
-        };
+        return { templateUrl: rendered.artifactUrl, info };
       } catch (error) {
         // Mirror the browser flow: when the provisioner cannot render, fall back to the package's
         // static template if the caller supplied one; otherwise surface the provisioner error.
@@ -154,20 +162,57 @@ export class AwsOnboardingStackService {
   }): Promise<CreateAwsOnboardingStackResponse> {
     const logger = appContextService.getLogger().get('AwsOnboardingStackService');
     const { client, stackNamePrefix } = await this.getClient('create');
-    const resolved = await this.resolveTemplate(args);
+    const { templateUrl, info } = await this.resolveTemplate(args);
+    if (!templateUrl) {
+      throw new FleetError('IaC Provisioner rendered a template without an artifact URL');
+    }
     const stackName = `${stackNamePrefix}-${randomBytes(4).toString('hex')}`;
-    const parameters = await this.declaredParameters(client, resolved.templateUrl, args.parameters);
+    const parameters = await this.declaredParameters(client, templateUrl, args.parameters);
     logger.info(
       `Creating CloudFormation stack ${stackName} (template source: ${
-        resolved.info.source
+        info.source
       }, parameters: ${parameters.map((p) => p.ParameterKey).join(', ')})`
     );
-    const stackId = await client.createStack({
+    const stackId = await client.createStack({ stackName, templateUrl, parameters });
+    return { stackId, stackName, template: info };
+  }
+
+  /**
+   * Re-renders a reused identity's stack for the merged integrations and updates it in place.
+   * No changes when the stored template digest still matches or CloudFormation has nothing to do.
+   */
+  public async update(args: {
+    soClient: SavedObjectsClientContract;
+    stackArn: string;
+    integrations: RenderIacTemplateIntegration[];
+    templateSha?: string;
+    parameters: Record<string, string>;
+  }): Promise<UpdateAwsOnboardingStackResult> {
+    const logger = appContextService.getLogger().get('AwsOnboardingStackService');
+    const { client } = await this.getClient('update');
+    const { templateUrl, info } = await this.resolveTemplate(args);
+    const stack = await client.describeStack(args.stackArn);
+    if (!stack?.StackName) {
+      throw new FleetNotFoundError(`CloudFormation stack ${args.stackArn} no longer exists`);
+    }
+    const { StackName: stackName } = stack;
+    if (!templateUrl) {
+      logger.info(`CloudFormation stack ${stackName} already runs the current template`);
+      return { stackId: args.stackArn, stackName, template: info, noChanges: true };
+    }
+    const parameters = await this.declaredParameters(client, templateUrl, args.parameters);
+    logger.info(
+      `Updating CloudFormation stack ${stackName} (template source: ${
+        info.source
+      }, parameters: ${parameters.map((p) => p.ParameterKey).join(', ')})`
+    );
+    const stackId = await client.updateStack({ stackArn: args.stackArn, templateUrl, parameters });
+    return {
+      stackId: stackId ?? args.stackArn,
       stackName,
-      templateUrl: resolved.templateUrl,
-      parameters,
-    });
-    return { stackId, stackName, template: resolved.info };
+      template: info,
+      noChanges: stackId === undefined,
+    };
   }
 
   /**

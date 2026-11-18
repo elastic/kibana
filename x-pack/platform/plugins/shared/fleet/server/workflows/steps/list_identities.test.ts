@@ -113,7 +113,9 @@ describe('awsOnboardingListIdentitiesStepDefinition', () => {
 
   it('merges the enabled inputs of the policies of one package into one covered entry', async () => {
     const stackId = stackArn('us-east-1', 'elastic-onboarding-ab12');
-    getList.mockResolvedValue([connector('cc-1', { iac_deployment_id: stackId })]);
+    getList.mockResolvedValue([
+      connector('cc-1', { iac_deployment_id: stackId, iac_key: 'sha-1' }),
+    ]);
     listPolicies.mockResolvedValue({
       items: [
         packagePolicy('aws', [
@@ -141,6 +143,7 @@ describe('awsOnboardingListIdentitiesStepDefinition', () => {
       name: 'identity-cc-1',
       stack_id: stackId,
       stack_region: 'us-east-1',
+      template_sha: 'sha-1',
       created_at: '2026-11-17T10:00:00.000Z',
       updatable: true,
       covered_integrations: [

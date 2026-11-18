@@ -18,6 +18,8 @@ import { awsOnboardingListIdentitiesStepDefinition } from './list_identities';
 import { awsOnboardingResolveStepDefinition } from './resolve';
 import { awsOnboardingSettingsRequirementStepDefinition } from './settings_requirement';
 import { awsOnboardingStackStatusStepDefinition } from './stack_status';
+import { awsOnboardingUpdateConnectorStepDefinition } from './update_connector';
+import { awsOnboardingUpdateStackStepDefinition } from './update_stack';
 
 /**
  * Registered unconditionally: each handler checks the `fleet.agenticAwsOnboarding` flag when it
@@ -33,6 +35,8 @@ export const registerAwsOnboardingSteps = (setup: WorkflowsExtensionsServerPlugi
   setup.registerStepDefinition(awsOnboardingCreateStackStepDefinition);
   setup.registerStepDefinition(awsOnboardingStackStatusStepDefinition);
   setup.registerStepDefinition(awsOnboardingCreateConnectorStepDefinition);
+  setup.registerStepDefinition(awsOnboardingUpdateStackStepDefinition);
+  setup.registerStepDefinition(awsOnboardingUpdateConnectorStepDefinition);
   setup.registerStepDefinition(awsOnboardingCreatePoliciesStepDefinition);
   setup.registerStepDefinition(awsOnboardingHasDataStepDefinition);
 };

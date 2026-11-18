@@ -226,6 +226,7 @@ describe('awsOnboardingResolveStepDefinition', () => {
       name: 'existing-identity',
       stack_id: 'arn:aws:cloudformation:us-west-2:123456789012:stack/elastic-onboarding-ab12/x',
       stack_region: 'us-west-2',
+      template_sha: 'sha-1',
       created_at: '2026-11-17T10:00:00.000Z',
       updatable: true,
       covered_integrations: [
@@ -257,6 +258,7 @@ describe('awsOnboardingResolveStepDefinition', () => {
         expect.objectContaining({
           stack_action: 'update',
           stack_id: reusable.stack_id,
+          template_sha: 'sha-1',
           cloud_connector_id: 'cc-1',
           identity_name: 'existing-identity',
           added_policy_templates: ['ec2 (aws-s3)'],
