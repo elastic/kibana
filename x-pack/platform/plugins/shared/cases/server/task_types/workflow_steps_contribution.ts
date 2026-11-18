@@ -71,8 +71,14 @@ export const contribution: WorkflowStepsContribution = {
     settings: ['cases'],
     // `register` below reads the rule registry's alerts client (`ruleRegistry`, for RAC-backed cases
     // steps) and, when spaces is enabled, the spaces service (`spaces`, for the space-scoped cases
-    // client): both are services another pack provides, not this one.
-    requires: ['ruleRegistry', 'spaces'],
+    // client): both are services another pack provides, not this one. `register` also builds this
+    // process's attachment type registry from every plugin's `cases-attachment-types` contribution
+    // (`createCasesAttachmentTypeRegistry`, read by the run check below registers for every
+    // `cases.*` step, not just the ones that add attachments): naming the whole `cases-attachment-types`
+    // contribution key here, the same way `ai.agent` names `agent-builder`, selects every one of
+    // those packs too, so no `cases.*` step is declined for a registration this pack alone does not
+    // carry.
+    requires: ['ruleRegistry', 'spaces', 'cases-attachment-types'],
     // Every `cases.*` step type `register` below can register: `casesStepRegistry` (./registry.ts)
     // plus the three it adds on top (`createCaseFromTemplate` always, `setExtendedFields` and
     // `addAttachments` each behind their own flag). Lets `resolvePacksForDefinition` select this
