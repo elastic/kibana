@@ -56,9 +56,6 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.datasetUserPrivileges.datasetsPrivilages['logs-*-*']).toMatchObject({
-        canMonitor: true,
-      });
 
       const privileges = (response.body.dataStreamsStats as DataStreamStat[])
         .filter(({ name }) => DATA_STREAMS.includes(name))

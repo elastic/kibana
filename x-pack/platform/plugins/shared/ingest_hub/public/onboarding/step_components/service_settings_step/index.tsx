@@ -33,6 +33,11 @@ import { supportsNamespace } from './instance_namespace_field';
 import { deploysAsPolicy, followsGlobalNamespace } from '../../common/effective_namespace';
 import { ecfFamilySupportsNamespace } from '../../ecf_cloudformation';
 import { getRegionFieldName, hasConfigurableFlyoutFields } from './field_config';
+import { getDatasetTemplatesPolicy } from './dataset_templates';
+import {
+  DEFAULT_NAMESPACE,
+  groupByPackage,
+} from '../authenticate_and_deploy_step/deploy_group_helpers';
 import type { ServiceInstance } from './use_service_settings';
 import { useServiceSettings } from './use_service_settings';
 import { useDuplicates } from './use_duplicates';
@@ -68,7 +73,11 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     policySettings,
     isProxyUrlSupported,
     proxyUrlError,
+    isReroutePermissionsSupported,
+    reroutePermissions,
+    reroutePermissionsError,
     setPolicySetting,
+    conditionErrors,
     bareNamePackage,
     instances,
     filteredInstances,
@@ -148,8 +157,17 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     [setPolicySetting]
   );
 
+  const setReroutePermissions = useCallback(
+    (permissions: string[]) => setPolicySetting('additional_datastreams_permissions', permissions),
+    [setPolicySetting]
+  );
+
   const setOutputId = useCallback(
     (outputId: string) => setPolicySetting('output_id', outputId),
+    [setPolicySetting]
+  );
+  const setCondition = useCallback(
+    (condition: string) => setPolicySetting('condition', condition),
     [setPolicySetting]
   );
 
@@ -162,6 +180,52 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   const activeFlyoutService = activeFlyoutInstance
     ? awsServicesMap?.get(activeFlyoutInstance.serviceId) ?? null
     : null;
+
+  // The services that deploy in the active service's policy share its template choice. A
+  // duplicate has a policy of its own.
+  const activePolicyContext = useMemo(() => {
+    if (!activeFlyoutInstance || activeFlyoutInstance.isDuplicate || !awsServicesMap) {
+      return undefined;
+    }
+    const originals = instances.flatMap((instance) => {
+      const service = awsServicesMap.get(instance.serviceId);
+      return !instance.isDuplicate && service && deploysAsPolicy(service, deploymentMethod)
+        ? [{ instance, service }]
+        : [];
+    });
+    const storedServiceVars = Object.fromEntries(
+      instances.map(({ instanceId }) => [instanceId, getServiceVars(instanceId)])
+    );
+    // Grouped the way the deploy groups them: managed deploys an empty namespace into the default
+    // one, agent-based leaves it to the agent policy.
+    const group = groupByPackage(
+      originals,
+      [],
+      storedServiceVars,
+      deploymentMethod === 'agent_based' ? undefined : DEFAULT_NAMESPACE,
+      namespace
+    ).find(({ instanceIds }) => instanceIds.includes(activeFlyoutInstance.instanceId));
+    return group ? { members: group.members, storedServiceVars } : undefined;
+  }, [
+    activeFlyoutInstance,
+    awsServicesMap,
+    instances,
+    deploymentMethod,
+    namespace,
+    getServiceVars,
+  ]);
+
+  const activeDatasetTemplatesPolicy = useMemo(
+    () =>
+      activeFlyoutInstance && activePolicyContext
+        ? getDatasetTemplatesPolicy(
+            activeFlyoutInstance.instanceId,
+            activePolicyContext.members,
+            activePolicyContext.storedServiceVars
+          )
+        : undefined,
+    [activeFlyoutInstance, activePolicyContext]
+  );
 
   const duplicates = useDuplicates({
     instances,
@@ -182,14 +246,34 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     (
       varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      instanceNamespace?: string
+      instanceNamespace?: string,
+      createDatasetTemplates?: boolean
     ) => {
+      // The policy is read from what was submitted, not what was saved: a service that moves from
+      // the generic dataset to a custom one only joins the switch's policy with this save.
+      const submittedPolicy = activePolicyContext
+        ? getDatasetTemplatesPolicy(instanceId, activePolicyContext.members, {
+            ...activePolicyContext.storedServiceVars,
+            [instanceId]: {
+              ...activePolicyContext.storedServiceVars[instanceId],
+              enabledDataStreams,
+              varsByDataStream,
+            },
+          })
+        : undefined;
       setServiceFieldsAndInputs(
         instanceId,
         varsByDataStream,
         enabledDataStreams,
         instanceNamespace,
-        duplicates.getRenamedName(instanceId, instanceNamespace)
+        duplicates.getRenamedName(instanceId, instanceNamespace),
+        // The policy takes one value, so a change reaches every service that deploys in it.
+        createDatasetTemplates === undefined
+          ? undefined
+          : {
+              instanceIds: [...new Set([instanceId, ...(submittedPolicy?.instanceIds ?? [])])],
+              enabled: createDatasetTemplates,
+            }
       );
       setActiveFlyoutInstanceId(null);
     };
@@ -217,7 +301,14 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         })
       );
     }
-    if (integrationNameError || descriptionError || namespaceError || proxyUrlError) {
+    if (
+      integrationNameError ||
+      descriptionError ||
+      namespaceError ||
+      proxyUrlError ||
+      conditionErrors ||
+      reroutePermissionsError
+    ) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
           defaultMessage: 'Fix the integration settings',
@@ -243,6 +334,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     descriptionError,
     namespaceError,
     proxyUrlError,
+    conditionErrors,
+    reroutePermissionsError,
     incompleteInstances,
   ]);
 
@@ -527,6 +620,24 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
               }
             : undefined
         }
+        condition={
+          supportsPolicySetting('condition', deploymentMethod)
+            ? {
+                value: policySettings.condition ?? '',
+                onChange: setCondition,
+                errors: conditionErrors,
+              }
+            : undefined
+        }
+        reroutePermissions={
+          isReroutePermissionsSupported
+            ? {
+                value: reroutePermissions,
+                onChange: setReroutePermissions,
+                error: reroutePermissionsError,
+              }
+            : undefined
+        }
       />
       <EuiSpacer size="m" />
 
@@ -640,6 +751,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           isDuplicate={activeFlyoutInstance.isDuplicate}
           globalNamespace={namespace}
           isDeployed={!!detectAndReviewStep.policyIdsByInstance[activeFlyoutInstance.instanceId]}
+          datasetTemplatesPolicy={activeDatasetTemplatesPolicy}
           onApply={handleFlyoutApply(activeFlyoutInstance.instanceId)}
           onClose={() => setActiveFlyoutInstanceId(null)}
         />

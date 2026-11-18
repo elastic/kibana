@@ -7,7 +7,10 @@
 
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import type { ServiceMapNode } from '@kbn/apm-types';
-import { isServiceNodeData } from '../../../../common/service_map';
+import {
+  isServiceNodeData,
+  shouldKeepVisibleDespiteLowTraffic,
+} from '../../../../common/service_map';
 
 export type ServiceMapBadgesApiResponse =
   APIReturnType<'POST /internal/apm/service-map/service_badges'>;
@@ -34,12 +37,19 @@ export function mergeServiceMapNodesWithBadges(
     const alertsCount = alertsByService.get(serviceName);
     const slo = slosByService.get(serviceName);
 
+    const data = {
+      ...node.data,
+      ...(alertsCount !== undefined ? { alertsCount } : {}),
+      ...(slo ? { sloStatus: slo.sloStatus, sloCount: slo.sloCount } : {}),
+    };
+
+    // Badges load after idle marking; reuse the same keep-visible rules (alerts / SLO /
+    // failure / anomaly) so a newly badged quiet node is not left faded.
     return {
       ...node,
       data: {
-        ...node.data,
-        ...(alertsCount !== undefined ? { alertsCount } : {}),
-        ...(slo ? { sloStatus: slo.sloStatus, sloCount: slo.sloCount } : {}),
+        ...data,
+        ...(data.isIdle && shouldKeepVisibleDespiteLowTraffic(data) ? { isIdle: false } : {}),
       },
     };
   });

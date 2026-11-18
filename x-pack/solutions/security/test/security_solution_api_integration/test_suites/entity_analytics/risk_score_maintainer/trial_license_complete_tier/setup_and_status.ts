@@ -14,7 +14,6 @@ import {
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   EntityStoreUtils,
-  riskEngineRouteHelpersFactory,
   entityMaintainerRouteHelpersFactory,
   cleanUpRiskScoreMaintainer,
 } from '../../utils';
@@ -25,7 +24,6 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const customSpaceName = 'ea-customspace-it';
-  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
   const maintainerRoutesCustomSpace = entityMaintainerRouteHelpersFactory(
     supertest,
@@ -144,8 +142,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       await entityStoreUtils.cleanEngines();
       await entityStoreUtilsCustomSpace.cleanEngines();
-      await cleanUpRiskScoreMaintainer({ es, log });
-      await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName });
+      await cleanUpRiskScoreMaintainer({ es, log, supertest });
+      await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName, supertest });
       await deleteRiskEngineConfigs();
       await deleteRiskEngineConfigs(customSpaceName);
     });
@@ -153,8 +151,8 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await entityStoreUtils.cleanEngines();
       await entityStoreUtilsCustomSpace.cleanEngines();
-      await cleanUpRiskScoreMaintainer({ es, log });
-      await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName });
+      await cleanUpRiskScoreMaintainer({ es, log, supertest });
+      await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName, supertest });
       await deleteRiskEngineConfigs();
       await deleteRiskEngineConfigs(customSpaceName);
     });
@@ -167,14 +165,6 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await enableEntityStoreV2Setting();
         await enableEntityStoreV2Setting(customSpaceName);
-      });
-
-      it('should return 400 for legacy risk engine init api', async () => {
-        await riskEngineRoutes.init(400);
-      });
-
-      it('should return 400 for legacy risk engine status api', async () => {
-        await riskEngineRoutes.getStatus(400);
       });
 
       it('adopts a legacy risk score config into the fixed saved object id', async () => {

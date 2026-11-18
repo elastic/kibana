@@ -1026,14 +1026,8 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
 
       resetInitialValues(values);
 
-      let isRefreshRequired = false;
-      if (
-        initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode ||
-        initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode ||
-        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale
-      ) {
-        isRefreshRequired = true;
-      }
+      const isRefreshRequired =
+        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale;
 
       if (
         values.data &&

@@ -1,6 +1,6 @@
 # Entity Inventory
 
-Server plugin for the Observability entity inventory. It will serve inventory lists, details and counts for registered entity types straight from raw telemetry, using queries generated from the entity definitions held by the entity store (`entityStore` plugin).
+Server plugin for the Observability entity inventory. It serves inventory lists, and later details, for registered entity types straight from raw telemetry, using queries generated from the entity definitions held by the entity store (`entityStore` plugin).
 
 The plugin is disabled by default. To enable it, add the following to `kibana.yml`:
 
@@ -10,7 +10,7 @@ xpack.entityInventory.enabled: true
 
 ## Routes
 
-The routes exist only when the plugin is enabled. Both are internal: send `x-elastic-internal-origin: kibana`, and `kbn-xsrf` on `POST`.
+The routes exist only when the plugin is enabled. All are internal: send `x-elastic-internal-origin: kibana`, and `kbn-xsrf` on `POST`.
 
 ### `GET /internal/entity_inventory/types`
 
@@ -63,11 +63,10 @@ Response:
 
 | key | |
 | --- | --- |
-| `columns` | `{ name, kind, type }` in column order: `entity.id`, the identity fields, the attributes in source order, `last_seen`. `type` comes from the first plan that returned the column with a type other than `null`. |
+| `columns` | `{ name, kind }` in column order: `entity.id`, the identity fields, the attributes in source order, `last_seen`. The same columns the `types` route returns for the type. No Elasticsearch type: values arrive with their JSON type and `kind` marks `last_seen` as the date. |
 | `rows` | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value. |
 | `provenance` | For each returned row's `entity.id`, the index pattern that supplied each attribute value. |
-| `total` | The exact number of entities in the window, or null when a plan was cut (returned `limit + 1` rows), Elasticsearch answered with a partial result, or a probe or plan query failed. |
-| `truncated` | True only when the row limit left rows out: a plan was cut, or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors` and nulls `total`. |
+| `truncated` | True only when the row limit left rows out: a plan was cut (returned `limit + 1` rows), or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors`. There is no `total`. |
 | `took` | Wall time of the request in milliseconds, probes included. |
 | `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, and Elasticsearch's `took`, `documentsFound` and `rowCount`. A failed query has null `took` and `documentsFound` and `rowCount` 0. Probes are not listed. |
 | `errors` | `{ indexPattern, status, reason }` per source problem; never a stack. |
@@ -75,10 +74,10 @@ Response:
 
 Anything about one source degrades the result and is reported in `errors`; it never fails the request:
 
-- A probe that fails for a reason other than verification: none of the source's plans run, `total` is null.
-- A plan query that fails: the other plans still return rows, `total` is null.
-- A plan whose response is partial (`is_partial`, some shards or clusters did not answer): its rows are kept, it is reported in `errors`, `total` is null.
-- A plan that reads nothing usable, because no readable index behind its pattern maps `@timestamp` or its identity fields are unmapped: the plan is dropped. That is not a failure, so `total` stays exact. A user who can read none of the source indices gets `rows: []`, every plan in `errors`, `total: 0` and `truncated: false`.
+- A probe that fails for a reason other than verification: none of the source's plans run.
+- A plan query that fails: the other plans still return rows.
+- A plan whose response is partial (`is_partial`, some shards or clusters did not answer): its rows are kept and it is reported in `errors`.
+- A plan that reads nothing usable, because no readable index behind its pattern maps `@timestamp` or its identity fields are unmapped: the plan is dropped and reported in `errors`. A user who can read none of the source indices gets `rows: []`, every plan in `errors` and `truncated: false`.
 
 Errors that fail the request:
 
@@ -92,6 +91,22 @@ Errors that fail the request:
 | The definition cannot be turned into queries | 400 |
 
 The route does not cap the window length: it checks only that `from` and `to` are instants and that `from` is earlier than `to`. The limit lives in the UI, which clamps its picker to `ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS` (3 days, `entity_inventory_app/public/application/constants.ts`). A direct caller is therefore unbounded — `{"from":"1970-01-01T00:00:00Z","to":"2200-01-01T00:00:00Z"}` is a valid request — which is acceptable while the route is internal and both plugins are off by default.
+
+### `POST /internal/entity_inventory/entities/{type}/_plan`
+
+Lets a caller, such as a benchmark, run the inventory's generated queries itself: it plans the request exactly as `_list` does, probes included, and returns the probes and the list queries `_list` would send for the same request, without running the list queries. Planning and the request body are shared with `_list`, so the queries are the ones `_list` sends.
+
+Body: the same as `_list` (`from`, `to`, `limit`, strict).
+
+Response:
+
+| key | |
+| --- | --- |
+| `probes` | One entry per distinct source pattern, in source order: `indexPattern`, `request`, and `hasTimeSeries`, whether the probe found a readable time-series index (null when the probe failed). |
+| `queries` | One entry per plan query `_list` would send, in plan order: `indexPattern`, `engine` (`TS` or `FROM`) and `request`. A source whose probe failed has none, as in `_list`. |
+| `errors` | `{ indexPattern, status, reason }` per source whose probe failed. |
+
+Each `request` is the body to send to Elasticsearch's `POST /_query` unchanged: `query`, `params` (the named parameters, never interpolated) and `include_execution_metadata: true`. A probe that fails is reported in `errors` and never fails the request. The request errors and their statuses are those of `_list`.
 
 ### Access control (interim)
 
@@ -189,15 +204,15 @@ The executor reads the type of the `@timestamp` column to decide whether the sou
 | `esql_client.ts` | Runs one generated query with its named parameters and `include_execution_metadata`, returning rows as objects keyed by column name (multi-values stay arrays) with `took`, documents found, values loaded and the row count. `drop_null_columns` stays off so every plan returns the same columns. |
 | `errors/source_error.ts` | Flattens a failed query to `{ indexPattern, status, reason }`; never a stack or the raw body. |
 | `value_labels.ts` | Maps an attribute's raw values to its `valueLabels` per plan, before the merge; an unmapped value passes through stringified. |
-| `merge.ts` | One row per `entity.id` across plans: attributes from the row with the newest `last_seen`, identity fields and `entity.id` first non-null, `last_seen` newest, a null never replacing a value; `provenance` names the source pattern behind each attribute value; column types come from the first plan that returned the column. |
+| `merge.ts` | One row per `entity.id` across plans: attributes from the row with the newest `last_seen`, identity fields and `entity.id` first non-null, `last_seen` newest, a null never replacing a value; `provenance` names the source pattern behind each attribute value. |
 | `plan_result.ts` | Reads from a plan's column types whether it is usable and which of its attribute fields no index maps. |
-| `output.ts` | Orders by `last_seen` descending with ties on `entity.id`, takes the limit from the front, sets each plan's `LIMIT` one above the request, derives `total` from plan cuts and partial results and `truncated` from plan cuts and the limit (there is no count query), and fills every row with every column. |
+| `output.ts` | Orders by `last_seen` descending with ties on `entity.id`, takes the limit from the front, sets each plan's `LIMIT` one above the request, derives `truncated` from plan cuts and the limit (there is no count query), and fills every row with every column. |
 
 No metadata API is called and no concrete index is named: the executor learns everything from ES\|QL results.
 
 **Probe.** One probe per distinct pattern, concurrently: `TS <pattern> | KEEP @timestamp | LIMIT 0`. `@timestamp` of any type other than `null` means a time-series index exists and the source gets a `TS` plan. `null`, no column, or a verification error (a concrete index that is not time series, a name that does not exist) means none. Any other failure is a source error and no plan of the source runs: the `FROM` plan excludes time-series indices, so reading the failure as "none" would silently leave them out. The decision reads the error type, never the message. Elasticsearch drops indices the user cannot read like indices that do not exist.
 
-**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped; a field the id evaluation overwrites, in practice `entity.id`, which the evaluation types `keyword` even when unmapped, is read from `raw:entity.id`, its value as the documents supplied it, which the response does not carry. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut; `total` is the merged row count, exact, only when no plan is cut or partial, otherwise null, and `truncated` is true only when the row limit left rows out. A failed probe or query and a partial result (`is_partial`) also make `total` null without setting `truncated`; each is reported in `errors[]`, and a partial plan's rows are kept.
+**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped; a field the id evaluation overwrites, in practice `entity.id`, which the evaluation types `keyword` even when unmapped, is read from `raw:entity.id`, its value as the documents supplied it, which the response does not carry. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut, and `truncated` is true only when the row limit left rows out. A failed probe or query and a partial result (`is_partial`) do not set `truncated`; each is reported in `errors[]`, and a partial plan's rows are kept.
 
 Nothing is cached yet.
 

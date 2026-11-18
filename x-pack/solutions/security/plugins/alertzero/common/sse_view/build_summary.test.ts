@@ -41,6 +41,12 @@ describe('buildSummary', () => {
     );
   });
 
+  it('reads a truncated behavior host count as a floor', () => {
+    expect(buildSummary([behaviorDetection({ host_count: 20, hosts_truncated: true })])).toBe(
+      'T1059 Command and Scripting Interpreter: 5 events on 20+ hosts'
+    );
+  });
+
   it("builds an IOC summary with count and the IOC's own host count", () => {
     const summary = buildSummary([iocDetection({ host_count: 3 })]);
     expect(summary).toBe('ip 203.0.113.5 seen 8x on 3 hosts');

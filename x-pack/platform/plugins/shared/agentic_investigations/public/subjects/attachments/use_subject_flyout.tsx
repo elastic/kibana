@@ -25,6 +25,7 @@ export interface SubjectFlyout {
   onClick: (event: React.MouseEvent) => void;
   /** The open flyout, to render next to the element that was clicked; `null` while closed. */
   flyout: React.ReactNode;
+  canOpenFlyout: boolean;
 }
 
 /**
@@ -57,14 +58,20 @@ export const useSubjectFlyout = (
     window.requestAnimationFrame(() => element?.focus());
   }, []);
 
+  const canOpen = useCallback((): boolean => {
+    if (!subject) {
+      return false;
+    }
+    const isRegistered = services.getAlertFlyout?.(source, subject.snapshot) !== undefined;
+    if (subject.type !== 'alert') {
+      return false;
+    }
+    return onlyRegistered ? isRegistered : canOpenSubjectFlyout(services, source, subject.snapshot);
+  }, [subject, source, services, onlyRegistered]);
+
   const onClick = useCallback(
     (event: React.MouseEvent) => {
-      const opensFlyout =
-        subject?.type === 'alert' &&
-        (onlyRegistered
-          ? services.getAlertFlyout?.(source, subject.snapshot) !== undefined
-          : canOpenSubjectFlyout(services, source, subject.snapshot));
-      if (!opensFlyout) {
+      if (!canOpen()) {
         onLinkClick?.(event);
         return;
       }
@@ -75,7 +82,7 @@ export const useSubjectFlyout = (
       opener.current = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
       setIsOpen(true);
     },
-    [subject, source, services, onlyRegistered, onLinkClick]
+    [canOpen, onLinkClick]
   );
 
   const flyout =
@@ -92,5 +99,5 @@ export const useSubjectFlyout = (
       </React.Suspense>
     ) : null;
 
-  return { onClick, flyout };
+  return { onClick, flyout, canOpenFlyout: canOpen() };
 };

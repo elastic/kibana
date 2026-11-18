@@ -7,6 +7,18 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityDefinitionsClient, RegisteredEntityDefinition } from '@kbn/entity-store/server';
+import type {
+  GetTypesResponse,
+  InventoryRow,
+  InventoryType,
+  InventoryTypeColumn,
+  ListQueryDiagnostic,
+  ListResponse,
+  PlanResponse,
+  Provenance,
+  SourceError,
+  UnavailableColumn,
+} from '../../common';
 import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
 import { InventoryTypeNotFoundError } from '../inventory/errors/inventory_type_not_found_error';
 import {
@@ -20,15 +32,10 @@ import {
   planRowLimit,
   probeSources,
   summarizeResults,
+  toEsqlRequestBody,
   toSourceError,
 } from '../inventory/executor';
-import type {
-  EsqlQueryResult,
-  InventoryRow,
-  PlanResult,
-  Provenance,
-  SourceError,
-} from '../inventory/executor';
+import type { EsqlQueryResult, PlanResult, ProbeResult } from '../inventory/executor';
 import {
   buildColumns,
   ENTITY_ID_COLUMN,
@@ -39,16 +46,11 @@ import {
 } from '../inventory/generator';
 import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
 import type { ListRequest } from '../inventory/types';
-import type {
-  GetTypesResponse,
-  InventoryType,
-  ListQueryDiagnostic,
-  ListResponse,
-  UnavailableColumn,
-} from '../routes/types';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {
+  /** The probe of each distinct source pattern, in source order. */
+  probes: Map<string, ProbeResult>;
   plans: QueryPlan[];
   identity: IdentityPlan;
   columns: OutputColumn[];
@@ -92,6 +94,9 @@ const toQueryDiagnostic = (
     rowCount: stats.rowCount,
   };
 };
+
+const toResponseColumns = (columns: OutputColumn[]): InventoryTypeColumn[] =>
+  columns.map(({ name, kind }) => ({ name, kind }));
 
 const restrictProvenance = (provenance: Provenance, rows: InventoryRow[]): Provenance =>
   Object.fromEntries(
@@ -140,9 +145,8 @@ export class InventoryService {
    * Throws `InventoryTypeNotFoundError` when no `dynamic` definition is registered for the type and `InventoryTypeDefinitionError` when the definition cannot be turned into queries. A
    * source whose probe failed runs no plan, and a query that fails or reads nothing usable is
    * reported in `errors[]`; neither fails the request. A partial result is also reported in
-   * `errors[]` and its rows are kept. A failed probe or query or a partial result makes `total`
-   * null, since the entities of that source are unknown; `truncated` is true only when the row
-   * limit left rows out. `queries[]` lists every plan query sent, `provenance` covers the returned
+   * `errors[]` and its rows are kept. `truncated` is true only when the row limit left rows out.
+   * `queries[]` lists every plan query sent, `provenance` covers the returned
    * rows only, and `took` is the wall time of the whole call.
    */
   list = async ({ type, window, limit, signal }: ListRequest): Promise<ListResponse> => {
@@ -161,7 +165,6 @@ export class InventoryService {
     );
 
     const errors: SourceError[] = [...probeErrors];
-    const failedQueries = outcomes.filter(({ status }) => status === 'rejected').length;
     const unavailableColumns: UnavailableColumn[] = [];
     const results = outcomes.flatMap((outcome, planIndex): PlanResult[] => {
       const plan = plans[planIndex];
@@ -170,7 +173,7 @@ export class InventoryService {
         return [];
       }
       const { columns: resultColumns, rows, isPartial } = outcome.value;
-      const result: PlanResult = { plan, columns: resultColumns, rows, isPartial };
+      const result: PlanResult = { plan, columns: resultColumns, rows };
       if (isPartial) {
         errors.push({
           indexPattern: plan.indexPattern,
@@ -193,16 +196,13 @@ export class InventoryService {
 
     const merged = mergeRows(results, columns);
     const ordered = orderRows(merged.rows);
-    const { total, truncated } = summarizeResults(results, limit, ordered.length);
+    const { truncated } = summarizeResults(results, limit, ordered.length);
     const rows = fillColumns(applyLimit(ordered, limit), columns);
-    // A plan that read nothing usable is not a failure: its pattern holds no data the user can read.
-    const incomplete = probeErrors.length > 0 || failedQueries > 0;
 
     return {
-      columns: merged.columns,
+      columns: toResponseColumns(columns),
       rows,
       provenance: restrictProvenance(merged.provenance, rows),
-      total: incomplete ? null : total,
       truncated,
       took: Date.now() - startedAt,
       queries: outcomes.map((outcome, planIndex) =>
@@ -210,6 +210,34 @@ export class InventoryService {
       ),
       errors,
       unavailableColumns,
+    };
+  };
+
+  /**
+   * Plans the request exactly as `list` does, probes included, and returns the probes and the list
+   * queries `list` would send as `POST /_query` bodies, without running the list queries.
+   * Throws as `list` does.
+   */
+  plan = async ({ type, window, limit, signal }: ListRequest): Promise<PlanResponse> => {
+    const definition = await this.getDynamicDefinition(type);
+    const { probes, plans, queries, probeErrors } = await this.planList(
+      definition,
+      window,
+      limit,
+      signal
+    );
+    return {
+      probes: [...probes].map(([indexPattern, probe]) => ({
+        indexPattern,
+        request: toEsqlRequestBody(probe.query),
+        hasTimeSeries: probe.failed ? null : probe.hasTimeSeries,
+      })),
+      queries: plans.map(({ indexPattern, engine }, position) => ({
+        indexPattern,
+        engine,
+        request: toEsqlRequestBody(queries[position]),
+      })),
+      errors: probeErrors,
     };
   };
 
@@ -275,6 +303,7 @@ export class InventoryService {
         failedPatterns.has(plan.indexPattern) ? [] : [{ plan, query: allQueries[position] }]
       );
       return {
+        probes,
         plans: runnable.map(({ plan }) => plan),
         identity,
         columns,
@@ -305,7 +334,7 @@ export class InventoryService {
       name,
       description,
       identityFields: identityPlan.groupingFields,
-      columns: columns.map(({ name: columnName, kind }) => ({ name: columnName, kind })),
+      columns: toResponseColumns(columns),
       sources: sources.map(({ indexPattern, filter }) => ({ indexPattern, filter })),
     };
   };

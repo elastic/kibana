@@ -7,10 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSelectable,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FlyoutTemplate } from './flyout_template';
 import {
   type SharedStoryArgs,
@@ -33,13 +47,15 @@ type Args = SharedStoryArgs & {
   sectionIcon: boolean;
   sectionAction: boolean;
   sectionHasBorder: boolean;
+  moduleDelayMs?: number;
+  dataDelayMs?: number;
 };
 
 const meta: Meta<Args> = {
   title: 'Flyout Template/Template',
   args: {
-    numLeadingActions: 1,
-    numTrailingActions: 1,
+    numLeadingActions: 0,
+    numTrailingActions: 0,
     numPages: 0,
     paginationJump: false,
     numUnstructuredBlocks: 0,
@@ -725,6 +741,155 @@ export const FooterActions: Story = {
 };
 
 /** Header and body each sit behind their own error boundary, so a throw in one spares the other. */
+const PopoverValue = ({
+  label,
+  options,
+  'data-test-subj': dataTestSubj,
+}: {
+  label: string;
+  options: string[];
+  'data-test-subj': string;
+}): React.JSX.Element => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [value, setValue] = useState(options[0]);
+  return (
+    <EuiPopover
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      aria-label={label}
+      panelPaddingSize="none"
+      panelProps={{ 'data-test-subj': `${dataTestSubj}Panel` }}
+      button={
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          iconType="chevronSingleDown"
+          iconSide="right"
+          onClick={() => setIsOpen((open) => !open)}
+          aria-label={`${label}: ${value}`}
+          data-test-subj={dataTestSubj}
+        >
+          {value}
+        </EuiButtonEmpty>
+      }
+    >
+      <EuiContextMenuPanel
+        items={options.map((option) => (
+          <EuiContextMenuItem
+            key={option}
+            icon={option === value ? 'check' : 'empty'}
+            onClick={() => {
+              setValue(option);
+              setIsOpen(false);
+            }}
+          >
+            {option}
+          </EuiContextMenuItem>
+        ))}
+      />
+    </EuiPopover>
+  );
+};
+
+const AssigneesValue = (): React.JSX.Element => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiAvatar name="Ada Lovelace" size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          isOpen={isOpen}
+          closePopover={() => setIsOpen(false)}
+          aria-label="Add assignees"
+          panelProps={{ 'data-test-subj': 'storyAssigneesPanel' }}
+          button={
+            <EuiToolTip content="Add assignees" disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="plusCircle"
+                aria-label="Add assignees"
+                onClick={() => setIsOpen((open) => !open)}
+                data-test-subj="storyAssignees"
+              />
+            </EuiToolTip>
+          }
+        >
+          <EuiSelectable
+            aria-label="Assignees"
+            searchable
+            options={[{ label: 'Ada Lovelace', checked: 'on' }, { label: 'Grace Hopper' }]}
+            onChange={() => {}}
+          >
+            {(list, search) => (
+              <>
+                {search}
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const InteractiveInfoBlocksRender = (args: Args): React.JSX.Element => (
+  <FlyoutTemplate
+    onClose={action('onClose')}
+    size="m"
+    {...buildFlyoutProps(args, 'Interactive info blocks')}
+  >
+    {headerZone(
+      args,
+      'Interactive info blocks',
+      <>
+        <FlyoutTemplate.Header.InfoBlock title="Status">
+          <PopoverValue label="Status" options={['Open', 'Closed']} data-test-subj="storyStatus" />
+        </FlyoutTemplate.Header.InfoBlock>
+        <FlyoutTemplate.Header.InfoBlock title="Severity">
+          <PopoverValue
+            label="Severity"
+            options={['Critical', 'High', 'Medium', 'Low']}
+            data-test-subj="storySeverity"
+          />
+        </FlyoutTemplate.Header.InfoBlock>
+        <FlyoutTemplate.Header.InfoBlock title="Assignees">
+          <AssigneesValue />
+        </FlyoutTemplate.Header.InfoBlock>
+      </>
+    )}
+    {bodyZone(
+      <>
+        <FlyoutTemplate.Body.Section title="Details">
+          <EuiText size="s">
+            <p>
+              Each info block value opens a popover. Tab through the header to check that focus
+              reaches every control in order. Then open a popover and scroll the body until the
+              header collapses.
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {Array.from({ length: 60 }, (_, index) => (
+            <React.Fragment key={index}>{bodyText(fillContent())}</React.Fragment>
+          ))}
+        </FlyoutTemplate.Body.Section>
+      </>
+    )}
+    {footerZone(args)}
+  </FlyoutTemplate>
+);
+
+export const InteractiveInfoBlocks: Story = {
+  argTypes: {
+    numInfoBlocks: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
+    headerIsCollapsed: { table: { disable: true } },
+  },
+  args: { numInfoBlocks: 0, description: true },
+  render: InteractiveInfoBlocksRender,
+};
+
 const ErrorInFlyoutRender = (args: Args): React.JSX.Element => (
   <FlyoutTemplate
     onClose={action('onClose')}
@@ -757,4 +922,123 @@ export const ErrorInFlyout: Story = {
     numTabs: { table: { disable: true } },
   },
   render: ErrorInFlyoutRender,
+};
+
+/** The details content, as a lazily loaded module would export it. It fetches its data after it mounts. */
+const LoadedDetails = ({
+  args,
+  dataDelayMs,
+  onClose,
+}: {
+  args: Args;
+  dataDelayMs: number;
+  onClose: () => void;
+}) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoaded(true), dataDelayMs);
+    return () => clearTimeout(timer);
+  }, [dataDelayMs]);
+
+  if (!isLoaded) {
+    return (
+      <FlyoutTemplate onClose={onClose}>
+        <FlyoutTemplate.Header title="Alert details" isLoading />
+        <FlyoutTemplate.Body />
+      </FlyoutTemplate>
+    );
+  }
+
+  return (
+    <FlyoutTemplate onClose={onClose}>
+      {headerZone(args, 'Alert details')}
+      {bodyZone(
+        <FlyoutTemplate.Body.Section title="Summary">
+          {bodyText(fillContent('Summary section content.'))}
+        </FlyoutTemplate.Body.Section>
+      )}
+      {footerZone(args)}
+    </FlyoutTemplate>
+  );
+};
+
+const LoadingInAFrameRender = (args: Args): React.JSX.Element => {
+  const { moduleDelayMs = 1500, dataDelayMs = 1500 } = args;
+  const [openCount, setOpenCount] = useState(1);
+  const [isOpen, setIsOpen] = useState(true);
+
+  const close = () => {
+    action('onClose')();
+    setIsOpen(false);
+  };
+
+  // A new lazy component per open, so every open loads the module again.
+  const LazyDetails = useMemo(
+    () =>
+      React.lazy(
+        () =>
+          new Promise<{ default: React.ComponentType<{ onClose: () => void }> }>((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  default: ({ onClose }) => (
+                    <LoadedDetails args={args} dataDelayMs={dataDelayMs} onClose={onClose} />
+                  ),
+                }),
+              moduleDelayMs
+            )
+          )
+      ),
+    // `args` is read when the module resolves; only an open or a new delay loads it again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [openCount, moduleDelayMs, dataDelayMs]
+  );
+
+  const builtProps = buildFlyoutProps(args, 'Alert details');
+
+  return (
+    <>
+      <EuiButton
+        onClick={() => {
+          setOpenCount((count) => count + 1);
+          setIsOpen(true);
+        }}
+      >
+        Reopen
+      </EuiButton>
+      {isOpen && (
+        <FlyoutTemplate.Frame
+          key={openCount}
+          onClose={close}
+          size="m"
+          {...builtProps}
+          flyoutMenuProps={{ title: 'Alert details', ...builtProps.flyoutMenuProps }}
+        >
+          <LazyDetails onClose={close} />
+        </FlyoutTemplate.Frame>
+      )}
+    </>
+  );
+};
+
+export const LoadingInAFrame: Story = {
+  name: 'Loading in a frame',
+  argTypes: {
+    moduleDelayMs: {
+      name: 'Module load (ms)',
+      control: { type: 'range', min: 0, max: 5000, step: 250 },
+      table: { category: 'Loading' },
+    },
+    dataDelayMs: {
+      name: 'Data load (ms)',
+      control: { type: 'range', min: 0, max: 5000, step: 250 },
+      table: { category: 'Loading' },
+    },
+    numPages: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
+    titleAsLink: { table: { disable: true } },
+  },
+  args: { moduleDelayMs: 1500, dataDelayMs: 1500 },
+  render: LoadingInAFrameRender,
 };

@@ -52,7 +52,7 @@ export function ResetSection({ canManage }: { canManage: boolean }) {
           content={
             !canManage
               ? i18n.translate('xpack.nightshift.settings.reset.privilegeTooltip', {
-                  defaultMessage: 'Reset requires the Nightshift Manage engines privilege.',
+                  defaultMessage: 'Reset requires the nightshift Manage engines privilege.',
                 })
               : undefined
           }

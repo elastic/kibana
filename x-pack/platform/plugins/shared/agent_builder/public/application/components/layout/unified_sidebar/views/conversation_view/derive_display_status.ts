@@ -21,5 +21,5 @@ export const deriveDisplayStatus = (
   if (conversation.read === false && !isActive) {
     return ConversationDisplayStatus.unread;
   }
-  return undefined;
+  return isActive ? undefined : ConversationDisplayStatus.read;
 };

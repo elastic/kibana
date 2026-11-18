@@ -25,7 +25,7 @@ export class AddToCaseModal {
       '[data-test-subj="caseTitle"] [data-test-subj="input"]'
     );
     this.createCaseDescriptionInput = this.createCaseFlyout.locator(
-      'textarea.euiMarkdownEditorTextArea'
+      'textarea[data-test-subj="euiMarkdownEditorTextArea"]'
     );
     this.createCaseSubmitButton = this.page.testSubj.locator('create-case-submit');
   }

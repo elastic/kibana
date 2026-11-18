@@ -110,24 +110,14 @@ export const createIndexTemplatesTabActions = () => {
 
   const clickActionMenu = async (templateName: string) => {
     const row = getTemplateRowByName(templateName);
-    // EUI tables typically use an icon button with accessible name "Actions" (fallback: aria-haspopup)
-    const buttons = within(row).getAllByRole('button') as HTMLButtonElement[];
-    const actionsButton =
-      buttons.find((b) =>
-        /actions/i.test((b.getAttribute('aria-label') ?? b.textContent ?? '').trim())
-      ) ??
-      buttons.find((b) => {
-        const hasPopup = b.getAttribute('aria-haspopup');
-        return typeof hasPopup === 'string' && hasPopup.length > 0;
-      });
-    if (!actionsButton)
-      throw new Error('Expected an actions popover toggle button in the table row');
+    // EuiBasicTable tags the collapsed row actions toggle with a stable `data-test-subj`.
+    const actionsButton = within(row).getByTestId('euiCollapsedItemActionsButton');
 
-    lastRowActionsButton = actionsButton;
+    lastRowActionsButton = actionsButton as HTMLButtonElement;
     fireEvent.click(actionsButton);
 
     // Wait until the expected menu item exists in an open popover panel
-    await new EuiPopoverPanelTestHarness().findContextMenuContainingItem('Edit');
+    return await new EuiPopoverPanelTestHarness().findContextMenuContainingItem('Edit');
   };
 
   const findActionButton = (action: 'edit' | 'clone' | 'delete'): HTMLElement | null => {
@@ -138,11 +128,8 @@ export const createIndexTemplatesTabActions = () => {
   };
 
   const clickTemplateAction = async (templateName: string, action: 'edit' | 'clone' | 'delete') => {
-    const label = getActionLabel(action);
-    await clickActionMenu(templateName);
-
-    const menu = await new EuiPopoverPanelTestHarness().findContextMenuContainingItem(label);
-    await menu.clickMenuItemAndWaitForClose(label);
+    const menu = await clickActionMenu(templateName);
+    await menu.clickMenuItemAndWaitForClose(getActionLabel(action));
   };
 
   const closeOpenActionMenu = async () => {
