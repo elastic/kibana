@@ -1,0 +1,676 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { z } from '@kbn/zod/v4';
+import type { ActionDefinition, ConnectorSpec } from '../../connector_spec';
+import type { ResponseHandlingFinding } from './check_response_handling';
+import { checkResponseHandling, formatResponseFindings } from './check_response_handling';
+
+const V1 = 'https://api.example.com/v1';
+
+const item = {
+  type: 'object',
+  required: ['id', 'name'],
+  properties: { id: { type: 'string' }, name: { type: 'string', maxLength: 255 } },
+};
+const json = (schema: unknown) => ({
+  description: 'response',
+  content: { 'application/json': { schema } },
+});
+
+const specs = {
+  v1: {
+    openapi: '3.0.3',
+    info: { title: 'Example', version: 'v1' },
+    servers: [{ url: V1 }],
+    security: [{ bearer: [] }],
+    paths: {
+      '/items': {
+        get: {
+          parameters: [
+            { name: 'cursor', in: 'query', schema: { type: 'string' } },
+            { name: 'limit', in: 'query', schema: { type: 'integer', maximum: 5000 } },
+          ],
+          responses: {
+            '200': json({
+              type: 'object',
+              required: ['items'],
+              properties: {
+                items: { type: 'array', items: item },
+                next: { type: 'string', nullable: true },
+              },
+            }),
+          },
+        },
+      },
+      '/tags': {
+        get: {
+          parameters: [
+            { name: 'offset', in: 'query', schema: { type: 'integer' } },
+            { name: 'limit', in: 'query', schema: { type: 'integer', maximum: 5000 } },
+          ],
+          responses: { '200': json({ type: 'array', items: item }) },
+        },
+      },
+      '/items/{id}': {
+        get: {
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': json(item), '404': json({ type: 'object' }) },
+        },
+        delete: {
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': json(item), '404': json({ type: 'object' }) },
+        },
+      },
+    },
+    components: { securitySchemes: { bearer: { type: 'http', scheme: 'bearer' } } },
+  },
+};
+
+const pagination = [
+  {
+    operation: { method: 'get', path: '/items', source: 'v1' },
+    pagination: {
+      style: 'cursor',
+      request: { cursorParam: 'cursor', sizeParam: 'limit' },
+      response: { itemsPath: 'items', nextPath: 'next' },
+      end: 'null',
+    },
+  },
+  {
+    // The body is the collection.
+    operation: { method: 'get', path: '/tags', source: 'v1' },
+    pagination: {
+      style: 'offset',
+      request: { offsetParam: 'offset', sizeParam: 'limit' },
+      response: { itemsPath: '' },
+    },
+  },
+] as const;
+
+const action = <T>(
+  input: z.ZodType<T>,
+  handler: ActionDefinition<T>['handler'],
+  scope: ActionDefinition<T>['scope'] = 'read'
+): ActionDefinition<T> => ({ input, handler, scope });
+
+interface Page {
+  readonly items: Array<{ id: string; name: string }>;
+  readonly next?: string | null;
+}
+
+const noInput = z.object({});
+const idInput = z.object({ id: z.string() });
+
+const connector: ConnectorSpec = {
+  metadata: {
+    id: '.example',
+    displayName: 'Example',
+    description: 'Example',
+    minimumLicense: 'enterprise',
+    supportedFeatureIds: ['workflows'],
+  },
+  auth: { types: ['bearer'] },
+  test: { enabled: false, handler: async () => ({}) },
+  actions: {
+    // Pages until the vendor says there are no more, and returns every item.
+    listAll: action(noInput, async ({ client }) => {
+      const all: Page['items'] = [];
+      let cursor: string | undefined;
+      do {
+        const { data } = await client.get<Page>(`${V1}/items`, { params: { cursor, limit: 5 } });
+        all.push(...data.items);
+        cursor = data.next ?? undefined;
+      } while (cursor);
+      return all;
+    }),
+    // Broken: the vendor ends a collection with `next: null`, which is not `undefined`, so it
+    // asks for the page after the last one for ever.
+    listLooping: action(noInput, async ({ client }) => {
+      const all: Page['items'] = [];
+      let cursor: string | null | undefined;
+      for (;;) {
+        const { data } = await client.get<Page>(`${V1}/items`, { params: { cursor, limit: 5 } });
+        all.push(...data.items);
+        if (data.next === undefined) {
+          return all;
+        }
+        cursor = data.next;
+      }
+    }),
+    // Broken: stops on the page without a next cursor before it keeps that page's items.
+    listDropsLast: action(noInput, async ({ client }) => {
+      const all: Page['items'] = [];
+      let cursor: string | undefined;
+      for (;;) {
+        const { data } = await client.get<Page>(`${V1}/items`, { params: { cursor, limit: 5 } });
+        if (!data.next) {
+          return all;
+        }
+        all.push(...data.items);
+        cursor = data.next;
+      }
+    }),
+    // Pages a body that is the collection by offset until a short page.
+    listTags: action(noInput, async ({ client }) => {
+      const all: Page['items'] = [];
+      for (let offset = 0; ; offset += 5) {
+        const { data } = await client.get<Page['items']>(`${V1}/tags`, {
+          params: { offset, limit: 5 },
+        });
+        all.push(...data);
+        if (data.length < 5) {
+          return all;
+        }
+      }
+    }),
+    // Broken: drops the first item when it joins the pages, which items 10 and 11 hide from a
+    // search for a part of "string-1".
+    listDropsFirst: action(noInput, async ({ client }) => {
+      const all: Page['items'] = [];
+      let cursor: string | undefined;
+      do {
+        const { data } = await client.get<Page>(`${V1}/items`, { params: { cursor, limit: 5 } });
+        all.push(...data.items);
+        cursor = data.next ?? undefined;
+      } while (cursor);
+      return all.slice(1);
+    }),
+    // Broken like listDropsLast, with a page size that only several pages of 500 exercise.
+    listDropsLastBig: action(noInput, async ({ client }) => {
+      const all: Page['items'] = [];
+      let cursor: string | undefined;
+      for (;;) {
+        const { data } = await client.get<Page>(`${V1}/items`, { params: { cursor, limit: 500 } });
+        if (!data.next) {
+          return all;
+        }
+        all.push(...data.items);
+        cursor = data.next;
+      }
+    }),
+    // Leaves paging to the caller: one request, and the cursor back.
+    listPage: action(noInput, async ({ client }) => {
+      const { data } = await client.get<Page>(`${V1}/items`, { params: { limit: 5 } });
+      return { items: data.items, next: data.next };
+    }),
+    // Broken: a list that comes back empty when the vendor fails, for an operation that declares
+    // no error status.
+    listSwallowing: action(noInput, async ({ client }) => {
+      try {
+        return (await client.get<Page>(`${V1}/items`, { params: { limit: 5 } })).data.items;
+      } catch {
+        return [];
+      }
+    }),
+    // Fails with the vendor's message.
+    getItem: action(idInput, async ({ client }, { id }) => {
+      try {
+        return (await client.get(`${V1}/items/${id}`)).data;
+      } catch (error) {
+        const { response } = error as { response?: { data?: { message?: string } } };
+        throw new Error(`Could not get item ${id}: ${response?.data?.message ?? 'unknown error'}`);
+      }
+    }),
+    // Broken: reads an error body that the vendor doesn't send, and crashes on the missing field.
+    getItemCrashing: action(idInput, async ({ client }, { id }) => {
+      try {
+        return (await client.get(`${V1}/items/${id}`)).data;
+      } catch (error) {
+        const { response } = error as { response: { data: { error: { message: string } } } };
+        throw new Error(response.data.error.message);
+      }
+    }),
+    // Broken: hides every failure behind an empty result.
+    getItemSwallowing: action(idInput, async ({ client }, { id }) => {
+      try {
+        return (await client.get(`${V1}/items/${id}`)).data;
+      } catch {
+        return null;
+      }
+    }),
+    // Answers a 404 with a result, as "no such item" is an answer, and throws on any failure.
+    getItemOrNothing: action(idInput, async ({ client }, { id }) => {
+      try {
+        return (await client.get(`${V1}/items/${id}`)).data;
+      } catch (error) {
+        const { response } = error as { response?: { status?: number } };
+        if (response?.status === 404) {
+          return { found: false };
+        }
+        throw error;
+      }
+    }),
+    // Broken: a change that is reported as done when the item doesn't exist.
+    deleteItemSwallowing: action(
+      idInput,
+      async ({ client }, { id }) => {
+        try {
+          return (await client.delete(`${V1}/items/${id}`)).data;
+        } catch (error) {
+          const { response } = error as { response?: { status?: number } };
+          if (response?.status === 404) {
+            return { deleted: true };
+          }
+          throw error;
+        }
+      },
+      'destroy'
+    ),
+    // Calls another operation for each value of an enum input, as GCP IAM's getIamPolicy does for
+    // its resource types. Broken for the second one: it reads an error body the vendor doesn't send.
+    getEither: action(z.object({ kind: z.enum(['item', 'tag']) }), async ({ client }, { kind }) => {
+      try {
+        return (await client.get(kind === 'item' ? `${V1}/items/1` : `${V1}/tags`)).data;
+      } catch (error) {
+        const { response } = error as { response: { data: { message?: string; error?: unknown } } };
+        if (kind === 'tag') {
+          throw new Error((response.data.error as { message: string }).message);
+        }
+        throw new Error(response.data.message ?? 'failed');
+      }
+    }),
+    // Broken like listDropsLast, for pages too large for two and a half of them to be built.
+    listDropsLastHuge: action(noInput, async ({ client }) => {
+      const all: Page['items'] = [];
+      let cursor: string | undefined;
+      for (;;) {
+        const { data } = await client.get<Page>(`${V1}/items`, { params: { cursor, limit: 2000 } });
+        if (!data.next) {
+          return all;
+        }
+        all.push(...data.items);
+        cursor = data.next;
+      }
+    }),
+    // Only works with the response its fixture gives it, and fails on a sampled item.
+    getItemNeedsOverride: action(idInput, async ({ client }, { id }) => {
+      const { data } = await client.get<{ name: string }>(`${V1}/items/${id}`);
+      if (data.name !== 'needed') {
+        throw new Error(`Unexpected item ${data.name}`);
+      }
+      return data;
+    }),
+    listNeedsOverride: action(noInput, async ({ client }) => {
+      const { data } = await client.get<Page>(`${V1}/items`, { params: { limit: 5 } });
+      if (data.items.length !== 1 || data.items[0].name !== 'needed') {
+        throw new Error('Unexpected items');
+      }
+      return data.items;
+    }),
+    // Broken: asks again for as long as the name is longer than usual, which only a response at
+    // the schema's bounds is.
+    getItemLooping: action(idInput, async ({ client }, { id }) => {
+      const { data } = await client.get<{ name: string }>(`${V1}/items/${id}`);
+      while (data.name.length > 100) {
+        await client.get(`${V1}/items/${id}`);
+      }
+      return data;
+    }),
+    // Broken: can't handle a name at the vendor's limit.
+    getItemShortName: action(idInput, async ({ client }, { id }) => {
+      const { data } = await client.get<{ name: string }>(`${V1}/items/${id}`);
+      if (data.name.length > 100) {
+        throw new Error(`The name is ${data.name.length} characters long`);
+      }
+      return data;
+    }),
+  },
+};
+
+const check = (options: Partial<Parameters<typeof checkResponseHandling>[0]> = {}) =>
+  checkResponseHandling({ connector, specs, pagination, ...options });
+
+const kindsOf = (findings: readonly ResponseHandlingFinding[], name: string) =>
+  [
+    ...new Set(findings.filter(({ action: found }) => found === name).map(({ kind }) => kind)),
+  ].sort();
+
+describe('checkResponseHandling', () => {
+  let findings: ResponseHandlingFinding[];
+
+  beforeAll(async () => {
+    findings = await check();
+  });
+
+  it.each(['listAll', 'listPage', 'getItem'])('finds nothing wrong with %s', (name) => {
+    expect(kindsOf(findings, name)).toEqual([]);
+  });
+
+  it('finds a handler that pages for ever', () => {
+    expect(kindsOf(findings, 'listLooping')).toEqual(['pagination-unbounded']);
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        kind: 'pagination-unbounded',
+        action: 'listLooping',
+        operation: 'v1 GET /items',
+        collectionSize: 0,
+      })
+    );
+  });
+
+  it('finds a handler that drops the last page', () => {
+    expect(kindsOf(findings, 'listDropsLast')).toEqual(['pagination-dropped-items']);
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        kind: 'pagination-dropped-items',
+        action: 'listDropsLast',
+        collectionSize: 11,
+        missing: 1,
+      })
+    );
+  });
+
+  it('finds a handler that crashes on a failure status', () => {
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        kind: 'error-crash',
+        action: 'getItemCrashing',
+        operation: 'v1 GET /items/{id}',
+        status: 400,
+      })
+    );
+    expect(kindsOf(findings, 'getItemCrashing')).toEqual(['error-crash']);
+  });
+
+  it('serves 400, 401, 429 and 500 whether the spec declares them or not', () => {
+    // GET /items declares no error status.
+    expect(
+      findings
+        .filter(({ action: name, kind }) => name === 'listSwallowing' && kind === 'error-swallowed')
+        .map((finding) => ('status' in finding ? finding.status : undefined))
+    ).toEqual([400, 401, 429, 500]);
+  });
+
+  it('finds a handler that returns a result for a failure status', () => {
+    expect(findings).toContainEqual({
+      kind: 'error-swallowed',
+      action: 'getItemSwallowing',
+      operation: 'v1 GET /items/{id}',
+      status: 400,
+    });
+  });
+
+  it('lets a read action answer a 404 with a result, but not any other failure', () => {
+    expect(kindsOf(findings, 'getItemOrNothing')).toEqual([]);
+    expect(
+      findings.some(
+        (finding) =>
+          finding.action === 'getItemSwallowing' && 'status' in finding && finding.status === 404
+      )
+    ).toBe(false);
+  });
+
+  it('still checks a 404 for an action that changes something', () => {
+    expect(findings.filter(({ action: name }) => name === 'deleteItemSwallowing')).toEqual([
+      {
+        kind: 'error-swallowed',
+        action: 'deleteItemSwallowing',
+        operation: 'v1 DELETE /items/{id}',
+        status: 404,
+      },
+    ]);
+  });
+
+  it('finds a handler that throws on a response at the schema bounds', () => {
+    expect(findings).toContainEqual({
+      kind: 'boundary-failure',
+      action: 'getItemShortName',
+      message: 'The name is 255 characters long',
+    });
+    expect(kindsOf(findings, 'getItem')).toEqual([]);
+  });
+
+  it('runs only the modes it is given', async () => {
+    const onlyBoundary = await check({ modes: ['boundary'] });
+    expect(onlyBoundary.map(({ action: name, kind }) => `${name} ${kind}`).sort()).toEqual([
+      'getItemLooping boundary-failure',
+      'getItemShortName boundary-failure',
+    ]);
+  });
+
+  it('skips the checks an action opts out of, with a reason', async () => {
+    const reason = 'Deliberately different';
+    const optedOut = await check({
+      fixtures: {
+        listLooping: { responseChecks: { pagination: reason } },
+        listDropsFirst: { responseChecks: { pagination: reason } },
+        listDropsLastBig: { responseChecks: { pagination: reason } },
+        getItemLooping: { responseChecks: { boundary: reason } },
+        getEither: { responseChecks: { errors: reason } },
+        listDropsLastHuge: { responseChecks: { pagination: reason } },
+        listDropsLast: { responseChecks: { pagination: reason } },
+        getItemCrashing: { responseChecks: { errors: reason } },
+        getItemSwallowing: { responseChecks: { errors: reason } },
+        deleteItemSwallowing: { responseChecks: { errors: reason } },
+        listSwallowing: { responseChecks: { errors: reason } },
+        getItemShortName: { responseChecks: { boundary: reason } },
+      },
+    });
+    expect(optedOut).toEqual([]);
+  });
+
+  it('names the problems and how to fix or opt out of each check', () => {
+    expect(formatResponseFindings(findings, 'specs/example/vendor_api/fixtures.json')).toContain(
+      [
+        'Fix the handler. If it behaves this way on purpose, opt the action out of that check with a',
+        'reason in specs/example/vendor_api/fixtures.json:',
+      ].join('\n')
+    );
+    const message = formatResponseFindings(
+      findings.filter(({ action: name }) => name === 'getItemCrashing'),
+      'fixtures.json'
+    );
+    expect(message).toContain('1 problem with how handlers handle responses');
+    expect(message).toContain(
+      '  - getItemCrashing: crashed on HTTP 400, 401, 429 and 500 from v1 GET /items/{id}: Cannot read properties of undefined'
+    );
+    expect(message).toContain(
+      '    "getItemCrashing": { "responseChecks": { "errors": "<why it differs on purpose>" } }'
+    );
+  });
+
+  it('finds a handler that loops only on a response at the schema bounds', () => {
+    expect(findings).toContainEqual({
+      kind: 'boundary-failure',
+      action: 'getItemLooping',
+      message: 'Sent more than 100 requests',
+    });
+  });
+
+  it('pages a body that is the collection, so such a handler is correct', () => {
+    expect(kindsOf(findings, 'listTags')).toEqual([]);
+  });
+
+  it('finds a dropped first item whose id is a part of the ids of others', () => {
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        kind: 'pagination-dropped-items',
+        action: 'listDropsFirst',
+        collectionSize: 11,
+        missing: 1,
+      })
+    );
+  });
+
+  it('builds collections as large as the pages the handler asks for', () => {
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        kind: 'pagination-dropped-items',
+        action: 'listDropsLastBig',
+        collectionSize: 1001,
+        missing: 1,
+      })
+    );
+  });
+
+  it('perturbs responses the action has overrides for', async () => {
+    const overridden = await check({
+      modes: ['boundary'],
+      fixtures: {
+        getItemShortName: {
+          responses: [
+            { method: 'get', path: '/items/{id}', status: 200, body: { id: '1', name: 'short' } },
+          ],
+        },
+      },
+    });
+    expect(overridden).toContainEqual({
+      kind: 'boundary-failure',
+      action: 'getItemShortName',
+      message: 'The name is 255 characters long',
+    });
+  });
+
+  it('runs an action under the first auth type it sends a request under', async () => {
+    const needsBearer: ConnectorSpec = {
+      ...connector,
+      auth: { types: ['basic', 'bearer'] },
+      actions: {
+        // Refuses the first auth type before it sends a request, as Gmail's `ears` does.
+        getItemNeedsBearer: action(idInput, async (ctx, { id }) => {
+          if (ctx.secrets?.authType === 'basic') {
+            throw new Error('This action needs a bearer token');
+          }
+          try {
+            return (await ctx.client.get(`${V1}/items/${id}`)).data;
+          } catch (error) {
+            const { response } = error as { response: { data: { error: { message: string } } } };
+            throw new Error(response.data.error.message);
+          }
+        }),
+      },
+    };
+    const underAuth = await checkResponseHandling({ connector: needsBearer, specs, pagination });
+    expect(underAuth).toContainEqual(
+      expect.objectContaining({ kind: 'error-crash', action: 'getItemNeedsBearer', status: 400 })
+    );
+  });
+
+  it('finds the operations an action calls with every generated input', () => {
+    // The default input calls only one of the two.
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        kind: 'error-crash',
+        action: 'getEither',
+        operation: 'v1 GET /tags',
+        status: 400,
+      })
+    );
+    expect(
+      findings.some(
+        (finding) =>
+          finding.action === 'getEither' &&
+          'operation' in finding &&
+          finding.operation === 'v1 GET /items/{id}'
+      )
+    ).toBe(false);
+  });
+
+  it('builds a collection of one page and a bit where pages are too large for more', () => {
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        kind: 'pagination-dropped-items',
+        action: 'listDropsLastHuge',
+        collectionSize: 2001,
+        missing: 1,
+      })
+    );
+  });
+
+  describe('opting out only some operations', () => {
+    const reason = 'Deliberately different';
+    const scoped = (path: string) => ({
+      errors: { reason, operations: [{ source: 'v1', method: 'get', path }] },
+    });
+
+    it('skips the operations it names', async () => {
+      const result = await check({
+        modes: ['errors'],
+        fixtures: { getEither: { responseChecks: scoped('/tags') } },
+      });
+      expect(result.filter(({ action: name }) => name === 'getEither')).toEqual([]);
+    });
+
+    it('still checks the action for the operations it does not name', async () => {
+      const result = await check({
+        modes: ['errors'],
+        fixtures: { getEither: { responseChecks: scoped('/items/{id}') } },
+      });
+      expect(result).toContainEqual(
+        expect.objectContaining({ action: 'getEither', operation: 'v1 GET /tags' })
+      );
+    });
+  });
+
+  describe('an action that needs the responses in its fixture to run', () => {
+    const responses = [
+      {
+        method: 'get',
+        path: '/items/{id}',
+        status: 200,
+        body: { id: '1', name: 'needed' },
+      },
+    ];
+    const pageResponse = [
+      {
+        method: 'get',
+        path: '/items',
+        status: 200,
+        body: { items: [{ id: '1', name: 'needed' }], next: null },
+      },
+    ];
+
+    it('reports that the boundary check can not vary its responses', async () => {
+      const result = await check({
+        modes: ['boundary'],
+        fixtures: { getItemNeedsOverride: { responses } },
+      });
+      expect(result).toContainEqual({
+        kind: 'check-skipped',
+        action: 'getItemNeedsOverride',
+        check: 'boundary',
+      });
+    });
+
+    it('reports that the pagination check can not vary them either', async () => {
+      const result = await check({
+        modes: ['pagination'],
+        fixtures: { listNeedsOverride: { responses: pageResponse } },
+      });
+      expect(result).toContainEqual({
+        kind: 'check-skipped',
+        action: 'listNeedsOverride',
+        check: 'pagination',
+        operation: 'v1 GET /items',
+      });
+    });
+
+    it('says nothing once the action opts out, with a reason', async () => {
+      const result = await check({
+        modes: ['boundary'],
+        fixtures: {
+          getItemNeedsOverride: {
+            responses,
+            responseChecks: { boundary: 'Needs its fixture to run' },
+          },
+        },
+      });
+      expect(result.filter(({ action: name }) => name === 'getItemNeedsOverride')).toEqual([]);
+    });
+
+    it('reports nothing for an action that runs without its fixture', async () => {
+      const result = await check({
+        modes: ['boundary'],
+        fixtures: { getItem: { responses } },
+      });
+      expect(result.filter(({ kind }) => kind === 'check-skipped')).toEqual([]);
+    });
+  });
+});

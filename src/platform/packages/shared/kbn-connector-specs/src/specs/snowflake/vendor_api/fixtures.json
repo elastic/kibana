@@ -11,5 +11,10 @@
   "runQuery": {
     "input": { "statement": "SELECT 1" },
     "queries": [{ "method": "POST", "path": "/api/v2/statements", "source": "sqlapi" }]
+  },
+  "cancelStatement": {
+    "responseChecks": {
+      "errors": "Cancelling a statement that has already finished answers 422, which the action treats as an answer and returns Snowflake's message for, so a repeated cancel is harmless (see 'cancellation of already completed statement (422)' in snowflake.test.ts)"
+    }
   }
 }

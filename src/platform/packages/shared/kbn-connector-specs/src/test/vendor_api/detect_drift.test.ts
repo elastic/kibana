@@ -24,6 +24,7 @@ const specYaml = ({
   version = '1.0',
   itemsPath = '/items',
   itemProperties = '{ name: { type: string } }',
+  conflict = false,
 } = {}) => `
 openapi: 3.0.3
 info: { title: Example, version: '${version}' }
@@ -39,6 +40,7 @@ paths:
               schema:
                 type: object
                 properties: ${itemProperties}
+${conflict ? "        '409': { description: conflict }" : ''}
 `;
 
 const connector: ConnectorSpec = {
@@ -59,6 +61,27 @@ const connector: ConnectorSpec = {
     },
   },
 };
+
+// Returns a result instead of throwing when the vendor answers with this status.
+const swallowing = (status: number): ConnectorSpec => ({
+  ...connector,
+  actions: {
+    getItems: {
+      scope: 'read',
+      input: z.object({}),
+      handler: async ({ client }) => {
+        try {
+          return (await client.get(`${BASE}/items`)).data;
+        } catch (error) {
+          if ((error as { response?: { status?: number } }).response?.status === status) {
+            return { conflict: true };
+          }
+          throw error;
+        }
+      },
+    },
+  },
+});
 
 const entry = (id: string, level: number): OasdiffEntry => ({
   id,
@@ -302,6 +325,41 @@ actions:
     await detect();
 
     expect(await read()).toEqual(before);
+  });
+
+  describe('how the handlers handle responses', () => {
+    it('is vendor drift when the latest spec declares an error status a handler swallows', async () => {
+      // The handler returns a result for a 409, which only the latest spec declares.
+      documents[SPEC_URL] = specYaml({ conflict: true });
+
+      const drift = await detect({ connector: swallowing(409) });
+
+      expect(drift.snapshotProblems).toEqual([]);
+      expect(drift.latestProblems).toEqual([
+        'getItems: returned a result for HTTP 409 from main GET /items',
+      ]);
+      expect(drift.verdict).toBe('vendor-drift');
+      expect(drift.outcome).toBe('issue');
+    });
+
+    it('is a Kibana regression when a handler already swallows a failure against the snapshots', async () => {
+      const drift = await detect({ connector: swallowing(500) });
+
+      expect(drift.snapshotProblems).toEqual([
+        'getItems: returned a result for HTTP 500 from main GET /items',
+      ]);
+      expect(drift.verdict).toBe('kibana-regression');
+      expect(drift.outcome).toBe('issue');
+    });
+
+    it('does not count a problem the snapshots have as drift as well', async () => {
+      documents[SPEC_URL] = specYaml({ conflict: true });
+
+      const drift = await detect({ connector: swallowing(500) });
+
+      expect(drift.latestProblems).toEqual([]);
+      expect(drift.verdict).toBe('kibana-regression');
+    });
   });
 });
 

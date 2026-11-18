@@ -1,0 +1,27 @@
+{
+  "getAnalysisResults": {
+    "responseChecks": {
+      "errors": "Returns { id: null, error } for every HTTP error unless failOnError is set (#247550), where the agreed behavior is to throw on 400, 401, 429 and 5xx; tracked in https://github.com/elastic/kibana/issues/304996"
+    }
+  },
+  "getIpReport": {
+    "responseChecks": {
+      "errors": "Returns { id: null, error } for every HTTP error unless failOnError is set (#247550), where the agreed behavior is to throw on 400, 401, 429 and 5xx; tracked in https://github.com/elastic/kibana/issues/304996"
+    }
+  },
+  "scanFileHash": {
+    "responseChecks": {
+      "errors": "Returns { id: null, error } for every HTTP error unless failOnError is set (#247550), where the agreed behavior is to throw on 400, 401, 429 and 5xx; tracked in https://github.com/elastic/kibana/issues/304996"
+    }
+  },
+  "scanUrl": {
+    "responseChecks": {
+      "errors": "Returns { id: null, error } for every HTTP error unless failOnError is set (#247550), where the agreed behavior is to throw on 400, 401, 429 and 5xx; tracked in https://github.com/elastic/kibana/issues/304996"
+    }
+  },
+  "submitFile": {
+    "responseChecks": {
+      "errors": "Returns { id: null, error } for every HTTP error unless failOnError is set (#247550), where the agreed behavior is to throw on 400, 401, 429 and 5xx; tracked in https://github.com/elastic/kibana/issues/304996"
+    }
+  }
+}
