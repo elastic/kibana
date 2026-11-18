@@ -88,7 +88,7 @@ export const AddSourcePanel = ({
         >
           <FormattedMessage
             id="xpack.contextEngine.aiIndexDetail.sources.addSourcesConfirmButton"
-            defaultMessage="{count, plural, one {Add source} other {Add # sources}}"
+            defaultMessage="{count, plural, =0 {Add sources} one {Add source} other {Add # sources}}"
             values={{ count: pendingCount }}
           />
         </EuiButton>

@@ -36,7 +36,9 @@ describe('AddSourcePanel', () => {
   it('disables confirm when pendingCount is 0', () => {
     renderWithProviders(<AddSourcePanel {...baseProps} />);
 
-    expect(screen.getByTestId('contextAddSourcesConfirmButton')).toBeDisabled();
+    const confirm = screen.getByTestId('contextAddSourcesConfirmButton');
+    expect(confirm).toBeDisabled();
+    expect(confirm).toHaveTextContent('Add sources');
   });
 
   it('disables confirm and shows loading while isSaving', () => {
