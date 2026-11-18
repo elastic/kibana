@@ -94,6 +94,8 @@ export const ENTITY_STORE_ROUTES = {
     RESOLUTION_CUSTOM_RULES: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules`,
     RESOLUTION_CUSTOM_RULE: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules/{id}`,
     RESOLUTION_CUSTOM_RULES_PREVIEW: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules/_preview`,
+    RESOLUTION_ENTITY_CHECK: `${INTERNAL_BASE_ROUTE}/resolution/entity_check`,
+    RESOLUTION_RULES_HEALTH: `${INTERNAL_BASE_ROUTE}/resolution/rules_health`,
   },
 } as const satisfies Record<string, Record<string, string>>;
 

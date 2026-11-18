@@ -49,6 +49,10 @@ import {
 } from './metadata_data_stream';
 import { installMetadataIndexIngestPipeline } from './metadata_index_ingest_pipeline';
 import {
+  getResolutionRunsDataStreamName,
+  getResolutionRunsIndexTemplateConfig,
+} from './resolution_runs_data_stream';
+import {
   ensureLegacyCompatibilityAliases,
   hasCollidingNeutralNamespaceAssets,
   hasLegacySecurityAssets,
@@ -162,6 +166,13 @@ export async function installIndicesAndDataStreams(
       });
       logger.debug(`created metadata entity data stream in ${namespace}`);
     })(),
+
+    (async () => {
+      await createDataStream(esClient, getResolutionRunsDataStreamName(namespace), {
+        throwIfExists: false,
+      });
+      logger.debug(`created resolution runs data stream in ${namespace}`);
+    })(),
   ]);
 }
 
@@ -184,6 +195,11 @@ async function installIndexTemplates(
     (async () => {
       await putIndexTemplate(esClient, getMetadataEntityIndexTemplateConfig(namespace));
       logger.debug(`installed metadata index template in ${namespace}`);
+    })(),
+
+    (async () => {
+      await putIndexTemplate(esClient, getResolutionRunsIndexTemplateConfig(namespace));
+      logger.debug(`installed resolution runs index template in ${namespace}`);
     })(),
   ]);
 }
@@ -276,6 +292,10 @@ async function uninstallIndicesAndDataStreams(
         );
       }
       logger.debug(`deleted entity metadata data stream`);
+    })(),
+    (async () => {
+      await deleteDataStream(esClient, getResolutionRunsDataStreamName(namespace));
+      logger.debug(`deleted resolution runs data stream`);
     })(),
   ]);
 }

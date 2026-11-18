@@ -107,6 +107,20 @@ export class ResolutionRulesClient {
     return this.toEffectiveRule(config, enabled);
   }
 
+  /** When each rule was last switched on or off, by rule id. Rules never switched have no entry. */
+  async getEnabledChangedAt(): Promise<Map<string, string>> {
+    const response = await this.soClient.find<EntityResolutionRuleAttributes>({
+      type: EntityResolutionRuleTypeName,
+      perPage: RESOLUTION_RULE_CONFIGS.length,
+    });
+
+    return new Map(
+      response.saved_objects.flatMap(({ attributes, updated_at: updatedAt }) =>
+        typeof updatedAt === 'string' ? [[attributes.id, updatedAt] as [string, string]] : []
+      )
+    );
+  }
+
   private async getOverrides(): Promise<Map<ResolutionRuleId, EntityResolutionRuleAttributes>> {
     const response = await this.soClient.find<EntityResolutionRuleAttributes>({
       type: EntityResolutionRuleTypeName,
