@@ -303,7 +303,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
       setBlockingError(e);
     }
   }
-  // How `valuesSource$` is executed: with an ES|QL query or a DSL request.
   const valuesSourceFetchPlan$ = new BehaviorSubject<ValuesSourceFetchPlan>({ fetchMode: 'dsl' });
   const valuesSourceFetchPlanSubscription = combineLatest([
     dataControlStateManager.api.valuesSource$,
