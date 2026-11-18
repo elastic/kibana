@@ -14,6 +14,7 @@ import { awsOnboardingCreateStackStepDefinition } from './create_stack';
 import { awsOnboardingCredentialsStepDefinition } from './credentials';
 import { awsOnboardingDiscoverStepDefinition } from './discover';
 import { awsOnboardingHasDataStepDefinition } from './has_data';
+import { awsOnboardingListIdentitiesStepDefinition } from './list_identities';
 import { awsOnboardingResolveStepDefinition } from './resolve';
 import { awsOnboardingSettingsRequirementStepDefinition } from './settings_requirement';
 import { awsOnboardingStackStatusStepDefinition } from './stack_status';
@@ -25,6 +26,7 @@ import { awsOnboardingStackStatusStepDefinition } from './stack_status';
 export const registerAwsOnboardingSteps = (setup: WorkflowsExtensionsServerPluginSetup): void => {
   setup.registerStepDefinition(awsOnboardingCredentialsStepDefinition);
   setup.registerStepDefinition(awsOnboardingDiscoverStepDefinition);
+  setup.registerStepDefinition(awsOnboardingListIdentitiesStepDefinition);
   setup.registerStepDefinition(awsOnboardingSettingsRequirementStepDefinition);
   setup.registerStepDefinition(awsOnboardingResolveStepDefinition);
   setup.registerStepDefinition(awsOnboardingCloudContextStepDefinition);

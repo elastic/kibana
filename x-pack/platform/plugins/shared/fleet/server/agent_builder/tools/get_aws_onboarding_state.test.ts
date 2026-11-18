@@ -147,7 +147,11 @@ describe('get_aws_onboarding_state', () => {
             permissions_summary: ['guardduty (aws-s3)'],
             suggested_identity_name: 'aws-onboarding',
             identity_name: 'my-identity',
-            stack_action: 'create',
+            stack_action: 'update',
+            stack_id:
+              'arn:aws:cloudformation:us-west-2:123456789012:stack/elastic-onboarding-ab12/x',
+            cloud_connector_id: 'cc-1',
+            added_policy_templates: ['guardduty (aws-s3)'],
           },
         }),
         step('has_data', 3, {
@@ -176,7 +180,10 @@ describe('get_aws_onboarding_state', () => {
         permissions_summary: ['guardduty (aws-s3)'],
         policies: [{ service: 'guardduty', name: 'aws-guardduty' }],
         identity_name: 'my-identity',
-        stack_action: 'create',
+        stack_action: 'update',
+        stack_id: 'arn:aws:cloudformation:us-west-2:123456789012:stack/elastic-onboarding-ab12/x',
+        cloud_connector_id: 'cc-1',
+        added_policy_templates: ['guardduty (aws-s3)'],
       },
     });
     expect(JSON.stringify(data)).not.toContain('must-not-leak');
@@ -391,6 +398,28 @@ describe('get_aws_onboarding_state', () => {
     });
   });
 
+  it('returns the identities the run listed for the plan', async () => {
+    const identities = [
+      {
+        id: 'cc-1',
+        name: 'existing-identity',
+        created_at: '2026-11-17T10:00:00.000Z',
+        updatable: false,
+        not_updatable_reason: 'no_stack',
+        covered_integrations: [],
+        covered_policy_templates: [],
+      },
+    ];
+
+    const { results } = await run(
+      waitingExecution('ask_plan', [
+        step('list_identities', 2, { status: 'completed', output: { identities } }),
+      ])
+    );
+
+    expect(results[0].data.identities).toEqual(identities);
+  });
+
   describe('stack progress', () => {
     const KEY = 'CREATE_IN_PROGRESS|WiiOidcProvider:CREATE_IN_PROGRESS';
     const STACK_ID = 'arn:aws:cloudformation:us-east-1:1:stack/s/1';
@@ -537,7 +566,7 @@ describe('get_aws_onboarding_state', () => {
       stackStatus.mockResolvedValue(inProgress());
       const paused = runningExecution([
         createStackStep(),
-        step('name_identity', 9, { status: 'waiting_for_input' }),
+        step('approve_plan', 9, { status: 'waiting_for_input' }),
       ]);
 
       const data = await runWait([runningExecution(), paused], KEY);

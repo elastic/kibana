@@ -203,7 +203,7 @@ describe('awsOnboardingResolveStepDefinition', () => {
     ]);
   });
 
-  it('returns the identity name from the plan and stack_action create', async () => {
+  it("creates a new identity named in the plan with the run's integrations", async () => {
     const result = await awsOnboardingResolveStepDefinition.handler(
       createStepContext({
         services: ['guardduty', 'ec2'],
@@ -216,6 +216,83 @@ describe('awsOnboardingResolveStepDefinition', () => {
     const { output } = result as { output: Record<string, any> };
     expect(output.identity_name).toBe('my-identity');
     expect(output.stack_action).toBe('create');
+    expect(output.stack_integrations).toEqual(output.integrations);
+    expect(output.cloud_connector_id).toBeUndefined();
+  });
+
+  describe('identity reuse', () => {
+    const reusable = {
+      id: 'cc-1',
+      name: 'existing-identity',
+      stack_id: 'arn:aws:cloudformation:us-west-2:123456789012:stack/elastic-onboarding-ab12/x',
+      stack_region: 'us-west-2',
+      created_at: '2026-11-17T10:00:00.000Z',
+      updatable: true,
+      covered_integrations: [
+        {
+          name: 'aws',
+          policyTemplates: [
+            { name: 'guardduty', enabledInputs: ['aws-s3'] },
+            { name: 'lambda', enabledInputs: ['aws/metrics'] },
+          ],
+        },
+      ],
+      covered_policy_templates: ['guardduty', 'lambda'],
+    };
+    const resolveWith = (identities: unknown[], reuseId = 'cc-1') =>
+      awsOnboardingResolveStepDefinition.handler(
+        createStepContext({
+          services: ['guardduty', 'ec2'],
+          region: 'us-west-2',
+          settings: logsSettings,
+          identity: { reuse_cloud_connector_id: reuseId },
+          identities,
+        })
+      );
+
+    it('updates the stack of a reused updatable identity with the union of what it covers', async () => {
+      const { output } = (await resolveWith([reusable])) as { output: Record<string, any> };
+
+      expect(output).toEqual(
+        expect.objectContaining({
+          stack_action: 'update',
+          stack_id: reusable.stack_id,
+          cloud_connector_id: 'cc-1',
+          identity_name: 'existing-identity',
+          added_policy_templates: ['ec2 (aws-s3)'],
+          stack_integrations: [
+            {
+              name: 'aws',
+              policyTemplates: [
+                { name: 'ec2', enabledInputs: ['aws-s3'] },
+                { name: 'guardduty', enabledInputs: ['aws-s3'] },
+                { name: 'lambda', enabledInputs: ['aws/metrics'] },
+              ],
+            },
+          ],
+        })
+      );
+    });
+
+    it('leaves the stack of a reused identity it cannot update alone', async () => {
+      const { output } = (await resolveWith([
+        { ...reusable, updatable: false, not_updatable_reason: 'other_region' },
+      ])) as { output: Record<string, any> };
+
+      expect(output.stack_action).toBe('none');
+      expect(output.cloud_connector_id).toBe('cc-1');
+      expect(output.stack_id).toBeUndefined();
+      expect(output.added_policy_templates).toEqual(['ec2 (aws-s3)']);
+    });
+
+    it('rejects reuse of an identity that is not listed', async () => {
+      expect(await resolveWith([reusable], 'cc-unknown')).toEqual({
+        error: expect.objectContaining({
+          type: 'ValidationError',
+          message: expect.stringContaining('cc-unknown'),
+        }),
+      });
+    });
   });
 
   it('produces policy bodies that pass the agentless conversion and deployment mode validation', async () => {

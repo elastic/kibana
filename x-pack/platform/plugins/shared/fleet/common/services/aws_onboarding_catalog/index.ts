@@ -8,6 +8,7 @@
 export * from './aws_service_matrix';
 export * from './field_config';
 export * from './instances';
+export * from './merge_iac_integrations';
 export * from './package_inputs';
 export * from './service_index_patterns';
 export * from './settings_requirement';

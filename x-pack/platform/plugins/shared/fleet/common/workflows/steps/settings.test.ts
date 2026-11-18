@@ -7,6 +7,7 @@
 
 import type { AwsOnboardingSettingsAnswer, AwsOnboardingSettingsRequirement } from './settings';
 import {
+  awsOnboardingPlanAnswerSchema,
   awsOnboardingSettingsAnswerSchema,
   settingsAnswerToServiceVars,
   validateSettingsAnswer,
@@ -373,5 +374,16 @@ describe('awsOnboardingSettingsAnswerSchema', () => {
       services: { ec2: { data_streams: {}, extra: 1 } },
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe('awsOnboardingPlanAnswerSchema', () => {
+  it('takes either a new identity name or an identity to reuse, not both', () => {
+    const plan = (identity: unknown) =>
+      awsOnboardingPlanAnswerSchema.safeParse({ services: {}, identity }).success;
+
+    expect(plan({ name: 'new-identity' })).toBe(true);
+    expect(plan({ reuse_cloud_connector_id: 'cc-1' })).toBe(true);
+    expect(plan({ name: 'new-identity', reuse_cloud_connector_id: 'cc-1' })).toBe(false);
   });
 });

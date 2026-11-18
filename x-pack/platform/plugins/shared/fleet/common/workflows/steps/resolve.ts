@@ -10,7 +10,8 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { awsOnboardingSettingsAnswerSchema } from './settings';
+import { awsOnboardingIacIntegrationSchema, awsOnboardingIdentitySchema } from './list_identities';
+import { awsOnboardingPlanIdentitySchema, awsOnboardingSettingsAnswerSchema } from './settings';
 
 export const AwsOnboardingResolveStepTypeId = 'fleet.awsOnboardingResolve';
 
@@ -29,8 +30,10 @@ export const awsOnboardingResolveInputSchema = lazySchema(() =>
     settings: awsOnboardingSettingsAnswerSchema,
     /** Policy name per service id; a service without one gets the default name. */
     policy_names: z.record(z.string().max(256), z.string().trim().min(1).max(256)).optional(),
-    /** The Federated Identity the plan names. */
-    identity: z.object({ name: z.string().trim().min(1).max(256) }),
+    /** The Federated Identity the plan names: a new one, or a listed one to reuse. */
+    identity: awsOnboardingPlanIdentitySchema,
+    /** The account's existing identities, which a reused one must be among. */
+    identities: z.array(awsOnboardingIdentitySchema).optional(),
   })
 );
 
@@ -49,14 +52,7 @@ export const awsOnboardingResolveOutputSchema = lazySchema(() =>
   z.object({
     package_name: z.literal('aws'),
     package_version: z.string(),
-    integrations: z.array(
-      z.object({
-        name: z.string(),
-        policyTemplates: z.array(
-          z.object({ name: z.string(), enabledInputs: z.array(z.string()) })
-        ),
-      })
-    ),
+    integrations: z.array(awsOnboardingIacIntegrationSchema),
     policies: z.array(
       z.object({
         service: z.string(),
@@ -69,8 +65,19 @@ export const awsOnboardingResolveOutputSchema = lazySchema(() =>
     permissions_summary: z.array(z.string()),
     suggested_identity_name: z.string(),
     identity_name: z.string(),
-    /** What the run does to the Federated Identity stack. */
-    stack_action: z.literal('create'),
+    /**
+     * What the run does to the Federated Identity stack: create a new one, update the reused
+     * identity's stack, or leave a reused identity's stack alone because the run cannot update it.
+     */
+    stack_action: z.enum(['create', 'update', 'none']),
+    /** The reused identity's stack; set on update only. */
+    stack_id: z.string().optional(),
+    /** The reused identity's connector; set on reuse only. */
+    cloud_connector_id: z.string().optional(),
+    /** Policy templates and inputs the run adds to what the identity's role covers. */
+    added_policy_templates: z.array(z.string()),
+    /** What the identity's stack is rendered for: the run's integrations plus what it covers. */
+    stack_integrations: z.array(awsOnboardingIacIntegrationSchema),
   })
 );
 

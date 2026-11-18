@@ -22,18 +22,30 @@ export interface SubmitPlanAnswerResult {
   problems?: SettingsProblem[];
 }
 
-/** Every policy name must belong to a service in the plan and must not be blank. */
+/**
+ * Every policy name must belong to a service in the plan, must not be blank and must not repeat:
+ * Fleet rejects a duplicate name only when it creates the policies, after the stack exists.
+ */
 const validatePolicyNames = ({
   services,
   policy_names: policyNames = {},
-}: AwsOnboardingPlanAnswer): SettingsProblem[] =>
-  Object.entries(policyNames).flatMap(([serviceId, name]) => {
+}: AwsOnboardingPlanAnswer): SettingsProblem[] => {
+  const seen = new Set<string>();
+  return Object.entries(policyNames).flatMap(([serviceId, name]) => {
     const path = `policy_names.${serviceId}`;
-    if (!(serviceId in services)) {
+    if (!Object.hasOwn(services, serviceId)) {
       return [{ path, message: `Unknown service "${serviceId}".` }];
     }
-    return name.trim() === '' ? [{ path, message: 'The policy name must not be empty.' }] : [];
+    if (name.trim() === '') {
+      return [{ path, message: 'The policy name must not be empty.' }];
+    }
+    if (seen.has(name)) {
+      return [{ path, message: `Duplicate policy name "${name}".` }];
+    }
+    seen.add(name);
+    return [];
   });
+};
 
 /**
  * The one place that validates an `ask_plan` answer against the requirement the run produced

@@ -128,6 +128,37 @@ describe('submitPlanAnswer', () => {
     expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
   });
 
+  it('returns invalid for a policy name inherited from Object rather than a planned service', async () => {
+    const { workflowApi } = setup();
+    const result = await submitPlanAnswer({
+      ...base,
+      workflowApi,
+      answer: { ...validPlan, policy_names: { toString: 'my-policy' } },
+    });
+    expect(result.problems).toEqual([
+      { path: 'policy_names.toString', message: 'Unknown service "toString".' },
+    ]);
+  });
+
+  it('returns invalid when two services are given the same policy name', async () => {
+    const { workflowApi } = setup();
+    const result = await submitPlanAnswer({
+      ...base,
+      workflowApi,
+      answer: {
+        ...validPlan,
+        services: { ...validPlan.services, ec2: validPlan.services.guardduty },
+        policy_names: { guardduty: 'shared-name', ec2: 'shared-name' },
+      },
+    });
+    expect(result.problems).toEqual(
+      expect.arrayContaining([
+        { path: 'policy_names.ec2', message: 'Duplicate policy name "shared-name".' },
+      ])
+    );
+    expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+  });
+
   it('refuses when the run is not waiting at ask_plan', async () => {
     const { workflowApi } = setup('approve_plan');
     await expect(submitPlanAnswer({ ...base, workflowApi, answer: validPlan })).rejects.toThrow(

@@ -44,16 +44,13 @@ describe('AWS agentless onboarding workflow definition', () => {
       'credentials',
       'credentials_missing',
       'discovery',
+      'list_identities',
       'settings_requirement',
       'ask_plan',
       'resolve',
       'approve_plan',
       'fail_plan_rejected',
-      'cloud_context',
-      'create_stack',
-      'poll_stack',
-      'fail_stack',
-      'create_connector',
+      'stack_branch',
       'create_policies',
       'wait_for_data',
       'done',
@@ -71,6 +68,26 @@ describe('AWS agentless onboarding workflow definition', () => {
       'discover',
       'select_services',
     ]);
+  });
+
+  it('creates the stack and connector only when the plan creates a new identity', () => {
+    const branch = findStep(definition, 'stack_branch');
+
+    expect(branch.type).toBe('if');
+    expect(branch.condition).toBe("${{ steps.resolve.output.stack_action == 'create' }}");
+    expect(branch.steps?.map(({ name }) => name)).toEqual([
+      'cloud_context',
+      'create_stack',
+      'poll_stack',
+      'fail_stack',
+      'create_connector',
+    ]);
+  });
+
+  it('creates the policies on the new connector or on the reused one', () => {
+    expect(findStep(definition, 'create_policies').with?.cloud_connector_id).toBe(
+      '{{ steps.create_connector.output.cloud_connector_id | default: steps.resolve.output.cloud_connector_id }}'
+    );
   });
 
   it('fails the run when the plan is not approved', () => {

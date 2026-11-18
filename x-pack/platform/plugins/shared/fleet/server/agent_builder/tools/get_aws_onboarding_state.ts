@@ -23,6 +23,7 @@ import type { AwsOnboardingSettingsRequirement } from '../../../common/workflows
 import type { AwsOnboardingSettingsRequirementOutput } from '../../../common/workflows/steps/settings_requirement';
 import type { AwsOnboardingCredentialsOutput } from '../../../common/workflows/steps/credentials';
 import type { AwsOnboardingDiscoverOutput } from '../../../common/workflows/steps/discover';
+import type { AwsOnboardingListIdentitiesOutput } from '../../../common/workflows/steps/list_identities';
 import type { AwsOnboardingResolveOutput } from '../../../common/workflows/steps/resolve';
 import type { AwsOnboardingCreateStackOutput } from '../../../common/workflows/steps/create_stack';
 import type { AwsOnboardingStackStatusOutput } from '../../../common/workflows/steps/stack_status';
@@ -347,6 +348,10 @@ export const createGetAwsOnboardingStateTool = ({
       (s) => s.status === ExecutionStatus.WAITING_FOR_INPUT
     );
     const discover = lastOutput<AwsOnboardingDiscoverOutput>(execution, 'discover');
+    const listIdentities = lastOutput<AwsOnboardingListIdentitiesOutput>(
+      execution,
+      'list_identities'
+    );
     const resolve = lastOutput<AwsOnboardingResolveOutput>(execution, 'resolve');
     const policies = lastOutput<AwsOnboardingCreatePoliciesOutput>(execution, 'create_policies');
     const hasData = lastOutput<AwsOnboardingHasDataOutput>(execution, 'has_data');
@@ -402,6 +407,7 @@ export const createGetAwsOnboardingStateTool = ({
               settings_requirement: requirementWithoutSuggestion(settingsRequirement),
             }),
           ...(discover && { region: discover.region, discovered_services: discover.services }),
+          ...(listIdentities && { identities: listIdentities.identities }),
           ...(resolve && {
             resolved: {
               policies: resolve.policies.map(({ service, name }) => ({ service, name })),
@@ -409,6 +415,9 @@ export const createGetAwsOnboardingStateTool = ({
               permissions_summary: resolve.permissions_summary,
               identity_name: resolve.identity_name,
               stack_action: resolve.stack_action,
+              stack_id: resolve.stack_id,
+              cloud_connector_id: resolve.cloud_connector_id,
+              added_policy_templates: resolve.added_policy_templates,
             },
           }),
           ...(stack && { stack: { ...stack, ...(timedOut && { timed_out: true as const }) } }),

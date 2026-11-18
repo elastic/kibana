@@ -114,13 +114,21 @@ export const awsOnboardingSettingsAnswerSchema = lazySchema(() =>
     .strict()
 );
 
+/** The plan's Federated Identity: a new one by name, or an existing connector to reuse. */
+export const awsOnboardingPlanIdentitySchema = lazySchema(() =>
+  z.union([
+    z.object({ name: z.string().trim().min(1).max(256) }).strict(),
+    z.object({ reuse_cloud_connector_id: z.string().min(1).max(256) }).strict(),
+  ])
+);
+
 /** The settled plan: the settings answer's services, a policy name per service and the identity. */
 export const awsOnboardingPlanAnswerSchema = lazySchema(() =>
   z
     .object({
       services: awsOnboardingSettingsAnswerSchema.shape.services,
       policy_names: z.record(z.string().max(256), z.string().trim().min(1).max(256)).optional(),
-      identity: z.object({ name: z.string().trim().min(1).max(256) }).strict(),
+      identity: awsOnboardingPlanIdentitySchema,
     })
     .strict()
 );

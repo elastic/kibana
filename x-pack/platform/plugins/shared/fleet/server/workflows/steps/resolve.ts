@@ -15,13 +15,21 @@ import {
   disableUnlistedPackageInputs,
   getPackageVarNames,
   buildSettingsRequirement,
+  diffIacIntegrations,
   getServiceIndexPatterns,
+  mergeIacIntegrations,
 } from '../../../common/services/aws_onboarding_catalog';
 import type {
   AwsServiceMatrixEntry,
   PackageInputEntry,
 } from '../../../common/services/aws_onboarding_catalog';
+import type { RenderIacTemplateIntegration } from '../../../common/types';
+import type { AwsOnboardingIdentity } from '../../../common/workflows/steps/list_identities';
 import { awsOnboardingResolveCommonDefinition } from '../../../common/workflows/steps/resolve';
+import type {
+  AwsOnboardingResolveInput,
+  AwsOnboardingResolveOutput,
+} from '../../../common/workflows/steps/resolve';
 import {
   pickSelectedServices,
   settingsAnswerToServiceVars,
@@ -58,6 +66,39 @@ const disableUnansweredStreams = (
   return result;
 };
 
+type PlannedIdentity = Pick<
+  AwsOnboardingResolveOutput,
+  'identity_name' | 'stack_action' | 'stack_id' | 'cloud_connector_id'
+> & { covered: RenderIacTemplateIntegration[] };
+
+/**
+ * A new identity gets a stack; a reused one keeps its connector and has its stack updated when
+ * the run can update it, else is reused as it is. The answer is untrusted input, so a reused
+ * identity must be one the run listed.
+ */
+const planIdentity = (
+  identity: AwsOnboardingResolveInput['identity'],
+  identities: AwsOnboardingIdentity[]
+): PlannedIdentity | ExecutionError => {
+  if ('name' in identity) {
+    return { identity_name: identity.name, stack_action: 'create', covered: [] };
+  }
+  const reused = identities.find(({ id }) => id === identity.reuse_cloud_connector_id);
+  if (!reused) {
+    return new ExecutionError({
+      type: 'ValidationError',
+      message: `Federated Identity "${identity.reuse_cloud_connector_id}" is not one of the account's identities`,
+    });
+  }
+  return {
+    identity_name: reused.name,
+    stack_action: reused.updatable ? 'update' : 'none',
+    ...(reused.updatable && { stack_id: reused.stack_id }),
+    cloud_connector_id: reused.id,
+    covered: reused.covered_integrations,
+  };
+};
+
 export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
   ...awsOnboardingResolveCommonDefinition,
   handler: async (context) => {
@@ -78,6 +119,7 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
       settings,
       policy_names: policyNames,
       identity,
+      identities = [],
     } = context.input;
     const requested = pickSelectedServices(context.input);
     if (!requested) {
@@ -87,6 +129,10 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
           message: 'No AWS services were selected or passed to the run',
         }),
       };
+    }
+    const planned = planIdentity(identity, identities);
+    if (planned instanceof ExecutionError) {
+      return { error: planned };
     }
     const { packageVersion, packageInfo, matrix } = await loadAwsServiceMatrix(context);
 
@@ -174,6 +220,8 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
       policyTemplates.map(({ name, enabledInputs }) => `${name} (${enabledInputs.join(', ')})`)
     );
 
+    const { covered, ...identityOutput } = planned;
+
     const indexPatterns = [
       ...new Set(answered.flatMap((service) => getServiceIndexPatterns(service, namespace))),
     ];
@@ -188,8 +236,9 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
         permissions_summary: permissionsSummary,
         // Liquid renders a missing account id as an empty string.
         suggested_identity_name: `aws-${account_id || 'account'}-federated-identity-${suffix}`,
-        identity_name: identity.name,
-        stack_action: 'create' as const,
+        ...identityOutput,
+        added_policy_templates: diffIacIntegrations(covered, integrations),
+        stack_integrations: mergeIacIntegrations(covered, integrations),
       },
     };
   },
