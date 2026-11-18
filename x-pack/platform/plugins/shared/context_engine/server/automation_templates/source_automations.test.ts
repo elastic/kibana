@@ -82,7 +82,8 @@ describe('chooseCategoryField', () => {
 
     await expect(chooseCategoryField(client, ['orders'])).resolves.toBe('status');
     expect(esql).toHaveBeenCalledWith({
-      query: 'FROM "orders" | STATS c0 = COUNT_DISTINCT(`status`), c1 = COUNT_DISTINCT(`region`)',
+      query:
+        'FROM "orders" | LIMIT 10000 | STATS c0 = COUNT_DISTINCT(`status`), c1 = COUNT_DISTINCT(`region`)',
     });
   });
 
@@ -142,6 +143,8 @@ describe('reconcileSourceAutomations', () => {
       changed: new Set(['sources']),
     } as unknown as AiIndexChangeEvent);
 
+  const attached = { automations: [{ type: 'workflow' as const, value: 'wf-old' }] };
+
   const installedWorkflow = (value: string) => ({
     id: 'wf-old',
     name: sourceAutomationName(value),
@@ -160,7 +163,7 @@ describe('reconcileSourceAutomations', () => {
     workflows.getWorkflow.mockResolvedValue(installedWorkflow(orders.value));
     workflows.createWorkflow.mockResolvedValue({ id: 'wf-new', valid: true });
     workflows.updateWorkflow.mockResolvedValue({ valid: true });
-    workflows.deleteWorkflows.mockResolvedValue({});
+    workflows.deleteWorkflows.mockResolvedValue({ failures: [] });
     aiIndexService = {
       get: jest.fn(async () =>
         aiIndex([], { automations: [{ type: 'workflow', value: 'wf-old' }] })
@@ -200,7 +203,7 @@ describe('reconcileSourceAutomations', () => {
   });
 
   it('updates the automation a source already has instead of installing another', async () => {
-    await reconcileSourceAutomations(deps(), event(undefined, aiIndex([orders])));
+    await reconcileSourceAutomations(deps(), event(undefined, aiIndex([orders], attached)));
 
     expect(workflows.updateWorkflow).toHaveBeenCalledWith(
       'wf-old',
@@ -214,7 +217,7 @@ describe('reconcileSourceAutomations', () => {
   it('detaches and deletes the automation of a source taken off', async () => {
     await reconcileSourceAutomations(
       deps(),
-      event(aiIndex([orders, logs]), aiIndex([logs, drive]))
+      event(aiIndex([orders, logs], attached), aiIndex([logs, drive], attached))
     );
 
     expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('shop', 'default', {
@@ -231,7 +234,7 @@ describe('reconcileSourceAutomations', () => {
       tags: ['ce-template:unit_profile'],
     });
 
-    await reconcileSourceAutomations(deps(), event(aiIndex([orders]), aiIndex([])));
+    await reconcileSourceAutomations(deps(), event(aiIndex([orders], attached), aiIndex([])));
 
     expect(aiIndexService.removeAutomation).not.toHaveBeenCalled();
     expect(workflows.deleteWorkflows).not.toHaveBeenCalled();
@@ -240,10 +243,31 @@ describe('reconcileSourceAutomations', () => {
   it('keeps the workflow, detached, when the saving user cannot delete workflows', async () => {
     canManage.mockResolvedValue(false);
 
-    await reconcileSourceAutomations(deps(), event(aiIndex([orders]), aiIndex([])));
+    await reconcileSourceAutomations(deps(), event(aiIndex([orders], attached), aiIndex([])));
 
     expect(aiIndexService.removeAutomation).toHaveBeenCalled();
     expect(workflows.deleteWorkflows).not.toHaveBeenCalled();
+  });
+
+  it('finds the workflow of a removed source when the save also dropped the automations', async () => {
+    await reconcileSourceAutomations(deps(), event(aiIndex([orders], attached), aiIndex([])));
+
+    expect(workflows.deleteWorkflows).toHaveBeenCalledWith(['wf-old'], 'default', request);
+    expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('shop', 'default', {
+      type: 'workflow',
+      value: 'wf-old',
+    });
+  });
+
+  it('keeps the workflow attached when deleting it fails', async () => {
+    workflows.deleteWorkflows.mockResolvedValue({
+      failures: [{ id: 'wf-old', error: 'managed workflow' }],
+    });
+
+    await expect(
+      reconcileSourceAutomations(deps(), event(aiIndex([orders], attached), aiIndex([])))
+    ).rejects.toThrow("workflow 'wf-old' could not be deleted: managed workflow");
+    expect(aiIndexService.removeAutomation).not.toHaveBeenCalled();
   });
 
   it('replaces the automation of a source whose query changed', async () => {
@@ -252,7 +276,10 @@ describe('reconcileSourceAutomations', () => {
       .mockResolvedValueOnce(installedWorkflow(orders.value))
       .mockResolvedValue(null);
 
-    await reconcileSourceAutomations(deps(), event(aiIndex([orders]), aiIndex([edited])));
+    await reconcileSourceAutomations(
+      deps(),
+      event(aiIndex([orders], attached), aiIndex([edited], attached))
+    );
 
     expect(workflows.deleteWorkflows).toHaveBeenCalledWith(['wf-old'], 'default', request);
     expect(parse(workflows.createWorkflow.mock.calls[0][0].yaml).name).toBe(

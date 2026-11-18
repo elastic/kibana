@@ -20,7 +20,6 @@ const toolDescriptionFiles = readdirSync(join(__dirname, 'agent_builder/tools'))
   .map((tool) => join('agent_builder/tools', tool, 'tool.ts'))
   .filter((file) => existsSync(join(__dirname, file)));
 
-/** The automation templates the install tool renders live in Context Engine. */
 const AUTOMATION_TEMPLATES_DIR = '../../context_engine/server/automation_templates';
 
 const modelFacingFiles = [
