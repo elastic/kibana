@@ -20,7 +20,10 @@ import {
   type GetSandboxAllowlistResponse,
   type PutCustomContextRequest,
 } from '../../common';
-import { SANDBOX_CONNECTORS_API_PATH } from '../../common/sandbox_connectors';
+import {
+  ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS,
+  SANDBOX_CONNECTORS_API_PATH,
+} from '../../common/sandbox_connectors';
 import type { GetSandboxConnectorsResponse } from '../../common/sandbox_connectors';
 import {
   ORCA_CONNECTOR_ID,
@@ -205,7 +208,7 @@ export const saveOrcaConnector = async (
   const connector = {
     name: ORCA_CONNECTOR_NAME,
     // As the eval's ORCA connector: the investigator reaches it from its sandbox, not as a tool.
-    config: { url, selectedActions: ['_test'] },
+    config: { url, selectedActions: [...ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS] },
     secrets: { authType: 'api_key_header', Authorization: `ApiKey ${apiKey}` },
   };
   const exists = await kibana(CONNECTOR_PATH).then(

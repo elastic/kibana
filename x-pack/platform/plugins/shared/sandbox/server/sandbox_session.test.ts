@@ -118,6 +118,20 @@ describe('SandboxSessionImpl', () => {
     );
   });
 
+  it('runs the command without callbacks when sandbox-api does not support them', async () => {
+    const unimplemented = new SandboxRpcError(
+      { ...rpc, statusCode: 'UNIMPLEMENTED' },
+      Object.assign(new Error('UNIMPLEMENTED'), { code: 12 })
+    );
+    jest.spyOn(apiClient, 'runCommandWithCallbacks').mockRejectedValueOnce(unimplemented);
+    runCommand.mockResolvedValueOnce(okResponse);
+
+    await expect(session.runCommandWithCallbacks({ command: 'true' }, jest.fn())).resolves.toEqual(
+      okResponse
+    );
+    expect(runCommand).toHaveBeenCalledWith('space:conv-1', { command: 'true' });
+  });
+
   it('sets isReset=true after an UNAVAILABLE failure', async () => {
     runCommand.mockResolvedValueOnce(okResponse);
     await run();

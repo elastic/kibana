@@ -158,7 +158,10 @@ describe('writeConnectorManifest', () => {
       const { content } = await renderManifest();
 
       expect(content).toContain('# Sandbox Connectors');
-      expect(content).toContain('`connector_id` parameter of the bash tool');
+      expect(content).toContain(
+        '**Always call a connector that has sub-actions with `kbn-tool connector <connector-id> <sub-action>`**'
+      );
+      expect(content).toContain('pass its id as the `connector_id` parameter');
       expect(content).toContain('CONNECTOR_CONFIG_<KEY>');
       expect(content).toContain('CONNECTOR_HEADER_<NAME>');
       expect(content).toContain('CONNECTOR_HEADER_AUTHORIZATION');
@@ -180,6 +183,41 @@ describe('writeConnectorManifest', () => {
       const { content } = await renderManifest();
 
       expect(content).toContain('## My GitHub (connector-id: connector-1, type: .github)');
+    });
+
+    it('tells the agent to call a connector with sub-actions through kbn-tool', async () => {
+      const { content } = await renderManifest();
+
+      expect(content).toContain('Call with `kbn-tool connector connector-1 <sub-action>`');
+    });
+
+    it('lists only the sub-actions enabled on the connector', async () => {
+      const { content } = await renderManifest({
+        connectors: [
+          createRawConnector({ config: { selectedActions: ['searchRepositories'] } }),
+          createRawConnector({
+            id: 'connector-2',
+            name: 'Test-only GitHub',
+            config: { selectedActions: ['_test'] },
+          }),
+        ],
+        allowedConnectorIds: ['connector-1', 'connector-2'],
+      });
+
+      expect(content).toContain('(sub-actions: `searchRepositories`;');
+      expect(content).toMatch(
+        /connector-2, type: \.github\)\n\nNo `kbn-tool` sub-actions: pass this id as the `connector_id`/
+      );
+    });
+
+    it('tells the agent to pass connector_id for a connector without sub-actions', async () => {
+      const { content } = await renderManifest({
+        connectors: [createRawConnector({ actionTypeId: '.http' })],
+      });
+
+      expect(content).toContain(
+        'No `kbn-tool` sub-actions: pass this id as the `connector_id` of the bash command.'
+      );
     });
 
     it('renders every allow-listed connector', async () => {

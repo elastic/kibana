@@ -6,6 +6,7 @@
  */
 
 import type { KbnClient } from '@kbn/scout';
+import { ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS } from '@kbn/nightshift-investigations-plugin/common';
 import { saveOrcaConnector } from './orca_connector';
 
 const connector = { url: 'https://orca.example', apiKey: 'cutoff-key' };
@@ -29,7 +30,10 @@ describe('saveOrcaConnector', () => {
     expect(body).toEqual({
       name: 'orcabench_es',
       connector_type_id: '.elasticsearch',
-      config: { url: 'https://orca.example', selectedActions: ['_test'] },
+      config: {
+        url: 'https://orca.example',
+        selectedActions: [...ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS],
+      },
       secrets: { authType: 'api_key_header', Authorization: 'ApiKey cutoff-key' },
     });
   });

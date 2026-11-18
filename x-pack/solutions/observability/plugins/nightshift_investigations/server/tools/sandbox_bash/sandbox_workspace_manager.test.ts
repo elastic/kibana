@@ -123,6 +123,7 @@ describe('createSandboxWorkspaceManager', () => {
     expect(mockWriteConnectorManifest).not.toHaveBeenCalled();
     expect(session.statFiles).toHaveBeenCalledWith([
       '/workspace/connectors.md',
+      '/workspace/kibana_tools.md',
       '/workspace/.connector-docs/elastic.md',
       '/workspace/.connector-docs/github.md',
       '/workspace/.connector-docs/newrelic.md',

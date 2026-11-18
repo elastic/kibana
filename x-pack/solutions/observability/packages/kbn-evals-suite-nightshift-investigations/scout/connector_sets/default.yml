@@ -7,7 +7,8 @@ xpack.actions.preconfigured.elasticsearch:
   actionTypeId: .elasticsearch
   config:
     url: ${NIGHTSHIFT_ES_URL}
-    selectedActions: [_test]
+    # Keep in sync with ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS in the Nightshift plugin.
+    selectedActions: [search, esql, listIndices, getMapping, request, getClusterInfo]
   secrets:
     authType: api_key_header
     Authorization: "ApiKey ${NIGHTSHIFT_ES_API_KEY}"

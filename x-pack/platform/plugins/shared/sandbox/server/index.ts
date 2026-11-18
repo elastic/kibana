@@ -56,4 +56,8 @@ export type {
   FileMetadata,
   ReadFileResult,
   WriteFileResult,
+  SandboxCallbackHandler,
+  SandboxCallbackRequest,
+  SandboxCallbackResult,
+  SandboxCallbackTarget,
 } from './grpc_client';

@@ -35,7 +35,11 @@ const setup = ({
   });
   const mkdirs = jest.fn().mockResolvedValue([true]);
   const writeFiles = jest.fn().mockResolvedValue([{ success: true }]);
-  const session = { runCommand, mkdirs, writeFiles } as unknown as AuditedSandboxSession;
+  const session = {
+    runCommandWithCallbacks: runCommand,
+    mkdirs,
+    writeFiles,
+  } as unknown as AuditedSandboxSession;
   const sandboxStart = {
     getSession: jest.fn(() => session),
   } as unknown as NightshiftSandboxStart;
@@ -49,6 +53,7 @@ const setup = ({
 
   const tool = createSandboxBashTool({
     getSandboxStart: () => sandboxStart,
+    getActions: () => undefined,
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
     sandboxAllowlistClient,
@@ -56,8 +61,10 @@ const setup = ({
   });
 
   const request = httpServerMock.createKibanaRequest();
+  const runTool = jest.fn();
   const context = {
     request,
+    runner: { runTool },
     runContext: { stack: [{ type: 'agent', agentId: 'agent', conversationId: 'conv-1' }] },
     callContext: { toolId: 'nightshift_sandbox_bash', toolCallId: 'call-1', callSource: 'agent' },
     agentConfiguration: { connector_ids: ['connector-1'] },
@@ -73,6 +80,7 @@ const setup = ({
     tool,
     run,
     runCommand,
+    runTool,
     writeFiles,
     request,
     logger,
@@ -98,6 +106,29 @@ describe('sandbox bash tool', () => {
       type: 'tool',
       toolId: 'nightshift_sandbox_bash',
       toolCallId: 'call-1',
+    });
+  });
+
+  it("answers the command's ES|QL callbacks with the tool runner of this call", async () => {
+    const { run, runCommand, runTool } = setup();
+    runTool.mockResolvedValue({ results: [{ type: 'esql_results', data: { values: [[1]] } }] });
+
+    await run({});
+    const [, onCallback] = runCommand.mock.calls[0];
+
+    await expect(
+      onCallback({
+        target: { type: 'tool', toolId: 'platform.core.execute_esql' },
+        params: { query: 'FROM logs' },
+      })
+    ).resolves.toEqual({
+      ok: true,
+      result: { results: [{ type: 'esql_results', data: { values: [[1]] } }] },
+    });
+    expect(runTool).toHaveBeenCalledWith({
+      toolId: 'platform.core.execute_esql',
+      toolParams: { query: 'FROM logs' },
+      source: 'agent',
     });
   });
 

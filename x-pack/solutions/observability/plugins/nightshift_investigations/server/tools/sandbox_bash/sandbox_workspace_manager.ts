@@ -11,6 +11,42 @@ import type { AuditedSandboxSession } from '../../sandbox_audit';
 import type { SandboxCallContext } from './tool_utils';
 import { writeConnectorManifest } from './connector_manifest';
 import { CONNECTOR_DOCS, CONNECTOR_MANIFEST_PATH } from './connector_docs';
+import type { ActionsClient } from './agent_connectors';
+import { KIBANA_TOOLS_MANIFEST_PATH } from './kibana_callbacks';
+import { listCallableAgentConnectors, renderKibanaToolsManifest } from './kibana_tools_manifest';
+
+const writeKibanaToolsManifest = async ({
+  session,
+  callContext,
+  getActionsClient,
+  logger,
+}: {
+  session: AuditedSandboxSession;
+  callContext: SandboxCallContext;
+  getActionsClient: ((req: KibanaRequest) => Promise<ActionsClient>) | undefined;
+  logger: Logger;
+}): Promise<void> => {
+  let connectors: Awaited<ReturnType<typeof listCallableAgentConnectors>> = [];
+  if (getActionsClient) {
+    try {
+      connectors = await listCallableAgentConnectors(
+        await getActionsClient(callContext.request),
+        callContext.allowedConnectorIds
+      );
+    } catch (err) {
+      logger.warn(`Failed to list connectors for ${KIBANA_TOOLS_MANIFEST_PATH}: ${err}`);
+    }
+  }
+  const [result] = await session.writeFiles([
+    {
+      path: KIBANA_TOOLS_MANIFEST_PATH,
+      content: Buffer.from(renderKibanaToolsManifest(connectors), 'utf8'),
+    },
+  ]);
+  if (!result?.success) {
+    throw new Error(`Failed to write ${KIBANA_TOOLS_MANIFEST_PATH}`);
+  }
+};
 
 /**
  * Tracks per-conversation workspace state (connector IDs) and writes the connector manifest and
@@ -49,7 +85,11 @@ export const createSandboxWorkspaceManager = ({
         // `isReset` is an edge-triggered signal and another sandbox RPC (for example the
         // before-agent allocation step) may consume it before tools run. Verify the actual
         // workspace invariant before trusting the connector cache.
-        const manifestPaths = [CONNECTOR_MANIFEST_PATH, ...CONNECTOR_DOCS.map(({ path }) => path)];
+        const manifestPaths = [
+          CONNECTOR_MANIFEST_PATH,
+          KIBANA_TOOLS_MANIFEST_PATH,
+          ...CONNECTOR_DOCS.map(({ path }) => path),
+        ];
         const manifests = await session.statFiles(manifestPaths);
         const workspaceReady =
           manifests.length === manifestPaths.length &&
@@ -66,6 +106,7 @@ export const createSandboxWorkspaceManager = ({
           getActionsClient,
           logger,
         });
+        await writeKibanaToolsManifest({ session, callContext, getActionsClient, logger });
         lastWorkspaceKeys.set(session.sessionKey, currentKey);
       } catch (err) {
         lastWorkspaceKeys.delete(session.sessionKey);

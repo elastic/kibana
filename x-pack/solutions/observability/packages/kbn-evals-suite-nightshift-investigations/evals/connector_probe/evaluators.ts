@@ -26,14 +26,16 @@ export const getTimeBudgetSeconds = (
 };
 
 /**
- * Sandbox commands that carried a connector_id and finished with exit code zero. A call that
- * errored (for example `DEADLINE_EXCEEDED` from an unavailable sandbox) never reached the data.
+ * Sandbox commands that reached a connector, through `kbn-tool connector` or a connector_id, and
+ * finished with exit code zero. A call that errored (for example `DEADLINE_EXCEEDED` from an
+ * unavailable sandbox) never reached the data.
  */
 export const getSuccessfulConnectorCalls = (trajectory: TrajectoryStep[]): TrajectoryStep[] =>
   trajectory.filter(
     ({ tool_id: toolId, params, result }) =>
       toolId === SANDBOX_BASH_TOOL_ID &&
-      typeof params.connector_id === 'string' &&
+      (typeof params.connector_id === 'string' ||
+        (typeof params.command === 'string' && params.command.includes('kbn-tool connector'))) &&
       result.startsWith('exit_code: 0')
   );
 
@@ -52,8 +54,8 @@ export const connectorUsedEvaluator: ConnectorProbeEvaluator = {
       score: connectorCalls.length > 0 ? 1 : 0,
       explanation:
         connectorCalls.length > 0
-          ? `${connectorCalls.length} of ${trajectory.length} tool call(s) passed a connector_id and succeeded.`
-          : `None of the ${trajectory.length} tool call(s) passed a connector_id and succeeded.`,
+          ? `${connectorCalls.length} of ${trajectory.length} tool call(s) reached a connector and succeeded.`
+          : `None of the ${trajectory.length} tool call(s) reached a connector and succeeded.`,
       metadata: {
         connector_calls: connectorCalls.length,
         tool_calls: trajectory.length,
@@ -105,7 +107,7 @@ export const createReferenceBehaviourEvaluator = (
       return {
         score: 0,
         explanation:
-          'No sandbox command carrying a connector_id succeeded, so the reply is not grounded in connector data.',
+          'No sandbox command that reached a connector succeeded, so the reply is not grounded in connector data.',
       };
     }
     return evaluators
@@ -114,7 +116,8 @@ export const createReferenceBehaviourEvaluator = (
           'Every number, name and list item in the reference must appear in the response with the same value ' +
           '(formatting and ordering may differ); a different, missing or extra value, a hedge or a refusal fails. ' +
           'In addition, each value in the response must be supported by the output of a successful sandbox ' +
-          'command (exit_code: 0, with a connector_id) in tool_call_trajectory. A value taken from memory, ' +
+          'command (exit_code: 0, calling `kbn-tool connector` or with a connector_id) in tool_call_trajectory. ' +
+          'A value taken from memory, ' +
           'from the question text, from a tool call that errored, from an empty result, or from a cluster ' +
           'other than the one the connector queries fails.',
       ])

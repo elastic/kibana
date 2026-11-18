@@ -492,6 +492,7 @@ export class NightshiftInvestigationsPlugin
         registerSandboxTool(
           createSandboxBashTool({
             getSandboxStart,
+            getActions: () => this.actionsStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
             sandboxAllowlistClient,

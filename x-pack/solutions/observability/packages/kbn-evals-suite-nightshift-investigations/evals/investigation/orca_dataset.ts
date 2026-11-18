@@ -13,7 +13,7 @@ import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
 import { timeoutSignal } from '@kbn/std';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { EvalsClient, EvaluationDataset } from '@kbn/evals';
-import { isOrcaConnectorId } from './connector_sets';
+import { isOrcaConnectorId, ORCABENCH_ES_CONNECTOR_ID } from './connector_sets';
 import { investigationExampleSchema } from './types';
 import type { InvestigationExample } from './types';
 
@@ -260,6 +260,23 @@ const hasRows = (stdout: string): boolean => {
     ) {
       return true;
     }
+    // `kbn-tool --format ndjson` prints one JSON object per row.
+    if (lines.some((line) => isTelemetryRowObject(line))) {
+      return true;
+    }
+    // `kbn-tool --format csv` prints a header line of column names, then the rows.
+    const [header, ...rows] = lines.filter(Boolean);
+    if (
+      header !== undefined &&
+      /^[@\w."`-]+(?:,[@\w."`-]+)*$/.test(header) &&
+      rows.some((row) =>
+        row
+          .split(',')
+          .some((cell) => /^[1-9]\d*(?:\.\d+)?$/.test(cell) || /^"?2026-04-\d{2}T/.test(cell))
+      )
+    ) {
+      return true;
+    }
     // Some sandbox scripts print Python rows/dictionaries rather than the JSON response.
     return lines.some(
       (line) =>
@@ -269,6 +286,32 @@ const hasRows = (stdout: string): boolean => {
   }
 };
 
+const isTelemetryRowObject = (line: string): boolean => {
+  if (!line.startsWith('{')) return false;
+  try {
+    const row: unknown = JSON.parse(line);
+    return (
+      row !== null &&
+      typeof row === 'object' &&
+      !Array.isArray(row) &&
+      Object.values(row).some(
+        (value) =>
+          (typeof value === 'number' && value > 0) ||
+          (typeof value === 'string' && /^2026-04-\d{2}T/.test(value))
+      )
+    );
+  } catch {
+    return false;
+  }
+};
+
+/** Whether a sandbox command reached the ORCA connector, by `connector_id` or through `kbn-tool`. */
+const usesOrcaConnector = (params: Record<string, unknown>): boolean =>
+  isOrcaConnectorId(params.connector_id) ||
+  (typeof params.command === 'string' &&
+    params.command.includes('kbn-tool') &&
+    new RegExp(`(?<![\\w-])${ORCABENCH_ES_CONNECTOR_ID}(?![\\w-])`).test(params.command));
+
 /** Whether any sandbox command returned real ORCA rows, catching HTTP errors masked by pipelines. */
 export const hasOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'steps'>>): boolean =>
   rounds
@@ -276,7 +319,7 @@ export const hasOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'ste
     .some(
       ({ tool_id: toolId, params, results }) =>
         toolId === 'nightshift_sandbox_bash' &&
-        isOrcaConnectorId(params.connector_id) &&
+        usesOrcaConnector(params) &&
         results.some(
           ({ type, data }) =>
             type === ToolResultType.other &&

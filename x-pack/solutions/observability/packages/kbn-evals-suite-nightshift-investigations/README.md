@@ -547,7 +547,7 @@ a subset its own `dataset` name so it does not replace the stored full set.
 
 | Evaluator             | Kind | Scores                                                                     |
 | --------------------- | ---- | -------------------------------------------------------------------------- |
-| `connector_used`      | CODE | At least one `nightshift_sandbox_bash` call passed a `connector_id`.       |
+| `connector_used`      | CODE | At least one `nightshift_sandbox_bash` call that ran `kbn-tool connector` or passed a `connector_id` succeeded. |
 | `within_time_budget`  | CODE | The `converse` call finished within `NIGHTSHIFT_PROBE_TIME_BUDGET_S` (30). |
 | `reference_behaviour` | LLM  | The reply and tool calls match the example's `output.reference_answer`.    |
 

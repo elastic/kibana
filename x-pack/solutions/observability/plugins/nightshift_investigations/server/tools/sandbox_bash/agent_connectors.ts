@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { SelectedActions } from '@kbn/connector-specs';
 import type { SandboxCallContext } from './tool_utils';
 
 export type ActionsClient = Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>;
@@ -15,6 +16,8 @@ export interface AgentConnector {
   id: string;
   name: string;
   actionTypeId: string;
+  /** The sub-actions enabled on this connector; unset enables all of them. */
+  selectedActions?: SelectedActions;
 }
 
 /**
@@ -32,7 +35,12 @@ export const listSandboxCapableAgentConnectors = async (
   const allowedSet = new Set(allowedConnectorIds);
   return all
     .filter((c) => allowedSet.has(c.id))
-    .map((c) => ({ id: c.id, name: c.name, actionTypeId: c.actionTypeId }));
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      actionTypeId: c.actionTypeId,
+      selectedActions: c.config?.selectedActions as SelectedActions,
+    }));
 };
 
 /**

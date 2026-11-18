@@ -12,6 +12,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import type { ElasticsearchClient, ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
+import { ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS } from '../../common/sandbox_connectors';
 import { OnboardingUnavailableError } from './errors';
 
 const LOCAL_ELASTICSEARCH_CONNECTOR_TYPE_ID = connectorsSpecs.Elasticsearch.metadata.id;
@@ -122,7 +123,7 @@ export const createLocalElasticsearchConnector = async ({
       action: {
         actionTypeId: LOCAL_ELASTICSEARCH_CONNECTOR_TYPE_ID,
         name: LOCAL_ELASTICSEARCH_CONNECTOR_NAME,
-        config: { url, selectedActions: ['_test'] },
+        config: { url, selectedActions: [...ELASTICSEARCH_CONNECTOR_SELECTED_ACTIONS] },
         secrets: { authType: 'api_key_header', Authorization: `ApiKey ${apiKey.encoded}` },
       },
     });
