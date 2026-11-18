@@ -298,44 +298,51 @@ describe('OIDCAuthenticationProvider', () => {
         });
       });
 
-      it('gets token and redirects user to the base path URL if requested URL is not a Kibana internal URL.', async () => {
-        const { request, attempt } = getMocks();
+      it.each([
+        'https://some-host/some-path',
+        '/some-other-path',
+        '/mock-server-basepath/some-path#some\u0001fragment',
+      ])(
+        'gets token and redirects user to the base path URL if requested URL is not a Kibana internal URL (%j).',
+        async (redirectURL) => {
+          const { request, attempt } = getMocks();
 
-        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
-          authentication: mockUser,
-          access_token: 'some-token',
-          refresh_token: 'some-refresh-token',
-        });
+          mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+            authentication: mockUser,
+            access_token: 'some-token',
+            refresh_token: 'some-refresh-token',
+          });
 
-        await expect(
-          provider.login(
-            request,
-            attempt,
-            sessionMock.createValue({
+          await expect(
+            provider.login(
+              request,
+              attempt,
+              sessionMock.createValue({
+                state: {
+                  state: 'statevalue',
+                  nonce: 'noncevalue',
+                  redirectURL,
+                  realm: 'oidc1',
+                },
+              })
+            )
+          ).resolves.toEqual(
+            AuthenticationResult.redirectTo('/mock-server-basepath/', {
+              userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
               state: {
-                state: 'statevalue',
-                nonce: 'noncevalue',
-                redirectURL: 'https://some-host/some-path',
+                accessToken: 'some-token',
+                refreshToken: 'some-refresh-token',
                 realm: 'oidc1',
               },
+              user: mockUser,
             })
-          )
-        ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/mock-server-basepath/', {
-            userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
-            state: {
-              accessToken: 'some-token',
-              refreshToken: 'some-refresh-token',
-              realm: 'oidc1',
-            },
-            user: mockUser,
-          })
-        );
+          );
 
-        expect(mockOptions.logger.warn).toHaveBeenCalledWith(
-          'Redirect URL is not a valid Kibana internal URL, using base path instead.'
-        );
-      });
+          expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+            'Redirect URL is not a valid Kibana internal URL, using base path instead.'
+          );
+        }
+      );
 
       it('fails if authentication response is presented but session state does not contain the state parameter.', async () => {
         const { request, attempt } = getMocks();
@@ -619,21 +626,28 @@ describe('OIDCAuthenticationProvider', () => {
         }
       );
 
-      it('initiates OIDC handshake with the base path URL if original URL is not a Kibana internal URL.', async () => {
-        mockOptions.getRequestOriginalURL.mockReturnValue('https://some-host/some-path');
+      it.each([
+        ['https://some-host/some-path', '#some-fragment'],
+        ['/some-other-path', '#some-fragment'],
+        ['/mock-server-basepath/some-path', '#some\u0001fragment'],
+      ])(
+        'initiates OIDC handshake with the base path URL if original URL is not a Kibana internal URL (%j, %j).',
+        async (originalURL, urlHash) => {
+          mockOptions.getRequestOriginalURL.mockReturnValue(originalURL);
 
-        const request = httpServerMock.createKibanaRequest({
-          path: '/some-path',
-          query: { [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '#some-fragment' },
-        });
-        await expect(provider.authenticate(request)).resolves.toEqual(
-          handshakeResult('/mock-server-basepath/')
-        );
+          const request = httpServerMock.createKibanaRequest({
+            path: '/some-path',
+            query: { [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: urlHash },
+          });
+          await expect(provider.authenticate(request)).resolves.toEqual(
+            handshakeResult('/mock-server-basepath/')
+          );
 
-        expect(mockOptions.logger.warn).toHaveBeenCalledWith(
-          'Redirect URL is not a valid Kibana internal URL, using base path instead.'
-        );
-      });
+          expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+            'Redirect URL is not a valid Kibana internal URL, using base path instead.'
+          );
+        }
+      );
     });
 
     it('succeeds if state contains a valid token.', async () => {

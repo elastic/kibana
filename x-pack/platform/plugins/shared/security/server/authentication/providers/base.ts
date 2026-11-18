@@ -219,7 +219,11 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
    * @param redirectURL URL user is supposed to be redirected to.
    */
   protected getInternalRedirectURL(request: KibanaRequest, redirectURL: string) {
-    if (isInternalURL(redirectURL, this.options.basePath.serverBasePath)) {
+    // Browsers percent-encode URLs, so a valid URL only contains printable ASCII characters.
+    if (
+      /^[\x20-\x7e]*$/.test(redirectURL) &&
+      isInternalURL(redirectURL, this.options.basePath.serverBasePath)
+    ) {
       return redirectURL;
     }
 
