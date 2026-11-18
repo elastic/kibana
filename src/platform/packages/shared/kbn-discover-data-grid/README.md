@@ -57,7 +57,7 @@ export const Results = () => (
     columns={columns}
     rows={rows}
     getRowId={getRowId}
-    height={400}
+    viewport={{ mode: 'fixed', height: 400 }}
     virtualization={{
       rows: {
         estimatedHeight: 40,
@@ -72,6 +72,14 @@ Keep `rows`, `columns`, and `getRowId` stable between meaningful changes. Row ID
 must continue to identify the same logical row when rows are inserted, removed, or reordered.
 Text headers provide their own accessible name. Set a column's optional `ariaLabel` only when its
 rendered header needs a different accessible name, such as an icon-only or abbreviated header.
+The `viewport` option decides how the grid's scroll viewport gets its height. By default
+(`{ mode: 'fill' }`) the grid fills its container, which needs a height of its own, such as a flex
+item with a defined size. If the container has none, the grid is never taller than the screen, so the
+number of mounted rows stays bounded. Use `{ mode: 'fixed', height }` for a fixed height in pixels.
+The grid does not measure its container: the browser sizes the viewport and the virtualizer observes
+it.
+Pass `data-test-subj` to give the grid element, the element with the `grid` role, a test subject.
+Tests should not rely on any other element the grid renders.
 Row virtualization is enabled by default. Its estimated height and overscan can be tuned through
 `virtualization.rows`; omitting those options uses the package defaults.
 
@@ -121,6 +129,28 @@ Consumers that need semantic control can pass `apiRef` and call `focusCell` or `
 stable `{ rowId, columnId }` address. Commands return explicit completed, failed, or cancelled
 results; they never fall back to an unrelated cell when an address is missing, and scrolling
 failures preserve the current active cell and focus.
+
+## Testing
+
+JSDOM has no layout, so a grid rendered in Jest sees an empty viewport and mounts no rows, and the
+focusable content of its cells looks hidden, so Enter cannot move into it. Call `mockDataGridLayout`
+from `@kbn/discover-data-grid/mocks` before rendering to give every grid a viewport, fixed row
+heights, and displayed cell content, so that its rows virtualize and its cells' focusable content is
+found as they would be in a browser. Elements outside a grid keep JSDOM's behavior. It returns a
+function that restores JSDOM's layout.
+
+```tsx
+import { mockDataGridLayout } from '@kbn/discover-data-grid/mocks';
+
+let restoreLayout: () => void;
+beforeEach(() => {
+  restoreLayout = mockDataGridLayout({ viewportHeight: 400, rowHeight: 34 });
+});
+afterEach(() => restoreLayout());
+```
+
+Use it instead of mocking the grid's virtualizer or focus libraries, or stubbing DOM measurements
+yourself.
 
 ## Intentional initial limits
 

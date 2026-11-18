@@ -11,7 +11,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY } from '@kbn/discover-utils';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
@@ -535,5 +535,44 @@ describe('DocViewerTable', () => {
         });
       });
     });
+  });
+});
+
+describe('DocViewerTable grid renderer selector', () => {
+  const { featureFlags } = mockUnifiedDocViewerServices.core;
+
+  const setKbnDataGridEnabled = (isEnabled: boolean) => {
+    jest
+      .mocked(featureFlags.useBooleanValue)
+      .mockImplementation((flagName, fallback) =>
+        flagName === KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY ? isEnabled : fallback
+      );
+  };
+
+  afterEach(() => {
+    jest.mocked(featureFlags.useBooleanValue).mockImplementation((_, fallback) => fallback);
+    storage.clear();
+  });
+
+  it('renders the EuiDataGrid renderer by default', () => {
+    setupComponent();
+
+    expect(screen.getByTestId('UnifiedDocViewerTableGrid')).toHaveClass('euiDataGrid');
+  });
+
+  it('renders the EuiDataGrid renderer when the feature flag is disabled', () => {
+    setKbnDataGridEnabled(false);
+    setupComponent();
+
+    expect(screen.getByTestId('UnifiedDocViewerTableGrid')).toHaveClass('euiDataGrid');
+  });
+
+  it('renders the @kbn/discover-data-grid renderer when the feature flag is enabled', () => {
+    setKbnDataGridEnabled(true);
+    setupComponent();
+
+    const grid = screen.getByTestId('UnifiedDocViewerTableGrid');
+    expect(grid).not.toHaveClass('euiDataGrid');
+    expect(grid).toBe(screen.getByRole('grid', { name: 'Field values' }));
   });
 });

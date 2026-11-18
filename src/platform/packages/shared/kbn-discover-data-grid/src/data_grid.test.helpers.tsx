@@ -13,7 +13,7 @@ import { useTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import type { DataGridApi, DataGridCommandResult } from './data_grid_api';
-import { DataGrid } from './data_grid';
+import { DataGrid, type DataGridViewport } from './data_grid';
 import type { DataGridColumn } from './data_grid_column';
 import { createDataGridColumnHelper } from './data_grid_column';
 
@@ -230,6 +230,8 @@ export interface TestDataGridProps {
   readonly gridColumns?: ReadonlyArray<DataGridColumn<TestRow>>;
   readonly apiRef?: React.RefObject<DataGridApi | null>;
   readonly ariaLabel?: string;
+  readonly viewport?: DataGridViewport | null;
+  readonly dataTestSubj?: string;
 }
 
 export const TestDataGrid = ({
@@ -237,13 +239,16 @@ export const TestDataGrid = ({
   gridColumns = columns,
   apiRef,
   ariaLabel = 'Example data',
+  viewport = { mode: 'fixed', height: 160 },
+  dataTestSubj,
 }: TestDataGridProps): React.ReactElement => (
   <DataGrid
     ariaLabel={ariaLabel}
     columns={gridColumns}
     rows={gridRows}
     getRowId={getRowId}
-    height={160}
+    viewport={viewport ?? undefined}
+    data-test-subj={dataTestSubj}
     apiRef={apiRef}
     virtualization={{
       rows: {

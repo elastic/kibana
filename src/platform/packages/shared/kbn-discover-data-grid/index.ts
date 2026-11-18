@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DataGrid, type DataGridProps, type DataGridVirtualizationOptions } from './src/data_grid';
+export {
+  DataGrid,
+  type DataGridProps,
+  type DataGridViewport,
+  type DataGridVirtualizationOptions,
+} from './src/data_grid';
 export {
   type DataGridApi,
   type DataGridCellAddress,

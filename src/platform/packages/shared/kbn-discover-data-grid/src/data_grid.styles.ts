@@ -21,6 +21,12 @@ export const getDataGridStyles = (themeContext: UseEuiTheme) => {
 
   return {
     tabGuard: css(euiScreenReaderOnly()),
+    fillViewport: css({
+      blockSize: '100%',
+      // A container without a height of its own would let the grid grow with its rows and mount
+      // all of them; the screen height keeps the number of mounted rows bounded.
+      maxBlockSize: '100dvh',
+    }),
     grid: css({
       position: 'relative',
       overflow: 'auto',
