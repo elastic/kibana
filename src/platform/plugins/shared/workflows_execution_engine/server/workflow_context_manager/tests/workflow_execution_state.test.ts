@@ -138,7 +138,11 @@ describe('WorkflowExecutionState', () => {
       startedAt: '2025-08-05T20:00:00.000Z',
       isTestRun: false,
     } as EsWorkflowExecution;
-    const state = new WorkflowExecutionState(executionWithUid, workflowExecutionRepository);
+    const state = new WorkflowExecutionState(
+      executionWithUid,
+      workflowExecutionRepository,
+      stepExecutionRepository
+    );
 
     state.upsertStep({
       id: 'step-1',
