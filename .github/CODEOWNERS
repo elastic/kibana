@@ -3247,7 +3247,7 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_invest
 # Context Engine managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/context_engine @elastic/context-eng
 
-# AlertZero managed workflows (shared files: index, constants, template values, rule workflows)
+# AlertZero managed workflows (shared files: index, constants, template values)
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/alertzero-common-layer
 # Per-watch definitions without an override below fall back to @elastic/alertzero-common-layer.
 
