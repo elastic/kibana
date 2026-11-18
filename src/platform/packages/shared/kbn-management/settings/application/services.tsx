@@ -8,7 +8,7 @@
  */
 
 import type { FC, PropsWithChildren } from 'react';
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useMemo, useRef } from 'react';
 
 import {
   FormProvider,
@@ -158,98 +158,112 @@ export const SettingsApplicationKibanaProvider: FC<
     Partial<Record<UiSettingsScope, Promise<UiSettingsMetadataState>>>
   >({});
 
-  const getScopeClient = (scope: UiSettingsScope) => {
-    return scope === 'namespace' ? client : globalClient;
-  };
+  // The settings hooks depend on these functions, so a new identity on each render would refetch
+  // the settings and swap the form for a spinner.
+  const services = useMemo<Services>(() => {
+    const getScopeClient = (scope: UiSettingsScope) => {
+      return scope === 'namespace' ? client : globalClient;
+    };
 
-  const getDefinitions = (scope: UiSettingsScope) => {
-    const pendingRequest = definitionRequests.current[scope];
-    if (pendingRequest) {
-      return pendingRequest;
-    }
+    const getDefinitions = (scope: UiSettingsScope) => {
+      const pendingRequest = definitionRequests.current[scope];
+      if (pendingRequest) {
+        return pendingRequest;
+      }
 
-    const request = metadata.getAll(scope);
-    definitionRequests.current[scope] = request;
-    request.catch(() => {
-      delete definitionRequests.current[scope];
-    });
-    return request;
-  };
+      const request = metadata.getAll(scope);
+      definitionRequests.current[scope] = request;
+      request.catch(() => {
+        delete definitionRequests.current[scope];
+      });
+      return request;
+    };
 
-  const getAllowlistedSettings = async (
-    scope: UiSettingsScope,
-    solution: SolutionView | undefined
-  ) => {
-    const { filterSettings } = application.capabilities;
-    const definitions = await getDefinitions(scope);
-    const allSettings = mergeSettingDefinitions(definitions, getScopeClient(scope).getAll());
-    const rawSettings = Object.fromEntries(
-      Object.entries(allSettings).filter(
-        ([settingId, settingDef]) =>
-          !settingDef.readonly &&
-          !client.isCustom(settingId) &&
-          (!filterSettings.bySolutionView ||
-            !solution ||
-            !settingDef.solutionViews ||
-            settingDef.solutionViews.includes(solution))
-      )
-    );
-    return normalizeSettings(rawSettings);
-  };
+    const getAllowlistedSettings = async (
+      scope: UiSettingsScope,
+      solution: SolutionView | undefined
+    ) => {
+      const { filterSettings } = application.capabilities;
+      const definitions = await getDefinitions(scope);
+      const allSettings = mergeSettingDefinitions(definitions, getScopeClient(scope).getAll());
+      const rawSettings = Object.fromEntries(
+        Object.entries(allSettings).filter(
+          ([settingId, settingDef]) =>
+            !settingDef.readonly &&
+            !client.isCustom(settingId) &&
+            (!filterSettings.bySolutionView ||
+              !solution ||
+              !settingDef.solutionViews ||
+              settingDef.solutionViews.includes(solution))
+        )
+      );
+      return normalizeSettings(rawSettings);
+    };
 
-  const getSections = (scope: UiSettingsScope) => {
-    return scope === 'namespace'
-      ? sectionRegistry.getSpacesSections()
-      : sectionRegistry.getGlobalSections();
-  };
+    const getSections = (scope: UiSettingsScope) => {
+      return scope === 'namespace'
+        ? sectionRegistry.getSpacesSections()
+        : sectionRegistry.getGlobalSections();
+    };
 
-  const getCapabilities = () => {
-    const { advancedSettings, globalSettings, filterSettings } = application.capabilities;
+    const getCapabilities = () => {
+      const { advancedSettings, globalSettings, filterSettings } = application.capabilities;
+      return {
+        spaceSettings: {
+          show: advancedSettings.show as boolean,
+          save: advancedSettings.save as boolean,
+        },
+        globalSettings: {
+          show: globalSettings.show as boolean,
+          save: globalSettings.save as boolean,
+        },
+        filterSettings: {
+          bySolutionView: filterSettings.bySolutionView as boolean,
+        },
+      };
+    };
+
+    const isCustomSetting = (key: string, scope: UiSettingsScope) => {
+      const scopeClient = getScopeClient(scope);
+      return scopeClient.isCustom(key);
+    };
+
+    const isOverriddenSetting = (key: string, scope: UiSettingsScope) => {
+      const scopeClient = getScopeClient(scope);
+      return scopeClient.isOverridden(key);
+    };
+
+    const subscribeToUpdates = (fn: () => void, scope: UiSettingsScope) => {
+      const scopeClient = getScopeClient(scope);
+      return scopeClient.getUpdate$().subscribe(fn);
+    };
+
     return {
-      spaceSettings: {
-        show: advancedSettings.show as boolean,
-        save: advancedSettings.save as boolean,
-      },
-      globalSettings: {
-        show: globalSettings.show as boolean,
-        save: globalSettings.save as boolean,
-      },
-      filterSettings: {
-        bySolutionView: filterSettings.bySolutionView as boolean,
+      getAllowlistedSettings,
+      getSections,
+      getToastsService: () => notifications.toasts,
+      getCapabilities,
+      setBadge: (badge: ChromeBadge) => chrome.setBadge(badge),
+      isCustomSetting,
+      isOverriddenSetting,
+      subscribeToUpdates,
+      addUrlToHistory: (url: string) => history.replace({ pathname: '', search: url }),
+      getActiveSpace: spaces.getActiveSpace,
+      subscribeToActiveSpace: (fn: () => void) => {
+        return spaces.getActiveSpace$().subscribe(fn);
       },
     };
-  };
-
-  const isCustomSetting = (key: string, scope: UiSettingsScope) => {
-    const scopeClient = getScopeClient(scope);
-    return scopeClient.isCustom(key);
-  };
-
-  const isOverriddenSetting = (key: string, scope: UiSettingsScope) => {
-    const scopeClient = getScopeClient(scope);
-    return scopeClient.isOverridden(key);
-  };
-
-  const subscribeToUpdates = (fn: () => void, scope: UiSettingsScope) => {
-    const scopeClient = getScopeClient(scope);
-    return scopeClient.getUpdate$().subscribe(fn);
-  };
-
-  const services: Services = {
-    getAllowlistedSettings,
-    getSections,
-    getToastsService: () => notifications.toasts,
-    getCapabilities,
-    setBadge: (badge: ChromeBadge) => chrome.setBadge(badge),
-    isCustomSetting,
-    isOverriddenSetting,
-    subscribeToUpdates,
-    addUrlToHistory: (url: string) => history.replace({ pathname: '', search: url }),
-    getActiveSpace: spaces.getActiveSpace,
-    subscribeToActiveSpace: (fn: () => void) => {
-      return spaces.getActiveSpace$().subscribe(fn);
-    },
-  };
+  }, [
+    client,
+    globalClient,
+    metadata,
+    application,
+    sectionRegistry,
+    notifications,
+    chrome,
+    history,
+    spaces,
+  ]);
 
   return (
     <SettingsApplicationContext.Provider value={services}>

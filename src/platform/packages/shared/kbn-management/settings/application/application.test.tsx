@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { of, Subject } from 'rxjs';
 import type {
@@ -39,7 +39,7 @@ import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settin
 import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import { wrap, createSettingsApplicationServicesMock } from './mocks';
 import type { SettingsApplicationServices } from './services';
-import { SettingsApplicationKibanaProvider } from './services';
+import { SettingsApplicationKibanaProvider, SettingsApplicationProvider } from './services';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { SolutionView, Space } from '@kbn/spaces-plugin/common';
@@ -93,36 +93,48 @@ const renderWithKibanaProvider = ({
     globalSettings: { show: true, save: true },
     filterSettings: { bySolutionView },
   } as any;
+  const rootMock = createRootMock();
+  const docLinks = docLinksServiceMock.createStartContract();
+  const notifications = { toasts: notificationServiceMock.createStartContract().toasts };
+  const userProfile = userProfileServiceMock.createStart();
+  const theme = themeServiceMock.createStartContract();
+  const i18n = i18nServiceMock.createStartContract();
+  const globalClient = uiSettingsServiceMock.createStartContract();
+  const sectionRegistry = {
+    getSpacesSections: () => [],
+    getGlobalSections: () => [],
+  };
+  const chrome = chromeServiceMock.createStartContract();
+  const spaces = {
+    getActiveSpace: () => Promise.resolve(activeSpace),
+    getActiveSpace$: () => of(activeSpace),
+  };
 
-  return render(
-    <KibanaRootContextProvider {...createRootMock()}>
+  const renderTree = () => (
+    <KibanaRootContextProvider {...rootMock}>
       <SettingsApplicationKibanaProvider
-        docLinks={docLinksServiceMock.createStartContract()}
-        notifications={{ toasts: notificationServiceMock.createStartContract().toasts }}
-        userProfile={userProfileServiceMock.createStart()}
-        theme={themeServiceMock.createStartContract()}
-        i18n={i18nServiceMock.createStartContract()}
-        settings={{
-          client,
-          globalClient: uiSettingsServiceMock.createStartContract(),
-          metadata,
-        }}
+        docLinks={docLinks}
+        notifications={notifications}
+        userProfile={userProfile}
+        theme={theme}
+        i18n={i18n}
+        settings={{ client, globalClient, metadata }}
         history={history}
-        sectionRegistry={{
-          getSpacesSections: () => [],
-          getGlobalSections: () => [],
-        }}
+        sectionRegistry={sectionRegistry}
         application={application}
-        chrome={chromeServiceMock.createStartContract()}
-        spaces={{
-          getActiveSpace: () => Promise.resolve(activeSpace),
-          getActiveSpace$: () => of(activeSpace),
-        }}
+        chrome={chrome}
+        spaces={spaces}
       >
         <SettingsApplication />
       </SettingsApplicationKibanaProvider>
     </KibanaRootContextProvider>
   );
+
+  const result = render(renderTree());
+  return {
+    ...result,
+    rerenderProvider: () => result.rerender(renderTree()),
+  };
 };
 
 describe('Settings application', () => {
@@ -308,6 +320,78 @@ describe('Settings application', () => {
 
     expect(await findByDisplayValue('new-value')).toBeInTheDocument();
     expect(queryByDisplayValue('hidden-value')).toBeNull();
+  });
+
+  it("doesn't refetch the settings or lose unsaved changes when the Kibana provider re-renders", async () => {
+    const client = uiSettingsServiceMock.createStartContract();
+    client.getAll.mockReturnValue({
+      'test:setting': { name: 'Test setting', type: 'string', value: 'default', userValue: 'saved' },
+    });
+    const metadata = {
+      getAll: jest.fn(async (scope: UiSettingsScope) =>
+        scope === 'namespace'
+          ? {
+              'test:setting': {
+                name: 'Test setting',
+                type: 'string' as const,
+                value: 'default',
+                userValue: 'saved',
+              },
+            }
+          : {}
+      ),
+    };
+
+    const { findByDisplayValue, getByDisplayValue, queryByTestId, rerenderProvider } =
+      renderWithKibanaProvider({ client, metadata });
+
+    const input = await findByDisplayValue('saved');
+    act(() => {
+      fireEvent.change(input, { target: { value: 'unsaved' } });
+    });
+    const getAllCallCount = client.getAll.mock.calls.length;
+
+    rerenderProvider();
+
+    expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOADING)).toBeNull();
+    expect(getByDisplayValue('unsaved')).toBeInTheDocument();
+    await act(async () => {});
+    expect(client.getAll).toHaveBeenCalledTimes(getAllCallCount);
+    expect(getByDisplayValue('unsaved')).toBeInTheDocument();
+  });
+
+  it('keeps the form and its unsaved changes while the settings are refetched', async () => {
+    const services = createSettingsApplicationServicesMock();
+    let setServices: (next: SettingsApplicationServices) => void = () => {};
+    // `wrap` remounts its tree on every call, so the services change from inside the tree.
+    const ServicesSwapper = () => {
+      const [current, setCurrent] = useState(services);
+      setServices = setCurrent;
+      return (
+        <SettingsApplicationProvider {...current}>
+          <SettingsApplication />
+        </SettingsApplicationProvider>
+      );
+    };
+    const { findByDisplayValue, getByDisplayValue, queryByTestId } = render(
+      wrap(<ServicesSwapper />, services)
+    );
+
+    const input = await findByDisplayValue('hello world');
+    act(() => {
+      fireEvent.change(input, { target: { value: 'unsaved' } });
+    });
+
+    const getAllowlistedSettings = jest.fn(services.getAllowlistedSettings);
+    act(() => {
+      setServices({ ...services, getAllowlistedSettings });
+    });
+
+    expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOADING)).toBeNull();
+    await waitFor(() => expect(getAllowlistedSettings).toHaveBeenCalled());
+    await act(async () => {});
+    expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOADING)).toBeNull();
+    expect(getByDisplayValue('unsaved')).toBeInTheDocument();
   });
 
   it('replaces history while typing so browser back does not step through each character', async () => {

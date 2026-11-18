@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
@@ -30,6 +30,7 @@ export const useSettings = (scope: UiSettingsScope, isEnabled: boolean = true) =
   const [settings, setSettings] = useState<Record<string, UiSettingMetadata>>({});
   const [isLoading, setIsLoading] = useState(isEnabled);
   const [error, setError] = useState<Error>();
+  const hasLoaded = useRef(false);
 
   useEffectOnce(() => {
     const subscription = subscribeToActiveSpace(() => {
@@ -46,6 +47,7 @@ export const useSettings = (scope: UiSettingsScope, isEnabled: boolean = true) =
 
   useEffect(() => {
     if (!isEnabled) {
+      hasLoaded.current = false;
       setSettings({});
       setError(undefined);
       setIsLoading(false);
@@ -53,12 +55,16 @@ export const useSettings = (scope: UiSettingsScope, isEnabled: boolean = true) =
     }
 
     let isCurrent = true;
-    setIsLoading(true);
+    // Refetches keep the loaded settings on screen, so the form and its unsaved changes stay mounted.
+    if (!hasLoaded.current) {
+      setIsLoading(true);
+    }
 
     const refreshSettings = () => {
       getAllowlistedSettings(scope, solutionView).then(
         (result) => {
           if (isCurrent) {
+            hasLoaded.current = true;
             setSettings(result);
             setError(undefined);
             setIsLoading(false);
