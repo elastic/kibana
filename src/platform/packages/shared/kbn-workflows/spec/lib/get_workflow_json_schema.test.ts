@@ -9,8 +9,11 @@
 
 import { stringify } from 'yaml';
 import { isoDateTime, z } from '@kbn/zod/v4';
+import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_connectors';
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
 import { getValidateWithYamlLsp } from './test_utils/validate_with_yaml_lsp';
+import { getOrResolveObject } from '../../common/utils';
+import { getKibanaConnectors } from '../kibana';
 
 describe('getWorkflowJsonSchema', () => {
   it('should set `additionalProperties: {}` for loose objects', () => {
@@ -93,6 +96,24 @@ describe('getWorkflowJsonSchema', () => {
         },
       },
     });
+  });
+
+  it('guards each step union alternative with an `if` on its `type` literal', () => {
+    const jsonSchema = getWorkflowJsonSchema(
+      generateYamlSchemaFromConnectors(getKibanaConnectors())
+    );
+    const steps = jsonSchema?.properties?.steps as z.core.JSONSchema.JSONSchema;
+    const stepUnion = getOrResolveObject<z.core.JSONSchema.JSONSchema>(steps.items, jsonSchema);
+    const alternatives = stepUnion?.oneOf ?? [];
+
+    expect(alternatives.length).toBeGreaterThan(1);
+    expect(alternatives).toEqual(
+      alternatives.map(() => ({
+        if: { properties: { type: { const: expect.any(String) } }, required: ['type'] },
+        then: expect.anything(),
+        else: false,
+      }))
+    );
   });
 });
 

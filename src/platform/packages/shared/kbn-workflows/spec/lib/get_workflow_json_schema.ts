@@ -52,9 +52,10 @@ export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.J
       },
     });
 
-    return mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(
-      stripNestedSchemaIds(jsonSchema) as z.core.JSONSchema.JSONSchema
-    );
+    const workflowJsonSchema = stripNestedSchemaIds(jsonSchema) as z.core.JSONSchema.JSONSchema;
+    guardStepUnionAlternativesByType(workflowJsonSchema);
+
+    return mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(workflowJsonSchema);
   } catch (error) {
     // console.error('Error generating JSON schema from YAML schema:', error);
     return null;
@@ -88,6 +89,47 @@ function stripNestedSchemaIds(node: unknown, isRoot = true): unknown {
   }
 
   return result;
+}
+
+/**
+ * yaml-language-server fully validates a step against every alternative of the step union, and
+ * steps nest (e.g. `on-failure.fallback`), so with hundreds of connector step types validation and
+ * completion take seconds. Guarding each alternative with an `if` on its `type` literal lets
+ * non-matching alternatives fail without validating their contents.
+ *
+ * This function MODIFIES the jsonSchema in place.
+ */
+function guardStepUnionAlternativesByType(jsonSchema: z.core.JSONSchema.JSONSchema) {
+  const resolve = (node: unknown) =>
+    getOrResolveObject<z.core.JSONSchema.JSONSchema>(node, jsonSchema) ?? undefined;
+
+  const getRequiredTypeLiteral = (alternative: unknown): string | undefined => {
+    const alternativeSchema = resolve(alternative);
+    if (!alternativeSchema?.required?.includes('type')) {
+      return undefined;
+    }
+    const literal = resolve(alternativeSchema.properties?.type)?.const;
+    return typeof literal === 'string' ? literal : undefined;
+  };
+
+  const stepUnion = resolve(resolve(resolve(jsonSchema)?.properties?.steps)?.items);
+  const unionKey = stepUnion?.oneOf ? 'oneOf' : 'anyOf';
+  const alternatives = stepUnion?.[unionKey];
+  if (!stepUnion || !alternatives) {
+    return;
+  }
+
+  stepUnion[unionKey] = alternatives.map((alternative) => {
+    const typeLiteral = getRequiredTypeLiteral(alternative);
+    if (typeLiteral === undefined) {
+      return alternative;
+    }
+    return {
+      if: { properties: { type: { const: typeLiteral } }, required: ['type'] },
+      then: alternative,
+      else: false,
+    };
+  });
 }
 
 // this function MODIFIES the jsonSchema in place
