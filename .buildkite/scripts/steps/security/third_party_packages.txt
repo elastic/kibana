@@ -1,3 +1,6 @@
+@jest/environment-jsdom-abstract
+@jest/expect
+@jest/globals
 @openfeature/ofrep-web-provider
 cbor2
 @eslint-community/eslint-plugin-eslint-comments
