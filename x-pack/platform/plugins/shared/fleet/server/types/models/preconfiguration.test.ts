@@ -149,16 +149,26 @@ describe('Test preconfiguration schema', () => {
   });
 
   describe('PreconfiguredAgentPoliciesSchema', () => {
-    it('should reject OTel collector keys in overrides with a clear error', () => {
+    // Rejecting them would fail kibana.yml validation and stop Kibana from starting after an
+    // upgrade. They are stripped when the full agent policy is built instead.
+    it('should not reject OTel collector keys in overrides', () => {
       expect(() => {
         PreconfiguredAgentPoliciesSchema.validate([
           {
             id: 'policy-1',
             name: 'Policy 1',
-            overrides: { 'extensions.pprof.save_to_file': '/tmp/x' },
+            overrides: { 'extensions.pprof.save_to_file': '/tmp/x', receivers: { otlp: {} } },
           },
         ]);
-      }).toThrow('extensions overrides is not allowed');
+      }).not.toThrow();
+    });
+
+    it('should keep rejecting inputs overrides', () => {
+      expect(() => {
+        PreconfiguredAgentPoliciesSchema.validate([
+          { id: 'policy-1', name: 'Policy 1', overrides: { 'inputs.foo': 'bar' } },
+        ]);
+      }).toThrow('inputs overrides is not allowed');
     });
 
     it('should still allow outputs and agent overrides', () => {

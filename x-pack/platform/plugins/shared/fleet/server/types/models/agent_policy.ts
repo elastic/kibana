@@ -56,8 +56,9 @@ function validateCPU(s: string) {
 }
 
 /**
- * `overrides` as accepted from requests (REST API and `xpack.fleet.agentPolicies` in kibana.yml):
- * rejects the denied keys, including dotted paths below them.
+ * `overrides` as accepted from REST API requests: rejects the denied keys, including dotted paths
+ * below them. Not used for `xpack.fleet.agentPolicies` in kibana.yml, where rejecting them would
+ * stop Kibana from starting after an upgrade.
  *
  * Not part of `AgentPolicyBaseSchema` on purpose: that object feeds the frozen SO model-version
  * schemas (create and forward compatibility) and the response schemas. Policies saved before this
