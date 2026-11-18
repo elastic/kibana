@@ -263,6 +263,38 @@ export interface ConversationClient {
  * Caps `title` at the stored bound. HTTP routes already validate it, but server-side callers
  * (LLM title generation in particular) do not, so enforce it here to cover every write path.
  */
+/**
+ * Fields that hold per-user state or feedback rather than conversation content. A write that only
+ * changes these is not a content update, so it keeps the conversation's `updated_at`.
+ */
+const PER_USER_FIELDS = [
+  'read',
+  'read_by',
+  'pinned',
+  'pinned_by',
+  'feedback',
+] as const satisfies ReadonlyArray<keyof ConversationUpdatableFields>;
+const PER_USER_FIELD_SET: ReadonlySet<string> = new Set(PER_USER_FIELDS);
+
+/**
+ * `updated_at` is bumped unless the write only changes per-user fields. Any other field, including
+ * one added later, bumps it. A change of the active execution also counts as an update.
+ */
+const resolveUpdateDate = ({
+  current,
+  changes,
+  activeExecution,
+}: {
+  current: NormalizedConversation;
+  changes: Omit<ConversationUpdatableFields, 'id'>;
+  activeExecution?: ActiveExecutionUpdate;
+}): Date => {
+  const changesContent =
+    activeExecution !== undefined ||
+    Object.keys(changes).some((key) => !PER_USER_FIELD_SET.has(key));
+  return changesContent ? new Date() : new Date(current.updated_at);
+};
+
 const withBoundedTitle = <T extends { title?: string }>(fields: T): T =>
   fields.title === undefined
     ? fields
@@ -823,7 +855,6 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access: 'owner',
       emit: false,
-      preserveUpdatedAt: true,
       fields: (current) => {
         const existing = current.feedback ?? {};
         if (feedback.vote === null) {
@@ -1302,9 +1333,8 @@ class ConversationClientImpl implements ConversationClient {
     return this.writeConversation({
       conversationId,
       access: 'converse',
-      // Per-user state only: never reported to `ai.conversation.updated`, and not a content update.
+      // Per-user state only: never reported to `ai.conversation.updated`.
       emit: false,
-      preserveUpdatedAt: true,
       fields: (current) =>
         updateReadBy({
           userId: this.getUser().id,
@@ -1319,9 +1349,8 @@ class ConversationClientImpl implements ConversationClient {
     return this.writeConversation({
       conversationId,
       access: 'converse',
-      // Per-user state only: never reported to `ai.conversation.updated`, and not a content update.
+      // Per-user state only: never reported to `ai.conversation.updated`.
       emit: false,
-      preserveUpdatedAt: true,
       fields: (current) =>
         updatePinnedBy({
           userId: this.getUser().id,
@@ -1863,7 +1892,6 @@ class ConversationClientImpl implements ConversationClient {
     refresh,
     activeExecution,
     peekHeld,
-    preserveUpdatedAt = false,
     ...emission
   }: {
     conversationId: string;
@@ -1873,8 +1901,6 @@ class ConversationClientImpl implements ConversationClient {
     refresh?: Refresh;
     activeExecution?: ActiveExecutionUpdate;
     peekHeld?: boolean;
-    /** Keeps the stored `updated_at`, for writes that only change per-user state (read, pinned). */
-    preserveUpdatedAt?: boolean;
   } & ConversationWriteEmission): Promise<Conversation> {
     const writer = this.createWriter({ access, maxRetries, refresh, activeExecution, peekHeld });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
@@ -1886,14 +1912,15 @@ class ConversationClientImpl implements ConversationClient {
         id: conversationId,
         mutate: (current) => {
           before = current;
+          const changes = fields(current);
           return updateConversation({
             conversation: current,
             update: {
               id: conversationId,
-              ...fields(current),
+              ...changes,
               ...(activeExecution && applyActiveExecutionUpdate(current, activeExecution)),
             },
-            updateDate: preserveUpdatedAt ? new Date(current.updated_at) : new Date(),
+            updateDate: resolveUpdateDate({ current, changes, activeExecution }),
             space: this.space,
           });
         },

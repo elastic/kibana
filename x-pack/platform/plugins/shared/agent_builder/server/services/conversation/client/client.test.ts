@@ -1557,6 +1557,27 @@ describe('ConversationClient', () => {
       );
     });
 
+    it('keeps updated_at when an update only changes per-user fields', async () => {
+      mockGetDocumentResponse(createConversationDocument({ readBy: [] }));
+
+      await client.update({ id: 'conversation-1', read: true }, { source: 'http_api' });
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.updated_at).toBe(CONVERSATION_UPDATED_AT);
+    });
+
+    it('bumps updated_at when a content field changes alongside a per-user field', async () => {
+      mockGetDocumentResponse(createConversationDocument({ readBy: [] }));
+
+      await client.update(
+        { id: 'conversation-1', title: 'Renamed', read: true },
+        { source: 'http_api' }
+      );
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.updated_at).not.toBe(CONVERSATION_UPDATED_AT);
+    });
+
     it('preserves legacy owner read state when renaming before read_by exists', async () => {
       mockGetDocumentResponse(createConversationDocument({ read: true, hasReadBy: false }));
 
@@ -6444,6 +6465,21 @@ describe('ConversationClient', () => {
       expect(indexed.active_execution).toMatchObject({
         execution_id: 'e2',
       });
+    });
+
+    it('an update without fields that sets or releases the active execution bumps updated_at', async () => {
+      mockGetDocumentResponse(documentWithHolder(undefined, { readBy: [{ userId: 'user-1' }] }));
+
+      await updateWithoutFields(setActiveExecution('e2'));
+
+      expect(indexedSource().updated_at).not.toBe(CONVERSATION_UPDATED_AT);
+
+      mockEsClient.index.mockClear();
+      mockGetDocumentResponse(documentWithHolder('e1', { readBy: [{ userId: 'user-1' }] }));
+
+      await updateWithoutFields({ action: 'release', executionId: 'e1' });
+
+      expect(indexedSource().updated_at).not.toBe(CONVERSATION_UPDATED_AT);
     });
 
     it('an update without fields that releases the active execution clears only its own', async () => {
