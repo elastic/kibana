@@ -102,7 +102,24 @@ export type UpsertPanelContent = z.infer<typeof upsertPanelContentSchema>;
 type ConfigPanelType = (typeof CONFIG_PANEL_KINDS)[number]['type'];
 
 /** The kind types the host executes. */
-type RequestPanelType = (typeof REQUEST_PANEL_KINDS)[number]['type'];
+export type RequestPanelType = (typeof REQUEST_PANEL_KINDS)[number]['type'];
+
+const requestPanelKindByType = new Map<string, (typeof REQUEST_PANEL_KINDS)[number]>(
+  REQUEST_PANEL_KINDS.map((kind) => [kind.type, kind])
+);
+
+/** Whether the value names a panel kind the host generates server-side from a request. */
+export const isRequestPanelType = (value: unknown): value is RequestPanelType =>
+  typeof value === 'string' && requestPanelKindByType.has(value);
+
+/** The embeddable type that panels of the given request kind are stored as. */
+export const getRequestPanelEmbeddableType = (type: RequestPanelType): string => {
+  const kind = requestPanelKindByType.get(type);
+  if (!kind) {
+    throw new Error(`Panel type "${type}" is not registered.`);
+  }
+  return kind.embeddableType;
+};
 
 type ConfigPanelContent = Extract<UpsertPanelContent, { type: ConfigPanelType }>;
 

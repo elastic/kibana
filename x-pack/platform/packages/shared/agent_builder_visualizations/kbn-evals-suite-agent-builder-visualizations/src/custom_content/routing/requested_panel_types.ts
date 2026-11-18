@@ -6,11 +6,10 @@
  */
 
 import { CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID } from '@kbn/custom-content-common';
+import { isRequestPanelType } from '@kbn/dashboard-agent-authoring';
 import { isRecord } from '../../evaluator_utils';
 
 const CREATE_VISUALIZATION_TOOL_ID = 'platform.core.create_visualization';
-
-const GENERATED_PANEL_TYPES: ReadonlySet<unknown> = new Set(['vis', 'vega', 'custom_content']);
 
 /**
  * The panel types the agent asked for, from the arguments of its tool calls. Which one it picked is
@@ -31,15 +30,15 @@ export const getRequestedPanelTypes = (
       Array.isArray(params.panels)
     ) {
       return params.panels.flatMap((item: unknown) =>
-        isRecord(item) && isRecord(item.content) && GENERATED_PANEL_TYPES.has(item.content.type)
-          ? [String(item.content.type)]
+        isRecord(item) && isRecord(item.content) && isRequestPanelType(item.content.type)
+          ? [item.content.type]
           : []
       );
     }
 
     if (step.tool_id === CREATE_VISUALIZATION_TOOL_ID && isRecord(params.target)) {
       const { type } = params.target;
-      if (type === 'custom_content' || type === 'vega') {
+      if (isRequestPanelType(type)) {
         return [type];
       }
       return typeof type === 'string' && type !== 'attachment' ? ['vis'] : [];

@@ -9,26 +9,28 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   VISUALIZATION_ATTACHMENT_TYPE,
-  VEGA_VIS_TYPE,
   getEffectiveRenderer,
   isCustomContentVisualization,
   readAttachmentQueries,
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
-import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
-import type { PanelContent, PanelContentAttempt } from '@kbn/dashboard-agent-authoring';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import {
+  getRequestPanelEmbeddableType,
+  type PanelContent,
+  type PanelContentAttempt,
+  type RequestPanelType,
+} from '@kbn/dashboard-agent-authoring';
 
-const EMBEDDABLE_TYPE_BY_RENDERER: Readonly<Record<VisualizationRenderer, string>> = {
-  lens: LENS_EMBEDDABLE_TYPE,
-  vega: VEGA_VIS_TYPE,
-  custom_content: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+const PANEL_TYPE_BY_RENDERER: Readonly<Record<VisualizationRenderer, RequestPanelType>> = {
+  lens: 'vis',
+  vega: 'vega',
+  custom_content: 'custom_content',
 };
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
-  const type = EMBEDDABLE_TYPE_BY_RENDERER[getEffectiveRenderer(data)];
+  const type = getRequestPanelEmbeddableType(PANEL_TYPE_BY_RENDERER[getEffectiveRenderer(data)]);
 
   // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
   if (isCustomContentVisualization(data)) {
