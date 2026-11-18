@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ceil, floor } from 'lodash';
 import type { HistogramBounds } from '../../types';
 
 /** A MIN/MAX cell as it arrives in an ES|QL row. */
@@ -18,10 +19,6 @@ const toFiniteNumber = (value: RawHistogramBound): number | undefined => {
   }
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 };
-
-// Scale through decimal text so a value already on a hundredth, such as 2.3, stays put.
-const toHundredths = (value: number, round: (scaled: number) => number): number =>
-  round(Number((value * 100).toFixed(8))) / 100;
 
 /**
  * Returns finite, ordered MIN/MAX rounded outward to hundredths, or undefined.
@@ -37,5 +34,11 @@ export const parseHistogramBounds = (
     return undefined;
   }
 
-  return { min: toHundredths(min, Math.floor), max: toHundredths(max, Math.ceil) };
+  const roundedMin = floor(min, 2);
+  const roundedMax = ceil(max, 2);
+
+  return {
+    min: Number.isFinite(roundedMin) ? roundedMin : min,
+    max: Number.isFinite(roundedMax) ? roundedMax : max,
+  };
 };

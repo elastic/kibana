@@ -38,6 +38,10 @@ describe('parseHistogramBounds', () => {
     expect(parseHistogramBounds(0.019, 0.019)).toEqual({ min: 0.01, max: 0.02 });
   });
 
+  it('keeps digits past the hundredth when rounding outward', () => {
+    expect(parseHistogramBounds(1.00000000004, 1.00000000004)).toEqual({ min: 1, max: 1.01 });
+  });
+
   it('leaves a value that is already on a hundredth unchanged', () => {
     expect(parseHistogramBounds(1, 4.2)).toEqual({ min: 1, max: 4.2 });
     expect(parseHistogramBounds(2.3, 8.7)).toEqual({ min: 2.3, max: 8.7 });
@@ -49,6 +53,13 @@ describe('parseHistogramBounds', () => {
 
   it('returns min and max when min is less than max', () => {
     expect(parseHistogramBounds(-1, 250)).toEqual({ min: -1, max: 250 });
+  });
+
+  it('keeps the original bound when rounding cannot produce a finite hundredth', () => {
+    expect(parseHistogramBounds(Number.MAX_VALUE, Number.MAX_VALUE)).toEqual({
+      min: Number.MAX_VALUE,
+      max: Number.MAX_VALUE,
+    });
   });
 
   it('coerces numeric strings and treats other strings as undefined', () => {
