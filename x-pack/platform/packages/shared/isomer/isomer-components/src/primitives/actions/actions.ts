@@ -9,7 +9,7 @@ import { navigationHref, z, type PrimitiveNode } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
-import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
+import { actionEventSchema, componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
 import { appPathSchema, appRouteSchema, refineAppOrUrl } from '../link/link_target';
 
 import { actionsReactRenderer } from './actions_react';
@@ -18,26 +18,43 @@ import { actionsMarkdownRenderer } from './actions_markdown';
 
 const buttonSchema = z
   .object({
-    label: plainText(SLACK_LIMITS.buttonTextChars).describe('What the link opens, in a few words.'),
+    label: plainText(SLACK_LIMITS.buttonTextChars).describe(
+      'What the button opens or does, in a few words.'
+    ),
     url: navigationHref({ max: SLACK_LIMITS.urlChars })
       .optional()
-      .describe('The URL it opens. Give either `url` or `app`.'),
+      .describe('The URL it opens. Give one of `url`, `app` or `event`.'),
     app: appRouteSchema
       .optional()
       .describe(
         'The Kibana app route after /app/, such as "discover". Each host resolves it in the current space.'
       ),
     path: appPathSchema.optional().describe('A path inside `app`, such as "/manage/skills".'),
+    event: actionEventSchema
+      .optional()
+      .describe('An event the host handles on click, instead of a link. Only for hosts that do.'),
     primary: z.boolean().optional().describe('Marks the one action the reader should take.'),
+    danger: z.boolean().optional().describe('Marks an action that destroys or cannot be undone.'),
   })
   .strict()
-  .superRefine(refineAppOrUrl);
+  .superRefine((button, context) => {
+    if (button.event === undefined) {
+      refineAppOrUrl(button, context);
+      return;
+    }
+
+    (['url', 'app', 'path'] as const)
+      .filter((key) => button[key] !== undefined)
+      .forEach((key) =>
+        context.addIssue({ code: 'custom', message: 'not with event', path: [key] })
+      );
+  });
 
 const actionsSchema = z.object({
   type: z.literal('actions'),
   buttons: fromChildren(
     'button',
-    z.array(buttonSchema).min(1).max(5).describe('Links, in order. 1 to 5.'),
+    z.array(buttonSchema).min(1).max(5).describe('Buttons, in order. 1 to 5.'),
     { text: 'label' }
   ),
 });
@@ -59,7 +76,7 @@ const icon = componentIcon(
     `<rect x="2" y="5.5" width="5.5" height="5" rx="1.25" fill="${accent}"/><rect x="9.25" y="6.25" width="4.75" height="3.5" rx="1" stroke="${muted}"/>`
 );
 
-/** A row of link buttons, such as one that opens the full record in Kibana. */
+/** A row of buttons that open a link, such as the full record in Kibana, or raise an event. */
 export type ActionsNode = z.infer<typeof actionsSchema> & PrimitiveNode;
 
 export const actions = definePrimitive<ActionsNode, typeof actionsSchema>({
@@ -82,11 +99,25 @@ export const actions = definePrimitive<ActionsNode, typeof actionsSchema>({
         { label: 'Edit in Management', url: 'https://kibana.example.com/app/management' },
       ],
     },
+    {
+      type: 'actions',
+      buttons: [
+        { label: 'Delete', event: { name: 'confirm', context: { allow: true } }, danger: true },
+        { label: 'Cancel', event: { name: 'confirm', context: { allow: false } } },
+      ],
+    },
   ],
   renderers: {
     react: actionsReactRenderer,
     text: ({ buttons }) =>
-      buttons.flatMap(({ label, url }) => (url ? [`${oneLine(label)}: ${url}`] : [])).join('\n'),
+      buttons
+        .flatMap(({ label, url, event }) => {
+          if (event) {
+            return [oneLine(label)];
+          }
+          return url ? [`${oneLine(label)}: ${url}`] : [];
+        })
+        .join('\n'),
     markdown: actionsMarkdownRenderer,
     slack: actionsSlackRenderer,
   },

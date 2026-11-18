@@ -8,7 +8,7 @@
 import type { SlackActionsBlock, SlackBlock, SlackButtonElement } from '@elastic/isomer-sdk/slack';
 import { SLACK_LIMITS, clampSlackText, slackLinkUrl } from '@elastic/isomer-sdk/slack';
 import type { ActionsNode } from './actions';
-import { oneLine } from '../../lib';
+import { oneLine, slackActionId } from '../../lib';
 import { slackAppHref } from '../link/resolve_link';
 
 type ActionsButton = ActionsNode['buttons'][number];
@@ -20,10 +20,46 @@ const slackButtonHref = ({ url, app, path }: ActionsButton, baseUrl: string | un
   return app === undefined ? null : slackAppHref({ app, path }, baseUrl);
 };
 
-const slackButton = (button: ActionsButton, baseUrl: string | undefined): SlackButtonElement[] => {
-  const { label, primary } = button;
+const slackButtonStyle = ({ primary, danger }: ActionsButton) => {
+  if (danger) {
+    return { style: 'danger' as const };
+  }
+  return primary ? { style: 'primary' as const } : {};
+};
+
+/** The event as `action_id` and `value`, or nothing when its context is past Slack's value limit. */
+const slackButtonEvent = (
+  { name, context }: NonNullable<ActionsButton['event']>,
+  index: number
+): Pick<SlackButtonElement, 'action_id' | 'value'> | null => {
+  const value = context === undefined ? undefined : JSON.stringify(context);
+
+  if (value !== undefined && value.length > SLACK_LIMITS.buttonValueChars) {
+    return null;
+  }
+  return { action_id: slackActionId(name, index), ...(value === undefined ? {} : { value }) };
+};
+
+const slackButtonTarget = (
+  button: ActionsButton,
+  index: number,
+  baseUrl: string | undefined
+): Pick<SlackButtonElement, 'action_id' | 'value' | 'url'> | null => {
+  if (button.event) {
+    return slackButtonEvent(button.event, index);
+  }
   const href = slackButtonHref(button, baseUrl);
-  if (!href) {
+
+  return href ? { url: href } : null;
+};
+
+const slackButton = (
+  button: ActionsButton,
+  index: number,
+  baseUrl: string | undefined
+): SlackButtonElement[] => {
+  const target = slackButtonTarget(button, index, baseUrl);
+  if (!target) {
     return [];
   }
   return [
@@ -31,11 +67,11 @@ const slackButton = (button: ActionsButton, baseUrl: string | undefined): SlackB
       type: 'button',
       text: {
         type: 'plain_text',
-        text: clampSlackText(oneLine(label), SLACK_LIMITS.buttonTextChars),
+        text: clampSlackText(oneLine(button.label), SLACK_LIMITS.buttonTextChars),
         emoji: true,
       },
-      url: href,
-      ...(primary ? { style: 'primary' as const } : {}),
+      ...target,
+      ...slackButtonStyle(button),
     },
   ];
 };
@@ -43,7 +79,7 @@ export const actionsSlackRenderer = (
   { buttons }: ActionsNode,
   { baseUrl }: { baseUrl?: string }
 ): SlackActionsBlock | readonly SlackBlock[] => {
-  const elements = buttons.flatMap((button) => slackButton(button, baseUrl));
+  const elements = buttons.flatMap((button, index) => slackButton(button, index, baseUrl));
   if (elements.length === 0) {
     return [];
   }
