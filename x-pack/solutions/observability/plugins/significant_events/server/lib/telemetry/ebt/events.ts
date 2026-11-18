@@ -20,8 +20,12 @@ import {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_FAILED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
 } from './constants';
 import {
+  agentToolFailedSchema,
+  knowledgeIndicatorQueriesGenerationFailedSchema,
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
   agentToolEventSearchSchema,
@@ -108,7 +112,19 @@ const agentToolEventSearchEventType = {
   schema: agentToolEventSearchSchema,
 };
 
+const agentToolFailedEventType = {
+  eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_FAILED_EVENT_TYPE,
+  schema: agentToolFailedSchema,
+};
+
+const knowledgeIndicatorQueriesGenerationFailedEventType = {
+  eventType: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
+  schema: knowledgeIndicatorQueriesGenerationFailedSchema,
+};
+
 export {
+  agentToolFailedEventType,
+  knowledgeIndicatorQueriesGenerationFailedEventType,
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
   agentToolEventSearchEventType,

@@ -1,5 +1,5 @@
 {
-  "sha1": "66b15990c4605fa1d3fc355081a0d0bb7eb2725c",
+  "sha1": "380876b925a232d88a20c650a00f5c39637eeea6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -859,8 +859,78 @@
       }
     },
     {
-      "id": "c207fb36d5236cf-58f1275acfeb96f",
-      "title": "context engine KI search matches title and description, ranks the title match first, and excludes a superseded revision",
+      "id": "f8cb9538eb003d4-ea87f1a63b7d1ea",
+      "title": "context engine KI list status returns the computed status only, excluding deleted KIs by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_list_status.spec.ts",
+        "line": 97,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8cb9538eb003d4-39e7eaa821c86e1",
+      "title": "context engine KI list status lists only active KIs past expires_at for status=expired",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_list_status.spec.ts",
+        "line": 110,
+        "column": 14
+      }
+    },
+    {
+      "id": "f8cb9538eb003d4-a5a0a70ae52f06b",
+      "title": "context engine KI list status excludes expired KIs for status=active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_list_status.spec.ts",
+        "line": 125,
+        "column": 52
+      }
+    },
+    {
+      "id": "f8cb9538eb003d4-64081267822aaba",
+      "title": "context engine KI list status keeps the stored status of deleted and failed KIs past expires_at",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_list_status.spec.ts",
+        "line": 137,
+        "column": 22
+      }
+    },
+    {
+      "id": "f8cb9538eb003d4-b1686c1ffd677c3",
+      "title": "context engine KI list status combines several statuses in one filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_list_status.spec.ts",
+        "line": 155,
+        "column": 14
+      }
+    },
+    {
+      "id": "c207fb36d5236cf-f540e5ea252f54b",
+      "title": "context engine KI search matches title and description, ranks the older title match first, and excludes a superseded revision",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -868,8 +938,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_search.spec.ts",
-        "line": 96,
-        "column": 21
+        "line": 105,
+        "column": 70
+      }
+    },
+    {
+      "id": "c207fb36d5236cf-823280b3aba9ed0",
+      "title": "context engine KI search sorts by title ignoring case, with empty and missing titles last",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_search.spec.ts",
+        "line": 123,
+        "column": 4
       }
     },
     {
@@ -882,8 +966,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_search.spec.ts",
-        "line": 105,
-        "column": 18
+        "line": 149,
+        "column": 21
       }
     },
     {

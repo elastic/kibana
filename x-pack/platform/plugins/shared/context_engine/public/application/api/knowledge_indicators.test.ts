@@ -11,7 +11,7 @@ import {
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_LIST_PATH,
 } from '../../../common/constants';
-import { KI_LIFECYCLE_STATUSES } from '../../../common/step_types/ki';
+import { KI_STATUSES } from '../../../common/ki_lifecycle_status';
 import type { GetKiResponse, ListKisResponse } from '../../../common/http_api/knowledge_indicators';
 import { getKi, listKis } from './knowledge_indicators';
 
@@ -53,7 +53,7 @@ describe('listKis', () => {
     });
   });
 
-  it('passes size, type, and lifecycle_status when provided', async () => {
+  it('passes size, type, status, and sort when provided', async () => {
     const http = createHttp();
     http.get.mockResolvedValue(emptyListKisResponse);
 
@@ -61,7 +61,8 @@ describe('listKis', () => {
       aiIndexId: 'support',
       size: 50,
       type: 'playbook',
-      lifecycleStatus: [...KI_LIFECYCLE_STATUSES],
+      status: [...KI_STATUSES],
+      sort: 'title',
     });
 
     expect(http.get).toHaveBeenCalledWith('/internal/context_engine/ai_index/support/kis', {
@@ -69,7 +70,8 @@ describe('listKis', () => {
       query: {
         size: 50,
         type: 'playbook',
-        lifecycle_status: ['active', 'deleted', 'verification_failed'],
+        status: ['active', 'deleted', 'verification_failed', 'expired'],
+        sort: 'title',
       },
     });
   });

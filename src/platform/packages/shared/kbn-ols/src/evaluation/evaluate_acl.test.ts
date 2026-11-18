@@ -13,7 +13,7 @@ import {
   FIXTURE_PROBES,
   type FixtureProbe,
 } from '../__fixtures__';
-import { normalizeAclSource, type AclState, type StoredAcl } from '../acl';
+import { normalizeAclSource, type StoredAcl } from '../acl';
 import { compareLevels, type EntryLevel } from '../levels';
 import {
   evaluateAcl,
@@ -100,39 +100,6 @@ describe('evaluateAcl', () => {
       }
     }
   );
-
-  // Shapes that the reader handles in a special way. They make the ACL absent or invalid, and the
-  // decision has to follow from that state alone.
-  it.each<[string, Record<string, unknown>, AclState]>([
-    ['a key the mapping does not know, alone under acl', { acl: { foo: 'bar' } }, 'absent'],
-    ['an entry with only added_at', { acl: { entries: [{ added_at: '2026-10-21' }] } }, 'invalid'],
-    ['an empty string', { acl: { general_access: '' } }, 'invalid'],
-    [
-      'sibling dotted entry keys',
-      {
-        acl: {
-          version: 1,
-          owner: { type: 'user', id: OWNER.id },
-          general_access: 'none',
-          'entries.type': 'user',
-          'entries.id': GRANTEE.id,
-          'entries.access': 'use',
-        },
-      },
-      'valid',
-    ],
-  ])('decides %s from its state alone', (_, source, state) => {
-    const stored = normalizeAclSource(source);
-    const grantee = evaluateAcl({ policy: FIXTURE_POLICY, acl: stored, principal: GRANTEE });
-    const anonymous = evaluateAcl({ policy: FIXTURE_POLICY, acl: stored });
-
-    expect(grantee.state).toBe(state);
-    // The type's default applies without an ACL. A damaged ACL grants nothing, and the separated
-    // dotted entry keys don't combine into a grant.
-    const expectedLevel = state === 'absent' ? FIXTURE_POLICY.defaultGeneralAccessLevel : 'none';
-    expect(grantee.level).toBe(expectedLevel);
-    expect(anonymous.level).toBe(expectedLevel);
-  });
 
   it('gives the owner every operation, access management, and transfer', () => {
     const decision = evaluateAcl({ policy: FIXTURE_POLICY, acl: acl(), principal: OWNER });

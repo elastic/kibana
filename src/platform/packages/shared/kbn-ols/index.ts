@@ -36,6 +36,7 @@ export {
 } from './src/policy';
 export {
   ACL_FIELD,
+  ACL_MAPPING,
   getAclState,
   normalizeAclSource,
   toAclSource,

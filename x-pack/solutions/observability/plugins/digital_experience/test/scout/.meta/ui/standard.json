@@ -1,5 +1,5 @@
 {
-  "sha1": "74702c854e8b565c7d712e1ca8089d8c938c0a82",
+  "sha1": "d64fa75c48a2ea282572d002bc0dce0bcb73961c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -468,7 +468,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/global.teardown.ts",
         "line": 19,
-        "column": 27
+        "column": 22
       }
     }
   ]

@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
-import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
 import { KnowledgeIndicatorSelectableFilter } from '../knowledge_indicator_selectable_filter';
 import {
@@ -15,6 +14,7 @@ import {
   MATCH_QUERY_TYPE,
   STATS_QUERY_TYPE,
 } from '../../utils/get_knowledge_indicator_type';
+import { getFeatureTypeLabel } from '../../utils/get_feature_type_label';
 
 interface KnowledgeIndicatorTypeFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -84,5 +84,5 @@ function getTypeLabel(type: string): string {
       { defaultMessage: 'Stats query' }
     );
   }
-  return upperFirst(type);
+  return getFeatureTypeLabel(type);
 }
