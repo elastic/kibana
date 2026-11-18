@@ -9,10 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { lookupTriggerDefinitionsForAgent } from '@kbn/workflows-management-plugin/common/build_trigger_definitions_for_agent';
 import { builtInStepDefinitions } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
-import {
-  getAllConnectors,
-  getStepUsageRestriction,
-} from '@kbn/workflows-management-plugin/common/schema';
+import { getAllConnectors, getStepExposure } from '@kbn/workflows-management-plugin/common/schema';
 import {
   categorizeConnectorType,
   formatBuiltInStep,
@@ -63,8 +60,7 @@ export const lookupStepDefinitions = async (
 
   // Managed-only steps are left out: generated workflows aren't managed, so they can't use them.
   const allConnectors = getAllConnectors().filter(
-    (c) =>
-      !builtInIds.has(c.type) && !c.deprecation && getStepUsageRestriction(c.type) !== 'managedOnly'
+    (c) => !builtInIds.has(c.type) && !c.deprecation && getStepExposure(c.type) !== 'managed_only'
   );
   const allConnectorEntries = allConnectors.map(formatConnectorStep);
 

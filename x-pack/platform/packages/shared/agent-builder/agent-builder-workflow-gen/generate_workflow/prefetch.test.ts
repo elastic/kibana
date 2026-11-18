@@ -6,10 +6,7 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
-import {
-  getAllConnectors,
-  getStepUsageRestriction,
-} from '@kbn/workflows-management-plugin/common/schema';
+import { getAllConnectors, getStepExposure } from '@kbn/workflows-management-plugin/common/schema';
 import {
   prefetchConnectors,
   prefetchStepDefinitions,
@@ -18,11 +15,11 @@ import {
 
 jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
   getAllConnectors: jest.fn().mockReturnValue([]),
-  getStepUsageRestriction: jest.fn().mockReturnValue(undefined),
+  getStepExposure: jest.fn().mockReturnValue('open'),
 }));
 
 const getAllConnectorsMock = getAllConnectors as jest.MockedFunction<typeof getAllConnectors>;
-const getStepUsageRestrictionMock = jest.mocked(getStepUsageRestriction);
+const getStepExposureMock = jest.mocked(getStepExposure);
 
 const buildApi = (
   overrides: Partial<{
@@ -41,8 +38,8 @@ const buildApi = (
 beforeEach(() => {
   getAllConnectorsMock.mockReset();
   getAllConnectorsMock.mockReturnValue([]);
-  getStepUsageRestrictionMock.mockReset();
-  getStepUsageRestrictionMock.mockReturnValue(undefined);
+  getStepExposureMock.mockReset();
+  getStepExposureMock.mockReturnValue('open');
 });
 
 describe('prefetch helpers', () => {
@@ -165,10 +162,10 @@ describe('prefetch helpers', () => {
         createStep('custom.internal'),
         createStep('custom.managedOnly'),
       ]);
-      getStepUsageRestrictionMock.mockImplementation((stepType: string) => {
+      getStepExposureMock.mockImplementation((stepType: string) => {
         if (stepType === 'custom.internal') return 'internal';
-        if (stepType === 'custom.managedOnly') return 'managedOnly';
-        return undefined;
+        if (stepType === 'custom.managedOnly') return 'managed_only';
+        return 'open';
       });
 
       const result = await prefetchStepDefinitions({

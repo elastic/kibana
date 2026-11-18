@@ -9,13 +9,13 @@
 
 import { Scalar } from 'yaml';
 import type { LineCounter } from 'yaml';
-import { validateInternalStepTypes } from './validate_internal_step_types';
-import { getStepUsageRestriction } from '../../../../common/schema';
+import { validateStepExposure } from './validate_step_exposure';
+import { getStepExposure } from '../../../../common/schema';
 import type { StepPropInfo } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import { createStepInfo, createWorkflowLookup } from '../../../shared/test_utils/step_info_factory';
 
 jest.mock('../../../../common/schema', () => ({
-  getStepUsageRestriction: jest.fn(),
+  getStepExposure: jest.fn(),
 }));
 
 const mockLineCounter: LineCounter = {
@@ -43,31 +43,31 @@ const createStep = (stepType: string) =>
     propInfos: { type: createTypePropInfo(stepType) },
   });
 
-describe('validateInternalStepTypes', () => {
+describe('validateStepExposure', () => {
   const lookup = createWorkflowLookup([
-    createStep('custom.public'),
+    createStep('custom.open'),
     createStep('custom.internal'),
     createStep('custom.managedOnly'),
   ]);
 
   beforeEach(() => {
-    jest.mocked(getStepUsageRestriction).mockImplementation((stepType: string) => {
+    jest.mocked(getStepExposure).mockImplementation((stepType: string) => {
       if (stepType === 'custom.internal') {
         return 'internal';
       }
       if (stepType === 'custom.managedOnly') {
-        return 'managedOnly';
+        return 'managed_only';
       }
-      return undefined;
+      return 'open';
     });
   });
 
   it('warns about internal steps and errors on managed-only steps in workflows that are not managed', () => {
-    const results = validateInternalStepTypes(lookup, mockLineCounter, false);
+    const results = validateStepExposure(lookup, mockLineCounter, false);
 
     expect(results).toEqual([
       expect.objectContaining({
-        owner: 'internal-step-validation',
+        owner: 'step-exposure-validation',
         ruleId: 'internalStepType',
         severity: 'warning',
         hoverMessage: null,
@@ -77,7 +77,7 @@ describe('validateInternalStepTypes', () => {
         endLineNumber: 21,
       }),
       expect.objectContaining({
-        owner: 'internal-step-validation',
+        owner: 'step-exposure-validation',
         ruleId: 'managedOnlyStepType',
         severity: 'error',
         hoverMessage: null,
@@ -90,7 +90,7 @@ describe('validateInternalStepTypes', () => {
   });
 
   it('accepts internal and managed-only steps in managed workflows', () => {
-    expect(validateInternalStepTypes(lookup, mockLineCounter, true)).toEqual([]);
+    expect(validateStepExposure(lookup, mockLineCounter, true)).toEqual([]);
   });
 
   it('skips steps without a type value range', () => {
@@ -101,7 +101,7 @@ describe('validateInternalStepTypes', () => {
     });
 
     expect(
-      validateInternalStepTypes(createWorkflowLookup([stepWithoutRange]), mockLineCounter, false)
+      validateStepExposure(createWorkflowLookup([stepWithoutRange]), mockLineCounter, false)
     ).toEqual([]);
   });
 });

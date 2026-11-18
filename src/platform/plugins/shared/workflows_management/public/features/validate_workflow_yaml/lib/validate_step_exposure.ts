@@ -10,24 +10,24 @@
 import type { LineCounter } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowLookup, YamlValidationResult } from '@kbn/workflows-yaml';
-import { getStepUsageRestriction } from '../../../../common/schema';
+import { getStepExposure } from '../../../../common/schema';
 
 const getInternalStepMessage = (stepType: string): string =>
-  i18n.translate('workflows.validateInternalStepTypes.internalStepWarningMessage', {
+  i18n.translate('workflows.validateStepExposure.internalStepWarningMessage', {
     defaultMessage:
       'Step type "{stepType}" is an internal step. Use it at your own risk: its inputs, outputs and behavior can change without notice.',
     values: { stepType },
   });
 
 const getManagedOnlyStepMessage = (stepType: string): string =>
-  i18n.translate('workflows.validateInternalStepTypes.managedOnlyStepErrorMessage', {
+  i18n.translate('workflows.validateStepExposure.managedOnlyStepErrorMessage', {
     defaultMessage:
       'Step type "{stepType}" is an internal step and can\'t be used in custom workflows.',
     values: { stepType },
   });
 
-/** Flags `internal` (warning) and `managedOnly` (error) steps in workflows that aren't managed. */
-export const validateInternalStepTypes = (
+/** Flags `internal` (warning) and `managed_only` (error) steps in workflows that aren't managed. */
+export const validateStepExposure = (
   workflowLookup: WorkflowLookup,
   lineCounter: LineCounter,
   isManaged: boolean
@@ -37,21 +37,21 @@ export const validateInternalStepTypes = (
   }
 
   return Object.values(workflowLookup.steps).flatMap((step): YamlValidationResult[] => {
-    const restriction = getStepUsageRestriction(step.stepType);
+    const exposure = getStepExposure(step.stepType);
     const range = step.propInfos.type?.valueNode.range;
-    if (!restriction || !range) {
+    if (exposure === 'open' || !range) {
       return [];
     }
 
     const [startOffset, endOffset] = range;
     const startPos = lineCounter.linePos(startOffset);
     const endPos = lineCounter.linePos(endOffset);
-    const isManagedOnly = restriction === 'managedOnly';
+    const isManagedOnly = exposure === 'managed_only';
 
     return [
       {
-        id: `internal-step-type-${step.stepId}-${startPos.line}-${startPos.col}`,
-        owner: 'internal-step-validation',
+        id: `step-exposure-${step.stepId}-${startPos.line}-${startPos.col}`,
+        owner: 'step-exposure-validation',
         ruleId: isManagedOnly ? 'managedOnlyStepType' : 'internalStepType',
         severity: isManagedOnly ? 'error' : 'warning',
         message: isManagedOnly

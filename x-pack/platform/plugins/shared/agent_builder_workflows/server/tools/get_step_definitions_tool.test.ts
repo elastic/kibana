@@ -12,13 +12,13 @@ import { registerGetStepDefinitionsTool } from './get_step_definitions_tool';
 
 const mockGetAllConnectors = jest.fn();
 const mockAddDynamicConnectorsToCache = jest.fn();
-const mockGetStepUsageRestriction = jest.fn();
+const mockGetStepExposure = jest.fn();
 jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
   getAllConnectors: (...args: unknown[]) => mockGetAllConnectors(...args),
   addDynamicConnectorsToCache: (...args: unknown[]) => mockAddDynamicConnectorsToCache(...args),
   getCachedAllConnectorsMap: () => null,
   getDeprecatedStepMetadata: () => undefined,
-  getStepUsageRestriction: (...args: unknown[]) => mockGetStepUsageRestriction(...args),
+  getStepExposure: (...args: unknown[]) => mockGetStepExposure(...args),
 }));
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
@@ -32,7 +32,7 @@ describe('registerGetStepDefinitionsTool', () => {
 
   beforeEach(async () => {
     const { z } = await import('@kbn/zod/v4');
-    mockGetStepUsageRestriction.mockReturnValue(undefined);
+    mockGetStepExposure.mockReturnValue('open');
     mockGetAllConnectors.mockReturnValue([
       {
         type: 'kibana.createCase',
@@ -282,10 +282,10 @@ describe('registerGetStepDefinitionsTool', () => {
         createConnector('custom.internal'),
         createConnector('custom.managedOnly'),
       ]);
-      mockGetStepUsageRestriction.mockImplementation((stepType: string) => {
+      mockGetStepExposure.mockImplementation((stepType: string) => {
         if (stepType === 'custom.internal') return 'internal';
-        if (stepType === 'custom.managedOnly') return 'managedOnly';
-        return undefined;
+        if (stepType === 'custom.managedOnly') return 'managed_only';
+        return 'open';
       });
     });
 

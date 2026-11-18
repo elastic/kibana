@@ -6,17 +6,14 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
-import {
-  getAllConnectors,
-  getStepUsageRestriction,
-} from '@kbn/workflows-management-plugin/common/schema';
+import { getAllConnectors, getStepExposure } from '@kbn/workflows-management-plugin/common/schema';
 import { z } from '@kbn/zod/v4';
 import type { LookupDeps } from './lookup';
 import { lookupStepDefinitions } from './lookup';
 
 jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
   getAllConnectors: jest.fn(),
-  getStepUsageRestriction: jest.fn(),
+  getStepExposure: jest.fn(),
 }));
 
 const createStep = (type: string) =>
@@ -44,10 +41,10 @@ describe('lookupStepDefinitions', () => {
     jest
       .mocked(getAllConnectors)
       .mockReturnValue([createStep('custom.internal'), createStep('custom.managedOnly')]);
-    jest.mocked(getStepUsageRestriction).mockImplementation((stepType: string) => {
+    jest.mocked(getStepExposure).mockImplementation((stepType: string) => {
       if (stepType === 'custom.internal') return 'internal';
-      if (stepType === 'custom.managedOnly') return 'managedOnly';
-      return undefined;
+      if (stepType === 'custom.managedOnly') return 'managed_only';
+      return 'open';
     });
   });
 

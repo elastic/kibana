@@ -9,10 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BaseStepDefinition, ConnectorContractUnion } from '@kbn/workflows';
 import { builtInStepDefinitions, getBuiltInTriggerDefinitions } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
-import {
-  getAllConnectors,
-  getStepUsageRestriction,
-} from '@kbn/workflows-management-plugin/common/schema';
+import { getAllConnectors, getStepExposure } from '@kbn/workflows-management-plugin/common/schema';
 import { pickLabelAndDescription } from './tools/lookup_helpers';
 import type { ConnectorSummary, StepDefinitionSummary, TriggerDefinitionSummary } from './types';
 
@@ -92,11 +89,7 @@ export const prefetchStepDefinitions = async ({
   const allConnectorIds = new Set<string>();
   const allConnectorSummaries: StepDefinitionSummary[] = [];
   for (const c of allConnectors) {
-    if (
-      builtInIds.has(c.type) ||
-      c.deprecation ||
-      getStepUsageRestriction(c.type) === 'managedOnly'
-    ) {
+    if (builtInIds.has(c.type) || c.deprecation || getStepExposure(c.type) === 'managed_only') {
       continue;
     }
     allConnectorIds.add(c.type);

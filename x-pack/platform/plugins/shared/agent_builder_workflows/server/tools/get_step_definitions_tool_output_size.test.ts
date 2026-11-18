@@ -16,7 +16,7 @@ jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
   addDynamicConnectorsToCache: jest.fn(),
   getCachedAllConnectorsMap: () => null,
   getDeprecatedStepMetadata: () => undefined,
-  getStepUsageRestriction: () => undefined,
+  getStepExposure: () => 'open',
 }));
 
 const MAX_CHARS_PER_STEP = 5000;

@@ -27,6 +27,7 @@ import {
   getStepPrefixDeprecationInfo,
   SystemConnectorsMap,
 } from '@kbn/workflows';
+import type { StepExposure } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 
 // Import the singleton instance of StepSchemas
@@ -484,24 +485,9 @@ export function isDeprecatedStepType(stepType: string): boolean {
   return getDeprecatedStepMetadata(stepType) !== undefined;
 }
 
-/** How a registered custom step limits its use to managed workflows. */
-export type StepUsageRestriction = 'internal' | 'managedOnly';
-
-/** Returns the restriction set on a registered custom step, if any. `managedOnly` wins over `internal`. */
-export function getStepUsageRestriction(stepType: string): StepUsageRestriction | undefined {
-  const definition = stepSchemas.getStepDefinition(stepType);
-  if (definition?.managedOnly) {
-    return 'managedOnly';
-  }
-  if (definition?.internal) {
-    return 'internal';
-  }
-  return undefined;
-}
-
-/** Whether a step is `internal` or `managedOnly`. Such steps are never suggested to users. */
-export function isInternalStepType(stepType: string): boolean {
-  return getStepUsageRestriction(stepType) !== undefined;
+/** Returns which workflows a step is meant for. Steps that don't set `exposure`, built-in steps and connectors are `open`. */
+export function getStepExposure(stepType: string): StepExposure {
+  return stepSchemas.getStepDefinition(stepType)?.exposure ?? 'open';
 }
 
 export function getAllConnectorsWithDynamic(

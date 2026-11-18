@@ -8,6 +8,7 @@
  */
 
 import { getWorkflowJsonSchema, isDynamicConnector, StepCategory } from '@kbn/workflows';
+import type { StepExposure } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import { CONNECTOR_SUB_ACTIONS_MAP } from './connector_sub_actions_map';
 import {
@@ -23,9 +24,8 @@ import {
   getCachedDynamicConnectorTypes,
   getCachedInferenceConnectorInstances,
   getDeprecatedStepMetadataMap,
-  getStepUsageRestriction,
+  getStepExposure,
   getWorkflowZodSchema,
-  isInternalStepType,
 } from './schema';
 import { EmailParamsSchema } from './stack_connectors_schema/email';
 import { stepSchemas } from './step_schemas';
@@ -612,11 +612,8 @@ describe('schema - additional coverage', () => {
     });
   });
 
-  describe('getStepUsageRestriction and isInternalStepType', () => {
-    const createStepDefinition = (
-      id: string,
-      flags: { internal?: boolean; managedOnly?: boolean }
-    ) =>
+  describe('getStepExposure', () => {
+    const createStepDefinition = (id: string, exposure?: StepExposure) =>
       ({
         id,
         label: id,
@@ -624,14 +621,14 @@ describe('schema - additional coverage', () => {
         category: StepCategory.Kibana,
         inputSchema: z.object({}),
         outputSchema: z.object({}),
-        ...flags,
+        exposure,
       } as never);
 
     const stepDefinitions = new Map([
-      ['custom.public', createStepDefinition('custom.public', {})],
-      ['custom.internal', createStepDefinition('custom.internal', { internal: true })],
-      ['custom.managedOnly', createStepDefinition('custom.managedOnly', { managedOnly: true })],
-      ['custom.both', createStepDefinition('custom.both', { internal: true, managedOnly: true })],
+      ['custom.unset', createStepDefinition('custom.unset')],
+      ['custom.open', createStepDefinition('custom.open', 'open')],
+      ['custom.internal', createStepDefinition('custom.internal', 'internal')],
+      ['custom.managedOnly', createStepDefinition('custom.managedOnly', 'managed_only')],
     ]);
 
     beforeEach(() => {
@@ -645,14 +642,13 @@ describe('schema - additional coverage', () => {
     });
 
     it.each([
-      ['custom.public', undefined, false],
-      ['custom.internal', 'internal', true],
-      ['custom.managedOnly', 'managedOnly', true],
-      ['custom.both', 'managedOnly', true],
-      ['not.registered', undefined, false],
-    ])('resolves %s', (stepType, expectedRestriction, expectedInternal) => {
-      expect(getStepUsageRestriction(stepType)).toBe(expectedRestriction);
-      expect(isInternalStepType(stepType)).toBe(expectedInternal);
+      ['custom.unset', 'open'],
+      ['custom.open', 'open'],
+      ['custom.internal', 'internal'],
+      ['custom.managedOnly', 'managed_only'],
+      ['not.registered', 'open'],
+    ])('returns the exposure of %s', (stepType, expectedExposure) => {
+      expect(getStepExposure(stepType)).toBe(expectedExposure);
     });
   });
 });

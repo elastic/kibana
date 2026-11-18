@@ -28,7 +28,7 @@ import {
   getAllConnectors,
   getCachedAllConnectorsMap,
   getDeprecatedStepMetadata,
-  getStepUsageRestriction,
+  getStepExposure,
 } from '@kbn/workflows-management-plugin/common/schema';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
@@ -235,8 +235,7 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
       const connectorDefinitions = allConnectors
         .filter(
           (connector) =>
-            !builtInTypes.has(connector.type) &&
-            getStepUsageRestriction(connector.type) !== 'managedOnly'
+            !builtInTypes.has(connector.type) && getStepExposure(connector.type) !== 'managed_only'
         )
         .map(formatConnectorStep);
       const builtInFormatted = builtInStepDefinitions.map(formatBuiltInStep);

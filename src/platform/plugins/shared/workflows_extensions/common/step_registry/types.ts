@@ -11,6 +11,16 @@ import type { BaseStepDefinition } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 
 /**
+ * Which workflows a custom step is meant for:
+ * - `open`: any workflow. The editor suggests it.
+ * - `internal`: the owner's managed workflows. Other workflows can still use it at their
+ *   own risk: the editor doesn't suggest it and shows a warning when they use it.
+ * - `managed_only`: managed workflows only. The editor doesn't suggest it and reports an
+ *   error when another workflow uses it, so that workflow can't be enabled.
+ */
+export type StepExposure = 'open' | 'internal' | 'managed_only';
+
+/**
  * Common step definition fields shared between server and public.
  * Extends BaseStepDefinition from @kbn/workflows with the same generic schema triple.
  * Input and output types are automatically inferred from the schemas.
@@ -20,17 +30,6 @@ export interface CommonStepDefinition<
   OutputSchema extends z.ZodType = z.ZodType,
   ConfigSchema extends z.ZodObject = z.ZodObject
 > extends BaseStepDefinition<InputSchema, OutputSchema, ConfigSchema> {
-  /**
-   * Marks the step as internal: it exists to support the owner's managed workflows.
-   * Users can still use it in their own workflows, at their own risk: the editor
-   * doesn't suggest it and shows a warning when a workflow that isn't managed uses it.
-   */
-  internal?: boolean;
-
-  /**
-   * Restricts the step to managed workflows. The editor doesn't suggest it and
-   * reports an error when a workflow that isn't managed uses it, so that workflow
-   * can't be enabled. Implies `internal`.
-   */
-  managedOnly?: boolean;
+  /** Which workflows the step is meant for. Defaults to `open`. See {@link StepExposure}. */
+  exposure?: StepExposure;
 }

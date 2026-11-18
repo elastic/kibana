@@ -212,16 +212,16 @@ export interface WorkflowValidationRules {
     values: { stepName: string };
   };
 
-  // -- internal steps -----------------------------------------------------------
+  // -- step exposure ------------------------------------------------------------
   /** An `internal` step used in a workflow that isn't managed. */
   internalStepType: {
-    owner: 'internal-step-validation';
+    owner: 'step-exposure-validation';
     defaultSeverity: 'warning';
     values: { stepType: string };
   };
-  /** A `managedOnly` step used in a workflow that isn't managed. */
+  /** A `managed_only` step used in a workflow that isn't managed. */
   managedOnlyStepType: {
-    owner: 'internal-step-validation';
+    owner: 'step-exposure-validation';
     defaultSeverity: 'error';
     values: { stepType: string };
   };
@@ -314,8 +314,8 @@ export const WORKFLOW_VALIDATION_RULES: {
   deprecatedStepType: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },
   ignoredFetcherSetting: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },
 
-  internalStepType: { owner: 'internal-step-validation', defaultSeverity: 'warning' },
-  managedOnlyStepType: { owner: 'internal-step-validation', defaultSeverity: 'error' },
+  internalStepType: { owner: 'step-exposure-validation', defaultSeverity: 'warning' },
+  managedOnlyStepType: { owner: 'step-exposure-validation', defaultSeverity: 'error' },
 
   esqlDiagnostic: { owner: 'esql-validation', defaultSeverity: 'error' },
   esqlUnknownSource: { owner: 'esql-validation', defaultSeverity: 'error' },

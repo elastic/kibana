@@ -22,7 +22,7 @@ import {
 import { getSuggestions as mockGetSuggestions } from './suggestions/get_suggestions';
 import { createMockWorkflowContextRegistry } from '../../../../../common/lib/create_workflow_context_registry.mock';
 
-import { isDeprecatedStepType, isInternalStepType } from '../../../../../common/schema';
+import { getStepExposure, isDeprecatedStepType } from '../../../../../common/schema';
 import { createStepInfo } from '../../../../shared/test_utils/step_info_factory';
 
 const emptyRegistry = createMockWorkflowContextRegistry();
@@ -44,7 +44,7 @@ jest.mock('./context/build_autocomplete_context', () => ({
 
 jest.mock('../../../../../common/schema', () => ({
   isDeprecatedStepType: jest.fn(() => false),
-  isInternalStepType: jest.fn(() => false),
+  getStepExposure: jest.fn(() => 'open'),
 }));
 
 describe('getCompletionItemProvider', () => {
@@ -75,7 +75,7 @@ describe('getCompletionItemProvider', () => {
 
     getState = jest.fn(() => ({} as any));
     (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
-    (isInternalStepType as jest.Mock).mockReturnValue(false);
+    (getStepExposure as jest.Mock).mockReturnValue('open');
   });
 
   afterEach(() => {
@@ -322,17 +322,20 @@ describe('getCompletionItemProvider', () => {
               filterText: 'custom.managedOnly',
             },
             {
-              label: 'custom.public',
-              insertText: 'custom.public',
+              label: 'custom.open',
+              insertText: 'custom.open',
             },
           ],
           incomplete: false,
         }),
       };
 
-      const internalStepTypes = new Set(['custom.internal', 'custom.managedOnly']);
-      (isInternalStepType as jest.Mock).mockImplementation((stepType: string) =>
-        internalStepTypes.has(stepType)
+      const stepExposures: Record<string, string> = {
+        'custom.internal': 'internal',
+        'custom.managedOnly': 'managed_only',
+      };
+      (getStepExposure as jest.Mock).mockImplementation(
+        (stepType: string) => stepExposures[stepType] ?? 'open'
       );
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
@@ -344,7 +347,7 @@ describe('getCompletionItemProvider', () => {
         {} as monaco.CancellationToken
       );
 
-      expect(result?.suggestions?.map((suggestion) => suggestion.label)).toEqual(['custom.public']);
+      expect(result?.suggestions?.map((suggestion) => suggestion.label)).toEqual(['custom.open']);
     });
 
     it('should deduplicate event-driven triggers from YAML schema and workflow provider by technical id', async () => {
