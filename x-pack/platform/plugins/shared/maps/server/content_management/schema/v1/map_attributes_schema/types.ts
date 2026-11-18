@@ -15,7 +15,7 @@ import type { customIconSchema, settingsSchema } from './settings_schema';
 
 export type AdhocDataView = z.output<typeof adhocDataViewSchema>;
 /**
- * Shape of ad hoc data views before they were converted to the as-code data view spec.
+ * Shape of ad hoc data views in legacy saved objects (`mapStateJSON.adHocDataViews`).
  */
 export interface LegacyAdhocDataView {
   allowHidden?: boolean;

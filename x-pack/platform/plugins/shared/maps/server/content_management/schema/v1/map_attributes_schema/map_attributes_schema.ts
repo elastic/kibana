@@ -23,7 +23,7 @@ export const mapCenterSchema = lazySchema(() =>
 
 /**
  * Ad hoc data views use the as-code inline data view spec.
- * `id` is added because layers reference ad hoc data views by id (`indexPatternId`).
+ * `id` is added because layers reference ad hoc data views by id.
  */
 export const adhocDataViewSchema = lazySchema(() =>
   dataViewSpecSchema.extend({

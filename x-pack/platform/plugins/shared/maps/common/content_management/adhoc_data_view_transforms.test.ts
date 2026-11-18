@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  transformAdhocDataViewIn,
-  transformAdhocDataViewOut,
-} from './adhoc_data_view_transforms';
+import { transformAdhocDataViewIn, transformAdhocDataViewOut } from './adhoc_data_view_transforms';
 
 describe('transformAdhocDataViewOut', () => {
   test('should convert legacy ad hoc data view to as code', () => {
@@ -47,7 +44,7 @@ describe('transformAdhocDataViewOut', () => {
 });
 
 describe('transformAdhocDataViewIn', () => {
-  test('should convert as code ad hoc data view to stored spec', () => {
+  test('should convert as code ad hoc data view to legacy shape', () => {
     expect(
       transformAdhocDataViewIn({
         id: 'adhoc-1',
@@ -64,6 +61,18 @@ describe('transformAdhocDataViewIn', () => {
       timeFieldName: '@timestamp',
       allowHidden: true,
     });
+  });
+
+  test('should drop properties not supported by legacy shape', () => {
+    expect(
+      transformAdhocDataViewIn({
+        id: 'adhoc-1',
+        type: 'data_view_spec',
+        index_pattern: 'logs-*',
+        field_filters: ['secret*'],
+        field_settings: { rt: { type: 'keyword', script: 'emit("a")' } },
+      })
+    ).toEqual({ id: 'adhoc-1', title: 'logs-*' });
   });
 
   test('should round trip', () => {

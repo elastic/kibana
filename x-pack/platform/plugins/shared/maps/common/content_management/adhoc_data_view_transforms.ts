@@ -7,11 +7,11 @@
 
 import type { DataViewSpec } from '@kbn/data-views-types';
 import type { AsCodeDataViewSpec } from '@kbn/as-code-data-views-schema';
-import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
-import type { AdhocDataView } from '../../server';
+import { fromStoredDataView } from '@kbn/as-code-data-views-transforms';
+import type { AdhocDataView, LegacyAdhocDataView } from '../../server';
 
 /**
- * Converts a stored ad hoc data view (legacy `LegacyAdhocDataView` or full `DataViewSpec`)
+ * Converts a stored ad hoc data view (`LegacyAdhocDataView` or full `DataViewSpec`)
  * to the as-code ad hoc data view. The `id` is retained because layers reference it.
  */
 export function transformAdhocDataViewOut(stored: DataViewSpec): AdhocDataView {
@@ -23,12 +23,17 @@ export function transformAdhocDataViewOut(stored: DataViewSpec): AdhocDataView {
 }
 
 /**
- * Converts an as-code ad hoc data view back to the stored `DataViewSpec`.
+ * Converts an as-code ad hoc data view to the `LegacyAdhocDataView` shape written to saved objects.
+ * Properties that the legacy shape can not represent (field settings, field filters) are dropped.
  */
-export function transformAdhocDataViewIn(adhocDataView: AdhocDataView): DataViewSpec {
-  const { id, ...spec } = adhocDataView;
+export function transformAdhocDataViewIn(adhocDataView: AdhocDataView): LegacyAdhocDataView {
   return {
-    ...(toStoredDataView(spec) as DataViewSpec),
-    id,
+    id: adhocDataView.id,
+    title: adhocDataView.index_pattern,
+    ...(adhocDataView.name !== undefined && { name: adhocDataView.name }),
+    ...(adhocDataView.time_field !== undefined && { timeFieldName: adhocDataView.time_field }),
+    ...(adhocDataView.allow_hidden_indices !== undefined && {
+      allowHidden: adhocDataView.allow_hidden_indices,
+    }),
   };
 }
