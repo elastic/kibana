@@ -158,11 +158,11 @@ class CheckTest(unittest.TestCase):
         )
 
     def test_suggested_level_text(self):
-        expected = {**EXPECTED_YES, "answer": {"suggested_level_text": "one functionality"}}
+        expected = {**EXPECTED_YES, "answer": {"suggested_level_text": "[elastic/kibana#100]"}}
         self.assertEqual(score.check(expected, "with", write_run(self.work, YES_ANSWER)), [])
-        answer = YES_ANSWER.replace("— one functionality;", "— a feature;").replace("**Hierarchy:**", "**Hierarchy:** one functionality")
-        failures = score.check(expected, "with", write_run(self.work, answer))
-        self.assertEqual(failures, ["suggested level line does not contain 'one functionality'"])
+        expected = {**EXPECTED_YES, "answer": {"suggested_level_text": "one functionality"}}
+        failures = score.check(expected, "with", write_run(self.work, YES_ANSWER))
+        self.assertEqual(failures, ["suggested level does not start with 'one functionality'"])
 
     def test_untouched(self):
         expected = {**EXPECTED_YES, "untouched": ["elastic/kibana#999"]}

@@ -191,8 +191,9 @@ def check_template(expected: dict, result: dict, message: str) -> list[str]:
     if wanted_level:
         lines = message.splitlines()
         level_at = _field(lines, "Suggested level for a test plan")
-        if level_at is None or wanted_level.lower() not in lines[level_at].lower():
-            failures.append(f"suggested level line does not contain {wanted_level!r}")
+        level = lines[level_at].split("**Suggested level for a test plan:**", 1)[1].strip().lower() if level_at is not None else ""
+        if not level.startswith(wanted_level.lower()):
+            failures.append(f"suggested level does not start with {wanted_level!r}")
     if expected.get("answer", {}).get("question") and not template["question"]:
         failures.append("answer has no **Question:** line")
     return failures
