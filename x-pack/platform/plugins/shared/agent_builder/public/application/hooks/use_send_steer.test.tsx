@@ -473,6 +473,16 @@ describe('useSendSteer', () => {
       expect(steerIdOfCall(1)).toBe(steerIdOfCall(0));
     });
 
+    it('gives the text back without steering when the message cannot be steered', () => {
+      const onUnsent = jest.fn();
+      const { result } = renderHook(() => useSendSteer());
+      const onRejected = result.current.steerIfBusy('hello', { onUnsent, steerable: false });
+
+      expect(onRejected(busyRejection())).toBe(false);
+      expect(steer).not.toHaveBeenCalled();
+      expect(onUnsent).toHaveBeenCalledWith('hello');
+    });
+
     it('leaves any other rejection to the send path', () => {
       const { onRejected } = steerIfBusyHandler();
 

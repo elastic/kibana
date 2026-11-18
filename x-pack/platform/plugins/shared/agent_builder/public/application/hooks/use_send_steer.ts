@@ -33,6 +33,14 @@ export interface SendSteerOptions {
   onUnsent?: (message: string) => void;
 }
 
+export interface SteerIfBusyOptions extends SendSteerOptions {
+  /**
+   * False when the message carries what a steer cannot (attachments, an image): a busy run then
+   * gets no steer, the text goes back through `onUnsent` and the busy error shows.
+   */
+  steerable?: boolean;
+}
+
 /** Steers the active run, falling back to converse when idle. */
 export const useSendSteer = () => {
   const conversationId = useConversationId();
@@ -85,13 +93,19 @@ export const useSendSteer = () => {
         message,
         eventId,
         onUnsent,
+        steerable = true,
       }: {
         message: string;
         eventId: string;
         onUnsent?: (message: string) => void;
+        steerable?: boolean;
       }) =>
       (error: unknown): boolean => {
         if (!conversationId || !isConversationBusyRejection(error)) {
+          return false;
+        }
+        if (!steerable) {
+          onUnsent?.(message);
           return false;
         }
         void attemptSteer({ targetConversationId: conversationId, message, eventId }).then(
@@ -153,8 +167,8 @@ export const useSendSteer = () => {
   );
 
   const steerIfBusy = useCallback(
-    (message: string, { onUnsent }: SendSteerOptions = {}) =>
-      steerAfterBusy({ message, eventId: uuidv4(), onUnsent }),
+    (message: string, { onUnsent, steerable }: SteerIfBusyOptions = {}) =>
+      steerAfterBusy({ message, eventId: uuidv4(), onUnsent, steerable }),
     [steerAfterBusy]
   );
 

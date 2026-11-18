@@ -199,6 +199,11 @@ const imageInSteerMessage = i18n.translate(
       "Images can't be sent to a running agent. Remove the image, or wait for the agent to finish.",
   }
 );
+const steerTooLongMessage = i18n.translate('xpack.agentBuilder.conversationInput.steer.tooLong', {
+  defaultMessage:
+    'A message to a running agent can be at most {max} characters. Shorten it, or wait for the agent to finish.',
+  values: { max: STEER_MESSAGE_MAX_LENGTH },
+});
 const imagePasteWhileRunningMessage = i18n.translate(
   'xpack.agentBuilder.conversationInput.steer.imagePasteRefused',
   {
@@ -267,7 +272,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const spaceId = useActiveSpaceId();
   const { sessionTag } = useConversationContext();
 
-  const { draft, saveDraft, clearDraft } = useInputDraft({
+  const { draft, saveDraft, clearDraft, keepUnsentFor } = useInputDraft({
     spaceId,
     sessionTag,
     username,
@@ -290,6 +295,16 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   >(null);
   const saveDraftDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastEditorContentRef = useRef('');
+  // A late failure must find out where the composer is by then, and whether it still exists.
+  const shownRef = useRef({ agentId, conversationId });
+  shownRef.current = { agentId, conversationId };
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
   const handleContentChange = useCallback(() => {
     try {
       const content = messageEditorControllerRef.current?.getContent() ?? '';
@@ -538,36 +553,45 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       return;
     }
 
+    const sentFrom = shownRef.current;
     // Preserve newer drafts on failure.
     const restoreUnsent = (unsent: string) => {
+      const shown = shownRef.current;
+      // The composer may show another conversation by now, or be gone: the text goes to the
+      // draft of the conversation it was sent to.
+      if (
+        !mountedRef.current ||
+        shown.conversationId !== sentFrom.conversationId ||
+        shown.agentId !== sentFrom.agentId
+      ) {
+        keepUnsentFor(sentFrom, unsent);
+        return;
+      }
       if (lastEditorContentRef.current !== '') {
         return;
       }
       lastEditorContentRef.current = unsent;
       messageEditorControllerRef.current?.setContent(unsent);
     };
+    // Both steer paths carry bounded text only; an image would travel as a bare reference.
+    const steerRefusal =
+      content.length > STEER_MESSAGE_MAX_LENGTH
+        ? steerTooLongMessage
+        : messageEditorController.getPlaceholderNames().length > 0
+        ? imageInSteerMessage
+        : undefined;
 
     // Retry uncertain sends through steering, also after the run ends.
     if (canSteer || isUnansweredSteer(content)) {
-      if (content.length > STEER_MESSAGE_MAX_LENGTH) {
-        addErrorToast(
-          i18n.translate('xpack.agentBuilder.conversationInput.steer.tooLong', {
-            defaultMessage:
-              'A message to a running agent can be at most {max} characters. Shorten it, or wait for the agent to finish.',
-            values: { max: STEER_MESSAGE_MAX_LENGTH },
-          })
-        );
-        return;
-      }
-      // An image pasted before switching to this mode would travel as a bare reference.
-      if (messageEditorController.getPlaceholderNames().length > 0) {
-        addErrorToast(imageInSteerMessage);
+      if (steerRefusal) {
+        addErrorToast(steerRefusal);
         return;
       }
       // Cleared at the submit, as for an ordinary send, so edits made during the request are kept.
       lastEditorContentRef.current = '';
       clearDraft();
       messageEditorController.clear();
+      markSent();
       onSubmit?.();
       sendSteer(content, { onUnsent: restoreUnsent }).then((sent) => {
         if (!sent) {
@@ -580,7 +604,11 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
-      submitMessage(content, { onRejected: steerIfBusy(content, { onUnsent: restoreUnsent }) });
+      // A send refused as busy is steered instead, unless it carries what a steer cannot.
+      const steerable = steerRefusal === undefined && (attachments?.length ?? 0) === 0;
+      submitMessage(content, {
+        onRejected: steerIfBusy(content, { onUnsent: restoreUnsent, steerable }),
+      });
     }
     clearDraft();
     messageEditorController.clear();
