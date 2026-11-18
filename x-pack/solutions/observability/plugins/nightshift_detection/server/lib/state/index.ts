@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Stats API', () => {
-    loadTestFile(require.resolve('./stats'));
-  });
-}
+export { DetectionStateClient } from './detection_state_client';
+export {
+  DETECTION_STATE_SO_TYPE,
+  detectionStateSavedObjectType,
+} from './detection_state_saved_object';
