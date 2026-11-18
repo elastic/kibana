@@ -57,7 +57,9 @@ const toAwsJsonError = ({ target, error }: { target: string; error: unknown }): 
     (parsed.success ? parsed.data.__type : undefined);
   const code = type?.split(':')[0].split('#').pop();
   const message = parsed.success ? parsed.data.message ?? parsed.data.Message : undefined;
-  return new Error(`${target} failed${code ? ` (${code})` : ''}: ${message ?? error.message}`);
+  // The action executor reads the HTTP status and Retry-After from the Axios error, so reword it in place.
+  error.message = `${target} failed${code ? ` (${code})` : ''}: ${message ?? error.message}`;
+  return error;
 };
 
 /** Calls an AWS Systems Manager operation; SigV4 signing is done by the aws_credentials auth type. */

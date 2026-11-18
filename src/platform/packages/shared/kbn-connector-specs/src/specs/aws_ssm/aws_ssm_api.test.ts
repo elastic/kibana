@@ -49,17 +49,23 @@ describe('callSsmApi', () => {
       { 'x-amzn-errortype': 'AccessDeniedException:http://internal.amazon.com/coral/' },
       { message },
     ],
-  ])('surfaces the AWS error code from the %s and the message', async (_source, headers, data) => {
-    mockClient.post.mockRejectedValue(
-      new AxiosError('Request failed with status code 400', 'ERR_BAD_REQUEST', undefined, {}, {
-        status: 400,
-        headers,
-        data,
-      } as AxiosResponse)
-    );
+  ])(
+    'surfaces the AWS error code from the %s and the message, keeping the HTTP response',
+    async (_source, headers, data) => {
+      mockClient.post.mockRejectedValue(
+        new AxiosError('Request failed with status code 400', 'ERR_BAD_REQUEST', undefined, {}, {
+          status: 400,
+          headers,
+          data,
+        } as AxiosResponse)
+      );
 
-    await expect(callSsmApi({ ctx, operation: 'DescribeInstanceInformation' })).rejects.toThrow(
-      `AmazonSSM.DescribeInstanceInformation failed (AccessDeniedException): ${message}`
-    );
-  });
+      await expect(
+        callSsmApi({ ctx, operation: 'DescribeInstanceInformation' })
+      ).rejects.toMatchObject({
+        message: `AmazonSSM.DescribeInstanceInformation failed (AccessDeniedException): ${message}`,
+        response: { status: 400, headers },
+      });
+    }
+  );
 });
