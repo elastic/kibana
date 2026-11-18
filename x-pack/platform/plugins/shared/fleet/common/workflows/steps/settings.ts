@@ -131,6 +131,19 @@ export type AwsOnboardingSettingsRequirement = z.infer<
 export type AwsOnboardingSettingsAnswer = z.infer<typeof awsOnboardingSettingsAnswerSchema>;
 export type AwsOnboardingPlanAnswer = z.infer<typeof awsOnboardingPlanAnswerSchema>;
 
+/**
+ * The services a step works on: the selection pause's answer when discovery ran, else the
+ * services the run was started with. Undefined when neither has any, which the step rejects.
+ */
+export const pickSelectedServices = ({
+  selected_services: selectedServices,
+  services,
+}: {
+  selected_services?: string[];
+  services?: string[];
+}): string[] | undefined =>
+  [selectedServices, services].find((candidate) => candidate !== undefined && candidate.length > 0);
+
 export interface SettingsProblem {
   path: string;
   message: string;

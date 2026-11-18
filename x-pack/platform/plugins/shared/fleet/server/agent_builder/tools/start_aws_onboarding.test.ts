@@ -21,7 +21,7 @@ jest.mock('../../services/utils/agentic_aws_onboarding');
 const workflowApi = {} as any;
 const request = httpServerMock.createKibanaRequest();
 
-const run = (params: { region: string; namespace?: string }) =>
+const run = (params: { region: string; namespace?: string; services?: string[] }) =>
   createStartAwsOnboardingTool({ workflowApi }).handler(params, {
     request,
     spaceId: 'default',
@@ -73,5 +73,20 @@ describe('start_aws_onboarding', () => {
       waitForCompletion: false,
     });
     expect(results[0].data).toEqual({ execution_id: 'exec-1', workflow_id: 'wf-1' });
+  });
+
+  it('passes the known services to the run so it skips discovery', async () => {
+    jest.mocked(executeWorkflow).mockResolvedValue({
+      success: true,
+      execution: { execution_id: 'exec-1', workflow_id: 'wf-1' },
+    } as any);
+
+    await run({ region: 'us-east-1', services: ['guardduty'] });
+
+    expect(executeWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowParams: { region: 'us-east-1', services: ['guardduty'] },
+      })
+    );
   });
 });

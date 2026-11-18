@@ -27,6 +27,13 @@ const startSchema = lazySchema(() =>
       .string()
       .optional()
       .describe('Data stream namespace for the created policies. Omit to use the default.'),
+    services: z
+      .array(z.string().max(256))
+      .max(100)
+      .optional()
+      .describe(
+        'Catalog ids of services an earlier discovery in this conversation found matched and agentless. When set, the run skips discovery and selection. Omit to run discovery.'
+      ),
   })
 );
 
@@ -39,7 +46,7 @@ export const createStartAwsOnboardingTool = ({
     'Start the fully managed AWS agentless onboarding workflow for the current user and return its execution id. The run pauses for user input and approvals, so call get_aws_onboarding_state afterwards.',
   schema: startSchema,
   confirmation: { askUser: 'never' },
-  handler: async ({ region, namespace }, { request, spaceId }) => {
+  handler: async ({ region, namespace, services }, { request, spaceId }) => {
     const denied = await checkOnboardingAccess(request, 'write');
     if (denied) {
       return { results: [denied] };
@@ -47,7 +54,11 @@ export const createStartAwsOnboardingTool = ({
 
     const result = await executeWorkflow({
       workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
-      workflowParams: { ...(region ? { region } : {}), ...(namespace ? { namespace } : {}) },
+      workflowParams: {
+        ...(region ? { region } : {}),
+        ...(namespace ? { namespace } : {}),
+        ...(services?.length ? { services } : {}),
+      },
       request,
       spaceId,
       workflowApi,

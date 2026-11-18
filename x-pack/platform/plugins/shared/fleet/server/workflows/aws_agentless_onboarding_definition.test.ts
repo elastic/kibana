@@ -43,10 +43,7 @@ describe('AWS agentless onboarding workflow definition', () => {
     expect(topLevelStepNames(definition)).toEqual([
       'credentials',
       'credentials_missing',
-      'ask_discover',
-      'fail_no_discover',
-      'discover',
-      'select_services',
+      'discovery',
       'settings_requirement',
       'ask_plan',
       'resolve',
@@ -60,6 +57,19 @@ describe('AWS agentless onboarding workflow definition', () => {
       'create_policies',
       'wait_for_data',
       'done',
+    ]);
+  });
+
+  it('runs discovery and selection only when the run starts without services', () => {
+    const branch = findStep(definition, 'discovery');
+
+    expect(branch.type).toBe('if');
+    expect(branch.condition).toContain('inputs.services');
+    expect(branch.steps?.map(({ name }) => name)).toEqual([
+      'ask_discover',
+      'fail_no_discover',
+      'discover',
+      'select_services',
     ]);
   });
 

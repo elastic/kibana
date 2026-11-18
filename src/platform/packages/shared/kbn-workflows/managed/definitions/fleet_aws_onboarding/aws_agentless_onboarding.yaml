@@ -14,7 +14,8 @@
 #   service is collected, the policy names and the Federated Identity name) and
 #   `approve_plan` approves the changes to the account. When the onboarding
 #   credentials are missing, `ask_credentials` pauses first until they are configured.
-#   Rejecting an approval fails the run.
+#   Rejecting an approval fails the run. A run started with `services` skips the
+#   discovery and selection pauses.
 #
 # Modes:
 #   Only the fully managed mode is encoded. The partially managed mode (the user runs
@@ -47,6 +48,12 @@ triggers:
           description: Overrides for the CloudFormation stack parameters, as string values by parameter name.
           additionalProperties:
             type: string
+        services:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+          description: Catalog ids of the services to onboard. When set, discovery and selection are skipped.
 
 steps:
   # Credentials are checked once. Only when they are missing do we enter the loop, which is
@@ -77,47 +84,55 @@ steps:
           - name: credentials_recheck
             type: fleet.awsOnboardingCredentials
 
-  - name: ask_discover
-    type: waitForApproval
-    with:
-      message: "May I match Elastic integrations to the services in your AWS account? This uses the read-only discovery role to list billed services, CloudTrail trails and GuardDuty detectors; nothing is changed."
-
-  - name: fail_no_discover
+  # A later run in the same chat already knows the services, so it starts with `services` and
+  # skips discovery and selection. The steps below then read `selected_services` (set only when
+  # this block ran) ahead of `services`, because Liquid `default` cannot fall back on arrays.
+  - name: discovery
     type: if
-    condition: "${{ steps.ask_discover.output.response.approved != true }}"
+    condition: "${{ inputs.services == null or inputs.services.size == 0 }}"
     steps:
-      - name: stop_no_discover
-        type: workflow.fail
+      - name: ask_discover
+        type: waitForApproval
         with:
-          message: "Service discovery was not approved."
-          reason: "discover_rejected"
+          message: "May I match Elastic integrations to the services in your AWS account? This uses the read-only discovery role to list billed services, CloudTrail trails and GuardDuty detectors; nothing is changed."
 
-  - name: discover
-    type: fleet.awsOnboardingDiscover
+      - name: fail_no_discover
+        type: if
+        condition: "${{ steps.ask_discover.output.response.approved != true }}"
+        steps:
+          - name: stop_no_discover
+            type: workflow.fail
+            with:
+              message: "Service discovery was not approved."
+              reason: "discover_rejected"
 
-  - name: select_services
-    type: waitForInput
-    with:
-      message: "Which services do you want to onboard?"
-      schema:
-        properties:
-          services:
-            type: array
-            items:
-              type: string
-            minItems: 1
-            uniqueItems: true
-          region:
-            type: string
-        required:
-          - services
+      - name: discover
+        type: fleet.awsOnboardingDiscover
+
+      - name: select_services
+        type: waitForInput
+        with:
+          message: "Which services do you want to onboard?"
+          schema:
+            properties:
+              services:
+                type: array
+                items:
+                  type: string
+                minItems: 1
+                uniqueItems: true
+              region:
+                type: string
+            required:
+              - services
 
   - name: settings_requirement
     type: fleet.awsOnboardingSettingsRequirement
     with:
-      services: "${{ steps.select_services.output.response.services }}"
+      selected_services: "${{ steps.select_services.output.response.services }}"
+      services: "${{ inputs.services }}"
       region: "{{ steps.select_services.output.response.region | default: inputs.region | default: steps.discover.output.region }}"
-      account_id: "${{ steps.discover.output.account_id }}"
+      account_id: "{{ steps.discover.output.account_id | default: steps.credentials.output.account_id }}"
       run_suffix: "{{ execution.id | slice: 0, 8 }}"
 
   - name: ask_plan
@@ -139,9 +154,10 @@ steps:
   - name: resolve
     type: fleet.awsOnboardingResolve
     with:
-      services: "${{ steps.select_services.output.response.services }}"
+      selected_services: "${{ steps.select_services.output.response.services }}"
+      services: "${{ inputs.services }}"
       region: "{{ steps.select_services.output.response.region | default: inputs.region | default: steps.discover.output.region }}"
-      account_id: "${{ steps.discover.output.account_id }}"
+      account_id: "{{ steps.discover.output.account_id | default: steps.credentials.output.account_id }}"
       run_suffix: "{{ execution.id | slice: 0, 8 }}"
       namespace: "${{ inputs.namespace }}"
       settings:

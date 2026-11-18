@@ -23,6 +23,7 @@ import type {
 } from '../../../common/services/aws_onboarding_catalog';
 import { awsOnboardingResolveCommonDefinition } from '../../../common/workflows/steps/resolve';
 import {
+  pickSelectedServices,
   settingsAnswerToServiceVars,
   validateSettingsAnswer,
 } from '../../../common/workflows/steps/settings';
@@ -70,7 +71,6 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
     }
 
     const {
-      services: requested,
       region,
       namespace = DEFAULT_NAMESPACE,
       account_id,
@@ -79,6 +79,15 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
       policy_names: policyNames,
       identity,
     } = context.input;
+    const requested = pickSelectedServices(context.input);
+    if (!requested) {
+      return {
+        error: new ExecutionError({
+          type: 'ValidationError',
+          message: 'No AWS services were selected or passed to the run',
+        }),
+      };
+    }
     const { packageVersion, packageInfo, matrix } = await loadAwsServiceMatrix(context);
 
     const selected: AwsServiceMatrixEntry[] = [];
@@ -177,7 +186,8 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
         policies,
         index_patterns: indexPatterns,
         permissions_summary: permissionsSummary,
-        suggested_identity_name: `aws-${account_id ?? 'account'}-federated-identity-${suffix}`,
+        // Liquid renders a missing account id as an empty string.
+        suggested_identity_name: `aws-${account_id || 'account'}-federated-identity-${suffix}`,
         identity_name: identity.name,
         stack_action: 'create' as const,
       },

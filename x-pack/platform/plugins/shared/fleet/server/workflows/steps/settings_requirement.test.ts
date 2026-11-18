@@ -76,6 +76,55 @@ describe('awsOnboardingSettingsRequirementStepDefinition', () => {
     expect(output.suggested_identity_name).toBe('aws-123456789012-federated-identity-ab12cd34');
   });
 
+  it('falls back to "account" in the identity name when the account id renders empty', async () => {
+    const result = await awsOnboardingSettingsRequirementStepDefinition.handler(
+      createStepContext({
+        services: ['guardduty'],
+        region: 'us-east-1',
+        account_id: '',
+        run_suffix: 'ab12cd34',
+      })
+    );
+
+    const { output } = result as { output: { suggested_identity_name: string } };
+    expect(output.suggested_identity_name).toBe('aws-account-federated-identity-ab12cd34');
+  });
+
+  it('uses the selected services over the services the run started with', async () => {
+    const result = await awsOnboardingSettingsRequirementStepDefinition.handler(
+      createStepContext({
+        selected_services: ['ec2'],
+        services: ['guardduty'],
+        region: 'us-east-1',
+      })
+    );
+
+    const { output } = result as { output: Output };
+    expect(output.services.map(({ id }) => id)).toEqual(['ec2']);
+  });
+
+  it('rejects an unknown service the run started with when nothing was selected', async () => {
+    const result = await awsOnboardingSettingsRequirementStepDefinition.handler(
+      createStepContext({ services: ['nope'], region: 'us-east-1' })
+    );
+
+    expect(result).toEqual({
+      error: expect.objectContaining({
+        type: 'ValidationError',
+        message: expect.stringContaining('nope'),
+      }),
+    });
+  });
+
+  it('fails with ValidationError when no services were selected or passed', async () => {
+    const result = await awsOnboardingSettingsRequirementStepDefinition.handler(
+      createStepContext({ selected_services: [], region: 'us-east-1' })
+    );
+
+    expect(result).toEqual({ error: expect.objectContaining({ type: 'ValidationError' }) });
+    expect(getPackageInfo).not.toHaveBeenCalled();
+  });
+
   it('attaches README notes when the registry serves the template README', async () => {
     (getFile as jest.Mock).mockResolvedValue({ text: async () => README });
 

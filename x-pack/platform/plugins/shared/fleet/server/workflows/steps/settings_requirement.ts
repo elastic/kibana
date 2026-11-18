@@ -14,6 +14,7 @@ import {
   getPolicyTemplateReadmePath,
 } from '../../../common/services/aws_onboarding_catalog';
 import type { AwsServiceMatrixEntry } from '../../../common/services/aws_onboarding_catalog';
+import { pickSelectedServices } from '../../../common/workflows/steps/settings';
 import { awsOnboardingSettingsRequirementCommonDefinition } from '../../../common/workflows/steps/settings_requirement';
 import { getFile } from '../../services/epm/packages/get';
 import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
@@ -32,12 +33,16 @@ export const awsOnboardingSettingsRequirementStepDefinition = createServerStepDe
       };
     }
 
-    const {
-      services: requested,
-      region,
-      account_id: accountId,
-      run_suffix: runSuffix,
-    } = context.input;
+    const { region, account_id: accountId, run_suffix: runSuffix } = context.input;
+    const requested = pickSelectedServices(context.input);
+    if (!requested) {
+      return {
+        error: new ExecutionError({
+          type: 'ValidationError',
+          message: 'No AWS services were selected or passed to the run',
+        }),
+      };
+    }
     const { packageVersion, packageInfo, matrix } = await loadAwsServiceMatrix(context);
 
     const selected: AwsServiceMatrixEntry[] = [];
@@ -93,7 +98,8 @@ export const awsOnboardingSettingsRequirementStepDefinition = createServerStepDe
           region,
           readmeNotesByService,
         }),
-        suggested_identity_name: `aws-${accountId ?? 'account'}-federated-identity-${suffix}`,
+        // Liquid renders a missing account id as an empty string.
+        suggested_identity_name: `aws-${accountId || 'account'}-federated-identity-${suffix}`,
       },
     };
   },

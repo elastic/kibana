@@ -16,7 +16,10 @@ export const AwsOnboardingSettingsRequirementStepTypeId = 'fleet.awsOnboardingSe
 
 export const awsOnboardingSettingsRequirementInputSchema = lazySchema(() =>
   z.object({
-    services: z.array(z.string()),
+    /** The services picked in the selection pause; set only when discovery ran. */
+    selected_services: z.array(z.string()).optional(),
+    /** The services the run was started with; used when there was no selection pause. */
+    services: z.array(z.string()).optional(),
     region: z.string(),
     account_id: z.string().optional(),
     /** Short per-run suffix that keeps the suggested identity name unique across runs. */
