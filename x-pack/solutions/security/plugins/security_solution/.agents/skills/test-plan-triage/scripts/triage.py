@@ -213,7 +213,7 @@ def _has_label(issue: dict) -> bool:
     return any(name.casefold() == LABEL.casefold() for name in _labels(issue))
 
 
-def summarize(issue: dict, *, body_limit: Optional[int]) -> dict:
+def summarize(issue: dict, *, body_limit: int) -> dict:
     repo = repo_from_issue(issue)
     summary = {
         "ref": f"{repo}#{issue['number']}",
@@ -228,10 +228,7 @@ def summarize(issue: dict, *, body_limit: Optional[int]) -> dict:
         "allowed_repo": repo in ALLOWED_REPOS,
         "private": repo not in PUBLIC_REPOS,
     }
-    if body_limit is not None:
-        body, truncated = _excerpt(issue.get("body"), body_limit)
-        summary["body"] = body
-        summary["body_truncated"] = truncated
+    summary["body"], summary["body_truncated"] = _excerpt(issue.get("body"), body_limit)
     return summary
 
 
@@ -314,12 +311,12 @@ def collect_ancestors(gh: Gh, issue: dict) -> list[dict]:
 
 
 def collect_descendants(gh: Gh, issue: dict) -> tuple[list[dict], bool]:
-    """Breadth-first sub-issue tree, titles only, capped at MAX_DESCENDANTS."""
+    """Breadth-first sub-issue tree with only the fields the rules read, capped at MAX_DESCENDANTS."""
     descendants: list[dict] = []
-    queue: list[tuple[dict, int]] = [(issue, 0)]
+    queue: list[dict] = [issue]
     seen = {str(_ref(issue))}
     while queue:
-        node, depth = queue.pop(0)
+        node = queue.pop(0)
         if not (node.get("sub_issues_summary") or {}).get("total"):
             continue
         for child in sub_issues(gh, _ref(node)):
@@ -329,11 +326,18 @@ def collect_descendants(gh: Gh, issue: dict) -> tuple[list[dict], bool]:
             if len(descendants) >= MAX_DESCENDANTS:
                 return descendants, True
             seen.add(child_ref)
-            entry = summarize(child, body_limit=None)
-            entry["depth"] = depth + 1
-            entry["parent"] = str(_ref(node))
-            descendants.append(entry)
-            queue.append((child, depth + 1))
+            descendants.append(
+                {
+                    "ref": child_ref,
+                    "title": child.get("title") or "",
+                    "state": child.get("state"),
+                    "type": (child.get("type") or {}).get("name"),
+                    "labels": _labels(child),
+                    "parent": str(_ref(node)),
+                    "sub_issues_total": (child.get("sub_issues_summary") or {}).get("total", 0),
+                }
+            )
+            queue.append(child)
     return descendants, False
 
 
@@ -545,13 +549,13 @@ def main(argv: Optional[list[str]] = None, gh: Optional[Gh] = None, stdin: Optio
             suggested = parse_ref(args.suggested) if args.suggested else None
             reason = read_reason(stdin or sys.stdin)
             result = comment_no(client, ref, rule=args.rule, reason=reason, suggested=suggested, dry_run=args.dry_run)
-        print(json.dumps(result, indent=2, ensure_ascii=False))
+        print(json.dumps(result, separators=(",", ":"), ensure_ascii=False))
         return EXIT_OK
     except TriageError as error:
         payload = {"ok": False, "error": str(error)}
         if error.gate:
             payload["gate"] = error.gate
-        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        print(json.dumps(payload, separators=(",", ":"), ensure_ascii=False))
         return error.exit_code
 
 

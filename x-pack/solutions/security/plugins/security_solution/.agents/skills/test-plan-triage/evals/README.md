@@ -124,4 +124,6 @@ After that round, step 4 says that N3 and N4 never skip the hierarchy. With that
 
 Two rewordings of that sentence were then tried with GPT on `s3`, `s11` and `s31`, both also dropping the N1, N2 and N5 row from `references/hierarchy.md`. "N3 and N4 with ancestors never skip this step" scored 5/9, and moving the N3 and N4 exclusion into the N1, N2 and N5 bullet scored 3/9. Every failure was again "none — N3 says nothing about the parent", so step 4 and the row stay as they are.
 
+`context` now prints compact JSON, and each descendant keeps only the fields the rules read. On a real epic with 91 sub-issues that cut the output from 73 KB to 46 KB. The scenarios whose agent reads descendants (`s10`, `s22`, `s23`, `s24` and `s34`) were run again for all three models: 45/45.
+
 The baseline brief used to say that only `--help` could be run, which reads as forbidding `context` and `label`, although the harness section under it told agents to run them through the stub. It now allows both explicitly. The baseline runs were not repeated: in the round they come from, 144 of the 153 runs read the issue through the stub, and the other 9 are `s22`, where the earlier turn already holds the decision.

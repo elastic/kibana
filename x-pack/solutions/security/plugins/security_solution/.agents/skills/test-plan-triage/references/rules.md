@@ -1,6 +1,6 @@
 # Decision rules
 
-Decide on the issue passed in (the `target` in the `context` JSON). Use its title, type, labels, body and comments. If it has sub-issues, decide on the whole: its body plus the titles, types and labels in `descendants`.
+Decide on the issue passed in (the `target` in the `context` JSON). Use its title, type, labels, body and comments. If it has sub-issues, decide on the whole: its body plus the titles, types and labels in `descendants`. Each descendant has only `ref`, `title`, `state`, `type`, `labels`, `parent` (the issue it hangs from) and `sub_issues_total`; there is no body.
 
 **Cut text.** `context` cuts long text and says so: `body_truncated` on the target, on a comment or on an ancestor, `comments_truncated` when older comments are missing, and `descendants_truncated` when the sub-issue tree is cut. Decide with what you can read. Only when text cut from the target itself (its body or its comments) leaves the decision open, for example a comment that announces a change of scope and is cut before it says what changed, the decision is A4: quote the last words before the cut and ask what the rest says.
 
