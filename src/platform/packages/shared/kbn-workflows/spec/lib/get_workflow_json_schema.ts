@@ -52,10 +52,9 @@ export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.J
       },
     });
 
-    const workflowJsonSchema = stripNestedSchemaIds(jsonSchema) as z.core.JSONSchema.JSONSchema;
-    guardStepUnionAlternativesByType(workflowJsonSchema);
-
-    return mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(workflowJsonSchema);
+    return mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(
+      stripNestedSchemaIds(jsonSchema) as z.core.JSONSchema.JSONSchema
+    );
   } catch (error) {
     // console.error('Error generating JSON schema from YAML schema:', error);
     return null;
@@ -92,14 +91,12 @@ function stripNestedSchemaIds(node: unknown, isRoot = true): unknown {
 }
 
 /**
- * yaml-language-server fully validates a step against every alternative of the step union, and
- * steps nest (e.g. `on-failure.fallback`), so with hundreds of connector step types validation and
- * completion take seconds. Guarding each alternative with an `if` on its `type` literal lets
- * non-matching alternatives fail without validating their contents.
- *
- * This function MODIFIES the jsonSchema in place.
+ * Wraps each step union alternative in an `if` on its `type` literal so yaml-language-server skips
+ * non-matching alternatives instead of fully validating each of them; nested steps (e.g.
+ * `on-failure.fallback`) otherwise make editor validation and completion take seconds.
+ * MODIFIES the jsonSchema in place.
  */
-function guardStepUnionAlternativesByType(jsonSchema: z.core.JSONSchema.JSONSchema) {
+export function guardStepUnionAlternativesByType(jsonSchema: z.core.JSONSchema.JSONSchema): void {
   const resolve = (node: unknown) =>
     getOrResolveObject<z.core.JSONSchema.JSONSchema>(node, jsonSchema) ?? undefined;
 
