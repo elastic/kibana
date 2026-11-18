@@ -6,8 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
+import { createHash } from 'crypto';
 import { readFileSync } from 'fs';
 import { chunk, partition } from 'lodash';
+import { LRUCache } from 'lru-cache';
 import { Agent } from 'undici';
 
 import { schema } from '@kbn/config-schema';
@@ -16,6 +18,7 @@ import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
+  isUiamCredential,
   resolveUiamClientAuthentication,
   UIAM_ERROR_CODES,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
@@ -35,6 +38,8 @@ import type {
   ClientAuthentication,
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
+import { timeoutSignal } from '@kbn/std';
+import { lazySchema, z } from '@kbn/zod';
 
 import type { UiamAuthorizationCheck, UiamAuthorizationResult } from './authorization_types';
 import {
@@ -204,6 +209,43 @@ const OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE = 'KIBANA.AUDIENCE_MISMATCH';
 const OAUTH_UNKNOWN_ERROR_TYPE = 'UNKNOWN';
 
 /**
+ * The principal UIAM records as the creator of an API key: the user for a key granted from a
+ * session, the source key for a key granted from another API key, or the organization service
+ * account that granted it.
+ */
+const apiKeyCreatorSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    z.object({ type: z.literal('user'), user_id: z.number() }),
+    z.object({ type: z.literal('api-key'), api_key_id: z.string() }),
+    z.object({
+      type: z.literal('organization-service-account'),
+      organization_service_account_id: z.string(),
+    }),
+  ])
+);
+
+/** The part of UIAM's `_authenticate` payload for an API key that carries its creator. */
+const apiKeyAuthenticateResponseSchema = lazySchema(() =>
+  z.object({
+    credentials: z.object({ creator: apiKeyCreatorSchema }),
+  })
+);
+
+export type UiamApiKeyCreator = z.infer<typeof apiKeyCreatorSchema>;
+
+/**
+ * Background tasks use the same key over and over. A key's creator never changes, so `max` is what
+ * bounds the cache, and the TTL only keeps idle entries from lingering. The cache says who created
+ * a key, not that the key is still valid, so callers must authenticate the key before they trust
+ * the creator.
+ */
+const API_KEY_CREATOR_CACHE_MAX_SIZE = 1000;
+const API_KEY_CREATOR_CACHE_TTL_MS = 5 * 60 * 1000;
+
+/** The lookup is optional enrichment, so it is cut off instead of holding up the request. */
+const API_KEY_CREATOR_REQUEST_TIMEOUT_MS = 5 * 1000;
+
+/**
  * Response containing a list of OAuth clients.
  */
 export interface OAuthClientsResponse {
@@ -297,6 +339,18 @@ export interface UiamServicePublic {
    * @returns A promise that resolves to a response containing per-key success/failure results.
    */
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
+
+  /**
+   * Returns the principal UIAM records as the creator of the UIAM API key a request carries, or
+   * `undefined` when UIAM reports none we support. Any other credential resolves to `undefined`
+   * without asking UIAM. The lookup carries the client authentication the request already has,
+   * which is none for an external (user-created) key, as UIAM rejects it for those.
+   * Results are cached per key, so the caller must authenticate the key before it trusts the
+   * creator: a cached creator outlives a revoked or expired key. A failed or slow request is
+   * thrown for the caller to log and is not cached, while a response without a supported creator
+   * resolves to `undefined`.
+   */
+  getApiKeyCreator(request: KibanaRequest): Promise<UiamApiKeyCreator | undefined>;
 
   /**
    * Creates a service account via the UIAM service.
@@ -513,6 +567,12 @@ export class UiamService implements UiamServicePublic {
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
+  // Keyed by a hash of the credential, so the key itself is never held or logged. It holds the
+  // lookups themselves, so concurrent requests for a new key share one call to UIAM.
+  readonly #apiKeyCreators = new LRUCache<string, Promise<UiamApiKeyCreator | undefined>>({
+    max: API_KEY_CREATOR_CACHE_MAX_SIZE,
+    ttl: API_KEY_CREATOR_CACHE_TTL_MS,
+  });
 
   constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
@@ -861,6 +921,66 @@ export class UiamService implements UiamServicePublic {
       this.#logger.error(() => `Failed to convert API keys: ${getDetailedErrorMessage(err)}`);
 
       throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.getApiKeyCreator}.
+   */
+  async getApiKeyCreator(request: KibanaRequest): Promise<UiamApiKeyCreator | undefined> {
+    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (
+      !authorization ||
+      authorization.scheme.toLowerCase() !== 'apikey' ||
+      !isUiamCredential(authorization)
+    ) {
+      return undefined;
+    }
+
+    const cacheKey = createHash('sha256').update(authorization.credentials).digest('hex');
+    const cached = this.#apiKeyCreators.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const lookup = this.#fetchApiKeyCreator(request);
+    this.#apiKeyCreators.set(cacheKey, lookup);
+    // A failed lookup says nothing about the key, so it is not kept.
+    lookup.catch(() => this.#apiKeyCreators.delete(cacheKey));
+    return lookup;
+  }
+
+  async #fetchApiKeyCreator(request: KibanaRequest): Promise<UiamApiKeyCreator | undefined> {
+    const deadline = timeoutSignal(API_KEY_CREATOR_REQUEST_TIMEOUT_MS);
+    try {
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          // Whatever client authentication already speaks for the key is kept, as for every other
+          // call made for a request, because the key may be bound to another client.
+          ...this.#getRequestAuthenticationHeaders(request),
+        },
+        signal: deadline,
+        dispatcher: this.#dispatcher,
+      };
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`, requestOptions)
+      );
+
+      const parsed = apiKeyAuthenticateResponseSchema.safeParse(response);
+      if (!parsed.success) {
+        this.#logger.debug(
+          `UIAM did not report a supported creator for the API key: ${parsed.error.message}`
+        );
+        return undefined;
+      }
+
+      return parsed.data.credentials.creator;
+    } finally {
+      deadline.dispose();
     }
   }
 
