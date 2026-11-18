@@ -34,12 +34,18 @@ import {
   MAX_AI_INDICES,
   MAX_AI_INDEX_TRACES,
   MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
+  MAX_AI_INDEX_USER_ID_LENGTH,
+  MAX_KI_GROUP_PREVIEW_SIZE,
+  MAX_KI_EXCLUDE_TYPES,
+  MAX_KI_GROUPS,
   MAX_KI_SEARCH_QUERY_LENGTH,
+  MAX_KI_TYPE_FILTER_LENGTH,
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_DREAMING_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
+  AI_INDEX_KI_GROUPS_PATH,
   AI_INDEX_KI_RESTORE_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_PATH,
@@ -355,6 +361,7 @@ describe('ai indices routes', () => {
     await callRoute('PUT', AI_INDEX_BY_ID_PATH, { params: { aiIndexId: 'a' }, body: {} });
     await callRoute('GET', AI_INDEX_BY_ID_PATH, { params: { aiIndexId: 'a' } });
     await callRoute('GET', AI_INDEX_KI_LIST_PATH, { params: { aiIndexId: 'a' } });
+    await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, { params: { aiIndexId: 'a' } });
     await callRoute('GET', AI_INDEX_KI_BY_ID_PATH, {
       params: { aiIndexId: 'a', kiId: 'ki-1' },
       query: { index: kiBackingIndex },
@@ -379,7 +386,7 @@ describe('ai indices routes', () => {
     });
 
     expect(response.notFound.mock.calls).toEqual(
-      Array(13).fill([{ body: { message: 'Not Found' } }])
+      Array(14).fill([{ body: { message: 'Not Found' } }])
     );
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
@@ -405,6 +412,10 @@ describe('ai indices routes', () => {
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
     expect(getRoute('GET', AI_INDEX_KI_LIST_PATH).config).toMatchObject({
+      access: 'internal',
+      security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
+    });
+    expect(getRoute('GET', AI_INDEX_KI_GROUPS_PATH).config).toMatchObject({
       access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
@@ -937,8 +948,20 @@ describe('ai indices routes', () => {
 
       it('accepts a full body', () => {
         expect(() =>
-          validateBody({ query: 'FROM a', params: { s: 'x', n: 1, b: true }, limit: 5 })
+          validateBody({
+            query: 'FROM a',
+            params: { s: 'x', n: 1, b: true },
+            limit: 5,
+            user_id: 'alice',
+          })
         ).not.toThrow();
+      });
+
+      it('bounds user_id', () => {
+        expect(() => validateBody({ query: 'FROM a', user_id: '' })).toThrow(/user_id/);
+        expect(() =>
+          validateBody({ query: 'FROM a', user_id: 'u'.repeat(MAX_AI_INDEX_USER_ID_LENGTH + 1) })
+        ).toThrow(/user_id/);
       });
 
       it('requires a non-empty query', () => {
@@ -1004,8 +1027,19 @@ describe('ai indices routes', () => {
       expect(readServiceParams).toHaveLength(1);
       expect(readServiceParams[0].request).toBe(request);
       expect(readServiceParams[0].esClient).toMatchObject({ search: esSearch, get: esGet });
-      expect(readService.describe).toHaveBeenCalledWith('a');
+      expect(readService.describe).toHaveBeenCalledWith('a', { userId: undefined });
       expect(response.ok).toHaveBeenCalledWith({ body: description });
+    });
+
+    it('passes user_id from the query string to the read service', async () => {
+      readService.describe.mockResolvedValue(description);
+
+      await callRoute('GET', AI_INDEX_DESCRIBE_PATH, {
+        params: { aiIndexId: 'a' },
+        query: { user_id: 'alice' },
+      });
+
+      expect(readService.describe).toHaveBeenCalledWith('a', { userId: 'alice' });
     });
 
     it('returns 404 when the AI Index does not exist', async () => {
@@ -1278,6 +1312,57 @@ describe('ai indices routes', () => {
           validateQuery({ query: 'a'.repeat(MAX_KI_SEARCH_QUERY_LENGTH + 1) })
         ).toThrow();
       });
+
+      it('rejects a decimal size', () => {
+        expect(() => validateQuery({ size: 2.5 })).toThrow('[size]: must be an integer');
+        expect(() => validateQuery({ size: 0 })).not.toThrow();
+      });
+
+      it('accepts exclude_types as a string or a bounded array of bounded strings', () => {
+        expect(validateQuery({ exclude_types: 'faq' })).toEqual(
+          expect.objectContaining({ exclude_types: 'faq' })
+        );
+        expect(validateQuery({ exclude_types: ['faq', 'policy'] })).toEqual(
+          expect.objectContaining({ exclude_types: ['faq', 'policy'] })
+        );
+        const maxTypes = Array.from({ length: MAX_KI_EXCLUDE_TYPES }, (_, i) => `t${i}`);
+        expect(() => validateQuery({ exclude_types: maxTypes })).not.toThrow();
+        expect(() => validateQuery({ exclude_types: [...maxTypes, 'one-more'] })).toThrow(
+          '[exclude_types]'
+        );
+        expect(() =>
+          validateQuery({ exclude_types: 'a'.repeat(MAX_KI_TYPE_FILTER_LENGTH) })
+        ).not.toThrow();
+        expect(() =>
+          validateQuery({ exclude_types: 'a'.repeat(MAX_KI_TYPE_FILTER_LENGTH + 1) })
+        ).toThrow('[exclude_types]');
+        expect(() => validateQuery({ exclude_types: '' })).toThrow('[exclude_types]');
+      });
+    });
+
+    it('passes exclude_types to Elasticsearch as params, a single value as a list', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(rows([]))
+        .mockResolvedValueOnce({
+          columns: [{ name: 'total' }, { name: 'filtered' }],
+          values: [[5, 2]],
+        })
+        .mockResolvedValueOnce(buckets([]));
+
+      await callRoute('GET', AI_INDEX_KI_LIST_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { size: 25, exclude_types: 'faq' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining('| WHERE (type IS NULL OR type NOT IN (?excludeType0))'),
+        params: [{ excludeType0: 'faq' }],
+      });
+      expect(response.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ total: 2, summary: { total: 5, counts_by_type: [] } }),
+      });
     });
 
     it('returns 404 when the AI Index does not exist', async () => {
@@ -1317,6 +1402,181 @@ describe('ai indices routes', () => {
           kis: [],
         },
       });
+    });
+  });
+
+  describe('GET /internal/context_engine/ai_index/{aiIndexId}/kis/_groups', () => {
+    const probe = {
+      columns: ['id', '@timestamp', 'updated_at', 'type', 'title'].map((name) => ({ name })),
+      values: [],
+    };
+    const groupBuckets = (values: unknown[][]) => ({
+      columns: [{ name: 'count' }, { name: 'group_type' }, { name: 'total' }, { name: 'is_other' }],
+      values,
+    });
+    const rows = (values: unknown[][]) => ({
+      columns: ['_index', 'id', 'type', 'title', 'updated_at', 'ki_status'].map((name) => ({
+        name,
+      })),
+      values,
+    });
+
+    const validateQuery = (query: unknown) =>
+      getQuerySchema('GET', AI_INDEX_KI_GROUPS_PATH).validate(query);
+
+    it('defaults to 5 groups of 3 KIs, newest first', () => {
+      expect(validateQuery({})).toEqual({ max_groups: 5, preview_size: 3, sort: 'updated' });
+    });
+
+    it('bounds max_groups and preview_size to integers in range', () => {
+      expect(() =>
+        validateQuery({ max_groups: MAX_KI_GROUPS, preview_size: MAX_KI_GROUP_PREVIEW_SIZE })
+      ).not.toThrow();
+      expect(() => validateQuery({ max_groups: 0 })).toThrow('[max_groups]');
+      expect(() => validateQuery({ max_groups: MAX_KI_GROUPS + 1 })).toThrow('[max_groups]');
+      expect(() => validateQuery({ max_groups: 2.5 })).toThrow('[max_groups]: must be an integer');
+      expect(() => validateQuery({ preview_size: 0 })).toThrow('[preview_size]');
+      expect(() => validateQuery({ preview_size: MAX_KI_GROUP_PREVIEW_SIZE + 1 })).toThrow(
+        '[preview_size]'
+      );
+      expect(() => validateQuery({ preview_size: 2.5 })).toThrow(
+        '[preview_size]: must be an integer'
+      );
+    });
+
+    it('accepts the list filters and rejects list-only params', () => {
+      expect(() =>
+        validateQuery({ status: ['active', 'expired'], sort: 'title', query: 'refund' })
+      ).not.toThrow();
+      expect(() => validateQuery({ query: 'a'.repeat(MAX_KI_SEARCH_QUERY_LENGTH + 1) })).toThrow(
+        '[query]'
+      );
+      expect(() => validateQuery({ type: 'faq' })).toThrow();
+    });
+
+    it('accepts exclude_types as a string or a bounded array of bounded strings', () => {
+      expect(validateQuery({ exclude_types: 'faq' })).toEqual(
+        expect.objectContaining({ exclude_types: 'faq' })
+      );
+      const maxTypes = Array.from({ length: MAX_KI_EXCLUDE_TYPES }, (_, i) => `t${i}`);
+      expect(() => validateQuery({ exclude_types: maxTypes })).not.toThrow();
+      expect(() => validateQuery({ exclude_types: [...maxTypes, 'one-more'] })).toThrow(
+        '[exclude_types]'
+      );
+      expect(() => validateQuery({ exclude_types: '' })).toThrow('[exclude_types]');
+      expect(() =>
+        validateQuery({ exclude_types: 'a'.repeat(MAX_KI_TYPE_FILTER_LENGTH + 1) })
+      ).toThrow('[exclude_types]');
+    });
+
+    it('passes exclude_types to the buckets query as params, a single value as a list', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(groupBuckets([[2, 'policy', 3, false]]))
+        .mockResolvedValueOnce(rows([]));
+
+      await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { max_groups: 10, preview_size: 1, exclude_types: 'faq', sort: 'updated' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining('WHERE (type IS NULL OR type NOT IN (?excludeType0))'),
+        params: [{ excludeType0: 'faq' }],
+      });
+    });
+
+    it('accepts types as a string or a bounded array of bounded strings', () => {
+      expect(validateQuery({ types: 'faq' })).toEqual(expect.objectContaining({ types: 'faq' }));
+      expect(() =>
+        validateQuery({ types: Array.from({ length: MAX_KI_GROUPS }, (_, i) => `t${i}`) })
+      ).not.toThrow();
+      expect(() =>
+        validateQuery({ types: Array.from({ length: MAX_KI_GROUPS + 1 }, (_, i) => `t${i}`) })
+      ).toThrow('[types]');
+      expect(() => validateQuery({ types: '' })).toThrow('[types]');
+      expect(() => validateQuery({ types: 'a'.repeat(257) })).toThrow('[types]');
+    });
+
+    it('passes the given types to the buckets query as params', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(groupBuckets([[2, 'faq', 3, false]]))
+        .mockResolvedValueOnce(rows([]));
+
+      await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { max_groups: 5, preview_size: 1, types: 'faq', sort: 'updated' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining('type IN (?groupType0)'),
+        params: [{ groupType0: 'faq' }],
+      });
+    });
+
+    it('returns the groups, reads as the current user and audits the read', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(groupBuckets([[2, 'faq', 3, false]]))
+        .mockResolvedValueOnce(rows([[kiBackingIndex, 'ki-1', 'faq', 'Refunds', null, 'active']]));
+
+      await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { max_groups: 2, preview_size: 1, status: 'active', query: 'refund', sort: 'title' },
+      });
+
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', 'default');
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining('| LIMIT 2'),
+        params: [{ searchQuery: 'refund' }],
+      });
+      expect(esEsqlQuery.mock.calls[1][0].query).toContain('WHERE ki_status IN ("active")');
+      expect(esEsqlQuery.mock.calls[2][0].query).toContain('SORT _score DESC, title_sort ASC');
+      expect(esEsqlQuery.mock.calls[2][0].query).toContain('| LIMIT 1');
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          total: 3,
+          total_other: 1,
+          groups: [
+            {
+              type: 'faq',
+              count: 2,
+              kis: [
+                {
+                  id: 'ki-1',
+                  index: kiBackingIndex,
+                  type: 'faq',
+                  title: 'Refunds',
+                  status: 'active',
+                },
+              ],
+            },
+          ],
+        },
+      });
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'ai_index_list', outcome: 'success' }),
+        })
+      );
+    });
+
+    it('returns 404 and audits the failure when the AI Index does not exist', async () => {
+      aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+      await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, { params: { aiIndexId: 'missing' } });
+
+      expect(response.notFound).toHaveBeenCalled();
+      expect(esEsqlQuery).not.toHaveBeenCalled();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'ai_index_list', outcome: 'failure' }),
+        })
+      );
     });
   });
 
@@ -1576,6 +1836,9 @@ describe('ai indices routes', () => {
       expect(() =>
         bodySchema.validate({ ki: { content: 'Updated content', title: 'Updated title' } })
       ).toThrow();
+      expect(() =>
+        bodySchema.validate({ ki: { content: 'Updated content', user_id: 'alice' } })
+      ).toThrow(/user_id/);
     });
 
     it('passes the index query param as backingIndex to updateKi', async () => {

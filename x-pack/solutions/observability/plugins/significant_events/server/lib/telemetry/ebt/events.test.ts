@@ -11,12 +11,14 @@ import {
   agentToolEventSearchEventType,
   agentToolEventStatusUpdateEventType,
   agentToolEventWriteEventType,
+  agentToolFailedEventType,
   agentToolKiIdentificationStartedEventType,
   detectionScanEventType,
   discoveryTriggeredEventType,
   eventStatusChangedEventType,
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,
+  knowledgeIndicatorQueriesGenerationFailedEventType,
   onboardingScheduledEventType,
 } from './events';
 
@@ -29,12 +31,14 @@ describe('EBT event types', () => {
     agentToolEventSearchEventType,
     agentToolEventStatusUpdateEventType,
     agentToolEventWriteEventType,
+    agentToolFailedEventType,
     agentToolKiIdentificationStartedEventType,
     detectionScanEventType,
     discoveryTriggeredEventType,
     eventStatusChangedEventType,
     knowledgeIndicatorEventsGeneratedEventType,
     knowledgeIndicatorFeaturesIdentifiedEventType,
+    knowledgeIndicatorQueriesGenerationFailedEventType,
     onboardingScheduledEventType,
   ])('$eventType registers the CPS target context', ({ schema }) => {
     expect(isOptional(schema.space_id)).toBe(false);
@@ -73,5 +77,18 @@ describe('EBT event types', () => {
 
     expect(isOptional(spaceId)).toBe(false);
     expect(isOptional(id)).toBe(true);
+  });
+
+  it('carries no free text on a failed tool call', () => {
+    expect(Object.keys(agentToolFailedEventType.schema)).not.toContain('error_message');
+    expect(Object.values(agentToolFailedEventType.schema).map(({ type }) => type)).not.toContain(
+      'text'
+    );
+  });
+
+  it('lets a query generation failure omit the connector when model resolution failed', () => {
+    expect(isOptional(knowledgeIndicatorQueriesGenerationFailedEventType.schema.connector_id)).toBe(
+      true
+    );
   });
 });
