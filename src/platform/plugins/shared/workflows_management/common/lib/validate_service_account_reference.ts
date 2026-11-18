@@ -32,9 +32,21 @@ export const validateServiceAccountReference = async (
   lookup: ServiceAccountLookup
 ): Promise<YamlValidationResult[]> => {
   const node = document.getIn(['settings', 'run_as'], true);
-  if (!isScalar(node) || typeof node.value !== 'string' || !node.range) return [];
+  if (
+    !isScalar(node) ||
+    typeof node.value !== 'string' ||
+    !node.range ||
+    node.type === 'BLOCK_LITERAL' ||
+    node.type === 'BLOCK_FOLDED'
+  ) {
+    return [];
+  }
   const id = node.value;
   if (!id) return [];
+  const start = lineCounter.linePos(node.range[0]);
+  const end = lineCounter.linePos(node.range[1]);
+  // A value that spans lines is not a reference, matching the service account badge.
+  if (start.line !== end.line) return [];
 
   const result = await lookup(id);
   if (result.status === 'unknown') return [];
@@ -42,8 +54,6 @@ export const validateServiceAccountReference = async (
     return [];
   }
 
-  const start = lineCounter.linePos(node.range[0]);
-  const end = lineCounter.linePos(node.range[1]);
   const location = {
     id: `service-account-validation-${id}`,
     owner: 'service-account-validation' as const,

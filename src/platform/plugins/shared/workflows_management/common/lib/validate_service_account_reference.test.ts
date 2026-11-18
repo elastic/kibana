@@ -45,6 +45,16 @@ describe('validateServiceAccountReference', () => {
     ]);
   });
 
+  it('looks up the raw ID that runtime uses, without trimming', async () => {
+    const lookup = jest.fn<ReturnType<ServiceAccountLookup>, [string]>(async () => ({
+      status: 'unknown',
+    }));
+
+    await validate(workflowYaml('"runner "'), lookup);
+
+    expect(lookup).toHaveBeenCalledWith('runner ');
+  });
+
   it('reports nothing for an existing, usable service account', async () => {
     const results = await validate(workflowYaml('runner'), async () => ({
       status: 'found',
@@ -82,6 +92,9 @@ describe('validateServiceAccountReference', () => {
     ['an empty run_as', workflowYaml('""')],
     ['a null run_as', workflowYaml('')],
     ['a non-string run_as', workflowYaml('42')],
+    ['a literal block run_as', workflowYaml('|\n    runner')],
+    ['a folded block run_as', workflowYaml('>\n    runner')],
+    ['a quoted run_as that spans lines', workflowYaml('"run\n    ner"')],
   ])('skips the lookup for %s', async (_, yaml) => {
     const lookup = jest.fn<ReturnType<ServiceAccountLookup>, [string]>();
 
