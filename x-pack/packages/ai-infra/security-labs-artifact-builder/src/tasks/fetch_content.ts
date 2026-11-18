@@ -79,6 +79,8 @@ const fetchEntriesPage = async ({
       api_key: credentials.apiKey,
       access_token: credentials.deliveryToken,
     },
+    // fetch forwards custom headers across origins, so a followed redirect could leak the credentials.
+    redirect: 'manual',
   });
   const body = (await response
     .json()

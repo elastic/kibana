@@ -5,6 +5,8 @@
 # builds only upload the artifact build steps when the published Security Labs content differs
 # from the content of the last build that uploaded artifacts. Any other build source always
 # builds, and any failure to fingerprint or look up the last upload falls back to a full build.
+# Webhook builds cancel running builds, so a webhook build also runs in full when a newer
+# non-webhook build was canceled; otherwise an unrelated publish could drop a manual rebuild.
 #
 # Build meta-data:
 #   security-labs-content-sha256  fingerprint of the published entries (set by this step)
@@ -64,13 +66,26 @@ fingerprint_content() {
     sha256sum | cut -d ' ' -f 1
 }
 
+list_builds() {
+  curl -fsS -H @<(printf 'Authorization: Bearer %s\n' "$BUILDKITE_TOKEN") \
+    "https://api.buildkite.com/v2/organizations/${BUILDKITE_ORGANIZATION_SLUG}/pipelines/${BUILDKITE_PIPELINE_SLUG}/builds?$1"
+}
+
 # Prints "<build number> <fingerprint>" for the newest other build that uploaded artifacts.
 last_uploaded_build() {
-  curl -fsS -H @<(printf 'Authorization: Bearer %s\n' "$BUILDKITE_TOKEN") \
-    "https://api.buildkite.com/v2/organizations/${BUILDKITE_ORGANIZATION_SLUG}/pipelines/${BUILDKITE_PIPELINE_SLUG}/builds?meta_data%5Bsecurity-labs-uploaded%5D=true&per_page=50" |
+  list_builds 'meta_data%5Bsecurity-labs-uploaded%5D=true&per_page=50' |
     jq -r --argjson current "$BUILDKITE_BUILD_NUMBER" \
       '[.[] | select(.number != $current and .meta_data["security-labs-uploaded"] == "true")][0]
         | select(. != null) | "\(.number) \(.meta_data["security-labs-content-sha256"] // "")"'
+}
+
+# Prints the number of the newest canceled non-webhook build after build $1, if any.
+canceled_build_since() {
+  list_builds 'state%5B%5D=canceled&state%5B%5D=canceling&per_page=50' |
+    jq -r --argjson since "$1" --argjson current "$BUILDKITE_BUILD_NUMBER" \
+      '[.[] | select(.number > $since and .number != $current
+          and (.state == "canceled" or .state == "canceling") and .source != "webhook")][0]
+        | select(. != null) | .number'
 }
 
 if [[ ! "$CONTENTSTACK_HOST" =~ ^([a-z0-9-]+-)?cdn\.contentstack\.(io|com)$ ]]; then
@@ -104,6 +119,13 @@ read -r last_build_number last_fingerprint <<<"$last"
 
 if [[ "$fingerprint" != "$last_fingerprint" ]]; then
   upload_build_steps "Security Labs content changed since build #${last_build_number}"
+fi
+
+if ! canceled_build="$(canceled_build_since "$last_build_number")"; then
+  upload_build_steps "Unable to look up canceled builds since build #${last_build_number}"
+fi
+if [[ -n "$canceled_build" ]]; then
+  upload_build_steps "Build #${canceled_build} (not started by the webhook) was canceled after build #${last_build_number}"
 fi
 
 message="Security Labs content is unchanged since build #${last_build_number}; skipped the artifact build."

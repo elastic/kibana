@@ -93,6 +93,22 @@ describe('fetchContent', () => {
     expect(url.searchParams.getAll('include[]')).toEqual(['author', 'categories']);
     expect(url.searchParams.has('query')).toBe(false);
     expect(init.headers).toEqual({ api_key: 'blt-stack-key', access_token: 'cs-delivery-token' });
+    expect(init.redirect).toBe('manual');
+  });
+
+  it('fails on a redirect instead of following it with the credentials', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(null, {
+        status: 301,
+        statusText: 'Moved Permanently',
+        headers: { Location: 'https://example.com/v3/content_types/threat_command/entries' },
+      })
+    );
+
+    await expect(fetchContent({ config: createConfig(), log })).rejects.toThrow(
+      'Contentstack request for content type [threat_command] failed with HTTP 301: Moved Permanently'
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('scopes the shared blog_v3 content type to Security Labs posts', async () => {
