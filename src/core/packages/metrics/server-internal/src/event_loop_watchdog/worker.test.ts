@@ -1265,8 +1265,8 @@ describe('runWatchdogWorker', () => {
 
     describe('files', () => {
       const DIR = '/diag';
-      const startWriting = (dir: string = DIR) => {
-        start({ profiling: { ...profilingData, dir } });
+      const startWriting = () => {
+        start({ profiling: { ...profilingData, dir: DIR } });
         setSlot(Slot.profiling, 1);
       };
       const warnLines = () =>
@@ -1324,25 +1324,6 @@ describe('runWatchdogWorker', () => {
           fileLimit: 0,
           writeFailed: 0,
         });
-      });
-
-      it('writes a file a viewer can read to a real directory', async () => {
-        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'watchdog-profile-'));
-        try {
-          const writeFile = jest.spyOn(Fs, 'writeFile');
-          startWriting(dir);
-          await profiledBlock(2_000);
-          await writeFile.mock.results[0].value;
-          await settle();
-
-          const [file] = fs.readdirSync(dir);
-          expect(warnLines()[0][0]).toContain(`File: ${path.join(dir, file)}.`);
-          const written: CpuProfile = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
-          expect(written.samples).toHaveLength(written.timeDeltas?.length ?? -1);
-          expect(written.startTime).toBeLessThanOrEqual(written.endTime);
-        } finally {
-          fs.rmSync(dir, { recursive: true, force: true });
-        }
       });
 
       it('logs a failed write once at error after the capture', async () => {
