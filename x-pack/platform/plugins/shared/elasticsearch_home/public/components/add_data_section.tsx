@@ -18,9 +18,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useHomeConfig } from '../context';
 import { addDataCard } from './add_data_section_styles';
+import { WebCrawlPanel } from './web_crawl_panel';
 
 export const AddDataSection = () => {
-  const { addDataLinks } = useHomeConfig();
+  const { addDataLinks, showWebCrawl } = useHomeConfig();
 
   return (
     <>
@@ -63,6 +64,12 @@ export const AddDataSection = () => {
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
+      {showWebCrawl && (
+        <>
+          <EuiSpacer size="s" />
+          <WebCrawlPanel />
+        </>
+      )}
     </>
   );
 };

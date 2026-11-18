@@ -17,11 +17,13 @@
     ],
     "requiredPlugins": [
       "features",
-      "share"
+      "share",
+      "taskManager"
     ],
     "optionalPlugins": [
       "agentBuilder",
-      "cloud"
+      "cloud",
+      "workflowsExtensions"
     ]
   }
 }

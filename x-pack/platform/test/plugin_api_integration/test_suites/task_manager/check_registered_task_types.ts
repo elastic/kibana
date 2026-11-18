@@ -192,6 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cloud_security_posture-stats_task',
         'contextEngine:signalGenerator',
         'dashboard_telemetry',
+        'elasticsearch_home:web_crawl',
         'endpoint:complete-external-response-actions',
         'endpoint:metadata-check-transforms-task',
         'endpoint:user-artifact-packager',
