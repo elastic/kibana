@@ -931,6 +931,15 @@ describe('UiamServiceAccounts', () => {
         serviceAccounts.lookupAccountAsInternalUser('service-account-id', { signal })
       ).resolves.toEqual({ status: 'unknown' });
     });
+
+    it('reports unknown when security features are disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      await expect(
+        serviceAccounts.lookupAccountAsInternalUser('service-account-id', { signal })
+      ).resolves.toEqual({ status: 'unknown' });
+      expect(mockUiam.getServiceAccount).not.toHaveBeenCalled();
+    });
   });
 
   describe('#get', () => {
@@ -1076,7 +1085,9 @@ describe('UiamServiceAccounts', () => {
         enabled: true,
         assumable: true,
       });
-      expect(mockUiam.getServiceAccount).toHaveBeenCalledWith('service-account-id');
+      expect(mockUiam.getServiceAccount).toHaveBeenCalledWith('service-account-id', {
+        signal: undefined,
+      });
     });
 
     it('authorizes no user', async () => {

@@ -1531,14 +1531,23 @@ describe('EsServiceAccounts', () => {
     });
 
     it.each(['not-an-id', 'elastic/fleet-server'])(
-      'reports unknown for [%s], which no workload can run as',
+      'reports [%s] as missing, because no workload can run as it',
       async (id) => {
         await expect(serviceAccounts.lookupAccountAsInternalUser(id, { signal })).resolves.toEqual({
-          status: 'unknown',
+          status: 'missing',
         });
         expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
       }
     );
+
+    it('reports unknown when security features are disabled', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(
+        serviceAccounts.lookupAccountAsInternalUser(ACCOUNT_ID, { signal })
+      ).resolves.toEqual({ status: 'unknown' });
+      expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
+    });
   });
 
   describe('#get', () => {

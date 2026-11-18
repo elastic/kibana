@@ -748,24 +748,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * So `assumable` comes from the stored credential alone, the same as in {@link list}.
    */
   async getSummary(id: string): Promise<ServiceAccountSummary | null> {
-    if (!this.license.isEnabled()) {
-      throw Boom.forbidden(
-        'Cannot get a service account: security features are disabled in Elasticsearch'
-      );
-    }
-
-    // Only an account Kibana could run as is named. Any other id names nothing a workload can be
-    // bound to, so it is missing rather than malformed.
-    const principal = parseBindableEsServiceAccountId(id);
-    if (!principal) {
-      return null;
-    }
-
-    const account = await this.readAccount(
-      this.clusterClient.asInternalUser,
-      principal.namespace,
-      principal.name
-    );
+    const account = await this.readAccountAsInternalUser(id);
     if (!account) {
       return null;
     }
@@ -781,21 +764,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     id: string,
     { signal }: { signal?: AbortSignal }
   ): Promise<ServiceAccountLookup> {
-    // Only accounts in Kibana's namespace can be exchanged. Any other ID tells nothing about an
-    // account a workload could run as.
-    const principal = parseBindableEsServiceAccountId(id);
-    if (!principal) {
-      this.logger.debug(`Cannot look up service account [${id}]: not a Kibana-managed account ID`);
-      return { status: 'unknown' };
-    }
-
     try {
-      const account = await this.readAccount(
-        this.clusterClient.asInternalUser,
-        principal.namespace,
-        principal.name,
-        { signal }
-      );
+      const account = await this.readAccountAsInternalUser(id, { signal });
       if (!account) {
         return { status: 'missing' };
       }
@@ -1233,6 +1203,34 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         }
       );
     }
+  }
+
+  /**
+   * Reads an account as `kibana_system`, for the callers that have no user request. Resolves
+   * `undefined` when there is no such account. An ID Kibana could never run as names no account a
+   * workload can be bound to, so it is missing too, the same as the exchange refusing it for good.
+   */
+  private async readAccountAsInternalUser(
+    id: string,
+    { signal }: { signal?: AbortSignal } = {}
+  ): Promise<ElasticsearchServiceAccount | undefined> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    const principal = parseBindableEsServiceAccountId(id);
+    if (!principal) {
+      return undefined;
+    }
+
+    return await this.readAccount(
+      this.clusterClient.asInternalUser,
+      principal.namespace,
+      principal.name,
+      { signal }
+    );
   }
 
   /**

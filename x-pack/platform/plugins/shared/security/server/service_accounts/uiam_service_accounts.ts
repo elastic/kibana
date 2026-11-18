@@ -373,9 +373,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     { signal }: { signal?: AbortSignal }
   ): Promise<ServiceAccountLookup> {
     try {
-      const account = await this.uiam.getServiceAccount(id, { signal });
-      // UIAM keeps a revoked account around for a while, but it cannot be exchanged.
-      return !account || account.revoked ? { status: 'missing' } : { status: 'present' };
+      const account = await this.readAccountAsInternalUser(id, { signal });
+      return account ? { status: 'present' } : { status: 'missing' };
     } catch (e) {
       this.logger.debug(`Unable to look up service account [${id}]: ${getDetailedErrorMessage(e)}`);
       return { status: 'unknown' };
@@ -426,15 +425,9 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
    * is {@link get} without the user's privilege check.
    */
   async getSummary(id: string): Promise<ServiceAccountSummary | null> {
-    if (!this.license.isEnabled()) {
-      throw Boom.forbidden(
-        'Cannot get a service account: security features are disabled in Elasticsearch'
-      );
-    }
-
-    let account: UiamServiceAccountDetails | null;
+    let account: UiamServiceAccountDetails | undefined;
     try {
-      account = await this.uiam.getServiceAccount(id);
+      account = await this.readAccountAsInternalUser(id);
     } catch (e) {
       this.logger.error(`Failed to get service account [${id}]: ${getDetailedErrorMessage(e)}`);
       throw e;
@@ -444,13 +437,37 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       return null;
     }
 
-    if (account.revoked) {
-      this.logger.debug(`Service account [${id}] was found, but it was revoked`);
-      return null;
-    }
-
     const { name, enabled, assumable } = toDirectoryEntry(this.cloudProjectContext, account);
     return { id: account.id, name, enabled, assumable };
+  }
+
+  /**
+   * Reads an account as Kibana, for the callers that have no user request. Resolves `undefined`
+   * when UIAM does not know the account, or when it was revoked.
+   */
+  private async readAccountAsInternalUser(
+    id: string,
+    { signal }: { signal?: AbortSignal } = {}
+  ): Promise<UiamServiceAccountDetails | undefined> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    const account = await this.uiam.getServiceAccount(id, { signal });
+    if (!account) {
+      return undefined;
+    }
+
+    // UIAM keeps a revoked account around for a while, but it is gone as far as Kibana is
+    // concerned: it cannot be exchanged, restored or listed.
+    if (account.revoked) {
+      this.logger.debug(`Service account [${id}] was found, but it was revoked`);
+      return undefined;
+    }
+
+    return account;
   }
 
   /**

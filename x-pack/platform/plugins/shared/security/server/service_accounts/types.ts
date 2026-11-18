@@ -32,7 +32,8 @@ import type {
  * - `present`: the account exists. `credentialCreatedAt` is when Kibana created the credential it
  *   holds for the account, when it holds one. It is only set on Elasticsearch, where an account
  *   deleted and created again keeps its ID.
- * - `missing`: the account is gone, or was revoked.
+ * - `missing`: the account is gone, was revoked, or has an ID Kibana could never run as. It is
+ *   missing exactly when {@link ServiceAccountsBackend.getSummary} resolves `null`.
  * - `unknown`: the lookup failed, and says nothing about the account.
  */
 export type ServiceAccountLookup =
