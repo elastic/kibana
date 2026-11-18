@@ -239,8 +239,8 @@ export class SavedMap {
 
     if (this._attributes?.adHocDataViews?.length) {
       const dataViewService = getIndexPatternService();
-      const promises = this._attributes.adHocDataViews.map((adhocDataView) => {
-        return dataViewService.create(toDataViewSpec(adhocDataView));
+      const promises = this._attributes.adHocDataViews.map((asCodeEmbeddedDataView) => {
+        return dataViewService.create(toDataViewSpec(asCodeEmbeddedDataView));
       });
       await Promise.all(promises);
     }
