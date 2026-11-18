@@ -16,10 +16,13 @@ You can also associate `.cpuprofile` and `.heapprofile` files with VS Code on Ma
 When doing that, selecting the file from the Download list in Chrome will open the profile up
 immediately.
 
+Note that running multiple profiles of the same type at the same time will likely 
+not work the way you want.  Only run one profile of each type at a time.
+
 ## Routes
 
-All routes are under `/internal/developer_toolbar_profilers`. Only one profile of each type can
-run at a time; requests that conflict with that return `409`.
+All routes are under `/internal/developer_toolbar_profilers` and require the `superuser` role.
+Only one profile of each type can run at a time; requests that conflict with that return `409`.
 
 | Route | Description |
 | --- | --- |
@@ -31,3 +34,7 @@ run at a time; requests that conflict with that return `409`.
 
 The `GET` profile routes have public access so they can be opened, or bookmarked, directly in
 the browser, e.g. `http://localhost:5601/internal/developer_toolbar_profilers/cpu_profile?duration=10`.
+
+In dev mode, requests usually go through the base path proxy, which drops proxied requests after
+3 minutes. So a capture longer than about 180 seconds can still fail there unless Kibana runs
+with `--no-base-path`.

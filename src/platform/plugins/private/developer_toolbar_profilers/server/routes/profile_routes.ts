@@ -8,7 +8,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IKibanaResponse, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
+import type {
+  IKibanaResponse,
+  IRouter,
+  KibanaResponseFactory,
+  Logger,
+  RouteSecurity,
+} from '@kbn/core/server';
 import {
   API_BASE_PATH,
   getProfileFileName,
@@ -19,16 +26,19 @@ import {
 import type { CompletedProfile, ProfileRunner, ProfileRunners } from '../lib/profile_runner';
 import { ProfileStateError } from '../lib/profile_state_error';
 
-const security = {
+const security: RouteSecurity = {
   authz: {
-    enabled: false,
-    reason:
-      'This development-only route profiles the Kibana server process with the Node.js inspector and is not registered outside of dev mode.',
+    requiredPrivileges: [ReservedPrivilegesSet.superuser],
   },
-} as const;
+};
+
+const MAX_DURATION_SECONDS = 300;
+
+// Time allowed after the capture to stop the profiler and send the profile.
+const RESPONSE_MARGIN_SECONDS = 60;
 
 const durationQuerySchema = schema.object({
-  duration: schema.number({ defaultValue: 5, min: 1, max: 300 }),
+  duration: schema.number({ defaultValue: 5, min: 1, max: MAX_DURATION_SECONDS }),
 });
 
 function profileResponse(
@@ -86,17 +96,28 @@ export function registerProfileRoutes(
   const path = getProfileRoutePath(type);
 
   // Public access lets the route be opened directly from the browser address bar.
+  // Nothing is sent while capturing, so the idle socket timeout must outlast the longest capture.
   router.get(
     {
       path,
       security,
-      options: { access: 'public' },
+      options: {
+        access: 'public',
+        timeout: { idleSocket: (MAX_DURATION_SECONDS + RESPONSE_MARGIN_SECONDS) * 1000 },
+      },
       validate: { query: durationQuerySchema },
     },
     async (context, request, response) =>
-      runProfilerAction(logger, response, async () =>
-        profileResponse(response, type, await runner.capture(request.query.duration))
-      )
+      runProfilerAction(logger, response, async () => {
+        const controller = new AbortController();
+        const subscription = request.events.aborted$.subscribe(() => controller.abort());
+        try {
+          const completed = await runner.capture(request.query.duration, controller.signal);
+          return profileResponse(response, type, completed);
+        } finally {
+          subscription.unsubscribe();
+        }
+      })
   );
 
   router.post(

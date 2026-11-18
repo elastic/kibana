@@ -66,9 +66,21 @@ export class ProfileRunner {
     }
   }
 
-  public async capture(durationSeconds: number): Promise<CompletedProfile> {
+  /** Runs a profile for `durationSeconds`; it is discarded if `signal` aborts first. */
+  public async capture(durationSeconds: number, signal?: AbortSignal): Promise<CompletedProfile> {
     await this.start();
-    await delay(durationSeconds * 1000);
+    const { active } = this;
+
+    try {
+      await delay(durationSeconds * 1000, undefined, { signal });
+    } catch (error) {
+      // The profile may have been stopped, and another one started, while waiting.
+      if (this.active === active) {
+        this.abort();
+      }
+      throw error;
+    }
+
     return await this.stop();
   }
 

@@ -8,13 +8,19 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import type { HttpStart, ToastsStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import type { ProfileType } from '../../common';
 import { fetchProfilerStatus, startProfile, stopProfile } from '../lib/api';
 import { downloadFile } from '../lib/download_file';
+
+// Matches the color of the developer toolbar's own badges, e.g. the environment indicator.
+const TOOLBAR_BADGE_COLOR = '#0B1628';
+
+// Dark enough that EuiBadge renders white text and icons on it; the dark theme's 'danger' is too light.
+const RUNNING_BADGE_COLOR = '#BD271E';
 
 export interface ProfileControlProps {
   readonly type: ProfileType;
@@ -121,18 +127,21 @@ export function ProfileControl({ type, http, toasts }: ProfileControlProps) {
     }
   }
 
+  const label = isRunning ? labels.stop : labels.start;
+
   return (
     <EuiToolTip content={labels.tooltip}>
-      <EuiButtonEmpty
-        size="xs"
-        color={isRunning ? 'danger' : 'text'}
+      <EuiBadge
+        color={isRunning ? RUNNING_BADGE_COLOR : TOOLBAR_BADGE_COLOR}
         iconType={isRunning ? 'stop' : 'play'}
-        isLoading={isBusy}
+        iconSide="left"
+        isDisabled={isBusy}
         onClick={onClick}
+        onClickAriaLabel={label}
         data-test-subj={`serverProfilers-${type}-button`}
       >
-        {isRunning ? labels.stop : labels.start}
-      </EuiButtonEmpty>
+        {label}
+      </EuiBadge>
     </EuiToolTip>
   );
 }

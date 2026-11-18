@@ -22,7 +22,7 @@ export class DeveloperToolbarProfilersServerPlugin implements Plugin {
   }
 
   public setup(core: CoreSetup) {
-    // The routes skip authorization, so they must never exist outside of dev mode.
+    // The routes expose the Node.js inspector, so they must never exist outside of dev mode.
     if (this.isDev) {
       registerRoutes(core.http.createRouter(), this.logger, this.runners);
     }

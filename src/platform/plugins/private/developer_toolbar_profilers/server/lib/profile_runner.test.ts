@@ -26,6 +26,10 @@ function createRunner() {
   return { commands, runner: new ProfileRunner('cpu', commands) };
 }
 
+async function flushPromises() {
+  await new Promise(setImmediate);
+}
+
 describe('ProfileRunner', () => {
   beforeEach(() => {
     mockDisconnect.mockReset();
@@ -90,6 +94,34 @@ describe('ProfileRunner', () => {
     expect(commands.start).toHaveBeenCalledTimes(1);
     expect(commands.stop).toHaveBeenCalledTimes(1);
     expect(runner.isRunning()).toBe(false);
+  });
+
+  it('discards the profile when a capture is aborted', async () => {
+    const { commands, runner } = createRunner();
+    const controller = new AbortController();
+
+    const capture = runner.capture(60, controller.signal);
+    await flushPromises();
+    controller.abort();
+
+    await expect(capture).rejects.toThrow();
+    expect(runner.isRunning()).toBe(false);
+    expect(commands.stop).not.toHaveBeenCalled();
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not discard a newer profile when an aborted capture was already stopped', async () => {
+    const { runner } = createRunner();
+    const controller = new AbortController();
+
+    const capture = runner.capture(60, controller.signal);
+    await flushPromises();
+    await runner.stop();
+    await runner.start();
+    controller.abort();
+
+    await expect(capture).rejects.toThrow();
+    expect(runner.isRunning()).toBe(true);
   });
 
   it('aborts a running profile', async () => {
