@@ -186,6 +186,22 @@ describe('EngineRunner', () => {
     expect(held.has(SPACE_ID)).toBe(false);
   });
 
+  it('stores nothing from a run aborted before it starts, even from a generator that returns at once', async () => {
+    const { runner, state, signals } = createRunner();
+    const controller = new AbortController();
+    controller.abort('the request went away');
+
+    const result = await runner.run({ now: NOW, abortSignal: controller.signal });
+
+    expect(result).toMatchObject({
+      strategies: [{ id: TEST_STRATEGY_ID, signals: 0, error: 'the request went away' }],
+    });
+    expect(signals.written).toHaveLength(0);
+    expect(
+      await state.readGeneratorStates({ spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })
+    ).toEqual(new Map());
+  });
+
   it('stops a generator that ignores its signal once the run budget is spent', async () => {
     jest.useFakeTimers();
     let generatorStarted: () => void = () => {};

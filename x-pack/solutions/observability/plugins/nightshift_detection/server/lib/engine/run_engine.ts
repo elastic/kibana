@@ -29,10 +29,14 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+function createAbortError(signal: AbortSignal): Error {
+  return new Error(String(signal.reason ?? 'aborted'));
+}
+
 /** Rejects when the signal aborts, so a generator that ignores its signal cannot hold the run. */
 function rejectOnAbort(signal: AbortSignal): Promise<never> {
   return new Promise((_resolve, reject) => {
-    const fail = () => reject(new Error(String(signal.reason ?? 'aborted')));
+    const fail = () => reject(createAbortError(signal));
     if (signal.aborted) {
       fail();
       return;
@@ -180,6 +184,12 @@ export class EngineRunner {
     }
 
     try {
+      // An aborted run starts no generator: one that ignores its signal and returns at once would
+      // win the race below, and the cancelled run would store its signals.
+      if (controller.signal.aborted) {
+        throw createAbortError(controller.signal);
+      }
+
       const generated: GenerateResult = await Promise.race([
         strategy.generator.generate({
           spaceId,
