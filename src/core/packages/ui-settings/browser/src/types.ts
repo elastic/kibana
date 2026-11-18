@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 import type {
   UiSettingsParams,
   UiSettingsRuntimeEntry,
+  UiSettingsScope,
   UserProvidedValues,
 } from '@kbn/core-ui-settings-common';
 
@@ -130,7 +131,7 @@ export type UiSettingsMetadataState = Record<string, PublicUiSettingsParams & Us
  * @public
  */
 export interface IUiSettingsMetadataClient {
-  getAll: (scope: 'namespace' | 'global') => Promise<UiSettingsMetadataState>;
+  getAll: (scope: UiSettingsScope) => Promise<UiSettingsMetadataState>;
 }
 
 /** @public */

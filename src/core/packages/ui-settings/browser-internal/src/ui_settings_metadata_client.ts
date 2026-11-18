@@ -8,6 +8,7 @@
  */
 
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import type {
   IUiSettingsMetadataClient,
   UiSettingsMetadataState,
@@ -20,7 +21,7 @@ interface MetadataResponse {
 export class UiSettingsMetadataClient implements IUiSettingsMetadataClient {
   constructor(private readonly http: InternalHttpSetup) {}
 
-  async getAll(scope: 'namespace' | 'global'): Promise<UiSettingsMetadataState> {
+  async getAll(scope: UiSettingsScope): Promise<UiSettingsMetadataState> {
     const path =
       scope === 'namespace'
         ? '/internal/kibana/settings/metadata'

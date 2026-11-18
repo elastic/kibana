@@ -301,7 +301,7 @@ describe('Settings application', () => {
       },
     };
     const metadata = {
-      getAll: jest.fn(async (scope: 'namespace' | 'global') =>
+      getAll: jest.fn(async (scope: UiSettingsScope) =>
         scope === 'namespace' ? namespaceDefinitions : {}
       ),
     };
