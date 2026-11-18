@@ -50,6 +50,5 @@ export const resolveWorkflowTaskPacks = (
   const packs = taskManager.getTaskBundlePacks?.(taskType);
   if (!packs) return undefined;
   const resolved = resolvePacksForDefinition(definition, packs);
-  if (!resolved) return undefined;
   return [...new Set([...resolved, WORKFLOWS_TASK_SCHEDULING_PACK_ID])];
 };

@@ -86,12 +86,10 @@ export const startTaskProcessCore = async ({
   init,
   module,
   contributions = {},
-  loadedPacks,
 }: {
   init: TaskProcessInit;
   module: TaskTypeModule;
   contributions?: Record<string, unknown[]>;
-  loadedPacks?: string[];
 }): Promise<TaskProcessCore> => {
   const definitions = new Map<string, TaskRegisterDefinition>();
   // The module with what plugins contributed to it declared: saved object types and the like.
@@ -101,7 +99,6 @@ export const startTaskProcessCore = async ({
     init,
     module: applied,
     contributions,
-    loadedPacks,
     definitions,
     flushers: [],
   };

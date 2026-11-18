@@ -20,8 +20,6 @@ export interface TaskProcessContext {
   module: TaskTypeModule;
   /** What plugins contribute, by key; see `TaskTypeModule.contributions`. */
   contributions: Record<string, unknown[]>;
-  /** Ids of the packs this process actually loaded; see `TaskHost.loadedPacks`. */
-  loadedPacks?: string[];
   /** The task definitions plugins registered through Task Manager's contract. */
   definitions: Map<string, TaskRegisterDefinition>;
   enrichFakeRequest?: FakeRequestEnricher;

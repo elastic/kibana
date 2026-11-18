@@ -42,6 +42,10 @@ export interface SecurityWorkflowEvents {
 export const contribution: WorkflowStepsContribution = {
   declares: {
     settings: [SECURITY_ALERTS_SETTINGS_ID, SECURITY_AGENT_BUILDER_SETTINGS_ID],
+    // `securitySolution.alerts` above needs the spaces service (`spaces`) and
+    // `securitySolution.events` needs the workflow trigger client (`workflows.extensions`): both
+    // services another pack provides, not this one.
+    requires: ['spaces', 'workflows.extensions'],
     // `registerSecurityWorkflowSteps` (../workflows/register_security_workflow_steps.ts) registers
     // every `security.*` step below unconditionally, and `threat_intel.fetch_source` only when the
     // process is given a `threatIntelLogger` (always true here). Lets `resolvePacksForDefinition`
@@ -69,19 +73,6 @@ export const contribution: WorkflowStepsContribution = {
       'security.setAttackTags',
       'security.updateNote',
       'threat_intel.fetch_source',
-    ],
-    // `registerSecurityWorkflowTriggers` registers these unconditionally. `resolvePacksForDefinition`
-    // does not yet read trigger coverage (only `stepTypes`), so this is metadata for now, not a
-    // second selection path; a workflow that only differs by trigger still resolves by its steps.
-    triggers: [
-      'security.alertAssigneesChanged',
-      'security.alertStatusChanged',
-      'security.alertTagsChanged',
-      'security.attackAssigneesChanged',
-      'security.attackStatusChanged',
-      'security.attackTagsChanged',
-      'security.noteCreated',
-      'security.noteUpdated',
     ],
     registerAnalyticsEventTypes: (analytics) => {
       events.forEach((event) => analytics.registerEventType(event));

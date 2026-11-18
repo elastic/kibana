@@ -17,6 +17,7 @@ import {
  * Kibana executes the connector, so the resources it needs to execute are not available here.
  */
 export const contribution: RuleRunContribution = {
+  declares: { registersConnectorTypes: true },
   register: ({ actions, alerting }) => {
     actions.registerType(
       getObsAIAssistantConnectorType(async () => {

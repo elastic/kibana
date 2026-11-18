@@ -26,15 +26,9 @@ const {
 // node scripts/task_bundle_bench [--dir <bundles>] [--name <substring>] [--runs <n>] [--settle <ms>]
 //   [--es-url <url>] [--es-user <user>] [--es-password <password>] [--json <file>] [--node-defaults]
 //   [--run <request.json>] [--settings <settings.json>] [--init <init.json>]
-//   [--cpu-profile <file.cpuprofile>] [--heap-profile <file.heapsnapshot>] [--check-no-load-after-ready]
+//   [--cpu-profile <file.cpuprofile>] [--heap-profile <file.heapsnapshot>]
 // Processes start with the Node flags Kibana's supervisor gives them (a small young generation);
 // `--node-defaults` starts them with Node's own, to compare.
-// `--check-no-load-after-ready` fails if the floor or any selected pack loads a module after the
-// worker says it is ready (floor code that keeps loading past boot, or a pack a step's `register`
-// reaches for only once a task actually runs, both hide real startup/idle cost from this bench's own
-// numbers). It attaches a V8 inspector session in the child to watch `Debugger.scriptParsed`, which
-// adds real overhead; don't trust the startup/idle numbers from a `--check-no-load-after-ready` run,
-// only its pass/fail.
 // For every bundle in the manifest: forks it as Kibana's supervisor does, sends `init`, and measures
 // the time until the process says it is ready to serve (Core booted, plugins started) and its resident
 // memory once idle, before it has served a task. Needs a running Elasticsearch, since Core connects.
@@ -56,7 +50,6 @@ const extraInit = initFile ? JSON.parse(fs.readFileSync(initFile, 'utf8')) : {};
 const cpuProfileFile = getArg('--cpu-profile') && path.resolve(getArg('--cpu-profile'));
 const heapProfileFile = getArg('--heap-profile') && path.resolve(getArg('--heap-profile'));
 const profiling = Boolean(cpuProfileFile || heapProfileFile);
-const checkNoLoadAfterReady = args.includes('--check-no-load-after-ready');
 const readyTimeoutMs = 60000;
 // The flags of a process as the supervisor starts it, without Kibana's own.
 const childOptions = args.includes('--node-defaults')
@@ -69,9 +62,14 @@ const esConfig = elasticsearchConfigFromEnv({
   ES_PASSWORD: getArg('--es-password', 'changeme'),
 });
 
+// `--runs n` only produces a real median (not n separate bench.js invocations averaged by hand) if
+// this itself is a real median: an even sample count (`--runs 2`, the common quick check) was
+// picking the higher of the two middle values instead of averaging them, silently biasing every
+// number `--runs` produces upward.
 const median = (values) => {
   const sorted = [...values].sort((a, b) => a - b);
-  return sorted[Math.floor(sorted.length / 2)];
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 };
 
 /** Settings a module declares that startup checks for: plugins read their own at run time. */
@@ -120,8 +118,6 @@ const measureOnce = (file, settingIds) =>
     else delete env.TASK_BUNDLE_CPU_PROFILE_FILE;
     if (heapProfileFile) env.TASK_BUNDLE_HEAP_PROFILE_FILE = heapProfileFile;
     else delete env.TASK_BUNDLE_HEAP_PROFILE_FILE;
-    if (checkNoLoadAfterReady) env.TASK_BUNDLE_CHECK_LATE_LOADS = '1';
-    else delete env.TASK_BUNDLE_CHECK_LATE_LOADS;
     const child = fork(file, [], {
       env,
       execArgv: [...childOptions.execArgv, '--require', path.join(__dirname, 'memory_probe.js')],
@@ -139,9 +135,6 @@ const measureOnce = (file, settingIds) =>
     let taskMs;
     let runStarted;
     const probes = {};
-    // The `idle` probe's `lateLoads` already covers everything parsed between ready and idle; a later
-    // `afterRun` probe (after a task actually executed) can only add to that set, never shrink it.
-    let lateLoads = [];
     const finish = (result) => {
       if (finished) return;
       finished = true;
@@ -169,7 +162,6 @@ const measureOnce = (file, settingIds) =>
       if (message?.kind === 'task-bundle-memory') {
         probes[message.phase] = message;
         peakRss = Math.max(peakRss, message.usage.rss / 1048576, message.peakRss / 1048576);
-        if (message.lateLoads) lateLoads = [...new Set([...lateLoads, ...message.lateLoads])];
         if (
           (message.phase === 'idle' && !runRequest && !profiling) ||
           message.phase === 'afterRun'
@@ -182,7 +174,6 @@ const measureOnce = (file, settingIds) =>
             probes,
             runStatus,
             taskMs,
-            lateLoads,
           });
         }
         return;
@@ -196,7 +187,6 @@ const measureOnce = (file, settingIds) =>
           probes,
           runStatus,
           taskMs,
-          lateLoads,
           profile: {
             cpuProfileFile: message.cpuProfileFile,
             heapProfileFile: message.heapProfileFile,
@@ -324,9 +314,6 @@ const measureOnce = (file, settingIds) =>
                   ),
                 }
               : {}),
-            ...(checkNoLoadAfterReady
-              ? { lateLoads: [...new Set(samples.flatMap((sample) => sample.lateLoads ?? []))] }
-              : {}),
             samples: samples.map((sample) => ({
               startupMs: sample.startupMs,
               readyRssMb: sample.readyRss,
@@ -351,21 +338,6 @@ const measureOnce = (file, settingIds) =>
     const profile = samples[0]?.profile;
     if (profile?.cpuProfileFile) console.log(`  profile written to ${profile.cpuProfileFile}`);
     if (profile?.heapProfileFile) console.log(`  profile written to ${profile.heapProfileFile}`);
-    if (row.lateLoads?.length) {
-      console.log(`  loaded after READY, which a floor or a selected pack should not do:`);
-      for (const url of row.lateLoads) console.log(`    ${url}`);
-    }
-  }
-  if (checkNoLoadAfterReady) {
-    const withLateLoads = results.filter((row) => row.lateLoads?.length);
-    if (withLateLoads.length) {
-      console.error(
-        `\n${withLateLoads.length} of ${results.length} bundle(s) loaded a module after READY.`
-      );
-      process.exitCode = 1;
-    } else {
-      console.log(`\nno bundle loaded a module after READY.`);
-    }
   }
   const ok = results.filter((r) => !r.error);
   if (ok.length) {

@@ -8,6 +8,7 @@
  */
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { getConnectorSpec } from '@kbn/connector-specs';
 import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
 import { ExecutionError } from '@kbn/workflows/server';
 import { ActionsResponseContentLengthLimitError } from './actions_response_content_length_limit_error';
@@ -15,7 +16,6 @@ import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
-import { isSpecConnectorStepType } from '../lib/is_spec_connector_step_type';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -28,6 +28,14 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  * add it here and implement the limit in that connector's Actions executor.
  */
 const CONNECTOR_TYPES_WITH_LAYER_1 = new Set<string>(['http']);
+
+/**
+ * Whether `stepType` is one of the stock, spec-defined Kibana connector types (slack, jira,
+ * webhook, ...): shapes the request Layer 1/2 size enforcement uses below, since spec-based
+ * connectors take `fetchOptions` where the HTTP system connector takes `fetcher`.
+ */
+const isSpecConnectorStepType = (stepType: string): boolean =>
+  getConnectorSpec(`.${stepType}`) !== undefined;
 
 // Axios internal error message format — no typed error code is exposed for this case,
 // so regex matching is the only reliable detection method.

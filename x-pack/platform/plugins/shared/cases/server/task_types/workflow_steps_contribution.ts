@@ -69,6 +69,10 @@ export const contribution: WorkflowStepsContribution = {
   declares: {
     savedObjectTypes: getCasesTaskProcessSavedObjectTypes(),
     settings: ['cases'],
+    // `register` below reads the rule registry's alerts client (`ruleRegistry`, for RAC-backed cases
+    // steps) and, when spaces is enabled, the spaces service (`spaces`, for the space-scoped cases
+    // client): both are services another pack provides, not this one.
+    requires: ['ruleRegistry', 'spaces'],
     // Every `cases.*` step type `register` below can register: `casesStepRegistry` (./registry.ts)
     // plus the three it adds on top (`createCaseFromTemplate` always, `setExtendedFields` and
     // `addAttachments` each behind their own flag). Lets `resolvePacksForDefinition` select this

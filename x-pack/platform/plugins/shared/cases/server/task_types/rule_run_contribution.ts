@@ -21,6 +21,7 @@ const kibanaOnly = (what: string) => () => {
  * Executing the connector is Kibana's job, so the services it would use throw here.
  */
 export const contribution: RuleRunContribution = {
+  declares: { registersConnectorTypes: true },
   register: ({ actions, alerting }, { logger, settings }) => {
     const cases = settings.cases as CasesTaskProcessSettings | undefined;
     if (!cases) return;

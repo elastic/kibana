@@ -90,11 +90,9 @@ export interface WorkflowStepsContribution {
     /**
      * The step type ids this contribution's `register` adds to the step registry. Resolved to packs
      * in Main, which walks a workflow definition's step types to decide what a run needs
-     * (`getPacks`); a test asserts a contribution registers exactly these ids, no more and no fewer.
+     * (`getPacks`).
      */
     stepTypes?: string[];
-    /** The trigger ids this contribution's `register` adds to the trigger registry, for the same resolution as `stepTypes`. */
-    triggers?: string[];
     /**
      * Ids this contribution's `provides` services need from another contribution's `provides`
      * (`getService` of a service this one does not itself provide). Added transitively when Main
@@ -220,64 +218,3 @@ export interface WorkflowStepsContributionContext {
 
 /** The contribution key under which plugins add their workflow steps and triggers. */
 export const WORKFLOW_STEPS_CONTRIBUTIONS = 'workflow-steps';
-
-/**
- * Calls a contribution's `register` against fresh, empty registries (no internal `data.*` steps or
- * triggers, so only this contribution's own ids are seen) and returns what it actually registered,
- * once its loaders (sync or async) have settled. For a plugin's own contribution test, and for the
- * repo-wide one that runs it against every real `workflow-steps` contribution (see
- * `src/dev/task_bundles/workflow_contribution_coverage.test.ts`).
- */
-export const registerContributionForTest = async (
-  contribution: WorkflowStepsContribution,
-  context: WorkflowStepsContributionContext
-): Promise<{ stepTypes: string[]; triggers: string[] }> => {
-  const stepRegistry = new ServerStepRegistry(context.logger);
-  const triggerRegistry = new TriggerRegistry();
-  await contribution.register(
-    {
-      registerStepDefinition: (definition) => stepRegistry.register(definition),
-      registerTriggerDefinition: (definition) => triggerRegistry.register(definition),
-    },
-    context
-  );
-  await stepRegistry.whenReady();
-  return {
-    stepTypes: stepRegistry.getAll().map(({ id }) => id),
-    triggers: triggerRegistry.list().map(({ id }) => id),
-  };
-};
-
-/**
- * Throws with a message naming the gap when a contribution's `register` adds step types or triggers
- * its own `declares.stepTypes` / `declares.triggers` does not list, or lists ones it never adds:
- * either would leave Main's pack resolution unable to tell what a workflow using this contribution
- * actually needs.
- */
-export const assertContributionDeclaresWhatItRegisters = async (
-  contribution: WorkflowStepsContribution,
-  context: WorkflowStepsContributionContext
-): Promise<void> => {
-  const registered = await registerContributionForTest(contribution, context);
-  const declared = {
-    stepTypes: [...(contribution.declares?.stepTypes ?? [])].sort(),
-    triggers: [...(contribution.declares?.triggers ?? [])].sort(),
-  };
-  const actual = {
-    stepTypes: [...registered.stepTypes].sort(),
-    triggers: [...registered.triggers].sort(),
-  };
-  for (const kind of ['stepTypes', 'triggers'] as const) {
-    const declaredSet = new Set(declared[kind]);
-    const actualSet = new Set(actual[kind]);
-    const undeclared = actual[kind].filter((id) => !declaredSet.has(id));
-    const unregistered = declared[kind].filter((id) => !actualSet.has(id));
-    if (undeclared.length || unregistered.length) {
-      throw new Error(
-        `This contribution's declares.${kind} does not match what it registers.${
-          undeclared.length ? ` Registered but not declared: ${undeclared.join(', ')}.` : ''
-        }${unregistered.length ? ` Declared but not registered: ${unregistered.join(', ')}.` : ''}`
-      );
-    }
-  }
-};

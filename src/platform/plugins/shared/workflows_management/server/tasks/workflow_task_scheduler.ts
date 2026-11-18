@@ -8,17 +8,42 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { calculateNextRunAtFromSchedule } from '@kbn/task-manager-plugin/server';
-import type { EsWorkflow } from '@kbn/workflows';
+import {
+  calculateNextRunAtFromSchedule,
+  type TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { EsWorkflow, WorkflowYaml } from '@kbn/workflows';
+import {
+  resolveWorkflowTaskPacks,
+  WORKFLOW_SCHEDULED_TASK_TYPE,
+} from '@kbn/workflows-execution-engine/server';
 import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_utils';
 import type { WorkflowTrigger } from '../lib/schedule_utils';
 import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
 import type { WorkflowManagementTaskManager } from '../runtime/dependencies';
 
+/**
+ * `getTaskBundlePacks` is not part of the shared `WorkflowManagementTaskManager` Kibana-side
+ * contract (a worker process's own, reduced `HostTaskManager` is also assigned to that type and
+ * does not have it); it is only ever available from the real `TaskManagerStartContract` the
+ * scheduler is constructed with, so it is added here, optionally, just for pack resolution.
+ */
+type SchedulerTaskManager = WorkflowManagementTaskManager &
+  Partial<Pick<TaskManagerStartContract, 'getTaskBundlePacks'>>;
+
 const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
 
 const getScheduledWorkflowTaskId = (workflowId: string) => `workflow:${workflowId}:scheduled`;
+
+/** Order-independent equality, for comparing a persisted pack selection with a freshly resolved one. */
+const packsAreEqual = (a: string[] | undefined, b: string[] | undefined): boolean => {
+  if (a === undefined || b === undefined) return a === b;
+  if (a.length !== b.length) return false;
+  const sortedA = [...a].sort();
+  const sortedB = [...b].sort();
+  return sortedA.every((id, index) => id === sortedB[index]);
+};
 
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
@@ -29,7 +54,7 @@ export interface WorkflowTaskSchedulerParams {
 export class WorkflowTaskScheduler {
   constructor(
     private readonly logger: Logger,
-    private readonly taskManager: WorkflowManagementTaskManager
+    private readonly taskManager: SchedulerTaskManager
   ) {}
 
   /**
@@ -46,7 +71,13 @@ export class WorkflowTaskScheduler {
 
     for (const trigger of scheduledTriggers) {
       try {
-        const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger, request);
+        const taskId = await this.scheduleWorkflowTask(
+          workflow.id,
+          spaceId,
+          trigger,
+          request,
+          workflow.definition
+        );
         scheduledTaskIds.push(taskId);
         this.logger.debug(
           `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.type}, task ID: ${taskId}`
@@ -65,17 +96,26 @@ export class WorkflowTaskScheduler {
   /**
    * Schedules a single workflow task for a specific trigger.
    * Idempotent: if the task already exists (409 conflict), updates the schedule in place
-   * via bulkUpdateSchedules instead of failing. If Task Manager skips the update, recreates
-   * the deterministic task with the latest schedule and execution credentials.
+   * via bulkUpdateSchedules instead of failing. `bulkUpdateSchedules` only ever touches
+   * `schedule`, not `params`, so a definition update that changes which packs the run needs
+   * (a step type added or removed) is only picked up by recreating the task: the in-place
+   * path below is also taken whenever the freshly resolved pack selection differs from what the
+   * existing task already has persisted, not only when Task Manager itself skips the update.
    */
   async scheduleWorkflowTask(
     workflowId: string,
     spaceId: string,
     trigger: WorkflowTrigger,
-    request: KibanaRequest
+    request: KibanaRequest,
+    definition?: WorkflowYaml
   ): Promise<string> {
     const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
     const taskId = `workflow:${workflowId}:${trigger.type}`;
+    const packs = resolveWorkflowTaskPacks(
+      this.taskManager,
+      WORKFLOW_SCHEDULED_TASK_TYPE,
+      definition
+    );
 
     // Log RRule-specific scheduling details
     if ('rrule' in schedule && schedule.rrule) {
@@ -89,12 +129,13 @@ export class WorkflowTaskScheduler {
 
     const taskInstance = {
       id: taskId,
-      taskType: 'workflow:scheduled',
+      taskType: WORKFLOW_SCHEDULED_TASK_TYPE,
       schedule,
       params: {
         workflowId,
         spaceId,
         triggerType: trigger.type,
+        ...(packs ? { packs } : {}),
       },
       state: {
         lastRunAt: null,
@@ -131,16 +172,19 @@ export class WorkflowTaskScheduler {
             );
           }
         }
+        const existingTask = await this.taskManager.get(taskId).catch((error) => {
+          if ((error as { statusCode?: number }).statusCode === NOT_FOUND_STATUS) {
+            return undefined;
+          }
+          throw error;
+        });
+        const existingPacks = (existingTask?.params as { packs?: string[] } | undefined)?.packs;
         // Task Manager intentionally skips running tasks when updating schedules, and skipped tasks
-        // are not returned in either `tasks` or `errors`. Recreate the deterministic workflow task
-        // so it picks up the latest schedule interval and refreshed execution credentials.
-        if (!result.tasks.some((task) => task.id === taskId)) {
-          const existingTask = await this.taskManager.get(taskId).catch((error) => {
-            if ((error as { statusCode?: number }).statusCode === NOT_FOUND_STATUS) {
-              return undefined;
-            }
-            throw error;
-          });
+        // are not returned in either `tasks` or `errors`; recreate in that case to pick up the
+        // latest schedule interval and refreshed execution credentials, and also whenever this
+        // definition now resolves to a different pack selection than what the task already has.
+        const skippedBySchedulesUpdate = !result.tasks.some((task) => task.id === taskId);
+        if (skippedBySchedulesUpdate || !packsAreEqual(existingPacks, packs)) {
           const recreatedTaskInstance = existingTask
             ? {
                 ...taskInstance,
@@ -156,7 +200,9 @@ export class WorkflowTaskScheduler {
           await this.taskManager.removeIfExists(taskId);
           const scheduledTask = await this.taskManager.schedule(recreatedTaskInstance, { request });
           this.logger.debug(
-            `Recreated scheduled task for workflow ${workflowId} after in-place update was skipped`
+            skippedBySchedulesUpdate
+              ? `Recreated scheduled task for workflow ${workflowId} after in-place update was skipped`
+              : `Recreated scheduled task for workflow ${workflowId} to refresh its pack selection`
           );
           return scheduledTask.id;
         }

@@ -35,7 +35,7 @@ export const scheduleWorkflowTriggers = async (params: {
   const scheduledTriggers = definition.triggers.filter((t) => t.type === 'scheduled');
   const results = await Promise.allSettled(
     scheduledTriggers.map((trigger) =>
-      taskScheduler.scheduleWorkflowTask(workflowId, spaceId, trigger, request)
+      taskScheduler.scheduleWorkflowTask(workflowId, spaceId, trigger, request, definition)
     )
   );
   results.forEach((result) => {

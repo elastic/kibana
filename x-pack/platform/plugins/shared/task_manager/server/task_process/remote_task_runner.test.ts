@@ -285,6 +285,96 @@ describe('RemoteTaskRunner dispatch', () => {
     expect(onTasksCreated).toHaveBeenCalledWith(2);
   });
 
+  it('retries once with every pack when a worker dispatched with a narrowed selection declines', async () => {
+    const dispatchedBodies: Array<{ snapshot?: TaskProcessDispatchSnapshot }> = [];
+    const fetchFn = jest.fn(
+      async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+        if (String(input).endsWith(TASK_PROCESS_PATHS.run)) {
+          dispatchedBodies.push(JSON.parse(String(init?.body)));
+          if (dispatchedBodies.length === 1) {
+            return new Response(
+              JSON.stringify({
+                kind: 'declined',
+                createdTaskCount: 0,
+                reason: 'The task process lacks connectorTypes [.slack2]',
+              }),
+              { status: 422 }
+            );
+          }
+        }
+        return new Response(
+          JSON.stringify({ kind: 'result', result: { state: {} }, reusable: true })
+        );
+      }
+    );
+    const snapshot: TaskProcessDispatchSnapshot = {
+      protocolVersion: TASK_PROCESS_PROTOCOL_VERSION,
+      init: {
+        kibanaVersion: '9.9.9',
+        elasticsearch: elasticsearchConfigFromEnv({
+          ES_URL: 'http://es:9200',
+          ES_USERNAME: 'test',
+          ES_PASSWORD: 'test',
+        }),
+        packs: ['workflow-steps:slack'],
+      },
+    };
+    const { runner, onDispatchFailure } = create(fetchFn, {
+      request: { ...request, snapshot },
+    });
+
+    const result = await runner.run();
+
+    expect(result).toEqual({ state: {} });
+    expect(dispatchedBodies).toHaveLength(2);
+    expect(dispatchedBodies[0].snapshot?.init.packs).toEqual(['workflow-steps:slack']);
+    expect(dispatchedBodies[1].snapshot?.init.packs).toBeUndefined();
+    // The declined attempt is still reported, so Main's incomplete pack resolution is visible.
+    expect(onDispatchFailure).toHaveBeenCalledWith(
+      'alerting:test',
+      'declined',
+      expect.stringContaining('lacks connectorTypes [.slack2]')
+    );
+    expect(onDispatchFailure).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry a decline when the worker already had every pack (no narrowed selection)', async () => {
+    const fetchFn = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 422,
+      json: async () => ({
+        kind: 'declined',
+        createdTaskCount: 0,
+        reason: 'The task process lacks connectorTypes [.x]',
+      }),
+    });
+    const { runner, onDispatchFailure } = create(fetchFn, {
+      request: {
+        ...request,
+        snapshot: {
+          protocolVersion: TASK_PROCESS_PROTOCOL_VERSION,
+          init: {
+            kibanaVersion: '9.9.9',
+            elasticsearch: elasticsearchConfigFromEnv({
+              ES_URL: 'http://es:9200',
+              ES_USERNAME: 'test',
+              ES_PASSWORD: 'test',
+            }),
+          },
+        } as TaskProcessDispatchSnapshot,
+      },
+    });
+
+    const error = await runner.run().catch((failure: Error) => failure);
+
+    expect(isDeclinedRunError(error)).toBe(true);
+    const runCalls = fetchFn.mock.calls.filter(([input]) =>
+      String(input).endsWith(TASK_PROCESS_PATHS.run)
+    );
+    expect(runCalls).toHaveLength(1);
+    expect(onDispatchFailure).toHaveBeenCalledTimes(1);
+  });
+
   it('reports receiver-side flag incompatibility as a permanent dispatch failure', async () => {
     const fetchFn = jest.fn().mockResolvedValue({
       ok: false,

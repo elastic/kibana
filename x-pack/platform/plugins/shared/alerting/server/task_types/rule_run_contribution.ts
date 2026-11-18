@@ -67,6 +67,13 @@ export interface RuleRunContribution {
      * The same flags go in `featureFlags` of the opt-in the plugin registers with Kibana.
      */
     featureFlags?: Record<string, boolean | string | number>;
+    /**
+     * Whether `register` calls `actions.registerType` or `actions.registerSubActionConnectorType`.
+     * Read into the pack manifest (`TaskBundlePackManifest.registersConnectorTypes`) so a worker
+     * narrowed to a resolved pack selection still loads whichever packs a workflow's connector
+     * steps need, without the resolver having to know each connector type by name.
+     */
+    registersConnectorTypes?: boolean;
   };
   /**
    * The workflows client of a request, which a rule run uses to send `alert.status.changed` events

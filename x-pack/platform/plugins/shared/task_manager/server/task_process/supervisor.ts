@@ -31,18 +31,21 @@ import type { TaskProcessInit, TaskProcessReady } from './wire';
 
 /**
  * One pack in a bundle's manifest: what it declares (for a workflow step contribution, the step
- * types and triggers it registers, and the pack ids it requires), read by a task type's own plugin
- * to resolve what a specific run needs (`TaskTypeRegistrationOptions.getPacks`).
+ * types it registers, and the pack ids it requires), read by a task type's own plugin to resolve
+ * what a specific run needs (`TaskTypeRegistrationOptions.getPacks`).
  */
 export interface TaskBundlePackManifest {
   id: string;
   stepTypes?: string[];
-  triggers?: string[];
   requires?: string[];
+  /**
+   * Whether this pack registers one or more connector types (`actions.registerType` or
+   * `actions.registerSubActionConnectorType`). A workflow step this manifest's `stepTypes` do not
+   * cover is assumed to be a connector step and selects every pack with this flag set.
+   */
+  registersConnectorTypes?: boolean;
   /** The service ids this pack's `provides` offers, which another pack's `requires` may name. */
   provides?: string[];
-  dependsOn?: string[];
-  bytes?: number;
 }
 
 /** `manifest.json` of a task bundle directory: which task types each bundle serves. */
@@ -220,6 +223,11 @@ export class TaskProcessSupervisor {
       max: this.params.settings.maxConcurrentProcesses,
       ...this.stats,
     };
+  }
+
+  /** The OS pids of every process this supervisor currently has live (idle or held by a run). */
+  public getProcessPids(): number[] {
+    return [...this.children].flatMap((child) => (child.pid ? [child.pid] : []));
   }
 
   /**

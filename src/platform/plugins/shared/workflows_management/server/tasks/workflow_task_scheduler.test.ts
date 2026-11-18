@@ -13,6 +13,7 @@ import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { TaskBundlePackManifest } from '@kbn/task-manager-plugin/server/task_process/supervisor';
 import type { EsWorkflow } from '@kbn/workflows';
 import { WorkflowTaskScheduler } from './workflow_task_scheduler';
 
@@ -352,6 +353,84 @@ describe('WorkflowTaskScheduler', () => {
       await expect(
         scheduler.scheduleWorkflowTasks(makeWorkflow(), 'default', mockRequest)
       ).rejects.toThrow('Failed to update schedule for workflow task');
+    });
+  });
+
+  describe('scheduleWorkflowTask — pack resolution', () => {
+    const slackPack: TaskBundlePackManifest = {
+      id: 'workflow-steps:slack',
+      stepTypes: ['slack'],
+    };
+
+    it('persists the resolved pack selection on the task params when freshly scheduled', async () => {
+      const mockTm = makeMockTaskManager({
+        getTaskBundlePacks: jest.fn().mockReturnValue([slackPack]),
+      });
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+      const workflow = makeWorkflow({
+        definition: {
+          triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+          steps: [{ name: 'sendSlack', type: 'slack', connectorId: 'slack', with: {} }],
+          name: 'Test Workflow',
+          enabled: false,
+          version: '1',
+        },
+      });
+
+      await scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest);
+
+      expect(mockTm.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            packs: expect.arrayContaining([
+              'workflow-steps:slack',
+              expect.stringContaining('task-scheduling:'),
+            ]),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('recreates an existing task when the resolved pack selection changed, even if bulkUpdateSchedules updated it', async () => {
+      const conflictError = new Error('Conflict') as Error & { statusCode: number };
+      conflictError.statusCode = 409;
+      const mockTm = makeMockTaskManager({
+        getTaskBundlePacks: jest.fn().mockReturnValue([slackPack]),
+      });
+      mockTm.schedule
+        .mockRejectedValueOnce(conflictError)
+        .mockResolvedValueOnce(makeTaskInstance('workflow:test-workflow:scheduled'));
+      // The existing task was scheduled before the slack step was added: its persisted packs are
+      // just the task-scheduling pack, not the now-required slack one.
+      mockTm.get.mockResolvedValueOnce(
+        makeTaskInstance('workflow:test-workflow:scheduled', {
+          params: { packs: ['task-scheduling:some/path.ts'] },
+        } as never)
+      );
+      mockTm.bulkUpdateSchedules.mockResolvedValueOnce({
+        tasks: [makeTaskInstance('workflow:test-workflow:scheduled')],
+        errors: [],
+      });
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+      const workflow = makeWorkflow({
+        definition: {
+          triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+          steps: [{ name: 'sendSlack', type: 'slack', connectorId: 'slack', with: {} }],
+          name: 'Test Workflow',
+          enabled: false,
+          version: '1',
+        },
+      });
+
+      const result = await scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest);
+
+      expect(result).toEqual(['workflow:test-workflow:scheduled']);
+      expect(mockTm.removeIfExists).toHaveBeenCalledWith('workflow:test-workflow:scheduled');
+      expect(mockTm.schedule).toHaveBeenCalledTimes(2);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('refresh its pack selection')
+      );
     });
   });
 

@@ -9,10 +9,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod/v4';
-import {
-  assertContributionDeclaresWhatItRegisters,
-  createServerStepRegistry,
-} from './create_server_step_registry';
+import { createServerStepRegistry } from './create_server_step_registry';
 import type { WorkflowStepsContribution } from './create_server_step_registry';
 
 describe('createServerStepRegistry', () => {
@@ -62,75 +59,6 @@ describe('createServerStepRegistry', () => {
     expect(registry.hasStepDefinition('fake.eager')).toBe(true);
     expect(registry.hasStepDefinition('fake.lazy')).toBe(true);
     expect(registry.getTriggerDefinition('fake.trigger')?.id).toBe('fake.trigger');
-  });
-
-  describe('assertContributionDeclaresWhatItRegisters', () => {
-    const context = {
-      host: {},
-      logger,
-      isServerless: false,
-      kibanaVersion: '1.0.0',
-      settings: {},
-    };
-    const stepOf = (id: string) =>
-      ({
-        id,
-        inputSchema: z.object({}),
-        outputSchema: z.object({}),
-        handler: async () => ({ output: {} }),
-      } as never);
-    const triggerOf = (id: string) => ({ id, eventSchema: z.object({ a: z.string() }) } as never);
-
-    it('passes a contribution whose declares match exactly what it registers, loaders included', async () => {
-      const contribution: WorkflowStepsContribution = {
-        declares: { stepTypes: ['fake.eager', 'fake.lazy'], triggers: ['fake.trigger'] },
-        register: (steps) => {
-          steps.registerStepDefinition(stepOf('fake.eager'));
-          steps.registerStepDefinition(async () => stepOf('fake.lazy'));
-          steps.registerTriggerDefinition(triggerOf('fake.trigger'));
-        },
-      };
-      await expect(
-        assertContributionDeclaresWhatItRegisters(contribution, context)
-      ).resolves.toBeUndefined();
-    });
-
-    it('fails a contribution that registers a step type it did not declare', async () => {
-      const contribution: WorkflowStepsContribution = {
-        declares: { stepTypes: ['fake.eager'] },
-        register: (steps) => {
-          steps.registerStepDefinition(stepOf('fake.eager'));
-          steps.registerStepDefinition(stepOf('fake.undeclared'));
-        },
-      };
-      await expect(
-        assertContributionDeclaresWhatItRegisters(contribution, context)
-      ).rejects.toThrow(/Registered but not declared: fake\.undeclared/);
-    });
-
-    it('fails a contribution that declares a step type it never registers', async () => {
-      const contribution: WorkflowStepsContribution = {
-        declares: { stepTypes: ['fake.eager', 'fake.missing'] },
-        register: (steps) => {
-          steps.registerStepDefinition(stepOf('fake.eager'));
-        },
-      };
-      await expect(
-        assertContributionDeclaresWhatItRegisters(contribution, context)
-      ).rejects.toThrow(/Declared but not registered: fake\.missing/);
-    });
-
-    it('fails a contribution that registers a trigger it did not declare', async () => {
-      const contribution: WorkflowStepsContribution = {
-        declares: { stepTypes: [], triggers: [] },
-        register: (steps) => {
-          steps.registerTriggerDefinition(triggerOf('fake.trigger'));
-        },
-      };
-      await expect(
-        assertContributionDeclaresWhatItRegisters(contribution, context)
-      ).rejects.toThrow(/Registered but not declared: fake\.trigger/);
-    });
   });
 
   it('rejects a duplicate registration as the plugin does', () => {

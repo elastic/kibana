@@ -86,6 +86,35 @@ describe('resolvePacksForDefinition', () => {
     );
   });
 
+  it('selects every pack under a contribution key a requires entry names, not just one', () => {
+    const definition = {
+      steps: [{ name: 'runAgent', type: 'ai.agent', with: {} }],
+    } as unknown as WorkflowYaml;
+    const packs = [
+      packOf('workflow-steps:ai-agent', { stepTypes: ['ai.agent'], requires: ['agent-builder'] }),
+      packOf('agent-builder:cases', {}),
+      packOf('agent-builder:observability', {}),
+      packOf('workflow-steps:unrelated', { stepTypes: ['unrelated'] }),
+    ];
+    expect(new Set(resolvePacksForDefinition(definition, packs))).toEqual(
+      new Set(['workflow-steps:ai-agent', 'agent-builder:cases', 'agent-builder:observability'])
+    );
+  });
+
+  it('prefers a specific provides match over a same-named contribution key, when both exist', () => {
+    const definition = {
+      steps: [{ name: 'sendSlack', type: 'slack', connectorId: 'slack', with: {} }],
+    } as unknown as WorkflowYaml;
+    const packs = [
+      packOf('workflow-steps:slack', { stepTypes: ['slack'], requires: ['spaces'] }),
+      packOf('workflow-steps:spaces-runtime', { provides: ['spaces'] }),
+      packOf('spaces:unrelated', {}),
+    ];
+    expect(new Set(resolvePacksForDefinition(definition, packs))).toEqual(
+      new Set(['workflow-steps:slack', 'workflow-steps:spaces-runtime'])
+    );
+  });
+
   it('does not loop forever on a requires cycle between two packs', () => {
     const definition = {
       steps: [{ name: 'sendSlack', type: 'slack', connectorId: 'slack', with: {} }],
@@ -99,57 +128,59 @@ describe('resolvePacksForDefinition', () => {
     );
   });
 
-  it('returns undefined (not []) for an atomic step type no pack declares, with an empty pack list', () => {
+  it('returns [] for an atomic connector step type when no pack registers connector types', () => {
     const definition = {
       steps: [{ name: 'sendSlack', type: 'slack', connectorId: 'slack', with: {} }],
     } as unknown as WorkflowYaml;
-    expect(resolvePacksForDefinition(definition, [])).toBeUndefined();
+    expect(resolvePacksForDefinition(definition, [])).toEqual([]);
   });
 
-  it('returns undefined (not []) when one atomic step type is uncovered, even if another is', () => {
+  it('selects every pack flagged registersConnectorTypes for a step type no pack declares', () => {
+    const definition = {
+      steps: [{ name: 'sendSlack', type: 'slack', connectorId: 'slack', with: {} }],
+    } as unknown as WorkflowYaml;
+    const packs = [
+      packOf('alerting-rule-run:stack-connectors', { registersConnectorTypes: true }),
+      packOf('alerting-rule-run:cases', { registersConnectorTypes: true }),
+      packOf('workflow-steps:unrelated', { stepTypes: ['unrelated'] }),
+    ];
+    expect(new Set(resolvePacksForDefinition(definition, packs))).toEqual(
+      new Set(['alerting-rule-run:stack-connectors', 'alerting-rule-run:cases'])
+    );
+  });
+
+  it('does not select connector packs when every step type is already pack-declared', () => {
+    const definition = {
+      steps: [{ name: 'sendSlack', type: 'slack', connectorId: 'slack', with: {} }],
+    } as unknown as WorkflowYaml;
+    const packs = [
+      packOf('workflow-steps:slack', { stepTypes: ['slack'] }),
+      packOf('alerting-rule-run:stack-connectors', { registersConnectorTypes: true }),
+    ];
+    expect(resolvePacksForDefinition(definition, packs)).toEqual(['workflow-steps:slack']);
+  });
+
+  it('selects both the declaring pack and the connector packs when steps need both', () => {
     const definition = {
       steps: [
-        { name: 'sendSlack', type: 'slack', connectorId: 'slack', with: {} },
         { name: 'runAgent', type: 'agent.run', with: {} },
+        { name: 'sendSlack', type: 'slack', connectorId: 'slack', with: {} },
       ],
     } as unknown as WorkflowYaml;
-    const packs = [packOf('workflow-steps:slack', { stepTypes: ['slack'] })];
-    // `agent.run` is atomic and not declared by any pack: this function cannot tell whether that
-    // is a connector, or a custom step whose contribution has not been annotated yet, so it must
-    // not persist a `packs: ['workflow-steps:slack']` that silently drops `agent.run`.
-    expect(resolvePacksForDefinition(definition, packs)).toBeUndefined();
+    const packs = [
+      packOf('workflow-steps:agent', { stepTypes: ['agent.run'] }),
+      packOf('alerting-rule-run:stack-connectors', { registersConnectorTypes: true }),
+    ];
+    expect(new Set(resolvePacksForDefinition(definition, packs))).toEqual(
+      new Set(['workflow-steps:agent', 'alerting-rule-run:stack-connectors'])
+    );
   });
 
-  it('returns [] for a stock connector step type (a real @kbn/connector-specs id), no pack declares', () => {
-    const definition = {
-      // `.slack2` is `SLACK_CONNECTOR_TYPE_ID`, a real spec `@kbn/connector-specs` registers; its
-      // executor is the actions plugin's own, already in the floor, not a `workflow-steps` pack.
-      steps: [{ name: 'sendSlack', type: 'slack2', connectorId: 'slack', with: {} }],
-    } as unknown as WorkflowYaml;
-    expect(resolvePacksForDefinition(definition, [])).toEqual([]);
-  });
-
-  it('returns [] for a stock connector sub-action step type (connector id before the dot)', () => {
-    const definition = {
-      steps: [{ name: 'sendSlack', type: 'slack2.postMessage', connectorId: 'slack', with: {} }],
-    } as unknown as WorkflowYaml;
-    expect(resolvePacksForDefinition(definition, [])).toEqual([]);
-  });
-
-  it('returns [] for the hardcoded console log step type', () => {
+  it('returns [] for the hardcoded console log step type when no pack registers connector types', () => {
     const definition = {
       steps: [{ name: 'log', type: 'console', with: { message: 'hi' } }],
     } as unknown as WorkflowYaml;
     expect(resolvePacksForDefinition(definition, [])).toEqual([]);
-  });
-
-  it('still returns undefined for a step type that is neither pack-declared nor a stock connector', () => {
-    const definition = {
-      // Not a real `@kbn/connector-specs` id: either a custom step not yet annotated, or a
-      // system-connector step this function does not yet recognize, so it must fall back.
-      steps: [{ name: 'runAgent', type: 'agent.run', with: {} }],
-    } as unknown as WorkflowYaml;
-    expect(resolvePacksForDefinition(definition, [])).toBeUndefined();
   });
 
   it('returns [] for a definition whose only steps are non-atomic (control flow and built-ins)', () => {

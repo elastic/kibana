@@ -15,7 +15,7 @@ import type { WorkflowConnectorManagement } from '../connectors/workflows';
 
 /** Registers the system connector with the management API of the executing workflow. */
 export const contribution: RuleRunContribution = {
-  declares: { featureFlags: taskType.featureFlags },
+  declares: { featureFlags: taskType.featureFlags, registersConnectorTypes: true },
   executionServices: {
     ids: ['workflows.management', 'workflows.extensions'],
     requirements: taskType,

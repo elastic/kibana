@@ -60,6 +60,13 @@ export const contribution: WorkflowStepsContribution = {
     // these when `register` below does not return early (agent builder's run settings are on). Lets
     // `resolvePacksForDefinition` select this pack for a workflow that uses `ai.agent` or reads and
     // writes conversations and attachments, instead of falling back to a full load.
+    //
+    // `register` above also reads every plugin's `agent-builder` contribution
+    // (`host.contributions[AGENT_BUILDER_CONTRIBUTIONS_KEY]`) to build the process's own agent, tool
+    // and skill registries with parity to what Kibana registered: naming the whole `agent-builder`
+    // contribution key here (not a specific service) selects every one of those packs too, so `ai.agent`
+    // is never declined for a registration this pack alone does not carry.
+    requires: ['agent-builder'],
     stepTypes: [
       'ai.agent',
       'ai.attachment.add',

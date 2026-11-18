@@ -33,8 +33,18 @@ import type {
 import type { CancellableTask, RunContext } from './task';
 import type { HostTaskManager } from './task_process/host_capabilities/task_scheduling';
 import type { TaskProcessParity, TaskTypeParityHook } from './task_process/parity';
-import type { TaskTypePackSelector } from './task_process/packs';
 import type { TaskRegisterDefinition } from './task_type_dictionary';
+import type { ConcreteTaskInstance } from './task';
+
+/**
+ * Ids of the packs a run needs, read from the task instance it was scheduled with. Without a hook,
+ * or when a call returns `undefined` (the ids were not resolvable for this particular run), a task
+ * type gets every pack a worker's bundle declares, which is the pre-pack behavior. Returning `[]`
+ * is different from returning `undefined`: `[]` says the run needs no pack at all.
+ */
+export type TaskTypePackSelector = (
+  taskInstance: ConcreteTaskInstance
+) => string[] | undefined | Promise<string[] | undefined>;
 
 export interface TaskHostEventLog {
   // Method signatures, so the plugin's own `IEventLogService` is assignable.
@@ -152,12 +162,6 @@ export interface TaskHost {
   settings?: Record<string, unknown>;
   /** A task process only: what plugins contribute, by key, for the keys the module lists. */
   contributions?: Record<string, unknown[]>;
-  /**
-   * A task process only: the ids of the packs it actually loaded for this run (`init.packs`, or
-   * every pack its bundle declares when Main sent none). Read by `TaskTypeModule.requiredPacks` to
-   * decline a run the worker was not initialized for instead of running it without what it needs.
-   */
-  loadedPacks?: string[];
   /** A task process only: the `start` contracts of `taskPlugins`, by plugin id. */
   plugins?: Record<string, unknown>;
 }
@@ -268,13 +272,6 @@ export interface TaskTypeModule extends Omit<TaskRegisterDefinition, 'createTask
    * of behaving differently. Kibana ignores it.
    */
   parity?: TaskTypeParityHook[];
-  /**
-   * What a run needs from the packs a worker may have been initialized without: declining it is the
-   * same defense as `parity`, but for Main's own pack selection instead of another plugin's
-   * registrations. Without this a worker runs every assigned run with whatever packs it loaded,
-   * which is the pre-pack behavior.
-   */
-  requiredPacks?: TaskTypePackSelector;
   createTaskRunner: (context: RunContext, host: TaskHost) => CancellableTask;
 }
 
@@ -386,7 +383,6 @@ export const toTaskDefinition = (
     featureFlags,
     optionalSettings,
     parity,
-    requiredPacks,
     createTaskRunner,
     ...definition
   } = module;

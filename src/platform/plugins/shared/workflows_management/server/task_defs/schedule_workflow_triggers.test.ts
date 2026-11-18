@@ -51,7 +51,8 @@ describe('scheduleWorkflowTriggers', () => {
       'wf-1',
       'default',
       expect.objectContaining({ type: 'scheduled' }),
-      mockRequest
+      mockRequest,
+      baseDefinition
     );
   });
 

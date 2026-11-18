@@ -99,3 +99,10 @@ export type {
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
 } from './trigger_events/event_logs/trigger_event_log_query';
+
+export {
+  resolveWorkflowTaskPacks,
+  WORKFLOWS_TASK_SCHEDULING_PACK_ID,
+} from './lib/get_workflow_task_packs';
+export type { WorkflowTaskPacksTaskManager } from './lib/get_workflow_task_packs';
+export { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';

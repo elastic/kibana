@@ -402,104 +402,26 @@ const getContributionAnalysis = (metafile, contributionFiles) => {
 const packId = (key, absoluteFile) => `${key}:${path.relative(REPO_ROOT, absoluteFile)}`;
 
 /**
- * One pack per contribution file: its id, what it declares (`stepTypes`, `triggers`, `requires`,
- * when the contribution is a workflow step; read by Main to resolve a workflow definition to the
- * packs it needs), the chunk closure and bytes it pulls in standing alone, which other packs' own
- * chunks it reaches (so Task Manager can resolve a pack's dependencies before dispatching a run),
- * and any dynamic import inside its closure that is neither folded into its own closure nor the
- * root chunk of another declared pack, so the build can say so instead of silently dropping it at
- * run time.
+ * One pack per contribution file: its id and what it declares (`stepTypes`, `requires`,
+ * `registersConnectorTypes`, when the contribution is a workflow step or a rule-run connector
+ * registration; read by Main to resolve a workflow definition to the packs it needs).
  */
-const getPackManifest = (metafile, contributions, declarations = new Map()) => {
-  const outputs = Object.entries(metafile.outputs).map(([file, output]) => [
-    path.resolve(REPO_ROOT, file),
-    output,
-  ]);
-  const findRootFile = (absolute) =>
-    outputs.find(([, output]) =>
-      Object.keys(output.inputs ?? {}).includes(path.relative(REPO_ROOT, absolute))
-    )?.[0];
-  const entries = Object.entries(contributions).flatMap(([key, files]) =>
+const getPackManifest = (contributions, declarations = new Map()) =>
+  Object.entries(contributions).flatMap(([key, files]) =>
     files.map((file) => {
       const absolute = path.resolve(REPO_ROOT, file);
       const contribution = declarations.get(file);
       const declares = contribution?.declares ?? {};
       return {
         id: packId(key, absolute),
-        key,
         file: path.relative(REPO_ROOT, absolute),
-        rootFile: findRootFile(absolute),
         stepTypes: declares.stepTypes ?? [],
-        triggers: declares.triggers ?? [],
         requires: declares.requires ?? [],
+        ...(declares.registersConnectorTypes ? { registersConnectorTypes: true } : {}),
         provides: Object.keys(contribution?.provides ?? {}),
       };
     })
   );
-  const rootFileToPackIds = new Map();
-  for (const entry of entries) {
-    if (!entry.rootFile) continue;
-    rootFileToPackIds.set(entry.rootFile, [
-      ...(rootFileToPackIds.get(entry.rootFile) ?? []),
-      entry.id,
-    ]);
-  }
-  return entries.map((entry) => {
-    const declares = {
-      stepTypes: entry.stepTypes,
-      triggers: entry.triggers,
-      requires: entry.requires,
-      provides: entry.provides,
-    };
-    if (!entry.rootFile) {
-      return {
-        id: entry.id,
-        file: entry.file,
-        ...declares,
-        bytes: 0,
-        files: [],
-        dependsOn: [],
-        dynamicImports: [],
-      };
-    }
-    const loaded = new Set();
-    const dependsOn = new Set();
-    const dynamicImports = new Set();
-    const visit = (file, isOwnRoot) => {
-      if (loaded.has(file)) return;
-      const output = metafile.outputs[path.relative(REPO_ROOT, file)];
-      if (!output) return;
-      loaded.add(file);
-      if (!isOwnRoot) {
-        for (const otherId of rootFileToPackIds.get(file) ?? []) {
-          if (otherId !== entry.id) dependsOn.add(otherId);
-        }
-      }
-      for (const dependency of output.imports) {
-        if (dependency.external) continue;
-        const depPath = path.resolve(REPO_ROOT, dependency.path);
-        if (dependency.kind === 'dynamic-import') {
-          if (!(rootFileToPackIds.get(depPath) ?? []).length) {
-            dynamicImports.add(path.relative(REPO_ROOT, depPath));
-          }
-          continue;
-        }
-        visit(depPath, false);
-      }
-    };
-    visit(entry.rootFile, true);
-    const files = [...loaded].filter((file) => file.endsWith('.mjs'));
-    return {
-      id: entry.id,
-      file: entry.file,
-      ...declares,
-      bytes: files.reduce((total, file) => total + fs.statSync(file).size, 0),
-      files: files.map((file) => path.relative(REPO_ROOT, file)),
-      dependsOn: [...dependsOn],
-      dynamicImports: [...dynamicImports],
-    };
-  });
-};
 
 /** Lists the complete reachable code and source maps belonging to one native task entry. */
 const getBundleOutputs = (metafile, outfile) => {
@@ -617,7 +539,6 @@ const buildTaskBundles = async ({
         `runtime.runTaskProcess(taskModule.taskType, {`,
         `  ...initialization,`,
         `  contributions,`,
-        `  loadedPacks: loadedPacks.map((pack) => pack.id),`,
         `});`,
       ].join('\n'),
     };
@@ -729,7 +650,7 @@ const buildTaskBundles = async ({
         ...getStartupAnalysis(result.metafile, outfile),
         contributions: contributionBytes,
       },
-      packs: getPackManifest(result.metafile, contributions, declarations),
+      packs: getPackManifest(contributions, declarations),
       packIds: packs.map(({ id }) => id),
       entry,
       featureFlags,

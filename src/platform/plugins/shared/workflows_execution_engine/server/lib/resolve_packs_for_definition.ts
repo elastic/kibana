@@ -10,7 +10,6 @@
 import type { TaskBundlePackManifest } from '@kbn/task-manager-plugin/server/task_process/supervisor';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { convertToWorkflowGraph, isAtomic } from '@kbn/workflows/graph';
-import { isSpecConnectorStepType } from './is_spec_connector_step_type';
 
 /**
  * Pack ids a workflow definition needs, read once (at schedule, resume creation, or a scheduled
@@ -26,32 +25,26 @@ import { isSpecConnectorStepType } from './is_spec_connector_step_type';
  * control-flow steps (`if`, `foreach`, `data.set`, `elasticsearch.*`, `kibana.*`, ...) never need
  * a pack and are not even considered here, the same split `collectWorkflowRequirements` uses for
  * the worker's own preflight check. Each atomic step type a pack declares (`declares.stepTypes`)
- * selects that pack; a selected pack's `declares.requires` then selects, transitively, whichever
- * other pack's `declares.provides` answers it.
+ * selects that pack.
  *
- * A step type not declared by any pack is skipped, not treated as uncovered, when it is a stock
- * connector step (`isFloorServedStepType`): its executor is the actions plugin's own, already in
- * the floor, not a pack. A workflow built entirely from stock connector and built-in steps
- * therefore resolves to `[]` (plus whatever `resolveWorkflowTaskPacks` unions in), not `undefined`.
+ * Any atomic step type no pack declares is assumed to be a connector step (stock or spec-based,
+ * `.slack`, `http`, `.slack2`, ...): it selects every pack flagged `registersConnectorTypes` in the
+ * manifest, instead of this function having to know each connector type by name. This trades a
+ * precise "uncovered step type" check for simplicity: a custom step whose contribution has not been
+ * annotated with `declares.stepTypes` is indistinguishable from a real connector step here, so it
+ * also pulls in the connector packs rather than falling back to every pack. That miss surfaces as a
+ * step failure mid-run, not a decline (see the PR's "known gaps").
  *
- * Returns `undefined`, not `[]`, when an atomic step type is neither declared by a pack nor a stock
- * connector step: a custom step whose contribution has not yet been annotated with
- * `declares.stepTypes`, or a system-connector step registered by a pack in a way this function does
- * not yet recognize (tracked separately from the stock-connector case above, since persisting `[]`
- * for a step this function cannot actually place would ask a worker to load zero packs for a step
- * it cannot serve). `[]` is reserved for a definition this function is certain needs nothing beyond
- * the floor.
+ * A selected pack's `declares.requires` then selects, transitively, whichever other pack's
+ * `declares.provides` answers it. A `requires` entry that instead names a whole contribution key
+ * (the part of a pack id before its first `:`, e.g. `agent-builder`) selects every pack under that
+ * key: `ai.agent` needs every plugin's `agent-builder` registrations loaded, not a single service,
+ * for its own-process registry to have parity with what Kibana registered.
  */
-const isFloorServedStepType = (stepType: string): boolean => {
-  // `connector_step.ts`'s own hardcoded log step, not a real connector; never pack-provided.
-  if (stepType === 'console') return true;
-  const [connectorType] = stepType.includes('.') ? stepType.split('.', 2) : [stepType];
-  return isSpecConnectorStepType(connectorType);
-};
 export const resolvePacksForDefinition = (
   definition: WorkflowYaml,
   packs: readonly TaskBundlePackManifest[]
-): string[] | undefined => {
+): string[] => {
   const graph = convertToWorkflowGraph(definition);
   const stepTypes = new Set(
     graph
@@ -65,28 +58,38 @@ export const resolvePacksForDefinition = (
   const packByStepType = new Map<string, string>();
   const packByProvides = new Map<string, string>();
   const packById = new Map<string, TaskBundlePackManifest>();
+  const packIdsByContributionKey = new Map<string, string[]>();
+  const connectorPackIds: string[] = [];
   for (const pack of packs) {
     packById.set(pack.id, pack);
     for (const stepType of pack.stepTypes ?? []) packByStepType.set(stepType, pack.id);
     for (const provided of pack.provides ?? []) packByProvides.set(provided, pack.id);
+    if (pack.registersConnectorTypes) connectorPackIds.push(pack.id);
+    const contributionKey = pack.id.slice(0, pack.id.indexOf(':'));
+    const group = packIdsByContributionKey.get(contributionKey);
+    if (group) group.push(pack.id);
+    else packIdsByContributionKey.set(contributionKey, [pack.id]);
   }
 
-  const uncovered = [...stepTypes].some(
-    (stepType) => !packByStepType.has(stepType) && !isFloorServedStepType(stepType)
-  );
-  if (uncovered) return undefined;
+  const needsConnectorPacks = [...stepTypes].some((stepType) => !packByStepType.has(stepType));
 
   const selected = new Set<string>();
   const queue = [...stepTypes]
     .map((stepType) => packByStepType.get(stepType))
     .filter((id): id is string => Boolean(id));
+  if (needsConnectorPacks) queue.push(...connectorPackIds);
   while (queue.length) {
     const id = queue.pop();
     if (id && !selected.has(id)) {
       selected.add(id);
       for (const required of packById.get(id)?.requires ?? []) {
         const requiredPackId = packByProvides.get(required);
-        if (requiredPackId && !selected.has(requiredPackId)) queue.push(requiredPackId);
+        const requiredPackIds = requiredPackId
+          ? [requiredPackId]
+          : packIdsByContributionKey.get(required) ?? [];
+        for (const requiredId of requiredPackIds) {
+          if (!selected.has(requiredId)) queue.push(requiredId);
+        }
       }
     }
   }

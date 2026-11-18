@@ -10,6 +10,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any, @kbn/eslint/require_kbn_fs */
 
 import type { Client } from '@elastic/elasticsearch';
+import { execFileSync } from 'child_process';
 import { cpSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from 'fs';
 import { createServer } from 'http';
 import type { IncomingHttpHeaders, Server } from 'http';
@@ -19,6 +20,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { fetch as undiciFetch } from 'undici';
 import { configSchema as actionsConfigSchema } from '@kbn/actions-plugin/server/config';
+import type { InMemoryConnector } from '@kbn/actions-plugin/server/types';
 import { configSchema as alertingConfigSchema } from '@kbn/alerting-plugin/server/config';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -218,6 +220,14 @@ export interface WorkflowProcessHarnessOptions {
   onMetrics?: TaskProcessDispatch['onMetrics'];
   executionContext?: TaskProcessInit['executionContext'];
   getCurrentTasksInPool?: TaskExecutionPool['getCurrentTasksInPool'];
+  /**
+   * The pack ids a worker is initialized with (`TaskProcessInit.packs`), as
+   * `resolveWorkflowTaskPacks` would resolve them for the workflow under test. `undefined` (the
+   * default) asks for every pack, the pre-pack behavior.
+   */
+  packs?: string[];
+  /** Connectors a run has without a saved object, such as a system connector a test registers. */
+  inMemoryConnectors?: InMemoryConnector[];
   additionalContributions?: Record<string, string[]>;
   featureFlags?: Record<string, boolean | string | number>;
   getFeatureFlags?: TaskProcessDispatch['getFeatureFlags'];
@@ -316,6 +326,16 @@ const getExecutionStorage = (options: Pick<WorkflowProcessHarnessOptions, 'setti
   return { engineConfig, executionsIndex, stepsIndex };
 };
 
+/** The live resident memory of a real OS process, in MB; `undefined` once the process has exited. */
+export const readProcessRssMb = (pid: number): number | undefined => {
+  try {
+    const kb = Number(execFileSync('ps', ['-o', 'rss=', '-p', String(pid)], { encoding: 'utf8' }));
+    return Number.isFinite(kb) ? kb / 1024 : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 /**
  * Real Elasticsearch, a stub of Kibana and the real `workflow:scheduled` bundle in a real task
  * process, with what Kibana would have installed (saved object and execution indices, data stream
@@ -364,7 +384,7 @@ const startHarness = async (
     inferenceFeatures: { features: [] },
     contextEngineManagedAiIndices: { registrations: [] },
     actions: actionsConfigSchema.validate({ allowedHosts: ['*'], enableFooterInEmail: false }),
-    actionsConnectors: { inMemoryConnectors: [] },
+    actionsConnectors: { inMemoryConnectors: options.inMemoryConnectors ?? [] },
     alerting: alertingConfigSchema.validate({}),
     ruleRegistry: ruleRegistryConfig.schema.validate({}),
     taskManager: createTaskManagerSettings(
@@ -408,6 +428,7 @@ const startHarness = async (
     },
     encryptedSavedObjects: { encryptionKey: ENCRYPTION_KEY, decryptionOnlyKeys: [] },
     ...(options.parity ? { parity: options.parity } : {}),
+    ...(options.packs ? { packs: options.packs } : {}),
     settings: Object.fromEntries(
       Object.entries(settings()).map(([id, config]) => [id, serializeSettings(config)])
     ) as never,
@@ -634,6 +655,7 @@ const startHarness = async (
   };
   let getRoute: TaskProcessSupervisor['getRoute'];
   let getWorkerStats: TaskProcessSupervisor['getStats'];
+  let getProcessPids: TaskProcessSupervisor['getProcessPids'];
   let collectGaugeMetrics: (owner?: string) => Promise<MetricResourceSnapshot[]>;
   if (options.mode === 'remote') {
     const worker = startTaskProcessWorker({
@@ -645,6 +667,7 @@ const startHarness = async (
     });
     cleanups.push(worker.stop);
     getWorkerStats = worker.getStats;
+    getProcessPids = () => worker.supervisor.getProcessPids();
     await new Promise<void>((resolve) => worker.server.once('listening', resolve));
     const address = worker.server.address();
     if (!address || typeof address === 'string')
@@ -662,6 +685,7 @@ const startHarness = async (
     cleanups.push(() => supervisor.stop());
     getRoute = (taskType) => supervisor.getRoute(taskType);
     getWorkerStats = () => supervisor.getStats();
+    getProcessPids = () => supervisor.getProcessPids();
     collectGaugeMetrics = (owner = options.serverUuid ?? KIBANA_UUID) =>
       supervisor.collectGaugeMetrics(owner);
   }
@@ -801,6 +825,35 @@ const startHarness = async (
   const stepsOf = (executionId: string): Promise<Document[]> =>
     findDocuments(stepsIndex, 'workflowRunId', executionId);
 
+  /**
+   * Runs `run(workflowId, ...)` and reads the RSS of the real OS process that served it, just after
+   * the process picks up the run (a real sample, not the ready/idle/afterRun bracket `bench.js` gets
+   * by owning the fork directly: the supervisor's pooling means this harness only sees a process once
+   * it is live) and again right after the run resolves.
+   */
+  const runMeasured = async (
+    ...args: Parameters<typeof run>
+  ): Promise<{
+    result: Awaited<ReturnType<typeof run>>;
+    pid: number | undefined;
+    startRssMb: number | undefined;
+    afterRunRssMb: number | undefined;
+  }> => {
+    const before = new Set(getProcessPids());
+    const resultPromise = run(...args);
+    let pid: number | undefined;
+    const deadline = Date.now() + 10000;
+    while (!pid && Date.now() < deadline) {
+      pid = getProcessPids().find((candidate) => !before.has(candidate));
+      if (!pid) await sleep(20);
+    }
+    const startRssMb = pid !== undefined ? readProcessRssMb(pid) : undefined;
+    const result = await resultPromise;
+    const servingPid = pid ?? getProcessPids()[0];
+    const afterRunRssMb = servingPid !== undefined ? readProcessRssMb(servingPid) : undefined;
+    return { result, pid: servingPid, startRssMb, afterRunRssMb };
+  };
+
   return {
     es,
     apiKey,
@@ -808,6 +861,8 @@ const startHarness = async (
     kibanaRequests,
     run,
     runTask,
+    runMeasured,
+    getProcessPids,
     waitForRunTask,
     getWorkerStats,
     collectGaugeMetrics,

@@ -11,6 +11,7 @@ import { STACK_CONNECTORS_TASK_PROCESS_SETTINGS_ID } from './constants';
 
 /** The connector types of this plugin, which every rule run may enqueue the actions of. */
 export const contribution: RuleRunContribution = {
+  declares: { registersConnectorTypes: true },
   register: ({ actions }, { publicBaseUrl, settings }) =>
     registerConnectorTypesForRuleRuns(actions, {
       publicBaseUrl,

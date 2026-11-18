@@ -56,7 +56,6 @@ import { getTaskProcessContext } from './context';
 import { createHostFeatureFlags } from './run_context';
 import { registerTaskAnalyticsEventTypes } from './host_capabilities/analytics';
 import { createParityGuard } from './parity';
-import { createPackGuard } from './packs';
 import type { TaskProcessTaskManagerSetup } from './task_manager_task_plugin';
 
 interface SetupDeps {
@@ -176,19 +175,12 @@ const plugin: TaskPluginInitializer<void, void, SetupDeps, StartDeps> = async (
         logger,
         taskType: module.type,
       });
-      // Before each run, the process checks the run itself needs no pack it did not load.
-      const packGuard = createPackGuard({
-        requiredPacks: module.requiredPacks,
-        logger,
-        taskType: module.type,
-      });
       deps.taskManager.registerTaskDefinitions({
         [module.type]: toTaskDefinition(
           module,
           () => hostPromise,
-          async (host, runContext) => {
+          async (host) => {
             await parityGuard(host);
-            await packGuard(runContext.taskInstance, host);
           }
         ),
       });
@@ -213,7 +205,6 @@ const plugin: TaskPluginInitializer<void, void, SetupDeps, StartDeps> = async (
         },
         logger,
         parity: init.parity,
-        loadedPacks: context.loadedPacks,
         elasticsearch: core.elasticsearch.client,
         savedObjects: core.savedObjects,
         executionContext: core.executionContext,
