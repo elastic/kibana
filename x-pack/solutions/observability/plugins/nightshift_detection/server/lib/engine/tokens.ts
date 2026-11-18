@@ -10,6 +10,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 
 /** What identifies one tick. */
 export interface RunContext {
+  /** The space the tick runs in; its run lock, state and signals are this space's. */
   spaceId: string;
   /** Unique per tick; reported back and stamped on what the run records. */
   runId: string;

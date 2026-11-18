@@ -221,6 +221,8 @@ export class EngineRunner {
           scheduledMinute,
         });
         if (wrapped.dropped) {
+          // Not an error, and the generator state still moves: the reading fails the signal
+          // schema, so reading the window again would drop it again.
           notes.push(wrapped.note);
           return [];
         }
