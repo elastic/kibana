@@ -145,14 +145,14 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         type: 'boolean',
         _meta: {
           description:
-            'Indicates if session cookies are set with the Secure attribute (configured explicitly, or enabled automatically because Kibana serves TLS).',
+            'Indicates if the Secure attribute is enabled by default for session cookies (configured explicitly, or enabled automatically because Kibana serves TLS). An authentication flow can still set the attribute on its own intermediate session cookie.',
         },
       },
       sessionCookieSameSite: {
         type: 'keyword',
         _meta: {
           description:
-            'The SameSite attribute configured for session cookies (`Strict`, `Lax` or `None`), or `not_configured` when the setting is not set.',
+            'The default SameSite attribute configured for session cookies (`Strict`, `Lax` or `None`), or `not_configured` when the setting is not set. An authentication flow can still override the attribute on its own intermediate session cookie.',
         },
       },
       sessionCookieNameCustomized: {
