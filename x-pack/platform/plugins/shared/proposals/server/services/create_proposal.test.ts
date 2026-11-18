@@ -16,11 +16,13 @@ const setup = ({
   isWorkflowsAvailable = true,
   assertCanManage = jest.fn().mockResolvedValue(undefined),
   findByWorkflowExecutionId = jest.fn().mockResolvedValue(proposal),
+  assertActionProposable = jest.fn().mockResolvedValue(undefined),
 } = {}) => {
   const executeWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
   const createDirectly = jest.fn().mockResolvedValue(proposal);
   const { create, assertAvailable } = createProposalCreator({
-    getProposalsService: () => ({ findByWorkflowExecutionId, create: createDirectly } as never),
+    getProposalsService: () =>
+      ({ findByWorkflowExecutionId, create: createDirectly, assertActionProposable } as never),
     getWorkflowsApi: () => ({ isWorkflowsAvailable, executeWorkflow } as never),
     privileges: { assertCanManage } as never,
     wait: { timeoutMs: 20, intervalMs: 5 },
@@ -32,6 +34,7 @@ const setup = ({
     assertCanManage,
     findByWorkflowExecutionId,
     createDirectly,
+    assertActionProposable,
   };
 };
 
@@ -173,5 +176,68 @@ describe('createProposalCreator', () => {
 
     await expect(create(input)).rejects.toThrow('Forbidden');
     expect(executeWorkflow).not.toHaveBeenCalled();
+  });
+
+  describe('with an action workflow', () => {
+    const withAction = {
+      ...input,
+      proposal: {
+        ...input.proposal,
+        actionWorkflowId: 'workflow-open-issue',
+        actionInput: { repo: 'kibana', title: 'Fix it' },
+      },
+    };
+
+    it('checks the action, then passes it to the gate', async () => {
+      const { create, executeWorkflow, assertActionProposable } = setup();
+
+      await create(withAction);
+
+      expect(assertActionProposable).toHaveBeenCalledWith(
+        'workflow-open-issue',
+        { repo: 'kibana', title: 'Fix it' },
+        'default',
+        request
+      );
+      expect(executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: CREATE_PROPOSAL_WORKFLOW_ID,
+          inputs: expect.objectContaining({
+            actionWorkflowId: 'workflow-open-issue',
+            actionInput: { repo: 'kibana', title: 'Fix it' },
+          }),
+        })
+      );
+    });
+
+    it('starts no gate for an action the proposal could not run', async () => {
+      const { create, executeWorkflow } = setup({
+        assertActionProposable: jest.fn().mockRejectedValue(new Error('actionInput is invalid')),
+      });
+
+      await expect(create(withAction)).rejects.toThrow('actionInput is invalid');
+      expect(executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('refuses an action on a to-do, which the analyst carries out themselves', async () => {
+      const { create, executeWorkflow, createDirectly } = setup();
+
+      await expect(
+        create({ ...withAction, proposal: { ...withAction.proposal, category: 'todo' } })
+      ).rejects.toThrow('cannot run action workflow [workflow-open-issue]');
+      expect(executeWorkflow).not.toHaveBeenCalled();
+      expect(createDirectly).not.toHaveBeenCalled();
+    });
+
+    it('passes no action fields for a proposal without one', async () => {
+      const { create, executeWorkflow, assertActionProposable } = setup();
+
+      await create(input);
+
+      expect(assertActionProposable).not.toHaveBeenCalled();
+      const [{ inputs }] = executeWorkflow.mock.calls[0];
+      expect(inputs).not.toHaveProperty('actionWorkflowId');
+      expect(inputs).not.toHaveProperty('actionInput');
+    });
   });
 });

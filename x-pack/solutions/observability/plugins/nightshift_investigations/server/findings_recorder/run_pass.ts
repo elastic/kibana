@@ -11,6 +11,7 @@ import { getEventActorDisplayName, type ConversationRoundStep } from '@kbn/agent
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MessageRole, type Message, type ToolCall } from '@kbn/inference-common';
+import type { ActionCatalogEntry } from '@kbn/proposals-common';
 import {
   INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
   INVESTIGATION_TEMPLATE_ID,
@@ -36,6 +37,7 @@ import {
   findingsOutputSchema,
   limitFindings,
   type FindingsRecord,
+  type RecordedProposal,
 } from './output_schema';
 import { buildRecorderSystemPrompt } from './prompt';
 import { RECORDER_MAX_TOOL_CALLS, RECORDER_MAX_TOOL_ROUNDS } from './constants';
@@ -45,14 +47,19 @@ import {
   type RecorderWorkspace,
 } from './workspace_tools';
 
-/** What the final pass needs from the proposals plugin: what is already proposed, and to propose. */
+/**
+ * What the final pass needs from the proposals plugin: what is already proposed, the workflows a
+ * proposal can carry, and to propose.
+ */
 export interface RecorderProposals {
   /** The titles of the proposals the investigation already has, so a later round does not repeat them. */
   listTitles: (args: { request: KibanaRequest; conversationId: string }) => Promise<string[]>;
+  /** The action workflows the space's users wrote, which a proposal can run once approved. */
+  listActions: (args: { request: KibanaRequest }) => Promise<ActionCatalogEntry[]>;
   propose: (args: {
     request: KibanaRequest;
     conversationId: string;
-    proposal: { title: string; comment: string; impact?: string; confidence?: string };
+    proposal: RecordedProposal;
   }) => Promise<void>;
 }
 
@@ -294,6 +301,7 @@ const runTrackedFindingsPass = async (
   }
 
   let output: FindingsRecord | undefined;
+  let actions: ActionCatalogEntry[] = [];
   try {
     const model = await createOptimizeModel({
       request,
@@ -323,6 +331,20 @@ const runTrackedFindingsPass = async (
       if (stored) memory.remember({ atGroups: 0, final: false, answer: stored });
     }
     const notices = severityNotices(conversation);
+    // Only the final pass proposes, so only it is told which workflows a proposal can run.
+    actions = final
+      ? (await deps
+          .getProposals?.()
+          ?.listActions({ request })
+          .catch((error) => {
+            logger.warn(
+              `Findings recorder could not list action workflows for ${conversationId}: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            return [];
+          })) ?? []
+      : [];
 
     // The final pass can read the investigation's workspace. The round's long tool results are
     // written there first, so what the recorder is shown clipped can be read in full.
@@ -413,7 +435,7 @@ const runTrackedFindingsPass = async (
       withFiles: boolean
     ) =>
       (await model.inferenceClient.chatComplete({
-        system: buildRecorderSystemPrompt({ final, files: withFiles }),
+        system: buildRecorderSystemPrompt({ final, files: withFiles, actions }),
         messages: conversationMessages,
         tools: toolDefinitions as never,
         toolChoice: toolChoice as never,
@@ -634,7 +656,16 @@ const runTrackedFindingsPass = async (
     }
     const proposals = deps.getProposals?.();
     if (final && proposals && record.proposals?.length) {
-      const wanted = record.proposals;
+      // A workflow the catalog did not list is not run: the model may name one that does not
+      // exist, or one the space's users did not mark as an action. The step is still proposed,
+      // for the person to carry out.
+      const listed = new Set(actions.map(({ workflowId }) => workflowId));
+      const wanted = record.proposals.map(
+        ({ action_workflow_id: workflowId, action_input: input, ...proposal }) =>
+          workflowId && listed.has(workflowId)
+            ? { ...proposal, action_workflow_id: workflowId, action_input: input }
+            : proposal
+      );
       writes.push([
         'proposals',
         async () => {
@@ -644,10 +675,19 @@ const runTrackedFindingsPass = async (
           const proposed = new Set(
             (await proposals.listTitles({ request, conversationId })).map(key)
           );
+          const failures: string[] = [];
           for (const proposal of wanted) {
             if (proposed.has(key(proposal.title))) continue;
             proposed.add(key(proposal.title));
-            await proposals.propose({ request, conversationId, proposal });
+            // One proposal that cannot be written does not stop the ones after it.
+            await proposals.propose({ request, conversationId, proposal }).catch((error) => {
+              failures.push(
+                `"${proposal.title}": ${error instanceof Error ? error.message : String(error)}`
+              );
+            });
+          }
+          if (failures.length > 0) {
+            throw new Error(failures.join('; '));
           }
         },
       ]);

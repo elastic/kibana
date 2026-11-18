@@ -13,7 +13,6 @@ import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { JSONSchema7 } from 'json-schema';
 import {
   ACTION_WORKFLOW_INPUT,
-  actionMetadataSchema,
   convertJsonSchemaToZod,
   ExecutionStatus,
   isHitlWaitStepType,
@@ -49,6 +48,7 @@ import type {
   ProposalWithMetadata,
 } from '@kbn/proposals-common';
 import type { ReviseProposalRequest } from '@kbn/proposals-common';
+import { parseActionMetadata } from './action_catalog';
 import {
   anchorQuery,
   bucketedEventQuery,
@@ -1380,6 +1380,26 @@ export class ProposalsService {
   }
 
   /**
+   * Refuses an action a proposal could never run: a workflow that cannot be read in the space,
+   * or an `actionInput` its manual trigger does not accept. For a caller that starts the gate
+   * workflow and would otherwise only see the gate fail after it answered.
+   */
+  async assertActionProposable(
+    actionWorkflowId: string,
+    actionInput: Record<string, unknown> | undefined,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId, request);
+    if (!definition) {
+      throw new ProposalInvalidActionInputError(
+        `Action workflow [${actionWorkflowId}] does not exist in this space or cannot be read`
+      );
+    }
+    this.assertActionInputValid(actionWorkflowId, definition, actionInput);
+  }
+
+  /**
    * The creation path: one fetch, then both the metadata and the input check.
    * An invalid input throws, because a proposal whose action can never run has
    * no business sitting in a human's queue.
@@ -1453,19 +1473,11 @@ export class ProposalsService {
     actionWorkflowId: string,
     definition: ActionWorkflowDefinition
   ): ActionMetadata | undefined {
-    const candidate = definition.consts?.actionMetadata;
-    if (!candidate) {
-      return undefined;
-    }
-
-    const parsed = actionMetadataSchema.safeParse(candidate);
-    if (!parsed.success) {
-      this.deps.logger.warn(
-        `Action workflow [${actionWorkflowId}] declares invalid consts.actionMetadata: ${parsed.error.message}`
-      );
-      return undefined;
-    }
-    return parsed.data;
+    return parseActionMetadata(
+      actionWorkflowId,
+      definition.consts?.actionMetadata,
+      this.deps.logger
+    );
   }
 
   private async load(id: string, spaceId: string): Promise<StoredProposal> {

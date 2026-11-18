@@ -874,6 +874,57 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('assertActionProposable', () => {
+    const withInputSchema = {
+      definition: {
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              properties: {
+                actionInput: {
+                  type: 'object',
+                  properties: { repo: { type: 'string' } },
+                  required: ['repo'],
+                },
+              },
+            },
+          },
+        ],
+      },
+    };
+
+    it('accepts an input the action declares', async () => {
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue(withInputSchema);
+      const { service } = createService(createStorage(), workflowsApi);
+
+      await expect(
+        service.assertActionProposable('wf-open-issue', { repo: 'checkout' }, SPACE_ID, request)
+      ).resolves.toBeUndefined();
+    });
+
+    it('refuses an input the action does not accept', async () => {
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue(withInputSchema);
+      const { service } = createService(createStorage(), workflowsApi);
+
+      await expect(
+        service.assertActionProposable('wf-open-issue', {}, SPACE_ID, request)
+      ).rejects.toThrow(ProposalInvalidActionInputError);
+    });
+
+    it('refuses a workflow the space does not have', async () => {
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue(null);
+      const { service } = createService(createStorage(), workflowsApi);
+
+      await expect(
+        service.assertActionProposable('wf-missing', {}, SPACE_ID, request)
+      ).rejects.toThrow('does not exist in this space');
+    });
+  });
+
   describe('create — caller-supplied id', () => {
     const ID = '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50';
     const idParams = (

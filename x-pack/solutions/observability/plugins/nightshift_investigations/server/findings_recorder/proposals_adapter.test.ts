@@ -6,16 +6,23 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { createRecorderProposals } from './proposals_adapter';
+import { loggerMock } from '@kbn/logging-mocks';
+import { createRecorderProposals, MAX_RECORDER_ACTIONS } from './proposals_adapter';
 
 const request = httpServerMock.createKibanaRequest();
 
-const setup = ({ canRead = true } = {}) => {
+const setup = ({
+  canRead = true,
+  createProposal = jest.fn().mockResolvedValue({ workflowExecutionId: 'e1' }),
+} = {}) => {
   const list = jest.fn().mockResolvedValue({
     proposals: [{ title: 'Restore the secrets' }, { title: 'Roll back the image' }],
     total: 2,
   });
-  const createProposal = jest.fn().mockResolvedValue({ workflowExecutionId: 'e1' });
+  const listActions = jest.fn().mockResolvedValue({
+    actions: Array.from({ length: 25 }, (_, i) => ({ workflowId: `wf-${i}`, name: `wf-${i}` })),
+    total: 25,
+  });
   const assertCanRead = jest.fn(async () => {
     if (!canRead) throw new Error('Forbidden');
   });
@@ -24,10 +31,12 @@ const setup = ({ canRead = true } = {}) => {
       getProposalsService: () => ({ list }),
       getProposalPrivileges: () => ({ assertCanRead }),
       createProposal,
+      listActions,
     } as never,
     getSpaceId: () => 'space-a',
+    logger: loggerMock.create(),
   });
-  return { adapter, list, createProposal, assertCanRead };
+  return { adapter, list, createProposal, assertCanRead, listActions };
 };
 
 describe('createRecorderProposals', () => {
@@ -80,6 +89,71 @@ describe('createRecorderProposals', () => {
         category: 'todo',
         skipDiscardReason: true,
       },
+    });
+  });
+
+  it("lists only the space's own action workflows, capped for the prompt", async () => {
+    const { adapter, listActions } = setup();
+
+    const actions = await adapter.listActions({ request });
+
+    expect(listActions).toHaveBeenCalledWith('space-a', request, { managedFilter: 'unmanaged' });
+    expect(actions).toHaveLength(MAX_RECORDER_ACTIONS);
+  });
+
+  it('proposes an action workflow through the gate, with its input and no to-do category', async () => {
+    const { adapter, createProposal } = setup();
+
+    await adapter.propose({
+      request,
+      conversationId: 'c1',
+      proposal: {
+        title: 'Open an issue',
+        comment: 'File the regression.',
+        action_workflow_id: 'wf-open-issue',
+        action_input: { repo: 'checkout', title: 'Pool exhausted' },
+      },
+    });
+
+    expect(createProposal).toHaveBeenCalledTimes(1);
+    const [{ proposal }] = createProposal.mock.calls[0];
+    expect(proposal).toEqual(
+      expect.objectContaining({
+        origin: 'nightshift',
+        actionWorkflowId: 'wf-open-issue',
+        actionInput: { repo: 'checkout', title: 'Pool exhausted' },
+      })
+    );
+    expect(proposal).not.toHaveProperty('category');
+    expect(proposal).not.toHaveProperty('skipDiscardReason');
+  });
+
+  it('falls back to a to-do when the workflow refuses the input', async () => {
+    const createProposal = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('actionInput does not satisfy action workflow'))
+      .mockResolvedValue({});
+    const { adapter } = setup({ createProposal });
+
+    await adapter.propose({
+      request,
+      conversationId: 'c1',
+      proposal: {
+        title: 'Open an issue',
+        comment: 'File the regression.',
+        action_workflow_id: 'wf-open-issue',
+        action_input: {},
+      },
+    });
+
+    expect(createProposal).toHaveBeenCalledTimes(2);
+    const [{ proposal }] = createProposal.mock.calls[1];
+    expect(proposal).toEqual({
+      title: 'Open an issue',
+      comment: 'File the regression.',
+      origin: 'nightshift',
+      category: 'todo',
+      skipDiscardReason: true,
     });
   });
 });

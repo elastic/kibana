@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { WorkflowListDto, WorkflowListItemDto } from '@kbn/workflows';
-import { ActionsService } from './actions_service';
-import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
+import { ActionCatalog } from './action_catalog';
+import type { ActionCatalogWorkflowsClient } from './action_catalog';
 
-const logger = loggingSystemMock.create().get('alertzero');
+const logger = loggerMock.create();
 
 const makeManagement = (
   pages: WorkflowListDto[]
-): { client: WatchWorkflowsManagementClient; getWorkflows: jest.Mock } => {
+): { client: ActionCatalogWorkflowsClient; getWorkflows: jest.Mock } => {
   const getWorkflows = jest.fn();
   pages.forEach((page, index) => {
     getWorkflows.mockResolvedValueOnce(page);
@@ -26,7 +26,7 @@ const makeManagement = (
   });
   return {
     getWorkflows,
-    client: { getWorkflows } as unknown as WatchWorkflowsManagementClient,
+    client: { getWorkflows } as unknown as ActionCatalogWorkflowsClient,
   };
 };
 
@@ -68,13 +68,24 @@ const page = (results: WorkflowListDto['results'], total = results.length): Work
 
 const request = httpServerMock.createKibanaRequest();
 
-describe('ActionsService', () => {
+describe('ActionCatalog', () => {
   it('queries managed workflows tagged action (managed installs, not unmanaged)', async () => {
     const { getWorkflows, client } = makeManagement([page([])]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     await service.list('default', request);
     expect(getWorkflows).toHaveBeenCalledWith(
       expect.objectContaining({ tags: ['action'], managedFilter: 'managed' }),
+      'default',
+      request
+    );
+  });
+
+  it('reads the managed filter it is asked for, so a space can list its own action workflows', async () => {
+    const { getWorkflows, client } = makeManagement([page([])]);
+    const service = new ActionCatalog(() => client, logger);
+    await service.list('default', request, { managedFilter: 'unmanaged' });
+    expect(getWorkflows).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: ['action'], managedFilter: 'unmanaged' }),
       'default',
       request
     );
@@ -93,7 +104,7 @@ describe('ActionsService', () => {
         }),
       ]),
     ]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     const result = await service.list('default', request);
     expect(result).toEqual({
       total: 1,
@@ -119,8 +130,8 @@ describe('ActionsService', () => {
         workflowItem('d-uncategorized', { name: 'D' }),
       ]),
     ]);
-    const service = new ActionsService(() => client, logger);
-    const result = await service.list('default', request, ['contain', 'escalate']);
+    const service = new ActionCatalog(() => client, logger);
+    const result = await service.list('default', request, { categories: ['contain', 'escalate'] });
     expect(result.actions.map((a) => a.workflowId)).toEqual(['a-contain', 'b-escalate']);
     expect(result.total).toBe(2);
     // the filter is applied AFTER fetching, so the API still queries by tag only
@@ -135,8 +146,10 @@ describe('ActionsService', () => {
     const { client } = makeManagement([
       page([workflowItem('a-contain', { name: 'A', category: 'contain' })]),
     ]);
-    const service = new ActionsService(() => client, logger);
-    const result = await service.list('default', request, ['nightshift-specific-category']);
+    const service = new ActionCatalog(() => client, logger);
+    const result = await service.list('default', request, {
+      categories: ['nightshift-specific-category'],
+    });
     expect(result).toEqual({ actions: [], total: 0 });
   });
 
@@ -147,7 +160,7 @@ describe('ActionsService', () => {
         workflowItem('valid', { name: 'Valid', category: 'contain' }),
       ]),
     ]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     const result = await service.list('default', request);
     expect(result.actions.map((a) => a.workflowId)).toEqual(['valid']);
   });
@@ -156,7 +169,7 @@ describe('ActionsService', () => {
     const { client } = makeManagement([
       page([workflowItem('isolate', { name: 'Isolate host', subject: 'host' })]),
     ]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     const result = await service.list('default', request);
     expect(result.actions[0].subjects).toEqual(['host']);
   });
@@ -171,7 +184,7 @@ describe('ActionsService', () => {
         workflowItem('legacy', { name: 'Legacy action' }),
       ]),
     ]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     const result = await service.list('default', request);
     expect(result.actions.find((a) => a.workflowId === 'both')?.subjects).toEqual([
       'host',
@@ -187,7 +200,7 @@ describe('ActionsService', () => {
         workflowItem('valid', { name: 'Valid', subject: ['host'] }),
       ]),
     ]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     const result = await service.list('default', request);
     expect(result.actions.map((a) => a.workflowId)).toEqual(['valid']);
   });
@@ -200,7 +213,7 @@ describe('ActionsService', () => {
         workflowItem('valid', { name: 'Valid' }),
       ]),
     ]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     const result = await service.list('default', request);
     expect(result.actions.map((a) => a.workflowId)).toEqual(['valid']);
   });
@@ -214,7 +227,7 @@ describe('ActionsService', () => {
       { ...page(first, 101), page: 1 },
       { ...page(second, 101), page: 2 },
     ]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     const result = await service.list('default', request);
     expect(result.total).toBe(101);
     expect(getWorkflows).toHaveBeenCalledTimes(2);
@@ -226,7 +239,7 @@ describe('ActionsService', () => {
   });
 
   it('throws when workflows management is unavailable', async () => {
-    const service = new ActionsService(() => undefined, logger);
+    const service = new ActionCatalog(() => undefined, logger);
     await expect(service.list('default', request)).rejects.toThrow(
       'Workflows management is not available'
     );
@@ -239,7 +252,7 @@ describe('ActionsService', () => {
         workflowItem('alpha', { name: 'Alpha action' }),
       ]),
     ]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     const result = await service.list('default', request);
     expect(result.actions.map((a) => a.name)).toEqual(['Alpha action', 'Zeta action']);
   });
@@ -267,7 +280,7 @@ describe('ActionsService', () => {
         }),
       ]),
     ]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     const result = await service.list('default', request);
     expect(result.actions[0].inputSchema).toEqual(inputSchema);
   });
@@ -294,7 +307,7 @@ describe('ActionsService', () => {
         }),
       ]),
     ]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     const result = await service.list('default', request);
     expect(result.actions).toEqual([
       expect.not.objectContaining({ inputSchema: expect.anything() }),
@@ -313,7 +326,7 @@ describe('ActionsService', () => {
         }),
       ]),
     ]);
-    const service = new ActionsService(() => client, logger);
+    const service = new ActionCatalog(() => client, logger);
     const result = await service.list('default', request);
     expect(result.actions[0]).not.toHaveProperty('inputSchema');
   });

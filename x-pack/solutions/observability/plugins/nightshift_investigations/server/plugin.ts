@@ -401,6 +401,7 @@ export class NightshiftInvestigationsPlugin
                     proposals: this.proposals,
                     getSpaceId: (request) =>
                       this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+                    logger: this.logger.get('findings_recorder'),
                   })
                 : undefined,
             // The final pass reads the investigation's own workspace (read-only), through the

@@ -21,6 +21,7 @@ import type {
 } from '@kbn/proposals-common';
 import type { ProposalPrivilegesChecker } from './check_proposal_privileges';
 import type { ProposalsService } from './proposals_service';
+import { ProposalInvalidActionInputError } from './errors';
 
 export const DEFAULT_PROPOSAL_WAIT = { timeoutMs: 5000, intervalMs: 500 } as const;
 
@@ -33,6 +34,15 @@ export interface NewProposal {
   impact?: string;
   confidence?: string;
   category?: string;
+  /**
+   * Action workflow to run once a person approves the proposal. Takes the gated path: approving
+   * runs the workflow as the approver, with `actionInput` as its single input. Checked before the
+   * gate starts, so a workflow the space does not have or an input it does not accept is refused
+   * here rather than failing the gate after the caller was answered.
+   */
+  actionWorkflowId?: string;
+  /** The action workflow's single `actionInput` object. Only meaningful with `actionWorkflowId`. */
+  actionInput?: Record<string, unknown>;
   /**
    * Waives the discard reason: declining the proposal is recorded without asking why. Honoured
    * on the direct path only — a proposal that runs an action is decided behind its gate, and
@@ -119,7 +129,24 @@ export const createProposalCreator = ({
   };
 
   const create: ProposalCreator = async ({ request, spaceId, conversationId, proposal }) => {
-    const { title, comment, origin, impact, confidence, category, skipDiscardReason } = proposal;
+    const {
+      title,
+      comment,
+      origin,
+      impact,
+      confidence,
+      category,
+      skipDiscardReason,
+      actionWorkflowId,
+      actionInput,
+    } = proposal;
+
+    if (actionWorkflowId !== undefined && category === PROPOSAL_CATEGORY_TODO) {
+      throw new ProposalInvalidActionInputError(
+        `A "${PROPOSAL_CATEGORY_TODO}" proposal is carried out by the analyst, so it cannot ` +
+          `run action workflow [${actionWorkflowId}]`
+      );
+    }
 
     if (category === PROPOSAL_CATEGORY_TODO) {
       // Workflows are not consulted at all here, so a to-do needs only
@@ -143,6 +170,14 @@ export const createProposalCreator = ({
     }
 
     await assertAvailable(request);
+    if (actionWorkflowId !== undefined) {
+      await getProposalsService().assertActionProposable(
+        actionWorkflowId,
+        actionInput,
+        spaceId,
+        request
+      );
+    }
     const { workflowExecutionId } = await getWorkflowsApi().executeWorkflow({
       workflowId: CREATE_PROPOSAL_WORKFLOW_ID,
       spaceId,
@@ -155,6 +190,8 @@ export const createProposalCreator = ({
         ...(impact !== undefined && { impact }),
         ...(confidence !== undefined && { confidence }),
         ...(category !== undefined && { category }),
+        ...(actionWorkflowId !== undefined && { actionWorkflowId }),
+        ...(actionInput !== undefined && { actionInput }),
       },
       // The gate parks on the analyst's decision; only its start is awaited.
       waitForCompletion: false,

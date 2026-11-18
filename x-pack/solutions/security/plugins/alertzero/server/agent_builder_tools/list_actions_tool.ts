@@ -12,7 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import { ToolType } from '@kbn/agent-builder-common';
 import { actionCategorySchema } from '@kbn/workflows/managed';
 import { ALERTZERO_ACTIONS_LIST_TOOL_ID } from '@kbn/alertzero-common';
-import type { ActionsService } from '../services/actions/actions_service';
+import type { ActionCatalogClient } from '@kbn/proposals-plugin/server';
 
 import type { AssertAlertZeroAccess } from './assert_alertzero_access';
 
@@ -33,11 +33,11 @@ const listByCategorySchema = lazySchema(() =>
  * installed action workflows at runtime instead of hard-coding workflow ids.
  *
  * Registered by the AlertZero plugin (setup), reads the catalog through
- * {@link ActionsService} — the same service backing the HTTP API — so the tool and
+ * the proposals plugin's action catalog — the same one backing the HTTP API — so the tool and
  * the API resolve the catalog the same way.
  */
 export const listActionsTool = (
-  getActionsService: () => Pick<ActionsService, 'list'>,
+  getActionsService: () => ActionCatalogClient,
   assertAlertZeroAccess: AssertAlertZeroAccess
 ): BuiltinToolDefinition<typeof listByCategorySchema> => ({
   id: ALERTZERO_ACTIONS_LIST_TOOL_ID,
@@ -56,7 +56,7 @@ export const listActionsTool = (
   handler: async ({ categories }, { logger, request, spaceId }) => {
     try {
       await assertAlertZeroAccess(request, 'read');
-      const { actions, total } = await getActionsService().list(spaceId, request, categories);
+      const { actions, total } = await getActionsService().list(spaceId, request, { categories });
       const message =
         total === 0
           ? categories

@@ -62,7 +62,7 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 ### Model
 
 - A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-proposals` and points at the conversation it belongs to.
-- An **action proposal** additionally references a managed **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow.
+- An **action proposal** additionally references an **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow. The workflow is usually a managed install, but can also be one the space's users wrote: the gate is a managed run, and a managed parent may execute the space's own workflows.
 - A **non-action proposal** carries only its `comment` — instructions the analyst carries out themselves before approving. It is always gated: autonomy governs whether an action may run unattended, and there is no action here to govern, so `autoApprove` is ignored.
 - Every proposal declares an **`origin`**: which feature produced it, so that feature's queue can show it and another's cannot. It is a closed enum, required, and fixed for the whole revision chain. See "Origin is a closed routing key" below.
 - Every proposal carries a **`title`**: a short plain-text label, distinct from the markdown `comment`. Required on the record and resolved on write — the caller's own title, else the action's name, else the `DEFAULT_PROPOSAL_TITLE` constant — so a reader renders the field rather than re-deriving a fallback chain. Deliberately untranslated, like the `comment` beside it: both are stored English.
@@ -435,7 +435,7 @@ Omitting an optional input is safe. A Liquid template for an absent input still 
 
 ### How an agent creates a proposal
 
-The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal_tool.ts`, allow-listed in `@kbn/agent-builder-server`; the `proposals` tool namespace is reserved for built-in tools in `@kbn/agent-builder-common`) lets an agent propose an action in the conversation it runs in. It takes `title`, `comment` (Markdown), `origin` (the closed enum above; the agent's instructions name it), and optionally `impact`, `confidence`, and `category`. It takes no `actionWorkflowId`: the analyst carries the action out and approves or dismisses it — or, for a `todo` proposal, marks it as applied (see [To-do proposals](#to-do-proposals)).
+The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal_tool.ts`, allow-listed in `@kbn/agent-builder-server`; the `proposals` tool namespace is reserved for built-in tools in `@kbn/agent-builder-common`) lets an agent propose an action in the conversation it runs in. It takes `title`, `comment` (Markdown), `origin` (the closed enum above; the agent's instructions name it), and optionally `impact`, `confidence`, `category`, `actionWorkflowId` and `actionInput`. Without `actionWorkflowId` the analyst carries the action out and approves or dismisses it — or, for a `todo` proposal, marks it as applied (see [To-do proposals](#to-do-proposals)). With it, approving runs that action workflow as the approver; the workflow and its input are checked (`ProposalsService.assertActionProposable`) before the gate starts, so a workflow the space does not have or an input it refuses fails the call instead of the gate. A `todo` cannot carry an action.
 
 - **It goes through the gate like any Worker, unless it is a to-do.** For any category other than `todo` the tool starts `system-create-proposal` with `workflowsManagement.management.executeWorkflow`, as the caller's request, with the conversation id of the innermost agent on the run stack — a decision that executes an action is only ever recorded behind its gate. A `todo` is written straight through `ProposalsService.create` with `gate: 'none'` and answered synchronously, so the tool returns the proposal id with no `workflow_execution_id`.
 - **The card is attached by the gate's create step**, through the public attachment client (`render_inline: true`), not through the run's attachment state. That write needs the caller to own the conversation, which holds for an investigation run started by its owner; otherwise the proposal is still created and only the card is missing, as for any Worker. Because the attachment is written out of band, the agent does not see its id in the same turn; the card is shown to the analyst all the same.
@@ -456,6 +456,14 @@ An action workflow is an ordinary managed workflow that:
 Rule 3 is the non-obvious one and the easiest to get wrong: the gate passes exactly one key, `actionInput`. An action that declares `name`, `query` and `index` as top-level inputs will receive none of them. Declare them as properties of `actionInput` instead, and mark the ones that define the action's scope `required` — a default that matches everything is a demo shortcut, not a catalog entry.
 
 See `definitions/alertzero/actions/action_create_detection_rule.yaml` for a worked example.
+
+A user can author one too, in the Workflows app: the same four rules apply, and the workflow lives in their space instead of the global one. Declare `approvalPolicy: always-gate` so it never runs without a person approving it.
+
+### The action catalog
+
+`ProposalsPluginStart.listActions(spaceId, request, { categories?, managedFilter? })` lists the action workflows a space can propose — every workflow tagged `action` with a valid `consts.actionMetadata` — as `ActionCatalogEntry` (`@kbn/proposals-common`): the workflow id, its metadata, and the JSON Schema of its manual trigger inputs, so an agent can fill `actionInput` without reading the YAML. It reads as the request's user, so it lists only what they can read. Definitions with invalid metadata are skipped with a warning.
+
+`managedFilter` picks which workflows: `managed` (the default) for the actions solutions install, `unmanaged` for the ones the space's users wrote, `all` for both. AlertZero lists the managed ones; Nightshift's findings recorder lists only the unmanaged ones, so it never proposes another solution's actions.
 
 ### API
 
