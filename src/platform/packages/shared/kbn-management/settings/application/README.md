@@ -25,6 +25,6 @@ The result is then merged with the client's runtime values using `mergeSettingDe
 Because this is an asynchronous request, pages that display settings must handle two additional states:
 
 - **Loading** — the definitions request is in flight. Show a spinner or other loading indicator and disable any search or filter controls.
-- **Error** — the definitions request failed. Show an inline error (such as a `KbnDangerCallout` from `@kbn/ui-callout`) in the place where the settings would appear.
+- **Error** — the definitions request failed. Show an inline error (such as a `KbnDangerCallout` from `@kbn/ui-callout`) in the place where the settings would appear, with an action that calls `retry`.
 
-If you add a new page that renders UI settings, follow the same pattern: fetch definitions with `settings.metadata.getAll`, merge them with `mergeSettingDefinitions`, and provide a UI with loading and error states.
+If you add a new page that renders UI settings, use the hooks in `@kbn/management-settings-hooks` to fetch the definitions, and render their loading and error states. `useEditableSettings` covers a page that edits a fixed list of settings. `useSettingDefinitions` fetches the definitions alone, and is what both `useEditableSettings` and this package's Settings page build on.

@@ -25,7 +25,7 @@ const merged = mergeSettingDefinitions(definitions, settings.client.getAll());
 const normalized = normalizeSettings(merged);
 ```
 
-Because `metadata.getAll` is asynchronous, your component must handle loading and error states. See the `@kbn/management-settings-application` README for the recommended patterns.
+Because `metadata.getAll` is asynchronous, your component must handle loading and error states. In React, the hooks in `@kbn/management-settings-hooks` fetch the definitions and track those states. See the `@kbn/management-settings-application` README for the recommended patterns.
 
 ### When you only need runtime values
 

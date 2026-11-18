@@ -8,7 +8,7 @@
  */
 
 import type { FC, PropsWithChildren } from 'react';
-import React, { useContext, useMemo, useRef } from 'react';
+import React, { useContext, useMemo } from 'react';
 
 import {
   FormProvider,
@@ -37,10 +37,16 @@ import type { Space } from '@kbn/spaces-plugin/common';
 import type { SolutionView } from '@kbn/spaces-plugin/common';
 
 export interface Services {
+  metadataClient: Pick<IUiSettingsMetadataClient, 'getAll'>;
+  /**
+   * Merges the loaded definitions with the current values from the scope's client, and drops
+   * the settings that the page doesn't show.
+   */
   getAllowlistedSettings: (
     scope: UiSettingsScope,
-    solution: SolutionView | undefined
-  ) => Promise<Record<string, UiSettingMetadata>>;
+    solution: SolutionView | undefined,
+    definitions: UiSettingsMetadataState
+  ) => Record<string, UiSettingMetadata>;
   getSections: (scope: UiSettingsScope) => RegistryEntry[];
   getToastsService: () => ToastsStart;
   getCapabilities: () => SettingsCapabilities;
@@ -96,6 +102,7 @@ export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicati
     showReloadPagePrompt,
     links,
     showDanger,
+    metadataClient,
     getAllowlistedSettings,
     getSections,
     getCapabilities,
@@ -112,6 +119,7 @@ export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicati
   return (
     <SettingsApplicationContext.Provider
       value={{
+        metadataClient,
         getAllowlistedSettings,
         getSections,
         getToastsService,
@@ -154,37 +162,20 @@ export const SettingsApplicationKibanaProvider: FC<
     spaces,
   } = dependencies;
   const { client, globalClient, metadata } = settings;
-  const definitionRequests = useRef<
-    Partial<Record<UiSettingsScope, Promise<UiSettingsMetadataState>>>
-  >({});
 
-  // The settings hooks depend on these functions, so a new identity on each render would refetch
-  // the settings and swap the form for a spinner.
+  // The settings hooks depend on these services, so a new identity on each render would fetch the
+  // setting definitions again.
   const services = useMemo<Services>(() => {
     const getScopeClient = (scope: UiSettingsScope) => {
       return scope === 'namespace' ? client : globalClient;
     };
 
-    const getDefinitions = (scope: UiSettingsScope) => {
-      const pendingRequest = definitionRequests.current[scope];
-      if (pendingRequest) {
-        return pendingRequest;
-      }
-
-      const request = metadata.getAll(scope);
-      definitionRequests.current[scope] = request;
-      request.catch(() => {
-        delete definitionRequests.current[scope];
-      });
-      return request;
-    };
-
-    const getAllowlistedSettings = async (
+    const getAllowlistedSettings = (
       scope: UiSettingsScope,
-      solution: SolutionView | undefined
+      solution: SolutionView | undefined,
+      definitions: UiSettingsMetadataState
     ) => {
       const { filterSettings } = application.capabilities;
-      const definitions = await getDefinitions(scope);
       const allSettings = mergeSettingDefinitions(definitions, getScopeClient(scope).getAll());
       const rawSettings = Object.fromEntries(
         Object.entries(allSettings).filter(
@@ -239,6 +230,7 @@ export const SettingsApplicationKibanaProvider: FC<
     };
 
     return {
+      metadataClient: metadata,
       getAllowlistedSettings,
       getSections,
       getToastsService: () => notifications.toasts,

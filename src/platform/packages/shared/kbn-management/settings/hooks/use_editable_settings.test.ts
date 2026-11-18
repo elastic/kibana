@@ -506,6 +506,24 @@ describe('useEditableSettings', () => {
     expect(result.current.fields).toEqual({});
   });
 
+  it('builds fields after a retry of a failed definitions request', async () => {
+    const clients = createClients();
+    clients.metadataClient.getAll.mockRejectedValueOnce(new Error('Request failed'));
+
+    const { result } = renderEditableSettings(undefined, clients);
+    await waitFor(() => expect(result.current.loadError).toEqual(new Error('Request failed')));
+
+    act(() => {
+      result.current.retry();
+    });
+
+    await waitFor(() =>
+      expect(Object.keys(result.current.fields)).toEqual([STRING_SETTING, RELOAD_SETTING])
+    );
+    expect(result.current.loadError).toBeUndefined();
+    expect(clients.metadataClient.getAll).toHaveBeenCalledTimes(2);
+  });
+
   it('unsubscribes from setting updates on unmount', async () => {
     const { unmount, update$ } = await setup();
 

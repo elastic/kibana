@@ -8,6 +8,11 @@
  */
 
 export { useEditableSettings } from './use_editable_settings';
+export { useSettingDefinitions } from './use_setting_definitions';
+export type {
+  UseSettingDefinitionsParams,
+  UseSettingDefinitionsResult,
+} from './use_setting_definitions';
 export type {
   SaveAllResult,
   UseEditableSettingsParams,

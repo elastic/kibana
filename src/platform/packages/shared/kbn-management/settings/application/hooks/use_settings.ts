@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import type { UiSettingMetadata } from '@kbn/management-settings-types';
+import { useSettingDefinitions } from '@kbn/management-settings-hooks';
 import type { SolutionView } from '@kbn/spaces-plugin/common';
 import { useServices } from '../services';
+
+const NO_SETTINGS: Record<string, UiSettingMetadata> = {};
 
 /**
  * React hook which retrieves settings metadata from the server,
@@ -25,14 +28,20 @@ import { useServices } from '../services';
  * a function that fetches the settings again.
  */
 export const useSettings = (scope: UiSettingsScope, isEnabled: boolean = true) => {
-  const { getAllowlistedSettings, subscribeToUpdates, getActiveSpace, subscribeToActiveSpace } =
-    useServices();
+  const {
+    metadataClient,
+    getAllowlistedSettings,
+    subscribeToUpdates,
+    getActiveSpace,
+    subscribeToActiveSpace,
+  } = useServices();
   const [solutionView, setSolutionView] = useState<SolutionView>();
-  const [settings, setSettings] = useState<Record<string, UiSettingMetadata>>({});
-  const [isLoading, setIsLoading] = useState(isEnabled);
-  const [error, setError] = useState<Error>();
-  const hasLoaded = useRef(false);
-  const [attempt, setAttempt] = useState(0);
+  const [settingsVersion, setSettingsVersion] = useState(0);
+  const { definitions, isLoading, loadError, retry } = useSettingDefinitions({
+    metadataClient,
+    scope,
+    isEnabled,
+  });
 
   useEffectOnce(() => {
     const subscription = subscribeToActiveSpace(() => {
@@ -49,55 +58,29 @@ export const useSettings = (scope: UiSettingsScope, isEnabled: boolean = true) =
 
   useEffect(() => {
     if (!isEnabled) {
-      hasLoaded.current = false;
-      setSettings({});
-      setError(undefined);
-      setIsLoading(false);
       return;
     }
 
-    let isCurrent = true;
-    // Refetches keep the loaded settings on screen, so the form and its unsaved changes stay mounted.
-    if (!hasLoaded.current) {
-      setIsLoading(true);
-    }
-
-    const refreshSettings = () => {
-      getAllowlistedSettings(scope, solutionView).then(
-        (result) => {
-          if (isCurrent) {
-            hasLoaded.current = true;
-            setSettings(result);
-            setError(undefined);
-            setIsLoading(false);
-          }
-        },
-        (e: Error) => {
-          if (isCurrent) {
-            setError(e);
-            setIsLoading(false);
-          }
-        }
-      );
-    };
-
-    refreshSettings();
-    const subscription = subscribeToUpdates(refreshSettings, scope);
+    const subscription = subscribeToUpdates(() => {
+      setSettingsVersion((version) => version + 1);
+    }, scope);
 
     return () => {
-      isCurrent = false;
       subscription.unsubscribe();
     };
-  }, [scope, isEnabled, solutionView, getAllowlistedSettings, subscribeToUpdates, attempt]);
+  }, [scope, isEnabled, subscribeToUpdates]);
 
-  const retry = useCallback(() => {
-    // Loading is set in the same batch as the cleared error, or the empty state flashes before the spinner.
-    if (!hasLoaded.current) {
-      setIsLoading(true);
-    }
-    setError(undefined);
-    setAttempt((current) => current + 1);
-  }, []);
+  const settings = useMemo(
+    () => {
+      if (isLoading || loadError) {
+        return NO_SETTINGS;
+      }
+      return getAllowlistedSettings(scope, solutionView, definitions);
+    },
+    // The client is mutable, so `settingsVersion` stands in for its values changing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [scope, solutionView, definitions, isLoading, loadError, getAllowlistedSettings, settingsVersion]
+  );
 
-  return { settings, isLoading, error, retry };
+  return { settings, isLoading, error: loadError, retry };
 };

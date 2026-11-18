@@ -2,7 +2,7 @@
 id: kbn-management/settings/Hooks
 slug: /kbn-management/settings/hooks/
 title: Settings Hooks
-description: React hooks for editing UI settings outside of Advanced Settings.
+description: React hooks for pages that render UI settings forms.
 tags: ['management', 'settings']
 date: 2026-11-03
 ---
@@ -18,6 +18,7 @@ const {
   fields,
   isLoading,
   loadError,
+  retry,
   unsavedChanges,
   handleFieldChange,
   cleanUnsavedChanges,
@@ -39,5 +40,23 @@ const onSave = async () => {
 ```
 
 - `fields` contains only the requested settings that are registered, keyed by setting ID, and refreshes when one of them changes. It is empty until the setting definitions load.
-- The setting definitions (name, description, options, etc.) are not part of the bootstrap payload, so the hook fetches them with `metadataClient.getAll(scope)`. The page must render the `isLoading` and `loadError` states, as described in the `@kbn/management-settings-application` README.
+- The setting definitions (name, description, options, etc.) are not part of the bootstrap payload, so the hook fetches them with `useSettingDefinitions`. The page must render the `isLoading` and `loadError` states, as described in the `@kbn/management-settings-application` README, and can offer `retry` as an action on the error.
 - `saveAll` rejects with the combined error messages when any update fails. Showing toasts is up to the caller.
+
+## `useSettingDefinitions`
+
+Fetches the full setting definitions for a scope, for a page that builds its own fields from them.
+
+```tsx
+import { useSettingDefinitions } from '@kbn/management-settings-hooks';
+
+const { definitions, isLoading, loadError, retry } = useSettingDefinitions({
+  metadataClient: settings.metadata,
+  scope: 'namespace',
+});
+```
+
+- `definitions` is empty until the request succeeds. Merge it with the client's current values using `mergeSettingDefinitions` from `@kbn/management-settings-utilities`.
+- `isLoading` is only true before the definitions first load. When they are fetched again, such as for a new `metadataClient`, the loaded definitions stay in place, so a form built from them stays mounted with its unsaved changes.
+- `loadError` is the error from the latest request, and is cleared while `retry` fetches the definitions again.
+- Pass `isEnabled: false` to skip the request, such as when the user can't see the scope.

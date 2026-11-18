@@ -39,6 +39,7 @@
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",
     "@kbn/core",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/management-settings-hooks"
   ]
 }

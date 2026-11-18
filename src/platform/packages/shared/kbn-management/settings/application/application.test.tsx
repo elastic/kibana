@@ -35,7 +35,6 @@ import { DATA_TEST_SUBJ_PREFIX_TAB } from './tab';
 import { DATA_TEST_SUBJ_SETTINGS_CATEGORY } from '@kbn/management-settings-components-field-category/category';
 import { DATA_TEST_SUBJ_SAVE_BUTTON } from '@kbn/management-settings-components-form/bottom_bar/bottom_bar';
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import type { UiSettingMetadata } from '@kbn/management-settings-types';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import { wrap, createSettingsApplicationServicesMock } from './mocks';
@@ -156,13 +155,15 @@ describe('Settings application', () => {
   });
 
   it('shows a spinner and disables the search and category filter while the settings load', async () => {
-    const resolvers: Array<(value: Record<string, never>) => void> = [];
+    const resolvers: Array<(value: UiSettingsMetadataState) => void> = [];
     const services: SettingsApplicationServices = {
       ...createSettingsApplicationServicesMock(),
-      getAllowlistedSettings: () =>
-        new Promise<Record<string, never>>((resolve) => {
-          resolvers.push(resolve);
-        }),
+      metadataClient: {
+        getAll: () =>
+          new Promise<UiSettingsMetadataState>((resolve) => {
+            resolvers.push(resolve);
+          }),
+      },
     };
 
     const { findByTestId, getByTestId, queryByTestId } = render(
@@ -186,7 +187,7 @@ describe('Settings application', () => {
   it('shows an error instead of the form when the settings fail to load', async () => {
     const services: SettingsApplicationServices = {
       ...createSettingsApplicationServicesMock(),
-      getAllowlistedSettings: () => Promise.reject(new Error('Internal Server Error')),
+      metadataClient: { getAll: () => Promise.reject(new Error('Internal Server Error')) },
     };
 
     const { findByTestId, queryByTestId } = render(wrap(<SettingsApplication />, services));
@@ -254,14 +255,14 @@ describe('Settings application', () => {
   });
 
   it("doesn't fetch the global settings when they can't be shown", async () => {
-    const getAllowlistedSettings = jest.fn((scope: UiSettingsScope) =>
+    const getAll = jest.fn((scope: UiSettingsScope) =>
       scope === 'global'
         ? Promise.reject(new Error('Forbidden'))
         : Promise.resolve(getSettingsMock())
     );
     const services: SettingsApplicationServices = {
       ...createSettingsApplicationServicesMock(),
-      getAllowlistedSettings,
+      metadataClient: { getAll },
       getCapabilities: () => ({
         ...getSettingsCapabilitiesMock(),
         globalSettings: { show: false, save: false },
@@ -276,7 +277,7 @@ describe('Settings application', () => {
       ).toBeInTheDocument();
     }
     expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR)).toBeNull();
-    expect(getAllowlistedSettings.mock.calls.map(([scope]) => scope)).not.toContain('global');
+    expect(getAll.mock.calls.map(([scope]) => scope)).not.toContain('global');
   });
 
   it('requests the setting definitions once per scope and shows saved values from the client', async () => {
@@ -385,12 +386,12 @@ describe('Settings application', () => {
       'test:setting': { name: 'Test setting', type: 'string', value: 'default', userValue: 'saved' },
     });
     const metadata = {
-      getAll: jest.fn(async (scope: UiSettingsScope) =>
+      getAll: jest.fn(async (scope: UiSettingsScope): Promise<UiSettingsMetadataState> =>
         scope === 'namespace'
           ? {
               'test:setting': {
                 name: 'Test setting',
-                type: 'string' as const,
+                type: 'string',
                 value: 'default',
                 userValue: 'saved',
               },
@@ -439,13 +440,13 @@ describe('Settings application', () => {
       fireEvent.change(input, { target: { value: 'unsaved' } });
     });
 
-    const getAllowlistedSettings = jest.fn(services.getAllowlistedSettings);
+    const getAll = jest.fn(services.metadataClient.getAll);
     act(() => {
-      setServices({ ...services, getAllowlistedSettings });
+      setServices({ ...services, metadataClient: { getAll } });
     });
 
     expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOADING)).toBeNull();
-    await waitFor(() => expect(getAllowlistedSettings).toHaveBeenCalled());
+    await waitFor(() => expect(getAll).toHaveBeenCalled());
     await act(async () => {});
     expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOADING)).toBeNull();
     expect(getByDisplayValue('unsaved')).toBeInTheDocument();
@@ -587,10 +588,12 @@ describe('Settings application', () => {
       const resolvers: Array<() => void> = [];
       const services: SettingsApplicationServices = {
         ...createSettingsApplicationServicesMock(),
-        getAllowlistedSettings: (scope: UiSettingsScope) =>
-          new Promise<Record<string, UiSettingMetadata>>((resolve) => {
-            resolvers.push(() => resolve(scope === 'namespace' ? getSettingsMock() : {}));
-          }),
+        metadataClient: {
+          getAll: (scope: UiSettingsScope) =>
+            new Promise<UiSettingsMetadataState>((resolve) => {
+              resolvers.push(() => resolve(scope === 'namespace' ? getSettingsMock() : {}));
+            }),
+        },
       };
 
       const { findByTestId, findByDisplayValue, queryByTestId } = render(

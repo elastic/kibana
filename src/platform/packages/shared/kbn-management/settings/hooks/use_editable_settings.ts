@@ -23,6 +23,7 @@ import type {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 import { mergeSettingDefinitions, normalizeSettings } from '@kbn/management-settings-utilities';
+import { useSettingDefinitions } from './use_setting_definitions';
 
 export interface UseEditableSettingsParams {
   /** The IDs of the settings to edit. */
@@ -53,6 +54,8 @@ export interface UseEditableSettingsResult {
   isLoading: boolean;
   /** The error from fetching the setting definitions, if it failed. */
   loadError?: Error;
+  /** Fetches the setting definitions again after `loadError`. */
+  retry: () => void;
   unsavedChanges: Record<string, UnsavedFieldChange>;
   handleFieldChange: OnFieldChangeFn;
   cleanUnsavedChanges: () => void;
@@ -93,37 +96,13 @@ export const useEditableSettings = ({
   const settingsKeysJson = JSON.stringify(settingsKeys);
   const trackedKeys = useMemo<string[]>(() => JSON.parse(settingsKeysJson), [settingsKeysJson]);
 
-  const [definitions, setDefinitions] = useState<UiSettingsMetadataState>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState<Error>();
+  const { definitions, isLoading, loadError, retry } = useSettingDefinitions({
+    metadataClient,
+    scope,
+  });
   const [settingsVersion, setSettingsVersion] = useState(0);
   const [allUnsavedChanges, setUnsavedChanges] = useState<Record<string, UnsavedFieldChange>>({});
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    let isCurrent = true;
-    setIsLoading(true);
-    setLoadError(undefined);
-
-    metadataClient.getAll(scope).then(
-      (result) => {
-        if (isCurrent) {
-          setDefinitions(result);
-          setIsLoading(false);
-        }
-      },
-      (error: Error) => {
-        if (isCurrent) {
-          setLoadError(error);
-          setIsLoading(false);
-        }
-      }
-    );
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [metadataClient, scope]);
 
   useEffect(() => {
     const subscription = settingsClient.getUpdate$().subscribe(({ key }) => {
@@ -247,6 +226,7 @@ export const useEditableSettings = ({
     fields,
     isLoading,
     loadError,
+    retry,
     unsavedChanges,
     handleFieldChange,
     cleanUnsavedChanges,

@@ -27,6 +27,7 @@ import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import type { UiSettingsSolutions } from '@kbn/core-ui-settings-common';
 import type { SolutionView } from '@kbn/spaces-plugin/common';
+import type { UiSettingMetadata } from '@kbn/management-settings-types';
 import type { SettingsApplicationServices } from '../services';
 import { SettingsApplicationProvider } from '../services';
 
@@ -51,14 +52,18 @@ export const createSettingsApplicationServicesMock = (
   spaceSolution: SolutionView = 'classic'
 ): SettingsApplicationServices => ({
   ...createFormServicesMock(),
-  getAllowlistedSettings: (scope: UiSettingsScope) =>
-    Promise.resolve(
-      scope === 'namespace'
-        ? getSettingsMock(undefined, undefined, settingsSolution)
-        : hasGlobalSettings
-        ? getGlobalSettingsMock(undefined, undefined, settingsSolution)
-        : {}
-    ),
+  metadataClient: {
+    getAll: (scope: UiSettingsScope) =>
+      Promise.resolve(
+        scope === 'namespace'
+          ? getSettingsMock(undefined, undefined, settingsSolution)
+          : hasGlobalSettings
+          ? getGlobalSettingsMock(undefined, undefined, settingsSolution)
+          : {}
+      ),
+  },
+  getAllowlistedSettings: (_scope, _solution, definitions) =>
+    definitions as Record<string, UiSettingMetadata>,
   getSections: () => [],
   getCapabilities: getSettingsCapabilitiesMock,
   setBadge: jest.fn(),
