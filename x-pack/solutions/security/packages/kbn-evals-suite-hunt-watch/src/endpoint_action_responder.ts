@@ -14,6 +14,8 @@
 import { randomBytes } from 'crypto';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
+import type { KbnClient } from '@kbn/test';
+import { PUBLIC_API_VERSION } from './constants';
 
 /**
  * Approve-path plumbing for `evals/hunt_watch_approval.spec.ts`.
@@ -148,11 +150,11 @@ const restartEndpointTransforms = async ({
 }: {
   esClient: Client;
   log: ToolingLog;
-}): Promise<string[]> => {
+}): Promise<string[] | undefined> => {
   const stats = await esClient.transform
     .getTransformStats({ transform_id: 'endpoint*', allow_no_match: true })
     .catch(() => undefined);
-  if (!stats) return [];
+  if (!stats) return undefined;
   const stuck = stats.transforms.filter(({ state }) => state === 'stopped' || state === 'failed');
   for (const { id, state } of stuck) {
     log.info(`approve path: transform ${id} is ${state}; restarting`);
@@ -168,17 +170,56 @@ const restartEndpointTransforms = async ({
   return stats.transforms.map(({ id, state }) => `${id}:${state}`);
 };
 
+const UNITED_TRANSFORM_PREFIX = 'endpoint.metadata_united-default';
+const REINSTALL_INTERVAL_MS = 60_000;
+
+/**
+ * Force-reinstalls the installed endpoint package version, which recreates its transforms.
+ * Fleet's boot-time reinstall can delete the metadata transforms and fail to recreate the
+ * united one (`stepVerifyAssets: ... missing ... metadata_united`); there is nothing to restart then.
+ */
+const reinstallEndpointPackage = async ({
+  kbnClient,
+  log,
+}: {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+}): Promise<void> => {
+  try {
+    const { data } = await kbnClient.request<{ item: { version: string } }>({
+      method: 'GET',
+      path: '/api/fleet/epm/packages/endpoint',
+      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+    });
+    const { version } = data.item;
+    log.info(
+      `approve path: ${UNITED_TRANSFORM_PREFIX} transform missing; reinstalling endpoint@${version}`
+    );
+    await kbnClient.request({
+      method: 'POST',
+      path: `/api/fleet/epm/packages/endpoint/${version}`,
+      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+      body: { force: true },
+    });
+  } catch (error) {
+    log.warning(`approve path: endpoint package reinstall failed: ${String(error)}`);
+  }
+};
+
 /**
  * Indexes the hunt host's endpoint metadata and waits for the metadata transforms to propagate
  * it into `metrics-endpoint.metadata_current` / `metadata_united`, which is where endpoint-id
- * validation resolves the agent.
+ * validation resolves the agent. With `kbnClient`, a missing united transform triggers a forced
+ * endpoint package reinstall, at most once per minute.
  */
 export const ensureHuntEndpointMetadata = async ({
   esClient,
+  kbnClient,
   log,
   maxWaitMs = 180_000,
 }: {
   esClient: Client;
+  kbnClient?: KbnClient;
   log: ToolingLog;
   maxWaitMs?: number;
 }): Promise<void> => {
@@ -192,10 +233,22 @@ export const ensureHuntEndpointMetadata = async ({
 
   const deadline = Date.now() + maxWaitMs;
   let transformStates: string[] = [];
+  let lastReinstallAt: number | undefined;
   while (Date.now() < deadline) {
     // Re-checked every poll: Fleet can delete and reinstall the endpoint metadata transforms
     // while Kibana boots, leaving the new ones stopped or failed after a one-off restart.
-    transformStates = await restartEndpointTransforms({ esClient, log });
+    const states = await restartEndpointTransforms({ esClient, log });
+    transformStates = states ?? [];
+    const unitedMissing =
+      states !== undefined && !states.some((entry) => entry.startsWith(UNITED_TRANSFORM_PREFIX));
+    if (
+      kbnClient &&
+      unitedMissing &&
+      (lastReinstallAt === undefined || Date.now() - lastReinstallAt >= REINSTALL_INTERVAL_MS)
+    ) {
+      lastReinstallAt = Date.now();
+      await reinstallEndpointPackage({ kbnClient, log });
+    }
     const [current, united] = await Promise.all([
       esClient
         .count({

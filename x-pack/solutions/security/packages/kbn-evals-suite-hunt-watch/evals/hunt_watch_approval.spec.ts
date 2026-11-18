@@ -190,7 +190,7 @@ const stageApprovePath = async ({
   kbnClient: KbnClient;
   log: ToolingLog;
 }): Promise<() => Promise<void>> => {
-  await ensureHuntEndpointMetadata({ esClient, log });
+  await ensureHuntEndpointMetadata({ esClient, kbnClient, log });
 
   const runId = String(Date.now());
   let indexed: IndexedFleetEndpointPolicyResponse | undefined;

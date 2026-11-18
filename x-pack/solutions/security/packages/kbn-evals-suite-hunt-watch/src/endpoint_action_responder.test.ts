@@ -16,6 +16,7 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
 import {
   HUNT_AGENT_ID,
   HUNT_HOST_NAME,
@@ -87,7 +88,7 @@ describe('endpoint action responder', () => {
   });
 
   describe('ensureHuntEndpointMetadata', () => {
-    const log = { info: jest.fn() } as unknown as ToolingLog;
+    const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
     const transformClient = (states: Array<[string, string]>, propagatedCount: number) => {
       const transform = {
         getTransformStats: jest
@@ -127,6 +128,69 @@ describe('endpoint action responder', () => {
         'endpoint.metadata_united-default-9.6.1',
         'endpoint.metadata_current-default-9.6.1',
       ]);
+    });
+
+    it('force-reinstalls the installed endpoint package when the united transform is missing', async () => {
+      const { esClient } = transformClient(
+        [['endpoint.metadata_current-default-9.6.1', 'started']],
+        1
+      );
+      const request = jest
+        .fn()
+        .mockResolvedValueOnce({ data: { item: { version: '9.6.1' } } })
+        .mockResolvedValueOnce({ data: {} });
+      const kbnClient = { request } as unknown as KbnClient;
+
+      await ensureHuntEndpointMetadata({ esClient, kbnClient, log });
+
+      expect(request).toHaveBeenCalledTimes(2);
+      expect(request.mock.calls[0][0]).toMatchObject({
+        method: 'GET',
+        path: '/api/fleet/epm/packages/endpoint',
+      });
+      expect(request.mock.calls[1][0]).toMatchObject({
+        method: 'POST',
+        path: '/api/fleet/epm/packages/endpoint/9.6.1',
+        body: { force: true },
+      });
+    });
+
+    it('reinstalls at most once a minute while the united transform stays missing', async () => {
+      jest.useFakeTimers();
+      const { esClient } = transformClient(
+        [['endpoint.metadata_current-default-9.6.1', 'started']],
+        0
+      );
+      const request = jest.fn().mockResolvedValue({ data: { item: { version: '9.6.1' } } });
+      const kbnClient = { request } as unknown as KbnClient;
+
+      const settled = ensureHuntEndpointMetadata({
+        esClient,
+        kbnClient,
+        log,
+        maxWaitMs: 70_000,
+      }).catch((error: Error) => error);
+      await jest.advanceTimersByTimeAsync(75_000);
+      await settled;
+
+      const posts = request.mock.calls.filter(([req]) => req.method === 'POST');
+      expect(posts).toHaveLength(2);
+    });
+
+    it('does not reinstall when the united transform exists', async () => {
+      const { esClient } = transformClient(
+        [['endpoint.metadata_united-default-9.6.1', 'started']],
+        1
+      );
+      const request = jest.fn();
+
+      await ensureHuntEndpointMetadata({
+        esClient,
+        kbnClient: { request } as unknown as KbnClient,
+        log,
+      });
+
+      expect(request).not.toHaveBeenCalled();
     });
 
     it('names the transform states when the metadata never propagates', async () => {
