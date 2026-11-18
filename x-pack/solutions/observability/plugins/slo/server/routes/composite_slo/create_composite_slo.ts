@@ -23,7 +23,7 @@ export const createCompositeSLORoute = createCompositeSloServerRoute({
   handler: async ({ context, params, logger, request, getScopedClients }) => {
     const core = await context.core;
 
-    const { scopedClusterClient, repository, compositeRepository, spaceId } =
+    const { scopedClusterClient, repository, compositeRepository, spaceId, telemetry } =
       await getScopedClients({
         request,
         logger,
@@ -45,6 +45,7 @@ export const createCompositeSLORoute = createCompositeSloServerRoute({
         repository,
         summaryClient,
         logger,
+        telemetry,
       }
     );
   },
