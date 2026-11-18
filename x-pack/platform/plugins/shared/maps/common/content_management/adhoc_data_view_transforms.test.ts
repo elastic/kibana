@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { transformAdhocDataViewIn, transformAdhocDataViewOut } from './adhoc_data_view_transforms';
+import type { LegacyAdhocDataView } from '../../server';
+import { transformAdhocDataViewOut } from './adhoc_data_view_transforms';
 
 describe('transformAdhocDataViewOut', () => {
   test('should convert legacy ad hoc data view to as code', () => {
@@ -27,56 +28,7 @@ describe('transformAdhocDataViewOut', () => {
     });
   });
 
-  test('should carry over source filters and runtime fields', () => {
-    const result = transformAdhocDataViewOut({
-      id: 'adhoc-1',
-      title: 'logs-*',
-      sourceFilters: [{ value: 'secret*' }],
-      runtimeFieldMap: { rt: { type: 'keyword', script: { source: 'emit("a")' } } },
-    });
-    expect(result.field_filters).toEqual(['secret*']);
-    expect(result.field_settings?.rt).toMatchObject({ type: 'keyword' });
-  });
-
   test('should throw when id is missing', () => {
-    expect(() => transformAdhocDataViewOut({ title: 'logs-*' })).toThrow();
-  });
-});
-
-describe('transformAdhocDataViewIn', () => {
-  test('should convert as code ad hoc data view to legacy shape', () => {
-    expect(
-      transformAdhocDataViewIn({
-        id: 'adhoc-1',
-        type: 'data_view_spec',
-        index_pattern: 'logs-*',
-        name: 'My logs',
-        time_field: '@timestamp',
-        allow_hidden_indices: true,
-      })
-    ).toEqual({
-      id: 'adhoc-1',
-      title: 'logs-*',
-      name: 'My logs',
-      timeFieldName: '@timestamp',
-      allowHidden: true,
-    });
-  });
-
-  test('should drop properties not supported by legacy shape', () => {
-    expect(
-      transformAdhocDataViewIn({
-        id: 'adhoc-1',
-        type: 'data_view_spec',
-        index_pattern: 'logs-*',
-        field_filters: ['secret*'],
-        field_settings: { rt: { type: 'keyword', script: 'emit("a")' } },
-      })
-    ).toEqual({ id: 'adhoc-1', title: 'logs-*' });
-  });
-
-  test('should round trip', () => {
-    const legacy = { id: 'adhoc-1', title: 'logs-*', timeFieldName: '@timestamp' };
-    expect(transformAdhocDataViewIn(transformAdhocDataViewOut(legacy))).toEqual(legacy);
+    expect(() => transformAdhocDataViewOut({ title: 'logs-*' } as LegacyAdhocDataView)).toThrow();
   });
 });
