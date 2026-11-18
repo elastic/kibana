@@ -41,17 +41,27 @@ interface BoundWorkloadsUsage {
   byBinderType: Record<string, number>;
 }
 
-const getServiceAccountsUsage = async (
+const countWorkflowBindings = ({ byWorkload }: BoundWorkloadsUsage): number =>
+  byWorkload.find(
+    ({ pluginId, workloadType }) =>
+      pluginId === 'workflowsExecutionEngine' && workloadType === 'workflow'
+  )?.count ?? 0;
+
+const getBoundWorkloadsUsage = async (
   apiClient: ApiClientFixture,
   headers: Record<string, string>
-): Promise<{ enabled: boolean; boundWorkloads?: BoundWorkloadsUsage }> => {
+): Promise<BoundWorkloadsUsage> => {
   const response = await apiClient.post('internal/telemetry/clusters/_stats', {
     headers: { ...headers, 'elastic-api-version': '2' },
     body: { unencrypted: true, refreshCache: true },
     responseType: 'json',
   });
   expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
-  return response.body[0].stats.stack_stats.kibana.plugins.security.serviceAccounts;
+  const { enabled, boundWorkloads } =
+    response.body[0].stats.stack_stats.kibana.plugins.security.serviceAccounts;
+  expect(enabled).toBe(true);
+  expect(boundWorkloads).toBeDefined();
+  return boundWorkloads;
 };
 
 apiTest.describe(
@@ -106,21 +116,22 @@ apiTest.describe(
     );
 
     apiTest(
-      'reports a workflow bound by its own run_as in the security usage collector',
+      'reports workflows bound by their own run_as in the security usage collector',
       async ({ apiClient }) => {
-        const { headers, accountId, create } = getContext();
-        await create(apiClient, workflowYaml(accountId));
+        const { headers, sessionHeaders, accountId, create } = getContext();
+        const before = await getBoundWorkloadsUsage(apiClient, headers);
 
-        const { enabled, boundWorkloads } = await getServiceAccountsUsage(apiClient, headers);
-        expect(enabled).toBe(true);
-        expect(boundWorkloads?.total).toBeGreaterThanOrEqual(1);
-        expect(boundWorkloads?.serviceAccounts).toBeGreaterThanOrEqual(1);
-        const workflows = boundWorkloads?.byWorkload.find(
-          ({ pluginId, workloadType }) =>
-            pluginId === 'workflowsExecutionEngine' && workloadType === 'workflow'
-        );
-        expect(workflows?.count).toBeGreaterThanOrEqual(1);
-        expect(boundWorkloads?.byBinderType.user).toBeGreaterThanOrEqual(1);
+        // The suite's default headers carry an API key; the session headers carry a user.
+        await create(apiClient, workflowYaml(accountId));
+        await create(apiClient, workflowYaml(accountId), sessionHeaders);
+
+        const after = await getBoundWorkloadsUsage(apiClient, headers);
+        expect(after.total - before.total).toBe(2);
+        expect(after.serviceAccounts - before.serviceAccounts).toBe(1);
+        expect(countWorkflowBindings(after) - countWorkflowBindings(before)).toBe(2);
+        expect(after.byBinderType.api_key - before.byBinderType.api_key).toBe(1);
+        expect(after.byBinderType.user - before.byBinderType.user).toBe(1);
+        expect(after.byBinderType.service_account - before.byBinderType.service_account).toBe(0);
       }
     );
   }
