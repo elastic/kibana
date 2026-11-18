@@ -80,6 +80,22 @@ describe('detectionSignalSchema', () => {
     expect(detectionSignalSchema.safeParse(host).success).toBe(false);
   });
 
+  it('rejects details that the flattened data field could not index', () => {
+    const withDetails = (details: Record<string, unknown>) => ({
+      ...SIGNAL,
+      data: { ...SIGNAL.data, details },
+    });
+    const deep = Array.from({ length: 20 }).reduce<Record<string, unknown>>(
+      (inner) => ({ a: inner }),
+      {}
+    );
+
+    expect(
+      detectionSignalSchema.safeParse(withDetails({ trace: 'x'.repeat(20_000) })).success
+    ).toBe(false);
+    expect(detectionSignalSchema.safeParse(withDetails(deep)).success).toBe(false);
+  });
+
   it('rejects a rule object, which the engine never sets', () => {
     expect(detectionSignalSchema.safeParse({ ...SIGNAL, rule: { id: 'rule-1' } }).success).toBe(
       false

@@ -17,6 +17,33 @@ export const DETECTION_SIGNAL_SOURCE = 'elastic.nightshift_detection_engine';
  * bytes per UTF-16 unit keeps 10,000 units under that.
  */
 const MAX_TEXT_LENGTH = 10_000;
+/**
+ * Deepest nesting inside `details`. `flattened` rejects a document nested deeper than 20 levels
+ * from `data`, and `details` itself is one of them.
+ */
+const MAX_DETAILS_DEPTH = 16;
+
+function getDepth(value: unknown): number {
+  if (value === null || typeof value !== 'object') {
+    return 0;
+  }
+  return 1 + Math.max(0, ...Object.values(value).map(getDepth));
+}
+
+/**
+ * Whether `details` fits the `flattened` field it is stored in. A serialized size within
+ * {@link MAX_TEXT_LENGTH} keeps every string in it under Lucene's term limit too.
+ */
+function isStorableDetails(details: Record<string, unknown>): boolean {
+  try {
+    return (
+      JSON.stringify(details).length <= MAX_TEXT_LENGTH && getDepth(details) <= MAX_DETAILS_DEPTH
+    );
+  } catch (error) {
+    // A value JSON can't hold, such as a bigint or a cycle, can't be stored either.
+    return false;
+  }
+}
 
 /**
  * What a signal can be about. Closed now because the history read skips a stored signal that no
@@ -72,8 +99,13 @@ export const detectionSignalReadingSchema = lazySchema(() =>
     role: z.enum(['primary', 'supporting']),
     /** Whether the judge should compare the reading with what is normal for the series. */
     compare_with_normal: z.boolean(),
-    /** Strategy-specific detail for the judge, kept as reported. Engine code never reads it. */
-    details: z.record(z.string(), z.unknown()),
+    /**
+     * Strategy-specific detail for the judge, kept as reported. Engine code never reads it. At most
+     * {@link MAX_TEXT_LENGTH} characters serialized and {@link MAX_DETAILS_DEPTH} levels deep.
+     */
+    details: z.record(z.string(), z.unknown()).refine(isStorableDetails, {
+      message: `details must serialize to at most ${MAX_TEXT_LENGTH} characters and ${MAX_DETAILS_DEPTH} levels`,
+    }),
   })
 );
 
