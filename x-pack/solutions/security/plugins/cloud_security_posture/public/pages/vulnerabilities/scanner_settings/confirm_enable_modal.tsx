@@ -127,6 +127,8 @@ const PolicyEntry = ({ policy }: { policy: PolicyPlan }) => {
   );
 };
 
+const noop = () => {};
+
 export const ConfirmEnableModal = ({
   plan,
   isApplying,
@@ -140,7 +142,7 @@ export const ConfirmEnableModal = ({
 
   return (
     <EuiModal
-      onClose={onCancel}
+      onClose={isApplying ? noop : onCancel}
       aria-labelledby={titleId}
       maxWidth={900}
       data-test-subj={SCANNER_SETTINGS_TEST_SUBJECTS.CONFIRM_MODAL}

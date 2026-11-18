@@ -42,6 +42,8 @@ export const SCANNER_SETTINGS_TEST_SUBJECTS = {
 
 export const getPolicyRowTestSubject = (policyId: string, column: string) =>
   `nativeVulnScannerPolicy-${policyId}-${column}`;
+export const getCollectInventoryTestSubject = (policyId: string) =>
+  getPolicyRowTestSubject(policyId, 'collect');
 export const getConfirmPolicyTestSubject = (policyId: string) =>
   `nativeVulnScannerConfirmPolicy-${policyId}`;
 export const getApplyPolicyTestSubject = (policyId: string) =>

@@ -68,6 +68,8 @@ export interface PackDifference {
 
 export interface PackInspection {
   state: PackState;
+  /** Saved object id of the stored pack, so the UI can run it as a live query. Absent when missing. */
+  packId?: string;
   /** Why the pack differs from the expected body; empty unless `state` is `differs`. */
   differences: PackDifference[];
   /** Agent policies the pack is assigned to. */

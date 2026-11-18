@@ -15,7 +15,7 @@ import type {
   RuntimePinResult,
 } from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import type { NativeVulnScannerClient } from '../../../common/api/use_native_vuln_scanner_api';
-import { applyOnboarding } from './apply_onboarding';
+import { PIN_RESTART_SETTLE_MS, applyOnboarding as applyWithSettle } from './apply_onboarding';
 
 const createClient = () => {
   const calls: string[] = [];
@@ -51,6 +51,13 @@ const httpError = (status: number, message: string, code?: string) => ({
   response: { status },
   body: { message, attributes: code ? { code } : undefined },
 });
+
+/** The settle delay is covered on its own; every other test runs without it. */
+const applyOnboarding = (
+  client: NativeVulnScannerClient,
+  plan: OnboardingPlan,
+  selectedPolicyIds: string[]
+) => applyWithSettle(client, plan, selectedPolicyIds, 0);
 
 describe('applyOnboarding', () => {
   it('pins, creates the missing pack, then runs the live query, in that order', async () => {
@@ -223,6 +230,45 @@ describe('applyOnboarding', () => {
     expect(result.pack).toEqual({ status: 'failed', message: 'pack write failed' });
     expect(result.liveQuery).toEqual({ status: 'not_run' });
     expect(client.runPackLiveQuery).not.toHaveBeenCalled();
+  });
+
+  describe('settle delay after the pin restart', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('waits for the settle delay before the live query when a pin updated the policy', async () => {
+      const { client, asClient } = createClient();
+      client.pinRuntime.mockResolvedValueOnce({
+        results: [pinResult('p1'), pinResult('p2', 'no_change')],
+      });
+
+      const pending = applyWithSettle(asClient, planWith('create'), ['p1', 'p2']);
+
+      await jest.advanceTimersByTimeAsync(PIN_RESTART_SETTLE_MS - 1);
+      expect(client.createPack).toHaveBeenCalled();
+      expect(client.runPackLiveQuery).not.toHaveBeenCalled();
+
+      await jest.advanceTimersByTimeAsync(1);
+      const result = await pending;
+      expect(client.runPackLiveQuery).toHaveBeenCalledWith('new-pack', ['p1', 'p2']);
+      expect(result.liveQuery).toEqual({ status: 'started' });
+    });
+
+    it('does not wait when every pin was already in place', async () => {
+      const { client, asClient } = createClient();
+      client.pinRuntime.mockResolvedValueOnce({ results: [pinResult('p1', 'no_change')] });
+
+      // No timer is advanced: a wait here would leave the promise pending.
+      const result = await applyWithSettle(asClient, planWith('create'), ['p1']);
+
+      expect(client.runPackLiveQuery).toHaveBeenCalledWith('new-pack', ['p1']);
+      expect(result.liveQuery).toEqual({ status: 'started' });
+    });
   });
 
   describe('live query errors', () => {

@@ -16,6 +16,7 @@ import type {
   SummaryRunStatus,
 } from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import { ErrorCode } from '@kbn/cloud-security-posture-common/native_vuln_scanner/constants';
+import type { LiveQueryResult } from './apply_onboarding';
 import type { HttpErrorInfo } from './http_error';
 
 export const getRefusalText = (reason: PolicyRefusalReason | undefined, key?: string): string => {
@@ -244,5 +245,36 @@ export const getScanErrorText = ({ code, message }: HttpErrorInfo): string => {
           defaultMessage: 'The scan could not be started.',
         })
       );
+  }
+};
+
+/** The result of a single "Collect inventory now" request, translated. */
+export const getCollectInventoryText = ({ status, message }: LiveQueryResult): string => {
+  switch (status) {
+    case 'started':
+      return i18n.translate('xpack.csp.nativeVulnScanner.collectInventory.started', {
+        defaultMessage: 'The inventory was requested. It can take a few minutes to show up.',
+      });
+    case 'no_agents':
+      return i18n.translate('xpack.csp.nativeVulnScanner.collectInventory.noAgents', {
+        defaultMessage: 'No online agents in this policy. The daily pack will pick them up.',
+      });
+    case 'skipped':
+      return i18n.translate('xpack.csp.nativeVulnScanner.collectInventory.skipped', {
+        defaultMessage:
+          'The inventory could not be requested now. It arrives with the daily schedule.',
+      });
+    default:
+      return i18n.translate('xpack.csp.nativeVulnScanner.collectInventory.failed', {
+        defaultMessage:
+          'The inventory request failed: {message}. It arrives with the daily schedule.',
+        values: {
+          message:
+            message ??
+            i18n.translate('xpack.csp.nativeVulnScanner.collectInventory.unknownError', {
+              defaultMessage: 'unknown error',
+            }),
+        },
+      });
   }
 };

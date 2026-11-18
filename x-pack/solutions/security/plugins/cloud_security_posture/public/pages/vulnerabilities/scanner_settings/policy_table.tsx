@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiBasicTable, EuiIconTip } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiButtonEmpty, EuiIconTip } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -14,7 +14,11 @@ import type {
   PolicyStatus,
 } from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import { getStateLabel } from './translations';
-import { SCANNER_SETTINGS_TEST_SUBJECTS, getPolicyRowTestSubject } from './test_subjects';
+import {
+  SCANNER_SETTINGS_TEST_SUBJECTS,
+  getCollectInventoryTestSubject,
+  getPolicyRowTestSubject,
+} from './test_subjects';
 
 interface PolicyTableProps {
   policies: PolicyStatus[];
@@ -23,6 +27,13 @@ interface PolicyTableProps {
   onSelectionChange: (ids: string[]) => void;
   /** False for read-only users: the rows stay visible but cannot be selected. */
   canSelect: boolean;
+  /**
+   * Re-requests the inventory of one policy. Omitted when the viewer cannot run the pack or the
+   * pack is unknown, which hides the action.
+   */
+  onCollectInventory?: (policyId: string) => void;
+  /** Ids of the policies whose inventory request is in flight. */
+  collectingIds?: string[];
 }
 
 const STATE_COLORS: Record<PolicyOnboardingState, string> = {
@@ -61,6 +72,8 @@ export const PolicyTable = ({
   selectedIds,
   onSelectionChange,
   canSelect,
+  onCollectInventory,
+  collectingIds = [],
 }: PolicyTableProps) => {
   const columns: Array<EuiBasicTableColumn<PolicyStatus>> = [
     {
@@ -124,6 +137,32 @@ export const PolicyTable = ({
       ),
     },
   ];
+
+  if (onCollectInventory) {
+    columns.push({
+      name: i18n.translate('xpack.csp.nativeVulnScanner.policyTable.actionsColumn', {
+        defaultMessage: 'Actions',
+      }),
+      render: ({ id, state }: PolicyStatus) => {
+        if (state !== 'pending_inventory') return null;
+        const isCollecting = collectingIds.includes(id);
+        return (
+          <EuiButtonEmpty
+            size="xs"
+            iconType="refresh"
+            onClick={() => onCollectInventory(id)}
+            isDisabled={isCollecting}
+            isLoading={isCollecting}
+            data-test-subj={getCollectInventoryTestSubject(id)}
+          >
+            {i18n.translate('xpack.csp.nativeVulnScanner.policyTable.collectInventory', {
+              defaultMessage: 'Collect inventory now',
+            })}
+          </EuiButtonEmpty>
+        );
+      },
+    });
+  }
 
   return (
     <EuiBasicTable<PolicyStatus>

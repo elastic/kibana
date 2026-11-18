@@ -21,6 +21,14 @@ import { getHttpErrorInfo } from './http_error';
 
 const NO_AGENTS_FOUND_CODE = 'NO_AGENTS_FOUND';
 
+/**
+ * Pinning the runtime restarts osquerybeat on every agent of the policy. A live query sent while it
+ * restarts is acknowledged by Fleet but never answered, because osqueryd reconnects later. The
+ * reconnect took 1-2 seconds when traced, so 10 seconds also covers slow hosts without making the
+ * apply feel stuck.
+ */
+export const PIN_RESTART_SETTLE_MS = 10000;
+
 export type PackStepStatus = 'created' | 'updated' | 'unchanged' | 'failed' | 'not_run';
 
 export interface PackStepResult {
@@ -95,8 +103,16 @@ const applyPack = async (
   }
 };
 
-/** A refused live query is not a failure: the daily schedule still delivers the first inventory. */
-const runLiveQuery = async (
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+/**
+ * Runs the inventory pack as a live query. A refused live query is not a failure: the daily
+ * schedule still delivers the inventory.
+ */
+export const requestInventory = async (
   client: NativeVulnScannerClient,
   packId: string,
   policyIds: string[]
@@ -115,12 +131,14 @@ const runLiveQuery = async (
 /**
  * Applies the onboarding in order: runtime pin, then the osquery pack (create, or update with the
  * selected policies merged into the existing ones), then a live query for the first inventory.
+ * When a pin restarted osquerybeat, the live query waits `settleMs` for the agents to reconnect.
  * A failing pin request throws; later steps report their own result instead.
  */
 export const applyOnboarding = async (
   client: NativeVulnScannerClient,
   plan: OnboardingPlan,
-  selectedPolicyIds: string[]
+  selectedPolicyIds: string[],
+  settleMs: number = PIN_RESTART_SETTLE_MS
 ): Promise<ApplyOnboardingResult> => {
   const { results } = await client.pinRuntime(selectedPolicyIds);
 
@@ -138,6 +156,9 @@ export const applyOnboarding = async (
     return { policies: results, pack, liveQuery: { status: 'not_run' } };
   }
 
-  const liveQuery = await runLiveQuery(client, pack.packId, eligibleIds);
+  // Only an `updated` pin restarted osquerybeat; with `no_change` the agents are already up.
+  if (results.some(({ outcome }) => outcome === 'updated')) await wait(settleMs);
+
+  const liveQuery = await requestInventory(client, pack.packId, eligibleIds);
   return { policies: results, pack, liveQuery };
 };

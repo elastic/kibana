@@ -106,7 +106,7 @@ const compareQueries = (pack: StoredPack): PackDifference[] => {
   if (pack.enabled === false) differences.push({ code: 'pack_disabled' });
   // osquery rejects a pack-level interval without schedule_type 'interval', so an explicit other
   // type is drift. A missing type (pack saved before osquery stored it) still runs on its intervals
-  // and is completed by the next pack PUT, which always sends it.
+  // and is completed by the next PUT when rrule scheduling is enabled.
   if (pack.schedule_type != null && pack.schedule_type !== INVENTORY_PACK_BODY.schedule_type) {
     differences.push({ code: 'schedule_type_differs' });
   }
@@ -157,6 +157,7 @@ export const inspectInventoryPack = async (
       const differences = compareQueries(pack.attributes);
       return {
         state: differences.length === 0 ? 'ok' : 'differs',
+        packId: pack.id,
         differences,
         policyIds: pack.references
           .filter(({ type }) => type === POLICY_REFERENCE_TYPE)

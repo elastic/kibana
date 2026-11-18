@@ -51,6 +51,7 @@ describe('inspectInventoryPack', () => {
     const soClient = findReturns([packObject({}, ['p1', 'p2'])]);
     expect(await inspectInventoryPack(soClient)).toEqual({
       state: 'ok',
+      packId: 'pack-1',
       differences: [],
       policyIds: ['p1', 'p2'],
     });
@@ -95,7 +96,7 @@ describe('inspectInventoryPack', () => {
     const result = await inspectInventoryPack(
       findReturns([packObject({ ...pack, queries: Object.values(queries) })])
     );
-    expect(result).toEqual({ state: 'ok', differences: [], policyIds: [] });
+    expect(result).toEqual({ state: 'ok', packId: 'pack-1', differences: [], policyIds: [] });
   });
 
   it('reports a pack-level interval that differs, but not an absent one', async () => {

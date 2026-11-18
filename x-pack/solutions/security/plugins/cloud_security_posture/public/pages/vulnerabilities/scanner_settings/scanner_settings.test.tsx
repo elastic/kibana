@@ -8,7 +8,7 @@
 import React from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import { of } from 'rxjs';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AppStatus } from '@kbn/core/public';
 import type { PublicAppInfo } from '@kbn/core/public';
@@ -30,10 +30,12 @@ import type {
 } from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import { TestProvider } from '../../../test/test_provider';
 import { getMockDependencies } from '../../../test/fixtures/get_mock_dependencies';
-import { SCAN_START_GRACE_MS, ScannerSettingsPage } from '.';
+import { INVENTORY_RETRY_MS, SCAN_START_GRACE_MS, ScannerSettingsPage } from '.';
+import { PIN_RESTART_SETTLE_MS } from './apply_onboarding';
 import {
   SCANNER_SETTINGS_TEST_SUBJECTS,
   getApplyPolicyTestSubject,
+  getCollectInventoryTestSubject,
   getConfirmPolicyTestSubject,
   getPolicyRowTestSubject,
 } from './test_subjects';
@@ -128,6 +130,8 @@ interface SetupOptions {
   workflowsAppStatus?: AppStatus | null;
   /** Id of the active space. */
   spaceId?: string;
+  /** `osquery` UI capabilities of the viewer. */
+  osqueryCapabilities?: Record<string, boolean>;
 }
 
 const setup = (
@@ -137,10 +141,14 @@ const setup = (
     workflowsCapabilities = WORKFLOWS_READ_CAPABILITIES,
     workflowsAppStatus = AppStatus.accessible,
     spaceId = DEFAULT_SPACE_ID,
+    osqueryCapabilities = { readPacks: true, writeLiveQueries: true },
   }: SetupOptions = {}
 ) => {
   const core = coreMock.createStart();
-  Object.assign(core.application.capabilities, { workflowsManagement: workflowsCapabilities });
+  Object.assign(core.application.capabilities, {
+    workflowsManagement: workflowsCapabilities,
+    osquery: osqueryCapabilities,
+  });
   core.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
@@ -201,14 +209,16 @@ const setup = (
 
 const waitForPage = () => screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.PAGE);
 
-const selectRow = async (id: string) => {
-  await userEvent.click(await screen.findByTestId(`checkboxSelectRow-${id}`));
+type User = ReturnType<typeof userEvent.setup>;
+
+const selectRow = async (id: string, user: Pick<User, 'click'> = userEvent) => {
+  await user.click(await screen.findByTestId(`checkboxSelectRow-${id}`));
 };
 
-const planAndOpenModal = async () => {
+const planAndOpenModal = async (user: Pick<User, 'click'> = userEvent) => {
   await waitForPage();
-  await selectRow('p1');
-  await userEvent.click(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.ENABLE_BUTTON));
+  await selectRow('p1', user);
+  await user.click(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.ENABLE_BUTTON));
   return screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.CONFIRM_MODAL);
 };
 
@@ -330,11 +340,30 @@ describe('ScannerSettingsPage', () => {
   });
 
   describe('apply', () => {
-    it('pins, creates the missing pack, then runs the live query, and reports the result', async () => {
-      const { calls } = setup();
-      await planAndOpenModal();
+    // Pinning restarts osquerybeat, so the apply waits before the live query.
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
 
-      await userEvent.click(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.CONFIRM_BUTTON));
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const fakeTimerUser = () => userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+    const confirmAndSettle = async (user: User) => {
+      await user.click(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.CONFIRM_BUTTON));
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(PIN_RESTART_SETTLE_MS + 100);
+      });
+    };
+
+    it('pins, creates the missing pack, then runs the live query, and reports the result', async () => {
+      const user = fakeTimerUser();
+      const { calls } = setup();
+      await planAndOpenModal(user);
+
+      await confirmAndSettle(user);
 
       const results = await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.APPLY_RESULTS);
       expect(within(results).getByTestId(getApplyPolicyTestSubject('p1'))).toBeInTheDocument();
@@ -365,6 +394,7 @@ describe('ScannerSettingsPage', () => {
     });
 
     it('updates the existing pack with PUT instead of creating a second one', async () => {
+      const user = fakeTimerUser();
       const { calls, core } = setup({
         packs: [{ saved_object_id: 'pack-1', name: INVENTORY_PACK_NAME, policy_ids: ['other'] }],
         plan: {
@@ -372,9 +402,9 @@ describe('ScannerSettingsPage', () => {
           policies: createPlan().policies,
         } satisfies OnboardingPlan,
       });
-      await planAndOpenModal();
+      await planAndOpenModal(user);
 
-      await userEvent.click(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.CONFIRM_BUTTON));
+      await confirmAndSettle(user);
       await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.APPLY_RESULTS);
 
       expect(calls).toContain('PUT /api/osquery/packs/pack-1');
@@ -388,10 +418,11 @@ describe('ScannerSettingsPage', () => {
     });
 
     it('falls back to "daily schedule" text when the live query answers 403', async () => {
+      const user = fakeTimerUser();
       setup({ liveQuery: httpError(403, 'Forbidden') });
-      await planAndOpenModal();
+      await planAndOpenModal(user);
 
-      await userEvent.click(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.CONFIRM_BUTTON));
+      await confirmAndSettle(user);
 
       const results = await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.APPLY_RESULTS);
       expect(
@@ -403,6 +434,248 @@ describe('ScannerSettingsPage', () => {
       expect(
         screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.APPLY_ERROR)
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('first inventory', () => {
+    const pendingStatus = (overrides: Partial<OnboardingStatus> = {}) =>
+      createStatus({
+        pack: { state: 'ok', packId: 'pack-1', differences: [], policyIds: ['p1', 'p2'] },
+        policies: [
+          policyStatus({ id: 'p1', state: 'pending_inventory', packAssigned: true }),
+          policyStatus({ id: 'p2', state: 'reporting', packAssigned: true }),
+        ],
+        ...overrides,
+      });
+
+    const getLiveQueryBodies = (core: ReturnType<typeof setup>['core']) => {
+      const calls: ReadonlyArray<readonly unknown[]> = core.http.post.mock.calls;
+      return calls
+        .filter(([path]) => path === OSQUERY_LIVE_QUERIES_PATH)
+        .map(([, options]) => {
+          if (typeof options !== 'object' || options === null || !('body' in options)) {
+            return undefined;
+          }
+          const { body } = options;
+          return typeof body === 'string' ? JSON.parse(body) : undefined;
+        });
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const fakeTimerUser = () => userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+    const applyAndSettle = async (user: User) => {
+      await planAndOpenModal(user);
+      await user.click(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.CONFIRM_BUTTON));
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(PIN_RESTART_SETTLE_MS + 100);
+      });
+      await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.APPLY_RESULTS);
+    };
+
+    it('keeps the confirm modal open on close or Escape while the apply waits for the pin to settle', async () => {
+      const user = fakeTimerUser();
+      setup({ status: () => pendingStatus() });
+      await planAndOpenModal(user);
+      await user.click(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.CONFIRM_BUTTON));
+
+      const modal = screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.CONFIRM_MODAL);
+      fireEvent.keyDown(modal, { key: 'Escape' });
+      await user.click(within(modal).getByLabelText('Closes this modal window'));
+
+      expect(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.CONFIRM_MODAL)).toBeInTheDocument();
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(PIN_RESTART_SETTLE_MS + 100);
+      });
+      await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.APPLY_RESULTS);
+      expect(
+        screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.CONFIRM_MODAL)
+      ).not.toBeInTheDocument();
+    });
+
+    describe('automatic retry', () => {
+      it('requests the inventory once more for the applied policies that are still pending', async () => {
+        const user = fakeTimerUser();
+        const { core } = setup({ status: () => pendingStatus() });
+        await applyAndSettle(user);
+        expect(getLiveQueryBodies(core)).toHaveLength(1);
+
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(INVENTORY_RETRY_MS);
+        });
+
+        // Only p1 is pending and applied; p2 was refused by the pin and already reports.
+        expect(getLiveQueryBodies(core)).toEqual([
+          { pack_id: 'new-pack', agent_policy_ids: ['p1'] },
+          { pack_id: 'pack-1', agent_policy_ids: ['p1'] },
+        ]);
+      });
+
+      it('retries only once, however long the policy stays pending', async () => {
+        const user = fakeTimerUser();
+        const { core } = setup({ status: () => pendingStatus() });
+        await applyAndSettle(user);
+
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(INVENTORY_RETRY_MS * 4);
+        });
+
+        expect(getLiveQueryBodies(core)).toHaveLength(2);
+      });
+
+      it('does not retry a policy that reports by then', async () => {
+        const user = fakeTimerUser();
+        let current = pendingStatus();
+        const { core } = setup({ status: () => current });
+        await applyAndSettle(user);
+
+        current = pendingStatus({
+          policies: [
+            policyStatus({ id: 'p1', state: 'reporting', packAssigned: true }),
+            policyStatus({ id: 'p2', state: 'reporting', packAssigned: true }),
+          ],
+        });
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(INVENTORY_RETRY_MS * 2);
+        });
+
+        expect(getLiveQueryBodies(core)).toHaveLength(1);
+      });
+
+      it('is cancelled when the page unmounts', async () => {
+        const user = fakeTimerUser();
+        const { core, unmount } = setup({ status: () => pendingStatus() });
+        await applyAndSettle(user);
+
+        unmount();
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(INVENTORY_RETRY_MS * 2);
+        });
+
+        expect(getLiveQueryBodies(core)).toHaveLength(1);
+      });
+
+      it('does not run for a viewer who cannot run the pack', async () => {
+        const user = fakeTimerUser();
+        const { core } = setup({ status: () => pendingStatus() }, { osqueryCapabilities: {} });
+        await applyAndSettle(user);
+
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(INVENTORY_RETRY_MS * 2);
+        });
+
+        expect(getLiveQueryBodies(core)).toHaveLength(1);
+      });
+
+      it('does not run for a viewer who can read packs but not run them', async () => {
+        const user = fakeTimerUser();
+        const { core } = setup(
+          { status: () => pendingStatus() },
+          { osqueryCapabilities: { readPacks: true } }
+        );
+        await applyAndSettle(user);
+
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(INVENTORY_RETRY_MS * 2);
+        });
+
+        expect(getLiveQueryBodies(core)).toHaveLength(1);
+      });
+    });
+
+    describe('"Collect inventory now"', () => {
+      it('is shown on pending rows only', async () => {
+        setup({ status: pendingStatus() });
+        await waitForPage();
+
+        expect(screen.getByTestId(getCollectInventoryTestSubject('p1'))).toBeInTheDocument();
+        expect(screen.queryByTestId(getCollectInventoryTestSubject('p2'))).not.toBeInTheDocument();
+      });
+
+      it('is hidden when the viewer can only read packs', async () => {
+        setup({ status: pendingStatus() }, { osqueryCapabilities: { readPacks: true } });
+        await waitForPage();
+
+        expect(screen.queryByTestId(getCollectInventoryTestSubject('p1'))).not.toBeInTheDocument();
+      });
+
+      it('is shown when the viewer can read packs and run saved queries', async () => {
+        setup(
+          { status: pendingStatus() },
+          { osqueryCapabilities: { readPacks: true, runSavedQueries: true } }
+        );
+        await waitForPage();
+
+        expect(screen.getByTestId(getCollectInventoryTestSubject('p1'))).toBeInTheDocument();
+      });
+
+      it('is hidden when the viewer cannot read packs', async () => {
+        setup({ status: pendingStatus() }, { osqueryCapabilities: { writeLiveQueries: true } });
+        await waitForPage();
+
+        expect(screen.queryByTestId(getCollectInventoryTestSubject('p1'))).not.toBeInTheDocument();
+      });
+
+      it('is hidden when the pack id is unknown', async () => {
+        setup({
+          status: pendingStatus({ pack: { state: 'missing', differences: [], policyIds: [] } }),
+        });
+        await waitForPage();
+
+        expect(screen.queryByTestId(getCollectInventoryTestSubject('p1'))).not.toBeInTheDocument();
+      });
+
+      it('requests the inventory of that one policy and reports it', async () => {
+        const user = fakeTimerUser();
+        const { core } = setup({ status: pendingStatus() });
+        await waitForPage();
+
+        await user.click(screen.getByTestId(getCollectInventoryTestSubject('p1')));
+
+        await waitFor(() => expect(core.notifications.toasts.addSuccess).toHaveBeenCalled());
+        expect(getLiveQueryBodies(core)).toEqual([{ pack_id: 'pack-1', agent_policy_ids: ['p1'] }]);
+      });
+
+      it('explains that the daily schedule delivers it when the live query answers 403', async () => {
+        const user = fakeTimerUser();
+        const { core } = setup({
+          status: pendingStatus(),
+          liveQuery: httpError(403, 'Forbidden'),
+        });
+        await waitForPage();
+
+        await user.click(screen.getByTestId(getCollectInventoryTestSubject('p1')));
+
+        await waitFor(() => expect(core.notifications.toasts.addWarning).toHaveBeenCalled());
+        expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith(
+          expect.stringContaining('daily schedule')
+        );
+        expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+      });
+
+      it('says so when no agent of the policy is online', async () => {
+        const user = fakeTimerUser();
+        const { core } = setup({
+          status: pendingStatus(),
+          liveQuery: httpError(400, 'No agents found', 'NO_AGENTS_FOUND'),
+        });
+        await waitForPage();
+
+        await user.click(screen.getByTestId(getCollectInventoryTestSubject('p1')));
+
+        await waitFor(() =>
+          expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith(
+            expect.stringContaining('No online agents')
+          )
+        );
+      });
     });
   });
 

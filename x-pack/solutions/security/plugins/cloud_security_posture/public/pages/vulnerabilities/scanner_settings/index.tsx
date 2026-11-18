@@ -27,7 +27,7 @@ import {
   useNativeVulnScannerClient,
   useNativeVulnScannerStatus,
 } from '../../../common/api/use_native_vuln_scanner_api';
-import { applyOnboarding } from './apply_onboarding';
+import { applyOnboarding, requestInventory } from './apply_onboarding';
 import type { ApplyOnboardingResult } from './apply_onboarding';
 import { ApplyResults } from './apply_results';
 import { ConfirmEnableModal } from './confirm_enable_modal';
@@ -36,10 +36,17 @@ import { PolicyCallouts } from './policy_callouts';
 import { PolicyTable } from './policy_table';
 import { ScanSection } from './scan_section';
 import { ScannerExplainer } from './scanner_explainer';
+import { getCollectInventoryText } from './translations';
 import { SCANNER_SETTINGS_TEST_SUBJECTS } from './test_subjects';
 
 /** How long to wait for a started scan to show up as running before the page stops waiting. */
 export const SCAN_START_GRACE_MS = 60000;
+
+/**
+ * How long after an apply a policy may still be waiting for its first inventory before the page
+ * requests it once more. A live query that raced the osquerybeat restart is never answered.
+ */
+export const INVENTORY_RETRY_MS = 60000;
 
 const PAGE_TITLE = i18n.translate('xpack.csp.nativeVulnScanner.page.title', {
   defaultMessage: 'Host vulnerability scanning',
@@ -48,7 +55,7 @@ const PAGE_TITLE = i18n.translate('xpack.csp.nativeVulnScanner.page.title', {
 export const ScannerSettingsPage = () => {
   const client = useNativeVulnScannerClient();
   const queryClient = useQueryClient();
-  const { fleet } = useKibana().services;
+  const { fleet, application, notifications } = useKibana().services;
 
   const [awaitingScan, setAwaitingScan] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -59,6 +66,7 @@ export const ScannerSettingsPage = () => {
   const [applyError, setApplyError] = useState<string | null>(null);
   const [applyResult, setApplyResult] = useState<ApplyOnboardingResult | null>(null);
   const [deniedByServer, setDeniedByServer] = useState(false);
+  const [collectingIds, setCollectingIds] = useState<string[]>([]);
 
   const { data: status, isLoading } = useNativeVulnScannerStatus({ awaitingScan });
 
@@ -95,8 +103,61 @@ export const ScannerSettingsPage = () => {
   }, [awaitingScan]);
 
   const canEdit = fleet.authz.fleet.allAgentPolicies && !deniedByServer;
+  // Running a pack as a live query needs `readPacks` plus either `writeLiveQueries` or
+  // `runSavedQueries` (see the osquery live query authz). `readPacks` alone, as the osquery read
+  // privilege grants, would only produce a 403.
+  const { readPacks, writeLiveQueries, runSavedQueries } = application.capabilities.osquery ?? {};
+  const canRunPack = readPacks === true && (writeLiveQueries === true || runSavedQueries === true);
 
   const refreshStatus = () => queryClient.invalidateQueries([NATIVE_VULN_SCANNER_STATUS_QUERY_KEY]);
+
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | undefined>();
+  const cancelInventoryRetry = useCallback(() => {
+    clearTimeout(retryTimer.current);
+    retryTimer.current = undefined;
+  }, []);
+  useEffect(() => cancelInventoryRetry, [cancelInventoryRetry]);
+
+  // One retry per apply, never re-armed: it covers a first request lost to the pin restart, and
+  // policies whose pin was `no_change` but are still pending from an earlier lost request.
+  const scheduleInventoryRetry = (policyIds: string[]) => {
+    cancelInventoryRetry();
+    if (!canRunPack || policyIds.length === 0) return;
+    retryTimer.current = setTimeout(async () => {
+      retryTimer.current = undefined;
+      try {
+        const fresh = await client.getStatus();
+        if (isInsufficientLicense(fresh)) return;
+        const { packId } = fresh.pack;
+        const stillPending = fresh.policies
+          .filter(({ id, state }) => state === 'pending_inventory' && policyIds.includes(id))
+          .map(({ id }) => id);
+        if (!packId || stillPending.length === 0) return;
+        await requestInventory(client, packId, stillPending);
+      } catch {
+        // A failed retry changes nothing: the daily schedule and the per-row action remain.
+      } finally {
+        refreshStatus();
+      }
+    }, INVENTORY_RETRY_MS);
+  };
+
+  const packId = status && !isInsufficientLicense(status) ? status.pack.packId : undefined;
+
+  const onCollectInventory = async (policyId: string) => {
+    if (!packId) return;
+    setCollectingIds((ids) => [...ids, policyId]);
+    try {
+      const result = await requestInventory(client, packId, [policyId]);
+      const text = getCollectInventoryText(result);
+      if (result.status === 'started') notifications.toasts.addSuccess(text);
+      else if (result.status === 'failed') notifications.toasts.addDanger(text);
+      else notifications.toasts.addWarning(text);
+    } finally {
+      setCollectingIds((ids) => ids.filter((id) => id !== policyId));
+      refreshStatus();
+    }
+  };
 
   const onEnable = async () => {
     setIsPlanning(true);
@@ -117,9 +178,16 @@ export const ScannerSettingsPage = () => {
   const onConfirm = async () => {
     if (!plan) return;
     setIsApplying(true);
+    cancelInventoryRetry();
     try {
-      setApplyResult(await applyOnboarding(client, plan, selectedIds));
+      const result = await applyOnboarding(client, plan, selectedIds);
+      setApplyResult(result);
       setSelectedIds([]);
+      scheduleInventoryRetry(
+        result.policies
+          .filter(({ outcome }) => outcome === 'updated' || outcome === 'no_change')
+          .map(({ id }) => id)
+      );
     } catch (e) {
       const { status: httpStatus, message } = getHttpErrorInfo(e);
       if (httpStatus === 403) setDeniedByServer(true);
@@ -231,6 +299,8 @@ export const ScannerSettingsPage = () => {
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
           canSelect={canEdit}
+          onCollectInventory={canRunPack && packId ? onCollectInventory : undefined}
+          collectingIds={collectingIds}
         />
         {planError !== null && (
           <>
