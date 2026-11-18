@@ -54,12 +54,14 @@ const DataSourceOption: FC<DataSourceOptionProps> = ({
   </EuiPanel>
 );
 
-const noop = () => {};
-
 export const Page: FC = () => {
   const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
   const navigateToSelectDataView = useCreateAndNavigateToManagementMlLink(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+    'anomaly_detection'
+  );
+  const navigateToEsqlWizard = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ESQL,
     'anomaly_detection'
   );
 
@@ -83,7 +85,7 @@ export const Page: FC = () => {
             description={i18n.translate('xpack.ml.newJob.wizard.selectDataSource.esqlDescription', {
               defaultMessage: 'Use an ES|QL query as the source of data for the job.',
             })}
-            onClick={noop}
+            onClick={navigateToEsqlWizard}
           />
         </EuiFlexItem>
         <EuiFlexItem>

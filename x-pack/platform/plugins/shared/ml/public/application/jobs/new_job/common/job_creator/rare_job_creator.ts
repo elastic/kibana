@@ -17,11 +17,11 @@ import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/dataf
 import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { JobCreator } from './job_creator';
+import { JobCreatorClassic } from './job_creator_classic';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors, isSparseDataJob } from './util/general';
 
-export class RareJobCreator extends JobCreator {
+export class RareJobCreator extends JobCreatorClassic {
   private _rareField: Field | null = null;
   private _populationField: SplitField = null;
   private _splitField: SplitField = null;
