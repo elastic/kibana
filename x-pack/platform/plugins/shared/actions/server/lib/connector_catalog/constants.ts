@@ -17,6 +17,3 @@ export const getCatalogAssetDocId = (sha256: string): string => `asset:${sha256}
 
 // The flag read alone can wait 10 seconds for the provider, so the whole first load gets 30.
 export const CATALOG_FIRST_LOAD_TIMEOUT_MS = 30_000;
-
-// Leave margin before Core's 10-second start lifecycle limit.
-export const CATALOG_STARTUP_TIMEOUT_MS = 8_000;

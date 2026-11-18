@@ -12,7 +12,6 @@ export type { ConnectorCatalogHandle } from './start_connector_catalog';
 export { buildTypeFromStoredSpec } from './build_type_from_stored_spec';
 export type { BuildTypeFromStoredSpec } from './build_type_from_stored_spec';
 export {
-  CATALOG_STARTUP_TIMEOUT_MS,
   CATALOG_FIRST_LOAD_TIMEOUT_MS,
   CATALOG_MANIFEST_DOC_ID,
   CONNECTOR_TYPE_CATALOG_INDEX,

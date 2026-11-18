@@ -23,7 +23,6 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { withTimeout } from '@kbn/std';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -144,7 +143,6 @@ import {
   buildTypeFromStoredSpec,
   createConnectorCatalogStorage,
   startConnectorCatalog,
-  CATALOG_STARTUP_TIMEOUT_MS,
   type ConnectorCatalogHandle,
 } from './lib/connector_catalog';
 
@@ -316,12 +314,7 @@ const includedHiddenTypes = [
 
 export class ActionsPlugin
   implements
-    Plugin<
-      PluginSetupContract,
-      PluginStartContract | Promise<PluginStartContract>,
-      ActionsPluginsSetup,
-      ActionsPluginsStart
-    >
+    Plugin<PluginSetupContract, PluginStartContract, ActionsPluginsSetup, ActionsPluginsStart>
 {
   private readonly logger: Logger;
   private readonly actionsConfig: ActionsConfig;
@@ -652,10 +645,7 @@ export class ActionsPlugin
     return setupContract;
   }
 
-  public start(
-    core: CoreStart,
-    plugins: ActionsPluginsStart
-  ): PluginStartContract | Promise<PluginStartContract> {
+  public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
     this.securityStart = plugins.security;
     if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
       this.logger.warn(
@@ -989,8 +979,8 @@ export class ActionsPlugin
       },
     };
 
-    const validation = this.validateEnabledConnectorTypes(plugins, connectorCatalog.ready);
-    return validation ? validation.then(() => startContract) : startContract;
+    this.validateEnabledConnectorTypes(plugins, connectorCatalog.ready);
+    return startContract;
   }
 
   private getUnsecuredSavedObjectsClient = (
@@ -1256,37 +1246,38 @@ export class ActionsPlugin
     return handle;
   }
 
+  /** Warns about allowlisted connector types that are still not registered after the first catalog load. */
   private validateEnabledConnectorTypes = (
     plugins: ActionsPluginsStart,
     catalogReady: Promise<void>
-  ): Promise<void> | undefined => {
+  ): void => {
     const { enabledActionTypes } = this.actionsConfig;
     if (
       !plugins.serverless ||
       enabledActionTypes.length === 0 ||
-      enabledActionTypes[0] === AllowedHosts.Any ||
-      enabledActionTypes.every((connectorType) => this.actionTypeRegistry?.has(connectorType))
+      enabledActionTypes[0] === AllowedHosts.Any
     ) {
       return;
     }
 
-    return withTimeout({ promise: catalogReady, timeoutMs: CATALOG_STARTUP_TIMEOUT_MS }).then(
-      ({ timedout }) => {
-        if (timedout) {
-          const unavailableTypes = enabledActionTypes.filter(
-            (connectorType) => !this.actionTypeRegistry?.has(connectorType)
-          );
-          if (unavailableTypes.length > 0) {
-            throw new Error(
-              `Unable to validate enabled connector types [${unavailableTypes.join(
-                ', '
-              )}] within ${CATALOG_STARTUP_TIMEOUT_MS}ms while waiting for the connector catalog.`
-            );
-          }
-        }
-        enabledActionTypes.forEach((connectorType) => this.actionTypeRegistry?.get(connectorType));
-      }
+    const pendingTypes = enabledActionTypes.filter(
+      (connectorType) => !this.actionTypeRegistry?.has(connectorType)
     );
+    if (pendingTypes.length === 0) {
+      return;
+    }
+
+    // Catalog types register after start(), so check again once the first load has ended.
+    void catalogReady.then(() => {
+      const unavailableTypes = pendingTypes.filter(
+        (connectorType) => !this.actionTypeRegistry?.has(connectorType)
+      );
+      if (unavailableTypes.length > 0) {
+        this.logger.warn(
+          `Enabled connector types [${unavailableTypes.join(', ')}] are not registered.`
+        );
+      }
+    });
   };
 
   private getAxiosInstanceWithAuthHelper = (

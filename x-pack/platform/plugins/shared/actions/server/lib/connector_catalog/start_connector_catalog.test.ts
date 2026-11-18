@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getConnectorType } from '../../fixtures';
-import { CATALOG_FIRST_LOAD_TIMEOUT_MS, CATALOG_STARTUP_TIMEOUT_MS } from './constants';
+import { CATALOG_FIRST_LOAD_TIMEOUT_MS } from './constants';
 import { startConnectorCatalog } from './start_connector_catalog';
 import type { ConnectorCatalogStorage, StoredCatalogDefinition } from './types';
 
@@ -242,12 +242,7 @@ describe('startConnectorCatalog', () => {
       const onResolved = jest.fn();
 
       const promise = start().then(onResolved);
-      await jest.advanceTimersByTimeAsync(CATALOG_STARTUP_TIMEOUT_MS);
-      expect(onResolved).not.toHaveBeenCalled();
-
-      await jest.advanceTimersByTimeAsync(
-        CATALOG_FIRST_LOAD_TIMEOUT_MS - CATALOG_STARTUP_TIMEOUT_MS - 1
-      );
+      await jest.advanceTimersByTimeAsync(CATALOG_FIRST_LOAD_TIMEOUT_MS - 1);
       expect(onResolved).not.toHaveBeenCalled();
 
       await jest.advanceTimersByTimeAsync(1);

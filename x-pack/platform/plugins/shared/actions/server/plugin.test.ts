@@ -49,7 +49,7 @@ import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
 import { loadFixture } from './lib/declarative_connectors/__fixtures__/load_fixture';
 import { errors } from '@elastic/elasticsearch';
-import { CATALOG_STARTUP_TIMEOUT_MS, CONNECTOR_TYPE_CATALOG_INDEX } from './lib/connector_catalog';
+import { CONNECTOR_TYPE_CATALOG_INDEX } from './lib/connector_catalog';
 
 function getConfig(overrides = {}) {
   return {
@@ -624,7 +624,7 @@ describe('Actions Plugin', () => {
       };
     });
 
-    it('should throw when there is an invalid connector type in enabledActionTypes', async () => {
+    it('should warn when there is an invalid connector type in enabledActionTypes', async () => {
       const pluginSetup = await plugin.setup(coreSetup, {
         ...pluginsSetup,
         encryptedSavedObjects: {
@@ -638,13 +638,15 @@ describe('Actions Plugin', () => {
 
       pluginSetup.setEnabledConnectorTypes(['.server-log', 'non-existing']);
 
-      await expect(async () =>
-        plugin.start(coreStart, {
-          ...pluginsStart,
-          serverless: serverlessPluginMock.createStartContract(),
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Action type \\"non-existing\\" is not registered."`
+      const pluginStart = plugin.start(coreStart, {
+        ...pluginsStart,
+        serverless: serverlessPluginMock.createStartContract(),
+      });
+      await pluginStart.whenCatalogReady();
+      await new Promise(process.nextTick);
+
+      expect(context.logger.get().warn).toHaveBeenCalledWith(
+        'Enabled connector types [non-existing] are not registered.'
       );
     });
 
@@ -827,7 +829,7 @@ describe('Actions Plugin', () => {
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
         });
 
-        it('validates configured types after a delayed catalog load', async () => {
+        it('starts synchronously and accepts a configured type after a delayed catalog load', async () => {
           const connectorCatalogEnabled$ = new Subject<boolean>();
           coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
           seedCatalog();
@@ -835,23 +837,21 @@ describe('Actions Plugin', () => {
           getEsClient().get.mockReturnValue(catalogRead.promise);
 
           await setupPlugin([SPEC_TYPE_ID]);
-          const startResult = startServerlessPlugin();
-          expect(startResult).toBeInstanceOf(Promise);
-          connectorCatalogEnabled$.next(true);
-          const state = await Promise.race([
-            Promise.resolve(startResult).then(() => 'resolved'),
-            flush().then(() => 'pending'),
-          ]);
-          expect(state).toBe('pending');
+          const pluginStart = startServerlessPlugin();
+          expect(pluginStart).not.toBeInstanceOf(Promise);
 
+          connectorCatalogEnabled$.next(true);
           catalogRead.resolve(manifestDoc);
-          const pluginStart = await startResult;
+          await pluginStart.whenCatalogReady();
+          await flush();
 
           expect(getTypeIds(pluginStart)).toContain(SPEC_TYPE_ID);
-          expect(context.logger.get().error).not.toHaveBeenCalled();
+          expect(context.logger.get().warn).not.toHaveBeenCalledWith(
+            expect.stringContaining('are not registered')
+          );
         });
 
-        it('rejects an invalid configured type after the catalog load', async () => {
+        it('warns about a configured type that is still missing after the catalog load', async () => {
           getEsClient().get.mockResolvedValue({
             _index: CONNECTOR_TYPE_CATALOG_INDEX,
             _id: 'manifest',
@@ -859,75 +859,36 @@ describe('Actions Plugin', () => {
           });
 
           await setupPlugin(['non-existing']);
-          await expect(startServerlessPlugin()).rejects.toThrow(
-            'Action type "non-existing" is not registered.'
+          const pluginStart = startServerlessPlugin();
+          expect(pluginStart).not.toBeInstanceOf(Promise);
+
+          await pluginStart.whenCatalogReady();
+          await flush();
+
+          expect(context.logger.get().warn).toHaveBeenCalledWith(
+            'Enabled connector types [non-existing] are not registered.'
           );
         });
 
-        it('rejects an invalid configured type after an asynchronous false flag value', async () => {
+        it('warns about a missing configured type after an asynchronous false flag value', async () => {
           const connectorCatalogEnabled$ = new Subject<boolean>();
           coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
           await setupPlugin(['non-existing']);
 
-          const startResult = startServerlessPlugin();
-          expect(startResult).toBeInstanceOf(Promise);
-          connectorCatalogEnabled$.next(false);
+          const pluginStart = startServerlessPlugin();
+          expect(context.logger.get().warn).not.toHaveBeenCalledWith(
+            expect.stringContaining('are not registered')
+          );
 
-          await expect(Promise.resolve(startResult)).rejects.toThrow(
-            'Action type "non-existing" is not registered.'
+          connectorCatalogEnabled$.next(false);
+          await pluginStart.whenCatalogReady();
+          await flush();
+
+          expect(context.logger.get().warn).toHaveBeenCalledWith(
+            'Enabled connector types [non-existing] are not registered.'
           );
           expect(getEsClient().get).not.toHaveBeenCalled();
         });
-
-        it('starts synchronously when an explicit allowlist only contains registered types', async () => {
-          coreStart.featureFlags.getBooleanValue$.mockReturnValue(new Subject<boolean>());
-          const pluginSetup = await setupPlugin(['.server-log']);
-          pluginSetup.registerType(serverLogConnectorType);
-
-          expect(startServerlessPlugin()).not.toBeInstanceOf(Promise);
-        });
-
-        it.each(['flag value', 'catalog read'])(
-          'rejects startup within the bounded wait when the %s stalls',
-          async (stall) => {
-            jest.useFakeTimers();
-            try {
-              const connectorCatalogEnabled$ = new Subject<boolean>();
-              coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
-              if (stall === 'catalog read') {
-                getEsClient().get.mockReturnValue(new Promise(() => {}));
-              }
-              await setupPlugin([SPEC_TYPE_ID]);
-
-              const startResult = startServerlessPlugin();
-              const startupRejection = expect(Promise.resolve(startResult)).rejects.toThrow(
-                `Unable to validate enabled connector types [${SPEC_TYPE_ID}] within ${CATALOG_STARTUP_TIMEOUT_MS}ms while waiting for the connector catalog.`
-              );
-              const startupSettlement = Promise.resolve(startResult).then(
-                () => 'resolved' as const,
-                () => 'rejected' as const
-              );
-              if (stall === 'catalog read') {
-                connectorCatalogEnabled$.next(true);
-                expect(getEsClient().get).toHaveBeenCalledTimes(1);
-              }
-
-              // Core stops waiting for plugin start after 10 seconds.
-              await jest.advanceTimersByTimeAsync(9_000);
-              await expect(
-                Promise.race([startupSettlement, Promise.resolve('pending' as const)])
-              ).resolves.toBe('rejected');
-              await startupRejection;
-              expect(jest.getTimerCount()).toBe(1);
-
-              plugin.stop();
-              expect(jest.getTimerCount()).toBe(0);
-            } finally {
-              plugin.stop();
-              jest.useRealTimers();
-            }
-          }
-        );
       });
 
       describe('flag off', () => {
