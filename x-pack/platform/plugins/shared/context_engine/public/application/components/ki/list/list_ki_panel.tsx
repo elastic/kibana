@@ -52,7 +52,12 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
 
   return (
     <EuiPanel hasBorder paddingSize="l" css={styles.panel} data-test-subj="contextListKiPanel">
-      <ListKiHeader total={total} discoverHref={discoverHref} />
+      <ListKiHeader
+        total={total}
+        isLoading={isLoading}
+        hasError={Boolean(error)}
+        discoverHref={discoverHref}
+      />
       <ListKiTypeTiles
         tiles={tiles}
         total={total}
