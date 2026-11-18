@@ -479,9 +479,11 @@ export class ScopedOlsService implements CoreScopedOlsService {
    */
   public getLevelPrivilegeActions(policy: AccessPolicy, level: EntryAccess) {
     // The engine decides which operations an entry with this access permits, so the order of the
-    // access values stays inside `@kbn/ols`.
+    // access values stays inside `@kbn/ols`. The probe policy allows exactly `level` as entry
+    // access, because the type's own `entryAccess` can leave it out, and the engine ignores an
+    // entry whose access the type doesn't allow.
     const { operations: permitted } = evaluateAcl({
-      policy,
+      policy: { ...policy, entryAccess: [level] },
       acl: {
         version: [1],
         owner: { type: ['user'], id: [LEVEL_PROBE_OWNER_ID] },

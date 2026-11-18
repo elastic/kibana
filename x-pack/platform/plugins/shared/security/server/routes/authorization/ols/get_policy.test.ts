@@ -65,6 +65,15 @@ describe('GET /internal/security/ols/{type}/_policy', () => {
     expect(atSpace).toHaveBeenCalledWith('space-a', { kibana: ['level:view'] });
   });
 
+  it('refuses the request when the `view` level needs no privileges', async () => {
+    mocks.olsService.getLevelPrivilegeActions.mockReturnValue([]);
+
+    const response = await getPolicy();
+
+    expect(response.status).toBe(403);
+    expect(atSpace).not.toHaveBeenCalled();
+  });
+
   it('reports that OLS is disabled instead of failing', async () => {
     mocks.olsService.isEnabled.mockReturnValue(false);
 

@@ -81,6 +81,16 @@ describe('POST /internal/security/ols/{type}/_suggest_principals', () => {
     expect(userProfileService.suggest).not.toHaveBeenCalled();
   });
 
+  it('refuses the request when the `edit` level needs no privileges', async () => {
+    mocks.olsService.getLevelPrivilegeActions.mockReturnValue([]);
+
+    const response = await suggest();
+
+    expect(response.status).toBe(403);
+    expect(checkPrivilegesAtSpace).not.toHaveBeenCalled();
+    expect(userProfileService.suggest).not.toHaveBeenCalled();
+  });
+
   it('requires a license that allows user profile collaboration', async () => {
     mocks.routeParams.license.getFeatures.mockReturnValue({
       allowUserProfileCollaboration: false,

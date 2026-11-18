@@ -31,7 +31,11 @@ export function defineSuggestPrincipalsRoute(params: RouteDefinitionParams) {
     },
     createOlsHandler(params, async ({ request, response, olsService, policy, spaceId }) => {
       // Only access managers need suggestions, and managing access needs the type's edit privileges.
+      // An empty list would pass any privilege check, so it is refused.
       const editActions = olsService.getLevelPrivilegeActions(policy, 'edit');
+      if (editActions.length === 0) {
+        return response.forbidden();
+      }
       const { hasAllRequested } = await params.authz
         .checkPrivilegesWithRequest(request)
         .atSpace(spaceId, { kibana: editActions });

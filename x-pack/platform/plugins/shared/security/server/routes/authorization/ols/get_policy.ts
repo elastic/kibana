@@ -23,10 +23,15 @@ export function defineGetAccessPolicyRoute(params: RouteDefinitionParams) {
     createOlsHandler(
       params,
       async ({ request, response, olsService, policy, spaceId }) => {
-        // Anyone who can view objects of the type can read its policy.
+        // Anyone who can view objects of the type can read its policy. An empty list would pass any
+        // privilege check, so it is refused.
+        const viewActions = olsService.getLevelPrivilegeActions(policy, 'view');
+        if (viewActions.length === 0) {
+          return response.forbidden();
+        }
         const { hasAllRequested } = await params.authz
           .checkPrivilegesWithRequest(request)
-          .atSpace(spaceId, { kibana: olsService.getLevelPrivilegeActions(policy, 'view') });
+          .atSpace(spaceId, { kibana: viewActions });
         if (!hasAllRequested) {
           return response.forbidden();
         }

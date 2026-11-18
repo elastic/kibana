@@ -186,6 +186,22 @@ describe('ScopedOlsService', () => {
     });
   });
 
+  describe('#getLevelPrivilegeActions', () => {
+    // POLICY allows only `use` as entry access, so `view` and `edit` are levels that no entry can
+    // hold. The actions must not depend on that.
+    it.each<[EntryAccess, string[]]>([
+      ['view', [VIEW_ACTION]],
+      ['use', [VIEW_ACTION, USE_ACTION]],
+      ['edit', [VIEW_ACTION, USE_ACTION, EDIT_ACTION, DELETE_ACTION]],
+    ])('returns the actions of every operation up to `%s`', (level, expected) => {
+      const actions = createOlsService().asScoped(request).getLevelPrivilegeActions(POLICY, level);
+
+      expect(actions).toHaveLength(expected.length);
+      expect(actions).toEqual(expect.arrayContaining(expected));
+      expect(actions).not.toContain(RECOVERY_ACTION);
+    });
+  });
+
   describe('#authorize', () => {
     const authorize = (
       operation: string,
