@@ -56,6 +56,17 @@ describe('sourceVerdictOf', () => {
     expect(sourceVerdictOf(fact(), new Map([memory('m-1')]))).toEqual({ verdict: 'intact' });
   });
 
+  it('keeps an item whose memories expired', () => {
+    const expired = (id: string): [string, DreamedKi] => [
+      id,
+      { ...memory(id)[1], expires_at: '2020-01-01T00:00:00.000Z' },
+    ];
+
+    expect(sourceVerdictOf(fact(), new Map([expired('m-1'), expired('m-2')]))).toEqual({
+      verdict: 'intact',
+    });
+  });
+
   it('leaves for review an item that lost memories while others aged out', () => {
     expect(sourceVerdictOf(fact(), new Map([memory('m-1', true)]))).toEqual({
       verdict: 'needs_review',
