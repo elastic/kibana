@@ -43,7 +43,6 @@ import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
-  LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
 } from '../../../../schema/constants';
 import type { LensAttributes } from '../../../../types';
@@ -607,14 +606,15 @@ const isDateHistogramColumn = (
 
 /**
  * Apply runtime defaults for missing `ignoreTimeRange`/`dropPartials`/`includeEmptyRows` on
- * `date_histogram` columns in the original SO. The transform uses the same constants when the
- * SO omits a field, so both sides converge to the same value after round-trip.
+ * `date_histogram` columns in the original SO. The transform uses the same values when the SO
+ * omits a field, so both sides converge to the same value after round-trip. A missing
+ * `includeEmptyRows` is `false` because the runtime reads it as falsy (`min_doc_count: 1`).
  */
 const normalizeDateHistogramColumnParams = (col: DateHistogramIndexPatternColumn): void => {
   const { params } = col;
   params.ignoreTimeRange = params.ignoreTimeRange ?? LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT;
   params.dropPartials = params.dropPartials ?? LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT;
-  params.includeEmptyRows = params.includeEmptyRows ?? LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT;
+  params.includeEmptyRows = params.includeEmptyRows ?? false;
 };
 
 const isRangeColumn = (col: GenericIndexPatternColumn): col is RangeIndexPatternColumn =>

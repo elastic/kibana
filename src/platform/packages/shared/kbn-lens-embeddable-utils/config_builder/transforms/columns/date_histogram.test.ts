@@ -136,6 +136,34 @@ describe('Date Histogram Transforms', () => {
       expect(fromDateHistogramLensStateToAPI(input)).toEqual(expected);
     });
 
+    it('should export a missing `includeEmptyRows` as false, as the runtime renders it', () => {
+      const input: DateHistogramIndexPatternColumn = {
+        operationType: 'date_histogram',
+        sourceField: '@timestamp',
+        customLabel: false,
+        label: '',
+        isBucketed: true,
+        dataType: 'date',
+        params: { interval: '1d', dropPartials: false },
+      };
+
+      expect(fromDateHistogramLensStateToAPI(input).include_empty_rows).toBe(false);
+    });
+
+    it('should keep an explicit `includeEmptyRows: true`', () => {
+      const input: DateHistogramIndexPatternColumn = {
+        operationType: 'date_histogram',
+        sourceField: '@timestamp',
+        customLabel: false,
+        label: '',
+        isBucketed: true,
+        dataType: 'date',
+        params: { interval: '1d', dropPartials: false, includeEmptyRows: true },
+      };
+
+      expect(fromDateHistogramLensStateToAPI(input).include_empty_rows).toBe(true);
+    });
+
     it('should handle custom label', () => {
       const input: DateHistogramIndexPatternColumn = {
         operationType: 'date_histogram',

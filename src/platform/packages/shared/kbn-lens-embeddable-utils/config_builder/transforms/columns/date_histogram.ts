@@ -11,7 +11,6 @@ import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiDateHistogramOperation } from '../../schema/bucket_ops';
 import {
   LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
-  LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
 } from '../../schema/constants';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
@@ -50,7 +49,9 @@ export function fromDateHistogramLensStateToAPI(
     suggested_interval: column.params.interval,
     use_original_time_range:
       column.params.ignoreTimeRange ?? LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
-    include_empty_rows: column.params.includeEmptyRows ?? LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+    // A stored column without the flag renders without empty rows (`min_doc_count: 1`). The `true`
+    // default only applies to columns the editor builds or the API schema defaults
+    include_empty_rows: column.params.includeEmptyRows ?? false,
     drop_partial_intervals: column.params.dropPartials ?? LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
   };
 }
