@@ -39,10 +39,9 @@ describe('useDebouncedText', () => {
 
   it('leaves spaces the user is still typing around an applied search alone', () => {
     const apply = jest.fn();
-    const { result, rerender } = renderHook(
-      ({ applied }) => useDebouncedText(applied, apply),
-      { initialProps: { applied: 'cart' } }
-    );
+    const { result, rerender } = renderHook(({ applied }) => useDebouncedText(applied, apply), {
+      initialProps: { applied: 'cart' },
+    });
 
     act(() => result.current[1]('cart '));
     pause();
