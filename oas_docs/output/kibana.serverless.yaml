@@ -157729,9 +157729,6 @@ components:
         name:
           description: ' The name of the connector.'
           type: string
-        spec_version:
-          description: The read-only exact major.minor schema version pinned to the connector. Present for versioned connector types.
-          type: string
       required:
         - id
         - name
@@ -157785,9 +157782,6 @@ components:
         referenced_by_count:
           description: The number of saved objects that reference the connector. If is_preconfigured is true, this value is not calculated.
           type: number
-        spec_version:
-          description: The read-only exact major.minor schema version pinned to the connector. Present for versioned connector types.
-          type: string
       required:
         - id
         - name
@@ -173002,10 +172996,6 @@ components:
         name:
           description: The display name for the connector.
           maxLength: 1024
-          type: string
-        spec_version:
-          description: The connector schema version, as a major (for example, "1") or exact major.minor (for example, "1.3"). When omitted, versioned connector types use the latest accepted minor of major 1.
-          maxLength: 32
           type: string
         config:
           additionalProperties: {}
