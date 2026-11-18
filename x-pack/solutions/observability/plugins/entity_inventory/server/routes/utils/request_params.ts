@@ -6,13 +6,10 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_PLAN_ROWS } from '../../inventory/executor';
+import { MAX_LIST_LIMIT } from '../../../common';
 
 // An ISO 8601 instant with a numeric offset and nanosecond precision is 35 characters long.
 const INSTANT_MAX_LENGTH = 64;
-
-/** Every plan asks for one row more than the request, so a request may ask for at most `MAX_PLAN_ROWS - 1`. */
-const MAX_LIST_LIMIT = MAX_PLAN_ROWS - 1;
 
 // A date and time with `Z` or a numeric offset, so every bound names one instant.
 export const instantParam = lazySchema(() =>

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ACTION_KILL_PROCESS_YAML from './action_kill_process.yaml';
 import type { ManagedWorkflowDefinition } from '../../../../types';
+import { readManagedWorkflowYaml } from '../../../read_managed_workflow_yaml';
 import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
@@ -22,5 +22,7 @@ export const ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW = {
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 7,
-  yaml: ACTION_KILL_PROCESS_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'action_kill_process.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

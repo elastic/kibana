@@ -105,7 +105,8 @@ describe('event_status_update tool', () => {
       expect.objectContaining({ request: expect.anything() })
     );
     expect(telemetry.trackAgentToolEventStatusUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
+      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
+      expect.anything()
     );
   });
 

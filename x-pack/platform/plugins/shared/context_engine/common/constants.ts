@@ -15,6 +15,7 @@ export const AI_INDEX_BY_ID_PATH = `${AI_INDEX_PATH}/{aiIndexId}`;
 /** Id-less; ids cannot start with `_` (`AI_INDEX_ID_PATTERN`), so this never collides with `{aiIndexId}`. */
 export const AI_INDEX_QUERY_PATH = `${AI_INDEX_PATH}/_query`;
 export const AI_INDEX_DESCRIBE_PATH = `${AI_INDEX_BY_ID_PATH}/_describe`;
+export const AI_INDEX_DREAMING_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/dreaming`;
 export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/ki_summary`;
 export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
@@ -31,6 +32,17 @@ export const MAX_SESSION_MEMORY_AI_INDEX_IDS = 100;
 export const MAX_SESSION_MEMORY_ATTRIBUTES = 50;
 export const MAX_SESSION_MEMORY_ATTRIBUTE_KEY_LENGTH = 256;
 export const MAX_SESSION_MEMORY_ATTRIBUTE_VALUE_LENGTH = 1024;
+export const SESSION_EVENTS_SAVE_PATH = `${PUBLIC_API_PATH}/memory/_save_event`;
+
+export const MAX_SESSION_EVENTS_BODY_BYTES = 10 * 1024 * 1024;
+export const MAX_SESSION_EVENTS_PER_REQUEST = 1000;
+export const MAX_SESSION_EVENT_ID_LENGTH = 256;
+export const MAX_SESSION_EVENT_USER_ID_LENGTH = 1024;
+export const MAX_SESSION_EVENT_TOOL_NAME_LENGTH = 256;
+export const MAX_SESSION_EVENT_TOOL_CALLS = 128;
+export const MAX_SESSION_EVENT_AI_INDEX_IDS = 100;
+export const MAX_SESSION_EVENT_TIMESTAMP_LENGTH = 64;
+export const MAX_SESSION_EVENT_TEXT_LENGTH = 1024 * 1024;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;

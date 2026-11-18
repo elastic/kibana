@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
 import {
+  useAvailableChannels,
   useRelayAppBindings,
   useBindChannel,
   useUnbindChannel,
@@ -21,6 +22,7 @@ import {
 jest.mock('../../../../data/relay_apps/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../../../data/relay_apps/use_relay_app_bindings'),
   useRelayAppBindings: jest.fn(),
+  useAvailableChannels: jest.fn(),
   useAllRelayAppBindings: () => mockUseAllRelayAppBindings(),
   useBindChannel: jest.fn(),
   useUnbindChannel: jest.fn(),
@@ -42,6 +44,9 @@ jest.mock('./use_relay_app_connection', () => ({
 
 const mockUseRelayAppBindings = useRelayAppBindings as jest.MockedFunction<
   typeof useRelayAppBindings
+>;
+const mockUseAvailableChannels = useAvailableChannels as jest.MockedFunction<
+  typeof useAvailableChannels
 >;
 const mockUseBindChannel = useBindChannel as jest.MockedFunction<typeof useBindChannel>;
 const mockUseUnbindChannel = useUnbindChannel as jest.MockedFunction<typeof useUnbindChannel>;
@@ -101,12 +106,24 @@ const openWorkspaceDisconnect = async () => {
 
 const openConnectChannel = async () => {
   fireEvent.click(await screen.findByTestId('streamsSlackAppOpenConnectChannelButton'));
-  return screen.findByTestId('streamsSlackAppChannelIdInput');
+  const combo = await screen.findByTestId('streamsSlackAppChannelIdInput');
+  return within(combo).getByTestId('comboBoxSearchInput');
+};
+
+const enterChannel = (input: HTMLElement, value: string) => {
+  fireEvent.change(input, { target: { value } });
+  fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 };
 
 describe('SlackChannelsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAvailableChannels.mockReturnValue({
+      channels: [],
+      isLoading: false,
+      isError: false,
+      isTruncated: false,
+    });
     mockUseRelayAppConnection.mockReturnValue(connected());
     mockUseFetchAutomations.mockReturnValue({ data: undefined });
     mockUseAllRelayAppBindings.mockReturnValue({ bindings: [], isError: false, isComplete: true });
@@ -298,7 +315,7 @@ describe('SlackChannelsSection', () => {
     // Empty input keeps the button disabled.
     expect(bindBtn).toBeDisabled();
 
-    fireEvent.change(input, { target: { value: '  C0123456789  ' } });
+    enterChannel(input, '  C0123456789  ');
     expect(bindBtn).toBeEnabled();
 
     fireEvent.click(bindBtn);
@@ -306,6 +323,87 @@ describe('SlackChannelsSection', () => {
 
     await waitFor(() =>
       expect(screen.queryByTestId('streamsSlackAppConnectChannelModal')).not.toBeInTheDocument()
+    );
+  });
+
+  it('connects a typed channel id without pressing Enter first', async () => {
+    setup();
+
+    const input = await openConnectChannel();
+    fireEvent.change(input, { target: { value: 'C0123456789' } });
+
+    fireEvent.click(screen.getByTestId('streamsSlackAppBindChannelButton'));
+    expect(bindChannel).toHaveBeenCalledWith('C0123456789');
+  });
+
+  it('connects a channel picked from the available channels', async () => {
+    mockUseAvailableChannels.mockReturnValue({
+      channels: [
+        { channel: 'C0456', displayName: 'alerts' },
+        { channel: 'C0789', displayName: 'ops' },
+      ],
+      isLoading: false,
+      isError: false,
+      isTruncated: false,
+    });
+    setup();
+
+    const input = await openConnectChannel();
+    fireEvent.click(input);
+    fireEvent.click(await screen.findByRole('option', { name: '#alerts' }));
+
+    fireEvent.click(screen.getByTestId('streamsSlackAppBindChannelButton'));
+    expect(bindChannel).toHaveBeenCalledWith('C0456');
+  });
+
+  it('does not bind the previous channel while a replacement is being typed', async () => {
+    mockUseAvailableChannels.mockReturnValue({
+      channels: [{ channel: 'C0456', displayName: 'alerts' }],
+      isLoading: false,
+      isError: false,
+      isTruncated: false,
+    });
+    setup();
+
+    const input = await openConnectChannel();
+    fireEvent.click(input);
+    fireEvent.click(await screen.findByRole('option', { name: '#alerts' }));
+    const bindBtn = screen.getByTestId('streamsSlackAppBindChannelButton');
+    expect(bindBtn).toBeEnabled();
+
+    fireEvent.change(input, { target: { value: '#nomatch' } });
+    expect(bindBtn).toBeDisabled();
+  });
+
+  it('does not flag a name search that matches an available channel', async () => {
+    mockUseAvailableChannels.mockReturnValue({
+      channels: [{ channel: 'C0456', displayName: 'alerts' }],
+      isLoading: false,
+      isError: false,
+      isTruncated: false,
+    });
+    setup();
+
+    const input = await openConnectChannel();
+    fireEvent.change(input, { target: { value: 'ale' } });
+
+    expect(screen.getByTestId('streamsSlackAppChannelInputHelp')).not.toHaveTextContent(
+      'Enter a channel ID such as'
+    );
+  });
+
+  it('hints at entering an id when the available channels were cut short', async () => {
+    mockUseAvailableChannels.mockReturnValue({
+      channels: [],
+      isLoading: false,
+      isError: false,
+      isTruncated: true,
+    });
+    setup();
+
+    await openConnectChannel();
+    expect(screen.getByTestId('streamsSlackAppChannelInputHelp')).toHaveTextContent(
+      'Not seeing your channel?'
     );
   });
 
@@ -381,6 +479,23 @@ describe('SlackChannelsSection', () => {
     expect(screen.queryByTestId('streamsSlackAppAffectedAutomations')).not.toBeInTheDocument();
   });
 
+  it('shows a loading line in the workspace disconnect modal while the channels load', async () => {
+    mockUseAllRelayAppBindings.mockReturnValue({
+      bindings: [],
+      isLoading: true,
+      isError: false,
+      isComplete: true,
+    });
+    setup();
+
+    await openWorkspaceDisconnect();
+
+    expect(
+      await screen.findByTestId('streamsSlackAppAffectedAutomationsLoading')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('streamsSlackAppAffectedAutomations')).not.toBeInTheDocument();
+  });
+
   it('does not claim that no channels are connected when the channel list failed to load', async () => {
     mockUseAllRelayAppBindings.mockReturnValue({ bindings: [], isError: true, isComplete: true });
     setup();
@@ -450,7 +565,7 @@ describe('SlackChannelsSection', () => {
     setup();
 
     const input = await openConnectChannel();
-    fireEvent.change(input, { target: { value: '#general' } });
+    enterChannel(input, '#general');
 
     expect(screen.getByTestId('streamsSlackAppBindChannelButton')).toBeDisabled();
     expect(screen.getByTestId('streamsSlackAppChannelInputHelp')).toHaveTextContent(

@@ -41,7 +41,12 @@ import { loadContractOperations } from '../openapi';
 import type { OperationMatch } from '../openapi/match_operation';
 import { createOperationMatcher } from '../openapi/match_operation';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
-import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import {
+  findAuthorizationEndpoints,
+  findTokenEndpoints,
+  respondToAuthorizationRequest,
+  respondToTokenRequest,
+} from '../openapi/token_endpoints';
 import { insufficientScopeChallenge } from '../openapi/validate_security';
 import type { SmithyModel } from '../smithy';
 import { convertSmithy, isSmithyModel } from '../smithy';
@@ -79,7 +84,10 @@ export interface ContractCall {
    * `operation` names the message.
    */
   readonly protocolMessage?: true;
-  /** Set for requests to the token URL of an OAuth 2 flow, which the mock answers itself. */
+  /**
+   * Set for requests to the token or authorization URL of an OAuth 2 flow, which the mock answers
+   * itself.
+   */
   readonly token?: true;
   /**
    * Set for answered OpenAPI operations: whether the response came from a fixture set while the
@@ -99,6 +107,11 @@ export interface ContractCall {
    * such as the tool calls of an MCP batch, share it.
    */
   readonly captured?: CapturedExchange;
+  /**
+   * Set with `checkScopes: 'report'` when the bearer token lacks scopes the operation needs; the
+   * request was answered as if the token had them.
+   */
+  readonly scopeViolations?: readonly Violation[];
 }
 
 /**
@@ -137,8 +150,10 @@ export interface EmulatorOptions extends PaginationOptions {
   /**
    * Answer 403 `insufficient_scope` when a bearer token the mock issued lacks the scopes an
    * operation's OAuth 2 requirements list. Off by default, as some specs declare scopes loosely.
+   * `'report'` answers the request as usual and lists the missing scopes in the call's
+   * `scopeViolations`, so a recorder sees every request a handler would send.
    */
-  readonly checkScopes?: boolean;
+  readonly checkScopes?: boolean | 'report';
   /**
    * Adds the headers, query and bodies of each exchange to its calls (`captured`), with the values
    * of keys that may hold secrets redacted. Off by default, as captures take memory; `true` uses
@@ -369,6 +384,7 @@ export const createEmulatorFetch = ({
   const loadedProtocols = loadProtocols(specs, namedResponses);
   const protocols = toProtocolEndpoints(loadedProtocols);
   const tokenEndpoints = findTokenEndpoints(operations);
+  const isAuthorizationUrl = findAuthorizationEndpoints(operations);
   const engine = createResponseEngine(operations, {
     fixtures,
     recordings,
@@ -385,7 +401,9 @@ export const createEmulatorFetch = ({
     },
     engine.respond
   );
-  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, { checkScopes });
+  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, {
+    checkScopes: checkScopes !== false,
+  });
   const awsJsonServices = loadAwsJsonServices(specs);
   const state = new Map<unknown, unknown>();
   // The contexts whose responder deferred to the default chain, for `responseSource`.
@@ -435,7 +453,16 @@ export const createEmulatorFetch = ({
     const { operation } = routed;
     const name = operation.id;
     const matched = toOperationRef(operation);
-    const authViolations = contract.authenticate(routed, request);
+    const checked = contract.authenticate(routed, request);
+    // Reported scope shortfalls don't stop the request, so the rest of it is still checked.
+    const reportScopes = checkScopes === 'report';
+    const authViolations = reportScopes
+      ? checked.filter(({ code }) => code !== 'insufficient_scope')
+      : checked;
+    const scopeViolations = reportScopes
+      ? checked.filter(({ code }) => code === 'insufficient_scope')
+      : [];
+    const scopeReport = scopeViolations.length > 0 ? { scopeViolations } : {};
     const requestViolations =
       authViolations.length > 0 ? authViolations : contract.validateRequest(routed, request);
     if (requestViolations.length > 0) {
@@ -455,6 +482,7 @@ export const createEmulatorFetch = ({
         status: response.statusCode,
         requestViolations,
         responseViolations: [],
+        ...scopeReport,
       });
       return response;
     }
@@ -474,6 +502,7 @@ export const createEmulatorFetch = ({
       status: response.statusCode,
       requestViolations,
       responseViolations,
+      ...scopeReport,
     });
     // HEAD responses carry the headers of a GET, without its body.
     return request.method === 'head'
@@ -566,6 +595,18 @@ export const createEmulatorFetch = ({
     }
     const routed = contract.route(request);
     const grants = 'operation' in routed ? undefined : tokenEndpoints(request.url);
+    if (!('operation' in routed) && request.method === 'get' && isAuthorizationUrl(request.url)) {
+      const { response, violations } = respondToAuthorizationRequest(request);
+      record({
+        request: description,
+        operation: 'OAuth authorization',
+        token: true,
+        status: response.statusCode,
+        requestViolations: violations,
+        responseViolations: [],
+      });
+      return response;
+    }
     if (grants) {
       const { response, violations } = respondToTokenRequest(grants, request);
       record({
@@ -639,19 +680,21 @@ export const createEmulatorFetch = ({
     });
     // Token URLs are classified once resolved, as an absolute one names its host whatever the
     // API servers are.
+    const tokens = findTokenEndpoints(operations, { include: serverNamesHost });
+    const authorization = findAuthorizationEndpoints(operations, { include: serverNamesHost });
     return {
       route: createOperationMatcher(named),
-      tokens: findTokenEndpoints(operations, { include: serverNamesHost }),
+      oauth: (url: URL) => tokens(url) !== undefined || authorization(url),
     };
   });
 
   return {
     fetch: mockFetch,
     namesHost: (method, url) => {
-      const { route, tokens } = getWithHosts();
+      const { route, oauth } = getWithHosts();
       if (
         protocols.has(toEndpoint(url)) ||
-        tokens(url) !== undefined ||
+        oauth(url) ||
         awsJsonServices.some((service) => service.matches(url))
       ) {
         return true;
@@ -663,6 +706,7 @@ export const createEmulatorFetch = ({
       if (
         protocols.has(toEndpoint(url)) ||
         tokenEndpoints(url) !== undefined ||
+        (method.toLowerCase() === 'get' && isAuthorizationUrl(url)) ||
         awsJsonServices.some((service) => service.matches(url))
       ) {
         return true;

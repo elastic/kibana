@@ -46,7 +46,7 @@ import {
   type KiLifecycleStatus,
 } from '../../../common/step_types/ki';
 import {
-  validateAbsoluteSignalWindow,
+  validateIsoDate,
   validateAiIndexId,
   validateAiIndexQueryLimit,
   validateFeedbackAnalysisInterval,
@@ -54,7 +54,6 @@ import {
   validateSignalWindowCoversInterval,
 } from '../../../common/validation';
 import { validateSignalFilter } from '../../ai_indices/signal_filter';
-
 const aiIndexIdSchema = schema.string({
   minLength: 1,
   maxLength: MAX_AI_INDEX_ID_LENGTH,
@@ -80,7 +79,7 @@ const signalTimeRangeSchema = schema.oneOf(
       type: schema.literal('absolute'),
       from: schema.string({
         maxLength: MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
-        validate: validateAbsoluteSignalWindow,
+        validate: validateIsoDate,
         meta: { description: 'ISO 8601 date to analyze signals since.' },
       }),
     }),
@@ -266,7 +265,9 @@ const aiIndexPropertiesSchema = {
   memory_enabled: schema.maybe(
     schema.boolean({
       meta: {
-        description: 'Whether this AI index accepts memory writes. Defaults to true when omitted.',
+        description:
+          'Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.',
+        deprecated: true,
       },
     })
   ),
@@ -542,9 +543,6 @@ export const aiIndexHttpItemResponseSchema = () =>
       meta: {
         description: 'Whether the AI Index is managed by a plugin and therefore immutable.',
       },
-    }),
-    memory_enabled: schema.boolean({
-      meta: { description: 'Whether this AI Index accepts memory writes.' },
     }),
     date_created: schema.string({
       meta: { description: 'ISO 8601 timestamp of when the AI Index was created.' },

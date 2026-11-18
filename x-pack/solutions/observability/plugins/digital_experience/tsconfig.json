@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "test/scout_digital_experience/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/apm-data-access-plugin",
     "@kbn/apm-types",
@@ -45,7 +45,8 @@
     "@kbn/typed-react-router-config",
     "@kbn/unified-search-plugin",
     "@kbn/ux-plugin",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-test-helpers-deprecations-getters"
   ],
   "exclude": ["target/**/*"]
 }

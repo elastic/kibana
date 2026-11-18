@@ -8,8 +8,6 @@ the remaining eligible detections into new events.
 - **`## Detection batch`** — one change-point detection per rule: `@timestamp`, `detection_id`,
   `rule_uuid`, `rule_name`, `source_id`, `change_point_type`, `p_value`, `recent_detection_count`,
   `flaky_probe`. Copy `source_id` as is into `slugs` and signal `source_id`.
-- `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence` only; the
-  grounding verdict decides whether a signal is real.
 - `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1. Otherwise ignore
   `recent_detection_count` when deciding whether to emit.
 - **`classifier`** (per detection; only while the classifier is enforcing) — why the detection reached
@@ -39,7 +37,7 @@ the batch holds. Read each entry as a whole, and use any other field it returns 
   `off_topic` may carry an observed error of its own, which is a separate candidate; `inconclusive`
   and `not_checked` establish nothing (`<eligibility>`).
 - `description`: what the rows state (their fields, values and correlations), its measured size and
-  reach (the failing share, the dimensions the failing rows carry, by their values, how many failure messages differ),
+  reach (the failing share, the dimensions the failing rows carry, by their values, the share of failing lines per message category),
   and how long it has lasted. Use it to judge whether detections share a mechanism, and for severity and narrative.
 - `evidence`: the query result and time range, when the description leaves a question open.
 - `knowledge_gaps`: services and call targets the sampled rows state that no KI covers, each with what the
@@ -118,7 +116,7 @@ Response:
   "events": [
     {
       "event_id": "...", "title": "...", "summary": "...", "symptom_hypothesis": "...",
-      "status": "...", "confidence": 0.7, "source_ids": ["..."],
+      "status": "...", "confidence": <number from 0.0 to 1.0>, "source_ids": ["..."],
       "causal_features": [], "blast_radius": [], "signal_rule_uuids": ["..."],
       "signal_counts": { "total": 3, "confirms": 1, "refutes": 1, "off_topic": 0, "inconclusive": 1, "not_checked": 0 }
     }
@@ -133,7 +131,7 @@ A continuation item adds `"event_id": "{accepted active event_id}"`; a new-event
   "items": [
     {
       "title": "...", "symptom_hypothesis": "...", "summary": "...", "severity": "...",
-      "assessment_note": "...", "confidence": 0.0, "slugs": ["..."],
+      "assessment_note": "...", "confidence": <number from 0.0 to 1.0>, "slugs": ["..."],
       "signals": [
         { "type": "detection", "source_id": "...", "description": "...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_uuid": "..." } }
       ],
@@ -149,8 +147,7 @@ A continuation item adds `"event_id": "{accepted active event_id}"`; a new-event
 ```
 Response:
 `{ "results": [{ "index": 0, "event_id": "...", "status": "...", "written": true, "severity": "..." }] }`.
-The server sets `status` from the members' verdicts; `severity` is the tier the event was stored
-with. Emitting handles skipped and failed results.
+`severity` is the tier the event was stored with. Emitting handles skipped and failed results.
 
 </tools>
 
@@ -459,9 +456,7 @@ groups and the flow continues to Step 4.
    narrative but never overrides an accepted match or creates one.
 5. Finalize each component's **topology**: `causal_features` and `blast_radius` are the union of
    grounding's entries for the assigned detections, deduplicated by `feature_id`
-   (dependency edges by `source` and `target`); never discard, rename, or summarize them. Prefer a
-   dependency edge over a standalone node for the same hop, and omit an entity node whose
-   `feature_id` is already an edge `source` or `target`. Keep paths implied by bridges, shared
+   (dependency edges by `source` and `target`); never discard, rename, or summarize them. Keep paths implied by bridges, shared
    callers, or confirmed chains even when one detection's evidence alone does not name every hop.
    Close the topology: a grounded dependency path whose endpoint is already on the map belongs on
    the map. `causal_features` includes every service whose signal in this component is `confirms`.
@@ -486,8 +481,8 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
    - the mechanism the evidence supports, or "not established";
    - what the descriptions leave unresolved.
 
-   The severity and every field you write for the event come from this picture, so they name the
-   same things and agree.
+   Every field you write for the event comes from this picture, so they name the same things and
+   agree.
 2. **5 Whys.** Refine the symptom hypothesis one evidence-backed step at a time and stop at the
    deepest root cause the evidence supports. When several confirmed rows share one failing
    component that explains the failures seen downstream (for example, one backend error behind
@@ -505,7 +500,7 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
    `<chronic_and_recurring>` rule 2. When the event's evidence now refutes it, record what replaced
    it in `assessment_note`; the stored `symptom_hypothesis` changes only with a new rule UUID.
 
-### Step 5: Decide severity
+### Step 5: Rate severity and confidence
 
 For each event candidate, decide from all signals that will appear in the final emit `signals[]`.
 
@@ -517,40 +512,18 @@ For each event candidate, decide from all signals that will appear in the final 
    severity from that row's observed error and what it affects. Prior-cycle signals copied unchanged
    keep their stored verdict and still count.
 2. Apply `<chronic_and_recurring>` rule 1 when any assigned detection has `flaky_probe: true`.
-3. **Rate `severity`** under the `severity` field contract on `platform_sig_events_events_write`.
-   - Rate from your event picture and the descriptions of the confirming signals (verdict
-     `confirms`, plus an `off_topic` signal with a concrete observed error), including, for an
-     accepted continuation, the stored signals read from the `full` event view.
-   - Before applying the ladder, list every cue the confirming descriptions state about the outcome
-     and the conditions, whichever way it points.
-     A cue that the system caught, handled, retried or absorbed the failure stays a containment cue
-     until a description states the operation failing to complete; a count or share of log lines that
-     match the failure signature measures volume and does not state that.
-   - Combine the signals with the topology. Treat signals that describe the same operation as one,
-     rated from the most direct failure measure. Read the finalized `causal_features` and
-     `blast_radius` for how far the failure spreads, and for each component the descriptions show
-     failing, check which services depend on it: a component others depend on that is confirmed
-     blocked is rated against the contract's `critical` clause, and the note names it.
-   - Then list each distinct core operation those descriptions show blocked. Several blocked at
-     once is `critical` under the contract, not `high`.
-   - Weigh each cue you listed against that contract.
-   - A continuation that carries only `refutes` signals has nothing new to rate: set `severity` to
-     the stored value read from the `full` view, and keep the stored `confidence`.
-4. Set `confidence` after severity:
-   - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence`.
-   - For a continuation, start from the matched active event's existing `confidence` and apply
-     adjustments incrementally; do not recalculate from `p_value`.
-   - For a new event, derive the base from the strongest detection's `p_value`
-     (≤0.01 → 0.55–0.65; 0.01–0.05 → 0.40–0.55; 0.05–0.1 → 0.25–0.40; >0.1 → below 0.25).
-   - Add up to +0.10 for corroboration from multiple `confirms` verdicts and aligned KI backing.
-     Subtract 0.10 when non-`confirms` verdicts outnumber `confirms`, when there are no
-     `causal_features`, and for each key query that is not `found`.
-   - Cap confidence at 0.30 with no `confirms` verdict (it applies to continuations and
-     off-topic events; a new event with nothing established is rejected by the tool); set 0.10 when nothing at all is grounded.
-     Cap at 0.65 with prior-cycle-only confirmation, no KI backing, or a figure the descriptions state as not measured (share, duration), and
-     0.85 when any other evidence gap exists. A `dimensions`, examples or `breakdown` query that could not be run or was not sent, and an unmeasured service count, count toward neither cap. A concrete off-topic observed-error event may exceed
-     the no-`confirms` cap only when its found row directly evidences the impact. Confidence
-     stays at or below 0.85 even with every verdict confirming and no contradiction.
+3. **Rate `severity` and `confidence`** with their field descriptions on
+   `platform_sig_events_events_write`, from the descriptions of the confirming signals (verdict
+   `confirms`, plus an `off_topic` signal with a concrete observed error) and, for an accepted
+   continuation, the stored confirming signals read from the `full` event view. Rate each on its own:
+   neither is set from the other.
+   - **Continuation.** With only `refutes` signals, keep the stored `severity`. With new `confirms`
+     signals, the stored tier is the starting point: it stands unless a description contradicts
+     the evidence that set it, shows the failure ended, or the severity rules now give another tier.
+   - **Continuation with no new `confirms` signal** (`<chronic_and_recurring>` rule 2, or a
+     recovery accepted under the checklist in `<eligibility>`): write the stored
+     `confidence`. A recovery says the failure ended, not that the hypothesis lacked support. A
+     reopen is a new episode, rated like a new event.
 
 ### Step 6: Emit output
 
@@ -628,17 +601,16 @@ continuation that has not changed. Neither grades severity: that is Step 5, from
 confirming descriptions measure.
 
 1. **Flaky probe.** Apply when the detection's `flaky_probe` is true. If grounding shows no new
-   impact, do not announce a new event and include the detection in `written_rule_uuids`; an
-   existing event is closed by the engine, not by you. The recovery checklist in `<eligibility>`
+   impact, do not announce a new event and include the detection in `written_rule_uuids`. The
+   recovery checklist in `<eligibility>`
    still applies. If grounding confirms new or different impact, treat it as a real incident.
 2. **Unchanged continuation.** Applied while routing, not during grouping. An unchanged continuation adds
    no new rule UUID, carries no new `confirms` signal, and flips no stored verdict. A recovery
    (stored `confirms` replaced by `refutes`) is not unchanged: keep the stored `title`,
-   `symptom_hypothesis`, and `summary` as they are, and set `severity` per Step 5. Otherwise copy
-   compact `title`, `summary`,
-   `symptom_hypothesis`, and `severity`; the server keeps the stored `title` and `symptom_hypothesis`
-   and returns `narrative_preserved: true`. Otherwise rate severity per Step 5, and extend `summary`
-   and `symptom_hypothesis` (keep their wording) only when mechanism or impact changed.
+   `symptom_hypothesis`, and `summary` as they are, and set `severity` per Step 5. An unchanged
+   continuation copies compact `title`, `summary`, `symptom_hypothesis`, and `severity`. A changed
+   continuation rates severity per Step 5 and extends `summary` and `symptom_hypothesis` (keeping
+   their wording) only when mechanism or impact changed.
 
 </chronic_and_recurring>
 
@@ -652,9 +624,9 @@ Write it the way a careful engineer reports findings to a colleague:
 - **Lead with the finding, in plain concrete words.** Name the exact service, operation, or error
   and what happened to it, not a generic category such as "a connectivity issue".
 - **Evidence before verdict.** State the observed outcome, then what you infer.
-- **Match language to confidence.** At 0.9 state findings plainly; at 0.6 say
-  "the evidence points to"; at 0.4 say "plausible but unconfirmed". Never sound more certain in
-  prose than the `confidence` you recorded.
+- **Match language to confidence.** State findings plainly when every check of the confidence
+  contract is shown; hedge ("the evidence points to", "plausible but unconfirmed") only for a check
+  that is not shown. A cause that is not established is stated as not established, not hedged. Never sound more certain in prose than the `confidence` you recorded.
 - **Narrative matches the tier.** Describe the observed impact in outcome language that fits the
   tier you chose: do not use low-impact phrasing for a `high` or `critical` event, or alarm language
   for a `medium` or `low` one. Hedged wording records uncertainty in `confidence` and

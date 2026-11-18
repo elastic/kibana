@@ -188,6 +188,25 @@ describe('Nightshift investigation workflow', () => {
     }
   });
 
+  // Nightshift tells an alert-recovery round from a user's message by how the message opens
+  // (`isAlertRecoveryRound`), so nothing may come before the caller's message.
+  it.each([
+    ['an alert recovery', { source: 'alert', follow_up: 'alert_recovered' }],
+    ['a user follow-up', { source: 'slack' }],
+  ])("opens the agent's message with the caller's message on %s", (_case, context) => {
+    const message = 'An alert in this investigation has recovered. Evidence follows.';
+    const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+      requireStep('investigate').with?.message ?? '',
+      {
+        inputs: { message, context, source_ids: ['s1'] },
+        variables: {
+          investigation_sources: [{ slug: 'logs', id: 's1', view_name: 'logs-view' }],
+        },
+      }
+    );
+    expect(rendered.startsWith(message)).toBe(true);
+  });
+
   it('attributes agent calls to Nightshift under the shared investigation id', () => {
     expect(requireStep('investigate')).toMatchObject({
       'plugin-id': 'nightshift_investigation',

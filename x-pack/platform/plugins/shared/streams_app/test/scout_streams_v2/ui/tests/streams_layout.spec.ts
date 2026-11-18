@@ -5,45 +5,12 @@
  * 2.0.
  */
 
-import { tags, type ScoutPage } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 const TAB_NAMES = ['map', 'sources', 'destinations', 'classic'];
-
-/**
- * A complete classic definition with a saved field override. `hasAlteredStreams` reads
- * `processing`, `lifecycle`, `settings`, and `failure_store`, so a partial body throws in
- * `select` and the tab stays up only because the query failed.
- */
-const alteredClassicStream = {
-  name: 'logs-test-default',
-  description: '',
-  updated_at: '2026-01-01T00:00:00.000Z',
-  type: 'classic' as const,
-  ingest: {
-    lifecycle: { inherit: {} },
-    processing: { steps: [] as const, updated_at: '2026-01-01T00:00:00.000Z' },
-    settings: {},
-    classic: { field_overrides: { message: { type: 'keyword' } } },
-    failure_store: { inherit: {} },
-  },
-};
-
-// Forces the Classic tab on, independent of the stack's data streams.
-const mockStreamsList = async (page: ScoutPage) => {
-  await page.route(
-    (url) => url.pathname.endsWith('/api/streams'),
-    async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ streams: [alteredClassicStream] }),
-      });
-    }
-  );
-};
 
 test.describe('Streams layout', { tag: tags.serverless.observability.complete }, () => {
   test.beforeAll(async ({ kbnClient }) => {
@@ -52,8 +19,7 @@ test.describe('Streams layout', { tag: tags.serverless.observability.complete },
     });
   });
 
-  test.beforeEach(async ({ browserAuth, page }) => {
-    await mockStreamsList(page);
+  test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });
 

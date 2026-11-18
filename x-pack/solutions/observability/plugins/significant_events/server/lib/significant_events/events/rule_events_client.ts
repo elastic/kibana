@@ -8,9 +8,12 @@
 import { esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import { isBoom } from '@hapi/boom';
 import {
+  ALERT_EPISODE_ACTION_TYPE,
   ALERT_EPISODE_STATUS,
+  INVALID_ALERT_STATE_TRANSITION_CODE,
   type AlertEpisodeStatus,
   type AlertEventSeverity,
   type CreateAlertEventResponse,
@@ -74,6 +77,23 @@ import {
 } from './event_status_change_telemetry';
 import type { SignificantEventActor } from '../../telemetry/ebt';
 import { toRuleEvent } from './to_rule_event';
+
+/** Alerting v2 rejects `activate` / `deactivate` of a superseded episode with this code; it is not exported by a package. */
+const ALERT_NOT_LATEST_CODE = 'ALERT_NOT_LATEST';
+
+/** The `code` Alerting v2 attaches to the Boom error of a rejected alert action, if any. */
+const getAlertActionErrorCode = (error: unknown): string | undefined => {
+  if (!isBoom(error)) {
+    return undefined;
+  }
+  const { data } = error;
+  return typeof data === 'object' &&
+    data !== null &&
+    'code' in data &&
+    typeof data.code === 'string'
+    ? data.code
+    : undefined;
+};
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
@@ -441,6 +461,8 @@ export class RuleEventsClient {
       esClient: ElasticsearchClient;
       space: string;
       getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
+      /** Writes operator deactivate and activate as alert actions; required for operator changes. */
+      getAlertActionsClient?: () => Promise<AlertActionsClientApi>;
       emitTrigger?: TriggerEmitter;
       telemetry?: EventStatusChangeReporter;
       /** Reads `.alert-actions`, a private Alerting v2 index; falls back to `esClient`. */
@@ -1108,6 +1130,18 @@ export class RuleEventsClient {
       return { updated: 0, ignored: 1, status: decision.status, reason: decision.reason };
     }
 
+    // An operator's change is an Alerting v2 alert action, not a rule event: the engine treats
+    // user-initiated transitions differently, and the action records the actor and the reason.
+    if (change.kind === 'operator') {
+      return this.applyOperatorChange({
+        latest,
+        event: { ...decision.event, workflow_execution_id: workflowExecutionId },
+        change,
+        assessmentNote,
+        origin: { actor, change, closeReason },
+      });
+    }
+
     const written = await this.updateEvent({
       event: { ...decision.event, workflow_execution_id: workflowExecutionId },
       prior: latest,
@@ -1123,6 +1157,78 @@ export class RuleEventsClient {
     }
 
     return { updated: 1, ignored: 0, status: decision.event.status };
+  }
+
+  /**
+   * Deactivates or reactivates the event's latest episode through an alert action. Alerting v2
+   * writes the synthetic `.rule-events` version (it keeps the head's stored data) and the audit
+   * row in one bulk, so there is no second write here. A bulk that rejects one of the two
+   * documents is reported as an error (the other may already be written); a retry then meets
+   * `already_in_state` when the synthetic version landed. The episode id is the stored head's,
+   * never the caller's.
+   */
+  private async applyOperatorChange({
+    latest,
+    event,
+    change,
+    assessmentNote,
+    origin,
+  }: {
+    latest: SignificantEventResponse;
+    event: SignificantEvent;
+    change: Extract<StatusChange, { kind: 'operator' }>;
+    assessmentNote?: string;
+    origin: WriteOrigin;
+  }): Promise<UpdateEventStatusResult> {
+    const { getAlertActionsClient, emitTrigger, telemetry, logger, space } = this.clients;
+    if (!getAlertActionsClient) {
+      throw new Error(
+        'RuleEventsClient was created without an alert actions client, so it cannot apply an operator change'
+      );
+    }
+
+    const episodeId = latest.episode_id;
+    if (episodeId === undefined) {
+      return { updated: 0, ignored: 1, status: latest.status, reason: 'not_found' };
+    }
+
+    const alertActionsClient = await getAlertActionsClient();
+    try {
+      await alertActionsClient.createEpisodeAction({
+        episodeId,
+        action: {
+          action_type:
+            change.status === ALERT_EPISODE_STATUS.INACTIVE
+              ? ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
+              : ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+          reason: assessmentNote?.trim() || operatorFallbackAssessmentNote(change.status),
+        },
+      });
+    } catch (error) {
+      const code = getAlertActionErrorCode(error);
+      if (code === ALERT_NOT_LATEST_CODE) {
+        return { updated: 0, ignored: 1, status: latest.status, reason: 'superseded' };
+      }
+      if (code === INVALID_ALERT_STATE_TRANSITION_CODE) {
+        return { updated: 0, ignored: 1, status: change.status, reason: 'already_in_state' };
+      }
+      throw error;
+    }
+
+    emitSignificantEventWriteTriggers({
+      emitTrigger,
+      significantEvent: event,
+      priorSignificantEvent: latest,
+    });
+    reportEventStatusChange({
+      telemetry,
+      logger,
+      event,
+      prior: latest,
+      origin,
+      spaceId: space,
+    });
+    return { updated: 1, ignored: 0, status: event.status };
   }
 
   private async writeVersion({

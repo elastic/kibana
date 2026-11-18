@@ -209,6 +209,7 @@ describe('CreateDestinationModal', () => {
         within(screen.getByTestId('streamsCreateDestinationFixedIndex')).getByRole('radio')
       );
       setFieldValue('streamsCreateDestinationIndex', 'shared-idx');
+      setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
       setFieldValue(
         'streamsCreateDestinationRemoteElasticsearchEndpoint',
         'https://es.example.com:443'
@@ -227,6 +228,7 @@ describe('CreateDestinationModal', () => {
               logsIndex: 'shared-idx',
               metricsIndex: 'shared-idx',
               tracesIndex: 'shared-idx',
+              docsIndex: 'accounting-2026',
               endpoint: 'https://es.example.com:443',
               apiKey: 'remote-key',
             }),

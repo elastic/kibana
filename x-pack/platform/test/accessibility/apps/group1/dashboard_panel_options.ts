@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'home']);
   const toasts = getService('toasts');
   const inspector = getService('inspector');
+  const listingTable = getService('listingTable');
 
   describe('Dashboard panel options a11y tests', () => {
     const title = '[Flights] Flight count';
@@ -25,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.home.addSampleDataSet('flights');
 
       await PageObjects.common.navigateToApp('dashboard');
-      await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
+      await listingTable.clickItemLink('dashboard', '[Flights] Global Flight Dashboard');
     });
 
     after(async () => {

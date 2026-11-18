@@ -345,6 +345,18 @@ const UnavailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }
   />
 );
 
+const PartiallyAvailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => (
+  <KbnWarningCallout
+    data-test-subj="digitalExperiencePartiallyAvailableSources"
+    size="s"
+    title={i18n.translate('xpack.digitalExperience.applications.partiallyAvailableSources', {
+      defaultMessage:
+        "You can't read all of the {sources} indices, so the applications, totals and chart may be incomplete. Ask an administrator for read access to them.",
+      values: { sources: sources.map((source) => SOURCE_LABELS[source]).join(', ') },
+    })}
+  />
+);
+
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.applications.fetchError', {
   defaultMessage: 'Could not load the applications',
 });
@@ -454,6 +466,7 @@ export function ApplicationsListPage() {
     [response, selectedSource]
   );
   const unavailableSources = response?.unavailableSources ?? [];
+  const partiallyAvailableSources = response?.partiallyAvailableSources ?? [];
 
   const { visibleColumns, setVisibleColumns } = useVisibleColumns({
     storageKey: HIDDEN_COLUMNS_STORAGE_KEY,
@@ -644,6 +657,12 @@ export function ApplicationsListPage() {
         {unavailableSources.length > 0 && (
           <>
             <UnavailableSourcesCallOut sources={unavailableSources} />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {partiallyAvailableSources.length > 0 && (
+          <>
+            <PartiallyAvailableSourcesCallOut sources={partiallyAvailableSources} />
             <EuiSpacer size="m" />
           </>
         )}

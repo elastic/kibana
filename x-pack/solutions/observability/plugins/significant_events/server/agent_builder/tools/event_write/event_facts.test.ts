@@ -204,6 +204,51 @@ describe('computeEventFacts', () => {
     );
   });
 
+  describe('confidence', () => {
+    const stored = makeStored([makeSignal()], { confidence: 0.6 });
+
+    it.each(['refutes', 'inconclusive', 'off_topic'] as const)(
+      'keeps the stored score on a continuation whose write carries only %s signals',
+      (verdict) => {
+        expect(
+          facts({
+            signals: [makeSignal({ verdict })],
+            candidateOverrides: { confidence: 0.9 },
+            stored,
+          }).confidence
+        ).toBe(0.6);
+      }
+    );
+
+    it('stores the submitted score on a continuation with a confirming signal', () => {
+      expect(
+        facts({ signals: [makeSignal()], candidateOverrides: { confidence: 0.9 }, stored })
+          .confidence
+      ).toBe(0.9);
+    });
+
+    it('stores the submitted score when a closed series reopens', () => {
+      const closed = makeStored([makeSignal()], { confidence: 0.6, status: 'inactive' });
+
+      expect(
+        facts({
+          signals: [makeSignal({ verdict: 'inconclusive' })],
+          candidateOverrides: { confidence: 0.9, status: 'active' },
+          stored: closed,
+        }).confidence
+      ).toBe(0.9);
+    });
+
+    it('stores the submitted score, unclamped, on a new event with no confirming signal', () => {
+      expect(
+        facts({
+          signals: [makeSignal({ verdict: 'inconclusive' })],
+          candidateOverrides: { event_id: undefined, confidence: 0.6 },
+        }).confidence
+      ).toBe(0.6);
+    });
+  });
+
   it('refuses signals without a proposed severity rather than guessing one', () => {
     expect(() =>
       facts({ signals: [makeSignal()], candidateOverrides: { severity: undefined } })

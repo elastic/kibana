@@ -45,7 +45,12 @@ const runHandler = ({
   ) => Promise<ApplicationOverviewResponse>;
   return handler({
     params: { path: { serviceName }, query },
-    context: { core: Promise.resolve({ elasticsearch: { client: { asCurrentUser: esClient } } }) },
+    context: {
+      core: Promise.resolve({
+        elasticsearch: { client: { asCurrentUser: esClient } },
+        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+      }),
+    },
     request: { events: { aborted$: NEVER } },
     plugins: {},
     isServerless: false,

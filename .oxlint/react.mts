@@ -40,8 +40,8 @@ export const reactRules: DummyRuleMap = {
   'jsx-a11y/scope': 'error',
   'jsx-a11y/tabindex-no-positive': 'error',
 
-  // 'react-hooks/exhaustive-deps': 'error',
-  // 'react-hooks/rules-of-hooks': 'error',
+  'react-hooks/exhaustive-deps': 'error',
+  'react-hooks/rules-of-hooks': 'error',
   'react/jsx-no-duplicate-props': 'error',
   'react/jsx-no-undef': 'error',
   'react/jsx-pascal-case': 'error',

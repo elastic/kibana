@@ -306,3 +306,16 @@ export {
   type KnowledgePurgeResult,
   type KnowledgePurgeScope,
 } from './purge';
+
+export {
+  DEFAULT_INVESTIGATION_QUOTA_LIMITS,
+  DEFAULT_INVESTIGATION_QUOTA_SETTINGS,
+  INVESTIGATION_QUOTA_GROUPS,
+  isInvestigationQuotaReached,
+  type InvestigationQuotaCounts,
+  type InvestigationQuotaGroup,
+  type InvestigationQuotaLimits,
+  type InvestigationQuotaSettings,
+  type InvestigationQuotasResponse,
+  type InvestigationQuotasUpdate,
+} from './investigation_quotas';

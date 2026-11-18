@@ -19,6 +19,7 @@ import {
   investigationRoundInputsSchema,
   withToolResults,
 } from '../investigation_round';
+import { trackBackgroundActivity, type NightshiftTelemetryClient } from '../telemetry';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { withTimeout } from './with_timeout';
 
@@ -36,6 +37,7 @@ export const wikiOptimizeStepDefinition = ({
   getSavedObjects,
   getUiSettings,
   analytics,
+  telemetry,
   logger,
   isEnabled,
 }: {
@@ -44,6 +46,7 @@ export const wikiOptimizeStepDefinition = ({
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
   analytics: AnalyticsServiceSetup;
+  telemetry?: NightshiftTelemetryClient;
   logger: Logger;
   isEnabled?: () => boolean;
 }) =>
@@ -114,35 +117,46 @@ export const wikiOptimizeStepDefinition = ({
           logger,
         },
         async (span) => {
-          const res = await withTimeout(
-            (signal) =>
-              runWikiOptimize({
-                request,
-                agentId: context.input.agent_id,
-                userMessage: context.input.prompt,
-                assistantMessage: context.input.response,
-                toolCalls: withToolResults(
-                  (context.input.tool_calls ?? []) as InvestigationToolCall[],
-                  context.input.tool_results ?? []
-                ),
-                esClient: context.contextManager.getScopedEsClient(),
-                spaceId: workflow.spaceId,
-                interactionId: execution.id,
-                signal,
-                analytics,
-                conversationId: context.input.conversation_id,
-                roundId: context.input.round_id,
-                roundIndex: context.input.round_index,
-                requestedConnectorId: context.input.connector_id,
-                roundConnectorId: context.input.round_connector_id,
-                logger,
-                getAgentBuilder,
-                getInference,
-                getSavedObjects,
-                getUiSettings,
-              }),
-            OPTIMIZE_TIMEOUT_MS,
-            `Wiki optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
+          const res = await trackBackgroundActivity(
+            {
+              telemetry,
+              activity: 'wiki_optimize',
+              workflowExecutionId: execution.id,
+              conversationId: context.input.conversation_id,
+              roundId: context.input.round_id,
+            },
+            (modelUsage) =>
+              withTimeout(
+                (signal) =>
+                  runWikiOptimize({
+                    request,
+                    agentId: context.input.agent_id,
+                    userMessage: context.input.prompt,
+                    assistantMessage: context.input.response,
+                    toolCalls: withToolResults(
+                      (context.input.tool_calls ?? []) as InvestigationToolCall[],
+                      context.input.tool_results ?? []
+                    ),
+                    esClient: context.contextManager.getScopedEsClient(),
+                    spaceId: workflow.spaceId,
+                    interactionId: execution.id,
+                    signal,
+                    analytics,
+                    conversationId: context.input.conversation_id,
+                    roundId: context.input.round_id,
+                    roundIndex: context.input.round_index,
+                    requestedConnectorId: context.input.connector_id,
+                    roundConnectorId: context.input.round_connector_id,
+                    logger,
+                    getAgentBuilder,
+                    getInference,
+                    getSavedObjects,
+                    getUiSettings,
+                    modelUsage,
+                  }),
+                OPTIMIZE_TIMEOUT_MS,
+                `Wiki optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
+              )
           );
           if (res?.openedIds) {
             span?.setAttribute('nightshift.opened_ids', JSON.stringify(res.openedIds));

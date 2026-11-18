@@ -382,6 +382,57 @@ describe('buildBranchCountsQuery', () => {
     // no LAST: the latest run is left to the branch stats query
     expect(query).not.toContain('LAST(');
     expect(query).not.toContain('latest_execution_at');
+    expect(query).not.toContain('judged_pipeline');
+  });
+
+  it('counts the builds of a pipeline judged on its own apart from those judged together', () => {
+    const query = buildBranchCountsQuery(
+      {
+        ...scope,
+        pipelines: ['kibana-on-merge', 'kibana-fips'],
+        judgedTogether: ['kibana-on-merge'],
+      },
+      ['jest'],
+      ['j1'],
+      countThresholds
+    );
+
+    expect(query).toContain(
+      'EVAL failed = CASE(test.status IN ("failed", "timedOut"), 1, 0), ' +
+        'judged_pipeline = CASE(buildkite.pipeline.slug IN ("kibana-on-merge"), "", buildkite.pipeline.slug)'
+    );
+    expect(query).toContain('BY test.id, buildkite.branch, judged_pipeline |');
+  });
+
+  it('judges every pipeline on its own when none is judged together', () => {
+    expect(
+      buildBranchCountsQuery({ ...scope, judgedTogether: [] }, ['jest'], ['j1'], countThresholds)
+    ).toContain(
+      'EVAL failed = CASE(test.status IN ("failed", "timedOut"), 1, 0), ' +
+        'judged_pipeline = buildkite.pipeline.slug'
+    );
+  });
+});
+
+describe('judging pipelines on their own in the other per-branch queries', () => {
+  const separate = {
+    ...scope,
+    pipelines: ['kibana-on-merge', 'kibana-fips'],
+    judgedTogether: ['kibana-on-merge'],
+  };
+
+  it('groups the branch stats, the setups and the setup builds by the judged pipeline too', () => {
+    expect(buildBranchStatsQuery(separate, ['jest'], ['j1'])).toContain(
+      'BY test.id, buildkite.branch, judged_pipeline |'
+    );
+    const setups = buildBranchSetupsQuery(separate, ['jest'], ['j1']);
+    expect(setups).toContain('BY test.id, buildkite.branch, judged_pipeline, setup |');
+    expect(setups).toContain(
+      'skipped_setups = SUM(CASE(latest_status == "skipped", 1, 0)) BY test.id, buildkite.branch, judged_pipeline |'
+    );
+    expect(buildSetupBuildsQuery(separate, ['jest'], ['j1'])).toContain(
+      'BY test.id, buildkite.branch, judged_pipeline, setup, buildkite.build.id, buildkite.build.number'
+    );
   });
 });
 
@@ -444,6 +495,26 @@ describe('fetchBranchCounts', () => {
     ]);
     // a test without any row is absent
     expect(counts.has('p1')).toBe(false);
+  });
+
+  it('records the pipeline a row is judged in, and none for the pipelines judged together', async () => {
+    const { client } = mockEs([
+      { test_id: 'j1', branch: 'main', judged_pipeline: '', builds: 500, failed_builds: 10 },
+      {
+        test_id: 'j1',
+        branch: 'main',
+        judged_pipeline: 'kibana-fips',
+        builds: 14,
+        failed_builds: 4,
+      },
+    ]);
+
+    const counts = await fetchBranchCounts(client, scope, tests.slice(0, 1), countThresholds);
+
+    expect(counts.get('j1')).toEqual([
+      { branch: 'main', builds: 500, failedBuilds: 10 },
+      { branch: 'main', pipeline: 'kibana-fips', builds: 14, failedBuilds: 4 },
+    ]);
   });
 
   it('fails when the result hits the row limit, as the cut-off tests would pass for disqualified', async () => {
@@ -834,6 +905,24 @@ describe('buildTargetStatsQuery', () => {
         'BY test.id, target_mode, target_type'
     );
     expect(query).toContain('RENAME test.id AS test_id');
+    expect(query).not.toContain('judged_pipeline');
+  });
+
+  it('gives a pipeline judged on its own rows of its own, as it may share the others’ targets', () => {
+    const query = buildTargetStatsQuery(
+      {
+        ...scope,
+        pipelines: ['kibana-on-merge', 'kibana-fips'],
+        judgedTogether: ['kibana-on-merge'],
+      },
+      ['ftr'],
+      ['t1']
+    );
+
+    expect(query).toContain(
+      'judged_pipeline = CASE(buildkite.pipeline.slug IN ("kibana-on-merge"), "", buildkite.pipeline.slug)'
+    );
+    expect(query).toContain('BY test.id, target_mode, target_type, judged_pipeline |');
   });
 });
 

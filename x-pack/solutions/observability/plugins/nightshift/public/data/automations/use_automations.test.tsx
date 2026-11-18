@@ -8,9 +8,9 @@
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
-import { useRunQuotas } from '../run_quotas/use_significant_events_run_quotas';
-import { RUN_QUOTAS_QUERY_KEY } from '../query_keys';
+import type { InvestigationQuotasResponse } from '@kbn/nightshift-investigations-plugin/common';
+import { useInvestigationQuotas } from '../run_quotas/use_investigation_quotas';
+import { INVESTIGATION_QUOTAS_QUERY_KEY } from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import {
   AUTOMATIONS_QUERY_KEY,
@@ -28,7 +28,6 @@ jest.mock('../../hooks/use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
 const investigationsFetch = jest.fn();
-const quotaFetch = jest.fn();
 const addSuccess = jest.fn();
 const addError = jest.fn();
 
@@ -48,7 +47,6 @@ describe('use_automations', () => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
-        significantEvents: { significantEventsRepositoryClient: { fetch: quotaFetch } },
         notifications: { toasts: { addError, addSuccess } },
         nightshiftInvestigations: { investigationsClient: { fetch: investigationsFetch } },
       },
@@ -144,23 +142,18 @@ describe('use_automations', () => {
   it('refreshes quotas after acceptance and polls later admission and daily reset while the menu is open', async () => {
     jest.useFakeTimers();
     try {
-      let quotas: RunQuotasResponse = {
+      let quotas: InvestigationQuotasResponse = {
         enabled: true,
-        investigationLimitsEnabled: true,
         canManage: true,
         limits: {
-          detection: 0,
-          investigation: 0,
+          automatic_investigation: null,
           manual_investigation: 1,
-          total_investigation: 0,
-          ki_extraction: 0,
+          total_investigation: null,
         },
         counts: {
-          detection: 0,
-          investigation: 0,
+          automatic_investigation: 0,
           manual_investigation: 0,
           total_investigation: 0,
-          ki_extraction: 0,
         },
         window: {
           start: '2040-01-01T00:00:00.000Z',
@@ -168,16 +161,19 @@ describe('use_automations', () => {
           timezone: 'UTC',
         },
       };
-      quotaFetch.mockImplementation(async () => quotas);
-      investigationsFetch.mockResolvedValue({ workflowExecutionId: 'exec-1' });
+      investigationsFetch.mockImplementation(async (endpoint: string) =>
+        endpoint.startsWith('GET /internal/nightshift/investigation_quotas')
+          ? quotas
+          : { workflowExecutionId: 'exec-1' }
+      );
       const { result, invalidateQueries } = renderWithClient(() => ({
-        quota: useRunQuotas({ poll: true }),
+        quota: useInvestigationQuotas({ poll: true }),
         run: useRunAutomation(),
       }));
       await waitFor(() => expect(result.current.quota.data?.counts.manual_investigation).toBe(0));
       act(() => result.current.run.mutate({ id: 'automation-1', name: 'Triage' }));
       await waitFor(() => expect(result.current.run.isSuccess).toBe(true));
-      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: RUN_QUOTAS_QUERY_KEY });
+      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: INVESTIGATION_QUOTAS_QUERY_KEY });
       expect(result.current.quota.data?.counts.manual_investigation).toBe(0);
 
       quotas = { ...quotas, counts: { ...quotas.counts, manual_investigation: 1 } };

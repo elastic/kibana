@@ -85,11 +85,14 @@ const discoveryExecuteRoute = createServerRoute({
           }),
       });
       if (isNew) {
-        telemetry.trackSignificantEventsDiscoveryTriggered({
-          workflow_execution_id: executionId,
-          execution_id: executionId,
-          space_id: spaceId,
-        });
+        telemetry.trackSignificantEventsDiscoveryTriggered(
+          {
+            workflow_execution_id: executionId,
+            execution_id: executionId,
+            space_id: spaceId,
+          },
+          request
+        );
       }
       return { executionId };
     }
@@ -161,7 +164,6 @@ const discoveryStartedRoute = createServerRoute({
     params,
     request,
     getScopedClients,
-    getSpaceId,
     server,
     telemetry,
   }): Promise<{ acknowledged: true }> => {
@@ -172,12 +174,14 @@ const discoveryStartedRoute = createServerRoute({
       parent_workflow_execution_id: parentExecutionId,
     } = params.body;
 
-    telemetry.trackSignificantEventsDiscoveryStarted({
-      ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
-      workflow_execution_id: discoveryExecutionId,
-      space_id: await getSpaceId(request),
-      alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
-    });
+    telemetry.trackSignificantEventsDiscoveryStarted(
+      {
+        ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
+        workflow_execution_id: discoveryExecutionId,
+        alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+      },
+      request
+    );
     return { acknowledged: true };
   },
 });
@@ -261,17 +265,19 @@ const discoveryCompletedRoute = createServerRoute({
       ? execution.duration ?? undefined
       : Date.now() - Date.parse(execution.startedAt);
 
-    telemetry.trackSignificantEventsDiscoveryCompleted({
-      ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
-      workflow_execution_id: discoveryExecutionId,
-      space_id: spaceId,
-      alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
-      // A step timeout reaches the failure fallback as a `TimeoutError`.
-      outcome: outcome === 'failed' && errorType === 'TimeoutError' ? 'timed_out' : outcome,
-      ...(durationMs !== undefined ? { duration_ms: durationMs } : {}),
-      ...counts,
-      ...(errorMessage ? { error_message: errorMessage } : {}),
-    });
+    telemetry.trackSignificantEventsDiscoveryCompleted(
+      {
+        ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
+        workflow_execution_id: discoveryExecutionId,
+        alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+        // A step timeout reaches the failure fallback as a `TimeoutError`.
+        outcome: outcome === 'failed' && errorType === 'TimeoutError' ? 'timed_out' : outcome,
+        ...(durationMs !== undefined ? { duration_ms: durationMs } : {}),
+        ...counts,
+        ...(errorMessage ? { error_message: errorMessage } : {}),
+      },
+      request
+    );
     return { acknowledged: true };
   },
 });

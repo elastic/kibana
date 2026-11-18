@@ -438,6 +438,7 @@ describe('createEisFieldDefinitions', () => {
     expect(category.resolveIdToDisplay('Rerank')).toBe('Rerank');
     expect(category.resolveDisplayToId('embedding')).toBe('Embedding');
     expect(category.resolveFuzzyDisplayToIds?.('rer')).toEqual(['Rerank']);
+    expect(category.resolveDisplayToId('decision')).toBe('Decision');
   });
 
   it('resolves region option labels to the flyout keys', () => {

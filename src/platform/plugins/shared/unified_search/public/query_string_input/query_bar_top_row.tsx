@@ -61,7 +61,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
-import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
+import type { ISessionService, PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { FilterableSource } from '@kbn/data-source';
 import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
@@ -342,6 +342,38 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   };
 }
 
+/** Returns the absolute ISO representation of a date math string, or `undefined` if it's invalid. */
+function toAbsoluteString(value: string, roundUp = false): string | undefined {
+  const valueAsMoment = dateMath.parse(value, { roundUp });
+  if (!valueAsMoment) {
+    return value;
+  }
+  return valueAsMoment.isValid() ? valueAsMoment.toISOString() : undefined;
+}
+
+function SharedTimefilterDuration({
+  timeFrom,
+  timeTo,
+  dateFormat,
+}: {
+  timeFrom: string;
+  timeTo: string;
+  dateFormat: string;
+}) {
+  const dateRangePretty = usePrettyDuration({
+    timeFrom,
+    timeTo,
+    quickRanges: [],
+    dateFormat,
+  });
+  return (
+    <div
+      data-shared-timefilter-duration={dateRangePretty}
+      data-test-subj="dataSharedTimefilterDuration"
+    />
+  );
+}
+
 export const SharingMetaFields = React.memo(function SharingMetaFields({
   from,
   to,
@@ -351,30 +383,14 @@ export const SharingMetaFields = React.memo(function SharingMetaFields({
   to: string;
   dateFormat: string;
 }) {
-  function toAbsoluteString(value: string, roundUp = false) {
-    const valueAsMoment = dateMath.parse(value, { roundUp });
-    if (!valueAsMoment) {
-      return value;
-    }
-    return valueAsMoment.toISOString();
-  }
+  const timeFrom = toAbsoluteString(from);
+  const timeTo = toAbsoluteString(to, true);
 
-  try {
-    const dateRangePretty = usePrettyDuration({
-      timeFrom: toAbsoluteString(from),
-      timeTo: toAbsoluteString(to, true),
-      quickRanges: [],
-      dateFormat,
-    });
-    return (
-      <div
-        data-shared-timefilter-duration={dateRangePretty}
-        data-test-subj="dataSharedTimefilterDuration"
-      />
-    );
-  } catch (e) {
+  if (timeFrom === undefined || timeTo === undefined) {
     return <div data-test-subj="dataSharedTimefilterDuration" />;
   }
+
+  return <SharedTimefilterDuration timeFrom={timeFrom} timeTo={timeTo} dateFormat={dateFormat} />;
 });
 
 type GenericQueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
@@ -535,8 +551,14 @@ export const QueryBarTopRow = React.memo(
         })
       )
     );
+    const backgroundSearchAvailability = getBackgroundSearchAvailability(
+      data.search.session,
+      props.useBackgroundSearchButton
+    );
     const canSendToBackground =
-      backgroundSearchState === SearchSessionState.Loading && !isSendingToBackground;
+      backgroundSearchState === SearchSessionState.Loading &&
+      !isSendingToBackground &&
+      !backgroundSearchAvailability.disabled;
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
@@ -1618,4 +1640,15 @@ const getSplitButtonSecondaryActionClassName = (
       ...(fill && { color: getEuiFilledButtonColorValues(euiThemeContext, color).color }),
     },
   });
+};
+
+const getBackgroundSearchAvailability = (
+  session: ISessionService,
+  useBackgroundSearchButton?: boolean
+) => {
+  if (!useBackgroundSearchButton) {
+    return { disabled: false } as const;
+  }
+
+  return session.getSearchSessionIndicatorUiConfig().isDisabled();
 };

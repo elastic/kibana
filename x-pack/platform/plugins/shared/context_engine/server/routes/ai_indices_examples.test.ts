@@ -15,6 +15,7 @@ import type { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-se
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
 import { registerSessionMemoryRoutes } from './session_memory';
+import { registerSessionEventsRoutes } from './session_events';
 
 interface ExampleMediaType {
   content: { 'application/json': { examples: Record<string, { value: unknown }> } };
@@ -69,7 +70,7 @@ registerAiIndexRoutes({
   getAiIndexService: jest.fn(),
   getAiIndexDataReadService: jest.fn(),
   getImprovementsService: jest.fn(),
-  getScheduleService: jest.fn(),
+  aiIndexChanges: { notify: jest.fn() },
   isMemoryEnabled: async () => false,
   getActions: jest.fn(),
   getAgentBuilder: jest.fn(),
@@ -84,6 +85,14 @@ registerSessionMemoryRoutes({
   getAiIndexService: jest.fn(),
   isMemoryEnabled: async () => false,
   logger: loggerMock.create(),
+});
+
+registerSessionEventsRoutes({
+  router: routerCapturingRoutes,
+  getSpaces: jest.fn(),
+  getSessionEventsService: jest.fn(),
+  getAiIndexService: jest.fn(),
+  isMemoryEnabled: async () => false,
 });
 
 const routesWithExamples = registered.flatMap(({ route, opts, handler }) => {
@@ -116,7 +125,7 @@ const codeSampleBody = ({ lang, source }: CodeSample) =>
 
 describe('route examples', () => {
   it('covers every route that links an example file', () => {
-    expect(routesWithExamples).toHaveLength(9);
+    expect(routesWithExamples).toHaveLength(10);
   });
 
   describe.each(routesWithExamples)('$route', ({ route, validation, examples, handler }) => {

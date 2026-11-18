@@ -251,6 +251,112 @@ describe('Partition', () => {
     });
   });
 
+  describe('API to state collapseFns index preservation', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    it('should keep the collapse and the color on their own groups when a collapsed group follows an active one in pie chart', () => {
+      const config = {
+        type: 'pie',
+        title: 'Collapsed group after an active one',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        group_by: [
+          {
+            operation: 'terms',
+            fields: ['host.name'],
+            limit: 3,
+            color: {
+              mode: 'categorical',
+              palette: 'default',
+              mapping: [{ values: ['a'], color: { type: 'color_code', value: '#ff0000' } }],
+            },
+          },
+          { operation: 'terms', fields: ['agent.keyword'], limit: 3, collapse_by: 'sum' },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(vizState.layers[0].collapseFns).toEqual({
+        partition_value_accessor_group_by_1: 'sum',
+      });
+      expect(apiOutput.group_by?.[0].collapse_by).toBeUndefined();
+      expect(apiOutput.group_by?.[0].color).toEqual(config.group_by[0].color);
+      expect(apiOutput.group_by?.[1].collapse_by).toBe('sum');
+      expect(apiOutput.group_by?.[1].color).toBeUndefined();
+    });
+
+    it('should keep each collapse on its own group when an active group sits between collapsed ones in pie chart', () => {
+      const config = {
+        type: 'pie',
+        title: 'Active group between collapsed ones',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        group_by: [
+          { operation: 'terms', fields: ['host.name'], limit: 3, collapse_by: 'sum' },
+          { operation: 'terms', fields: ['agent.keyword'], limit: 3 },
+          { operation: 'terms', fields: ['geo.dest'], limit: 3, collapse_by: 'max' },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(vizState.layers[0].collapseFns).toEqual({
+        partition_value_accessor_group_by_0: 'sum',
+        partition_value_accessor_group_by_2: 'max',
+      });
+      expect(apiOutput.group_by?.map(({ collapse_by }) => collapse_by)).toEqual([
+        'sum',
+        undefined,
+        'max',
+      ]);
+      expect(apiOutput.group_by?.[1].color).toEqual(DEFAULT_CATEGORICAL_COLOR_MAPPING);
+    });
+
+    it('should keep the collapse on its own group_breakdown_by dimension in mosaic chart', () => {
+      const config = {
+        type: 'mosaic',
+        title: 'Collapsed breakdown after an active one',
+        data_source: baseDataSource,
+        metric: { operation: 'count', empty_as_null: false },
+        group_by: [{ operation: 'terms', fields: ['host.name'], limit: 3 }],
+        group_breakdown_by: [
+          { operation: 'terms', fields: ['agent.keyword'], limit: 3 },
+          { operation: 'terms', fields: ['geo.dest'], limit: 3, collapse_by: 'sum' },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies MosaicConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+      const apiOutput = builder.toAPIFormat(lensState) as MosaicConfig;
+
+      expect(vizState.layers[0].collapseFns).toEqual({
+        partition_value_accessor_group_breakdown_by_1: 'sum',
+      });
+      expect(apiOutput.group_breakdown_by?.map(({ collapse_by }) => collapse_by)).toEqual([
+        undefined,
+        'sum',
+      ]);
+    });
+  });
+
   describe('waffle legend values', () => {
     const baseDataSource = {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,

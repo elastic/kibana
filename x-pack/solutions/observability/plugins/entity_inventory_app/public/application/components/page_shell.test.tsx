@@ -11,6 +11,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { EntityInventoryEntityCategory } from '../../types';
+import { createPublicConfigMock } from '../../mocks';
 import { useEntityInventorySearch } from '../context/search_context';
 import { EntityInventoryPageShell } from './page_shell';
 
@@ -23,7 +24,9 @@ const renderWithServices = (ui: React.ReactElement) => {
   unifiedSearch.ui.SearchBar = () => <div data-test-subj="mockSearchBar" />;
 
   return render(
-    <KibanaContextProvider services={{ ...coreMock.createStart(), unifiedSearch }}>
+    <KibanaContextProvider
+      services={{ ...coreMock.createStart(), unifiedSearch, config: createPublicConfigMock() }}
+    >
       {ui}
     </KibanaContextProvider>
   );
