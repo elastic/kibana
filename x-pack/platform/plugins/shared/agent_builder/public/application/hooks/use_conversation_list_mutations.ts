@@ -131,14 +131,10 @@ export const useConversationListMutations = ({
       // Pinning is per-user state, so `updated_at` is left untouched.
       movePinnedConversationBetweenLists({ queryClient, agentId, conversationId, pinned });
 
-      conversationsService
-        .updatePinnedStatus({ conversationId, pinned })
-        // The optimistic update puts the row at the top; refetch so it lands where the server sorts it.
-        .then(() => queryClient.invalidateQueries({ queryKey: queryKeys.conversations.list }))
-        .catch(() => {
-          rollbackConversationCaches(conversationId);
-          addErrorToast({ title: pinnedUpdateErrorTitle });
-        });
+      conversationsService.updatePinnedStatus({ conversationId, pinned }).catch(() => {
+        rollbackConversationCaches(conversationId);
+        addErrorToast({ title: pinnedUpdateErrorTitle });
+      });
     },
     [conversationsService, queryClient, agentId, rollbackConversationCaches, addErrorToast]
   );

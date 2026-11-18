@@ -96,6 +96,10 @@ const mockRawEsClient: MockRawEsClient = {
 
 const TEST_CONVERSATION_INDEX = '.kibana_agent_builder_conversations';
 const CONVERSATION_UPDATED_AT = '2025-08-04T06:44:19.123Z';
+const expectUpdatedAtBumped = (document: { updated_at: string }) =>
+  expect(new Date(document.updated_at).getTime()).toBeGreaterThan(
+    new Date(CONVERSATION_UPDATED_AT).getTime()
+  );
 
 const mockConversationEvents: ConversationEventsServiceStart = {
   getDefinition: jest.fn(),
@@ -1551,7 +1555,7 @@ describe('ConversationClient', () => {
       );
 
       const { document } = mockEsClient.index.mock.calls[0][0];
-      expect(document.updated_at).not.toBe(CONVERSATION_UPDATED_AT);
+      expectUpdatedAtBumped(document);
       expect(new Date(document.updated_at).getTime()).toBeGreaterThan(
         new Date(CONVERSATION_UPDATED_AT).getTime()
       );
@@ -1575,7 +1579,7 @@ describe('ConversationClient', () => {
       );
 
       const { document } = mockEsClient.index.mock.calls[0][0];
-      expect(document.updated_at).not.toBe(CONVERSATION_UPDATED_AT);
+      expectUpdatedAtBumped(document);
     });
 
     it('preserves legacy owner read state when renaming before read_by exists', async () => {
@@ -1866,16 +1870,6 @@ describe('ConversationClient', () => {
       expect(document.pinned_by).toEqual([{ userId: 'user-1' }]);
       expectNoReadBy(result);
       expect(result.pinned).toBe(true);
-    });
-
-    it('writes with refresh wait_for so the pinned lists are up to date on return', async () => {
-      mockGetDocumentResponse(createConversationDocument({ pinnedBy: [] }));
-
-      await client.setPinned('conversation-1', true);
-
-      expect(mockEsClient.index.mock.calls[0][0]).toEqual(
-        expect.objectContaining({ refresh: 'wait_for' })
-      );
     });
 
     it('keeps updated_at when pinning or unpinning', async () => {
@@ -5406,7 +5400,7 @@ describe('ConversationClient', () => {
       );
 
       const { document } = mockEsClient.index.mock.calls[0][0];
-      expect(document.updated_at).not.toBe(CONVERSATION_UPDATED_AT);
+      expectUpdatedAtBumped(document);
     });
 
     it('replaceRoundEvents bumps updated_at', async () => {
@@ -5423,7 +5417,7 @@ describe('ConversationClient', () => {
       );
 
       const { document } = mockEsClient.index.mock.calls[0][0];
-      expect(document.updated_at).not.toBe(CONVERSATION_UPDATED_AT);
+      expectUpdatedAtBumped(document);
     });
 
     it('leaves legacy conversations rounds-only on an update that records no activity (no events / no schema_version written)', async () => {
@@ -6522,19 +6516,19 @@ describe('ConversationClient', () => {
       });
     });
 
-    it('an update without fields that sets or releases the active execution bumps updated_at', async () => {
+    it('an update without fields that sets or releases the active execution keeps updated_at', async () => {
       mockGetDocumentResponse(documentWithHolder(undefined, { readBy: [{ userId: 'user-1' }] }));
 
       await updateWithoutFields(setActiveExecution('e2'));
 
-      expect(indexedSource().updated_at).not.toBe(CONVERSATION_UPDATED_AT);
+      expect(indexedSource().updated_at).toBe(CONVERSATION_UPDATED_AT);
 
       mockEsClient.index.mockClear();
       mockGetDocumentResponse(documentWithHolder('e1', { readBy: [{ userId: 'user-1' }] }));
 
       await updateWithoutFields({ action: 'release', executionId: 'e1' });
 
-      expect(indexedSource().updated_at).not.toBe(CONVERSATION_UPDATED_AT);
+      expect(indexedSource().updated_at).toBe(CONVERSATION_UPDATED_AT);
     });
 
     it('an update without fields that releases the active execution clears only its own', async () => {
