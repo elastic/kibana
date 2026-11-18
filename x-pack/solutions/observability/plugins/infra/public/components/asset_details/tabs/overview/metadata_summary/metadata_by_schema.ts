@@ -10,16 +10,28 @@ import type { InfraMetadata } from '../../../../../../common/http_api';
 import { firstValue } from '../../../../../utils/first_value';
 import type { MetadataData } from './metadata_summary_list';
 
+// The `schema` passed in comes from `timeRangeMetadata.preferredSchema` and can resolve to `'ecs'`
+// for an OpenTelemetry host whose documents are actually semconv-shaped. Reading the ECS path first
+// and falling back to `resource.attributes.*` keeps the Overview populated in that mismatched case,
+// matching the resilient extraction the dedicated Metadata tab (`getAllFields`) already performs.
 const ecsHostExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   {
     field: 'cloudProvider',
-    value: metadataInfo?.cloud?.provider,
+    value: firstValue(
+      metadataInfo?.cloud?.provider,
+      metadataInfo?.resource?.attributes?.cloud?.provider
+    ),
     tooltipFieldLabel: 'cloud.provider',
     tooltipLink: 'https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html#field-cloud-provider',
   },
   {
     field: 'operatingSystem',
-    value: metadataInfo?.host?.os?.name,
+    value: firstValue(
+      metadataInfo?.host?.os?.name,
+      metadataInfo?.resource?.attributes?.os?.name,
+      metadataInfo?.host?.os?.platform,
+      metadataInfo?.resource?.attributes?.os?.type
+    ),
     tooltipFieldLabel: 'host.os.name',
   },
 ];
@@ -27,13 +39,16 @@ const ecsHostExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataD
 const ecsHostMetadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   {
     field: 'hostIp',
-    value: metadataInfo?.host?.ip,
+    value: firstValue(metadataInfo?.host?.ip, metadataInfo?.resource?.attributes?.host?.ip),
     tooltipFieldLabel: 'host.ip',
     tooltipLink: 'https://www.elastic.co/guide/en/ecs/current/ecs-host.html#field-host-ip',
   },
   {
     field: 'hostOsVersion',
-    value: metadataInfo?.host?.os?.version,
+    value: firstValue(
+      metadataInfo?.host?.os?.version,
+      metadataInfo?.resource?.attributes?.os?.version
+    ),
     tooltipFieldLabel: 'host.os.version',
   },
 ];

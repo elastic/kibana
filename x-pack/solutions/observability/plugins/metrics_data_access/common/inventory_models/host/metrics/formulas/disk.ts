@@ -52,10 +52,13 @@ export const diskUsage: SchemaBasedFormula = {
   label: DISK_USAGE_LABEL,
   value: {
     ecs: 'max(system.filesystem.used.pct)',
-    // Some OTel datasets do not provide `metrics.system.filesystem.utilization`.
-    // Compute usage from state-based usage values instead.
-    semconv:
-      "1 - sum(metrics.system.filesystem.usage, kql='state: free') / sum(metrics.system.filesystem.usage)",
+    // `metrics.system.filesystem.utilization` is a per-document fraction of filesystem bytes used
+    // (bounded 0-1, the semconv analogue of ECS `system.filesystem.used.pct`). Taking `max` mirrors
+    // the ECS KPI shape and reports the busiest mount point as current usage. The previous
+    // `1 - sum(free) / sum(all)` expression summed `usage` bytes across every mount point (and every
+    // `state`, including non-`free`/`used` states), blending differently-sized filesystems and
+    // inflating the KPI toward 100% even when no single mount was that full.
+    semconv: 'max(metrics.system.filesystem.utilization)',
   },
   format: 'percent',
   decimals: 0,
