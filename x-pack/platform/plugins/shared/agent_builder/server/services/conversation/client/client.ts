@@ -823,6 +823,7 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access: 'owner',
       emit: false,
+      preserveUpdatedAt: true,
       fields: (current) => {
         const existing = current.feedback ?? {};
         if (feedback.vote === null) {

@@ -1978,6 +1978,44 @@ describe('ConversationClient', () => {
       );
     });
 
+    it('keeps updated_at when submitting or retracting feedback', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [makeTerminalEvent()],
+        })
+      );
+
+      await client.updateRoundFeedback('conversation-1', executionId, { vote: 'up' });
+
+      const base = createConversationDocument({
+        schemaVersion: CONVERSATION_SCHEMA_VERSION,
+        events: [makeTerminalEvent()],
+      });
+      mockGetDocumentResponse({
+        ...base,
+        _source: {
+          ...base._source!,
+          feedback: {
+            [executionId]: {
+              vote: 'up',
+              chips: [],
+              comment: '',
+              submitted_at: '2025-01-01T00:00:00.000Z',
+            },
+          },
+        },
+      } as Document);
+
+      await client.updateRoundFeedback('conversation-1', executionId, { vote: null });
+
+      const [{ document: submitted }, { document: retracted }] = mockEsClient.index.mock.calls.map(
+        ([params]) => params
+      );
+      expect(submitted.updated_at).toBe(CONVERSATION_UPDATED_AT);
+      expect(retracted.updated_at).toBe(CONVERSATION_UPDATED_AT);
+    });
+
     it('throws not found when no terminal event matches the executionId', async () => {
       mockGetDocumentResponse(
         createConversationDocument({
