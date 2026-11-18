@@ -181,21 +181,20 @@ const SEEN_EVALS = Object.entries(SESSION_ATTRIBUTE_GROUPS).map(
       .join(' OR ')}, @timestamp, null)`
 );
 
+/** A column of the summary and the aggregation that computes it. */
+type Stat = readonly [column: string, aggregation: string];
+
 /**
- * Each source field of a group as it is on the group's latest event, then the group's latest time.
- * The fields are cleaned into attributes only once per session, after the last stage: cleaning
- * every event's fields took about 40% of the query.
+ * Each source field of a group as it is on the group's latest event. The fields are cleaned into
+ * attributes only once per session, after the last stage: cleaning every event's fields took
+ * about 40% of the query.
  */
-const attributeStats = (stage: 'events' | 'pages'): string[] =>
-  Object.entries(SESSION_ATTRIBUTE_GROUPS).flatMap(([group, attributes]) => [
-    ...groupFields(attributes).map(
-      (field) =>
-        `${rawColumn(field)} = LAST(${
-          stage === 'events' ? `TO_STRING(${field})` : rawColumn(field)
-        }, ${seenColumn(group)})`
-    ),
-    `${seenColumn(group)} = MAX(${seenColumn(group)})`,
-  ]);
+const ATTRIBUTE_STATS: Stat[] = Object.entries(SESSION_ATTRIBUTE_GROUPS).flatMap(
+  ([group, attributes]) =>
+    groupFields(attributes).map(
+      (field): Stat => [rawColumn(field), `LAST(TO_STRING(${field}), ${seenColumn(group)})`]
+    )
+);
 
 /** Each attribute from its group's latest event: the first of its fields with a value. */
 const ATTRIBUTE_EVALS = Object.entries(SESSION_ATTRIBUTE_FIELDS).map(
@@ -211,44 +210,56 @@ const ATTRIBUTE_EVALS = Object.entries(SESSION_ATTRIBUTE_FIELDS).map(
  */
 const asFloat = (value: number): string => String(Math.fround(value));
 
-const vitalStats = (vital: CoreWebVital): string[] => {
+// A column per web vital, so that its stats need no filter and compare a number, not a string.
+const VITAL_EVALS = CORE_WEB_VITALS.map(
+  (vital) => `${vital} = CASE(vital == ${escapeStringValue(vital)}, vital_value, null)`
+);
+
+const vitalStats = (vital: CoreWebVital): Stat[] => {
   const { good, needsImprovement } = CORE_WEB_VITAL_THRESHOLDS[vital];
-  const ofVital = `vital == ${escapeStringValue(vital)}`;
   return [
-    `${vital}_p75 = PERCENTILE(vital_value, 75) WHERE ${ofVital}`,
-    `${vital}_samples = COUNT(*) WHERE ${ofVital}`,
-    `${vital}_good = COUNT(*) WHERE ${ofVital} AND vital_value <= ${asFloat(good)}`,
-    `${vital}_up_to_needs_improvement = COUNT(*) WHERE ${ofVital} AND vital_value <= ${asFloat(
-      needsImprovement
-    )}`,
+    [`${vital}_p75`, `PERCENTILE(${vital}, 75)`],
+    [`${vital}_samples`, `COUNT(${vital})`],
+    [`${vital}_good`, `COUNT(*) WHERE ${vital} <= ${asFloat(good)}`],
+    [`${vital}_up_to_needs_improvement`, `COUNT(*) WHERE ${vital} <= ${asFloat(needsImprovement)}`],
   ];
 };
 
-/**
- * Only page views have a page URL, so the web vitals all fall in the session's row without one, and
- * its p75 is the session's: the next stage keeps it as is, and adds up the counts.
- */
-const vitalTotals = (vital: CoreWebVital): string[] => [
-  `${vital}_p75 = MAX(${vital}_p75)`,
-  ...['samples', 'good', 'up_to_needs_improvement'].map(
-    (count) => `${vital}_${count} = SUM(${vital}_${count})`
-  ),
+const SESSION_STATS: Stat[] = [
+  ['start_time', 'MIN(@timestamp)'],
+  ['end_time', 'MAX(@timestamp)'],
+  ['event_count', 'COUNT(@timestamp)'],
+  ['page_view_count', 'COUNT(*) WHERE is_page_view'],
+  ['page_load_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_NAVIGATION_TIMING)}`],
+  ['click_count', 'COUNT(*) WHERE is_click'],
+  ['js_error_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_EXCEPTION)}`],
+  [
+    'http_request_count',
+    `COUNT(*) WHERE is_http_request AND (${HTTP_RESPONSE_STATUS_CODE} IS NOT NULL OR no_response)`,
+  ],
+  [
+    'http_failed_request_count',
+    `COUNT(*) WHERE is_http_request AND (COALESCE(${HTTP_RESPONSE_STATUS_CODE} >= 400, false) OR no_response)`,
+  ],
+  ...ATTRIBUTE_STATS,
+  ...CORE_WEB_VITALS.flatMap(vitalStats),
 ];
 
-const COUNTS = [
-  'event_count',
-  'page_view_count',
-  'page_load_count',
-  'click_count',
-  'js_error_count',
-  'http_request_count',
-  'http_failed_request_count',
-] as const;
+// Only the session branch has these columns, so its row is the only non-null value.
+const MERGED_SESSION_STATS: Stat[] = SESSION_STATS.map(([column]) => [column, `MAX(${column})`]);
+
+// On the source fields rather than `is_page_view`, whose COALESCE keeps Lucene from applying it.
+const PAGE_VIEW_FILTER = `${OTEL_EVENT_NAME} IN (${texts(
+  PAGE_VIEW_EVENTS
+)}) OR ${OTEL_SPAN_NAME} IN (${texts(PAGE_VIEW_EVENTS)})`;
+
+const renderStats = (stats: readonly Stat[], indent: string): string =>
+  stats.map(([column, aggregation]) => `${column} = ${aggregation}`).join(`,\n${indent}`);
 
 /**
  * One row per session of `sessionIds`, rebuilt from its events since `?rebuild_from`: its counts,
- * times, latest attributes and web vitals, and its journey. It aggregates per session and page URL
- * first, so the first view of each page comes out of the same pass, then per session. Counts what
+ * times, latest attributes and web vitals, and its journey. One branch aggregates per session, the
+ * other the first and last view of each page, which the last stage merges per session. Counts what
  * the applications list counts, with the same event names and request outcomes.
  */
 export const sessionSummaryQuery = (
@@ -271,26 +282,15 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
   )}) AND ${SOURCE_WEB_VITAL_VALUE_FIELD} IS NOT NULL, TO_LOWER(${SOURCE_WEB_VITAL_NAME_FIELD}), null),
        vital_value = ${SOURCE_WEB_VITAL_VALUE_FIELD},
        ${SEEN_EVALS.join(',\n       ')}
-| EVAL page_url = CASE(is_page_view, ${SOURCE_URL_FIELD}, null)
-| STATS start_time = MIN(@timestamp),
-        end_time = MAX(@timestamp),
-        event_count = COUNT(@timestamp),
-        page_view_count = COUNT(*) WHERE is_page_view,
-        page_load_count = COUNT(*) WHERE event == ${escapeStringValue(EVENT_NAVIGATION_TIMING)},
-        click_count = COUNT(*) WHERE is_click,
-        js_error_count = COUNT(*) WHERE event == ${escapeStringValue(EVENT_EXCEPTION)},
-        http_request_count = COUNT(*) WHERE is_http_request AND (${HTTP_RESPONSE_STATUS_CODE} IS NOT NULL OR no_response),
-        http_failed_request_count = COUNT(*) WHERE is_http_request AND (COALESCE(${HTTP_RESPONSE_STATUS_CODE} >= 400, false) OR no_response),
-        first_view = MIN(@timestamp) WHERE is_page_view,
-        last_view = MAX(@timestamp) WHERE is_page_view,
-        ${[...attributeStats('events'), ...CORE_WEB_VITALS.flatMap(vitalStats)].join(',\n        ')}
-  BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, page_url
-| STATS start_time = MIN(start_time),
-        end_time = MAX(end_time),
-        ${COUNTS.map((count) => `${count} = SUM(${count})`).join(',\n        ')},
+| EVAL ${VITAL_EVALS.join(', ')}
+| FORK (STATS ${renderStats(SESSION_STATS, '              ')}
+          BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
+       (WHERE ${PAGE_VIEW_FILTER}
+        | STATS first_view = MIN(@timestamp), last_view = MAX(@timestamp)
+            BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, page_url = ${SOURCE_URL_FIELD})
+| STATS ${renderStats(MERGED_SESSION_STATS, '        ')},
         pages = TOP(first_view, ${SESSIONS_JOURNEY_URL_CANDIDATES}, "asc", page_url) WHERE page_url IS NOT NULL,
-        exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL,
-        ${[...attributeStats('pages'), ...CORE_WEB_VITALS.flatMap(vitalTotals)].join(',\n        ')}
+        exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
   BY service, session
 | EVAL ${ATTRIBUTE_EVALS.join(',\n       ')}
 | DROP ${RAW_PREFIX}*

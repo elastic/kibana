@@ -109,13 +109,21 @@ describe('sessionSummaryQuery', () => {
     ]);
   });
 
-  it('aggregates per session and page URL, then per session', () => {
+  it('aggregates per session in one branch and per page view in the other, then merges them per session', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 
     expect(query).toContain(
-      'BY service = resource.attributes.service.name, session = attributes.session.id, page_url'
+      'BY service = resource.attributes.service.name, session = attributes.session.id)'
     );
-    expect(query).toContain('page_url = CASE(is_page_view, attributes.url.full, null)');
+    // On the source fields, so that Lucene applies the filter.
+    expect(query).toContain(
+      '(WHERE event_name IN ("documentLoad", "browser.navigation") OR name IN ("documentLoad", "browser.navigation")'
+    );
+    expect(query).toContain(
+      'BY service = resource.attributes.service.name, session = attributes.session.id, page_url = attributes.url.full)'
+    );
+    expect(query).toContain('start_time = MAX(start_time)');
+    expect(query).toContain('event_count = MAX(event_count)');
     expect(query).toContain(
       'pages = TOP(first_view, 30, "asc", page_url) WHERE page_url IS NOT NULL'
     );
@@ -124,7 +132,7 @@ describe('sessionSummaryQuery', () => {
     expect(query).toMatch(/BY service, session\n\| EVAL [^|]+\n\| DROP raw_\*\n\| LIMIT 10000$/);
   });
 
-  it('reads every attribute field from its group’s latest event, in both stages', () => {
+  it('reads every attribute field from its group’s latest event', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 
     Object.entries(SESSION_ATTRIBUTE_GROUPS).forEach(([group, attributes]) => {
@@ -133,9 +141,8 @@ describe('sessionSummaryQuery', () => {
         .forEach((field) => {
           const raw = `raw_${field.replace(/\./g, '_')}`;
           expect(query).toContain(`${raw} = LAST(TO_STRING(${field}), seen_${group})`);
-          expect(query).toContain(`${raw} = LAST(${raw}, seen_${group})`);
+          expect(query).toContain(`${raw} = MAX(${raw})`);
         });
-      expect(query.split(`seen_${group} = MAX(seen_${group})`)).toHaveLength(3);
     });
   });
 
@@ -151,16 +158,15 @@ describe('sessionSummaryQuery', () => {
     );
   });
 
-  it('rates the web vitals against the thresholds as floats store them, and adds up their counts', () => {
+  it('rates each web vital from its own column, against the thresholds as floats store them', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 
-    expect(query).toContain(
-      'cls_good = COUNT(*) WHERE vital == "cls" AND vital_value <= 0.10000000149011612'
-    );
-    expect(query).toContain(
-      'lcp_up_to_needs_improvement = COUNT(*) WHERE vital == "lcp" AND vital_value <= 4000'
-    );
+    expect(query).toContain('lcp = CASE(vital == "lcp", vital_value, null)');
+    expect(query).toContain('lcp_p75 = PERCENTILE(lcp, 75)');
+    expect(query).toContain('lcp_samples = COUNT(lcp)');
+    expect(query).toContain('cls_good = COUNT(*) WHERE cls <= 0.10000000149011612');
+    expect(query).toContain('lcp_up_to_needs_improvement = COUNT(*) WHERE lcp <= 4000');
     expect(query).toContain('lcp_p75 = MAX(lcp_p75)');
-    expect(query).toContain('lcp_samples = SUM(lcp_samples)');
+    expect(query).toContain('lcp_samples = MAX(lcp_samples)');
   });
 });
