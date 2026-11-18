@@ -60,12 +60,6 @@ export function hasNoResults$({
         if (!dataSource || !rangeFilter || ignoreValidations) {
           return false;
         }
-        const esqlQuery =
-          valuesSourceFetchPlan.fetchMode === 'esql' ? valuesSourceFetchPlan.query : undefined;
-        // An ES|QL control without a query yet has nothing to validate
-        if (valuesSourceFetchPlan.fetchMode === 'esql' && !esqlQuery) {
-          return false;
-        }
         const timeRange = getFetchContextTimeRange(controlFetchContext, useGlobalFilters);
         const filters = getFetchContextFilters(controlFetchContext, useGlobalFilters);
 
@@ -73,27 +67,26 @@ export function hasNoResults$({
           setIsLoading(true);
           const abortController = new AbortController();
           prevRequestAbortController = abortController;
-          if (esqlQuery) {
-            return await hasNoEsqlResults({
-              abortSignal: abortController.signal,
-              dataSource,
-              esqlQuery,
-              rangeFilter,
-              query: controlFetchContext.query,
-              timeRange,
-              filters,
-            });
-          }
-          return await hasNoDslResults({
-            abortSignal: abortController.signal,
-            dataSource,
-            rangeFilter,
-            query: isOfAggregateQueryType(controlFetchContext.query)
-              ? undefined
-              : controlFetchContext.query,
-            timeRange,
-            filters,
-          });
+          return valuesSourceFetchPlan.fetchMode === 'esql'
+            ? await hasNoEsqlResults({
+                abortSignal: abortController.signal,
+                dataSource,
+                esqlQuery: valuesSourceFetchPlan.query,
+                rangeFilter,
+                query: controlFetchContext.query,
+                timeRange,
+                filters,
+              })
+            : await hasNoDslResults({
+                abortSignal: abortController.signal,
+                dataSource,
+                rangeFilter,
+                query: isOfAggregateQueryType(controlFetchContext.query)
+                  ? undefined
+                  : controlFetchContext.query,
+                timeRange,
+                filters,
+              });
         } catch (error) {
           // Ignore error, validation is not required for control to function properly
           return false;
@@ -127,12 +120,15 @@ export async function hasNoEsqlResults({
 }: {
   abortSignal: AbortSignal;
   dataSource: FilterableSource;
-  esqlQuery: string;
+  esqlQuery?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
 }): Promise<boolean> {
+  // An ES|QL control without a query yet has nothing to validate
+  if (!esqlQuery) return false;
+
   // The values of the query that are in the range: there are none when the range has no results
   const result = await getESQLSingleColumnValues({
     query: `${esqlQuery}\n| LIMIT 1`,
