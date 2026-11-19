@@ -1,7 +1,0 @@
-// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
-
-exports[`code generation guard under Vitest > still lets Vitest read snapshot files 1`] = `
-Object {
-  "snapshotFileLoaded": true,
-}
-`;
