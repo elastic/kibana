@@ -84,14 +84,28 @@ interface SqlParameter {
   value: { stringValue: string };
 }
 
+interface DataApiField {
+  isNull?: boolean;
+  stringValue?: string;
+  longValue?: number;
+  doubleValue?: number;
+  booleanValue?: boolean;
+  blobValue?: string;
+  arrayValue?: unknown;
+}
+
 interface ExecuteStatementResponse {
   formattedRecords?: string;
+  records?: DataApiField[][];
+  columnMetadata?: Array<{ label?: string; name?: string }>;
+  generatedFields?: DataApiField[];
   numberOfRecordsUpdated?: number;
 }
 
 interface ExecuteResult {
   rows: Array<Record<string, unknown>>;
   numberOfRecordsUpdated?: number;
+  generatedFields?: unknown[];
 }
 
 const getConfig = (ctx: ActionContext): AwsRdsConfig => ctx.config as unknown as AwsRdsConfig;
@@ -226,7 +240,7 @@ export const AwsRds: ConnectorSpec = {
       description:
         'Execute a read-only SQL SELECT query against the Aurora database. ' +
         'Only SELECT and WITH statements are permitted; INSERT, UPDATE, DELETE and DDL are blocked. ' +
-        'Include a LIMIT clause (e.g. LIMIT 100) because the Data API fails any response over 1 MiB. ' +
+        'Include a LIMIT clause (e.g. LIMIT 100) because a response over the size limit fails (1 MB by default in Kibana, 10 MB in the Data API). ' +
         'Do not include a trailing semicolon. ' +
         'Use listTables and describeTable first to learn table and column names. ' +
         'Returns { rows, truncated } where rows is an array of objects keyed by column name.',
@@ -351,10 +365,10 @@ export const AwsRds: ConnectorSpec = {
         'No restrictions: INSERT, UPDATE, DELETE, DROP and DDL are all permitted and are committed automatically. ' +
         'Use only when the user explicitly asks for a write or destructive operation. ' +
         'Prefer query for read-only access. ' +
-        'Returns { rows, numberOfRecordsUpdated }.',
+        'Returns { rows, numberOfRecordsUpdated, generatedFields } where generatedFields holds values such as a new auto-increment ID.',
       input: ExecuteSqlInputSchema,
       handler: async (ctx, input: ExecuteSqlInput) =>
-        executeStatement(ctx, input.sql, { database: input.database }),
+        executeStatement(ctx, input.sql, { database: input.database, includeMetadata: true }),
     },
   },
 
@@ -382,7 +396,7 @@ export const AwsRds: ConnectorSpec = {
     '### Gotchas',
     '- Write SQL for the cluster engine: MySQL uses backticks to quote identifiers, PostgreSQL uses double quotes.',
     '- `query` only allows SELECT and WITH; multi-statement SQL and anything containing INTO are rejected.',
-    '- Always include a `LIMIT`. The Data API terminates any call whose response exceeds 1 MiB, and `maxRows` only trims the result after it arrives.',
+    '- Always include a `LIMIT`. A response over the size limit fails (1 MB by default in Kibana, `xpack.actions.maxResponseContentLength`; 10 MB for JSON results in the Data API), and `maxRows` only trims the result after it arrives.',
     '- PostgreSQL scopes tables by schema (default `public`); pass `schema` to list or describe tables elsewhere. To work in another database, pass `database`.',
     '- Only Aurora clusters with the Data API enabled are supported. Other RDS engines (standard RDS for PostgreSQL, MySQL, MariaDB, SQL Server) cannot be reached.',
     '- A `DatabaseResumingException` means an Aurora Serverless instance is waking from pause; retry after a few seconds.',
@@ -406,7 +420,7 @@ const toErrorMessage = (error: unknown): string => {
 const executeStatement = async (
   ctx: ActionContext,
   sql: string,
-  options: { database?: string; parameters?: SqlParameter[] } = {}
+  options: { database?: string; parameters?: SqlParameter[]; includeMetadata?: boolean } = {}
 ): Promise<ExecuteResult> => {
   const { region, clusterArn, secretArn, database: defaultDatabase } = getConfig(ctx);
   const database = options.database ?? defaultDatabase;
@@ -417,6 +431,8 @@ const executeStatement = async (
     formatRecordsAs: 'JSON',
     ...(database ? { database } : {}),
     ...(options.parameters ? { parameters: options.parameters } : {}),
+    // Column names for statements the JSON format doesn't apply to, such as INSERT ... RETURNING.
+    ...(options.includeMetadata ? { includeResultMetadata: true } : {}),
   });
 
   let data: ExecuteStatementResponse;
@@ -437,9 +453,44 @@ const executeStatement = async (
     } catch {
       throw new Error('AWS RDS Data API returned a result set that could not be parsed as JSON');
     }
+  } else if (data.records) {
+    // The JSON format applies only to SELECT, so other statements that return rows come back typed.
+    rows = recordsToRows(data.records, data.columnMetadata);
   }
-  return { rows, numberOfRecordsUpdated: data.numberOfRecordsUpdated };
+  return {
+    rows,
+    numberOfRecordsUpdated: data.numberOfRecordsUpdated,
+    ...(data.generatedFields?.length
+      ? { generatedFields: data.generatedFields.map(fieldValue) }
+      : {}),
+  };
 };
+
+const fieldValue = ({
+  isNull,
+  stringValue,
+  longValue,
+  doubleValue,
+  booleanValue,
+  blobValue,
+  arrayValue,
+}: DataApiField): unknown =>
+  isNull
+    ? null
+    : stringValue ?? longValue ?? doubleValue ?? booleanValue ?? blobValue ?? arrayValue ?? null;
+
+const recordsToRows = (
+  records: DataApiField[][],
+  columnMetadata: ExecuteStatementResponse['columnMetadata'] = []
+): ExecuteResult['rows'] =>
+  records.map((record) =>
+    Object.fromEntries(
+      record.map((field, index) => [
+        columnMetadata[index]?.label ?? columnMetadata[index]?.name ?? `column_${index + 1}`,
+        fieldValue(field),
+      ])
+    )
+  );
 
 const stringParams = (params: Record<string, string>): SqlParameter[] =>
   Object.entries(params).map(([name, value]) => ({ name, value: { stringValue: value } }));

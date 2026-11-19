@@ -437,6 +437,91 @@ describe('AwsRds', () => {
       expect(sentBody().sql).toBe("UPDATE orders SET status = 'shipped'");
       expect(result).toEqual({ rows: [], numberOfRecordsUpdated: 3 });
     });
+
+    it('asks the Data API for column metadata so non-SELECT rows can be named', async () => {
+      mockClient.post.mockResolvedValueOnce({ data: { numberOfRecordsUpdated: 1 } });
+      await AwsRds.actions.executeSql.handler(buildContext(), { sql: 'DELETE FROM orders' });
+      expect(sentBody().includeResultMetadata).toBe(true);
+    });
+
+    it('returns rows from `records` when the JSON format does not apply, such as RETURNING', async () => {
+      mockClient.post.mockResolvedValueOnce({
+        data: {
+          numberOfRecordsUpdated: 1,
+          columnMetadata: [
+            { label: 'id', name: 'id' },
+            { label: 'note', name: 'note' },
+          ],
+          records: [[{ longValue: 42 }, { stringValue: 'new' }]],
+        },
+      });
+
+      const result = await AwsRds.actions.executeSql.handler(
+        buildContext({ engine: 'postgresql' }),
+        {
+          sql: "INSERT INTO orders (note) VALUES ('new') RETURNING id, note",
+        }
+      );
+
+      expect(result).toEqual({
+        rows: [{ id: 42, note: 'new' }],
+        numberOfRecordsUpdated: 1,
+      });
+    });
+
+    it('unwraps every typed field value, including NULL, zero and false', async () => {
+      mockClient.post.mockResolvedValueOnce({
+        data: {
+          columnMetadata: [{ label: 'a' }, { label: 'b' }, { label: 'c' }, { label: 'd' }],
+          records: [
+            [{ isNull: true }, { longValue: 0 }, { booleanValue: false }, { doubleValue: 1.5 }],
+          ],
+        },
+      });
+
+      const result = await AwsRds.actions.executeSql.handler(buildContext(), {
+        sql: 'INSERT ... RETURNING a, b, c, d',
+      });
+
+      expect(result).toEqual({
+        rows: [{ a: null, b: 0, c: false, d: 1.5 }],
+        numberOfRecordsUpdated: undefined,
+      });
+    });
+
+    it('names columns by position when the response has no metadata', async () => {
+      mockClient.post.mockResolvedValueOnce({
+        data: { records: [[{ stringValue: 'x' }, { longValue: 7 }]] },
+      });
+
+      const result = await AwsRds.actions.executeSql.handler(buildContext(), { sql: 'SELECT 1' });
+
+      expect(result).toEqual({
+        rows: [{ column_1: 'x', column_2: 7 }],
+        numberOfRecordsUpdated: undefined,
+      });
+    });
+
+    it('returns generatedFields, such as a MySQL auto-increment ID', async () => {
+      mockClient.post.mockResolvedValueOnce({
+        data: { numberOfRecordsUpdated: 1, generatedFields: [{ longValue: 17 }] },
+      });
+
+      const result = await AwsRds.actions.executeSql.handler(buildContext(), {
+        sql: "INSERT INTO customers (name) VALUES ('Ada')",
+      });
+
+      expect(result).toEqual({ rows: [], numberOfRecordsUpdated: 1, generatedFields: [17] });
+    });
+
+    it('does not request column metadata from the read actions', async () => {
+      respondWithRows([]);
+      respondWithRows([]);
+      await AwsRds.actions.query.handler(buildContext(), { sql: 'SELECT 1' });
+      await AwsRds.actions.listDatabases.handler(buildContext(), {});
+      expect(sentBody(0)).not.toHaveProperty('includeResultMetadata');
+      expect(sentBody(1)).not.toHaveProperty('includeResultMetadata');
+    });
   });
 
   describe('test handler', () => {

@@ -77,7 +77,7 @@ The AWS RDS connector has the following actions:
 
 Query
 :   Run a read-only SQL query against the database.
-    - **sql** (required): The `SELECT` or `WITH` query to run. Include a `LIMIT` clause, because the Data API fails any response larger than 1 MiB. Do not include a trailing semicolon.
+    - **sql** (required): The `SELECT` or `WITH` query to run. Include a `LIMIT` clause, because a response over the size limit fails. The limit is 1 MB by default in {{kib}} (`xpack.actions.maxResponseContentLength`), and 10 MB for JSON results in the Data API. Do not include a trailing semicolon.
     - **database** (optional): The database to run in. Uses the configured default if omitted.
     - **maxRows** (optional): Maximum number of rows to return (1 to 1,000, default: 100).
     - Integer values larger than 9,007,199,254,740,991 (2^53 − 1), such as some `BIGINT` IDs, can lose precision in results. Cast them to text in the query, for example `CAST(id AS CHAR)` on Aurora MySQL or `CAST(id AS TEXT)` on Aurora PostgreSQL.
@@ -105,6 +105,7 @@ Execute SQL
 :   Run any SQL statement against the database. No restrictions: `INSERT`, `UPDATE`, `DELETE`, `DROP`, and DDL are all permitted, and changes are committed automatically. Agents can call this action, so give the database user only the privileges you are willing for them to use. Prefer **Query** for read-only access.
     - **sql** (required): The SQL statement to run.
     - **database** (optional): The database to run in. Uses the configured default if omitted.
+    - Returns the rows a statement produces, such as `INSERT ... RETURNING` on Aurora PostgreSQL, the number of records updated, and generated values such as a new auto-increment ID on Aurora MySQL.
 
 ## Database user permissions [aws-rds-security]
 

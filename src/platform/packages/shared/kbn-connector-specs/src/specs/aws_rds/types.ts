@@ -35,7 +35,7 @@ export const QueryInputSchema = lazySchema(() =>
       .max(1000)
       .optional()
       .describe(
-        'Maximum number of rows to return (1-1000, default 100). Extra rows are dropped and the result reports truncated: true. Still add a LIMIT to the SQL: the Data API fails any response over 1 MiB.'
+        'Maximum number of rows to return (1-1000, default 100). Extra rows are dropped and the result reports truncated: true. Still add a LIMIT to the SQL: a response over the size limit fails (1 MB by default in Kibana, 10 MB in the Data API).'
       ),
   })
 );
