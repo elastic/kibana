@@ -166,10 +166,7 @@ export const UpdateDetectionRuleInputSchema = lazySchema(() =>
         .max(MAX_RULE_QUERY_LENGTH)
         .optional()
         .describe('Updated KQL query text.'),
-      period: z
-        .enum(detectionRuleSchedulePeriodValues)
-        .optional()
-        .describe('New schedule period.'),
+      period: z.enum(detectionRuleSchedulePeriodValues).optional().describe('New schedule period.'),
       alertTemplate: AlertTemplateSchema.optional().describe(
         'Updated alert definition. Includes title, severity, description, category, recommended actions, and MITRE technique IDs.'
       ),

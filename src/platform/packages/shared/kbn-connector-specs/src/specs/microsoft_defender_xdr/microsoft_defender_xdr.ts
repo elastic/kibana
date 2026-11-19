@@ -67,10 +67,8 @@ import {
   type CorrelationReason,
 } from './types';
 
-
 /** Resolve Graph API base URL from connector config. Falls back to commercial. */
-const graphBase = (cloud: Cloud | undefined): string =>
-  `${GRAPH_HOST[cloud ?? 'commercial']}/v1.0`;
+const graphBase = (cloud: Cloud | undefined): string => `${GRAPH_HOST[cloud ?? 'commercial']}/v1.0`;
 
 const JSON_HEADERS = {
   Accept: 'application/json',
@@ -526,11 +524,9 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
           },
         };
         try {
-          const response = await ctx.client.post(
-            `${base}/security/rules/detectionRules`,
-            body,
-            { headers: JSON_HEADERS }
-          );
+          const response = await ctx.client.post(`${base}/security/rules/detectionRules`, body, {
+            headers: JSON_HEADERS,
+          });
           return response.data;
         } catch (error) {
           throw formatError('createDetectionRule', error);
@@ -687,7 +683,9 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         const base = graphBase(ctx.config?.cloud as Cloud | undefined);
         try {
           const response = await ctx.client.get(
-            `${base}/security/threatIntelligence/hosts/${encodeURIComponent(input.host)}/reputation`,
+            `${base}/security/threatIntelligence/hosts/${encodeURIComponent(
+              input.host
+            )}/reputation`,
             { headers: JSON_HEADERS }
           );
           return response.data;
@@ -710,7 +708,9 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         const base = graphBase(ctx.config?.cloud as Cloud | undefined);
         try {
           const response = await ctx.client.get(
-            `${base}/security/threatIntelligence/hosts/${encodeURIComponent(input.host)}/passivedns`,
+            `${base}/security/threatIntelligence/hosts/${encodeURIComponent(
+              input.host
+            )}/passivedns`,
             { headers: JSON_HEADERS }
           );
           return {
@@ -751,7 +751,7 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
       scope: 'read',
       description:
         'Retrieve Microsoft Secure Score snapshots from the Graph Security API. ' +
-        'Returns the organization\'s composite identity, device, and app security score with control-level breakdowns. ' +
+        "Returns the organization's composite identity, device, and app security score with control-level breakdowns. " +
         'Results are ordered by date descending so the most recent score is first. ' +
         'Requires the SecurityEvents.Read.All Graph permission.',
       input: ListSecureScoresInputSchema,

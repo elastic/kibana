@@ -16,8 +16,12 @@ const isAuthTypeDef = (t: string | AuthTypeDef): t is AuthTypeDef => typeof t ==
 
 const makeClient = (getData: (url: string) => unknown = () => ({ value: [] })) => ({
   get: jest.fn(async (url: string) => ({ data: getData(url) })),
-  post: jest.fn(async (_url: string, _body?: unknown, _opts?: unknown) => ({ data: { schema: [], results: [] } })),
-  patch: jest.fn(async (_url: string, _body?: unknown, _opts?: unknown) => ({ data: { id: '1', status: 'resolved' } })),
+  post: jest.fn(async (_url: string, _body?: unknown, _opts?: unknown) => ({
+    data: { schema: [], results: [] },
+  })),
+  patch: jest.fn(async (_url: string, _body?: unknown, _opts?: unknown) => ({
+    data: { id: '1', status: 'resolved' },
+  })),
   put: jest.fn(),
   delete: jest.fn(async () => ({ data: {} })),
   request: jest.fn(),
@@ -678,7 +682,9 @@ describe('addAlertComment handler', () => {
 describe('mergeIncidents handler', () => {
   it('calls POST /security/incidents/mergeIncidents with incidentIds and incidentComment', async () => {
     const client = makeClient();
-    client.post = jest.fn().mockResolvedValue({ data: { id: '1', redirectedIncidentIds: ['2', '3'] } });
+    client.post = jest
+      .fn()
+      .mockResolvedValue({ data: { id: '1', redirectedIncidentIds: ['2', '3'] } });
     const ctx = makeCtx(client);
     const action = MicrosoftDefenderXdr.actions?.mergeIncidents;
     const result = await action?.handler(ctx as never, {
@@ -687,7 +693,10 @@ describe('mergeIncidents handler', () => {
     });
     expect(client.post).toHaveBeenCalledWith(
       expect.stringContaining('/security/incidents/mergeIncidents'),
-      expect.objectContaining({ incidentIds: ['1', '2', '3'], incidentComment: 'Same attack campaign' }),
+      expect.objectContaining({
+        incidentIds: ['1', '2', '3'],
+        incidentComment: 'Same attack campaign',
+      }),
       expect.any(Object)
     );
     expect(result).toMatchObject({ id: '1' });
@@ -786,11 +795,15 @@ describe('getPassiveDnsRecords handler', () => {
   it('propagates nextLink when present', async () => {
     const client = makeClient(() => ({
       value: [],
-      '@odata.nextLink': 'https://graph.microsoft.com/v1.0/security/threatIntelligence/hosts/x/passivedns?$skiptoken=abc',
+      '@odata.nextLink':
+        'https://graph.microsoft.com/v1.0/security/threatIntelligence/hosts/x/passivedns?$skiptoken=abc',
     }));
     const ctx = makeCtx(client);
     const action = MicrosoftDefenderXdr.actions?.getPassiveDnsRecords;
-    const result = await action?.handler(ctx as never, { host: 'x.example.com' }) as Record<string, unknown>;
+    const result = (await action?.handler(ctx as never, { host: 'x.example.com' })) as Record<
+      string,
+      unknown
+    >;
     expect(result.nextLink).toContain('skiptoken');
   });
 });
@@ -799,7 +812,10 @@ describe('getPassiveDnsRecords handler', () => {
 
 describe('getWhoisRecord handler', () => {
   it('calls GET /security/threatIntelligence/hosts/{host}/whois', async () => {
-    const whois = { registrar: { name: 'Example Registrar' }, registrant: { organization: 'ACME' } };
+    const whois = {
+      registrar: { name: 'Example Registrar' },
+      registrant: { organization: 'ACME' },
+    };
     const client = makeClient(() => whois);
     const ctx = makeCtx(client);
     const action = MicrosoftDefenderXdr.actions?.getWhoisRecord;
@@ -842,7 +858,10 @@ describe('listSecureScores handler', () => {
   it('throws a descriptive error on API failure', async () => {
     const client = makeClient();
     client.get = jest.fn().mockRejectedValue({
-      response: { status: 403, data: { error: { code: 'Forbidden', message: 'Insufficient scope' } } },
+      response: {
+        status: 403,
+        data: { error: { code: 'Forbidden', message: 'Insufficient scope' } },
+      },
       message: 'Request failed',
     });
     const ctx = makeCtx(client);
