@@ -662,5 +662,54 @@ describe('Serialization utils', () => {
         'legacy-session-id'
       );
     });
+
+    test('deserialize by-value uses the declarative tab merged over a legacy draft', async () => {
+      const legacyDraft: SearchEmbeddableByValueState = {
+        title: 'Custom panel title',
+        attributes: mockedSavedSearchAttributes,
+      };
+      const incomingPackage: DiscoverSessionEmbeddableByValueState = {
+        tabs: [{ ...apiStateByValue.tabs[0], column_order: ['message'] }],
+      };
+
+      // Dashboard merges the package from Discover over the panel state it restored
+      const deserialized = await deserializeState({
+        serializedState: { ...legacyDraft, ...incomingPackage },
+        discoverServices: discoverServiceMock,
+      });
+
+      expect(discoverServiceMock.savedSearch.byValueToSavedSearch).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({ columns: ['message'] }),
+        }),
+        true
+      );
+      expect(deserialized.title).toBe('Custom panel title');
+    });
+
+    test('deserialize by-ref uses ref_id merged over a legacy draft', async () => {
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession([mockTab('tab-1', 'Tab 1')]));
+      const legacyDraft: SearchEmbeddableByReferenceState = {
+        title: 'Panel title',
+        savedObjectId: 'legacy-session-id',
+      };
+      const incomingPackage: DiscoverSessionEmbeddableByReferenceState = {
+        ref_id: 'new-session-id',
+        overrides: {},
+      };
+
+      const deserialized = await deserializeState({
+        serializedState: { ...legacyDraft, ...incomingPackage },
+        discoverServices: discoverServiceMock,
+      });
+
+      expect(discoverServiceMock.savedSearch.getDiscoverSession).toHaveBeenCalledWith(
+        'new-session-id'
+      );
+      expect(deserialized.savedObjectId).toBe('new-session-id');
+      expect(deserialized.title).toBe('Panel title');
+    });
   });
 });
