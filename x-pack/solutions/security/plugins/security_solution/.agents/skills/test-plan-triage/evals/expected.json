@@ -295,8 +295,7 @@
     "proposed": ["elastic/kibana#914002"],
     "labeled": [],
     "comments": [],
-    "proposed_comment": true,
-    "held_out": true
+    "proposed_comment": true
   },
   "s32-risk-history-source": {
     "reps": 3,
@@ -378,5 +377,16 @@
     "comments": [],
     "proposed_comment": true,
     "answer": {"suggested_level_text": "none — standalone"}
+  },
+  "s40-n3-under-umbrella": {
+    "reps": 3,
+    "decision": "no",
+    "rule": "N3",
+    "suggested_level": null,
+    "proposed": [],
+    "labeled": [],
+    "comments": [],
+    "proposed_comment": true,
+    "answer": {"suggested_level_text": "none — "}
   }
 }

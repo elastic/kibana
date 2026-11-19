@@ -284,6 +284,16 @@ def parent_chain(gh: Gh, issue: dict) -> list[tuple[IssueRef, Optional[dict]]]:
     return chain
 
 
+def _sub_issue(issue: dict) -> dict:
+    return {
+        "ref": str(_ref(issue)),
+        "title": issue.get("title") or "",
+        "state": issue.get("state"),
+        "type": (issue.get("type") or {}).get("name"),
+        "sub_issues_total": (issue.get("sub_issues_summary") or {}).get("total", 0),
+    }
+
+
 def collect_ancestors(gh: Gh, issue: dict) -> list[dict]:
     """Summarize every parent from `parent_chain`, with its test plan state and its children."""
     ancestors: list[dict] = []
@@ -295,15 +305,7 @@ def collect_ancestors(gh: Gh, issue: dict) -> list[dict]:
         entry = summarize(parent, body_limit=ANCESTOR_BODY_LIMIT)
         entry["has_test_plan"] = has_test_plan(gh, parent_ref)
         entry["children"] = [
-            {
-                "ref": str(_ref(child)),
-                "title": child.get("title") or "",
-                "state": child.get("state"),
-                "type": (child.get("type") or {}).get("name"),
-                "sub_issues_total": (child.get("sub_issues_summary") or {}).get("total", 0),
-                "on_chain": str(_ref(child)) == child_ref,
-            }
-            for child in sub_issues(gh, parent_ref)
+            {**_sub_issue(child), "on_chain": str(_ref(child)) == child_ref} for child in sub_issues(gh, parent_ref)
         ]
         ancestors.append(entry)
         child_ref = str(parent_ref)
@@ -311,7 +313,7 @@ def collect_ancestors(gh: Gh, issue: dict) -> list[dict]:
 
 
 def collect_descendants(gh: Gh, issue: dict) -> tuple[list[dict], bool]:
-    """Breadth-first sub-issue tree with only the fields the rules read, capped at MAX_DESCENDANTS."""
+    """Breadth-first sub-issue tree with no bodies, capped at MAX_DESCENDANTS."""
     descendants: list[dict] = []
     queue: list[dict] = [issue]
     seen = {str(_ref(issue))}
@@ -327,15 +329,7 @@ def collect_descendants(gh: Gh, issue: dict) -> tuple[list[dict], bool]:
                 return descendants, True
             seen.add(child_ref)
             descendants.append(
-                {
-                    "ref": child_ref,
-                    "title": child.get("title") or "",
-                    "state": child.get("state"),
-                    "type": (child.get("type") or {}).get("name"),
-                    "labels": _labels(child),
-                    "parent": str(_ref(node)),
-                    "sub_issues_total": (child.get("sub_issues_summary") or {}).get("total", 0),
-                }
+                {**_sub_issue(child), "url": child.get("html_url"), "labels": _labels(child), "parent": str(_ref(node))}
             )
             queue.append(child)
     return descendants, False

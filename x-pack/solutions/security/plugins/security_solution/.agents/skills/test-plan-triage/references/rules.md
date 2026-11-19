@@ -1,6 +1,6 @@
 # Decision rules
 
-Decide on the issue passed in (the `target` in the `context` JSON). Use its title, type, labels, body and comments. If it has sub-issues, decide on the whole: its body plus the titles, types and labels in `descendants`. Each descendant has only `ref`, `title`, `state`, `type`, `labels`, `parent` (the issue it hangs from) and `sub_issues_total`; there is no body.
+Decide on the issue passed in (the `target` in the `context` JSON). Use its title, type, labels, body and comments. If it has sub-issues, decide on the whole: its body plus the titles, types and labels in `descendants`. Descendants have no body.
 
 **Cut text.** `context` cuts long text and says so: `body_truncated` on the target, on a comment or on an ancestor, `comments_truncated` when older comments are missing, and `descendants_truncated` when the sub-issue tree is cut. Decide with what you can read. Only when text cut from the target itself (its body or its comments) leaves the decision open, for example a comment that announces a change of scope and is cut before it says what changed, the decision is A4: quote the last words before the cut and ask what the rest says.
 
@@ -40,7 +40,7 @@ Apply the rules **in this order** and stop at the first one that matches. Quote 
 |---|---|---|
 | New row action that opens a panel, runs a workflow and shows a toast; 4 ACs | S1 | Yes |
 | Bug report with steps to reproduce | N1 | No |
-| "Test plan for the native Dashboards migration" sub-issue | N3 | No |
+| "Test plan for the native Dashboards migration" sub-issue | N3 | No, suggest an ancestor |
 | Title only, empty body ("Dashboard Studio 2.0 support") | A1 | Ask |
 | Title only, empty body ("Bump the charts library") | N2 | No |
 | "Feature flag for the native Dashboards migration" | N5 | No |

@@ -109,6 +109,10 @@ class ContextTests(unittest.TestCase):
         result = triage.context(FakeGh(issues), triage.IssueRef("elastic/kibana", 1011))
         self.assertEqual([entry["ref"] for entry in result["ancestors"]], [f"elastic/kibana#{n}" for n in range(1010, 999, -1)])
         self.assertEqual(result["ancestors"][0]["children"][0]["on_chain"], True)
+        self.assertEqual(
+            set(result["ancestors"][0]["children"][0]),
+            {"ref", "title", "state", "type", "sub_issues_total", "on_chain"},
+        )
 
     def test_cross_repo_parent_is_read_and_marked(self):
         issues = {
@@ -165,8 +169,9 @@ class ContextTests(unittest.TestCase):
         )
         self.assertEqual(
             set(result["descendants"][0]),
-            {"ref", "title", "state", "type", "labels", "parent", "sub_issues_total"},
+            {"ref", "url", "title", "state", "type", "labels", "parent", "sub_issues_total"},
         )
+        self.assertEqual(result["descendants"][0]["url"], "https://github.com/elastic/kibana/issues/2")
         self.assertFalse(result["descendants_truncated"])
         with mock.patch.object(triage, "MAX_DESCENDANTS", 3):
             capped = triage.context(FakeGh(issues), triage.IssueRef("elastic/kibana", 1))

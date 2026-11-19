@@ -659,5 +659,32 @@
     "type": "Task",
     "labels": ["Team:Entity Analytics"],
     "body": "Run the upgrade checks for asset criticality between 9.3 and 9.4 and record the results in this issue.\n\n- [ ] Criticality levels assigned in 9.3 are kept after the upgrade\n- [ ] The criticality field still feeds the risk score after the upgrade"
+  },
+  "elastic/kibana#914100": {
+    "title": "[Security Solution] 9.4 GA tasks",
+    "type": "Epic",
+    "labels": ["Team:Security Solution"],
+    "body": "Tracks the work each team needs to finish before 9.4 GA."
+  },
+  "elastic/kibana#914101": {
+    "title": "[Cases] Manual test pass: bulk actions in the cases table",
+    "type": "Task",
+    "labels": ["Team:Cases"],
+    "parent": "elastic/kibana#914100",
+    "body": "Run the manual checks for the bulk actions added to the cases table in 9.4 and record the results here.\n\n- [ ] Bulk close and reopen\n- [ ] Bulk assign\n- [ ] Bulk delete asks for confirmation"
+  },
+  "elastic/kibana#914102": {
+    "title": "[Timeline] Pin events from the notes tab",
+    "type": "Enhancement",
+    "labels": ["Team:Threat Hunting:Investigations"],
+    "parent": "elastic/kibana#914100",
+    "body": "Add a pin action to each event listed in the notes tab of a timeline."
+  },
+  "elastic/kibana#914103": {
+    "title": "[Detection Rules] Preview EQL sequence rules",
+    "type": "Enhancement",
+    "labels": ["Team:Detection Engine"],
+    "parent": "elastic/kibana#914100",
+    "body": "The rule preview runs EQL sequence queries and shows the matched sequences."
   }
 }

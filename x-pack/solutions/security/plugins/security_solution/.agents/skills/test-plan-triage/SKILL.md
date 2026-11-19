@@ -72,9 +72,9 @@ Skip this step, without reading `hierarchy.md`, in two cases:
 - `ancestors` is empty: the issue is standalone. Write `none — standalone` as the suggested level (the target itself is never the suggested level).
 - The decision is N1, N2 or N5: a bug, a chore or a flag says nothing about whether its parent needs a plan. Write `none — N1 says nothing about the parent` (or N2, or N5) as the suggested level and propose no label. In **Hierarchy**, list the ancestors from the root down without classifying them.
 
-N3 and N4 with ancestors never skip this step: an N3 is the testing of work that lives above it, and an N4 is a slice of it, so their plan belongs to an ancestor.
+N3 with ancestors and N4 never skip this step: an N3 is the testing of work that lives above it, and an N4 is a slice of it, so their plan belongs to an ancestor.
 
-Otherwise read [`references/hierarchy.md`](references/hierarchy.md) now and follow it to pick the suggested level for a test plan. The script has already walked every ancestor up to the root; do not fetch anything else. If the decision is N4 and this step gives no suggested level, the decision becomes A2 (Need your input), and nothing is recorded. If `hierarchy.md` leaves the level unclear, the decision becomes A4 (Need your input) whatever the target's own rule, and no label or comment is proposed.
+Otherwise read [`references/hierarchy.md`](references/hierarchy.md) now and follow it to pick the suggested level for a test plan. The script has already walked every ancestor up to the root; do not fetch anything else. If the decision is N4 and this step gives no suggested level, the decision becomes A2 (Need your input), and nothing is recorded. An N3 with no suggested level stays No, with no label. If `hierarchy.md` leaves the level unclear, the decision becomes A4 (Need your input) whatever the target's own rule, and no label or comment is proposed.
 
 ### 5. Prepare the No comment
 
