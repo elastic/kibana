@@ -679,6 +679,14 @@
       "approvedBy": "@elastic/streams-ui",
       "oasdiffId": "request-property-any-of-removed",
       "prUrl": "https://github.com/elastic/kibana/pull/299837"
+    },
+    {
+      "path": "/api/fleet/epm/packages/_bulk",
+      "method": "post",
+      "reason": "False-positive: oasdiff matches anyOf subschemas by content, so adding the informational x-kibana-planned-max-length extension to both 'packages' item variants is reported as removing them. No subschema was removed and request validation is unchanged.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/301658"
     }
   ]
 }
