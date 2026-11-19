@@ -12,8 +12,8 @@ import {
   verdictCacheId,
   type VerdictCacheRecord,
 } from '../../server/alert_triage/verdict_cache';
-import { buildPocSection, pocNote } from './report_poc';
-import type { TaggedAlert, Truth } from './report_run';
+import { buildPocSection, buildWaitSection, pocNote } from './report_poc';
+import type { ModelCall, Sweep, TaggedAlert, Truth } from './report_run';
 
 const record = (keyHash: string, verdict: string): VerdictCacheRecord =>
   ({ keyHash, verdict, state: 'active' } as unknown as VerdictCacheRecord);
@@ -174,5 +174,86 @@ describe('buildPocSection', () => {
     });
 
     expect(pocNote(section)).toContain('Jev 1 (1 true positives, 100.0%)');
+  });
+});
+
+describe('buildWaitSection', () => {
+  const at = (minutes: number): string =>
+    new Date(Date.UTC(2026, 10, 18, 10, minutes)).toISOString();
+  const created = (
+    id: string,
+    minute: number,
+    tags: string[],
+    buildingBlock = false
+  ): TaggedAlert => ({
+    id,
+    timestamp: at(minute),
+    tags,
+    buildingBlock,
+  });
+  const callOf = (ids: string[], finishedMinute: number): ModelCall => ({
+    startedAt: at(finishedMinute - 1),
+    finishedAt: at(finishedMinute),
+    status: 'completed',
+    prompt: ids.map((id) => `<alert id="${id}">`).join('\n'),
+  });
+  const sweepAt = (minute: number): Sweep => ({ startedAt: at(minute) });
+
+  it('counts the alerts that Jev settled, not only the ones that the model analyzed', () => {
+    const section = buildWaitSection({
+      alerts: [
+        created('m1', 0, ['az:true_positive']),
+        created('j1', 1, ['az:false_positive', JEV_VERDICT_TAG]),
+        created('j2', 16, ['az:false_positive', JEV_VERDICT_TAG]),
+      ],
+      calls: [callOf(['m1'], 70)],
+      sweeps: [sweepAt(15), sweepAt(30)],
+    });
+
+    expect(section.alertsWithTime).toBe(3);
+    // m1 waited 70 minutes (its call), j1 14 minutes (the sweep at 15), j2 14 minutes (the sweep at 30).
+    expect(section.bySource.model).toEqual({ count: 1, p50Seconds: 4200 });
+    expect(section.bySource.jev).toEqual({ count: 2, p50Seconds: 840 });
+    expect(section.within).toEqual({ '15': 2, '30': 2, '60': 2 });
+    expect(section.p95Seconds).toBe(4200);
+  });
+
+  it('gives an alert that has a verdict tag and no time to the alerts without a time', () => {
+    const section = buildWaitSection({
+      // A cache verdict on an alert that is newer than the last sweep, and a model verdict that no call lists.
+      alerts: [
+        created('c1', 40, [`az:false_positive`, `${TRIAGE_CACHE_REUSE_TAG_PREFIX}x`]),
+        created('m1', 0, ['az:true_positive']),
+      ],
+      calls: [],
+      sweeps: [sweepAt(15), sweepAt(30)],
+    });
+
+    expect(section.alertsWithTime).toBe(0);
+    expect(section.alertsWithoutTime).toBe(2);
+  });
+
+  it('counts the alerts without a verdict against the share, so that unserved alerts are not hidden', () => {
+    const section = buildWaitSection({
+      alerts: [created('j1', 1, ['az:false_positive', JEV_VERDICT_TAG])],
+      calls: [],
+      sweeps: [sweepAt(15)],
+      counts: { nonBuildingBlock: 10, nonBuildingBlockWithoutVerdict: 9 },
+    });
+
+    expect(section.within['60']).toBe(1);
+    expect(section.shareOfAllWithin['60']).toBe(0.1);
+    expect(section.nonBuildingBlockWithoutVerdict).toBe(9);
+  });
+
+  it('leaves out an alert that has no verdict tag', () => {
+    const section = buildWaitSection({
+      alerts: [created('a1', 0, ['az:triage_pending'])],
+      calls: [callOf(['a1'], 5)],
+      sweeps: [sweepAt(15)],
+    });
+
+    expect(section.alertsWithTime).toBe(0);
+    expect(section.p50Seconds).toBeNull();
   });
 });

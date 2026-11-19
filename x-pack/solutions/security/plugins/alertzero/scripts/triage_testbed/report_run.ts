@@ -34,7 +34,13 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 import { buildCacheSection, cacheNote, readCacheData, type CacheSection } from './report_cache';
-import { buildPocSection, pocNote, type PocSection } from './report_poc';
+import {
+  buildPocSection,
+  buildWaitSection,
+  pocNote,
+  type PocSection,
+  type WaitSection,
+} from './report_poc';
 import type { Classification, TruthRecord } from './fake_llm';
 import { parseAlertIds } from './fake_llm';
 
@@ -139,6 +145,8 @@ export interface Scorecard {
   verdictCache?: CacheSection;
   /** Set when a verdict came from the cache or from Jev (`on` mode of either flag). */
   poc?: PocSection;
+  /** The wait from creation to verdict over every source, and the alerts that have no verdict at the end. */
+  wait?: WaitSection;
 }
 
 export type ScorecardDiff = Record<
@@ -626,6 +634,8 @@ export interface RunData {
   sweeps: Sweep[];
   steps: WorkflowStep[];
   alerts: TaggedAlert[];
+  /** Counts from the alert index, read before the reset: alerts that are not building blocks, and those without a verdict tag. */
+  alertCounts: { nonBuildingBlock: number; nonBuildingBlockWithoutVerdict: number };
 }
 
 export const readRun = async (
@@ -706,8 +716,23 @@ export const readRun = async (
       'kibana.alert.building_block_type',
     ],
   });
+  const countAlerts = async (query: object): Promise<number> =>
+    (await request<{ count: number }>('POST', `/${alertIndex}/_count`, { query })).count;
+  const notBuildingBlock = { exists: { field: 'kibana.alert.building_block_type' } };
+  const alertCounts = {
+    nonBuildingBlock: await countAlerts({ bool: { must_not: [notBuildingBlock] } }),
+    nonBuildingBlockWithoutVerdict: await countAlerts({
+      bool: {
+        must_not: [
+          notBuildingBlock,
+          { terms: { 'kibana.alert.workflow_tags': Object.keys(VERDICT_TAGS) } },
+        ],
+      },
+    }),
+  };
   return {
     calls,
+    alertCounts,
     sweeps: sweepHits.map((hit) => hit._source),
     steps: stepHits.map((hit) => hit._source),
     alerts: alertHits.map((hit) => ({
@@ -826,6 +851,12 @@ export const main = async (): Promise<void> => {
     verdictsPerHour: scorecard.throughput.verdictsPerHour,
   });
   if (poc.bySource.cache.verdicts + poc.bySource.jev.verdicts > 0) scorecard.poc = poc;
+  scorecard.wait = buildWaitSection({
+    alerts: run.alerts,
+    calls: run.calls,
+    sweeps: run.sweeps,
+    counts: run.alertCounts,
+  });
   const exclusionNote = excluded.names.length
     ? `Left out of the wrong-verdict metric (reported apart under excludedRules): ${excluded.names.join(
         '; '
