@@ -52,7 +52,8 @@ export const executeConnectorRoute = (
           response: {
             200: {
               description: 'Indicates a successful call.',
-              body: () => getConnectorResponseSchemaV1(includeInboundEventsField, includeSpecVersionField),
+              body: () =>
+                getConnectorResponseSchemaV1(includeInboundEventsField, includeSpecVersionField),
             },
             403: {
               description: 'Indicates that this call is forbidden.',
