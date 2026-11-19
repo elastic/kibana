@@ -118,7 +118,6 @@ interface ProcessorEditorProps {
   /** `unchecked` when the configuration service could not be reached to check the processor. */
   onCommit: (processor: DraftProcessor, options?: { unchecked?: boolean }) => void;
   onCancel: () => void;
-  /** Called once the user changes the processor, which stays uncommitted until `onCommit`. */
   onChange: () => void;
   /** Deletes the step being edited; omitted when creating a processor. */
   onDelete?: () => void;
