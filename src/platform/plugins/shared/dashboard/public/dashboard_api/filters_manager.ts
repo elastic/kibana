@@ -42,7 +42,7 @@ export const initializeFiltersManager = (
   const publishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
 
-  const childFiltersLoading$ = layoutManager.internalApi.childrenLoading$
+  const childFiltersLoading$ = layoutManager.internalApi.childApisPending$
     .pipe(
       combineLatestWith(
         combineCompatibleChildrenApis<AppliesFilters, boolean>(

@@ -806,7 +806,7 @@ describe('layout manager', () => {
     });
   });
 
-  describe('childrenLoading$', () => {
+  describe('childApisPending$', () => {
     test('all children load when no sections', async () => {
       const loadingStates: boolean[] = [];
       const layoutManager = initializeLayoutManager(
@@ -815,7 +815,7 @@ describe('layout manager', () => {
         pinnedControls,
         trackPanelMock
       );
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
 
@@ -842,7 +842,7 @@ describe('layout manager', () => {
         pinnedControls,
         trackPanelMock
       );
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
 
@@ -871,7 +871,7 @@ describe('layout manager', () => {
         pinnedControls,
         trackPanelMock
       );
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
 
@@ -914,7 +914,7 @@ describe('layout manager', () => {
         trackPanelMock
       );
 
-      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+      layoutManager.internalApi.childApisPending$.subscribe((loading) => {
         loadingStates.push(loading);
       });
       layoutManager.api.registerChildApi(panel1Api);
