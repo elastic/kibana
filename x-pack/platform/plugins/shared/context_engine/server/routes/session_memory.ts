@@ -10,7 +10,6 @@ import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
-import type { RouteSecurity } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   AI_INDEX_API_VERSION,
@@ -27,7 +26,6 @@ import {
   SESSION_MEMORY_FORGET_PATH,
   SESSION_MEMORY_REMEMBER_PATH,
 } from '../../common/constants';
-import { apiPrivileges } from '../../common/features';
 import type {
   ForgetMode,
   ForgetSessionMemoriesResponse,
@@ -44,14 +42,13 @@ import {
 import type { SessionMemoryAuditEventParams } from '../audit/audit_events';
 import type { SessionMemoryScope, SessionMemoryService } from '../session_memory/types';
 import { resolveSpaceId } from '../utils/resolve_space_id';
+import {
+  MANAGE_MEMORY_REQUIRED_MESSAGE,
+  MEMORY_WRITE_SECURITY,
+  canActOnUserMemory,
+} from './memory_user';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
 import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
-
-const MANAGE_MEMORY_SECURITY: RouteSecurity = {
-  authz: {
-    requiredPrivileges: [apiPrivileges.writeContextEngine, apiPrivileges.manageMemory],
-  },
-};
 
 const NO_PROFILE_MESSAGE =
   'The caller has no user profile, so its memory cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.';
@@ -81,7 +78,7 @@ const rememberBodySchema = schema.object({
       maxLength: MAX_SESSION_MEMORY_USER_ID_LENGTH,
       meta: {
         description:
-          "The user the memory is about. Defaults to the caller's user profile. Any user in the space can be named.",
+          "The user the memory is about. Defaults to the caller's user profile. Naming another user needs `contextEngine:manage_memory`.",
       },
     })
   ),
@@ -122,14 +119,16 @@ const rememberResponseSchema = () =>
   });
 
 const forgetBodySchema = schema.object({
-  user_id: schema.string({
-    minLength: 1,
-    maxLength: MAX_SESSION_MEMORY_USER_ID_LENGTH,
-    meta: {
-      description:
-        'The user the memories are about. A memory of any other user is reported as `not_found`.',
-    },
-  }),
+  user_id: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: MAX_SESSION_MEMORY_USER_ID_LENGTH,
+      meta: {
+        description:
+          "The user the memories are about. Defaults to the caller's user profile. Naming another user needs `contextEngine:manage_memory`. A memory of any other user is reported as `not_found`.",
+      },
+    })
+  ),
   ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_SESSION_MEMORY_ID_LENGTH }), {
     minSize: 1,
     maxSize: MAX_SESSION_MEMORY_FORGET_IDS,
@@ -228,13 +227,13 @@ export const registerSessionMemoryRoutes = ({
   router.versioned
     .post({
       path: SESSION_MEMORY_REMEMBER_PATH,
-      security: MANAGE_MEMORY_SECURITY,
+      security: MEMORY_WRITE_SECURITY,
       access: 'public',
       summary: 'Remember a session memory',
       description: [
         'Writes one memory to the session memory store. Pass `id` to revise an existing memory; the revision replaces it in full.',
         'Answers 202 with the memory id at once and writes in the background, because semantic indexing runs inside the write. The memory is searchable only once the background write completes.',
-        "The route needs the `contextEngine:manageMemory` privilege on top of `contextEngine:write`. It lets the caller write a memory for any user in the space by naming them in `user_id`. Without `user_id` the memory belongs to the caller's user profile, and a caller without one gets a 403.",
+        "The route needs the `contextEngine:write` privilege. Without `user_id` the memory belongs to the caller's user profile, and a caller without one gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`.",
         'Each AI index in `ai_index_ids` must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index. Otherwise the request is rejected and nothing is written.',
         'Each request writes one `memory_remember` audit event, when the background write finishes. A failed background write is not reported in the response. It shows up only in the Kibana logs and the audit log.',
         'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off, or when an AI index in `ai_index_ids` does not exist.',
@@ -258,7 +257,7 @@ export const registerSessionMemoryRoutes = ({
             403: {
               body: errorResponseSchema,
               description:
-                '`user_id` is missing and the caller has no user profile, or the caller cannot write to one of the AI indices.',
+                '`user_id` is missing and the caller has no user profile, `user_id` names another user and the caller lacks `contextEngine:manage_memory`, or the caller cannot write to one of the AI indices.',
             },
             404: {
               body: errorResponseSchema,
@@ -285,7 +284,8 @@ export const registerSessionMemoryRoutes = ({
         } = request.body;
         const space = resolveSpaceId(await getSpaces(), request);
         const { security, elasticsearch, userProfile } = await ctx.core;
-        const userId = requestedUserId ?? (await userProfile.getCurrentProfileId()) ?? undefined;
+        const callerUserId = (await userProfile.getCurrentProfileId()) ?? undefined;
+        const userId = requestedUserId ?? callerUserId;
         const revision = id !== undefined;
 
         const audit = (outcome: { memoryId?: string; error?: Error }) =>
@@ -304,6 +304,10 @@ export const registerSessionMemoryRoutes = ({
 
         if (userId === undefined) {
           return reject(forbidden(NO_PROFILE_MESSAGE), 'forbidden');
+        }
+
+        if (!canActOnUserMemory(request, userId, callerUserId)) {
+          return reject(forbidden(MANAGE_MEMORY_REQUIRED_MESSAGE), 'forbidden');
         }
 
         try {
@@ -348,12 +352,12 @@ export const registerSessionMemoryRoutes = ({
   router.versioned
     .post({
       path: SESSION_MEMORY_FORGET_PATH,
-      security: MANAGE_MEMORY_SECURITY,
+      security: MEMORY_WRITE_SECURITY,
       access: 'public',
       summary: 'Forget session memories',
       description: [
-        'Requires the `contextEngine:write` and `contextEngine:manageMemory` privileges. With `contextEngine:manageMemory` the caller can forget the memories of any user in the space.',
-        'Forgets session memories by id, for the user in `user_id`. A memory of another user or in another space is reported as `not_found`, as if it did not exist.',
+        "Requires the `contextEngine:write` privilege. Without `user_id` the route forgets the caller's own memories, and a caller without a user profile gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`.",
+        'Forgets session memories by id, for that user. A memory of another user or in another space is reported as `not_found`, as if it did not exist.',
         'In `tombstone` mode (the default) the memory stops being returned but its revisions are kept until retention removes them. In `hard_delete` mode every revision is removed now.',
         'Each memory is audited. Forgetting still works when memory is turned off.',
         'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).',
@@ -373,6 +377,11 @@ export const registerSessionMemoryRoutes = ({
               body: forgetResponseSchema,
               description: 'The outcome for every requested memory.',
             },
+            403: {
+              body: errorResponseSchema,
+              description:
+                '`user_id` is missing and the caller has no user profile, or `user_id` names another user and the caller lacks `contextEngine:manage_memory`.',
+            },
             404: {
               body: errorResponseSchema,
               description: 'Context Engine is turned off in this space.',
@@ -384,10 +393,28 @@ export const registerSessionMemoryRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const { user_id: userId, ids, mode } = request.body;
+        const { user_id: requestedUserId, ids, mode } = request.body;
         const { action, run } = forgetModes[mode];
         const uniqueIds = [...new Set(ids)];
-        const auditLogger = (await ctx.core).security.audit.logger;
+        const { security, userProfile } = await ctx.core;
+        const auditLogger = security.audit.logger;
+        const callerUserId = (await userProfile.getCurrentProfileId()) ?? undefined;
+        const userId = requestedUserId ?? callerUserId;
+
+        if (userId === undefined) {
+          return response.forbidden({ body: { message: NO_PROFILE_MESSAGE } });
+        }
+
+        if (!canActOnUserMemory(request, userId, callerUserId)) {
+          const failure = forbidden(MANAGE_MEMORY_REQUIRED_MESSAGE);
+          uniqueIds.forEach((memoryId) =>
+            auditLogger.log(
+              sessionMemoryAuditEvent({ action, memoryId, targetUserId: userId, failure })
+            )
+          );
+          return response.forbidden({ body: { message: MANAGE_MEMORY_REQUIRED_MESSAGE } });
+        }
+
         const scope = { space: resolveSpaceId(await getSpaces(), request), userId };
 
         let body: ForgetSessionMemoriesResponse;

@@ -339,15 +339,16 @@ POST /api/context_engine/memory/_remember
 replaces it in full and the id is not checked. Without it the route generates one.
 `ai_index_ids` names the AI indices dreaming promotes the memory into, and `attributes` is
 a map of string hints passed through to dreaming. `user_id` is the user the memory is
-about. It defaults to the caller's user profile, and any user in the space can be named.
-A caller without a profile and without `user_id` gets a 403.
+about. It defaults to the caller's user profile. A caller without a profile and without
+`user_id` gets a 403.
 
 The route answers `202` with `{ "id": "..." }` at once and writes in the background,
 because `semantic_text` inference runs inside the index request. The memory is searchable
 only once the write completes. A failed write is not reported in the response. It shows up
 in the Kibana logs and the audit log.
 
-The route needs `contextEngine:write` and `contextEngine:manageMemory`. It returns a 404
+The route needs `contextEngine:write`. Naming another user in `user_id` also needs
+`contextEngine:manage_memory`, which is not part of All (403 without it). It returns a 404
 while `contextEngine:enabled` or the memory setting is off. Each AI index in `ai_index_ids`
 must exist in this space (404 otherwise), and the caller needs the Elasticsearch `write`
 privilege on its backing index (403 otherwise). A rejected request writes nothing.
@@ -363,7 +364,7 @@ POST /api/context_engine/memory/_forget
 ```
 
 ```json
-{ "user_id": "jdoe", "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"], "mode": "tombstone" }
+{ "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"], "mode": "tombstone" }
 ```
 
 `ids` takes 1 to 100 ids and duplicates are collapsed. `mode` is `tombstone` (the
@@ -382,14 +383,13 @@ still works after memory is turned off.
 
 ### Privileges and audit
 
-The route needs `contextEngine:write` and `contextEngine:manageMemory` for both modes.
-`contextEngine:manageMemory` is not part of All, so an administrator grants it explicitly.
-With it a caller can forget the memories of any user in the space. `_remember` uses the
-same privilege.
+The route needs `contextEngine:write` for both modes. Without `user_id` it forgets the
+caller's own memories, and a caller without a user profile gets a 403.
 
-`user_id` is the subject of the memory, supplied by the caller as the session memory RFC
-describes. It is not checked against the authenticated user, and a mismatch with the
-memory's owner reads as `not_found`.
+Naming another user in `user_id` also needs `contextEngine:manage_memory`, which is not
+part of All, so an administrator grants it explicitly. Without it the request gets a 403,
+and every id is audited as a failure. A mismatch between `user_id` and a memory's owner
+reads as `not_found`.
 
 Each unique id writes one audit event, `session_memory_forget` or
 `session_memory_hard_delete`. The event records the authenticated actor in `user.*`, the
