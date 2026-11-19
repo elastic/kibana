@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { Case } from '../../../common/types/domain';
 import {
@@ -79,76 +79,72 @@ export const injectAttachmentIds = <T extends { results: Array<{ data?: unknown 
   };
 };
 
-// Tool calls from one model message run in parallel and share one attachment state manager.
-// `add` awaits validation before storing, so find-then-add is check-then-act: two concurrent
-// emits for the same new case would both add. Serialize emits per (manager, case id).
-const caseEmitQueues = new WeakMap<object, Map<string, Promise<unknown>>>();
-
-const serializePerCase = async <T>(
-  attachments: object,
-  caseId: string,
-  run: () => Promise<T>
-): Promise<T> => {
-  let queues = caseEmitQueues.get(attachments);
-  if (!queues) {
-    queues = new Map();
-    caseEmitQueues.set(attachments, queues);
-  }
-  const previous = queues.get(caseId) ?? Promise.resolve();
-  const current = previous.then(run, run);
-  const tail = current.then(
-    () => undefined,
-    () => undefined
-  );
-  queues.set(caseId, tail);
-  try {
-    return await current;
-  } finally {
-    if (queues.get(caseId) === tail) {
-      queues.delete(caseId);
+const findCaseAttachments = (
+  attachments: ToolHandlerContext['attachments'],
+  caseId: string
+): VersionedAttachment[] =>
+  attachments.getActive().filter((attachment) => {
+    if (attachment.type !== CASE_ATTACHMENT_TYPE) {
+      return false;
     }
-  }
+    const latestData = getLatestVersion(attachment)?.data as
+      | Partial<CaseAttachmentData>
+      | undefined;
+    return latestData?.id === caseId;
+  });
+
+const updateCaseAttachment = async (
+  attachments: ToolHandlerContext['attachments'],
+  existing: VersionedAttachment,
+  data: CaseAttachmentData,
+  description: string
+): Promise<string> => {
+  // `update` replaces the whole version's data. The UI ("Add to chat") supplies
+  // `totalAttachments` and `url`, which server-side emits don't know: carry them forward.
+  const previous = getLatestVersion(existing)?.data as Partial<CaseAttachmentData> | undefined;
+  const totalAttachments = data.totalAttachments ?? previous?.totalAttachments;
+  await attachments.update(existing.id, {
+    data: {
+      ...data,
+      url: data.url ?? previous?.url ?? null,
+      ...(totalAttachments !== undefined && { totalAttachments }),
+    },
+    description,
+  });
+  return existing.id;
 };
 
-export const emitCaseAttachment = (
+export const emitCaseAttachment = async (
   attachments: ToolHandlerContext['attachments'],
   data: CaseAttachmentData,
   description?: string
-): Promise<string> =>
-  serializePerCase(attachments, data.id, async () => {
-    const resolvedDescription = description ?? `Case: ${data.title}`;
-    const existing = attachments.getActive().find((attachment) => {
-      if (attachment.type !== CASE_ATTACHMENT_TYPE) {
-        return false;
-      }
-      const latest = getLatestVersion(attachment);
-      const latestData = latest?.data as Partial<CaseAttachmentData> | undefined;
-      return latestData?.id === data.id;
-    });
+): Promise<string> => {
+  const resolvedDescription = description ?? `Case: ${data.title}`;
+  const [existing] = findCaseAttachments(attachments, data.id);
+  if (existing) {
+    return updateCaseAttachment(attachments, existing, data, resolvedDescription);
+  }
 
-    if (existing) {
-      // `update` replaces the whole version's data. The UI ("Add to chat") supplies
-      // `totalAttachments` and `url`, which server-side emits don't know: carry them forward.
-      const previous = getLatestVersion(existing)?.data as Partial<CaseAttachmentData> | undefined;
-      const totalAttachments = data.totalAttachments ?? previous?.totalAttachments;
-      await attachments.update(existing.id, {
-        data: {
-          ...data,
-          url: data.url ?? previous?.url ?? null,
-          ...(totalAttachments !== undefined && { totalAttachments }),
-        },
-        description: resolvedDescription,
-      });
-      return existing.id;
-    }
-
-    const added = await attachments.add({
-      type: CASE_ATTACHMENT_TYPE,
-      data,
-      description: resolvedDescription,
-    });
-    return added.id;
+  const added = await attachments.add({
+    type: CASE_ATTACHMENT_TYPE,
+    data,
+    description: resolvedDescription,
   });
+
+  // Tool calls from one model message run in parallel, each with its own `forToolCall` view over
+  // one shared state, and `add` awaits validation before storing: concurrent emits for the same
+  // new case can all miss the check above and each add. Per-view locking can't see across views,
+  // so reconcile on the shared state instead: the earliest attachment for the case wins and a
+  // later one folds its data into it and removes itself, so every racer ends up with one id.
+  const [winner] = findCaseAttachments(attachments, data.id);
+  if (!winner || winner.id === added.id) {
+    return added.id;
+  }
+  attachments.permanentDelete(added.id);
+  // Drop the loser's add/delete changes so the transient duplicate is never surfaced as events.
+  attachments.drainChanges(({ attachment_id: changedId }) => changedId === added.id);
+  return updateCaseAttachment(attachments, winner, data, resolvedDescription);
+};
 
 export const emitCasesAttachment = async (
   attachments: ToolHandlerContext['attachments'],

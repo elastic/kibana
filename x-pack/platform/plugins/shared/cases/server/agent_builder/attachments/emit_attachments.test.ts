@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import {
   emitCaseAttachment,
@@ -266,6 +267,118 @@ describe('emitCaseAttachment', () => {
     const active = attachments.getActive();
     expect(active).toHaveLength(1);
     expect(active[0].versions).toHaveLength(2);
+  });
+
+  it('adds only one attachment when parallel tool calls emit the same new case through distinct forToolCall views', async () => {
+    // run_tool.ts hands each tool call `manager.forToolCall(toolCallId)`: a distinct object over
+    // the one shared conversation state.
+    const manager = buildRealManager();
+    const toolCallA = manager.forToolCall('tool-call-a');
+    const toolCallB = manager.forToolCall('tool-call-b');
+    expect(toolCallA).not.toBe(toolCallB);
+
+    const [first, second] = await Promise.all([
+      emitCaseAttachment(toolCallA, toCaseAttachmentData(buildCase('c1'))),
+      emitCaseAttachment(toolCallB, {
+        ...toCaseAttachmentData(buildCase('c1')),
+        total_observables: 2,
+      }),
+    ]);
+
+    expect(second).toBe(first);
+    const active = manager.getActive();
+    expect(active).toHaveLength(1);
+    expect(active[0].id).toBe(first);
+    expect(active[0].versions).toHaveLength(2);
+    expect(active[0].versions[1].data).toMatchObject({ id: 'c1', total_observables: 2 });
+    // The duplicate that lost the race is gone from the state and never surfaced as a change.
+    expect(manager.getAll()).toHaveLength(1);
+    expect(manager.drainChanges().map(({ kind, attachment_id: id }) => ({ kind, id }))).toEqual([
+      { kind: 'added', id: first },
+      { kind: 'updated', id: first },
+    ]);
+  });
+
+  it('keeps one attachment per case when several tool calls emit several cases in parallel', async () => {
+    const manager = buildRealManager();
+
+    const ids = await Promise.all(
+      ['c1', 'c2', 'c1', 'c2', 'c1'].map((caseId, index) =>
+        emitCaseAttachment(
+          manager.forToolCall(`tool-call-${index}`),
+          toCaseAttachmentData(buildCase(caseId))
+        )
+      )
+    );
+
+    expect(ids[2]).toBe(ids[0]);
+    expect(ids[4]).toBe(ids[0]);
+    expect(ids[3]).toBe(ids[1]);
+    expect(ids[0]).not.toBe(ids[1]);
+    expect(manager.getActive().map(({ id }) => id)).toEqual([ids[0], ids[1]]);
+  });
+
+  it('keeps conversations independent: the same case id in two managers gets one attachment each', async () => {
+    const conversationA = buildRealManager();
+    const conversationB = buildRealManager();
+
+    const [idA, idB] = await Promise.all([
+      emitCaseAttachment(conversationA.forToolCall('a'), toCaseAttachmentData(buildCase('c1'))),
+      emitCaseAttachment(conversationB.forToolCall('b'), toCaseAttachmentData(buildCase('c1'))),
+    ]);
+
+    expect(idA).not.toBe(idB);
+    expect(conversationA.getActive().map(({ id }) => id)).toEqual([idA]);
+    expect(conversationB.getActive().map(({ id }) => id)).toEqual([idB]);
+    expect(conversationA.getActive()[0].versions).toHaveLength(1);
+    expect(conversationB.getActive()[0].versions).toHaveLength(1);
+  });
+
+  it('updates the existing attachment, carrying url and totalAttachments, when a later tool call emits the case', async () => {
+    const manager = buildRealManager();
+    await emitCaseAttachment(manager.forToolCall('a'), {
+      ...toCaseAttachmentData(buildCase('c1'), 'https://example.com/case/c1'),
+      totalAttachments: 3,
+    });
+
+    await Promise.all([
+      emitCaseAttachment(manager.forToolCall('b'), {
+        ...toCaseAttachmentData(buildCase('c1')),
+        total_observables: 2,
+      }),
+      emitCaseAttachment(manager.forToolCall('c'), {
+        ...toCaseAttachmentData(buildCase('c1')),
+        total_observables: 3,
+      }),
+    ]);
+
+    const [active] = manager.getActive();
+    expect(manager.getActive()).toHaveLength(1);
+    expect(active.versions).toHaveLength(3);
+    expect(getLatestVersion(active)?.data).toMatchObject({
+      url: 'https://example.com/case/c1',
+      totalAttachments: 3,
+    });
+  });
+
+  it('does not block later emits for the case when an add through another tool call view failed', async () => {
+    const manager = buildRealManager();
+    const failing = manager.forToolCall('failing');
+    jest.spyOn(failing, 'add').mockRejectedValueOnce(new Error('boom'));
+
+    const results = await Promise.allSettled([
+      emitCaseAttachment(failing, toCaseAttachmentData(buildCase('c1'))),
+      emitCaseAttachment(manager.forToolCall('ok'), toCaseAttachmentData(buildCase('c1'))),
+    ]);
+    const [rejected, fulfilled] = results;
+    const later = await emitCaseAttachment(
+      manager.forToolCall('later'),
+      toCaseAttachmentData(buildCase('c1'))
+    );
+
+    expect(rejected.status).toBe('rejected');
+    expect(fulfilled.status).toBe('fulfilled');
+    expect(manager.getActive().map(({ id }) => id)).toEqual([later]);
   });
 
   it('still emits for the same case after a parallel emit failed', async () => {
