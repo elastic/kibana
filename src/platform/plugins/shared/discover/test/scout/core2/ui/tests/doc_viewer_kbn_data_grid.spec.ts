@@ -21,7 +21,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { test, testData } from '../fixtures';
 
 const KBN_DATA_GRID_FLAG = 'discover.kbnDataGridEnabled';
 const FIELDS_GRID_TEST_SUBJ = 'UnifiedDocViewerTableGrid';
@@ -29,18 +29,22 @@ const DOC_VIEWER_TEST_SUBJ = 'kbnDocViewer';
 // The grid's default number of rows rendered beyond each edge of its viewport.
 const ROW_OVERSCAN = 5;
 
-spaceTest.describe(
+test.describe(
   'Discover doc viewer - fields table rendered by the Kibana data grid foundation',
   { tag: '@local-stateful-classic' },
   () => {
-    spaceTest.beforeAll(async ({ apiServices, discoverScoutSpace }) => {
+    test.beforeAll(async ({ apiServices, kbnClient, uiSettings }) => {
       await apiServices.core.settings({
         'feature_flags.overrides': { [KBN_DATA_GRID_FLAG]: true },
       });
-      await discoverScoutSpace.setupDiscoverDefaults();
+      await kbnClient.importExport.load(testData.DISCOVER_KBN_ARCHIVE);
+      await uiSettings.set({
+        defaultIndex: testData.DEFAULT_DATA_VIEW,
+        'timepicker:timeDefaults': JSON.stringify(testData.DEFAULT_TIME_RANGE),
+      });
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.dataGrid.waitForLoad();
@@ -48,14 +52,15 @@ spaceTest.describe(
       await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 0 });
     });
 
-    spaceTest.afterAll(async ({ apiServices, discoverScoutSpace }) => {
-      await discoverScoutSpace.teardownDiscoverDefaults();
+    test.afterAll(async ({ apiServices, kbnClient, uiSettings }) => {
+      await uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+      await kbnClient.savedObjects.cleanStandardList();
       await apiServices.core.settings({
         'feature_flags.overrides': { [KBN_DATA_GRID_FLAG]: null },
       });
     });
 
-    spaceTest('mounts only the rows near the viewport of a long document', async ({ page }) => {
+    test('mounts only the rows near the viewport of a long document', async ({ page }) => {
       const grid = page.testSubj.locator(FIELDS_GRID_TEST_SUBJ);
       await expect(grid).toBeVisible();
 
@@ -76,7 +81,7 @@ spaceTest.describe(
       expect(mountedRowCount).toBeLessThanOrEqual(maxMountedRowCount);
     });
 
-    spaceTest('moves focus to the off-screen last row with Ctrl+End', async ({ page }) => {
+    test('moves focus to the off-screen last row with Ctrl+End', async ({ page }) => {
       const grid = page.testSubj.locator(FIELDS_GRID_TEST_SUBJ);
       await grid.getByRole('gridcell', { name: /@timestamp/ }).click();
 
@@ -90,7 +95,7 @@ spaceTest.describe(
       await expect(lastCell).toBeFocused();
     });
 
-    spaceTest('has no accessibility violations in the doc viewer', async ({ page }) => {
+    test('has no accessibility violations in the doc viewer', async ({ page }) => {
       // The doc viewer also contains the markup the grid renders next to its grid element, such as
       // its focus guards and live region.
       const { violations } = await page.checkA11y({
