@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { ExecutableTool } from '@kbn/agent-builder-server';
-import type {
-  DynamicToolDefinition,
-  ExecutableToolWithOrigin,
-} from '@kbn/agent-builder-server/runner/tool_manager';
-import { zodToolInputToJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
+import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 
 /**
  * Tools the model reaches through the `execute_dynamic_tool` meta-tool rather than through the
@@ -47,22 +42,3 @@ export class DynamicToolRegistry {
     return [...this.tools.keys()];
   }
 }
-
-/**
- * Renders the definition the model sees for a dynamic tool: the description it would have as a
- * native tool and its input schema, serialized the same way the inference adapter serializes
- * natively bound tools.
- */
-export const renderDynamicToolDefinition = async (
-  tool: ExecutableTool
-): Promise<DynamicToolDefinition> => {
-  const description = tool.getLlmDescription
-    ? await tool.getLlmDescription({ description: tool.description, config: tool.configuration })
-    : tool.description;
-  const schema = await tool.getSchema();
-  return {
-    tool_id: tool.id,
-    description,
-    parameters: zodToolInputToJsonSchema(schema),
-  };
-};

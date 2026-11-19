@@ -11,8 +11,10 @@ import {
   type V2AlertSnapshot,
 } from '../../common';
 import {
+  ALERT_OUTCOME_POLICY,
   buildAlertRecoveredFollowUpMessage,
   buildInvestigationMessage,
+  isAlertRecoveryRound,
 } from './build_investigation_message';
 
 /** What the client does at the boundary, reduced to accepted-or-not for these cases. */
@@ -449,7 +451,7 @@ describe('buildAlertRecoveredFollowUpMessage', () => {
     expect(message).not.toContain('rule undefined');
   });
 
-  it('asks the agent to use all available signals to reassess the root cause', () => {
+  it('asks the agent to use all available signals and the alert-outcome policy to reassess the root cause', () => {
     const message = buildAlertRecoveredFollowUpMessage(baseRecovery);
 
     expect(message).toContain(
@@ -458,10 +460,19 @@ describe('buildAlertRecoveredFollowUpMessage', () => {
         '',
         '1. Examine all available signals before, during, and after the recovery: metrics, logs, traces, topology, deployments, rollbacks, code and configuration changes, operational actions, and relevant discussions or incident records.',
         '2. Determine what resolved the alert, or state that it is unknown. Test the existing hypotheses against what changed near recovery. If an expected fix or rollback did not happen—or the alert only cleared because load dropped, a transient condition passed, or the rule was snoozed, muted, or in a maintenance window—do not treat recovery alone as confirmation. In your reply, lower the confidence of or dismiss hypotheses contradicted by the evidence.',
-        '3. State whether the investigated root cause is confirmed, partly supported, contradicted, or unresolved.',
+        '3. State whether the investigated root cause is confirmed, partially supported but incomplete, contradicted, or unresolved.',
         '4. State whether the alert needed remediation, such as a rollback, configuration change, or code fix, or was benign: noise, a transient condition that ended on its own, or an expected artifact. Say so if it is unknown.',
+        '',
+        ALERT_OUTCOME_POLICY,
       ].join('\n')
     );
+    expect(ALERT_OUTCOME_POLICY).toContain('<alert_outcome_policy>');
+    expect(ALERT_OUTCOME_POLICY).toContain(
+      'In your reply, update or downgrade hypotheses to match the outcome evidence.'
+    );
+    expect(ALERT_OUTCOME_POLICY).toContain('"Verdict: <one allowed verdict>"');
+    expect(isAlertRecoveryRound(message)).toBe(true);
+    expect(isAlertRecoveryRound('Why is checkout slow?')).toBe(false);
   });
 
   it('omits the times it was not given', () => {

@@ -157,8 +157,28 @@ describe('useCheckDocumentAttachments', () => {
 
   it('returns disabled cases and loading state from query results', () => {
     (useFindCasesContainingAllSelectedDocuments as jest.Mock).mockReturnValue({
+      data: undefined,
+      isFetching: true,
+      isInitialLoading: true,
+    });
+
+    const { result } = renderHook(() =>
+      useCheckDocumentAttachments({
+        cases,
+        getAttachments: () => [],
+      })
+    );
+
+    expect(result.current.disabledCases).toEqual(new Set());
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.isInitialLoading).toBe(true);
+  });
+
+  it('does not report a background refetch as the initial load', () => {
+    (useFindCasesContainingAllSelectedDocuments as jest.Mock).mockReturnValue({
       data: { casesWithAllAttachments: ['case-2'] },
       isFetching: true,
+      isInitialLoading: false,
     });
 
     const { result } = renderHook(() =>
@@ -170,6 +190,7 @@ describe('useCheckDocumentAttachments', () => {
 
     expect(result.current.disabledCases).toEqual(new Set(['case-2']));
     expect(result.current.isLoading).toBe(true);
+    expect(result.current.isInitialLoading).toBe(false);
   });
 
   it('returns an empty disabled cases set when query data is not available', () => {

@@ -34,7 +34,9 @@ import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
 import { getWorkflowExecutionIdFromRequest } from '../../../../lib/telemetry/ebt/workflow_execution_id';
+import { trackTelemetryBestEffort } from '../../../../lib/telemetry/track_telemetry_best_effort';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
+import { identifyMetricsEntities } from '../../../../lib/significant_events/metrics/identify_metrics_entities';
 
 const getSerializedByteLength = (value: unknown) =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
@@ -279,9 +281,17 @@ const identifyInferredFeaturesRoute = createServerRoute({
           maxPreviouslyIdentifiedFeatures,
         },
         trackFeaturesIdentified: (data) =>
-          telemetry.trackFeaturesIdentified({
-            ...data,
-            ...workflowProvenance,
+          trackTelemetryBestEffort({
+            logger: routeLogger,
+            description: 'features identified telemetry',
+            track: () =>
+              telemetry.trackFeaturesIdentified(
+                {
+                  ...data,
+                  ...workflowProvenance,
+                },
+                request
+              ),
           }),
       });
 
@@ -300,24 +310,30 @@ const identifyInferredFeaturesRoute = createServerRoute({
         }`
       );
 
-      telemetry.trackFeaturesIdentified(
-        buildTelemetry(
-          {
-            ...workflowProvenance,
-            run_id: resolvedRunId,
-            connector_id: connectorId,
-            iteration: iteration ?? 1,
-            source_id: source.id,
-            docs_count: documents.length,
-            excluded_features_count: 0,
-            total_filters: totalFilters,
-            filters_capped: filtersCapped,
-            has_filtered_documents: hasFilteredDocuments,
-          },
-          Date.now() - now,
-          { state: 'failure' }
-        )
-      );
+      trackTelemetryBestEffort({
+        logger: routeLogger,
+        description: 'features identified telemetry',
+        track: () =>
+          telemetry.trackFeaturesIdentified(
+            buildTelemetry(
+              {
+                ...workflowProvenance,
+                run_id: resolvedRunId,
+                connector_id: connectorId,
+                iteration: iteration ?? 1,
+                source_id: source.id,
+                docs_count: documents.length,
+                excluded_features_count: 0,
+                total_filters: totalFilters,
+                filters_capped: filtersCapped,
+                has_filtered_documents: hasFilteredDocuments,
+              },
+              Date.now() - now,
+              { state: 'failure' }
+            ),
+            request
+          ),
+      });
 
       if (isInferenceProviderError(error)) {
         const connector = await inferenceClient
@@ -406,6 +422,46 @@ const identifyComputedFeaturesRoute = createServerRoute({
   },
 });
 
+const identifyMetricsEntitiesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{sourceId}/features/_identify/metrics_entities',
+  options: {
+    access: 'internal',
+    summary: 'Extract and persist Kubernetes entities from a metrics source',
+    timeout: { idleSocket: 300_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+    })
+  ),
+  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
+    const scopedClients = await getScopedClients({ request });
+    const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
+
+    const { sourceId } = params.path;
+    const routeLogger = logger.get('features_identification', 'metrics_entities', sourceId);
+    const { source } = await sourcesClient.get(sourceId);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
+
+    return identifyMetricsEntities({
+      esClient: streamDataEsClient,
+      esql: source.esql,
+      sourceId: source.id,
+      kiClient,
+      logger: routeLogger,
+      signal: getRequestAbortSignal(request),
+    });
+  },
+});
+
 const shouldIdentifyRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{sourceId}/features/_should_identify',
   options: {
@@ -450,5 +506,6 @@ export const internalIdentifyKIFeaturesRoutes = {
   ...prepareInferredSamplingRoute,
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
+  ...identifyMetricsEntitiesRoute,
   ...shouldIdentifyRoute,
 };
