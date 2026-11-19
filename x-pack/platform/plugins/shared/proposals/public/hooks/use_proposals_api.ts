@@ -56,8 +56,10 @@ type LiftableProposal = Pick<Proposal, 'id'> &
 
 /**
  * Whether this read shows that the gateless approval which stamped `releasedAt` will not decide
- * the proposal: the server lifted that mark because the approval's resolve run ended without
- * deciding it. A read from before the approval cannot show it, since only the lift keeps the mark.
+ * the proposal: the server lifted that mark, or a later approval's, because its resolve run ended
+ * without deciding it. Only the latest lift is kept, and a later approval can only be stamped once
+ * this one is over, so a later lift ends this one too. A read from before the approval cannot show
+ * either.
  */
 const isApprovalLifted = (
   { gate, gateReleasedAt, liftedGateReleasedAt }: Omit<LiftableProposal, 'id'>,
@@ -66,7 +68,8 @@ const isApprovalLifted = (
   isGatelessProposal({ gate }) &&
   gateReleasedAt === undefined &&
   releasedAt !== undefined &&
-  liftedGateReleasedAt === releasedAt;
+  liftedGateReleasedAt !== undefined &&
+  Date.parse(liftedGateReleasedAt) >= Date.parse(releasedAt);
 
 /**
  * Whether this read of the proposal shows its decision, or no decision can follow: the unseen

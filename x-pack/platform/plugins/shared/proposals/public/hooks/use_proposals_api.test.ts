@@ -269,6 +269,19 @@ describe('isDecisionShown', () => {
     expect(isDecisionShown({ id: 'g-1', status: 'pending', gate: 'none' })).toBe(false);
   });
 
+  it('is true when the server lifted a later approval than the unseen one', () => {
+    inFlightDecisions.markUnseen('approve', 'g-1', RELEASED_AT);
+
+    expect(
+      isDecisionShown({
+        id: 'g-1',
+        status: 'pending',
+        gate: 'none',
+        liftedGateReleasedAt: '2026-01-01T00:10:00.000Z',
+      })
+    ).toBe(true);
+  });
+
   it('is false when the server lifted an earlier approval than the unseen one', () => {
     inFlightDecisions.markUnseen('approve', 'g-1', RELEASED_AT);
 
