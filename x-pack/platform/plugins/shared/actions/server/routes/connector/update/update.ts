@@ -40,6 +40,7 @@ export const updateConnectorRoute = (
       },
       validate: () => {
         const includeInboundEventsField = actionsConfigUtils.isInboundEventsEnabled();
+        const includeSpecVersionField = actionsConfigUtils.isCatalogEnabled();
         return {
           request: {
             body: getUpdateConnectorBodySchemaV1(includeInboundEventsField),
@@ -48,7 +49,8 @@ export const updateConnectorRoute = (
           response: {
             200: {
               description: 'Indicates a successful call.',
-              body: () => getConnectorResponseSchemaV1(includeInboundEventsField),
+              body: () =>
+                getConnectorResponseSchemaV1(includeInboundEventsField, includeSpecVersionField),
             },
             403: {
               description: 'Indicates that this call is forbidden.',
@@ -83,7 +85,7 @@ export const updateConnectorRoute = (
               }),
               {
                 includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled(),
-                includeSpecVersionField: actions.isConnectorCatalogEnabled(),
+                includeSpecVersionField: actionsConfigUtils.isCatalogEnabled(),
               }
             ),
           });

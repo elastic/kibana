@@ -54,15 +54,6 @@ const createConnectorRequestBodyFields = {
       defaultValue: {},
     }
   ),
-  spec_version: schema.maybe(
-    schema.string({
-      maxLength: CONNECTOR_SPEC_VERSION_MAX_LENGTH,
-      meta: {
-        description:
-          'The connector schema version, as a major (for example, "1") or exact major.minor (for example, "1.3"). When omitted, versioned connector types use the latest accepted minor of major 1.',
-      },
-    })
-  ),
 };
 
 const isInboundEventsEnabledCreateField = {
@@ -76,15 +67,31 @@ const isInboundEventsEnabledCreateField = {
   ),
 };
 
+const specVersionCreateField = {
+  spec_version: schema.maybe(
+    schema.string({
+      maxLength: CONNECTOR_SPEC_VERSION_MAX_LENGTH,
+      meta: {
+        description:
+          'The connector schema version, as a major (for example, "1") or exact major.minor (for example, "1.3"). When omitted, versioned connector types use the latest accepted minor of major 1.',
+      },
+    })
+  ),
+};
+
 /** Create-connector body schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
-export const getCreateConnectorRequestBodySchema = (includeInboundEventsField: boolean) =>
+export const getCreateConnectorRequestBodySchema = (
+  includeInboundEventsField: boolean,
+  includeSpecVersionField: boolean
+) =>
   schema.object(
     {
       ...createConnectorRequestBodyFields,
       ...(includeInboundEventsField ? isInboundEventsEnabledCreateField : {}),
+      ...(includeSpecVersionField ? specVersionCreateField : {}),
     },
     { meta: { id: 'new_connector' } }
   );
 
 /** Flag-on schema so TypeOf includes the optional field. */
-export const createConnectorRequestBodySchema = getCreateConnectorRequestBodySchema(true);
+export const createConnectorRequestBodySchema = getCreateConnectorRequestBodySchema(true, true);

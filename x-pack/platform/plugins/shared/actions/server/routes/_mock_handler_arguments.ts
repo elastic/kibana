@@ -20,13 +20,13 @@ export function mockHandlerArguments(
     listTypes: listTypesRes = [],
     getCurrentUser,
     getSkippedPreconfiguredConnectorIds = () => new Set<string>(),
-    isConnectorCatalogEnabled = () => false,
+    isCatalogFeatureFlagEnabled = () => false,
   }: {
     actionsClient?: ActionsClientMock;
     listTypes?: ConnectorType[];
     getCurrentUser?: jest.Mock;
     getSkippedPreconfiguredConnectorIds?: () => Set<string>;
-    isConnectorCatalogEnabled?: () => boolean;
+    isCatalogFeatureFlagEnabled?: () => boolean;
   },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
@@ -50,7 +50,7 @@ export function mockHandlerArguments(
           );
         },
         getSkippedPreconfiguredConnectorIds,
-        isConnectorCatalogEnabled,
+        isCatalogFeatureFlagEnabled,
       },
       core: Promise.resolve({
         security: {

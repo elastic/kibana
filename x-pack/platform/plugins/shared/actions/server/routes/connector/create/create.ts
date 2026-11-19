@@ -37,15 +37,20 @@ export const createConnectorRoute = (
       },
       validate: () => {
         const includeInboundEventsField = actionsConfigUtils.isInboundEventsEnabled();
+        const includeSpecVersionField = actionsConfigUtils.isCatalogEnabled();
         return {
           request: {
             params: createConnectorRequestParamsSchemaV1,
-            body: getCreateConnectorRequestBodySchemaV1(includeInboundEventsField),
+            body: getCreateConnectorRequestBodySchemaV1(
+              includeInboundEventsField,
+              includeSpecVersionField
+            ),
           },
           response: {
             200: {
               description: 'Indicates a successful call.',
-              body: () => getConnectorResponseSchemaV1(includeInboundEventsField),
+              body: () =>
+                getConnectorResponseSchemaV1(includeInboundEventsField, includeSpecVersionField),
             },
             403: {
               description: 'Indicates that this call is forbidden.',
@@ -59,11 +64,17 @@ export const createConnectorRoute = (
         try {
           const actions = await context.actions;
           const actionsClient = actions.getActionsClient();
-          if (req.body?.spec_version !== undefined && !actions.isConnectorCatalogEnabled()) {
+          try {
+            getCreateConnectorRequestBodySchemaV1(
+              actionsConfigUtils.isInboundEventsEnabled(),
+              actions.isCatalogFeatureFlagEnabled()
+            ).validate(req.body, {}, 'request body');
+          } catch (error) {
             return res.badRequest({
-              body: 'spec_version requires the connector catalog feature flag to be enabled.',
+              body: error.message,
             });
           }
+
           const action = transformCreateConnectorBodyV1(req.body);
           const resp = await actionsClient.create({
             action,
@@ -71,7 +82,8 @@ export const createConnectorRoute = (
           });
           const body = transformConnectorResponseV1(resp, {
             includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled(),
-            includeSpecVersionField: actions.isConnectorCatalogEnabled(),
+            includeSpecVersionField:
+              actionsConfigUtils.isCatalogEnabled() && actions.isCatalogFeatureFlagEnabled(),
           });
 
           return res.ok({

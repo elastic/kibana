@@ -31,11 +31,12 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-const setupRoute = ({ inboundEventsFeatureEnabled = false } = {}) => {
+const setupRoute = ({ inboundEventsFeatureEnabled = false, catalogEnabled = false } = {}) => {
   const licenseState = licenseStateMock.create();
   const router = httpServiceMock.createRouter();
   const actionsConfigUtils = actionsConfigMock.create();
   actionsConfigUtils.isInboundEventsEnabled.mockReturnValue(inboundEventsFeatureEnabled);
+  actionsConfigUtils.isCatalogEnabled.mockReturnValue(catalogEnabled);
   createConnectorRoute(router, licenseState, actionsConfigUtils);
   const [config, handler] = router.post.mock.calls[0];
   return { licenseState, router, config, handler };
@@ -114,7 +115,7 @@ describe('createConnectorRoute', () => {
   it.each(['1', '1.3'])(
     'forwards spec_version %s and returns the exact version from the application',
     async (specVersion) => {
-      const { handler } = setupRoute();
+      const { handler } = setupRoute({ catalogEnabled: true });
       const actionsClient = actionsClientMock.create();
       actionsClient.create.mockResolvedValueOnce(createMockConnector({ specVersion: '1.3' }));
 
@@ -126,7 +127,7 @@ describe('createConnectorRoute', () => {
         spec_version: specVersion,
       });
       const [context, req, res] = mockHandlerArguments(
-        { actionsClient, isConnectorCatalogEnabled: jest.fn().mockReturnValue(true) },
+        { actionsClient, isCatalogFeatureFlagEnabled: jest.fn().mockReturnValue(true) },
         { body, params: { id: 'custom-id' } },
         ['ok']
       );
@@ -151,7 +152,7 @@ describe('createConnectorRoute', () => {
   );
 
   it('sets a default spec_version when it is not sent and catalog connectors are enabled', async () => {
-    const { handler } = setupRoute();
+    const { handler } = setupRoute({ catalogEnabled: true });
     const actionsClient = actionsClientMock.create();
     actionsClient.create.mockResolvedValueOnce(createMockConnector({ specVersion: '1.3' }));
     const body = createConnectorRequestBodySchemaV1.validate({
@@ -161,7 +162,7 @@ describe('createConnectorRoute', () => {
       secrets: {},
     });
     const [context, req, res] = mockHandlerArguments(
-      { actionsClient, isConnectorCatalogEnabled: jest.fn().mockReturnValue(true) },
+      { actionsClient, isCatalogFeatureFlagEnabled: jest.fn().mockReturnValue(true) },
       { body },
       ['ok']
     );
@@ -195,7 +196,7 @@ describe('createConnectorRoute', () => {
       spec_version: '1',
     });
     const [context, req, res] = mockHandlerArguments(
-      { actionsClient, isConnectorCatalogEnabled: jest.fn().mockReturnValue(false) },
+      { actionsClient, isCatalogFeatureFlagEnabled: jest.fn().mockReturnValue(false) },
       { body },
       ['badRequest']
     );
@@ -203,7 +204,7 @@ describe('createConnectorRoute', () => {
     await handler(context, req, res);
 
     expect(res.badRequest).toHaveBeenCalledWith({
-      body: 'spec_version requires the connector catalog feature flag to be enabled.',
+      body: "[request body.spec_version]: Additional properties are not allowed ('spec_version' was unexpected)",
     });
     expect(actionsClient.create).not.toHaveBeenCalled();
   });
@@ -231,7 +232,7 @@ describe('createConnectorRoute', () => {
       secrets: {},
     });
     const [context, req, res] = mockHandlerArguments(
-      { actionsClient, isConnectorCatalogEnabled: jest.fn().mockReturnValue(false) },
+      { actionsClient, isCatalogFeatureFlagEnabled: jest.fn().mockReturnValue(false) },
       { body },
       ['ok']
     );
@@ -396,7 +397,7 @@ describe('createConnectorRoute', () => {
 
   it('rejects is_inbound_events_enabled as unknown when the inbound events flag is off', () => {
     expect(() =>
-      getCreateConnectorRequestBodySchemaV1(false).validate({
+      getCreateConnectorRequestBodySchemaV1(false, false).validate({
         name: 'Datadog prod',
         connector_type_id: '.dual',
         config: {},

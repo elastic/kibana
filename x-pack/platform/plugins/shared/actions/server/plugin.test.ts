@@ -87,6 +87,7 @@ function getConfig(overrides = {}) {
       ...defaultInboundEventsLimitConfigs,
     },
     connectorSigningKeys: { enabled: false },
+    catalog: { enabled: false },
     ...overrides,
   };
 }
@@ -152,6 +153,7 @@ describe('Actions Plugin', () => {
           ...defaultInboundEventsLimitConfigs,
         },
         connectorSigningKeys: { enabled: false },
+        catalog: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -599,6 +601,7 @@ describe('Actions Plugin', () => {
           ...defaultInboundEventsLimitConfigs,
         },
         connectorSigningKeys: { enabled: false },
+        catalog: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -635,29 +638,29 @@ describe('Actions Plugin', () => {
         httpServerMock.createResponseFactory()
       );
       if (
-        !('isConnectorCatalogEnabled' in actionsContext) ||
-        typeof actionsContext.isConnectorCatalogEnabled !== 'function'
+        !('isCatalogFeatureFlagEnabled' in actionsContext) ||
+        typeof actionsContext.isCatalogFeatureFlagEnabled !== 'function'
       ) {
         throw new Error('Actions context does not expose the connector catalog flag');
       }
-      expect(actionsContext.isConnectorCatalogEnabled()).toBe(false);
+      expect(actionsContext.isCatalogFeatureFlagEnabled()).toBe(false);
 
       plugin.start(coreStart, pluginsStart);
       expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
         ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
         false
       );
-      expect(actionsContext.isConnectorCatalogEnabled()).toBe(true);
+      expect(actionsContext.isCatalogFeatureFlagEnabled()).toBe(true);
 
       enabled$.next(false);
-      expect(actionsContext.isConnectorCatalogEnabled()).toBe(false);
+      expect(actionsContext.isCatalogFeatureFlagEnabled()).toBe(false);
       enabled$.next(true);
-      expect(actionsContext.isConnectorCatalogEnabled()).toBe(true);
+      expect(actionsContext.isCatalogFeatureFlagEnabled()).toBe(true);
 
       plugin.stop();
       expect(onUnsubscribe).toHaveBeenCalledTimes(1);
       enabled$.next(true);
-      expect(actionsContext.isConnectorCatalogEnabled()).toBe(false);
+      expect(actionsContext.isCatalogFeatureFlagEnabled()).toBe(false);
     });
 
     it('should throw when there is an invalid connector type in enabledActionTypes', async () => {
@@ -1047,6 +1050,7 @@ describe('Actions Plugin', () => {
                 ...defaultInboundEventsLimitConfigs,
               },
               connectorSigningKeys: { enabled: false },
+              catalog: { enabled: false },
             })
           );
           const enabledPluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
