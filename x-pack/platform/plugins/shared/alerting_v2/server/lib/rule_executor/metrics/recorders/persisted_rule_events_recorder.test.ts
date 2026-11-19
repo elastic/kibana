@@ -324,6 +324,32 @@ describe('PersistedRuleEventsRecorder', () => {
     });
   });
 
+  it('counts a doc with an unknown status in the total but in no status counter', () => {
+    const known = createAlertEvent({ type: 'alert', status: 'breached' });
+    const unknown = createAlertEvent({
+      type: 'alert',
+      status: 'something_unexpected' as AlertEvent['status'],
+    });
+
+    recorder.record(
+      collector,
+      buildContext({
+        meta: {
+          observations: {
+            bulkIndexResult: { attempted: 2, docs: [known, unknown], errors: [] },
+          },
+        },
+      })
+    );
+
+    // The unknown status maps to no counter, so it must not add a status key
+    // (nor an `undefined` one) — it only contributes to the overall total.
+    expect(collector.snapshot().counters).toEqual({
+      ruleEventsGenerated: 2,
+      breachedEventsGenerated: 1,
+    });
+  });
+
   it('counts status only from persisted docs, ignoring what failed to index', () => {
     const persistedRecovered = createAlertEvent({ type: 'alert', status: 'recovered' });
     const failedRecovered = createAlertEvent({ type: 'alert', status: 'recovered' });
