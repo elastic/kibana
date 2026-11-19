@@ -76,13 +76,21 @@ const ASSET_LINK_DEFINITION = new RegExp(
   String.raw`^[ \t]*\[[^\]]+\]:[ \t]*${CONTENTSTACK_ASSET_HOST}.*$`,
   'gm'
 );
-const HTML_EMBED = /<(iframe|video)\b(?:(?!\n[ \t]*\n)[\s\S])*?<\/\1>|<img\b[^>]*>/gi;
+const HTML_EMBED = /<(iframe|video)\b[\s\S]*?<\/\1>|<img\b[^>]*>/gi;
 const HTML_LINE_BREAK = /<br\s*\/?>/gi;
 const HTML_FORMATTING_TAG = /<\/?(?:b|center|code|div|em|i|span|strong|sub|sup|u)\b[^>]*>/gi;
-const FENCED_CODE = String.raw`^[ \t]*\`\`\`[^\`\n]*\n[\s\S]*?^[ \t]*\`\`\`[ \t]*$|^[ \t]*~~~[^\n]*\n[\s\S]*?^[ \t]*~~~[ \t]*$`;
-const INLINE_CODE = String.raw`(?<!\`)(\`+)(?!\`)(?:(?!\n[ \t]*\n)[\s\S])*?(?<!\`)\1(?!\`)`;
-const FENCED_CODE_BLOCK = new RegExp(FENCED_CODE, 'gm');
-const FENCED_OR_INLINE_CODE = new RegExp(`${FENCED_CODE}|${INLINE_CODE}`, 'gm');
+// A fence closes with the same character, repeated at least as many times as the opener.
+const FENCED_CODE_BLOCK = new RegExp(
+  [
+    String.raw`^[ \t]*(?<backticks>\`{3,})[^\`\n]*\n[\s\S]*?^[ \t]*\k<backticks>\`*[ \t]*$`,
+    String.raw`^[ \t]*(?<tildes>~{3,})[^\n]*\n[\s\S]*?^[ \t]*\k<tildes>~*[ \t]*$`,
+  ].join('|'),
+  'gm'
+);
+const INLINE_CODE_SPAN = new RegExp(
+  String.raw`(?<!\`)(?<run>\`+)(?!\`)(?:(?!\n[ \t]*\n)[\s\S])*?(?<!\`)\k<run>(?!\`)`,
+  'g'
+);
 const NON_BREAKING_SPACE = /\u00a0|&nbsp;/g;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
 const JSON_RTE_INLINE_TYPES = new Set(['a', 'span', 'inlineCode']);
@@ -141,10 +149,8 @@ const removeHtmlMarkup = (prose: string): string =>
  */
 export const cleanMarkdown = (markdown: string): string =>
   collapseBlankLines(
-    transformOutsideCode(
-      transformOutsideCode(markdown, FENCED_CODE_BLOCK, removeMediaMarkup),
-      FENCED_OR_INLINE_CODE,
-      removeHtmlMarkup
+    transformOutsideCode(markdown, FENCED_CODE_BLOCK, (prose) =>
+      transformOutsideCode(removeMediaMarkup(prose), INLINE_CODE_SPAN, removeHtmlMarkup)
     )
   );
 
@@ -242,15 +248,28 @@ function renderNode(node: JsonRteNode): string {
  */
 export const jsonRteToMarkdown = (doc: JsonRteNode): string => collapseBlankLines(renderNode(doc));
 
+/** Whether a Rich Text document has any text, ignoring empty structure such as bare headings. */
+const hasRichTextContent = (node: JsonRteNode): boolean => {
+  if (node.text?.trim()) {
+    return true;
+  }
+  if (node.type === 'esqlSnippet' && node.attrs?.code?.trim()) {
+    return true;
+  }
+  if (node.type === 'infoPanel' && htmlToText(node.attrs?.content ?? '')) {
+    return true;
+  }
+  return (node.children ?? []).some(hasRichTextContent);
+};
+
 /**
  * Prefers the Rich Text body: Markdown bodies come from the migration, Rich Text is the current
  * authoring format, and converting an entry may leave the old Markdown in place.
  */
 const getBodyText = ({ main_content: mainContent }: ContentstackEntry): string | undefined => {
   const richText = mainContent?.body?.content_l10n;
-  const richTextBody = richText ? getString(jsonRteToMarkdown(richText)) : undefined;
-  if (richTextBody) {
-    return richTextBody;
+  if (richText && hasRichTextContent(richText)) {
+    return getString(jsonRteToMarkdown(richText));
   }
   const markdown = getString(mainContent?.markdown_l10n);
   return markdown ? getString(cleanMarkdown(markdown)) : undefined;

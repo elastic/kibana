@@ -64,9 +64,27 @@ describe('cleanMarkdown', () => {
         'The `<iframe>` tag loads the page.\n\nAttackers then close it with `</iframe>`.'
       )
     ).toBe('The `<iframe>` tag loads the page.\n\nAttackers then close it with `</iframe>`.');
-    expect(cleanMarkdown('An unquoted <iframe> mention.\n\nLater, </iframe> again.')).toBe(
-      'An unquoted <iframe> mention.\n\nLater, </iframe> again.'
+  });
+
+  it('removes embeds that span blank lines', () => {
+    expect(
+      cleanMarkdown('Before.\n\n<video controls>\n\n<source src="x.mp4">\n</video>\n\nAfter.')
+    ).toBe('Before.\n\nAfter.');
+  });
+
+  it('closes a fence only with a run at least as long as its opener', () => {
+    expect(
+      cleanMarkdown(
+        `~~~~md\n~~~\n![kept](${ASSET_URL})\n~~~~\n\n![Diagram](${ASSET_URL})\n\n\`\`\`\`\n\`\`\`\n<b>kept</b>\n\`\`\`\`\n\nDone.`
+      )
+    ).toBe(
+      `~~~~md\n~~~\n![kept](${ASSET_URL})\n~~~~\n\nDiagram\n\n\`\`\`\`\n\`\`\`\n<b>kept</b>\n\`\`\`\`\n\nDone.`
     );
+  });
+
+  it('does not let an unmatched backtick in prose reach into a fenced block', () => {
+    const markdown = 'Type ``` to start a fence:\n```html\n<div><b>payload</b></div>\n```';
+    expect(cleanMarkdown(markdown)).toBe(markdown);
   });
 
   it('normalizes non-breaking spaces', () => {
@@ -239,7 +257,10 @@ describe('contentstackEntryToDocument', () => {
   it('uses the markdown body when the rich text body has no text', () => {
     const emptyRichText: JsonRteNode = {
       type: 'doc',
-      children: [{ type: 'p', children: [{ text: '' }] }],
+      children: [
+        { type: 'h2', children: [{ text: ' ' }] },
+        { type: 'p', children: [{ text: '' }] },
+      ],
     };
     expect(
       contentstackEntryToDocument({
