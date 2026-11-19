@@ -81,6 +81,20 @@ describe('parseDecisionResponse', () => {
     );
   });
 
+  it('throws when a choice is not one the question offers', () => {
+    const body = {
+      decision: {
+        answers: {
+          question_1: { type: 'choice', choice: 'c', confidence: 0.5, probabilities: [] },
+        },
+      },
+    };
+
+    expect(() => parseDecisionResponse(body, [choice])).toThrow(
+      "Decision answer [question_1] has choice [c], which the question doesn't offer"
+    );
+  });
+
   it('throws when the body is not an object', () => {
     expect(() => parseDecisionResponse('oops', [predicate])).toThrow();
   });

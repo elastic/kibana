@@ -56,7 +56,8 @@ const answerSchemas = lazySchema((): { [T in DecisionType]: z.ZodType<DecisionAn
 
 /**
  * Reads the answers to `questions`, in order, from a `POST _inference/decision` response body,
- * throwing when the body is malformed or a question has no answer of its own type.
+ * throwing when the body is malformed, a question has no answer of its own type or a choice isn't
+ * one the question offers.
  */
 export const parseDecisionResponse = (
   body: unknown,
@@ -92,6 +93,18 @@ export const parseDecisionResponse = (
       );
     }
 
-    return answer.data;
+    const { data } = answer;
+
+    if (
+      question.type === 'choice' &&
+      data.type === 'choice' &&
+      !Object.hasOwn(question.choices, data.choice)
+    ) {
+      throw createInferenceProviderError(
+        `Decision answer [${name}] has choice [${data.choice}], which the question doesn't offer`
+      );
+    }
+
+    return data;
   });
 };
