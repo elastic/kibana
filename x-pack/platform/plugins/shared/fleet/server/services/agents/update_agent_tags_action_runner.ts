@@ -27,6 +27,7 @@ import {
   createErrorActionResults,
 } from './actions';
 import { MAX_RETRY_COUNT } from './retry_helper';
+import { updateByQueryAndWait } from './update_by_query_task';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -119,7 +120,7 @@ export async function updateTagsBatch(
 
   let res;
   try {
-    res = await esClient.updateByQuery({
+    res = await updateByQueryAndWait(esClient, {
       query: {
         terms: {
           _id: agentIds,
@@ -127,7 +128,6 @@ export async function updateTagsBatch(
       },
       index: AGENTS_INDEX,
       refresh: true,
-      wait_for_completion: true,
       script: {
         source: `
       if (ctx._source.tags == null) {
@@ -157,9 +157,9 @@ export async function updateTagsBatch(
       conflicts: 'proceed', // relying on the task to retry in case of conflicts - retry only conflicted agents
     });
   } catch (error) {
-    throw new FleetError(
-      'Caught error while batch updating tags: ' + JSON.stringify(error).slice(0, 1000)
-    );
+    // a FleetError has no enumerable fields, JSON.stringify would drop its message
+    const details = error instanceof FleetError ? error.message : JSON.stringify(error);
+    throw new FleetError('Caught error while batch updating tags: ' + details.slice(0, 1000));
   }
 
   if (appContextService.getLogger().isLevelEnabled('debug')) {
