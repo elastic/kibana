@@ -43,7 +43,7 @@ export const SentinelOne: ConnectorSpec = {
     displayName: 'SentinelOne (v2)',
     description: i18n.translate('connectorSpecs.sentinelone.metadata.description', {
       defaultMessage:
-        'Find endpoints, isolate and release hosts, triage and mitigate threats, run remote scripts, fetch files, and manage blocklists, exclusions, indicators, firewall and custom detection rules in SentinelOne',
+        'Respond to endpoint threats in SentinelOne - isolate hosts, mitigate or roll back threats, and run remote scripts and blocklist actions.',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,

@@ -543,6 +543,38 @@
           "3.0.2"
         ],
         "publishedDateGte": "2025-01-01T00:00:00Z"
+      },
+      {
+        "applicationName": "openssl",
+        "applicationVendor": "OpenSSL Software Foundation",
+        "applicationVersions": [
+          "3.0.2"
+        ],
+        "remediationLevels": [
+          "Official Fix",
+          "Temporary Fix",
+          "Workaround",
+          "Unavailable",
+          "Not Defined"
+        ],
+        "exploitedInTheWild": [
+          "Yes",
+          "Unknown",
+          "Not Defined"
+        ],
+        "exploitCodeMaturity": [
+          "Functional",
+          "High",
+          "Proof of Concept",
+          "Unproven",
+          "Not Defined"
+        ],
+        "reportConfidence": [
+          "Confirmed",
+          "Reasonable",
+          "Unknown",
+          "Not Defined"
+        ]
       }
     ]
   }
