@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt/api';
-import type { ServiceMapGrouping, ServiceMapResponse } from '@kbn/apm-types';
+import type { ServiceGroupingSource, ServiceMapGrouping, ServiceMapResponse } from '@kbn/apm-types';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-types';
 import { enableServiceMapGrouping, removeServiceMapGroupingOverride } from '../../../shared';
 import {
@@ -18,10 +18,14 @@ import {
   SERVICE_MAP_GROUPING_END_DATE,
   SERVICE_MAP_GROUPING_ENVIRONMENT,
   SERVICE_MAP_GROUPING_NOT_CONNECTED,
+  SERVICE_MAP_GROUPING_PLATFORM,
+  SERVICE_MAP_GROUPING_PLATFORM_NAMESPACE,
   SERVICE_MAP_GROUPING_SERVICES,
   SERVICE_MAP_GROUPING_SHARED,
   SERVICE_MAP_GROUPING_START_DATE,
+  SERVICE_MAP_GROUPING_TEAM_NAMESPACES,
   SERVICE_MAP_GROUPING_TEAMS,
+  SERVICE_MAP_GROUPING_WITHOUT_NAMESPACE,
 } from '../../fixtures';
 
 const GROUPING_QUERY = {
@@ -35,11 +39,23 @@ const GROUPING_QUERY = {
   }),
 };
 
-/** Each group's id, with its services sorted. */
-const getMembersByGroupId = ({ services, strategies: [calls] }: ServiceMapGrouping) => {
+const getStrategy = ({ strategies }: ServiceMapGrouping, source: ServiceGroupingSource) => {
+  const strategy = strategies.find((candidate) => candidate.source === source);
+  if (!strategy) {
+    throw new Error(`The service grouping has no ${source} strategy`);
+  }
+  return strategy;
+};
+
+/** Each group's id in the strategy grouping by `source`, with its services sorted. */
+const getMembersByGroupId = (
+  serviceGrouping: ServiceMapGrouping,
+  source: ServiceGroupingSource = 'calls'
+) => {
+  const { groups, assignment } = getStrategy(serviceGrouping, source);
   const members: Record<string, string[]> = {};
-  services.forEach((service, index) => {
-    const { id } = calls.groups[calls.assignment[index]];
+  serviceGrouping.services.forEach((service, index) => {
+    const { id } = groups[assignment[index]];
     members[id] = [...(members[id] ?? []), service].sort();
   });
   return members;
@@ -55,7 +71,7 @@ const getServiceGrouping = ({ serviceGrouping }: ServiceMapResponse): ServiceMap
 };
 
 apiTest.describe(
-  'Service map grouping by calls',
+  'Service map grouping',
   // Local servers only: the flag can only be overridden there (see `enableServiceMapGrouping`)
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
@@ -77,12 +93,12 @@ apiTest.describe(
         const response = await getServiceMap(apiClient, { headers, query: GROUPING_QUERY });
 
         expect(response).toHaveStatusCode(200);
-        const { services, automatic, strategies } = getServiceGrouping(response.body);
-        expect(services).toStrictEqual(sorted(SERVICE_MAP_GROUPING_SERVICES));
-        expect(automatic).toBe('calls');
-        expect(strategies).toHaveLength(1);
-        expect(strategies[0]).toMatchObject({ source: 'calls', passes: true });
-        expect(strategies[0].assignment).toHaveLength(SERVICE_MAP_GROUPING_SERVICES.length);
+        const serviceGrouping = getServiceGrouping(response.body);
+        expect(serviceGrouping.services).toStrictEqual(sorted(SERVICE_MAP_GROUPING_SERVICES));
+        expect(serviceGrouping.automatic).toBe('calls');
+        const calls = getStrategy(serviceGrouping, 'calls');
+        expect(calls.passes).toBe(true);
+        expect(calls.assignment).toHaveLength(SERVICE_MAP_GROUPING_SERVICES.length);
       }
     );
 
@@ -92,7 +108,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       const serviceGrouping = getServiceGrouping(response.body);
       const membersByGroupId = getMembersByGroupId(serviceGrouping);
-      const callsGroups = serviceGrouping.strategies[0].groups.flatMap((group) =>
+      const callsGroups = getStrategy(serviceGrouping, 'calls').groups.flatMap((group) =>
         group.kind === 'calls' ? [group] : []
       );
 
@@ -118,6 +134,33 @@ apiTest.describe(
         expect(membersByGroupId.notConnected).toStrictEqual(
           sorted(SERVICE_MAP_GROUPING_NOT_CONNECTED)
         );
+      }
+    );
+
+    apiTest(
+      'groups every service by its service.namespace, and those with none in a single group',
+      async ({ apiClient }) => {
+        const response = await getServiceMap(apiClient, { headers, query: GROUPING_QUERY });
+
+        expect(response).toHaveStatusCode(200);
+        const membersByGroupId = getMembersByGroupId(
+          getServiceGrouping(response.body),
+          'service.namespace'
+        );
+
+        expect(membersByGroupId).toStrictEqual({
+          ...Object.fromEntries(
+            SERVICE_MAP_GROUPING_TEAMS.map((members, team) => [
+              `service.namespace:${SERVICE_MAP_GROUPING_TEAM_NAMESPACES[team]}`,
+              sorted(members),
+            ])
+          ),
+          // shared by calls, the platform services still sit with their namespace
+          [`service.namespace:${SERVICE_MAP_GROUPING_PLATFORM_NAMESPACE}`]: sorted(
+            SERVICE_MAP_GROUPING_PLATFORM
+          ),
+          noAttribute: sorted(SERVICE_MAP_GROUPING_WITHOUT_NAMESPACE),
+        });
       }
     );
 

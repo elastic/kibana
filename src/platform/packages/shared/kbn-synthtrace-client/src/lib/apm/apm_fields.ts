@@ -196,6 +196,7 @@ export type ApmFields = Fields<{
     'service.language.name': string;
     'service.language.version': string;
     'service.name': string;
+    'service.namespace': string;
     'service.node.name': string;
     'service.runtime.name': string;
     'service.runtime.version': string;

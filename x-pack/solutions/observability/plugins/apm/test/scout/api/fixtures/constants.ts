@@ -81,6 +81,18 @@ export const SERVICE_MAP_GROUPING_NOT_CONNECTED = [
   ...SERVICE_MAP_GROUPING_ISOLATED,
 ];
 
+/** Each team's `service.namespace`, by team: grouping by namespace should find the teams. */
+export const SERVICE_MAP_GROUPING_TEAM_NAMESPACES = SERVICE_MAP_GROUPING_TEAMS.map(
+  (_, team) => `grouping-team-${team}`
+);
+/** The platform services' `service.namespace`: shared by calls, they still have a namespace. */
+export const SERVICE_MAP_GROUPING_PLATFORM_NAMESPACE = 'grouping-platform';
+/** Services that set no `service.namespace`, with calls (the gateway) and without. */
+export const SERVICE_MAP_GROUPING_WITHOUT_NAMESPACE = [
+  SERVICE_MAP_GROUPING_GATEWAY,
+  ...SERVICE_MAP_GROUPING_NOT_CONNECTED,
+];
+
 export const SERVICE_MAP_GROUPING_SERVICES = [
   ...SERVICE_MAP_GROUPING_TEAMS.flat(),
   ...SERVICE_MAP_GROUPING_SHARED,

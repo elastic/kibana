@@ -12,7 +12,9 @@ import {
   SERVICE_MAP_GROUPING_GATEWAY,
   SERVICE_MAP_GROUPING_ISOLATED,
   SERVICE_MAP_GROUPING_PLATFORM,
+  SERVICE_MAP_GROUPING_PLATFORM_NAMESPACE,
   SERVICE_MAP_GROUPING_SERVICES,
+  SERVICE_MAP_GROUPING_TEAM_NAMESPACES,
   SERVICE_MAP_GROUPING_TEAMS,
 } from '../constants';
 
@@ -47,6 +49,22 @@ const CALLS: ReadonlyMap<string, string[]> = (() => {
 })();
 
 /**
+ * Each service's `service.namespace`. Services not listed set none.
+ */
+const NAMESPACES: ReadonlyMap<string, string> = new Map([
+  ...SERVICE_MAP_GROUPING_TEAMS.flatMap((members, team) =>
+    members.map((service): [string, string] => [
+      service,
+      SERVICE_MAP_GROUPING_TEAM_NAMESPACES[team],
+    ])
+  ),
+  ...SERVICE_MAP_GROUPING_PLATFORM.map((service): [string, string] => [
+    service,
+    SERVICE_MAP_GROUPING_PLATFORM_NAMESPACE,
+  ]),
+]);
+
+/**
  * Every minute, each service runs one transaction with an HTTP exit span to each service it
  * calls, and each callee runs a transaction under that span: the exit spans give the service
  * destination metrics grouping reads, and the callee transactions connect the trace sample.
@@ -59,12 +77,16 @@ export function serviceMapGrouping({
   to: number;
 }): SynthtraceGenerator<ApmFields> {
   const instances = new Map(
-    SERVICE_MAP_GROUPING_SERVICES.map((name) => [
-      name,
-      apm
+    SERVICE_MAP_GROUPING_SERVICES.map((name) => {
+      const created = apm
         .service({ name, environment: SERVICE_MAP_GROUPING_ENVIRONMENT, agentName: 'java' })
-        .instance(`${name}-1`),
-    ])
+        .instance(`${name}-1`);
+      const namespace = NAMESPACES.get(name);
+      return [
+        name,
+        namespace ? created.defaults({ 'service.namespace': namespace }) : created,
+      ] as const;
+    })
   );
   const instance = (name: string) => {
     const found = instances.get(name);
