@@ -11,8 +11,9 @@ import type {
   ExistingAlertIdentityProps,
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
-  AgentToolEventStatusUpdateProps,
+  AgentToolFailedProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
+  KnowledgeIndicatorQueriesGenerationFailedProps,
   DetectionScanProps,
   DiscoveryCompletedProps,
   DiscoveryStartedProps,
@@ -374,7 +375,7 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
       type: 'keyword',
       _meta: {
         description:
-          'The `feature.id` or `query.id` the write addressed, unique within `source_id`; absent only when a failed query write had no caller-supplied id',
+          'The `feature.id` or `query.id` created, unique within `source_id`; absent when the write failed',
         optional: true,
       },
     },
@@ -476,45 +477,6 @@ const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
     type: 'text',
     _meta: {
       description: 'Error message when event creation fails',
-      optional: true,
-    },
-  },
-};
-
-const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdateProps> = {
-  ...optionalWorkflowExecutionTelemetrySchema,
-  ...existingAlertIdentitySchema,
-  success: {
-    type: 'boolean',
-    _meta: {
-      description: 'Whether the event status update succeeded',
-    },
-  },
-  event_uuid: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'Deprecated — superseded by `event_id`. The identifier of the updated significant event',
-      optional: true,
-    },
-  },
-  event_id: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'The stable event id of the updated significant event; the same value as `fingerprint`, kept for compatibility',
-    },
-  },
-  status: {
-    type: 'keyword',
-    _meta: {
-      description: 'The status value set on the significant event',
-    },
-  },
-  error_message: {
-    type: 'text',
-    _meta: {
-      description: 'Error message when event status update fails',
       optional: true,
     },
   },
@@ -958,11 +920,111 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
   },
 };
 
+const agentToolFailedSchema: RootSchema<AgentToolFailedProps> = {
+  ...ebtTelemetryContextSchema,
+  ...optionalWorkflowExecutionTelemetrySchema,
+  tool_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'Agent Builder id of the tool whose call failed',
+    },
+  },
+  error_code: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Why the call failed. Calls refused for their arguments: unknown_source, source_disabled, detection_rule_mismatch, detection_not_stored, unresolved_feature_reference, validation_error, bad_request, not_found. Other failures: forbidden, paused, lease_held, reconcile_pending, stale_revision, conflict, outcome_unknown, bulk_error, internal_error',
+    },
+  },
+  input_rejected: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'True when the tool refused the call because of its arguments; false when it failed for a reason the caller could not avoid by changing them',
+    },
+  },
+  agent_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Agent that made the call: the id of a built-in agent, or custom-<hash> for a user-created one, as on the Agent Builder events. Absent when the tool ran outside an agent',
+      optional: true,
+    },
+  },
+  tool_call_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Id of the tool call, as on agent_builder_tool_call_error, which carries the model, the conversation and the error text',
+      optional: true,
+    },
+  },
+  status_code: {
+    type: 'long',
+    _meta: {
+      description: 'HTTP status the error carries, when it carries one',
+      optional: true,
+    },
+  },
+  item_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'Items in the failed call of a tool that takes a batch (events for events_write, candidates for ki_feature_similarity_search); a failed call processes none of them',
+      optional: true,
+    },
+  },
+  unresolved_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'How many of the values the call named could not be resolved (source slugs for unknown_source, feature ids for unresolved_feature_reference)',
+      optional: true,
+    },
+  },
+};
+
+const knowledgeIndicatorQueriesGenerationFailedSchema: RootSchema<KnowledgeIndicatorQueriesGenerationFailedProps> =
+  {
+    ...ebtTelemetryContextSchema,
+    ...optionalWorkflowExecutionTelemetrySchema,
+    ...parentWorkflowExecutionTelemetrySchema,
+    error_code: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Why this attempt failed: agent_did_not_finalize (the agent ended without a finalized validate_queries result), unexpected_source (it finalized for another source), model_not_found, model_blocked, aborted (the request was cancelled), or internal_error. The event is reported once per failed attempt and the queries generation workflow retries, so several can share a workflow_execution_id; the run failed only when no queries-generated event follows under that id',
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The ID of the LLM connector used for the inference; absent when model resolution failed',
+        optional: true,
+      },
+    },
+    source_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The nightshift source id the queries were generated for',
+      },
+    },
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description:
+          'Wall-clock duration of the failed generation attempt, including model resolution and context loading, in milliseconds',
+      },
+    },
+  };
+
 export {
+  agentToolFailedSchema,
+  knowledgeIndicatorQueriesGenerationFailedSchema,
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
   agentToolEventSearchSchema,
-  agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
