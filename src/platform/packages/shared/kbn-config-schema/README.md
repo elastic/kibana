@@ -90,14 +90,14 @@ expect(valueSchema.validate({ isEnabled: true }, { envName: 'staging' })).toEqua
 // Fail because of type mismatch
 expect(() =>
   valueSchema.validate({ isEnabled: 'non-bool' }, { envName: 'staging' })
-).toThrowError(
+).toThrow(
   '[isEnabled]: expected value of type [boolean] but got [string]'
 );
 
 // Fail because of type mismatch and prefix error with a custom namespace
 expect(() =>
   valueSchema.validate({ isEnabled: 'non-bool' }, { envName: 'staging' }, 'configuration')
-).toThrowError(
+).toThrow(
   '[configuration.isEnabled]: expected value of type [boolean] but got [string]'
 );
 ```
@@ -147,6 +147,8 @@ schema.object({
   panelId: savedObjectId.warn({ label: 'dashboard.panelId' }),
   // optional field
   description: schema.maybe(schema.description()),
+  // no semantic helper fits: explicit limit required
+  keyFile: schema.boundedString({ maxLength: 4096 }),
   // explicit opt-out, reason required
   blob: schema.unboundedString({ reason: 'Size is enforced upstream' }),
 });

@@ -81,12 +81,17 @@ describe('EscalationQueue', () => {
     expect(screen.getByTestId('escalationCard-esc-3')).toBeInTheDocument();
   });
 
-  it('renders "No escalations" when the list is empty', () => {
+  it('renders "No open escalations" when the open list is empty', () => {
     renderQueue('open', []);
-    expect(screen.getByText('No escalations')).toBeInTheDocument();
+    expect(screen.getByText('No open escalations')).toBeInTheDocument();
   });
 
-  it('replaces "No escalations" with the note when the list is empty', () => {
+  it('renders "No closed escalations" when the closed list is empty', () => {
+    renderQueue('closed', []);
+    expect(screen.getByText('No closed escalations')).toBeInTheDocument();
+  });
+
+  it('replaces the empty-queue line with the note when the list is empty', () => {
     renderWithKibanaRenderContext(
       <EscalationQueue
         status="open"
@@ -95,7 +100,7 @@ describe('EscalationQueue', () => {
         renderAssignees={() => <span />}
       />
     );
-    expect(screen.queryByText('No escalations')).not.toBeInTheDocument();
+    expect(screen.queryByText('No open escalations')).not.toBeInTheDocument();
     expect(screen.getByTestId('escalationQueueNote-open')).toHaveTextContent('About escalations');
   });
 

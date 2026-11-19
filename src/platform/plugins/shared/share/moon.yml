@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/core-rendering-browser'
   - '@kbn/std'
+  - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-router-server-mocks'

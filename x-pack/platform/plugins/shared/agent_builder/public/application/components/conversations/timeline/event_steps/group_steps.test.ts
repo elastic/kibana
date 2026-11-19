@@ -16,7 +16,6 @@ import type {
   AskUserQuestionStep,
   BackgroundAgentCompleteStep,
   CompactionStep,
-  TodosStep,
   ToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import { groupSteps } from './group_steps';
@@ -249,37 +248,6 @@ describe('groupSteps', () => {
     const result = groupSteps([a, solo, c]);
 
     expect(result).toEqual([{ kind: 'group', steps: [a, solo, c] }]);
-  });
-
-  it('does not flush the tool buffer when a TodosStep arrives mid-stream between tool calls', () => {
-    const todos: TodosStep = {
-      type: ConversationRoundStepType.updateTodos,
-      todos: [{ content: 'do thing', status: 'in_progress' }],
-    };
-    const a = toolStep('a');
-    const b = toolStep('b');
-    const c = toolStep('c');
-    const result = groupSteps([a, b, todos, c]);
-
-    expect(result).toEqual([{ kind: 'group', steps: [a, b, c] }]);
-  });
-
-  it('keeps a TodosStep between two reasoning steps from affecting grouping', () => {
-    const todos: TodosStep = {
-      type: ConversationRoundStepType.updateTodos,
-      todos: [],
-    };
-    const r1 = reasoningStep('r1');
-    const a = toolStep('a');
-    const r2 = reasoningStep('r2');
-
-    const result = groupSteps([r1, todos, a, todos, r2]);
-
-    expect(result).toEqual([
-      { kind: 'step', step: r1, index: 0 },
-      { kind: 'group', steps: [a] },
-      { kind: 'step', step: r2, index: 4 },
-    ]);
   });
 
   it('hides a SubstitutionStep without splitting the surrounding tool group', () => {

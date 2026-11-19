@@ -7,6 +7,7 @@
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type {
+  ChatCompletionReasoning,
   InferenceConnector,
   EisInferenceEndpointMetadata,
   CspRegion,
@@ -38,8 +39,13 @@ export interface SearchInferenceEndpointsConfigType {
   };
 }
 
+export interface InferenceEndpointParameters {
+  reasoning?: Pick<ChatCompletionReasoning, 'effort'>;
+}
+
 export interface InferenceEndpointSetting {
   id: string;
+  parameters?: InferenceEndpointParameters;
 }
 
 export interface InferenceFeatureSetting {
@@ -73,6 +79,7 @@ export interface InferenceFeatureResponse {
   taskType: string;
   maxNumberOfEndpoints?: number;
   recommendedEndpoints: string[];
+  recommendedEndpointParameters?: Record<string, InferenceEndpointParameters>;
   isBeta?: boolean;
   isTechPreview?: boolean;
   ignoreGlobalDefault?: boolean;

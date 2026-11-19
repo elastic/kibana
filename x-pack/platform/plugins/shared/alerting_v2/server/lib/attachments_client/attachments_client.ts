@@ -7,7 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { lazySchema, z } from '@kbn/zod/v4';
-import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import {
+  getLatestVersion,
+  type AttachmentRefActor,
+  type VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ActionPolicyAttachmentData, RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
@@ -64,8 +68,15 @@ export interface TypedAttachmentClient<TData> {
   list(): Array<AttachmentEntry<TData>>;
   /** Loads an attachment for editing; an unknown or omitted id yields a new, empty draft. */
   getDraft(attachmentId?: string): AttachmentDraft<TData>;
-  /** Adds or updates the draft's attachment with `data`. */
-  saveDraft(draft: AttachmentDraft<TData>, data: Partial<TData>): Promise<VersionedAttachment>;
+  /**
+   * Adds or updates the draft's attachment with `data`. A new attachment is linked to
+   * `draft.origin` when set. `actor` attributes the change; it defaults to the current caller.
+   */
+  saveDraft(
+    draft: AttachmentDraft<TData>,
+    data: Partial<TData>,
+    actor?: AttachmentRefActor
+  ): Promise<VersionedAttachment>;
 }
 
 export interface TypedAttachmentClientOptions<TData> {
@@ -145,11 +156,13 @@ const createTypedAttachmentClient = <TData>(
         data: latest && isDraft(latest.data) ? latest.data : {},
       };
     },
-    saveDraft: async ({ attachmentId, isNew }, data) => {
+    saveDraft: async ({ attachmentId, isNew, origin }, data, actor) => {
       const description = `${label ?? type}: ${getName(data) ?? attachmentId}`;
+      const addInput = { id: attachmentId, type, description, data, ...(origin && { origin }) };
+      const updateInput = label ? { data, description } : { data };
       const attachment = isNew
-        ? await attachments.add({ id: attachmentId, type, description, data })
-        : await attachments.update(attachmentId, label ? { data, description } : { data });
+        ? await attachments.add(addInput, actor)
+        : await attachments.update(attachmentId, updateInput, actor);
 
       if (!attachment) {
         throw new Error(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+const P75 = 75;
+const P95 = 95;
+
 export interface TermsAggregation {
   buckets: Array<{ key: string | number }>;
 }
@@ -13,15 +16,62 @@ export interface PercentilesAggregation {
   values: Array<{ key: number; value: number | null }>;
 }
 
+/** A terms aggregation whose bucket counts are read, not only its keys. */
+export interface CountedTermsAggregation {
+  buckets: Array<{ key: string | number; doc_count: number }>;
+}
+
 export const bucketKeys = (aggregation?: TermsAggregation): string[] =>
   (aggregation?.buckets ?? []).map(({ key }) => String(key));
 
-export const getP75 = ({ values }: PercentilesAggregation): number | null =>
-  values[0]?.value ?? null;
+/** Each bucket's key, as a string, and document count. */
+export const bucketCounts = (
+  aggregation?: CountedTermsAggregation
+): Array<{ key: string; count: number }> =>
+  (aggregation?.buckets ?? []).map(({ key, doc_count: count }) => ({ key: String(key), count }));
 
-export const p75Of = (field: string) => ({
-  percentiles: { field, percents: [75], keyed: false },
-});
+/** The key of a `size: 1` terms aggregation, e.g. a resource's initiator type; `null` without. */
+export const firstBucketKey = (aggregation?: TermsAggregation): string | null => {
+  return bucketKeys(aggregation)[0] ?? null;
+};
+
+/** The value of a single-percentile aggregation, `null` without samples. */
+export const getPercentile = ({ values }: PercentilesAggregation): number | null => {
+  return values[0]?.value ?? null;
+};
+
+export const getP75 = getPercentile;
+
+export const percentileOf = (field: string, percent: number) => {
+  return {
+    percentiles: { field, percents: [percent], keyed: false as const },
+  };
+};
+
+export const p75Of = (field: string) => {
+  return percentileOf(field, P75);
+};
+
+export const p95Of = (field: string) => {
+  return percentileOf(field, P95);
+};
+
+/** Orders terms buckets by their `p75Of` sub-aggregation named `aggregationName`, highest first. */
+export const byP75Descending = (aggregationName: string) => {
+  return {
+    [`${aggregationName}.${P75}`]: 'desc' as const,
+  };
+};
+
+export interface ValueCountAggregation {
+  value: number;
+}
+
+/** The documents of a bucket that have a value for `field`, e.g. the samples of a percentile. */
+export const countOf = (field: string) => ({ value_count: { field } });
+
+/** The sum of `field` over the documents of a bucket, e.g. a count the session summaries kept. */
+export const sumOf = (field: string) => ({ sum: { field } });
 
 /** The latest document of a bucket. */
 export const LAST_SEEN_AGGREGATION = { max: { field: '@timestamp' } } as const;

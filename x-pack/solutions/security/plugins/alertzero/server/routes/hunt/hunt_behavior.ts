@@ -16,7 +16,13 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { TIER2_MODEL_TIERS } from '../../services/watches/hunt/common/hunt_model_tiers';
+import {
+  scopeGuardPatterns,
+  unqualifiedExclusions,
+} from '../../services/watches/hunt/common/cps_scope';
+import { selectHuntCallModel } from '../../services/watches/hunt/common/select_hunt_call_model';
 import { mostSevereFailure, resolveHuntModels } from './lib/hunt_models';
+import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
@@ -32,6 +38,8 @@ export const registerHuntBehaviorRoute = ({
   router,
   logger,
   getHuntServices,
+  getClusterClient,
+  isCpsEnabled,
 }: RouteDependencies): void => {
   router.versioned
     .post({
@@ -43,7 +51,7 @@ export const registerHuntBehaviorRoute = ({
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_WRITE],
         },
       },
-      summary: 'Run Tier 2 behavioral corroboration against a threat report',
+      summary: 'Run Behavior Hunt against a threat report',
     })
     .addVersion(
       {
@@ -60,8 +68,9 @@ export const registerHuntBehaviorRoute = ({
           const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 
           // Resolved by tier, not the deployment default — see resolveScopedModel's doc for
-          // why that distinction matters. Both Tier 2 jobs run on the Frontier tier, so a
-          // missing Frontier model fails the request.
+          // why that distinction matters. Extraction prefers a saved cyber-domain model.
+          // ES|QL generation keeps Frontier when that model requires a prompt template,
+          // so a missing Frontier model still fails the request in that case.
           const { models, failures } = await resolveHuntModels({
             inference: getInference(),
             searchInferenceEndpoints: getSearchInferenceEndpoints(),
@@ -71,8 +80,17 @@ export const registerHuntBehaviorRoute = ({
             logger,
             tiers: TIER2_MODEL_TIERS,
           });
+          const extraction = selectHuntCallModel({
+            tierModel: models.frontier,
+            cyberModel: models.cyber,
+          });
+          const esql = selectHuntCallModel({
+            tierModel: models.frontier,
+            cyberModel: models.cyber,
+            messagesOnly: true,
+          });
 
-          if (!models.frontier) {
+          if (!extraction || !esql) {
             const failure = mostSevereFailure(failures);
             return response.customError({
               // A resolution that threw is ours to fix, not a missing connector the caller can add.
@@ -100,12 +118,13 @@ export const registerHuntBehaviorRoute = ({
             excluded_iocs,
             article_context,
           } = request.body;
-          const esClient = core.elasticsearch.client.asCurrentUser;
+          const esClient = huntEsClient({ getClusterClient, request });
           // What the generated query may read: the same default data view Tier 1 searches.
           const indexPatterns = await resolveHuntUniverse(context, logger);
+          const crossProjectSearch = isCpsEnabled();
 
           const body: HuntBehaviorResponse = await huntBehavior(
-            { extraction: models.frontier, esql: models.frontier },
+            { extraction, esql },
             logger,
             {
               text,
@@ -114,7 +133,11 @@ export const registerHuntBehaviorRoute = ({
               iocs,
               ...(excluded_iocs !== undefined ? { excluded_iocs } : {}),
               article_context,
-              allowed_indices: indexPatterns,
+              allowed_indices: scopeGuardPatterns(indexPatterns, crossProjectSearch),
+              cross_project_search: crossProjectSearch,
+              ...(crossProjectSearch
+                ? { excluded_indices: unqualifiedExclusions(indexPatterns) }
+                : {}),
             },
             esClient,
             mitreDataClient

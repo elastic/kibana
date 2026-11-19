@@ -1,5 +1,5 @@
+@openfeature/ofrep-web-provider
 cbor2
-@launchdarkly/js-client-sdk
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
 @xterm/xterm
@@ -76,3 +76,4 @@ bump-cli
 @oxlint/plugins
 @types/mssql
 monaco-marker-data-provider
+tabbable

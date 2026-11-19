@@ -36,7 +36,7 @@ describe('OnboardingEnableFooter', () => {
   it('shows how many workers are selected', () => {
     renderFooter({ selectedCount: 2, totalCount: 6 });
     expect(screen.getByTestId('alertZeroOnboardingSelectedCount')).toHaveTextContent(
-      '2 of 6 Workers selected'
+      '2 of 6 Workers on'
     );
   });
 

@@ -159,6 +159,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     BAR_TARGET,
     undefined,
     undefined,
+    undefined,
     projectRouting
   );
 

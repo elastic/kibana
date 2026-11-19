@@ -43,7 +43,6 @@
       "matchDepNames": [
         "clean-webpack-plugin",
         "css-loader",
-        "mini-css-extract-plugin",
         "sass-loader",
         "style-loader",
         "val-loader",
@@ -462,8 +461,7 @@
       "matchDepNames": ["redux-toolkit-v1"],
       "reviewers": [
         "team:kibana-dashboards",
-        "team:security-investigations",
-        "team:security-threat-hunting"
+        "team:security-investigations"
       ],
       "matchBaseBranches": ["main"],
       "enabled": true,
@@ -543,7 +541,7 @@
         "msw",
         "@xterm/xterm"
       ],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "enabled": true,
@@ -655,7 +653,8 @@
         "diff",
         "fastest-levenshtein",
         "usng.js",
-        "react-reverse-portal"
+        "react-reverse-portal",
+        "tabbable"
       ],
       "reviewers": ["team:kibana-discover"],
       "matchBaseBranches": ["main"],
@@ -755,8 +754,6 @@
     {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
-        "@openfeature/launchdarkly-client-provider",
-        "@launchdarkly/js-client-sdk",
         "@launchdarkly/node-server-sdk",
         "@launchdarkly/openfeature-node-server"
       ],
@@ -778,7 +775,12 @@
     },
     {
       "groupName": "OpenFeature",
-      "matchDepNames": ["@openfeature/core", "@openfeature/server-sdk", "@openfeature/web-sdk"],
+      "matchDepNames": [
+        "@openfeature/core",
+        "@openfeature/ofrep-web-provider",
+        "@openfeature/server-sdk",
+        "@openfeature/web-sdk"
+      ],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Team:Security", "Team:Core"],
@@ -1084,6 +1086,11 @@
       "addLabels": ["Team:One Workflow"],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "description": "openapi-ts >= 0.91 is ESM-only and drops combined *_request schemas; the workflow connector codegen needs migrating first",
+      "matchDepNames": ["@hey-api/openapi-ts"],
+      "allowedVersions": "<0.91.0"
     },
     {
       "groupName": "jszip",
@@ -1563,15 +1570,6 @@
       "enabled": true
     },
     {
-      "groupName": "lmdb",
-      "matchDepNames": ["lmdb"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "pirates",
       "matchDepNames": ["pirates"],
       "reviewers": ["team:kibana-operations"],
@@ -1693,11 +1691,11 @@
       "matchDepNames": ["adm-zip"],
       "reviewers": [
         "team:siem-conduit",
-        "team:security-threat-hunting",
+        "team:security-investigations",
         "team:security-data-engineering"
       ],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:security-siem-conduit", "Team:Threat Hunting"],
+      "addLabels": ["Team:security-siem-conduit", "Team:Security Investigations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1756,16 +1754,16 @@
     {
       "groupName": "css-box-model",
       "matchDepNames": ["css-box-model"],
-      "reviewers": ["team:security-investigations", "team:security-threat-hunting"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security Investigations", "Team:Threat Hunting"],
+      "addLabels": ["Team:Security Investigations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "i18n-iso-countries",
       "matchDepNames": ["i18n-iso-countries"],
-      "reviewers": ["team:security-entity-analytics", "team:contextual-security-apps"],
+      "reviewers": ["team:security-entity-analytics", "team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Entity Analytics", "Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -1785,11 +1783,10 @@
       "matchDepNames": ["typescript-fsa-reducers"],
       "reviewers": [
         "team:security-investigations",
-        "team:security-entity-analytics",
-        "team:security-threat-hunting"
+        "team:security-entity-analytics"
       ],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security Investigations", "Team:Entity Analytics", "Team:Threat Hunting"],
+      "addLabels": ["Team:Security Investigations", "Team:Entity Analytics"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1963,15 +1960,6 @@
       "enabled": true
     },
     {
-      "groupName": "minify",
-      "matchDepNames": ["terser-webpack-plugin"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "@testing-library",
       "matchDepNames": [
         "@testing-library/dom",
@@ -2034,6 +2022,7 @@
       "reviewers": [
         "team:response-ops",
         "team:contextual-security-apps",
+        "team:siem-beacon",
         "team:security-asset-management",
         "team:streams-ui",
         "team:awp-platform",
@@ -2135,14 +2124,6 @@
       "enabled": true
     },
     {
-      "groupName": "hdr-histogram-js",
-      "matchDepNames": ["hdr-histogram-js"],
-      "reviewers": ["team:obs-signals-metrics-team"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "@appland/sql-parser",
       "matchDepNames": ["@appland/sql-parser"],
       "reviewers": ["team:security-defend-workflows"],
@@ -2199,9 +2180,9 @@
     {
       "groupName": "langsmith",
       "matchDepNames": ["langsmith"],
-      "reviewers": ["team:security-threat-hunting"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Threat Hunting"],
+      "addLabels": ["Team:Security Investigations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2348,7 +2329,6 @@
       "reviewers": [
         "team:search-ml-ux",
         "team:kibana-core",
-        "team:kibana-security",
         "team:stack-monitoring"
       ],
       "matchBaseBranches": ["main"],
@@ -2357,8 +2337,7 @@
         "backport:skip",
         "Team:AI Infra",
         "Team:Monitoring",
-        "Team:Core",
-        "Team:Security"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2464,7 +2443,7 @@
     {
       "groupName": "@xyflow/react",
       "matchPackageNames": ["@xyflow/react"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -2473,7 +2452,7 @@
     {
       "groupName": "@dagrejs/dagre",
       "matchPackageNames": ["@dagrejs/dagre"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -2527,9 +2506,9 @@
     {
       "groupName": "xml Format Util",
       "matchDepNames": ["xml-formatter"],
-      "reviewers": ["team:security-threat-hunting"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:Threat Hunting", "release_note:skip", "backport:skip"],
+      "labels": ["Team:Security Investigations", "release_note:skip", "backport:skip"],
       "minimumReleaseAge": "60 days",
       "enabled": true
     },

@@ -1,0 +1,60 @@
+{
+  "sha1": "7cc2313c26e46078e893e6d59117b160129b8cc2",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "c85dc68a18c50e3-caa637c2b1da64e",
+      "title": "Search boost capabilities a user with both read privileges gets show: true, save: false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/search_boost_capabilities.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "c85dc68a18c50e3-7539e8f5ee49055",
+      "title": "Search boost capabilities a user with both manage privileges gets show: true, save: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/search_boost_capabilities.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "c85dc68a18c50e3-4739e9572dffa95",
+      "title": "Search boost capabilities a user with only manage_boost_profiles gets show: true, save: false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/search_boost_capabilities.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "c85dc68a18c50e3-037384c465eee90",
+      "title": "Search boost capabilities a user with only manage_boost_rules gets show: true, save: false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/api/tests/search_boost_capabilities.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    }
+  ]
+}

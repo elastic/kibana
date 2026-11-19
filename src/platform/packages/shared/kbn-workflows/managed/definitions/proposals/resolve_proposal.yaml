@@ -58,6 +58,7 @@ triggers:
 # - `settled`: the decision and its outcome are recorded; the gate is done.
 # - `refused`: the decider may not decide and nothing was written; the gate re-parks.
 # - `action_failed`: the approval is recorded and its action failed; the gate re-offers a clone.
+#   A failure the action marks non-retryable is `settled` as failed instead.
 outputs:
   - name: resolution
     type: string
@@ -194,6 +195,7 @@ steps:
         with:
           action_failed: '${{ steps.execute_as_approver.error != blank }}'
           action_error_message: '{{ steps.execute_as_approver.error.message }}'
+          action_error_type: '{{ steps.execute_as_approver.error.type }}'
     else:
       # Auto-approved: this run inherited the caller's service account, and the
       # default mode would run the action as the original caller instead.
@@ -220,6 +222,7 @@ steps:
         with:
           action_failed: '${{ steps.execute_as_worker.error != blank }}'
           action_error_message: '{{ steps.execute_as_worker.error.message }}'
+          action_error_type: '{{ steps.execute_as_worker.error.type }}'
 
   - name: handle_action_failure
     type: if
@@ -231,6 +234,23 @@ steps:
           proposalId: '{{ variables.proposal_id }}'
           status: failed
           executionError: '{{ variables.action_error_message }}'
+
+      # The action reported that another attempt cannot succeed (for example,
+      # the process it targets has already exited), so the failure is final:
+      # reported settled, which the gate completes without cloning it.
+      - name: handle_non_retryable_failure
+        type: if
+        condition: '${{ variables.action_error_type == "NonRetryableError" }}'
+        steps:
+          - name: output_non_retryable_failed
+            type: workflow.output
+            status: completed
+            with:
+              resolution: settled
+              proposalId: '{{ variables.proposal_id }}'
+              status: failed
+              decision: approved
+
       - name: output_action_failed
         type: workflow.output
         status: completed

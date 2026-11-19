@@ -89,10 +89,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
-  const conversationStreamService = useMemo(
-    () => new ConversationStreamService(services.eventsService),
-    [services.eventsService]
-  );
+  const conversationStreamService = useMemo(() => new ConversationStreamService(), []);
   useEffect(() => {
     return () => {
       conversationStreamService.dispose();

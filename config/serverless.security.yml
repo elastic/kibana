@@ -8,6 +8,7 @@ xpack.securitySolutionEss.enabled: false
 
 ## Disable plugins
 xpack.observabilityAIAssistant.enabled: false
+xpack.alerting_v2.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:

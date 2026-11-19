@@ -404,7 +404,12 @@ export class LensStyle {
     }
   }
 
-  /** Sets the text-decoration mode in the currently open annotation dimension editor. */
+  /** Sets the marker icon in the open reference-line dimension editor. */
+  async setReferenceLineIcon(icon: string) {
+    await this.page.components.comboBox('lns-icon-select').setSelectedOptions([icon]);
+  }
+
+  /** Sets text decoration in the open annotation or reference-line dimension editor. */
   async setAnnotationTextVisibility(mode: 'none' | 'name' | 'field') {
     await this.page.testSubj.click(`lnsXY_textVisibility_${mode}`);
   }

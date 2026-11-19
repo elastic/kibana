@@ -26,6 +26,10 @@ export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = 
     type: 'command',
     name: 'dense_vector',
   },
+  describe: {
+    type: 'command',
+    name: 'describe',
+  },
   dissect: {
     type: 'command',
     name: 'dissect',
@@ -65,6 +69,10 @@ export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = 
   inline_stats: {
     type: 'command',
     name: 'inline_stats',
+  },
+  into: {
+    type: 'command',
+    name: 'into',
   },
   ip_location: {
     type: 'command',
@@ -771,6 +779,7 @@ export enum EsqlCommandNames {
   CHANGE_POINT = 'change_point',
   DEDUP = 'dedup',
   DENSE_VECTOR = 'dense_vector',
+  DESCRIBE = 'describe',
   DISSECT = 'dissect',
   DROP = 'drop',
   ENRICH = 'enrich',
@@ -781,6 +790,7 @@ export enum EsqlCommandNames {
   GROK = 'grok',
   HIGHLIGHT = 'highlight',
   INLINE_STATS = 'inline_stats',
+  INTO = 'into',
   IP_LOCATION = 'ip_location',
   KEEP = 'keep',
   LIMIT = 'limit',

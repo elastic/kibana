@@ -1,5 +1,5 @@
 {
-  "sha1": "83c4fb2426a02c08e392fba2aad4a9e39c30755b",
+  "sha1": "ce4c26e101da5a747b41d2bac8acefa2d1f16018",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/deployment_stats.spec.ts",
-        "line": 28,
+        "line": 30,
         "column": 68
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/deployment_stats.spec.ts",
-        "line": 47,
+        "line": 49,
         "column": 12
       }
     },

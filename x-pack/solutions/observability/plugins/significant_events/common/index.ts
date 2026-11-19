@@ -23,10 +23,7 @@ export type {
   SignificantEventsSortOrder,
 } from './events_list';
 
-export { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from './feature_flags';
-
 export {
-  SIGNIFICANT_EVENTS_APP_ROUTE,
   SIGNIFICANT_EVENT_TIERED_FEATURES,
   SIGNIFICANT_EVENTS_TIERED_FEATURE,
   SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
@@ -78,6 +75,7 @@ export type {
 export { RELAY_APP_CONNECTION_STATUS } from './slack_app/types';
 export type {
   RelayAppConnectionStatus,
+  SlackAppAvailableChannelsResponse,
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,
   SlackAppConfirmResponse,
@@ -88,6 +86,7 @@ export type {
   SlackAppWorkspace,
   SlackChannelBinding,
   SlackChannelBindingStatus,
+  SlackAvailableChannel,
 } from './slack_app/types';
 
 export type {
@@ -114,16 +113,21 @@ export type { SignificantEventsMaintenanceState } from './maintenance/state_mach
 
 export {
   DEFAULT_RUN_LIMITS,
+  INVESTIGATION_RUN_QUOTA_GROUPS,
+  isInvestigationRunQuotaGroup,
   isRunQuotaReached,
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
   RUN_QUOTA_GROUPS,
 } from './run_quotas';
 export type {
+  InvestigationRunLimitsUpdate,
+  InvestigationRunQuotaGroup,
   RunQuotaConsumeRequest,
   RunQuotaConsumeResponse,
   RunQuotaGroup,
   RunQuotaSettings,
+  RunQuotaSettingsPatch,
   RunQuotaSettingsUpdate,
   RunQuotaWindow,
   RunQuotasResponse,

@@ -24,7 +24,7 @@ interface EntityPanelHeaderTabsProps {
 export const EntityPanelHeaderTabs: FC<EntityPanelHeaderTabsProps> = memo(
   ({ tabs, selectedTabId, setSelectedTabId }) => {
     return (
-      <EuiTabs size="l" expand>
+      <EuiTabs>
         {tabs.map((tab) => (
           <EuiTab
             key={tab.id}
