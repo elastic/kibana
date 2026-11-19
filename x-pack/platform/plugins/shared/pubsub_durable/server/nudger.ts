@@ -13,14 +13,14 @@ interface RunSoonResult {
 }
 
 export interface NudgerDeps {
-  runSoon: (taskId: string, options: { requestImmediateClaim: boolean }) => Promise<RunSoonResult>;
+  runSoon: (taskId: string) => Promise<RunSoonResult>;
   isAlreadyRunningError: (error: unknown) => boolean;
   logger: Logger;
   now?: () => number;
 }
 
 /**
- * Asks Task Manager to run a drain task now. At most one request per task per second on this node;
+ * Asks Task Manager to run a drain task at its next poll (no extra claim cycle is requested). At most one request per task per second on this node;
  * a request inside that window is delayed to its end rather than dropped. A request that finds the
  * task running or conflicting is retried once after two seconds, so an event that arrives during a
  * run is still picked up promptly.
@@ -62,7 +62,7 @@ export class Nudger {
   private send(taskId: string, mayRetry: boolean): void {
     this.lastSentAt.set(taskId, (this.deps.now ?? Date.now)());
     this.deps
-      .runSoon(taskId, { requestImmediateClaim: true })
+      .runSoon(taskId)
       .then(({ conflict }) => {
         if (conflict) this.retryOnce(taskId, mayRetry);
       })

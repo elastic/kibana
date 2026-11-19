@@ -31,7 +31,7 @@ describe('Nudger', () => {
     nudger.nudge('t');
     await jest.advanceTimersByTimeAsync(0);
     expect(runSoon).toHaveBeenCalledTimes(1);
-    expect(runSoon).toHaveBeenCalledWith('t', { requestImmediateClaim: true });
+    expect(runSoon).toHaveBeenCalledWith('t');
 
     await jest.advanceTimersByTimeAsync(NUDGE_MIN_INTERVAL_MS);
     expect(runSoon).toHaveBeenCalledTimes(2);

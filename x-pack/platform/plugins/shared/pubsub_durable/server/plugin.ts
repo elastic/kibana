@@ -79,7 +79,7 @@ export class PubSubDurablePlugin implements Plugin<void, void, SetupDeps, StartD
 
   public start(_core: CoreStart, { taskManager }: StartDeps) {
     this.nudger = new Nudger({
-      runSoon: (taskId, options) => taskManager.runSoon(taskId, options),
+      runSoon: (taskId) => taskManager.runSoon(taskId),
       isAlreadyRunningError: (error) => error instanceof TaskAlreadyRunningError,
       logger: this.logger,
     });
