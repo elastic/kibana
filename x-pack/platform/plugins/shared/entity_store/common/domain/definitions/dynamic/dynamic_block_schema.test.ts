@@ -133,6 +133,16 @@ describe('dynamicBlockSchema', () => {
       ).toBe(false);
     });
 
+    it(`accepts a name of ${MAX_FIELD_PATH_LENGTH} characters and rejects one more`, () => {
+      const name = 'a'.repeat(MAX_FIELD_PATH_LENGTH);
+      expect(dynamicBlockSchema.safeParse(blockWithLabels([displayLabel({ name })])).success).toBe(
+        true
+      );
+      expect(
+        dynamicBlockSchema.safeParse(blockWithLabels([displayLabel({ name: `${name}a` })])).success
+      ).toBe(false);
+    });
+
     it('rejects an empty label', () => {
       expect(
         dynamicBlockSchema.safeParse(blockWithLabels([displayLabel({ label: '' })])).success

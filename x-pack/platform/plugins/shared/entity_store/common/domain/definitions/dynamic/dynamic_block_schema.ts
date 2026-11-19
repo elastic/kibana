@@ -127,7 +127,7 @@ export const dynamicSourceSchema = lazySchema(() =>
 export const dynamicDisplayLabelSchema = lazySchema(() =>
   z.strictObject({
     // An identity field or attribute of the definition; the whole-definition rules check which.
-    name: attributeNameSchema,
+    name: literalFieldPathSchema,
     label: z.string().min(1).max(MAX_DISPLAY_LABEL_LENGTH),
   })
 );
