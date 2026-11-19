@@ -342,7 +342,15 @@ describe('summarizeProfile', () => {
     for (const node of fixture.nodes) {
       const url = node.callFrame.url ?? '';
       if (url.startsWith('file:///kibana/src/') || url.startsWith('file:///kibana/x-pack/')) {
-        expect(url).toMatch(/^file:\/\/\/kibana\/(src|x-pack)\/f\/\d+\.ts$/);
+        const prefix = url.startsWith('file:///kibana/src/')
+          ? 'file:///kibana/src/'
+          : 'file:///kibana/x-pack/';
+        const rest = url.slice(prefix.length);
+        expect(rest.startsWith('f/')).toBe(true);
+        expect(rest.endsWith('.ts')).toBe(true);
+        const id = rest.slice('f/'.length, -'.ts'.length);
+        expect(id.length).toBeGreaterThan(0);
+        expect([...id].every((c) => c >= '0' && c <= '9')).toBe(true);
       }
     }
     const summary = summarizeProfile(fixture, { root: ROOT });
