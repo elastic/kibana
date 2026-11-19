@@ -108,6 +108,7 @@ export interface InjectedMetadata {
   };
   externalUrl: { policy: InjectedMetadataExternalUrlPolicy[] };
   apmConfig: Record<string, unknown> | null;
+  edotBrowserConfig: { url: string; headers?: Record<string, string> } | null;
   uiPlugins: InjectedMetadataPlugin[];
   legacyMetadata: {
     uiSettings: {

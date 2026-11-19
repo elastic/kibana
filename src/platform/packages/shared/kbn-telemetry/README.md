@@ -37,6 +37,14 @@ telemetry.tracing:
         headers:
           authorization: 'ApiKey [REDACTED]'
 
+# For browser traces with EDOT Browser (experimental, runs alongside the APM RUM agent).
+# The values are sent to the browser, so don't use secrets in headers.
+telemetry.tracing.browser:
+  enabled: true
+  url: <URL_TO_THE_OTLP_ENDPOINT> # must allow CORS from Kibana's origin
+  headers: {}
+csp.connect_src: ['<URL_TO_THE_OTLP_ENDPOINT>'] # let the browser reach the endpoint
+
 # For RUM traces (pending to be migrated to OTel when OTel RUM is production-ready)
 elastic.apm:
   serverUrl: <URL_TO_THE_APM_SERVER>
