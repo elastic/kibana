@@ -8,7 +8,8 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { BehaviorSubject } from 'rxjs';
+import { ACTION_POLICY_ATTACHMENT_TYPE, type ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MockLocatorProvider } from '../../../test_utils/test_providers';
@@ -24,12 +25,16 @@ jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
     '../../../services/user_capabilities'
   );
+  let agentBuilder: unknown = {};
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
         return new ActualUserCapabilities({
           capabilities: { alerting_v2_rules: { read: mockCanReadRules } },
         });
+      }
+      if (token === Symbol.for('plugin.start.agentBuilder')) {
+        return agentBuilder;
       }
       if (token === 'application') {
         return {
@@ -52,8 +57,15 @@ jest.mock('@kbn/core-di-browser', () => {
       return {};
     },
     CoreStart: (key: string) => key,
+    setMockAgentBuilder: (next: unknown) => {
+      agentBuilder = next;
+    },
   };
 });
+
+const { setMockAgentBuilder } = jest.requireMock('@kbn/core-di-browser') as {
+  setMockAgentBuilder: (agentBuilder: unknown) => void;
+};
 
 let mockIsLicenseValid = true;
 jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
@@ -159,9 +171,28 @@ const renderFlyout = (props: RenderProps = {}) => {
   return { policy, handlers };
 };
 
+const toPolicyAttachment = (policy: ActionPolicyResponse) => ({
+  id: `action_policy:${policy.id}`,
+  type: ACTION_POLICY_ATTACHMENT_TYPE,
+  origin: policy.id,
+  data: {
+    id: policy.id,
+    name: policy.name,
+    description: policy.description,
+    destinations: policy.destinations,
+    matcher: policy.matcher,
+    grouping: policy.grouping,
+    throttle: policy.throttle,
+    enabled: policy.enabled,
+    snoozed_until: policy.snoozed_until,
+    updated_at: policy.updated_at,
+  },
+});
+
 describe('ActionPolicyDetailsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockAgentBuilder({});
     mockIsLicenseValid = true;
     mockCanReadRules = true;
     mockBulkGet.mockResolvedValue([
@@ -568,6 +599,57 @@ describe('ActionPolicyDetailsFlyout', () => {
       await user.click(screen.getByTestId('unsnoozeActionPolicy-policy-1'));
 
       expect(handlers.onCancelSnooze).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('hides Add to chat when Agent Builder cannot open chat', () => {
+      renderFlyout();
+
+      expect(screen.getByTestId(TEST_SUBJ.takeActionButton)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionPolicyDetailsFlyoutAddToChatButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('opens a new conversation with the action policy when chat is unbound', () => {
+      const openChat = jest.fn();
+      const addAttachment = jest.fn();
+      setMockAgentBuilder({
+        openChat,
+        addAttachment,
+        events: { ui: { activeConversation$: new BehaviorSubject(null) } },
+      });
+
+      const { policy } = renderFlyout();
+
+      const footer = screen.getByTestId('actionPolicyDetailsFlyoutFooter');
+      const text = footer.textContent ?? '';
+      expect(text.indexOf('Add to chat')).toBeLessThan(text.indexOf('Take action'));
+
+      fireEvent.click(screen.getByTestId('actionPolicyDetailsFlyoutAddToChatButton'));
+
+      expect(openChat).toHaveBeenCalledWith({
+        autoSendInitialMessage: false,
+        newConversation: true,
+        attachments: [toPolicyAttachment(policy)],
+      });
+      expect(addAttachment).not.toHaveBeenCalled();
+    });
+
+    it('attaches the action policy to the bound conversation', () => {
+      const openChat = jest.fn();
+      const addAttachment = jest.fn();
+      setMockAgentBuilder({
+        openChat,
+        addAttachment,
+        events: { ui: { activeConversation$: new BehaviorSubject({ id: 'conv-1' }) } },
+      });
+
+      const { policy } = renderFlyout();
+
+      fireEvent.click(screen.getByTestId('actionPolicyDetailsFlyoutAddToChatButton'));
+
+      expect(addAttachment).toHaveBeenCalledWith(toPolicyAttachment(policy));
+      expect(openChat).not.toHaveBeenCalled();
     });
   });
 

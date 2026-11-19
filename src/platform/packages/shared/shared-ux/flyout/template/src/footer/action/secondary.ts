@@ -15,19 +15,28 @@ import { secondaryActionPart } from './part';
 import { resolveTooltipButtonProps, withTooltip } from './tooltip';
 
 const renderButton = ({
-  label,
   tooltip,
   ...props
 }: FlyoutFooterSecondaryActionProps): React.ReactElement => {
   if (props.variant === 'ai') {
-    const { variant: _variant, ...buttonProps } = props;
+    // `addToChat` replaces children with the shared Add to chat label, so none is passed.
+    if (props.iconType === 'addToChat') {
+      const { variant: _variant, ...buttonProps } = props;
+      return React.createElement(AiButtonEmpty, {
+        ...resolveTooltipButtonProps(buttonProps, tooltip),
+        size: 'm',
+      });
+    }
+
+    const { label, variant: _variant, ...buttonProps } = props;
     return React.createElement(
       AiButtonEmpty,
       { ...resolveTooltipButtonProps(buttonProps, tooltip), size: 'm' },
       label
     );
   }
-  const { variant: _variant, ...buttonProps } = props;
+
+  const { label, variant: _variant, ...buttonProps } = props;
   return React.createElement(
     EuiButtonEmpty,
     { ...resolveTooltipButtonProps(buttonProps, tooltip), color: 'primary', size: 'm' },

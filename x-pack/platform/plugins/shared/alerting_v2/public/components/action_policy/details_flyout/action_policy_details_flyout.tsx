@@ -7,7 +7,10 @@
 
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiLink, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { useActionPolicyManualAddToChat } from '@kbn/alerting-v2-browser-shared';
+import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
@@ -74,6 +77,12 @@ export const ActionPolicyDetailsFlyout = ({
 }: Props) => {
   const settings = useService(CoreStart('settings'));
   const canReadRules = useService(UserCapabilities).canRead('rules');
+  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
+    | AgentBuilderPluginStart
+    | undefined;
+  const { addToChat, isAddToChatAvailable } = useActionPolicyManualAddToChat(policy, {
+    agentBuilder,
+  });
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
 
@@ -253,6 +262,14 @@ export const ActionPolicyDetailsFlyout = ({
         </Body>
 
         <Footer>
+          {isAddToChatAvailable && (
+            <Footer.SecondaryAction
+              variant="ai"
+              iconType="addToChat"
+              onClick={addToChat}
+              data-test-subj="actionPolicyDetailsFlyoutAddToChatButton"
+            />
+          )}
           <Footer.PrimaryActionMenu
             label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.takeAction', {
               defaultMessage: 'Take action',
