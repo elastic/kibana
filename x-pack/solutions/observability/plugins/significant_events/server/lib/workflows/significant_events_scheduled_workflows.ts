@@ -45,9 +45,9 @@ export interface SignificantEventsScheduledWorkflowsService {
    *   new cadence and batch values, preserving enablement.
    * - Disabling disables both workflows, cancels non-terminal scheduled
    *   wrapper executions in that space, and uninstalls the per-space dynamic
-   *   workflow instances. `skipExecutionDrain` skips that cancel-and-wait so a
-   *   source delete is not blocked on in-flight runs; the workflows are still
-   *   disabled and uninstalled.
+   *   workflow instances. `skipExecutionDrain` only disables scheduling, so a
+   *   source delete is not blocked on in-flight runs and does not force-delete
+   *   a workflow that still has one.
    */
   ensureWorkflow(params: {
     enabled: boolean;
@@ -262,24 +262,30 @@ export const createSignificantEventsScheduledWorkflowsService = ({
         return;
       }
 
-      const client = await getManagedWorkflowsClient();
-
       if (enabled) {
+        const client = await getManagedWorkflowsClient();
         await installOrUpdate({ client, spaceId, config });
         await setAllEnabled({ enabled: true, request, spaceId });
         log.info(`Enabled scheduled Significant Events discovery workflows in space ${spaceId}`);
         return;
       }
 
+      // Stop scheduling new runs. Leave the documents in place when a source delete
+      // must not wait on in-flight work: uninstall force-deletes them and fails
+      // while an execution is still running.
       await setAllEnabled({ enabled: false, request, spaceId });
-      if (!skipExecutionDrain) {
-        await cancelRunningScheduledExecutions({ request, spaceId });
+      if (skipExecutionDrain) {
+        log.info(
+          `Disabled scheduled Significant Events discovery workflow scheduling in space ${spaceId}`
+        );
+        return;
       }
+
+      await cancelRunningScheduledExecutions({ request, spaceId });
+      const client = await getManagedWorkflowsClient();
       await uninstallScheduledWorkflows({ client, spaceId });
       log.info(
-        skipExecutionDrain
-          ? `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId} without draining executions`
-          : `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId}`
+        `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId}`
       );
     },
   };

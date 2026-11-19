@@ -10,6 +10,7 @@ import {
   getNormalizedInputs,
 } from '../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../common/services/agentless_policy_helper';
+import { isVarGroupOptionHiddenInDeploymentMode } from '../../../../../../../common/services/var_group_helpers';
 import { isCloudProvider } from '../../../../../../../common/types';
 import type {
   CloudProvider,
@@ -207,25 +208,16 @@ export function getVisibleOptions(
   hideInVarGroupOptions?: Record<string, string[]>
 ): RegistryVarGroupOption[] {
   const hiddenOptionNames = hideInVarGroupOptions?.[varGroup.name] ?? [];
+  const deploymentMode = isAgentlessEnabled ? 'agentless' : 'default';
 
-  return varGroup.options.filter((option) => {
-    // Check if option is hidden via hide_in_var_group_options
-    if (hiddenOptionNames.includes(option.name)) {
-      return false;
-    }
-
-    // Check if option is hidden based on deployment mode
-    if (option.hide_in_deployment_modes) {
-      if (isAgentlessEnabled && option.hide_in_deployment_modes.includes('agentless')) {
-        return false;
-      }
-      if (!isAgentlessEnabled && option.hide_in_deployment_modes.includes('default')) {
-        return false;
-      }
-    }
-
-    return true;
-  });
+  // Deployment-mode hiding shares its rule with validation (common
+  // `isVarGroupOptionHiddenInDeploymentMode`) so the form's first visible
+  // option and validation's fallback can never drift apart.
+  return varGroup.options.filter(
+    (option) =>
+      !hiddenOptionNames.includes(option.name) &&
+      !isVarGroupOptionHiddenInDeploymentMode(option, deploymentMode)
+  );
 }
 
 /**

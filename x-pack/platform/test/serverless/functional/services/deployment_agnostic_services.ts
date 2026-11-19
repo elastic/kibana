@@ -64,7 +64,6 @@ export const services = {
   snapshots: functionalPlatformServices.snapshots,
   supertest: functionalPlatformServices.supertest,
   testSubjects: functionalPlatformServices.testSubjects,
-  transform: functionalPlatformServices.transform,
   toasts: functionalPlatformServices.toasts,
   usageCollection: functionalPlatformServices.usageCollection,
   userMenu: functionalPlatformServices.userMenu,

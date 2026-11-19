@@ -402,6 +402,7 @@ function TrialInvestigationCard({
             <EuiButton
               size="s"
               color="success"
+              isDisabled={isSelected}
               onClick={() => onOpenInvestigation(investigation)}
               data-test-subj="nightshiftOnboardingTrialInvestigationOpen"
             >

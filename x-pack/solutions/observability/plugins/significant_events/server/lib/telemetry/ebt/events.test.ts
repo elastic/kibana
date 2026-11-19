@@ -9,7 +9,6 @@ import {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
   agentToolEventSearchEventType,
-  agentToolEventStatusUpdateEventType,
   agentToolEventWriteEventType,
   agentToolFailedEventType,
   agentToolKiIdentificationStartedEventType,
@@ -29,7 +28,6 @@ describe('EBT event types', () => {
     agentBuilderKnowledgeIndicatorCreatedEventType,
     agentToolEventCreateEventType,
     agentToolEventSearchEventType,
-    agentToolEventStatusUpdateEventType,
     agentToolEventWriteEventType,
     agentToolFailedEventType,
     agentToolKiIdentificationStartedEventType,
@@ -47,14 +45,15 @@ describe('EBT event types', () => {
     expect(isOptional(schema.target_cluster_ids_complete)).toBe(true);
   });
 
-  it.each([agentToolEventStatusUpdateEventType, eventStatusChangedEventType])(
-    '$eventType requires the full alert identity on an event about an existing alert',
-    ({ schema }) => {
-      const { alert_source: source, fingerprint, space_id: spaceId } = schema;
+  it('event-status-changed requires the full alert identity', () => {
+    const {
+      alert_source: source,
+      fingerprint,
+      space_id: spaceId,
+    } = eventStatusChangedEventType.schema;
 
-      [source, fingerprint, spaceId].forEach((field) => expect(isOptional(field)).toBe(false));
-    }
-  );
+    [source, fingerprint, spaceId].forEach((field) => expect(isOptional(field)).toBe(false));
+  });
 
   it.each([agentToolEventCreateEventType, agentToolEventWriteEventType])(
     '$eventType lets a failed create omit the series identity',
