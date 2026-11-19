@@ -37,7 +37,10 @@ import {
   type SlackAppWorkspace,
 } from '@kbn/significant-events-plugin/common';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
-import { useAllRelayAppBindings } from '../../../../data/relay_apps/use_relay_app_bindings';
+import {
+  useAllRelayAppBindings,
+  useRelayAppBindings,
+} from '../../../../data/relay_apps/use_relay_app_bindings';
 import { SettingsSection } from '../settings_section';
 import { useRelayAppConnection } from './use_relay_app_connection';
 import { SlackConnectionBindings } from './slack_connection_bindings';
@@ -68,12 +71,12 @@ export function SlackChannelsSection({ canEdit }: SlackChannelsSectionProps) {
     disconnect,
   } = connection;
   const available = connection.available && !hasStatusRequestError;
+  const isConnected = available && status === RELAY_APP_CONNECTION_STATUS.connected;
+  const { isConnectionLost } = useRelayAppBindings(isConnected, undefined, { silent: true });
 
   if (isLoading || (!available && !hasStatusRequestError)) {
     return null;
   }
-
-  const isConnected = available && status === RELAY_APP_CONNECTION_STATUS.connected;
 
   return (
     <>
@@ -97,7 +100,19 @@ export function SlackChannelsSection({ canEdit }: SlackChannelsSectionProps) {
         }
         titleAdornment={
           isConnected ? (
-            <WorkspaceBadge workspace={workspace} createdBy={createdBy} createdAt={createdAt} />
+            isConnectionLost ? (
+              <EuiBadge
+                color="warning"
+                iconType="warning"
+                data-test-subj="nightshiftSlackLostBadge"
+              >
+                {i18n.translate('xpack.nightshift.settings.apps.slackConnectionLostBadge', {
+                  defaultMessage: 'Not connected',
+                })}
+              </EuiBadge>
+            ) : (
+              <WorkspaceBadge workspace={workspace} createdBy={createdBy} createdAt={createdAt} />
+            )
           ) : undefined
         }
         headerAction={
@@ -143,6 +158,7 @@ export function SlackChannelsSection({ canEdit }: SlackChannelsSectionProps) {
             createdAt={createdAt}
             canEdit={canEdit}
             isMutating={isMutating}
+            isConnectionLost={isConnectionLost}
             onConnect={connect}
             onConfirm={confirm}
             onDisconnect={disconnect}
@@ -161,6 +177,7 @@ interface SlackConnectionBodyProps {
   createdAt?: string;
   canEdit: boolean;
   isMutating: boolean;
+  isConnectionLost: boolean;
   onConnect: () => void;
   onConfirm: (tenantKey: string) => Promise<void>;
   onDisconnect: (tenantKey?: string) => Promise<void>;
@@ -175,6 +192,7 @@ function SlackConnectionBody({
   createdAt,
   canEdit,
   isMutating,
+  isConnectionLost,
   onConnect,
   onConfirm,
   onDisconnect,
@@ -226,6 +244,37 @@ function SlackConnectionBody({
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
+    );
+  }
+
+  if (status === RELAY_APP_CONNECTION_STATUS.connected && isConnectionLost) {
+    return (
+      <KbnWarningCallout
+        size="s"
+        css={{ width: '100%' }}
+        data-test-subj="nightshiftSlackConnectionLost"
+        title={i18n.translate('xpack.nightshift.settings.apps.slackConnectionLostTitle', {
+          defaultMessage: 'Slack is no longer connected to this project',
+        })}
+        text={i18n.translate('xpack.nightshift.settings.apps.slackConnectionLostBody', {
+          defaultMessage:
+            "@Elastic can't answer in Slack until you reconnect the workspace. This happens when the app is removed from the Slack workspace.",
+        })}
+        actionProps={{
+          primary: {
+            children: i18n.translate('xpack.nightshift.settings.apps.slackReconnect', {
+              defaultMessage: 'Reconnect',
+            }),
+            onClick: onConnect,
+            isDisabled: !canEdit || isMutating,
+            'data-test-subj': 'nightshiftSlackReconnectButton',
+            ...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.RECONNECT_SLACK_CONNECTION,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            }),
+          },
+        }}
+      />
     );
   }
 

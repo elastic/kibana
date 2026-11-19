@@ -77,6 +77,7 @@ function makeBindings(bindings: SlackChannelBinding[], nextCursor?: string) {
     isLoading: false,
     isFetching: false,
     nextCursor,
+    isConnectionLost: false,
   });
   mockUseBindChannel.mockReturnValue({
     bind: bindChannel,
@@ -305,6 +306,24 @@ describe('SlackChannelsSection', () => {
       expect(await screen.findByTestId('nightshiftSlackWorkspaceTooltip')).toHaveTextContent(tip);
     }
   );
+
+  it('warns instead of showing the channels when the Relay no longer knows the workspace, and reconnects', () => {
+    mockUseRelayAppBindings.mockReturnValue({
+      bindings: [],
+      isLoading: false,
+      isFetching: false,
+      isConnectionLost: true,
+    });
+    setup();
+
+    expect(screen.getByTestId('nightshiftSlackConnectionLost')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftSlackLostBadge')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftSlackConnectedBadge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('streamsSlackAppOpenConnectChannelButton')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('nightshiftSlackReconnectButton'));
+    expect(mockConnectWorkspace).toHaveBeenCalled();
+  });
 
   it('connects a channel from the modal by entering an id', async () => {
     setup();

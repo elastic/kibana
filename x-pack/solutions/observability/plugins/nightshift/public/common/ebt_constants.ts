@@ -15,6 +15,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   CLEAR_AUTOMATION_FILTERS: 'clearAutomationFilters',
   CANCEL_DETECTION_ENGINE_CHANGE: 'cancelDetectionEngineChange',
   CANCEL_SLACK_CONNECTION: 'cancelSlackConnection',
+  RECONNECT_SLACK_CONNECTION: 'reconnectSlackConnection',
   CLEAR_IMPACTED_SERVICES_FILTER: 'clearImpactedServicesFilter',
   CLOSE_FLYOUT: 'closeFlyout',
   CLOSE_SIGNIFICANT_EVENT: 'closeSignificantEvent',

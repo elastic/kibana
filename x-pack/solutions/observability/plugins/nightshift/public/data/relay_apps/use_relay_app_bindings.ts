@@ -18,6 +18,7 @@ import type {
 import { buildPath, type HttpStart } from '@kbn/core-http-browser';
 import { useKibana } from '../../hooks/use_kibana';
 import { getFormattedError } from '../../common/errors';
+import { getHttpErrorStatus } from '../../common/http_error';
 
 const BINDINGS_ROUTE = '/internal/significant_events/apps/slack/bindings';
 const AVAILABLE_CHANNELS_ROUTE = '/internal/significant_events/apps/slack/available_channels';
@@ -52,6 +53,8 @@ export interface UseRelayAppBindings {
   isFetching: boolean;
   /** Opaque cursor for the next page; absent when this is the last page. */
   nextCursor?: string;
+  /** The Relay no longer knows this deployment's Slack workspace. */
+  isConnectionLost: boolean;
 }
 
 /**
@@ -59,8 +62,13 @@ export interface UseRelayAppBindings {
  * only active when `enabled` is true (e.g. once the Slack App is connected). Pass the
  * opaque `cursor` from a previous page's `nextCursor` to fetch the next page; omit it for
  * the first page. Each cursor is cached as its own query so paging back and forth is instant.
+ * `silent` skips the error toast, for a second observer of a query another component already reports.
  */
-export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelayAppBindings {
+export function useRelayAppBindings(
+  enabled: boolean,
+  cursor?: string,
+  { silent = false }: { silent?: boolean } = {}
+): UseRelayAppBindings {
   const {
     services: { http, notifications },
   } = useKibana();
@@ -73,6 +81,9 @@ export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelay
     enabled,
     keepPreviousData: true,
     onError: (error) => {
+      if (silent || getHttpErrorStatus(error) === 403) {
+        return;
+      }
       notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.nightshift.settings.apps.listBindingsError', {
           defaultMessage: 'Failed to load connected Slack channels',
@@ -86,6 +97,7 @@ export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelay
     isLoading: query.isLoading && enabled,
     isFetching: query.isFetching && enabled,
     nextCursor: query.data?.nextCursor,
+    isConnectionLost: enabled && getHttpErrorStatus(query.error) === 403,
   };
 }
 
