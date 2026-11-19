@@ -187,6 +187,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "nightshift-secrets|1",
         "oauth_state|1",
         "service-account-credential|1",
+        "service-account-workload-binding|2",
         "service-account-workload-binding|1",
         "synthetics-monitor|2",
         "synthetics-monitor|1",

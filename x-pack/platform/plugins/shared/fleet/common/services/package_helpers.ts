@@ -8,7 +8,7 @@
 import { uniqBy } from 'lodash';
 
 import type { PackageInfo, PackageListItem, PackagePolicy, RegistryPolicyTemplate } from '../types';
-import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
+import { FIPS_INCOMPATIBLE_PACKAGES, OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 
 /**
  * Return true if a package need Elastic Agent to be run as root/administrator
@@ -163,4 +163,31 @@ export function shouldAddIntegrationFromCatalog(pkg: PackageClassificationFields
     return true;
   }
   return hasDataStreamsOrPolicyTemplates(pkg);
+}
+
+/**
+ * True when the package is listed in FIPS_INCOMPATIBLE_PACKAGES, i.e. it is known to be
+ * FIPS incompatible even though its manifest does not flag its policy templates.
+ */
+export function isPackageNameFipsIncompatible(packageName?: string): boolean {
+  return !!packageName && FIPS_INCOMPATIBLE_PACKAGES.includes(packageName);
+}
+
+/**
+ * A package is FIPS incompatible when it is listed in FIPS_INCOMPATIBLE_PACKAGES, or when it has
+ * policy templates and all of them are explicitly marked `fips_compatible: false`.
+ * A missing flag means compatible.
+ */
+export function isPackageFipsIncompatible(
+  policyTemplates?: Array<{ fips_compatible?: boolean }>,
+  packageName?: string
+): boolean {
+  if (isPackageNameFipsIncompatible(packageName)) {
+    return true;
+  }
+  return (
+    !!policyTemplates &&
+    policyTemplates.length > 0 &&
+    policyTemplates.every((template) => template.fips_compatible === false)
+  );
 }

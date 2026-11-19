@@ -205,8 +205,8 @@ describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
   });
 });
 
-describe('processJUnitReports with issue creation off', () => {
-  it('updates tracked failures but opens no issue for new ones', async () => {
+describe('processJUnitReports with per-test issues off', () => {
+  it('neither updates per-test issues, left for suite issues to replace, nor opens new ones', async () => {
     const failures = [makeFailure(0), makeFailure(1)];
     getFailures.mockReturnValue(failures);
     const { params } = createParams([createExistingIssue(failures[0])]);
@@ -214,9 +214,29 @@ describe('processJUnitReports with issue creation off', () => {
 
     await processJUnitReports(['report.xml'], params);
 
-    expect(updateFailureIssue).toHaveBeenCalledTimes(1);
+    expect(updateFailureIssue).not.toHaveBeenCalled();
     expect(createFailureIssue).not.toHaveBeenCalled();
-    expect(failures[1].failureCount).toBe(0);
+    expect(failures.map(({ githubIssue, failureCount }) => [githubIssue, failureCount])).toEqual([
+      [undefined, 0],
+      [undefined, 0],
+    ]);
+  });
+
+  it('still records failures on suite issues', async () => {
+    const failures = [makeFailure(0)];
+    getFailures.mockReturnValue(failures);
+    const suiteIssue = createSuiteIssue(failures[0]);
+    const { params } = createParams(
+      [createExistingIssue(failures[0])],
+      [[failures[0], suiteIssue]]
+    );
+    params.perTestIssues = false;
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(updateSuiteIssue).toHaveBeenCalledTimes(1);
+    expect(updateFailureIssue).not.toHaveBeenCalled();
+    expect(failures[0].githubIssue).toBe(suiteIssue.github.htmlUrl);
   });
 
   it('still indexes every failure and hands them to the file reporter', async () => {

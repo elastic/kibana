@@ -1084,7 +1084,7 @@ x-pack/platform/packages/shared/ingest-pipelines @elastic/kibana-management
 x-pack/platform/packages/shared/isomer/isomer @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-components @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-theme @elastic/appex-sharedux
-x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/security-solution
+x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/alertzero-common-layer
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-ml-ux @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
@@ -3111,6 +3111,7 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 
 /x-pack/solutions/security/plugins/security_solution/test/scout/agent_builder/ @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/test/scout/onboarding/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/overview/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ @elastic/security-investigations
@@ -3199,6 +3200,11 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_invest
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/alertzero-common-layer
 # Per-watch definitions without an override below fall back to @elastic/alertzero-common-layer.
 
+# Proposals managed workflows (proposal gate and resolution), and the action workflow contract the gate relies on
+src/platform/packages/shared/kbn-workflows/managed/definitions/proposals @elastic/alertzero-common-layer
+src/platform/packages/shared/kbn-workflows/managed/action_workflow.ts @elastic/alertzero-common-layer
+src/platform/packages/shared/kbn-workflows/managed/definitions/action_workflows.test.ts @elastic/alertzero-common-layer
+
 # Actions directories
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/actions/defend @elastic/security-defend-workflows
 
@@ -3218,6 +3224,8 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 # AlertZero Hunt Watch services
 /src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/hunt @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/ip_ranges.ts @elastic/alertzero-common-layer @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/ip_ranges.test.ts @elastic/alertzero-common-layer @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/hunt @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.schema.yaml @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.gen.ts @elastic/security-investigations

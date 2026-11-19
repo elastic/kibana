@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupTestUsers } from '../test_users';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 const BASE_URL = '/api/fleet/cloud_onboarding_deployments';
@@ -49,6 +50,7 @@ export default function (providerContext: FtrProviderContext) {
     };
 
     before(async () => {
+      await setupTestUsers(getService('security'));
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       await fleetAndAgents.setup();

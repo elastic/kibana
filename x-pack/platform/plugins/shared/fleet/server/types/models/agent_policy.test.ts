@@ -10,7 +10,15 @@ import { set } from '@kbn/safer-lodash-set';
 import type { AgentlessAgentPolicyConfig, GlobalDataTag } from '../../../common/types';
 import { getSettings } from '../../services/form_settings';
 
-import { AgentPolicyBaseSchema, FullAgentPolicyResponseSchema } from './agent_policy';
+import {
+  AgentPolicyBaseSchema,
+  AgentPolicyOverridesRequestSchema,
+  AgentPolicyResponseSchema,
+  AgentPolicySchemaV8,
+  FullAgentPolicyResponseSchema,
+  NewAgentPolicySchema,
+} from './agent_policy';
+import { PreconfiguredAgentPoliciesSchema } from './preconfiguration';
 
 describe('AgentPolicyBaseSchema', () => {
   describe('global_data_tags validations', () => {
@@ -167,11 +175,116 @@ describe('AgentPolicyBaseSchema', () => {
       }).toThrow('output_permissions overrides is not allowed');
     });
 
+    // The base schema feeds the persisted SO model-version schemas and the response schemas, which
+    // must keep accepting overrides saved before the OpenTelemetry keys were denied.
+    it('should keep accepting stored OpenTelemetry collector keys', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({
+          receivers: { otlp: {} },
+          'service.pipelines': {},
+        });
+      }).not.toThrow();
+    });
+
     it('should not throw for valid overrides keys', () => {
       expect(() => {
         AgentPolicyBaseSchema.overrides.validate({ 'agent.monitoring.use_output': 'custom' });
       }).not.toThrow();
     });
+  });
+});
+
+describe('AgentPolicyOverridesRequestSchema', () => {
+  it.each(['receivers', 'exporters', 'processors', 'connectors', 'extensions', 'service'])(
+    'should throw an error if the OTel key %s is provided',
+    (key) => {
+      expect(() => {
+        AgentPolicyOverridesRequestSchema.validate({ [key]: { foo: {} } });
+      }).toThrow(`${key} overrides is not allowed`);
+    }
+  );
+
+  it('should throw an error if a dotted OTel key is provided', () => {
+    expect(() => {
+      AgentPolicyOverridesRequestSchema.validate({ 'extensions.pprof.save_to_file': '/tmp/x' });
+    }).toThrow('extensions overrides is not allowed');
+    expect(() => {
+      AgentPolicyOverridesRequestSchema.validate({ 'service.pipelines': {} });
+    }).toThrow('service overrides is not allowed');
+  });
+
+  it('should keep rejecting inputs and output_permissions', () => {
+    expect(() => AgentPolicyOverridesRequestSchema.validate({ 'inputs.foo': 'bar' })).toThrow(
+      'inputs overrides is not allowed'
+    );
+    expect(() =>
+      AgentPolicyOverridesRequestSchema.validate({ 'output_permissions.someOutput': {} })
+    ).toThrow('output_permissions overrides is not allowed');
+  });
+
+  it('should not throw for keys that only share a prefix with denied keys', () => {
+    expect(() => {
+      AgentPolicyOverridesRequestSchema.validate({ 'servicefoo.bar': 1, outputs: {} });
+    }).not.toThrow();
+  });
+
+  it('should not throw for null or missing overrides', () => {
+    expect(() => AgentPolicyOverridesRequestSchema.validate(null)).not.toThrow();
+    expect(() => AgentPolicyOverridesRequestSchema.validate(undefined)).not.toThrow();
+  });
+
+  // Keys are bounded in reporting mode only: an overlong key is recorded, not rejected.
+  it('should not reject a key longer than the reporting bound', () => {
+    expect(() =>
+      AgentPolicyOverridesRequestSchema.validate({ [`agent.${'a'.repeat(300)}`]: 'x' })
+    ).not.toThrow();
+  });
+});
+
+describe('agent policy overrides with OpenTelemetry collector keys', () => {
+  const storedOverrides = { receivers: { otlp: {} } };
+  const basePolicy = { name: 'policy', namespace: 'default' };
+
+  it('are rejected in create and update requests', () => {
+    expect(() =>
+      NewAgentPolicySchema.validate({ ...basePolicy, overrides: storedOverrides })
+    ).toThrow('receivers overrides is not allowed');
+  });
+
+  // kibana.yml is validated at startup: rejecting them would stop Kibana from starting after an
+  // upgrade. They are stripped when the full agent policy is built instead.
+  it('are accepted in kibana.yml preconfigured policies', () => {
+    expect(() =>
+      PreconfiguredAgentPoliciesSchema.validate([
+        { ...basePolicy, id: 'preconfigured', overrides: storedOverrides },
+      ])
+    ).not.toThrow();
+  });
+
+  // Policies saved before these keys were denied are still created again by internal paths, such as
+  // the space awareness migration and copying a policy, which validate the SO `create` schema.
+  it('are accepted by the persisted SO create schema', () => {
+    const soCreateSchema = AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' });
+    expect(() =>
+      soCreateSchema.validate({ ...basePolicy, overrides: storedOverrides })
+    ).not.toThrow();
+  });
+
+  // Responses are validated in dev mode: reading such a policy must not fail.
+  it('are accepted by the response schema', () => {
+    expect(() =>
+      AgentPolicyResponseSchema.validate({
+        ...basePolicy,
+        id: 'policy-id',
+        status: 'active',
+        revision: 1,
+        updated_at: '2026-01-01T00:00:00.000Z',
+        updated_by: 'elastic',
+        is_managed: false,
+        is_protected: false,
+        overrides: storedOverrides,
+      })
+    ).not.toThrow();
   });
 });
 

@@ -1,27 +1,15 @@
 steps:
-  - command: .buildkite/scripts/steps/cloud/build_cloud_image.sh
-    label: 'Build Cloud Image'
-    key: build_cloud_image
-    agents:
-      machineType: n2-standard-16
-      preemptible: true
-      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-  - command: .buildkite/scripts/steps/cloud/deploy.sh
-    label: 'Deploy to Cloud'
+  # Cloud deploy keys are only granted to kibana-deploy-cloud-from-pr, so the PR build hands the deploy off to it
+  - command: .buildkite/scripts/steps/trigger_from_pr.sh kibana-deploy-cloud-from-pr
+    label: 'Trigger Cloud Deployment'
     key: deploy_cloud
     agents:
+      provider: gcp
+      image: family/kibana-minimal-ubuntu-2604
+      imageProject: elastic-images-prod
       machineType: n2-standard-2
-      preemptible: true
-      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
-    depends_on:
-      - build_cloud_image
-    timeout_in_minutes: 30
+    timeout_in_minutes: 10
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 3
+          limit: 1

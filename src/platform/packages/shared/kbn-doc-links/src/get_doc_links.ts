@@ -564,7 +564,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       siemMigrations: `${ELASTIC_DOCS}solutions/security/get-started/automatic-migration`,
       llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
       alertZero: {
-        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/configure-worker-settings#configure-worker-settings-continuous-threat-hunt`,
+        overview: `${ELASTIC_DOCS}solutions/security/alertzero`,
+        setUp: `${ELASTIC_DOCS}solutions/security/alertzero/set-up-alertzero`,
+        proposedActions: `${ELASTIC_DOCS}solutions/security/alertzero/work-in-alertzero`,
+        escalations: `${ELASTIC_DOCS}solutions/security/alertzero/manage-escalations`,
+        watches: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers`,
+        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers#alertzero-hunt-watch`,
       },
     },
     query: {
@@ -1180,6 +1185,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       limitationsKnownIssues: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/limitations-known-issues`,
       learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-agent-or-ai-assistant`,
       aiAssistant: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-assistant`,
+      replaceKnowledgeBaseContent: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-agent-or-ai-assistant#replace-knowledge-base-content`,
     },
     applicationConnections: {
       oauthClients: `${ELASTIC_DOCS}deploy-manage/app-connections/oauth-clients`,

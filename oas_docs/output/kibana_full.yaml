@@ -29947,7 +29947,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_UUID'
+            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -30026,7 +30026,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_UUID'
+            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -32693,7 +32693,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_UUID'
+            $ref: '#/components/schemas/Security_Exceptions_API_RuleId'
       requestBody:
         content:
           application/json:
@@ -35091,7 +35091,7 @@ paths:
                     updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -35216,7 +35216,7 @@ paths:
                     updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -35393,7 +35393,7 @@ paths:
                     updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -35562,7 +35562,7 @@ paths:
                     updated_at: '2025-01-15T09:30:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -35652,7 +35652,7 @@ paths:
           name: filter
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_FindEndpointListItemsFilter'
         - description: The page number to return
           in: query
           name: page
@@ -35722,7 +35722,7 @@ paths:
                   data:
                     description: The list of endpoint exception list items.
                     items:
-                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
                     type: array
                   page:
                     description: The current page number.
@@ -41082,7 +41082,7 @@ paths:
           schema:
             default: []
             items:
-              $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+              $ref: '#/components/schemas/Security_Exceptions_API_FindExceptionListItemsFilter'
             type: array
         - description: |
             Determines whether the returned containers are Kibana associated with a Kibana space
@@ -64404,24 +64404,21 @@ paths:
           source: |
             POST kbn:/api/links
             {
-              "summary": "Create a links library item",
-              "value": {
-                "title": "Important Resources",
-                "description": "A collection of important links",
-                "links": [
-                  {
-                    "label": "Overview",
-                    "type": "dashboardLink",
-                    "destination": "dashboard-abc-123"
-                  },
-                  {
-                    "label": "Elastic Documentation",
-                    "type": "externalLink",
-                    "destination": "https://www.elastic.co/docs"
-                  }
-                ],
-                "layout": "horizontal"
-              }
+              "title": "Important Resources",
+              "description": "A collection of important links",
+              "links": [
+                {
+                  "label": "Overview",
+                  "type": "dashboardLink",
+                  "destination": "dashboard-abc-123"
+                },
+                {
+                  "label": "Elastic Documentation",
+                  "type": "externalLink",
+                  "destination": "https://www.elastic.co/docs"
+                }
+              ],
+              "layout": "horizontal"
             }
       x-state: Experimental; added in 9.6.0
       x-metaTags:
@@ -138420,7 +138417,7 @@ paths:
           schema:
             maxLength: 1024
             type: string
-        - description: If `true`, store the `namespace` as sent. Otherwise, a `default` namespace is replaced with one derived from the space ID.
+        - description: If `true`, store the `namespace` exactly as sent, skipping the space-derived fallback. If `false` or omitted, an explicit `namespace` is still stored as sent; only an omitted `namespace` is derived from the space ID.
           in: query
           name: preserve_namespace
           required: false
@@ -141062,7 +141059,7 @@ paths:
                     title: Escalated case review
                     version: WzE1LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '405':
           content:
@@ -141158,7 +141155,7 @@ paths:
                     title: Malware containment
                     version: WzE0LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '405':
           content:
@@ -141235,7 +141232,7 @@ paths:
                     title: Copy of investigation
                     version: WzE1LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
       summary: Copies timeline or timeline template
       tags:
@@ -141275,7 +141272,7 @@ paths:
                     title: ''
                     version: WzE0LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '403':
           content:
@@ -141362,7 +141359,7 @@ paths:
                     title: ''
                     version: WzE0LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '403':
           content:
@@ -163443,85 +163440,87 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
-              - additionalProperties: false
-                type: object
-                properties:
-                  alignment:
-                    default: right
-                    description: Alignment of the columns.
-                    enum:
-                      - left
-                      - center
-                      - right
-                    type: string
-                  apply_color_to:
-                    anyOf:
-                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
-                        enum:
-                          - value
-                          - background
-                        type: string
-                      - enum:
-                          - badge
-                        type: string
-                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
-                  color:
-                    anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
-                    description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
-                  summary:
-                    additionalProperties: false
-                    description: Summary row configuration
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricFormula'
+              - discriminator:
+                  propertyName: apply_color_to
+                oneOf:
+                  - additionalProperties: false
                     type: object
                     properties:
-                      label:
-                        description: Summary row label.
+                      alignment:
+                        default: right
+                        description: Alignment of the columns.
+                        enum:
+                          - left
+                          - center
+                          - right
                         type: string
-                      type:
+                      apply_color_to:
                         anyOf:
-                          - enum:
-                              - sum
+                          - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                            enum:
+                              - value
+                              - background
                             type: string
                           - enum:
-                              - avg
+                              - badge
                             type: string
-                          - enum:
-                              - count
+                        description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
+                      color:
+                        anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
+                      summary:
+                        additionalProperties: false
+                        description: Summary row configuration
+                        type: object
+                        properties:
+                          label:
+                            description: Summary row label.
                             type: string
-                          - enum:
-                              - min
-                            type: string
-                          - enum:
-                              - max
-                            type: string
-                        description: Type of summary function to apply to the column.
-                    required:
-                      - type
-                  visible:
-                    default: true
-                    description: When `false`, hides the column from the datatable.
-                    type: boolean
-                  width:
-                    description: Column width in pixels.
-                    minimum: 0
-                    type: number
+                          type:
+                            anyOf:
+                              - enum:
+                                  - sum
+                                type: string
+                              - enum:
+                                  - avg
+                                type: string
+                              - enum:
+                                  - count
+                                type: string
+                              - enum:
+                                  - min
+                                type: string
+                              - enum:
+                                  - max
+                                type: string
+                            description: Type of summary function to apply to the column.
+                        required:
+                          - type
+                      visible:
+                        default: true
+                        description: When `false`, hides the column from the datatable.
+                        type: boolean
+                      width:
+                        description: Column width in pixels.
+                        minimum: 0
+                        type: number
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBar'
           maxItems: 1000
           minItems: 1
           type: array
@@ -163532,11 +163531,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowFilters'
               - additionalProperties: false
                 type: object
                 properties:
@@ -163569,8 +163568,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
                   visible:
                     default: true
                     description: When `false`, hides the column from the datatable.
@@ -166092,14 +166090,14 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricPercentileRanks'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -166148,8 +166146,7 @@ components:
                         - enum:
                             - bands
                           type: string
-                      default: bands
-                      description: Tick placement mode.
+                      description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                     visible:
                       default: true
                       description: When `true`, displays tick marks on the gauge.
@@ -167176,19 +167173,19 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricPercentileRanks'
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricDifferences'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricMovingAverage'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCumulativeSum'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCounterRate'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -169139,7 +169136,7 @@ components:
             - enum:
                 - default
               type: string
-          description: Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit).
+          description: Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit). Requests authenticated with an API key can't set `write_restricted`, because an API key doesn't map to a user. To set it, authenticate as a user.
       title: Access control
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-data:
@@ -173289,14 +173286,14 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricPercentileRanks'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -173312,9 +173309,7 @@ components:
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyColorByValueAbsolute'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                  default:
-                    type: auto
-                  description: Color configuration based on the metric value.
+                  description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
                 labels:
                   additionalProperties: false
                   description: Labels configuration
@@ -174337,11 +174332,11 @@ components:
         breakdown_by:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -174376,19 +174371,19 @@ components:
               - allOf:
                   - anyOf:
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryUniqueCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryStatsMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimarySumMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryLastValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryPercentile'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryPercentileRanks'
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryDifferences'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryMovingAverage'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCumulativeSum'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCounterRate'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryFormula'
                   - type: object
                     properties:
                       apply_color_to:
@@ -174419,19 +174414,19 @@ components:
               - allOf:
                   - anyOf:
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryUniqueCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryStatsMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondarySumMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryLastValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryPercentile'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryPercentileRanks'
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryDifferences'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryMovingAverage'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCumulativeSum'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCounterRate'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryFormula'
                   - type: object
                     properties:
                       color:
@@ -176862,11 +176857,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -176879,11 +176874,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByFilters'
               - additionalProperties: false
                 type: object
                 properties:
@@ -176903,19 +176898,19 @@ components:
         metric:
           anyOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricPercentileRanks'
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricDifferences'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricMovingAverage'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCumulativeSum'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCounterRate'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricFormula'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
         sampling:
@@ -177156,7 +177151,7 @@ components:
         overrides:
           additionalProperties:
             nullable: true
-          description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
+          description: Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
           nullable: true
           type: object
         package_agent_version_conditions:
@@ -181845,11 +181840,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -181871,27 +181866,26 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricFormula'
               - type: object
                 properties:
                   color:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -182088,11 +182082,11 @@ components:
         region:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -185074,19 +185068,19 @@ components:
         metric:
           anyOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricPercentileRanks'
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricDifferences'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricMovingAverage'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCumulativeSum'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCounterRate'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricFormula'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
         sampling:
@@ -185100,16 +185094,20 @@ components:
         tag_by:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagFilters'
             - additionalProperties: false
               type: object
               properties:
                 color:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                  default:
+                    mapping: []
+                    mode: categorical
+                    palette: default
         tags:
           default: []
           description: Tag IDs to associate with this visualization.
@@ -185534,11 +185532,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -185560,27 +185558,26 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricFormula'
               - type: object
                 properties:
                   color:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -185826,7 +185823,7 @@ components:
         overrides:
           additionalProperties:
             nullable: true
-          description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
+          description: Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
           nullable: true
           type: object
         package_agent_version_conditions:
@@ -187285,7 +187282,7 @@ components:
     Kibana_HTTP_APIs_visApiConfig:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricChart'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricChart'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyChart'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeChart'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapChart'
@@ -187848,10 +187845,6 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCategoricalColorMapping'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGradientColorMapping'
-      default:
-        mapping: []
-        mode: categorical
-        palette: default
       description: Color mapping for dimension values, either categorical (for specific values) or as a gradient.
       title: Color Mapping
     Kibana_HTTP_APIs_visCounterRateOperation:
@@ -188054,66 +188047,72 @@ components:
         metrics:
           description: Array of metrics to display as columns in the datatable
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetric'
+            discriminator:
+              propertyName: apply_color_to
+            oneOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetric'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBar'
           maxItems: 1000
           minItems: 1
           type: array
         rows:
           description: Array of operations to split the datatable rows by
           items:
-            type: object
-            properties:
-              alignment:
-                default: left
-                description: Alignment of the rows.
-                enum:
-                  - left
-                  - center
-                  - right
-                type: string
-              apply_color_to:
-                anyOf:
-                  - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+            discriminator:
+              propertyName: apply_color_to
+            oneOf:
+              - type: object
+                properties:
+                  alignment:
+                    default: left
+                    description: Alignment of the rows.
                     enum:
-                      - value
-                      - background
+                      - left
+                      - center
+                      - right
                     type: string
-                  - enum:
-                      - badge
+                  apply_color_to:
+                    anyOf:
+                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                        enum:
+                          - value
+                          - background
+                        type: string
+                      - enum:
+                          - badge
+                        type: string
+                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
+                  click_filter:
+                    default: false
+                    description: When `true`, enables one-click filtering on cell values.
+                    type: boolean
+                  collapse_by:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+                  color:
+                    anyOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                    description: Color configuration for ES|QL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
+                  column:
+                    description: Column to use
                     type: string
-                description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
-              click_filter:
-                default: false
-                description: When `true`, enables one-click filtering on cell values.
-                type: boolean
-              collapse_by:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
-              color:
-                anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
-                description: Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
-              column:
-                description: Column to use
-                type: string
-              format:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
-              label:
-                description: Label for the operation
-                type: string
-              visible:
-                default: true
-                description: When `false`, hides the column from the datatable.
-                type: boolean
-              width:
-                description: Column width in pixels.
-                minimum: 0
-                type: number
-            required:
-              - column
+                  format:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+                  label:
+                    description: Label for the operation
+                    type: string
+                  visible:
+                    default: true
+                    description: When `false`, hides the column from the datatable.
+                    type: boolean
+                  width:
+                    description: Column width in pixels.
+                    minimum: 0
+                    type: number
+                required:
+                  - column
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBar'
           maxItems: 50
           minItems: 1
           type: array
@@ -188182,9 +188181,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-          default:
-            type: auto
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         column:
           description: Column to use
           type: string
@@ -188232,6 +188229,458 @@ components:
       required:
         - column
       title: Datatable Metric (ES|QL)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBar:
+      discriminator:
+        mapping:
+          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle'
+          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid'
+        propertyName: fill_mode
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarGradient'
+      title: Datatable metric progress bar (ES|QL)
+      x-state: Added in 9.6.1
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarGradient:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          default: gradient
+          description: Displays the palette across the bar's full range. Shorter bars reveal only the portion of the palette up to their length, rather than stretching the gradient to fit the bar.
+          enum:
+            - gradient
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+      title: Datatable metric progress bar (ES|QL) (gradient fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+          default:
+            type: auto
+          description: Bar color.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar with one fixed color.
+          enum:
+            - single
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (ES|QL) (single fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar using the palette color corresponding to the value's position within the palette scale.
+          enum:
+            - solid
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (ES|QL) (solid fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBar:
+      discriminator:
+        mapping:
+          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle'
+          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid'
+        propertyName: fill_mode
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarGradient'
+      title: Datatable row progress bar (ES|QL)
+      x-state: Added in 9.6.1
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBarGradient:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        click_filter:
+          default: false
+          description: When `true`, enables one-click filtering on cell values.
+          type: boolean
+        collapse_by:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          default: gradient
+          description: Displays the palette across the bar's full range. Shorter bars reveal only the portion of the palette up to their length, rather than stretching the gradient to fit the bar.
+          enum:
+            - gradient
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+      title: Datatable row progress bar (ES|QL) (gradient fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        click_filter:
+          default: false
+          description: When `true`, enables one-click filtering on cell values.
+          type: boolean
+        collapse_by:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+          default:
+            type: auto
+          description: Bar color.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar with one fixed color.
+          enum:
+            - single
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable row progress bar (ES|QL) (single fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        click_filter:
+          default: false
+          description: When `true`, enables one-click filtering on cell values.
+          type: boolean
+        collapse_by:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visCollapseBy'
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        column:
+          description: Column to use
+          type: string
+        fill_mode:
+          description: Fills the bar using the palette color corresponding to the value's position within the palette scale.
+          enum:
+            - solid
+          type: string
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+        label:
+          description: Label for the operation
+          type: string
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - column
+        - apply_color_to
+        - fill_mode
+      title: Datatable row progress bar (ES|QL) (solid fill)
       type: object
     Kibana_HTTP_APIs_visDatatableMetricCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
@@ -188285,85 +188734,87 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
-              - additionalProperties: false
-                type: object
-                properties:
-                  alignment:
-                    default: right
-                    description: Alignment of the columns.
-                    enum:
-                      - left
-                      - center
-                      - right
-                    type: string
-                  apply_color_to:
-                    anyOf:
-                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
-                        enum:
-                          - value
-                          - background
-                        type: string
-                      - enum:
-                          - badge
-                        type: string
-                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
-                  color:
-                    anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
-                    description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
-                  summary:
-                    additionalProperties: false
-                    description: Summary row configuration
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricFormula'
+              - discriminator:
+                  propertyName: apply_color_to
+                oneOf:
+                  - additionalProperties: false
                     type: object
                     properties:
-                      label:
-                        description: Summary row label.
+                      alignment:
+                        default: right
+                        description: Alignment of the columns.
+                        enum:
+                          - left
+                          - center
+                          - right
                         type: string
-                      type:
+                      apply_color_to:
                         anyOf:
-                          - enum:
-                              - sum
+                          - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                            enum:
+                              - value
+                              - background
                             type: string
                           - enum:
-                              - avg
+                              - badge
                             type: string
-                          - enum:
-                              - count
+                        description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
+                      color:
+                        anyOf:
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
+                      summary:
+                        additionalProperties: false
+                        description: Summary row configuration
+                        type: object
+                        properties:
+                          label:
+                            description: Summary row label.
                             type: string
-                          - enum:
-                              - min
-                            type: string
-                          - enum:
-                              - max
-                            type: string
-                        description: Type of summary function to apply to the column.
-                    required:
-                      - type
-                  visible:
-                    default: true
-                    description: When `false`, hides the column from the datatable.
-                    type: boolean
-                  width:
-                    description: Column width in pixels.
-                    minimum: 0
-                    type: number
+                          type:
+                            anyOf:
+                              - enum:
+                                  - sum
+                                type: string
+                              - enum:
+                                  - avg
+                                type: string
+                              - enum:
+                                  - count
+                                type: string
+                              - enum:
+                                  - min
+                                type: string
+                              - enum:
+                                  - max
+                                type: string
+                            description: Type of summary function to apply to the column.
+                        required:
+                          - type
+                      visible:
+                        default: true
+                        description: When `false`, hides the column from the datatable.
+                        type: boolean
+                      width:
+                        description: Column width in pixels.
+                        minimum: 0
+                        type: number
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBar'
           maxItems: 1000
           minItems: 1
           type: array
@@ -188374,11 +188825,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowFilters'
               - additionalProperties: false
                 type: object
                 properties:
@@ -188411,8 +188862,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
                   visible:
                     default: true
                     description: When `false`, hides the column from the datatable.
@@ -188459,6 +188909,272 @@ components:
         - metrics
       title: Datatable (DSL)
       type: object
+    Kibana_HTTP_APIs_visDatatableProgressBar:
+      discriminator:
+        mapping:
+          single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSingle'
+          solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSolid'
+        propertyName: fill_mode
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSingle'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSolid'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarGradient'
+      title: Datatable metric progress bar
+      x-state: Added in 9.6.1
+    Kibana_HTTP_APIs_visDatatableProgressBarGradient:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        fill_mode:
+          default: gradient
+          description: Displays the palette across the bar's full range. Shorter bars reveal only the portion of the palette up to their length, rather than stretching the gradient to fit the bar.
+          enum:
+            - gradient
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - apply_color_to
+      title: Datatable metric progress bar (gradient fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableProgressBarSingle:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+          default:
+            type: auto
+          description: Bar color.
+        fill_mode:
+          description: Fills the bar with one fixed color.
+          enum:
+            - single
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (single fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableProgressBarSolid:
+      additionalProperties: false
+      properties:
+        alignment:
+          default: right
+          description: Label alignment relative to the progress bar.
+          enum:
+            - left
+            - right
+          type: string
+        apply_color_to:
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
+          enum:
+            - progress_bar
+          type: string
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePercentage'
+          default:
+            type: auto
+          description: Palette the bar takes its colors from.
+        fill_mode:
+          description: Fills the bar using the palette color corresponding to the value's position within the palette scale.
+          enum:
+            - solid
+          type: string
+        summary:
+          additionalProperties: false
+          description: Summary row configuration
+          type: object
+          properties:
+            label:
+              description: Summary row label.
+              type: string
+            type:
+              anyOf:
+                - enum:
+                    - sum
+                  type: string
+                - enum:
+                    - avg
+                  type: string
+                - enum:
+                    - count
+                  type: string
+                - enum:
+                    - min
+                  type: string
+                - enum:
+                    - max
+                  type: string
+              description: Type of summary function to apply to the column.
+          required:
+            - type
+        value_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarValueRange'
+          default:
+            type: auto
+        visible:
+          default: true
+          description: When `false`, hides the column from the datatable.
+          type: boolean
+        width:
+          description: Column width in pixels.
+          minimum: 0
+          type: number
+      required:
+        - apply_color_to
+        - fill_mode
+      title: Datatable metric progress bar (solid fill)
+      type: object
+    Kibana_HTTP_APIs_visDatatableProgressBarValueRange:
+      description: The numeric span the progress bar represents
+      discriminator:
+        propertyName: type
+      oneOf:
+        - additionalProperties: false
+          description: The bar spans the minimum to the maximum of the loaded values.
+          type: object
+          properties:
+            type:
+              enum:
+                - auto
+              type: string
+          required:
+            - type
+        - additionalProperties: false
+          description: Custom explicit bounds.
+          type: object
+          properties:
+            max:
+              description: Value at which the bar is full.
+              type: number
+            min:
+              description: Value at which the bar is empty.
+              type: number
+            type:
+              enum:
+                - custom
+              type: string
+          required:
+            - type
+            - min
+            - max
+      title: Datatable progress bar value range
     Kibana_HTTP_APIs_visDatatableRowDateHistogram:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
     Kibana_HTTP_APIs_visDatatableRowFilters:
@@ -188876,8 +189592,7 @@ components:
                     - enum:
                         - bands
                       type: string
-                  default: bands
-                  description: Tick placement mode.
+                  description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                 visible:
                   default: true
                   description: When `true`, displays tick marks on the gauge.
@@ -188959,14 +189674,14 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricPercentileRanks'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -189015,8 +189730,7 @@ components:
                         - enum:
                             - bands
                           type: string
-                      default: bands
-                      description: Tick placement mode.
+                      description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                     visible:
                       default: true
                       description: When `true`, displays tick marks on the gauge.
@@ -189353,19 +190067,19 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricPercentileRanks'
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricDifferences'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricMovingAverage'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCumulativeSum'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCounterRate'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -189723,14 +190437,14 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricPercentileRanks'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -189746,9 +190460,7 @@ components:
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyColorByValueAbsolute'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                  default:
-                    type: auto
-                  description: Color configuration based on the metric value.
+                  description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
                 labels:
                   additionalProperties: false
                   description: Labels configuration
@@ -190218,11 +190930,11 @@ components:
         breakdown_by:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -190257,19 +190969,19 @@ components:
               - allOf:
                   - anyOf:
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryUniqueCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryStatsMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimarySumMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryLastValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryPercentile'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryPercentileRanks'
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryDifferences'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryMovingAverage'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCumulativeSum'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCounterRate'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryFormula'
                   - type: object
                     properties:
                       apply_color_to:
@@ -190300,19 +191012,19 @@ components:
               - allOf:
                   - anyOf:
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryUniqueCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryStatsMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondarySumMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryLastValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryPercentile'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryPercentileRanks'
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryDifferences'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryMovingAverage'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCumulativeSum'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCounterRate'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryFormula'
                   - type: object
                     properties:
                       color:
@@ -190480,8 +191192,7 @@ components:
               type: object
               properties:
                 placement:
-                  default: before
-                  description: 'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Ignored when the label is not visible.'
+                  description: 'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Defaults to `before`. Ignored when the label is not visible.'
                   enum:
                     - before
                     - after
@@ -190734,11 +191445,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -190751,11 +191462,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByFilters'
               - additionalProperties: false
                 type: object
                 properties:
@@ -190775,19 +191486,19 @@ components:
         metric:
           anyOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricPercentileRanks'
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricDifferences'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricMovingAverage'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCumulativeSum'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCounterRate'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricFormula'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
         sampling:
@@ -191070,8 +191781,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -191191,11 +191901,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -191217,27 +191927,26 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricFormula'
               - type: object
                 properties:
                   color:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -191493,11 +192202,11 @@ components:
         region:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -191676,6 +192385,10 @@ components:
           properties:
             color:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+              default:
+                mapping: []
+                mode: categorical
+                palette: default
             column:
               description: Column to use
               type: string
@@ -191749,19 +192462,19 @@ components:
         metric:
           anyOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricPercentileRanks'
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricDifferences'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricMovingAverage'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCumulativeSum'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCounterRate'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricFormula'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
         sampling:
@@ -191775,16 +192488,20 @@ components:
         tag_by:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagFilters'
             - additionalProperties: false
               type: object
               properties:
                 color:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                  default:
+                    mapping: []
+                    mode: categorical
+                    palette: default
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -191939,7 +192656,7 @@ components:
       description: Terms ranked alphabetically.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByAlphabeticalDirection'
         type:
           enum:
             - alphabetical
@@ -191957,7 +192674,7 @@ components:
       description: Terms ranked by count, either of all documents or of a specific field.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomDirection'
         field:
           description: Numeric field to be used for the custom operation.
           type: string
@@ -191983,7 +192700,7 @@ components:
       description: Terms ranked by the last value of a field.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomDirection'
         field:
           description: Numeric field to be used for the custom operation.
           type: string
@@ -192011,7 +192728,7 @@ components:
       description: Terms ranked by custom operation.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomDirection'
         field:
           description: Numeric field to be used for the custom operation.
           type: string
@@ -192041,7 +192758,7 @@ components:
       description: Terms ranked by a linked metric.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByMetricDirection'
         metric_index:
           default: 0
           description: Zero-based index into the metrics array identifying which metric to rank by.
@@ -192064,7 +192781,7 @@ components:
       description: Terms ranked by a percentile of a numeric field, for example the 95th percentile of response time.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomDirection'
         field:
           description: Numeric field to be used for the custom operation.
           type: string
@@ -192092,7 +192809,7 @@ components:
       description: 'Terms ranked by the percentile rank of a single value: the proportion of field values at or below that value.'
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomDirection'
         field:
           description: Numeric field to be used for the custom operation.
           type: string
@@ -192197,8 +192914,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -192318,11 +193034,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -192344,27 +193060,26 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricFormula'
               - type: object
                 properties:
                   color:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -192521,8 +193236,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -192647,11 +193361,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -192673,27 +193387,26 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricFormula'
               - type: object
                 properties:
                   color:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -193331,8 +194044,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
               column:
                 description: Column to use
                 type: string
@@ -193358,11 +194070,11 @@ components:
         breakdown_by:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyBreakdownDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyBreakdownTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyBreakdownHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyBreakdownRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyBreakdownFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -193427,30 +194139,30 @@ components:
           description: Chart type for the data layer
         x:
           anyOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyXDateHistogram'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyXTerms'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyXHistogram'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyXRanges'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyXFilters'
         'y':
           description: Array of metrics to display on Y-axis
           items:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYFormula'
               - type: object
                 properties:
                   axis:
@@ -193467,8 +194179,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
           maxItems: 100
           type: array
       required:
@@ -194048,15 +194759,15 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticOperationDefinition'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLinePercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLinePercentileRanks'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineStatic'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineFormula'
               - type: object
                 properties:
                   axis:
@@ -194367,11 +195078,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -194393,27 +195104,26 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricFormula'
               - type: object
                 properties:
                   color:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -199771,7 +200481,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -199875,7 +200585,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -200243,7 +200953,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -200372,7 +201082,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -200915,7 +201625,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -201035,7 +201745,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -201513,7 +202223,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -201642,7 +202352,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -202160,7 +202870,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -202283,7 +202993,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -202498,7 +203208,7 @@ components:
         execution_summary:
           $ref: '#/components/schemas/Security_Detections_API_RuleExecutionSummary'
         id:
-          $ref: '#/components/schemas/Security_Detections_API_UUID'
+          $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         immutable:
           $ref: '#/components/schemas/Security_Detections_API_IsRuleImmutable'
         required_fields:
@@ -203415,7 +204125,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -203538,7 +204248,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -204219,7 +204929,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -204351,7 +205061,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -204821,7 +205531,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -204947,7 +205657,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -206376,12 +207086,22 @@ components:
                   example: true
                   type: boolean
                 path:
-                  description: The full file path to retrieve from the endpoint.
+                  description: The full file path to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both.
                   maxLength: 4096
                   minLength: 1
                   type: string
-              required:
-                - path
+                paths:
+                  description: The list of file paths to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.
+                  example:
+                    - /var/log/syslog
+                    - /var/log/auth.log
+                  items:
+                    maxLength: 4096
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  minItems: 1
+                  type: array
           required:
             - parameters
     Security_Endpoint_Management_API_GetProcessesRouteRequestBody:
@@ -210592,23 +211312,23 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         enabled:
           $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         result_type:
           $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_CopyPacksResponse:
       description: The response for copying a pack.
       example:
@@ -210648,11 +211368,11 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
-              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+              $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
             min_osquery_version:
               $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
@@ -210660,14 +211380,14 @@ components:
             platform:
               $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               description: 'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.'
               items:
                 type: object
                 properties:
                   ecs_mapping:
-                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArray'
+                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArrayOrUndefined'
                   enabled:
                     $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
                   id:
@@ -210683,9 +211403,9 @@ components:
                   result_type:
                     $ref: '#/components/schemas/Security_Osquery_API_ResultType'
                   rrule_schedule:
-                    $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+                    $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
                   schedule_type:
-                    $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+                    $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
                   snapshot:
                     type: boolean
                   timeout:
@@ -210696,12 +211416,12 @@ components:
             result_type:
               $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
-              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the copied pack.
               type: string
             schedule_type:
-              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
             shards:
               description: Shard configuration as an array of key-value pairs.
               items:
@@ -210762,9 +211482,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -210772,15 +211492,15 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               type: integer
             updated_at:
@@ -210834,7 +211554,7 @@ components:
             type: string
           type: array
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         event_ids:
           description: A list of event IDs associated with the live query.
           items:
@@ -210845,13 +211565,13 @@ components:
           nullable: true
           type: object
         pack_id:
-          $ref: '#/components/schemas/Security_Osquery_API_PackId'
+          $ref: '#/components/schemas/Security_Osquery_API_PackIdOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ArrayQueries'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
     Security_Osquery_API_CreateLiveQueryResponse:
       description: The response for creating a live query.
       example:
@@ -210942,7 +211662,7 @@ components:
                       type: string
                     type: array
                   ecs_mapping:
-                    $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
                   id:
                     type: string
                   platform:
@@ -210992,9 +211712,9 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
         min_osquery_version:
@@ -211004,7 +211724,7 @@ components:
         platform:
           $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueriesInput'
         result_type:
@@ -211060,9 +211780,9 @@ components:
               description: The profile UID of the user who created the pack.
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
               $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
             min_osquery_version:
@@ -211072,7 +211792,7 @@ components:
             platform:
               $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
             result_type:
@@ -211128,23 +211848,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_Interval'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_CreateSavedQueryResponse:
       description: The response for creating a saved query.
       example:
@@ -211179,9 +211899,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -211190,19 +211910,19 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             prebuilt:
               description: Whether the saved query is prebuilt.
               type: boolean
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               description: The saved object ID of the saved query.
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               description: The query timeout in seconds.
               type: integer
@@ -211475,7 +212195,7 @@ components:
                     description: Number of result documents.
                     type: integer
                   ecs_mapping:
-                    $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
                   failed:
                     description: Number of failed queries.
                     type: integer
@@ -211580,7 +212300,7 @@ components:
                                 type: string
                               type: array
                             ecs_mapping:
-                              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
                             id:
                               type: string
                             query:
@@ -211647,11 +212367,11 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
-              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+              $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
             min_osquery_version:
               $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
@@ -211664,7 +212384,7 @@ components:
             platform:
               $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
             read_only:
@@ -211673,12 +212393,12 @@ components:
             result_type:
               $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
-              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
             schedule_type:
-              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
             shards:
               $ref: '#/components/schemas/Security_Osquery_API_Shards'
             type:
@@ -211743,11 +212463,11 @@ components:
               created_by_profile_uid:
                 type: string
               description:
-                $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+                $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
               enabled:
-                $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+                $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
               interval:
-                $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+                $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
               min_osquery_version:
                 $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
               name:
@@ -211755,14 +212475,14 @@ components:
               platform:
                 $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
               policy_ids:
-                $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+                $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
               queries:
                 description: 'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.'
                 items:
                   type: object
                   properties:
                     ecs_mapping:
-                      $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArray'
+                      $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArrayOrUndefined'
                     enabled:
                       $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
                     id:
@@ -211778,9 +212498,9 @@ components:
                     result_type:
                       $ref: '#/components/schemas/Security_Osquery_API_ResultType'
                     rrule_schedule:
-                      $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+                      $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
                     schedule_type:
-                      $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+                      $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
                     snapshot:
                       type: boolean
                     timeout:
@@ -211794,12 +212514,12 @@ components:
               result_type:
                 $ref: '#/components/schemas/Security_Osquery_API_ResultType'
               rrule_schedule:
-                $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+                $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
               saved_object_id:
                 description: The saved object ID of the pack.
                 type: string
               schedule_type:
-                $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+                $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
               updated_at:
                 format: date-time
                 type: string
@@ -211862,9 +212582,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -211872,17 +212592,17 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             prebuilt:
               type: boolean
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               type: integer
             updated_at:
@@ -211942,9 +212662,9 @@ components:
               created_by_profile_uid:
                 type: string
               description:
-                $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+                $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
               ecs_mapping:
-                $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
               id:
                 $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
               interval:
@@ -211952,17 +212672,17 @@ components:
                   - type: integer
                   - type: string
               platform:
-                $ref: '#/components/schemas/Security_Osquery_API_Platform'
+                $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
               prebuilt:
                 type: boolean
               query:
                 $ref: '#/components/schemas/Security_Osquery_API_Query'
               removed:
-                $ref: '#/components/schemas/Security_Osquery_API_Removed'
+                $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
               saved_object_id:
                 type: string
               snapshot:
-                $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+                $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
               timeout:
                 type: integer
               updated_at:
@@ -212259,7 +212979,7 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         enabled:
           $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
         id:
@@ -212270,28 +212990,28 @@ components:
           nullable: true
           type: integer
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         result_type:
           $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         rrule_schedule:
-          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
         schedule_type:
-          $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+          $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_ObjectQueriesItemInput:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         enabled:
           $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
         id:
@@ -212302,23 +213022,23 @@ components:
           nullable: true
           type: integer
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         result_type:
           $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         rrule_schedule:
-          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
         schedule_type:
-          $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+          $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_PackQueryVersionInput'
+          $ref: '#/components/schemas/Security_Osquery_API_PackQueryVersionInputOrUndefined'
     Security_Osquery_API_PackDescription:
       description: The pack description.
       example: Pack description
@@ -212662,27 +213382,27 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
         interval:
-          $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+          $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
         min_osquery_version:
-          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersionInput'
+          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersionInputOrUndefined'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
+          $ref: '#/components/schemas/Security_Osquery_API_PackPlatformOrUndefined'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueriesInput'
         result_type:
-          $ref: '#/components/schemas/Security_Osquery_API_ResultType'
+          $ref: '#/components/schemas/Security_Osquery_API_ResultTypeOrUndefined'
         rrule_schedule:
-          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
         schedule_type:
-          $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+          $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
         shards:
           $ref: '#/components/schemas/Security_Osquery_API_Shards'
     Security_Osquery_API_UpdatePacksResponse:
@@ -212727,11 +213447,11 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
-              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+              $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
             min_osquery_version:
               $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
@@ -212739,18 +213459,18 @@ components:
             platform:
               $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
             result_type:
               $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
-              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
             schedule_type:
-              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
             shards:
               $ref: '#/components/schemas/Security_Osquery_API_Shards'
             updated_at:
@@ -212770,23 +213490,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
-          $ref: '#/components/schemas/Security_Osquery_API_Interval'
+          $ref: '#/components/schemas/Security_Osquery_API_IntervalOrUndefined'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_UpdateSavedQueryResponse:
       description: The response for updating a saved query.
       example:
@@ -212815,9 +213535,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -212825,17 +213545,17 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             prebuilt:
               type: boolean
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               type: integer
             updated_at:

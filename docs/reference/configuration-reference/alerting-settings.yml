@@ -253,6 +253,123 @@ groups:
           ech: ga
           self: ga
 
+      - setting: xpack.actions.inboundEvents.admission.enabled
+        description: |
+          When `true`, {{kib}} caps how many inbound event requests are in flight. When `false`, that cap is off. The per-minute rate limits stay in effect.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.actions.inboundEvents.admission.maxInFlight
+        description: |
+          Maximum inbound event requests in flight on this {{kib}} process. Allowed values are 1 to 100. A request over the cap returns HTTP 429 and the body is not read.
+        datatype: int
+        default: 50
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.actions.inboundEvents.admission.maxInFlightPerConnector
+        description: |
+          Maximum in-flight inbound event requests for one connector on this process. Allowed values are 1 to 100. The value must be less than or equal to `xpack.actions.inboundEvents.admission.maxInFlight`.
+        datatype: int
+        default: 10
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.actions.inboundEvents.rateLimit.enabled
+        description: |
+          When `true`, {{kib}} applies the failed-authentication and authenticated-request windows. When `false`, those windows are off. The in-flight cap stays in effect.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.actions.inboundEvents.rateLimit.maxKeys
+        description: |
+          Maximum number of keys in each rate-limit map on this process. Allowed values are 1 to 10000. Failed authentications and authenticated requests each have their own map, and this limit applies to each one, so the process can hold twice this many keys. A new key is rejected when its map is full and no key in that map has expired.
+        datatype: int
+        default: 10000
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.actions.inboundEvents.rateLimit.remoteAddress.limit
+        description: |
+          Failed inbound-event authentications allowed for one socket address and one connector during `xpack.actions.inboundEvents.rateLimit.remoteAddress.window`. Allowed values are 1 to 1500. The key includes the space, the connector type, and the connector ID, so one address has a separate allowance for each connector. A successful request does not count. {{kib}} uses the socket address and does not read `X-Forwarded-For`.
+        datatype: int
+        default: 10
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.actions.inboundEvents.rateLimit.remoteAddress.window
+        description: |
+          Length of the failed-authentication window for one socket address and connector. The time is a positive integer and a unit (`s`, `m`, `h`, or `d`). For example, `30s`, `5m`, `1h`, or `1d`.
+        datatype: string
+        default: 1m
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.actions.inboundEvents.rateLimit.connector.limit
+        description: |
+          Authenticated inbound event requests allowed for one connector during `xpack.actions.inboundEvents.rateLimit.connector.window`. Allowed values are 1 to 1500. A request over the limit returns HTTP 429 for that connector only.
+        datatype: int
+        default: 300
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.actions.inboundEvents.rateLimit.connector.window
+        description: |
+          Length of the authenticated-request window for one connector. The time is a positive integer and a unit (`s`, `m`, `h`, or `d`). For example, `30s`, `5m`, `1h`, or `1d`.
+        datatype: string
+        default: 1m
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
       - setting: xpack.actions.microsoftExchangeUrl
         description: |
           The URL for the Microsoft Azure Active Directory endpoint to use for MS Exchange email authentication.
