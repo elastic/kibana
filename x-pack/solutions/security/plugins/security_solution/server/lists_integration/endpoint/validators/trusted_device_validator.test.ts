@@ -240,6 +240,12 @@ describe('Endpoint Trusted Device API validations', () => {
         trustedDeviceValidator.validatePreCreateItem(buildItem(['a'.repeat(4097)]))
       ).rejects.toThrow(/maximum length of \[4096\]/);
     });
+
+    it('rejects a null character on create', async () => {
+      await expect(
+        trustedDeviceValidator.validatePreCreateItem(buildItem('DESKTOP\u0000-1'))
+      ).rejects.toThrow(/null characters in fields: host\.name/);
+    });
   });
 
   it('should initialize', () => {
