@@ -60486,7 +60486,6 @@
     "xpack.securitySolution.headerPage.pageSubtitle": "Letztes Ereignis: {beat}",
     "xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage": "{fieldOrValue} zur Zeitleiste hinzugefügt",
     "xpack.securitySolution.hooks.useAddToTimeline.template.addedFieldMessage": "{fieldOrValue} zur Zeitleistenvorlage hinzugefügt",
-    "xpack.securitySolution.hooks.useGetAIConnectors.fetchError": "Fehler beim Abrufen der KI-Connectors",
     "xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage": "Die gespeicherte Abfrage konnte nicht geladen werden",
     "xpack.securitySolution.host.details.architectureLabel": "Architektur",
     "xpack.securitySolution.host.details.endpoint.endpointPolicy": "Richtlinie zur Endpoint-Integration",
