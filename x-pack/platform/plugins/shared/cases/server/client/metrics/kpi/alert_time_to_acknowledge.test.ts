@@ -12,6 +12,7 @@ import type { AlertGeneratedTimes } from '../../../services/alerts';
 import { createAlertServiceMock } from '../../../services/mocks';
 import {
   aggregateAlertDurations,
+  aggregateDurationsByCase,
   buildAcknowledgeEventSearch,
   buildAlertAttachmentSearch,
   extractAcknowledgeEvents,
@@ -233,6 +234,29 @@ describe('alert time to acknowledge', () => {
 
     it('returns null with no durations', () => {
       expect(aggregateAlertDurations([], 'avg')).toBeNull();
+    });
+  });
+
+  describe('aggregateDurationsByCase', () => {
+    const durations = [
+      { caseId: 'a', duration: 10 },
+      { caseId: 'a', duration: 30 },
+      { caseId: 'b', duration: 100 },
+    ];
+
+    it('averages the case averages', () => {
+      expect(aggregateDurationsByCase(durations, 'avg')).toBe(60);
+      expect(aggregateAlertDurations([10, 30, 100], 'avg')).toBeCloseTo(46.67, 2);
+    });
+
+    it('takes the median of the case medians', () => {
+      expect(
+        aggregateDurationsByCase([...durations, { caseId: 'a', duration: 50 }], 'median')
+      ).toBe(65);
+    });
+
+    it('returns null with no duration', () => {
+      expect(aggregateDurationsByCase([], 'avg')).toBeNull();
     });
   });
 
@@ -672,6 +696,48 @@ describe('alert time to acknowledge', () => {
         1800, 600, 600, 600,
       ]);
       expect(reader.msearch).toHaveBeenCalledTimes(2);
+    });
+
+    it('counts each case once with aggregateBy case and each alert with aggregateBy alert or no value', async () => {
+      mockSearches({
+        attachments: [
+          searchResponse([
+            attachmentHit('ca', '2026-11-04T10:00:00.000Z', ['a1', 'a2']),
+            attachmentHit('cb', '2026-11-04T10:00:00.000Z', ['a3']),
+          ]),
+        ],
+        events: [
+          searchResponse([
+            eventHit('ca', '2026-11-04T10:00:30.000Z'),
+            eventHit('cb', '2026-11-04T10:02:00.000Z'),
+          ]),
+        ],
+      });
+      alertsService.getAlertGeneratedTimes.mockResolvedValue(
+        alerts({
+          a1: { start: '2026-11-04T10:00:20.000Z' },
+          a2: { start: '2026-11-04T10:00:00.000Z' },
+          a3: { start: '2026-11-04T10:00:20.000Z' },
+        })
+      );
+
+      const results = await runAlertTimeToAcknowledgeMetrics({
+        metrics: [
+          { ...avgMetric, id: 'by-case', aggregateBy: 'case' },
+          { ...avgMetric, id: 'by-alert', aggregateBy: 'alert' },
+          { ...avgMetric, id: 'none' },
+        ],
+        context,
+        reader,
+        alertsService,
+      });
+
+      // case ca has 10 s and 30 s (average 20 s), case cb has 100 s
+      expect(results.map((result) => ('value' in result ? result.value : undefined))).toEqual([
+        60,
+        (10 + 30 + 100) / 3,
+        (10 + 30 + 100) / 3,
+      ]);
     });
 
     it('runs no search with no metric', async () => {

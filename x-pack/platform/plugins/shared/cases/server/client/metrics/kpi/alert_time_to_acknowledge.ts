@@ -293,6 +293,33 @@ export const aggregateAlertDurations = (
   return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
 };
 
+export interface CaseDuration {
+  caseId: string;
+  duration: number;
+}
+
+/**
+ * Aggregates the durations of each case into one case value, then aggregates the case values.
+ * A case with no duration gives no case value.
+ */
+export const aggregateDurationsByCase = (
+  durations: readonly CaseDuration[],
+  aggregation: AlertDurationAggregation
+): number | null => {
+  const byCase = new Map<string, number[]>();
+
+  durations.forEach(({ caseId, duration }) => {
+    byCase.set(caseId, [...(byCase.get(caseId) ?? []), duration]);
+  });
+
+  const caseValues = Array.from(byCase.values()).flatMap((values) => {
+    const value = aggregateAlertDurations(values, aggregation);
+    return value != null ? [value] : [];
+  });
+
+  return aggregateAlertDurations(caseValues, aggregation);
+};
+
 const readTotalHits = ({ hits: { total } }: estypes.MsearchMultiSearchItem): number =>
   typeof total === 'number' ? total : total?.value ?? 0;
 
@@ -345,7 +372,7 @@ const readAcknowledgeEvents = async (
 const getPeriodDurations = (
   { pairs, alerts, events }: Extract<PeriodData, { type: 'data' }>,
   trigger?: KpiAcknowledgeTrigger
-): number[] =>
+): CaseDuration[] =>
   pairs.flatMap((pair) => {
     const duration = getAlertDurationSeconds(
       pair,
@@ -354,8 +381,23 @@ const getPeriodDurations = (
       trigger
     );
 
-    return duration != null ? [duration] : [];
+    return duration != null ? [{ caseId: pair.caseId, duration }] : [];
   });
+
+const getPeriodValue = (
+  data: Extract<PeriodData, { type: 'data' }>,
+  { acknowledgeTrigger, aggregateBy }: PredefinedKpiMetricConfiguration,
+  aggregation: AlertDurationAggregation
+): number | null => {
+  const durations = getPeriodDurations(data, acknowledgeTrigger);
+
+  return aggregateBy === 'case'
+    ? aggregateDurationsByCase(durations, aggregation)
+    : aggregateAlertDurations(
+        durations.map(({ duration }) => duration),
+        aggregation
+      );
+};
 
 const readPeriodData = async (
   response: estypes.MsearchResponseItem | undefined,
@@ -445,7 +487,9 @@ export const runAlertTimeToAcknowledgeMetrics = async ({
       : undefined,
   ]);
 
-  return metrics.map(({ id, predefinedId, acknowledgeTrigger }) => {
+  return metrics.map((metric) => {
+    const { id, predefinedId } = metric;
+
     if (current.type === 'error') {
       return toKpiMetricError(id, current.message);
     }
@@ -456,12 +500,10 @@ export const runAlertTimeToAcknowledgeMetrics = async ({
       id,
       type: 'value',
       format: 'duration',
-      value: aggregateAlertDurations(getPeriodDurations(current, acknowledgeTrigger), aggregation),
+      value: getPeriodValue(current, metric, aggregation),
       ...(previous != null && {
         previousValue:
-          previous.type === 'data'
-            ? aggregateAlertDurations(getPeriodDurations(previous, acknowledgeTrigger), aggregation)
-            : null,
+          previous.type === 'data' ? getPeriodValue(previous, metric, aggregation) : null,
       }),
     };
   });
