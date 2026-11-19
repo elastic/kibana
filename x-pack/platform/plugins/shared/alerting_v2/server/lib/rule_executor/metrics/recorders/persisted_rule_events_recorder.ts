@@ -67,12 +67,18 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
     let signalsCount = 0;
     const statusCounts = new Map<RuleExecutionCounter, number>();
     const persistedEpisodeIds = new Set<string>();
+
     for (const doc of persistedDocs) {
       if (doc.type === alertEventType.signal) {
         signalsCount += 1;
       }
+
       const statusCounter = EVENT_STATUS_COUNTER[doc.status];
-      statusCounts.set(statusCounter, (statusCounts.get(statusCounter) ?? 0) + 1);
+
+      if (statusCounter) {
+        statusCounts.set(statusCounter, (statusCounts.get(statusCounter) ?? 0) + 1);
+      }
+
       if (doc.alert) {
         persistedEpisodeIds.add(doc.alert.id);
       }

@@ -352,7 +352,7 @@ describe('ExecuteRuleQueryStep', () => {
     });
   });
 
-  it('emits rowsReturnedByQuery = 0 when the query returns no rows', async () => {
+  it('emits rowsReturnedByQuery = 0 and no query batch when the query returns no rows', async () => {
     mockEsClient.esql.query.mockResolvedValue(
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [])
     );
@@ -362,10 +362,11 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(result.type).toBe('continue');
 
+    // The synthetic empty batch keeps the pipeline moving but is not a query
+    // result, so queryBatchesProcessed is absent (defaults to 0 downstream).
     // @ts-expect-error: meta is present on the result
     expect(result.meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 0,
-      [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
     });
   });
 

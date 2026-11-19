@@ -133,6 +133,40 @@ describe('DirectorStep', () => {
     });
   });
 
+  it('counts each (episode, status) transition once across batches of the same run', async () => {
+    // An ungrouped rule can surface the same episode in several batches; with
+    // this run's writes not yet refreshed, the director recomputes the same
+    // transition each batch. The step must report it once.
+    const transition = {
+      groupHash: 'g1',
+      episodeId: 'e1',
+      previousStatus: 'inactive' as const,
+      status: 'active' as const,
+    };
+    const director = createStubDirector({
+      alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+      stats: { newEpisodeIds: [], statusTransitions: [transition] },
+      previousAlertStateByGroupHash: new Map(),
+    });
+    const step = new DirectorStep(director);
+
+    const batchState = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+    });
+
+    const [first, second] = await collectStreamResults(
+      step.executeStream(createPipelineStream([batchState, batchState]))
+    );
+
+    // @ts-expect-error: meta is present on the result
+    expect(first.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToActive]: 1,
+    });
+    // @ts-expect-error: meta is present on the result
+    expect(second.meta?.counters).toEqual({});
+  });
+
   it('does not emit a counter for transitions to pending', async () => {
     const director = createStubDirector({
       alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],

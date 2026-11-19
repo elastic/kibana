@@ -21,16 +21,31 @@ const TRANSITION_COUNTER: Partial<Record<AlertEpisodeStatus, RuleExecutionCounte
   [alertEpisodeStatus.inactive]: RULE_EXECUTION_COUNTERS.episodesTransitionedToInactive,
 };
 
-/** Counts the batch's episode transitions by destination status. */
-const countTransitions = (
-  transitions: readonly AlertStatusTransition[]
+/**
+ * Counts episode transitions by destination status, skipping any
+ * `(episodeId, status)` already counted this run.
+ *
+ * The director runs once per streamed query batch and this run's own writes
+ * are not refreshed between batches, so an ungrouped rule whose rows span
+ * several batches recomputes the same transition each time. `seen` dedupes
+ * those recomputations so one episode's transition is reported once per run.
+ */
+const countNewTransitions = (
+  transitions: readonly AlertStatusTransition[],
+  seen: Set<string>
 ): Partial<Record<RuleExecutionCounter, number>> => {
   const counters: Partial<Record<RuleExecutionCounter, number>> = {};
-  for (const { status } of transitions) {
+  for (const { episodeId, status } of transitions) {
     const counter = TRANSITION_COUNTER[status];
-    if (counter) {
-      counters[counter] = (counters[counter] ?? 0) + 1;
+    if (!counter) {
+      continue;
     }
+    const key = `${episodeId}:${status}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    counters[counter] = (counters[counter] ?? 0) + 1;
   }
   return counters;
 };
@@ -43,6 +58,7 @@ export class DirectorStep implements RuleExecutionStep {
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
+    const countedTransitions = new Set<string>();
 
     return guardedExpandStep(streamState, ['rule', 'alertEventsBatch'], async function* (state) {
       const { input, rule, alertEventsBatch } = state;
@@ -78,7 +94,7 @@ export class DirectorStep implements RuleExecutionStep {
           alertStatusTransitions: stats.statusTransitions,
           previousAlertStateByGroupHash,
         },
-        meta: { counters: countTransitions(stats.statusTransitions) },
+        meta: { counters: countNewTransitions(stats.statusTransitions, countedTransitions) },
       };
     });
   }

@@ -84,16 +84,33 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           format,
         });
 
+        // `withAtLeastOne` injects one empty batch when the query returns
+        // nothing so downstream recovery / no-data classification still runs.
+        // That synthetic batch is not a query result, so track how many batches
+        // the stream actually produced to keep it out of `queryBatchesProcessed`.
+        let queryBatches = 0;
+        const trackedStream = (async function* () {
+          for await (const batch of esqlRowBatchStream) {
+            queryBatches += 1;
+            yield batch;
+          }
+        })();
+
         let totalRows = 0;
         let loggedRowsDropped = false;
 
-        for await (const batch of withAtLeastOne<EsqlRowBatch>(esqlRowBatchStream, [])) {
+        for await (const batch of withAtLeastOne<EsqlRowBatch>(trackedStream, [])) {
           totalRows += batch.length;
 
           const counters: Partial<Record<RuleExecutionCounter, number>> = {
             [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
-            [RULE_EXECUTION_COUNTERS.queryBatchesProcessed]: 1,
           };
+
+          // Zero only for the synthetic fallback; every real batch bumps the
+          // counter before `withAtLeastOne` forwards it.
+          if (queryBatches > 0) {
+            counters[RULE_EXECUTION_COUNTERS.queryBatchesProcessed] = 1;
+          }
 
           if (!loggedRowsDropped && totalRows >= queryRowLimit) {
             loggedRowsDropped = true;
