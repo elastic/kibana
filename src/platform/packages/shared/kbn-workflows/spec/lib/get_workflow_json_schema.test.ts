@@ -9,8 +9,14 @@
 
 import { stringify } from 'yaml';
 import { isoDateTime, z } from '@kbn/zod/v4';
-import { getWorkflowJsonSchema } from './get_workflow_json_schema';
+import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_connectors';
+import {
+  getWorkflowJsonSchema,
+  guardStepUnionAlternativesByType,
+} from './get_workflow_json_schema';
 import { getValidateWithYamlLsp } from './test_utils/validate_with_yaml_lsp';
+import { getOrResolveObject } from '../../common/utils';
+import { getKibanaConnectors } from '../kibana';
 import { DataSetStepInputSchema, MaxIterationsSchema } from '../schema';
 
 describe('getWorkflowJsonSchema', () => {
@@ -94,6 +100,31 @@ describe('getWorkflowJsonSchema', () => {
         },
       },
     });
+  });
+});
+
+describe('guardStepUnionAlternativesByType', () => {
+  it('guards each step union alternative with an `if` on its `type` literal', () => {
+    const jsonSchema = getWorkflowJsonSchema(
+      generateYamlSchemaFromConnectors(getKibanaConnectors())
+    );
+    if (!jsonSchema) {
+      throw new Error('Expected a workflow JSON schema');
+    }
+    guardStepUnionAlternativesByType(jsonSchema);
+
+    const steps = jsonSchema.properties?.steps as z.core.JSONSchema.JSONSchema;
+    const stepUnion = getOrResolveObject<z.core.JSONSchema.JSONSchema>(steps.items, jsonSchema);
+    const alternatives = stepUnion?.oneOf ?? [];
+
+    expect(alternatives.length).toBeGreaterThan(1);
+    expect(alternatives).toEqual(
+      alternatives.map(() => ({
+        if: { properties: { type: { const: expect.any(String) } }, required: ['type'] },
+        then: expect.anything(),
+        else: false,
+      }))
+    );
   });
 });
 

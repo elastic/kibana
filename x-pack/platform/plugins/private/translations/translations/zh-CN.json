@@ -33579,7 +33579,6 @@
     "xpack.fleet.packagePolicyValidation.requiredErrorMessage": "“{fieldName}”必填",
     "xpack.fleet.packageUpload.datasetOwned": "已上传的软件包声明的数据集 \"{dataset}\" 已属于已安装的软件包 \"{packageName}\"。",
     "xpack.fleet.packageUpload.dataStreamLookupFailed": "无法验证已上传的软件包数据集 \"{dataset}\" 是否与现有 Elasticsearch 数据流不匹配。",
-    "xpack.fleet.packageUpload.existingDataStream": "数据集 \"{dataset}\" 已存在匹配的实时数据流 \"{dataStreamName}\"，在上传新软件包之前，必须先迁移或移除该数据流。",
     "xpack.fleet.packageUpload.forbiddenArchiveAsset": "已上传的软件包包含一个被禁止的资产：{path}",
     "xpack.fleet.packageUpload.invalidDataset": "已上传的软件包声明了无效的数据集 \"{dataset}\"。",
     "xpack.fleet.packageUpload.invalidDataStreamType": "已上传的软件包声明了无效的数据流类型 \"{type}\"：{reason}",
