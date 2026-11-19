@@ -6,6 +6,7 @@
  */
 
 import { readFileSync } from 'fs';
+import type { Response as SupertestResponse } from 'supertest';
 import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
 import url from 'url';
@@ -640,7 +641,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const authenticatedCookie = getSessionCookie(firstResponse.headers['set-cookie']);
 
-        const responses = await Promise.all(
+        const responses: SupertestResponse[] = await Promise.all(
           pendingLogins.slice(1).map(({ samlResponse, intermediateCookie }, index) =>
             supertest
               .post('/api/security/saml/callback')
