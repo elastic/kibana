@@ -527,6 +527,60 @@ describe('HeatmapComponent', function () {
     });
   });
 
+  describe('missing numeric Y buckets', () => {
+    const gappedRows = [
+      { 'col-0-1': 1, 'col-1-2': 'a', 'col-2-3': 0 },
+      { 'col-0-1': 2, 'col-1-2': 'a', 'col-2-3': 2 },
+    ];
+    const countAndXColumns: Datatable['columns'] = [
+      { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
+      { id: 'col-1-2', name: 'Dest', meta: { type: 'string' } },
+    ];
+
+    it('fills a missing ES|QL histogram step from the column interval', () => {
+      const esqlData: Datatable = {
+        type: 'datatable',
+        meta: { type: ESQL_TABLE_TYPE },
+        rows: gappedRows,
+        columns: [
+          ...countAndXColumns,
+          {
+            id: 'col-2-3',
+            name: 'Bytes',
+            meta: { type: 'number', esMeta: { bucket: { interval: 1 } } },
+          },
+        ],
+      };
+      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} data={esqlData} />);
+      const chartData = component.find(Heatmap).prop('data') as Datatable['rows'];
+
+      expect(chartData.map((row) => row['col-2-3'])).toEqual([0, 1, 2]);
+      expect(chartData[1]['col-0-1']).toBeNull();
+    });
+
+    it('leaves a DSL histogram gap for the agg empty-row toggle', () => {
+      const dslData: Datatable = {
+        type: 'datatable',
+        rows: gappedRows,
+        columns: [
+          ...countAndXColumns,
+          {
+            id: 'col-2-3',
+            name: 'Bytes',
+            meta: {
+              type: 'number',
+              source: 'esaggs',
+              sourceParams: { type: 'histogram', params: { used_interval: 1 } },
+            },
+          },
+        ],
+      };
+      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} data={dslData} />);
+
+      expect(component.find(Heatmap).prop('data')).toEqual(gappedRows);
+    });
+  });
+
   it('not renders the component if no value accessor is given', () => {
     const newProps = { ...wrapperProps, valueAccessor: undefined } as unknown as HeatmapRenderProps;
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
