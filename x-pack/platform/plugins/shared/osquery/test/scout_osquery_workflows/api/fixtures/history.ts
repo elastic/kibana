@@ -8,6 +8,8 @@
 import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+const MAX_HISTORY_PAGES = 50;
+
 export interface HistoryRow {
   actionId?: string;
   source: string;
@@ -24,7 +26,11 @@ export const historyClient =
   async (actionId: string, sourceFilters?: string): Promise<HistoryRow[]> => {
     const matches: HistoryRow[] = [];
     let nextPage: string | undefined;
+    let pages = 0;
     do {
+      pages++;
+      // A repeated cursor would otherwise spin until the test timeout instead of failing here.
+      expect(pages).toBeLessThanOrEqual(MAX_HISTORY_PAGES);
       const params = new URLSearchParams({ pageSize: '100', startDate: since });
       if (sourceFilters) params.set('sourceFilters', sourceFilters);
       if (nextPage) params.set('nextPage', nextPage);
