@@ -199,7 +199,14 @@ const P0_EVALS = [
 const CUSTOM_YARA_SIGNATURE_MAX_TOOL_CALLS = 12;
 
 const getTroubleshootingEvaluators = ({
-  traceBasedEvaluators: { toolCalls, latency, inputTokens, outputTokens, cachedTokens },
+  traceBasedEvaluators: {
+    toolCalls,
+    latency,
+    inputTokens,
+    outputTokens,
+    cachedTokens,
+    estimatedCost,
+  },
 }: DefaultEvaluators): Evaluator[] => [
   createTroubleshootingToolUsageEvaluator() as Evaluator,
   toolCalls,
@@ -207,6 +214,7 @@ const getTroubleshootingEvaluators = ({
   inputTokens,
   outputTokens,
   cachedTokens,
+  estimatedCost,
 ];
 
 const CUSTOM_YARA_SIGNATURE_COMMON_CRITERIA = [

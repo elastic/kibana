@@ -27,6 +27,7 @@ const createMockEvaluators = (): DefaultEvaluators =>
       inputTokens: createTraceEvaluator('Input Tokens'),
       outputTokens: createTraceEvaluator('Output Tokens'),
       cachedTokens: createTraceEvaluator('Cached Tokens'),
+      estimatedCost: createTraceEvaluator('Estimated Cost (USD)'),
       toolCalls: createTraceEvaluator('Tool Calls'),
       latency: createTraceEvaluator('Latency'),
     },
@@ -43,6 +44,7 @@ describe('evaluatePolicyManagementDataset', () => {
     expect(names).toContain(POLICY_MANAGEMENT_TOOL_USAGE_EVALUATOR_NAME);
     expect(names).toContain('Tool Calls');
     expect(names).toContain('Latency');
+    expect(names).toContain('Estimated Cost (USD)');
     expect(names).not.toContain('Skill Invoked (elastic-defend-policy-management)');
   });
 });

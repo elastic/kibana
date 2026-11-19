@@ -176,7 +176,7 @@ export const buildAlertsRagEvaluators = ({
   traceEsClient: EsClient;
   log: ToolingLog;
 }): Array<Evaluator<AlertsRagDatasetExample, TaskOutput>> => {
-  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+  const { inputTokens, outputTokens, cachedTokens, estimatedCost, toolCalls, latency } =
     evaluators.traceBasedEvaluators;
 
   return [
@@ -189,6 +189,7 @@ export const buildAlertsRagEvaluators = ({
     inputTokens as Evaluator<AlertsRagDatasetExample, TaskOutput>,
     outputTokens as Evaluator<AlertsRagDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<AlertsRagDatasetExample, TaskOutput>,
+    estimatedCost as Evaluator<AlertsRagDatasetExample, TaskOutput>,
     createSkillInvocationEvaluator({
       traceEsClient,
       log,

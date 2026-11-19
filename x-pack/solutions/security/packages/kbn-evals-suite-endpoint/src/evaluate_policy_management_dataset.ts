@@ -35,7 +35,7 @@ export const buildPolicyManagementEvaluators = ({
 }: {
   evaluators: DefaultEvaluators;
 }): Array<Evaluator<PolicyManagementDatasetExample, TaskOutput>> => {
-  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+  const { inputTokens, outputTokens, cachedTokens, estimatedCost, toolCalls, latency } =
     evaluators.traceBasedEvaluators;
 
   return [
@@ -49,6 +49,7 @@ export const buildPolicyManagementEvaluators = ({
     inputTokens as Evaluator<PolicyManagementDatasetExample, TaskOutput>,
     outputTokens as Evaluator<PolicyManagementDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<PolicyManagementDatasetExample, TaskOutput>,
+    estimatedCost as Evaluator<PolicyManagementDatasetExample, TaskOutput>,
   ];
 };
 

@@ -34,7 +34,7 @@ evaluate.describe('Attack Discovery audit failure classes', { tag: tags.stateful
   evaluate(
     'bundled alerts by scenario and input variant',
     async ({ executorClient, inferenceClient, attackDiscoveryClient, evaluators, log }) => {
-      const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+      const { inputTokens, outputTokens, cachedTokens, estimatedCost, toolCalls, latency } =
         evaluators.traceBasedEvaluators;
 
       await executorClient.runExperiment(
@@ -68,6 +68,7 @@ evaluate.describe('Attack Discovery audit failure classes', { tag: tags.stateful
           inputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
           outputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
           cachedTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
+          estimatedCost as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
         ]
       );
     }

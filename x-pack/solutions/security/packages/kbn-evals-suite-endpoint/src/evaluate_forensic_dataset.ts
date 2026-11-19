@@ -123,7 +123,7 @@ export const buildForensicEvaluators = ({
   traceEsClient: EsClient;
   log: ToolingLog;
 }): Array<Evaluator<ForensicDatasetExample, TaskOutput>> => {
-  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+  const { inputTokens, outputTokens, cachedTokens, estimatedCost, toolCalls, latency } =
     evaluators.traceBasedEvaluators;
 
   return [
@@ -136,6 +136,7 @@ export const buildForensicEvaluators = ({
     inputTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     outputTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
+    estimatedCost as Evaluator<ForensicDatasetExample, TaskOutput>,
     wrapSkillInvocationForDistractors(
       createSecuritySkillInvocationEvaluator({
         traceEsClient,

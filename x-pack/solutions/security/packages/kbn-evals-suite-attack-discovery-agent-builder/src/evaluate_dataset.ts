@@ -1642,6 +1642,10 @@ export const createEvaluateAttackDiscoveryAgentBuilderDataset =
           AttackDiscoveryAgentBuilderExample,
           AttackDiscoveryAgentBuilderTaskOutput
         >,
+        traceEvaluators.estimatedCost as Evaluator<
+          AttackDiscoveryAgentBuilderExample,
+          AttackDiscoveryAgentBuilderTaskOutput
+        >,
         createResponseSkillInvocationEvaluator() as Evaluator<
           AttackDiscoveryAgentBuilderExample,
           AttackDiscoveryAgentBuilderTaskOutput

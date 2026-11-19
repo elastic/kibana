@@ -7,6 +7,7 @@
 
 import { isImproved, PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
 import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import { formatMetricValue } from './format_metric';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
@@ -27,7 +28,7 @@ function formatSig(pValue: number | null, threshold: number): string {
 }
 
 function formatNumber(value: number): string {
-  return Number.isFinite(value) ? value.toFixed(2) : '-';
+  return Number.isFinite(value) ? formatMetricValue(value) : '-';
 }
 
 function formatOutcome(
@@ -46,9 +47,9 @@ function formatDifference(value: number): string {
     return '-';
   }
   if (value > 0) {
-    return `+${value.toFixed(2)}`;
+    return `+${formatMetricValue(value)}`;
   }
-  return value.toFixed(2);
+  return formatMetricValue(value);
 }
 
 function escapeTableCell(value: string): string {

@@ -126,7 +126,7 @@ export const buildResponseActionsEvaluators = ({
 }: {
   evaluators: DefaultEvaluators;
 }): Array<Evaluator<ResponseActionsDatasetExample, TaskOutput>> => {
-  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+  const { inputTokens, outputTokens, cachedTokens, estimatedCost, toolCalls, latency } =
     evaluators.traceBasedEvaluators;
 
   return [
@@ -141,6 +141,7 @@ export const buildResponseActionsEvaluators = ({
     inputTokens as Evaluator<ResponseActionsDatasetExample, TaskOutput>,
     outputTokens as Evaluator<ResponseActionsDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<ResponseActionsDatasetExample, TaskOutput>,
+    estimatedCost as Evaluator<ResponseActionsDatasetExample, TaskOutput>,
   ];
 };
 
