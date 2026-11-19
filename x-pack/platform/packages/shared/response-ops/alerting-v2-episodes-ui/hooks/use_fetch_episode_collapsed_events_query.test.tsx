@@ -153,6 +153,81 @@ describe('useFetchEpisodeCollapsedEventsQuery', () => {
     });
   });
 
+  it('ends on the status that is still open for a flapping alert', async () => {
+    runEsqlAsyncSearchMock.mockImplementation(async ({ params }) =>
+      params.query === phasesQueryString
+        ? {
+            columns: [
+              { name: 'episode.id', type: 'keyword' },
+              { name: 'episode.status', type: 'keyword' },
+              { name: 'group_hash', type: 'keyword' },
+              { name: 'seg_start', type: 'date' },
+              { name: 'seg_end', type: 'date' },
+              { name: 'event_count', type: 'long' },
+            ],
+            // Recovering started after active did, but active was seen again afterwards.
+            values: [
+              [
+                'ep-1',
+                ALERT_EPISODE_STATUS.PENDING,
+                'hash-1',
+                '2024-01-01T00:00:00.000Z',
+                '2024-01-01T00:00:00.000Z',
+                1,
+              ],
+              [
+                'ep-1',
+                ALERT_EPISODE_STATUS.ACTIVE,
+                'hash-1',
+                '2024-01-01T00:01:00.000Z',
+                '2024-01-01T00:06:00.000Z',
+                4,
+              ],
+              [
+                'ep-1',
+                ALERT_EPISODE_STATUS.RECOVERING,
+                'hash-1',
+                '2024-01-01T00:04:00.000Z',
+                '2024-01-01T00:04:00.000Z',
+                1,
+              ],
+            ],
+          }
+        : {
+            columns: [
+              { name: 'episode.id', type: 'keyword' },
+              { name: 'severity', type: 'keyword' },
+              { name: 'seg_start', type: 'date' },
+              { name: 'seg_end', type: 'date' },
+              { name: 'event_count', type: 'long' },
+            ],
+            values: [['ep-1', 'high', '2024-01-01T00:00:00.000Z', '2024-01-01T00:06:00.000Z', 6]],
+          }
+    );
+
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeCollapsedEventsQuery({
+          episodeId: 'ep-1',
+          enabled: true,
+          ...eventCounts,
+          services,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(
+      result.current.data?.statusRows.map((row) => [row['@timestamp'], row['episode.status']])
+    ).toEqual([
+      ['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.PENDING],
+      ['2024-01-01T00:01:00.000Z', ALERT_EPISODE_STATUS.ACTIVE],
+      ['2024-01-01T00:04:00.000Z', ALERT_EPISODE_STATUS.RECOVERING],
+      ['2024-01-01T00:04:00.000Z', ALERT_EPISODE_STATUS.ACTIVE],
+    ]);
+  });
+
   it('retries a failed load, then toasts the error', async () => {
     const error = new Error('search failed');
     runEsqlAsyncSearchMock.mockRejectedValue(error);
