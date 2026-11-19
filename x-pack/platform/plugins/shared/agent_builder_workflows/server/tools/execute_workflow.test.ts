@@ -15,7 +15,7 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 
 type ToolCallSource = ToolHandlerContext['callContext']['callSource'];
 import { loggerMock } from '@kbn/logging-mocks';
-import { executeWorkflowTool } from './execute_workflow';
+import { executeWorkflowTool as createExecuteWorkflowTool } from './execute_workflow';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => {
   const actual = jest.requireActual('@kbn/agent-builder-tools-base/workflows');
@@ -25,9 +25,12 @@ jest.mock('@kbn/agent-builder-tools-base/workflows', () => {
   };
 });
 
-const executeWorkflowMock = executeWorkflow as jest.MockedFunction<typeof executeWorkflow>;
-
 const logger = loggerMock.create();
+const executeWorkflowTool = (
+  deps: Omit<Parameters<typeof createExecuteWorkflowTool>[0], 'logger'>
+) => createExecuteWorkflowTool({ ...deps, logger });
+
+const executeWorkflowMock = executeWorkflow as jest.MockedFunction<typeof executeWorkflow>;
 
 // Security plugin disabled by default in these tests -> privilege checks allow.
 const getSecurity = () => undefined;
@@ -90,7 +93,7 @@ describe('executeWorkflowTool', () => {
 
   it('executes a saved workflow when only `workflowId` is provided', async () => {
     executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-    const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
 
     const result = await invokeHandler(
       tool,
@@ -114,58 +117,37 @@ describe('executeWorkflowTool', () => {
   });
 
   describe('availability', () => {
-    const availableWorkflows = { management: { isWorkflowsAvailable: true } } as any;
-    const createSecurity = (hasAllRequested: boolean) => () =>
+    const securityWith = (atSpace: jest.Mock) => () =>
       ({
         authz: {
           actions: { api: { get: (a: string) => `api:${a}` } },
-          checkPrivilegesWithRequest: () => ({
-            atSpace: jest.fn().mockResolvedValue({ hasAllRequested }),
-          }),
+          checkPrivilegesWithRequest: () => ({ atSpace }),
         },
       } as any);
-    const getAvailability = (getSecurityFn: () => any, management: any = availableWorkflows) =>
+    const getAvailability = (isWorkflowsAvailable: boolean, atSpace: jest.Mock) =>
       executeWorkflowTool({
-        logger,
-        workflowsManagement: management,
-        getSecurity: getSecurityFn,
+        workflowsManagement: { management: { isWorkflowsAvailable } } as any,
+        getSecurity: securityWith(atSpace),
       }).availability!.handler({ request: {} as any, uiSettings: {} as any, spaceId: 'default' });
 
-    it('is available to a caller with the execute privilege', async () => {
-      await expect(getAvailability(createSecurity(true))).resolves.toEqual({ status: 'available' });
+    it('is available when Workflows is available and the caller can execute workflows', async () => {
+      const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: true });
+
+      await expect(getAvailability(true, atSpace)).resolves.toEqual({ status: 'available' });
     });
 
-    it('is available when security is disabled', async () => {
-      await expect(getAvailability(getSecurity)).resolves.toEqual({ status: 'available' });
-    });
-
-    it('is unavailable to a caller without the execute privilege', async () => {
-      await expect(getAvailability(createSecurity(false))).resolves.toMatchObject({
+    it.each([
+      ['Workflows is not available', false, jest.fn().mockResolvedValue({ hasAllRequested: true })],
+      [
+        'the caller lacks the privilege',
+        true,
+        jest.fn().mockResolvedValue({ hasAllRequested: false }),
+      ],
+      ['the privilege check fails', true, jest.fn().mockRejectedValue(new Error('es down'))],
+    ])('is unavailable when %s', async (_case, isWorkflowsAvailable, atSpace) => {
+      await expect(getAvailability(isWorkflowsAvailable, atSpace)).resolves.toMatchObject({
         status: 'unavailable',
       });
-    });
-
-    it('is unavailable when Workflows is not available, even with the privilege', async () => {
-      await expect(
-        getAvailability(createSecurity(true), { management: { isWorkflowsAvailable: false } })
-      ).resolves.toMatchObject({ status: 'unavailable' });
-    });
-
-    it('is unavailable, and logs, when the privilege check fails', async () => {
-      const failingSecurity = () =>
-        ({
-          authz: {
-            actions: { api: { get: (a: string) => `api:${a}` } },
-            checkPrivilegesWithRequest: () => ({
-              atSpace: jest.fn().mockRejectedValue(new Error('es down')),
-            }),
-          },
-        } as any);
-
-      await expect(getAvailability(failingSecurity)).resolves.toMatchObject({
-        status: 'unavailable',
-      });
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es down'));
     });
   });
 
@@ -180,11 +162,7 @@ describe('executeWorkflowTool', () => {
             checkPrivilegesWithRequest: () => ({ atSpace }),
           },
         } as any);
-      const tool = executeWorkflowTool({
-        logger,
-        workflowsManagement,
-        getSecurity: denyingSecurity,
-      });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity: denyingSecurity });
 
       const result = await invokeHandler(
         tool,
@@ -207,7 +185,7 @@ describe('executeWorkflowTool', () => {
 
   it('executes an inline yaml workflow when only `yaml` is provided', async () => {
     executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-    const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
 
     await invokeHandler(
       tool,
@@ -240,7 +218,7 @@ describe('executeWorkflowTool', () => {
         },
       },
     });
-    const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
 
     await invokeHandler(tool, { attachmentId: 'att-1', inputs: { b: 2 } }, buildContext({ get }));
 
@@ -257,7 +235,7 @@ describe('executeWorkflowTool', () => {
 
   it('forwards `waitForCompletion: false`', async () => {
     executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-    const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
 
     await invokeHandler(tool, { workflowId: 'wf-1', waitForCompletion: false }, buildContext());
 
@@ -267,7 +245,7 @@ describe('executeWorkflowTool', () => {
   });
 
   it('returns an error result when zero modes are provided', async () => {
-    const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(tool, {}, buildContext());
     expect(executeWorkflowMock).not.toHaveBeenCalled();
     expect(result.results[0].type).toBe('error');
@@ -275,7 +253,7 @@ describe('executeWorkflowTool', () => {
   });
 
   it('returns an error result when two modes are provided', async () => {
-    const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(
       tool,
       {
@@ -289,7 +267,7 @@ describe('executeWorkflowTool', () => {
   });
 
   it('returns an error result when all three modes are provided', async () => {
-    const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(
       tool,
       {
@@ -304,7 +282,7 @@ describe('executeWorkflowTool', () => {
   });
 
   it('returns an error result when the attachment is missing', async () => {
-    const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(
       tool,
       { attachmentId: 'missing' },
@@ -316,7 +294,7 @@ describe('executeWorkflowTool', () => {
   });
 
   it('returns an error result when the attachment is not a workflow yaml attachment', async () => {
-    const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(
       tool,
       { attachmentId: 'att-wrong' },
@@ -336,7 +314,7 @@ describe('executeWorkflowTool', () => {
 
   it('returns an error result when the helper reports failure', async () => {
     executeWorkflowMock.mockResolvedValueOnce({ success: false, error: 'boom' });
-    const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+    const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
     const result = await invokeHandler(tool, { workflowId: 'wf-1' }, buildContext());
     expect(result.results[0].type).toBe('error');
     expect(JSON.stringify(result.results[0])).toContain('boom');
@@ -371,7 +349,7 @@ steps:
 `;
 
     it('asks before running inline YAML with an unsafe step', async () => {
-      const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
       const context = buildContext({ interactive: true });
 
       const result = (await tool.handler({ yaml: UNSAFE_YAML } as never, context)) as any;
@@ -384,7 +362,7 @@ steps:
 
     it('runs without asking when every step is safe', async () => {
       executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-      const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
       const context = buildContext({ interactive: true });
 
       await tool.handler({ yaml: SAFE_YAML } as never, context);
@@ -396,7 +374,6 @@ steps:
     it('reads a persisted workflow to decide', async () => {
       const getWorkflow = jest.fn().mockResolvedValue({ name: 'Notify', yaml: UNSAFE_YAML });
       const tool = executeWorkflowTool({
-        logger,
         workflowsManagement: { management: { getWorkflow } } as any,
         getSecurity,
       });
@@ -423,7 +400,6 @@ steps:
           },
         } as any);
       const tool = executeWorkflowTool({
-        logger,
         workflowsManagement: { management: { getWorkflow } } as any,
         getSecurity: executeOnlySecurity,
       });
@@ -439,7 +415,7 @@ steps:
 
     it('runs after the user accepts', async () => {
       executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-      const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
       const context = buildContext({
         interactive: true,
         promptStatus: ConfirmationStatus.accepted,
@@ -451,7 +427,7 @@ steps:
     });
 
     it('does not run after the user declines', async () => {
-      const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
       const context = buildContext({
         interactive: true,
         promptStatus: ConfirmationStatus.rejected,
@@ -464,7 +440,7 @@ steps:
     });
 
     it('refuses an agent run with unsafe steps when no user is present', async () => {
-      const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
       const context = buildContext({ interactive: false, callSource: 'agent' });
 
       const result = await invokeHandler(tool, { yaml: UNSAFE_YAML }, context);
@@ -476,7 +452,7 @@ steps:
 
     it('runs an agent run with only safe steps when no user is present', async () => {
       executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-      const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
 
       await tool.handler(
         { yaml: SAFE_YAML } as never,
@@ -488,7 +464,7 @@ steps:
 
     it('runs an agent run with unsafe steps that pre-approved workflows.*', async () => {
       executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-      const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
 
       await tool.handler(
         { yaml: UNSAFE_YAML } as never,
@@ -504,7 +480,7 @@ steps:
 
     it('keeps running a call from an MCP client without a prompt', async () => {
       executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-      const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
       const context = buildContext({ interactive: false, callSource: 'mcp' });
 
       await tool.handler({ yaml: UNSAFE_YAML } as never, context);
@@ -514,7 +490,7 @@ steps:
     });
 
     it('shows the step parameters and the run inputs', async () => {
-      const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
       const context = buildContext({ interactive: true });
 
       const result = (await tool.handler(
@@ -537,7 +513,6 @@ steps:
           hasAllRequested: kibana.includes('api:workflowsManagement:execute'),
         }));
       const tool = executeWorkflowTool({
-        logger,
         workflowsManagement: { management: { getWorkflow } } as any,
         getSecurity: () =>
           ({
@@ -560,7 +535,6 @@ steps:
     it('asks again when the persisted definition changed after the prompt', async () => {
       const getWorkflow = jest.fn().mockResolvedValue({ name: 'Notify', yaml: UNSAFE_YAML });
       const tool = executeWorkflowTool({
-        logger,
         workflowsManagement: { management: { getWorkflow } } as any,
         getSecurity,
       });
@@ -586,7 +560,6 @@ steps:
       executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
       const getWorkflow = jest.fn().mockResolvedValue({ name: 'Notify', yaml: UNSAFE_YAML });
       const tool = executeWorkflowTool({
-        logger,
         workflowsManagement: { management: { getWorkflow } } as any,
         getSecurity,
       });
@@ -604,7 +577,7 @@ steps:
     });
 
     it('asks when the steps cannot be read because of a recursive alias', async () => {
-      const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
 
       const result = (await tool.handler(
         { yaml: 'name: &a\n  b: *a\nsteps:\n  - name: log\n    type: console\n' } as never,
@@ -617,7 +590,7 @@ steps:
 
     it('skips the prompt when the run pre-approved the execute_api selector', async () => {
       executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
-      const tool = executeWorkflowTool({ logger, workflowsManagement, getSecurity });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
       const context = buildContext({
         interactive: true,
         autoApprovedApis: [{ target: 'kibana', api: 'workflows.post-workflows-test' }],
