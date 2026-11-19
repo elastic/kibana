@@ -13,6 +13,7 @@ import { MigrationSource } from '../types';
 
 const mockStopRuleMigration = jest.fn();
 const mockStopDashboardMigration = jest.fn();
+const mockStopWorkflowMigration = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 
@@ -26,6 +27,7 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => ({
       siemMigrations: {
         rules: { stopRuleMigration: mockStopRuleMigration },
         dashboards: { stopDashboardMigration: mockStopDashboardMigration },
+        workflows: { stopWorkflowMigration: mockStopWorkflowMigration },
       },
     },
   }),
@@ -71,6 +73,20 @@ describe('useStopSiemMigration', () => {
       migrationId: 'did',
       vendor: MigrationSource.SPLUNK,
     });
+    expect(mockAddSuccess).toHaveBeenCalledWith(STOP_SUCCESS);
+  });
+
+  it('should stop a workflow migration through the workflows service', async () => {
+    mockStopWorkflowMigration.mockResolvedValue({ stopped: true });
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useStopSiemMigration('workflow'), { wrapper });
+    act(() => {
+      result.current.mutate({ migrationId: 'wid' });
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockStopWorkflowMigration).toHaveBeenCalledWith({ migrationId: 'wid' });
+    expect(mockStopRuleMigration).not.toHaveBeenCalled();
+    expect(mockStopDashboardMigration).not.toHaveBeenCalled();
     expect(mockAddSuccess).toHaveBeenCalledWith(STOP_SUCCESS);
   });
 

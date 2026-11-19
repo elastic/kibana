@@ -30,6 +30,9 @@ const mockSiemMigrationsService = {
   dashboards: {
     getMissingCapabilities: jest.fn(),
   },
+  workflows: {
+    getMissingCapabilities: jest.fn(),
+  },
 } as unknown as jest.MockedObjectDeep<SiemMigrationsService>;
 
 const TestComponent = ({ isAuthorized }: { isAuthorized: boolean }) => {
@@ -50,6 +53,10 @@ describe('WithMissingPrivileges Tooltip', () => {
       mockedMissingCapabilities
     );
     mockSiemMigrationsService.dashboards.getMissingCapabilities.mockReturnValue(
+      mockedMissingCapabilities
+    );
+
+    mockSiemMigrationsService.workflows.getMissingCapabilities.mockReturnValue(
       mockedMissingCapabilities
     );
 
@@ -77,6 +84,28 @@ describe('WithMissingPrivileges Tooltip', () => {
       fireEvent.mouseOver(getByTestId('test-component'));
       await waitFor(() => {
         expect(getByTestId('missingPrivilegesTooltip')).toBeVisible();
+        expect(getByTestId('missingPrivilegesTooltip')).toHaveTextContent(
+          'Test capability description'
+        );
+      });
+    });
+  });
+
+  describe('Workflows', () => {
+    it('should evaluate the workflows privileges and not the dashboards ones', () => {
+      mockSiemMigrationsService.workflows.getMissingCapabilities.mockReturnValue([]);
+      const { getByTestId, queryByTestId } = renderTestComponent('workflow');
+      expect(getByTestId('test-component')).not.toBeDisabled();
+      expect(queryByTestId('missingPrivilegesTooltipAnchor')).not.toBeInTheDocument();
+    });
+
+    it('should show the tooltip with the workflows missing privileges', async () => {
+      mockSiemMigrationsService.dashboards.getMissingCapabilities.mockReturnValue([]);
+      const { getByTestId, queryByTestId } = renderTestComponent('workflow');
+      expect(getByTestId('test-component')).toBeDisabled();
+      expect(queryByTestId('missingPrivilegesTooltipAnchor')).toBeInTheDocument();
+      fireEvent.mouseOver(getByTestId('test-component'));
+      await waitFor(() => {
         expect(getByTestId('missingPrivilegesTooltip')).toHaveTextContent(
           'Test capability description'
         );

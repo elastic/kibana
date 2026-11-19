@@ -36,6 +36,7 @@ const createWrapper = () => {
 describe('useUpdateSiemMigration', () => {
   const updateRuleMigrationApiMock = jest.fn();
   const updateDashboardMigrationMock = jest.fn();
+  const updateWorkflowMigrationMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -53,6 +54,11 @@ describe('useUpdateSiemMigration', () => {
               updateDashboardMigration: updateDashboardMigrationMock,
             },
           },
+          workflows: {
+            api: {
+              updateWorkflowMigration: updateWorkflowMigrationMock,
+            },
+          },
         },
       },
     });
@@ -60,6 +66,26 @@ describe('useUpdateSiemMigration', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  describe('workflow', () => {
+    it('should update a workflow migration through the workflows service', async () => {
+      updateWorkflowMigrationMock.mockResolvedValue(undefined);
+      const wrapper = createWrapper();
+      const { result } = renderHook(() => useUpdateSiemMigration('workflow'), { wrapper });
+
+      act(() => {
+        result.current.mutate({ migrationId: 'workflow-migration-id', body: { name: 'Renamed' } });
+      });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(updateWorkflowMigrationMock).toHaveBeenCalledWith({
+        migrationId: 'workflow-migration-id',
+        body: { name: 'Renamed' },
+      });
+      expect(updateRuleMigrationApiMock).not.toHaveBeenCalled();
+      expect(updateDashboardMigrationMock).not.toHaveBeenCalled();
+    });
   });
 
   describe('rule', () => {
