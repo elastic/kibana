@@ -26,6 +26,7 @@ import type {
   CustomKpiMetricConfiguration,
   KpiAcknowledgeTrigger,
   KpiMetricConfiguration,
+  KpiTilesDisplay,
 } from '../../../../common/types/domain';
 import { CaseStatuses } from '../../../../common/types/domain';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
@@ -70,6 +71,10 @@ export interface CasesMetricsProps {
    * The saved case list metrics. With no saved list, the bar shows the four default stats.
    */
   kpiMetrics?: KpiMetricConfiguration[];
+  /**
+   * The team default of the start state of the tiles. A choice of the user in this browser wins.
+   */
+  kpiTilesDisplay?: KpiTilesDisplay;
   kpiResults?: KpiMetricResult[];
   isLoadingKpiResults?: boolean;
   isAnalyticsEnabled?: boolean;
@@ -225,15 +230,23 @@ const getKpiTileValues = (
 };
 
 const CasesMetricsComponent: React.FC<CasesMetricsProps> = (props) => {
-  const { countOpenCases, countInProgressCases, countClosedCases, mttr, isLoading, kpiMetrics } =
-    props;
+  const {
+    countOpenCases,
+    countInProgressCases,
+    countClosedCases,
+    mttr,
+    isLoading,
+    kpiMetrics,
+    kpiTilesDisplay,
+  } = props;
   const { euiTheme } = useEuiTheme();
   const tilesId = useGeneratedHtmlId({ prefix: 'casesKpiTiles' });
-  const [tilesDisplay, setTilesDisplay] = useCasesLocalStorage<'expanded' | 'collapsed'>(
+  // null means that the user made no choice in this browser, so the team default applies
+  const [userTilesDisplay, setTilesDisplay] = useCasesLocalStorage<KpiTilesDisplay | null>(
     LOCAL_STORAGE_KEYS.casesKpiTilesDisplay,
-    'expanded'
+    null
   );
-  const isExpanded = tilesDisplay !== 'collapsed';
+  const isExpanded = (userTilesDisplay ?? kpiTilesDisplay ?? 'expanded') !== 'collapsed';
   const toggleTiles = useCallback(
     () => setTilesDisplay(isExpanded ? 'collapsed' : 'expanded'),
     [isExpanded, setTilesDisplay]

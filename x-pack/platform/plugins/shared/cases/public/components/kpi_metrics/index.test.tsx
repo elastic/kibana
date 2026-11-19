@@ -38,7 +38,9 @@ describe('KpiMetricsSettings', () => {
   });
 
   it('shows the four default metrics when no list is saved', async () => {
-    renderWithTestingProviders(<KpiMetricsSettings isLoading={false} onSave={onSave} />);
+    renderWithTestingProviders(
+      <KpiMetricsSettings onSaveTilesDisplay={jest.fn()} isLoading={false} onSave={onSave} />
+    );
 
     expect(await screen.findByTestId('kpi-metrics-default-note')).toBeInTheDocument();
     expect(screen.getByText('Open cases')).toBeInTheDocument();
@@ -50,6 +52,7 @@ describe('KpiMetricsSettings', () => {
   it('saves the list without the deleted metric', async () => {
     renderWithTestingProviders(
       <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
         kpiMetrics={[customMetric('a'), customMetric('b')]}
         isLoading={false}
         onSave={onSave}
@@ -64,6 +67,7 @@ describe('KpiMetricsSettings', () => {
   it('saves the new order when a metric moves down', async () => {
     renderWithTestingProviders(
       <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
         kpiMetrics={[customMetric('a'), customMetric('b')]}
         isLoading={false}
         onSave={onSave}
@@ -77,7 +81,12 @@ describe('KpiMetricsSettings', () => {
 
   it('adds a custom metric from the flyout', async () => {
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={[]} isLoading={false} onSave={onSave} />
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[]}
+        isLoading={false}
+        onSave={onSave}
+      />
     );
 
     await userEvent.click(await screen.findByTestId('kpi-metric-add'));
@@ -106,7 +115,12 @@ describe('KpiMetricsSettings', () => {
     };
 
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={[metric]} isLoading={false} onSave={onSave} />
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[metric]}
+        isLoading={false}
+        onSave={onSave}
+      />
     );
 
     await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -117,7 +131,12 @@ describe('KpiMetricsSettings', () => {
 
   it('does not save a custom metric without a label', async () => {
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={[]} isLoading={false} onSave={onSave} />
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[]}
+        isLoading={false}
+        onSave={onSave}
+      />
     );
 
     await userEvent.click(await screen.findByTestId('kpi-metric-add'));
@@ -131,7 +150,12 @@ describe('KpiMetricsSettings', () => {
     const kpiMetrics = Array.from({ length: 8 }, (_, index) => customMetric(`m${index}`));
 
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={kpiMetrics} isLoading={false} onSave={onSave} />
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={kpiMetrics}
+        isLoading={false}
+        onSave={onSave}
+      />
     );
 
     expect(await screen.findByTestId('kpi-metrics-max')).toBeInTheDocument();
@@ -140,18 +164,29 @@ describe('KpiMetricsSettings', () => {
 
   it('is read-only without the settings permission', async () => {
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />,
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[customMetric('a')]}
+        isLoading={false}
+        onSave={onSave}
+      />,
       { wrapperProps: { permissions: noCasesSettingsPermission() } }
     );
 
     expect(await screen.findByTestId('kpi-metric-add')).toBeDisabled();
     expect(screen.getByTestId('kpi-metric-delete-0')).toBeDisabled();
     expect(screen.getByTestId('kpi-metric-edit-0')).toBeDisabled();
+    expect(screen.getByTestId('kpi-tiles-display')).toBeDisabled();
   });
 
   it('saves the trend color of an edited metric', async () => {
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[customMetric('a')]}
+        isLoading={false}
+        onSave={onSave}
+      />
     );
 
     await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -166,7 +201,12 @@ describe('KpiMetricsSettings', () => {
 
   it('saves a percent metric', async () => {
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[customMetric('a')]}
+        isLoading={false}
+        onSave={onSave}
+      />
     );
 
     await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -179,6 +219,7 @@ describe('KpiMetricsSettings', () => {
   it('describes a saved percent metric', async () => {
     renderWithTestingProviders(
       <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
         kpiMetrics={[{ ...customMetric('a'), percent: true }]}
         isLoading={false}
         onSave={onSave}
@@ -193,7 +234,12 @@ describe('KpiMetricsSettings', () => {
   describe('group by', () => {
     it('shows the group-by row for a count and not for an average', async () => {
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-add'));
@@ -210,7 +256,12 @@ describe('KpiMetricsSettings', () => {
       };
 
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[metric]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[metric]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -235,6 +286,7 @@ describe('KpiMetricsSettings', () => {
     it('describes a saved breakdown metric', async () => {
       renderWithTestingProviders(
         <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
           kpiMetrics={[{ ...customMetric('a'), groupBy: { field: 'case.severity' } }]}
           isLoading={false}
           onSave={onSave}
@@ -251,6 +303,7 @@ describe('KpiMetricsSettings', () => {
     it('shows the date row only for the cases index and resets it on an index change', async () => {
       renderWithTestingProviders(
         <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
           kpiMetrics={[{ ...customMetric('a'), dateField: 'closed_at' }]}
           isLoading={false}
           onSave={onSave}
@@ -269,7 +322,12 @@ describe('KpiMetricsSettings', () => {
 
     it('saves the closed date', async () => {
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[customMetric('a')]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -293,6 +351,7 @@ describe('KpiMetricsSettings', () => {
     it('shows the unit select for a duration field and hides it for a count', async () => {
       renderWithTestingProviders(
         <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
           kpiMetrics={[durationMetric, customMetric('b')]}
           isLoading={false}
           onSave={onSave}
@@ -318,7 +377,12 @@ describe('KpiMetricsSettings', () => {
 
     it('saves 3 days in seconds with the unit', async () => {
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[durationMetric]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[durationMetric]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -346,7 +410,12 @@ describe('KpiMetricsSettings', () => {
       });
 
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[customMetric('a')]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -374,7 +443,12 @@ describe('KpiMetricsSettings', () => {
       });
 
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[customMetric('a')]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -401,7 +475,12 @@ describe('KpiMetricsSettings', () => {
         display: 'value' as const,
       };
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[alertMetric]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[alertMetric]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -424,7 +503,12 @@ describe('KpiMetricsSettings', () => {
         display: 'value' as const,
       };
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[alertMetric]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[alertMetric]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -444,7 +528,12 @@ describe('KpiMetricsSettings', () => {
         display: 'value' as const,
       };
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[alertMetric]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[alertMetric]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -465,6 +554,35 @@ describe('KpiMetricsSettings', () => {
       );
     });
 
+    it('selects the team default of the tiles display', async () => {
+      const onSaveTilesDisplay = jest.fn();
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          isLoading={false}
+          onSave={onSave}
+          tilesDisplay="expanded"
+          onSaveTilesDisplay={onSaveTilesDisplay}
+        />
+      );
+
+      await userEvent.selectOptions(await screen.findByTestId('kpi-tiles-display'), 'collapsed');
+
+      expect(onSaveTilesDisplay).toHaveBeenCalledWith('collapsed');
+    });
+
+    it('shows the saved team default of the tiles display', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          isLoading={false}
+          onSave={onSave}
+          tilesDisplay="collapsed"
+          onSaveTilesDisplay={jest.fn()}
+        />
+      );
+
+      expect(await screen.findByTestId('kpi-tiles-display')).toHaveValue('collapsed');
+    });
+
     it('saves the close date basis of an alert metric', async () => {
       const alertMetric = {
         id: 'alert-1',
@@ -473,7 +591,12 @@ describe('KpiMetricsSettings', () => {
         display: 'value' as const,
       };
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[alertMetric]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[alertMetric]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -491,6 +614,7 @@ describe('KpiMetricsSettings', () => {
     it('does not show the acknowledge trigger for a case search metric', async () => {
       renderWithTestingProviders(
         <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
           kpiMetrics={[
             { id: 'open-1', kind: 'predefined', predefinedId: 'open_cases', display: 'value' },
           ]}
@@ -517,6 +641,7 @@ describe('KpiMetricsSettings', () => {
 
       renderWithTestingProviders(
         <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
           kpiMetrics={[
             {
               ...customMetric('a'),
@@ -554,6 +679,7 @@ describe('KpiMetricsSettings', () => {
 
       renderWithTestingProviders(
         <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
           kpiMetrics={[
             {
               ...customMetric('a'),
@@ -584,7 +710,12 @@ describe('KpiMetricsSettings', () => {
       });
 
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[customMetric('a')]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));

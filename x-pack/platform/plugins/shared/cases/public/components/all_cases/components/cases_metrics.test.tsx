@@ -143,6 +143,29 @@ describe('Cases metrics', () => {
         expect(screen.queryByTestId('cases-kpi-tiles')).not.toBeInTheDocument();
       });
 
+      it('starts collapsed with the team default collapsed and no user choice', async () => {
+        renderWithTestingProviders(<CasesMetrics {...kpiProps} kpiTilesDisplay="collapsed" />);
+
+        expect(await screen.findByTestId('cases-kpi-tiles-toggle')).toHaveTextContent(
+          'Show metrics'
+        );
+        expect(screen.queryByTestId('cases-kpi-tiles')).not.toBeInTheDocument();
+      });
+
+      it('uses the user choice over the team default', async () => {
+        const { unmount } = renderWithTestingProviders(
+          <CasesMetrics {...kpiProps} kpiTilesDisplay="collapsed" />
+        );
+
+        await userEvent.click(await screen.findByTestId('cases-kpi-tiles-toggle'));
+        expect(await screen.findByTestId('cases-kpi-tiles')).toBeInTheDocument();
+        unmount();
+
+        renderWithTestingProviders(<CasesMetrics {...kpiProps} kpiTilesDisplay="collapsed" />);
+
+        expect(await screen.findByTestId('cases-kpi-tiles')).toBeInTheDocument();
+      });
+
       it('has no control with no saved list', () => {
         renderWithTestingProviders(<CasesMetrics {...props} />);
 

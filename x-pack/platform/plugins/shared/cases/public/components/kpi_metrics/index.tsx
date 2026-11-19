@@ -11,14 +11,16 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiHorizontalRule,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { MAX_METRICS_PER_PAGE, PREDEFINED_KPI_METRICS } from '../../../common/constants';
 import type { KpiMetricRequest } from '../../../common/types/api';
-import type { KpiMetricConfiguration } from '../../../common/types/domain';
+import type { KpiMetricConfiguration, KpiTilesDisplay } from '../../../common/types/domain';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { KpiMetricFlyout } from './kpi_metric_flyout';
 import * as i18n from './translations';
@@ -61,19 +63,31 @@ const getMetricDescription = (metric: KpiMetricRequest): string => {
 const getMetricKey = (metric: KpiMetricRequest, position: number): string =>
   metric.id ?? `${metric.kind}-${position}`;
 
+const TILES_DISPLAY_OPTIONS: Array<{ value: KpiTilesDisplay; text: string }> = [
+  { value: 'expanded', text: i18n.TILES_DISPLAY_EXPANDED },
+  { value: 'collapsed', text: i18n.TILES_DISPLAY_COLLAPSED },
+];
+
 export interface KpiMetricsSettingsProps {
   /**
    * The saved case list metrics. Undefined when the admin never saved a list.
    */
   kpiMetrics?: KpiMetricConfiguration[];
+  /**
+   * The team default of the start state of the tiles. Undefined means expanded.
+   */
+  tilesDisplay?: KpiTilesDisplay;
   isLoading: boolean;
   onSave: (metrics: KpiMetricRequest[]) => void;
+  onSaveTilesDisplay: (display: KpiTilesDisplay) => void;
 }
 
 const KpiMetricsSettingsComponent: React.FC<KpiMetricsSettingsProps> = ({
   kpiMetrics,
+  tilesDisplay,
   isLoading,
   onSave,
+  onSaveTilesDisplay,
 }) => {
   const { permissions } = useCasesContext();
   const canEdit = permissions.settings && !isLoading;
@@ -133,6 +147,18 @@ const KpiMetricsSettingsComponent: React.FC<KpiMetricsSettingsProps> = ({
 
   return (
     <div data-test-subj="kpi-metrics-settings">
+      <EuiFormRow label={i18n.TILES_DISPLAY} helpText={i18n.TILES_DISPLAY_HELP}>
+        <EuiSelect
+          options={TILES_DISPLAY_OPTIONS}
+          value={tilesDisplay ?? 'expanded'}
+          disabled={!canEdit}
+          onChange={(e) =>
+            onSaveTilesDisplay(e.target.value === 'collapsed' ? 'collapsed' : 'expanded')
+          }
+          data-test-subj="kpi-tiles-display"
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
       {isDefaultList && (
         <>
           <EuiText size="s" color="subdued" data-test-subj="kpi-metrics-default-note">

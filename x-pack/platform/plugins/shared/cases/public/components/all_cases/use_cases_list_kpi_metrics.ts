@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { omit } from 'lodash';
 import { isAnalyticsPredefinedKpiMetric } from '../../../common/constants';
-import type { KpiMetricConfiguration } from '../../../common/types/domain';
+import type { KpiMetricConfiguration, KpiTilesDisplay } from '../../../common/types/domain';
 import type { KpiMetricResult } from '../../../common/types/api';
 import type { FilterOptions } from '../../../common/ui/types';
 import { useCasesConfig } from '../../common/lib/kibana';
@@ -18,6 +18,7 @@ import { useGetKpiMetrics } from '../../containers/use_get_kpi_metrics';
 
 interface UseCasesListKpiMetricsResult {
   kpiMetrics?: KpiMetricConfiguration[];
+  kpiTilesDisplay?: KpiTilesDisplay;
   kpiResults?: KpiMetricResult[];
   isLoadingKpiResults: boolean;
   isAnalyticsEnabled: boolean;
@@ -58,6 +59,7 @@ export const useCasesListKpiMetrics = ({
 
   return {
     kpiMetrics,
+    kpiTilesDisplay: configuration?.metrics?.casesListDisplay,
     kpiResults: data?.metrics,
     isLoadingKpiResults: isFetching,
     isAnalyticsEnabled: analyticsV2Enabled && data?.enabled !== false,

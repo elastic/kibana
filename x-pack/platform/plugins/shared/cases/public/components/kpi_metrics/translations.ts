@@ -22,6 +22,29 @@ export const DEFAULT_METRICS_NOTE = i18n.translate('xpack.cases.kpiMetrics.defau
   defaultMessage: 'The case list shows the default metrics. A change saves your own list.',
 });
 
+export const TILES_DISPLAY = i18n.translate('xpack.cases.kpiMetrics.tilesDisplay', {
+  defaultMessage: 'Metrics on the case list',
+});
+
+export const TILES_DISPLAY_HELP = i18n.translate('xpack.cases.kpiMetrics.tilesDisplayHelp', {
+  defaultMessage:
+    'The start state of the metrics. Each user can still show or hide the metrics in the browser.',
+});
+
+export const TILES_DISPLAY_EXPANDED = i18n.translate(
+  'xpack.cases.kpiMetrics.tilesDisplayExpanded',
+  {
+    defaultMessage: 'Expanded',
+  }
+);
+
+export const TILES_DISPLAY_COLLAPSED = i18n.translate(
+  'xpack.cases.kpiMetrics.tilesDisplayCollapsed',
+  {
+    defaultMessage: 'Collapsed',
+  }
+);
+
 export const NO_METRICS = i18n.translate('xpack.cases.kpiMetrics.noMetrics', {
   defaultMessage: 'The case list shows no metrics.',
 });
