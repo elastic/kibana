@@ -61,7 +61,6 @@ describe('defineRoutes', () => {
     actionsConfigUtils: actionsConfigMock.create(),
     logger: loggingSystemMock.createLogger(),
     core: coreMock.createSetup(),
-    getConnectorSpecSummaries: () => [],
     oauthRateLimiter: new OAuthRateLimiter({
       config: {
         authorize: { lookbackWindow: '1h', limit: 100 },

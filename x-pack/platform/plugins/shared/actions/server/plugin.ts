@@ -544,7 +544,6 @@ export class ActionsPlugin
       core,
       oauthRateLimiter,
       inboundEvents,
-      getConnectorSpecSummaries: () => listSpecSummaries(this.actionTypeRegistry!),
     });
 
     return {
