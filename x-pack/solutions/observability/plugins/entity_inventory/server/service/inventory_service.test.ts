@@ -12,7 +12,7 @@ import {
   k8sDeploymentOtelAndAgentFixture,
   k8sNodeFixture,
 } from '../inventory/__fixtures__/definitions';
-import { buildColumns } from '../inventory/generator';
+import { buildColumns, getDynamicBlock } from '../inventory/generator';
 import { InventoryService } from './inventory_service';
 
 jest.mock('../inventory/generator', () => {
@@ -67,6 +67,7 @@ describe('InventoryService.listTypes', () => {
           { name: 'resource_id', kind: 'attribute' },
           { name: 'last_seen', kind: 'last_seen' },
         ],
+        suggestedFilters: [],
         sources: [
           {
             indexPattern: 'metrics-kubernetes.state_deployment-*',
@@ -76,6 +77,23 @@ describe('InventoryService.listTypes', () => {
         ],
       },
     ]);
+  });
+
+  it('returns the suggested filters of a definition, in the order it declares them', async () => {
+    const suggesting = {
+      ...k8sDeploymentOtelAndAgentFixture,
+      dynamic: {
+        ...getDynamicBlock(k8sDeploymentOtelAndAgentFixture),
+        suggestedFilters: ['paused', 'k8s.cluster.name'],
+      },
+    };
+    const { service } = createService([suggesting]);
+
+    const {
+      types: [type],
+    } = await service.listTypes();
+
+    expect(type.suggestedFilters).toStrictEqual(['paused', 'k8s.cluster.name']);
   });
 
   it('omits definitions without a dynamic block', async () => {

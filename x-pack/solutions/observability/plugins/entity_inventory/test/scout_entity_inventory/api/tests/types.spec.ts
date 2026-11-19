@@ -15,12 +15,14 @@ const SPACE_ID = `entity-inventory-types-${randomUUID()}`;
 // Every registered type with a `dynamic` block: the entity store's built-in `host` and this plugin's own.
 const INVENTORY_TYPES = ['host', 'k8s.deployment'];
 const K8S_DEPLOYMENT_IDENTITY_FIELDS = ['kubernetes.namespace', 'kubernetes.deployment.name'];
+const K8S_DEPLOYMENT_SUGGESTED_FILTERS = ['k8s.cluster.name', 'kubernetes.namespace'];
 
 interface InventoryTypeResponse {
   type: string;
   name: string;
   identityFields: string[];
   columns: Array<{ name: string; kind: string }>;
+  suggestedFilters: string[];
   sources: Array<{ indexPattern: string; filter?: string }>;
 }
 
@@ -54,6 +56,7 @@ apiTest.describe(
       expect(k8sDeployment?.name).toBe('K8s Deployment');
       expect(k8sDeployment?.identityFields).toStrictEqual(K8S_DEPLOYMENT_IDENTITY_FIELDS);
       expect(k8sDeployment?.columns[0].name).toBe('entity.id');
+      expect(k8sDeployment?.suggestedFilters).toStrictEqual(K8S_DEPLOYMENT_SUGGESTED_FILTERS);
       expect(k8sDeployment?.sources).toHaveLength(2);
     });
 

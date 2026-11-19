@@ -63,6 +63,8 @@ export interface InventoryType {
   /** The identity plan's grouping fields. */
   identityFields: string[];
   columns: InventoryTypeColumn[];
+  /** The definition's `dynamic.suggestedFilters`, in display order; empty when it suggests none. */
+  suggestedFilters: string[];
   /** The definition's `dynamic.sources`, in source order. */
   sources: InventoryTypeSource[];
 }

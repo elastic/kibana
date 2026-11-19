@@ -305,7 +305,7 @@ export class InventoryService {
 
   private buildType = (definition: RegisteredEntityDefinition): InventoryType => {
     const { type, name, description } = definition;
-    const { sources } = getDynamicBlock(definition);
+    const { sources, suggestedFilters = [] } = getDynamicBlock(definition);
     const identityPlan = resolveIdentityPlan(definition);
     const columns = buildColumns(
       definition,
@@ -318,6 +318,7 @@ export class InventoryService {
       description,
       identityFields: identityPlan.groupingFields,
       columns: toResponseColumns(columns),
+      suggestedFilters,
       sources: sources.map(({ indexPattern, filter }) => ({ indexPattern, filter })),
     };
   };
