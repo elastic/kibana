@@ -68,15 +68,42 @@ export const hashText = (text: string): string =>
   createHash('sha256').update(text).digest('hex').slice(0, 12);
 
 /**
- * The commit a prompt spec names. `merge-base` is where this checkout branched from `origin/main`,
- * the baseline a branch's change should be compared against.
+ * The commit a prompt spec names. `merge-base` is where this checkout branched from `main`, the
+ * baseline a branch's change should be compared against. In a fork checkout `origin` is the fork,
+ * whose `main` can lag behind, so `upstream/main` is used when it exists. A commit this checkout
+ * doesn't have (a shallow CI clone) is fetched from `origin` first.
  */
 export const resolvePromptCommit = (spec: string, repoRoot = REPO_ROOT): string => {
   const git = (...args: string[]) =>
-    execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8' }).trim();
-  return spec === 'merge-base'
-    ? git('merge-base', 'HEAD', 'origin/main')
-    : git('rev-parse', '--verify', `${spec}^{commit}`);
+    execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8', stdio: 'pipe' }).trim();
+  const hasRef = (ref: string) => {
+    try {
+      git('rev-parse', '--verify', '--quiet', `${ref}^{commit}`);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  if (spec === 'merge-base') {
+    return git('merge-base', 'HEAD', hasRef('upstream/main') ? 'upstream/main' : 'origin/main');
+  }
+  if (!hasRef(spec) && /^[0-9a-f]{40}$/.test(spec)) {
+    git('fetch', '--quiet', '--no-tags', '--depth=1', 'origin', spec);
+  }
+  return git('rev-parse', '--verify', `${spec}^{commit}`);
+};
+
+/**
+ * The prompt the writeup eval compares against. `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` when set (empty
+ * turns the comparison off). Otherwise a PR build compares against the commit the PR branched from,
+ * which CI exports as `PR_MERGE_BASE`, so a PR run scores the change head to head in one run.
+ */
+export const baselinePromptSpec = (
+  env: Record<string, string | undefined> = process.env
+): string | undefined => {
+  const explicit = env.NIGHTSHIFT_WRITEUP_BASELINE_PROMPT;
+  if (explicit !== undefined) return explicit.trim() || undefined;
+  return env.GITHUB_PR_NUMBER && env.PR_MERGE_BASE ? env.PR_MERGE_BASE.trim() : undefined;
 };
 
 /**

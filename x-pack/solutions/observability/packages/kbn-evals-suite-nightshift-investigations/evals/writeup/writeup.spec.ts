@@ -10,12 +10,22 @@ import { join } from 'path';
 import { expect } from '@playwright/test';
 import { selectEvaluators, tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
-import { isWriteupDatasetFile } from '../../src/datasets/eval_selection';
-import { ORCA_WRITEUP_RELEASE, guardValidatedExamples, loadWriteupDataset } from './datasets';
+import {
+  ORCA_WRITEUP_RELEASE,
+  guardValidatedExamples,
+  isWriteupDatasetFile,
+  loadWriteupDataset,
+} from './datasets';
 import { goldensByCase, goldensDirFor, readGoldens } from './goldens';
 import { createWriteupEvaluators } from './evaluators';
 import { formatReport, judgeCoverage, toWriteupRows, type WriteupResults } from './report';
-import { WRITEUP_DATA_DIR, createGenerationCache, createWriteupTask, loadPromptArm } from './task';
+import {
+  WRITEUP_DATA_DIR,
+  baselinePromptSpec,
+  createGenerationCache,
+  createWriteupTask,
+  loadPromptArm,
+} from './task';
 import type { WriteupTaskOutput } from './types';
 
 /**
@@ -55,7 +65,7 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
       const votes = VOTES;
       // The checkout's prompt unless NIGHTSHIFT_WRITEUP_PROMPT names another (a git ref or a file).
       const arm = loadPromptArm(process.env.NIGHTSHIFT_WRITEUP_PROMPT);
-      const baselineSpec = process.env.NIGHTSHIFT_WRITEUP_BASELINE_PROMPT;
+      const baselineSpec = baselinePromptSpec();
       const baseline = baselineSpec ? loadPromptArm(baselineSpec) : undefined;
       log.info(
         `Rewriting the final reply of ${dataset.examples.length} rounds of ${dataset.name} with prompt ${arm.label} (${arm.hash})` +

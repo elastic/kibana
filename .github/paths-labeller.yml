@@ -77,6 +77,6 @@
     - 'x-pack/platform/plugins/shared/inference/**/*.*'
     - 'x-pack/platform/packages/shared/ai-infra/**/*.*'
 # The investigator's reply rules and the eval that scores them; the label runs the writeup eval.
-- 'evals:nightshift-writeup':
+- 'evals:nightshift-investigations-writeup':
     - 'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/response_style.md.text'
     - 'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/evals/writeup/**/*.*'

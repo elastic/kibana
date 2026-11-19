@@ -12,7 +12,6 @@ import stringify from 'safe-stable-stringify';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
 import { DatasetTags } from '@kbn/evals-common';
-import { isWriteupDatasetFile } from '../../src/datasets/eval_selection';
 import {
   REPLY_TYPES,
   defaultReplyType,
@@ -20,6 +19,9 @@ import {
   writeupExampleSchema,
   type WriteupExample,
 } from './types';
+
+/** A writeup conversations file (a `.json` path) rather than a stored dataset's name. */
+export const isWriteupDatasetFile = (name: string): boolean => name.endsWith('.json');
 
 /**
  * The default dataset: synthetic ORCA investigations with scripted follow-ups, stored in the golden

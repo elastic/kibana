@@ -20,6 +20,7 @@ import {
   fillKnowledge,
   loadPromptArm,
   RESPONSE_STYLE_PATH,
+  baselinePromptSpec,
   resolvePromptCommit,
   replayReply,
 } from './task';
@@ -286,6 +287,44 @@ describe('loadPromptArm', () => {
     expect(loadPromptArm('HEAD', root).label).toBe(`HEAD@${head.slice(0, 10)}`);
     expect(() => resolvePromptCommit('no-such-ref', root)).toThrow();
     rmSync(root, { recursive: true, force: true });
+  });
+
+  it('prefers upstream/main for merge-base, so a stale fork main adds no prompt change', () => {
+    const root = mkdtempSync(join(tmpdir(), 'writeup-upstream-'));
+    const git = (...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim();
+    const commitPrompt = (text: string) => {
+      mkdirSync(dirname(join(root, INVESTIGATOR_PROMPT_PATH)), { recursive: true });
+      writeFileSync(join(root, INVESTIGATOR_PROMPT_PATH), text);
+      git('add', '.');
+      git('commit', '-q', '-m', text);
+      return git('rev-parse', 'HEAD');
+    };
+    git('init', '-q');
+    const forkMain = commitPrompt('old main prompt');
+    const upstreamMain = commitPrompt("someone else's prompt change");
+    git('update-ref', 'refs/remotes/origin/main', forkMain);
+    commitPrompt('branch prompt');
+
+    expect(resolvePromptCommit('merge-base', root)).toBe(forkMain);
+    git('update-ref', 'refs/remotes/upstream/main', upstreamMain);
+    expect(resolvePromptCommit('merge-base', root)).toBe(upstreamMain);
+    expect(loadPromptArm('merge-base', root).prompt).toBe("someone else's prompt change");
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it('compares a PR build against its merge base unless a baseline is set', () => {
+    const pr = { GITHUB_PR_NUMBER: '306343', PR_MERGE_BASE: 'abc123' };
+    expect(baselinePromptSpec(pr)).toBe('abc123');
+    expect(baselinePromptSpec({ PR_MERGE_BASE: 'abc123' })).toBeUndefined();
+    expect(baselinePromptSpec({})).toBeUndefined();
+    expect(baselinePromptSpec({ ...pr, NIGHTSHIFT_WRITEUP_BASELINE_PROMPT: 'origin/main' })).toBe(
+      'origin/main'
+    );
+    expect(baselinePromptSpec({ ...pr, NIGHTSHIFT_WRITEUP_BASELINE_PROMPT: ' ' })).toBeUndefined();
   });
 
   it('fills the reply rules from the same place as the prompt', () => {
