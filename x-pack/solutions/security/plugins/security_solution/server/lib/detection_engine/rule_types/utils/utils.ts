@@ -91,14 +91,14 @@ export interface TimestampFieldCapsResponse {
   body: Pick<estypes.FieldCapsResponse, 'indices' | 'fields'>;
 }
 
-export const hasTimestampFields = async (args: {
+export const hasTimestampFields = (args: {
   timestampField: string;
   timestampFieldCapsResponse: TimestampFieldCapsResponse;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-}): Promise<{
+}): {
   foundNoIndices: boolean;
   warningMessage: string | undefined;
-}> => {
+} => {
   const { timestampField, timestampFieldCapsResponse, ruleExecutionLogger } = args;
 
   if (

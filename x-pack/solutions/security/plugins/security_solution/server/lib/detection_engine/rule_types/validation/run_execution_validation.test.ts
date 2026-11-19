@@ -72,7 +72,7 @@ describe('runExecutionValidation', () => {
     mockGetMatchedIndices.mockReset();
     scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-    jest.mocked(hasTimestampFields).mockResolvedValue({
+    jest.mocked(hasTimestampFields).mockReturnValue({
       foundNoIndices: false,
       warningMessage: undefined,
     });

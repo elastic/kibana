@@ -662,7 +662,7 @@ describe('utils', () => {
   });
 
   describe('hasTimestampFields', () => {
-    test('returns true when missing timestamp override field', async () => {
+    test('returns true when missing timestamp override field', () => {
       const timestampField = 'event.ingested';
       const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
@@ -686,7 +686,7 @@ describe('utils', () => {
         },
       };
 
-      const { foundNoIndices, warningMessage } = await hasTimestampFields({
+      const { foundNoIndices, warningMessage } = hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           FieldCapsResponse,
@@ -701,7 +701,7 @@ describe('utils', () => {
       );
     });
 
-    test('returns true when missing timestamp field', async () => {
+    test('returns true when missing timestamp field', () => {
       const timestampField = '@timestamp';
       const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
@@ -725,7 +725,7 @@ describe('utils', () => {
         },
       };
 
-      const { foundNoIndices, warningMessage } = await hasTimestampFields({
+      const { foundNoIndices, warningMessage } = hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           FieldCapsResponse,

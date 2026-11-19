@@ -125,10 +125,10 @@ export const runExecutionValidation = async (
     };
   };
 
-  const warnAboutMissingTimestampFields = async (
+  const warnAboutMissingTimestampFields = (
     timestampFieldCapsResponse: TimestampFieldCapsResponse
-  ): Promise<void> => {
-    const { warningMessage } = await hasTimestampFields({
+  ): void => {
+    const { warningMessage } = hasTimestampFields({
       timestampField: primaryTimestamp,
       timestampFieldCapsResponse,
       ruleExecutionLogger,
@@ -191,11 +191,7 @@ export const runExecutionValidation = async (
 
     // A failed index resolution has no timestamp fields to check and its error is already reported
     if (!skipExecution && threatIndexResolution != null) {
-      try {
-        await warnAboutMissingTimestampFields(threatIndexResolution.timestampFieldCapsResponse);
-      } catch (exc) {
-        warnings.push(`Threat index timestamp fields check failed to execute ${exc}`);
-      }
+      warnAboutMissingTimestampFields(threatIndexResolution.timestampFieldCapsResponse);
     }
   }
 
@@ -210,18 +206,14 @@ export const runExecutionValidation = async (
   }
 
   if (inputIndexResolution != null) {
-    try {
-      const { timestampFieldCapsResponse } = inputIndexResolution;
+    const { timestampFieldCapsResponse } = inputIndexResolution;
 
-      await warnAboutMissingTimestampFields(timestampFieldCapsResponse);
+    warnAboutMissingTimestampFields(timestampFieldCapsResponse);
 
-      ({ dateNanosTimestampFields, mixedTimestampFields } = getDateNanosTimestampFields(
-        timestampFields,
-        timestampFieldCapsResponse
-      ));
-    } catch (exc) {
-      warnings.push(`Timestamp fields check failed to execute ${exc}`);
-    }
+    ({ dateNanosTimestampFields, mixedTimestampFields } = getDateNanosTimestampFields(
+      timestampFields,
+      timestampFieldCapsResponse
+    ));
   }
 
   if (!isServerless && shouldCheckFrozenIndices()) {
