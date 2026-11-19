@@ -30,25 +30,30 @@ const NO_CONTEXT_ENGINE_ROLE: KibanaRole = {
 };
 
 apiTest.describe('context engine dreaming templates API', { tag: tags.stateful.classic }, () => {
-  let initialMemoryEnabled: boolean | undefined;
+  let initialMemorySetting: { value: boolean | undefined } | undefined;
 
   apiTest.beforeAll(async ({ kbnClient }) => {
     const { data } = await kbnClient.request<GlobalUiSettingsResponse>({
       method: 'GET',
       path: GLOBAL_SETTINGS_PATH,
     });
-    initialMemoryEnabled = data.settings?.[CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]?.userValue;
+    initialMemorySetting = {
+      value: data.settings?.[CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]?.userValue,
+    };
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
-    if (initialMemoryEnabled === undefined) {
+    if (!initialMemorySetting) {
+      return;
+    }
+    if (initialMemorySetting.value === undefined) {
       await kbnClient.request({
         method: 'DELETE',
         path: `${GLOBAL_SETTINGS_PATH}/${CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID}`,
       });
     } else {
       await kbnClient.uiSettings.updateGlobal({
-        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: initialMemoryEnabled,
+        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: initialMemorySetting.value,
       });
     }
     await kbnClient.uiSettings.waitForEventualCacheRefresh();
