@@ -64,6 +64,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
   private readonly isServerlessEnabled: boolean;
+  private readonly isEce: boolean;
   private readonly contextProviders: Array<FC<PropsWithChildren<unknown>>> = [];
   private readonly logger: Logger;
   private elasticsearchConfig?: PublicElasticsearchConfigType;
@@ -73,6 +74,11 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
     this.isServerlessEnabled = !!this.config.serverless?.project_id;
+    this.isEce = getIsEce({
+      isCloudEnabled: this.isCloudEnabled,
+      isServerlessEnabled: this.isServerlessEnabled,
+      isSaasContainer: this.config.isSaasContainer,
+    });
     this.logger = initializerContext.logger.get();
     this.elasticsearchConfig = undefined;
   }
@@ -89,11 +95,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     const kibanaUrl = decodedId?.kibanaUrl;
 
     this.cloudUrls.setup(this.config, core, kibanaUrl);
-    const isEce = getIsEce({
-      isCloudEnabled: this.isCloudEnabled,
-      isServerlessEnabled: this.isServerlessEnabled,
-      isSaasContainer: this.config.isSaasContainer,
-    });
 
     return {
       cloudId: id,
@@ -107,7 +108,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
-      isEce,
+      isEce: this.isEce,
       managedOtlp: {
         url: this.config.managed_otlp?.url,
       },
@@ -172,11 +173,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     return {
       CloudContextProvider,
       isCloudEnabled: this.isCloudEnabled,
-      isEce: getIsEce({
-        isCloudEnabled: this.isCloudEnabled,
-        isServerlessEnabled: this.isServerlessEnabled,
-        isSaasContainer: this.config.isSaasContainer,
-      }),
+      isEce: this.isEce,
       cloudId: this.config.id,
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
