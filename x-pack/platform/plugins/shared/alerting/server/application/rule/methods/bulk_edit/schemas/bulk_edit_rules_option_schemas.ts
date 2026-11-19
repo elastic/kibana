@@ -6,8 +6,12 @@
  */
 import { schema } from '@kbn/config-schema';
 import { rRuleRequestSchema } from '@kbn/response-ops-schedule-schema';
-import { notifyWhenSchema, actionRequestSchema, systemActionRequestSchema } from '../../../schemas';
-import { validateDuration } from '../../../validation';
+import {
+  notifyWhenSchema,
+  actionRequestSchema,
+  systemActionRequestSchema,
+  validatedScheduleSchema,
+} from '../../../schemas';
 import { validateSnoozeSchedule } from '../validation';
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
@@ -41,7 +45,7 @@ const bulkEditActionsSchema = schema.object({
 const bulkEditScheduleSchema = schema.object({
   operation: schema.literal('set'),
   field: schema.literal('schedule'),
-  value: schema.object({ interval: schema.string({ validate: validateDuration }) }),
+  value: validatedScheduleSchema,
 });
 
 const bulkEditThrottleSchema = schema.object({

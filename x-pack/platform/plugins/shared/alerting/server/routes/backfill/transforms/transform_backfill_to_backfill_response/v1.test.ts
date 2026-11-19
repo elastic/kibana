@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Frequency } from '@kbn/rrule';
 import type { Backfill } from '../../../../application/backfill/result/types';
 import { transformBackfillToBackfillResponse } from './v1';
 import { backfillInitiator } from '../../../../../common/constants';
@@ -73,6 +74,19 @@ describe('transformBackfillToBackfillResponse', () => {
         status: 'pending',
         schedule: [{ run_at: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' }],
       });
+    });
+
+    it('serializes rrule rule schedules into strings', () => {
+      const result = transformBackfillToBackfillResponse({
+        ...mockBackfillResult,
+        rule: {
+          ...mockBackfillResult.rule,
+          schedule: {
+            rrule: { freq: Frequency.WEEKLY, interval: 1, tzid: 'UTC', byweekday: ['FR'] },
+          },
+        },
+      });
+      expect(result.rule.schedule).toEqual({ rrule: 'RRULE:FREQ=WEEKLY;BYDAY=FR' });
     });
   });
 });

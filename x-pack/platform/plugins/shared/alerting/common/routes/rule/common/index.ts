@@ -14,6 +14,7 @@ export {
 } from './constants/latest';
 
 export { flappingSchema } from './flapping/schemas/latest';
+export { ruleScheduleRequestSchema, ruleScheduleResponseSchema } from './schedule/schemas/latest';
 
 export type {
   RuleNotifyWhen,
@@ -24,6 +25,7 @@ export type {
 } from './constants/latest';
 
 export type { Flapping } from './flapping/types/latest';
+export type { RuleScheduleRequest, RuleScheduleResponse } from './schedule/types/latest';
 
 export {
   ruleNotifyWhen as ruleNotifyWhenV1,
@@ -35,6 +37,10 @@ export {
 
 export { flappingSchema as flappingSchemaV1 } from './flapping/schemas/v1';
 export { flappingSchema as flappingSchemaV2 } from './flapping/schemas/v2';
+export {
+  ruleScheduleRequestSchema as ruleScheduleRequestSchemaV1,
+  ruleScheduleResponseSchema as ruleScheduleResponseSchemaV1,
+} from './schedule/schemas/v1';
 
 export type {
   RuleNotifyWhen as RuleNotifyWhenV1,
@@ -46,3 +52,7 @@ export type {
 
 export type { Flapping as FlappingV1 } from './flapping/types/v1';
 export type { Flapping as FlappingV2 } from './flapping/types/v2';
+export type {
+  RuleScheduleRequest as RuleScheduleRequestV1,
+  RuleScheduleResponse as RuleScheduleResponseV1,
+} from './schedule/types/v1';

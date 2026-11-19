@@ -6,6 +6,7 @@
  */
 
 import { omit, pick } from 'lodash';
+import { Frequency } from '@kbn/rrule';
 import { updateRuleRoute } from './update_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -224,6 +225,47 @@ describe('updateRuleRoute', () => {
     expect(res.ok).toHaveBeenCalled();
   });
 
+  it('updates a rule with an rrule schedule', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateRuleRoute(router, licenseState);
+
+    const [, handler] = router.put.mock.calls[0];
+    const mockRruleString =
+      'DTSTART;TZID=America/New_York:20261117T060000\nRRULE:FREQ=DAILY;INTERVAL=2;BYHOUR=6';
+    const mockRrule = {
+      freq: Frequency.DAILY,
+      interval: 2,
+      tzid: 'America/New_York',
+      dtstart: '2026-11-17T11:00:00.000Z',
+      byhour: [6],
+    };
+
+    rulesClient.update.mockResolvedValueOnce({
+      ...mockedRule,
+      schedule: { rrule: mockRrule },
+    } as unknown as SanitizedRule);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: { id: '1' },
+        body: { ...updateRequest, schedule: { rrule: mockRruleString } },
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toEqual({
+      body: { ...updateResult, schedule: { rrule: mockRruleString } },
+    });
+    expect(rulesClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ schedule: { rrule: mockRrule } }),
+      })
+    );
+  });
+
   it('ensures the license allows updating rules', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -290,10 +332,11 @@ describe('updateRuleRoute', () => {
 
     rulesClient.update.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
-      'ok',
-      'forbidden',
-    ]);
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { params: {}, body: updateRequest },
+      ['ok', 'forbidden']
+    );
 
     await handler(context, req, res);
 

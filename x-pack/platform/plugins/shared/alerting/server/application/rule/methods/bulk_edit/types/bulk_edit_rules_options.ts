@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { KueryNode } from '@kbn/es-query';
 import type { RuleChangeTracking } from '@kbn/alerting-types';
+import type { Schedule as RuleSchedule } from '@kbn/response-ops-scheduling-types';
 import type { ParamsModifier, ShouldIncrementRevision } from '../../../../../rules_client/common';
 import type {
   bulkEditRuleSnoozeScheduleSchema,
@@ -18,7 +19,14 @@ import type { RuleParams, RuleDomain } from '../../../types';
 import type { Rule } from '../../../../../../common';
 
 export type BulkEditRuleSnoozeSchedule = TypeOf<typeof bulkEditRuleSnoozeScheduleSchema>;
-export type BulkEditOperation = TypeOf<typeof bulkEditOperationSchema>;
+type BulkEditOperationFromSchema = TypeOf<typeof bulkEditOperationSchema>;
+type BulkEditScheduleOperation = Omit<
+  Extract<BulkEditOperationFromSchema, { field: 'schedule' }>,
+  'value'
+> & { value: RuleSchedule };
+export type BulkEditOperation =
+  | Exclude<BulkEditOperationFromSchema, { field: 'schedule' }>
+  | BulkEditScheduleOperation;
 export type BulkEditOperations = TypeOf<typeof bulkEditOperationsSchema>;
 
 export type BulkEditFields = keyof Pick<

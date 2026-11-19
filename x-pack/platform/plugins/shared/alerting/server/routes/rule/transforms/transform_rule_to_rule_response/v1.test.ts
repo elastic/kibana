@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Frequency } from '@kbn/rrule';
 import type { RuleAction, RuleSystemAction } from '../../../../../common';
 import { transformRuleToRuleResponse } from './v1';
 
@@ -97,6 +98,22 @@ describe('transformRuleToRuleResponse', () => {
           connector_type_id: '.test',
         },
       ]);
+    });
+  });
+
+  describe('schedule', () => {
+    it('keeps interval schedules', () => {
+      expect(transformRuleToRuleResponse(rule).schedule).toEqual({ interval: '1s' });
+    });
+
+    it('serializes rrule schedules into strings', () => {
+      const res = transformRuleToRuleResponse({
+        ...rule,
+        schedule: {
+          rrule: { freq: Frequency.DAILY, interval: 1, tzid: 'UTC', byhour: [8], byminute: [0] },
+        },
+      });
+      expect(res.schedule).toEqual({ rrule: 'RRULE:FREQ=DAILY;BYHOUR=8;BYMINUTE=0' });
     });
   });
 });

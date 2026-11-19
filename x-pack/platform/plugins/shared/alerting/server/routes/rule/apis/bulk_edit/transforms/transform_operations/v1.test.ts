@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Frequency } from '@kbn/rrule';
 import { transformOperations } from './v1';
 
 describe('transformOperations', () => {
@@ -60,6 +61,40 @@ describe('transformOperations', () => {
           isSystemAction,
         })
       ).toEqual([]);
+    });
+  });
+
+  describe('schedule', () => {
+    it('keeps interval schedules as they are', () => {
+      expect(
+        transformOperations({
+          operations: [{ field: 'schedule', operation: 'set', value: { interval: '5m' } }],
+          isSystemAction,
+        })
+      ).toEqual([{ field: 'schedule', operation: 'set', value: { interval: '5m' } }]);
+    });
+
+    it('parses rrule string schedules', () => {
+      expect(
+        transformOperations({
+          operations: [
+            {
+              field: 'schedule',
+              operation: 'set',
+              value: { rrule: 'RRULE:FREQ=HOURLY;INTERVAL=2;BYMINUTE=30' },
+            },
+          ],
+          isSystemAction,
+        })
+      ).toEqual([
+        {
+          field: 'schedule',
+          operation: 'set',
+          value: {
+            rrule: { freq: Frequency.HOURLY, interval: 2, tzid: 'UTC', byminute: [30] },
+          },
+        },
+      ]);
     });
   });
 });

@@ -91,6 +91,13 @@ module.exports = (request, options) => {
     });
   }
 
+  if (request === 'rrule-temporal') {
+    return resolve.sync('rrule-temporal/dist/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   if (request === 'unicorn-magic/node') {
     return resolve.sync('unicorn-magic/node.js', {
       basedir: options.basedir,

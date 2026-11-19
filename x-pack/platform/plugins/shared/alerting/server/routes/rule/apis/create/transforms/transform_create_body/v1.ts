@@ -10,6 +10,7 @@ import type {
   CreateRuleRequestBodyV1,
 } from '../../../../../../../common/routes/rule/apis/create';
 import type { CreateRuleData } from '../../../../../../application/rule/methods/create';
+import { transformRuleScheduleRequestV1 } from '../../../../transforms';
 import type {
   RuleParams,
   ActionRequest,
@@ -96,7 +97,7 @@ export const transformCreateBody = <Params extends RuleParams = never>({
     tags: createBody.tags,
     ...(createBody.throttle ? { throttle: createBody.throttle } : {}),
     params: createBody.params,
-    schedule: createBody.schedule,
+    schedule: transformRuleScheduleRequestV1(createBody.schedule),
     actions: transformCreateBodyActions(actions),
     systemActions: transformCreateBodySystemActions(systemActions),
     ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),

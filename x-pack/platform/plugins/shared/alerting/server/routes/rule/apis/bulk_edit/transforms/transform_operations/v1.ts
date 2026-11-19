@@ -7,6 +7,7 @@
 
 import type { BulkEditOperation } from '../../../../../../application/rule/methods/bulk_edit';
 import type { BulkEditRulesRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/bulk_edit';
+import { transformRuleScheduleRequestV1 } from '../../../../transforms';
 
 export const transformOperations = ({
   operations,
@@ -20,6 +21,14 @@ export const transformOperations = ({
   }
 
   return operations.map((operation) => {
+    if (operation.field === 'schedule') {
+      return {
+        field: operation.field,
+        operation: operation.operation,
+        value: transformRuleScheduleRequestV1(operation.value),
+      };
+    }
+
     if (operation.field !== 'actions') {
       return operation;
     }

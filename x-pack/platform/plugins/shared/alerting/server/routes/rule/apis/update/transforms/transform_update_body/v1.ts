@@ -11,6 +11,7 @@ import type {
   UpdateRuleRequestBodyV1,
 } from '../../../../../../../common/routes/rule/apis/update';
 import type { UpdateRuleData } from '../../../../../../application/rule/methods/update';
+import { transformRuleScheduleRequestV1 } from '../../../../transforms';
 import type {
   RuleParams,
   ActionRequest,
@@ -97,7 +98,7 @@ export const transformUpdateBody = <Params extends RuleParams = never>({
     tags: updateBody.tags,
     ...(updateBody.throttle ? { throttle: updateBody.throttle } : {}),
     params: updateBody.params,
-    schedule: updateBody.schedule,
+    schedule: transformRuleScheduleRequestV1(updateBody.schedule),
     actions: transformUpdateBodyActions(actions),
     systemActions: transformUpdateBodySystemActions(systemActions),
     ...(updateBody.notify_when ? { notifyWhen: updateBody.notify_when } : {}),

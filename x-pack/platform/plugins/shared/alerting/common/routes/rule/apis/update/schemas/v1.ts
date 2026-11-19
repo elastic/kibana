@@ -11,7 +11,7 @@ import { ruleParamsSchemaForUpdateV1 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
-import { flappingSchemaV2 } from '../../../common';
+import { flappingSchemaV2, ruleScheduleRequestSchemaV1 } from '../../../common';
 import { artifactsSchemaV1 } from '../../../request';
 
 export const updateRuleParamsExamples = () => path.join(__dirname, 'examples_update_rule.yaml');
@@ -154,12 +154,7 @@ export const updateBodySchema = schema.object(
       }),
       { defaultValue: [] }
     ),
-    schedule: schema.object({
-      interval: schema.string({
-        validate: validateDurationV1,
-        meta: { description: 'The interval is specified in seconds, minutes, hours, or days.' },
-      }),
-    }),
+    schedule: ruleScheduleRequestSchemaV1,
     throttle: schema.maybe(
       schema.nullable(
         schema.string({

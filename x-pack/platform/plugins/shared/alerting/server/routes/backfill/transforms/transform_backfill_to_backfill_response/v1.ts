@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IntervalSchedule } from '@kbn/alerting-types';
 import type { Backfill } from '../../../../application/backfill/result/types';
+import { transformRuleScheduleResponseV1 } from '../../../rule/transforms';
 
 export const transformBackfillToBackfillResponse = (backfill: Backfill) => {
   const { createdAt, rule, spaceId, schedule, initiator, initiatorId, ...rest } = backfill;
@@ -28,8 +28,7 @@ export const transformBackfillToBackfillResponse = (backfill: Backfill) => {
     space_id: spaceId,
     rule: {
       ...restRule,
-      // TODO: routes do not expose rrule schedules yet, see https://github.com/elastic/kibana-team/issues/2955
-      schedule: ruleSchedule as IntervalSchedule,
+      schedule: transformRuleScheduleResponseV1(ruleSchedule),
       rule_type_id: alertTypeId,
       api_key_owner: apiKeyOwner,
       api_key_created_by_user: apiKeyCreatedByUser,
