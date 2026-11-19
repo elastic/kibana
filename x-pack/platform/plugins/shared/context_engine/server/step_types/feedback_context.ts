@@ -38,6 +38,7 @@ export const getFeedbackContextStepDefinition = ({
           briefing,
           output_schema: outputSchema,
           has_signals: hasSignals,
+          can_analyze: canAnalyze,
           run,
         } = await buildFeedbackContext(aiIndexId, spaceId, {
           esClient,
@@ -47,7 +48,7 @@ export const getFeedbackContextStepDefinition = ({
 
         logger.debug(
           () =>
-            `Feedback context for AI index '${aiIndexId}': ${run.signal_count} signal(s) from ${run.signal_spaces.length} space(s), analyzable=${hasSignals}`
+            `Feedback context for AI index '${aiIndexId}': ${run.signal_count} signal(s) from ${run.signal_spaces.length} space(s), signals=${hasSignals}, analyzable=${canAnalyze}`
         );
 
         return {
@@ -56,6 +57,7 @@ export const getFeedbackContextStepDefinition = ({
             briefing,
             output_schema: outputSchema,
             has_signals: hasSignals,
+            can_analyze: canAnalyze,
             signal_window: run.signal_window,
             signal_spaces: run.signal_spaces,
             signal_count: run.signal_count,

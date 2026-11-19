@@ -441,6 +441,10 @@ export class AiIndexService {
         if (!existing) {
           throw new AiIndexNotFoundError(aiIndexId);
         }
+        if (existing.document.managed) {
+          throw new AiIndexManagedError(aiIndexId);
+        }
+
         const automations = existing.document.automations.filter(
           (entry) => entry.type !== automation.type || entry.value !== automation.value
         );

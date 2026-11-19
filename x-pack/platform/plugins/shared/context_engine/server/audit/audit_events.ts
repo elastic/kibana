@@ -86,7 +86,64 @@ export interface KiAuditEventParams {
 
 export enum ImprovementAuditAction {
   RECORD = 'context_engine_improvement_record',
+  APPROVE = 'context_engine_improvement_approve',
+  REJECT = 'context_engine_improvement_reject',
+  RUN = 'context_engine_feedback_analysis_run',
 }
+
+export interface ImprovementDecisionAuditEventParams {
+  action:
+    | ImprovementAuditAction.APPROVE
+    | ImprovementAuditAction.REJECT
+    | ImprovementAuditAction.RUN;
+  aiIndexId: string;
+  /** Id of the approved or rejected improvement; absent for a run. */
+  improvementId?: string;
+  error?: Error;
+}
+
+const DECISION_VERB: Record<
+  ImprovementDecisionAuditEventParams['action'],
+  { attempt: string; done: string }
+> = {
+  [ImprovementAuditAction.APPROVE]: { attempt: 'approve', done: 'approved' },
+  [ImprovementAuditAction.REJECT]: { attempt: 'reject', done: 'rejected' },
+  [ImprovementAuditAction.RUN]: {
+    attempt: 'run feedback analysis for',
+    done: 'run feedback analysis for',
+  },
+};
+
+/** Audit event for approving or rejecting an improvement, or starting a feedback analysis run. */
+export const improvementDecisionAuditEvent = ({
+  action,
+  aiIndexId,
+  improvementId,
+  error,
+}: ImprovementDecisionAuditEventParams): AuditEvent => {
+  const subject = improvementId
+    ? `improvement [id=${improvementId}] on AI index [id=${aiIndexId}]`
+    : `AI index [id=${aiIndexId}]`;
+
+  return {
+    message: error
+      ? `Failed attempt to ${DECISION_VERB[action].attempt} ${subject}`
+      : `User has ${DECISION_VERB[action].done} ${subject}`,
+    event: {
+      action,
+      category: ['database'],
+      type: [action === ImprovementAuditAction.RUN ? 'access' : 'change'],
+      outcome: error ? 'failure' : 'success',
+    },
+    kibana: {
+      saved_object: { type: 'ai_index', id: aiIndexId },
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+};
 
 export interface ImprovementAuditEventParams {
   aiIndexId: string;

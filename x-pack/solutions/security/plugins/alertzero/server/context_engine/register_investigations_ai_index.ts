@@ -29,7 +29,7 @@ export const ATTACK_FINGERPRINT_AI_INDEX_ID = 'security-attack-fingerprints';
 export const registerInvestigationsAiIndex = ({
   contextEngine,
 }: {
-  contextEngine: ContextEnginePluginSetup;
+  contextEngine: Pick<ContextEnginePluginSetup, 'registerAiIndex'>;
 }): void => {
   contextEngine.registerAiIndex(HUNT_COVERAGE_AI_INDEX_ID, {
     description:

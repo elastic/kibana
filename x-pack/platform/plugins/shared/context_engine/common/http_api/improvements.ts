@@ -19,6 +19,13 @@ export type ImprovementStatus = (typeof IMPROVEMENT_STATUSES)[number];
 export const isImprovementStatus = (value: string): value is ImprovementStatus =>
   (IMPROVEMENT_STATUSES as readonly string[]).includes(value);
 
+/** Improvement statuses that can still be approved or rejected. */
+export const OPEN_IMPROVEMENT_STATUSES: readonly ImprovementStatus[] = ['suggested', 'failed'];
+
+/** Whether the improvement can still be approved or rejected. */
+export const isOpenImprovement = (status: ImprovementStatus): boolean =>
+  OPEN_IMPROVEMENT_STATUSES.includes(status);
+
 /**
  * How much history an AI index carries, without the documents. A run is told the shape of what
  * came before so it knows whether to look, and queries the index itself for the lineage of the
@@ -72,7 +79,7 @@ export interface ImprovementResolution {
 export interface ImprovementProvenance {
   /** The analysis run that produced it. */
   agent_run_id: string;
-  /** Signals it was derived from. */
+  /** Signals the improvement was derived from; empty when it was derived from the index alone. */
   signal_ids: string[];
   /** Spaces those signals came from. */
   signal_spaces: string[];
@@ -125,6 +132,22 @@ export type ImprovementTransition = Extract<ImprovementStatus, 'applied' | 'reje
 export interface ListImprovementsResponse {
   items: Improvement[];
   total: number;
+}
+
+/** Response to approving or rejecting an improvement: its updated state. */
+export interface MutateImprovementResponse {
+  improvement: Improvement;
+}
+
+/** Response to starting a feedback analysis run. */
+export interface RunFeedbackAnalysisResponse {
+  /** Id of the started workflow execution. */
+  execution_id: string;
+}
+
+/** Body of a reject request. */
+export interface RejectImprovementRequest {
+  reason?: string;
 }
 
 /** What an analysis run posts when it finishes. */

@@ -25,10 +25,10 @@ import {
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { parseIntervalMinutes } from '../../common/validation';
 import type { AiIndexService } from '../ai_indices/service';
-import type { WorkflowEnablementApi } from '../feedback_analysis/schedule';
+import type { WorkflowsManagementPort } from '../feedback_analysis/schedule';
 
 /** The workflows management API dreaming uses. */
-export interface DreamingWorkflowsApi extends WorkflowEnablementApi {
+export interface DreamingWorkflowsApi extends WorkflowsManagementPort {
   cancelAllActiveWorkflowExecutions(
     workflowId: string,
     spaceId: string,

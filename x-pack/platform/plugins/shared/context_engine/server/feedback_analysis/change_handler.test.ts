@@ -25,6 +25,7 @@ describe('createFeedbackAnalysisChangeHandler', () => {
   const request = httpServerMock.createKibanaRequest();
   const scheduleService: jest.Mocked<FeedbackAnalysisScheduleService> = {
     reconcile: jest.fn().mockResolvedValue(undefined),
+    run: jest.fn(),
     remove: jest.fn().mockResolvedValue(undefined),
   };
   const handler = createFeedbackAnalysisChangeHandler(() => scheduleService);

@@ -19,16 +19,19 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
-import type { WorkflowEnablementApi } from './feedback_analysis/schedule';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
+import type { WorkflowsManagementPort } from './feedback_analysis/schedule';
 import type { ImprovementsServiceApi } from './improvements/service';
 import type { SessionEventsService } from './session_events/types';
 import type { SignalsServiceApi } from './signals/service';
+import type { WorkflowProvider } from './workflows/provider';
 
 export interface ContextEnginePluginSetup {
   registerAiIndex: (id: string, properties: AiIndexProperties) => void;
+  /** Registers the workflow operations used to apply automation improvements. */
+  registerWorkflowProvider: (provider: WorkflowProvider) => void;
 }
 
 export interface GetAiIndexDataReadServiceParams {
@@ -76,7 +79,7 @@ export interface ContextEngineSetupDependencies {
   taskManager: TaskManagerSetupContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   /** Optional in the manifest; without it a feedback analysis schedule cannot be enabled. */
-  workflowsManagement?: { management: WorkflowEnablementApi };
+  workflowsManagement?: { management: WorkflowsManagementPort };
   usageCollection?: UsageCollectionSetup;
 }
 

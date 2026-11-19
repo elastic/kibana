@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const CONTEXT_ENGINE_SETUP_AGENT_ID = 'platform.context_engine.setup' as const;
+export { CONTEXT_ENGINE_SETUP_AGENT_ID } from '@kbn/context-engine-plugin/common/constants';

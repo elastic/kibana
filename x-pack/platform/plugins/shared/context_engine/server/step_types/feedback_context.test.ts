@@ -23,6 +23,7 @@ const CONTEXT = {
   briefing: '# Feedback analysis for AI index `orders`',
   output_schema: { type: 'object', properties: { improvements: {} } },
   has_signals: true,
+  can_analyze: true,
   run: {
     signal_window: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-31T00:00:00.000Z' },
     signal_spaces: ['default', 'marketing'],
@@ -64,6 +65,7 @@ describe('getFeedbackContextStepDefinition', () => {
         briefing: CONTEXT.briefing,
         output_schema: CONTEXT.output_schema,
         has_signals: true,
+        can_analyze: true,
         signal_window: CONTEXT.run.signal_window,
         signal_spaces: ['default', 'marketing'],
         signal_count: 12,
@@ -84,13 +86,31 @@ describe('getFeedbackContextStepDefinition', () => {
     );
   });
 
-  it('reports a window with nothing classified so the run can skip the agent', async () => {
-    buildFeedbackContextMock.mockResolvedValue({ ...CONTEXT, has_signals: false });
+  it('reports a window with nothing classified, which the run analyzes anyway', async () => {
+    buildFeedbackContextMock.mockResolvedValue({
+      ...CONTEXT,
+      has_signals: false,
+      can_analyze: true,
+    });
     const context = createMockStepContext({ input: { ai_index_id: 'orders' }, esClient: {} });
 
     const result = await buildStep().handler(context);
 
     expect(result.output?.has_signals).toBe(false);
+    expect(result.output?.can_analyze).toBe(true);
+  });
+
+  it('reports an index with nothing to read, so the run can skip the agent', async () => {
+    buildFeedbackContextMock.mockResolvedValue({
+      ...CONTEXT,
+      has_signals: false,
+      can_analyze: false,
+    });
+    const context = createMockStepContext({ input: { ai_index_id: 'orders' }, esClient: {} });
+
+    const result = await buildStep().handler(context);
+
+    expect(result.output?.can_analyze).toBe(false);
   });
 
   it('fails the step when the AI index no longer exists', async () => {

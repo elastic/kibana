@@ -44,7 +44,8 @@ const renderTemplate = (template: string, values: Record<string, string | number
 export const CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW = {
   id: CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 1,
+  /** Must be bumped whenever `feedback_analysis.yaml` changes, or existing installs keep the old YAML. */
+  version: 3,
   billable: false,
   yamlTemplate: ({ aiIndexId, intervalMinutes }) =>
     renderTemplate(FEEDBACK_ANALYSIS_YAML, {
