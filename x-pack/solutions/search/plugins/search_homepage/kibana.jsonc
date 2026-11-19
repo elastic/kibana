@@ -14,9 +14,13 @@
     ],
     "requiredPlugins": [
       "elasticsearchHome",
+      "share",
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "console",
+      "home",
+      "licensing",
       "searchNavigation",
       "usageCollection",
     ],

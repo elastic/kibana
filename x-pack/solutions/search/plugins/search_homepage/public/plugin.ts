@@ -9,6 +9,7 @@ import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
+import { ANALYTICS_DEEP_LINK_ID, LEGACY_ANALYTICS_HOME_PATH } from './analytics/constants';
 import type {
   SearchHomepageAppPluginStartDependencies,
   SearchHomepageServicesContextDeps,
@@ -35,6 +36,16 @@ export class SearchHomepagePlugin
         return renderApp(coreStart, startDeps, element);
       },
       order: 0,
+      deepLinks: [
+        {
+          id: ANALYTICS_DEEP_LINK_ID,
+          path: LEGACY_ANALYTICS_HOME_PATH,
+          title: i18n.translate('xpack.searchHomepage.analytics.deepLinkTitle', {
+            defaultMessage: 'Analytics home',
+          }),
+          visibleIn: ['globalSearch'],
+        },
+      ],
       visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
     });
   }

@@ -10,12 +10,16 @@ import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public'
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ElasticsearchHomePublicStart } from '@kbn/elasticsearch-home/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 
 export interface SearchHomepageAppPluginStartDependencies {
+  agentBuilder?: AgentBuilderPluginStart;
   console?: ConsolePluginStart;
   elasticsearchHome: ElasticsearchHomePublicStart;
   usageCollection?: UsageCollectionStart;
   searchNavigation?: SearchNavigationPluginStart;
+  share: SharePluginStart;
 }
 
 export type SearchHomepageServicesContextDeps = SearchHomepageAppPluginStartDependencies & {
