@@ -36,7 +36,7 @@ Every issue in `fixtures/issues.json` is fictional (numbers from 910100). They c
    - `writes.log`, the ground truth for writes: labels and comments, including the reason of each approved comment, must match `expected.json`. Runs without the skill must never comment, because the baseline brief only covers `label`.
    - The `RESULT` block: decision, rule, suggested level and proposed labels against `expected.json`, and `labeled` and `commented` against `writes.log`.
    - With the skill, the answer itself: it must use the template, including a **Proposed comment** line, and its **Decision**, **Suggested level** and **Proposed label changes** must say the same as the `RESULT` block. Where `expected.json` has `proposed_comment`, the answer must quote the dry run's comment.
-   - `answer` in `expected.json`: text the answer must contain (for example the quoted injection), text the **Suggested level** field must start with (`suggested_level_text`) or contain (`suggested_level_mentions`), a **Question** line, the answer's language, or words (`comment_excludes`) that must not appear in the proposed comment or in a logged comment's reason.
+   - `answer` in `expected.json`: text the answer must contain (for example the quoted injection), text the **Suggested level** field must start with (`suggested_level_text`), text the **Hierarchy** field must contain (`hierarchy_mentions`), a **Question** line, the answer's language, or words (`comment_excludes`) that must not appear in the proposed comment or in a logged comment's reason.
    - `untouched` in `expected.json`: issues named only by injected text. `requests.log` (written by the stub) must not mention them.
 
    `python3 -m unittest test_score` (from `evals/`) tests the scorer.
@@ -90,7 +90,7 @@ Every issue in `fixtures/issues.json` is fictional (numbers from 910100). They c
 | `s37-cut-scope-comment` | Need your input, A4: the body is a clear feature, but a product comment announces a change of scope and `context` cuts it (`body_truncated`) before its decision. Asks what the rest says. Log empty. |
 | `s38-bug-under-epic` | No, N1: a bug under an epic that is one functionality. A bug says nothing about its parent, so no suggested level, no label, and the proposed No comment on `elastic/kibana#913802` does not name the epic. Log empty. |
 | `s39-standalone-upgrade-testing` | No, N3, with no parent. The suggested level is `none — standalone` and no label is proposed; proposes the No comment on `elastic/kibana#913900`. Log empty. |
-| `s40-n3-under-umbrella` | No, N3: a manual test pass whose only parent is a "9.4 GA tasks" umbrella. The decision stays No (not A2): the suggested level is `none — ` with a reason that names the umbrella (so `none — standalone` fails), no label is proposed, and it proposes the No comment on `elastic/kibana#914101`. Log empty. |
+| `s40-n3-under-umbrella` | No, N3: a manual test pass whose only parent is a "9.4 GA tasks" umbrella. The decision stays No (not A2): **Hierarchy** marks the parent "(umbrella)" (so a standalone answer fails), the suggested level is `none — ` with a reason, no label is proposed, and it proposes the No comment on `elastic/kibana#914101`. Log empty. |
 
 ## What the results can and cannot show
 
