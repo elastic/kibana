@@ -46,7 +46,10 @@ export const useSubmitMessage = () => {
   });
 
   const submitMessage = useCallback(
-    async (message: string) => {
+    async (
+      message: string,
+      { onConversationCreated }: { onConversationCreated?: (conversationId: string) => void } = {}
+    ) => {
       if (conversationId) {
         sendMessage({ message, conversationId });
         return;
@@ -62,6 +65,7 @@ export const useSubmitMessage = () => {
         return;
       }
 
+      onConversationCreated?.(created.id);
       sendMessage({ message, conversationId: created.id });
 
       if (isEmbeddedContext) {

@@ -86,6 +86,32 @@ describe('useSubmitMessage', () => {
     );
   });
 
+  it('tells the caller about the new conversation before sending and navigating', async () => {
+    setState({});
+    const calls: string[] = [];
+    sendMessage.mockImplementation(() => calls.push('send'));
+    navigateToAgentBuilderUrl.mockImplementation(() => calls.push('navigate'));
+    const { result } = renderHook(() => useSubmitMessage(), { wrapper });
+
+    await act(() =>
+      result.current.submitMessage('hello', {
+        onConversationCreated: (id) => calls.push(`created:${id}`),
+      })
+    );
+
+    expect(calls).toEqual(['created:conv-1', 'send', 'navigate']);
+  });
+
+  it('does not report a new conversation when one already exists', async () => {
+    setState({ conversationId: 'existing' });
+    const onConversationCreated = jest.fn();
+    const { result } = renderHook(() => useSubmitMessage(), { wrapper });
+
+    await act(() => result.current.submitMessage('hello', { onConversationCreated }));
+
+    expect(onConversationCreated).not.toHaveBeenCalled();
+  });
+
   it('reports that the conversation is being created while the request is in flight', async () => {
     setState({});
     let resolveCreate: (value: typeof created) => void = () => {};

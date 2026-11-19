@@ -13,7 +13,7 @@ import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useAgentModel } from '../../../hooks/agents/use_agent_model';
 import { useCurrentUser } from '../../../hooks/use_current_user';
-import { useInputDraft } from '../../../hooks/use_input_draft';
+import { useCarryOverDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { resolveConversationStarters } from './resolve_conversation_starters';
@@ -56,12 +56,11 @@ export const useConversationStarters = () => {
   const spaceId = useActiveSpaceId();
   const { sessionTag } = useConversationContext();
   const { currentUser } = useCurrentUser();
-  const { clearDraft } = useInputDraft({
+  const { takeNewChatDraft, saveDraftTo } = useCarryOverDraft({
     spaceId,
     sessionTag,
     username: currentUser?.user.username,
     agentId,
-    conversationId: undefined,
   });
 
   const isBoundAgentForbidden = Boolean(agent?.service_account_id) && !invokeBoundAgents;
@@ -78,11 +77,15 @@ export const useConversationStarters = () => {
 
   const onSelect = useCallback(
     ({ label, prompt }: ConversationStarter) => {
-      // The starter is sent instead of what was typed, so the unsent draft doesn't come back later.
-      clearDraft();
-      void submitMessage(prompt ?? label);
+      // What was typed isn't sent: it moves to the input of the conversation that starts.
+      const typedText = takeNewChatDraft();
+      void submitMessage(prompt ?? label, {
+        onConversationCreated: (conversationId) => {
+          if (typedText) saveDraftTo(conversationId, typedText);
+        },
+      });
     },
-    [clearDraft, submitMessage]
+    [takeNewChatDraft, saveDraftTo, submitMessage]
   );
 
   return { starters, onSelect, isDisabled: isCreatingConversation || isAgentModelLoading };

@@ -12,7 +12,7 @@ import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useAgentModel } from '../../../hooks/agents/use_agent_model';
 import { useCurrentUser } from '../../../hooks/use_current_user';
-import { useInputDraft } from '../../../hooks/use_input_draft';
+import { useCarryOverDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useConversationStarters } from './use_conversation_starters';
@@ -33,15 +33,23 @@ const mockUseSubmitMessage = jest.mocked(useSubmitMessage);
 const mockUseUiPrivileges = jest.mocked(useUiPrivileges);
 const mockUseAgentModel = jest.mocked(useAgentModel);
 const mockUseCurrentUser = jest.mocked(useCurrentUser);
-const mockUseInputDraft = jest.mocked(useInputDraft);
+const mockUseCarryOverDraft = jest.mocked(useCarryOverDraft);
 const mockUseActiveSpaceId = jest.mocked(useActiveSpaceId);
 const mockUseConversationContext = jest.mocked(useConversationContext);
 
 const submitMessage = jest.fn();
-const clearDraft = jest.fn();
+const takeNewChatDraft = jest.fn();
+const saveDraftTo = jest.fn();
 
 const mockAgent = (agent: Record<string, unknown> | undefined, isLoading = false) => {
   mockUseResolvedAgent.mockReturnValue({ agent: agent as never, isLoading });
+};
+
+const submitCreatesConversation = (conversationId = 'conv-1') => {
+  submitMessage.mockImplementation(
+    (_message: string, options?: { onConversationCreated?: (id: string) => void }) =>
+      options?.onConversationCreated?.(conversationId)
+  );
 };
 
 describe('useConversationStarters', () => {
@@ -54,7 +62,8 @@ describe('useConversationStarters', () => {
     mockUseActiveSpaceId.mockReturnValue('default');
     mockUseConversationContext.mockReturnValue({ sessionTag: 'tag' } as never);
     mockUseCurrentUser.mockReturnValue({ currentUser: { user: { username: 'elastic' } } } as never);
-    mockUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft });
+    takeNewChatDraft.mockReturnValue(null);
+    mockUseCarryOverDraft.mockReturnValue({ takeNewChatDraft, saveDraftTo });
     mockAgent({
       id: 'agent-1',
       conversation_starters: [{ label: 'first' }, { label: 'second', prompt: 'Second prompt' }],
@@ -115,7 +124,7 @@ describe('useConversationStarters', () => {
       result.current.onSelect({ label: 'first' });
     });
 
-    expect(submitMessage).toHaveBeenCalledWith('first');
+    expect(submitMessage).toHaveBeenCalledWith('first', expect.any(Object));
   });
 
   it('sends the prompt of a starter instead of its label', () => {
@@ -125,24 +134,58 @@ describe('useConversationStarters', () => {
       result.current.onSelect({ label: 'second', prompt: 'Second prompt' });
     });
 
-    expect(submitMessage).toHaveBeenCalledWith('Second prompt');
+    expect(submitMessage).toHaveBeenCalledWith('Second prompt', expect.any(Object));
   });
 
-  it('clears the unsent draft of the new conversation when a starter is sent', () => {
+  it('carries drafts over for the current user and agent', () => {
+    renderHook(() => useConversationStarters());
+
+    expect(mockUseCarryOverDraft).toHaveBeenCalledWith({
+      spaceId: 'default',
+      sessionTag: 'tag',
+      username: 'elastic',
+      agentId: 'agent-1',
+    });
+  });
+
+  describe('when text was typed before a starter is clicked', () => {
+    const sendStarterAndCreateConversation = () => {
+      submitCreatesConversation();
+      const { result } = renderHook(() => useConversationStarters());
+
+      act(() => {
+        result.current.onSelect({ label: 'first' });
+      });
+    };
+
+    beforeEach(() => {
+      takeNewChatDraft.mockReturnValue('typed text');
+    });
+
+    it('moves the typed text to the input of the conversation that starts', () => {
+      sendStarterAndCreateConversation();
+
+      expect(takeNewChatDraft).toHaveBeenCalledTimes(1);
+      expect(saveDraftTo).toHaveBeenCalledWith('conv-1', 'typed text');
+    });
+
+    it('sends the starter and not the typed text', () => {
+      sendStarterAndCreateConversation();
+
+      expect(submitMessage).toHaveBeenCalledWith('first', expect.any(Object));
+    });
+  });
+
+  it('stores no draft in the new conversation when nothing was typed', () => {
+    takeNewChatDraft.mockReturnValue(null);
+    submitCreatesConversation();
     const { result } = renderHook(() => useConversationStarters());
 
     act(() => {
       result.current.onSelect({ label: 'first' });
     });
 
-    expect(mockUseInputDraft).toHaveBeenCalledWith({
-      spaceId: 'default',
-      sessionTag: 'tag',
-      username: 'elastic',
-      agentId: 'agent-1',
-      conversationId: undefined,
-    });
-    expect(clearDraft).toHaveBeenCalledTimes(1);
+    expect(saveDraftTo).not.toHaveBeenCalled();
   });
 
   it('is disabled while the agent model is loading', () => {
