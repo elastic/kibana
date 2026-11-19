@@ -89,6 +89,7 @@ dependsOn:
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/cloud-plugin'
   - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/router-utils'
 tags:
   - plugin
   - prod
