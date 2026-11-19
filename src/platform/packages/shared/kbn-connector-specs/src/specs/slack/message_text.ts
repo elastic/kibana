@@ -254,7 +254,7 @@ const toPlainToken = (token: string): string => {
 /** Code spans and `<...>` tokens, which emphasis never applies inside. */
 const SLACK_VERBATIM = /```[\s\S]*?```|`[^`\n]+`|<[^<>]*>/g;
 const SLACK_TOKEN = /<([^<>]*)>/g;
-const SLACK_QUOTE = /^&gt; ?/gm;
+const SLACK_QUOTE = /^&gt; /gm;
 
 const toVerbatim = (span: string): string =>
   span.startsWith('<')
@@ -278,15 +278,17 @@ const SLACK_EMPHASIS = ['*', '_', '~'].map(toEmphasisPattern);
 const stripMarkup = (text: string): string => {
   let markerPrefix = '\uE000';
   while (text.includes(markerPrefix)) markerPrefix += '\uE000';
-  const toMarker = (index: number) => `${markerPrefix}${index}\uE001`;
 
   const spans: string[] = [];
   const masked = text
-    .replace(SLACK_VERBATIM, (span) => toMarker(spans.push(toVerbatim(span)) - 1))
+    .replace(SLACK_VERBATIM, (span) => `${markerPrefix}${spans.push(toVerbatim(span)) - 1}\uE001`)
     .replace(SLACK_QUOTE, '');
-  return spans.reduce(
-    (result, span, index) => result.replaceAll(toMarker(index), () => span),
-    SLACK_EMPHASIS.reduce((result, pattern) => result.replace(pattern, '$1$2'), masked)
+  return SLACK_EMPHASIS.reduce(
+    (result, pattern) => result.replace(pattern, '$1$2'),
+    masked
+  ).replace(
+    new RegExp(`${markerPrefix}(\\d+)\\uE001`, 'g'),
+    (_, index: string) => spans[Number(index)]
   );
 };
 

@@ -358,7 +358,11 @@ describe('toSlackPlainText', () => {
       '<!here|here> <!subteam^S1|eng> <tel:+1555>',
       '@here @eng tel:+1555',
     ],
-    ['quote markers dropped', '&gt; quoted\n&gt; more, 5 &gt; 3', 'quoted more, 5 > 3'],
+    [
+      'quote markers dropped',
+      '&gt; quoted\n&gt; more, 5 &gt; 3\n&gt;= 90% CPU',
+      'quoted more, 5 > 3 >= 90% CPU',
+    ],
     [
       'private-use characters and replacement patterns kept',
       'a\uE0000\uE001 `\uE000b\uE001 $$ $&` *c*',

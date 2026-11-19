@@ -18,6 +18,7 @@ import {
   deleteWorkflow,
   findInvestigationBySubject,
   findOrCreateSlackThread,
+  getSharedInvestigation,
   listSharedInvestigations,
   makeAlertSnapshot,
   runAlertStartWorkflow,
@@ -299,15 +300,9 @@ apiTest.describe(
 
         // Later calls backfill a missing link, so the create alone must record it.
         const permalink = `https://app.slack.com/client/${thread.workspace}/${thread.channel}/thread/${thread.channel}-${thread.thread_ts}`;
-        const justCreated = await listSharedInvestigations(
-          apiClient,
-          cookieHeader,
-          `subject_type=slack_thread&subject_id=${encodeURIComponent(threadKey)}`
-        );
+        const justCreated = await getSharedInvestigation(apiClient, cookieHeader, id);
         expect(justCreated).toHaveStatusCode(200);
-        expect(
-          (justCreated.body as { results: SharedInvestigation[] }).results[0].subjects
-        ).toStrictEqual([
+        expect((justCreated.body as SharedInvestigation).subjects).toStrictEqual([
           expect.objectContaining({ slack: expect.objectContaining({ permalink }) }),
         ]);
 
