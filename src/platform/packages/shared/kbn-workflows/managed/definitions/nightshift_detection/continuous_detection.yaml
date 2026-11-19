@@ -3,7 +3,8 @@
 version: "1"
 name: "Nightshift Continuous Detection"
 description: "Runs the Nightshift detection strategies for the space every minute."
-# Off until the space's setup has checked the binding and turns it on.
+# A first install starts off; the space's setup turns it on after checking the binding. A later
+# install keeps whatever state the installed workflow has.
 enabled: false
 tags:
   - observability

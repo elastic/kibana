@@ -109,7 +109,7 @@ export class DetectionSetupService {
       }
 
       // Last, so a call that failed or lost a race above never switches the workflow on.
-      await this.workflows.enable({ request, spaceId });
+      await this.workflows.enable({ request, spaceId, serviceAccountId });
     } catch (error) {
       if (!isInstallStarted || previousAccountId === undefined) {
         await this.restorePreviousBinding({

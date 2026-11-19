@@ -65,5 +65,7 @@ shows `busy` is normal while a long tick outlives its minute. A tick whose strat
 progress in the hidden `nightshift-detection-state` saved objects of the space. The runs themselves are in the workflow's execution history in
 the Workflows app, under the space.
 
+A setup that fails after it rebound a space to another account keeps the new binding, and the workflow keeps running as the previous account until a retry of `_enable` succeeds. Every tick is refused with 403 in between, so detection is paused for that space.
+
 Turning the plugin off leaves the installed workflow calling a route that answers 404 every minute.
 That is accepted, and there is no cleanup.

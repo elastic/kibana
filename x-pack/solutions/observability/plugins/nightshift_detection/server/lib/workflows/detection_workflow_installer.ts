@@ -59,20 +59,42 @@ export class DetectionWorkflowInstaller {
     await this.assertBoundTo({ request, spaceId, serviceAccountId });
   }
 
-  /** Turns the installed workflow on. Safe to call when it is already on. */
+  /**
+   * Turns the installed workflow on. Safe to call when it is already on. It checks the binding
+   * again afterwards: a concurrent `_enable` for another account may have rebound the workflow since
+   * `install` checked it, and a workflow on under the wrong account is refused by every tick. There
+   * is no compare-and-set on the binding, so this narrows that race rather than closing it.
+   *
+   * @throws EngineHttpError when the workflow cannot be turned on, or no longer runs as the account.
+   */
   public async enable({
     request,
     spaceId,
+    serviceAccountId,
   }: {
     request: KibanaRequest;
     spaceId: string;
+    serviceAccountId: string;
   }): Promise<void> {
-    await this.workflowsManagement.management.updateWorkflow(
-      DetectionWorkflowInstaller.getDocumentId(spaceId),
-      { enabled: true },
-      spaceId,
-      request
-    );
+    try {
+      await this.workflowsManagement.management.updateWorkflow(
+        DetectionWorkflowInstaller.getDocumentId(spaceId),
+        { enabled: true },
+        spaceId,
+        request
+      );
+    } catch (error) {
+      const statusCode = getStatusCode(error) ?? 500;
+      const retry = statusCode >= 500 ? ' Call _enable again to retry.' : '';
+      throw new EngineHttpError(
+        `Turning on workflow [${NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID}] failed: ${getErrorMessage(
+          error
+        )}.${retry}`,
+        statusCode
+      );
+    }
+
+    await this.assertBoundTo({ request, spaceId, serviceAccountId });
   }
 
   private async installWorkflow({

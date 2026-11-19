@@ -25,6 +25,7 @@ function createSetup({
   spaceExists = true,
   onSummaryRead,
   installWorkflow = async () => {},
+  enableWorkflowError,
 }: {
   roleCount?: number;
   boundAccountId?: string;
@@ -38,9 +39,15 @@ function createSetup({
   onSummaryRead?: () => void;
   /** Stands in for installing the bound workflow. */
   installWorkflow?: () => Promise<void>;
+  /** Makes turning the installed workflow on fail. */
+  enableWorkflowError?: Error;
 } = {}) {
   let currentAccountId = boundAccountId;
-  const enableWorkflow = jest.fn(async () => {});
+  const enableWorkflow = jest.fn(async () => {
+    if (enableWorkflowError) {
+      throw enableWorkflowError;
+    }
+  });
   const bindWorkload = jest.fn(async (_request: unknown, binding: { serviceAccountId: string }) => {
     currentAccountId = binding.serviceAccountId;
     return {};
@@ -239,6 +246,19 @@ describe('DetectionSetupService.enable', () => {
     ).rejects.toMatchObject({ statusCode: 500 });
     expect(unbindWorkload).toHaveBeenCalledTimes(1);
     expect(enableWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('puts a space that was never set up back when turning the workflow on fails', async () => {
+    const { service, unbindWorkload, enableWorkflow } = createSetup({
+      enableWorkflowError: new EngineHttpError('could not turn it on', 500),
+    });
+
+    await expect(
+      service.enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).rejects.toMatchObject({ statusCode: 500 });
+    // The workflow was installed off and never switched on, so the space only loses its binding.
+    expect(enableWorkflow).toHaveBeenCalledTimes(1);
+    expect(unbindWorkload).toHaveBeenCalledTimes(1);
   });
 
   it('keeps the new account of a rebound space when the workflow install fails', async () => {
