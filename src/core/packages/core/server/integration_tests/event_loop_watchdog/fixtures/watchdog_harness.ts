@@ -248,8 +248,7 @@ const scenarios: Record<string, () => Promise<void>> = {
     await sleep(STATS_INTERVAL_MS * 3);
     await watchdog.stop();
   },
-  // Three large captures with a 1 s cooldown; checks that repeated captures don't restart the
-  // worker or retain the previous profiles across captures.
+  // Three large captures in one worker, so anything a capture leaves behind breaks a later one.
   profile_repeated: async () => {
     const run = await loadDeepCode(2_000, 40);
     const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });

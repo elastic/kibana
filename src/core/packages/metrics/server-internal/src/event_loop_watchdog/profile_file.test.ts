@@ -85,7 +85,7 @@ describe('prepareProfile', () => {
     );
   });
 
-  it('changes the kept nodes in place instead of copying them', () => {
+  it('mutates the kept nodes in place instead of copying them', () => {
     const input = fileProfile();
     const original = new Set<object>(input.nodes);
     const prepared = prepareProfile(input, ROOT);

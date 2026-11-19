@@ -442,13 +442,12 @@ describe('event loop watchdog in a child process', () => {
       expect(Date.parse(line['@timestamp'])).toBeLessThan(ended?.at ?? NaN);
     }, 120_000);
 
-    it('profiles and writes a large block without running out of memory at the 64 MB limit (installs outside containers)', async () => {
+    it('writes a large profile without running out of memory at the 64 MB limit', async () => {
       const { result, profile: written } = await runWritingHarness('profile_large', {
         timeoutMs: 120_000,
       });
       expectCleanExit(result);
-      // The harness parsed the written JSON; the checks below verify it contains a complete
-      // profile.
+      // A file cut mid-write fails to parse in `runWritingHarness`.
       expectViewableProfile(written);
       const [line] = profileLogLines(result);
       const profile = line.kibana?.event_loop_watchdog?.profile;
@@ -464,11 +463,16 @@ describe('event loop watchdog in a child process', () => {
       expect(restarts(result)).toEqual([]);
     }, 150_000);
 
-    it('profiles three large blocks in a row without restarting the worker', async () => {
+    it('profiles three large blocks in a row in the same worker', async () => {
       const result = await runHarness('profile_repeated', { timeoutMs: 180_000 });
       expectCleanExit(result);
       const profiles = profileLogLines(result);
-      expect(profiles).toHaveLength(3);
+      // A restarted worker numbers its captures from #1 again.
+      expect(profiles.map(({ message }) => message)).toEqual([
+        expect.stringContaining('profile #1:'),
+        expect.stringContaining('profile #2:'),
+        expect.stringContaining('profile #3:'),
+      ]);
       for (const line of profiles) {
         const profile = line.kibana?.event_loop_watchdog?.profile;
         expect(profile?.nodes).toBeGreaterThanOrEqual(11_900);
