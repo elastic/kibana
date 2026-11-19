@@ -14,5 +14,5 @@ export { LockedSectionPanel } from './locked_section_panel';
 export { ManageAutomationsLink } from './manage_automations_link';
 export { OverviewPlaceholderPanel } from './overview_placeholder_panel';
 export { SignalsPanel } from './signals_panel';
-export { SourcesPanel } from './sources_panel';
+export { SourcesPanel } from './sources/sources_panel';
 export { TracesPanel } from './traces_panel';

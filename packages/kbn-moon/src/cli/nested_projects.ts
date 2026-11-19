@@ -16,8 +16,6 @@ export const NESTED_PROJECT_ANCESTORS_ALLOWLIST: readonly string[] = [
   'src/platform/packages/shared/kbn-esql-resource-browser',
   'src/platform/test',
   'x-pack/platform/test',
-  'x-pack/solutions/security/test',
-  'x-pack/solutions/security/test/security_solution_api_integration',
 ];
 
 /** Returns `ancestor -> nested` directory pairs whose ancestor is not allowlisted. */
