@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { DETECTIONS_DATA_STREAM } from '../../significant_events/detections/data_stream';
+import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../../knowledge_indicators/data_stream';
 import { GLOBAL_MAINTENANCE_WORKFLOW_IDS } from '../../maintenance/managed_workflow_targets';
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
@@ -59,13 +60,14 @@ describe('createManagedWorkflowsInstaller', () => {
     expect(dataStreams.initializeClient).not.toHaveBeenCalled();
   });
 
-  it('creates the detections data stream before installing any workflow', async () => {
+  it('creates the detections and knowledge indicators data streams before installing any workflow', async () => {
     const { client, dataStreams, installer } = createInstaller();
 
     await installer.install();
 
     expect(dataStreams.initializeClient).toHaveBeenCalledWith(DETECTIONS_DATA_STREAM);
-    expect(dataStreams.initializeClient.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(dataStreams.initializeClient).toHaveBeenCalledWith(KNOWLEDGE_INDICATORS_DATA_STREAM);
+    expect(dataStreams.initializeClient.mock.invocationCallOrder[1]).toBeLessThan(
       client.install.mock.invocationCallOrder[0]
     );
   });

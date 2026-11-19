@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import { union } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { NightshiftSource } from '@kbn/nightshift-shared';
-import type { SourceChangeListener, SourcesClient } from '@kbn/nightshift-sources-plugin/server';
+import { isNightshiftSupportedSpace, type NightshiftSource } from '@kbn/nightshift-shared';
+import type {
+  SourceChangeEvent,
+  SourceChangeListener,
+  SourcesClient,
+} from '@kbn/nightshift-sources-plugin/server';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
@@ -21,11 +26,16 @@ import { listAllSources } from '../../utils/list_all_sources';
 import type { SourceKnowledgeStateClient } from '../../../lib/knowledge_indicators/source_knowledge_state';
 import { StatusError } from '../../../lib/errors/status_error';
 
+const ONBOARDING_RESERVATION_MS = 5 * 60_000;
+
 interface OnboardingClient {
   cancelBySource: (args: ISourceRunIdentity & { request: KibanaRequest }) => Promise<unknown>;
   getNonTerminalExecutions?: (args: {
     request: KibanaRequest;
   }) => Promise<WorkflowExecutionListItemDto[]>;
+  getLatestExecution?: (
+    args: ISourceRunIdentity & { request: KibanaRequest }
+  ) => Promise<WorkflowExecutionListItemDto | undefined>;
 }
 
 type CatalogKiClient = Pick<
@@ -68,7 +78,7 @@ export async function retireSourceDetections({
 /**
  * Drops the owned rules, queries and knowledge indicators of a source id. Onboarding runs, the view
  * and the saved object are left alone. The reconcile calls it for ids that left the catalog, and
- * `resetSourceKnowledge` for a live or just-deleted source after cancelling its run.
+ * `resetSourceKnowledge` or `retireDeletedSource` after cancelling the source's run.
  */
 export async function retireSourceKnowledge({
   sourceId,
@@ -118,19 +128,17 @@ async function cancelOnboardingThen({
 
 /**
  * Cancels the source's onboarding run, then drops its owned rules, queries and knowledge
- * indicators, even when the cancel fails. Runs when a source is deleted and when its knowledge is
- * reset; the view and the saved object are left to the caller.
+ * indicators, even when the cancel fails. Runs when a source's knowledge is reset; the view and the
+ * saved object are left to the caller.
  */
 export async function resetSourceKnowledge({
   source,
   kiClient,
   onboardingClient,
   request,
-  sourceKnowledgeState,
 }: {
   source: Pick<NightshiftSource, 'id' | 'slug'>;
   kiClient: Pick<CatalogKiClient, 'deleteOwnedRules' | 'deleteAllQueries' | 'deleteIndicators'>;
-  sourceKnowledgeState?: SourceKnowledgeStateClient;
   onboardingClient?: Pick<OnboardingClient, 'cancelBySource'>;
   request: KibanaRequest;
 }): Promise<void> {
@@ -138,17 +146,37 @@ export async function resetSourceKnowledge({
     onboardingClient,
     source,
     request,
-    cleanup: () =>
-      sourceKnowledgeState
-        ? sourceKnowledgeState.runExclusive({
-            sourceId: source.id,
-            run: () => retireSourceKnowledge({ sourceId: source.id, kiClient }),
-          })
-        : retireSourceKnowledge({ sourceId: source.id, kiClient }),
+    cleanup: () => retireSourceKnowledge({ sourceId: source.id, kiClient }),
   });
 }
 
-/** Invalidates an unapplied query revision before scheduling its replacement onboarding. */
+/** Like `resetSourceKnowledge`, for a deleted source: its knowledge state object is deleted too. */
+export async function retireDeletedSource({
+  source,
+  kiClient,
+  onboardingClient,
+  sourceKnowledgeState,
+  request,
+}: {
+  source: Pick<NightshiftSource, 'id' | 'slug'>;
+  kiClient: Pick<CatalogKiClient, 'deleteOwnedRules' | 'deleteAllQueries' | 'deleteIndicators'>;
+  onboardingClient?: Pick<OnboardingClient, 'cancelBySource'>;
+  sourceKnowledgeState: SourceKnowledgeStateClient;
+  request: KibanaRequest;
+}): Promise<void> {
+  await cancelOnboardingThen({
+    onboardingClient,
+    source,
+    request,
+    cleanup: () =>
+      sourceKnowledgeState.retire({
+        sourceId: source.id,
+        run: () => retireSourceKnowledge({ sourceId: source.id, kiClient }),
+      }),
+  });
+}
+
+/** Invalidates an unapplied query revision and defers onboarding until reconciliation finishes. */
 export async function reconcileSourceRevision({
   source,
   sourcesClient,
@@ -165,8 +193,21 @@ export async function reconcileSourceRevision({
   sourceKnowledgeState: SourceKnowledgeStateClient;
   scheduleSourceOnboarding?: (source: NightshiftSource) => Promise<boolean>;
   request: KibanaRequest;
-}): Promise<void> {
-  await sourceKnowledgeState.runExclusive({
+}): Promise<(() => Promise<void>) | undefined> {
+  let latestExecutionPromise: Promise<WorkflowExecutionListItemDto | undefined> | undefined;
+  const loadLatestExecution = ({
+    id: sourceId,
+    slug: sourceSlug,
+  }: Pick<NightshiftSource, 'id' | 'slug'>): Promise<WorkflowExecutionListItemDto | undefined> => {
+    latestExecutionPromise ??=
+      onboardingClient?.getLatestExecution?.({
+        sourceId,
+        sourceSlug,
+        request,
+      }) ?? Promise.resolve(undefined);
+    return latestExecutionPromise;
+  };
+  const sourceToSchedule = await sourceKnowledgeState.runExclusive({
     sourceId: source.id,
     run: async (state, checkpoint) => {
       // Another edit may have committed while this event was waiting for a write to finish.
@@ -178,24 +219,110 @@ export async function reconcileSourceRevision({
         if (state.revision !== undefined) {
           await resetSourceKnowledge({ source: current, kiClient, onboardingClient, request });
         }
-        await checkpoint({ revision: current.esql_updated_at, onboardingScheduled: false });
+        await checkpoint({
+          revision: current.esql_updated_at,
+          onboardingScheduled: false,
+          onboardingReservedAt: null,
+        });
       }
-      if (
-        current.enabled &&
-        (isRevisionChanged || !state.onboardingScheduled) &&
-        scheduleSourceOnboarding
-      ) {
-        const runningSources = await loadRunningSources(onboardingClient, request);
-        if (runningSources.has(current.id)) {
-          throw new StatusError('Waiting for the previous onboarding execution to finish', 409);
+      if (!current.enabled) {
+        return;
+      }
+      return isRevisionChanged ||
+        !(await isOnboardingScheduled(state, () => loadLatestExecution(current)))
+        ? current
+        : undefined;
+    },
+  });
+  if (!sourceToSchedule || !scheduleSourceOnboarding) {
+    return;
+  }
+
+  return async () => {
+    const runningSources = await loadRunningSources(onboardingClient, request);
+    if (runningSources.has(sourceToSchedule.id)) {
+      throw new StatusError('Waiting for the previous onboarding execution to finish', 409);
+    }
+    const reservedAt = Date.now();
+    const reserved = await sourceKnowledgeState.runExclusive({
+      sourceId: sourceToSchedule.id,
+      run: async (state, checkpoint) => {
+        if (
+          state.revision !== sourceToSchedule.esql_updated_at ||
+          (await isOnboardingScheduled(state, () => loadLatestExecution(sourceToSchedule)))
+        ) {
+          return false;
         }
-        if (await scheduleSourceOnboarding(current)) {
-          await checkpoint({ onboardingScheduled: true });
-        }
+        await checkpoint({ onboardingReservedAt: reservedAt });
+        return true;
+      },
+    });
+    if (!reserved) {
+      return;
+    }
+
+    try {
+      if (await scheduleSourceOnboarding(sourceToSchedule)) {
+        return;
+      }
+    } catch (error) {
+      await clearOnboardingReservation({
+        source: sourceToSchedule,
+        sourceKnowledgeState,
+        reservedAt,
+      });
+      throw error;
+    }
+    await clearOnboardingReservation({
+      source: sourceToSchedule,
+      sourceKnowledgeState,
+      reservedAt,
+    });
+  };
+}
+
+const clearOnboardingReservation = async ({
+  source,
+  sourceKnowledgeState,
+  reservedAt,
+}: {
+  source: NightshiftSource;
+  sourceKnowledgeState: SourceKnowledgeStateClient;
+  reservedAt: number;
+}): Promise<void> => {
+  await sourceKnowledgeState.runExclusive({
+    sourceId: source.id,
+    run: async (state, checkpoint) => {
+      if (state.revision === source.esql_updated_at && state.onboardingReservedAt === reservedAt) {
+        await checkpoint({ onboardingReservedAt: null });
       }
     },
   });
-}
+};
+
+const isOnboardingScheduled = async (
+  state: {
+    onboardingScheduled?: boolean;
+    onboardingReservedAt?: number | null;
+  },
+  loadLatestExecution: () => Promise<WorkflowExecutionListItemDto | undefined>
+): Promise<boolean> => {
+  if (state.onboardingScheduled) {
+    return true;
+  }
+  const { onboardingReservedAt } = state;
+  if (onboardingReservedAt === undefined || onboardingReservedAt === null) {
+    return false;
+  }
+  if (Date.now() - onboardingReservedAt < ONBOARDING_RESERVATION_MS) {
+    return true;
+  }
+  const latestExecution = await loadLatestExecution();
+  const latestStartedAt = latestExecution?.startedAt
+    ? Date.parse(latestExecution.startedAt)
+    : Number.NaN;
+  return latestStartedAt >= onboardingReservedAt;
+};
 
 /**
  * Applies the enabled flag of one source to its onboarding and owned rules. A disabled source has
@@ -282,6 +409,8 @@ export const createSourceChangeListener =
   ({
     enqueueReconciliation,
     ensurePeriodicReconciliation,
+    syncContinuousOnboarding,
+    syncScheduledDiscovery,
   }: {
     enqueueReconciliation: (args: {
       sourceId: string;
@@ -289,8 +418,16 @@ export const createSourceChangeListener =
       request: KibanaRequest;
     }) => Promise<void>;
     ensurePeriodicReconciliation: (request: KibanaRequest) => Promise<void>;
+    syncContinuousOnboarding: (event: SourceChangeEvent) => Promise<void>;
+    syncScheduledDiscovery: (event: SourceChangeEvent) => Promise<void>;
   }): SourceChangeListener =>
   async (event) => {
+    // Every branch below installs or enables a workflow in the event's space, and Nightshift only
+    // runs in the default one. The source routes refuse other spaces already; this also covers a
+    // write made through `getSourcesClient()`.
+    if (!isNightshiftSupportedSpace(event.request.spaceId)) {
+      return;
+    }
     if (
       event.type === 'updated' &&
       event.previous.esql_updated_at === event.source.esql_updated_at &&
@@ -305,6 +442,8 @@ export const createSourceChangeListener =
         request: event.request,
       }),
       ensurePeriodicReconciliation(event.request),
+      syncContinuousOnboarding(event),
+      syncScheduledDiscovery(event),
     ]);
     const failures = results.flatMap((result) =>
       result.status === 'rejected' ? [result.reason] : []
@@ -324,8 +463,8 @@ export const createSourceChangeListener =
  * A running execution whose slug has no catalog row is cancelled. Executions are
  * keyed by slug and live in the request space, so they are matched against this
  * space's catalog only.
- * Ids that still have knowledge indicators or owned rules but no catalog row are
- * then retired.
+ * Ids that still have knowledge indicators, owned rules or a knowledge state object but
+ * no catalog row are then retired.
  */
 export async function reconcileSourceCatalog({
   sourcesClient,
@@ -353,6 +492,8 @@ export async function reconcileSourceCatalog({
   maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
   request: KibanaRequest;
 }): Promise<{ sources: NightshiftSource[]; reconcileIds: string[] }> {
+  // Listed before the catalog, so a source created during the sweep can't pass for an orphan.
+  const stateSourceIds = await sourceKnowledgeState?.listSourceIds();
   const [sources, ownedRuleIds, maintenanceState, runningSources] = await Promise.all([
     listAllSources(sourcesClient),
     kiClient.findSourceIdsWithOwnedRules(),
@@ -383,8 +524,9 @@ export async function reconcileSourceCatalog({
   const failures: unknown[] = [];
   for (const source of sources) {
     try {
+      let scheduleOnboarding: (() => Promise<void>) | undefined;
       if (sourceKnowledgeState) {
-        await reconcileSourceRevision({
+        scheduleOnboarding = await reconcileSourceRevision({
           source,
           sourcesClient,
           kiClient,
@@ -404,10 +546,9 @@ export async function reconcileSourceCatalog({
         skipCancel: !runningSources.has(source.id),
         skipRuleToggle: !ownedRuleSourceIds.has(source.id),
       });
+      await scheduleOnboarding?.();
     } catch (error) {
-      // A 409 means a write holds the source's lease or its cancelled run is still winding down.
-      // The next sweep retries it, and failing the sweep here would skip every other source too.
-      if (!(error instanceof StatusError && error.statusCode === 409)) {
+      if (!isRetryableConflict(error)) {
         failures.push(error);
       }
     }
@@ -430,10 +571,11 @@ export async function reconcileSourceCatalog({
   }
 
   const reconcileIds = await kiClient.getSourceIdsToReconcile();
-  const survivingReconcileIds: string[] = [];
-  for (const sourceId of reconcileIds) {
+  const survivingReconcileIds = reconcileIds.filter((sourceId) => catalogIds.has(sourceId));
+  // A state object outlives its source when the cleanup of the deleted source failed or when it
+  // was created before deletion cleaned it up, and no indicator or rule leads the sweep to it.
+  for (const sourceId of union(reconcileIds, stateSourceIds)) {
     if (catalogIds.has(sourceId)) {
-      survivingReconcileIds.push(sourceId);
       continue;
     }
     try {
@@ -441,7 +583,7 @@ export async function reconcileSourceCatalog({
       // id, so a failed marker write must leave them in place for the retry.
       await retireSourceDetections({ sourceId, getDetectionClient });
       if (sourceKnowledgeState) {
-        await sourceKnowledgeState.runExclusive({
+        await sourceKnowledgeState.retire({
           sourceId,
           run: () => retireSourceKnowledge({ sourceId, kiClient }),
         });
@@ -449,7 +591,9 @@ export async function reconcileSourceCatalog({
         await retireSourceKnowledge({ sourceId, kiClient });
       }
     } catch (error) {
-      failures.push(error);
+      if (!isRetryableConflict(error)) {
+        failures.push(error);
+      }
     }
   }
 
@@ -461,6 +605,10 @@ export async function reconcileSourceCatalog({
 
   return { sources, reconcileIds: survivingReconcileIds };
 }
+
+/** A 409 means a held lease or a cancelled run still winding down, which the next sweep retries. */
+export const isRetryableConflict = (error: unknown): boolean =>
+  error instanceof StatusError && error.statusCode === 409;
 
 /** The sources with a run going, by source id. A run carries the slug its source had at the time. */
 async function loadRunningSources(

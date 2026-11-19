@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import { withTimeout } from '@kbn/std';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   createToolNotFoundError,
@@ -33,6 +34,15 @@ import type { ToolProvider, WritableToolProvider, ReadonlyToolProvider } from '.
 import { isReadonlyToolProvider } from './tool_provider';
 import { toExecutableTool } from './utils';
 import type { ToolHealthClient } from './health';
+
+/** Per-attempt timeout for a tool availability check. */
+const AVAILABILITY_CHECK_TIMEOUT_MS = 5000;
+/** Number of retries after a timed-out availability check (exponential backoff between attempts). */
+const AVAILABILITY_CHECK_MAX_RETRIES = 2;
+/** Base delay before the first retry; doubled for each subsequent retry. */
+const AVAILABILITY_CHECK_RETRY_BASE_DELAY_MS = 250;
+
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 interface CreateToolRegistryParams {
   getRunner: () => Runner;
@@ -226,25 +236,35 @@ class ToolRegistryImpl implements ToolRegistry {
     return this._scopedClients;
   }
 
-  private async isAvailable(tool: InternalToolDefinition, timeoutMs = 2000): Promise<boolean> {
+  private async isAvailable(tool: InternalToolDefinition): Promise<boolean> {
     const { uiSettingsClient } = this.getScopedClients();
     const context: ToolAvailabilityContext = {
       spaceId: this.spaceId,
       request: this.request,
       uiSettings: uiSettingsClient,
     };
-    let timeoutHandle: ReturnType<typeof setTimeout>;
-    const checkPromise = Promise.resolve(tool.isAvailable(context)).then((s) => {
-      clearTimeout(timeoutHandle);
-      return s.status === 'available';
-    });
-    const timeoutPromise = new Promise<boolean>((resolve) => {
-      timeoutHandle = setTimeout(() => {
-        this.logger.warn(`Tool availability check for "${tool.id}" timed out after ${timeoutMs}ms`);
-        resolve(false);
-      }, timeoutMs);
-    });
-    return Promise.race([checkPromise, timeoutPromise]);
+
+    for (let attempt = 0; attempt <= AVAILABILITY_CHECK_MAX_RETRIES; attempt++) {
+      if (attempt > 0) {
+        await delay(AVAILABILITY_CHECK_RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
+      }
+      const outcome = await withTimeout({
+        promise: Promise.resolve(tool.isAvailable(context)).then((s) => s.status === 'available'),
+        timeoutMs: AVAILABILITY_CHECK_TIMEOUT_MS,
+      });
+      if (!outcome.timedout) {
+        return outcome.value;
+      }
+      const isLastAttempt = attempt === AVAILABILITY_CHECK_MAX_RETRIES;
+      this.logger.warn(
+        `Tool availability check for "${
+          tool.id
+        }" timed out after ${AVAILABILITY_CHECK_TIMEOUT_MS}ms (attempt ${attempt + 1}/${
+          AVAILABILITY_CHECK_MAX_RETRIES + 1
+        })${isLastAttempt ? ', treating tool as unavailable' : ', retrying'}`
+      );
+    }
+    return false;
   }
 
   /**

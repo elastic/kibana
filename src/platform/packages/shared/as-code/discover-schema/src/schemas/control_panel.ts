@@ -33,7 +33,10 @@ export const discoverSessionApiControlPanelSchema = z
     grow: z.boolean().default(DEFAULT_PINNED_CONTROL_STATE.grow).meta({
       description: 'When `true`, the control expands to fill any available horizontal space.',
     }),
-    config: optionsListESQLControlSchema,
+    config: optionsListESQLControlSchema.meta({
+      description:
+        'The ES|QL control settings, including its variable, available options, and selected values.',
+    }),
   })
   .strict()
   .meta({

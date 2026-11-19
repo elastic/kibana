@@ -44,6 +44,10 @@ export interface SlackAppStatusResponse {
   error?: string;
   /** Present once the install has registered a workspace (`pending_confirmation` and `connected`). */
   workspace?: SlackAppWorkspace;
+  /** Username of the admin who started the install; present with `workspace` when the request had one. */
+  createdBy?: string;
+  /** ISO timestamp of when the install started; present with `workspace`. */
+  createdAt?: string;
 }
 
 export interface SlackAppConfirmResponse {
@@ -70,6 +74,8 @@ export interface SlackChannelBinding {
   channel?: string;
   /** Human-readable channel name from the Relay's persisted display snapshot. */
   displayName?: string;
+  /** Absent for legacy rows; a private channel has no `displayName`. */
+  visibility?: 'public' | 'private';
   /** Binding status for this entry; always `bound_to_self` for the connected-channel list. */
   status: SlackChannelBindingStatus;
 }
@@ -79,6 +85,18 @@ export interface SlackAppBindingsResponse {
   bindings: SlackChannelBinding[];
   /** Opaque cursor for the next page of connected channels; absent on the last page. */
   nextCursor?: string;
+}
+
+export interface SlackAvailableChannel {
+  channel: string;
+  /** Channel name, without the leading `#`. */
+  displayName: string;
+}
+
+export interface SlackAppAvailableChannelsResponse {
+  channels: SlackAvailableChannel[];
+  /** True when the Relay stopped listing early, so some channels are missing. */
+  truncated: boolean;
 }
 
 /** Response from the per-channel bind route. */

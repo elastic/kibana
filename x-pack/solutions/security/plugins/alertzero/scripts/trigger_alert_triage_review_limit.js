@@ -19,7 +19,7 @@
  *   - every further review is `skipped`, and its Investigation says no proposal was created
  *
  * Needs a running stack with Alert Analysis and the Alert Triage Worker enabled (Manual autonomy,
- * or the proposals resolve on their own), and a connector for the `alertzero_reasoning` tier.
+ * or the proposals resolve on their own), and a connector for the `alertzero_balanced` tier.
  * Each batch costs one LLM analysis, so keep --runs small.
  *
  * Usage:

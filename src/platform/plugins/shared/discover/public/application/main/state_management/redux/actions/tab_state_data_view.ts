@@ -16,12 +16,8 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
-import {
-  DataViewSource,
-  getRegisteredEsqlDataView,
-  isSameDataset,
-  type DataSource,
-} from '@kbn/data-source';
+import { DataViewSource, isSameDataset, type DataSource } from '@kbn/data-source';
+import { isEqual } from 'lodash';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -29,6 +25,9 @@ import {
 } from '../internal_state';
 import {
   type RuntimeStateManager,
+  getDataViewOfSource,
+  getTabDataView,
+  pinDataViewOfSource,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectTabRuntimeState,
 } from '../runtime_state';
@@ -55,20 +54,56 @@ export const setDataSource: InternalStateThunkActionCreator<
 > =
   ({ tabId, dataSource }) =>
   (dispatch, _, { runtimeStateManager }) => {
-    const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
-      runtimeStateManager,
-      tabId
-    );
+    const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const currentSource = currentDataSource$.getValue();
 
     if (!isSameDataset(currentSource, dataSource)) {
       dispatch(internalStateSlice.actions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 
-    currentDataView$.next(getDataViewOfSource(dataSource));
+    const previousDataView = getDataViewOfSource(currentSource);
+    assertDataViewOfSource(dataSource);
+
     if (dataSource !== currentSource) {
       currentDataSource$.next(dataSource);
+    } else if (dataSource.kind === 'esql' && getDataViewOfSource(dataSource) !== previousDataView) {
+      // The same source got a new DataView. A new reference, so consumers keyed on the source
+      // (React context, memos) pick the new DataView up.
+      const republishedSource = dataSource.withColumns(dataSource.resultColumns);
+      pinDataViewOfSource(republishedSource);
+      currentDataSource$.next(republishedSource);
     }
+  };
+
+/** Publishes the fetched ES|QL source as the tab's source when its empty columns differ from the current one's. */
+export const publishFetchedEsqlSource: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataSource: DataSource }>]
+> =
+  ({ tabId, dataSource }) =>
+  (_, __, { runtimeStateManager }) => {
+    const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentSource = currentDataSource$.getValue();
+
+    if (
+      currentSource?.kind !== 'esql' ||
+      dataSource.kind !== 'esql' ||
+      currentSource === dataSource ||
+      currentSource.id !== dataSource.id
+    ) {
+      return;
+    }
+
+    if (isEqual(dataSource.getEmptyColumnNames(), currentSource.getEmptyColumnNames())) {
+      return;
+    }
+
+    const dataView = getDataViewOfSource(currentSource);
+    if (!dataView) {
+      return;
+    }
+
+    pinDataViewOfSource(dataSource, dataView);
+    currentDataSource$.next(dataSource);
   };
 
 /**
@@ -110,15 +145,10 @@ export const assignNextDataView: InternalStateThunkActionCreator<
     );
   };
 
-const getDataViewOfSource = (dataSource: DataSource): DataView => {
-  if (dataSource.kind === 'index-pattern') {
-    return dataSource.getDataView();
-  }
-  const dataView = getRegisteredEsqlDataView(dataSource);
-  if (!dataView) {
+const assertDataViewOfSource = (dataSource: DataSource) => {
+  if (dataSource.kind === 'esql' && !pinDataViewOfSource(dataSource)) {
     throw new Error(`ES|QL source ${dataSource.id} must be registered with resolveEsqlSource`);
   }
-  return dataView;
 };
 
 /** Reuses the tab's current source when it already wraps this data view. */
@@ -179,8 +209,7 @@ export const changeDataView: InternalStateThunkActionCreator<
     addLog('[ui] changeDataView', { id: dataViewOrDataViewId });
 
     const { dataViews, uiSettings } = services;
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const currentDataView = currentDataView$.getValue();
+    const currentDataView = getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId));
 
     let nextDataView: DataView | null = null;
 
@@ -296,8 +325,7 @@ export const updateAdHocDataViewId: InternalStateThunkActionCreator<
     getState,
     { runtimeStateManager, services }
   ) {
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const prevDataView = currentDataView$.getValue();
+    const prevDataView = getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId));
     if (!prevDataView || prevDataView.isPersisted()) return;
 
     const isUsedInMultipleTabs = selectIsDataViewUsedInMultipleRuntimeTabStates(

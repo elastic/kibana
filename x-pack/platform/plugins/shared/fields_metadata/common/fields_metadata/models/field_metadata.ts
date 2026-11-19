@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 import { pick } from 'lodash';
 import type { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';

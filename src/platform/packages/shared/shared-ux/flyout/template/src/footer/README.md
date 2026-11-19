@@ -9,8 +9,8 @@
 </FlyoutTemplate.Footer>
 ```
 
-- `FlyoutTemplate.Footer.PrimaryAction` — rendered as a filled `EuiButton`.
-- `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
+- `FlyoutTemplate.Footer.PrimaryAction` — rendered as a filled `EuiButton`, `primary` or `danger` colored.
+- `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`, or as an `AiButtonEmpty` with `variant="ai"`. See [AI-styled secondary action](#ai-styled-secondary-action) below.
 - `FlyoutTemplate.Footer.PrimaryActionMenu` — rendered as a filled `EuiButton` that opens an `EuiContextMenu` in a popover above the footer. See [Primary action menu](#primary-action-menu) below.
 
 Only the first instance of each action renders. For `PrimaryActionMenu`, the first instance that has panels wins. Use either `PrimaryAction` or `PrimaryActionMenu`, not both. A `PrimaryActionMenu` with an empty `panels` array counts as absent, so a footer whose only action is an empty menu is not rendered, and nothing warns.
@@ -21,9 +21,33 @@ All three `label` props are `string`, not `ReactNode`.
 
 `PrimaryAction` and `SecondaryAction` accept `label`, `onClick`, an optional `id`, any `data-*` attributes, and the remaining `EuiButton` props, such as `iconType`, `iconSide`, `isLoading`, `isDisabled`, `contentProps`, and `textProps`. The `id` is forwarded to the button element.
 
-Both are typed from EUI's button-only props, so an action always renders a button and cannot take anchor props. The template controls appearance and sizing, so `children`, `color`, `element`, `fill`, `fullWidth`, `size`, and `buttonRef` are not accepted, and `SecondaryAction` does not take `flush`. `PrimaryAction` also takes `minWidth`, which `EuiButtonEmpty` does not support.
+Both are typed from EUI's button-only props, so an action always renders a button and cannot take anchor props. The template controls appearance and sizing, so `children`, `element`, `fill`, `fullWidth`, `size`, and `buttonRef` are not accepted, and `SecondaryAction` does not take `flush`. `PrimaryAction` also takes `minWidth`, which `EuiButtonEmpty` does not support.
+
+`PrimaryAction` takes a `color` of `primary` (the default) or `danger`. Use `danger` for a destructive action, such as deleting or cancelling something. No other colors are accepted, and `SecondaryAction` takes no `color`.
+
+```tsx
+<FlyoutTemplate.Footer.PrimaryAction label="Delete rule" color="danger" onClick={onDelete} />
+```
 
 An optional `tooltip` wraps the button in an `EuiToolTip`, for example to explain why the button is disabled. A natively disabled button fires no pointer events, so its tooltip could never open. For that reason, a disabled action with a tooltip sets `hasAriaDisabled` to true by default.
+
+## AI-styled secondary action
+
+Set `variant="ai"` on `SecondaryAction` for an action that hands off to an AI agent or chat, such as "Open chat". It renders an `AiButtonEmpty` from `@kbn/ui-ai-components`, with the same size as the other footer actions. A footer can have it as its only action.
+
+```tsx
+<FlyoutTemplate.Footer>
+  <FlyoutTemplate.Footer.SecondaryAction
+    variant="ai"
+    iconType="productAgent"
+    label="Open chat"
+    onClick={onOpenChat}
+  />
+  <FlyoutTemplate.Footer.PrimaryAction label="Open an escalation" onClick={onEscalate} />
+</FlyoutTemplate.Footer>
+```
+
+It takes the same props as the default variant, except that `iconType` is limited to the AI icons: `productAgent`, `sparkles`, `aiAssistantLogo`, and `inspect`. `addToChat` is not accepted, because `AiButtonEmpty` replaces the button's text with its own label for that icon, which would override `label`.
 
 ## Primary action menu
 
@@ -48,7 +72,8 @@ const panels: FlyoutFooterMenuPanel[] = useMemo(() => [
 
 `panels` uses EUI's own panel descriptors, with these restrictions:
 
-- Panel `content` and item `renderItem` are not supported. Both are typed `?: never`, so they fail type checking.
+- Panel `content` is not supported. It is typed `?: never`, so it fails type checking.
+- Item `renderItem` is deprecated. See [Deprecated: custom items](#deprecated-custom-items).
 - `items` is required. Without `content`, a panel with no items is always a mistake.
 - Panel `title` and item `name` are `string`, not `ReactNode`. Type the array as `FlyoutFooterMenuPanel[]`. EUI's own type skips these restrictions.
 - A nested panel (one opened from another panel's item) must have a `title`, because EUI uses it for the back button. The template warns in development about any nested panel without one.
@@ -80,3 +105,22 @@ The template sets these trigger props itself, so passing them is a type error ra
 - `color` and `size`, so all footer actions look the same.
 - `isSelected`, because it sets `aria-pressed`, which is for toggle buttons. A popover trigger uses `aria-expanded`, which EUI already sets.
 - `type`, which is always `"button"`, so a trigger inside a `<form>` opens the menu without submitting the form.
+
+### Deprecated: custom items
+
+Custom items are a temporary allowance for existing menus with interactive items, such as an item that opens its own popover. Do not use them in new menus. Redesign existing ones with plain items and nested panels so custom items can be removed.
+
+Interactive content inside a context menu conflicts with the menu's keyboard navigation, and the template does not work around it:
+
+- **The menu claims the arrow keys.** Arrow keys pressed in a custom item's controls, including a text field or a field in a nested popover, move focus to other menu items or go back a panel.
+- **ArrowRight can open the wrong sub-panel.** EUI picks the sub-panel by the focused element's position among the panel's items, and a custom item throws that count off.
+
+A custom item (`FlyoutFooterMenuCustomItem`) takes a required `key` and a `renderItem` function. `renderItem` receives `{ closeMenu }` and returns the item's content.
+
+```tsx
+{ key: 'assignee', renderItem: ({ closeMenu }) => <AssigneeItem onApplied={closeMenu} /> }
+```
+
+- A custom item owns its clicks. Clicking it never closes the menu, whatever `closeOnItemClick` is set to. Call `closeMenu` when the item is done.
+- The template does not add a `menuitem` role, an icon, or keyboard handling to a custom item. Its content provides those itself.
+- `renderItem` runs again only when `panels` changes. Content that depends on other state should be a component that reads that state itself.

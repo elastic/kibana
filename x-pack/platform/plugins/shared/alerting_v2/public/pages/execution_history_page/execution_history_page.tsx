@@ -6,12 +6,19 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { ALERTING_V2_EXECUTION_HISTORY_APP_ID } from '@kbn/alerting-v2-constants';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  canAccessTriggersActionsRules,
+  ruleLogsRoute,
+  triggersActionsRoute,
+} from '@kbn/rule-data-utils';
 import {
   UniversalRulesOnlyCallout,
   universalRulesOnlyBadge,
@@ -67,15 +74,48 @@ const getExecutionHistoryTabs = ({
   },
 ];
 
-const UNIVERSAL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
-  'xpack.alertingV2.executionHistory.universalRulesOnlyCalloutBody',
-  {
-    defaultMessage: 'Review past runs for Universal rules and action policies.',
-  }
+const POLICIES_TAB_CALLOUT_BODY = i18n.translate(
+  'xpack.alertingV2.executionHistory.policiesTabCalloutBody',
+  { defaultMessage: 'Review past runs for action policies.' }
 );
+
+const RulesTabCalloutBody = () => {
+  const application = useService(CoreStart('application'));
+  const basePath = useService(CoreStart('http')).basePath;
+
+  if (!canAccessTriggersActionsRules(application.capabilities)) {
+    return (
+      <FormattedMessage
+        id="xpack.alertingV2.executionHistory.rulesTabCalloutBody"
+        defaultMessage="Review past runs for Universal rules."
+      />
+    );
+  }
+
+  return (
+    <FormattedMessage
+      id="xpack.alertingV2.executionHistory.rulesTabCalloutBodyWithClassicLogs"
+      defaultMessage="Review past runs for Universal rules. To check logs from Classic rules, go to {classicLogsLink}."
+      values={{
+        classicLogsLink: (
+          <EuiLink
+            href={basePath.prepend(`${triggersActionsRoute}${ruleLogsRoute}`)}
+            data-test-subj="executionHistoryClassicRuleLogsLink"
+          >
+            <FormattedMessage
+              id="xpack.alertingV2.executionHistory.classicRuleLogsLink"
+              defaultMessage="Classic rule logs"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+};
 
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
+  const { links } = useService(CoreStart('docLinks'));
 
   const [selectedTabId, setSelectedTabId] = useState<TabId>(RULES_TAB_ID);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
@@ -110,11 +150,18 @@ export const ExecutionHistoryPage = () => {
         badges={[universalRulesOnlyBadge]}
         spacing="bleed"
         tabs={tabs}
+        docLink={
+          selectedTabId === RULES_TAB_ID
+            ? links.alerting.reviewRuleExecutionHistory
+            : links.alerting.reviewActionPolicyExecutionHistory
+        }
       />
       <EuiSpacer size="m" />
       <UniversalRulesOnlyCallout
         appId={ALERTING_V2_EXECUTION_HISTORY_APP_ID}
-        description={UNIVERSAL_RULES_ONLY_CALLOUT_BODY}
+        description={
+          selectedTabId === RULES_TAB_ID ? <RulesTabCalloutBody /> : POLICIES_TAB_CALLOUT_BODY
+        }
       />
       {selectedTabId === RULES_TAB_ID ? (
         <RulesTabContent onRuleClick={handleRuleClick} />

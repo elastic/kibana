@@ -23,6 +23,7 @@ import { isEqualFilters } from '../../utils/state_comparators';
 import { addLog } from '../../../../../utils/add_log';
 import { selectTab } from './tabs';
 import {
+  getTabDataView,
   selectTabRuntimeState,
   selectTabTypeForPersistence,
   type RuntimeStateManager,
@@ -83,7 +84,7 @@ export const selectHasUnsavedChanges = (
 
     const tabState = selectTab(state, tabId);
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+    const currentDataView = getTabDataView(tabRuntimeState);
 
     // Normalize both sides against the same tab type to avoid phantom changes.
     const tabType = selectTabTypeForPersistence({ runtimeStateManager, tabState });

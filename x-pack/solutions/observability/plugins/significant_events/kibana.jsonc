@@ -23,6 +23,7 @@
     ],
     "optionalPlugins": [
       "agentBuilder",
+      "agenticInvestigations",
       "agentBuilderSml",
       "cloud",
       "cps",

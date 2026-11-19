@@ -49,7 +49,7 @@ import type {
   TaskRunAsContext,
   TaskTypeGroup,
 } from '../task';
-import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
+import { isFailedRunResult, TaskStatus, TaskCost } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import {
   createTaskRunError,
@@ -72,7 +72,7 @@ import type { ApiKeyStrategy } from '../api_key_strategy';
 import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
 import { TaskValidator } from '../task_validator';
 import { getRetryDate, getTimeout } from '../lib/get_retry_at';
-import { getNextRunAt } from '../lib/get_next_run_at';
+import { getNextRunAt, getRRuleScheduleDurationMs } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
 import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
@@ -305,8 +305,7 @@ export class TaskManagerRunner implements TaskRunner {
    *  Effective cost for this task (instance override, then definition, then Normal).
    */
   public get cost(): number {
-    const instanceCost = getTaskCostFromInstance(this.instance.task.cost);
-    return instanceCost ?? this.definition?.cost ?? TaskCost.Normal;
+    return this.instance.task.cost ?? this.definition?.cost ?? TaskCost.Normal;
   }
 
   /**
@@ -828,15 +827,19 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private shouldUpdateExpiredTask(): boolean {
-    if (!this.instance.task.schedule || !this.instance.task.schedule.interval) {
-      // if the task does not have a schedule interval, we will not update it on timeout
-      return false;
+    const { interval, rrule } = this.instance.task.schedule ?? {};
+    const timeoutDuration = parseIntervalAsMillisecond(this.timeout);
+
+    if (interval) {
+      return parseIntervalAsMillisecond(interval) > timeoutDuration;
     }
 
-    const timeoutDuration = parseIntervalAsMillisecond(this.timeout);
-    const scheduleDuration = parseIntervalAsMillisecond(this.instance.task.schedule.interval);
+    if (rrule) {
+      return getRRuleScheduleDurationMs(rrule, this.instance.task.runAt) > timeoutDuration;
+    }
 
-    return scheduleDuration > timeoutDuration;
+    // if the task does not have a schedule, we will not update it on timeout
+    return false;
   }
 
   private rescheduleFailedRun = (

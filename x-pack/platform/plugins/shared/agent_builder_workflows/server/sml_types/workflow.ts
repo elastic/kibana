@@ -12,6 +12,8 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { WORKFLOW_INDEX_NAME } from '@kbn/workflows';
+import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { WorkflowProperties } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -29,8 +31,12 @@ const buildSearchContent = (source: WorkflowProperties): string => {
   return parts.filter(Boolean).join('\n');
 };
 
-export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefinition => ({
+export const createWorkflowSmlType = (
+  api: WorkflowsManagementApi,
+  getSecurity: () => SecurityPluginStart | undefined
+): SmlTypeDefinition => ({
   id: WORKFLOW_KI_TYPE,
+  attachmentType: WORKFLOW_YAML_ATTACHMENT_TYPE,
   fetchFrequency: () => '30m',
 
   async *list(context) {
@@ -127,6 +133,19 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
    * with that declaration.
    */
   getPermissions: () => kibanaPermissions({ kiType: WORKFLOW_KI_TYPE }),
+
+  searchByTitle: async ({ title, size }, { request, spaceId }) => {
+    // The API below filters by access control, but does not require the workflows read privilege.
+    if (!(await hasWorkflowReadPrivilege({ security: getSecurity(), request, spaceId }))) {
+      return [];
+    }
+    const { results } = await api.getWorkflows(
+      { page: 1, size, ...(title ? { query: title } : {}) },
+      spaceId,
+      { request }
+    );
+    return results.map(({ id, name }) => ({ originId: id, title: name || id }));
+  },
 
   toAttachment: async (item, context) => {
     const workflow = await api.getWorkflow(getSmlOriginId(item), context.spaceId, context.request);

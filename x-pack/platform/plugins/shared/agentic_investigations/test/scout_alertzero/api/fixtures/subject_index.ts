@@ -91,7 +91,13 @@ const ensureSubjectIndex = (esClient: Client): Promise<void> => {
                       thread_ts: { type: 'keyword' },
                       status_message_ts: { type: 'keyword' },
                       permalink: { type: 'keyword', index: false },
-                      seen_event_ids: { type: 'keyword', index: false },
+                      seen_events: {
+                        type: 'object',
+                        properties: {
+                          event_id: { type: 'keyword', index: false },
+                          execution_id: { type: 'keyword', index: false },
+                        },
+                      },
                     },
                   },
                   createdAt: { type: 'date', format: 'strict_date_optional_time' },

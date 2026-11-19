@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ALERTZERO_REASONING_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  ALERTZERO_THREAT_INTEL_EXTRACT_DIAMOND_TELEMETRY_PLUGIN_ID,
+} from '@kbn/alertzero-common';
 import {
   EXTRACT_DIAMOND_API_PATH,
   extractDiamondBodySchema,
@@ -51,7 +54,8 @@ export const registerExtractDiamondRoute = ({
           searchInferenceEndpoints: getSearchInferenceEndpoints(),
           request,
           uiSettingsClient: core.uiSettings.client,
-          featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+          featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+          telemetryPluginId: ALERTZERO_THREAT_INTEL_EXTRACT_DIAMOND_TELEMETRY_PLUGIN_ID,
           logger,
         });
         if (!modelOutcome.ok) {

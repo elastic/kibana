@@ -54,7 +54,7 @@ describe('getAlertingNavTourSteps', () => {
     expect(byId.rules.anchor).toBe(
       '[data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules-v2"]'
     );
-    expect(byId.rules.path).toBe('/rules/v2');
+    expect(byId.rules.path).toBe('/rules/universal');
     expect(byId.rulesTabs.anchor).toBe('[data-test-subj="v2RulesTab"]');
 
     expect(byId.maintenanceWindows.appId).toBe('management');
@@ -63,7 +63,7 @@ describe('getAlertingNavTourSteps', () => {
     expect(byId.maintenanceWindows.anchor).not.toContain('mw-create-button');
 
     expect(byId.createFirstRule.appId).toBe('observabilityAlerting');
-    expect(byId.createFirstRule.path).toBe('/rules/v2');
+    expect(byId.createFirstRule.path).toBe('/rules/universal');
     expect(byId.createFirstRule.anchor).toContain('createRuleButton');
     expect(byId.createFirstRule.anchor).toContain('ruleCreateOptionsEmptyStateTitle');
     expect(byId.createFirstRule.anchor).not.toContain(' h2');
@@ -89,7 +89,7 @@ describe('getAlertingNavTourSteps', () => {
     expect(rules?.anchor).toBe(
       '[data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules-v1"]'
     );
-    expect(rules?.path).toBe('/rules/v1');
+    expect(rules?.path).toBe('/rules/classic');
   });
 
   it('omits the rules tabs step when only Universal rules are visible', () => {

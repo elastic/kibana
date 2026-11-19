@@ -13,7 +13,7 @@ import { EndpointActionGenerator } from '../../../../../../../common/endpoint/da
 import { IsolationResults } from './isolation_results';
 import type { IsolationResultsProps } from './isolation_results';
 
-jest.mock('../action_failure_message', () => ({
+jest.mock('../endpoint_action_failure_message', () => ({
   EndpointActionFailureMessage: jest.fn((props: { 'data-test-subj'?: string }) => (
     <div data-test-subj={props['data-test-subj']} />
   )),

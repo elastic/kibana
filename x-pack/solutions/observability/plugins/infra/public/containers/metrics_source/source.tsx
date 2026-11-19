@@ -46,7 +46,7 @@ export const useSourceFetcher = ({
 
         const start = performance.now();
         const response = await http.fetch<MetricsSourceConfigurationResponse>(
-          `${API_URL}/${sourceId}`,
+          `${API_URL}/${encodeURIComponent(sourceId)}`,
           {
             method: 'GET',
             query: {
@@ -78,10 +78,13 @@ export const useSourceFetcher = ({
           throw new MissingHttpClientException();
         }
 
-        return await http.patch<MetricsSourceConfigurationResponse>(`${API_URL}/${sourceId}`, {
-          method: 'PATCH',
-          body: JSON.stringify(sourceProperties),
-        });
+        return await http.patch<MetricsSourceConfigurationResponse>(
+          `${API_URL}/${encodeURIComponent(sourceId)}`,
+          {
+            method: 'PATCH',
+            body: JSON.stringify(sourceProperties),
+          }
+        );
       },
       onResolve: (response) => {
         if (response) {

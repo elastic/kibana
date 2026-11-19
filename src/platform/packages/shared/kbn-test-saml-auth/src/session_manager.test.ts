@@ -164,6 +164,157 @@ describe('SamlSessionManager', () => {
       expect(createCloudSAMLSessionMock).not.toHaveBeenCalled();
     });
 
+    test(`should create a distinct UIAM user per organization role combination`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiam: true },
+      });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer, {
+        organizationRoles: ['billing-admin'],
+      });
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer, {
+        organizationRoles: ['billing-admin'],
+      });
+      await samlSessionManager.getEmail(roleViewer, { organizationRoles: ['billing-admin'] });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer);
+
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(2);
+      expect(createLocalSAMLSessionMock).toHaveBeenNthCalledWith(1, {
+        username: expect.not.stringMatching(/^1806480617$/),
+        email: 'elastic_viewer_billing-admin@elastic.co',
+        fullname: 'test viewer',
+        role: 'viewer',
+        serverless: {
+          organizationId: 'org123',
+          projectType: 'oblt',
+          uiamEnabled: true,
+          organizationRoleIds: ['billing-admin'],
+        },
+        kbnHost: 'http://localhost:5620',
+        log: expect.any(ToolingLog),
+      });
+      expect(createLocalSAMLSessionMock).toHaveBeenNthCalledWith(2, {
+        username: '1806480617',
+        email: 'elastic_viewer@elastic.co',
+        fullname: 'test viewer',
+        role: 'viewer',
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiamEnabled: true },
+        kbnHost: 'http://localhost:5620',
+        log: expect.any(ToolingLog),
+      });
+    });
+
+    test(`should treat the same organization roles in any order as one UIAM user`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiam: true },
+      });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer, {
+        organizationRoles: ['organization-admin', 'billing-admin'],
+      });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer, {
+        organizationRoles: ['billing-admin', 'organization-admin', 'billing-admin'],
+      });
+
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(1);
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'elastic_viewer_billing-admin_organization-admin@elastic.co',
+          serverless: expect.objectContaining({
+            organizationRoleIds: ['billing-admin', 'organization-admin'],
+          }),
+        })
+      );
+    });
+
+    test(`should create a distinct UIAM user per project role combination`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiam: true },
+      });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer, {
+        projectRoles: ['admin'],
+      });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer, {
+        organizationRoles: ['billing-admin'],
+        projectRoles: ['admin'],
+      });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer, {
+        projectRoles: ['admin', 'admin'],
+      });
+
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(2);
+      expect(createLocalSAMLSessionMock).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          email: 'elastic_viewer_project-admin@elastic.co',
+          serverless: {
+            organizationId: 'org123',
+            projectType: 'oblt',
+            uiamEnabled: true,
+            projectRoles: ['admin'],
+          },
+        })
+      );
+      expect(createLocalSAMLSessionMock).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          email: 'elastic_viewer_billing-admin_project-admin@elastic.co',
+          serverless: expect.objectContaining({
+            organizationRoleIds: ['billing-admin'],
+            projectRoles: ['admin'],
+          }),
+        })
+      );
+    });
+
+    test(`should reject UIAM project roles when UIAM is not enabled`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiam: false },
+      });
+      await expect(
+        samlSessionManager.getApiCredentialsForRole(roleViewer, { projectRoles: ['admin'] })
+      ).rejects.toThrow(
+        `UIAM project roles [admin] can only be granted to local UIAM-enabled serverless sessions.`
+      );
+      expect(createLocalSAMLSessionMock).not.toHaveBeenCalled();
+    });
+
+    test(`'getUserData' should request the session of the UIAM user holding the organization roles`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiam: true },
+      });
+      getSecurityProfileMock.mockResolvedValue({} as UserProfile);
+      await samlSessionManager.getUserData(roleViewer, {
+        organizationRoles: ['organization-admin'],
+      });
+
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(1);
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'elastic_viewer_organization-admin@elastic.co',
+          serverless: expect.objectContaining({ organizationRoleIds: ['organization-admin'] }),
+        })
+      );
+    });
+
+    test(`should reject UIAM organization roles when UIAM is not enabled`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiam: false },
+      });
+      await expect(
+        samlSessionManager.getApiCredentialsForRole(roleViewer, {
+          organizationRoles: ['billing-admin'],
+        })
+      ).rejects.toThrow(
+        `UIAM organization roles [billing-admin] can only be granted to local UIAM-enabled serverless sessions.`
+      );
+      expect(createLocalSAMLSessionMock).not.toHaveBeenCalled();
+    });
+
     test(`'getEmail' return the correct email`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
       const email = await samlSessionManager.getEmail(roleEditor);
@@ -446,6 +597,73 @@ describe('SamlSessionManager', () => {
         `User with '${noCredentialsRole}' role is not defined`
       );
       expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(0);
+    });
+
+    describe('with custom SAML realm', () => {
+      const customRole = 'custom_role_worker_1';
+      const customRealmCookieInstance = Cookie.parse(
+        'sid=custom_realm_cookie_value; Path=/; Expires=Wed, 01 Oct 2023 07:00:00 GMT'
+      )!;
+      const samlSMOptionsWithCustomRealm = {
+        ...samlSMOptionsWithCloudHostName,
+        customSamlRealm: { providerName: 'qaf', roles: [customRole] },
+      };
+      let createCustomRealmSAMLSessionMock: jest.SpyInstance;
+
+      beforeEach(() => {
+        createCustomRealmSAMLSessionMock = jest
+          .spyOn(samlAuth, 'createCustomRealmSAMLSession')
+          .mockResolvedValue(
+            new Session(customRealmCookieInstance, `elastic_${customRole}@elastic.co`)
+          );
+      });
+
+      test(`uses the custom SAML provider for listed roles without reading cloud users`, async () => {
+        const samlSessionManager = new SamlSessionManager(samlSMOptionsWithCustomRealm);
+        const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+          customRole
+        );
+
+        expect(cookie).toBe(customRealmCookieInstance.value);
+        expect(createCustomRealmSAMLSessionMock).toHaveBeenCalledWith({
+          providerName: 'qaf',
+          username: `elastic_${customRole}`,
+          email: `elastic_${customRole}@elastic.co`,
+          fullname: `test ${customRole}`,
+          role: customRole,
+          kbnHost: 'https://my-test-deployment.test.elastic.cloud',
+          kbnVersion: '8.12.0',
+          log: expect.any(ToolingLog),
+        });
+        expect(createCloudSAMLSessionMock).not.toHaveBeenCalled();
+        expect(readCloudUsersFromFileMock).not.toHaveBeenCalled();
+      });
+
+      test(`uses cloud users for roles that aren't listed`, async () => {
+        const samlSessionManager = new SamlSessionManager(samlSMOptionsWithCustomRealm);
+        const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+          roleViewer
+        );
+
+        expect(cookie).toBe(cloudCookieInstance.value);
+        expect(createCloudSAMLSessionMock).toHaveBeenCalledTimes(1);
+        expect(createCustomRealmSAMLSessionMock).not.toHaveBeenCalled();
+      });
+
+      test(`still throws for unlisted roles without cloud users`, async () => {
+        const samlSessionManager = new SamlSessionManager(samlSMOptionsWithCustomRealm);
+        await expect(
+          samlSessionManager.getInteractiveUserSessionCookieWithRoleScope('admin')
+        ).rejects.toThrow(`User with 'admin' role is not defined`);
+        expect(createCustomRealmSAMLSessionMock).not.toHaveBeenCalled();
+      });
+
+      test(`caches the custom realm session for the same role`, async () => {
+        const samlSessionManager = new SamlSessionManager(samlSMOptionsWithCustomRealm);
+        await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(customRole);
+        await samlSessionManager.getApiCredentialsForRole(customRole);
+        expect(createCustomRealmSAMLSessionMock).toHaveBeenCalledTimes(1);
+      });
     });
   });
 

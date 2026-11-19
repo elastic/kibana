@@ -136,6 +136,14 @@ export class SecurityPlugin
     return this.config;
   };
 
+  private uiam?: UiamService;
+  private readonly getUiam = () => {
+    if (!this.uiam) {
+      throw new Error('UIAM service is not available.');
+    }
+    return this.uiam;
+  };
+
   private session?: Session;
   private readonly getSession = () => {
     if (!this.session) {
@@ -356,6 +364,8 @@ export class SecurityPlugin
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
       getCurrentUser,
+      getFakeRequestPrincipal: (request) =>
+        this.serviceAccountsStart?.backend.getFakeRequestPrincipal(request) ?? null,
       recordAuditLoggingUsage: () => this.getFeatureUsageService().recordAuditLoggingUsage(),
     });
 
@@ -418,6 +428,8 @@ export class SecurityPlugin
         getAuthc: this.getAuthentication.bind(this),
         getSession: this.getSession,
         getServiceAccounts: this.getServiceAccountsService,
+        getUiam: this.getUiam,
+        organizationId,
         audit: this.auditSetup,
         config,
         logger: this.logger,
@@ -509,18 +521,6 @@ export class SecurityPlugin
     });
     this.session = session;
 
-    this.userProfileStart = this.userProfileService.start({
-      clusterClient,
-      session,
-      getCurrentUser: core.security.authc.getCurrentUser,
-    });
-
-    // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
-    const customLogoutURL =
-      this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
-        ? cloud?.projectsUrl
-        : undefined;
-
     const config = this.getConfig();
 
     const { protocol, hostname, port } = core.http.getServerInfo();
@@ -538,6 +538,20 @@ export class SecurityPlugin
           kibanaVersion: this.initializerContext.env.packageInfo.version,
         })
       : undefined;
+    this.uiam = uiam;
+
+    this.userProfileStart = this.userProfileService.start({
+      clusterClient,
+      session,
+      getCurrentUser: core.security.authc.getCurrentUser,
+      uiam,
+    });
+
+    // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
+    const customLogoutURL =
+      this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
+        ? cloud?.projectsUrl
+        : undefined;
 
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
@@ -572,6 +586,7 @@ export class SecurityPlugin
       getCurrentUser: this.authenticationStart.getCurrentUser,
       getCurrentUserProfileId: (request) =>
         this.getUserProfileService().getCurrentProfileId({ request }),
+      getUserProfiles: (uids) => this.getUserProfileService().bulkGet({ uids }),
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       workloadTypes: this.getWorkloadTypes(),
     });

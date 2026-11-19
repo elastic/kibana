@@ -265,6 +265,18 @@ describe('setResolutionRulesTool', () => {
       expect(error.data.message).toContain('permission');
     });
 
+    it('checks the manage privilege the enable and disable routes require', async () => {
+      const ctx = buildHandlerContextWithPrompts(mocks, {
+        checkStatus: ConfirmationStatus.accepted,
+      });
+
+      await tool.handler({ rules: [{ ruleId: 'email_exact_match', enabled: true }] }, ctx);
+
+      expect(mocks.mockCheckPrivileges).toHaveBeenCalledWith({
+        kibana: ['api:securitySolution', 'api:securitySolution-entity-analytics-manage'],
+      });
+    });
+
     it('returns an error result when setEnabled throws', async () => {
       mockSetEnabled.mockRejectedValueOnce(new Error('boom'));
       const ctx = buildHandlerContextWithPrompts(mocks, {

@@ -10,6 +10,7 @@ import {
   CONTAINER_ID,
   HOST_HOSTNAME,
   HOST_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
   SERVICE_NAME,
 } from '../../../common/es_fields/apm';
 import type { RollupInterval } from '../../../common/rollup';
@@ -75,6 +76,12 @@ export async function getServiceCorrelationFields({
           size: 500,
         },
       },
+      deploymentNames: {
+        terms: {
+          field: KUBERNETES_DEPLOYMENT_NAME,
+          size: 500,
+        },
+      },
     },
   });
 
@@ -83,9 +90,14 @@ export async function getServiceCorrelationFields({
     ...getBucketKeysAsString(response.aggregations?.hostNames.buckets),
   ];
   const hostNames = new Set<string>(allHostNames);
+  const deploymentNames = getBucketKeysAsString(response.aggregations?.deploymentNames.buckets);
 
   return {
     hostNames: Array.from(hostNames),
     containerIds: getBucketKeysAsString(response.aggregations?.containerIds.buckets),
+    // Profiling samples carry the Kubernetes workload name as `orchestrator.resource.name`. Prefer
+    // the deployment name when the collector enriched the APM data with it; otherwise fall back to
+    // the service name, which is what the workload is called in most deployments.
+    workloadNames: deploymentNames.length > 0 ? deploymentNames : [serviceName],
   };
 }

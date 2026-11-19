@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiNotificationBadge, EuiPanel } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
+import { EuiTabbedContent, EuiNotificationBadge, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
@@ -14,9 +14,16 @@ import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 import type { AddToTimelineHandler } from '../../../types';
 
-const euiTabbedContentCss = ({ euiTheme }: UseEuiTheme) => ({
+const euiTabbedContentCss = {
   'div.euiTabs': {
     paddingLeft: '8px',
+  },
+};
+
+/** Panel variant (pack rows) keeps the tab strip on the page body color. */
+const panelTabbedContentCss = ({ euiTheme }: UseEuiTheme) => ({
+  'div.euiTabs': {
+    ...euiTabbedContentCss['div.euiTabs'],
     background: euiTheme.colors.body,
   },
 });
@@ -33,6 +40,11 @@ interface ResultTabsProps {
   addToTimeline?: AddToTimelineHandler;
   scheduleId?: string;
   executionCount?: number;
+  /**
+   * Wraps the tabs in a panel (bordered in the default theme). Results pages render them
+   * directly under the AppHeader instead, per the Chrome Next design.
+   */
+  hasPanel?: boolean;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -47,6 +59,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   addToTimeline,
   scheduleId,
   executionCount,
+  hasPanel = true,
 }) => {
   const tabs = useMemo(
     () => [
@@ -106,17 +119,25 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
     ]
   );
 
+  const tabbedContent = (
+    <EuiTabbedContent
+      css={hasPanel ? panelTabbedContentCss : euiTabbedContentCss}
+      // TODO: extend the EuiTabbedContent component to support EuiTabs props
+      // bottomBorder={false}
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+      autoFocus="selected"
+      expand={false}
+    />
+  );
+
+  if (!hasPanel) {
+    return tabbedContent;
+  }
+
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
-      <EuiTabbedContent
-        css={euiTabbedContentCss}
-        // TODO: extend the EuiTabbedContent component to support EuiTabs props
-        // bottomBorder={false}
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-        autoFocus="selected"
-        expand={false}
-      />
+      {tabbedContent}
     </EuiPanel>
   );
 };

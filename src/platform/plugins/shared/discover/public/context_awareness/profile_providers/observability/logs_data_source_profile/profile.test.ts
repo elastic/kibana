@@ -119,7 +119,7 @@ describe('logsDataSourceProfileProvider', () => {
     expect(
       logsDataSourceProfileProvider.resolve({
         ...params,
-        rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Default },
+        rootContext: { profileId: 'classic-nav-root-profile', solutionType: SolutionType.Default },
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(

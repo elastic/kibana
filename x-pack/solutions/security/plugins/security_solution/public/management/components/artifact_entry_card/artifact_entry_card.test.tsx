@@ -400,3 +400,33 @@ describe.each([
     });
   });
 });
+
+describe('when using the ArtifactEntryCard component with a wildcard (Match) entry', () => {
+  beforeEach(() => {
+    mockUserPrivileges.mockReturnValue({ endpointPrivileges: getEndpointAuthzInitialStateMock() });
+  });
+
+  afterEach(() => {
+    mockUserPrivileges.mockReset();
+  });
+
+  it('should display the MATCHES operator for a wildcard entry', () => {
+    const item = getExceptionProviderMock();
+    item.entries = [
+      {
+        field: 'file.path.caseless',
+        operator: 'included',
+        type: 'wildcard',
+        value: 'C:\\foo\\*.exe',
+      },
+    ];
+
+    const renderResult = createAppRootMockRenderer().render(
+      <ArtifactEntryCard item={item} data-test-subj="testCard" />
+    );
+
+    expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
+      ' OSIS WindowsAND file.path.caselessMATCHES C:\\foo\\*.exe'
+    );
+  });
+});

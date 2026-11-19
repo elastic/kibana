@@ -7,26 +7,20 @@
 
 import type { AuthMode } from '@kbn/connector-specs';
 import { findConnectorsSo } from '../../../../data/connector';
-import type { GetUserTokenConnectorsSoResult } from '../../../../data/connector/types';
 import { filterInferenceConnectors } from '../get_all';
 import { getAuthMode } from '../../lib/get_auth_mode';
-import { getUserTokenConnectorsForProfile } from '../../lib';
 import type { Connector } from '../../types';
 import type { GetAuthStatusParams, GetAuthStatusResult } from './types';
 import type { RawAction } from '../../../../types';
 
 function deriveUserAuthStatus(
-  connectorId: string,
-  userTokenConnectors: GetUserTokenConnectorsSoResult,
+  isUsableToken: boolean,
   authMode: AuthMode
 ): GetAuthStatusResult[string]['userAuthStatus'] {
   if (authMode === 'shared') {
     return 'not_applicable';
   }
-  if (userTokenConnectors.connectorIds.includes(connectorId)) {
-    return 'connected';
-  }
-  return 'not_connected';
+  return isUsableToken ? 'connected' : 'not_connected';
 }
 
 export async function getAuthStatus({
@@ -35,11 +29,6 @@ export async function getAuthStatus({
   await context.authorization.ensureAuthorized({ operation: 'get' });
 
   const profileUid = await context.getCurrentUserProfileId?.(context.request);
-
-  const userTokenConnectors = await getUserTokenConnectorsForProfile({
-    savedObjectsClient: context.unsecuredSavedObjectsClient,
-    profileUid,
-  });
 
   const namespace = context.spaceId
     ? context.spaces?.spaceIdToNamespace(context.spaceId)
@@ -51,14 +40,28 @@ export async function getAuthStatus({
     fields: ['authMode'],
   });
 
+  const connectors = savedObjects.map((so) => ({
+    id: so.id,
+    authMode: getAuthMode(
+      (so.attributes as RawAction | undefined)?.authMode as Connector['authMode'] | undefined
+    ),
+  }));
+
+  // A token only counts as connected while it is usable: unexpired, or refreshable.
+  const usableConnectorIds = profileUid
+    ? await context.connectorTokenClient.getUsableOAuthConnectorIds({
+        profileUid,
+        connectorIds: connectors
+          .filter(({ authMode }) => authMode !== 'shared')
+          .map(({ id }) => id),
+      })
+    : new Set<string>();
+
   const results: GetAuthStatusResult = {};
 
-  for (const so of savedObjects) {
-    const authMode = getAuthMode(
-      (so.attributes as RawAction | undefined)?.authMode as Connector['authMode'] | undefined
-    );
-    results[so.id] = {
-      userAuthStatus: deriveUserAuthStatus(so.id, userTokenConnectors, authMode),
+  for (const { id, authMode } of connectors) {
+    results[id] = {
+      userAuthStatus: deriveUserAuthStatus(usableConnectorIds.has(id), authMode),
     };
   }
 

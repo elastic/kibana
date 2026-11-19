@@ -23,6 +23,8 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { securityMock } from '../../mocks';
 import { ROUTE_TAG_ACCEPT_JWT, ROUTE_TAG_ACCEPT_UIAM_OAUTH } from '../../routes/tags';
 import { ServiceAccountFakeRequests } from '../../service_accounts/fake_requests';
+import type { UiamApiKeyCreator } from '../../uiam/uiam_service';
+import { uiamServiceMock } from '../../uiam/uiam_service.mock';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -522,8 +524,8 @@ describe('HTTPAuthenticationProvider', () => {
       }));
       const mintToken = jest
         .fn()
-        .mockResolvedValueOnce('essu_service_account_initial')
-        .mockResolvedValueOnce('essu_service_account_replacement');
+        .mockResolvedValueOnce({ token: 'essu_service_account_initial' })
+        .mockResolvedValueOnce({ token: 'essu_service_account_replacement' });
       const registry = new ServiceAccountFakeRequests(logger, mintToken, 600_000);
       const fakeRequest = await registry.create({ serviceAccountId: 'service-account' });
       const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -552,7 +554,7 @@ describe('HTTPAuthenticationProvider', () => {
         expect(result.authHeaders).toEqual({ authorization: `Bearer ${token}` });
         expect(client.asScoped).toHaveBeenLastCalledWith(request);
         if (token === 'essu_service_account_initial') {
-          await registry.ensureFreshToken(fakeRequest, 0);
+          await registry.ensureFreshToken(fakeRequest, 0, 'reauthenticate');
         }
       }
 
@@ -714,6 +716,92 @@ describe('HTTPAuthenticationProvider', () => {
       );
 
       expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('UIAM API key creator', () => {
+    const keyUser = mockAuthenticatedUser({
+      username: 'task-key-id',
+      authentication_type: 'api_key',
+      api_key: {
+        id: 'task-key-id',
+        name: 'TaskManager-UIAM: workflow:run - 12345',
+        managed_by: 'cloud',
+        internal: true,
+      },
+    });
+
+    const authenticate = async (options: MockAuthenticationProviderOptions) => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_task_manager_key' },
+      });
+      const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
+      scopedClient.asCurrentUser.security.authenticate.mockResponse(keyUser);
+      options.client.asScoped.mockReturnValue(scopedClient);
+      const provider = new HTTPAuthenticationProvider(options, {
+        supportedSchemes: new Set(['apikey']),
+      });
+      return provider.authenticate(request);
+    };
+
+    let uiam: ReturnType<typeof uiamServiceMock.create>;
+    let options: MockAuthenticationProviderOptions;
+    beforeEach(() => {
+      uiam = uiamServiceMock.create();
+      options = { ...mockAuthenticationProviderOptions({ name: 'http' }), uiam };
+    });
+
+    it('authenticates the key as the user who created it, keeping the key identity', async () => {
+      uiam.getApiKeyCreator.mockResolvedValue({ type: 'user', user_id: 12345 });
+
+      const result = await authenticate(options);
+
+      expect(result.succeeded()).toBe(true);
+      expect(result.user).toEqual(
+        expect.objectContaining({
+          username: '12345',
+          // Like an Elasticsearch API key, it has no profile of its own on the user.
+          profile_uid: keyUser.profile_uid,
+          authentication_type: 'api_key',
+          api_key: expect.objectContaining({ id: 'task-key-id' }),
+        })
+      );
+      const [[lookedUpRequest]] = uiam.getApiKeyCreator.mock.calls;
+      expect(HTTPAuthorizationHeader.parseFromRequest(lookedUpRequest)).toEqual(
+        new HTTPAuthorizationHeader('ApiKey', 'essu_task_manager_key')
+      );
+    });
+
+    it.each<[string, UiamApiKeyCreator | undefined]>([
+      ['an API key creator', { type: 'api-key', api_key_id: 'source-key-id' }],
+      [
+        'an organization service account creator',
+        { type: 'organization-service-account', organization_service_account_id: 'sa-id' },
+      ],
+      ['no creator', undefined],
+    ])('keeps the key identity when UIAM reports %s', async (_, creator) => {
+      uiam.getApiKeyCreator.mockResolvedValue(creator);
+
+      expect((await authenticate(options)).user?.username).toBe('task-key-id');
+    });
+
+    it('keeps the key identity and logs when the lookup fails', async () => {
+      uiam.getApiKeyCreator.mockRejectedValue(new Error('UIAM is down'));
+
+      const result = await authenticate(options);
+
+      expect(result.succeeded()).toBe(true);
+      expect(result.user?.username).toBe('task-key-id');
+      expect(options.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to retrieve the creator of a UIAM API key')
+      );
+    });
+
+    it('does not look anything up when UIAM is not enabled', async () => {
+      const result = await authenticate(mockOptions);
+
+      expect(result.user?.username).toBe('task-key-id');
+      expect(mockOptions.logger.error).not.toHaveBeenCalled();
     });
   });
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { z } from '@kbn/zod';
+import { numeralPatternSchema } from './common';
 
 const baseColorOptions = z.object({
   text: z.string().meta({
@@ -37,6 +38,7 @@ export const colorFormatSchema = z
       }),
       z.object({
         field_type: z.literal('number'),
+        pattern: numeralPatternSchema,
         colors: z.array(
           baseColorOptions.extend({
             range: z.string().meta({

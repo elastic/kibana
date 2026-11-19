@@ -30,7 +30,8 @@ export const spaceTest = spaceBaseTest.extend<
         LogsExperiencePage,
         page,
         pageObjects.dataGrid,
-        pageObjects.discover
+        pageObjects.discover,
+        pageObjects.appMenu
       ),
     };
 

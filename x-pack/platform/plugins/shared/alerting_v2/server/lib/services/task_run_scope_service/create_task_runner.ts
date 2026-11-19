@@ -12,11 +12,13 @@ import { Request } from '@kbn/core-di-server';
 import type {
   RunContext,
   RunResult,
+  TaskCost,
+  TaskPriority,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server/task';
 import { createToken } from '@kbn/core-di';
 import type { Newable } from 'inversify';
-import type { PluginConfig } from '../../../config';
+import type { ConfigService } from '../config_service/config_service';
 
 type TaskRunnerConstructor<T> = Newable<T>;
 
@@ -37,8 +39,9 @@ export interface AlertingTaskRunner {
 export interface AlertingTaskDefinition<TRunner extends AlertingTaskRunner = AlertingTaskRunner> {
   taskType: string;
   title: string;
+  description?: string;
   timeout: string;
-  resolveTimeout?: (config: PluginConfig) => string;
+  resolveTimeout?: (configService: ConfigService) => string;
   paramsSchema?: ObjectType;
   stateSchemaByVersion?: Record<
     number,
@@ -48,6 +51,8 @@ export interface AlertingTaskDefinition<TRunner extends AlertingTaskRunner = Ale
     }
   >;
   maxAttempts?: number;
+  cost?: TaskCost;
+  priority?: TaskPriority;
   taskRunnerClass: TaskRunnerConstructor<TRunner>;
   /**
    * Whether this task requires a fakeRequest from Task Manager.

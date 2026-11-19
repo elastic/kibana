@@ -1,5 +1,5 @@
 {
-  "sha1": "41c6a00cf59c750ef28492b1af00e0ed09f52852",
+  "sha1": "0cdc5c671d5979b60da45524039079a44a49acee",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_create_integration_page.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 24
       }
     },
@@ -56,8 +56,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_create_integration_page.spec.ts",
-        "line": 66,
+        "line": 67,
         "column": 64
+      }
+    },
+    {
+      "id": "9b334bf5625696a-1e8681bc04b9d55",
+      "title": "Automatic Import — accessibility — create integration page has no detectable a11y violations with the AI connector callout shown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_create_integration_page.spec.ts",
+        "line": 73,
+        "column": 11
       }
     },
     {
@@ -103,8 +117,8 @@
       }
     },
     {
-      "id": "91779db3dc0c555-2e88748e780fbd3",
-      "title": "Add Integration — Automatic Import V2 — Connector & Form does not show the Add new connector button when connectors exist",
+      "id": "91779db3dc0c555-298a5817052ac2e",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form does not show the Add AI connector button when connectors exist",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -117,8 +131,8 @@
       }
     },
     {
-      "id": "91779db3dc0c555-36054075bbaabbe",
-      "title": "Add Integration — Automatic Import V2 — Connector & Form shows Add new connector button when no AI connectors are available",
+      "id": "91779db3dc0c555-f08bee663322bd0",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form shows the AI connector callout instead of the connector selector on load when no AI connectors are available",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -131,8 +145,8 @@
       }
     },
     {
-      "id": "91779db3dc0c555-2516336563ee82d",
-      "title": "Add Integration — Automatic Import V2 — Connector & Form opens the connector setup flyout when Add new connector is clicked",
+      "id": "91779db3dc0c555-356e261c537b6c0",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form does not show the AI connector callout when a connector is available",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -140,13 +154,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 76,
-        "column": 11
+        "line": 82,
+        "column": 10
       }
     },
     {
-      "id": "91779db3dc0c555-086e482ecaa65ea",
-      "title": "Add Integration — Automatic Import V2 — Connector & Form renders the title and description input fields",
+      "id": "91779db3dc0c555-2033215a6c20334",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form Add data stream shows inline errors and does not open the flyout when no connector exists",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -159,6 +173,48 @@
       }
     },
     {
+      "id": "91779db3dc0c555-c9d84a0e241cc90",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form Add data stream does not open the flyout when no connector exists and the other fields are valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 103,
+        "column": 10
+      }
+    },
+    {
+      "id": "91779db3dc0c555-e6160fa83a26ff0",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form opens the connector setup flyout from the AI connector callout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 118,
+        "column": 24
+      }
+    },
+    {
+      "id": "91779db3dc0c555-086e482ecaa65ea",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form renders the title and description input fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 132,
+        "column": 7
+      }
+    },
+    {
       "id": "91779db3dc0c555-7c49076f136ebd7",
       "title": "Add Integration — Automatic Import V2 — Connector & Form allows entering an integration title and description",
       "expectedStatus": "passed",
@@ -168,7 +224,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 93,
+        "line": 137,
+        "column": 11
+      }
+    },
+    {
+      "id": "91779db3dc0c555-6a41cb985003672",
+      "title": "Add Integration — Automatic Import V2 — Connector & Form Add data stream shows inline errors and does not open the flyout when name and description are empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
+        "line": 145,
         "column": 25
       }
     },
@@ -182,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 100,
-        "column": 11
+        "line": 161,
+        "column": 7
       }
     },
     {
@@ -196,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 104,
-        "column": 24
+        "line": 165,
+        "column": 22
       }
     },
     {
@@ -229,8 +299,8 @@
       }
     },
     {
-      "id": "dcd0cf5828764e1-59c0db1a422424d",
-      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs button is disabled when the form is empty",
+      "id": "dcd0cf5828764e1-317f0c5e4816716",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs shows inline errors and keeps the flyout open when the form is empty",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -252,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 88,
-        "column": 13
+        "line": 97,
+        "column": 7
       }
     },
     {
@@ -266,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 91,
-        "column": 92
+        "line": 102,
+        "column": 13
       }
     },
     {
@@ -280,13 +350,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 96,
-        "column": 10
+        "line": 107,
+        "column": 13
       }
     },
     {
-      "id": "dcd0cf5828764e1-ec45aa2469635dc",
-      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs button is enabled when all required fields are filled",
+      "id": "dcd0cf5828764e1-bdb90b7eb26a2ec",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout inline errors clear once all required fields are filled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -294,13 +364,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 100,
+        "line": 116,
         "column": 75
       }
     },
     {
-      "id": "dcd0cf5828764e1-c744259da309dc3",
-      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs button stays disabled when integration title has only one character",
+      "id": "dcd0cf5828764e1-7fe1801392b4edd",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs shows the integration details callout when integration title has only one character",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -308,13 +378,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 125,
-        "column": 25
+        "line": 147,
+        "column": 96
       }
     },
     {
-      "id": "dcd0cf5828764e1-aa3659440780795",
-      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs button stays disabled when data stream title is empty",
+      "id": "dcd0cf5828764e1-5426cda2a4b5c4e",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs shows an inline error when data stream title is empty",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -322,13 +392,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 155,
-        "column": 9
+        "line": 178,
+        "column": 7
       }
     },
     {
-      "id": "dcd0cf5828764e1-e810a49812f51a5",
-      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs button stays disabled when data stream title has only one character",
+      "id": "dcd0cf5828764e1-044508caf3b00fd",
+      "title": "Add Integration — Automatic Import V2 — Create Data Stream Flyout Analyze Logs shows an inline error when data stream title has only one character",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -336,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 180,
-        "column": 24
+        "line": 205,
+        "column": 19
       }
     },
     {
@@ -350,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 202,
-        "column": 24
+        "line": 232,
+        "column": 19
       }
     },
     {
@@ -364,7 +434,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 253,
+        "line": 284,
         "column": 36
       }
     }

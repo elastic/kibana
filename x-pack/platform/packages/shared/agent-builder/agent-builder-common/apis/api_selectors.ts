@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import type { ApiTarget } from './targets';
+
+/**
+ * An API operation, addressed by the backend it belongs to and its identifier.
+ */
+export interface ApiReference {
+  target: ApiTarget;
+  api: string;
+}
+
 export const allApisSelector = '*';
 
 const namespaceSelectorSuffix = '.*';
@@ -54,3 +64,17 @@ export const matchesApiSelector = (selector: string, api: string): boolean => {
   }
   return api.startsWith(selector.slice(0, -1));
 };
+
+/**
+ * Whether any of a list of target/selector pairs covers a specific operation.
+ *
+ * @param selectors - Pairs to match against. Each selector is `*`, a namespace wildcard such as
+ *   `indices.*`, or an exact identifier, and only covers operations on its own target.
+ * @param reference - Target and exact operation identifier to look up.
+ * @returns True when at least one pair covers the operation. False for an empty list.
+ */
+export const matchesAnyApiSelector = (
+  selectors: readonly ApiReference[],
+  { target, api }: ApiReference
+): boolean =>
+  selectors.some((selector) => selector.target === target && matchesApiSelector(selector.api, api));

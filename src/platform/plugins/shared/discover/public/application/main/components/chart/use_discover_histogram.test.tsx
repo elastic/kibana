@@ -30,7 +30,11 @@ import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_message
 import type { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
 import { useDiscoverCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import {
+  getDataViewOfSource,
+  internalStateActions,
+  selectTabRuntimeState,
+} from '../../state_management/redux';
 import { DataViewSource } from '@kbn/data-source';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -673,11 +677,8 @@ describe('useDiscoverHistogram', () => {
       const { toolkit } = await setup();
       const { api } = await setupFetching({ toolkit });
       const tabId = toolkit.getCurrentTab().id;
-      const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
-        toolkit.runtimeStateManager,
-        tabId
-      );
-      const dataView = currentDataView$.getValue();
+      const { currentDataSource$ } = selectTabRuntimeState(toolkit.runtimeStateManager, tabId);
+      const dataView = getDataViewOfSource(currentDataSource$.getValue());
       const breakdownField = 'host.name';
 
       act(() => {
@@ -697,11 +698,8 @@ describe('useDiscoverHistogram', () => {
       const { toolkit } = await setup();
       const { api } = await setupFetching({ toolkit });
       const tabId = toolkit.getCurrentTab().id;
-      const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
-        toolkit.runtimeStateManager,
-        tabId
-      );
-      const dataView = currentDataView$.getValue();
+      const { currentDataSource$ } = selectTabRuntimeState(toolkit.runtimeStateManager, tabId);
+      const dataView = getDataViewOfSource(currentDataSource$.getValue());
 
       act(() => {
         currentDataSource$.next(new DataViewSource(dataView!));

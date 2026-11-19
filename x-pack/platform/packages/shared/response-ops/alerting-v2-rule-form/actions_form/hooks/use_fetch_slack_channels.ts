@@ -61,7 +61,7 @@ export const useFetchSlackChannels = ({
     onError: (error: Error) => {
       toasts.addError(error, {
         title: i18n.translate(
-          'xpack.responseOps.alertingV2RuleForm.actionForm.slackChannels.fetchError',
+          'xpack.alertingV2.alertingV2RuleForm.actionForm.slackChannels.fetchError',
           { defaultMessage: 'Failed to load Slack channels' }
         ),
       });

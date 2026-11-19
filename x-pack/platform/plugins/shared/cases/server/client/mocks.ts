@@ -100,6 +100,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     getTags: jest.fn(),
     getReporters: jest.fn(),
     getCasesByAlertID: jest.fn(),
+    getCasesByAttachmentIDs: jest.fn(),
     getCategories: jest.fn(),
     replaceCustomField: jest.fn(),
     similar: jest.fn(),
@@ -128,8 +129,11 @@ const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
   return lazyObject({
     bulkGet: jest.fn(),
     add: jest.fn(),
+    addAndGetCase: jest.fn(),
     addFile: jest.fn(),
+    addFileAndGetCase: jest.fn(),
     bulkCreate: jest.fn(),
+    bulkCreateAndGetCase: jest.fn(),
     delete: jest.fn(),
     deleteAll: jest.fn(),
     bulkDelete: jest.fn(),
@@ -138,6 +142,7 @@ const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
     getAll: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
+    updateAndGetCase: jest.fn(),
     getAllDocumentsAttachedToCase: jest.fn(),
   });
 };

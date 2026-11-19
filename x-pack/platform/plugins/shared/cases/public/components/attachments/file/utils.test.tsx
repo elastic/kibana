@@ -15,7 +15,13 @@ import { FILE_ATTACHMENT_TYPE, SECURITY_SOLUTION_OWNER } from '../../../../commo
 import { basicComment } from '../../../containers/mock';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { makeFileComment } from './test_helpers';
-import { getFileIdsFromComments, getFilesFromComments, isImage, parseMimeType } from './utils';
+import {
+  getFileAttachmentIds,
+  getFileIdsFromComments,
+  getFilesFromComments,
+  isImage,
+  parseMimeType,
+} from './utils';
 
 const imageMimeTypes = Array.from(IMAGE_MIME_TYPES);
 
@@ -104,6 +110,30 @@ describe('getFileIdsFromComments', () => {
       owner
     );
     expect(result).toEqual(new Set(['file-1']));
+  });
+});
+
+describe('getFileAttachmentIds', () => {
+  const owner = SECURITY_SOLUTION_OWNER;
+
+  it('returns the attachments that reference the file ids', () => {
+    const comments = [
+      basicComment,
+      makeFileComment('c1', 'file-1', owner),
+      makeFileComment('c2', 'file-2', owner),
+      makeFileComment('c3', 'file-3', owner),
+    ];
+
+    expect(getFileAttachmentIds(comments, owner, ['file-1', 'file-3'])).toEqual(['c1', 'c3']);
+  });
+
+  it('returns every attachment that references the same file', () => {
+    const comments = [
+      makeFileComment('c1', 'file-1', owner),
+      makeFileComment('c2', 'file-1', owner),
+    ];
+
+    expect(getFileAttachmentIds(comments, owner, ['file-1'])).toEqual(['c1', 'c2']);
   });
 });
 

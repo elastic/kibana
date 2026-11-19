@@ -71,7 +71,7 @@ export const MysqlConnector: ConnectorSpec = {
   metadata: {
     id: '.mysql',
     displayName: 'MySQL',
-    description: i18n.translate('core.kibanaConnectorSpecs.mysql.metadata.description', {
+    description: i18n.translate('connectorSpecs.mysql.metadata.description', {
       defaultMessage:
         'Query tables, search rows, explore schema, and execute SQL in a MySQL database',
     }),
@@ -94,17 +94,17 @@ export const MysqlConnector: ConnectorSpec = {
           message: 'Host must be a hostname or IP address, without a protocol prefix',
         })
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.description', {
+          i18n.translate('connectorSpecs.mysql.config.host.description', {
             defaultMessage: 'The MySQL server hostname or IP address',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.label', {
+          label: i18n.translate('connectorSpecs.mysql.config.host.label', {
             defaultMessage: 'Host',
           }),
           placeholder: 'mysql.example.com',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.helpText', {
+          helpText: i18n.translate('connectorSpecs.mysql.config.host.helpText', {
             defaultMessage: 'The hostname or IP address of the MySQL server (no protocol prefix).',
           }),
         }),
@@ -115,17 +115,17 @@ export const MysqlConnector: ConnectorSpec = {
         .max(65535)
         .default(3306)
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.description', {
+          i18n.translate('connectorSpecs.mysql.config.port.description', {
             defaultMessage: 'The MySQL server port',
           })
         )
         .meta({
           widget: 'number',
-          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.label', {
+          label: i18n.translate('connectorSpecs.mysql.config.port.label', {
             defaultMessage: 'Port',
           }),
           placeholder: '3306',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.helpText', {
+          helpText: i18n.translate('connectorSpecs.mysql.config.port.helpText', {
             defaultMessage: 'The port number of the MySQL server (default: 3306)',
           }),
         }),
@@ -134,17 +134,17 @@ export const MysqlConnector: ConnectorSpec = {
         .min(1)
         .max(64)
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.mysql.config.database.description', {
+          i18n.translate('connectorSpecs.mysql.config.database.description', {
             defaultMessage: 'The default database to connect to',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.database.label', {
+          label: i18n.translate('connectorSpecs.mysql.config.database.label', {
             defaultMessage: 'Database',
           }),
           placeholder: 'my_database',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.database.helpText', {
+          helpText: i18n.translate('connectorSpecs.mysql.config.database.helpText', {
             defaultMessage: 'The name of the default database to query',
           }),
         }),
@@ -152,16 +152,16 @@ export const MysqlConnector: ConnectorSpec = {
         .enum(['required', 'disabled'])
         .default('required')
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.mysql.config.ssl.description', {
+          i18n.translate('connectorSpecs.mysql.config.ssl.description', {
             defaultMessage: 'Whether to use TLS when connecting to MySQL',
           })
         )
         .meta({
           widget: 'select',
-          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.ssl.label', {
+          label: i18n.translate('connectorSpecs.mysql.config.ssl.label', {
             defaultMessage: 'TLS',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.ssl.helpText', {
+          helpText: i18n.translate('connectorSpecs.mysql.config.ssl.helpText', {
             defaultMessage:
               'Required (default) encrypts the connection using Kibana TLS settings. Disable only for servers that do not support TLS.',
           }),
@@ -250,7 +250,7 @@ export const MysqlConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.mysql.test.description', {
+    description: i18n.translate('connectorSpecs.mysql.test.description', {
       defaultMessage: 'Verifies MySQL connection by running a lightweight query',
     }),
     enabled: true,

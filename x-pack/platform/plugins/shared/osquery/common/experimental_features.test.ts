@@ -90,6 +90,7 @@ describe('getExperimentalAllowedValues', () => {
       'exportResults',
       'rruleScheduling',
       'crossProjectSearch',
+      'workflowsExtensionsEnabled',
     ]);
   });
 });
@@ -100,6 +101,7 @@ describe('allowedExperimentalValues', () => {
       exportResults: true,
       rruleScheduling: true,
       crossProjectSearch: true,
+      workflowsExtensionsEnabled: false,
     });
   });
 });

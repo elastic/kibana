@@ -48,13 +48,11 @@ export function StepDataset({
   existingDataSetNames,
   loadDataSources,
   isEditMode = false,
-  datasetNameToEdit = '',
 }: {
   dataSources: DataSource[];
   existingDataSetNames: readonly string[];
   loadDataSources: () => Promise<void>;
   isEditMode?: boolean;
-  datasetNameToEdit?: string;
 }) {
   const { control, getFieldState, setValue, trigger } = useFormContext<CreateDatasetFormValues>();
   const formState = useFormState({ control, name: DATASET_STEP_FIELDS });
@@ -115,7 +113,6 @@ export function StepDataset({
         dataSources={dataSources}
         existingDataSetNames={existingDataSetNames}
         isEditMode={isEditMode}
-        datasetNameToEdit={datasetNameToEdit}
         loadDataSources={loadDataSources}
       />
       <EuiSpacer size="m" />

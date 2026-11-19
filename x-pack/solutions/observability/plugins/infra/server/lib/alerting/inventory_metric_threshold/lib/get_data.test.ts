@@ -102,7 +102,7 @@ describe('getData additionalContext schema', () => {
     mockedDoFieldsExist.mockResolvedValue({});
   });
 
-  it('reads ECS _source context for a pod rule stored as semconv', async () => {
+  it('reads SemConv docvalue fields for a pod rule stored as semconv', async () => {
     const search = jest.fn().mockResolvedValue({
       aggregations: {
         nodes: {
@@ -117,11 +117,10 @@ describe('getData additionalContext schema', () => {
                 hits: {
                   hits: [
                     {
-                      _source: {
-                        host: { name: 'node-1' },
-                        labels: { env: 'test' },
-                        tags: ['inventory'],
-                        orchestrator: { cluster: { name: 'cluster-a' } },
+                      fields: {
+                        'host.name': ['node-1'],
+                        'host.hostname': ['node-1.local'],
+                        tags: ['otel'],
                       },
                     },
                   ],
@@ -150,7 +149,7 @@ describe('getData additionalContext schema', () => {
       undefined,
       undefined,
       {},
-      'ecs'
+      'semconv'
     );
 
     expect(response['pod-uid-1']).toEqual(
@@ -158,10 +157,11 @@ describe('getData additionalContext schema', () => {
         value: 0.42,
         trigger: true,
         warn: false,
-        host: { name: 'node-1' },
-        labels: { env: 'test' },
-        tags: ['inventory'],
-        orchestrator: { cluster: { name: 'cluster-a' } },
+        host: {
+          name: 'node-1',
+          hostname: 'node-1.local',
+        },
+        tags: ['otel'],
       })
     );
   });

@@ -13,6 +13,20 @@ const buildRequest = (members?: Array<{ sloId: string; weight: number; instanceI
 });
 
 describe('UpdateCompositeSLO schema validation', () => {
+  it.each([
+    ['name', 'a'.repeat(1024), 'a'.repeat(1025)],
+    ['description', 'a'.repeat(10000), 'a'.repeat(10001)],
+  ])('bounds %s', (field, valid, tooLong) => {
+    const parse = (value: string) =>
+      updateCompositeSLOParamsSchema.safeParse({
+        path: { id: 'composite-slo-id' },
+        body: { [field]: value },
+      });
+
+    expect(parse(valid).success).toBe(true);
+    expect(parse(tooLong).success).toBe(false);
+  });
+
   it('accepts a request without members', () => {
     const result = updateCompositeSLOParamsSchema.safeParse(buildRequest());
 
@@ -42,5 +56,25 @@ describe('UpdateCompositeSLO schema validation', () => {
     expect(result.error?.issues[0].message).toBe(
       'Composite SLO members must be unique by sloId and instanceId'
     );
+  });
+
+  it.each([
+    ['an empty members array', []],
+    ['a single member', [{ sloId: 'slo-id-1', weight: 1 }]],
+    [
+      'more than 25 members',
+      Array.from({ length: 26 }, (_, index) => ({ sloId: `slo-id-${index}`, weight: 1 })),
+    ],
+    [
+      'a non-integer weight',
+      [
+        { sloId: 'slo-id-1', weight: 1.5 },
+        { sloId: 'slo-id-2', weight: 1 },
+      ],
+    ],
+  ])('rejects %s', (_, members) => {
+    const result = updateCompositeSLOParamsSchema.safeParse(buildRequest(members));
+
+    expect(result.success).toBe(false);
   });
 });

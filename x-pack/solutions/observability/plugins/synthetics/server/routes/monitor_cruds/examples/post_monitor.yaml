@@ -91,3 +91,16 @@ responses:
               message: Browser Monitor timeout is invalid
               attributes:
                 details: Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/synthetics/monitors" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"type":"http","name":"Website Availability","url":"https://example.com","tags":["website","availability"],"locations":["united_kingdom"]}'
+  - lang: Console
+    source: |
+      POST kbn://api/synthetics/monitors
+      {"type":"http","name":"Website Availability","url":"https://example.com","tags":["website","availability"],"locations":["united_kingdom"]}

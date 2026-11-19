@@ -14,17 +14,19 @@ import type {
 import { deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { computeFeatureUuid, normalizeFeatureSlug } from '@kbn/significant-events-schema';
-import type {
-  StoredFeatureKnowledgeIndicator,
-  StoredKnowledgeIndicator,
-  StoredQueryKnowledgeIndicator,
-  StoredTombstone,
+import {
+  computeRevisionId,
+  type StoredFeatureKnowledgeIndicator,
+  type StoredKnowledgeIndicator,
+  type StoredQueryKnowledgeIndicator,
+  type StoredTombstone,
 } from '../data_stream';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 import { computeRuleId } from '../helpers/compute_rule_id';
 
-export function buildSearchEmbeddingFeature(feature: FeatureUpsert, sourceId: string): string {
-  const parts: string[] = [`Source: ${sourceId}`];
+// No source marker: it would bias cross-source semantic matches toward same-source features.
+export function buildSearchEmbeddingFeature(feature: FeatureUpsert): string {
+  const parts: string[] = [];
   if (feature.title) parts.push(`Title: ${feature.title}`);
   if (feature.description) parts.push(`Description: ${feature.description}`);
   if (feature.type) parts.push(`Type: ${feature.type}`);
@@ -65,12 +67,14 @@ export function toStoredFeature({
   includeEmbedding,
   expiresAt,
 }: ToStoredFeatureParams): StoredFeatureKnowledgeIndicator {
-  const embedding = buildSearchEmbeddingFeature(feature, sourceId);
+  const embedding = buildSearchEmbeddingFeature(feature);
   const timestamp = new Date().toISOString();
   const slug = normalizeFeatureSlug(feature.id);
+  const id = computeFeatureUuid({ id: slug, source_id: sourceId });
   return {
     '@timestamp': timestamp,
-    id: computeFeatureUuid({ id: slug, source_id: sourceId }),
+    id,
+    revision_id: computeRevisionId({ id, timestamp }),
     type: KI_TYPE_FEATURE,
     title: feature.title,
     description: feature.description,
@@ -120,6 +124,7 @@ export function toStoredQuery({
   return {
     '@timestamp': timestamp,
     id: query.id,
+    revision_id: computeRevisionId({ id: query.id, timestamp }),
     type: KI_TYPE_QUERY,
     title: query.title,
     description: query.description,
@@ -129,6 +134,7 @@ export function toStoredQuery({
     query: {
       esql: query.esql.query,
       query_type: derivedType,
+      category: query.category,
       severity_score: query.severity_score,
       rule_backed: ruleBacked,
       rule_id: ruleId,
@@ -142,9 +148,11 @@ export function toTombstone(
   sourceId: string,
   identity: Pick<StoredKnowledgeIndicator, 'id' | 'type'>
 ): StoredTombstone {
+  const timestamp = new Date().toISOString();
   return {
-    '@timestamp': new Date().toISOString(),
+    '@timestamp': timestamp,
     id: identity.id,
+    revision_id: computeRevisionId({ id: identity.id, timestamp }),
     type: identity.type,
     'source.id': sourceId,
     deleted: true,
@@ -181,6 +189,7 @@ export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature
 export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
   const {
     query_type: type,
+    category,
     rule_backed,
     rule_id,
     esql: esqlQuery,
@@ -201,6 +210,7 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
       title: doc.title,
       description: doc.description,
       esql: { query: esqlQuery },
+      category,
       severity_score,
       features,
       evidence: doc.evidence,

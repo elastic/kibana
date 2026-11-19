@@ -7,6 +7,8 @@
 
 import { internalAvailabilityRoutes } from './internal/availability/route';
 import { internalSlackAppRoutes } from './internal/apps/slack/route';
+import { internalDetectionOverviewRoutes } from './internal/detection_overview/route';
+import { internalDetectionEntitiesRoutes } from './internal/detection_entities/route';
 import { internalDetectionsRoutes } from './internal/detections/route';
 import { internalDetectionsWorkflowRoutes } from './internal/detections/workflow_route';
 import { internalDiscoveryRoutes } from './internal/discovery/route';
@@ -25,11 +27,14 @@ import { internalCostRoutes } from './internal/cost/route';
 import { reconcileRoutes } from './internal/knowledge_indicators/reconcile_route';
 import { syncRoutes } from './internal/knowledge_indicators/sync_route';
 import { internalScheduledDiscoveryRoutes } from './internal/scheduled_discovery/route';
+import { internalTopologyRoutes } from './internal/topology/route';
 
 export const significantEventsRouteRepository = {
   // internal APIs
   ...internalAvailabilityRoutes,
   ...internalSlackAppRoutes,
+  ...internalDetectionOverviewRoutes,
+  ...internalDetectionEntitiesRoutes,
   ...internalDetectionsRoutes,
   ...internalDetectionsWorkflowRoutes,
   ...internalDiscoveryRoutes,
@@ -48,6 +53,7 @@ export const significantEventsRouteRepository = {
   ...reconcileRoutes,
   ...syncRoutes,
   ...internalScheduledDiscoveryRoutes,
+  ...internalTopologyRoutes,
 };
 
 export type SignificantEventsRouteRepository = typeof significantEventsRouteRepository;

@@ -27,6 +27,7 @@ import {
   createSubAgentExecutor,
 } from './utils';
 import { createPluginsService } from './utils/plugins';
+import { createConnectorSkillsService } from './utils/connector_skills_service';
 import type { RunnerManager } from './runner';
 
 export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
@@ -51,12 +52,12 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     resultStore,
     skillsStore,
     attachmentStateManager,
-    todoStateManager,
     logger,
     promptManager,
     stateManager,
     skillServiceStart,
     pluginsServiceStart,
+    actions,
     toolManager,
     analyticsService,
     trackingService,
@@ -71,7 +72,15 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
   const agentRegistry = await manager.deps.agentsService.getRegistry({ request });
-  const conversationClient = await manager.deps.conversationService.getScopedClient({ request });
+  // Under a bound service account's credential the conversation still belongs to the caller.
+  const { owner, runAs } = manager.deps;
+  const conversationClient = owner
+    ? await manager.deps.conversationService.getScopedClientAsUser({
+        request,
+        user: { ...owner, isAdmin: false },
+        runAs: runAs?.serviceAccountId,
+      })
+    : await manager.deps.conversationService.getScopedClient({ request });
   const deployment = await resolveDeploymentContext({
     deploymentInfo,
     request,
@@ -91,8 +100,9 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   return {
     request,
     spaceId,
+    runAs: runAs?.serviceAccountId,
     deployment,
-    defaultConnectorId: manager.deps.defaultConnectorId,
+    defaultModel: manager.deps.defaultModel,
     logger,
     modelProvider,
     esClient: elasticsearch.client.asScoped(
@@ -115,7 +125,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     resultStore,
     skillsStore,
     attachmentStateManager,
-    todoStateManager,
     stateManager,
     promptManager,
     attachments: createAttachmentsService({
@@ -136,6 +145,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     conversationEvents: conversationEventsService,
     conversationTemplates,
     plugins: createPluginsService({ pluginsServiceStart, request }),
+    connectorSkills: createConnectorSkillsService({ actions, request, logger }),
     toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,
@@ -164,11 +174,14 @@ export const runAgent = async ({
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
   const { agentId, agentParams, executionId } = agentExecutionParams;
-  const { agentsService, request, modelProvider } = parentManager.deps;
+  const { agentsService, request, modelProvider, runAs } = parentManager.deps;
 
   const resolveAgent = async () => {
     const agentRegistry = await agentsService.getRegistry({ request });
-    const resolvedAgent = await agentRegistry.get(agentId, { access: 'use' });
+    const resolvedAgent = await agentRegistry.get(agentId, {
+      access: 'use',
+      ...(runAs ? { runAs: runAs.serviceAccountId } : {}),
+    });
     // Layer runtime overrides onto the agent's own config first, then merge with the type base.
     const agentWithOverrides = {
       ...resolvedAgent,
@@ -215,6 +228,7 @@ export const runAgent = async ({
       getExecutionService: parentManager.deps.getExecutionService,
       projectRouting: parentManager.deps.projectRouting,
       interactivity,
+      workflowExecutionId: parentManager.deps.workflowExecutionId,
     }),
   });
 

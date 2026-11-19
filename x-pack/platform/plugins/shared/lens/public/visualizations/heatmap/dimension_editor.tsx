@@ -9,9 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { CustomizablePalette } from '@kbn/coloring';
+import { CustomizablePalette } from '@kbn/coloring-components';
 import { css } from '@emotion/react';
 import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import { LENS_HEATMAP_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import { PalettePanelContainer } from '../../shared_components';
 import type { HeatmapVisualizationState } from './types';
 import { getSafePaletteParams } from './utils';
@@ -57,6 +58,7 @@ export function HeatmapDimensionEditor(
               palettes={props.paletteService}
               activePalette={activePalette}
               dataBounds={currentMinMax}
+              defaultBandCount={LENS_HEATMAP_DEFAULT_COLOR_STEPS}
               setPalette={(newPalette) => {
                 // make sure to always have a list of stops
                 if (newPalette.params && !newPalette.params.stops) {

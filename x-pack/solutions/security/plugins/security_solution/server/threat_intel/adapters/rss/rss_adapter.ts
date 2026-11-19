@@ -15,6 +15,7 @@ import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } fro
 import { decodeDataUrl, isDataUrl } from './decode_data_url';
 import { htmlFragmentToStructuredText } from './html_fragment_to_structured_text';
 import { parseRssFeed } from './parse_rss';
+import { isPublishedBeforeLookback } from '../publish_lookback';
 
 const TITLE_MAX_LENGTH = 280;
 const BODY_TEXT_MAX_LENGTH = 32_000;
@@ -69,13 +70,19 @@ export const rssAdapter: FetchAdapter = {
       return [];
     }
 
-    const ingestedAt = context.now().toISOString();
+    const now = context.now();
+    const ingestedAt = now.toISOString();
     const spaceId = source._source.space_id ?? GLOBAL_SPACE_ID;
     const language = parsed.language ?? 'en';
     const adapterId = `rss:${source._id}`;
 
     const reports: NormalizedReport[] = [];
-    for (const entry of parsed.entries) {
+    // A feed's backlog is not worth enrichment or hunting; entries without a date are kept.
+    const recentEntries = parsed.entries.filter(
+      (entry) => !isPublishedBeforeLookback(entry.publishedAt, now)
+    );
+    const skippedOld = parsed.entries.length - recentEntries.length;
+    for (const entry of recentEntries) {
       const title = collapseWhitespace(entry.title || parsed.feedTitle || source._source.name);
       // `parse_rss.ts` has already decided markup vs text. Markup is the one narrow HTML
       // boundary we accept: it is converted to bounded plain text here and only the text is
@@ -94,7 +101,7 @@ export const rssAdapter: FetchAdapter = {
         feedUrl,
         entry.id,
         title,
-        entry.publishedAt,
+        entry.fingerprintDate ?? entry.publishedAt,
         fullBodyText,
       ]);
       const articleUrl = normalizeProvenanceUrl(entry.link);
@@ -118,6 +125,7 @@ export const rssAdapter: FetchAdapter = {
             language,
           }),
           ...(articleUrl ? { article_url: articleUrl } : {}),
+          ...(entry.publishedAt ? { published_at: entry.publishedAt } : {}),
         },
         severity: {
           level: DEFAULT_SEVERITY_LEVEL,
@@ -132,6 +140,12 @@ export const rssAdapter: FetchAdapter = {
           },
         },
       });
+    }
+
+    if (skippedOld > 0) {
+      log.debug(
+        `RSS feed ${redactUrl(feedUrl)} skipped ${skippedOld} entries published before the lookback`
+      );
     }
 
     return reports;

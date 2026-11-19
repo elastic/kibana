@@ -82,7 +82,6 @@ export function CreateDatasetWizardPage({
     services: { datasetsClient, toasts, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
   const isEditMode = initialDataSet !== undefined;
-  const datasetNameToEdit = initialDataSet?.name;
   const [saveError, setSaveError] = useState<SaveError | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const formDefaultValues = useMemo(
@@ -153,7 +152,6 @@ export function CreateDatasetWizardPage({
     }
 
     setIsSaving(true);
-    const previousName = initialDataSet?.name.trim();
     let savedName: string;
     const savedFormat = values.settings?.format as DatasetFormat | undefined;
     try {
@@ -166,25 +164,8 @@ export function CreateDatasetWizardPage({
       return;
     }
 
-    if (previousName && previousName !== savedName) {
-      try {
-        await datasetsClient.delete(previousName);
-      } catch (error) {
-        setSaveError({
-          title: createDatasetWizardStrings.deletePreviousErrorTitle,
-          text: createDatasetWizardStrings.deletePreviousErrorText(
-            savedName,
-            previousName,
-            getFlyoutSaveErrorMessage(error)
-          ),
-        });
-        setIsSaving(false);
-        return;
-      }
-    }
-
     reportUiCounter?.(
-      previousName ? UI_COUNTER_EVENTS.datasetUpdate : getDatasetCreateEvents(savedFormat)
+      isEditMode ? UI_COUNTER_EVENTS.datasetUpdate : getDatasetCreateEvents(savedFormat)
     );
 
     try {
@@ -198,15 +179,7 @@ export function CreateDatasetWizardPage({
       setIsSaving(false);
       goToDatasets();
     }
-  }, [
-    datasetsClient,
-    goToDatasets,
-    initialDataSet,
-    loadDataSets,
-    methods,
-    reportUiCounter,
-    toasts,
-  ]);
+  }, [datasetsClient, goToDatasets, isEditMode, loadDataSets, methods, reportUiCounter, toasts]);
 
   const activeStepId = STEPS[activeStepIndex].id;
   const isLastStep = activeStepIndex === LAST_STEP_INDEX;
@@ -290,7 +263,6 @@ export function CreateDatasetWizardPage({
                       existingDataSetNames={existingDataSetNames}
                       loadDataSources={loadDataSources}
                       isEditMode={isEditMode}
-                      datasetNameToEdit={datasetNameToEdit}
                     />
                   )}
                   {activeStepId === 'settings' && <StepAdditional />}

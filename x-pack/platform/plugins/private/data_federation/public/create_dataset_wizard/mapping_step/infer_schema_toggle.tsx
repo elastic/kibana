@@ -20,6 +20,11 @@ import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 
 const fillFlexItemStyles = css({ flexGrow: 1 });
 
+// Must be at least the infer card's min-content width (its one-line schema resolution toggle);
+// otherwise the cards sit side by side at unequal widths instead of wrapping.
+const CARD_FLEX_BASIS = 380;
+const cardFlexItemStyles = css({ flex: `1 1 ${CARD_FLEX_BASIS}px` });
+
 export interface InferSchemaToggleProps {
   dynamicMode: boolean;
   onDynamicModeChange: (nextDynamic: boolean) => void;
@@ -29,8 +34,8 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
   return (
     <>
       <EuiHorizontalRule margin="m" />
-      <EuiFlexGroup gutterSize="m" responsive={false} alignItems="stretch">
-        <EuiFlexItem>
+      <EuiFlexGroup gutterSize="m" alignItems="stretch" responsive={false} wrap>
+        <EuiFlexItem css={cardFlexItemStyles}>
           <EuiCheckableCard
             id="createDatasetWizardInferSchema"
             css={fillFlexItemStyles}
@@ -46,7 +51,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
             <EuiText size="xs" color="subdued">
               {i18n.translate('xpack.dataFederation.createDatasetWizard.inferSchemaDescription', {
                 defaultMessage:
-                  "Elastic infers any fields you don't map. All fields are available to query.",
+                  'Elastic infers fields from your files, but you can manually define fields to override them.',
               })}
             </EuiText>
 
@@ -54,7 +59,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
           </EuiCheckableCard>
         </EuiFlexItem>
 
-        <EuiFlexItem>
+        <EuiFlexItem css={cardFlexItemStyles}>
           <EuiCheckableCard
             id="createDatasetWizardDefineSchema"
             css={fillFlexItemStyles}
@@ -69,7 +74,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
           >
             <EuiText size="xs" color="subdued">
               {i18n.translate('xpack.dataFederation.createDatasetWizard.defineSchemaDescription', {
-                defaultMessage: 'Only fields you map are available to query.',
+                defaultMessage: 'Only fields you manually define are available to query.',
               })}
             </EuiText>
           </EuiCheckableCard>

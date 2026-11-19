@@ -41,6 +41,16 @@ describe('EvidenceView', () => {
     );
   });
 
+  it('renders a description on its own', () => {
+    render(
+      <EuiProvider>
+        <EvidenceView evidence={{ description: 'Errors spiked.' }} />
+      </EuiProvider>
+    );
+
+    expect(screen.getByText('Errors spiked.')).toBeVisible();
+  });
+
   it('renders nothing for empty evidence', () => {
     const { container } = render(<EvidenceView evidence={{ description: '  ' }} />);
 

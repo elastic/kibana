@@ -227,7 +227,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
       return legacyFilters;
     }
     const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnEntityRecord(
-      EntityType.host,
+      euidApi.getBuiltInEntityDefinition(EntityType.host),
       entityFromStoreResult.entityRecord
     );
     return entityDslFilter ? euidDslFilterToPageFilters(entityDslFilter) : legacyFilters;
@@ -236,7 +236,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     entityFromStoreResult.entityRecord,
     entityStoreV2Enabled,
     noEntityInStore,
-    euidApi?.euid,
+    euidApi,
   ]);
 
   const { indexPatterns: securityDefaultPatterns } = useSecurityDefaultPatterns();
@@ -435,13 +435,13 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                   <AnomalyTableProvider
                     criteriaFields={hostToCriteria({
                       hostItem: hostDetailsForOverview,
-                      euid: euidApi?.euid,
+                      euidApi: euidApi ?? undefined,
                       entityRecord: entityStoreV2Enabled
                         ? entityFromStoreResult.entityRecord
                         : undefined,
                     })}
                     filterQuery={buildAnomaliesTableInfluencersFilterQuery({
-                      euid: euidApi?.euid,
+                      euidApi: euidApi ?? undefined,
                       entityType: 'host',
                       isScopedToEntity: true,
                       identityFields: resolvedIdentityFields,

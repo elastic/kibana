@@ -38,6 +38,7 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import type { AsCodeDataViewReference } from '@kbn/as-code-data-views-schema';
+import { DataViewNotFoundError } from '../errors';
 import type { LensAttributes } from '../types';
 import type { LensApiAllOperations, LensApiConfig, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
@@ -355,7 +356,7 @@ export function buildDataSourceStateNoESQL(
     inlineDataViewId
   );
   if (!dataViewId) {
-    throw new Error(`Cannot resolve the data view for layer "${layerId}".`);
+    throw new DataViewNotFoundError(layerId);
   }
   return buildDataViewDataSource(dataViewId, adHocDataViews);
 }
@@ -792,7 +793,8 @@ function extraQueryFromAPIState(state: LensApiConfig): Query | undefined {
   // ES|QL queries live exclusively on the text-based datasource layers
   // (written by the layer transforms); the top-level slot only carries the
   // chart-scoped KQL/Lucene filter from the API `query` field.
-  if ('query' in state && state.query) {
+  // An empty KQL or Lucene expression filters nothing, so neither it nor its language is stored.
+  if ('query' in state && state.query?.expression.length) {
     return queryToLensState(state.query satisfies LensApiFilterType);
   }
   return undefined;

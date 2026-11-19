@@ -16,7 +16,7 @@ import { queryKeys } from '../constants';
 import type { Case, CasesBulkGetResponse } from '../apis/bulk_get_cases';
 import { bulkGetCases } from '../apis/bulk_get_cases';
 
-const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', {
+const ERROR_TITLE = i18n.translate('xpack.responseOpsAlertsTable.cases.api.bulkGet', {
   defaultMessage: 'Error fetching cases data',
 });
 

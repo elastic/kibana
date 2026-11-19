@@ -12,6 +12,8 @@ import { FLYOUT_ORIGIN, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../../common/lib/
 import { useOpenFlyout } from '../../../flyout_v2/shared/hooks/use_open_flyout';
 import { InvestigationTimelineFlyoutOpener } from './open_timeline_flyout_on_mount';
 
+let mockPinnedSessionSize: number | string | undefined;
+
 jest.mock('../../../flyout_v2/shared/hooks/use_open_flyout', () => ({
   useOpenFlyout: jest.fn(),
 }));
@@ -24,6 +26,7 @@ jest.mock('../../../flyout_v2/session_context', () => {
     session: 'start' | 'inherit';
     historyKey?: symbol;
     isChildFlyout?: boolean;
+    size?: number | string;
   }>({
     session: 'inherit',
     historyKey: fallbackKey,
@@ -34,9 +37,17 @@ jest.mock('../../../flyout_v2/session_context', () => {
       value,
       children,
     }: {
-      value: { session: 'start' | 'inherit'; historyKey?: symbol; isChildFlyout?: boolean };
+      value: {
+        session: 'start' | 'inherit';
+        historyKey?: symbol;
+        isChildFlyout?: boolean;
+        size?: number | string;
+      };
       children: React.ReactNode;
-    }) => <SessionContext.Provider value={value}>{children}</SessionContext.Provider>,
+    }) => {
+      mockPinnedSessionSize = value.size;
+      return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
+    },
     useFlyoutSessionContext: () => useSessionContext(SessionContext),
   };
 });
@@ -64,6 +75,7 @@ const events = [
 describe('InvestigationTimelineFlyoutOpener', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPinnedSessionSize = undefined;
     jest.mocked(useOpenFlyout).mockReturnValue(openFlyout);
   });
 
@@ -83,11 +95,9 @@ describe('InvestigationTimelineFlyoutOpener', () => {
     expect(openFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        size: 's',
         paddingSize: 'l',
-        title: 'Investigation timeline',
+        title: 'Forensic timeline',
         session: 'start',
-        maxWidth: false,
         resizable: true,
         type: 'push',
         historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
@@ -97,11 +107,11 @@ describe('InvestigationTimelineFlyoutOpener', () => {
         flyoutType: FLYOUT_TYPE.INVESTIGATION_TIMELINE,
         session: 'start',
         origin: FLYOUT_ORIGIN.ATTACHMENTS_OVERVIEW,
-      }),
-      undefined,
-      { persistWidth: false }
+      })
     );
     expect(openFlyout.mock.calls[0][1]).not.toHaveProperty('flyoutMenuProps');
+    expect(openFlyout.mock.calls[0][1]).not.toHaveProperty('maxWidth');
+    expect(mockPinnedSessionSize).toBeUndefined();
   });
 
   it('opens at the conversation flyout width', async () => {
@@ -128,12 +138,7 @@ describe('InvestigationTimelineFlyoutOpener', () => {
     );
 
     await waitFor(() => expect(openFlyout).toHaveBeenCalledTimes(1));
-    expect(openFlyout).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ size: 640, type: 'push', session: 'start' }),
-      expect.anything(),
-      undefined,
-      { persistWidth: false }
-    );
+    expect(mockPinnedSessionSize).toBe(640);
+    expect(openFlyout.mock.calls[0]).toHaveLength(3);
   });
 });

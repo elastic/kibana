@@ -20,7 +20,11 @@ properties:
       - type
   customFields:
     type: array
-    description: Custom fields case configuration.
+    deprecated: true
+    description: >
+      Custom fields case configuration.
+      Deprecated. Use the field library (`/api/cases/field_definitions`) to manage
+      field definitions and `extended_fields` on case create/update to set field values.
     minItems: 0
     maxItems: 10
     items:
@@ -37,8 +41,8 @@ properties:
     description: >
       Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
       When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability.
-      For owners that do not support observable extraction (currently Observability), setting this to `true`
-      has no effect on case creation; new cases for those owners always use `false`.
+      Observable extraction is available only for Security cases. For Stack and Observability cases,
+      a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.
   owner:
     $ref: 'owner.yaml'
   templates:

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { stringify } from 'yaml';
+import { CONTAINER_LOG_OPERATORS } from './container_log_operators';
+
 /**
  * Generates the OTel Collector configuration for Kubernetes deployment.
  * Collects container logs, Kubernetes metrics, and host metrics from Kubernetes nodes.
@@ -18,13 +21,14 @@ export function getFullOtelCollectorConfig({
   elasticsearchEndpoint,
   username,
   password,
-  logsIndex = 'logs.otel',
+  logsIndex,
   namespace = 'otel-demo',
   demoId = 'otel-demo',
 }: {
   elasticsearchEndpoint: string;
   username: string;
   password: string;
+  /** Index for container logs and k8s events. Unset: the default `logs-generic.otel-default` data stream. */
   logsIndex?: string;
   namespace?: string;
   demoId?: string;
@@ -144,70 +148,9 @@ receivers:
       initial_interval: 1s
       max_interval: 30s
     operators:
-      # Parse Docker JSON format logs (used by minikube with Docker driver)
-      # Format: {"log":"...","stream":"stdout|stderr","time":"..."}
-      - type: json_parser
-        id: parser-docker
-        timestamp:
-          parse_from: attributes.time
-          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-
-      # Recombine multiline logs (stack traces)
-      # First entry = starts with non-whitespace char (timestamps, log levels, etc.)
-      # Continuation = starts with whitespace, "at ", "Caused by:", etc.
-      - type: recombine
-        id: multiline
-        combine_field: attributes.log
-        is_first_entry: 'attributes.log != nil and attributes.log matches "^[^[:space:]]"'
-        combine_with: "\\n"
-        max_log_size: 102400
-        source_identifier: attributes["log.file.path"]
-
-      # Extract k8s metadata from file path
-      # Path format: /var/log/pods/<namespace>_<pod>_<uid>/<container>/<restart_count>.log
-      - type: regex_parser
-        id: extract_k8s_metadata
-        regex: '^/var/log/pods/(?P<namespace>[^_]+)_(?P<pod>[^_]+)_(?P<uid>[^/]+)/(?P<container>[^/]+)/.*\\.log$'
-        parse_from: attributes["log.file.path"]
-        on_error: send
-
-      # Move parsed k8s metadata to resource attributes
-      - type: move
-        id: move_namespace
-        from: attributes.namespace
-        to: resource["k8s.namespace.name"]
-        on_error: send
-
-      - type: move
-        id: move_pod
-        from: attributes.pod
-        to: resource["k8s.pod.name"]
-        on_error: send
-
-      - type: move
-        id: move_uid
-        from: attributes.uid
-        to: resource["k8s.pod.uid"]
-        on_error: send
-
-      - type: move
-        id: move_container
-        from: attributes.container
-        to: resource["k8s.container.name"]
-        on_error: send
-
-      # Move stream to attributes
-      - type: move
-        id: move_stream
-        from: attributes.stream
-        to: attributes["log.iostream"]
-        on_error: send
-
-      # Move the log message to body
-      - type: move
-        id: move_log_to_body
-        from: attributes.log
-        to: body
+      # Container runtime parsing (Docker JSON or CRI) and multiline recombination,
+      # see container_log_operators.ts
+CONTAINER_LOG_OPERATORS_PLACEHOLDER
 
       # Try to parse body as JSON (for structured logs from services)
       # Only attempt if body looks like JSON (starts with { and ends with }, allowing trailing whitespace)
@@ -339,7 +282,7 @@ exporters:
       - ELASTICSEARCH_ENDPOINT_PLACEHOLDER
     user: USERNAME_PLACEHOLDER
     password: PASSWORD_PLACEHOLDER
-    logs_index: LOGS_INDEX_PLACEHOLDER
+LOGS_INDEX_PLACEHOLDER
     traces_index: traces-generic.otel-default
     mapping:
       mode: otel
@@ -413,5 +356,11 @@ service:
     .replace(/ELASTICSEARCH_ENDPOINT_PLACEHOLDER/g, elasticsearchEndpoint)
     .replace(/USERNAME_PLACEHOLDER/g, username)
     .replace(/PASSWORD_PLACEHOLDER/g, password)
-    .replace(/LOGS_INDEX_PLACEHOLDER/g, logsIndex);
+    .replace('LOGS_INDEX_PLACEHOLDER\n', logsIndex ? `    logs_index: ${logsIndex}\n` : '')
+    .replace(
+      'CONTAINER_LOG_OPERATORS_PLACEHOLDER\n',
+      `${stringify([...CONTAINER_LOG_OPERATORS])
+        .trimEnd()
+        .replace(/^/gm, '      ')}\n`
+    );
 }

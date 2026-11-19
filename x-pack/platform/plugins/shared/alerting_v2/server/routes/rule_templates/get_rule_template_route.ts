@@ -34,7 +34,7 @@ export class GetRuleTemplateRoute extends BaseAlertingRoute {
     access: 'internal' as const,
     summary: 'Get a rule template',
     description:
-      'Get a single rule template installed for alerting. The returned `rule` payload can be submitted to the create rule API as-is.',
+      'Get a single rule template installed for alerting. The returned `rule` payload can be submitted to the install rule template API as-is.',
   } as const;
   static schemas = {
     request: {

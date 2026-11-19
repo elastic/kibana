@@ -17,10 +17,9 @@ const buildEaName = <TSuffix extends string>(
 export const EA_EXECUTION_CONTEXT_NAMES = {
   LEAD_GENERATION_TASK: buildEaName('lead_generation_task'),
   PRIVILEGE_MONITORING_TASK: buildEaName('privilege_monitoring_task'),
-  RISK_SCORING_TASK: buildEaName('risk_scoring_task'),
   ASSET_CRITICALITY_ECS_MIGRATION: buildEaName('asset_criticality_ecs_migration'),
   ASSET_CRITICALITY_MIGRATION: buildEaName('asset_criticality_migration'),
-  RISK_SCORE_MIGRATION: buildEaName('risk_score_migration'),
+  ALERT_ENTITY_ID_BACKFILL: buildEaName('alert_entity_id_backfill'),
 } as const;
 
 export type EaExecutionContextName =

@@ -244,6 +244,17 @@ export class ConnectorTokenClient {
   }
 
   /**
+   * Returns the connector ids for which the user holds a usable per-user OAuth token
+   * (delegates to the user client)
+   */
+  public async getUsableOAuthConnectorIds(options: {
+    profileUid: string;
+    connectorIds: string[];
+  }): Promise<Set<string>> {
+    return this.userClient.getUsableOAuthConnectorIds(options);
+  }
+
+  /**
    * Create new token with refresh token support (delegates to shared or user client)
    */
   public async createWithRefreshToken(options: {

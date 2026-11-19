@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiTextArea,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DismissReason } from '@kbn/proposals-common';
 import { DISMISS_REASON_OPTIONS } from '@kbn/proposals-ui';
 import type { InvestigationClosePreviewResponse } from '../../../../common';
@@ -78,6 +79,7 @@ export const CloseInvestigationModal: React.FC<CloseInvestigationModalProps> = (
   const [rationale, setRationale] = useState('');
 
   const hasProposals = (preview?.pending_proposal_count ?? 0) > 0;
+  const runningCount = preview?.running_proposal_count ?? 0;
   const isConfirmDisabled = isLoading || isRefreshing || preview === undefined;
 
   return (
@@ -173,6 +175,16 @@ export const CloseInvestigationModal: React.FC<CloseInvestigationModalProps> = (
               </EuiFormRow>
             </>
           ) : null}
+          {runningCount > 0 && (
+            <>
+              {hasProposals && <EuiSpacer size="m" />}
+              <KbnWarningCallout
+                size="s"
+                title={i18n.CLOSE_INVESTIGATION_RUNNING_ACTIONS_WARNING(runningCount)}
+                data-test-subj="closeInvestigationRunningActionsCallout"
+              />
+            </>
+          )}
         </>
       )}
     </EuiConfirmModal>

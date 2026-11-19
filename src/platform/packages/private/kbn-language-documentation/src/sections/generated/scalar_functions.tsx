@@ -4943,7 +4943,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.to_text', {
         defaultMessage: 'TO_TEXT',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(

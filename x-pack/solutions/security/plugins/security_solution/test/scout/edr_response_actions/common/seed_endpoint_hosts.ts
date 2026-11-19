@@ -48,6 +48,13 @@ interface SeedEndpointHostsParams {
   config: ScoutTestConfig;
   count: number;
   isolation: boolean;
+  /**
+   * Agent version written to the host metadata. When omitted, the generator picks a
+   * random 7.x/8.x version, which decides the host capabilities (get-file needs 8.6+).
+   * Pass `kibanaPackageJson.version`, as the Cypress loader does, for commands that
+   * need a capability.
+   */
+  agentVersion?: string;
 }
 
 const hostIdentity = (indexed: IndexedHostsAndAlertsResponse): SeededEndpointHost[] => {
@@ -74,6 +81,7 @@ export const seedEndpointHosts = async ({
   config,
   count,
   isolation,
+  agentVersion,
 }: SeedEndpointHostsParams): Promise<SeededEndpointHosts> => {
   const kbnClient = scopeKbnClientToSpace(rootKbnClient, spaceId);
   const systemEsClient = await createSystemIndicesEsClient(esClient, config);
@@ -111,7 +119,10 @@ export const seedEndpointHosts = async ({
 
   try {
     const DocGenerator = EndpointDocGenerator.custom({
-      CustomMetadataGenerator: EndpointMetadataGenerator.custom({ isolation }),
+      CustomMetadataGenerator: EndpointMetadataGenerator.custom({
+        isolation,
+        version: agentVersion,
+      }),
     });
 
     indexed = await withMetadataTransformLock(() =>
@@ -212,7 +223,15 @@ export const seedHostWithAlert = async ({
     }
     if (alertId) {
       try {
-        await systemEsClient.delete({ index: alertsIndex, id: alertId, refresh: 'wait_for' });
+        // On serverless the alerts index is a data stream, which rejects a delete by id
+        // (only create ops are allowed). A delete by query works on both.
+        await systemEsClient.deleteByQuery({
+          index: alertsIndex,
+          query: { ids: { values: [alertId] } },
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+          refresh: true,
+        });
       } catch (error) {
         failures.push(error);
       }

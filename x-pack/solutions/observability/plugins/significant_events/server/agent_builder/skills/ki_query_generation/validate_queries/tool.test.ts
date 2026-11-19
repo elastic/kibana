@@ -15,11 +15,12 @@ import {
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import {
   createMockToolContext,
+  createMockToolFailureTelemetry,
   createSignificantEventsServer,
   invokeHandler,
   mockSourcesClient,
 } from '../../../utils/test_helpers';
-import { createValidateQueriesTool } from './tool';
+import { createValidateQueriesTool, SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from './tool';
 
 jest.mock('@kbn/nightshift-ai', () => ({
   ...jest.requireActual('@kbn/nightshift-ai'),
@@ -34,6 +35,7 @@ const validateKIQueriesMock = validateKIQueries as jest.MockedFunction<typeof va
 
 describe('ki_queries_validate tool', () => {
   const logger = loggingSystemMock.createLogger();
+  const telemetry = createMockToolFailureTelemetry();
   const streamDataEsClient = { esql: { query: jest.fn() } };
   const getFeatures = jest.fn();
   const getSourceToQueryLinksMap = jest.fn();
@@ -91,7 +93,7 @@ describe('ki_queries_validate tool', () => {
     });
     createQueryValidationContextMock.mockResolvedValue({
       targetSources: ['logs.test'],
-      validationLookback: 'now-10m',
+      validationLookbackMinutes: 10,
       conflictingFields: new Set(),
       normalizedStoredEsqls: new Set(),
     });
@@ -108,6 +110,7 @@ describe('ki_queries_validate tool', () => {
       getScopedClients,
       server: createSignificantEventsServer({ featurePrivilege: 'read' }),
       logger,
+      telemetry,
     });
 
   it('bounds its input and keeps evaluation intent optional', () => {
@@ -122,6 +125,12 @@ describe('ki_queries_validate tool', () => {
       true
     );
     expect(tool.schema.safeParse({ slug: 'logs.test', queries: [] }).success).toBe(true);
+    expect(
+      tool.schema.safeParse({
+        slug: 'logs.test',
+        queries: [{ ...candidate, category: 'unsupported' }],
+      }).success
+    ).toBe(false);
     expect(
       tool.schema.safeParse({ slug: 'logs.test', queries: Array(101).fill(candidate) }).success
     ).toBe(false);
@@ -284,6 +293,7 @@ describe('ki_queries_validate tool', () => {
       getScopedClients,
       server: createSignificantEventsServer({ featurePrivilege: 'none' }),
       logger,
+      telemetry,
     });
 
     const result = await invokeHandler(
@@ -293,6 +303,13 @@ describe('ki_queries_validate tool', () => {
     );
 
     expect(result).toMatchObject({ results: [{ type: 'error' }] });
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+        error_code: 'forbidden',
+      }),
+      expect.anything()
+    );
   });
 
   it('does not read stored state for a source the caller cannot read', async () => {
@@ -313,6 +330,7 @@ describe('ki_queries_validate tool', () => {
       getScopedClients: getScopedClientsDenied,
       server: createSignificantEventsServer({ featurePrivilege: 'read' }),
       logger,
+      telemetry,
     });
 
     const result = await invokeHandler(

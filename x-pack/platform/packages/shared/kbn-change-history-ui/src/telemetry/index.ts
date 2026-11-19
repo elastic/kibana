@@ -14,7 +14,7 @@ export { changeHistoryTelemetryEventNames } from './event_names';
 export { changeHistoryTelemetryEventSchemas } from './schemas';
 export {
   ChangeHistoryTelemetryEventTypes,
-  type ChangeHistoryCompareMode,
+  type ChangeHistoryDiffViewMode,
   type ChangeHistoryComparisonType,
   type ChangeHistoryDiffNavigationSource,
   type ChangeHistoryFilterType,

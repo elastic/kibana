@@ -116,6 +116,7 @@ describe('scoutTestDistributionStrategies', () => {
     process.env = { ...originalEnv };
     delete process.env.SCOUT_TEST_LANES_GROUP_DEPS;
     delete process.env.SERVERLESS_TESTS_ONLY;
+    delete process.env.TEST_ES_SERVERLESS_IMAGE;
     delete process.env.UIAM_DOCKER_IMAGE;
     delete process.env.UIAM_COSMOSDB_DOCKER_IMAGE;
   });
@@ -183,6 +184,22 @@ describe('scoutTestDistributionStrategies', () => {
       expect(step.env.SCOUT_TEST_TARGET_LOCATION).toBe('local');
       expect(step.env.SCOUT_TEST_TARGET_ARCH).toBe('serverless');
       expect(step.env.SCOUT_TEST_TARGET_DOMAIN).toBe('search');
+    });
+
+    it('step env includes TEST_ES_SERVERLESS_IMAGE when set', async () => {
+      process.env.TEST_ES_SERVERLESS_IMAGE = 'es-serverless:git-0123456789ab';
+
+      const track = createMockTrack('local', 'serverless', 'search', 'default', [
+        createMockLane(1, 'n2-8-spot', ['config-a.ts']),
+      ]);
+
+      mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
+      mockDefinitionsLoadFromPath.mockReturnValue(createMockTrackDefinition([track]));
+
+      await scoutTestDistributionStrategies.lanes();
+
+      const step = mockUploadSteps.mock.calls[0][0][0].steps[0];
+      expect(step.env.TEST_ES_SERVERLESS_IMAGE).toBe('es-serverless:git-0123456789ab');
     });
 
     it("writes the lane loads with the track's server config set", async () => {

@@ -80,9 +80,6 @@ export const esqlAsyncSearchStrategyProvider = (
     const params = {
       ...getCommonDefaultAsyncGetParams(searchConfig, options),
       ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
-      ...(request.params?.wait_for_completion_timeout
-        ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
-        : {}),
     };
 
     return esClient.asCurrentUser.esql.asyncQueryGet(

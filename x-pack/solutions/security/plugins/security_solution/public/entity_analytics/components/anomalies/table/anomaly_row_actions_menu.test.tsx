@@ -15,11 +15,14 @@ import { useAnomalyTableRowActions } from '../../../api/hooks/use_anomaly_table_
 import type { TableRow } from './types';
 import { useEntityCaseTakeActionItems } from '../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items';
 import { ADD_TO_CASE_TEST_ID } from '../../../../../common/cases/attachments/entity/test_ids';
+import { useInvalidateEntityGrid } from '../../home/entities_grid/hooks/use_invalidate_entity_grid';
 
 jest.mock('../../../api/hooks/use_anomaly_table_row_actions');
 jest.mock('../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items', () => ({
   useEntityCaseTakeActionItems: jest.fn(),
 }));
+
+jest.mock('../../home/entities_grid/hooks/use_invalidate_entity_grid');
 
 const useAnomalyTableRowActionsMock = useAnomalyTableRowActions as jest.MockedFunction<
   typeof useAnomalyTableRowActions
@@ -27,6 +30,8 @@ const useAnomalyTableRowActionsMock = useAnomalyTableRowActions as jest.MockedFu
 const useEntityCaseTakeActionItemsMock = useEntityCaseTakeActionItems as jest.MockedFunction<
   typeof useEntityCaseTakeActionItems
 >;
+
+const invalidateEntityGrid = jest.fn();
 
 const ACTIONS_BUTTON = 'entity-anomalies-table-row-actions-button';
 const ADD_TO_CASE = ADD_TO_CASE_TEST_ID;
@@ -91,6 +96,7 @@ describe('AnomalyRowActionsMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useAnomalyTableRowActionsMock.mockReturnValue({ actions: allActions });
+    (useInvalidateEntityGrid as jest.Mock).mockReturnValue(invalidateEntityGrid);
     useEntityCaseTakeActionItemsMock.mockReturnValue(() => [
       <EuiContextMenuItem key="addToCase" data-test-subj={ADD_TO_CASE}>
         {'Add to case'}
@@ -170,6 +176,8 @@ describe('AnomalyRowActionsMenu', () => {
   it('builds the case action from the entity represented by the anomalies table', () => {
     renderMenu();
 
-    expect(useEntityCaseTakeActionItemsMock).toHaveBeenCalledWith(entityToAttach);
+    expect(useEntityCaseTakeActionItemsMock).toHaveBeenCalledWith(entityToAttach, {
+      onSuccess: invalidateEntityGrid,
+    });
   });
 });

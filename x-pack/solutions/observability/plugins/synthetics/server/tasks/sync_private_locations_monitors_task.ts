@@ -365,9 +365,8 @@ export class SyncPrivateLocationMonitorsTask {
     taskState: SyncTaskState;
     monitorMwsIds: string[];
   }) {
-    const { syntheticsService } = this.syntheticsMonitorClient;
-
-    const maintenanceWindows = (await syntheticsService.getMaintenanceWindows(ALL_SPACES_ID)) ?? [];
+    const maintenanceWindows =
+      (await this.syntheticsMonitorClient.getMaintenanceWindows(ALL_SPACES_ID)) ?? [];
     // check if any of the MWs were updated since the last run
     const updatedMWs = maintenanceWindows.filter((mw) => {
       const updatedAt = mw.updatedAt;
@@ -392,8 +391,8 @@ export class SyncPrivateLocationMonitorsTask {
   }
 
   async haveMWsUpdatedSince(sinceIso: string, monitorMwsIds: string[]): Promise<boolean> {
-    const { syntheticsService } = this.syntheticsMonitorClient;
-    const maintenanceWindows = (await syntheticsService.getMaintenanceWindows(ALL_SPACES_ID)) ?? [];
+    const maintenanceWindows =
+      (await this.syntheticsMonitorClient.getMaintenanceWindows(ALL_SPACES_ID)) ?? [];
     const monitorMwIds = new Set(monitorMwsIds);
     return maintenanceWindows.some((mw) => {
       if (!monitorMwIds.has(mw.id)) {

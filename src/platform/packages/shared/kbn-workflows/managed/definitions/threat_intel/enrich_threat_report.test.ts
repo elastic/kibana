@@ -210,7 +210,7 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
   });
 
   // Not "-global": a space literally named "global" running the pre-space-aware
-  // version of this workflow would collide with a real global install's key.
+  // version of this workflow would collide with the key of the single shared install.
   it('uses a concurrency key with no space or "global" suffix', () => {
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain('key: "threat-intel-enrich"');
   });

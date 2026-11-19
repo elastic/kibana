@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import type { ApprovalAction, ApprovalProposal, DeclineParams } from '@kbn/proposals-ui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProposalApprovalCard } from './proposal_approval_card';
 import {
   useProposal,
@@ -15,6 +16,7 @@ import {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  isDecisionShown,
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
@@ -108,7 +110,11 @@ jest.mock('@kbn/proposals-ui', () => {
             </button>
           ))}
           {onDismiss && (
-            <button onClick={() => setIsDeclining(true)} data-test-subj={`${dataTestSubj}-dismiss`}>
+            <button
+              onClick={() => setIsDeclining(true)}
+              disabled={readOnly}
+              data-test-subj={`${dataTestSubj}-dismiss`}
+            >
               Dismiss
             </button>
           )}
@@ -131,7 +137,7 @@ jest.mock('@kbn/proposals-ui', () => {
               `decision` yet. */}
           {!isReplaced && !decision && proposal.previousExecutionError && (
             <div data-test-subj="warning-callout">
-              A previous attempt at this action failed
+              Previous attempt to apply this proposal failed
               {proposal.previousExecutionError}
             </div>
           )}
@@ -141,6 +147,10 @@ jest.mock('@kbn/proposals-ui', () => {
     },
   };
 });
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(),
+}));
 
 jest.mock('@kbn/core-http-browser', () => ({
   isHttpFetchError: (e: unknown) => {
@@ -154,6 +164,9 @@ jest.mock('../hooks/use_proposals_api', () => ({
   useDismissProposal: jest.fn(),
   useIsApprovingProposal: jest.fn(),
   useIsDecliningProposal: jest.fn(),
+  useReopenProposal: jest.fn(() => ({ mutateAsync: jest.fn() })),
+  useIsReopeningProposal: jest.fn(() => false),
+  isDecisionShown: jest.fn(() => false),
 }));
 
 jest.mock('../hooks/use_current_user_profile', () => ({
@@ -169,6 +182,7 @@ jest.mock('@kbn/user-profile-components', () => ({
 const useProposalMock = useProposal as jest.MockedFunction<typeof useProposal>;
 const useApproveProposalMock = useApproveProposal as jest.MockedFunction<typeof useApproveProposal>;
 const useDismissProposalMock = useDismissProposal as jest.MockedFunction<typeof useDismissProposal>;
+const isDecisionShownMock = isDecisionShown as jest.MockedFunction<typeof isDecisionShown>;
 const useIsApprovingProposalMock = useIsApprovingProposal as jest.MockedFunction<
   typeof useIsApprovingProposal
 >;
@@ -178,6 +192,17 @@ const useIsDecliningProposalMock = useIsDecliningProposal as jest.MockedFunction
 const useCurrentUserProfileMock = useCurrentUserProfile as jest.MockedFunction<
   typeof useCurrentUserProfile
 >;
+const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+
+const capabilitiesFor = (canDecide: boolean) =>
+  ({
+    services: {
+      application: {
+        capabilities: { proposals: { decideProposals: canDecide } },
+      },
+      http: { basePath: { serverBasePath: '', prepend: (path: string) => path } },
+    },
+  } as unknown as ReturnType<typeof useKibana>);
 
 const baseProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMetadata => ({
   id: 'proposal-1',
@@ -218,6 +243,7 @@ const setupMocks = (
   >);
   useIsApprovingProposalMock.mockReturnValue(false);
   useIsDecliningProposalMock.mockReturnValue(false);
+  isDecisionShownMock.mockReturnValue(false);
   useCurrentUserProfileMock.mockReturnValue({ data: null } as unknown as ReturnType<
     typeof useCurrentUserProfile
   >);
@@ -232,6 +258,7 @@ describe('ProposalApprovalCard', () => {
     jest.clearAllMocks();
     latestOnApprove = undefined;
     latestOnDismiss = undefined;
+    useKibanaMock.mockReturnValue(capabilitiesFor(true));
   });
 
   describe('loading state', () => {
@@ -281,6 +308,18 @@ describe('ProposalApprovalCard', () => {
       ).toBeInTheDocument();
     });
 
+    it('disables Approve and Decline when the user cannot decide proposals', () => {
+      setupMocks();
+      useKibanaMock.mockReturnValue(capabilitiesFor(false));
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(
+        container.querySelector('[data-test-subj="proposalCard-proposal-1-confirm"]')
+      ).toBeDisabled();
+      expect(
+        container.querySelector('[data-test-subj="proposalCard-proposal-1-dismiss"]')
+      ).toBeDisabled();
+    });
+
     it('passes onDismiss to ApprovalContent so its built-in decline flow is enabled', () => {
       setupMocks();
       render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
@@ -305,7 +344,7 @@ describe('ProposalApprovalCard', () => {
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
       const callout = getByTestId('warning-callout');
-      expect(callout).toHaveTextContent('A previous attempt at this action failed');
+      expect(callout).toHaveTextContent('Previous attempt to apply this proposal failed');
       // The reason is the actionable half: the title alone does not tell an
       // analyst whether re-approving is likely to fail the same way.
       expect(callout).toHaveTextContent(FAILURE);
@@ -430,7 +469,7 @@ describe('ProposalApprovalCard', () => {
         })
       );
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Someone');
+      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Unknown user');
     });
   });
 
@@ -470,6 +509,25 @@ describe('ProposalApprovalCard', () => {
       expect(container.querySelector('[data-test-subj="approval-is-submitting"]')).toBeNull();
       expect(queryByText(/The decision deadline has passed/)).not.toBeInTheDocument();
       expect(useProposalMock.mock.calls.every(([id]) => id === PROPOSAL_ID)).toBe(true);
+    });
+
+    it('says a to-do proposal marked as not applied is offered again, with nothing to decide', () => {
+      setupMocks(
+        baseProposal({
+          actionWorkflowId: undefined,
+          category: 'todo',
+          decision: 'approved',
+          status: 'no_action',
+          supersededBy: 'proposal-2',
+        })
+      );
+      const { container, getByText } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(getByText('Marked as not applied. It is offered again below.')).toBeInTheDocument();
+      expect(
+        container.querySelector('[data-test-subj="proposalCard-proposal-1-confirm"]')
+      ).toBeNull();
+      expect(container.querySelector('[data-test-subj="proposalDismiss-proposal-1"]')).toBeNull();
     });
 
     it('hides an open dismissal form when the proposal is replaced', () => {
@@ -534,6 +592,15 @@ describe('ProposalApprovalCard', () => {
       expect(getByTestId('approval-is-submitting')).toHaveTextContent('applying');
     });
 
+    it('tells the decision hooks whether the data of its own proposal shows a decision', () => {
+      setupMocks();
+      isDecisionShownMock.mockReturnValue(true);
+      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(useIsApprovingProposalMock).toHaveBeenCalledWith(PROPOSAL_ID, true);
+      expect(useIsDecliningProposalMock).toHaveBeenCalledWith(PROPOSAL_ID, true);
+    });
+
     it('rejects with a friendly message rather than the raw generic error', async () => {
       const mutateAsync = jest.fn().mockRejectedValue(new Error('Network failure'));
       useApproveProposalMock.mockReturnValue({
@@ -564,6 +631,19 @@ describe('ProposalApprovalCard', () => {
       render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
       await expect(latestOnApprove!()).rejects.toThrow(/no longer available to decide/);
+    });
+
+    it('rejects with a permission message for a 403', async () => {
+      const forbiddenError = { _isHttpFetchError: true, response: { status: 403 } };
+      const mutateAsync = jest.fn().mockRejectedValue(forbiddenError);
+      setupMocks();
+      useApproveProposalMock.mockReturnValue({
+        ...noopMutation,
+        mutateAsync,
+      } as unknown as ReturnType<typeof useApproveProposal>);
+      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      await expect(latestOnApprove!()).rejects.toThrow(/don't have permission to decide proposals/);
     });
   });
 

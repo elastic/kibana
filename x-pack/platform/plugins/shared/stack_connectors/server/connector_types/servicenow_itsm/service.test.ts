@@ -802,7 +802,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category^language=en&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category^language=en&sysparm_fields=label,value,dependent_value,element,name',
         connectorUsageCollector,
       });
     });
@@ -838,7 +838,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category^language=en&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category^language=en&sysparm_fields=label,value,dependent_value,element,name',
         connectorUsageCollector,
       });
     });

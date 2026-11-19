@@ -21,16 +21,13 @@ import type { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
-import {
-  CustomizablePalette,
-  DEFAULT_MAX_STOP,
-  DEFAULT_MIN_STOP,
-  applyPaletteParams,
-} from '@kbn/coloring';
+import { DEFAULT_MAX_STOP, DEFAULT_MIN_STOP, applyPaletteParams } from '@kbn/coloring';
+import { CustomizablePalette } from '@kbn/coloring-components';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes-components';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   VisualizationDimensionEditorProps,
@@ -44,8 +41,13 @@ import {
   LENS_METRIC_GROUP_ID,
   LENS_METRIC_STATE_DEFAULTS,
   LENS_LEGACY_METRIC_STATE_DEFAULTS,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
 } from '@kbn/lens-common';
-import { PalettePanelContainer, getAccessorType } from '../../shared_components';
+import {
+  PalettePanelContainer,
+  getAccessorType,
+  LENS_PALETTE_MAX_COLOR_RANGES,
+} from '../../shared_components';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
@@ -1248,6 +1250,8 @@ export function DimensionEditorAdditionalSection({
                   activePalette={activePalette}
                   dataBounds={currentMinMax}
                   showRangeTypeSelector={supportsPercentPalette}
+                  maxSteps={LENS_PALETTE_MAX_COLOR_RANGES}
+                  defaultBandCount={LENS_METRIC_DEFAULT_COLOR_STEPS}
                   setPalette={(newPalette) => {
                     setState({
                       ...state,

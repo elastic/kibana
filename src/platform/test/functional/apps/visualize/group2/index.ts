@@ -41,11 +41,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.refresh();
     });
 
-    loadTestFile(require.resolve('./_inspector'));
     loadTestFile(require.resolve('./_experimental_vis'));
     loadTestFile(require.resolve('./_gauge_chart'));
     loadTestFile(require.resolve('./_heatmap_chart'));
-    loadTestFile(require.resolve('./_histogram_request_start'));
     loadTestFile(require.resolve('./_metric_chart'));
+    loadTestFile(require.resolve('./_legend_colors'));
   });
 }

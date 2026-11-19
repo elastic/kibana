@@ -16,7 +16,91 @@ import type { FunctionParameterType, SupportedDataType } from '../types';
 import { commaCompleteItem } from '../../registry/complete_items';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
+/**
+ * System named param populated with a geotile precision (0-29) derived from the current
+ * geospatial map zoom level.
+ * Intended for the `precision` argument of `ST_GEOTILE`.
+ */
+export const GEOTILE_PRECISION_PARAM = '_geotile_precision';
+
+/**
+ * System named param populated with an H3 resolution (0-15) derived from the current
+ * geospatial map zoom level.
+ * Intended for the `precision` argument of `ST_GEOHEX`.
+ */
+export const GEOHEX_PRECISION_PARAM = '_geohex_precision';
+
+/**
+ * System named param populated with a geohash precision (1-12) derived from the current
+ * geospatial map zoom level.
+ * Intended for the `precision` argument of `ST_GEOHASH`.
+ */
+export const GEOHASH_PRECISION_PARAM = '_geohash_precision';
+
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
+export const GEOTILE_PRECISION_SYSTEM_PARAM = `?${GEOTILE_PRECISION_PARAM}`;
+export const GEOHEX_PRECISION_SYSTEM_PARAM = `?${GEOHEX_PRECISION_PARAM}`;
+export const GEOHASH_PRECISION_SYSTEM_PARAM = `?${GEOHASH_PRECISION_PARAM}`;
+export const GEO_PRECISION_SYSTEM_PARAMS = [
+  GEOTILE_PRECISION_SYSTEM_PARAM,
+  GEOHEX_PRECISION_SYSTEM_PARAM,
+  GEOHASH_PRECISION_SYSTEM_PARAM,
+];
+
+/** Functions whose `precision` argument can be bound to a geo precision system param. */
+const GEO_PRECISION_PARAM_BY_FUNCTION: Record<string, string> = {
+  st_geotile: GEOTILE_PRECISION_SYSTEM_PARAM,
+  st_geohex: GEOHEX_PRECISION_SYSTEM_PARAM,
+  st_geohash: GEOHASH_PRECISION_SYSTEM_PARAM,
+};
+
+/**
+ * Returns the geo precision system param that can be bound to the given function argument,
+ * or undefined when the argument does not support one.
+ */
+export const getGeoPrecisionSystemParam = (functionName: string, paramName?: string) =>
+  paramName === 'precision'
+    ? GEO_PRECISION_PARAM_BY_FUNCTION[functionName.toLowerCase()]
+    : undefined;
+
+export const GEO_PRECISION_SYSTEM_PARAM_DESCRIPTIONS: Record<string, string> = {
+  [GEOTILE_PRECISION_SYSTEM_PARAM]: i18n.translate(
+    'esqlLanguage.esql.autocomplete.geotilePrecisionSystemParam',
+    {
+      defaultMessage:
+        'The geotile precision for the current map zoom level. Only supported in Maps.',
+    }
+  ),
+  [GEOHEX_PRECISION_SYSTEM_PARAM]: i18n.translate(
+    'esqlLanguage.esql.autocomplete.geohexPrecisionSystemParam',
+    {
+      defaultMessage:
+        'The geohex (H3) resolution for the current map zoom level. Only supported in Maps.',
+    }
+  ),
+  [GEOHASH_PRECISION_SYSTEM_PARAM]: i18n.translate(
+    'esqlLanguage.esql.autocomplete.geohashPrecisionSystemParam',
+    {
+      defaultMessage:
+        'The geohash precision for the current map zoom level. Only supported in Maps.',
+    }
+  ),
+};
+
+export function getGeoPrecisionLiterals(systemParam: string, options?: BuildConstantsOptions) {
+  return buildConstantsDefinitions(
+    [systemParam],
+    i18n.translate('esqlLanguage.esql.autocomplete.namedParamGeoPrecisionDefinition', {
+      defaultMessage: 'Bind to map zoom level (Maps only)',
+    }),
+    options,
+    i18n.translate('esqlLanguage.esql.autocomplete.geoPrecisionNamedParamDoc', {
+      defaultMessage: `Use the \`{param}\` parameter to bind the precision to the zoom level of the map. Only supported in Maps.`,
+      values: { param: systemParam },
+    }),
+    SuggestionCategory.GEO_PRECISION_PARAM
+  );
+}
 
 // Targeted: define option interfaces for constants/date literals
 export interface BuildConstantsOptions {
@@ -49,7 +133,7 @@ export const buildConstantsDefinitions = (
       kind: 'Constant',
       detail:
         detail ??
-        i18n.translate('kbn-esql-language.esql.autocomplete.constantDefinition', {
+        i18n.translate('esqlLanguage.esql.autocomplete.constantDefinition', {
           defaultMessage: `Constant`,
         }),
       ...(documentationValue ? { documentation: { value: documentationValue } } : {}),
@@ -63,29 +147,29 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
   return [
     ...buildConstantsDefinitions(
       TIME_SYSTEM_PARAMS,
-      i18n.translate('kbn-esql-language.esql.autocomplete.namedParamDefinition', {
+      i18n.translate('esqlLanguage.esql.autocomplete.namedParamTimeFilterDefinition', {
         defaultMessage: 'Bind to time filter',
       }),
       options,
       // appears when the user opens the second level popover
-      i18n.translate('kbn-esql-language.esql.autocomplete.timeNamedParamDoc', {
+      i18n.translate('esqlLanguage.esql.autocomplete.timeNamedParamDoc', {
         defaultMessage: `Use the \`?_tstart\` and \`?_tend\` parameters to bind a custom timestamp field to Kibana's time filter.`,
       }),
       SuggestionCategory.TIME_PARAM
     ),
     {
-      label: i18n.translate('kbn-esql-language.esql.autocomplete.chooseFromTimePickerLabel', {
+      label: i18n.translate('esqlLanguage.esql.autocomplete.chooseFromTimePickerLabel', {
         defaultMessage: 'Choose from the time picker',
       }),
       text: '',
       kind: 'Issue',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.chooseFromTimePicker', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.chooseFromTimePicker', {
         defaultMessage: 'Click to choose',
       }),
       category: SuggestionCategory.CUSTOM_ACTION,
       command: {
         id: 'esql.timepicker.choose',
-        title: i18n.translate('kbn-esql-language.esql.autocomplete.chooseFromTimePicker', {
+        title: i18n.translate('esqlLanguage.esql.autocomplete.chooseFromTimePicker', {
           defaultMessage: 'Click to choose',
         }),
       },

@@ -91,7 +91,7 @@ export class SyntheticsAppPage {
     await this.ensureIsOnMonitorConfigPage();
     await this.page.testSubj.click('syntheticsMonitorConfigSubmitButton');
     const msg = isUpdate ? 'Monitor updated successfully.' : 'Monitor added successfully.';
-    await expect(this.page.getByText(msg)).toBeVisible();
+    await expect(this.page.testSubj.locator('globalToastList').getByText(msg)).toBeVisible();
     await this.page.testSubj.locator('toastCloseButton').click();
   }
 
@@ -265,22 +265,6 @@ export class SyntheticsAppPage {
     }
   }
 
-  async enableMonitorManagement(shouldEnable = true) {
-    const addMonitorBtn = this.page.getByRole('button', { name: 'Create monitor' });
-    const isDisabled = await addMonitorBtn.isDisabled();
-    const isEnabled = !isDisabled;
-    if (isEnabled === shouldEnable) {
-      return;
-    }
-    const toggle = this.page.testSubj.locator('syntheticsEnableSwitch');
-    const button = this.page.testSubj.locator('syntheticsEnableButton');
-    if (await toggle.isVisible({ timeout: 3000 })) {
-      await toggle.click();
-    } else if (await button.isVisible({ timeout: 3000 })) {
-      await button.click();
-    }
-  }
-
   async getMonitorRowLocator(monitorName: string) {
     const monitorRow = this.page.locator(
       `${euiSelectors.basicTable.ROW_SELECTOR}:has([data-test-subj="syntheticsMonitorDetailsLinkLink"]:has-text("${monitorName}"))`
@@ -292,8 +276,8 @@ export class SyntheticsAppPage {
 
   async deleteMonitor(monitorName: string) {
     const monitorRow = await this.getMonitorRowLocator(monitorName);
-    await monitorRow.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
-    await this.page.testSubj.click('syntheticsMonitorDeleteAction');
+    await monitorRow.hover();
+    await monitorRow.locator('[data-test-subj="syntheticsMonitorDeleteAction"]').click();
     await expect(this.page.testSubj.locator('confirmModalTitleText')).toBeVisible();
     await this.page.testSubj.click('confirmModalConfirmButton');
   }

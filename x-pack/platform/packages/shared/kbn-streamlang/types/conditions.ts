@@ -59,22 +59,24 @@ export interface ShorthandBinaryFilterCondition {
 }
 
 export const operatorToHumanReadableNameMap = {
-  eq: i18n.translate('xpack.streams.filter.equals', { defaultMessage: 'equals' }),
-  neq: i18n.translate('xpack.streams.filter.notEquals', { defaultMessage: 'not equals' }),
-  lt: i18n.translate('xpack.streams.filter.lessThan', { defaultMessage: 'less than' }),
-  lte: i18n.translate('xpack.streams.filter.lessThanOrEquals', {
+  eq: i18n.translate('xpack.streamlang.filter.equals', { defaultMessage: 'equals' }),
+  neq: i18n.translate('xpack.streamlang.filter.notEquals', { defaultMessage: 'not equals' }),
+  lt: i18n.translate('xpack.streamlang.filter.lessThan', { defaultMessage: 'less than' }),
+  lte: i18n.translate('xpack.streamlang.filter.lessThanOrEquals', {
     defaultMessage: 'less than or equals',
   }),
-  gt: i18n.translate('xpack.streams.filter.greaterThan', { defaultMessage: 'greater than' }),
-  gte: i18n.translate('xpack.streams.filter.greaterThanOrEquals', {
+  gt: i18n.translate('xpack.streamlang.filter.greaterThan', { defaultMessage: 'greater than' }),
+  gte: i18n.translate('xpack.streamlang.filter.greaterThanOrEquals', {
     defaultMessage: 'greater than or equals',
   }),
-  contains: i18n.translate('xpack.streams.filter.contains', { defaultMessage: 'contains' }),
-  startsWith: i18n.translate('xpack.streams.filter.startsWith', { defaultMessage: 'starts with' }),
-  endsWith: i18n.translate('xpack.streams.filter.endsWith', { defaultMessage: 'ends with' }),
-  exists: i18n.translate('xpack.streams.filter.exists', { defaultMessage: 'exists' }),
-  range: i18n.translate('xpack.streams.filter.range', { defaultMessage: 'in range' }),
-  includes: i18n.translate('xpack.streams.filter.includes', { defaultMessage: 'includes' }),
+  contains: i18n.translate('xpack.streamlang.filter.contains', { defaultMessage: 'contains' }),
+  startsWith: i18n.translate('xpack.streamlang.filter.startsWith', {
+    defaultMessage: 'starts with',
+  }),
+  endsWith: i18n.translate('xpack.streamlang.filter.endsWith', { defaultMessage: 'ends with' }),
+  exists: i18n.translate('xpack.streamlang.filter.exists', { defaultMessage: 'exists' }),
+  range: i18n.translate('xpack.streamlang.filter.range', { defaultMessage: 'in range' }),
+  includes: i18n.translate('xpack.streamlang.filter.includes', { defaultMessage: 'includes' }),
 };
 
 export const rangeConditionSchema = z

@@ -12,6 +12,7 @@ import { parse } from 'yaml';
 import {
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
+  ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE,
 } from '.';
 import { getManagedWorkflowDefinition, managedWorkflowDefinitions } from '../..';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
@@ -20,8 +21,10 @@ interface ParsedStep {
   name: string;
   type: string;
   'branch-timeout'?: string;
+  'on-failure'?: { continue?: boolean | string };
   concurrency?: number;
   foreach?: string;
+  if?: string;
   mode?: string;
   status?: string;
   steps?: ParsedStep[];
@@ -33,6 +36,7 @@ interface ParsedWorkflow {
   enabled?: boolean;
   name?: string;
   outputs?: Array<{ name: string }>;
+  settings?: { timeout?: string };
   steps?: ParsedStep[];
   triggers?: Array<{ type?: string; inputs?: { properties?: Record<string, unknown> } }>;
 }
@@ -95,8 +99,19 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
   });
 
   describe('inputs', () => {
-    it('exposes exactly batch_size, connector_id and lookback', () => {
-      expect(Object.keys(inputs()).sort()).toEqual(['batch_size', 'connector_id', 'lookback']);
+    it('exposes exactly batch_size, connector_id, lookback and max_alerts', () => {
+      expect(Object.keys(inputs()).sort()).toEqual([
+        'batch_size',
+        'connector_id',
+        'lookback',
+        'max_alerts',
+      ]);
+    });
+
+    it('defaults max_alerts to a full day and keeps it inside one page of batches', () => {
+      expect(inputs().max_alerts).toEqual(
+        expect.objectContaining({ default: 10000, minimum: 100, maximum: 10000, type: 'integer' })
+      );
     });
 
     it('defaults batch_size to 100', () => {
@@ -130,13 +145,99 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     const retrieve = () => step('retrieve_alert_ids');
     const query = () => String(retrieve().with?.query);
 
+    describe('in a space with no alerts index yet', () => {
+      const check = () => step('check_alerts_index');
+
+      it('checks that the space alerts index exists before querying it', () => {
+        expect(check().with?.index).toBe('.alerts-security.alerts-{{ workflow.spaceId }}');
+        expect(parsed.steps?.findIndex((s) => s.name === 'check_alerts_index')).toBeLessThan(
+          parsed.steps?.findIndex((s) => s.name === 'retrieve_alert_ids') ?? -1
+        );
+      });
+
+      const evalExpression = (expression: unknown, context: Record<string, unknown>) =>
+        createWorkflowLiquidEngine().evalValueSync(
+          String(expression)
+            .replace(/^\$\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          context
+        );
+
+      it('skips retrieve_alert_ids only when the probe failed', () => {
+        expect(retrieve().type).toBe('elasticsearch.esql.query');
+        expect(evalExpression(retrieve().if, { steps: { check_alerts_index: {} } })).toBe(true);
+        expect(
+          evalExpression(retrieve().if, {
+            steps: { check_alerts_index: { error: { type: 'ResponseError' } } },
+          })
+        ).toBe(false);
+      });
+
+      // `elasticsearch.indices.exists` needs `view_index_metadata`, which a principal that
+      // can read the alerts alias may not hold. A size-0 search needs only `read`.
+      it('probes with a read-only search, not an index-metadata call', () => {
+        expect(check().type).toBe('elasticsearch.search');
+        expect(check().with).toEqual({
+          index: '.alerts-security.alerts-{{ workflow.spaceId }}',
+          size: 0,
+          track_total_hits: false,
+        });
+      });
+
+      // The ES client names a response error `ResponseError` and puts the ES error type
+      // first in its message.
+      it.each([
+        [
+          'continues past a missing alerts index',
+          {
+            type: 'ResponseError',
+            message:
+              'index_not_found_exception\n\tRoot causes:\n\t\tindex_not_found_exception: no such index',
+          },
+          true,
+        ],
+        [
+          'fails when the caller cannot read the alerts index',
+          {
+            type: 'ResponseError',
+            message:
+              'security_exception\n\tRoot causes:\n\t\tsecurity_exception: action is unauthorized',
+          },
+          false,
+        ],
+        ['fails on any other error', { type: 'Error', message: 'socket hang up' }, false],
+      ] as const)('%s', (_label, error, continues) => {
+        expect(evalExpression(check()['on-failure']?.continue, { error })).toBe(continues);
+      });
+
+      it('does not loosen the query, so a genuine ES|QL error still fails the run', () => {
+        expect(retrieve()).not.toHaveProperty('on-failure');
+        expect(retrieve()).not.toHaveProperty('continue');
+        expect(JSON.stringify(retrieve().with)).not.toContain('ignore_unavailable');
+      });
+
+      it('runs no batch when the skipped retrieval left no ids', async () => {
+        const engine = createWorkflowLiquidEngine({ strictFilters: true });
+        const rendered = await engine.parseAndRender(String(step('generate_batches').foreach), {
+          inputs: { batch_size: 100 },
+          steps: { retrieve_alert_ids: {} },
+        });
+
+        expect(JSON.parse(rendered as string)).toEqual([]);
+      });
+    });
+
     it('retrieves ids only, leaving anonymization to each batch', () => {
       expect(retrieve().type).toBe('elasticsearch.esql.query');
       expect(query()).toMatch(/\| KEEP _id$/);
     });
 
-    it('sorts by @timestamp so batches are contiguous in time', () => {
-      expect(query()).toContain('SORT @timestamp ASC');
+    // The cap drops everything past LIMIT, so the kept rows have to be the newest.
+    // Descending order also makes the first batch that newest slice.
+    it('sorts newest first so the cap keeps the most recent alerts', () => {
+      expect(query().indexOf('| SORT @timestamp DESC')).toBeGreaterThan(-1);
+      expect(query().indexOf('| SORT @timestamp DESC')).toBeLessThan(query().indexOf('| LIMIT'));
     });
 
     it('retrieves only open and acknowledged alerts', () => {
@@ -162,12 +263,65 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       );
     });
 
+    // A true-positive or inconclusive review retires its alerts with
+    // `az:ad_correlated`, and a false positive retires them with `az:ad_fp_chain`.
+    // Correlating either again would only persist a near-duplicate attack.
+    it('excludes alerts tagged az:ad_correlated or az:ad_fp_chain', () => {
+      expect(retrieve().with?.filter).toEqual({
+        bool: {
+          must_not: [
+            {
+              terms: {
+                'kibana.alert.workflow_tags': ['az:ad_correlated', 'az:ad_fp_chain'],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    // A `must_not` keeps untagged alerts, which an ES|QL comparison on the
+    // multi-valued, often-absent tag field would drop unless it had a null arm.
+    it('excludes the tag in the pushed-down filter rather than the ES|QL query', () => {
+      expect(query()).not.toContain('workflow_tags');
+    });
+
     it('selects METADATA _id, which is all the batches need', () => {
       expect(query()).toContain('METADATA _id');
     });
 
-    it('derives the LIMIT from batch_size so the fan-out cap cannot be exceeded', () => {
-      expect(query()).toContain('LIMIT {{ inputs.batch_size | times: 100 | at_most: 10000 }}');
+    it('derives the LIMIT from the alert cap and the 100-branch ceiling', () => {
+      expect(query()).toContain(
+        '{%- assign branch_ceiling = inputs.batch_size | times: 100 | at_most: 10000 -%}'
+      );
+      expect(query()).toContain(
+        '{%- assign alert_limit = inputs.max_alerts | default: 10000 | at_most: branch_ceiling -%}'
+      );
+      expect(query()).toContain('| LIMIT {{ alert_limit }}');
+    });
+
+    it('renders the prorated cap, and never more branches than the batch size allows', async () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const limitOf = async (maxAlerts: number | undefined, batchSize: number) => {
+        const rendered = await engine.parseAndRender(query(), {
+          inputs: {
+            batch_size: batchSize,
+            lookback: '24h',
+            ...(maxAlerts === undefined ? {} : { max_alerts: maxAlerts }),
+          },
+          workflow: { spaceId: 'default' },
+        });
+        return Number(/\| LIMIT (\d+)/.exec(rendered)?.[1]);
+      };
+
+      expect(await limitOf(undefined, 100)).toBe(10000);
+      expect(await limitOf(416, 100)).toBe(416);
+      expect(await limitOf(100, 100)).toBe(100);
+      expect(await limitOf(10000, 50)).toBe(5000);
+    });
+
+    it('gives the child 12h so a slow scan can return to the runner', () => {
+      expect(parsed.settings?.timeout).toBe('12h');
     });
   });
 
@@ -217,6 +371,14 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     it('has each batch retrieve its own alerts rather than take pre-built alert strings', () => {
       expect(fanOut().steps?.[0].with?.alert_retrieval_mode).toBe('esql');
       expect(fanOut().steps?.[0].with).not.toHaveProperty('alerts');
+    });
+
+    // The YAML cannot import the constant, so this is what keeps the two equal and
+    // stops a deleted key from leaving the Worker deduplicating against manual runs.
+    it('passes the Worker generation source to the run step', () => {
+      expect(fanOut().steps?.[0].with?.generation_source).toBe(
+        ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE
+      );
     });
 
     // The offsets and the per-branch slice are a matched pair — an off-by-one
@@ -320,6 +482,21 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(fanOut().steps?.[0].with?.include_attack_discoveries).toBe(false);
     });
 
+    // The review's FP/TP analysis owns the false-positive decision. With the
+    // gate on, generation dropped false-positive chains before any review ran.
+    it('turns off the ground-truth gate on the run step', () => {
+      expect(fanOut().steps?.[0].with?.ground_truth_gate_enabled).toBe(false);
+    });
+
+    // An unset cyber-domain row resolves to nothing, so the frontier tier stays
+    // in charge. The order is the resolution order.
+    it('tries the cyber-domain row before the frontier tier', () => {
+      expect(fanOut().steps?.[0].with?.feature_id).toEqual([
+        'alertzero_template_models',
+        'alertzero_frontier',
+      ]);
+    });
+
     // Step IO is keyed by step id and returns the latest execution, so two
     // concurrent branches running the same step name would race.
     it('keeps the branch body to a single step', () => {
@@ -335,6 +512,18 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
         index: '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}',
         type: 'elasticsearch.search',
       });
+    });
+
+    // Persistence writes only when the model produced attacks. A zero count must
+    // not search an index that was never created.
+    it('searches only when attacks were generated', () => {
+      expect(fetch().if).toBe('${{ steps.aggregate.output.discoveries_generated > 0 }}');
+    });
+
+    // `ignore_unavailable` also hides an index the caller cannot read. Leaving it
+    // unset makes that 403 fail the run instead of looking like a quiet run.
+    it('fails the run when the search is not authorized', () => {
+      expect(fetch().with?.ignore_unavailable).toBeUndefined();
     });
 
     // The run step's `execution_uuid` is written to each persisted document as
@@ -357,6 +546,12 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       const names = parsed.steps?.map(({ name }) => name) ?? [];
 
       expect(names.indexOf('fetch_discoveries')).toBeGreaterThan(names.indexOf('generate_batches'));
+    });
+
+    it('runs after the generated count, which gates the search', () => {
+      const names = parsed.steps?.map(({ name }) => name) ?? [];
+
+      expect(names.indexOf('fetch_discoveries')).toBeGreaterThan(names.indexOf('aggregate'));
     });
   });
 
@@ -406,7 +601,7 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
 
     it('emits the persisted documents rather than the branch outputs', () => {
       expect(step('emit_result').with?.attack_discoveries).toBe(
-        "${{ steps.fetch_discoveries.output.hits.hits | map: '_source' }}"
+        "${{ steps.fetch_discoveries.output.hits.hits | default: steps.aggregate.output.no_discoveries | map: '_source' }}"
       );
     });
 

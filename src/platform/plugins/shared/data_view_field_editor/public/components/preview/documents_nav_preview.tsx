@@ -53,9 +53,13 @@ export const DocumentsNavPreview = () => {
 
   const isInvalid = fetchDocError?.code === 'DOC_NOT_FOUND';
 
+  // The user is in "custom document" mode as soon as a custom ID has been entered,
+  // including while the input is empty after clearing the ID
+  const isCustomMode = typeof customId === 'string';
+
   // We don't display the nav button when the user has entered a custom
   // document ID as at that point there is no more reference to what's "next"
-  const showNavButtons = !customId;
+  const showNavButtons = !isCustomMode;
 
   const onDocumentIdChange = useCallback(
     (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -84,7 +88,7 @@ export const DocumentsNavPreview = () => {
               data-test-subj="documentIdField"
             />
           </EuiFormRow>
-          {customId && (
+          {isCustomMode && (
             <span>
               <EuiButtonEmpty
                 color="primary"

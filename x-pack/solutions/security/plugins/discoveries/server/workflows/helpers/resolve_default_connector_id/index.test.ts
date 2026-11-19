@@ -52,7 +52,7 @@ describe('resolveDefaultConnectorId', () => {
 
     it('returns the connector configured for the feature', async () => {
       const result = await resolveDefaultConnectorId({
-        featureId: 'alertzero_reasoning',
+        featureId: 'alertzero_frontier',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -65,7 +65,7 @@ describe('resolveDefaultConnectorId', () => {
 
     it('passes the request to getForFeature', async () => {
       await resolveDefaultConnectorId({
-        featureId: 'alertzero_reasoning',
+        featureId: 'alertzero_frontier',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -73,16 +73,67 @@ describe('resolveDefaultConnectorId', () => {
         uiSettingsClient: mockUiSettingsClient,
       });
 
-      expect(mockGetForFeature).toHaveBeenCalledWith('alertzero_reasoning', mockRequest, {
+      expect(mockGetForFeature).toHaveBeenCalledWith('alertzero_frontier', mockRequest, {
         onlyReturnConfigured: true,
       });
     });
 
     // The tier is deliberately above the cluster-wide default in the resolution
     // order, so a configured default must not win over an operator's tier choice.
+    it('uses the first feature in the list that resolves a connector', async () => {
+      mockGetForFeature.mockImplementation(async (featureId: string) => {
+        if (featureId === 'alertzero_template_models') {
+          return {
+            endpoints: [{ connectorId: 'template-connector' }],
+            soEntryFound: true,
+          };
+        }
+        return { endpoints: [{ connectorId: 'tier-connector' }], soEntryFound: false };
+      });
+
+      const result = await resolveDefaultConnectorId({
+        featureId: ['alertzero_template_models', 'alertzero_frontier'],
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(result).toBe('template-connector');
+      expect(mockGetForFeature).toHaveBeenCalledWith('alertzero_template_models', mockRequest, {
+        onlyReturnConfigured: true,
+      });
+      expect(mockGetForFeature).not.toHaveBeenCalledWith(
+        'alertzero_frontier',
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('keeps the later feature when an earlier one resolves no connector', async () => {
+      mockGetForFeature.mockImplementation(async (featureId: string) => {
+        if (featureId === 'alertzero_template_models') {
+          return { endpoints: [], soEntryFound: false };
+        }
+        return { endpoints: [{ connectorId: 'tier-connector' }], soEntryFound: false };
+      });
+
+      const result = await resolveDefaultConnectorId({
+        featureId: ['alertzero_template_models', 'alertzero_frontier'],
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(result).toBe('tier-connector');
+    });
+
     it('takes precedence over genAiSettings:defaultAIConnector', async () => {
       await resolveDefaultConnectorId({
-        featureId: 'alertzero_reasoning',
+        featureId: 'alertzero_frontier',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -106,7 +157,7 @@ describe('resolveDefaultConnectorId', () => {
       mockFeaturesGet.mockReturnValue(undefined);
 
       const result = await resolveDefaultConnectorId({
-        featureId: 'alertzero_reasoning',
+        featureId: 'alertzero_frontier',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -121,7 +172,7 @@ describe('resolveDefaultConnectorId', () => {
       mockFeaturesGet.mockReturnValue(undefined);
 
       await resolveDefaultConnectorId({
-        featureId: 'alertzero_reasoning',
+        featureId: 'alertzero_frontier',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -134,7 +185,7 @@ describe('resolveDefaultConnectorId', () => {
 
     it('falls through when the searchInferenceEndpoints plugin is unavailable', async () => {
       const result = await resolveDefaultConnectorId({
-        featureId: 'alertzero_reasoning',
+        featureId: 'alertzero_frontier',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -148,7 +199,7 @@ describe('resolveDefaultConnectorId', () => {
       mockFeaturesGet.mockReturnValue({ taskType: 'text_embedding' });
 
       const result = await resolveDefaultConnectorId({
-        featureId: 'alertzero_reasoning',
+        featureId: 'alertzero_frontier',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -163,7 +214,7 @@ describe('resolveDefaultConnectorId', () => {
       mockFeaturesGet.mockReturnValue({ taskType: 'text_embedding' });
 
       await resolveDefaultConnectorId({
-        featureId: 'alertzero_reasoning',
+        featureId: 'alertzero_frontier',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -172,7 +223,7 @@ describe('resolveDefaultConnectorId', () => {
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Ignoring feature_id alertzero_reasoning: task type is text_embedding, not chat_completion'
+        'Ignoring feature_id alertzero_frontier: task type is text_embedding, not chat_completion'
       );
     });
 
@@ -181,7 +232,7 @@ describe('resolveDefaultConnectorId', () => {
       mockGetForFeature.mockResolvedValue({ endpoints: [] });
 
       const result = await resolveDefaultConnectorId({
-        featureId: 'alertzero_reasoning',
+        featureId: 'alertzero_frontier',
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,

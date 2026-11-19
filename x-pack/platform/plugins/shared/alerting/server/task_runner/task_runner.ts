@@ -6,6 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { cloneDeep } from 'lodash';
 import { isExternalUiamCredential } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
@@ -13,6 +14,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { addSpanLabels } from '@kbn/apm-utils';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { ActionScheduler, type RunResult } from './action_scheduler';
 import type {
   RuleRunnerErrorStackTraceLog,
@@ -24,6 +26,7 @@ import type {
 } from './types';
 import { getDeleteRuleTaskRunResult } from './types';
 import { getExecutorServices } from './get_executor_services';
+import { isAlertStatusChangedEnabled } from '../lib/workflow_extensions/alert_status_changed_opt_in';
 import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
 import type {
   IntervalSchedule,
@@ -31,6 +34,7 @@ import type {
   RawRuleLastRun,
   RawRuleMonitoring,
   RuleExecutionStatus,
+  RuleTaskState,
   RuleTypeRegistry,
 } from '../types';
 import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
@@ -80,13 +84,26 @@ import {
   evaluatePerAlertSnoozeExpiry,
   evaluatePerAlertSnoozeConditions,
 } from './lib';
+import { getAlertFieldValue } from './lib/evaluate_per_alert_snooze_conditions';
 import {
   ErrorWithType,
   isOutdatedTaskVersionError,
   OUTDATED_TASK_VERSION,
 } from '../lib/error_with_type';
+import type { AlertStatusChangedV1Payload } from '../../common/workflows/triggers';
+import { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../lib/workflow_extensions/events';
+import { translations } from '../constants/translations';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
+
+/**
+ * The severity of an alert as the alerts client built it for this run, or null when the rule type
+ * sets none or the alert has no built document (rule types on the legacy alerts client).
+ */
+const getBuiltAlertSeverity = (alertAsData: Record<string, unknown> | undefined): string | null => {
+  const severity = alertAsData ? getAlertFieldValue(alertAsData, ALERT_SEVERITY) : undefined;
+  return typeof severity === 'string' ? severity : null;
+};
 
 interface TaskRunnerConstructorParams<
   Params extends RuleTypeParams,
@@ -129,6 +146,7 @@ export class TaskRunner<
   private logger: Logger;
   private taskInstance: RuleTaskInstance;
   private ruleConsumer: string | null;
+  private apiKeyCreatedByUser: boolean;
   private ruleType: NormalizedRuleType<
     Params,
     ExtractedParams,
@@ -149,6 +167,7 @@ export class TaskRunner<
   private searchAbortController: AbortController;
   private cancelled: boolean;
   private stackTraceLog: RuleRunnerErrorStackTraceLog | null;
+  private persistedAlertsState: RuleTaskState | null = null;
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RuleRunningHandler;
   private ruleResult: RuleResultService;
@@ -197,6 +216,7 @@ export class TaskRunner<
     this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
+    this.apiKeyCreatedByUser = false;
     this.ruleMonitoring = new RuleMonitoringService();
     this.ruleRunning = new RuleRunningHandler(
       this.internalSavedObjectsRepository,
@@ -464,6 +484,32 @@ export class TaskRunner<
     const alertsToUpdateWithMaintenanceWindows =
       await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
+    // Saved as task state if a later step fails, so it matches the alert documents written above.
+    // Copied before actions are scheduled, so alerts whose actions fail to enqueue notify again.
+    // Copied after scoped maintenance windows are added to new alerts, which only happens in the
+    // run that creates them, so the next run still suppresses their actions.
+    // Recovered alerts keep their previous entry, so the next run recovers them again.
+    // The rest of the state, such as the rule type state, stays at the previous run, so the next
+    // run evaluates the same data again instead of skipping the data of this run.
+    if (this.ruleType.autoRecoverAlerts && this.shouldLogAndScheduleActionsForAlerts()) {
+      const { rawActiveAlerts, rawRecoveredAlerts } =
+        alertsClient.getRawAlertInstancesForState(true);
+      const alertInstances = { ...rawActiveAlerts };
+      const alertRecoveredInstances = { ...rawRecoveredAlerts };
+      for (const id of Object.keys(alertsClient.getProcessedAlerts('recovered'))) {
+        const previousAlertInstance = alertsClient.getRawTrackedActiveAlert(id);
+        if (previousAlertInstance) {
+          alertInstances[id] = previousAlertInstance;
+          delete alertRecoveredInstances[id];
+        }
+      }
+      this.persistedAlertsState = cloneDeep({
+        ...this.taskInstance.state,
+        alertInstances,
+        alertRecoveredInstances,
+      });
+    }
+
     const alertAsDataByInstanceId = new Map<string, Record<string, unknown>>();
     for (const instance of activeInstances) {
       if (!instance.conditions?.length) {
@@ -521,6 +567,27 @@ export class TaskRunner<
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
 
+    // ActionScheduler calls alert.unscheduleActions() once it has scheduled a per-alert action,
+    // which clears getScheduledActionOptions(). Snapshot the action group of each new alert
+    // (id -> group) now so the alertStatusChanged payload can still report it afterwards.
+    // Only done when the batch could be built, which needs at least one opt-in. The opt-ins
+    // themselves are asked later, once there is something to emit.
+    const hasAlertStatusChangedOptIns = (this.context.alertStatusChangedOptIns?.length ?? 0) > 0;
+    const newAlertActionGroups = new Map<string, string>();
+    if (
+      !this.cancelled &&
+      this.ruleType.autoRecoverAlerts &&
+      this.context.alertingEventBus &&
+      hasAlertStatusChangedOptIns
+    ) {
+      for (const [id, alert] of Object.entries(alertsClient.getProcessedAlerts('new'))) {
+        const actionGroup = alert.getScheduledActionOptions()?.actionGroup;
+        if (actionGroup != null) {
+          newAlertActionGroups.set(id, actionGroup);
+        }
+      }
+    }
+
     await withAlertingSpan('alerting:schedule-actions', () =>
       this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
         if (isRuleSnoozed(rule)) {
@@ -561,16 +628,94 @@ export class TaskRunner<
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       await withAlertingSpan('alerting:update-alerts', () =>
         this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
-          await alertsClient.updatePersistedAlerts({
-            alertsToUpdateWithLastScheduledActions,
-            alertsToUpdateWithMaintenanceWindows,
-          });
+          // The alerts are written and their actions enqueued, so this update must not fail the run.
+          try {
+            await alertsClient.updatePersistedAlerts({
+              alertsToUpdateWithLastScheduledActions,
+              alertsToUpdateWithMaintenanceWindows,
+            });
+          } catch (err) {
+            this.ruleResult
+              .getLastRunSetters()
+              .addLastRunWarning(
+                translations.taskRunner.warning.updatePersistedAlerts(err.message)
+              );
+          }
         })
       );
     } else {
       this.logger.debug(
         `skipping updating alerts for rule ${ruleTypeRunnerContext.ruleLogPrefix}: rule execution has been cancelled.`
       );
+    }
+
+    // Collect alert status-change events for rules whose alerts recover automatically.
+    // The batch is returned and published to the bus only after processRunResults()
+    // completes. Cancelled runs collect and publish nothing on purpose: a run cancelled
+    // for timeout is treated as a failed run, so its events are dropped (at most once).
+    let alertStatusChangedBatch: RunRuleResult['alertStatusChangedBatch'];
+    if (
+      !this.cancelled &&
+      this.ruleType.autoRecoverAlerts &&
+      this.context.alertingEventBus &&
+      hasAlertStatusChangedOptIns
+    ) {
+      const newAlerts = alertsClient.getProcessedAlerts('new');
+      const recoveredAlerts = alertsClient.getProcessedAlerts('recovered');
+      const newEntries = Object.entries(newAlerts);
+      const recoveredEntries = Object.entries(recoveredAlerts);
+
+      // The opt-ins are asked only when there is something to emit, and after the executor has
+      // finished, with the rule's own request so the answer can differ per space. When none of
+      // them is enabled, nothing is built or published.
+      if (
+        (newEntries.length > 0 || recoveredEntries.length > 0) &&
+        (await isAlertStatusChangedEnabled({
+          optIns: this.context.alertStatusChangedOptIns ?? [],
+          request: fakeRequest,
+          logger: this.logger,
+        }))
+      ) {
+        const rulePayload: AlertStatusChangedV1Payload['rule'] = {
+          id: ruleId,
+          name: rule.name,
+          spaceId,
+          consumer: rule.consumer,
+          ruleTypeId: this.ruleType.id,
+          tags: rule.tags,
+          ruleTypeName: this.ruleType.name,
+        };
+
+        alertStatusChangedBatch = {
+          request: fakeRequest,
+          events: [
+            ...newEntries.map(([id, alert]) => ({
+              rule: rulePayload,
+              alert: {
+                id: alert.getId(),
+                uuid: alert.getUuid(),
+                status: 'active' as const,
+                actionGroup: newAlertActionGroups.get(id) ?? null,
+                start: alert.getStart(),
+                severity: getBuiltAlertSeverity(
+                  alertsClient.getBuiltActiveAlertDataByInstanceId(id)
+                ),
+              },
+            })),
+            ...recoveredEntries.map(([, alert]) => ({
+              rule: rulePayload,
+              alert: {
+                id: alert.getId(),
+                uuid: alert.getUuid(),
+                status: 'recovered' as const,
+                actionGroup: alert.getLastScheduledActions()?.group ?? null,
+                start: alert.getStart(),
+                severity: null,
+              },
+            })),
+          ],
+        };
+      }
     }
 
     return {
@@ -581,6 +726,7 @@ export class TaskRunner<
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
+      alertStatusChangedBatch,
       expiredSnoozedInstances:
         expiredInstances.length > 0 || conditionExpiredInstances.length > 0
           ? [
@@ -681,6 +827,7 @@ export class TaskRunner<
       const ruleData = await withAlertingSpan('alerting:update-missing-uiam-api-key-tag', () =>
         updateRuleMissingUiamKeyTag(this.context, ruleId, spaceId, loadedRuleData)
       );
+      this.apiKeyCreatedByUser = ruleData.rawRule.apiKeyCreatedByUser ?? false;
 
       // Check that this task is current
       const scheduledTaskId = ruleData.rawRule.scheduledTaskId;
@@ -881,6 +1028,7 @@ export class TaskRunner<
 
   async run(): Promise<RuleTaskRunResult> {
     this.runDate = new Date();
+    this.persistedAlertsState = null;
     const {
       params: { alertId: ruleId, spaceId },
       startedAt,
@@ -927,6 +1075,29 @@ export class TaskRunner<
       this.processRunResults({ schedule, runRuleResult })
     );
 
+    // Publish alert status-change events only after processRunResults() has completed.
+    // Events follow persisted state, the same as actions do.
+    // - If the rule type throws, the run result is an error and nothing is published. The state
+    //   falls back to the previous run, so the next run classifies those alerts again.
+    // - If the run fails after the alerts were persisted, the state keeps them, so the events of
+    //   that run are dropped (at most once).
+    // - If the rule type only records an error (addLastRunError) and finishes, the new alert
+    //   state is persisted and its actions are scheduled, so the events are published too.
+    //   Holding them back would lose them, because the next run sees those alerts as ongoing.
+    // - A run cancelled for timeout publishes nothing.
+    if (isOk(runRuleResult) && !this.cancelled && this.context.alertingEventBus) {
+      const batch = runRuleResult.value.alertStatusChangedBatch;
+      if (batch) {
+        const bus = this.context.alertingEventBus;
+        for (const payload of batch.events) {
+          bus.publish(
+            { type: ALERT_STATUS_CHANGED_EVENT_TYPE, payload },
+            { request: batch.request }
+          );
+        }
+      }
+    }
+
     return {
       state: getState({
         runRuleResult,
@@ -936,7 +1107,9 @@ export class TaskRunner<
         ruleTypeId: this.ruleType.id,
         logger: this.logger,
         stackTraceLog: this.stackTraceLog,
+        apiKeyCreatedByUser: this.apiKeyCreatedByUser,
         originalState,
+        persistedAlertsState: this.persistedAlertsState,
       }),
       schedule: getSchedule({
         schedule,

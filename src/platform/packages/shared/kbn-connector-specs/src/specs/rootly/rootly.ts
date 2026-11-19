@@ -107,7 +107,7 @@ export const Rootly: ConnectorSpec = {
   metadata: {
     id: '.rootly',
     displayName: 'Rootly',
-    description: i18n.translate('core.kibanaConnectorSpecs.rootly.metadata.description', {
+    description: i18n.translate('connectorSpecs.rootly.metadata.description', {
       defaultMessage:
         'Declare, read, and drive Rootly incidents through their lifecycle, and triage, acknowledge, and resolve Rootly alerts.',
     }),
@@ -121,19 +121,19 @@ export const Rootly: ConnectorSpec = {
       {
         type: 'bearer',
         isRecommended: true,
+        // Sandbox use is turned off until Night Shift has evals for this connector.
+        // Set back to true to re-enable it (elastic/nightshift-program#2256).
+        supportsSandbox: false,
         defaults: {},
         overrides: {
           meta: {
             token: {
-              label: i18n.translate('core.kibanaConnectorSpecs.rootly.auth.bearer.token.label', {
+              label: i18n.translate('connectorSpecs.rootly.auth.bearer.token.label', {
                 defaultMessage: 'API Key',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.rootly.auth.bearer.token.helpText',
-                {
-                  defaultMessage: 'A Rootly API key (Organization Settings > API Keys).',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.rootly.auth.bearer.token.helpText', {
+                defaultMessage: 'A Rootly API key (Organization Settings > API Keys).',
+              }),
             },
           },
         },
@@ -142,6 +142,8 @@ export const Rootly: ConnectorSpec = {
   },
 
   schema: lazySchema(() => z.object({})),
+
+  sandbox: { hosts: ['api.rootly.com'] },
 
   actions: {
     createIncident: {
@@ -416,12 +418,14 @@ export const Rootly: ConnectorSpec = {
         'List action items on a Rootly incident (or org-wide if incidentId is omitted), filtered by status or priority.',
       input: RootlyListActionItemsInputSchema,
       handler: async (ctx, input: RootlyListActionItemsInput) => {
+        const { incidentId, status, priority } = input;
+        // Only the org-wide endpoint documents filter[status] and filter[priority].
         const params: Record<string, string> = {};
-        if (input.status) params['filter[status]'] = input.status;
-        if (input.priority) params['filter[priority]'] = input.priority;
+        if (!incidentId && status) params['filter[status]'] = status;
+        if (!incidentId && priority) params['filter[priority]'] = priority;
 
-        const url = input.incidentId
-          ? `${ROOTLY_BASE_URL}/incidents/${input.incidentId}/action_items`
+        const url = incidentId
+          ? `${ROOTLY_BASE_URL}/incidents/${incidentId}/action_items`
           : `${ROOTLY_BASE_URL}/action_items`;
 
         try {
@@ -429,7 +433,15 @@ export const Rootly: ConnectorSpec = {
             params,
             headers: JSON_API_HEADERS,
           });
-          return flattenList(response.data);
+          if (!incidentId) {
+            return flattenList(response.data);
+          }
+          const data = response.data.data.filter(
+            ({ attributes }) =>
+              (!status || attributes?.status === status) &&
+              (!priority || attributes?.priority === priority)
+          );
+          return flattenList({ ...response.data, data });
         } catch (error) {
           throw formatRootlyError('listActionItems', error);
         }
@@ -615,7 +627,7 @@ export const Rootly: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.rootly.test.description', {
+    description: i18n.translate('connectorSpecs.rootly.test.description', {
       defaultMessage: 'Verifies the Rootly connection by listing severities',
     }),
     handler: async (ctx) => {

@@ -28,6 +28,7 @@ import type {
 } from '../../../../../../common/endpoint/types';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -241,15 +242,45 @@ describe('When using the suspend-process action from response actions console', 
     });
   });
 
+  it('should show pending status while `suspend-process` action is not yet complete', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'suspend-process',
+        agents: ['a.b.c'],
+        isCompleted: false,
+        wasSuccessful: false,
+        agentState: {
+          'a.b.c': { isCompleted: false, wasSuccessful: false },
+        },
+      }),
+    });
+    await render();
+    await enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('suspendProcess-pending')).toBeTruthy();
+    });
+
+    expect(renderResult.getByTestId('suspendProcess-actionResult-hostStatus')).toHaveTextContent(
+      'suspend-process is pending'
+    );
+  });
+
   it('should show success when `suspend-process` action completes with no errors when using `pid`', async () => {
     await render();
     await enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
-        'Action completed.'
-      );
+      expect(renderResult.getByTestId('suspendProcess-success')).toBeTruthy();
     });
+
+    expect(renderResult.getByTestId('suspendProcess-actionResult-hostStatus')).toHaveTextContent(
+      'suspend-process completed successfully'
+    );
   });
 
   it('should show success when `suspend-process` action completes with no errors when using `entityId`', async () => {
@@ -257,26 +288,32 @@ describe('When using the suspend-process action from response actions console', 
     await enterConsoleCommand(renderResult, user, 'suspend-process --entityId 123wer');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
-        'Action completed.'
-      );
+      expect(renderResult.getByTestId('suspendProcess-success')).toBeTruthy();
     });
+
+    expect(renderResult.getByTestId('suspendProcess-actionResult-hostStatus')).toHaveTextContent(
+      'suspend-process completed successfully'
+    );
   });
   it('should display the process result output content returned by the action', async () => {
     await render();
     await enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('killProcessResponseOutput')).toBeTruthy();
+      expect(
+        renderResult.getByTestId('suspendProcess-actionResult-killSuspendProcessResults')
+      ).toBeTruthy();
     });
 
-    const output = renderResult.getByTestId('killProcessResponseOutput').textContent ?? '';
+    const output =
+      renderResult.getByTestId('suspendProcess-actionResult-killSuspendProcessResults')
+        .textContent ?? '';
 
     expect(output).toContain('PID 5');
     expect(output).toContain('Entity ID entity-foo');
   });
 
-  it('should display the response code message as the result title', async () => {
+  it('should display the response code message in the result', async () => {
     const detailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
     }) as ActionDetailsApiResponse<SuspendProcessActionOutputContent>;
@@ -299,11 +336,13 @@ describe('When using the suspend-process action from response actions console', 
     await enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-commandExecutionResult')).toHaveTextContent(
-        endpointActionResponseCodes['ra_suspend-process_success_done']
-      );
+      expect(
+        renderResult.getByTestId('suspendProcess-actionResult-killSuspendProcessResults')
+      ).toHaveTextContent(endpointActionResponseCodes['ra_suspend-process_success_done']);
     });
-    expect(renderResult.getByTestId('killProcessResponseOutput')).toHaveTextContent('PID 5');
+    expect(
+      renderResult.getByTestId('suspendProcess-actionResult-killSuspendProcessResults')
+    ).toHaveTextContent('PID 5');
   });
 
   it('should only display output fields that are present in the content', async () => {
@@ -328,10 +367,14 @@ describe('When using the suspend-process action from response actions console', 
     await enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('killProcessResponseOutput')).toBeTruthy();
+      expect(
+        renderResult.getByTestId('suspendProcess-actionResult-killSuspendProcessResults')
+      ).toBeTruthy();
     });
 
-    const output = renderResult.getByTestId('killProcessResponseOutput').textContent ?? '';
+    const output =
+      renderResult.getByTestId('suspendProcess-actionResult-killSuspendProcessResults')
+        .textContent ?? '';
 
     expect(output).toContain('PID 5');
     expect(output).not.toContain('Entity ID');
@@ -363,6 +406,15 @@ describe('When using the suspend-process action from response actions console', 
         /error one \| error two/
       );
     });
+
+    expect(renderResult.getByTestId('suspendProcess-actionResult-hostStatus')).toHaveTextContent(
+      'suspend-process failed'
+    );
+    expect(
+      renderResult.getByTestId(
+        'suspendProcess-actionResult-killSuspendProcessResults-agent-a-outputFailureMessage-response-action-failure-info'
+      ).textContent
+    ).toMatch(/error one \| error two/);
   });
 
   it('should show error if suspend-process API fails', async () => {

@@ -19,6 +19,8 @@ import { ObservabilityAlertingPlugin } from './plugin';
 import {
   OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
+  OBSERVABILITY_ALERTING_RULES_V1_PATH,
+  OBSERVABILITY_ALERTING_RULES_V2_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
@@ -72,6 +74,7 @@ describe('ObservabilityAlertingPlugin', () => {
           RulesPage: () => null,
           RuleLibraryPage: () => null,
           EpisodesPage: () => null,
+          AlertsProvider: ({ children }: { children?: React.ReactNode }) => children ?? null,
           ActionPoliciesPage: () => null,
           ExecutionHistoryPage: () => null,
           CreateRuleOptionsFlyout: () => null,
@@ -83,6 +86,9 @@ describe('ObservabilityAlertingPlugin', () => {
         },
         triggersActionsUi: {
           getClassicRulesPage: () => React.createElement('div'),
+        },
+        observabilityShared: {
+          navigation: { PageTemplate: () => null },
         },
       },
       {},
@@ -119,18 +125,18 @@ describe('ObservabilityAlertingPlugin', () => {
           }),
           expect.objectContaining({
             id: 'rules-v1',
-            path: '/rules/v1',
+            path: OBSERVABILITY_ALERTING_RULES_V1_PATH,
             visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'rules-v2',
-            path: '/rules/v2',
+            path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
             visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'rule-library',
             path: '/rule-library',
-            visibleIn: [],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'action-policies',
@@ -168,7 +174,11 @@ describe('ObservabilityAlertingPlugin', () => {
     );
 
     expect(visibilityById).toEqual({
-      [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ['globalSearch', 'projectSideNav'],
+      [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: [
+        'globalSearch',
+        'projectSideNav',
+        'classicSideNav',
+      ],
       [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],

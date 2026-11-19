@@ -15,6 +15,7 @@ import type { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/expo
 import type { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
 import type { OTLPLogExporter as OTLPLogExporterPROTO } from '@opentelemetry/exporter-logs-otlp-proto';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import { withTimeout } from '@kbn/std';
 import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/logging';
 import {
   ROOT_CONTEXT,
@@ -454,10 +455,7 @@ export class OtelAppender implements DisposableAppender {
     // Attach .catch() so that a late rejection from shutdown() after the timeout
     // fires does not produce an unhandled promise rejection.
     const shutdownPromise = this.loggerProvider.shutdown().catch(() => {});
-    await Promise.race([
-      shutdownPromise,
-      new Promise<void>((resolve) => setTimeout(resolve, DISPOSE_TIMEOUT_MS)),
-    ]);
+    await withTimeout({ promise: shutdownPromise, timeoutMs: DISPOSE_TIMEOUT_MS });
   }
 }
 
@@ -478,7 +476,7 @@ const createExporter = (
   switch (config.protocol) {
     case 'http': {
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
       return new OTLPLogExporter({
         url: config.url,
@@ -489,7 +487,7 @@ const createExporter = (
     }
     case 'proto': {
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-proto');
       return new OTLPLogExporter({
         url: config.url,
@@ -500,14 +498,14 @@ const createExporter = (
     }
     case 'grpc': {
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { Metadata, credentials } = require('@grpc/grpc-js');
       const metadata = new Metadata();
       Object.entries(config.headers ?? {}).forEach(([key, value]) => {
         metadata.add(key, value);
       });
       // No need to import the module at the top if not used in the switch statement.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-grpc');
       return new OTLPLogExporter({
         url: config.url,

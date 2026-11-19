@@ -33,6 +33,7 @@ export interface WorkspaceNode {
 export type BlockListedNode = Omit<WorkspaceNode, 'numChildren' | 'kx' | 'ky' | 'id'>;
 
 export interface WorkspaceEdge {
+  id?: string;
   weight: number;
   width: number;
   label: string;
@@ -96,12 +97,8 @@ export interface Workspace {
   expandSelecteds: (targetOptions: TargetOptions) => {};
   deleteSelection: () => void;
   blocklistSelection: () => void;
-  selectAll: () => void;
   selectNone: () => void;
-  selectInvert: () => void;
-  selectNeighbours: () => void;
   deselectNode: (node: WorkspaceNode) => void;
-  colorSelected: (color: string) => void;
   groupSelections: (node: WorkspaceNode | undefined) => void;
   ungroup: (node: WorkspaceNode | undefined) => void;
   callElasticsearch: (request: any) => void;
@@ -165,6 +162,7 @@ export type WorkspaceOptions = Partial<{
   vertex_fields: WorkspaceField[];
   nodeLabeller: (newNodes: WorkspaceNode[]) => void;
   changeHandler: () => void;
+  topologyChangeHandler: () => void;
   graphExploreProxy: (
     indexPattern: string,
     request: ExploreRequest,

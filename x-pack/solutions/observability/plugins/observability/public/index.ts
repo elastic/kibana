@@ -125,9 +125,21 @@ export { Threshold } from './components/custom_threshold/components/threshold';
 export { builtInComparatorsWithInclusive } from './constants/comparators';
 
 export { ObservabilityAlertsTable } from './components/alerts_table/alerts_table_lazy';
+export { AlertsTableCellValue as ObservabilityAlertsTableCellValue } from './components/alerts_table/common/cell_value';
 export { AlertActions } from './components/alert_actions/alert_actions_lazy';
 export type {
   GetObservabilityAlertsTableProp,
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
 } from './components/alerts_table/types';
+
+export { createObservabilityEpisodeActions } from './episode_actions/create_observability_episode_actions';
+export type {
+  ObservabilityEpisodeActionsCases,
+  ObservabilityEpisodeActionsDeps,
+} from './episode_actions/create_observability_episode_actions';
+export {
+  getAlertIdFromEpisode,
+  INVESTIGATE_EPISODE_ACTION_ID,
+} from './episode_actions/investigate_episode_action';
+export { VIEW_V1_ALERT_IN_APP_ACTION_ID } from './episode_actions/view_in_app';

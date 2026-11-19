@@ -22,13 +22,14 @@ interface UseMinimumConfidenceScoreDraftResult {
   /** Value in [0, 100] display range, or '' for an uncommitted empty draft. */
   draft: number | '';
   onValueChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus: () => void;
   onBlur: () => void;
 }
 
 /**
  * Draft/persist state for a 0–100% confidence score field that stores and emits its value as a
- * 0–1 decimal. Persists on blur (not per keystroke) and restores the last persisted value if
- * blurred while the field is empty, rather than writing a 0% floor.
+ * 0–1 decimal. Emits each valid keystroke and, if blurred while the field is empty, restores the
+ * value from before the edit rather than writing a 0% floor.
  *
  * `'' ` is a distinct, uncommitted draft state — not a user-entered 0. `Number('')` is 0, so
  * treating an emptied field as 0 would drop the closure floor to 0% on blur (every
@@ -41,32 +42,40 @@ export const useMinimumConfidenceScoreDraft = ({
 }: UseMinimumConfidenceScoreDraftParams): UseMinimumConfidenceScoreDraftResult => {
   const [draft, setDraft] = useState<number | ''>(() => toDisplay(current));
   const draftRef = useRef<number | ''>(toDisplay(current));
-  const lastPersistedRef = useRef(toDecimal(toDisplay(current)));
+  const lastEmittedRef = useRef(toDecimal(toDisplay(current)));
+  const editStartRef = useRef(lastEmittedRef.current);
   const onChangeRef = useRef(onChange);
 
   onChangeRef.current = onChange;
 
   useEffect(() => {
-    lastPersistedRef.current = toDecimal(toDisplay(current));
+    const decimal = toDecimal(toDisplay(current));
+    // A reload or Discard becomes the value to restore; an echo of our own emitted value does not.
+    if (decimal !== lastEmittedRef.current) {
+      editStartRef.current = decimal;
+    }
+    lastEmittedRef.current = decimal;
     const next = toDisplay(current);
     draftRef.current = next;
     setDraft(next);
   }, [current]);
 
+  const onFocus = useCallback(() => {
+    editStartRef.current = lastEmittedRef.current;
+  }, []);
+
   const onBlur = useCallback(() => {
     if (draftRef.current === '') {
-      // Blurred while empty: restore the last persisted value rather than writing a 0% floor.
-      const restored = toDisplay(lastPersistedRef.current);
-      draftRef.current = restored;
-      setDraft(restored);
-      return;
+      // Blurred while empty: restore the pre-edit value rather than writing a 0% floor. Valid
+      // keystrokes were already emitted, so emit the pre-edit value again if one of them landed.
+      const restored = editStartRef.current;
+      draftRef.current = toDisplay(restored);
+      setDraft(toDisplay(restored));
+      if (restored !== lastEmittedRef.current) {
+        lastEmittedRef.current = restored;
+        onChangeRef.current(restored);
+      }
     }
-    const decimal = toDecimal(draftRef.current);
-    if (decimal === lastPersistedRef.current) {
-      return;
-    }
-    lastPersistedRef.current = decimal;
-    onChangeRef.current(decimal);
   }, []);
 
   const onValueChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +94,13 @@ export const useMinimumConfidenceScoreDraft = ({
     }
     draftRef.current = raw;
     setDraft(raw);
+    // Publish valid values right away so the page's unsaved-changes state stays current.
+    const decimal = toDecimal(raw);
+    if (decimal !== lastEmittedRef.current) {
+      lastEmittedRef.current = decimal;
+      onChangeRef.current(decimal);
+    }
   }, []);
 
-  return { draft, onValueChange, onBlur };
+  return { draft, onValueChange, onFocus, onBlur };
 };

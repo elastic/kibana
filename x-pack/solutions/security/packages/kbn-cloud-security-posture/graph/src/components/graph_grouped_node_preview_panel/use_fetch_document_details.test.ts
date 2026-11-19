@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDocumentsRequest, buildItemFromHit } from './use_fetch_document_details';
+
+const euidApi = { euid, getBuiltInEntityDefinition };
 
 const SOURCE = {
   '@timestamp': '2024-09-01T12:34:56.789Z',
@@ -23,7 +25,7 @@ const buildHit = (source: Record<string, unknown>, index = 'logs-gcp.audit-defau
 
 describe('buildItemFromHit', () => {
   it('maps the document fields and the resolved actor and targets', () => {
-    expect(buildItemFromHit(buildHit(SOURCE), euid)).toMatchObject({
+    expect(buildItemFromHit(buildHit(SOURCE), euidApi)).toMatchObject({
       itemType: 'event',
       id: 'kabcd1234efgh5678',
       docId: 'doc-1',
@@ -40,7 +42,7 @@ describe('buildItemFromHit', () => {
   it('marks documents from the alerts index as alerts', () => {
     const item = buildItemFromHit(
       buildHit(SOURCE, '.internal.alerts-security.alerts-default-000001'),
-      euid
+      euidApi
     );
 
     expect(item.itemType).toBe('alert');
@@ -54,7 +56,7 @@ describe('buildItemFromHit', () => {
   });
 
   it('leaves actor and target unset when the document has no identity fields', () => {
-    const item = buildItemFromHit(buildHit({ event: { id: 'e1', action: 'a' } }), euid);
+    const item = buildItemFromHit(buildHit({ event: { id: 'e1', action: 'a' } }), euidApi);
 
     expect(item.actor).toBeUndefined();
     expect(item.target).toBeUndefined();
@@ -63,7 +65,7 @@ describe('buildItemFromHit', () => {
   it('ignores the legacy actor.entity.id and target.entity.id fields', () => {
     const item = buildItemFromHit(
       buildHit({ actor: { entity: { id: 'legacy' } }, target: { entity: { id: 'legacy-t' } } }),
-      euid
+      euidApi
     );
 
     expect(item.actor).toBeUndefined();

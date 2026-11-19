@@ -7,6 +7,15 @@
 
 import { syncParamsSettingsParamsRoute } from './settings/params/sync_global_params_settings';
 import { syncParamsSyntheticsParamsRoute } from './settings/params/sync_global_params';
+import {
+  getSecretConnectionsRoute,
+  getAffectedMonitorsRoute,
+  previewAffectedMonitorsRoute,
+  saveSecretConnectionRoute,
+  deleteSecretConnectionRoute,
+  testSecretConnectionRoute,
+} from './settings/secret_connection/secret_connection';
+import { getFleetSecretStorageStatusRoute } from './settings/secret_connection/fleet_secret_storage';
 import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
 import { resetPrivateLocationRoute } from './settings/private_locations/reset_private_location';
 import { getSyntheticsTriggerTaskRun } from './tasks/trigger_task_run';
@@ -153,6 +162,13 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   cleanupPrivateLocationRoute,
   resetPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
+  getSecretConnectionsRoute,
+  getAffectedMonitorsRoute,
+  previewAffectedMonitorsRoute,
+  saveSecretConnectionRoute,
+  deleteSecretConnectionRoute,
+  testSecretConnectionRoute,
+  getFleetSecretStorageStatusRoute,
   syncParamsSettingsParamsRoute,
   getMonitorsHealthRoute,
   getMonitorHealthRoute,

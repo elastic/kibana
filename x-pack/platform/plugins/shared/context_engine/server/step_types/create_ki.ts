@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { createKiStepCommonDefinition } from '../../common/step_types/create_ki';
@@ -19,6 +20,9 @@ import {
   resolveOrCreateAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
+import { findKiRevision, putKiRevision } from '../ai_indices/ki_revision';
+import { assertSameUserId } from '../ai_indices/ki_write';
+import { toStepError } from './to_step_error';
 import type { VerifyKi } from './verify_ki';
 
 export const getCreateKiStepDefinition = ({
@@ -49,9 +53,7 @@ export const getCreateKiStepDefinition = ({
           const verification = verifiers
             ? await verifyKi({ context, ki, verifiers, aiIndexId })
             : undefined;
-          if (verification && !verification.passed) {
-            return { output: { verification } };
-          }
+          const verificationFailed = verification?.passed === false;
 
           const { dest, managed } = await resolveOrCreateAiIndex(
             getAiIndexService,
@@ -63,24 +65,45 @@ export const getCreateKiStepDefinition = ({
           const esClient = context.contextManager.getScopedEsClient();
 
           const id = kiId ?? uuidv4();
+          const existing = kiId
+            ? await findKiRevision({
+                esClient,
+                aiIndexId,
+                dest,
+                kiId,
+                includeSource: true,
+                abortSignal: context.abortSignal,
+              })
+            : undefined;
+          if (existing) {
+            try {
+              assertSameUserId(aiIndexId, id, existing.source, ki);
+            } catch (error) {
+              throw toStepError(error, 'Failed to create knowledge indicator');
+            }
+          }
+          const userId = ki.user_id ?? existing?.source.user_id;
           const now = new Date().toISOString();
           const writer = kiWriterFromContext(context.contextManager.getContext());
-          await esClient.index(
-            {
-              index: dest.value,
-              document: {
-                '@timestamp': now,
-                ...ki,
-                id,
-                updated_at: now,
-                governance: { provenance: { created_by: writer, updated_by: writer } },
+          await putKiRevision({
+            esClient,
+            aiIndexId,
+            dest,
+            kiId: id,
+            document: {
+              '@timestamp': now,
+              ...omit(ki, 'user_id'),
+              ...(userId !== undefined ? { user_id: userId } : {}),
+              id,
+              updated_at: now,
+              governance: {
+                provenance: { created_by: writer, updated_by: writer },
+                ...(verificationFailed && { lifecycle: { status: 'verification_failed' } }),
               },
-              // Data streams only accept `create`.
-              ...(dest.type === 'data_stream' ? { op_type: 'create' as const } : { id }),
-              ...(refresh && { refresh: 'wait_for' as const }),
             },
-            { signal: context.abortSignal }
-          );
+            refresh,
+            abortSignal: context.abortSignal,
+          });
 
           return { output: { id, ...(verification && { verification }) } };
         },

@@ -41,7 +41,7 @@ const processesTab: Tab = {
 const profilingTab: Tab = {
   id: ContentTabIds.PROFILING,
   name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.profiling', {
-    defaultMessage: 'Universal Profiling',
+    defaultMessage: 'Profiling',
   }),
 };
 

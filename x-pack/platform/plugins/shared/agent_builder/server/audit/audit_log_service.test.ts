@@ -353,4 +353,22 @@ describe('AuditLogService', () => {
       })
     );
   });
+
+  it('scopes a conversation creation audit event to the request', () => {
+    const auditLogger = { log: jest.fn() };
+    const { service, security } = createService({ auditLogger });
+    const request = {} as KibanaRequest;
+
+    service.logConversationCreated(request, { conversationId: 'conv-1', agentId: 'agent-1' });
+
+    expect(security.audit.asScoped).toHaveBeenCalledWith(request);
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'User has created conversation [id=conv-1, agent=agent-1]',
+        event: expect.objectContaining({
+          action: AgentBuilderAuditAction.CONVERSATION_CREATE,
+        }),
+      })
+    );
+  });
 });

@@ -25,6 +25,7 @@ import {
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
 } from '@kbn/nightshift-shared';
 import { EMPTY_TOKENS, buildKIQueryGenerationUserMessage } from '@kbn/nightshift-ai';
+import { timeoutSignal } from '@kbn/std';
 import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../agent_builder/agents/ki_query_generation';
@@ -33,8 +34,20 @@ import {
   type AcceptedQuery,
 } from '../../agent_builder/skills/ki_query_generation';
 import { chatTokenCountFromModelUsage } from './features/chat_token_count';
+import { getWorkflowExecutionIdFromRequest } from '../telemetry/ebt/workflow_execution_id';
 
 const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
+
+/** The agent run ended without a usable result; `reason` names which way, for telemetry. */
+export class KIQueryGenerationAgentError extends Error {
+  constructor(
+    public readonly reason: 'agent_did_not_finalize' | 'unexpected_source',
+    message: string
+  ) {
+    // The name stays `Error` so the line the route logs for this failure does not change.
+    super(message);
+  }
+}
 
 interface FinalizedValidationData {
   slug: string;
@@ -59,6 +72,7 @@ export interface ExecuteKIQueryGenerationAgentOptions {
   interactionId: string;
   source: NightshiftSource;
   existingQueries: ExistingQuerySummary[];
+  maxExistingQueriesForContext: number;
   signal?: AbortSignal;
   logger: Logger;
 }
@@ -70,6 +84,7 @@ export async function executeKIQueryGenerationAgent({
   interactionId,
   source,
   existingQueries,
+  maxExistingQueriesForContext,
   signal,
   logger,
 }: ExecuteKIQueryGenerationAgentOptions): Promise<{
@@ -78,7 +93,8 @@ export async function executeKIQueryGenerationAgent({
 }> {
   const userMessage = buildKIQueryGenerationUserMessage(
     { slug: source.slug, description: source.description },
-    existingQueries
+    existingQueries,
+    maxExistingQueriesForContext
   );
 
   const conversationClient = await agentBuilder.conversations.getScopedClient({ request });
@@ -88,67 +104,79 @@ export async function executeKIQueryGenerationAgent({
     accessControl: { access_mode: ConversationAccessControlMode.Public },
   });
 
-  const timeoutSignal = AbortSignal.timeout(QUERY_GENERATION_MAX_DURATION_MS);
-  const executionSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
-  const { events$ } = await agentBuilder.execution.executeAgent({
-    mode: AgentExecutionMode.conversation,
-    request,
-    abortSignal: executionSignal,
-    useTaskManager: false,
-    params: {
-      agentId: KI_QUERY_GENERATION_AGENT_ID,
-      connectorId,
-      conversationId: conversation.id,
-      storeConversation: true,
-      nextInput: { message: userMessage },
-      telemetryMetadata: {
-        pluginId: NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
-        aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
-        productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-        productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
-        interactionId,
+  const queryTimeout = timeoutSignal(QUERY_GENERATION_MAX_DURATION_MS);
+  try {
+    const executionSignal = signal ? AbortSignal.any([signal, queryTimeout]) : queryTimeout;
+    const { events$ } = await agentBuilder.execution.executeAgent({
+      mode: AgentExecutionMode.conversation,
+      request,
+      abortSignal: executionSignal,
+      useTaskManager: false,
+      params: {
+        agentId: KI_QUERY_GENERATION_AGENT_ID,
+        connectorId,
+        conversationId: conversation.id,
+        storeConversation: true,
+        nextInput: { message: userMessage },
+        telemetryMetadata: {
+          pluginId: NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
+          aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
+          productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+          productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
+          interactionId,
+        },
+        workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
       },
-    },
-  });
+    });
 
-  const events = await firstValueFrom(events$.pipe(toArray()));
+    const events = await firstValueFrom(events$.pipe(toArray()));
 
-  const validationResultEvent = events
-    .filter(isToolResultEvent)
-    .filter((event) => event.data.tool_id === SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID)
-    .at(-1);
-  const finalizedData = validationResultEvent?.data.results
-    .map(({ data }) => data)
-    .find(isFinalizedValidationData);
+    const validationResultEvent = events
+      .filter(isToolResultEvent)
+      .filter((event) => event.data.tool_id === SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID)
+      .at(-1);
+    const finalizedData = validationResultEvent?.data.results
+      .map(({ data }) => data)
+      .find(isFinalizedValidationData);
 
-  if (!finalizedData) {
-    throw new Error('KI query generation agent did not finalize validate_queries');
-  }
-  if (finalizedData.slug !== source.slug) {
-    throw new Error(
-      `KI query generation agent finalized for unexpected source "${finalizedData.slug}"`
+    if (!finalizedData) {
+      throw new KIQueryGenerationAgentError(
+        'agent_did_not_finalize',
+        'KI query generation agent did not finalize validate_queries'
+      );
+    }
+    if (finalizedData.slug !== source.slug) {
+      throw new KIQueryGenerationAgentError(
+        'unexpected_source',
+        `KI query generation agent finalized for unexpected source "${finalizedData.slug}"`
+      );
+    }
+
+    const roundEvent = events.find(isRoundCompleteEvent);
+    const rawQueries = finalizedData.finalized_queries;
+
+    const queries: GeneratedSignificantEventQuery[] = rawQueries.map((q) => ({
+      type: q.type,
+      title: q.title,
+      description: q.description,
+      esql: q.esql,
+      category: q.category,
+      severity_score: q.severity_score,
+      evidence: q.evidence,
+      replaces: q.replaces,
+      features: q.features,
+    }));
+
+    const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromModelUsage(
+      roundEvent?.data.round.model_usage
+    ) ?? { ...EMPTY_TOKENS };
+
+    logger.debug(
+      `KI query generation agent returned ${queries.length} queries for "${source.slug}"`
     );
+
+    return { queries, tokensUsed };
+  } finally {
+    queryTimeout.dispose();
   }
-
-  const roundEvent = events.find(isRoundCompleteEvent);
-  const rawQueries = finalizedData.finalized_queries;
-
-  const queries: GeneratedSignificantEventQuery[] = rawQueries.map((q) => ({
-    type: q.type,
-    title: q.title,
-    description: q.description,
-    esql: q.esql,
-    severity_score: q.severity_score,
-    evidence: q.evidence,
-    replaces: q.replaces,
-    features: q.features,
-  }));
-
-  const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromModelUsage(
-    roundEvent?.data.round.model_usage
-  ) ?? { ...EMPTY_TOKENS };
-
-  logger.debug(`KI query generation agent returned ${queries.length} queries for "${source.slug}"`);
-
-  return { queries, tokensUsed };
 }

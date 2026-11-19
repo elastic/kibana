@@ -18,6 +18,15 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { GraphDisplayOptions } from '../graph/graph_display_options_context';
 
+const displayHeading = i18n.translate('securitySolutionPackages.csp.graph.layersPanel.display', {
+  defaultMessage: 'Display',
+});
+
+const highlightOriginLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.layersPanel.highlightOrigin',
+  { defaultMessage: 'Highlight starting point' }
+);
+
 const entityMetadataHeading = i18n.translate(
   'securitySolutionPackages.csp.graph.layersPanel.entityMetadata',
   { defaultMessage: 'Entity metadata' }
@@ -94,8 +103,34 @@ export const LayersPanel = ({ displayOptions, onChange }: LayersPanelProps) => {
         width: 240px;
       `}
     >
-      {/* Entity metadata section */}
+      {/* Display section */}
       <EuiText size="s">
+        <strong>{displayHeading}</strong>
+      </EuiText>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="xs"
+        css={css`
+          margin-top: ${euiTheme.size.xs};
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiCheckbox
+            id={`${id}HighlightOrigin`}
+            label={highlightOriginLabel}
+            checked={displayOptions.highlightOrigin}
+            onChange={(e) => onChange({ ...displayOptions, highlightOrigin: e.target.checked })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {/* Entity metadata section */}
+      <EuiText
+        size="s"
+        css={css`
+          margin-top: ${euiTheme.size.m};
+        `}
+      >
         <strong>{entityMetadataHeading}</strong>
       </EuiText>
       <EuiFlexGroup

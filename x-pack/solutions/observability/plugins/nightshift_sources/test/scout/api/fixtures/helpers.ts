@@ -11,9 +11,15 @@ import type {
   ListSourcesResponse,
   NightshiftSource,
   UpdateSourceRequest,
+  ValidateSourceQueryRequest,
 } from '@kbn/nightshift-shared';
 import type { ApiClientFixture, ApiClientResponse, EsClient } from '@kbn/scout-oblt';
-import { COMMON_HEADERS, SOURCES_PATH, TEST_INDEX_PREFIX } from './constants';
+import {
+  COMMON_HEADERS,
+  RECOMMENDED_SOURCE_TEST_INDEX_PREFIX,
+  SOURCES_PATH,
+  TEST_INDEX_PREFIX,
+} from './constants';
 
 type CookieHeader = Record<string, string>;
 
@@ -28,6 +34,8 @@ const spacePath = (path: string, spaceId?: string): string =>
 export const uniqueSuffix = (): string => randomUUID().slice(0, 8);
 
 export const testIndexName = (suffix: string): string => `${TEST_INDEX_PREFIX}${suffix}`;
+export const recommendedSourceTestIndexName = (suffix: string): string =>
+  `${RECOMMENDED_SOURCE_TEST_INDEX_PREFIX}${suffix}`;
 
 const withHeaders = (cookieHeader: CookieHeader) => ({
   headers: { ...COMMON_HEADERS, ...cookieHeader },
@@ -41,6 +49,13 @@ export const createSource = (
   { spaceId }: SourceRequestOptions = {}
 ): Promise<ApiClientResponse> =>
   apiClient.post(spacePath(SOURCES_PATH, spaceId), { ...withHeaders(cookieHeader), body });
+
+export const validateSourceQuery = (
+  apiClient: ApiClientFixture,
+  cookieHeader: CookieHeader,
+  body: ValidateSourceQueryRequest
+): Promise<ApiClientResponse> =>
+  apiClient.post(`${SOURCES_PATH}/_validate`, { ...withHeaders(cookieHeader), body });
 
 export const getSource = (
   apiClient: ApiClientFixture,
@@ -60,6 +75,13 @@ export const listSources = (
     spacePath(query ? `${SOURCES_PATH}?${query}` : SOURCES_PATH, spaceId),
     withHeaders(cookieHeader)
   );
+
+export const listRecommendedSources = (
+  apiClient: ApiClientFixture,
+  cookieHeader: CookieHeader,
+  { spaceId }: SourceRequestOptions = {}
+): Promise<ApiClientResponse> =>
+  apiClient.get(spacePath(`${SOURCES_PATH}/_recommendations`, spaceId), withHeaders(cookieHeader));
 
 export const updateSource = (
   apiClient: ApiClientFixture,

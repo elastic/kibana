@@ -12,12 +12,13 @@ import { i18n } from '@kbn/i18n';
 import {
   contentListKeys,
   contentListQueryClient,
+  type ActionRestriction,
   type ContentListItem,
 } from '@kbn/content-list-provider';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { ContentEditorConfig } from './types';
 
-const MANAGED_READONLY_REASON = i18n.translate(
+export const MANAGED_READONLY_REASON = i18n.translate(
   'contentManagement.contentList.contentEditor.managedReadonlyReason',
   { defaultMessage: 'This item is managed by Kibana and cannot be edited.' }
 );
@@ -36,12 +37,14 @@ export const useContentEditorOpen = ({
   entityName,
   isReadOnly,
   queryKeyScope,
+  editRestriction,
 }: {
   contentEditor?: ContentEditorConfig;
   openContentEditor: (params: OpenContentEditorParams) => () => void;
   entityName: string;
   isReadOnly?: boolean;
   queryKeyScope: string;
+  editRestriction?: ActionRestriction;
 }): ((item: ContentListItem) => void) | undefined => {
   const open = useCallback(
     (item: ContentListItem) => {
@@ -49,12 +52,29 @@ export const useContentEditorOpen = ({
         return;
       }
 
-      const { onSave, isReadonly, customValidators, appendRows } = contentEditor;
+      const {
+        onSave,
+        isReadonly,
+        readonlyReason: listReadonlyReason,
+        customValidators,
+        appendRows,
+      } = contentEditor;
 
-      // Read-only unless the consumer opts in (`isReadonly: false` + `onSave`).
-      // Managed items always force read-only — matches TableListView and avoids
-      // a runtime throw from useOpenContentEditor when `onSave` is absent.
-      const itemIsReadonly = item.managed || isReadonly !== false || isReadOnly || !onSave;
+      // Every item on the list is read-only unless the consumer opts in (`isReadonly: false` + `onSave`).
+      const listIsReadonly = isReadonly !== false || isReadOnly || !onSave;
+
+      // A consumer restriction wins over the built-in managed fallback.
+      const itemReadonlyReason =
+        editRestriction?.(item) ?? (item.managed ? MANAGED_READONLY_REASON : undefined);
+
+      const itemIsReadonly = listIsReadonly || itemReadonlyReason !== undefined;
+
+      // Use the list-wide reason if the entire list is read-only, otherwise use the item-specific reason.
+      // If both are undefined, the flyout falls back to its generic read-only message.
+      const readonlyReason =
+        listIsReadonly && listReadonlyReason !== undefined
+          ? listReadonlyReason
+          : itemReadonlyReason;
 
       const close = openContentEditor({
         item: {
@@ -70,7 +90,9 @@ export const useContentEditorOpen = ({
         },
         entityName,
         isReadonly: itemIsReadonly,
-        ...(item.managed && { readonlyReason: MANAGED_READONLY_REASON }),
+        ...(readonlyReason !== undefined && {
+          readonlyReason,
+        }),
         customValidators,
         onSave:
           !itemIsReadonly && onSave
@@ -85,7 +107,7 @@ export const useContentEditorOpen = ({
         appendRows: appendRows ? appendRows(item) : undefined,
       });
     },
-    [contentEditor, openContentEditor, entityName, isReadOnly, queryKeyScope]
+    [contentEditor, openContentEditor, entityName, isReadOnly, queryKeyScope, editRestriction]
   );
 
   return contentEditor ? open : undefined;

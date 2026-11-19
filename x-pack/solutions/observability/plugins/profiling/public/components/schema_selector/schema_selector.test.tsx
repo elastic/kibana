@@ -12,8 +12,7 @@ import { EuiProvider } from '@elastic/eui';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ProfilingSchema } from '@kbn/profiling-utils';
-import type { ProfilingSchemaContextValue } from '../contexts/profiling_schema/profiling_schema_context';
-import { ProfilingSchemaContext } from '../contexts/profiling_schema/profiling_schema_context';
+import type { SchemaSelectorProps } from '.';
 import {
   AVAILABILITY_ERROR,
   NO_SCHEMA_AVAILABLE,
@@ -28,24 +27,20 @@ const UNIVERSAL_PROFILING_LABEL = schemaTranslationMap[ProfilingSchema.ECS];
 const OPENTELEMETRY_LABEL = schemaTranslationMap[ProfilingSchema.OTEL];
 
 const renderSelector = (
-  context: Pick<ProfilingSchemaContextValue, 'selectedSchema' | 'schemas'> &
-    Partial<Pick<ProfilingSchemaContextValue, 'supportedSchemas' | 'isLoading' | 'error'>>
+  props: Pick<SchemaSelectorProps, 'selectedSchema' | 'schemas'> &
+    Partial<Pick<SchemaSelectorProps, 'supportedSchemas' | 'isLoading' | 'error'>>
 ) => {
   const onSchemaChange = jest.fn();
 
   render(
     <EuiProvider>
       <I18nProvider>
-        <ProfilingSchemaContext.Provider
-          value={{
-            supportedSchemas: [ProfilingSchema.ECS, ProfilingSchema.OTEL],
-            isLoading: false,
-            onSchemaChange,
-            ...context,
-          }}
-        >
-          <SchemaSelector />
-        </ProfilingSchemaContext.Provider>
+        <SchemaSelector
+          supportedSchemas={[ProfilingSchema.ECS, ProfilingSchema.OTEL]}
+          isLoading={false}
+          onSchemaChange={onSchemaChange}
+          {...props}
+        />
       </I18nProvider>
     </EuiProvider>
   );
@@ -178,8 +173,8 @@ describe('SchemaSelector', () => {
   it.each([
     ['while the schemas with data are loading', { schemas: undefined, isLoading: true }],
     ['once the schemas with data are known', { schemas: [ProfilingSchema.ECS], isLoading: false }],
-  ])('shows no schema until one is selected, %s', (_description, context) => {
-    renderSelector({ selectedSchema: undefined, ...context });
+  ])('shows no schema until one is selected, %s', (_description, props) => {
+    renderSelector({ selectedSchema: undefined, ...props });
 
     const select = screen.getByTestId('profilingSchemaSelect');
     expect(select).toHaveTextContent(PLACEHOLDER);

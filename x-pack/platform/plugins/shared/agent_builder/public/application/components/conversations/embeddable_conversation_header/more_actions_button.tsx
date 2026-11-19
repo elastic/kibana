@@ -10,6 +10,7 @@ import {
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
+  EuiHorizontalRule,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,8 +26,8 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { appPaths } from '../../../utils/app_paths';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useLoadTraceFromFile } from '../../../hooks/use_load_trace_from_file';
-import { TraceFlyout } from '../timeline/response/trace_flyout';
+import { ActivityLogFlyout } from '../activity_log/activity_log_flyout';
+import { useActivityLog } from '../activity_log/use_activity_log';
 
 const labels = {
   actionsAriaLabel: i18n.translate('xpack.agentBuilder.conversationActions.actionsAriaLabel', {
@@ -53,9 +54,15 @@ const labels = {
       defaultMessage: 'Download conversation',
     }
   ),
-  loadTrace: i18n.translate('xpack.agentBuilder.conversationActions.loadTrace', {
-    defaultMessage: 'Load trace from file',
+  activityLog: i18n.translate('xpack.agentBuilder.conversationActions.activityLog', {
+    defaultMessage: 'Activity log',
   }),
+  activityLogNoActivityTooltip: i18n.translate(
+    'xpack.agentBuilder.conversationActions.activityLogNoActivityTooltip',
+    {
+      defaultMessage: 'No activity has been recorded for this conversation.',
+    }
+  ),
 };
 
 interface MoreActionsButtonProps {
@@ -79,17 +86,13 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const { conversation } = useConversation();
   const { title: conversationTitle } = useConversationTitle();
 
-  const {
-    openFilePicker,
-    isFlyoutOpen: isTraceFlyoutOpen,
-    loadedSpans,
-    loadedTraceId,
-    closeFlyout: closeTraceFlyout,
-    fileInputRef,
-    handleFileChange,
-  } = useLoadTraceFromFile();
-
   const closePopover = () => setIsPopoverOpen(false);
+  const {
+    hasActivity,
+    isOpen: isActivityLogOpen,
+    open: openActivityLog,
+    close: closeActivityLog,
+  } = useActivityLog();
   const togglePopover = () => setIsPopoverOpen((v) => !v);
 
   const handleOpenFullScreen = useCallback(() => {
@@ -119,11 +122,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     });
   }, [conversationTitle, conversation]);
 
-  const handleLoadTrace = useCallback(() => {
-    setIsPopoverOpen(false);
-    openFilePicker();
-  }, [openFilePicker]);
-
   const fullScreenMenuItemLabel = useMemo(() => {
     if (conversationId) {
       return labels.fullScreen;
@@ -148,18 +146,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       })}
     >
       {labels.downloadConversation}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="load-trace"
-      icon="export"
-      onClick={handleLoadTrace}
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.LOAD_TRACE_FROM_FILE,
-        detail: 'conversation',
-      })}
-    >
-      {labels.loadTrace}
     </EuiContextMenuItem>,
   ];
 
@@ -216,7 +202,34 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     ...exportMenuItems,
   ];
 
-  const menuItems = isEmbeddedContext ? embeddedContextMenuItems : exportMenuItems;
+  const activityLogMenuItem = (
+    <EuiContextMenuItem
+      key="activity-log"
+      icon="timeline"
+      disabled={!hasActivity}
+      toolTipContent={hasActivity ? undefined : labels.activityLogNoActivityTooltip}
+      data-test-subj="agentBuilderActivityLogMenuItem"
+      onClick={() => {
+        closePopover();
+        openActivityLog();
+      }}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_ACTIVITY_LOG,
+        detail: 'conversation',
+      })}
+    >
+      {labels.activityLog}
+    </EuiContextMenuItem>
+  );
+
+  const menuItems = isEmbeddedContext
+    ? embeddedContextMenuItems
+    : [
+        activityLogMenuItem,
+        <EuiHorizontalRule key="activity-log-divider" margin="none" />,
+        ...exportMenuItems,
+      ];
 
   const buttonProps = {
     iconType: 'boxesVertical' as const,
@@ -234,13 +247,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   return (
     <>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".json"
-        style={{ display: 'none' }}
-        onChange={handleFileChange}
-      />
       <EuiPopover
         button={<EuiButtonIcon {...buttonProps} />}
         isOpen={isPopoverOpen}
@@ -251,13 +257,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       >
         <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
-      {isTraceFlyoutOpen && (
-        <TraceFlyout
-          traceId={loadedTraceId}
-          initialSpans={loadedSpans ?? undefined}
-          onClose={closeTraceFlyout}
-        />
-      )}
+      {isActivityLogOpen && <ActivityLogFlyout onClose={closeActivityLog} />}
     </>
   );
 };

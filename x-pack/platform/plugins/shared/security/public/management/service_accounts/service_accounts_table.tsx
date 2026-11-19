@@ -16,12 +16,16 @@ import {
   EuiBadge,
   EuiBadgeGroup,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 
@@ -32,10 +36,7 @@ import type {
   ServiceAccountDirectoryEntry,
 } from '../../service_accounts';
 
-export interface ServiceAccountTableItem extends ServiceAccountDirectoryEntry {
-  description?: string;
-  workloadCount?: number;
-}
+export type ServiceAccountTableItem = ServiceAccountDirectoryEntry;
 
 export interface ServiceAccountsTableProps {
   serviceAccounts: ServiceAccountTableItem[];
@@ -45,13 +46,86 @@ export interface ServiceAccountsTableProps {
   onLoadMore: () => void;
   /** Shows a delete action on each row when set. */
   onDeleteAccount?: (serviceAccount: ServiceAccountTableItem) => void;
+  /** Shows a View link next to the workload count of each bound account when set. */
+  onViewWorkloads?: (serviceAccount: ServiceAccountTableItem) => void;
 }
 
-const unavailableValue = (tabIndex?: number) => (
-  <EuiText color="subdued" size="s" tabIndex={tabIndex}>
+const unavailableValue = (tabIndex?: number, dataTestSubj?: string) => (
+  <EuiText color="subdued" size="s" tabIndex={tabIndex} data-test-subj={dataTestSubj}>
     &mdash;
   </EuiText>
 );
+
+const VISIBLE_ROLE_COUNT = 3;
+
+const ServiceAccountRoles = ({ roles, name }: { roles: string[]; name: string }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId({ prefix: 'serviceAccountRolesTitle' });
+
+  if (roles.length === 0) {
+    return unavailableValue();
+  }
+
+  const remainingRoleCount = roles.length - VISIBLE_ROLE_COUNT;
+
+  return (
+    <EuiBadgeGroup gutterSize="xs" data-test-subj="serviceAccountDisplayedRoles">
+      {roles.slice(0, VISIBLE_ROLE_COUNT).map((role) => (
+        <EuiBadge key={role} color="hollow" iconType="user">
+          {role}
+        </EuiBadge>
+      ))}
+      {remainingRoleCount > 0 && (
+        <EuiPopover
+          button={
+            <EuiBadge
+              onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+              onClickAriaLabel={i18n.translate(
+                'xpack.security.management.serviceAccounts.table.showAllRolesAriaLabel',
+                {
+                  defaultMessage: 'Show all {count} roles for {name}',
+                  values: { count: roles.length, name },
+                }
+              )}
+              data-test-subj="serviceAccountMoreRoles"
+            >
+              {i18n.translate('xpack.security.management.serviceAccounts.table.moreRoles', {
+                defaultMessage: '+{count} more',
+                values: { count: remainingRoleCount },
+              })}
+            </EuiBadge>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          panelPaddingSize="s"
+          aria-labelledby={popoverTitleId}
+          data-test-subj="serviceAccountRolesPopover"
+        >
+          <EuiPopoverTitle id={popoverTitleId}>
+            {i18n.translate('xpack.security.management.serviceAccounts.table.rolesPopoverTitle', {
+              defaultMessage: 'Roles for {name}',
+              values: { name },
+            })}
+          </EuiPopoverTitle>
+          <EuiBadgeGroup
+            gutterSize="xs"
+            data-test-subj="serviceAccountAllRoles"
+            role="region"
+            aria-labelledby={popoverTitleId}
+            tabIndex={0}
+            css={{ maxWidth: '20rem', maxHeight: 'min(40vh, 20rem)', overflowY: 'auto' }}
+          >
+            {roles.map((role) => (
+              <EuiBadge key={role} color="hollow" iconType="user">
+                {role}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        </EuiPopover>
+      )}
+    </EuiBadgeGroup>
+  );
+};
 
 const getCreatorLabel = (creator?: ServiceAccountDirectoryCreator) => {
   if (!creator) {
@@ -60,20 +134,29 @@ const getCreatorLabel = (creator?: ServiceAccountDirectoryCreator) => {
     });
   }
 
-  if (creator.displayName) {
-    return creator.displayName;
-  }
-
   switch (creator.type) {
     case 'user':
-      return creator.username;
-    case 'api_key':
-      return i18n.translate('xpack.security.management.serviceAccounts.table.createdByApiKey', {
-        defaultMessage: 'API key {apiKeyId}',
-        values: { apiKeyId: creator.apiKeyId },
-      });
+      return creator.displayName ?? creator.username;
+    case 'api_key': {
+      const apiKeyLabel =
+        creator.apiKeyName ??
+        i18n.translate('xpack.security.management.serviceAccounts.table.createdByApiKey', {
+          defaultMessage: 'API key {apiKeyId}',
+          values: { apiKeyId: creator.apiKeyId },
+        });
+      if (!creator.displayName) {
+        return apiKeyLabel;
+      }
+      return i18n.translate(
+        'xpack.security.management.serviceAccounts.table.createdByApiKeyWithOwner',
+        {
+          defaultMessage: '{apiKeyLabel} ({ownerName})',
+          values: { apiKeyLabel, ownerName: creator.displayName },
+        }
+      );
+    }
     case 'service_account':
-      return creator.serviceAccountId;
+      return creator.displayName ?? creator.serviceAccountId;
   }
 };
 
@@ -84,6 +167,7 @@ export const ServiceAccountsTable = ({
   hasLoadMoreError,
   onLoadMore,
   onDeleteAccount,
+  onViewWorkloads,
 }: ServiceAccountsTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const roleOptions = useMemo(
@@ -176,18 +260,9 @@ export const ServiceAccountsTable = ({
           defaultMessage: 'Roles',
         }),
         sortable: ({ roles }) => [...roles].sort().join(','),
-        render: (roles: string[]) =>
-          roles.length > 0 ? (
-            <EuiBadgeGroup gutterSize="xs">
-              {roles.map((role) => (
-                <EuiBadge key={role} color="hollow" iconType="user">
-                  {role}
-                </EuiBadge>
-              ))}
-            </EuiBadgeGroup>
-          ) : (
-            unavailableValue()
-          ),
+        render: (roles: string[], { name }: ServiceAccountTableItem) => (
+          <ServiceAccountRoles roles={roles} name={name} />
+        ),
       },
       {
         field: 'createdBy',
@@ -212,22 +287,59 @@ export const ServiceAccountsTable = ({
         name: i18n.translate('xpack.security.management.serviceAccounts.table.workloadsColumn', {
           defaultMessage: 'Workloads',
         }),
-        render: (workloadCount: number | undefined) =>
-          workloadCount === undefined ? (
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.security.management.serviceAccounts.table.workloadsUnavailable',
-                { defaultMessage: 'Workload associations are not available yet.' }
+        render: (workloadCount: number | undefined, serviceAccount: ServiceAccountTableItem) => {
+          if (workloadCount === undefined) {
+            return (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.security.management.serviceAccounts.table.workloadsCountFailed',
+                  { defaultMessage: 'Unable to count the workloads bound to this account.' }
+                )}
+              >
+                {unavailableValue(0, 'serviceAccountWorkloadCountUnavailable')}
+              </EuiToolTip>
+            );
+          }
+
+          if (workloadCount === 0) {
+            return <span data-test-subj="serviceAccountWorkloadCount">{workloadCount}</span>;
+          }
+
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="primary" data-test-subj="serviceAccountWorkloadCount">
+                  {workloadCount}
+                </EuiBadge>
+              </EuiFlexItem>
+              {onViewWorkloads && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="both"
+                    onClick={() => onViewWorkloads(serviceAccount)}
+                    aria-label={i18n.translate(
+                      'xpack.security.management.serviceAccounts.table.viewWorkloadsAriaLabel',
+                      {
+                        defaultMessage: 'View the workloads bound to {name}',
+                        values: { name: serviceAccount.name },
+                      }
+                    )}
+                    data-test-subj="serviceAccountViewWorkloads"
+                  >
+                    {i18n.translate(
+                      'xpack.security.management.serviceAccounts.table.viewWorkloadsButton',
+                      { defaultMessage: 'View' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
               )}
-            >
-              {unavailableValue(0)}
-            </EuiToolTip>
-          ) : (
-            <EuiBadge color="primary">{workloadCount}</EuiBadge>
-          ),
+            </EuiFlexGroup>
+          );
+        },
       },
     ],
-    []
+    [onViewWorkloads]
   );
 
   const columnsWithActions = useMemo(() => {

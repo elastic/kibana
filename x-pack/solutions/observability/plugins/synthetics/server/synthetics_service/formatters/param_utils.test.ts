@@ -42,7 +42,7 @@ describe('getParamsForSpace', () => {
     expect(getParamsForSpace(paramsBySpace, 'space1')).toEqual({ GLOBAL_KEY: 'global' });
   });
 
-  it('lets globally-shared params win on key collision, matching getSyntheticsParams/normalizeConfigs', () => {
+  it('lets globally-shared params win on key collision, matching getSyntheticsParams/formatSavedMonitors', () => {
     const paramsBySpace = {
       space1: { SHARED_KEY: 'local' },
       '*': { SHARED_KEY: 'global' },

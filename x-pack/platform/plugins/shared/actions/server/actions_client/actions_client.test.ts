@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -3373,7 +3374,7 @@ describe('bulkEnqueueExecution()', () => {
         {
           id: uuidv4(),
           params: {},
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -3382,7 +3383,7 @@ describe('bulkEnqueueExecution()', () => {
         {
           id: uuidv4(),
           params: {},
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '456def',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -3405,7 +3406,7 @@ describe('bulkEnqueueExecution()', () => {
           {
             id: uuidv4(),
             params: {},
-            spaceId: 'default',
+            spaceId: DEFAULT_SPACE_ID,
             executionId: '123abc',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
@@ -3414,7 +3415,7 @@ describe('bulkEnqueueExecution()', () => {
           {
             id: uuidv4(),
             params: {},
-            spaceId: 'default',
+            spaceId: DEFAULT_SPACE_ID,
             executionId: '456def',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
@@ -3434,7 +3435,7 @@ describe('bulkEnqueueExecution()', () => {
       {
         id: uuidv4(),
         params: {},
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -3443,7 +3444,7 @@ describe('bulkEnqueueExecution()', () => {
       {
         id: uuidv4(),
         params: {},
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '456def',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
