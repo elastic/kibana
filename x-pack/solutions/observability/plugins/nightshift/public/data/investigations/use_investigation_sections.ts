@@ -36,7 +36,7 @@ const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
  * `not-rated` holds the investigations nothing works on that have no severity: the agent did not
  * record one, for example because its run ended early. There is no failed state.
  */
-export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated';
+export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated' | 'closed';
 
 export interface InvestigationSectionState extends FetchInvestigationsResult {
   id: InvestigationSectionId;
@@ -136,6 +136,13 @@ export const useInvestigationSections = ({
     ...updatedWindow,
   });
 
+  const closed = useFetchInvestigations({
+    inProgress: false,
+    status: 'closed',
+    query,
+    ...updatedWindow,
+  });
+
   const hasSearchQuery = Boolean(query?.trim());
   const severityCountsTimeQuery = {
     ...(updatedAfter ? { updated_after: updatedAfter } : {}),
@@ -197,6 +204,7 @@ export const useInvestigationSections = ({
   const { refetch: refetchMedium } = medium;
   const { refetch: refetchLow } = low;
   const { refetch: refetchNotRated } = notRated;
+  const { refetch: refetchClosed } = closed;
   const { refetch: refetchSeverityCounts } = severityCountsQuery;
   const { refetch: refetchUnfilteredSeverityCounts } = unfilteredSeverityCountsQuery;
 
@@ -236,6 +244,7 @@ export const useInvestigationSections = ({
     refetchMedium();
     refetchLow();
     refetchNotRated();
+    refetchClosed();
     void refetchSeverityCounts();
     if (hasSearchQuery) {
       void refetchUnfilteredSeverityCounts();
@@ -251,6 +260,7 @@ export const useInvestigationSections = ({
     refetchMedium,
     refetchLow,
     refetchNotRated,
+    refetchClosed,
     refetchSeverityCounts,
     refetchUnfilteredSeverityCounts,
   ]);
@@ -263,8 +273,9 @@ export const useInvestigationSections = ({
       toSectionState({ id: 'medium', queryResult: medium }),
       toSectionState({ id: 'low', queryResult: low }),
       toSectionState({ id: 'not-rated', queryResult: notRated }),
+      toSectionState({ id: 'closed', queryResult: closed }),
     ],
-    [inProgress, critical, high, medium, low, notRated]
+    [inProgress, critical, high, medium, low, notRated, closed]
   );
 
   const severityCounts = useMemo(
@@ -297,7 +308,7 @@ export const useInvestigationSections = ({
   }, [sections, refetchSeverityCounts, hasSearchQuery, refetchUnfilteredSeverityCounts]);
 
   // Status toggles in the investigation flyout run on an isolated QueryClient, so closing a
-  // finished investigation would not invalidate this page's open-only lists/counts otherwise.
+  // finished investigation would not refresh this page's open/closed lists and counts otherwise.
   useStatusSignal(refetchAll);
 
   return {
