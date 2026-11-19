@@ -94,12 +94,13 @@ describe('isIgnoredElement', () => {
   });
 
   it.each(['kbnChromeLayoutFooter', 'kbnChromeLayoutHeader', 'kbnChromeLayoutSidebar'])(
-    'should ignore element with class "%s"',
+    'should ignore element with class "%s" when its prefix is passed',
     (className) => {
       const el = document.createElement('div');
       el.className = className;
       document.body.appendChild(el);
-      expect(isIgnoredElement(el)).toBe(true);
+      expect(isIgnoredElement(el)).toBe(false);
+      expect(isIgnoredElement(el, ['kbnChromeLayout'])).toBe(true);
     }
   );
 });

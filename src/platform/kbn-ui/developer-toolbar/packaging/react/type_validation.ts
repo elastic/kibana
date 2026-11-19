@@ -28,10 +28,12 @@ import type {
   DeveloperToolbarState as SourceDeveloperToolbarState,
   DeveloperToolbarRegisteredItem as SourceDeveloperToolbarRegisteredItem,
   EnvironmentInfo as SourceEnvironmentInfo,
+  MeasureButtonProps as SourceMeasureButtonProps,
 } from '../../src';
 import {
   DeveloperToolbar as SourceDeveloperToolbar,
   DeveloperToolbarItem as SourceDeveloperToolbarItem,
+  MeasureButton as SourceMeasureButton,
   useToolbarState as sourceUseToolbarState,
 } from '../../src';
 
@@ -42,8 +44,10 @@ import type {
   DeveloperToolbarState as PackagedDeveloperToolbarState,
   DeveloperToolbarRegisteredItem as PackagedDeveloperToolbarRegisteredItem,
   EnvironmentInfo as PackagedEnvironmentInfo,
+  MeasureButtonProps as PackagedMeasureButtonProps,
   DeveloperToolbar as PackagedDeveloperToolbar,
   DeveloperToolbarItem as PackagedDeveloperToolbarItem,
+  MeasureButton as PackagedMeasureButton,
   useToolbarState as packagedUseToolbarState,
 } from './types';
 
@@ -65,6 +69,8 @@ const _registeredItem: PackagedDeveloperToolbarRegisteredItem =
   {} as SourceDeveloperToolbarRegisteredItem;
 const _registeredItemReverse: SourceDeveloperToolbarRegisteredItem =
   {} as PackagedDeveloperToolbarRegisteredItem;
+const _measureProps: PackagedMeasureButtonProps = {} as SourceMeasureButtonProps;
+const _measurePropsReverse: SourceMeasureButtonProps = {} as PackagedMeasureButtonProps;
 
 // Key equality: mutual assignability alone misses an added optional field, so also
 // require both sides to declare exactly the same property names.
@@ -87,10 +93,12 @@ const _registeredItemKeys: SameKeys<
   SourceDeveloperToolbarRegisteredItem,
   PackagedDeveloperToolbarRegisteredItem
 > = true;
+const _measurePropsKeys: SameKeys<SourceMeasureButtonProps, PackagedMeasureButtonProps> = true;
 
 // Runtime exports: source implementations must satisfy the declared signatures.
 const _toolbar: typeof PackagedDeveloperToolbar = SourceDeveloperToolbar;
 const _item: typeof PackagedDeveloperToolbarItem = SourceDeveloperToolbarItem;
+const _measureButton: typeof PackagedMeasureButton = SourceMeasureButton;
 const _useToolbarState: typeof packagedUseToolbarState = sourceUseToolbarState;
 
 // Export completeness: the source entry, the declared types and the packaging entry
@@ -108,14 +116,18 @@ void _state;
 void _stateReverse;
 void _registeredItem;
 void _registeredItemReverse;
+void _measureProps;
+void _measurePropsReverse;
 void _envInfoKeys;
 void _packageInfoKeys;
 void _toolbarPropsKeys;
 void _itemPropsKeys;
 void _stateKeys;
 void _registeredItemKeys;
+void _measurePropsKeys;
 void _toolbar;
 void _item;
+void _measureButton;
 void _useToolbarState;
 void _sourceTypesValueExports;
 void _packagedEntryValueExports;

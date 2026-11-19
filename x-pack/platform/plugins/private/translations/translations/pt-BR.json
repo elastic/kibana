@@ -8324,8 +8324,6 @@
     "kbnDesignTools.layout.settings.rowAlignType.top": "Topo",
     "kbnDesignTools.layout.settings.width": "Largura",
     "kbnDesignTools.layout.toggle.label": "Alternar layout",
-    "kbnDesignTools.measure.button.ariaLabel": "Meça o espaçamento",
-    "kbnDesignTools.measure.button.tooltip": "Meça o espaçamento {keyboardShortcut}",
     "kbnGridLayout.deleteGridSectionModal.body": "Escolha remover a seção, incluindo seu conteúdo, ou apenas a seção.",
     "kbnGridLayout.deleteGridSectionModal.cancelButton": "Cancelar",
     "kbnGridLayout.deleteGridSectionModal.confirmDeleteAllPanels": "Excluir seção e {panelCount} {panelCount, plural, one {panel} other {painéis}}",

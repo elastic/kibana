@@ -106,9 +106,6 @@ export const EUI_CARD_ICON_CLASS = 'euiCard__icon';
 /** Class name substrings for purely structural components (e.g. euiSpacer). */
 export const IGNORED_CLASS_LABELS = ['euiSpacer'];
 
-/** Class name prefixes for structural/chrome elements that should always be ignored. */
-export const IGNORED_CLASS_PREFIXES = ['kbnChromeLayout'];
-
 /** Height of the edit controls panel below a selected element. */
 export const CONTROLS_HEIGHT = 40;
 

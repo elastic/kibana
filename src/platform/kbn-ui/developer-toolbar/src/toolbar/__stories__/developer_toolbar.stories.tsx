@@ -24,6 +24,7 @@ import {
 import { DeveloperToolbar, type DeveloperToolbarProps } from '../components/developer_toolbar';
 import { DeveloperToolbarItem } from '../components/developer_toolbar_item';
 import type { EnvironmentInfo } from '../types';
+import { MeasureButton } from '../../measure/components/measure_button';
 
 const mockEnvInfo: EnvironmentInfo = {
   mode: {
@@ -333,6 +334,11 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
           </EuiToolTip>
         </DeveloperToolbarItem>
       )}
+
+      {/* Built-in tools are registered as items too */}
+      <DeveloperToolbarItem priority={2} id="Measure Component">
+        <MeasureButton />
+      </DeveloperToolbarItem>
 
       {/* Render test items */}
       {testItems.map((item) => (

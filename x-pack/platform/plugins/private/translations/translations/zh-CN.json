@@ -8301,8 +8301,6 @@
     "kbnDesignTools.layout.settings.rowAlignType.top": "顶部",
     "kbnDesignTools.layout.settings.width": "宽",
     "kbnDesignTools.layout.toggle.label": "切换布局",
-    "kbnDesignTools.measure.button.ariaLabel": "测量间距",
-    "kbnDesignTools.measure.button.tooltip": "测量间距 {keyboardShortcut}",
     "kbnGridLayout.deleteGridSectionModal.body": "选择删除该部分，包括其内容，或仅删除该部分。",
     "kbnGridLayout.deleteGridSectionModal.cancelButton": "取消",
     "kbnGridLayout.deleteGridSectionModal.confirmDeleteAllPanels": "删除该部分和 {panelCount} 个{panelCount, plural, one {panel} other {面板}}",

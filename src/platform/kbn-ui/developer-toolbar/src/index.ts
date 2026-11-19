@@ -17,4 +17,5 @@ export {
 } from './toolbar/components/developer_toolbar_item';
 export { useToolbarState, type DeveloperToolbarState } from './toolbar/hooks';
 export type { DeveloperToolbarItem as DeveloperToolbarRegisteredItem } from './toolbar/state/developer_toolbar_state';
+export { MeasureButton, type MeasureButtonProps } from './measure/components/measure_button';
 export type { EnvironmentInfo } from './toolbar/types';

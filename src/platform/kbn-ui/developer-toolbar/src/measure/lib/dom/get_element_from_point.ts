@@ -17,13 +17,17 @@ import { isIgnoredElement } from './is_ignored_element';
  * that callers can safely use HTMLElement-specific APIs.
  *
  * @param event - The mouse event with coordinates.
+ * @param ignoredClassPrefixes - Host-specific class name prefixes to skip.
  * @returns The deepest HTMLElement at the coordinates, or `null`.
  */
-export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
+export const getElementFromPoint = (
+  event: MouseEvent,
+  ignoredClassPrefixes: readonly string[] = []
+): HTMLElement | null => {
   const elements = document.elementsFromPoint(event.clientX, event.clientY);
 
   for (const el of elements) {
-    if (isIgnoredElement(el)) continue;
+    if (isIgnoredElement(el, ignoredClassPrefixes)) continue;
 
     if (el instanceof HTMLElement) {
       if (getComputedStyle(el).visibility === 'hidden') continue;

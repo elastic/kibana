@@ -68,7 +68,7 @@ describe('MeasureOverlay', () => {
   };
 
   it('sets an anchor element on click', () => {
-    renderWithI18n(<MeasureOverlay setIsMeasuring={setIsMeasuring} />);
+    renderWithI18n(<MeasureOverlay setIsMeasuring={setIsMeasuring} ignoredClassPrefixes={[]} />);
 
     mockHitTarget(elementA);
     fireEvent.click(elementA);
@@ -78,7 +78,7 @@ describe('MeasureOverlay', () => {
   });
 
   it('sets an anchor when click resolves a page element via capture handler', () => {
-    renderWithI18n(<MeasureOverlay setIsMeasuring={setIsMeasuring} />);
+    renderWithI18n(<MeasureOverlay setIsMeasuring={setIsMeasuring} ignoredClassPrefixes={[]} />);
 
     mockHitTarget(elementA);
     fireEvent.click(document.body);
@@ -87,7 +87,7 @@ describe('MeasureOverlay', () => {
   });
 
   it('updates hover highlight and spacing while an anchor is set even when pointermove target is not the backdrop', () => {
-    renderWithI18n(<MeasureOverlay setIsMeasuring={setIsMeasuring} />);
+    renderWithI18n(<MeasureOverlay setIsMeasuring={setIsMeasuring} ignoredClassPrefixes={[]} />);
 
     mockHitTarget(elementA);
     fireEvent.click(elementA);
@@ -105,7 +105,7 @@ describe('MeasureOverlay', () => {
   });
 
   it('closes the overlay on Escape', () => {
-    renderWithI18n(<MeasureOverlay setIsMeasuring={setIsMeasuring} />);
+    renderWithI18n(<MeasureOverlay setIsMeasuring={setIsMeasuring} ignoredClassPrefixes={[]} />);
 
     fireEvent.keyDown(document, { key: 'Escape' });
 

@@ -8281,8 +8281,6 @@
     "kbnDesignTools.layout.settings.rowAlignType.top": "Oben",
     "kbnDesignTools.layout.settings.width": "Breite",
     "kbnDesignTools.layout.toggle.label": "Layout umschalten",
-    "kbnDesignTools.measure.button.ariaLabel": "Abstände messen",
-    "kbnDesignTools.measure.button.tooltip": "Abstände messen {keyboardShortcut}",
     "kbnGridLayout.deleteGridSectionModal.body": "Wählen Sie, ob Sie den Abschnitt einschließlich seines Inhalts oder nur den Abschnitt entfernen möchten.",
     "kbnGridLayout.deleteGridSectionModal.cancelButton": "Abbrechen",
     "kbnGridLayout.deleteGridSectionModal.confirmDeleteAllPanels": "Abschnitt löschen und {panelCount} {panelCount, plural, one {panel} other {panels}}",

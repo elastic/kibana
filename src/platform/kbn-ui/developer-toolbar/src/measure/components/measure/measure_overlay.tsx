@@ -28,6 +28,7 @@ import { GlobalCursorOverride } from '../global_cursor_override';
 
 interface Props {
   setIsMeasuring: Dispatch<SetStateAction<boolean>>;
+  ignoredClassPrefixes: readonly string[];
 }
 
 /**
@@ -36,7 +37,7 @@ interface Props {
  * - Hover over other elements to see spacing distances between anchor and hovered element.
  * - Click again to select a new anchor, or press Escape to exit.
  */
-export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
+export const MeasureOverlay = ({ setIsMeasuring, ignoredClassPrefixes }: Props) => {
   const { euiTheme } = useEuiTheme();
   const zIndex = useOverlayZIndex();
 
@@ -67,7 +68,7 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
     (event: PointerEvent) => {
       const { clientX, clientY } = event;
       const synth = new MouseEvent('mousemove', { clientX, clientY });
-      const target = getElementFromPoint(synth);
+      const target = getElementFromPoint(synth, ignoredClassPrefixes);
 
       if (!target) {
         setHoverRect(null);
@@ -91,23 +92,26 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
         setSpacingLines([]);
       }
     },
-    [anchorElement]
+    [anchorElement, ignoredClassPrefixes]
   );
 
   useThrottledDocumentPointerMove(handlePointerMove);
 
-  const handleClick = useCallback((event: MouseEvent) => {
-    const target = getElementFromPoint(event);
+  const handleClick = useCallback(
+    (event: MouseEvent) => {
+      const target = getElementFromPoint(event, ignoredClassPrefixes);
 
-    if (!target) {
-      return;
-    }
+      if (!target) {
+        return;
+      }
 
-    const rect = target.getBoundingClientRect();
-    setAnchorElement(target);
-    setAnchorRect(rect);
-    setSpacingLines([]);
-  }, []);
+      const rect = target.getBoundingClientRect();
+      setAnchorElement(target);
+      setAnchorRect(rect);
+      setSpacingLines([]);
+    },
+    [ignoredClassPrefixes]
+  );
 
   useOverlayClickCapture({ onActivate: handleClick });
 

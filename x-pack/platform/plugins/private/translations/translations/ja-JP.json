@@ -8305,8 +8305,6 @@
     "kbnDesignTools.layout.settings.rowAlignType.top": "一番上",
     "kbnDesignTools.layout.settings.width": "幅",
     "kbnDesignTools.layout.toggle.label": "レイアウトを切り替える",
-    "kbnDesignTools.measure.button.ariaLabel": "間隔を測定",
-    "kbnDesignTools.measure.button.tooltip": "間隔を測定 {keyboardShortcut}",
     "kbnGridLayout.deleteGridSectionModal.body": "セクションの内容を含めて削除するか、セクションのみを削除するかを選択できます。",
     "kbnGridLayout.deleteGridSectionModal.cancelButton": "キャンセル",
     "kbnGridLayout.deleteGridSectionModal.confirmDeleteAllPanels": "セクションと{panelCount}件の{panelCount, plural, one {panel} other {パネル}}を削除します。",

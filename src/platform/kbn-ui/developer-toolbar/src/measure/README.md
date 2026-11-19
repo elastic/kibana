@@ -35,4 +35,13 @@ Tests:
 
 ## Modified since the copy
 
-None.
+The class name prefixes of host chrome to ignore are a parameter instead of Kibana's hard-coded `kbnChromeLayout`:
+
+- `lib/constants.ts` — `IGNORED_CLASS_PREFIXES` removed.
+- `lib/dom/is_ignored_element.ts` — takes `ignoredClassPrefixes`.
+- `lib/dom/get_element_from_point.ts` — takes `ignoredClassPrefixes` and passes it on.
+- `lib/dom/is_ignored_element.test.ts` — the chrome class cases pass the prefix.
+
+## Not copies
+
+The measure tool itself was moved here from `@kbn/design-tools` (it is no longer there): `components/measure_button.tsx`, `components/measure/measure_overlay.tsx`, `components/measure/spacing_measurement.tsx`, `hooks/use_eui_size_lookup.ts`, `lib/dom/calculate_spacing.ts` and their tests. `lib/tests/helpers.ts` holds only `makeRect` from `@kbn/design-tools`' test helpers, which `calculate_spacing.test.ts` needs; the rest of that file depends on the edit engine.

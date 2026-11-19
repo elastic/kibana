@@ -15,6 +15,7 @@ It exposes the following:
 * `DeveloperToolbar` — the toolbar shell with the built-in monitors. Render it once per page.
 * `DeveloperToolbarItem` — registers a custom item. It renders nothing in place; its children appear in the toolbar.
 * `useToolbarState` — reads the registered items and the enabled/disabled settings.
+* `MeasureButton` — a toolbar button that toggles the spacing measure overlay.
 
 ### Toolbar [kbn-ui-developer-toolbar-toolbar]
 
@@ -32,6 +33,18 @@ The toolbar can be minimized to a floating button (`Ctrl+\` / `⌘+\`) and hidde
 :id: kibana:kbn_ui:developer-toolbar--extensible
 :::
 
+### Measure [kbn-ui-developer-toolbar-measure]
+
+`MeasureButton` toggles a measure overlay (`Ctrl+.` / `⌘+.`). Click an element to anchor it, then hover another element to see the distance between them; spacing that matches an EUI size token is labelled with the token name. Press `Escape` to exit. Render it inside a `DeveloperToolbarItem`; the Extensible story above includes it.
+
+The overlay always skips the toolbar itself (`#developerToolbar`), the `@kbn/design-tools` overlays, EUI spacers, and anything marked with `data-devtool-ignore`. Pass `ignoredClassPrefixes` to also skip host chrome elements whose class names contain one of the given prefixes. {{kib}} passes `['kbnChromeLayout']`; it defaults to none.
+
+```tsx
+<DeveloperToolbarItem id="Measure Component">
+  <MeasureButton ignoredClassPrefixes={['myAppChrome']} />
+</DeveloperToolbarItem>
+```
+
 ### Host labels [kbn-ui-developer-toolbar-labels]
 
 Hosts without {{kib}} build metadata can pass `labels` in `envInfo`; they are listed in the environment tooltip.
@@ -43,11 +56,14 @@ Hosts without {{kib}} build metadata can pass `labels` in `envInfo`; they are li
 ## Usage [kbn-ui-developer-toolbar-usage]
 
 ```tsx
-import { DeveloperToolbar, DeveloperToolbarItem } from '@kbn/ui-developer-toolbar';
+import { DeveloperToolbar, DeveloperToolbarItem, MeasureButton } from '@kbn/ui-developer-toolbar';
 
 <>
   <DeveloperToolbarItem id="myItem">
     <MyItem />
+  </DeveloperToolbarItem>
+  <DeveloperToolbarItem id="Measure Component">
+    <MeasureButton />
   </DeveloperToolbarItem>
   <DeveloperToolbar envInfo={envInfo} onHeightChange={setFooterHeight} />
 </>;

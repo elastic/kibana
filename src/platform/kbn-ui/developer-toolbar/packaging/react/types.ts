@@ -69,11 +69,20 @@ export interface DeveloperToolbarState {
   isEnabled: (itemId: string) => boolean;
 }
 
+/** Props for the `MeasureButton` component. */
+export interface MeasureButtonProps {
+  /** Class name prefixes of host chrome elements the measure overlay never selects. */
+  ignoredClassPrefixes?: readonly string[];
+}
+
 /** Developer toolbar shell with the built-in monitors; render once per page. */
 export declare function DeveloperToolbar(props: DeveloperToolbarProps): React.ReactNode;
 
 /** Registers an item to be displayed in the developer toolbar. */
 export declare function DeveloperToolbarItem(props: DeveloperToolbarItemProps): React.ReactNode;
+
+/** Toolbar button that toggles the spacing measure overlay (`⌘ .` / `Ctrl .`). */
+export declare function MeasureButton(props: MeasureButtonProps): React.ReactNode;
 
 /** Accesses the shared toolbar state (registered items and enabled settings). */
 export declare function useToolbarState(): DeveloperToolbarState;

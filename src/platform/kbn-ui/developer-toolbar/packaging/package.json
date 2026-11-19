@@ -2,7 +2,7 @@
   "name": "@kbn/ui-developer-toolbar",
   "version": "0.1.0",
   "private": true,
-  "description": "Elastic developer toolbar (shell and built-in monitors) for standalone distribution",
+  "description": "Elastic developer toolbar (shell, built-in monitors and measure tool) for standalone distribution",
   "main": "index.js",
   "types": "index.d.ts",
   "files": [

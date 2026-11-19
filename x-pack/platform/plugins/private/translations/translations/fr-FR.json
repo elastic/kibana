@@ -8288,8 +8288,6 @@
     "kbnDesignTools.layout.settings.rowAlignType.top": "Haut",
     "kbnDesignTools.layout.settings.width": "Largeur",
     "kbnDesignTools.layout.toggle.label": "Basculer la disposition",
-    "kbnDesignTools.measure.button.ariaLabel": "Mesurer l’espacement",
-    "kbnDesignTools.measure.button.tooltip": "Mesurer l’espacement {keyboardShortcut}",
     "kbnGridLayout.deleteGridSectionModal.body": "Choisissez de supprimer la section, y compris son contenu, ou seulement la section.",
     "kbnGridLayout.deleteGridSectionModal.cancelButton": "Annuler",
     "kbnGridLayout.deleteGridSectionModal.confirmDeleteSection": "Supprimer uniquement la section",

@@ -1,6 +1,6 @@
 # @kbn/ui-developer-toolbar
 
-Developer toolbar shell with built-in monitors (environment, frame jank, memory, console errors) and a registry for custom items.
+Developer toolbar shell with built-in monitors (environment, frame jank, memory, console errors), a registry for custom items and a spacing measure tool.
 
 **Portability:** candidate for extraction to Cloud UI. The package has no `@kbn/*` runtime dependencies and builds to a standalone tarball via `packaging/scripts/build.sh`.
 
@@ -9,6 +9,7 @@ Developer toolbar shell with built-in monitors (environment, frame jank, memory,
 Each source keeps its original structure under its own folder in `src/`:
 
 - `src/toolbar/` — the toolbar shell and its built-in monitors (`toolbar_items/`).
+- `src/measure/` — the measure tool and the `@kbn/design-tools` helpers it needs, at their `@kbn/design-tools` paths. The helpers are copies; see [`src/measure/README.md`](src/measure/README.md).
 - `src/lib/` — package-only helpers that replace Kibana packages (`platform.ts` for `isMac`).
 
 ## Exports
@@ -16,7 +17,8 @@ Each source keeps its original structure under its own folder in `src/`:
 - `DeveloperToolbar` — the toolbar; render once per page. Props are listed [below](#developertoolbar-props).
 - `DeveloperToolbarItem` — registers a custom item (`id`, `children`, `priority`) from anywhere in the tree.
 - `useToolbarState` — access registered items and enabled/disabled settings.
-- Types: `DeveloperToolbarProps`, `DeveloperToolbarItemProps`, `DeveloperToolbarState`, `DeveloperToolbarRegisteredItem`, `EnvironmentInfo`.
+- `MeasureButton` — toolbar button (`⌘ .` / `Ctrl .`) that toggles a spacing measure overlay; render it inside a `DeveloperToolbarItem`. Prop: `ignoredClassPrefixes` (host chrome class name prefixes the overlay never selects, e.g. `['kbnChromeLayout']` in Kibana; defaults to none).
+- Types: `DeveloperToolbarProps`, `DeveloperToolbarItemProps`, `DeveloperToolbarState`, `DeveloperToolbarRegisteredItem`, `EnvironmentInfo`, `MeasureButtonProps`.
 
 ## DeveloperToolbar props
 

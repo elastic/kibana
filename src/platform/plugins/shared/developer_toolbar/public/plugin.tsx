@@ -34,7 +34,7 @@ const LazyColorThemeToggle = lazy(() =>
 );
 
 const LazyMeasureButton = lazy(() =>
-  import('@kbn/design-tools').then(({ MeasureButton }) => ({
+  import('@kbn/ui-developer-toolbar').then(({ MeasureButton }) => ({
     default: MeasureButton,
   }))
 );
@@ -44,6 +44,8 @@ const LazyFontInspectButton = lazy(() =>
     default: FontInspectButton,
   }))
 );
+
+const KIBANA_CHROME_CLASS_PREFIXES = ['kbnChromeLayout'] as const;
 
 const LazyDesignToolsButton = lazy(() =>
   import('@kbn/design-tools').then(({ DesignToolsButton }) => ({
@@ -102,7 +104,7 @@ export class DeveloperToolbarPlugin
       id: 'Measure Component',
       children: (
         <Suspense fallback={null}>
-          <LazyMeasureButton />
+          <LazyMeasureButton ignoredClassPrefixes={KIBANA_CHROME_CLASS_PREFIXES} />
         </Suspense>
       ),
     });
