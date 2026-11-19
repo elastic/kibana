@@ -579,6 +579,40 @@ describe('HeatmapComponent', function () {
 
       expect(component.find(Heatmap).prop('data')).toEqual(gappedRows);
     });
+
+    it('fills a missing ES|QL range step and keeps it between the populated ranges when Y sort is descending', () => {
+      const rangeRows = [
+        { 'col-0-1': 2, 'col-1-2': 'a', 'col-2-3': '2..3' },
+        { 'col-0-1': 1, 'col-1-2': 'a', 'col-2-3': '0..1' },
+      ];
+      const esqlData: Datatable = {
+        type: 'datatable',
+        meta: { type: ESQL_TABLE_TYPE },
+        rows: rangeRows,
+        columns: [
+          ...countAndXColumns,
+          {
+            id: 'col-2-3',
+            name: 'Bytes',
+            meta: { type: 'number_range', esMeta: { bucket: { interval: 1 } } },
+          },
+        ],
+      };
+      const component = shallowWithIntl(
+        <HeatmapComponent
+          {...wrapperProps}
+          data={esqlData}
+          args={{
+            ...wrapperProps.args,
+            gridConfig: { ...wrapperProps.args.gridConfig, ySortPredicate: 'desc' },
+          }}
+        />
+      );
+      const chartData = component.find(Heatmap).prop('data') as Datatable['rows'];
+
+      expect(chartData.map((row) => row['col-2-3'])).toEqual(['2..3', '1..2', '0..1']);
+      expect(chartData[1]['col-0-1']).toBeNull();
+    });
   });
 
   it('not renders the component if no value accessor is given', () => {
