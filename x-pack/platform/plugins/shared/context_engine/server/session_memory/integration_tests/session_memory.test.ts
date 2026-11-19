@@ -115,5 +115,4 @@ describe('session memory', () => {
     expect(await countRevisions('forgotten')).toBe(2);
     await expect(service.forget(jdoe, ['live'])).resolves.toEqual({ live: 'already_forgotten' });
   });
-
 });
