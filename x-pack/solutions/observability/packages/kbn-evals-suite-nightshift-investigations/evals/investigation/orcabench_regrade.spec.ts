@@ -11,8 +11,9 @@ import { evaluate } from '../../src/evaluate';
 import { loadOrcaDataset, resolveOrcaRun, storeOrcaSlice } from './orca_dataset';
 import { orcaJudgeConnector } from './orca_judge';
 import { createOrcaEvaluators } from './orca/evaluators';
-import { addOrcaReport } from './orca/report';
-import { loadOrcaRubrics } from './orca/rubrics';
+import { addOrcaReport, assertOrcaReportsWritten } from './orca/report';
+import { assertOrcaRubricsCover, loadOrcaRubrics } from './orca/rubrics';
+import type { InvestigationTaskOutput } from './types';
 import {
   buildOrcaRegradeDataset,
   loadStoredOrcaRuns,
@@ -58,6 +59,8 @@ evaluate.describe(
           evalsClient,
           buildOrcaRegradeDataset(release, stored.outputs, experimentId)
         );
+        const rubrics = await loadOrcaRubrics(evalsClient);
+        assertOrcaRubricsCover(dataset.examples, rubrics);
         const judgeConnector = orcaJudgeConnector(evaluationConnector);
         const evaluators = createOrcaEvaluators(
           {
@@ -65,7 +68,7 @@ evaluate.describe(
             evaluationConnector: judgeConnector,
             log,
           },
-          { rubrics: await loadOrcaRubrics(evalsClient) }
+          { rubrics }
         );
         assertScoresWithinQueryLimit({
           examples: dataset.examples.length,
@@ -78,7 +81,7 @@ evaluate.describe(
         };
         const concurrency = Math.min(8, requestedConcurrency);
         evaluate.setTimeout(Math.ceil(dataset.examples.length / concurrency) * 10 * 60_000);
-        let reportsWritten = 0;
+        const reportRuns: InvestigationTaskOutput[] = [];
 
         const [experiment] = await executorClient.runExperiment(
           {
@@ -97,7 +100,7 @@ evaluate.describe(
               // A run graded before the report step existed gets its report.md now.
               if (!needsOrcaReport(output)) return output;
               const withReport = await addOrcaReport(reportDeps, { ...output });
-              if (withReport.orca_report_md !== undefined) reportsWritten++;
+              reportRuns.push(withReport);
               return withReport;
             },
           },
@@ -109,6 +112,10 @@ evaluate.describe(
             timeout: 60_000,
           })
           .toBe(dataset.examples.length * evaluators.length);
+        assertOrcaReportsWritten(reportRuns);
+        const reportsWritten = reportRuns.filter(
+          ({ orca_report_md: report }) => report !== undefined
+        ).length;
         log.info(
           `Re-graded ${dataset.examples.length} runs of ${experimentId} as ${experiment.id}; wrote ${reportsWritten} of ${missingReports} missing report.md`
         );
