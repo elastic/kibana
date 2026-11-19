@@ -54,7 +54,7 @@ import {
   SessionsTable,
 } from './components/sessions_table';
 import { useSessionsListQuery } from './hooks/use_sessions_list_query';
-import { useSessionsStatus } from './hooks/use_sessions_status';
+import { useSessionsStatus } from '../../application/sessions_status_provider';
 import { DURATION_BUCKETS, pickSessionsListQuery } from '../../utils/sessions_list_query';
 
 /** The attribute EDOT Browser stamps on every span and log of a session. */
@@ -65,9 +65,6 @@ const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.sessions.hiddenColum
 const LOADING_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.loadingMessage', {
   defaultMessage: 'Loading sessions',
 });
-
-/** How often the status is checked again while sessions rebuild in the background. */
-const STATUS_REFRESH_MS = 30_000;
 
 const statusLoadingPrompt = (
   <EuiEmptyPrompt
@@ -319,6 +316,7 @@ function SessionsList({
       <SessionsRetentionCallout
         retentionDays={response?.retentionDays ?? status.retentionDays}
         rangeStart={rangeStart}
+        formatters={formatters}
       />
       <SessionsKpis kpis={response?.kpis} isLoading={isLoading} formatters={formatters} />
       <EuiSpacer size="m" />
@@ -377,16 +375,6 @@ export function SessionsTab({
   const canManage = canManageSessions(application.capabilities);
   const { status, error, refresh, enable, enabling, enableError } = useSessionsStatus();
   const enableProps = { canManage, onEnable: enable, enabling, enableError };
-
-  // A rebuild finishes in the background, so check back until it does.
-  const rebuilding = status?.rebuilding === true;
-  useEffect(() => {
-    if (!rebuilding) {
-      return;
-    }
-    const interval = setInterval(refresh, STATUS_REFRESH_MS);
-    return () => clearInterval(interval);
-  }, [rebuilding, refresh]);
 
   // A failed background refresh keeps the last status.
   if (error && !status) {

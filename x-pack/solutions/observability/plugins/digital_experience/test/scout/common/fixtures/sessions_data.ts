@@ -13,10 +13,21 @@ import {
   SESSIONS_TASK_ID,
   type SessionsStatus,
 } from '../../../../common/sessions';
-import { OTEL_APPS } from './constants';
+import { OTEL_APPS, SERVICE_NAME, STAGING_ENVIRONMENT } from './constants';
 
 /** The application of the mock sessions. */
 export const SESSIONS_APP = OTEL_APPS.shop;
+
+/**
+ * The other EDOT Browser applications of the applications list, a session each, in the
+ * environments they have in the mock OTel data.
+ */
+const LIST_APPLICATIONS: ReadonlyArray<{ service: string; environment: string | null }> = [
+  { service: OTEL_APPS.checkout, environment: 'production' },
+  { service: OTEL_APPS.docs, environment: STAGING_ENVIRONMENT },
+  { service: OTEL_APPS.blog, environment: null },
+  { service: SERVICE_NAME, environment: 'production' },
+];
 
 /**
  * The mock sessions are from the last day: the summaries task deletes summaries that ended more
@@ -64,7 +75,11 @@ export const sessionJourney = (index: number): string[] => {
 const summaryOf = (
   sessionsStartMs: number,
   index: number,
-  { id = sessionId(index), environment = 'production' }: { id?: string; environment?: string } = {}
+  {
+    id = sessionId(index),
+    environment = 'production',
+    service = SESSIONS_APP,
+  }: { id?: string; environment?: string | null; service?: string } = {}
 ) => {
   const isDetailed = index === 0;
   const startMs = sessionStartOffsetMs(index);
@@ -78,7 +93,7 @@ const summaryOf = (
     : { browser: 'Chrome', browser_version: '130', os: 'macOS' };
   return {
     session: { id },
-    service: { name: SESSIONS_APP },
+    service: { name: service },
     start_time: at(sessionsStartMs, startMs),
     end_time: at(sessionsStartMs, startMs + durationMs),
     duration_ms: durationMs,
@@ -160,17 +175,24 @@ const enableSessions = async (kbnClient: KbnClient): Promise<void> => {
 };
 
 /**
- * Sets sessions up as the system user, then writes the mock summaries straight to the sessions
- * index. The summaries task never rewrites them: their raw events have no
+ * Sets sessions up as the system user, then writes the mock summaries, and a session of each other
+ * application of the list, straight to the sessions index. The summaries task never rewrites them: their raw events have no
  * `telemetry.sdk.language`, which it filters on.
  */
 export const ingestSessionsData = async (esClient: EsClient, kbnClient: KbnClient) => {
   const sessionsStartMs = Date.now() - DAY_MS;
   await enableSessions(kbnClient);
 
-  const summaries = Array.from({ length: SESSION_COUNT }, (_, index) =>
-    summaryOf(sessionsStartMs, index)
-  );
+  const summaries = [
+    ...Array.from({ length: SESSION_COUNT }, (_, index) => summaryOf(sessionsStartMs, index)),
+    ...LIST_APPLICATIONS.map(({ service, environment }) =>
+      summaryOf(sessionsStartMs, SESSION_COUNT, {
+        id: `dx-session-${service}`,
+        environment,
+        service,
+      })
+    ),
+  ];
   const { errors, items } = await esClient.bulk({
     refresh: 'wait_for',
     operations: [
@@ -299,19 +321,14 @@ export const setUpOwnedSessions = async (
   return setup;
 };
 
-/** Writes `sessions` from a day ago, resolving to when the first one starts. */
-export const ingestOwnedSessions = async (
+const indexOwnedSessions = async (
   esClient: EsClient,
-  sessions: OwnedSessions
-): Promise<number> => {
-  const sessionsStartMs = Date.now() - DAY_MS;
+  summaries: ReadonlyArray<ReturnType<typeof summaryOf>>
+): Promise<void> => {
   const { errors, items } = await esClient.bulk({
     refresh: 'wait_for',
-    operations: ownedSessionIds(sessions).flatMap((id, index) => {
-      return [
-        { index: { _index: SESSIONS_INDEX, _id: id } },
-        summaryOf(sessionsStartMs, index, { id, environment: sessions.environment }),
-      ];
+    operations: summaries.flatMap((summary) => {
+      return [{ index: { _index: SESSIONS_INDEX, _id: summary.session.id } }, summary];
     }),
   });
   if (errors) {
@@ -320,7 +337,42 @@ export const ingestOwnedSessions = async (
     });
     throw new Error(`Could not ingest the owned sessions: ${JSON.stringify(failure)}`);
   }
+};
+
+/** Writes `sessions` from a day ago, resolving to when the first one starts. */
+export const ingestOwnedSessions = async (
+  esClient: EsClient,
+  sessions: OwnedSessions
+): Promise<number> => {
+  const sessionsStartMs = Date.now() - DAY_MS;
+  await indexOwnedSessions(
+    esClient,
+    ownedSessionIds(sessions).map((id, index) => {
+      return summaryOf(sessionsStartMs, index, { id, environment: sessions.environment });
+    })
+  );
   return sessionsStartMs;
+};
+
+/** Writes one session of `sessions` with a single page load at each of `startTimes`. */
+export const ingestOwnedSessionsAt = async (
+  esClient: EsClient,
+  sessions: OwnedSessions,
+  startTimes: readonly number[]
+): Promise<void> => {
+  const ids = ownedSessionIds(sessions);
+  await indexOwnedSessions(
+    esClient,
+    startTimes.map((startMs, index) => {
+      return {
+        ...summaryOf(startMs - sessionStartOffsetMs(index), index, {
+          id: ids[index],
+          environment: sessions.environment,
+        }),
+        page_load_count: 1,
+      };
+    })
+  );
 };
 
 /**

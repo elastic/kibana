@@ -39,6 +39,7 @@ export const SESSIONS_ENABLE_PATH = 'internal/digital_experience/sessions/enable
 
 export {
   TIME_ZONE as NEW_YORK_TIME_ZONE,
+  TIME_ZONE_APP,
   TIME_ZONE_ENVIRONMENT,
 } from '../../common/fixtures/time_zone_data';
 

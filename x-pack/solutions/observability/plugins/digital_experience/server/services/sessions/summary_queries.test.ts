@@ -134,6 +134,24 @@ describe('sessionSummaryQuery', () => {
     );
   });
 
+  it('takes the load time in a branch of its own, from the page loads that have a load event', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+    const loadTimeBranch = query.indexOf('(WHERE event_name == "browser.navigation_timing"');
+
+    // On the source fields, so that Lucene applies the filter.
+    expect(query).toContain(
+      '(WHERE event_name == "browser.navigation_timing" AND attributes.browser.navigation_timing.load_event_end IS NOT NULL'
+    );
+    expect(query.slice(0, loadTimeBranch)).not.toContain('load_time');
+    expect(query.slice(loadTimeBranch)).toContain(
+      'EVAL load_time = TO_DOUBLE(attributes.browser.navigation_timing.load_event_end)'
+    );
+    expect(query).toContain('load_time_p75 = PERCENTILE(load_time, 75)');
+    expect(query).toContain('load_time_p75 = MAX(load_time_p75)');
+    // A session without a timed page load has no row in that branch.
+    expect(query).toContain('load_time_samples = COALESCE(load_time_samples, 0)');
+  });
+
   it('reads every attribute field from its group’s latest event', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 

@@ -78,6 +78,7 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
   COLUMN_SELECTOR: 'columnSelector',
   RETRY: 'applicationsRetry',
   SHOW_ALL_ENVIRONMENTS: 'showAllEnvironments',
+  ENABLE_SESSIONS: 'applicationsEnableSessions',
 } as const;
 
 export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {

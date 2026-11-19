@@ -7,6 +7,7 @@
 
 import { SERVICE_NAME, SESSION_ID, URL_FULL } from '@kbn/apm-types';
 import {
+  NAVIGATION_TIMING_LOAD_EVENT_END,
   WEB_VITAL_NAME,
   WEB_VITAL_VALUE,
   attributeField,
@@ -23,3 +24,4 @@ export const SOURCE_SERVICE_NAME_FIELD = resourceAttributeField(SERVICE_NAME);
 export const SOURCE_URL_FIELD = attributeField(URL_FULL);
 export const SOURCE_WEB_VITAL_NAME_FIELD = attributeField(WEB_VITAL_NAME);
 export const SOURCE_WEB_VITAL_VALUE_FIELD = attributeField(WEB_VITAL_VALUE);
+export const SOURCE_LOAD_EVENT_END_FIELD = attributeField(NAVIGATION_TIMING_LOAD_EVENT_END);

@@ -10,12 +10,14 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ApplicationsResponse } from '../../../common/types/applications';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../common/otel_data';
+import { SESSIONS_INDEX_PATTERN } from '../../../common/sessions';
 import { getApplications } from './get_applications';
 import { hasPartialReadAccess } from './get_partial_access';
 import type { ApmIndices } from './classic/create_apm_event_client';
 import { createApmEventClient } from './classic/create_apm_event_client';
 import { getClassicApplications } from './classic/get_classic_applications';
-import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
+import { getSessionsApplications } from './otel/get_sessions_applications';
+import { createDigitalExperienceTracedEsClient } from '../../lib/create_digital_experience_traced_es_client';
 import { getHistogramInterval } from '../../lib/helpers/time_series';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
 import { START_AFTER_END_ISSUE, isStartBeforeEnd, timeRangeShape, timeZoneShape } from '../params';
@@ -43,8 +45,6 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     plugins,
     isServerless,
     isUxEnabled,
-    sessionsSettings,
-    getSessionsServices,
     logger,
   }): Promise<ApplicationsResponse> => {
     const { environment, timeZone } = params.query;
@@ -56,7 +56,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     const { elasticsearch, savedObjects, uiSettings } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
     const internalEsClient = elasticsearch.client.asInternalUser;
-    // APMEventClient cancels its own searches; the OTel ones and the access checks get this signal.
+    // APMEventClient cancels its own searches; the sessions one and the access checks get this signal.
     const signal = getRequestAbortedSignal(request.events.aborted$);
 
     const { apmDataAccess } = plugins;
@@ -104,28 +104,26 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
           })
       : undefined;
 
-    const { taskManager, sessionsReadable } = await getSessionsServices();
     return getApplications({
       histogram: { interval: histogram.interval, start, end },
       getOtelApplications: () =>
-        getOtelApplicationsFromBestSource({
-          esClient,
-          taskManager,
-          sessionsSettings,
-          sessionsReadable,
+        getSessionsApplications({
+          tracedEsClient: createDigitalExperienceTracedEsClient({
+            client: esClient,
+            logger,
+            abortSignal: signal,
+          }),
           start,
           end,
           environment,
           histogram,
-          signal,
-          logger,
         }),
       getClassicApplications: getClassic,
       hasPartialOtelAccess: () =>
         hasPartialReadAccess({
           esClient,
           internalEsClient,
-          getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
+          getIndices: async () => [SESSIONS_INDEX_PATTERN],
           signal,
           logger,
         }),

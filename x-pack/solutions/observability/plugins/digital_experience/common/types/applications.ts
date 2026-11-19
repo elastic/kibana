@@ -68,8 +68,7 @@ export interface ApplicationSummary {
   pageLoads: { count: number };
   /**
    * Sessions that started in the time range, as `ApplicationsResponse.sessionsOverTime` counts
-   * them, `null` when the source doesn't count them. Only the sessions index does: the raw events
-   * and Classic RUM don't.
+   * them; `null` for Classic RUM, which doesn't count sessions.
    */
   sessions: { count: number } | null;
   webVitals: WebVitals;
@@ -87,16 +86,16 @@ export interface ApplicationsResponse {
   applications: ApplicationSummary[];
   /**
    * The environments in the time range, whatever the `environment` filter, for the picker. Each
-   * environment field keeps its 100 most used: Classic RUM has one, EDOT Browser two
-   * (`service.environment` and `deployment.environment.name`), so up to 300 in total. Names longer than the route accepts are left out.
+   * source keeps its 100 most used, so up to 200 in total. Names longer than the route accepts are
+   * left out.
    */
   environments: string[];
   /** Page loads over the time range in the selected environment, per source. */
   pageLoadsOverTime: PageLoadsOverTime;
   /**
    * The EDOT Browser sessions that started in each bucket of the time range in the selected
-   * environment, in the same buckets as `pageLoadsOverTime`. `null` when the sessions index did not
-   * answer, as the raw events and Classic RUM don't count sessions.
+   * environment, in the same buckets as `pageLoadsOverTime`. `null` when the EDOT Browser source
+   * did not load, as Classic RUM doesn't count sessions.
    */
   sessionsOverTime: TimeSeriesPoint[] | null;
   /** Sources whose search failed while others loaded, so their rows are missing; empty when none. */

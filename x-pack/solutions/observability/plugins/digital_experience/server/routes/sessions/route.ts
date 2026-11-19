@@ -29,6 +29,7 @@ import {
 import {
   NO_ENCRYPTION_KEY_MESSAGE,
   SessionsEnableError,
+  canEnableSessions,
   enableSessions,
   type SessionsEnableStep,
 } from '../../services/sessions/enable_sessions';
@@ -141,17 +142,20 @@ const statusRoute = createDigitalExperienceServerRoute({
     },
   },
   handler: async ({
+    context,
     request,
     sessionsSettings,
     getSessionsServices,
+    isServerless,
     logger,
   }): Promise<SessionsStatus> => {
     const canManage =
       request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
-    const { taskManager } = await getSessionsServices();
+    const { taskManager, canEncrypt } = await getSessionsServices();
+    let status: SessionsStatus;
     try {
       // The task and its state only; no session data is read with the internal user.
-      return await getSessionsStatus({
+      status = await getSessionsStatus({
         taskManager,
         settings: sessionsSettings,
         withDetails: canManage,
@@ -160,6 +164,19 @@ const statusRoute = createDigitalExperienceServerRoute({
       logger.error(`Could not read the sessions status: ${describeError(error)}`);
       throw internal(LOAD_FAILED_MESSAGE);
     }
+    if (status.installed || !canManage || !taskManager) {
+      return status;
+    }
+    const { elasticsearch } = await context.core;
+    return {
+      ...status,
+      autoEnable: await canEnableSessions({
+        client: elasticsearch.client.asCurrentUser,
+        canEncrypt,
+        isServerless,
+        logger,
+      }),
+    };
   },
 });
 

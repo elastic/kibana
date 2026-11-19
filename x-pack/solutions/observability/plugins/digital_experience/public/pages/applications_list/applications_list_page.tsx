@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -43,7 +43,10 @@ import { CORE_WEB_VITAL, getVitalRating } from '../../../common/core_web_vitals'
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../../common/feature';
 import { ApplicationsSummaryPanel } from './components/applications_summary_panel';
 import { PageLoadsChart } from './components/page_loads_chart';
+import { SessionsSourceStatus } from './components/sessions_source_status';
 import { SourceFilter } from './components/source_filter';
+import { useSessionsStatus } from '../../application/sessions_status_provider';
+import { canManageSessions } from '../../capabilities';
 import { ColumnSelector } from '../../components/column_selector';
 import { EnvironmentFilter } from '../../components/environment_filter';
 import { formatVital, RATING_COLORS, RATING_LABELS } from '../../utils/web_vitals';
@@ -361,6 +364,15 @@ const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.applications.f
   defaultMessage: 'Could not load the applications',
 });
 
+const NO_SESSIONS_MESSAGE = i18n.translate('xpack.digitalExperience.applications.noSessions', {
+  defaultMessage: 'EDOT Browser applications show up here once sessions are set up.',
+});
+
+const SESSIONS_REBUILDING_MESSAGE = i18n.translate(
+  'xpack.digitalExperience.applications.sessionsRebuilding',
+  { defaultMessage: 'EDOT Browser applications show up here as sessions are built.' }
+);
+
 const SORT_BY_PAGE_LOADS = { sort: { field: 'pageLoads.count', direction: 'desc' } } as const;
 
 type OptionalColumnId =
@@ -437,6 +449,27 @@ export function ApplicationsListPage() {
   // A source in the URL is ignored where the filter isn't shown, so it can't hide every row.
   const selectedSource = canFilterBySource ? sourceFilter : undefined;
 
+  const {
+    status: sessionsStatus,
+    enable: enableSessions,
+    enabling: enablingSessions,
+    enableError: enableSessionsError,
+  } = useSessionsStatus();
+  // Only the EDOT Browser applications are read from the sessions.
+  const showsSessionsStatus = sessionsStatus && selectedSource !== APPLICATION_SOURCE.classic;
+
+  // Once sessions are set up and built, the list has applications it was fetched without.
+  const sessionsReady = sessionsStatus
+    ? sessionsStatus.installed && !sessionsStatus.rebuilding
+    : undefined;
+  const wereSessionsReady = useRef(sessionsReady);
+  useEffect(() => {
+    if (wereSessionsReady.current === false && sessionsReady) {
+      refresh();
+    }
+    wereSessionsReady.current = sessionsReady;
+  }, [sessionsReady, refresh]);
+
   const items = useMemo(
     () =>
       filterApplications({
@@ -496,6 +529,13 @@ export function ApplicationsListPage() {
     }
     if (response?.applications.length) {
       return NO_MATCHES_MESSAGE;
+    }
+    // The callout above says why and what to do.
+    if (showsSessionsStatus && !sessionsStatus.installed) {
+      return NO_SESSIONS_MESSAGE;
+    }
+    if (showsSessionsStatus && sessionsStatus.rebuilding) {
+      return SESSIONS_REBUILDING_MESSAGE;
     }
     if (environment) {
       return (
@@ -658,6 +698,17 @@ export function ApplicationsListPage() {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
+        {showsSessionsStatus && (
+          <SessionsSourceStatus
+            status={sessionsStatus}
+            rangeStart={response?.pageLoadsOverTime.histogram.start}
+            formatters={formatters}
+            canManage={canManageSessions(application.capabilities)}
+            onEnable={enableSessions}
+            enabling={enablingSessions}
+            enableError={enableSessionsError}
+          />
+        )}
         {unavailableSources.length > 0 && (
           <>
             <UnavailableSourcesCallOut sources={unavailableSources} />

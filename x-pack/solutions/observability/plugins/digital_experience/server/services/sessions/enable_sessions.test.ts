@@ -21,11 +21,13 @@ import {
 import {
   NO_ENCRYPTION_KEY_MESSAGE,
   SessionsEnableError,
+  canEnableSessions,
   enableSessions,
   type SessionsEnableStep,
 } from './enable_sessions';
 import { checkSessionsPrivileges } from './sessions_privileges';
 import { SessionsPrivilegesError } from './sessions_privileges_error';
+import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 
 jest.mock('./sessions_privileges');
 
@@ -192,5 +194,46 @@ describe('enableSessions', () => {
 
     await expect(enable()).resolves.toBeUndefined();
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('task is already running'));
+  });
+});
+
+describe('canEnableSessions', () => {
+  const client = elasticsearchServiceMock.createElasticsearchClient();
+  const logger = loggingSystemMock.createLogger();
+
+  const canEnable = (canEncrypt = true) =>
+    canEnableSessions({ client, canEncrypt, isServerless: false, logger });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('is true when the user passes the checks enabling runs', async () => {
+    jest.mocked(checkSessionsPrivileges).mockResolvedValue();
+
+    expect(await canEnable()).toBe(true);
+    expect(checkSessionsPrivileges).toHaveBeenCalledWith(client, { isServerless: false });
+  });
+
+  it('is false without checking the user when Kibana cannot store the API key', async () => {
+    expect(await canEnable(false)).toBe(false);
+    expect(checkSessionsPrivileges).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['missing privileges', new SessionsPrivilegesError(['index:logs-*.otel-*:read'])],
+    ['a filtered source read', new SessionsRestrictedReadError(['logs-*.otel-*'], 'filtered')],
+  ])('is false for %s, which is expected', async (_name, error) => {
+    jest.mocked(checkSessionsPrivileges).mockRejectedValue(error);
+
+    expect(await canEnable()).toBe(false);
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
+  it('is false, and logs why, when the check itself fails', async () => {
+    jest.mocked(checkSessionsPrivileges).mockRejectedValue(new Error('no shards available'));
+
+    expect(await canEnable()).toBe(false);
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('no shards available'));
   });
 });

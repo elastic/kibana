@@ -9,7 +9,7 @@ import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { bucketKeys } from '../../../lib/helpers/aggregations';
 import { withNotDefined } from '../../../lib/helpers/environment';
 import { toTimeSeries } from '../../../lib/helpers/time_series';
-import { SEARCH_SPAN_NAMES } from '../constants';
+import { CLASSIC_SEARCH_SPAN_NAME } from '../constants';
 import type { SourceApplications } from '../types';
 import type { SearchParams } from './search_requests';
 import { classicSearch } from './search_requests';
@@ -26,7 +26,7 @@ export const getClassicApplications = async ({
   ...searchParams
 }: GetClassicApplicationsParams): Promise<SourceApplications> => {
   const response = await apmEventClient.search(
-    SEARCH_SPAN_NAMES.classic,
+    CLASSIC_SEARCH_SPAN_NAME,
     classicSearch(searchParams)
   );
   const aggregations = response.aggregations as unknown as SearchAggregations | undefined;

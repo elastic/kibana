@@ -15,12 +15,15 @@ import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../
 import type { Formatters } from '../../../hooks/use_formatters';
 import { httpErrorMessage } from '../../../utils/http_error_message';
 
-const ASK_ADMIN_TEXT = i18n.translate('xpack.digitalExperience.sessions.status.askAdminText', {
-  defaultMessage:
-    'Ask an administrator with the Set up session summaries privilege of Digital Experience to set them up.',
-});
+export const ASK_ADMIN_TEXT = i18n.translate(
+  'xpack.digitalExperience.sessions.status.askAdminText',
+  {
+    defaultMessage:
+      'Ask an administrator with the Set up session summaries privilege of Digital Experience to set them up.',
+  }
+);
 
-const EnableError = ({ error }: { error: Error }) => (
+export const EnableError = ({ error }: { error: Error }) => (
   <>
     <EuiSpacer size="m" />
     <KbnDangerCallout
@@ -35,7 +38,7 @@ const EnableError = ({ error }: { error: Error }) => (
   </>
 );
 
-interface EnableProps {
+export interface EnableProps {
   canManage: boolean;
   onEnable: () => void;
   enabling: boolean;
@@ -232,11 +235,14 @@ export function SessionsFreshness({
 export function SessionsRetentionCallout({
   retentionDays,
   rangeStart,
+  formatters: { formatDate },
 }: {
   retentionDays: number;
   rangeStart: number;
+  formatters: Formatters;
 }) {
-  if (rangeStart >= Date.now() - retentionDays * 24 * 60 * 60 * 1000) {
+  const earliest = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+  if (rangeStart >= earliest) {
     return null;
   }
   return (
@@ -246,8 +252,8 @@ export function SessionsRetentionCallout({
         size="s"
         title={i18n.translate('xpack.digitalExperience.sessions.status.retentionTitle', {
           defaultMessage:
-            'Sessions are kept for {days} days, so there are none before then in this time range.',
-          values: { days: retentionDays },
+            'Sessions are kept for {days} days, so there are none before {earliest} in this time range.',
+          values: { days: retentionDays, earliest: formatDate(earliest) },
         })}
       />
       <EuiSpacer size="m" />

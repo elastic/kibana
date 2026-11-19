@@ -55,6 +55,7 @@ const MISSING: SessionsStatus = {
   lastError: null,
   enabledBy: null,
   retentionDays: SESSIONS_LOOKBACK_DAYS,
+  autoEnable: false,
 };
 
 describe('getSessionsStatus', () => {
@@ -123,6 +124,7 @@ describe('getSessionsStatus', () => {
       lastError: null,
       enabledBy: 'ana',
       retentionDays: SESSIONS_LOOKBACK_DAYS,
+      autoEnable: false,
     });
   });
 

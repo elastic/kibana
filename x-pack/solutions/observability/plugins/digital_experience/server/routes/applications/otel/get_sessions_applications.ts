@@ -11,14 +11,14 @@ import { withNotDefined } from '../../../lib/helpers/environment';
 import { toTimeSeries } from '../../../lib/helpers/time_series';
 import { SESSIONS_SEARCH_SPAN_NAME } from '../constants';
 import type { SourceApplications } from '../types';
-import type { SearchParams } from './search_requests';
-import { sessionsSearch } from './sessions_search_requests';
+import { sessionsSearch, type SearchParams } from './sessions_search_requests';
 import type { SessionsAggregations } from './sessions_search_responses';
 import { toSessionsApplication, toSessionsTimeSeries } from './sessions_to_application';
 
 /**
  * EDOT Browser applications and their metrics from the sessions index, in one search. It reads what
- * the current user can read there, so it fails for a user without access to the index.
+ * the current user can read there: Elasticsearch skips an index of the pattern they can't read, so
+ * the route checks that access separately.
  */
 export const getSessionsApplications = async ({
   tracedEsClient,

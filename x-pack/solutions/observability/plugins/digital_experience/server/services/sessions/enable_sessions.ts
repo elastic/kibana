@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IScopedClusterClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { SESSIONS_TASK_ID, type SessionsSettings } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
 import { checkSessionsPrivileges } from './sessions_privileges';
+import { SessionsPrivilegesError } from './sessions_privileges_error';
+import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 import { createSessionsIndex, putSessionsIndexTemplate } from './sessions_index';
 import { scheduleSessionsTask } from './sessions_task';
 
@@ -36,6 +43,39 @@ const step = async <T>(name: SessionsEnableStep, run: () => Promise<T>): Promise
     return await run();
   } catch (error) {
     throw new SessionsEnableError(name, error);
+  }
+};
+
+/**
+ * Whether enabling sessions as the requesting user would pass its checks: Kibana can store the
+ * task's API key, and the user has the privileges `checkSessionsPrivileges` asks for. Never throws,
+ * so a failed check only means the app asks instead of enabling on its own.
+ */
+export const canEnableSessions = async ({
+  client,
+  canEncrypt,
+  isServerless,
+  logger,
+}: {
+  client: ElasticsearchClient;
+  canEncrypt: boolean;
+  isServerless: boolean;
+  logger: Logger;
+}): Promise<boolean> => {
+  if (!canEncrypt) {
+    return false;
+  }
+  try {
+    await checkSessionsPrivileges(client, { isServerless });
+    return true;
+  } catch (error) {
+    if (
+      !(error instanceof SessionsPrivilegesError) &&
+      !(error instanceof SessionsRestrictedReadError)
+    ) {
+      logger.debug(`Could not check whether sessions can be enabled: ${describeError(error)}`);
+    }
+    return false;
   }
 };
 

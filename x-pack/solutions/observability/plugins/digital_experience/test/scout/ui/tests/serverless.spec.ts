@@ -10,7 +10,7 @@ import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_SERVERLESS_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
-const { SERVICE_NAME, OTEL_APPS, OTEL_SHOP_PAGE_LOADS } = testData;
+const { SERVICE_NAME, OTEL_APPS, OTEL_SHOP_PAGE_LOADS, LIST_TIME_RANGE } = testData;
 
 const isClassicRumRequest = (url: string): boolean => /\/internal\/(apm|ux)\//.test(url);
 
@@ -42,7 +42,7 @@ test.describe(
       });
 
       await test.step('lists the EDOT Browser applications and no Classic one', async () => {
-        await digitalExperience.gotoApplications();
+        await digitalExperience.gotoApplications(LIST_TIME_RANGE);
 
         await expect(digitalExperience.projectNavEntry).toBeVisible();
         await expect(digitalExperience.applicationLink(OTEL_APPS.shop)).toBeVisible();

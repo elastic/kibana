@@ -10,11 +10,18 @@ import { CORE_WEB_VITAL, type CoreWebVital } from '../../../../common/core_web_v
 import { SESSIONS_INDEX_PATTERN } from '../../../../common/sessions';
 import { p75Of, sumOf } from '../../../lib/helpers/aggregations';
 import { environmentFilter, environmentNotDefinedFilter } from '../../../lib/helpers/environment';
-import { dateHistogram } from '../../../lib/helpers/time_series';
+import { dateHistogram, type HistogramParams } from '../../../lib/helpers/time_series';
 import { MAX_ENVIRONMENTS } from '../../../lib/constants';
 import { sessionOverlapFilters } from '../../sessions/list_sessions';
 import { MAX_APPLICATIONS_PER_SOURCE, MAX_ENVIRONMENTS_PER_APPLICATION } from '../constants';
-import type { SearchParams } from './search_requests';
+
+export interface SearchParams {
+  start: number;
+  end: number;
+  /** Only this environment's data when set. */
+  environment?: string;
+  histogram: HistogramParams;
+}
 
 const ENVIRONMENT_FIELD = 'environment';
 
@@ -34,8 +41,8 @@ const vitalAggs = (vital: CoreWebVital) => ({
 
 /**
  * The applications' metrics, the page loads and sessions over time and the environments, from the
- * sessions index in one search: the numbers `logsSearch` and `spansSearch` find in the raw events,
- * which the session summaries add up per session. A session that overlaps the time range counts
+ * sessions index in one search: the session summaries add up the raw events per session, so the
+ * list never aggregates the raw events itself. A session that overlaps the time range counts
  * in full in the metrics, as its events can't be told apart, but the sessions themselves, and the
  * page loads charted at their start, are those that started in it, so the summary and the chart
  * agree.
@@ -58,7 +65,7 @@ export const sessionsSearch = ({
     index: SESSIONS_INDEX_PATTERN,
     size: 0,
     track_total_hits: false,
-    // The caller has checked that the sessions are set up; a missing index is empty data.
+    // Before sessions are set up there is no index: no applications, which the app explains.
     ignore_unavailable: true,
     // A shard that fails fails the search, so a failure is never shown as lower or zero metrics.
     allow_partial_search_results: false,

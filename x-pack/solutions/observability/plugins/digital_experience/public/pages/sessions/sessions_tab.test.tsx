@@ -24,6 +24,7 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { digitalExperienceRouter } from '../../routes';
 import { createUiSettingsMock } from '../../test_utils/ui_settings_mock';
+import { SessionsStatusProvider } from '../../application/sessions_status_provider';
 import { SessionsTab } from './sessions_tab';
 
 jest.mock('../../hooks/use_kibana_services');
@@ -54,6 +55,7 @@ const status = (overrides: Partial<SessionsStatus> = {}): SessionsStatus => ({
   lastError: null,
   enabledBy: 'elastic',
   retentionDays: 30,
+  autoEnable: false,
   ...overrides,
 });
 
@@ -166,7 +168,9 @@ const renderTab = ({
       history={history}
       router={digitalExperienceRouter as unknown as ComponentProps<typeof RouterProvider>['router']}
     >
-      <SessionsTab serviceName="shop" source="otel" />
+      <SessionsStatusProvider>
+        <SessionsTab serviceName="shop" source="otel" />
+      </SessionsStatusProvider>
     </RouterProvider>,
     {
       wrapper: ({ children }) => (
@@ -743,7 +747,7 @@ describe('SessionsTab', () => {
     renderTab();
 
     expect(await screen.findByTestId('digitalExperienceSessionsRetention')).toHaveTextContent(
-      'Sessions are kept for 7 days, so there are none before then in this time range.'
+      /^Sessions are kept for 7 days, so there are none before .+ in this time range\.$/
     );
   });
 

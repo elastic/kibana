@@ -41,10 +41,25 @@ privileges like the app.
 - **Summary:** applications, sessions, page loads, JS errors per page load, failed HTTP requests and
   the applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
   source; the search narrows only the table. The sessions are the total of the sessions that started
-  in the range, over the EDOT Browser applications, which only the sessions index counts, so it shows
-  a dash while they are read from the raw events (sessions not set up, a range past their lookback,
-  no access to them) and for Classic RUM, which has no sessions. It adds up to the same total as the
-  sessions in the chart.
+  in the range, over the EDOT Browser applications, so it shows a dash for Classic RUM, which has no
+  sessions, and when the EDOT Browser source failed. It adds up to the same total as the sessions in
+  the chart.
+- **Sessions states:** as EDOT Browser applications are read from the sessions index only, a callout
+  above the summary says when it can't answer for the whole range, unless only Classic RUM is
+  selected:
+  - not set up: a **Set up sessions** button for users with the **Set up session summaries**
+    privilege, who rarely see it as the app sets sessions up for them (see
+    [Enabling sessions](#enabling-sessions)), and whom to ask for everyone else; while they are set
+    up, a message says so;
+  - being built, after they are set up or after an upgrade with a new `SESSIONS_VERSION`: applications
+    and metrics may be missing or incomplete;
+  - an API key that no longer works, a failing summaries task, or summaries that are behind: the
+    Sessions tab's callouts;
+  - a range that starts before the 30 days sessions are kept: the earliest date they cover;
+  - no `read` on the sessions index: the partial data warning below.
+
+  With no EDOT Browser application to list, the table says sessions aren't set up or are being
+  built instead of pointing to the EDOT Browser docs, and it lists them again once they are.
 - **Partial data:** when one source fails to load, a warning above the summary names it (the
   response lists it in `unavailableSources`). A source the user can only partly read is listed in
   `partiallyAvailableSources` and gets its own warning, as Elasticsearch skips the indices of a
@@ -55,17 +70,17 @@ privileges like the app.
   when the user reaches less data: indices, data streams (a backing index counts as its data
   stream) and alias targets.
   Unused defaults such as `apm-*` don't count, and a role narrower than the wildcard passes when it
-  covers every existing index. Classic RUM leaves out the EDOT wildcards of the default APM
-  indices, both sources leave out the Agent Builder OTel indices, as in APM Diagnostics, and remote
-  (CCS or CPS) patterns aren't checked. EDOT Browser has no warning when the sessions index
-  answered, as it is summarized with the access of the user who enabled sessions. With security
-  disabled, or if the check fails, no warning is shown. It doesn't name the indices, and document-
-  or field-level security isn't reported.
+  covers every existing index. EDOT Browser is checked on `digital-experience-sessions-browser-*`,
+  the only index it reads, whatever the user can read in the raw OTel indices, as the sessions are
+  summarized with the access of the user who enabled them. Classic RUM leaves out the EDOT wildcards
+  of the default APM indices and the Agent Builder OTel indices, as in APM Diagnostics, and remote
+  (CCS or CPS) patterns aren't checked. With security disabled, or if the check fails, no warning
+  is shown. It doesn't name the indices, and document- or field-level security isn't reported.
 - **Chart:** page loads over time, or the sessions that started, picked with a toggle whose choice
-  is kept in local storage; drag over it to zoom into that range. The sessions are counted only
-  while the applications are read from the sessions index, so the toggle disables **Sessions**, and
-  says why, when they are not or when only Classic RUM is selected. The choice is kept until they are
-  back, the chart showing page loads meanwhile.
+  is kept in local storage; drag over it to zoom into that range. Only EDOT Browser has sessions, so
+  the toggle disables **Sessions**, and says why, when only Classic RUM is selected or the EDOT
+  Browser source failed. The choice is kept until they are back, the chart showing page loads
+  meanwhile.
 - **Filters:** environment and source (kept in the URL), and a search on the name.
 - **Table:** per application, its source, page loads, JS errors per page load, LCP / INP / CLS / FCP /
   TTFB p75 colored by rating (with the good / needs improvement / poor shares in the tooltip), JS
@@ -76,26 +91,18 @@ privileges like the app.
 - With all sources, a name with data in both shows its EDOT Browser row with a "+ Classic RUM" hint
   that switches the list to the Classic RUM rows.
 
-**Where the EDOT Browser rows come from:** the sessions index (see [Sessions](#sessions)) when it can
-answer, which takes one cheap search over session summaries instead of aggregating every raw event,
-and the raw OTel events otherwise. The response has the same shape either way, and Classic RUM
-always reads its own indices. The sessions are read when all of these hold, which is checked with the
-summaries task's state, read by Kibana and shared by the requests of the next 30 seconds, so a
-change of their status shows up within that time:
+**Where the EDOT Browser rows come from:** the sessions index only (see [Sessions](#sessions)), as
+the current user, in one cheap search over session summaries instead of aggregating every raw
+event; the list never reads `logs-*.otel-*` or `traces-*.otel-*`. Classic RUM reads its own indices.
+Without sessions set up there is no index and so no EDOT Browser application, and a failing
+sessions search leaves the source out like any other (`unavailableSources`); the sessions states
+above say why rows are missing. The user needs `read` on `digital-experience-sessions-browser-*`,
+which a `digital-experience-sessions-*` grant covers.
 
-- sessions are set up, the task's last run succeeded, it isn't lagging, and it has caught up since
-  sessions were enabled, so a build in progress is never shown as lower numbers;
-- the time range starts within the sessions' 30 day lookback (from the start of that day, in UTC);
-- the user can read `digital-experience-sessions-browser-*`, which a `digital-experience-sessions-*`
-  grant covers, otherwise the raw events are read quietly;
-- the sessions hold at least one application, so applications that send no `session.id`, which the
-  summaries skip, still appear when no application sends one.
-
-A failing sessions search falls back to the raw events too, with a warning in the server log. The
-counts (page loads, JS errors, HTTP requests, failed requests, web vital samples and their ratings)
-are the sums of what each session counted with the list's own event names, so both sources count the
-same events of a session, and the environments are the sessions'. What differs when the sessions are
-read:
+The counts (page loads, JS errors, HTTP requests, failed requests, web vital samples and their
+ratings) are the sums of what each session counted with the same event names the raw search used,
+and the environments are the sessions'. How they differ from aggregating the raw events, which the
+list did before:
 
 - **Time range:** a session that overlaps the range counts in full in the page loads, errors and
   requests, with its events outside the range, as its events can't be told apart. The sessions are
@@ -108,15 +115,18 @@ read:
   p75 of the samples otherwise: on 3 hours of the synthtrace EDOT Browser data, with about seven
   samples of a vital per session, it was 2% to 8% higher for LCP, INP, FCP and TTFB and 3% to 18%
   higher for CLS. The sample counts and the good, needs improvement and poor shares are sums over the
-  sessions, so they only differ by the events below. The Overview, whose figures need samples, always
+  sessions, so they only differ by the events below. The Overview, whose figures need samples, still
   reads the raw events.
 - **Freshness:** the sessions are about `frequency` and the sync delay (a minute) behind the events.
+  While they are first built, or rebuilt for a new `SESSIONS_VERSION`, older sessions are missing.
+- **Lookback:** sessions are kept for 30 days, so a range that starts earlier has no EDOT Browser
+  data before then.
 - **Access:** the sessions hold what the user who enabled them could read, not what the current user
   can read in the raw indices (see the security note under [Sessions](#sessions)).
 - **Events without `session.id`:** the summaries skip them, so they are not counted. In the
   synthtrace data that is 8.7% of the HTTP requests and 3.8% of the exceptions (every page load and
   web vital carried one), so the JS errors and HTTP requests of the list are that much lower than
-  from the raw events. An application that sends none is missing while others have sessions.
+  from the raw events. An application that sends none is not listed.
 - **Last seen:** the end of the application's latest session, which any event can extend.
 
 Numbers, percents, dates and the chart's time zone follow the Advanced Settings.
@@ -280,7 +290,9 @@ A Task Manager task (`digital_experience:sessions-summaries`, every minute) summ
 sessions from `traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-browser-<version>` with
 ES|QL, one document per `service.name` + `session.id`: start/end time and duration, page views with
 entry/exit page and journey, page loads, clicks, JS errors, HTTP requests and failed requests, p75
-Core Web Vitals with their samples by rating, and environment, user, browser, OS and geo attributes.
+Core Web Vitals with their samples by rating, the p75 load time (`load_time`, from the page loads'
+`browser.navigation_timing.load_event_end`, with how many page loads had one, as the Overview leaves
+out those without), and environment, user, browser, OS and geo attributes.
 Like the applications list, it only reads browser SDK data (`telemetry.sdk.language: webjs`), and it
 skips events with an empty `service.name` or `session.id`.
 
@@ -383,12 +395,15 @@ FROM traces-*.otel-*, logs-*.otel-*
         | EVAL lcp = CASE(vital == "lcp", vital_value, null), ...
         | STATS lcp_p75 = PERCENTILE(lcp, 75), lcp_samples = COUNT(lcp), ...
             BY service, session)
-| STATS <every session and vital column> = MAX(<column>),
+       (WHERE event_name == "browser.navigation_timing" AND <has a load event>
+        | STATS load_time_p75 = PERCENTILE(load_time, 75), load_time_samples = COUNT(load_time)
+            BY service, session)
+| STATS <every session, vital and load time column> = MAX(<column>),
         pages = TOP(first_view, 30, "asc", page_url) WHERE page_url IS NOT NULL,
         exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
   BY service, session
 | EVAL attribute_<name> = COALESCE(<cleaned raw_<field>>, ...)
-| EVAL <vital count> = COALESCE(<vital count>, 0), ...
+| EVAL <vital and load time count> = COALESCE(<count>, 0), ...
 | DROP raw_*
 ```
 
@@ -399,7 +414,8 @@ FROM traces-*.otel-*, logs-*.otel-*
   applying them.
 - **So are the web vitals**, which are about 7% of the events: computing their columns, p75s and
   counts on every event cost 19% to 32% of the query. A session without a vital has no row in
-  their branch, so its vital counts are set to 0 after the merge.
+  their branch, so its vital counts are set to 0 after the merge. The load time, from the page
+  loads only, has a branch of its own for the same reason.
 - **A column per web vital**, so its p75 and sample count need no filter, and the thresholds
   compare a number instead of the vital's name.
 - **Attributes are cleaned once per session.** The query keeps the raw fields of each group's
@@ -421,8 +437,14 @@ column of every row.
 
 ### Enabling sessions
 
-Sessions are set up by an explicit action, `POST /internal/digital_experience/sessions/enable`,
-which requires the `manage_digital_experience_sessions` API privilege. Only the **Sessions → Set up
+Sessions are set up with `POST /internal/digital_experience/sessions/enable`, which requires the
+`manage_digital_experience_sessions` API privilege. As the applications list needs them, the app
+calls it by itself, once per visit, when sessions aren't set up and status reports `autoEnable`:
+the user has the privilege below, Task Manager is available, Kibana can store an API key, and the
+user passes the Elasticsearch checks below, which status runs so that users who would fail write
+no failed audit event. Otherwise the **Set up sessions** button stays the way to set them up. The
+first such user to open the app is the one whose access the summaries hold (see the security note
+below). Only the **Sessions → Set up
 session summaries** sub-feature privilege grants it. It is not part of **All**, as setting sessions up
 runs the task with the user's data access for every reader, and it can only be granted in all
 spaces, as the task and index serve every space. The user also needs these Elasticsearch privileges;
@@ -469,9 +491,10 @@ from replacing the key. Without Task Manager, sessions can't be enabled.
 Like any granted key, the task's key has the access the user had when it was granted, and no
 expiration. Anyone with `manage_api_key` or `manage_security`, or the enabling user with
 `manage_own_api_key`, can invalidate it. The task's runs then fail with a 401, which status reports
-as `apiKeyInvalid`. A user with the privilege then sets sessions up again from the Sessions tab,
-which grants a new key on their behalf. Nothing re-grants it by itself: the task reads what the user
-who set sessions up can read, so only an explicit action changes whose data the summaries hold.
+as `apiKeyInvalid`. A user with the privilege then sets sessions up again from the applications list
+or the Sessions tab, which grants a new key on their behalf. Nothing re-grants it by itself, as the
+app only sets sessions up when they aren't: the task reads what the user who set sessions up can
+read, so only an explicit action changes whose data the summaries hold.
 
 There is no disable action. Removing the task (`digital_experience:sessions-summaries`) with the
 Task Manager API stops it and invalidates its key.
@@ -517,15 +540,17 @@ lags and then catches up; no data is lost.
 
 ### Reading sessions
 
-The applications list reads the sessions index as the current user too, and without `read` on it the
-raw events answer instead (see [Applications](#applications-)). Session routes require
+The applications list reads the sessions index as the current user too, and without `read` on it
+lists no EDOT Browser application and warns of partial data (see [Applications](#applications-)).
+Session routes require
 `read_digital_experience` and query Elasticsearch as the current user, so
 readers also need `read` on `digital-experience-sessions-*` (and on the source indices for the
 session detail timeline). Without it they answer 403 naming those privileges; other failures are
 logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status`: whether sessions are set up, the task's health,
-  lag and last error, whether it is still building, and how many days sessions are kept.
+  lag and last error, whether it is still building, how many days sessions are kept, and whether the
+  app should set them up for the current user (`autoEnable`).
 - `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets (browser,
   OS, country, entry page), the `environment`, `withJsErrors`, `withFailedRequests` and
   `minDurationMs` / `maxDurationMs` filters, sorting, pagination, KPIs, and how many days sessions

@@ -12,7 +12,7 @@ import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from './otel_data';
  * Bump when the summary document or its mappings change: the summaries task then rebuilds every
  * session into a new index and deletes the older one.
  */
-export const SESSIONS_VERSION = 1;
+export const SESSIONS_VERSION = 2;
 export const SESSIONS_MANAGED_BY = 'digital_experience';
 
 export const SESSIONS_SOURCE_INDICES = [OTEL_TRACES_INDEX, OTEL_LOGS_INDEX] as const;
@@ -132,6 +132,11 @@ export interface SessionsStatus {
   enabledBy: string | null;
   /** Sessions are kept for this many days, so older time ranges have none. */
   retentionDays: number;
+  /**
+   * True when sessions aren't set up and the current user can set them up, with every privilege
+   * enabling checks: the app then sets them up without asking.
+   */
+  autoEnable: boolean;
 }
 
 const TIME_VALUE = /^([1-9][0-9]*)(s|m|h)$/;

@@ -36,6 +36,7 @@ const MISSING_STATUS: SessionsStatus = {
   lastError: null,
   enabledBy: null,
   retentionDays: SESSIONS_LOOKBACK_DAYS,
+  autoEnable: false,
 };
 
 const getTask = async (

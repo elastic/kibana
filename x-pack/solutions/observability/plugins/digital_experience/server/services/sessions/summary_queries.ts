@@ -38,6 +38,7 @@ import {
   type SessionAttribute,
 } from '../../../common/session_attribute_fields';
 import {
+  SOURCE_LOAD_EVENT_END_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_SESSION_ID_FIELD,
   SOURCE_URL_FIELD,
@@ -246,16 +247,20 @@ const SESSION_STATS: Stat[] = [
 
 const VITAL_STATS: Stat[] = CORE_WEB_VITALS.flatMap(vitalStatsOf);
 
-// A session without a web vital has no row in the vitals branch.
-const VITAL_COUNT_EVALS = VITAL_STATS.flatMap(([column, aggregation]) =>
+const LOAD_TIME_STATS: Stat[] = [
+  ['load_time_p75', 'PERCENTILE(load_time, 75)'],
+  ['load_time_samples', 'COUNT(load_time)'],
+];
+
+// A session without a web vital or a timed page load has no row in that branch.
+const BRANCH_COUNT_EVALS = [...VITAL_STATS, ...LOAD_TIME_STATS].flatMap(([column, aggregation]) =>
   aggregation.startsWith('COUNT(') ? [`${column} = COALESCE(${column}, 0)`] : []
 );
 
 // Only one branch has each of these columns, so its row is the only non-null value.
-const MERGED_STATS: Stat[] = [...SESSION_STATS, ...VITAL_STATS].map(([column]) => [
-  column,
-  `MAX(${column})`,
-]);
+const MERGED_STATS: Stat[] = [...SESSION_STATS, ...VITAL_STATS, ...LOAD_TIME_STATS].map(
+  ([column]) => [column, `MAX(${column})`]
+);
 
 // The branch filters are on the source fields: the COALESCE of `event` and `span` keeps Lucene
 // from applying them.
@@ -267,15 +272,19 @@ const WEB_VITAL_FILTER = `(${OTEL_EVENT_NAME} == ${escapeStringValue(
 )} OR ${OTEL_SPAN_NAME} == ${escapeStringValue(
   EVENT_WEB_VITAL
 )}) AND ${SOURCE_WEB_VITAL_VALUE_FIELD} IS NOT NULL`;
+// Page loads without a load event are counted but have no load time, as in the Overview.
+const LOAD_TIME_FILTER = `${OTEL_EVENT_NAME} == ${escapeStringValue(
+  EVENT_NAVIGATION_TIMING
+)} AND ${SOURCE_LOAD_EVENT_END_FIELD} IS NOT NULL`;
 
 const renderStats = (stats: readonly Stat[], indent: string): string =>
   stats.map(([column, aggregation]) => `${column} = ${aggregation}`).join(`,\n${indent}`);
 
 /**
  * One row per session of `sessionIds`, rebuilt from its events since `?rebuild_from`: its counts,
- * times, latest attributes and web vitals, and its journey. One branch aggregates per session, one
- * the first and last view of each page and one the web vitals, which the last stage merges per
- * session. Counts what the applications list counts, with the same event names and request
+ * times, latest attributes, web vitals and load time, and its journey. One branch aggregates per
+ * session, one the first and last view of each page, one the web vitals and one the load time,
+ * which the last stage merges per session. Counts what the applications list counts, with the same event names and request
  * outcomes. Design: "Summary query" in the plugin README; measurements: `query_performance.md`.
  */
 export const sessionSummaryQuery = (
@@ -304,12 +313,16 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
         | EVAL ${VITAL_EVALS.join(', ')}
         | STATS ${renderStats(VITAL_STATS, '                ')}
             BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
+       (WHERE ${LOAD_TIME_FILTER}
+        | EVAL load_time = TO_DOUBLE(${SOURCE_LOAD_EVENT_END_FIELD})
+        | STATS ${renderStats(LOAD_TIME_STATS, '                ')}
+            BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
 | STATS ${renderStats(MERGED_STATS, '        ')},
         pages = TOP(first_view, ${SESSIONS_JOURNEY_URL_CANDIDATES}, "asc", page_url) WHERE page_url IS NOT NULL,
         exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
   BY service, session
 | EVAL ${ATTRIBUTE_EVALS.join(',\n       ')}
-| EVAL ${VITAL_COUNT_EVALS.join(', ')}
+| EVAL ${BRANCH_COUNT_EVALS.join(', ')}
 | DROP ${RAW_PREFIX}*
 | LIMIT ${maxRows}`,
   params: [{ rebuild_from: rebuildFrom }, { changed_to: changedTo }],

@@ -13,12 +13,12 @@ import { SESSIONS_LOOKBACK_DAYS, type SessionsStatus } from '../../../common/ses
 import {
   NO_ENCRYPTION_KEY_MESSAGE,
   SessionsEnableError,
+  canEnableSessions,
   enableSessions,
   type SessionsEnableStep,
 } from '../../services/sessions/enable_sessions';
 import { SessionsPrivilegesError } from '../../services/sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../services/sessions/sessions_restricted_read_error';
-import { createSessionsReadableCache } from '../../services/sessions/sessions_readable';
 import { getSessionsStatus } from '../../services/sessions/sessions_status';
 import type { SessionsServices } from '../create_digital_experience_server_route';
 import { getSession } from './get_session';
@@ -37,6 +37,7 @@ jest.mock('../../services/sessions/sessions_status');
 jest.mock('../../services/sessions/enable_sessions', () => ({
   ...jest.requireActual('../../services/sessions/enable_sessions'),
   enableSessions: jest.fn(),
+  canEnableSessions: jest.fn(),
 }));
 
 type Endpoint = keyof typeof sessionsRouteRepository;
@@ -57,6 +58,7 @@ const status: SessionsStatus = {
   lastError: null,
   enabledBy: 'ana',
   retentionDays: SESSIONS_LOOKBACK_DAYS,
+  autoEnable: false,
 };
 
 const LOAD_FAILED_MESSAGE =
@@ -82,7 +84,6 @@ const runHandler = (
     services = {
       taskManager: taskManagerMock.createStart(),
       canEncrypt: true,
-      sessionsReadable: createSessionsReadableCache(),
     },
   }: {
     params?: Record<string, unknown>;
@@ -185,7 +186,6 @@ describe('sessions routes', () => {
         services: {
           taskManager: undefined,
           canEncrypt: true,
-          sessionsReadable: createSessionsReadableCache(),
         },
       });
 
@@ -196,6 +196,53 @@ describe('sessions routes', () => {
         settings,
         withDetails: false,
       });
+    });
+
+    describe('autoEnable', () => {
+      const notSetUp: SessionsStatus = { ...status, installed: false, health: 'missing' };
+      const asManager = { manage_digital_experience_sessions: true };
+
+      it.each([true, false])(
+        'tells a manager whether the app can set sessions up for them (can enable: %s)',
+        async (canEnable) => {
+          jest.mocked(getSessionsStatus).mockResolvedValue(notSetUp);
+          jest.mocked(canEnableSessions).mockResolvedValue(canEnable);
+          const { result, coreContext, logger } = runHandler(SESSIONS_STATUS_ENDPOINT, {
+            authzResult: asManager,
+          });
+
+          expect(await result).toEqual({ ...notSetUp, autoEnable: canEnable });
+          expect(canEnableSessions).toHaveBeenCalledWith({
+            client: coreContext.elasticsearch.client.asCurrentUser,
+            canEncrypt: true,
+            isServerless: true,
+            logger,
+          });
+        }
+      );
+
+      it.each<[string, SessionsStatus, Record<string, boolean>, SessionsServices['taskManager']]>([
+        ['sessions are set up', status, asManager, taskManagerMock.createStart()],
+        [
+          'the user can not manage sessions',
+          notSetUp,
+          { manage_digital_experience_sessions: false },
+          taskManagerMock.createStart(),
+        ],
+        ['there is no Task Manager', notSetUp, asManager, undefined],
+      ])(
+        'does not check the privileges when %s',
+        async (_name, sessionsStatus, authzResult, taskManager) => {
+          jest.mocked(getSessionsStatus).mockResolvedValue(sessionsStatus);
+          const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, {
+            authzResult,
+            services: { taskManager, canEncrypt: true },
+          });
+
+          expect(await result).toEqual(sessionsStatus);
+          expect(canEnableSessions).not.toHaveBeenCalled();
+        }
+      );
     });
 
     it('answers 500 without the details when the status read fails', async () => {
@@ -250,7 +297,6 @@ describe('sessions routes', () => {
         services: {
           taskManager: taskManagerMock.createStart(),
           canEncrypt: false,
-          sessionsReadable: createSessionsReadableCache(),
         },
       });
 
@@ -264,7 +310,6 @@ describe('sessions routes', () => {
         services: {
           taskManager: undefined,
           canEncrypt: true,
-          sessionsReadable: createSessionsReadableCache(),
         },
       });
 
