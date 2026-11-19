@@ -22,7 +22,7 @@ import {
   deleteLeftoverWorkflows,
   deleteSavedQuery,
   deleteSystemIndicesUser,
-  findAgentActionIds,
+  findActionIdsSince,
   historyClient,
   indexFakeAgents,
   OSQUERY_ACTIONS_INDEX,
@@ -79,9 +79,11 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
   let systemEs: Client;
   let policyId: string;
   let adminHeaders: Record<string, string>;
+  let specStart: string;
   const savedQueryIds: Array<{ id: string; space?: string }> = [];
 
   apiTest.beforeAll(async ({ esClient, kbnClient, config, requestAuth }) => {
+    specStart = new Date().toISOString();
     systemEs = await createSystemIndicesClient(esClient, config);
     policyId = await createOsqueryAgentPolicy(kbnClient, 'osq-wf-run-query');
     await indexFakeAgents(systemEs, policyId, [AGENT_A, AGENT_B]);
@@ -115,14 +117,11 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
 
   apiTest.afterAll(async ({ esClient, kbnClient }) => {
     await deleteAnsweredQueries(esClient);
-    // Also every action that targeted this spec's agents, in case a test failed before it could
+    // Also this run's actions for the spec's agents, in case a test failed before it could
     // register the ids it dispatched.
-    const agentActionIds = await Promise.all(
-      [AGENT_A, AGENT_B].map(({ id }) => findAgentActionIds(systemEs, id))
-    );
     await deleteDispatchedActions(systemEs, [
       ...takeDispatchedActionIds(),
-      ...agentActionIds.flatMap((ids) => [...ids]),
+      ...(await findActionIdsSince(systemEs, [AGENT_A.id, AGENT_B.id], specStart)),
     ]);
     for (const { id, space } of savedQueryIds) {
       await deleteSavedQuery(kbnClient, id, space);
