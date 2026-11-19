@@ -164,6 +164,13 @@ class CheckTest(unittest.TestCase):
         failures = score.check(expected, "with", write_run(self.work, YES_ANSWER))
         self.assertEqual(failures, ["suggested level does not start with 'one functionality'"])
 
+    def test_suggested_level_excludes(self):
+        expected = {**EXPECTED_YES, "answer": {"suggested_level_excludes": ["standalone"]}}
+        self.assertEqual(score.check(expected, "with", write_run(self.work, YES_ANSWER)), [])
+        expected = {**EXPECTED_YES, "answer": {"suggested_level_excludes": ["elastic/kibana#100"]}}
+        failures = score.check(expected, "with", write_run(self.work, YES_ANSWER))
+        self.assertEqual(failures, ["suggested level names ['elastic/kibana#100']"])
+
     def test_hierarchy_mentions(self):
         expected = {**EXPECTED_YES, "answer": {"hierarchy_mentions": "elastic/kibana#100"}}
         self.assertEqual(score.check(expected, "with", write_run(self.work, YES_ANSWER)), [])

@@ -189,11 +189,15 @@ def check_template(expected: dict, result: dict, message: str) -> list[str]:
             failures.append(f"answer says {field} {template[field] or 'none'} but RESULT says {refs(result.get(field)) or 'none'}")
     lines = message.splitlines()
     wanted_level = expected.get("answer", {}).get("suggested_level_text")
-    if wanted_level:
+    unwanted_level = expected.get("answer", {}).get("suggested_level_excludes", [])
+    if wanted_level or unwanted_level:
         level_at = _field(lines, "Suggested level for a test plan")
         level = lines[level_at].split("**Suggested level for a test plan:**", 1)[1].strip().lower() if level_at is not None else ""
-        if not level.startswith(wanted_level.lower()):
+        if wanted_level and not level.startswith(wanted_level.lower()):
             failures.append(f"suggested level does not start with {wanted_level!r}")
+        words = leaked([level], unwanted_level)
+        if words:
+            failures.append(f"suggested level names {words}")
     wanted_hierarchy = expected.get("answer", {}).get("hierarchy_mentions")
     if wanted_hierarchy:
         hierarchy_at = _field(lines, "Hierarchy")
