@@ -210,8 +210,7 @@ function buildSloRevisionFilter(slo: SLODefinition, dateRange: { from: Date; to:
 }
 
 /**
- * Builds the query listing the instances whose short window burn rate reaches the threshold of at least one window,
- * which every instance breaching a window does. It only reads the short windows, much shorter than the long ones.
+ * Builds the query listing the instances whose short window burn rate reaches the threshold of at least one window.
  */
 export function buildCandidatesQuery(
   startedAt: Date,
@@ -223,16 +222,11 @@ export function buildCandidatesQuery(
   const shortWindows = params.windows.map((winDef, index) => ({
     windowId: generateWindowId(index),
     threshold: winDef.burnRateThreshold,
-    dateRange: getLookbackDateRange(
-      startedAt,
-      new Duration(winDef.shortWindow.value, toDurationUnit(winDef.shortWindow.unit)),
-      delayInSeconds
-    ),
+    duration: new Duration(winDef.shortWindow.value, toDurationUnit(winDef.shortWindow.unit)),
   }));
-  const dateRange = {
-    from: new Date(Math.min(...shortWindows.map(({ dateRange: { from } }) => from.getTime()))),
-    to: shortWindows[0].dateRange.to,
-  };
+  const longestShortWindow = shortWindows.reduce((acc, shortWindow) =>
+    shortWindow.duration.isShorterThan(acc.duration) ? acc : shortWindow
+  );
   const isTimesliceBudgetingMethod = slo.budgetingMethod === 'timeslices';
 
   return {
@@ -240,7 +234,10 @@ export function buildCandidatesQuery(
     query: {
       bool: {
         filter: [
-          ...buildSloRevisionFilter(slo, dateRange),
+          ...buildSloRevisionFilter(
+            slo,
+            getLookbackDateRange(startedAt, longestShortWindow.duration, delayInSeconds)
+          ),
           // The timeslices burn rate only depends on the bad slices.
           ...(isTimesliceBudgetingMethod ? [{ term: { 'slo.isGoodSlice': 0 } }] : []),
         ],
@@ -255,9 +252,15 @@ export function buildCandidatesQuery(
         },
         aggs: {
           ...shortWindows.reduce(
-            (acc, { windowId, threshold, dateRange: shortDateRange }) => ({
+            (acc, { windowId, threshold, duration }) => ({
               ...acc,
-              ...buildWindowAgg(windowId, SHORT_WINDOW, threshold, slo, shortDateRange),
+              ...buildWindowAgg(
+                windowId,
+                SHORT_WINDOW,
+                threshold,
+                slo,
+                getLookbackDateRange(startedAt, duration, delayInSeconds)
+              ),
             }),
             {}
           ),

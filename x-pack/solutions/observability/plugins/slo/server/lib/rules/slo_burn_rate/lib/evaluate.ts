@@ -68,19 +68,13 @@ export interface EvaluationBucket {
   WINDOW_3_LONG_ABOVE_THRESHOLD?: { value: number };
 }
 
-export interface EvalutionAggResults {
+interface InstancesAggResults<TBucket> {
   instances: {
     after_key?: EvaluationAfterKey;
-    buckets: EvaluationBucket[];
+    buckets: TBucket[];
   };
 }
-
-interface CandidatesAggResults {
-  instances: {
-    after_key?: EvaluationAfterKey;
-    buckets: Array<Pick<EvaluationBucket, 'key'>>;
-  };
-}
+type SpanName = (typeof BURN_RATE_EXECUTOR_SPAN_NAMES)[keyof typeof BURN_RATE_EXECUTOR_SPAN_NAMES];
 
 interface EvaluationContext {
   esClient: ElasticsearchClient;
@@ -90,13 +84,13 @@ interface EvaluationContext {
   projectRouting?: string;
 }
 
-async function searchInstances<TAggregations>(
+async function searchInstances<TBucket>(
   { esClient, projectRouting }: EvaluationContext,
-  spanName: string,
+  spanName: SpanName,
   request: Omit<SearchRequest, 'index'>
-): Promise<TAggregations> {
+): Promise<InstancesAggResults<TBucket>['instances']> {
   const results = await withSpan({ name: spanName, type: 'rule' }, () =>
-    esClient.search<undefined, TAggregations>({
+    esClient.search<undefined, InstancesAggResults<TBucket>>({
       index: SLI_DESTINATION_INDEX_PATTERN,
       ...(projectRouting ? { project_routing: projectRouting } : {}),
       ...request,
@@ -106,56 +100,43 @@ async function searchInstances<TAggregations>(
   if (!results.aggregations) {
     throw new Error('Elasticsearch query failed to return a valid aggregation');
   }
-  return results.aggregations;
+  return results.aggregations.instances;
 }
 
-async function findCandidateInstanceIds(context: EvaluationContext): Promise<string[]> {
-  const { slo, params, startedAt } = context;
-  const instanceIds: string[] = [];
+async function searchAllPages<TBucket>(
+  context: EvaluationContext,
+  spanName: SpanName,
+  buildRequest: (afterKey?: EvaluationAfterKey) => Omit<SearchRequest, 'index'>
+): Promise<TBucket[]> {
+  const buckets: TBucket[] = [];
   let afterKey: EvaluationAfterKey | undefined;
   do {
-    const { instances } = await searchInstances<CandidatesAggResults>(
-      context,
-      BURN_RATE_EXECUTOR_SPAN_NAMES.CANDIDATES_QUERY,
-      buildCandidatesQuery(startedAt, slo, params, afterKey)
-    );
-    instanceIds.push(...instances.buckets.map(({ key }) => key.instanceId));
+    const instances = await searchInstances<TBucket>(context, spanName, buildRequest(afterKey));
+    buckets.push(...instances.buckets);
     afterKey = instances.after_key;
   } while (afterKey);
 
-  return instanceIds;
+  return buckets;
 }
 
 async function evaluateCandidates(context: EvaluationContext): Promise<EvaluationBucket[]> {
   const { slo, params, startedAt } = context;
-  const candidateIds = await findCandidateInstanceIds(context);
+  const candidates = await searchAllPages<Pick<EvaluationBucket, 'key'>>(
+    context,
+    BURN_RATE_EXECUTOR_SPAN_NAMES.CANDIDATES_QUERY,
+    (afterKey) => buildCandidatesQuery(startedAt, slo, params, afterKey)
+  );
+  const candidateIds = candidates.map(({ key }) => key.instanceId);
   const buckets: EvaluationBucket[] = [];
   // Chunks match the composite page size, so each chunk is evaluated in a single page.
   for (const instanceIds of chunk(candidateIds, EVALUATION_PAGE_SIZE)) {
-    const { instances } = await searchInstances<EvalutionAggResults>(
+    const instances = await searchInstances<EvaluationBucket>(
       context,
       BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY,
       buildQuery(startedAt, slo, params, undefined, instanceIds)
     );
     buckets.push(...instances.buckets);
   }
-
-  return buckets;
-}
-
-async function evaluateAllInstances(context: EvaluationContext): Promise<EvaluationBucket[]> {
-  const { slo, params, startedAt } = context;
-  const buckets: EvaluationBucket[] = [];
-  let afterKey: EvaluationAfterKey | undefined;
-  do {
-    const { instances } = await searchInstances<EvalutionAggResults>(
-      context,
-      BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY,
-      buildQuery(startedAt, slo, params, afterKey)
-    );
-    buckets.push(...instances.buckets);
-    afterKey = instances.after_key;
-  } while (afterKey);
 
   return buckets;
 }
@@ -172,13 +153,17 @@ export async function evaluate(
   }
 
   const context: EvaluationContext = { esClient, slo, params, startedAt, projectRouting };
-  // Instances without bad events in the short windows are not candidates, yet can reach a threshold that is not positive.
+  // A threshold <= 0 is reached by instances without bad events in the short windows, which the candidates query may not return.
   const canPrefilterCandidates = params.windows.every(
     ({ burnRateThreshold }) => burnRateThreshold > 0
   );
   const buckets = canPrefilterCandidates
     ? await evaluateCandidates(context)
-    : await evaluateAllInstances(context);
+    : await searchAllPages<EvaluationBucket>(
+        context,
+        BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY,
+        (afterKey) => buildQuery(startedAt, slo, params, afterKey)
+      );
   return transformBucketToResults(buckets, params);
 }
 

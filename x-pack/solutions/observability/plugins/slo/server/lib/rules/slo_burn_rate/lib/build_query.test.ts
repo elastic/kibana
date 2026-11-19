@@ -25,13 +25,13 @@ describe('buildQuery()', () => {
     expect(buildQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
   });
 
-  it('should return a valid query with afterKey', () => {
-    const slo = createSLO({
-      id: 'test-slo',
-      indicator: createKQLCustomIndicator(),
-    });
+  it('should continue after the given key', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
     const rule = createBurnRateRule(slo);
-    expect(buildQuery(STARTED_AT, slo, rule, { instanceId: 'example' })).toMatchSnapshot();
+
+    const { aggs } = buildQuery(STARTED_AT, slo, rule, { instanceId: 'example' });
+
+    expect(aggs.instances.composite.after).toEqual({ instanceId: 'example' });
   });
 
   it('should return a valid query for timeslices', () => {
@@ -67,9 +67,13 @@ describe('buildCandidatesQuery()', () => {
     const rule = createBurnRateRule(slo);
     const reversedRule = { ...rule, windows: [...rule.windows].reverse() };
 
-    expect(buildCandidatesQuery(STARTED_AT, slo, reversedRule).query).toEqual(
-      buildCandidatesQuery(STARTED_AT, slo, rule).query
-    );
+    [rule, reversedRule].forEach((ruleParams) => {
+      expect(buildCandidatesQuery(STARTED_AT, slo, ruleParams).query.bool.filter).toContainEqual({
+        range: {
+          '@timestamp': { gte: '2022-12-31T17:57:00.000Z', lt: '2022-12-31T23:57:00.000Z' },
+        },
+      });
+    });
   });
 
   it('should look up the instances breaching a short window from their bad slices for timeslices', () => {
