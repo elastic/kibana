@@ -409,6 +409,9 @@ describe('SlackAppService', () => {
 
       await new SlackAppService(server).connect(request);
 
+      expect(startInstall).toHaveBeenCalledWith(
+        expect.objectContaining({ created_by_user_key: '12345' })
+      );
       expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
         expect.objectContaining({ createdBy: 'Test User' }),
