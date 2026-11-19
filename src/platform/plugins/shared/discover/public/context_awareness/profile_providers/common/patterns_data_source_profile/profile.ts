@@ -26,7 +26,6 @@ import { DataSourceCategory } from '../../../profiles';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { SparklineCellRenderer } from '../sparkline_data_source_profile/sparkline_cell_renderer';
-import { getMetricColumns } from './get_metric_columns';
 
 const DOC_LIMIT = 10000;
 
@@ -35,33 +34,33 @@ export const createPatternsDataSourceProfileProvider = (
 ): DataSourceProfileProvider<{
   patternColumns: string[];
   sparklineColumns: string[];
-  metricColumns: string[];
 }> => ({
   profileId: 'patterns-data-source-profile',
   profile: {
     getColumnsConfiguration:
       (prev, { context }) =>
-      (displayParams) => {
-        const previous = prev(displayParams);
-        const configuration: CustomGridColumnsConfiguration = { ...previous };
-        const { columns = [], settings } = displayParams ?? {};
-        const automaticColumns = columns.filter((name) => !settings?.columns?.[name]?.width);
-        const hasAutomaticColumn = automaticColumns.some(
-          (name) => !context.metricColumns.includes(name) || settings?.columns?.[name] !== undefined
+      (params) => {
+        const previous = prev(params);
+        const { columns = [], dataSource, settings } = params ?? {};
+        const hasFlexiblePattern = columns.some(
+          (name) => context.patternColumns.includes(name) && !settings?.columns?.[name]?.width
         );
-        const fillColumn = hasAutomaticColumn ? undefined : automaticColumns.at(-1);
+        if (!hasFlexiblePattern || dataSource?.kind !== 'esql') {
+          return previous;
+        }
 
-        for (const name of context.metricColumns) {
-          configuration[name] = (params) => {
-            const column = previous[name]?.(params) ?? params.column;
-            if (
-              name === fillColumn ||
-              params.columnSettings !== undefined ||
-              column.initialWidth !== undefined
-            ) {
-              return column;
-            }
-            return { ...column, initialWidth: 150 };
+        const configuration: CustomGridColumnsConfiguration = { ...previous };
+        for (const name of columns) {
+          if (
+            context.patternColumns.includes(name) ||
+            dataSource.getColumn(name)?.type !== 'number' ||
+            settings?.columns?.[name]?.width
+          ) {
+            continue;
+          }
+          configuration[name] = (columnProps) => {
+            const column = previous[name]?.(columnProps) ?? columnProps.column;
+            return { ...column, initialWidth: column.initialWidth ?? 150 };
           };
         }
         return configuration;
@@ -188,7 +187,6 @@ export const createPatternsDataSourceProfileProvider = (
         category: DataSourceCategory.Default,
         patternColumns,
         sparklineColumns,
-        metricColumns: getMetricColumns(query.esql),
       },
     };
   },

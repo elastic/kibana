@@ -574,6 +574,7 @@ export interface Profile {
    */
   getColumnsConfiguration: (params?: {
     columns: string[];
+    dataSource?: DataSource;
     settings?: UnifiedDataTableProps['settings'];
   }) => CustomGridColumnsConfiguration;
 

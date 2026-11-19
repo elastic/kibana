@@ -30,7 +30,6 @@ import type {
   CustomGridColumnsConfiguration,
   DocumentsDisplayMode,
   UnifiedDataTableSettings,
-  UnifiedDataTableSettingsColumn,
 } from '../types';
 import type { ValueToStringConverter } from '../types';
 import { buildCellActions, buildSummaryColumnCellActions } from './default_cell_actions';
@@ -134,7 +133,6 @@ function buildEuiGridColumn({
   headerRowHeight,
   customGridColumnsConfiguration,
   columnDisplay,
-  columnSettings,
   onResize,
   sortedColumns,
   disableCellActions = false,
@@ -166,7 +164,6 @@ function buildEuiGridColumn({
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
   columnDisplay?: string;
-  columnSettings?: UnifiedDataTableSettingsColumn;
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
   disableCellActions?: boolean;
@@ -186,21 +183,25 @@ function buildEuiGridColumn({
     editField &&
     dataViewField &&
     buildEditFieldButton({ hasEditDataViewPermission, dataView, field: dataViewField, editField });
-  const resetWidthButton: (EuiListGroupItemProps & { key: string }) | undefined = onResize
-    ? {
-        // Keep the action stable when resizing adds or removes it from the menu.
-        key: 'reset-width',
-        label: i18n.translate('unifiedDataTable.grid.resetColumnWidthButton', {
-          defaultMessage: 'Reset width',
-        }),
-        iconType: 'refresh',
-        iconProps: { size: 'm' },
-        onClick: () => {
-          onResize({ columnId: columnName, width: undefined });
-        },
-        'data-test-subj': 'unifiedDataTableResetColumnWidth',
-      }
-    : undefined;
+  const resetWidthButton: EuiListGroupItemProps | undefined =
+    onResize && columnWidth > 0
+      ? {
+          // @ts-expect-error
+          // We need to force a key here because EuiListGroup uses the array index as a key by default,
+          // which causes re-render issues with conditional items like this one, and can result in
+          // incorrect attributes (e.g. title) on the HTML element as well as test failures
+          key: 'reset-width',
+          label: i18n.translate('unifiedDataTable.grid.resetColumnWidthButton', {
+            defaultMessage: 'Reset width',
+          }),
+          iconType: 'refresh',
+          iconProps: { size: 'm' },
+          onClick: () => {
+            onResize({ columnId: columnName, width: undefined });
+          },
+          'data-test-subj': 'unifiedDataTableResetColumnWidth',
+        }
+      : undefined;
 
   const columnDisplayName = getColumnDisplayName(
     columnName,
@@ -290,7 +291,7 @@ function buildEuiGridColumn({
           showMoveLeft: !isSummaryOnlyColumn,
           showMoveRight: !isSummaryOnlyColumn,
           additional: [
-            ...(resetWidthButton && columnWidth > 0 ? [resetWidthButton] : []),
+            ...(resetWidthButton ? [resetWidthButton] : []),
             ...(columnName === SOURCE_COLUMN
               ? []
               : [
@@ -366,27 +367,7 @@ function buildEuiGridColumn({
     if (column.id === SOURCE_COLUMN && documentsDisplayMode === 'json') {
       return column;
     }
-    const customizedColumn = customGridColumnsConfiguration[column.id]({
-      column,
-      headerRowHeight,
-      columnSettings,
-    });
-    if (
-      !columnWidth &&
-      customizedColumn.initialWidth &&
-      customizedColumn.initialWidth !== column.initialWidth &&
-      resetWidthButton &&
-      customizedColumn.actions
-    ) {
-      return {
-        ...customizedColumn,
-        actions: {
-          ...customizedColumn.actions,
-          additional: [resetWidthButton, ...(customizedColumn.actions.additional ?? [])],
-        },
-      };
-    }
-    return customizedColumn;
+    return customGridColumnsConfiguration[column.id]({ column, headerRowHeight });
   }
 
   if (disableCellActions) {
@@ -494,7 +475,6 @@ export function getEuiGridColumns({
       headerRowHeight,
       customGridColumnsConfiguration,
       columnDisplay: settings?.columns?.[column]?.display,
-      columnSettings: settings?.columns?.[column],
       onResize,
       sortedColumns,
       disableCellActions: disableCellActions || !isInteractive,

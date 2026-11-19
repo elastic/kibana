@@ -262,15 +262,15 @@ columns: [
 
 ### Columns configuration — `getColumnsConfiguration`
 
-**Changes:** Header labels, icons, metadata, and default widths for columns.
+**Changes:** Header labels, icons, and metadata for columns.
 
-**Use when:** Rename headers, add icons, improve tooltips, or size query-derived columns without changing column selection.
+**Use when:** Rename headers, add icons, improve tooltips.
 
 **Returns:** `CustomGridColumnsConfiguration`
 
-Each callback receives the column and its persisted `columnSettings`. When supplying an `initialWidth`, preserve existing widths and settings; an empty settings object can represent an explicit reset to automatic sizing. Customized default widths expose the grid's **Reset width** action.
+The accessor receives the displayed column names, data source, and saved grid settings. Profiles can use response column types to supply default widths while preserving user settings and leaving a column flexible to fill the table.
 
-The accessor receives the displayed column names and grid settings. Use these to retain an automatically sized column when applying defaults, without overriding widths explicitly saved by the user.
+The Patterns profile uses compact numeric widths while a flexible pattern is displayed. Resetting a resized numeric column restores that profile default.
 
 **Screenshot:**
 ![Columns configuration example](./docs/extension_points/get_columns_configuration.png)
