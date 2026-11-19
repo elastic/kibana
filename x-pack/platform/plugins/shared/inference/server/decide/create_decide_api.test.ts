@@ -308,6 +308,61 @@ describe('createDecideApi', () => {
     );
   });
 
+  it('masks the question text, keeping choice keys and level labels', async () => {
+    const { decide, transportRequest } = setup({ anonymizationRules: [emailRule] });
+
+    transportRequest.mockResolvedValue(decisionResponse);
+
+    await decide(
+      { input, inferenceId: 'my-decision' },
+      { type: 'predicate', instructions: 'Is this from a@example.com?' },
+      {
+        type: 'choice',
+        instructions: 'Who owns b@example.com?',
+        choices: { a: 'The team of c@example.com', b: 'Nobody' },
+      },
+      {
+        type: 'score',
+        instructions: 'How urgent is it for d@example.com?',
+        levels: [
+          { label: 'low', description: 'e@example.com can wait' },
+          { label: 'medium', description: 'Soon' },
+          { label: 'high', description: 'Now' },
+        ],
+      }
+    );
+
+    expect(transportRequest.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        body: {
+          input,
+          task_settings: {
+            questions: {
+              question_1: {
+                type: 'predicate',
+                instructions: expect.stringMatching(/^Is this from EMAIL_\w+\?$/),
+              },
+              question_2: {
+                type: 'choice',
+                instructions: expect.stringMatching(/^Who owns EMAIL_\w+\?$/),
+                choices: { a: expect.stringMatching(/^The team of EMAIL_\w+$/), b: 'Nobody' },
+              },
+              question_3: {
+                type: 'score',
+                instructions: expect.stringMatching(/^How urgent is it for EMAIL_\w+\?$/),
+                levels: [
+                  { label: 'low', description: expect.stringMatching(/^EMAIL_\w+ can wait$/) },
+                  { label: 'medium', description: 'Soon' },
+                  { label: 'high', description: 'Now' },
+                ],
+              },
+            },
+          },
+        },
+      })
+    );
+  });
+
   it('does not send the input when anonymization fails', async () => {
     const { decide, regexWorker, transportRequest } = setup({ anonymizationRules: [emailRule] });
 

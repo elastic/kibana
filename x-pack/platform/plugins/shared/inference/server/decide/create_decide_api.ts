@@ -21,6 +21,7 @@ import type {
   DecisionQuestion,
 } from '@kbn/inference-common';
 import {
+  createInferenceInternalError,
   createInferenceProviderError,
   createInferenceRequestAbortedError,
   createInferenceRequestError,
@@ -74,21 +75,76 @@ const toInferenceError = ({
 };
 
 /**
- * Masks the input with the space's anonymization rules, like chat completion does. Answers are
- * probabilities and caller-defined keys, so there's nothing to restore and no replacements to keep.
+ * The free text of a question: its instructions, then its choice or level descriptions. Choice
+ * keys and level labels are left out, since answers are keyed by them.
  */
-const anonymizeInput = async ({
+const getQuestionTexts = (question: DecisionQuestion): string[] => {
+  switch (question.type) {
+    case 'predicate':
+      return [question.instructions];
+
+    case 'choice':
+      return [question.instructions, ...Object.values(question.choices)];
+
+    case 'score':
+      return [question.instructions, ...question.levels.map(({ description }) => description)];
+  }
+};
+
+/** Returns the question with its free text replaced, in the order of {@link getQuestionTexts}. */
+const withQuestionTexts = (
+  question: DecisionQuestion,
+  [instructions, ...descriptions]: string[]
+): DecisionQuestion => {
+  switch (question.type) {
+    case 'predicate':
+      return { ...question, instructions };
+
+    case 'choice':
+      return {
+        ...question,
+        instructions,
+        choices: Object.fromEntries(
+          Object.keys(question.choices).map((key, index) => [key, descriptions[index]])
+        ),
+      };
+
+    case 'score':
+      return {
+        ...question,
+        instructions,
+        levels: question.levels.map(({ label }, index) => ({
+          label,
+          description: descriptions[index],
+        })),
+      };
+  }
+};
+
+/**
+ * Masks the input and the questions' text with the space's anonymization rules, like chat
+ * completion does. Answers are probabilities and caller-defined keys, so there's nothing to
+ * restore and no replacements to keep.
+ */
+const anonymizeRequest = async ({
   input,
+  questions,
   esClient,
   logger,
   anonymizationRulesPromise,
   regexWorker,
   anonymization,
-}: CreateDecideApiOptions & { input: string }): Promise<string> => {
-  const {
-    messages: [masked],
-  } = await anonymizeMessages({
-    messages: [{ role: MessageRole.User, content: input }],
+}: CreateDecideApiOptions & { input: string; questions: DecisionQuestion[] }): Promise<{
+  input: string;
+  questions: DecisionQuestion[];
+}> => {
+  const questionTexts = questions.map(getQuestionTexts);
+
+  const { messages } = await anonymizeMessages({
+    messages: [input, ...questionTexts.flat()].map((content) => ({
+      role: MessageRole.User,
+      content,
+    })),
     anonymizationRules: await anonymizationRulesPromise,
     regexWorker,
     esClient,
@@ -97,11 +153,20 @@ const anonymizeInput = async ({
     logger,
   });
 
-  if (masked?.role !== MessageRole.User || typeof masked.content !== 'string') {
-    throw createInferenceProviderError('Anonymization did not return the decision input as text');
-  }
+  const [maskedInput, ...maskedTexts] = messages.map((message) => {
+    if (message.role !== MessageRole.User || typeof message.content !== 'string') {
+      throw createInferenceInternalError('Anonymization did not return the decision text as text');
+    }
 
-  return masked.content;
+    return message.content;
+  });
+
+  return {
+    input: maskedInput,
+    questions: questions.map((question, index) =>
+      withQuestionTexts(question, maskedTexts.splice(0, questionTexts[index].length))
+    ),
+  };
 };
 
 /** Sends the questions to the `decision` inference task and reads the answers back. */
@@ -163,8 +228,9 @@ export function createDecideApi({
             throw createInferenceRequestAbortedError();
           }
 
-          const input = await anonymizeInput({
+          const masked = await anonymizeRequest({
             input: options.input,
+            questions,
             esClient,
             logger,
             anonymizationRulesPromise,
@@ -174,8 +240,8 @@ export function createDecideApi({
 
           const answers = await invokeDecision({
             esClient,
-            options: { ...options, input },
-            questions,
+            options: { ...options, input: masked.input },
+            questions: masked.questions,
           });
 
           span?.setAttributes({ 'elastic.decision.inference_id': options.inferenceId });
