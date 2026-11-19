@@ -7,8 +7,16 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { ToolType } from '@kbn/agent-builder-common/tools/definition';
 import { createSandboxCallbackHandler } from './kibana_callbacks';
 import type { SandboxCallContext } from './tool_utils';
+
+const tool = (id: string, overrides: Record<string, unknown> = {}) => ({
+  id,
+  type: ToolType.builtin,
+  annotations: { readOnlyHint: true, destructiveHint: false },
+  ...overrides,
+});
 
 const setup = ({
   actionTypeId = '.abuseipdb',
@@ -32,24 +40,68 @@ const setup = ({
     allowedConnectorIds: ['abuse'],
     resolvedCredentials: new Map(),
   };
-  const handler = createSandboxCallbackHandler({ runner: { runTool }, callContext, actions });
+  const toolRegistry = {
+    list: jest.fn().mockResolvedValue([
+      tool('platform.core.execute_esql', { confirmation: { askUser: 'never' } }),
+      tool('platform.core.index_explorer'),
+      tool('platform.core.cases_write', { annotations: { readOnlyHint: false } }),
+      tool('platform.core.create_visualization'),
+      tool('nightshift_sandbox_bash'),
+      tool('platform.core.confirmed', { confirmation: { askUser: 'always' } }),
+      tool('platform.core.dynamic', {
+        confirmation: { askUser: 'never', getConfirmation: jest.fn() },
+      }),
+    ]),
+  };
+  const handler = createSandboxCallbackHandler({
+    runner: { runTool },
+    callContext,
+    actions,
+    toolRegistry: toolRegistry as never,
+  });
   return { handler, runTool, execute };
 };
 
 describe('createSandboxCallbackHandler', () => {
-  it('refuses a tool that is not callable from the sandbox, without running it', async () => {
+  it.each([
+    'platform.core.cases_write',
+    'platform.core.create_visualization',
+    'nightshift_sandbox_bash',
+    'platform.core.confirmed',
+    'platform.core.dynamic',
+    'platform.core.unknown',
+  ])('refuses %s, which is not a read-only scriptable tool, without running it', async (toolId) => {
     const { handler, runTool } = setup();
 
-    const result = await handler({
-      target: { type: 'tool', toolId: 'platform.core.index_explorer' },
-      params: {},
-    });
+    const result = await handler({ target: { type: 'tool', toolId }, params: {} });
 
     expect(result).toEqual({
       ok: false,
-      errorMessage: expect.stringContaining("Tool 'platform.core.index_explorer' cannot be called"),
+      errorMessage: expect.stringContaining(`Tool '${toolId}' cannot be called`),
     });
     expect(runTool).not.toHaveBeenCalled();
+  });
+
+  it('runs a read-only tool that never asks for confirmation', async () => {
+    const { handler, runTool } = setup();
+    runTool.mockResolvedValue({ results: [] });
+
+    await expect(
+      handler({ target: { type: 'tool', toolId: 'platform.core.execute_esql' }, params: {} })
+    ).resolves.toEqual({ ok: true, result: { results: [] } });
+    expect(runTool).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs a read-only tool of the registry', async () => {
+    const { handler, runTool } = setup();
+    runTool.mockResolvedValue({ results: [{ type: 'other', data: { index: 'logs' } }] });
+
+    await expect(
+      handler({ target: { type: 'tool', toolId: 'platform.core.index_explorer' }, params: {} })
+    ).resolves.toEqual({
+      ok: true,
+      result: { results: [{ type: 'other', data: { index: 'logs' } }] },
+    });
   });
 
   it('reports the error results of a tool as a failed call', async () => {

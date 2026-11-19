@@ -5,16 +5,35 @@
  * 2.0.
  */
 
-import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import { getConnectorSpec, isSelectedActionEnabled, isToolAction } from '@kbn/connector-specs';
 import type { AgentConnector, ActionsClient } from './agent_connectors';
 
 const HEADER = `# Calling Kibana from the sandbox
 
-Commands run by the bash tool can call back into Kibana with \`kbn-tool\`. The call runs in Kibana
-as the user of this conversation, so it can only read what you could read with the same tool, and
-it never puts credentials into the sandbox. Use it to process query results with jq or Python in
-the same command instead of copying them through the conversation.
+Write Python and call Kibana through the generated \`kibana_sdk\` module. Each call runs in Kibana
+as the user of this conversation, with the connector's credentials (they never enter the sandbox),
+and returns parsed data. Results with \`columns\` and \`values\`, such as ES|QL, come back as a list of
+row dicts. A refused or failed call raises \`KibanaError\` with the reason.
+
+\`\`\`python
+import sys; sys.path.insert(0, "/workspace")
+from kibana_sdk import kibana
+kibana.search_tools("error rate by service")   # find what to call; prints path and description
+kibana.search_tools("mapping", detail="full")  # signature and every parameter of the matches
+es = kibana.connectors["<connector-id>"]       # an id from /workspace/connectors.md
+rows = es.esql(query="FROM logs-* | STATS errors = COUNT(*) BY service.name | SORT errors DESC")
+\`\`\`
+
+Nothing is printed unless you print it: loop over many calls in one script (up to 8 run at a time),
+join and aggregate in Python, and print only what you need to read. A result is limited to 2 MiB:
+ask for fewer rows or fields when a call reports it is too large.
+
+\`kibana.esql(query)\` runs ES|QL on the cluster behind this Kibana, not on a cluster an
+Elasticsearch connector points at: for a connector's cluster use its \`esql\` sub-action.
+\`kibana.call(tool_id, **params)\` runs a Kibana tool by its id; \`kibana.tools.<name>(...)\` is the
+same with typed parameters.
+
+The module wraps the \`kbn-tool\` CLI, which also works from shell when you do not need Python:
 
 \`\`\`text
 kbn-tool esql [--limit N] [--format ndjson|json|csv] '<ES|QL query>'
@@ -22,39 +41,8 @@ kbn-tool call <tool-id> --params '<json object>'        # or --params - to read 
 kbn-tool connector <connector-id> <sub-action> --params '<json object>' [--format ndjson|json|csv]
 \`\`\`
 
-Exit code 0: the result is on stdout. Exit code 1: Kibana refused or failed the call; the reason is on
-stderr. Exit code 2: wrong usage, or the command was started without Kibana callbacks.
-A result is limited to 2 MiB: ask for fewer rows or fields when a call reports it is too large.
-
-## ES|QL
-
-\`kbn-tool esql\` runs \`platform.core.execute_esql\` and prints one JSON object per row
-(\`--format csv\` and \`--format json\` are also available). \`--limit\` defaults to 100 rows.
-It queries the Elasticsearch cluster behind this Kibana, not a cluster an Elasticsearch connector
-points at: to query a connector's cluster, call the connector's \`esql\` sub-action (see Connectors).
-
-\`\`\`bash
-kbn-tool esql 'FROM logs-* | STATS errors = COUNT(*) BY service.name | SORT errors DESC' | jq -r '.["service.name"]'
-\`\`\`
-
-\`\`\`python
-import json, subprocess
-
-def esql(query, limit=1000):
-    out = subprocess.run(["kbn-tool", "esql", "--limit", str(limit), query],
-                         capture_output=True, text=True, check=True).stdout
-    return [json.loads(line) for line in out.splitlines()]
-\`\`\`
-
-For the full tool result, including the query that ran and any warnings, call the tool directly:
-
-\`\`\`bash
-kbn-tool call platform.core.execute_esql --params '{"query": "FROM logs-* | LIMIT 5", "time_range": {"from": "now-1h", "to": "now"}}'
-\`\`\`
-
-Parameters: \`query\` (required), \`limit\`, \`params\` (named query parameters), \`time_range\`
-(\`{from, to}\`, applied through \`?_tstart\` / \`?_tend\` in the query), \`filter\` (Query DSL), and
-\`timeout_seconds\`.`;
+Exit code 1: Kibana refused or failed the call; the reason is on stderr. Exit code 2: wrong usage,
+or the command was started without Kibana callbacks.`;
 
 const getToolSubActions = ({ actionTypeId, selectedActions }: AgentConnector) => {
   const spec = getConnectorSpec(actionTypeId);
@@ -83,37 +71,46 @@ const renderConnectorSection = (connector: AgentConnector): string => {
     return lines.join('\n');
   }
   for (const [name, action] of subActions) {
-    lines.push('', `- \`${name}\`${action.description ? `: ${action.description}` : ''}`);
-    try {
-      lines.push(`  Params: ${formatSchemaForLlm(action.input)}`);
-    } catch {
-      // A schema the formatter cannot describe still leaves the sub-action usable.
-    }
+    // Only the name and first line: \`kibana.search_tools\` explains the parameters on demand.
+    const summary = action.description?.split(/(?<=[.!?])\s/)[0];
+    lines.push('', `- \`${name}\`${summary ? `: ${summary}` : ''}`);
   }
   return lines.join('\n');
 };
 
 /** Renders the guide to `kbn-tool` for the connectors assigned to the agent. */
-export const renderKibanaToolsManifest = (connectors: readonly AgentConnector[]): string => {
+export const renderKibanaToolsManifest = (
+  connectors: readonly AgentConnector[],
+  toolIds: readonly string[] = []
+): string => {
   const sections = [
     HEADER,
     '',
     '## Connectors',
     '',
-    'Always make requests to a connector listed here with `kbn-tool connector`, never with `curl`',
-    'and the `connector_id` of the bash command. Sub-actions run in Kibana with the connector',
-    'credentials, which keeps every request checked and audited, and works for connectors that have',
-    'no sandbox credentials. Add `--format ndjson|json|csv` to print a result with `columns` and',
-    '`values`, such as an `esql` sub-action, as rows:',
-    '',
-    '```bash',
-    "kbn-tool connector <connector-id> <sub-action> --params '{...}' [--format csv]",
-    '```',
+    'Always make requests to a connector listed here from Python, with',
+    '`kibana.connectors["<connector-id>"].<sub_action>(...)`, never with `curl` and the',
+    '`connector_id` of the bash command. Sub-actions run in Kibana with the connector credentials,',
+    'which keeps every request checked and audited, and works for connectors that have no sandbox',
+    'credentials. The sub-actions below are listed by name; `kibana.search_tools()` shows their',
+    'parameters.',
   ];
   if (connectors.length === 0) {
     sections.push('', '*(No connectors are assigned to this agent.)*');
   } else {
     for (const connector of connectors) sections.push('', renderConnectorSection(connector));
+  }
+  if (toolIds.length > 0) {
+    sections.push(
+      '',
+      '## Kibana tools',
+      '',
+      'Read-only Kibana tools a script can call with `kibana.tools.<name>(...)` or',
+      '`kibana.call("<tool-id>", ...)`. Use `kibana.search_tools("<what you need>")` to see their',
+      'parameters.',
+      '',
+      ...toolIds.map((id) => `- \`${id}\``)
+    );
   }
   return sections.join('\n') + '\n';
 };
@@ -128,5 +125,10 @@ export const listCallableAgentConnectors = async (
   const all = await actionsClient.getAll({ includeSystemActions: false });
   return all
     .filter(({ id }) => allowed.has(id))
-    .map(({ id, name, actionTypeId }) => ({ id, name, actionTypeId }));
+    .map(({ id, name, actionTypeId, config }) => ({
+      id,
+      name,
+      actionTypeId,
+      selectedActions: config?.selectedActions as AgentConnector['selectedActions'],
+    }));
 };

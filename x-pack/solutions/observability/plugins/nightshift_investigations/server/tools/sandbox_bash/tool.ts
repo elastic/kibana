@@ -10,7 +10,7 @@ import { lazySchema, z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecretEnvKey } from '@kbn/sandbox-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
@@ -21,6 +21,7 @@ import { SANDBOX_VIEW_FILE_TOOL_ID } from './view_file_tool';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import { KIBANA_TOOLS_MANIFEST_PATH, createSandboxCallbackHandler } from './kibana_callbacks';
 import type { SandboxAllowlistClient } from '../../sandbox_allowlist';
+import type { SandboxToolRegistry } from './sandbox_callable_tools';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
@@ -98,6 +99,7 @@ const sandboxBashSchema = lazySchema(() =>
 export const createSandboxBashTool = ({
   getSandboxStart,
   getActions,
+  getToolRegistry,
   sandboxWorkspaceManager,
   resolveConnectorCredentials,
   sandboxAllowlistClient,
@@ -105,6 +107,7 @@ export const createSandboxBashTool = ({
 }: {
   getSandboxStart: () => NightshiftSandboxStart | undefined;
   getActions: () => ActionsPluginStart | undefined;
+  getToolRegistry: (request: KibanaRequest) => Promise<SandboxToolRegistry | undefined>;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
   sandboxAllowlistClient?: Pick<SandboxAllowlistClient, 'getHostsForCommand'>;
@@ -114,7 +117,7 @@ export const createSandboxBashTool = ({
   type: ToolType.builtin,
   description:
     'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace.' +
-    ' Always make requests to a Kibana connector that has sub-actions, Elasticsearch included, with the `kbn-tool` CLI inside the command, for example `kbn-tool connector <connector-id> esql --format csv --params \'{"query": "FROM logs-* | STATS c = COUNT(*) BY service.name"}\'`: Kibana runs the request with the connector credentials, and the result can be processed with jq or Python in the same command. See ' +
+    ' Always make requests to a Kibana connector that has sub-actions, Elasticsearch included, from Python with the generated SDK, for example `import sys; sys.path.insert(0, "/workspace"); from kibana_sdk import kibana; rows = kibana.esql("FROM logs-* | STATS c = COUNT(*) BY service.name")` (`kibana.help()` lists every connector and sub-action): Kibana runs the request with the connector credentials and the parsed result stays in Python, so aggregate there and print only what you need. The `kbn-tool` CLI behind it also works from shell. See ' +
     KIBANA_TOOLS_MANIFEST_PATH +
     ' for every connector sub-action and tool it can call. Only for a connector without sub-actions (see /workspace/connectors.md), pass its id as `connector_id`: its credentials are then available to that single command as CONNECTOR_* environment variables.',
   tags: ['sandbox', 'bash'],
@@ -249,6 +252,7 @@ export const createSandboxBashTool = ({
           runner: context.runner,
           callContext,
           actions: getActions(),
+          toolRegistry: await getToolRegistry(context.request),
         })
       );
 

@@ -466,7 +466,7 @@ export class NightshiftInvestigationsPlugin
         // Tools are registered in setup() but only run after start(), so read start deps lazily.
         const getSandboxStart = getGatedSandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
-          getDeps: () => ({ actions: this.actionsStart }),
+          getDeps: () => ({ actions: this.actionsStart, agentBuilder: this.agentBuilder }),
           logger: sandboxLogger,
         });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
@@ -493,6 +493,7 @@ export class NightshiftInvestigationsPlugin
           createSandboxBashTool({
             getSandboxStart,
             getActions: () => this.actionsStart,
+            getToolRegistry: async (request) => this.agentBuilder?.tools.getRegistry({ request }),
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
             sandboxAllowlistClient,

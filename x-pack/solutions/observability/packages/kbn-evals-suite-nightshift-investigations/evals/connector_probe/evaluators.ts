@@ -35,7 +35,9 @@ export const getSuccessfulConnectorCalls = (trajectory: TrajectoryStep[]): Traje
     ({ tool_id: toolId, params, result }) =>
       toolId === SANDBOX_BASH_TOOL_ID &&
       (typeof params.connector_id === 'string' ||
-        (typeof params.command === 'string' && params.command.includes('kbn-tool connector'))) &&
+        (typeof params.command === 'string' &&
+          (params.command.includes('kbn-tool connector') ||
+            params.command.includes('kibana_sdk')))) &&
       result.startsWith('exit_code: 0')
   );
 

@@ -26,7 +26,11 @@ const createSessionMock = (isReset: boolean, sessionKey: object = {}): AuditedSa
     },
     runCommand: jest.fn(),
     readFiles: jest.fn(),
-    writeFiles: jest.fn().mockResolvedValue([{ bytes_written: 0, success: true }]),
+    writeFiles: jest
+      .fn()
+      .mockImplementation(async (files: unknown[]) =>
+        files.map(() => ({ bytes_written: 0, success: true }))
+      ),
     mkdirs: jest.fn(),
     statFiles: jest.fn().mockImplementation(async (paths: string[]) =>
       paths.map((path) => ({
@@ -53,7 +57,11 @@ const createMutableSessionMock = (): {
     },
     runCommand: jest.fn(),
     readFiles: jest.fn(),
-    writeFiles: jest.fn().mockResolvedValue([{ bytes_written: 0, success: true }]),
+    writeFiles: jest
+      .fn()
+      .mockImplementation(async (files: unknown[]) =>
+        files.map(() => ({ bytes_written: 0, success: true }))
+      ),
     mkdirs: jest.fn(),
     statFiles: jest.fn().mockImplementation(async (paths: string[]) =>
       paths.map((path) => ({
@@ -124,6 +132,7 @@ describe('createSandboxWorkspaceManager', () => {
     expect(session.statFiles).toHaveBeenCalledWith([
       '/workspace/connectors.md',
       '/workspace/kibana_tools.md',
+      '/workspace/kibana_sdk.py',
       '/workspace/.connector-docs/elastic.md',
       '/workspace/.connector-docs/github.md',
       '/workspace/.connector-docs/newrelic.md',

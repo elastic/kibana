@@ -305,6 +305,10 @@ const isTelemetryRowObject = (line: string): boolean => {
   }
 };
 
+/** Whether a command calls Kibana from Python with the generated `kibana_sdk` module. */
+const usesKibanaSdk = (params: Record<string, unknown>): boolean =>
+  typeof params.command === 'string' && params.command.includes('kibana_sdk');
+
 /** Whether a sandbox command reached the ORCA connector, by `connector_id` or through `kbn-tool`. */
 const usesOrcaConnector = (params: Record<string, unknown>): boolean =>
   isOrcaConnectorId(params.connector_id) ||
@@ -319,7 +323,7 @@ export const hasOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'ste
     .some(
       ({ tool_id: toolId, params, results }) =>
         toolId === 'nightshift_sandbox_bash' &&
-        usesOrcaConnector(params) &&
+        (usesOrcaConnector(params) || usesKibanaSdk(params)) &&
         results.some(
           ({ type, data }) =>
             type === ToolResultType.other &&
@@ -330,7 +334,8 @@ export const hasOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'ste
             !/curl: \(22\)|The requested URL returned error/.test(
               'stderr' in data && typeof data.stderr === 'string' ? data.stderr : ''
             ) &&
-            hasRows(data.stdout)
+            // A script aggregates in Python and prints what it needs, in no fixed row format.
+            (usesKibanaSdk(params) ? data.stdout.trim().length > 0 : hasRows(data.stdout))
         )
     );
 

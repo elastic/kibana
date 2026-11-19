@@ -7,24 +7,31 @@ Take an Elasticsearch connector id from `/workspace/connectors.md`: an External 
 If several fit, pick the one for the cluster the question is about. If none is listed,
 Elasticsearch is not reachable: say so instead of guessing credentials.
 
-## Always query through `kbn-tool`
+## Always query from Python with `kibana_sdk`
 
-Make every request to an External Elasticsearch connector with `kbn-tool connector`, from bash or
-Python inside `nightshift_sandbox_bash`. Kibana runs the request with the connector's credentials,
-so do not pass `connector_id` to the command and do not use `curl` for these connectors.
-`/workspace/kibana_tools.md` lists each sub-action's parameters.
+Make every request to an External Elasticsearch connector from Python with the `kibana_sdk`
+module, inside `nightshift_sandbox_bash`. Kibana runs the request with the connector's
+credentials, so do not pass `connector_id` to the command and do not use `curl` or `kbn-tool` for
+these connectors. Parameters come from `kibana.search_tools("<keywords>", detail="full")`.
 
-- ES|QL: `esql` with `{"query": "..."}`. Add `--format csv` or `--format ndjson` to print rows
-  instead of the raw `columns` and `values`.
-- Query DSL searches and aggregations: `search` with
-  `{"index": "...", "query": {...}, "size": 0, "aggs": {...}}`.
-- Any GET API, such as `_remote/info`, `_resolve/index`, `_field_caps` or `_cat/...`: `request`
-  with `{"path": "/...", "queryParams": {...}}`.
-- Indices and data streams by pattern: `listIndices` with `{"pattern": "logs-*"}`.
-- The fields of one index: `getMapping` with `{"index": "...", "fields": ["..."]}`.
+```python
+import sys; sys.path.insert(0, "/workspace")
+from kibana_sdk import kibana
+es = kibana.connectors["<connector-id>"]   # the id from /workspace/connectors.md
+```
 
-Exit code 1 means Elasticsearch or Kibana refused the request: stderr holds the error, for example
-an ES|QL `Unknown column`. Read it instead of treating the call as empty.
+- ES|QL: `es.esql(query="...")` returns a list of row dicts.
+- Query DSL searches and aggregations: `es.search(index="...", query={...}, size=0, aggs={...})`.
+- Any GET API, such as `_remote/info`, `_resolve/index`, `_field_caps` or `_cat/...`:
+  `es.request(path="/...", queryParams={...})`.
+- Indices and data streams by pattern: `es.list_indices(pattern="logs-*")`. A key that cannot list
+  indices or read `/_remote/info` is refused with `security_exception`; `es.request` on
+  `/_resolve/index/<pattern>` still works for it, so use that to discover data streams.
+- The fields of one index: `es.get_mapping(index="...", fields=["..."])`.
+
+A call that Elasticsearch or Kibana refuses raises `KibanaError` with the reason, for example an
+ES|QL `Unknown column`. Read it and fix the query instead of treating the call as empty; do not
+wrap calls in a bare `except`.
 
 Only an HTTP (`.http`) connector, which has no sub-actions, still needs the old way: pass its
 `connector_id` to `nightshift_sandbox_bash`, and for that single command the environment holds
@@ -50,23 +57,22 @@ shown below, before querying.
 - Name each remote explicitly as `remote:index`; never use wildcard remote names in
   `_resolve/cluster`, `_resolve/index` or searches. To check many remotes, query them in parallel,
   as in the last example below: a sequential loop over dozens of remotes exceeds the sandbox
-  command timeout and returns nothing. One command runs at most 8 `kbn-tool` calls at a time.
+  command timeout and returns nothing. One script runs at most 8 calls at a time.
 - Query a specific data stream, not a broad `logs-*`: on large clusters a broad pattern scans
   every data stream and times out. Find candidates with `request` on
   `/_resolve/index/<remote>:logs-*<keyword>*`, then query the one you need. The response has
   three arrays, `indices`, `aliases` and `data_streams`: read all three and don't filter to one,
   because a data stream's backing indices are not listed under `indices`.
-- Build params with `jq -n --arg q '<ES|QL>' '{query: $q}' | kbn-tool connector <id> esql --params -`
-  so the query needs no JSON escaping, or with `json.dumps` in Python, and put regexes (`GROK`,
-  `RLIKE`) in triple-quoted `"""…"""` strings so backslashes stay literal.
+- Put ES|QL regexes (`GROK`, `RLIKE`) in triple-quoted `"""…"""` Python strings so backslashes
+  stay literal.
 - Bound every telemetry query with a `@timestamp` range. If a query times out, filter on a
   structured field (`data_stream.dataset`, `host.name`) before any text match, or split the window
   into hours or days.
-- Never hide a failure: no `2>/dev/null` or `|| true` on `kbn-tool`. A failed request then looks
-  like no data.
-- The sandbox has `jq` and `python3`; there is no `python`. Process results in the same command,
-  for example aggregate `--format ndjson` rows in Python, instead of copying them through the
-  conversation.
+- Never hide a failure: print the `KibanaError` text, never `except: pass` or an empty result for
+  an error. A failed request then looks like no data.
+- Do the work in the script: loop over services, windows or remotes, join and aggregate the rows
+  in Python, and print only a compact result, instead of one command per query and instead of
+  copying rows through the conversation. The sandbox has `python3`; there is no `python`.
 - Common ES|QL mistakes: `LIKE` wildcards are `*`, not `%`; string comparisons are
   case-sensitive; use `MATCH_PHRASE(message, "…")` for text; count conditionally with
   `COUNT(*) WHERE …`; `first` and `last` are reserved; convert fields with conflicting types with
@@ -81,36 +87,36 @@ shown below, before querying.
   pattern maps `x`: pick another stream instead of retrying. Prefer ES|QL `STATS` for totals and a
   small `LIMIT` for raw documents.
 
-```bash
-ES=<connector-id>   # from /workspace/connectors.md
+```python
+import sys; sys.path.insert(0, "/workspace")
+from concurrent.futures import ThreadPoolExecutor
+from kibana_sdk import kibana, KibanaError
 
-kbn-tool connector "$ES" request --params '{"path": "/_remote/info"}'
+es = kibana.connectors["<connector-id>"]   # from /workspace/connectors.md
 
-jq -n --arg q 'FROM logs-* | WHERE @timestamp >= "2026-01-01T00:00:00Z" AND @timestamp < "2026-01-01T01:00:00Z" | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 20' \
-  '{query: $q}' | kbn-tool connector "$ES" esql --format csv --params -
+# First look, in one call: the remotes (a read-only key may be refused) and the data streams
+try:
+    print("remotes:", list(es.request(path="/_remote/info")))
+except KibanaError as error:
+    print("remotes unavailable:", str(error)[:200])
+print([stream["name"] for stream in es.request(path="/_resolve/index/*")["data_streams"]][:80])
+
+rows = es.esql(query="FROM logs-* | WHERE @timestamp >= \"2026-01-01T00:00:00Z\" AND @timestamp < \"2026-01-01T01:00:00Z\" | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 20")
+print(rows)
 
 # Find the data streams that match a keyword on one remote
-kbn-tool connector "$ES" request --params '{"path": "/_resolve/index/<remote>:logs-*nginx*"}'
+print(es.request(path="/_resolve/index/<remote>:logs-*nginx*"))
 
-# Count one data stream on every remote whose name starts with <prefix>, 8 at a time, each line
-# prefixed with its remote; failed requests print their error
-q() {
-  jq -n --arg q "FROM $1:logs-nginx.error-* | WHERE @timestamp >= \"2026-01-01T00:00:00Z\" AND @timestamp < \"2026-01-01T06:00:00Z\" | STATS count = COUNT(*)" \
-    '{query: $q}' | kbn-tool connector "$ES" esql --format csv --params - 2>&1 | sed "s/^/$1\t/"
-}
-export -f q; export ES
-kbn-tool connector "$ES" request --params '{"path": "/_remote/info"}' \
-  | jq -r 'keys[] | select(startswith("<prefix>"))' | xargs -P 8 -n 1 bash -c 'q "$0"'
-```
+# Count one data stream on every remote whose name starts with <prefix>, 8 at a time; a failed
+# request keeps its error next to its remote
+def count(remote):
+    try:
+        return remote, es.esql(query=f"FROM {remote}:logs-nginx.error-* | WHERE @timestamp >= \"2026-01-01T00:00:00Z\" AND @timestamp < \"2026-01-01T06:00:00Z\" | STATS count = COUNT(*)")
+    except KibanaError as error:
+        return remote, f"error: {error}"
 
-```python
-import json, subprocess
-
-def esql(connector_id, query):
-    out = subprocess.run(
-        ["kbn-tool", "connector", connector_id, "esql", "--format", "ndjson", "--params", "-"],
-        input=json.dumps({"query": query}), capture_output=True, text=True)
-    if out.returncode != 0:
-        raise RuntimeError(out.stderr)
-    return [json.loads(line) for line in out.stdout.splitlines()]
+remotes = [name for name in es.request(path="/_remote/info") if name.startswith("<prefix>")]
+with ThreadPoolExecutor(8) as pool:
+    for remote, result in pool.map(count, remotes):
+        print(remote, result)
 ```

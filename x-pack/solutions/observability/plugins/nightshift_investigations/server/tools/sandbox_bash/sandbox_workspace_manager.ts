@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AuditedSandboxSession } from '../../sandbox_audit';
 import type { SandboxCallContext } from './tool_utils';
@@ -13,17 +14,22 @@ import { writeConnectorManifest } from './connector_manifest';
 import { CONNECTOR_DOCS, CONNECTOR_MANIFEST_PATH } from './connector_docs';
 import type { ActionsClient } from './agent_connectors';
 import { KIBANA_TOOLS_MANIFEST_PATH } from './kibana_callbacks';
+import { KIBANA_SDK_PATH, renderKibanaSdk } from './kibana_sdk';
+import { describeSandboxCallableTools } from './sandbox_callable_tools';
+import type { SandboxToolRegistry } from './sandbox_callable_tools';
 import { listCallableAgentConnectors, renderKibanaToolsManifest } from './kibana_tools_manifest';
 
 const writeKibanaToolsManifest = async ({
   session,
   callContext,
   getActionsClient,
+  getToolRegistry,
   logger,
 }: {
   session: AuditedSandboxSession;
   callContext: SandboxCallContext;
   getActionsClient: ((req: KibanaRequest) => Promise<ActionsClient>) | undefined;
+  getToolRegistry: ((req: KibanaRequest) => Promise<SandboxToolRegistry>) | undefined;
   logger: Logger;
 }): Promise<void> => {
   let connectors: Awaited<ReturnType<typeof listCallableAgentConnectors>> = [];
@@ -37,14 +43,29 @@ const writeKibanaToolsManifest = async ({
       logger.warn(`Failed to list connectors for ${KIBANA_TOOLS_MANIFEST_PATH}: ${err}`);
     }
   }
-  const [result] = await session.writeFiles([
+  let tools: Awaited<ReturnType<typeof describeSandboxCallableTools>> = [];
+  if (getToolRegistry) {
+    try {
+      tools = await describeSandboxCallableTools(await getToolRegistry(callContext.request));
+    } catch (err) {
+      logger.warn(`Failed to list callable tools for ${KIBANA_SDK_PATH}: ${err}`);
+    }
+  }
+  const results = await session.writeFiles([
     {
       path: KIBANA_TOOLS_MANIFEST_PATH,
-      content: Buffer.from(renderKibanaToolsManifest(connectors), 'utf8'),
+      content: Buffer.from(
+        renderKibanaToolsManifest(
+          connectors,
+          tools.map(({ id }) => id)
+        ),
+        'utf8'
+      ),
     },
+    { path: KIBANA_SDK_PATH, content: Buffer.from(renderKibanaSdk(connectors, tools), 'utf8') },
   ]);
-  if (!result?.success) {
-    throw new Error(`Failed to write ${KIBANA_TOOLS_MANIFEST_PATH}`);
+  if (results.length !== 2 || !results.every(({ success }) => success)) {
+    throw new Error(`Failed to write ${KIBANA_TOOLS_MANIFEST_PATH} and ${KIBANA_SDK_PATH}`);
   }
 };
 
@@ -59,7 +80,7 @@ export const createSandboxWorkspaceManager = ({
   getDeps,
   logger,
 }: {
-  getDeps: () => { actions?: ActionsPluginStart };
+  getDeps: () => { actions?: ActionsPluginStart; agentBuilder?: AgentBuilderPluginStart };
   logger: Logger;
 }) => {
   // Keyed by the pod session: the audited view of it is made per tool call.
@@ -73,7 +94,10 @@ export const createSandboxWorkspaceManager = ({
       session: AuditedSandboxSession;
       callContext: SandboxCallContext;
     }): Promise<void> {
-      const { actions } = getDeps();
+      const { actions, agentBuilder } = getDeps();
+      const getToolRegistry = agentBuilder
+        ? (request: KibanaRequest) => agentBuilder.tools.getRegistry({ request })
+        : undefined;
       const getActionsClient = actions
         ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req)
         : undefined;
@@ -88,6 +112,7 @@ export const createSandboxWorkspaceManager = ({
         const manifestPaths = [
           CONNECTOR_MANIFEST_PATH,
           KIBANA_TOOLS_MANIFEST_PATH,
+          KIBANA_SDK_PATH,
           ...CONNECTOR_DOCS.map(({ path }) => path),
         ];
         const manifests = await session.statFiles(manifestPaths);
@@ -106,7 +131,13 @@ export const createSandboxWorkspaceManager = ({
           getActionsClient,
           logger,
         });
-        await writeKibanaToolsManifest({ session, callContext, getActionsClient, logger });
+        await writeKibanaToolsManifest({
+          session,
+          callContext,
+          getActionsClient,
+          getToolRegistry,
+          logger,
+        });
         lastWorkspaceKeys.set(session.sessionKey, currentKey);
       } catch (err) {
         lastWorkspaceKeys.delete(session.sessionKey);

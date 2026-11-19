@@ -19,10 +19,14 @@ const renderConnectorSection = (connector: AgentConnector): string => {
   const subActions = getCallableSubActionNames(connector);
   const howToCall =
     subActions.length > 0
-      ? `Call with \`kbn-tool connector ${connector.id} <sub-action>\` (sub-actions: ${subActions
+      ? `Call from Python with \`kibana.connectors["${
+          connector.id
+        }"].<sub_action>(...)\` (sub-actions: ${subActions
           .map((name) => `\`${name}\``)
-          .join(', ')}; parameters in ${KIBANA_TOOLS_MANIFEST_PATH}).`
-      : 'No `kbn-tool` sub-actions: pass this id as the `connector_id` of the bash command.';
+          .join(
+            ', '
+          )}; \`kibana.search_tools("<what you need>")\` shows their parameters, see ${KIBANA_TOOLS_MANIFEST_PATH}).`
+      : 'No sub-actions: pass this id as the `connector_id` of the bash command.';
   return `${heading}\n\n${howToCall}`;
 };
 
@@ -56,10 +60,11 @@ export const writeConnectorManifest = async ({
     '',
     'Connector credentials are never stored in this sandbox.',
     '',
-    `**Always call a connector that has sub-actions with \`kbn-tool connector <connector-id> <sub-action>\`**`,
-    `from bash or Python, as ${KIBANA_TOOLS_MANIFEST_PATH} describes. Kibana runs the request with the`,
-    "connector's credentials. Do not pass `connector_id` or use `curl` for such a connector. Each",
-    'connector below says whether it has sub-actions.',
+    '**Always call a connector that has sub-actions from Python with the `kibana_sdk` module**',
+    `(\`from kibana_sdk import kibana\`, as ${KIBANA_TOOLS_MANIFEST_PATH} describes). Kibana runs the`,
+    "request with the connector's credentials, and the parsed result stays in Python. Do not pass",
+    '`connector_id` or use `curl` for such a connector. Each connector below says whether it has',
+    'sub-actions.',
     '',
     'Only for a connector without sub-actions, pass its id as the `connector_id` parameter of the',
     'bash tool. For that single command only, the environment contains:',

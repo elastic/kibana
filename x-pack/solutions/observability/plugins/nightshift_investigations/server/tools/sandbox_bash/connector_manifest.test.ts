@@ -159,7 +159,7 @@ describe('writeConnectorManifest', () => {
 
       expect(content).toContain('# Sandbox Connectors');
       expect(content).toContain(
-        '**Always call a connector that has sub-actions with `kbn-tool connector <connector-id> <sub-action>`**'
+        '**Always call a connector that has sub-actions from Python with the `kibana_sdk` module**'
       );
       expect(content).toContain('pass its id as the `connector_id` parameter');
       expect(content).toContain('CONNECTOR_CONFIG_<KEY>');
@@ -185,10 +185,12 @@ describe('writeConnectorManifest', () => {
       expect(content).toContain('## My GitHub (connector-id: connector-1, type: .github)');
     });
 
-    it('tells the agent to call a connector with sub-actions through kbn-tool', async () => {
+    it('tells the agent to call a connector with sub-actions from Python with the SDK', async () => {
       const { content } = await renderManifest();
 
-      expect(content).toContain('Call with `kbn-tool connector connector-1 <sub-action>`');
+      expect(content).toContain(
+        'Call from Python with `kibana.connectors["connector-1"].<sub_action>(...)`'
+      );
     });
 
     it('lists only the sub-actions enabled on the connector', async () => {
@@ -206,7 +208,7 @@ describe('writeConnectorManifest', () => {
 
       expect(content).toContain('(sub-actions: `searchRepositories`;');
       expect(content).toMatch(
-        /connector-2, type: \.github\)\n\nNo `kbn-tool` sub-actions: pass this id as the `connector_id`/
+        /connector-2, type: \.github\)\n\nNo sub-actions: pass this id as the `connector_id`/
       );
     });
 
@@ -216,7 +218,7 @@ describe('writeConnectorManifest', () => {
       });
 
       expect(content).toContain(
-        'No `kbn-tool` sub-actions: pass this id as the `connector_id` of the bash command.'
+        'No sub-actions: pass this id as the `connector_id` of the bash command.'
       );
     });
 

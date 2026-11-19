@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ScopedRunner } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -14,12 +13,8 @@ import type { SelectedActions } from '@kbn/connector-specs';
 import type { SandboxCallbackHandler, SandboxCallbackResult } from '@kbn/sandbox-plugin/server';
 import { authorizeConnector } from './connector_authorization';
 import type { SandboxCallContext } from './tool_utils';
-
-/**
- * Agent Builder tools a sandbox command may call through `kbn-tool`. A tool joins this list only
- * when running it from code the agent wrote is as safe as the agent calling it directly.
- */
-export const SANDBOX_CALLABLE_TOOL_IDS: readonly string[] = [platformCoreTools.executeEsql];
+import { listSandboxCallableToolIds } from './sandbox_callable_tools';
+import type { SandboxToolRegistry } from './sandbox_callable_tools';
 
 export const KIBANA_TOOLS_MANIFEST_PATH = '/workspace/kibana_tools.md';
 
@@ -34,24 +29,34 @@ export const createSandboxCallbackHandler = ({
   runner,
   callContext,
   actions,
+  toolRegistry,
 }: {
   runner: Pick<ScopedRunner, 'runTool'>;
   callContext: SandboxCallContext;
   actions: ActionsPluginStart | undefined;
+  /** Decides which tools are callable; without it no tool is. */
+  toolRegistry: SandboxToolRegistry | undefined;
 }): SandboxCallbackHandler => {
+  // A command makes many callbacks; the registry answers once per command.
+  let callableToolIds: Promise<string[]> | undefined;
+  const getCallableToolIds = (): Promise<string[]> => {
+    callableToolIds ??= toolRegistry
+      ? listSandboxCallableToolIds(toolRegistry)
+      : Promise.resolve([]);
+    return callableToolIds;
+  };
+
   const callTool = async (
     toolId: string,
     params: Record<string, unknown>
   ): Promise<SandboxCallbackResult> => {
-    if (!SANDBOX_CALLABLE_TOOL_IDS.includes(toolId)) {
-      return {
-        ok: false,
-        errorMessage: `Tool '${toolId}' cannot be called from the sandbox. Callable tools: ${SANDBOX_CALLABLE_TOOL_IDS.join(
-          ', '
-        )}. See ${KIBANA_TOOLS_MANIFEST_PATH}.`,
-      };
-    }
     try {
+      if (!(await getCallableToolIds()).includes(toolId)) {
+        return {
+          ok: false,
+          errorMessage: `Tool '${toolId}' cannot be called from the sandbox. Find callable tools with kibana.search_tools('<what you need>') in /workspace/kibana_sdk.py.`,
+        };
+      }
       const { results = [] } = await runner.runTool({
         toolId,
         toolParams: params,

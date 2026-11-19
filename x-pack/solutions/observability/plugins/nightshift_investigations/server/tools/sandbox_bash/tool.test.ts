@@ -54,6 +54,16 @@ const setup = ({
   const tool = createSandboxBashTool({
     getSandboxStart: () => sandboxStart,
     getActions: () => undefined,
+    getToolRegistry: async () => ({
+      list: async () =>
+        [
+          {
+            id: 'platform.core.execute_esql',
+            type: 'builtin',
+            annotations: { readOnlyHint: true, destructiveHint: false },
+          },
+        ] as never,
+    }),
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
     sandboxAllowlistClient,
