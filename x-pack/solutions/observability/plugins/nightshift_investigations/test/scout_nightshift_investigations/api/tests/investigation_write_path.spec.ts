@@ -355,6 +355,7 @@ apiTest.describe(
             slack: {
               channel: thread.channel,
               thread_ts: thread.thread_ts,
+              permalink: `https://app.slack.com/client/${thread.workspace}/${thread.channel}/thread/${thread.channel}-${thread.thread_ts}`,
               status_message_ts: '1712345679.000200',
               seen_events: [{ event_id: 'EvSCOUT1', execution_id: 'exec-scout-1' }],
             },
