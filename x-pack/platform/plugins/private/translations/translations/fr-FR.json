@@ -68293,7 +68293,6 @@
     "xpack.streams.sources.createSourceFailedTitle": "Impossible de terminer la création de la source",
     "xpack.streams.sources.createSourceModalDescription": "Choisissez comment les données entreront dans ce flux",
     "xpack.streams.sources.createSourceModalTitle": "Créer une source",
-    "xpack.streams.sources.dangerAreaLabel": "Zone dangereuse",
     "xpack.streams.sources.deleteApiKeyAriaLabel": "Supprimer la clé API",
     "xpack.streams.sources.deleteApiKeyButtonLabel": "Supprimer",
     "xpack.streams.sources.deleteApiKeyConfirmButtonLabel": "Supprimer la clé API",

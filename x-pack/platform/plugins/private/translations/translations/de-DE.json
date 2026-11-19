@@ -68534,7 +68534,6 @@
     "xpack.streams.sources.createSourceFailedTitle": "Die Erstellung der Quelle konnte nicht abgeschlossen werden",
     "xpack.streams.sources.createSourceModalDescription": "Wählen Sie aus, wie Daten in diesen Stream gelangen",
     "xpack.streams.sources.createSourceModalTitle": "Quelle erstellen",
-    "xpack.streams.sources.dangerAreaLabel": "Gefahrenbereich",
     "xpack.streams.sources.deleteApiKeyAriaLabel": "API-Schlüssel löschen",
     "xpack.streams.sources.deleteApiKeyButtonLabel": "Löschen",
     "xpack.streams.sources.deleteApiKeyConfirmButtonLabel": "API-Schlüssel löschen",
