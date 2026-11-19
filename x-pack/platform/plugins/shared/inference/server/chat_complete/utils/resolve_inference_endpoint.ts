@@ -14,6 +14,7 @@ export interface InferenceEndpointMeta {
   provider?: string;
   modelId?: string;
   taskType?: string;
+  supportedReasoningEffortLevels?: string[];
 }
 
 /**
@@ -47,5 +48,7 @@ export const resolveInferenceEndpoint = async ({
     provider: endpoint.service,
     modelId: serviceSettings?.model_id ?? serviceSettings?.model ?? undefined,
     taskType: endpoint.taskType,
+    supportedReasoningEffortLevels:
+      endpoint.metadata?.capabilities?.reasoning?.supported_effort_levels,
   };
 };

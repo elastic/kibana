@@ -30,19 +30,26 @@ const modelMatchesAny = (model: string, candidates: readonly string[]): boolean 
  * native tools are present, the caller did not set reasoning, and the model is
  * known to require it, default to `{ effort: 'none' }`. Explicit caller values
  * always win. For every other model the field is omitted, since models with
- * mandatory reasoning reject `effort: none` outright.
+ * mandatory reasoning reject `effort: none` outright. The default is also skipped
+ * when the endpoint advertises effort levels that do not include `none`.
  */
 export const resolveChatCompletionReasoning = ({
   reasoning,
   hasNativeTools,
   model,
+  supportedEffortLevels,
 }: {
   reasoning?: ChatCompletionReasoning;
   hasNativeTools: boolean;
   model?: string;
+  supportedEffortLevels?: readonly string[];
 }): ChatCompletionReasoning | undefined => {
   if (reasoning) {
     return reasoning;
+  }
+
+  if (supportedEffortLevels?.length && !supportedEffortLevels.includes('none')) {
+    return undefined;
   }
 
   if (

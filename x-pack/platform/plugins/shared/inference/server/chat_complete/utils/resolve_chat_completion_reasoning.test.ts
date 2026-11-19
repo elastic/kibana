@@ -80,6 +80,28 @@ describe('resolveChatCompletionReasoning', () => {
     ).toBeUndefined();
   });
 
+  it('skips the default when the endpoint advertises levels without none', () => {
+    expect(
+      resolveChatCompletionReasoning({
+        hasNativeTools: true,
+        model: 'openai-gpt-6-astra',
+        supportedEffortLevels: ['xhigh', 'high', 'medium', 'low'],
+      })
+    ).toBeUndefined();
+  });
+
+  it('applies the default when the endpoint advertises none or no levels', () => {
+    for (const supportedEffortLevels of [['medium', 'none'], [], undefined]) {
+      expect(
+        resolveChatCompletionReasoning({
+          hasNativeTools: true,
+          model: 'openai-gpt-6-luna',
+          supportedEffortLevels,
+        })
+      ).toEqual({ effort: 'none' });
+    }
+  });
+
   it('keeps an explicit none effort when tools are present', () => {
     expect(
       resolveChatCompletionReasoning({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getSupportedReasoningEffortLevels } from '@kbn/inference-common';
 import { wrapWithSimulatedFunctionCalling } from '../../simulated_function_calling';
 import type { OpenAIRequest } from '../openai/types';
 import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from '../openai';
@@ -56,6 +57,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       reasoning,
       hasNativeTools: hasTools,
       model,
+      supportedEffortLevels: getSupportedReasoningEffortLevels(options.connector),
     });
 
     request = {

@@ -50,6 +50,7 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
   modelName?: string;
   // Endpoint model identity is authoritative for parameter support.
   endpointModelId?: string;
+  supportedReasoningEffortLevels?: string[];
   provider?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
@@ -81,6 +82,7 @@ export const inferenceEndpointAdapter = {
       reasoning,
       modelName,
       endpointModelId,
+      supportedReasoningEffortLevels,
       provider,
       logger,
       abortSignal,
@@ -126,6 +128,7 @@ export const inferenceEndpointAdapter = {
       reasoning,
       modelName,
       endpointModelId,
+      supportedReasoningEffortLevels,
       provider,
       cacheControl,
       sessionId,
@@ -159,6 +162,7 @@ const createEndpointRequest = ({
   reasoning,
   modelName,
   endpointModelId,
+  supportedReasoningEffortLevels,
   provider,
   cacheControl,
   sessionId,
@@ -173,6 +177,7 @@ const createEndpointRequest = ({
   reasoning?: ChatCompletionReasoning;
   modelName?: string;
   endpointModelId?: string;
+  supportedReasoningEffortLevels?: string[];
   provider?: string;
   cacheControl?: ChatCompleteCacheControl;
   sessionId?: string;
@@ -223,6 +228,7 @@ const createEndpointRequest = ({
     reasoning,
     hasNativeTools: hasTools,
     model: endpointModelId ?? modelName,
+    supportedEffortLevels: supportedReasoningEffortLevels,
   });
 
   return {

@@ -492,6 +492,33 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
+    it('omits the reasoning default when the endpoint does not advertise the none effort level', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of({ choices: [], usage: null }), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'openai-gpt-6-astra',
+          supportedReasoningEffortLevels: ['xhigh', 'high', 'medium', 'low'],
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            reasoning: expect.anything(),
+          }),
+        })
+      );
+    });
+
     it('omits the reasoning default when the model is unknown', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of({ choices: [], usage: null }), logger)
