@@ -125,6 +125,8 @@ export const KpiAggregateBySchema = lazySchema(() => z.enum(['alert', 'case']));
 
 export const KpiDateBasisSchema = lazySchema(() => z.enum(['attached_at', 'case_closed_at']));
 
+export const KpiTilesDisplaySchema = lazySchema(() => z.enum(['expanded', 'collapsed']));
+
 export const KpiMetricGroupBySchema = lazySchema(() =>
   z.object({
     field: z.string(),
@@ -212,6 +214,10 @@ export const KpiMetricsConfigurationSchema = lazySchema(() =>
   z.object({
     casesList: z.array(KpiMetricSchema).optional(),
     caseDetails: z.array(KpiMetricSchema).optional(),
+    /**
+     * The start display of the KPI tiles on the case list. No value means expanded.
+     */
+    casesListDisplay: KpiTilesDisplaySchema.optional(),
   })
 );
 
@@ -300,6 +306,7 @@ export type KpiMetricDateField = z.infer<typeof KpiMetricDateFieldSchema>;
 export type KpiAcknowledgeTrigger = z.infer<typeof KpiAcknowledgeTriggerSchema>;
 export type KpiAggregateBy = z.infer<typeof KpiAggregateBySchema>;
 export type KpiDateBasis = z.infer<typeof KpiDateBasisSchema>;
+export type KpiTilesDisplay = z.infer<typeof KpiTilesDisplaySchema>;
 export type KpiMetricGroupBy = z.infer<typeof KpiMetricGroupBySchema>;
 export type PredefinedKpiMetricConfiguration = z.infer<typeof PredefinedKpiMetricSchema>;
 export type CustomKpiMetricConfiguration = z.infer<typeof CustomKpiMetricSchema>;

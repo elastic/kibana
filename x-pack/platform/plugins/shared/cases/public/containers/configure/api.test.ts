@@ -72,6 +72,7 @@ describe('Case Configuration API', () => {
 
     test('keeps the KPI metrics of the configuration', async () => {
       const metrics = {
+        casesListDisplay: 'collapsed' as const,
         casesList: [
           {
             id: 'metric-1',

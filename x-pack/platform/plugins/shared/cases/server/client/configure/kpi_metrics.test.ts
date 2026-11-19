@@ -41,4 +41,10 @@ describe('assignKpiMetricIds', () => {
     expect(result).toEqual({ casesList: [] });
     expect(result).not.toHaveProperty('caseDetails');
   });
+
+  it('keeps the default display of the KPI tiles', () => {
+    expect(assignKpiMetricIds({ casesListDisplay: 'collapsed' })).toEqual({
+      casesListDisplay: 'collapsed',
+    });
+  });
 });

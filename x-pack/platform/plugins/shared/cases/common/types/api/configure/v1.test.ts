@@ -894,6 +894,19 @@ describe('configure', () => {
       }
     );
 
+    it('accepts the default display of the KPI tiles and rejects another value', () => {
+      ['expanded', 'collapsed'].forEach((casesListDisplay) => {
+        const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesListDisplay });
+
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ casesListDisplay });
+      });
+      expect(KpiMetricsConfigurationRequestSchema.safeParse({}).success).toBe(true);
+      expect(
+        KpiMetricsConfigurationRequestSchema.safeParse({ casesListDisplay: 'hidden' }).success
+      ).toBe(false);
+    });
+
     it('accepts metrics in the configure request and the patch request', () => {
       const metrics = { casesList: [customMetric] };
       expect(

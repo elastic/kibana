@@ -40,6 +40,7 @@ import {
   ClosureTypeSchema,
   ConfigurationBasicWithoutOwnerSchema,
   KpiAcknowledgeTriggerSchema,
+  KpiTilesDisplaySchema,
   KpiAggregateBySchema,
   KpiDateBasisSchema,
   KpiMetricAggregationTypeSchema,
@@ -273,6 +274,7 @@ export const KpiMetricsConfigurationRequestSchema = lazySchema(() =>
   z.object({
     casesList: KpiMetricsListRequestSchema('metrics.casesList').optional(),
     caseDetails: KpiMetricsListRequestSchema('metrics.caseDetails').optional(),
+    casesListDisplay: KpiTilesDisplaySchema.optional(),
   })
 );
 

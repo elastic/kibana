@@ -11,6 +11,7 @@ import { CustomFieldTypes } from '../custom_field/v1';
 import {
   ConfigurationAttributesSchema,
   ConfigurationSchema,
+  KpiMetricsConfigurationSchema,
   CustomFieldConfigurationWithoutTypeSchema,
   TemplateConfigurationSchema,
   TextCustomFieldConfigurationSchema,
@@ -228,6 +229,18 @@ describe('configure', () => {
       const result = ConfigurationAttributesSchema.safeParse(request);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(request);
+    });
+  });
+
+  describe('KpiMetricsConfigurationSchema', () => {
+    it('keeps the default display of the KPI tiles', () => {
+      expect(
+        KpiMetricsConfigurationSchema.safeParse({ casesListDisplay: 'collapsed' }).data
+      ).toStrictEqual({ casesListDisplay: 'collapsed' });
+      expect(KpiMetricsConfigurationSchema.safeParse({}).data).toStrictEqual({});
+      expect(KpiMetricsConfigurationSchema.safeParse({ casesListDisplay: 'hidden' }).success).toBe(
+        false
+      );
     });
   });
 
