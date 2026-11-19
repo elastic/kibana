@@ -43,4 +43,31 @@ describe('KEEP', () => {
 
     expect(result.map(({ name }) => name)).toEqual(['field2', 'field1']);
   });
+
+  it.each([
+    { command: 'KEEP field*', expected: ['field2', 'field1'] },
+    { command: 'KEEP field1, *', expected: ['field1', 'field2', 'other'] },
+    { command: 'KEEP *, field1', expected: ['field2', 'other', 'field1'] },
+  ])('expands wildcards for $command', ({ command, expected }) => {
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'field2', type: 'double', userDefined: false },
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'other', type: 'integer', userDefined: false },
+    ];
+
+    const result = columnsAfter(synth.cmd(command), previousCommandFields, '');
+
+    expect(result.map(({ name }) => name)).toEqual(expected);
+  });
+
+  it('keeps an asterisk inside backticks literal', () => {
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'field*', type: 'keyword', userDefined: false },
+      { name: 'field1', type: 'double', userDefined: false },
+    ];
+
+    const result = columnsAfter(synth.cmd('KEEP `field*`'), previousCommandFields, '');
+
+    expect(result.map(({ name }) => name)).toEqual(['field*']);
+  });
 });

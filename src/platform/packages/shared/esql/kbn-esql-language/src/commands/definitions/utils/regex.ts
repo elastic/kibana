@@ -78,6 +78,11 @@ export function escapeRegExp(text: string): string {
   return text.replace(REGEX_SPECIAL_CHARS, '\\$&');
 }
 
+/** True when a column name is a pattern: it has an asterisk that is not written inside backticks. */
+export function isWildcardColumn(name: string, text: string): boolean {
+  return name.includes('*') && !text.includes('`');
+}
+
 export function matchesWildcardPattern(pattern: string, value: string): boolean {
   const regex = new RegExp(
     `^${escapeRegExp(pattern).replace(ESCAPED_WILDCARD_ASTERISK_REGEX, '.*')}$`

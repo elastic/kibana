@@ -9,31 +9,42 @@
 import type { ESQLCommand } from '@elastic/esql/types';
 import { walk } from '@elastic/esql';
 import type { ESQLColumnData } from '../types';
+import { isWildcardColumn, matchesWildcardPattern } from '../../definitions/utils/regex';
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
   query: string
 ) => {
-  const columnsToKeep: string[] = [];
+  const columnsByName = new Map(previousColumns.map((column) => [column.name, column]));
+  const columnsToKeep: ESQLColumnData[] = [];
 
   walk(command, {
-    visitColumn: (node) => {
-      columnsToKeep.push(node.parts.join('.'));
+    visitColumn: ({ parts, text }) => {
+      const name = parts.join('.');
+
+      // A pattern adds the matching columns that are not kept yet, in their input order.
+      if (isWildcardColumn(name, text)) {
+        const matches = previousColumns.filter(
+          (column) => matchesWildcardPattern(name, column.name) && !columnsToKeep.includes(column)
+        );
+        columnsToKeep.push(...matches);
+        return;
+      }
+
+      // An exact name moves its column to the end: `KEEP a, b, a` returns `[b, a]`.
+      const column = columnsByName.get(name);
+      if (!column) {
+        return;
+      }
+      const index = columnsToKeep.indexOf(column);
+      if (index !== -1) {
+        columnsToKeep.splice(index, 1);
+      }
+      columnsToKeep.push(column);
     },
   });
 
-  const columnsByName = new Map(previousColumns.map((column) => [column.name, column]));
-  const uniqueColumnsToKeep = columnsToKeep.filter(
-    (name, index) => columnsToKeep.lastIndexOf(name) === index
-  );
-
-  // KEEP follows the written order and keeps the last occurrence of repeated columns.
-  // For example, `KEEP a, b, a` returns `[b, a]`.
   // Multi-column IN uses this order to compare the fields on each side.
-  return uniqueColumnsToKeep.flatMap((name) => {
-    const column = columnsByName.get(name);
-
-    return column ? [column] : [];
-  });
+  return columnsToKeep;
 };

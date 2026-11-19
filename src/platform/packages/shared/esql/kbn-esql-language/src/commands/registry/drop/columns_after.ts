@@ -9,18 +9,22 @@
 import { walk } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../types';
+import { isWildcardColumn, matchesWildcardPattern } from '../../definitions/utils/regex';
 
 export const columnsAfter = (command: ESQLCommand, previousColumns: ESQLColumnData[]) => {
-  const columnsToDrop: string[] = [];
+  const namesToDrop: string[] = [];
+  const patternsToDrop: string[] = [];
 
   walk(command, {
-    visitColumn: (node) => {
-      columnsToDrop.push(node.parts.join('.'));
+    visitColumn: ({ parts, text }) => {
+      const name = parts.join('.');
+      (isWildcardColumn(name, text) ? patternsToDrop : namesToDrop).push(name);
     },
   });
 
-  return previousColumns.filter((field) => {
-    // if the field is not in the columnsToDrop, keep it
-    return !columnsToDrop.some((column) => column === field.name);
-  });
+  return previousColumns.filter(
+    ({ name }) =>
+      !namesToDrop.includes(name) &&
+      !patternsToDrop.some((pattern) => matchesWildcardPattern(pattern, name))
+  );
 };

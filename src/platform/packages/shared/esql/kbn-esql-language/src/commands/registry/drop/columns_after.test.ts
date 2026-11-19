@@ -21,4 +21,19 @@ describe('DROP', () => {
 
     expect(result).toEqual([{ name: 'field2', type: 'double', userDefined: false }]);
   });
+
+  it.each([
+    { command: 'DROP field*', expected: ['other'] },
+    { command: 'DROP `field*`', expected: ['field1', 'other'] },
+  ])('removes the columns matching $command', ({ command, expected }) => {
+    const previousColumns: ESQLColumnData[] = [
+      { name: 'field*', type: 'keyword', userDefined: false },
+      { name: 'field1', type: 'double', userDefined: false },
+      { name: 'other', type: 'integer', userDefined: false },
+    ];
+
+    const result = columnsAfter(synth.cmd(command), previousColumns);
+
+    expect(result.map(({ name }) => name)).toEqual(expected);
+  });
 });

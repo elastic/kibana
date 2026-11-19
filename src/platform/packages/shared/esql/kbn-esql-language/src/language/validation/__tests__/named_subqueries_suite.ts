@@ -64,6 +64,15 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
       }
     );
 
+    it('keeps comparing IN columns when a KEEP of exact names follows a wildcard', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'LET a = (ROW k = "a", tmp1 = 1); ROW x = 1 | WHERE x IN (FROM a | DROP tmp* | KEEP k)',
+        ['Left field [x] of type [INTEGER] is incompatible with right field [k] of type [KEYWORD]']
+      );
+    });
+
     describe('METADATA', () => {
       it.each([
         {

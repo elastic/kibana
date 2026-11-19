@@ -94,20 +94,6 @@ const getUsedNamedSubqueries = (
   return used;
 };
 
-/** Returns the commands of a query and of the LETs it reads, or none when it reads no LET. */
-const getCommandsReadingNamedSubqueries = (
-  commands: ESQLCommand[],
-  namedSubqueries: NamedSubquery[]
-): ESQLCommand[] => {
-  const usedNamedSubqueries = [...getUsedNamedSubqueries(commands, namedSubqueries)];
-
-  if (usedNamedSubqueries.length === 0) {
-    return [];
-  }
-
-  return [...commands, ...usedNamedSubqueries.flatMap(({ query }) => query.commands)];
-};
-
 /**
  * True when the query reads a LET and uses METADATA, in the main query or in a LET it reads.
  * We can't know every METADATA column Elasticsearch adds in this case, so we let it do the check.
@@ -115,26 +101,16 @@ const getCommandsReadingNamedSubqueries = (
 const readsNamedSubqueryWithMetadata = (
   rootCommands: ESQLCommand[],
   namedSubqueries: NamedSubquery[]
-): boolean =>
-  Walker.matchAll(getCommandsReadingNamedSubqueries(rootCommands, namedSubqueries), {
-    type: 'option',
-    name: 'metadata',
-  }).length > 0;
-
-/**
- * True when the query reads a LET and KEEP or DROP use a wildcard, in the query or in a LET it reads.
- * Kibana doesn't expand these wildcards, so it can't know the columns the query returns.
- */
-const readsNamedSubqueryWithWildcardProjection = (
-  commands: ESQLCommand[],
-  namedSubqueries: NamedSubquery[]
 ): boolean => {
-  const projections = Walker.matchAll(getCommandsReadingNamedSubqueries(commands, namedSubqueries), {
-    type: 'command',
-    name: ['keep', 'drop'],
-  });
+  const usedNamedSubqueries = [...getUsedNamedSubqueries(rootCommands, namedSubqueries)];
 
-  return Walker.matchAll(projections, { type: 'column', name: /\*/ }).length > 0;
+  if (usedNamedSubqueries.length === 0) {
+    return false;
+  }
+
+  const commands = [...rootCommands, ...usedNamedSubqueries.flatMap(({ query }) => query.commands)];
+
+  return Walker.matchAll(commands, { type: 'option', name: 'metadata' }).length > 0;
 };
 
 /**
@@ -293,17 +269,14 @@ async function validateAst(
     ) {
       // We need the columns the subquery returns, which nothing has computed yet.
       // Cheap anyway: its source columns were already cached earlier in this loop.
-      // No columns skip the check, which Elasticsearch still does.
       const rightColumns = await Promise.all(
         inSubqueries.map(({ query }) =>
-          readsNamedSubqueryWithWildcardProjection(query.commands, namedSubqueries)
-            ? new Map()
-            : new QueryColumns(
-                { ...query, header: letCommands },
-                queryString,
-                callbacks,
-                options
-              ).asMap()
+          new QueryColumns(
+            { ...query, header: letCommands },
+            queryString,
+            callbacks,
+            options
+          ).asMap()
         )
       );
       messages.push(
