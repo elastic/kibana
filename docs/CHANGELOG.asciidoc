@@ -166,7 +166,7 @@ Discover::
 Elastic Observability solution::
 * Fix APM service dashboards and service metrics dashboards crashing the page with an `Embeddable has been destroyed` error ({kibana-pull}302552[#302552]).
 * Fix the Synthetics APIs that run a monitor test manually running tests on Elastic managed locations for users who lack permission to use them. The APIs now return a `403` error, like the disabled **Run test manually** option in the UI ({kibana-pull}302483[#302483]).
-* Fix Synthetics monitor status rule notifications showing the wrong time when you pass `context.checkedAt` to `FormatDate`, because that variable is already formatted without a timezone offset. Use the new `context.timestamp` action variable, an ISO 8601 time, with `FormatDate` instead ({kibana-pull}302776[#302776]).
+* Fix Synthetics monitor status rule notifications showing the wrong time when you pass `context.checkedAt` to `FormatDate`. This happens when the date format has no timezone offset, which is the default, and the {kib} server timezone differs from the `dateFormat:tz` setting. Use the new `context.timestamp` action variable, an ISO 8601 time, with `FormatDate` instead ({kibana-pull}302776[#302776]).
 // !!DEFERRED!! Not on the 8.19 branch (backport failed with merge conflicts, as of 2026-11-19). Re-verify against the next BC.
 // * Fix grouped Metric threshold and Custom threshold rules not raising a no-data alert for a group that stops reporting when the rule runs much less often than its time window, for example a 5-minute check interval with a 1-minute window ({kibana-pull}303559[#303559]).
 Elastic Security solution::
