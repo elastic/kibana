@@ -36,6 +36,7 @@ import {
   KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT,
   KPI_METRIC_ALERT_ACKNOWLEDGE_HINT,
   KPI_METRIC_ALERT_ACKNOWLEDGE_IN_PROGRESS_HINT,
+  KPI_METRIC_ALERT_CASE_QUERY_HINT,
   KPI_METRIC_ALERT_EACH_CASE_ONCE_HINT,
   KPI_METRIC_CLOSED_DATE_HINT,
   KPI_METRIC_UNKNOWN,
@@ -191,6 +192,9 @@ const getDateHint = (metric: KpiMetricConfiguration): string | undefined => {
 
   return [
     getAcknowledgeRuleHint(metric.acknowledgeTrigger),
+    ...(metric.caseQuery != null && metric.caseQuery.trim() !== ''
+      ? [KPI_METRIC_ALERT_CASE_QUERY_HINT]
+      : []),
     ...(metric.aggregateBy === 'case' ? [KPI_METRIC_ALERT_EACH_CASE_ONCE_HINT] : []),
     ...(metric.dateBasis === 'case_closed_at' ? [KPI_METRIC_CLOSED_DATE_HINT] : []),
   ].join(' ');

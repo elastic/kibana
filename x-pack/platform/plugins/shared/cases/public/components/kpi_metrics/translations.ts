@@ -115,6 +115,21 @@ export const QUERY_HELP = (fields: string) =>
     defaultMessage: 'Optional. Use the analytics field names. Available fields: {fields}',
   });
 
+export const CASE_QUERY = i18n.translate('xpack.cases.kpiMetrics.caseQuery', {
+  defaultMessage: 'Case query (KQL)',
+});
+
+export const CASE_QUERY_HELP = (fields: string) =>
+  i18n.translate('xpack.cases.kpiMetrics.caseQueryHelp', {
+    values: { fields },
+    defaultMessage:
+      'Optional. Only alerts of the cases that match the query are counted. Use the analytics field names. Available fields: {fields}',
+  });
+
+export const CASE_QUERY_INVALID = i18n.translate('xpack.cases.kpiMetrics.caseQueryInvalid', {
+  defaultMessage: 'The case query is not valid KQL.',
+});
+
 export const AGGREGATION = i18n.translate('xpack.cases.kpiMetrics.aggregation', {
   defaultMessage: 'Calculation',
 });

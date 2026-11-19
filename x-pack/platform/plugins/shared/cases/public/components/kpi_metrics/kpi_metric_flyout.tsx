@@ -230,8 +230,29 @@ const KpiMetricGroupByRows: React.FC<KpiMetricRowsProps> = ({
 };
 KpiMetricGroupByRows.displayName = 'KpiMetricGroupByRows';
 
-const KpiMetricAlertOptionRows: React.FC<KpiMetricRowsProps> = ({ state, update }) => (
+const KpiMetricAlertOptionRows: React.FC<KpiMetricRowsProps> = ({
+  state,
+  errors,
+  showErrors,
+  update,
+}) => (
   <>
+    <EuiFormRow
+      label={i18n.CASE_QUERY}
+      helpText={i18n.CASE_QUERY_HELP(KPI_FIELD_CATALOG.cases.map(({ field }) => field).join(', '))}
+      fullWidth
+      isInvalid={showErrors && errors.caseQuery != null}
+      error={errors.caseQuery}
+    >
+      <EuiTextArea
+        fullWidth
+        rows={2}
+        value={state.caseQuery}
+        onChange={(e) => update({ caseQuery: e.target.value })}
+        isInvalid={showErrors && errors.caseQuery != null}
+        data-test-subj="kpi-metric-case-query"
+      />
+    </EuiFormRow>
     <EuiFormRow label={i18n.ACKNOWLEDGE_TRIGGER} helpText={i18n.ACKNOWLEDGE_TRIGGER_HELP} fullWidth>
       <EuiSelect
         fullWidth

@@ -306,6 +306,28 @@ describe('kpi metric form', () => {
       expect(toKpiMetricRequest(toKpiMetricFormState(metric), metric)).toEqual(metric);
     });
 
+    it('round trips the case query and writes no case query for an empty field', () => {
+      const metric = { ...alertMetric, caseQuery: 'case.category: "IR"' };
+      const state = toKpiMetricFormState(metric);
+
+      expect(state.caseQuery).toBe('case.category: "IR"');
+      expect(toKpiMetricRequest(state, metric)).toEqual(metric);
+      expect(toKpiMetricRequest({ ...state, caseQuery: '  ' }, metric)).toEqual(alertMetric);
+      expect(toKpiMetricRequest(toKpiMetricFormState(alertMetric), alertMetric)).toEqual(
+        alertMetric
+      );
+    });
+
+    it('gives an error for a case query that is not valid KQL', () => {
+      const state = toKpiMetricFormState(alertMetric);
+
+      expect(validateKpiMetricForm({ ...state, caseQuery: 'case.category: "IR"' })).toEqual({});
+      expect(
+        validateKpiMetricForm({ ...state, caseQuery: 'case.category: "IR" or (case.status: *' })
+          .caseQuery
+      ).toBeDefined();
+    });
+
     it('reads the per-case mode and writes it only when it is not the default or was saved', () => {
       const state = toKpiMetricFormState(alertMetric);
 

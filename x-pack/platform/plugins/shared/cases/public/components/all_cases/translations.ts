@@ -205,6 +205,13 @@ export const KPI_METRIC_ALERT_ACKNOWLEDGE_HINT = i18n.translate(
   }
 );
 
+export const KPI_METRIC_ALERT_CASE_QUERY_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricAlertCaseQueryHint',
+  {
+    defaultMessage: 'Only cases that match the case query are counted.',
+  }
+);
+
 export const KPI_METRIC_ALERT_EACH_CASE_ONCE_HINT = i18n.translate(
   'xpack.cases.casesStats.kpiMetricAlertEachCaseOnceHint',
   {

@@ -436,6 +436,35 @@ describe('KpiMetricsSettings', () => {
       );
     });
 
+    it('saves the case query of an alert metric and shows an error for a query that is not valid', async () => {
+      const alertMetric = {
+        id: 'alert-1',
+        kind: 'predefined' as const,
+        predefinedId: 'alert_time_to_acknowledge_median',
+        display: 'value' as const,
+      };
+      renderWithTestingProviders(
+        <KpiMetricsSettings kpiMetrics={[alertMetric]} isLoading={false} onSave={onSave} />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.type(await screen.findByTestId('kpi-metric-case-query'), 'case.status: (');
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      expect(await screen.findByText('The case query is not valid KQL.')).toBeInTheDocument();
+      expect(onSave).not.toHaveBeenCalled();
+
+      await userEvent.clear(screen.getByTestId('kpi-metric-case-query'));
+      await userEvent.type(screen.getByTestId('kpi-metric-case-query'), 'case.category: Network');
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      await waitFor(() =>
+        expect(onSave).toHaveBeenCalledWith([
+          { ...alertMetric, caseQuery: 'case.category: Network' },
+        ])
+      );
+    });
+
     it('saves the close date basis of an alert metric', async () => {
       const alertMetric = {
         id: 'alert-1',

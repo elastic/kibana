@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import type { KpiFieldType, KpiMetricIndex } from '../../../common/constants';
 import {
   DEFAULT_KPI_BREAKDOWN_SIZE,
@@ -68,6 +69,10 @@ export interface KpiMetricFormState {
    * The date that the date range of an alert metric applies to
    */
   dateBasis: KpiDateBasis;
+  /**
+   * The KQL on the case fields of an alert metric. An empty string means no case query.
+   */
+  caseQuery: string;
 }
 
 export const DEFAULT_ACKNOWLEDGE_TRIGGER: KpiAcknowledgeTrigger = 'assigned_or_in_progress';
@@ -77,6 +82,7 @@ export const DEFAULT_DATE_BASIS: KpiDateBasis = 'attached_at';
 export interface KpiMetricFormErrors {
   label?: string;
   query?: string;
+  caseQuery?: string;
   field?: string;
   thresholdValue?: string;
   groupByField?: string;
@@ -197,6 +203,7 @@ const toPredefinedFormState = (
   acknowledgeTrigger: metric.acknowledgeTrigger ?? DEFAULT_ACKNOWLEDGE_TRIGGER,
   aggregateBy: metric.aggregateBy ?? DEFAULT_AGGREGATE_BY,
   dateBasis: metric.dateBasis ?? DEFAULT_DATE_BASIS,
+  caseQuery: metric.caseQuery ?? '',
 });
 
 export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetricFormState => {
@@ -219,6 +226,7 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
     acknowledgeTrigger: DEFAULT_ACKNOWLEDGE_TRIGGER,
     aggregateBy: DEFAULT_AGGREGATE_BY,
     dateBasis: DEFAULT_DATE_BASIS,
+    caseQuery: '',
   };
 
   if (metric == null) {
@@ -251,6 +259,18 @@ const validateGroupBy = (state: KpiMetricFormState): KpiMetricFormErrors => ({
   ...(toGroupBySize(state.groupBySize) == null && { groupBySize: i18n.GROUP_BY_SIZE_ERROR }),
 });
 
+const validateCaseQuery = (caseQuery: string): string | undefined => {
+  if (caseQuery.length > MAX_METRIC_QUERY_LENGTH) {
+    return i18n.MAX_LENGTH_ERROR(MAX_METRIC_QUERY_LENGTH);
+  }
+
+  try {
+    fromKueryExpression(caseQuery);
+  } catch (error) {
+    return i18n.CASE_QUERY_INVALID;
+  }
+};
+
 export const validateKpiMetricForm = (state: KpiMetricFormState): KpiMetricFormErrors => {
   const isBreakdown = isBreakdownMetric(state);
   const errors: KpiMetricFormErrors = isBreakdown ? validateGroupBy(state) : {};
@@ -266,7 +286,9 @@ export const validateKpiMetricForm = (state: KpiMetricFormState): KpiMetricFormE
   }
 
   if (state.kind === 'predefined') {
-    return errors;
+    const caseQueryError = isAlertMetric(state) ? validateCaseQuery(state.caseQuery) : undefined;
+
+    return caseQueryError != null ? { ...errors, caseQuery: caseQueryError } : errors;
   }
 
   if (state.label.trim() === '') {
@@ -309,8 +331,7 @@ const toThreshold = (state: KpiMetricFormState): KpiMetricThreshold | undefined 
 
 /**
  * Returns the options of an alert metric. The trigger, the per-case mode, and the date basis are written when
- * they are not the default, or when the saved metric already had them. The other saved options stay as they are,
- * because this form does not edit them.
+ * they are not the default, or when the saved metric already had them. The case query is written when it is not empty.
  */
 const toAlertOptions = (
   state: KpiMetricFormState,
@@ -332,7 +353,7 @@ const toAlertOptions = (
     ...((saved?.dateBasis != null || state.dateBasis !== DEFAULT_DATE_BASIS) && {
       dateBasis: state.dateBasis,
     }),
-    ...(saved?.caseQuery != null && { caseQuery: saved.caseQuery }),
+    ...(state.caseQuery.trim() !== '' && { caseQuery: state.caseQuery.trim() }),
     ...((saved?.acknowledgeTrigger != null ||
       state.acknowledgeTrigger !== DEFAULT_ACKNOWLEDGE_TRIGGER) && {
       acknowledgeTrigger: state.acknowledgeTrigger,
