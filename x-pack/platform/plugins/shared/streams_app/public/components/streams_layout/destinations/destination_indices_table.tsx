@@ -266,7 +266,12 @@ export const DestinationIndicesTable = ({
         truncateText: true,
         minWidth: NAME_COLUMN_MIN_WIDTH,
         render: (name: string) => (
-          <EuiToolTip content={name} display="block" anchorProps={{ css: truncateStyles }}>
+          <EuiToolTip
+            content={name}
+            display="block"
+            anchorProps={{ css: truncateStyles }}
+            disableScreenReaderOutput
+          >
             <EuiLink
               data-test-subj="streamsDestinationIndexLink"
               {...indexLinkProps(name, 'overview')}

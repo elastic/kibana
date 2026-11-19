@@ -281,8 +281,6 @@ export const SourceDetailsFlyout = ({
               <EuiSpacer size="s" />
               <EuiButton
                 color="danger"
-                fill
-                size="s"
                 onClick={() => setIsConfirmingDelete(true)}
                 data-test-subj="streamsSourceDeleteButton"
               >
