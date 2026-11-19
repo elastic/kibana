@@ -11,7 +11,11 @@ import yargs from 'yargs';
 import { CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
 import { AttachmentType, CaseStatuses } from '../../common/types/domain';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../common/utils/attachments';
-import { ATTACHMENTS_INDEX_NAME, CASE_INDEX_NAME } from '../../server/cases_analytics_v2/constants';
+import {
+  ACTIVITY_INDEX_NAME,
+  ATTACHMENTS_INDEX_NAME,
+  CASE_INDEX_NAME,
+} from '../../server/cases_analytics_v2/constants';
 import { createEsClient } from '../cases_generator/clients';
 import { logger } from '../cases_generator/logger';
 import { installSeededRandom, rng } from '../cases_generator/seeded_random';
@@ -21,8 +25,13 @@ import {
   DEMO_ALERT_RULE_NAME,
   DEMO_ALERT_RULE_TAG,
 } from '../seed_demo_alert_attachments/demo_alert';
-import type { DemoCaseTimeFields } from './timeline';
-import { buildDemoAlertTimes, buildDemoTimeline, getDemoCaseTimeFields } from './timeline';
+import type { DemoActivityEvent, DemoCaseTimeFields, DemoTimeline } from './timeline';
+import {
+  buildDemoActivityEvents,
+  buildDemoAlertTimes,
+  buildDemoTimeline,
+  getDemoCaseTimeFields,
+} from './timeline';
 
 const PAGE_SIZE = 500;
 const PIT_KEEP_ALIVE = '1m';
@@ -33,6 +42,11 @@ const ATTACHMENT_SAVED_OBJECT_TYPES = [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMEN
 interface BackdatedCase {
   caseId: string;
   createdAt: string;
+  timeline: DemoTimeline;
+  space: string;
+  owner: string;
+  assigneeUids: string[];
+  actor?: CaseUser;
 }
 
 interface AlertAttachmentSource {
@@ -50,7 +64,18 @@ interface AlertAttachment {
 interface AlertAttachmentCounts {
   attachments: number;
   alerts: number;
+  /**
+   * The new attach times of the alert attachments of each case
+   */
+  attachTimes: Map<string, string[]>;
 }
+
+interface ActivityCounts {
+  deleted: number;
+  written: number;
+}
+
+const ACTIVITY_ACTION_TYPES = ['status', 'assignees'];
 
 interface CaseUser {
   username?: string | null;
@@ -60,7 +85,7 @@ interface CaseUser {
 }
 
 interface CaseSource {
-  cases: { created_by?: CaseUser };
+  cases: { created_by?: CaseUser; owner?: string; assignees?: Array<{ uid: string }> };
   namespaces?: string[];
 }
 
@@ -253,7 +278,7 @@ const backdateDemoAlertAttachments = async ({
   );
 
   if (attachments.length === 0) {
-    return { attachments: 0, alerts: 0 };
+    return { attachments: 0, alerts: 0, attachTimes: new Map() };
   }
 
   const demoAlerts = await findDemoAlerts(
@@ -265,7 +290,7 @@ const backdateDemoAlertAttachments = async ({
   );
 
   if (demoAttachments.length === 0) {
-    return { attachments: 0, alerts: 0 };
+    return { attachments: 0, alerts: 0, attachTimes: new Map() };
   }
 
   const savedObjectTypes = await findAttachmentSavedObjectTypes(
@@ -275,6 +300,7 @@ const backdateDemoAlertAttachments = async ({
   const operations: estypes.BulkOperationContainer[] = [];
   const documents: Array<Record<string, unknown>> = [];
   let alertCount = 0;
+  const attachTimes = new Map<string, string[]>();
 
   cases.forEach(({ caseId, createdAt }) => {
     const caseAttachments = demoAttachments.filter((attachment) => attachment.caseId === caseId);
@@ -287,6 +313,7 @@ const backdateDemoAlertAttachments = async ({
 
     caseAttachments.forEach(({ id, alertIds }, position) => {
       const { attachedAt, startedAt } = times[position];
+      attachTimes.set(caseId, [...(attachTimes.get(caseId) ?? []), attachedAt]);
       const savedObjectType = savedObjectTypes.get(id);
 
       if (savedObjectType != null) {
@@ -323,7 +350,133 @@ const backdateDemoAlertAttachments = async ({
     });
   }
 
-  return { attachments: demoAttachments.length, alerts: alertCount };
+  return { attachments: demoAttachments.length, alerts: alertCount, attachTimes };
+};
+
+const toActivityDocument = (
+  { caseId, space, owner, actor }: BackdatedCase,
+  { timestamp, type, verb, status, assigneeUids }: DemoActivityEvent
+) => ({
+  '@timestamp': timestamp,
+  space_id: space,
+  owner,
+  case: { id: caseId },
+  actor: {
+    username: actor?.username ?? null,
+    full_name: actor?.full_name ?? null,
+    email: actor?.email ?? null,
+    ...(actor?.profile_uid != null && { profile_uid: actor.profile_uid }),
+  },
+  action: {
+    type,
+    verb,
+    payload_json: JSON.stringify(
+      type === 'status' ? { status } : { assignees: (assigneeUids ?? []).map((uid) => ({ uid })) }
+    ),
+    ...(type === 'status' ? { status_new: status } : { assignees_changed: assigneeUids }),
+  },
+  source: { type: 'user', id: 'user' },
+});
+
+/**
+ * Replaces the status and assignee activity documents of each given demo case. The delete matches
+ * the exact case ids, the space, the owner, and the two action types only. The new documents follow
+ * the time line of the case and its alert attach times.
+ */
+const replaceDemoActivityEvents = async ({
+  esClient,
+  cases,
+  attachTimes,
+  now,
+  dryRun,
+}: {
+  esClient: Client;
+  cases: BackdatedCase[];
+  attachTimes: Map<string, string[]>;
+  now: Date;
+  dryRun: boolean;
+}): Promise<ActivityCounts> => {
+  const counts: ActivityCounts = { deleted: 0, written: 0 };
+  const documents = cases.flatMap((demoCase) =>
+    buildDemoActivityEvents({
+      timeline: demoCase.timeline,
+      attachTimes: attachTimes.get(demoCase.caseId) ?? [],
+      assigneeUids: demoCase.assigneeUids,
+      now,
+      random: rng,
+    }).map((event) => toActivityDocument(demoCase, event))
+  );
+
+  for (const group of groupBySpaceAndOwner(cases)) {
+    const query: estypes.QueryDslQueryContainer = {
+      bool: {
+        filter: [
+          { term: { space_id: group.space } },
+          { term: { owner: group.owner } },
+          { terms: { 'case.id': group.caseIds } },
+          { terms: { 'action.type': ACTIVITY_ACTION_TYPES } },
+        ],
+      },
+    };
+
+    if (dryRun) {
+      const { count } = await esClient.count({ index: ACTIVITY_INDEX_NAME, query });
+      counts.deleted += count;
+    } else {
+      const response = await esClient.deleteByQuery({
+        index: ACTIVITY_INDEX_NAME,
+        query,
+        refresh: true,
+        conflicts: 'proceed',
+      });
+      counts.deleted += response.deleted ?? 0;
+    }
+  }
+
+  if (dryRun) {
+    return { ...counts, written: documents.length };
+  }
+
+  if (documents.length > 0) {
+    const response = await esClient.bulk({
+      refresh: 'wait_for',
+      operations: documents.flatMap((document) => [
+        { create: { _index: ACTIVITY_INDEX_NAME } },
+        document,
+      ]),
+    });
+
+    response.items.forEach(({ create }) => {
+      if (create?.error != null) {
+        logger.error(`Failed to write ${create._index}: ${create.error.reason}`);
+      } else {
+        counts.written += 1;
+      }
+    });
+  }
+
+  return counts;
+};
+
+const groupBySpaceAndOwner = (
+  cases: BackdatedCase[]
+): Array<{ space: string; owner: string; caseIds: string[] }> => {
+  const groups = new Map<string, { space: string; owner: string; caseIds: string[] }>();
+
+  cases.forEach(({ caseId, space, owner }) => {
+    const key = JSON.stringify([space, owner]);
+    const group = groups.get(key) ?? { space, owner, caseIds: [] };
+    group.caseIds.push(caseId);
+    groups.set(key, group);
+  });
+
+  return Array.from(groups.values()).flatMap(({ space, owner, caseIds }) =>
+    Array.from({ length: Math.ceil(caseIds.length / PAGE_SIZE) }, (_, page) => ({
+      space,
+      owner,
+      caseIds: caseIds.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE),
+    }))
+  );
 };
 
 /**
@@ -347,7 +500,8 @@ export const runBackdate = async (): Promise<void> => {
   let updatedCases = 0;
   let missingAnalyticsDocs = 0;
   const backdatedCases: BackdatedCase[] = [];
-  let alertCounts: AlertAttachmentCounts = { attachments: 0, alerts: 0 };
+  let alertCounts: AlertAttachmentCounts = { attachments: 0, alerts: 0, attachTimes: new Map() };
+  let activityCounts: ActivityCounts = { deleted: 0, written: 0 };
   let { id: pitId } = await esClient.openPointInTime({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     keep_alive: PIT_KEEP_ALIVE,
@@ -360,7 +514,7 @@ export const runBackdate = async (): Promise<void> => {
         size: PAGE_SIZE,
         query,
         sort: [{ _shard_doc: 'asc' }],
-        _source: ['cases.created_by', 'namespaces'],
+        _source: ['cases.created_by', 'cases.owner', 'cases.assignees', 'namespaces'],
         ...(searchAfter != null && { search_after: searchAfter }),
       });
       pitId = page.pit_id ?? pitId;
@@ -377,7 +531,15 @@ export const runBackdate = async (): Promise<void> => {
         const fields = getDemoCaseTimeFields(timeline, now);
 
         scenarioCounts[timeline.scenario] = (scenarioCounts[timeline.scenario] ?? 0) + 1;
-        backdatedCases.push({ caseId, createdAt: fields.created_at });
+        backdatedCases.push({
+          caseId,
+          createdAt: fields.created_at,
+          timeline,
+          space: hit._source?.namespaces?.[0] ?? 'default',
+          owner: hit._source?.cases.owner ?? '',
+          assigneeUids: (hit._source?.cases.assignees ?? []).map(({ uid }) => uid),
+          actor: createdBy,
+        });
 
         return [
           { update: { _index: ALERTING_CASES_SAVED_OBJECT_INDEX, _id: hit._id } },
@@ -415,6 +577,13 @@ export const runBackdate = async (): Promise<void> => {
       now,
       dryRun: argv.dryRun,
     });
+    activityCounts = await replaceDemoActivityEvents({
+      esClient,
+      cases: backdatedCases.filter(({ owner }) => owner !== ''),
+      attachTimes: alertCounts.attachTimes,
+      now,
+      dryRun: argv.dryRun,
+    });
   } finally {
     restoreRandom?.();
     await esClient.closePointInTime({ id: pitId });
@@ -428,6 +597,12 @@ export const runBackdate = async (): Promise<void> => {
     `${argv.dryRun ? 'Planned' : 'Backdated'} ${
       alertCounts.attachments
     } demo alert attachments and ${alertCounts.alerts} demo alerts.`
+  );
+
+  logger.info(
+    `${argv.dryRun ? 'Would delete' : 'Deleted'} ${activityCounts.deleted} and ${
+      argv.dryRun ? 'would write' : 'wrote'
+    } ${activityCounts.written} status and assignee activity events.`
   );
 
   if (missingAnalyticsDocs > 0) {

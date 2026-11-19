@@ -9,6 +9,7 @@ import { CaseStatuses } from '../../common/types/domain';
 import { CasePersistedStatus } from '../../server/common/types/case';
 import type { DemoTimeline } from './timeline';
 import {
+  buildDemoActivityEvents,
   buildDemoAlertTimes,
   buildDemoTimeline,
   getDemoCaseTimeFields,
@@ -178,5 +179,107 @@ describe('buildDemoAlertTimes', () => {
       { attachedAt: createdAt, startedAt: at(-MINUTE_MS) },
       { attachedAt: at(10 * MINUTE_MS), startedAt: at(9 * MINUTE_MS) },
     ]);
+  });
+});
+
+describe('buildDemoActivityEvents', () => {
+  const resolved: DemoTimeline = {
+    scenario: 'resolved',
+    createdAt,
+    statusChanges: [
+      { status: CaseStatuses['in-progress'], timestamp: at(2 * HOUR_MS) },
+      { status: CaseStatuses.closed, timestamp: at(100 * HOUR_MS) },
+    ],
+  };
+  const events = (overrides: Partial<Parameters<typeof buildDemoActivityEvents>[0]> = {}) =>
+    buildDemoActivityEvents({
+      timeline: resolved,
+      attachTimes: [],
+      assigneeUids: [],
+      now,
+      random: () => 0,
+      ...overrides,
+    });
+
+  it('writes the status changes of the time line, and the last status event is the case status', () => {
+    const result = events();
+
+    expect(result.map(({ status }) => status)).toEqual([
+      CaseStatuses['in-progress'],
+      CaseStatuses.closed,
+    ]);
+    expect(result[result.length - 1]).toEqual({
+      timestamp: at(100 * HOUR_MS),
+      type: 'status',
+      verb: 'update',
+      status: CaseStatuses.closed,
+    });
+  });
+
+  it('writes no event for an open case', () => {
+    expect(
+      events({ timeline: { scenario: 'open', createdAt, statusChanges: [] }, attachTimes: [at(1)] })
+    ).toEqual([]);
+  });
+
+  it('adds an assignee event at each pickup only when the case has assignees', () => {
+    expect(events().some(({ type }) => type === 'assignees')).toBe(false);
+
+    const withAssignee = events({ assigneeUids: ['u1'] }).filter(
+      ({ type }) => type === 'assignees'
+    );
+
+    expect(withAssignee).toEqual([
+      { timestamp: at(2 * HOUR_MS), type: 'assignees', verb: 'add', assigneeUids: ['u1'] },
+    ]);
+  });
+
+  it('moves the case to Open at a later attach and to In progress 1 to 10 hours later', () => {
+    const result = events({ attachTimes: [at(1), at(10 * HOUR_MS)], random: () => 0 });
+
+    expect(result.map(({ status, timestamp }) => [status, timestamp])).toEqual([
+      [CaseStatuses['in-progress'], at(2 * HOUR_MS)],
+      [CaseStatuses.open, at(10 * HOUR_MS)],
+      [CaseStatuses['in-progress'], at(11 * HOUR_MS)],
+      [CaseStatuses.closed, at(100 * HOUR_MS)],
+    ]);
+  });
+
+  it('skips a later pickup that is after the last status change or after now', () => {
+    expect(events({ attachTimes: [at(99 * HOUR_MS + 1)], random: () => 0.99 })).toHaveLength(2);
+    expect(
+      events({
+        attachTimes: [at(50 * HOUR_MS)],
+        random: () => 0,
+        now: new Date(at(50 * HOUR_MS + 1)),
+      })
+    ).toHaveLength(2);
+  });
+
+  it('keeps every event in time order and before now', () => {
+    for (let run = 0; run < 50; run++) {
+      const timeline = buildDemoTimeline({ now, days: 60, random: Math.random });
+      const result = buildDemoActivityEvents({
+        timeline,
+        attachTimes: buildDemoAlertTimes({
+          createdAt: timeline.createdAt,
+          count: 3,
+          now,
+          random: Math.random,
+        }).map(({ attachedAt }) => attachedAt),
+        assigneeUids: [],
+        now,
+        random: Math.random,
+      });
+      const times = result.map(({ timestamp }) => Date.parse(timestamp));
+
+      expect([...times].sort((a, b) => a - b)).toEqual(times);
+      times.forEach((time) => expect(time).toBeLessThanOrEqual(now.getTime()));
+
+      const lastStatus = result.filter(({ type }) => type === 'status').pop()?.status;
+      const expected = timeline.statusChanges[timeline.statusChanges.length - 1]?.status;
+
+      expect(lastStatus).toBe(expected);
+    }
   });
 });

@@ -214,3 +214,89 @@ export const getDemoCaseTimeFields = (timeline: DemoTimeline, now: Date): DemoCa
     statusHistory: calculateStatusHistoryFields({ createdAt, statusChanges, now }),
   };
 };
+
+export interface DemoActivityEvent {
+  timestamp: string;
+  type: 'status' | 'assignees';
+  verb: 'update' | 'add';
+  status?: CaseStatuses;
+  assigneeUids?: string[];
+}
+
+/**
+ * Builds the status and assignee events of one demo case. The status events are the changes of the time line,
+ * so the last event agrees with the status of the case. A case with assignees gets an assignee event at each
+ * pickup. For each alert after the first pickup, the case moves to Open at the attach time and to In progress
+ * again 1 to 10 hours later, if that pickup is before the last status change and before now.
+ */
+export const buildDemoActivityEvents = ({
+  timeline,
+  attachTimes,
+  assigneeUids,
+  now,
+  random,
+}: {
+  timeline: DemoTimeline;
+  attachTimes: readonly string[];
+  assigneeUids: readonly string[];
+  now: Date;
+  random: () => number;
+}): DemoActivityEvent[] => {
+  const { statusChanges } = timeline;
+  const events: DemoActivityEvent[] = [];
+  const pickup = (timestamp: string) => {
+    events.push({
+      timestamp,
+      type: 'status',
+      verb: 'update',
+      status: CaseStatuses['in-progress'],
+    });
+
+    if (assigneeUids.length > 0) {
+      events.push({ timestamp, type: 'assignees', verb: 'add', assigneeUids: [...assigneeUids] });
+    }
+  };
+
+  statusChanges.forEach(({ status, timestamp }) => {
+    if (status === CaseStatuses['in-progress']) {
+      pickup(timestamp);
+    } else {
+      events.push({ timestamp, type: 'status', verb: 'update', status });
+    }
+  });
+
+  const firstPickup = statusChanges.find(
+    ({ status }) => status === CaseStatuses['in-progress']
+  )?.timestamp;
+  const lastChange = statusChanges[statusChanges.length - 1]?.timestamp;
+
+  if (firstPickup == null || lastChange == null) {
+    return events;
+  }
+
+  let previousEndMs = Date.parse(firstPickup);
+
+  [...attachTimes]
+    .sort((first, second) => Date.parse(first) - Date.parse(second))
+    .forEach((attachedAt) => {
+      const attachedAtMs = Date.parse(attachedAt);
+      const pickupMs = attachedAtMs + between(random, HOUR_MS, 10 * HOUR_MS);
+
+      if (
+        attachedAtMs > previousEndMs &&
+        pickupMs < Date.parse(lastChange) &&
+        pickupMs < now.getTime()
+      ) {
+        events.push({
+          timestamp: attachedAt,
+          type: 'status',
+          verb: 'update',
+          status: CaseStatuses.open,
+        });
+        pickup(new Date(pickupMs).toISOString());
+        previousEndMs = pickupMs;
+      }
+    });
+
+  return events.sort((first, second) => Date.parse(first.timestamp) - Date.parse(second.timestamp));
+};
