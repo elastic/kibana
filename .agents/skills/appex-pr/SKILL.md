@@ -1,10 +1,10 @@
 ---
-name: dashboards-pr
-description: Writes or updates elastic/kibana PR titles and descriptions following the Kibana Dashboards team's conventions (problem, solution, before/after, how to test, collapsed review notes, checklist and risks). Invoke explicitly, e.g. `/dashboards-pr`, `/dashboards-pr #304512`, `/dashboards-pr update 305973`.
+name: appex-pr
+description: Writes or updates elastic/kibana PR titles and descriptions following the Kibana AppEx teams' conventions (problem, solution, before/after, how to test, collapsed review notes, checklist and risks). Invoke explicitly, e.g. `/appex-pr`, `/appex-pr #304512`, `/appex-pr update 305973`.
 disable-model-invocation: true
 ---
 
-# Dashboards PR
+# AppEx PR
 
 Write PR descriptions a reviewer with no context can digest in a minute: restate the problem from the linked issue, describe the solution at a high level, show it, and say how to test it. Put reviewer-only detail and the template checklist in collapsed blocks.
 

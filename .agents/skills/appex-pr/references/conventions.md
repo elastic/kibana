@@ -3,7 +3,7 @@
 ## Title
 
 - **Format:** `[Area] Short human sentence`. It must read as a release note: Kibana uses the title without the `[Area]` prefix when there's no `## Release note` section.
-- **Area:** the user-facing feature name, matching the `Feature:*` label where one exists: `[Lens]`, `[Dashboard]`, `[Controls]`, `[Maps]`, `[ES|QL]`, `[Dashboards in Chat]`. Chain two only when it narrows the scope, as in `[Lens][Datatable]`.
+- **Area:** the user-facing feature name, matching the `Feature:*` label where one exists: `[Lens]`, `[Dashboard]`, `[Controls]`, `[Maps]`, `[ES|QL]`, `[Dashboards in Chat]`, `[Discover]`, `[Data Views]`. Chain two only when it narrows the scope, as in `[Lens][Datatable]`.
 - **Sentence:** start with an action verb such as Add, Fix, Improve, Show or Prevent, and say where the change is. Present tense, sentence case, no trailing period, under 80 characters.
 - **Fixes:** describe the symptom the user saw, not the code fix: `Fix missing city dots on the Dark basemap`, not `Namespace zoom-function sprite ids`.
 - **Features:** describe what users can now do.
