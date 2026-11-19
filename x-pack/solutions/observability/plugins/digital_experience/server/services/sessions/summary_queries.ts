@@ -261,16 +261,14 @@ export const HTTP_REQUEST_EVALS = `is_http_request = COALESCE(${KIND} == ${escap
        no_response = COALESCE(${STATUS_CODE} == ${escapeStringValue(SPAN_STATUS_ERROR)}, false)`;
 
 /** The requests with a known outcome, and the failed ones, as the applications list counts them. */
-export const HTTP_REQUEST_STATS: Stat[] = [
-  [
-    'http_request_count',
-    `COUNT(*) WHERE is_http_request AND (${HTTP_RESPONSE_STATUS_CODE} IS NOT NULL OR no_response)`,
-  ],
-  [
-    'http_failed_request_count',
-    `COUNT(*) WHERE is_http_request AND (COALESCE(${HTTP_RESPONSE_STATUS_CODE} >= 400, false) OR no_response)`,
-  ],
-];
+export const HTTP_REQUEST_CONDITIONS = {
+  http_request_count: `is_http_request AND (${HTTP_RESPONSE_STATUS_CODE} IS NOT NULL OR no_response)`,
+  http_failed_request_count: `is_http_request AND (COALESCE(${HTTP_RESPONSE_STATUS_CODE} >= 400, false) OR no_response)`,
+};
+
+export const HTTP_REQUEST_STATS: Stat[] = Object.entries(HTTP_REQUEST_CONDITIONS).map(
+  ([column, condition]): Stat => [column, `COUNT(*) WHERE ${condition}`]
+);
 
 const SESSION_STATS: Stat[] = [
   ['start_time', 'MIN(@timestamp)'],

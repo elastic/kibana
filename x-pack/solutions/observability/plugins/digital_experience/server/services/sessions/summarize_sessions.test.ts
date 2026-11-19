@@ -67,7 +67,7 @@ const setUp = ({
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.esql.query.mockImplementation((async ({ query, params = [] }) => {
     const named = params as estypes.EsqlNamedValue[];
-    if (query.includes('COUNT_DISTINCT')) {
+    if (query.includes('sessions = COUNT_DISTINCT')) {
       return result(['sessions'], [[changed(named)]]);
     }
     if (query.includes('VALUES(session_id)')) {
@@ -175,7 +175,7 @@ describe('summarizeSessions', () => {
     expect(progress.caughtUp).toBe(true);
     const windows = esClient.esql.query.mock.calls
       .map(([{ query, params }]) => ({ query, params: params as estypes.EsqlNamedValue[] }))
-      .filter(({ query }) => query.includes('COUNT_DISTINCT'))
+      .filter(({ query }) => query.includes('sessions = COUNT_DISTINCT'))
       .map(({ params }) => [paramOf(params, 'changed_from'), paramOf(params, 'changed_to')]);
     expect(windows[0]).toEqual([
       new Date(UNTIL - HOUR).toISOString(),
@@ -207,7 +207,7 @@ describe('summarizeSessions', () => {
     expect(progress.caughtUp).toBe(true);
     const windows = esClient.esql.query.mock.calls
       .map(([{ query, params }]) => ({ query, params: params as estypes.EsqlNamedValue[] }))
-      .filter(({ query }) => query.includes('COUNT_DISTINCT'))
+      .filter(({ query }) => query.includes('sessions = COUNT_DISTINCT'))
       .map(({ params }) => paramOf(params, 'changed_to'));
     expect(windows.slice(0, 2)).toEqual([
       new Date(UNTIL).toISOString(),

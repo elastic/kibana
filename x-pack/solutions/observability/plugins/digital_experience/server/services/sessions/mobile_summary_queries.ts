@@ -13,6 +13,7 @@ import {
   MOBILE_SDK_NAMES,
   OTEL_OBSERVED_TIMESTAMP,
   OTEL_SCOPE_NAME,
+  OTEL_SPAN_ID,
   VIEW_CONTROLLER_SCOPE,
 } from '../../../common/otel_data';
 import { SESSIONS_MAX_SESSION_HOURS } from '../../../common/sessions';
@@ -20,8 +21,8 @@ import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fiel
 import { SOURCE_SERVICE_NAME_FIELD, SOURCE_SESSION_ID_FIELD } from '../../lib/otel/source_fields';
 import {
   ESQL_MAX_ROWS,
+  HTTP_REQUEST_CONDITIONS,
   HTTP_REQUEST_EVALS,
-  HTTP_REQUEST_STATS,
   NULLIFY_UNMAPPED_FIELDS,
   RAW_PREFIX,
   attributeQueryParts,
@@ -91,7 +92,11 @@ const MOBILE_SESSION_STATS: Stat[] = [
   ['crash_count', 'COUNT(*) WHERE is_crash'],
   ['screen_view_count', 'COUNT(*) WHERE is_screen_view'],
   ['tap_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_WIDGET_CLICK)}`],
-  ...HTTP_REQUEST_STATS,
+  // EDOT Android and EDOT iOS export from a disk buffer at least once, so a retried export can
+  // store the same span twice.
+  ...Object.entries(HTTP_REQUEST_CONDITIONS).map(
+    ([column, condition]): Stat => [column, `COUNT_DISTINCT(${OTEL_SPAN_ID}) WHERE ${condition}`]
+  ),
   ...ATTRIBUTE_STATS,
 ];
 

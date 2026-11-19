@@ -73,8 +73,10 @@ describe('mobileSessionSummaryQuery', () => {
     expect(query).toContain('crash_count = COUNT(*) WHERE is_crash');
     expect(query).toContain('screen_view_count = COUNT(*) WHERE is_screen_view');
     expect(query).toContain('tap_count = COUNT(*) WHERE event == "app.widget.click"');
-    expect(query).toContain('http_request_count = ');
-    expect(query).toContain('http_failed_request_count = ');
+    expect(query).toContain('http_request_count = COUNT_DISTINCT(span_id) WHERE is_http_request');
+    expect(query).toContain(
+      'http_failed_request_count = COUNT_DISTINCT(span_id) WHERE is_http_request'
+    );
   });
 
   it('reads every attribute of the groups, and drops the raw columns', () => {
