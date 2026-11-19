@@ -24,9 +24,13 @@ import type { StrategyRunResult, TickResult } from './tick_result';
 import { EnabledSources, RunContext } from './tokens';
 
 /**
- * Time one tick has for all its generators together. A generator past it is aborted. JavaScript
- * cannot kill one that ignores the signal: it runs on after the tick returns, but the runner
- * stores nothing from it once the run has ended.
+ * Deadline for the generators of one tick, counted from taking the space's run lock, so a slow
+ * read of the generator state or the sources leaves them less time. A generator still running
+ * when it passes is aborted and reported with an error, and its generator state does not move.
+ * JavaScript cannot kill a generator that ignores its signal: it runs on, but nothing it returns
+ * is used. Only generators are cut off: the reads before them and the signal writes after them
+ * are not, so a slow cluster can keep the tick, and the lock, past the workflow's five-minute
+ * timeout. The minute between the two is the margin for them.
  */
 export const RUN_BUDGET_MS = 4 * 60_000;
 
@@ -59,7 +63,7 @@ export class EngineRunner {
   constructor(
     @inject(RunContext) private readonly runContext: RunContext,
     @inject(AvailabilityService)
-    private readonly availability: Pick<AvailabilityService, 'isAvailable'>,
+    private readonly availability: Pick<AvailabilityService, 'getUnavailableReason'>,
     @inject(StrategyCatalog) private readonly catalog: StrategyCatalog,
     @inject(DetectionStateClient) private readonly state: DetectionStateClient,
     @inject(SpaceRunLock) private readonly spaceRunLock: Pick<SpaceRunLock, 'run'>,
@@ -95,8 +99,9 @@ export class EngineRunner {
     const { runId, spaceId } = this.runContext;
 
     // 1. Availability: nothing is read or written while the engine is off for this deployment.
-    if (!(await this.availability.isAvailable())) {
-      return { run_id: runId, status: 'unavailable', strategies: [] };
+    const unavailableReason = await this.availability.getUnavailableReason();
+    if (unavailableReason !== undefined) {
+      return { run_id: runId, status: 'unavailable', reason: unavailableReason, strategies: [] };
     }
 
     // 2. One run per space at a time. The lock is released when the callback ends, however it ends.

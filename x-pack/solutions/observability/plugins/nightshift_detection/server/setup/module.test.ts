@@ -120,7 +120,9 @@ describe('module', () => {
   // missing token between the runner and the module shows up.
   it('runs a tick through a forked scope', async () => {
     const { container } = createContainer();
-    jest.spyOn(container.get(AvailabilityService), 'isAvailable').mockResolvedValue(true);
+    jest
+      .spyOn(container.get(AvailabilityService), 'getUnavailableReason')
+      .mockResolvedValue(undefined);
     await container.unbind(DetectionStateClient);
     container
       .bind(DetectionStateClient)

@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type { AvailabilityUnavailableReason } from '../availability/availability_service';
 import { DetectionStateClient } from '../state/detection_state_client';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { DetectionStrategy } from '../strategies/detection_strategy';
@@ -46,20 +47,20 @@ function createSpaceRunLock() {
 
 function createRunner({
   strategies = [createTestStrategy()],
-  isAvailable = true,
+  unavailableReason,
   state = createStateClient(),
   signals = new InMemorySignalStore(),
   lock = createSpaceRunLock().lock,
 }: {
   strategies?: DetectionStrategy[];
-  isAvailable?: boolean;
+  unavailableReason?: AvailabilityUnavailableReason;
   state?: DetectionStateClient;
   signals?: InMemorySignalStore;
   lock?: Pick<SpaceRunLock, 'run'>;
 } = {}) {
   const runner = new EngineRunner(
     { spaceId: SPACE_ID, runId: 'run-1', scheduledMinute: NOW },
-    { isAvailable: async () => isAvailable },
+    { getUnavailableReason: async () => unavailableReason },
     new StrategyCatalog(strategies),
     state,
     lock,
@@ -207,11 +208,11 @@ describe('EngineRunner', () => {
   it('takes no run lock while the engine is unavailable', async () => {
     const { lock } = createSpaceRunLock();
     const run = jest.spyOn(lock, 'run');
-    const { runner } = createRunner({ isAvailable: false, lock });
+    const { runner } = createRunner({ unavailableReason: 'license', lock });
 
     const result = await runner.run({ now: NOW });
 
-    expect(result).toMatchObject({ status: 'unavailable', strategies: [] });
+    expect(result).toMatchObject({ status: 'unavailable', reason: 'license', strategies: [] });
     expect(run).not.toHaveBeenCalled();
   });
 });
