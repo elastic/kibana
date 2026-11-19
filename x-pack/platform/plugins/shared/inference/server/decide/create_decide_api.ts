@@ -28,6 +28,7 @@ import {
   MessageRole,
 } from '@kbn/inference-common';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
+import { getTelemetryHeaders } from '../util/telemetry_headers';
 import { parseDecisionResponse, questionKey } from './parse_decision_response';
 
 interface CreateDecideApiOptions {
@@ -106,7 +107,7 @@ const anonymizeInput = async ({
 /** Sends the questions to the `decision` inference task and reads the answers back. */
 const invokeDecision = async ({
   esClient,
-  options: { input, inferenceId, abortSignal },
+  options: { input, inferenceId, abortSignal, metadata },
   questions,
 }: {
   esClient: ElasticsearchClient;
@@ -123,7 +124,7 @@ const invokeDecision = async ({
       path: `/_inference/decision/${encodeURIComponent(inferenceId)}`,
       body: { input, task_settings: { questions: toKeyedQuestions(questions) } },
     },
-    { signal: abortSignal }
+    { signal: abortSignal, headers: getTelemetryHeaders(metadata?.connectorTelemetry) }
   );
 
   return parseDecisionResponse(body, questions);

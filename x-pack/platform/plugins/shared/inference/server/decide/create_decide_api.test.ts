@@ -115,6 +115,42 @@ describe('createDecideApi', () => {
     );
   });
 
+  it('sends the inference use case header by default', async () => {
+    const { decide, transportRequest } = setup();
+
+    transportRequest.mockResolvedValue(decisionResponse);
+
+    await decide({ input, inferenceId: 'my-decision' }, shouldRespond);
+
+    expect(transportRequest.mock.calls[0][1]).toEqual(
+      expect.objectContaining({ headers: { 'X-Elastic-Product-Use-Case': 'inference' } })
+    );
+  });
+
+  it('sends the attribution headers the caller passes', async () => {
+    const { decide, transportRequest } = setup();
+
+    transportRequest.mockResolvedValue(decisionResponse);
+
+    await decide(
+      {
+        input,
+        inferenceId: 'my-decision',
+        metadata: { connectorTelemetry: { pluginId: 'agent_builder', productFeature: 'triggers' } },
+      },
+      shouldRespond
+    );
+
+    expect(transportRequest.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        headers: {
+          'X-Elastic-Product-Use-Case': 'agent_builder',
+          'X-Elastic-Product-Feature': 'triggers',
+        },
+      })
+    );
+  });
+
   it('accepts a list of questions built at runtime', async () => {
     const { decide, transportRequest } = setup();
 
@@ -247,7 +283,9 @@ describe('createDecideApi', () => {
       shouldRespond
     ).catch((thrown) => thrown);
 
-    expect(transportRequest.mock.calls[0][1]).toEqual({ signal: controller.signal });
+    expect(transportRequest.mock.calls[0][1]).toEqual(
+      expect.objectContaining({ signal: controller.signal })
+    );
     expect(isInferenceRequestAbortedError(error)).toBe(true);
   });
 

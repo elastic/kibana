@@ -6,6 +6,7 @@
  */
 
 import type { NonEmptyTuple } from 'type-fest';
+import type { ConnectorTelemetryMetadata } from '../chat_complete';
 
 export interface DecisionPredicateQuestion {
   type: 'predicate';
@@ -77,6 +78,8 @@ export interface DecideOptions {
   /** The `decision` inference endpoint to use. */
   inferenceId: string;
   abortSignal?: AbortSignal;
+  /** Attribution sent as headers with the request. */
+  metadata?: { connectorTelemetry?: ConnectorTelemetryMetadata };
 }
 
 /**
