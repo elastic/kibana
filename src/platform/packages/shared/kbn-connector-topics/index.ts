@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { connectorEventBusSchema } from './src/events/connector_event_bus_schema';
 export { datadogAlert } from './src/events/datadog';
 export {
   githubCheckRun,
