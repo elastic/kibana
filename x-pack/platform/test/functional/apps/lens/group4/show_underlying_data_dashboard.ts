@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('lnsApp', { timeout: 30_000 });
       await dashboard.waitForRenderComplete();
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
-      await queryBar.switchQueryLanguage('kql');
+      await queryBar.expectQueryLanguageOrFail('kql');
       await savedQueryManagementComponent.closeSavedQueryManagementComponent();
       await queryBar.setQuery('request.keyword : "/apm"');
       await queryBar.submitQuery();
