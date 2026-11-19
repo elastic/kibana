@@ -145,7 +145,7 @@ describe('updateVendorApi', () => {
   it('fetches and bundles new sources, and writes the manifest and a projected snapshot', async () => {
     const result = await update({ sources: { main: SPEC_URL } });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       changed: ['snapshots/main.openapi.json', 'manifest.json'],
       problems: [],
     });
@@ -204,7 +204,7 @@ describe('updateVendorApi', () => {
     await update({ sources: { main: SPEC_URL } });
     fetched = [];
 
-    expect(await update({ now: () => new Date('2027-01-01T00:00:00.000Z') })).toEqual({
+    expect(await update({ now: () => new Date('2027-01-01T00:00:00.000Z') })).toMatchObject({
       changed: [],
       problems: [],
     });
@@ -382,6 +382,30 @@ actions:
     expect(warnings.filter((warning) => warning.includes('auth type'))).toEqual([]);
   });
 
+  it('records past operations whose schemas are broken, reporting the actions that call them', async () => {
+    const broken = (yaml: string) =>
+      yaml.replace(
+        `schema: { type: array, items: { type: string } }`,
+        `schema: { $ref: '#/components/schemas/Void' }`
+      );
+    documents[SPEC_URL] = broken(specYaml('1.0'));
+
+    expect((await update({ sources: { main: SPEC_URL } })).problems).toEqual([]);
+    expect(warnings).toContainEqual(
+      expect.stringMatching(
+        /^GET \/tags is left out of the mock, as its schema in the spec is invalid/
+      )
+    );
+    expect((await readJson('manifest.json')).operations).toEqual({ listItems: [itemsOperation] });
+
+    const { problems } = await update({ connector: withTags, refresh: true });
+    expect(problems).toEqual([
+      expect.stringMatching(
+        /^listTags: calls GET \/tags, whose schema in the spec is invalid \(response 200 application\/json\): .*Void.*; correct the spec in overlay\.yaml$/
+      ),
+    ]);
+  });
+
   it('reports list-like operations it cannot propose pagination for', async () => {
     const { problems } = await update({ connector: withTags, sources: { main: SPEC_URL } });
 
@@ -474,7 +498,7 @@ actions:
     expect((await readJson('snapshots/main.openapi.json')).components.schemas.Legacy).toEqual({
       type: 'object',
     });
-    expect(await update({ connector: withLegacy })).toEqual({ changed: [], problems: [] });
+    expect(await update({ connector: withLegacy })).toMatchObject({ changed: [], problems: [] });
   });
 
   it('reports what would change in check mode without writing', async () => {
@@ -512,7 +536,7 @@ actions:
       },
     });
 
-    expect(await update({ sources: { main: discoveryUrl } })).toEqual({
+    expect(await update({ sources: { main: discoveryUrl } })).toMatchObject({
       changed: ['snapshots/main.openapi.json', 'manifest.json'],
       problems: [],
     });
@@ -585,7 +609,7 @@ actions:
         pages: { search: ['api-reference/'] },
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         changed: ['snapshots/search.openapi.json', 'manifest.json'],
         problems: [],
       });
@@ -615,9 +639,9 @@ actions:
       });
       fetched = [];
 
-      expect(await update({ connector: searcher })).toEqual({ changed: [], problems: [] });
+      expect(await update({ connector: searcher })).toMatchObject({ changed: [], problems: [] });
       expect(fetched).toEqual([]);
-      expect(await update({ connector: searcher, refresh: true })).toEqual({
+      expect(await update({ connector: searcher, refresh: true })).toMatchObject({
         changed: [],
         problems: [],
       });

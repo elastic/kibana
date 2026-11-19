@@ -21,7 +21,25 @@ export interface PolicySettings {
   proxy_url?: string;
   /** Extra data stream names the policy may write to (the reroute processor permissions). */
   additional_datastreams_permissions?: string[];
+  /**
+   * The custom fields (`global_data_tags`), as a JSON list of `CustomField`. The onboarding record
+   * only keeps strings and lists of strings, so the list is stored as text and sent as the list
+   * Fleet takes (see `getPolicySettings`).
+   */
+  global_data_tags?: string;
 }
+
+/** A name and value attached to all data of the integration, as in Fleet's Custom fields. */
+export interface CustomField {
+  name: string;
+  value: string;
+}
+
+/** The top-level package policy fields of a new or updated policy, as Fleet takes them. */
+export type PolicyFieldSettings = Pick<
+  PolicySettings,
+  'output_id' | 'condition' | 'additional_datastreams_permissions'
+> & { global_data_tags?: Array<{ name: string; value: string | number }> };
 
 type PolicySettingKey = keyof PolicySettings;
 
@@ -29,6 +47,66 @@ type PolicySettingKey = keyof PolicySettings;
 type PolicySettingsSource = PolicySettings | Record<string, unknown> | undefined;
 
 const isString = (value: unknown): boolean => typeof value === 'string';
+
+const isCustomField = (value: unknown): value is CustomField =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as CustomField).name === 'string' &&
+  typeof (value as CustomField).value === 'string';
+
+/** The custom fields of a stored value. Anything that is not a list of fields reads as none. */
+export const parseCustomFields = (value: unknown): CustomField[] => {
+  if (typeof value !== 'string') return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed) && parsed.every(isCustomField)
+      ? parsed.map(({ name, value: fieldValue }) => ({ name, value: fieldValue }))
+      : [];
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * A value of digits only is sent as a number, as Fleet's Custom fields table does, so a field set
+ * here gets the same type in the data as one set in Fleet. One too large for a number to hold
+ * exactly stays text rather than losing digits.
+ */
+const toCustomFieldValue = (value: string): string | number => {
+  if (!/^[0-9]+$/.test(value)) return value;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) ? parsed : value;
+};
+
+const toCustomFieldsRequest = (value: unknown): Array<{ name: string; value: string | number }> =>
+  parseCustomFields(value).map(({ name, value: fieldValue }) => ({
+    name,
+    value: toCustomFieldValue(fieldValue),
+  }));
+
+export const serializeCustomFields = (fields: CustomField[]): string => JSON.stringify(fields);
+
+const isCustomFieldsText = (value: unknown): boolean => {
+  if (typeof value !== 'string') return false;
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed) && parsed.every(isCustomField);
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Trims names and values and drops the rows left blank (Step 2 keeps an empty row while it is being
+ * filled in). A value that is not a list of fields is left as it is for `isValid` to reject.
+ */
+const normalizeCustomFields = (value: unknown): unknown => {
+  if (!isCustomFieldsText(value)) return value;
+  const fields = parseCustomFields(value)
+    .map(({ name, value: fieldValue }) => ({ name: name.trim(), value: fieldValue.trim() }))
+    .filter(({ name, value: fieldValue }) => name !== '' || fieldValue !== '');
+  return fields.length ? serializeCustomFields(fields) : '';
+};
 const isStringArray = (value: unknown): boolean =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
 
@@ -50,6 +128,10 @@ const POLICY_SETTINGS: Record<
     isValid: (value: unknown) => boolean;
     /** What an update sends to clear the setting. Both Fleet APIs take an empty list, not null. */
     cleared?: unknown;
+    /** Turns the stored value into what the request carries, when the two differ. */
+    toRequest?: (value: unknown) => unknown;
+    /** Replaces the generic normalization (see `normalizeSetting`) for a value of its own shape. */
+    normalize?: (value: unknown) => unknown;
   }
 > = {
   output_id: { methods: ['agent_based'], target: 'field', isValid: isString },
@@ -60,6 +142,14 @@ const POLICY_SETTINGS: Record<
     target: 'field',
     isValid: isStringArray,
     cleared: [],
+  },
+  global_data_tags: {
+    methods: ['managed_integration'],
+    target: 'field',
+    isValid: isCustomFieldsText,
+    cleared: [],
+    toRequest: toCustomFieldsRequest,
+    normalize: normalizeCustomFields,
   },
 };
 
@@ -75,7 +165,9 @@ const isEmptySetting = (value: unknown): boolean =>
  * is kept (it is what Step 2 shows again on resume). A list with a non-string entry is left as it
  * is for `isValid` to reject.
  */
-const normalizeSetting = (value: unknown): unknown => {
+const normalizeSetting = (key: string, value: unknown): unknown => {
+  const custom = POLICY_SETTINGS[key as PolicySettingKey]?.normalize;
+  if (custom) return custom(value);
   if (typeof value === 'string') return value.trim();
   if (isStringArray(value)) {
     return [...new Set((value as string[]).map((item) => item.trim()).filter(Boolean))];
@@ -113,7 +205,7 @@ export const supportsPolicySetting = (key: PolicySettingKey, method: DeploymentM
 export const compactPolicySettings = (settings: PolicySettingsSource): Record<string, unknown> =>
   Object.fromEntries(
     Object.entries(settings ?? {})
-      .map(([key, value]) => [key, normalizeSetting(value)])
+      .map(([key, value]) => [key, normalizeSetting(key, value)])
       .filter(([, value]) => !isEmptySetting(value))
   );
 
@@ -133,8 +225,13 @@ const pickSettings = (settings: PolicySettingsSource, keys: PolicySettingKey[]):
 export const getPolicySettings = (
   settings: PolicySettingsSource,
   method: DeploymentMethod
-): Pick<PolicySettings, 'output_id' | 'condition' | 'additional_datastreams_permissions'> =>
-  pickSettings(settings, getKeys(method, 'field'));
+): PolicyFieldSettings =>
+  Object.fromEntries(
+    Object.entries(pickSettings(settings, getKeys(method, 'field'))).map(([key, value]) => {
+      const { toRequest } = POLICY_SETTINGS[key as PolicySettingKey];
+      return [key, toRequest ? toRequest(value) : value];
+    })
+  );
 
 /**
  * The var settings a new policy gets, only for the vars the package declares: Fleet rejects a var
@@ -173,10 +270,12 @@ const pickSettingsUpdate = (
   Object.fromEntries(
     keys.flatMap((key) => {
       const raw = (settings as Record<string, unknown> | undefined)?.[key];
-      const value = normalizeSetting(raw);
+      const value = normalizeSetting(key, raw);
       if (value === undefined) return [];
       if (isEmptySetting(value)) return [[key, POLICY_SETTINGS[key].cleared ?? null]];
-      return POLICY_SETTINGS[key].isValid(value) ? [[key, value]] : [];
+      if (!POLICY_SETTINGS[key].isValid(value)) return [];
+      const { toRequest } = POLICY_SETTINGS[key];
+      return [[key, toRequest ? toRequest(value) : value]];
     })
   );
 
