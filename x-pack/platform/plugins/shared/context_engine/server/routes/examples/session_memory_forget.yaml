@@ -2,44 +2,27 @@ requestBody:
   content:
     application/json:
       examples:
-        forgetTombstoneRequestExample:
+        forgetRequestExample:
           summary: "Forget memories"
           description: "Example request to forget two of the caller's memories, keeping their revisions until retention removes them"
           value:
             ids:
               - 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
               - 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
-        forgetHardDeleteRequestExample:
-          summary: "Permanently delete memories"
-          description: "Example request to remove every revision of a memory of another user, which needs the manage memory privilege"
-          value:
-            user_id: jdoe
-            ids:
-              - 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
-            mode: hard_delete
 responses:
   200:
     content:
       application/json:
         examples:
-          forgetTombstoneResponseExample:
+          forgetResponseExample:
             summary: "Memories forgotten"
             description: "One memory was forgotten, and the other does not exist for this user"
             value:
-              mode: tombstone
               results:
                 - id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
                   outcome: forgotten
                 - id: 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
                   outcome: not_found
-          forgetHardDeleteResponseExample:
-            summary: "Memory permanently deleted"
-            description: "Every revision of the memory was removed"
-            value:
-              mode: hard_delete
-              results:
-                - id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
-                  outcome: deleted
   403:
     content:
       application/json:

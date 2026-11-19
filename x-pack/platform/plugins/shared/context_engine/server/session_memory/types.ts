@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ForgetOutcome, HardDeleteOutcome } from '../../common/http_api/session_memory';
+import type { ForgetOutcome } from '../../common/http_api/session_memory';
 
 /** One revision of a memory. */
 export interface StoredSessionMemory {

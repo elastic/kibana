@@ -192,15 +192,10 @@ export const kiAuditEvent = ({
 
 export enum SessionMemoryAuditAction {
   FORGET = 'session_memory_forget',
-  HARD_DELETE = 'session_memory_hard_delete',
 }
 
 const sessionMemoryVerbs: Record<SessionMemoryAuditAction, { attempt: string; done: string }> = {
   [SessionMemoryAuditAction.FORGET]: { attempt: 'forget', done: 'forgotten' },
-  [SessionMemoryAuditAction.HARD_DELETE]: {
-    attempt: 'permanently delete',
-    done: 'permanently deleted',
-  },
 };
 
 export interface SessionMemoryAuditEventParams {
