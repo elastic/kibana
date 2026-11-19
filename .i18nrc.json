@@ -54,6 +54,7 @@
       "src/platform/packages/shared/kbn-discover-utils",
       "src/platform/packages/shared/kbn-discover-contextual-components"
     ],
+    "discoverDataGrid": "src/platform/packages/shared/kbn-discover-data-grid",
     "savedSearch": "src/platform/plugins/shared/saved_search",
     "embeddableApi": "src/platform/plugins/shared/embeddable",
     "embeddableExamples": "examples/embeddable_examples",
@@ -176,7 +177,10 @@
     "sse": [
       "src/platform/packages/shared/kbn-sse-utils"
     ],
-    "coloring": "src/platform/packages/shared/kbn-coloring/src",
+    "coloring": [
+      "src/platform/packages/shared/kbn-coloring/src",
+      "src/platform/packages/shared/kbn-coloring-components"
+    ],
     "languageDocumentation": "src/platform/packages/private/kbn-language-documentation/src",
     "esql": "src/platform/plugins/shared/esql",
     "esqlDataGrid": "src/platform/plugins/shared/esql_datagrid",
@@ -237,20 +241,24 @@
     "cpsUtils": "src/platform/packages/shared/kbn-cps-utils",
     "dashboardsSelector": "src/platform/packages/shared/dashboards/dashboards-selector",
     "devComments": "src/platform/packages/private/kbn-dev-comments",
+    "developerToolbarProfilers": "src/platform/plugins/private/developer_toolbar_profilers",
     "kbnDesignTools": "src/platform/packages/shared/kbn-design-tools",
     "kbnInspectComponent": "src/platform/plugins/private/inspect_component",
     "kql": "src/platform/plugins/shared/kql",
     "navigationCustomizationComponents": "src/platform/packages/shared/navigation-customization-components",
     "savedSearchComponent": "src/platform/packages/shared/kbn-saved-search-component",
     "visualizationListing": "src/platform/plugins/shared/visualization_listing",
-    "visualizationsCommon": "src/platform/packages/shared/kbn-visualizations-common",
+    "visualizationsCommon": [
+      "src/platform/packages/shared/kbn-visualizations-common",
+      "src/platform/packages/shared/kbn-visualizations-components"
+    ],
     "workflows": [
       "src/platform/packages/shared/kbn-workflows",
       "src/platform/packages/shared/kbn-workflows-library",
       "src/platform/plugins/shared/workflows_management",
       "x-pack/platform/plugins/shared/agent_builder_workflows"
     ],
-    "workflowsExecutionEngine": "src/platform/plugins/shared/workflows_execution_engine",
+    "workflowsExecutionEngine": "x-pack/platform/plugins/shared/workflows_execution_engine",
     "workflowsExtensions": "src/platform/plugins/shared/workflows_extensions",
     "aiInfra": "x-pack/platform/plugins/shared/ai_infra/product_doc_base",
     "alertsFiltersForm": "x-pack/platform/packages/shared/response-ops/alerts-filters-form",

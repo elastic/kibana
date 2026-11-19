@@ -38,12 +38,19 @@ import {
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { getNamespaceError } from './instance_namespace_field';
-import { supportsPolicySetting, type PolicySettings } from '../../common/policy_settings';
+import {
+  getReroutePermissions,
+  parseCustomFields,
+  supportsPolicySetting,
+  type PolicySettings,
+} from '../../common/policy_settings';
 import {
   getConditionErrors,
+  getCustomFieldsErrors,
   getDescriptionError,
   getIntegrationNameError,
   getProxyUrlError,
+  getReroutePermissionsError,
   supportsIntegrationSettings,
 } from './integration_settings';
 
@@ -656,6 +663,57 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const proxyUrl = policySettings.proxy_url ?? '';
   const proxyUrlError = isProxyUrlSupported ? getProxyUrlError(proxyUrl) : undefined;
 
+  // The reroute permissions reach every package policy of the deployment methods that send them,
+  // so any selected service that gets a policy is enough. Under managed integration an ECF-only
+  // service gets none (it is deployed through CloudFormation), so with only such services the
+  // field would do nothing. Elsewhere the field is hidden, so a value left over from another
+  // method or selection must not block Continue.
+  const isReroutePermissionsSupported = useMemo(
+    () =>
+      supportsPolicySetting('additional_datastreams_permissions', deploymentMethod) &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return !!service && supportsIntegrationSettings(service, deploymentMethod);
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+  const reroutePermissions = getReroutePermissions(policySettings);
+  const reroutePermissionsError = isReroutePermissionsSupported
+    ? getReroutePermissionsError(reroutePermissions)
+    : undefined;
+
+  // The custom fields reach the policies of the services that get one, like the reroute
+  // permissions, so with only ECF-only services under managed integration they would do nothing.
+  // Elsewhere the field is hidden, so a value left over from another method or selection must not
+  // block Continue.
+  const isCustomFieldsSupported = useMemo(
+    () =>
+      supportsPolicySetting('global_data_tags', deploymentMethod) &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return !!service && supportsIntegrationSettings(service, deploymentMethod);
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+  // Selected services that are deployed through ECF, whose templates take no custom fields.
+  const hasServicesIgnoringCustomFields = useMemo(
+    () =>
+      isCustomFieldsSupported &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return !!service && !supportsIntegrationSettings(service, deploymentMethod);
+      }),
+    [isCustomFieldsSupported, instances, awsServicesMap, deploymentMethod]
+  );
+  const customFields = useMemo(
+    () => parseCustomFields(policySettings.global_data_tags),
+    [policySettings.global_data_tags]
+  );
+  const customFieldsErrors = useMemo(
+    () => (isCustomFieldsSupported ? getCustomFieldsErrors(customFields) : undefined),
+    [isCustomFieldsSupported, customFields]
+  );
+
   const isReady = useMemo(
     () =>
       !!globalRegion.trim() &&
@@ -664,7 +722,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       !descriptionError &&
       !namespaceError &&
       !proxyUrlError &&
-      !conditionErrors,
+      !conditionErrors &&
+      !reroutePermissionsError &&
+      !customFieldsErrors,
     [
       globalRegion,
       incompleteInstances,
@@ -673,6 +733,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       namespaceError,
       proxyUrlError,
       conditionErrors,
+      reroutePermissionsError,
+      customFieldsErrors,
     ]
   );
 
@@ -720,6 +782,13 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     isProxyUrlSupported,
     proxyUrlError,
     conditionErrors,
+    isReroutePermissionsSupported,
+    reroutePermissions,
+    reroutePermissionsError,
+    isCustomFieldsSupported,
+    hasServicesIgnoringCustomFields,
+    customFields,
+    customFieldsErrors,
     bareNamePackage,
     instances,
     filteredInstances,

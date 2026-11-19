@@ -56,7 +56,6 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/css-utils'
-  - '@kbn/visualizations-common'
   - '@kbn/es-types'
   - '@kbn/esql-types'
   - '@kbn/esql-utils'
@@ -75,6 +74,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-feature-flags-server'
   - '@kbn/core-http-server'
+  - '@kbn/visualizations-components'
 tags:
   - plugin
   - prod
