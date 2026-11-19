@@ -407,7 +407,7 @@ it('still fails when transient reads never recover before the timeout', async ()
     expect(await runInvestigation(fetch, example, connector)).toMatchObject({
       investigation_id: 'unready',
       execution_error:
-        'Investigation was not created within 30 minutes. Last read failed: no shard available',
+        'Investigation was not created within 55 minutes. Last read failed: no shard available',
     });
   } finally {
     clock.mockRestore();
@@ -465,7 +465,7 @@ it('bounds polling and retains partial conversation evidence when an investigati
       workflow_status: 'running',
       traceId: 'partial-trace',
       conversation_round_count: 1,
-      execution_error: 'Investigation was still in progress after 30 minutes',
+      execution_error: 'Investigation was still in progress after 55 minutes',
     });
   } finally {
     clock.mockRestore();
@@ -484,7 +484,7 @@ it('reports an investigation that never appeared', async () => {
       .mockRejectedValue(notFound());
     expect(await runInvestigation(fetch, example, connector)).toMatchObject({
       investigation_id: 'missing',
-      execution_error: 'Investigation was not created within 30 minutes',
+      execution_error: 'Investigation was not created within 55 minutes',
     });
   } finally {
     clock.mockRestore();

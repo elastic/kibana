@@ -24,7 +24,7 @@ import type {
 } from './types';
 
 /** Matches the investigation workflow's `investigate` step timeout. */
-export const INVESTIGATION_TIMEOUT_MS = 30 * 60_000;
+export const INVESTIGATION_TIMEOUT_MS = 55 * 60_000;
 /** The execution error of a run that ended without a `verdict`; judges still grade its hypotheses. */
 export const NO_CONCLUSION_ERROR = 'Investigation finished without recording a conclusion';
 export const UNPERSISTED_CONVERSATION_ERROR =

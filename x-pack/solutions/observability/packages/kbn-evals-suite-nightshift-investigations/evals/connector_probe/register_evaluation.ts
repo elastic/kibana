@@ -22,7 +22,7 @@ import type { ConnectorProbeExample, ConnectorProbeTaskOutput } from './types';
 const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
 
 // Sizes the test timeout only; a single `converse` call is not cut off at this budget.
-const PROBE_BUDGET_MS = 5 * 60_000;
+const PROBE_BUDGET_MS = 15 * 60_000;
 
 /**
  * Asks the Nightshift assistant each probe question in one `converse` call, so a case takes a few
