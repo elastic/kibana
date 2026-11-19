@@ -8,7 +8,7 @@
  */
 
 import fs from 'node:fs';
-import Fs from 'node:fs/promises';
+import fsPromises from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import type * as WorkerThreads from 'node:worker_threads';
@@ -1134,7 +1134,7 @@ describe('runWatchdogWorker', () => {
 
       jest.replaceProperty(workerThreads, 'isMainThread', false);
       jest.spyOn(process, 'uptime').mockReturnValue(999_999.999_999_999);
-      jest.spyOn(Fs, 'writeFile').mockResolvedValue();
+      jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
       // Pair the longest supported directory and hostname to exercise the maximum output path.
       jest.spyOn(os, 'hostname').mockReturnValue('h'.repeat(MAX_HOSTNAME_LENGTH));
 
@@ -1291,7 +1291,7 @@ describe('runWatchdogWorker', () => {
       afterEach(() => jest.restoreAllMocks());
 
       it('logs the capture at warn with the file path, then writes the prepared profile', async () => {
-        const writeFile = jest.spyOn(Fs, 'writeFile').mockResolvedValue();
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
         startWriting();
         await profiledBlock(2_000);
 
@@ -1319,7 +1319,7 @@ describe('runWatchdogWorker', () => {
 
       it('logs a failed write once at error after the capture', async () => {
         jest
-          .spyOn(Fs, 'writeFile')
+          .spyOn(fsPromises, 'writeFile')
           .mockRejectedValue(
             Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' })
           );
@@ -1338,7 +1338,7 @@ describe('runWatchdogWorker', () => {
       });
 
       it("doesn't write or ask admission without a directory", async () => {
-        const writeFile = jest.spyOn(Fs, 'writeFile');
+        const writeFile = jest.spyOn(fsPromises, 'writeFile');
         startProfiling();
         await profiledBlock(2_000);
 
@@ -1353,7 +1353,7 @@ describe('runWatchdogWorker', () => {
       });
 
       it("doesn't write a capture with no busy samples", async () => {
-        const writeFile = jest.spyOn(Fs, 'writeFile');
+        const writeFile = jest.spyOn(fsPromises, 'writeFile');
         profile = { nodes: [node(1, '(root)')], startTime: 0, endTime: 1_000 };
         startWriting();
         await profiledBlock(2_000);
@@ -1363,7 +1363,7 @@ describe('runWatchdogWorker', () => {
       });
 
       it('logs a capture admission refuses at info, without writing it', async () => {
-        const writeFile = jest.spyOn(Fs, 'writeFile').mockResolvedValue();
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
         startWriting();
         // Fill the rolling-hour allowance, then submit an equally long block that is not a record.
         for (let i = 0; i <= perHour; i++) {
@@ -1381,7 +1381,7 @@ describe('runWatchdogWorker', () => {
       });
 
       it('counts a failed write toward the rolling hour', async () => {
-        jest.spyOn(Fs, 'writeFile').mockRejectedValue(new Error('ENOSPC'));
+        jest.spyOn(fsPromises, 'writeFile').mockRejectedValue(new Error('ENOSPC'));
         startWriting();
         for (let i = 0; i <= perHour; i++) {
           await profiledBlock(2_000);
@@ -1394,7 +1394,7 @@ describe('runWatchdogWorker', () => {
       });
 
       it('refuses a record once the phase has written maxFiles', async () => {
-        const writeFile = jest.spyOn(Fs, 'writeFile').mockResolvedValue();
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
         startWriting();
         // Each block exceeds the previous longest, so the lifetime file cap is the only rejection.
         for (let i = 0; i <= maxFiles; i++) {
@@ -1409,7 +1409,7 @@ describe('runWatchdogWorker', () => {
       });
 
       it('writes a running-phase capture under its own phase', async () => {
-        const writeFile = jest.spyOn(Fs, 'writeFile').mockResolvedValue();
+        const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
         startWriting();
         setSlot(Slot.runningSince, nowUs);
         await profiledBlock(2_000, profilingData.startAfterMs.running);

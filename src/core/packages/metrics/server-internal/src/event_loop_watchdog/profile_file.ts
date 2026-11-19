@@ -45,16 +45,24 @@ export const prepareProfile = (profile: CpuProfile, root: string): CpuProfile =>
   const { nodes, samples = [], timeDeltas = [] } = profile;
   const byId = new Map(nodes.map((node) => [node.id, node]));
   let kept = samples.length;
-  while (kept > 0 && byId.get(samples[kept - 1])?.callFrame.functionName === IDLE) kept--;
+  while (kept > 0 && byId.get(samples[kept - 1])?.callFrame.functionName === IDLE) {
+    kept--;
+  }
   const keptSamples = samples.slice(0, kept);
   const keptDeltas = timeDeltas.slice(0, kept).map((delta, i) => (i === 0 ? 0 : delta));
   const startTime = profile.startTime + (timeDeltas[0] ?? 0);
   const endTime = keptDeltas.reduce((time, delta) => time + delta, startTime);
 
   const hits = new Map<number, number>();
-  for (const id of keptSamples) hits.set(id, (hits.get(id) ?? 0) + 1);
+  for (const id of keptSamples) {
+    hits.set(id, (hits.get(id) ?? 0) + 1);
+  }
   const parents = new Map<number, number>();
-  for (const { id, children = [] } of nodes) for (const child of children) parents.set(child, id);
+  for (const { id, children = [] } of nodes) {
+    for (const child of children) {
+      parents.set(child, id);
+    }
+  }
   const keep = new Set<number>();
   for (const sampled of hits.keys()) {
     let id: number | undefined = sampled;

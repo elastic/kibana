@@ -346,8 +346,12 @@ export const runWatchdogWorker = (
       diagnosticDir && file === 'admitted'
         ? Path.join(diagnosticDir, fileName(phase, blockedMs, new Date()))
         : undefined;
-    if (file === 'in_window') counts.files[phase].inWindow++;
-    if (file === 'file_limit') counts.files[phase].fileLimit++;
+    if (file === 'in_window') {
+      counts.files[phase].inWindow++;
+    }
+    if (file === 'file_limit') {
+      counts.files[phase].fileLimit++;
+    }
     captureNumber++;
     const frameLists = formatFrameLists(summary);
     // Log levels chosen specifically to indicate if a profile was admitted for file output: warn if
