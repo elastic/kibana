@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { MAX_KPI_ALERTS } from '../../../../common/constants';
+import { MAX_KPI_ACKNOWLEDGE_EVENTS, MAX_KPI_ALERTS } from '../../../../common/constants';
 import type { KpiMetricResult } from '../../../../common/types/api';
 import type { PredefinedKpiMetricConfiguration } from '../../../../common/types/domain';
 import { AttachmentType } from '../../../../common/types/domain';
@@ -31,9 +31,15 @@ const ALERT_ATTACHMENT_TYPES: readonly string[] = [
 ];
 
 const LIMIT_MESSAGE = `More than ${MAX_KPI_ALERTS} alerts are attached in this range. Select a shorter range to see this metric.`;
+const EVENT_LIMIT_MESSAGE = `More than ${MAX_KPI_ACKNOWLEDGE_EVENTS} assignments and status changes are in this range. Select a shorter range to see this metric.`;
 const UNREADABLE_MESSAGE = 'You do not have permission to read the alerts of these cases.';
 const FAILED_MESSAGE = 'The metric search failed.';
 const INCOMPLETE_MESSAGE = 'The metric search returned incomplete results.';
+
+interface AcknowledgeEventSource {
+  '@timestamp'?: string;
+  case?: { id?: string };
+}
 
 interface AlertAttachmentSource {
   '@timestamp'?: string;
@@ -77,6 +83,54 @@ export const buildAlertAttachmentSearch = (context: KpiQueryContext): KpiSearchR
         filter: [
           ...buildForcedFilters('attachments', context),
           { terms: { 'attachment.type': [...ALERT_ATTACHMENT_TYPES] } },
+        ],
+      },
+    },
+  },
+});
+
+/**
+ * Builds the search of the events that acknowledge an alert: a move to In progress or an added assignee.
+ * The date range of the period does not apply, so a late pickup is not cut off.
+ */
+export const buildAcknowledgeEventSearch = (
+  context: Pick<KpiQueryContext, 'spaceId' | 'owner'> & { caseIds: string[] },
+  since: string
+): KpiSearchRequest => ({
+  index: 'activity',
+  body: {
+    size: MAX_KPI_ACKNOWLEDGE_EVENTS,
+    track_total_hits: true,
+    sort: [{ '@timestamp': 'asc' }],
+    _source: ['@timestamp', 'case.id', 'action.type'],
+    query: {
+      bool: {
+        filter: [
+          ...buildForcedFilters('activity', context),
+          { range: { '@timestamp': { gte: since } } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      { term: { 'action.type': 'status' } },
+                      { term: { 'action.status_new': 'in-progress' } },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    filter: [
+                      { term: { 'action.type': 'assignees' } },
+                      { term: { 'action.verb': 'add' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
         ],
       },
     },
@@ -131,25 +185,57 @@ export const getAlertGeneratedAt = ({
 }: AlertGeneratedTimes): string | undefined => start ?? timestamp;
 
 /**
- * Returns the time when the alert was acknowledged in the case.
+ * Groups the event times by case id, in ascending order.
  */
-export const getAlertAcknowledgedAt = ({ attachedAt }: Pick<AlertCasePair, 'attachedAt'>): string =>
-  attachedAt;
+export const extractAcknowledgeEvents = (
+  hits: ReadonlyArray<estypes.SearchHit<AcknowledgeEventSource>>
+): Map<string, string[]> => {
+  const events = new Map<string, string[]>();
+
+  for (const { _source: source } of hits) {
+    const caseId = source?.case?.id;
+    const time = source?.['@timestamp'];
+
+    if (caseId != null && time != null) {
+      events.set(caseId, [...(events.get(caseId) ?? []), time]);
+    }
+  }
+
+  events.forEach((times) => times.sort((first, second) => Date.parse(first) - Date.parse(second)));
+
+  return events;
+};
 
 /**
- * Returns the duration in seconds, or undefined when the alert is missing or the duration is invalid or negative.
+ * Returns the time when the alert was acknowledged in the case: the first event at or after the attach time.
+ * Returns undefined when no such event exists.
+ */
+export const getAlertAcknowledgedAt = ({
+  attachedAt,
+  eventTimes,
+}: Pick<AlertCasePair, 'attachedAt'> & { eventTimes: readonly string[] }): string | undefined => {
+  const attached = Date.parse(attachedAt);
+
+  return eventTimes.find((time) => Date.parse(time) >= attached);
+};
+
+/**
+ * Returns the duration in seconds, or undefined when the alert is missing, no event acknowledged it,
+ * or the duration is invalid or negative.
  */
 export const getAlertDurationSeconds = (
   pair: AlertCasePair,
-  alert: AlertGeneratedTimes | undefined
+  alert: AlertGeneratedTimes | undefined,
+  eventTimes: readonly string[]
 ): number | undefined => {
   const generatedAt = alert != null ? getAlertGeneratedAt(alert) : undefined;
+  const acknowledgedAt = getAlertAcknowledgedAt({ attachedAt: pair.attachedAt, eventTimes });
 
-  if (generatedAt == null) {
+  if (generatedAt == null || acknowledgedAt == null) {
     return;
   }
 
-  const seconds = (Date.parse(getAlertAcknowledgedAt(pair)) - Date.parse(generatedAt)) / 1000;
+  const seconds = (Date.parse(acknowledgedAt) - Date.parse(generatedAt)) / 1000;
 
   return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
 };
@@ -178,8 +264,56 @@ export const aggregateAlertDurations = (
 const readTotalHits = ({ hits: { total } }: estypes.MsearchMultiSearchItem): number =>
   typeof total === 'number' ? total : total?.value ?? 0;
 
+const readAcknowledgeEvents = async (
+  pairs: readonly AlertCasePair[],
+  context: KpiQueryContext,
+  reader: CasesAnalyticsV2ReaderContract
+): Promise<{ events: Map<string, string[]> } | { message: string }> => {
+  if (pairs.length === 0) {
+    return { events: new Map() };
+  }
+
+  const since = pairs.reduce(
+    (earliest, { attachedAt }) =>
+      Date.parse(attachedAt) < Date.parse(earliest) ? attachedAt : earliest,
+    pairs[0].attachedAt
+  );
+  const caseIds = Array.from(new Set(pairs.map(({ caseId }) => caseId)));
+
+  try {
+    const [response] = await reader.msearch([
+      buildAcknowledgeEventSearch(
+        { spaceId: context.spaceId, owner: context.owner, caseIds },
+        since
+      ),
+    ]);
+
+    if (response == null || 'error' in response) {
+      return { message: FAILED_MESSAGE };
+    }
+
+    if (isIncompleteKpiSearchResponse(response)) {
+      return { message: INCOMPLETE_MESSAGE };
+    }
+
+    if (readTotalHits(response) > MAX_KPI_ACKNOWLEDGE_EVENTS) {
+      return { message: EVENT_LIMIT_MESSAGE };
+    }
+
+    return {
+      events: extractAcknowledgeEvents(
+        response.hits.hits as Array<estypes.SearchHit<AcknowledgeEventSource>>
+      ),
+    };
+  } catch (error) {
+    return { message: FAILED_MESSAGE };
+  }
+};
+
 const readPeriodDurations = async (
   response: estypes.MsearchResponseItem | undefined,
+  context: KpiQueryContext,
+  reader: CasesAnalyticsV2ReaderContract,
   alertsService: AlertService
 ): Promise<PeriodDurations> => {
   if (response == null || 'error' in response) {
@@ -204,14 +338,25 @@ const readPeriodDurations = async (
   }
 
   try {
-    const result = await alertsService.getAlertGeneratedTimes({ ids, indices });
+    const [result, acknowledge] = await Promise.all([
+      alertsService.getAlertGeneratedTimes({ ids, indices }),
+      readAcknowledgeEvents(pairs, context, reader),
+    ]);
 
     if (!result.readable) {
       return { type: 'error', message: UNREADABLE_MESSAGE };
     }
 
+    if ('message' in acknowledge) {
+      return { type: 'error', message: acknowledge.message };
+    }
+
     const durations = pairs.flatMap((pair) => {
-      const duration = getAlertDurationSeconds(pair, result.alerts.get(pair.alertId));
+      const duration = getAlertDurationSeconds(
+        pair,
+        result.alerts.get(pair.alertId),
+        acknowledge.events.get(pair.caseId) ?? []
+      );
       return duration != null ? [duration] : [];
     });
 
@@ -256,8 +401,10 @@ export const runAlertTimeToAcknowledgeMetrics = async ({
   }
 
   const [current, previous] = await Promise.all([
-    readPeriodDurations(responses[0], alertsService),
-    previousPeriod != null ? readPeriodDurations(responses[1], alertsService) : undefined,
+    readPeriodDurations(responses[0], context, reader, alertsService),
+    previousPeriod != null
+      ? readPeriodDurations(responses[1], { ...context, ...previousPeriod }, reader, alertsService)
+      : undefined,
   ]);
 
   return metrics.map(({ id, predefinedId }) => {

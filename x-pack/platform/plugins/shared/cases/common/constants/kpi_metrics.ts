@@ -129,6 +129,11 @@ export const MAX_KPI_FILTER_CASE_IDS = 10000;
 export const MAX_KPI_ALERTS = 10000;
 
 /**
+ * The maximum number of assignment and status events that the alert acknowledge metrics read in one period
+ */
+export const MAX_KPI_ACKNOWLEDGE_EVENTS = 10000;
+
+/**
  * The maximum and the default number of values that a breakdown metric shows
  */
 export const MAX_KPI_BREAKDOWN_SIZE = 10;
