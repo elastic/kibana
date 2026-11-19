@@ -15,7 +15,7 @@ export const EVENT_SESSION_END = 'session.end';
 export const EVENT_APP_START = 'elastic.app.start';
 export const EVENT_SCREEN_CLICK = 'app.screen.click';
 
-export const SPAN_SCREEN_LOAD = 'elastic.screen.load';
+export const SPAN_SCREEN_LOAD = 'elastic.app.screen.load';
 
 export const ATTR_SESSION_PREVIOUS_ID = 'session.previous_id';
 export const ATTR_START_TYPE = 'start.type';

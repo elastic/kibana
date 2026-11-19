@@ -14,12 +14,12 @@
  *
  * Data shape (OTel-native, no APM enrichment):
  * - `logs-generic.otel-default`: `session.start` (with `session.previous_id` when the run has the
- *   installation's previous session), `session.end`, `elastic.app.start` (`start.type` cold or warm,
- *   `elastic.app.start.duration` in ms), `app.screen.click`, `app.widget.click`, `app.crash`
+ *   installation's previous session), `session.end`, `elastic.app.start` (`start.type` cold or
+ *   warm, `elastic.app.start.duration` in ms), `app.screen.click`, `app.widget.click`, `app.crash`
  *   (reported on the next launch, with the crash time), WARN `exception` events of handled errors,
  *   and ERROR logs of ANRs (`elastic.error.kind: anr`, Android) and hangs (`hang`, iOS)
- * - `traces-generic.otel-default`: `elastic.screen.load` spans with `app.screen.name`, which parent
- *   the HTTP CLIENT spans of the screen, and the SERVER spans of the backends that answer
+ * - `traces-generic.otel-default`: `elastic.app.screen.load` spans with `app.screen.name`, which
+ *   parent the HTTP CLIENT spans of the screen, and the SERVER spans of the backends that answer
  * - every span and log written while a screen is shown carries its `app.screen.name`
  *
  * Sessions start at their time, from the run's `from` on, and are written as they go; those still

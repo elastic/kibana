@@ -595,10 +595,9 @@ describe('digital experience mobile apps', () => {
         // The run doesn't have the session before an installation's first one
         expect(first.attributes).not.toHaveProperty('session.previous_id');
         later.forEach((start, i) => {
-          const previous = i === 0 ? first : later[i - 1];
-          expect(start.attributes?.['session.previous_id']).toBe(
-            previous.attributes?.['session.id']
-          );
+          const previousSessionId = (i === 0 ? first : later[i - 1]).attributes?.['session.id'];
+          expect(previousSessionId).toEqual(expect.stringMatching(/.+/));
+          expect(start.attributes?.['session.previous_id']).toBe(previousSessionId);
         });
       });
     });
