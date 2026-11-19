@@ -138,10 +138,13 @@ export const CleanExtraFilesFromModules: Task = {
           '**/*.scss',
           '**/*.sass',
           '**/*.ts',
+          '**/*.mts',
+          '**/*.cts',
           '**/*.text',
           '**/*.tsx',
           '**/tsconfig.json',
           '**/.tsbuildinfo',
+          '**/*.tsbuildinfo',
           '**/babel.config.*',
 
           // editors

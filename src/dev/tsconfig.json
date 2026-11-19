@@ -23,6 +23,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
+    "@kbn/setup-node-env",
     "@kbn/tooling-log",
     "@kbn/ci-stats-reporter",
     "@kbn/jest-serializers",

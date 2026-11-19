@@ -83,7 +83,7 @@ describe('ApmConfiguration', () => {
     expect(labels.kibana_uuid).toBe('uuid-from-config');
   });
 
-  it('overrides metricsInterval, breakdownMetrics, captureHeaders, and captureBody when `isDistributable` is true', () => {
+  it('overrides metricsInterval, breakdownMetrics, captureHeaders, captureBody, and error source lines when `isDistributable` is true', () => {
     let config = new ApmConfiguration(mockedRootDir, {}, false);
     expect(config.getConfig('serviceName')).toMatchInlineSnapshot(`
       Object {
@@ -125,6 +125,8 @@ describe('ApmConfiguration', () => {
         "serverUrl": "https://kibana-cloud-apm.apm.us-east-1.aws.found.io",
         "serviceName": "serviceName",
         "serviceVersion": "8.0.0",
+        "sourceLinesErrorAppFrames": 0,
+        "sourceLinesErrorLibraryFrames": 0,
         "transactionSampleRate": 0.1,
       }
     `);

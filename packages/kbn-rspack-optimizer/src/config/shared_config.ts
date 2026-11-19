@@ -165,7 +165,6 @@ export function getSwcOptions(dist: boolean, hmr: boolean = false) {
       // Use @swc/helpers for smaller output (like @babel/plugin-transform-runtime)
       externalHelpers: true,
     },
-    sourceMaps: !dist,
     inlineSourcesContent: !dist,
   };
 }
@@ -637,6 +636,13 @@ export function computeConfigHash(repoRoot: string, files: readonly string[]): s
   }
   return hash.digest('hex').slice(0, 8);
 }
+
+/**
+ * Strips the repo root from a module's source map path. Not `Path.relative()`, since identifiers
+ * that aren't paths contain it too, like those of ignored modules.
+ */
+export const toRepoRelativePath = (repoRoot: string, path: string): string =>
+  path.replaceAll(`${repoRoot}${Path.sep}`, '');
 
 /**
  * Shared SWC minimizer configuration for production builds.

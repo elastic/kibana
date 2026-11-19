@@ -23,6 +23,7 @@ const launchers = [
   'kibana-encryption-keys',
   'kibana-setup',
   'kibana-verification-code',
+  'kibana-resolve-stack-trace',
   'kibana-health-gateway',
 ];
 

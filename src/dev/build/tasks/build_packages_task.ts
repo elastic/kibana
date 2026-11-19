@@ -19,6 +19,7 @@ import { getNodeSwcConfig } from '@kbn/swc-config/node';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { Task } from '../lib';
 import { deleteAll, scanCopy, write } from '../lib';
 import type { Record } from '../lib/fs_records';
@@ -33,6 +34,8 @@ function excludeFileByName(name: string) {
   return (
     name === 'package.json' ||
     name === 'tsconfig.json' ||
+    name === 'moon.yml' ||
+    name === 'moon.extend.yml' ||
     name === '.gitignore' ||
     name === 'webpack.config.js' ||
     name.endsWith('.d.ts')
@@ -228,10 +231,15 @@ export const BuildPackages: Task = {
               case '.mjs':
               case '.jsx': {
                 const source = await Fsp.readFile(rec.source.abs, 'utf8');
-                const result = await transform(
-                  source,
-                  getNodeSwcConfig(rec.source.abs, { production: true })
-                );
+                const result = await transform(source, {
+                  ...getNodeSwcConfig(rec.source.abs, { production: true }),
+                  sourceMaps: true,
+                  sourceFileName: Path.relative(REPO_ROOT, rec.source.abs),
+                });
+                // MinifyPackages only keeps it for the files it minifies.
+                if (result.map) {
+                  await Fsp.writeFile(`${rec.dest.withExt('.js').abs}.map`, result.map);
+                }
                 return {
                   ...rec,
                   dest: rec.dest.withExt('.js'),

@@ -7,7 +7,10 @@
 
 import { min, max, map, flatten } from 'lodash';
 
-/*
+/* @notice
+ * This product includes code that is based on the Flot bubbles plugin, which is
+ * available under a "MIT" license.
+ *
  * The MIT License
 Copyright (c) 2010, 2011, 2012, 2013 by Juergen Marsch
 Copyright (c) 2015 by Alexander Wunschik
@@ -29,10 +32,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
-The below is based on the flot bubble plugin, but with all the complex overlay logic stripped
-
 */
+
+// The below is based on the flot bubble plugin, but with all the complex overlay logic stripped
 
 const pluginName = 'simpleBubble';
 const pluginVersion = '0.1.0';

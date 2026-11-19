@@ -28,6 +28,12 @@ const DEFAULT_CONFIG: AgentConfigOptions = {
   globalLabels: {},
 };
 
+// Lines of distributable server code are minified, and can be hundreds of KB long.
+const DIST_CONFIG: AgentConfigOptions = {
+  sourceLinesErrorAppFrames: 0,
+  sourceLinesErrorLibraryFrames: 0,
+};
+
 export const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfigOptions = {
   serverUrl: 'https://kibana-cloud-apm.apm.us-east-1.aws.found.io',
 
@@ -132,6 +138,7 @@ export class ApmConfiguration {
           serviceVersion: this.kibanaVersion,
         },
         DEFAULT_CONFIG,
+        this.isDistributable ? DIST_CONFIG : {},
         this.getElasticAPMConfigDerivedFromOTelConfig(),
         this.getUuidConfig(),
         this.getGitConfig(),

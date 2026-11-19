@@ -50,6 +50,9 @@ export function registerBundleRoutes({
   // will store the most recently used hashes.
   const fileHashCache = new FileHashCache();
 
+  // Kibana's bundles ship source maps they don't reference, only served when enabled.
+  const sourceMaps = process.env.KBN_ENABLE_BROWSER_SOURCE_MAPS === 'true' ? 'linked' : 'hidden';
+
   // Shared deps are emitted by the main Rspack bundle build and loaded before plugin bundles.
   const sharedNpmDepsPath = '/bundles/kbn-ui-shared-deps-npm/';
   registerRouteForBundle(router, {
@@ -58,6 +61,7 @@ export function registerBundleRoutes({
     bundlesPath: UiSharedDepsNpm.distDir,
     fileHashCache,
     isDist,
+    sourceMaps,
   });
   const sharedDepsPath = '/bundles/kbn-ui-shared-deps-src/';
   registerRouteForBundle(router, {
@@ -66,6 +70,7 @@ export function registerBundleRoutes({
     bundlesPath: UiSharedDepsSrcDistDir,
     fileHashCache,
     isDist,
+    sourceMaps,
   });
   const monacoEditorPath = '/bundles/kbn-monaco/';
   registerRouteForBundle(router, {
@@ -74,6 +79,7 @@ export function registerBundleRoutes({
     bundlesPath: KbnMonaco.bundleDir,
     fileHashCache,
     isDist,
+    sourceMaps,
   });
   const vegaSandboxPath = '/bundles/kbn-vega-sandbox/';
   registerRouteForBundle(router, {
@@ -82,6 +88,7 @@ export function registerBundleRoutes({
     bundlesPath: KbnVegaSandbox.bundleDir,
     fileHashCache,
     isDist,
+    sourceMaps,
   });
 
   // Unified Rspack build: core and all internal plugins are served from a central directory
@@ -92,6 +99,7 @@ export function registerBundleRoutes({
     bundlesPath: fromRoot('target/public/bundles'),
     fileHashCache,
     isDist,
+    sourceMaps,
   });
 
   // External plugins live in the plugins/ directory and have standalone bundles

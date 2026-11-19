@@ -13,5 +13,4 @@ require('./harden');
 // The following require statements MUST be executed before any others - END
 
 require('symbol-observable');
-require('source-map-support').install();
 require('./node_version_validator');

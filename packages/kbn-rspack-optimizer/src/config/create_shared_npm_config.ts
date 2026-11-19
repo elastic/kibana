@@ -11,6 +11,7 @@ import Path from 'path';
 import type { Configuration } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { rspack } from '../rspack_runtime';
+import { toRepoRelativePath } from './shared_config';
 import { resolveSharedAssetPaths } from './shared_asset_paths';
 
 export const SHARED_NPM_COMPILER = 'shared-npm';
@@ -31,7 +32,8 @@ export function createSharedNpmConfig({
     name: SHARED_NPM_COMPILER,
     context: npmPackageRoot,
     mode: dist ? 'production' : 'development',
-    devtool: dist ? false : 'cheap-source-map',
+    // Distributables ship source maps the bundles don't reference, with repo paths like Kibana's bundles.
+    devtool: dist ? 'hidden-nosources-source-map' : 'cheap-source-map',
     target: 'web',
     externals: {
       module: 'module',
@@ -119,7 +121,10 @@ export function createSharedNpmConfig({
       filename: '[name].dll.js',
       chunkFilename: 'kbn-ui-shared-deps-npm.chunk.[id].js',
       devtoolModuleFilenameTemplate: (info) =>
-        `kbn-ui-shared-deps-npm/${Path.relative(repoRoot, info.absoluteResourcePath)}`,
+        `${dist ? '' : 'kbn-ui-shared-deps-npm/'}${toRepoRelativePath(
+          repoRoot,
+          info.absoluteResourcePath
+        )}`,
       library: '__kbnSharedDeps_npm__',
       clean: true,
     },
