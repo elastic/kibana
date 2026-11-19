@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/fleet-plugin'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
