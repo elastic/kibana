@@ -11,6 +11,10 @@ export const CLASSIC_SEARCH_SPAN_NAME = 'get_digital_experience_classic_applicat
 /** Name of the APM span that traces the EDOT Browser search of the sessions index. */
 export const SESSIONS_SEARCH_SPAN_NAME = 'get_digital_experience_otel_applications_from_sessions';
 
+/** Name of the APM span that traces the search of the EDOT Browser applications' p75 vitals. */
+export const SESSIONS_VITALS_SEARCH_SPAN_NAME =
+  'get_digital_experience_otel_application_vitals_from_sessions';
+
 /** Maximum number of applications returned per source. */
 export const MAX_APPLICATIONS_PER_SOURCE = 1000;
 

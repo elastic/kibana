@@ -93,8 +93,16 @@ privileges like the app.
   that switches the list to the Classic RUM rows.
 
 **Where the EDOT Browser rows come from:** the sessions index only (see [Sessions](#sessions)), as
-the current user, in one cheap search over session summaries instead of aggregating every raw
-event; the list never reads `logs-*.otel-*` or `traces-*.otel-*`. Classic RUM reads its own indices.
+the current user, over session summaries instead of aggregating every raw event; the list never
+reads `logs-*.otel-*` or `traces-*.otel-*`. Classic RUM reads its own indices. Two searches run at
+once, one for the metrics and one for the p75 of the vitals: Elasticsearch runs a search on a
+shard in one thread, and the percentiles are half the cost, so on a single shard the two finish in
+about half the time of one. On 12M synthetic sessions, a 30-day range took about 0.9 s instead of
+2 s, 7 days 0.3 s instead of 0.5 s, and 24 hours under 0.1 s; the time grows with the sessions in
+the range, not the size of the index. They use the same Elasticsearch CPU in total, so the gain
+shrinks when many users load the list at once. Computing the p75 only for the applications of the
+table's page was slower: the busiest applications hold most sessions, and the table sorts by the
+vitals in the browser. ES|QL took about as long as the search.
 Without sessions set up there is no index and so no EDOT Browser application, and a failing
 sessions search leaves the source out like any other (`unavailableSources`); the sessions states
 above say why rows are missing. The user needs `read` on `digital-experience-sessions-browser-*`,

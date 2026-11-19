@@ -14,12 +14,11 @@ interface SumAggregation {
   value: number;
 }
 
-/** One vital in `sessionsSearch`: the sums of its sample counts, and the p75 of the sessions' p75. */
+/** One vital in `sessionsSearch`: the sums of its sample counts. */
 export interface SessionsVitalBucket {
   samples: SumAggregation;
   good: SumAggregation;
   needsImprovement: SumAggregation;
-  p75: PercentilesAggregation;
 }
 
 /** One application in `sessionsSearch`. */
@@ -49,4 +48,12 @@ export interface SessionsAggregations {
       };
     };
   };
+}
+
+/** One application in `sessionsVitalsSearch`: the p75 of each vital. */
+export type SessionsVitalsBucket = Record<CoreWebVital, PercentilesAggregation> & { key: string };
+
+/** `sessionsVitalsSearch`: the applications in the selected environment. */
+export interface SessionsVitalsAggregations {
+  applications: { buckets: SessionsVitalsBucket[] };
 }

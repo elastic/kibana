@@ -12,12 +12,16 @@ import { getSessionsApplications } from './get_sessions_applications';
 const sum = (value: number) => ({ value });
 
 // `good` and `needsImprovement` of the samples are good and need improvement, the rest are poor.
-const vital = (p75: number | null, samples: number, good = samples, needsImprovement = 0) => ({
+const vital = (samples: number, good = samples, needsImprovement = 0) => ({
   samples: sum(samples),
   good: sum(good),
   needsImprovement: sum(needsImprovement),
-  p75: { values: p75 === null ? [] : [{ key: 75, value: p75 }] },
 });
+
+const p75 = (value: number) => ({ values: [{ key: 75, value }] });
+
+const SEARCH_SPAN = 'get_digital_experience_otel_applications_from_sessions';
+const VITALS_SPAN = 'get_digital_experience_otel_application_vitals_from_sessions';
 
 const terms = (...keys: string[]) => ({ buckets: keys.map((key) => ({ key })) });
 
@@ -32,11 +36,11 @@ const application = (key: string, overrides: Record<string, unknown> = {}) => ({
   jsErrors: sum(0),
   httpRequests: sum(0),
   failedHttpRequests: sum(0),
-  lcp: vital(null, 0),
-  inp: vital(null, 0),
-  cls: vital(null, 0),
-  fcp: vital(null, 0),
-  ttfb: vital(null, 0),
+  lcp: vital(0),
+  inp: vital(0),
+  cls: vital(0),
+  fcp: vital(0),
+  ttfb: vital(0),
   lastSeen: { value: null },
   ...overrides,
 });
@@ -44,8 +48,10 @@ const application = (key: string, overrides: Record<string, unknown> = {}) => ({
 /** The buckets of the page loads over time, of the sessions that started in the time range. */
 const startedInRange = (buckets: unknown[] = []) => ({ pageLoadsOverTime: { buckets } });
 
-const setup = (aggregations: unknown) => {
-  const search = jest.fn().mockResolvedValue({ aggregations });
+const setup = (aggregations: unknown, vitalsAggregations: unknown = undefined) => {
+  const search = jest.fn(async (spanName: string) => ({
+    aggregations: spanName === VITALS_SPAN ? vitalsAggregations : aggregations,
+  }));
   return { tracedEsClient: { search } as unknown as TracedElasticsearchClient, search };
 };
 
@@ -56,34 +62,58 @@ const PARAMS = {
 };
 
 describe('getSessionsApplications', () => {
-  it('maps the sessions buckets to application summaries, with the samples and ratings summed', async () => {
-    const { tracedEsClient } = setup({
-      environments: terms('production', 'staging'),
-      environmentNotDefined: { doc_count: 0 },
-      inEnvironment: {
+  it('maps the sessions buckets to application summaries, with the samples and ratings summed and the p75 of the vitals search', async () => {
+    const { tracedEsClient } = setup(
+      {
+        environments: terms('production', 'staging'),
+        environmentNotDefined: { doc_count: 0 },
+        inEnvironment: {
+          applications: {
+            buckets: [
+              application('web', {
+                startedSessions: { doc_count: 40 },
+                environments: terms('production', 'canary'),
+                pageLoads: sum(12),
+                jsErrors: sum(3),
+                httpRequests: sum(8),
+                failedHttpRequests: sum(2),
+                lcp: vital(10),
+                inp: vital(4),
+                cls: vital(9),
+                fcp: vital(10),
+                // Two good, one needs improvement, one poor.
+                ttfb: vital(4, 2, 1),
+                lastSeen: { value: Date.parse('2021-01-18T12:33:00.000Z') },
+              }),
+              application('no-metrics'),
+            ],
+          },
+          startedInRange: startedInRange(),
+        },
+      },
+      {
         applications: {
           buckets: [
-            application('web', {
-              startedSessions: { doc_count: 40 },
-              environments: terms('production', 'canary'),
-              pageLoads: sum(12),
-              jsErrors: sum(3),
-              httpRequests: sum(8),
-              failedHttpRequests: sum(2),
-              lcp: vital(2412.5, 10),
-              inp: vital(180.25, 4),
-              cls: vital(0.3, 9),
-              fcp: vital(1500.5, 10),
-              // Two good, one needs improvement, one poor.
-              ttfb: vital(950.75, 4, 2, 1),
-              lastSeen: { value: Date.parse('2021-01-18T12:33:00.000Z') },
-            }),
-            application('no-metrics'),
+            {
+              key: 'web',
+              lcp: p75(2412.5),
+              inp: p75(180.25),
+              cls: p75(0.3),
+              fcp: p75(1500.5),
+              ttfb: p75(950.75),
+            },
+            {
+              key: 'no-metrics',
+              lcp: { values: [] },
+              inp: { values: [] },
+              cls: { values: [] },
+              fcp: { values: [] },
+              ttfb: { values: [] },
+            },
           ],
         },
-        startedInRange: startedInRange(),
-      },
-    });
+      }
+    );
 
     await expect(getSessionsApplications({ tracedEsClient, ...PARAMS })).resolves.toMatchObject({
       applications: [
@@ -120,6 +150,24 @@ describe('getSessionsApplications', () => {
         },
       ],
     });
+  });
+
+  it('has no p75 for an application the vitals search did not return', async () => {
+    const { tracedEsClient } = setup(
+      {
+        environments: terms(),
+        environmentNotDefined: { doc_count: 0 },
+        inEnvironment: {
+          applications: { buckets: [application('web', { lcp: vital(3) })] },
+          startedInRange: startedInRange(),
+        },
+      },
+      { applications: { buckets: [] } }
+    );
+
+    const { applications } = await getSessionsApplications({ tracedEsClient, ...PARAMS });
+
+    expect(applications[0].webVitals.lcp).toMatchObject({ p75Ms: null, sampleCount: 3 });
   });
 
   it('has no ratio without page loads', async () => {
@@ -198,15 +246,28 @@ describe('getSessionsApplications', () => {
     });
   });
 
-  it('searches the sessions index in a span of its own', async () => {
-    const { tracedEsClient, search } = setup(undefined);
+  it('sends the metrics and vitals searches at once, each in a span of its own', async () => {
+    let resolveSearches = () => {};
+    const searchesSent = new Promise<void>((resolve) => {
+      resolveSearches = resolve;
+    });
+    const search = jest.fn(async () => {
+      if (search.mock.calls.length === 2) {
+        resolveSearches();
+      }
+      await searchesSent;
+      return { aggregations: undefined };
+    });
+    const tracedEsClient = { search } as unknown as TracedElasticsearchClient;
 
     await getSessionsApplications({ tracedEsClient, ...PARAMS, environment: 'production' });
 
-    expect(search).toHaveBeenCalledTimes(1);
-    expect(search).toHaveBeenCalledWith(
-      'get_digital_experience_otel_applications_from_sessions',
-      expect.objectContaining({ index: 'digital-experience-sessions-browser-*' })
-    );
+    expect(search).toHaveBeenCalledTimes(2);
+    for (const span of [SEARCH_SPAN, VITALS_SPAN]) {
+      expect(search).toHaveBeenCalledWith(
+        span,
+        expect.objectContaining({ index: 'digital-experience-sessions-browser-*' })
+      );
+    }
   });
 });
