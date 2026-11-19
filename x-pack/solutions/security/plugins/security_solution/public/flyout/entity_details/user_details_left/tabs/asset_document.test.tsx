@@ -13,7 +13,7 @@ import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import { DocumentDetailsContext } from '../../../document_details/shared/context';
 import { mockContextValue } from '../../../document_details/shared/mocks/mock_context';
 import userEvent from '@testing-library/user-event';
-import { TABLE_TAB_CONTENT_TEST_ID } from '../../../document_details/right/tabs/test_ids';
+import { TABLE_TAB_CONTENT_TEST_ID } from '../../../../flyout_v2/document/main/tabs/test_ids';
 import { JSON_TAB_CONTENT_TEST_ID } from '../../../../flyout_v2/shared/components/json_tab';
 import { PREFIX } from '../../../shared/test_ids';
 

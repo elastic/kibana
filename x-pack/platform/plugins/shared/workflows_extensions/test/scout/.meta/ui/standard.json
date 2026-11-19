@@ -1,0 +1,32 @@
+{
+  "sha1": "abd0b9010c2f6bc1a2575f2c4e61e23ba0b62bde",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "cc764775ac314da-2de02fd2ecc4134",
+      "title": "Workflows Extensions - Custom Step Definitions Client Registration should register every custom step on both the server and the client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/workflows_extensions/test/scout/ui/tests/step_definitions_client_registration.spec.ts",
+        "line": 76,
+        "column": 25
+      }
+    }
+  ]
+}

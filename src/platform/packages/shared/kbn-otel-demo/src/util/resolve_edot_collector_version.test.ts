@@ -9,6 +9,8 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
 import { resolveEdotCollectorVersion } from './resolve_edot_collector_version';
 
 jest.mock('execa', () => ({
@@ -116,6 +118,49 @@ describe('resolveEdotCollectorVersion', () => {
       expect.not.stringContaining('SNAPSHOT'),
       expect.anything()
     );
+  });
+
+  it('inspects manifests without a credential helper and removes the config afterwards', async () => {
+    let dockerConfigDir: string | undefined;
+    mockExecaCommand.mockImplementation((_command, options) => {
+      const configDir = options?.env?.DOCKER_CONFIG;
+      if (typeof configDir !== 'string') {
+        throw new Error('DOCKER_CONFIG was not set');
+      }
+      const config = JSON.parse(readFileSync(join(configDir, 'config.json'), 'utf8')) as {
+        auths?: Record<string, unknown>;
+        credsStore?: string;
+        credHelpers?: Record<string, string>;
+      };
+      expect(config.credsStore).toBeUndefined();
+      expect(config.credHelpers).toBeUndefined();
+      expect(config.auths).toEqual({ 'edot-collector.invalid': {} });
+      dockerConfigDir = configDir;
+      // execa.command returns a thenable child process. The caller only awaits it.
+      return Promise.resolve(mockExecaResult) as ReturnType<typeof execa.command>;
+    });
+
+    const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
+
+    if (!dockerConfigDir) {
+      throw new Error('DOCKER_CONFIG was not set');
+    }
+    expect(version).toBe('9.1.0');
+    expect(dockerConfigDir).toEqual(expect.stringContaining('edot-collector-docker-config-'));
+    expect(existsSync(dockerConfigDir)).toBe(false);
+  });
+
+  it('keeps walking when the registry returns HTTP 500', async () => {
+    const error = Object.assign(new Error('command failed'), {
+      stderr:
+        'Get "https://docker.elastic.co/v2/elastic-agent/elastic-otel-collector/manifests/9.1.0": received unexpected HTTP status: 500 Internal Server Error',
+    });
+    mockExecaCommand.mockRejectedValueOnce(error).mockResolvedValueOnce(mockExecaResult);
+
+    const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
+
+    expect(version).toBe('9.0.0');
+    expect(mockExecaCommand).toHaveBeenCalledTimes(2);
   });
 
   it('should fall back to Kibana version when no image is found', async () => {
