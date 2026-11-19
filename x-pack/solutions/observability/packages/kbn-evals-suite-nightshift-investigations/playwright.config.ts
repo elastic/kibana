@@ -15,6 +15,7 @@ import { selectStoredDatasets } from './src/datasets/stored_datasets';
 const {
   runInvestigations,
   runOrca,
+  runOrcaRegrade,
   runConnectorProbes,
   runWikiOptimize,
   runWriteup,
@@ -36,6 +37,7 @@ export default createPlaywrightEvalsConfig({
   testIgnore: [
     ...(runInvestigations ? [] : ['**/investigation/investigation.spec.ts']),
     ...(runOrca ? [] : ['**/investigation/orcabench.spec.ts']),
+    ...(runOrcaRegrade ? [] : ['**/investigation/orcabench_regrade.spec.ts']),
     ...(runStoredInvestigations ? [] : ['**/investigation/stored.spec.ts']),
     ...(runConnectorProbes ? [] : ['**/connector_probe/connector_probe.spec.ts']),
     ...(runStoredConnectorProbes ? [] : ['**/connector_probe/stored.spec.ts']),
