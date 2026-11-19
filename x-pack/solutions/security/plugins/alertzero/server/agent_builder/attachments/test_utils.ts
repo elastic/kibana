@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { formatValidationError } from '@elastic/isomer-sdk';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentFormatContext,
   AttachmentTypeDefinition,
+  SurfaceComposition,
   TextAttachmentRepresentation,
 } from '@kbn/agent-builder-server/attachments';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 
 /**
  * Formats `data` through `attachmentType` and returns the plain text
@@ -30,4 +34,34 @@ export const formatToText = async (
     : { type: 'text', value: '' };
 
   return (representation as TextAttachmentRepresentation).value;
+};
+
+export const surfaceContext = {
+  request: httpServerMock.createKibanaRequest(),
+  spaceId: 'default',
+  agentId: 'hunt-agent',
+};
+
+/**
+ * Validates a surface composition with the `isomer` plugin's runtime, as Agent Builder does before
+ * it renders one, and renders it for Slack.
+ */
+export const renderSurface = async (composition: SurfaceComposition | undefined) => {
+  if (!composition) {
+    throw new Error('Expected a surface composition');
+  }
+
+  const runtime = await isomerPluginMock.createStartContract().getRuntime();
+  const { valid, errors } = runtime.validate(composition);
+
+  return {
+    errors: errors.map(formatValidationError),
+    valid,
+    slack: JSON.stringify(
+      runtime.surfaces.slack.render(composition, {
+        heading: false,
+        baseUrl: 'https://kibana.example.com',
+      }).blocks
+    ),
+  };
 };

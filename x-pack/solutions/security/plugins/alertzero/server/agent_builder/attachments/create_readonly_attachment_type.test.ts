@@ -94,4 +94,49 @@ describe('createReadonlyAttachmentType', () => {
       expect(description).toContain('fixture widget');
     });
   });
+
+  describe('toSurfaceComposition', () => {
+    const surfaceContext = { ...formatContext, agentId: 'agent-1' };
+
+    const surfacedType = createReadonlyAttachmentType({
+      id: 'test.surfaced',
+      schema: fixtureSchema,
+      readSchema: fixtureSchema.extend({
+        attachmentLabel: fixtureSchema.shape.attachmentLabel.catch(undefined),
+      }),
+      formatForAgent: (data) => `fixture: ${data.value}`,
+      describePayload: 'The payload contains: value.',
+      renderNoun: 'fixture widget',
+      maxContentLength: 100,
+      toSurfaceComposition: ({ value }) => ({
+        type: 'view',
+        body: [{ type: 'markdown', text: value }],
+      }),
+    });
+
+    const toAttachment = (data: unknown): Attachment<string, unknown> => ({
+      id: 'attachment-1',
+      type: 'test.surfaced',
+      data,
+    });
+
+    it('is left undefined when the type has no mapping', () => {
+      expect(attachmentType.toSurfaceComposition).toBeUndefined();
+    });
+
+    it('maps the data read through readSchema, tolerating a stale display field', async () => {
+      const composition = await surfacedType.toSurfaceComposition?.(
+        toAttachment({ value: 'ok', attachmentLabel: 42 }),
+        surfaceContext
+      );
+
+      expect(composition).toEqual({ type: 'view', body: [{ type: 'markdown', text: 'ok' }] });
+    });
+
+    it('throws a message naming the attachment id when data is invalid', () => {
+      expect(() =>
+        surfacedType.toSurfaceComposition?.(toAttachment({ value: '' }), surfaceContext)
+      ).toThrow('Invalid test.surfaced attachment data for attachment attachment-1');
+    });
+  });
 });

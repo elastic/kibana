@@ -97,6 +97,8 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/discover-plugin'
   - '@kbn/workflows-execution-engine'
+  - '@kbn/isomer-components'
+  - '@kbn/isomer-plugin'
 tags:
   - plugin
   - prod

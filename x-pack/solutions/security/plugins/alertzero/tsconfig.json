@@ -85,6 +85,8 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/kibana-utils-plugin",
     "@kbn/discover-plugin",
-    "@kbn/workflows-execution-engine"
+    "@kbn/workflows-execution-engine",
+    "@kbn/isomer-components",
+    "@kbn/isomer-plugin"
   ]
 }

@@ -13,6 +13,7 @@ import {
   type SignificantSecurityEventAttachmentData,
 } from '../../../common/significant_security_event_schema';
 import { createReadonlyAttachmentType } from './create_readonly_attachment_type';
+import { toSignificantSecurityEventSurfaceComposition } from './significant_security_event_surface';
 
 export const SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID =
   ALERTZERO_ATTACHMENT_TYPES.significantSecurityEvent;
@@ -284,6 +285,7 @@ export const createSignificantSecurityEventAttachmentType = (): AttachmentTypeDe
     formatForAgent: formatSignificantSecurityEventForAgent,
     describePayload,
     renderNoun: 'event card',
+    toSurfaceComposition: toSignificantSecurityEventSurfaceComposition,
     // Backstop only. The real bound is `SECTION_CHAR_BUDGET` per list section, which keeps a
     // payload at the schema's caps inside this limit; reaching it here would mean a section
     // grew unbounded, and the cut drops whole sections without saying so.
