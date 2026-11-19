@@ -133,18 +133,32 @@ describe('DirectorStep', () => {
   });
 
   it('counts each (episode, status) transition once across batches of the same run', async () => {
-    const transition = {
+    const e1ToActive = {
       groupHash: 'g1',
       episodeId: 'e1',
       previousStatus: 'inactive' as const,
       status: 'active' as const,
     };
+    const e2ToActive = {
+      groupHash: 'g2',
+      episodeId: 'e2',
+      previousStatus: 'inactive' as const,
+      status: 'active' as const,
+    };
     const director = createMockDirectorService();
-    director.run.mockResolvedValue({
-      alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
-      stats: { newEpisodeIds: [], statusTransitions: [transition] },
-      previousAlertStateByGroupHash: new Map(),
-    });
+    // Second batch recomputes `e1` (a repeat) and surfaces `e2` for the first
+    // time: the repeat must be skipped while the newly-arriving episode counts.
+    director.run
+      .mockResolvedValueOnce({
+        alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+        stats: { newEpisodeIds: [], statusTransitions: [e1ToActive] },
+        previousAlertStateByGroupHash: new Map(),
+      })
+      .mockResolvedValueOnce({
+        alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+        stats: { newEpisodeIds: [], statusTransitions: [e1ToActive, e2ToActive] },
+        previousAlertStateByGroupHash: new Map(),
+      });
     const step = new DirectorStep(director);
 
     const batchState = createRulePipelineState({
@@ -160,8 +174,11 @@ describe('DirectorStep', () => {
     expect(first.meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.episodesTransitionedToActive]: 1,
     });
+    // Only `e2` counts in the second batch; the `e1` repeat is deduped.
     // @ts-expect-error: meta is present on the result
-    expect(second.meta?.counters).toEqual({});
+    expect(second.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToActive]: 1,
+    });
   });
 
   it('emits a counter for transitions to pending', async () => {
