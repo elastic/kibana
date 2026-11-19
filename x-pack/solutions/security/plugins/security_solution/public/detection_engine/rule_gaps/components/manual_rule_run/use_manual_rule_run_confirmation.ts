@@ -16,6 +16,7 @@ export const useManualRuleRunConfirmation = () => {
     showScheduleBulkActionConfirmation,
     cancelScheduleBulkAction,
     confirmScheduleBulkAction,
+    focusTrapProps,
   } = useScheduleBulkActionConfirmation();
 
   return {
@@ -23,5 +24,6 @@ export const useManualRuleRunConfirmation = () => {
     showManualRuleRunConfirmation: showScheduleBulkActionConfirmation,
     cancelManualRuleRun: cancelScheduleBulkAction,
     confirmManualRuleRun: confirmScheduleBulkAction,
+    manualRuleRunFocusTrapProps: focusTrapProps,
   };
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFocusTrapProps } from '@elastic/eui';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import type { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +25,7 @@ export const UpdateApiKeyModalConfirmation = ({
   setIsLoadingState,
   onUpdated,
   onSearchPopulate,
+  focusTrapProps,
 }: {
   onCancel: () => void;
   idsToUpdate?: string[];
@@ -42,6 +44,7 @@ export const UpdateApiKeyModalConfirmation = ({
   setIsLoadingState: (isLoading: boolean) => void;
   onUpdated: () => void;
   onSearchPopulate?: (filter: string) => void;
+  focusTrapProps?: Pick<EuiFocusTrapProps, 'returnFocus'>;
 }) => {
   const {
     http,
@@ -85,6 +88,7 @@ export const UpdateApiKeyModalConfirmation = ({
       titleProps={{ id: modalTitleId }}
       buttonColor="primary"
       data-test-subj="updateApiKeyIdsConfirmation"
+      focusTrapProps={focusTrapProps}
       title={i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.title', {
         defaultMessage: 'Update API key',
       })}

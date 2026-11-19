@@ -28,13 +28,16 @@ import type { TimeRange } from '../../../rule_gaps/types';
 import { useScheduleRuleRun } from '../../../rule_gaps/logic/use_schedule_rule_run';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
+const ALL_ACTIONS_OPEN_TOGGLE_SELECTOR =
+  '[data-test-subj="euiCollapsedItemActionsButton"][aria-expanded="true"]';
+
 export const useRulesTableActions = ({
   showExceptionsDuplicateConfirmation,
   showManualRuleRunConfirmation,
   confirmDeletion,
 }: {
   showExceptionsDuplicateConfirmation: () => Promise<string | null>;
-  showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
+  showManualRuleRunConfirmation: (triggerElement?: HTMLElement | null) => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
 }): Array<DefaultItemAction<Rule>> => {
   const {
@@ -137,7 +140,10 @@ export const useRulesTableActions = ({
       name: i18n.MANUAL_RULE_RUN,
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
-        const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
+        // The row's "All actions" popover is still open here; its toggle is the element to return focus to
+        const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation(
+          document.querySelector<HTMLElement>(ALL_ACTIONS_OPEN_TOGGLE_SELECTOR)
+        );
         telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunOpenModal, {
           type: 'single',
         });

@@ -6,6 +6,7 @@
  */
 import type moment from 'moment';
 import React, { useMemo } from 'react';
+import type { EuiFocusTrapProps } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
 import { MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
 
@@ -15,6 +16,7 @@ import { ScheduleBulkActionModal } from '../../../common/components/schedule_bul
 interface ManualRuleRunModalProps {
   onCancel: () => void;
   onConfirm: (timeRange: { startDate: moment.Moment; endDate: moment.Moment }) => void;
+  focusTrapProps?: Pick<EuiFocusTrapProps, 'returnFocus'>;
 }
 
 const modalCopy = {
@@ -31,7 +33,11 @@ const modalCopy = {
   },
 };
 
-const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModalProps) => {
+const ManualRuleRunModalComponent = ({
+  onCancel,
+  onConfirm,
+  focusTrapProps,
+}: ManualRuleRunModalProps) => {
   const callouts = useMemo(() => {
     return [
       <EuiCallOut
@@ -48,6 +54,7 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
       text={modalCopy}
       maxLookbackWindowDays={MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS}
       callouts={callouts}
+      focusTrapProps={focusTrapProps}
     />
   );
 };

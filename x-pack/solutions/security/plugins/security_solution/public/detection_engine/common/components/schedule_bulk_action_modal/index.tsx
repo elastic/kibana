@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiFocusTrapProps } from '@elastic/eui';
 import {
   EuiConfirmModal,
   EuiDatePicker,
@@ -37,6 +38,7 @@ interface ScheduleBulkActionModalProps {
   };
   maxLookbackWindowDays: number;
   callouts: ReactNode[];
+  focusTrapProps?: Pick<EuiFocusTrapProps, 'returnFocus'>;
 }
 
 const ScheduleBulkActionModalComponent = ({
@@ -45,6 +47,7 @@ const ScheduleBulkActionModalComponent = ({
   text,
   maxLookbackWindowDays,
   callouts,
+  focusTrapProps,
 }: ScheduleBulkActionModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
 
@@ -92,6 +95,7 @@ const ScheduleBulkActionModalComponent = ({
       }
       titleProps={{ id: modalTitleId, style: { width: '100%' } }}
       onCancel={onCancel}
+      focusTrapProps={focusTrapProps}
       onConfirm={handleConfirm}
       confirmButtonText={text.confirmButton}
       cancelButtonText={text.cancelButton}

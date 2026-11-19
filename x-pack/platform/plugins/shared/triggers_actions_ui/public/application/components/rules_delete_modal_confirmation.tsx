@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFocusTrapProps } from '@elastic/eui';
 import { EuiCallOut, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import React from 'react';
 import { CANCEL_BUTTON_TEXT } from '../sections/rules_list/translations';
@@ -16,6 +17,7 @@ export const RulesDeleteModalConfirmation = ({
   onConfirm,
   showWarningText,
   warningText,
+  focusTrapProps,
 }: {
   confirmButtonText: string;
   confirmModalText: string;
@@ -23,6 +25,7 @@ export const RulesDeleteModalConfirmation = ({
   onCancel: () => void;
   showWarningText?: boolean;
   warningText?: string;
+  focusTrapProps?: Pick<EuiFocusTrapProps, 'returnFocus'>;
 }) => {
   const modalTitleId = useGeneratedHtmlId();
 
@@ -33,6 +36,7 @@ export const RulesDeleteModalConfirmation = ({
       titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="rulesDeleteConfirmation"
+      focusTrapProps={focusTrapProps}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={CANCEL_BUTTON_TEXT}

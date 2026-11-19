@@ -139,6 +139,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     showManualRuleRunConfirmation,
     cancelManualRuleRun,
     confirmManualRuleRun,
+    manualRuleRunFocusTrapProps,
   } = useManualRuleRunConfirmation();
 
   const {
@@ -327,7 +328,11 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         </EuiConfirmModal>
       )}
       {isManualRuleRunConfirmationVisible && (
-        <ManualRuleRunModal onCancel={cancelManualRuleRun} onConfirm={confirmManualRuleRun} />
+        <ManualRuleRunModal
+          onCancel={cancelManualRuleRun}
+          onConfirm={confirmManualRuleRun}
+          focusTrapProps={manualRuleRunFocusTrapProps}
+        />
       )}
       {isBulkFillRuleGapsConfirmationVisible && (
         <BulkFillRuleGapsModal

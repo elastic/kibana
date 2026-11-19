@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { asyncScheduler } from 'rxjs';
 import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -40,9 +40,9 @@ export type ComponentOpts = {
   item: RuleTableItem;
   onRuleChanged: () => Promise<void>;
   onLoading: (isLoading: boolean) => void;
-  onDeleteRule: (item: RuleTableItem) => void;
+  onDeleteRule: (item: RuleTableItem, triggerElement?: HTMLElement | null) => void;
   onEditRule: (item: RuleTableItem) => void;
-  onUpdateAPIKey: (item: RuleTableItem) => void;
+  onUpdateAPIKey: (item: RuleTableItem, triggerElement?: HTMLElement | null) => void;
   onRunRule: (item: RuleTableItem) => void;
   onCloneRule: (ruleId: string) => void;
 } & Pick<
@@ -71,6 +71,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
 
   const { euiTheme } = useEuiTheme();
 
+  const actionsButtonRef = useRef<HTMLButtonElement | null>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
@@ -219,7 +220,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     'data-test-subj': testId,
     onClick: () => {
       setIsPopoverOpen(!isPopoverOpen);
-      onUpdateAPIKey(item);
+      onUpdateAPIKey(item, actionsButtonRef.current);
     },
     name: i18n.translate(
       'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.updateApiKey',
@@ -306,7 +307,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
               'data-test-subj': 'deleteRule',
               onClick: () => {
                 setIsPopoverOpen(!isPopoverOpen);
-                onDeleteRule(item);
+                onDeleteRule(item, actionsButtonRef.current);
               },
               name: i18n.translate(
                 'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.deleteRuleTitle',
@@ -369,6 +370,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
               disableScreenReaderOutput
             >
               <EuiButtonIcon
+                buttonRef={actionsButtonRef}
                 data-test-subj="selectActionButton"
                 data-testid="selectActionButton"
                 iconType="boxesVertical"

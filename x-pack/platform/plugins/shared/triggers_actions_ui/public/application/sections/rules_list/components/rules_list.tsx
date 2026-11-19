@@ -7,7 +7,7 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import type { EuiSelectableOption, EuiTableSortingType } from '@elastic/eui';
+import type { EuiFocusTrapProps, EuiSelectableOption, EuiTableSortingType } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiDescriptionList,
@@ -625,8 +625,28 @@ export const RulesList = ({
       : false;
   }, [selectedIds, rulesState.data, ruleTypesState.data, isAllSelected]);
 
+  // The row actions popover unmounts before the modal mounts, so EUI can't restore focus on its own.
+  const returnFocusElementRef = useRef<HTMLElement | null>(null);
+  const modalFocusTrapProps: Pick<EuiFocusTrapProps, 'returnFocus'> = useMemo(
+    () => ({
+      returnFocus: () => {
+        const element = returnFocusElementRef.current;
+        if (element?.isConnected) {
+          element.focus();
+          return false;
+        }
+        return true;
+      },
+    }),
+    []
+  );
+
   const updateRulesToBulkEdit = useCallback(
-    ({ action, rules, filter }: UpdateRulesToBulkEditProps) => {
+    (
+      { action, rules, filter }: UpdateRulesToBulkEditProps,
+      triggerElement?: HTMLElement | null
+    ) => {
+      returnFocusElementRef.current = triggerElement ?? null;
       setBulkEditAction(action);
       if (rules) {
         setRulesToBulkEdit(rules);
@@ -810,6 +830,7 @@ export const RulesList = ({
             )}
             showWarningText={isAllSelected}
             warningText={getConfirmDeletionModalWarningText()}
+            focusTrapProps={modalFocusTrapProps}
           />
         )}
         <BulkSnoozeModal
@@ -867,6 +888,7 @@ export const RulesList = ({
               await refreshRules();
             }}
             onSearchPopulate={onSearchPopulate}
+            focusTrapProps={modalFocusTrapProps}
           />
         )}
         <EuiSpacer size="xs" />
@@ -950,18 +972,12 @@ export const RulesList = ({
                   item={rule}
                   onLoading={onLoading}
                   onRuleChanged={refreshRules}
-                  onDeleteRule={() =>
-                    updateRulesToBulkEdit({
-                      action: 'delete',
-                      rules: [rule],
-                    })
+                  onDeleteRule={(_, triggerElement) =>
+                    updateRulesToBulkEdit({ action: 'delete', rules: [rule] }, triggerElement)
                   }
                   onEditRule={() => onRuleEdit(rule)}
-                  onUpdateAPIKey={() =>
-                    updateRulesToBulkEdit({
-                      action: 'updateApiKey',
-                      rules: [rule],
-                    })
+                  onUpdateAPIKey={(_, triggerElement) =>
+                    updateRulesToBulkEdit({ action: 'updateApiKey', rules: [rule] }, triggerElement)
                   }
                   onRunRule={() => onRunRule(rule.id)}
                   onCloneRule={onCloneRule}

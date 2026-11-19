@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
+import type { EuiFocusTrapProps } from '@elastic/eui';
 
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import type { TimeRange } from '../../../rule_gaps/types';
@@ -16,6 +17,22 @@ import type { TimeRange } from '../../../rule_gaps/types';
 export const useScheduleBulkActionConfirmation = () => {
   const [isScheduleBulkActionConfirmationVisible, showModal, hideModal] = useBoolState();
   const confirmationPromiseRef = useRef<(timerange: TimeRange | null) => void>();
+  const returnFocusElementRef = useRef<HTMLElement | null>(null);
+
+  // The menu that opens the modal unmounts before the modal mounts, so EUI can't restore focus on its own.
+  const focusTrapProps: Pick<EuiFocusTrapProps, 'returnFocus'> = useMemo(
+    () => ({
+      returnFocus: () => {
+        const element = returnFocusElementRef.current;
+        if (element?.isConnected) {
+          element.focus();
+          return false;
+        }
+        return true;
+      },
+    }),
+    []
+  );
 
   const onConfirm = useCallback((timerange: TimeRange) => {
     confirmationPromiseRef.current?.(timerange);
@@ -25,31 +42,39 @@ export const useScheduleBulkActionConfirmation = () => {
     confirmationPromiseRef.current?.(null);
   }, []);
 
-  const initModal = useCallback(() => {
-    showModal();
+  const initModal = useCallback(
+    (triggerElement?: HTMLElement | null) => {
+      returnFocusElementRef.current = triggerElement ?? null;
+      showModal();
 
-    return new Promise<TimeRange | null>((resolve) => {
-      confirmationPromiseRef.current = resolve;
-    }).finally(() => {
-      hideModal();
-    });
-  }, [showModal, hideModal]);
+      return new Promise<TimeRange | null>((resolve) => {
+        confirmationPromiseRef.current = resolve;
+      }).finally(() => {
+        hideModal();
+      });
+    },
+    [showModal, hideModal]
+  );
 
-  const showScheduleBulkActionConfirmation = useCallback(async () => {
-    const confirmation = await initModal();
-    if (confirmation) {
-      onConfirm(confirmation);
-    } else {
-      onCancel();
-    }
+  const showScheduleBulkActionConfirmation = useCallback(
+    async (triggerElement?: HTMLElement | null) => {
+      const confirmation = await initModal(triggerElement);
+      if (confirmation) {
+        onConfirm(confirmation);
+      } else {
+        onCancel();
+      }
 
-    return confirmation;
-  }, [initModal, onConfirm, onCancel]);
+      return confirmation;
+    },
+    [initModal, onConfirm, onCancel]
+  );
 
   return {
     isScheduleBulkActionConfirmationVisible,
     showScheduleBulkActionConfirmation,
     cancelScheduleBulkAction: onCancel,
     confirmScheduleBulkAction: onConfirm,
+    focusTrapProps,
   };
 };
