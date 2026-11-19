@@ -9,17 +9,24 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { QueryProfileView } from './types';
+import type { QueryProfileView } from './profile/types';
 import {
   operatorCategoryLabel,
   summarizeCpuByCategory,
   useOperatorCategoryColors,
-} from './operator_category';
-import { formatDurationMillis, formatShare } from './profile_format';
-import { LegendSwatch } from './legend_swatch';
+} from './shared/operator_category';
+import { formatDurationMillis, formatShare } from './shared/profile_format';
 
 const useSummaryStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -101,22 +108,20 @@ const DurationSummary = ({ view }: { view: QueryProfileView }) => {
           <EuiSpacer size="xs" />
           <EuiFlexGroup gutterSize="m" responsive={false} wrap>
             <EuiFlexItem grow={false}>
-              <LegendSwatch
-                colorCss={styles.planning}
-                label={i18n.translate('data.inspector.queryProfile.planningLegendLabel', {
+              <EuiHealth color="warning" textSize="xs">
+                {i18n.translate('data.inspector.queryProfile.planningLegendLabel', {
                   defaultMessage: 'Planning {time}',
                   values: { time: formatDurationMillis(planningTookMillis) },
                 })}
-              />
+              </EuiHealth>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <LegendSwatch
-                colorCss={styles.execution}
-                label={i18n.translate('data.inspector.queryProfile.executionLegendLabel', {
+              <EuiHealth color="primary" textSize="xs">
+                {i18n.translate('data.inspector.queryProfile.executionLegendLabel', {
                   defaultMessage: 'Execution {time}',
                   values: { time: formatDurationMillis(executionTookMillis) },
                 })}
-              />
+              </EuiHealth>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
@@ -162,12 +167,9 @@ const CpuByKind = ({ view }: { view: QueryProfileView }) => {
       <EuiFlexGroup gutterSize="m" responsive={false} wrap>
         {entries.map(({ category, text }) => (
           <EuiFlexItem grow={false} key={category}>
-            <LegendSwatch
-              colorCss={css`
-                background: ${categoryColor[category]};
-              `}
-              label={text}
-            />
+            <EuiHealth color={categoryColor[category]} textSize="xs">
+              {text}
+            </EuiHealth>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

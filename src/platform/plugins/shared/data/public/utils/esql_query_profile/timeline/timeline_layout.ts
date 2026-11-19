@@ -8,7 +8,8 @@
  */
 
 import { max, median, min } from 'd3-array';
-import type { QueryProfileTimeline, TimelineDriver, TimeSpan } from './types';
+import { spanMillis } from '../shared/time_span';
+import type { QueryProfileTimeline, TimelineDriver, TimeSpan } from '../profile/types';
 
 /** The kinds of driver in the order a query runs them. Any other kind is listed after these. */
 const GROUP_ORDER = ['data', 'node_reduce', 'final'];
@@ -21,9 +22,6 @@ export interface LaneBox {
   left: number;
   width: number;
 }
-
-/** How long a span of the timeline lasted. */
-export const spanMillis = (span: TimeSpan): number => span.stopMillis - span.startMillis;
 
 /** The time range that holds planning and every driver. */
 export const fullDomain = (timeline: QueryProfileTimeline): TimeSpan => {

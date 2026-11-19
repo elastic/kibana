@@ -9,7 +9,6 @@
 
 import type { esqlProfileResponseSchema } from '@elastic/esql-definitions/profile-schema';
 import type { EsqlProfilePlan } from '@kbn/es-types';
-import type { QueryResultsSummary } from './compare_results';
 
 type SchemaProperties = typeof esqlProfileResponseSchema.properties;
 
@@ -56,8 +55,6 @@ interface OperatorName {
 
 /** One operator as it ran in one driver. */
 export interface AggregatedOperatorDriver {
-  /** Position of the driver in the profile. */
-  driverIndex: number;
   /** The node the driver ran on. Plan node ids only mean something together with it. */
   nodeName?: string;
   /** The id of the plan node the operator was built from, when ES reports it. */
@@ -115,6 +112,17 @@ export interface TimelineDriver extends TimeSpan {
 export interface QueryProfileTimeline {
   planning?: TimeSpan;
   drivers: TimelineDriver[];
+}
+
+/** What is kept of a result set so two runs can be compared without holding every row. */
+export interface QueryResultsSummary {
+  /** The name and type of every column, since the same values in another type are another result. */
+  columns: Array<{ name: string; type: string }>;
+  rowCount: number;
+  /** Fingerprint of the rows, ignoring their order. */
+  rowsFingerprint: string;
+  /** Fingerprint of the rows in the order they came back. */
+  orderedFingerprint: string;
 }
 
 export interface QueryProfileView {

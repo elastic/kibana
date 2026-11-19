@@ -142,6 +142,10 @@ export const useTimelineStyles = () => {
       `,
       waitSwatch: css`
         /* Stripes and an outline in the text color, because the shades are too close to the page in dark mode. */
+        display: inline-block;
+        width: ${euiTheme.size.s};
+        height: ${euiTheme.size.s};
+        border-radius: ${euiTheme.border.radius.small};
         box-sizing: border-box;
         border: 1px solid ${euiTheme.colors.textSubdued};
         background: repeating-linear-gradient(
@@ -165,18 +169,16 @@ export const useTimelineStyles = () => {
         `,
       strip: css`
         display: flex;
+        flex-wrap: wrap;
         gap: ${euiTheme.size.xs};
-        overflow-x: auto;
-      `,
-      stripAnchor: css`
-        display: flex;
-        flex-basis: 0;
-        min-width: ${euiTheme.base * 6}px;
       `,
       stripStep: css`
         display: flex;
         flex-direction: column;
-        width: 100%;
+        /* A tile is as wide as what it says, and shares the free room of its row by share. */
+        flex-basis: auto;
+        flex-shrink: 0;
+        max-width: 100%;
         gap: ${euiTheme.size.xs};
         padding: ${euiTheme.size.s};
         text-align: start;
@@ -192,12 +194,10 @@ export const useTimelineStyles = () => {
         }
       `,
       stripTitle: css`
-        overflow: hidden;
+        overflow-wrap: anywhere;
         font-weight: ${euiTheme.font.weight.bold};
         font-size: ${euiTheme.font.scale.s * euiTheme.base}px;
         line-height: 1.4;
-        white-space: nowrap;
-        text-overflow: ellipsis;
       `,
       stripShare: css`
         display: flex;
@@ -207,6 +207,7 @@ export const useTimelineStyles = () => {
         font-size: ${small};
         font-variant-numeric: tabular-nums;
         line-height: 1.4;
+        white-space: nowrap;
       `,
       stripBar: css`
         height: ${euiTheme.size.s};

@@ -10,11 +10,11 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { IEsqlSearchParams } from '@kbn/search-types';
-import type { ISearchStart } from '../../search';
+import type { ISearchStart } from '../../../search';
 import { aggregateEsqlProfile } from './aggregate_esql_profile';
 import type { QueryProfileView } from './types';
-import { summarizeResults } from './compare_results';
-import { isRecord } from './json_helpers';
+import { summarizeResults } from './result_summary';
+import { isRecord } from '../shared/json_helpers';
 
 /** Re-runs a logged ES|QL request with `profile: true` and returns the view model. */
 export async function loadEsqlQueryProfile({

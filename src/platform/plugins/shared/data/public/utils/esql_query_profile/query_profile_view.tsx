@@ -28,17 +28,16 @@ import { getConnectorsUrl, readRequestErrorMessage } from '@kbn/esql-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { Adapters, Request } from '@kbn/inspector-plugin/public';
 import type { ISearchStart } from '../../search';
-import type { QueryProfileView as QueryProfileViewModel } from './types';
-import { ByCommandTab, computeCommandHeat, hasCommandBreakdown } from './by_command_tab';
-import type { QueryHeat } from './map_operators_to_commands';
-import { esqlRequestLabels } from './esql_request_label';
+import type { QueryProfileView as QueryProfileViewModel } from './profile/types';
+import { ByCommandTab, computeCommandHeat, hasCommandBreakdown } from './by_command/by_command_tab';
+import type { QueryHeat } from './by_command/map_operators_to_commands';
 import { listEsqlInspectorRequests } from './esql_inspector_requests';
-import { FasterQuerySuggestion } from './faster_query_suggestion';
-import { loadEsqlQueryProfile } from './load_esql_query_profile';
+import { FasterQuerySuggestion } from './suggestion/faster_query_suggestion';
+import { loadEsqlQueryProfile } from './profile/load_esql_query_profile';
 import { ProfileSummary } from './profile_summary';
-import { readRequestQuery } from './json_helpers';
-import { useHasEnterpriseLicense } from './use_has_enterprise_license';
-import { TimelineTab } from './timeline_tab';
+import { readRequestQuery } from './shared/json_helpers';
+import { useHasEnterpriseLicense } from './suggestion/use_has_enterprise_license';
+import { TimelineTab } from './timeline/timeline_tab';
 
 type TabId = 'timeline' | 'byCommand';
 
@@ -139,11 +138,7 @@ const RequestPicker = ({
   const requestLabel = i18n.translate('data.inspector.queryProfile.requestLabel', {
     defaultMessage: 'Request',
   });
-  const labels = esqlRequestLabels(requests);
-  const options = requests.map((request) => ({
-    label: labels.get(request.id) ?? request.name,
-    value: request.id,
-  }));
+  const options = requests.map((request) => ({ label: request.name, value: request.id }));
 
   return (
     <EuiComboBox
@@ -153,7 +148,7 @@ const RequestPicker = ({
       isClearable={false}
       options={options}
       prepend={requestLabel}
-      selectedOptions={[{ label: labels.get(selected.id) ?? selected.name, value: selected.id }]}
+      selectedOptions={[{ label: selected.name, value: selected.id }]}
       singleSelection={{ asPlainText: true }}
       onChange={(selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
         const next = requests.find((request) => request.id === selectedOptions[0]?.value);

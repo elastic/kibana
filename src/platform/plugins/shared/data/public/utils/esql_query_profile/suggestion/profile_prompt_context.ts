@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryProfileView } from './types';
-import { spanMillis } from './timeline_layout';
+import type { QueryProfileView } from '../profile/types';
+import { spanMillis } from '../shared/time_span';
 
 /** Stays below the limit the optimize route accepts for the profile context. */
 const MAX_CONTEXT_LENGTH = 50_000;

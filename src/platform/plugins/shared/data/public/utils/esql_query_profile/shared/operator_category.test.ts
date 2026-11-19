@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregatedOperator } from './types';
+import type { AggregatedOperator } from '../profile/types';
 import { operatorCategory, summarizeCpuByCategory } from './operator_category';
 
 const operator = (title: string, processNanos: number, timeReported = true) =>

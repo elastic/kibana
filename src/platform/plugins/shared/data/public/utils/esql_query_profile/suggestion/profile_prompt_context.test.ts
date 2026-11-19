@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { aggregateEsqlProfile } from './aggregate_esql_profile';
+import { aggregateEsqlProfile } from '../profile/aggregate_esql_profile';
 import { buildProfileContext } from './profile_prompt_context';
 
 describe('buildProfileContext', () => {

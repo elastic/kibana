@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregatedOperator, PlanNodeSource } from './types';
-import { shareOf } from './aggregate_esql_profile';
-import { planNodeKey } from './plan_node_sources';
+import type { AggregatedOperator, PlanNodeSource } from '../profile/types';
+import { shareOf } from '../profile/aggregate_esql_profile';
+import { planNodeKey } from '../profile/plan_node_sources';
 import type { QueryCommand } from './query_commands';
 
 export interface CommandHeat {

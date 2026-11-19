@@ -19,13 +19,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ticks as niceTicks } from 'd3-array';
-import type { QueryProfileView, TimelineDriver } from './types';
-import { formatDurationMillis } from './profile_format';
-import { LegendSwatch } from './legend_swatch';
+import type { QueryProfileView, TimelineDriver } from '../profile/types';
+import type { Fact } from './driver_facts';
+import { driverFacts, timingFacts } from './driver_facts';
+import { formatDurationMillis } from '../shared/profile_format';
 import { groupLabel, planningLabel, spreadLabel } from './timeline_labels';
 import { TimelineDetails } from './timeline_details';
 import type { LaneBox } from './timeline_layout';
-import { driverSpread, fullDomain, groupDrivers, laneBox, spanMillis } from './timeline_layout';
+import { spanMillis } from '../shared/time_span';
+import { driverSpread, fullDomain, groupDrivers, laneBox } from './timeline_layout';
 import { useTimelineStyles } from './timeline_styles';
 
 /** The id of the selected lane. Drivers use their own id, which is never this one. */
@@ -64,57 +66,16 @@ const TimeRuler = ({ durationMillis }: { durationMillis: number }) => {
   );
 };
 
-const LaneTooltip = ({
-  name,
-  startMillis,
-  durationMillis,
-  driver,
-}: {
-  name: string;
-  startMillis: number;
-  durationMillis: number;
-  driver?: TimelineDriver;
-}) => {
-  const reasons = [...new Set((driver?.sleeps ?? []).map((sleep) => sleep.reason).filter(Boolean))];
-  const hasUnrecordedWaits = driver ? driver.sleepCount > driver.sleeps.length : false;
-
-  return (
-    <>
-      <strong>{name}</strong>
-      <div>
-        {i18n.translate('data.inspector.queryProfile.laneTooltipTiming', {
-          defaultMessage: 'Starts at +{start}, runs {duration}',
-          values: {
-            start: formatDurationMillis(Math.max(startMillis, 0)),
-            duration: formatDurationMillis(durationMillis),
-          },
-        })}
+const LaneTooltip = ({ name, facts }: { name: string; facts: Fact[] }) => (
+  <>
+    <strong>{name}</strong>
+    {facts.map(({ id, label, value }) => (
+      <div key={id}>
+        {label} {value}
       </div>
-      {driver?.cpuNanos !== undefined ? (
-        <div>
-          {i18n.translate('data.inspector.queryProfile.laneTooltipCpu', {
-            defaultMessage: 'CPU {cpu}',
-            values: { cpu: formatDurationMillis(driver.cpuNanos / 1e6) },
-          })}
-        </div>
-      ) : null}
-      {driver && driver.sleeps.length > 0 ? (
-        <div>
-          {i18n.translate('data.inspector.queryProfile.laneTooltipWaiting', {
-            defaultMessage:
-              '{isLowerBound, select, true {Waiting at least {time}} other {Waiting {time}}}{hasReasons, select, true { ({reasons})} other {}}',
-            values: {
-              isLowerBound: hasUnrecordedWaits,
-              time: formatDurationMillis(driver.waitedMillis),
-              hasReasons: reasons.length > 0,
-              reasons: reasons.join(', '),
-            },
-          })}
-        </div>
-      ) : null}
-    </>
-  );
-};
+    ))}
+  </>
+);
 
 const Lane = ({
   label,
@@ -252,11 +213,7 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
             label={planningLabel()}
             durationMillis={spanMillis(timeline.planning)}
             tooltip={
-              <LaneTooltip
-                name={planningLabel()}
-                startMillis={timeline.planning.startMillis - origin}
-                durationMillis={spanMillis(timeline.planning)}
-              />
+              <LaneTooltip name={planningLabel()} facts={timingFacts(timeline.planning, origin)} />
             }
             box={laneBox(timeline.planning.startMillis, timeline.planning.stopMillis, domain)}
             colorCss={styles.planningColor}
@@ -273,14 +230,7 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
                 key={driver.id}
                 label={driver.nodeName || driver.label}
                 durationMillis={spanMillis(driver)}
-                tooltip={
-                  <LaneTooltip
-                    name={driver.label}
-                    startMillis={driver.startMillis - origin}
-                    durationMillis={spanMillis(driver)}
-                    driver={driver}
-                  />
-                }
+                tooltip={<LaneTooltip name={driver.label} facts={driverFacts(driver, origin)} />}
                 box={laneBox(driver.startMillis, driver.stopMillis, domain)}
                 waits={driver.sleeps.map((sleep) =>
                   laneBox(sleep.startMillis, sleep.stopMillis, domain)
@@ -298,12 +248,18 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
           <EuiSpacer size="xs" />
           <EuiFlexGroup gutterSize="m" responsive={false} wrap>
             <EuiFlexItem grow={false}>
-              <LegendSwatch
-                colorCss={styles.waitSwatch}
-                label={i18n.translate('data.inspector.queryProfile.waitingLegendLabel', {
-                  defaultMessage: 'Waiting, for example for another driver to send data',
-                })}
-              />
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <span css={styles.waitSwatch} aria-hidden="true" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate('data.inspector.queryProfile.waitingLegendLabel', {
+                      defaultMessage: 'Waiting, for example for another driver to send data',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

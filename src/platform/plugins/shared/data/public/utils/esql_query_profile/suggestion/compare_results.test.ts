@@ -7,17 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { compareResults, summarizeResults } from './compare_results';
+import { compareResults } from './compare_results';
+import { summarizeResults } from '../profile/result_summary';
 
 const response = (names: string[], values: unknown[][]) =>
   summarizeResults({ columns: names.map((name) => ({ name })), values });
-
-describe('summarizeResults', () => {
-  it('returns nothing for a response without columns and values', () => {
-    expect(summarizeResults({})).toBeUndefined();
-    expect(summarizeResults({ columns: [] })).toBeUndefined();
-  });
-});
 
 describe('compareResults', () => {
   const rows = [
@@ -51,6 +45,15 @@ describe('compareResults', () => {
 
   it('ignores floating point noise from a different summing order', () => {
     const verdict = compareResults(response(['avg'], [[0.1 + 0.2]]), response(['avg'], [[0.3]]));
+
+    expect(verdict).toMatchObject({ kind: 'same' });
+  });
+
+  it('ignores floating point noise inside multivalued cells too', () => {
+    const verdict = compareResults(
+      response(['avgs'], [[[0.1 + 0.2, 1]]]),
+      response(['avgs'], [[[0.3, 1]]])
+    );
 
     expect(verdict).toMatchObject({ kind: 'same' });
   });

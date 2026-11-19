@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { PlanningPhaseId, TimelineOperator } from './types';
+import type { PlanningPhaseId, TimelineOperator } from '../profile/types';
 import type { DriverSpread } from './timeline_layout';
-import { formatDurationMillis, formatShare } from './profile_format';
+import { formatDurationMillis, formatShare } from '../shared/profile_format';
 
 export const planningLabel = () =>
   i18n.translate('data.inspector.queryProfile.planningLaneLabel', { defaultMessage: 'Planning' });

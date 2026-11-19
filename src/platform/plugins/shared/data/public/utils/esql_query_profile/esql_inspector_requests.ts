@@ -8,7 +8,8 @@
  */
 
 import type { Adapters, Request } from '@kbn/inspector-plugin/public';
-import { isRecord } from './json_helpers';
+import { disambiguateRequestNames } from '@kbn/inspector-plugin/public';
+import { isRecord } from './shared/json_helpers';
 
 /**
  * True when an inspector request is the body logged by the ES|QL expression.
@@ -21,9 +22,12 @@ const isEsqlInspectorRequest = (request: Request): boolean => {
   );
 };
 
-/** ES|QL requests on an inspector adapter, in the order they were logged. */
+/**
+ * ES|QL requests on an inspector adapter, in the order they were logged. Their names are the ones
+ * the Requests view shows, so a request is called the same in both.
+ */
 export const listEsqlInspectorRequests = (adapters: Adapters): Request[] =>
-  adapters.requests?.getRequests().filter(isEsqlInspectorRequest) ?? [];
+  disambiguateRequestNames(adapters.requests?.getRequests() ?? []).filter(isEsqlInspectorRequest);
 
 /** Inspector views use this to appear only when an ES|QL request was logged. */
 export const hasEsqlInspectorRequest = (adapters: Adapters): boolean =>

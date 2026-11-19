@@ -9,7 +9,7 @@
 
 import type { EsqlProfilePlan } from '@kbn/es-types';
 import type { PlanNodeSource } from './types';
-import { isRecord } from './json_helpers';
+import { isRecord } from '../shared/json_helpers';
 
 /** Plan node ids are only unique on the node that planned them, so a node is named with its id. */
 export const planNodeKey = (nodeName: string | undefined, planNodeId: string): string =>

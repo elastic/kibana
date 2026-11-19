@@ -9,17 +9,16 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiSpacer, EuiText, EuiToolTip, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { EuiProgress, EuiSpacer, EuiText, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { QueryProfileView } from './types';
+import type { QueryProfileView } from '../profile/types';
 import { mapOperatorsToCommands } from './map_operators_to_commands';
 import type { CommandHeat, QueryHeat } from './map_operators_to_commands';
 import { splitQueryCommands } from './query_commands';
-import { formatShare } from './profile_format';
-import { heatLevel } from './profile_heat';
+import { formatShare } from '../shared/profile_format';
+import { heatLevel } from '../shared/profile_heat';
 
-const MAX_COMMAND_LENGTH = 90;
 /** Time in steps that belong to no command is only mentioned when it is at least this share. */
 const MIN_UNATTRIBUTED_SHARE = 0.01;
 
@@ -35,6 +34,8 @@ export const computeCommandHeat = (view: QueryProfileView, query: string): Query
 /** Whether the tab has anything to show for this query and profile. */
 export const hasCommandBreakdown = (heat: QueryHeat | undefined): boolean =>
   heat?.commands.some((entry) => entry.share > 0) ?? false;
+
+const HEAT_COLOR = { hot: 'danger', warm: 'warning', cool: 'primary' } as const;
 
 const oneLine = (text: string): string => text.replace(/\s+/g, ' ').trim();
 
@@ -54,11 +55,9 @@ const useCommandStyles = () => {
         padding-inline-start: ${euiTheme.size.m};
       `,
       command: css`
-        overflow: hidden;
         font-family: ${euiTheme.font.familyCode};
         font-size: ${small};
-        white-space: nowrap;
-        text-overflow: ellipsis;
+        overflow-wrap: anywhere;
       `,
       share: css`
         font-size: ${small};
@@ -66,27 +65,15 @@ const useCommandStyles = () => {
         font-weight: ${euiTheme.font.weight.bold};
         text-align: end;
       `,
-      track: css`
-        grid-column: 1 / -1;
-        height: ${euiTheme.size.xs};
-        margin-block: ${euiTheme.size.xs};
-        overflow: hidden;
-        background: ${euiTheme.colors.backgroundBaseFormsControlDisabled};
-        border-radius: ${euiTheme.border.radius.medium};
-      `,
       bar: css`
-        height: 100%;
+        grid-column: 1 / -1;
+        margin-block: ${euiTheme.size.xs};
       `,
       note: css`
         grid-column: 1 / -1;
         color: ${euiTheme.colors.textSubdued};
         font-size: ${small};
       `,
-      color: {
-        hot: euiTheme.colors.danger,
-        warm: euiTheme.colors.warning,
-        cool: euiTheme.colors.primary,
-      },
     }),
     [euiTheme, small]
   );
@@ -108,19 +95,15 @@ const CommandRow = ({ entry, isNested }: { entry: CommandHeat; isNested: boolean
       css={[styles.row, isNested ? styles.nested : undefined]}
       data-test-subj="esqlQueryProfileCommand"
     >
-      <EuiToolTip content={entry.command.text} position="top" display="block">
-        <div css={styles.command} tabIndex={0}>
-          {text.length > MAX_COMMAND_LENGTH ? `${text.slice(0, MAX_COMMAND_LENGTH)}…` : text}
-        </div>
-      </EuiToolTip>
+      <div css={styles.command}>{text}</div>
       <div css={styles.share}>{entry.share > 0 ? formatShare(entry.share) : '–'}</div>
-      <div css={styles.track} aria-hidden="true">
-        <div
-          css={styles.bar}
-          style={{
-            width: `${entry.share * 100}%`,
-            background: styles.color[heatLevel(entry.share)],
-          }}
+      <div css={styles.bar}>
+        <EuiProgress
+          value={entry.share * 100}
+          max={100}
+          size="s"
+          color={HEAT_COLOR[heatLevel(entry.share)]}
+          aria-hidden="true"
           data-test-subj="esqlQueryProfileCommandBar"
         />
       </div>

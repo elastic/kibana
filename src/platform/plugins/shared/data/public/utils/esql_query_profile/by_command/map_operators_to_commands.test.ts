@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { aggregateEsqlProfile } from './aggregate_esql_profile';
+import { aggregateEsqlProfile } from '../profile/aggregate_esql_profile';
 import { mapOperatorsToCommands } from './map_operators_to_commands';
 import { splitQueryCommands } from './query_commands';
 

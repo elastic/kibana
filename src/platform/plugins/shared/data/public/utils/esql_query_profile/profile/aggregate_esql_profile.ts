@@ -20,9 +20,9 @@ import type {
   TimeSpan,
 } from './types';
 import { PHASE_NANOS_FIELDS, PLANNING_PHASE_IDS, PROCESS_NANOS_FIELD } from './profile_schema';
-import { isRecord } from './json_helpers';
+import { isRecord } from '../shared/json_helpers';
 import { readPlanNodeSources } from './plan_node_sources';
-import { spanMillis } from './timeline_layout';
+import { spanMillis } from '../shared/time_span';
 
 interface OperatorAccumulator extends OperatorMeasures {
   operator: string;
@@ -158,7 +158,6 @@ function aggregateOperators(
       current.rowsReceived += reading.rowsReceived;
       current.rowsEmitted += reading.rowsEmitted;
       current.drivers.push({
-        driverIndex: index,
         nodeName: drivers[index].node_name,
         planNodeId: reading.planNodeId,
         processNanos: reading.processNanos,

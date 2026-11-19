@@ -233,6 +233,22 @@ describe('QueryProfileView', () => {
     );
   });
 
+  it('numbers requests that share a name, as the Requests view does', async () => {
+    const requests = new RequestAdapter();
+    logRequest(requests, 'Visualization', { query: QUERY, include_execution_metadata: true });
+    logRequest(requests, 'Visualization', {
+      query: 'FROM untimed',
+      include_execution_metadata: true,
+    });
+
+    renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+    await screen.findByTestId('esqlQueryProfileDuration');
+    await userEvent.click(screen.getByRole('combobox', { name: 'Request' }));
+
+    expect(await screen.findByRole('option', { name: 'Visualization (1)' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Visualization (2)' })).toBeInTheDocument();
+  });
+
   it('profiles again on request and shows the new profile', async () => {
     renderProfileOf(QUERY, search);
     expect(await screen.findByTestId('esqlQueryProfileDuration')).toHaveTextContent('2 s');
@@ -284,7 +300,7 @@ describe('QueryProfileView', () => {
 
       await userEvent.hover(finalLane);
 
-      expect(await screen.findByText('Waiting 1.1 s (exchange empty)')).toBeInTheDocument();
+      expect(await screen.findByText('Waited 1.1 s (exchange empty)')).toBeInTheDocument();
     });
 
     it('shows the operators of a driver when its lane is selected, and hides them again', async () => {
@@ -297,6 +313,7 @@ describe('QueryProfileView', () => {
       const strip = await screen.findByTestId('esqlQueryProfileOperatorStrip');
       expect(strip).toHaveTextContent('LuceneSource');
       expect(strip).toHaveTextContent('60%');
+      expect(strip).toHaveTextContent('Rows 10 → 10');
       expect(strip).toHaveTextContent('HashAggregation');
 
       await userEvent.click(dataLane);

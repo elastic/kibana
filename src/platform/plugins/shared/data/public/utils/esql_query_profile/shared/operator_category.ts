@@ -9,7 +9,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AggregatedOperator } from './types';
+import type { AggregatedOperator } from '../profile/types';
 
 /** The kinds of work that the operator time breakdown tells apart, in the order they are shown. */
 const OPERATOR_CATEGORIES = [

@@ -12,7 +12,7 @@ import type { OptimizeQueryResponse } from '@kbn/esql-types';
 import { OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
 import { toAiRequestFailure } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import type { QueryProfileView } from './types';
+import type { QueryProfileView } from '../profile/types';
 import { buildProfileContext } from './profile_prompt_context';
 
 export interface FasterQuerySuggestion {

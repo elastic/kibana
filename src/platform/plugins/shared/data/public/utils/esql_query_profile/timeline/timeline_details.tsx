@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiCodeBlock,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -18,16 +19,15 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { QueryProfileView, TimelineDriver, TimelineOperator } from './types';
-import { operatorCategory, useOperatorCategoryColors } from './operator_category';
-import { formatCount, formatDurationMillis } from './profile_format';
-import { heatLevel } from './profile_heat';
+import type { QueryProfileView, TimelineDriver, TimelineOperator } from '../profile/types';
+import { driverFacts } from './driver_facts';
+import { operatorCategory, useOperatorCategoryColors } from '../shared/operator_category';
+import { formatCount, formatDurationMillis } from '../shared/profile_format';
+import { heatLevel } from '../shared/profile_heat';
 import { operatorShareLabel, operatorTimeLabel, planningPhaseLabel } from './timeline_labels';
-import { spanMillis } from './timeline_layout';
 import { useTimelineStyles } from './timeline_styles';
 
 /** An operator also has to be at least this share of the whole query to be flagged. */
@@ -43,47 +43,6 @@ const isHotOperator = (operator: TimelineOperator, totalOperatorNanos: number): 
 const operatorKey = (operator: TimelineOperator, index: number): string =>
   `${index}:${operator.operator}`;
 
-const Stat = ({ label, value }: { label: string; value: string }) => (
-  <EuiFlexItem grow={false}>
-    <EuiText size="xs" color="subdued">
-      {label}
-    </EuiText>
-    <EuiText size="s">
-      <strong>{value}</strong>
-    </EuiText>
-  </EuiFlexItem>
-);
-
-const Stats = ({ children }: { children: React.ReactNode }) => (
-  <EuiFlexGroup gutterSize="l" responsive={false} wrap>
-    {children}
-  </EuiFlexGroup>
-);
-
-const OperatorTooltip = ({
-  operator,
-  time,
-  share,
-}: {
-  operator: TimelineOperator;
-  time: string;
-  share: string;
-}) => (
-  <>
-    <strong>{operator.title}</strong>
-    <div>
-      {operator.timeReported
-        ? i18n.translate('data.inspector.queryProfile.stripTooltipTiming', {
-            defaultMessage: '{time}, {share} of this driver',
-            values: { time, share },
-          })
-        : i18n.translate('data.inspector.queryProfile.stripTooltipNoTime', {
-            defaultMessage: 'This operator does not report time',
-          })}
-    </div>
-  </>
-);
-
 const OperatorDetails = ({
   driver,
   operator,
@@ -96,42 +55,14 @@ const OperatorDetails = ({
   return (
     <div data-test-subj="esqlQueryProfileOperatorDetails">
       <EuiSpacer size="m" />
-      <EuiText size="s">
-        <strong>{operator.title}</strong>
-      </EuiText>
       {operator.detail ? (
-        <EuiText size="xs" color="subdued">
-          <p>{operator.detail}</p>
-        </EuiText>
+        <>
+          <EuiText size="xs" color="subdued">
+            <p>{operator.detail}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
       ) : null}
-      <EuiSpacer size="s" />
-      <Stats>
-        <Stat
-          label={i18n.translate('data.inspector.queryProfile.operatorTimeStatLabel', {
-            defaultMessage: 'Time',
-          })}
-          value={operatorTimeLabel(operator)}
-        />
-        <Stat
-          label={i18n.translate('data.inspector.queryProfile.operatorShareLabel', {
-            defaultMessage: 'Share of driver',
-          })}
-          value={operatorShareLabel(operator)}
-        />
-        <Stat
-          label={i18n.translate('data.inspector.queryProfile.operatorRowsInLabel', {
-            defaultMessage: 'Rows in',
-          })}
-          value={formatCount(operator.rowsReceived)}
-        />
-        <Stat
-          label={i18n.translate('data.inspector.queryProfile.operatorRowsOutLabel', {
-            defaultMessage: 'Rows out',
-          })}
-          value={formatCount(operator.rowsEmitted)}
-        />
-      </Stats>
-      <EuiSpacer size="s" />
       <EuiAccordion
         id={`esqlQueryProfileRawStatus-${driver.id}`}
         buttonContent={i18n.translate('data.inspector.queryProfile.rawStatusLabel', {
@@ -169,44 +100,51 @@ const OperatorStrip = ({
         const time = operatorTimeLabel(operator);
         const share = operatorShareLabel(operator);
         return (
-          <EuiToolTip
+          <button
             key={key}
-            position="top"
-            anchorProps={{
-              css: styles.stripAnchor,
-              style: { flexGrow: Math.max(operator.share * 100, 1) },
-            }}
-            content={<OperatorTooltip operator={operator} time={time} share={share} />}
+            type="button"
+            css={styles.stripStep}
+            style={{ flexGrow: Math.max(operator.share * 100, 1) }}
+            aria-expanded={selectedKey === key}
+            aria-label={i18n.translate('data.inspector.queryProfile.operatorButtonAriaLabel', {
+              defaultMessage: '{title}, {time}, {share}, {rowsIn} rows in, {rowsOut} rows out',
+              values: {
+                title: operator.title,
+                time,
+                share,
+                rowsIn: formatCount(operator.rowsReceived),
+                rowsOut: formatCount(operator.rowsEmitted),
+              },
+            })}
+            onClick={() => onSelect(selectedKey === key ? undefined : key)}
+            data-test-subj="esqlQueryProfileOperator"
           >
-            <button
-              type="button"
-              css={styles.stripStep}
-              aria-expanded={selectedKey === key}
-              aria-label={i18n.translate('data.inspector.queryProfile.operatorButtonAriaLabel', {
-                defaultMessage: '{title}, {time}, {share}',
-                values: { title: operator.title, time, share },
+            <span css={styles.stripTitle}>{operator.title}</span>
+            <span css={styles.stripShare}>
+              {operator.timeReported ? `${share} · ${time}` : share}
+              {isHotOperator(operator, totalOperatorNanos) ? (
+                <EuiIcon
+                  type="thermometer"
+                  size="s"
+                  color={heatLevel(operator.share) === 'hot' ? 'danger' : 'warning'}
+                  aria-hidden="true"
+                />
+              ) : null}
+            </span>
+            <span css={styles.stripShare}>
+              {i18n.translate('data.inspector.queryProfile.operatorRowsLabel', {
+                defaultMessage: 'Rows {rowsIn} → {rowsOut}',
+                values: {
+                  rowsIn: formatCount(operator.rowsReceived),
+                  rowsOut: formatCount(operator.rowsEmitted),
+                },
               })}
-              onClick={() => onSelect(selectedKey === key ? undefined : key)}
-              data-test-subj="esqlQueryProfileOperator"
-            >
-              <span css={styles.stripTitle}>{operator.title}</span>
-              <span css={styles.stripShare}>
-                {share}
-                {isHotOperator(operator, totalOperatorNanos) ? (
-                  <EuiIcon
-                    type="thermometer"
-                    size="s"
-                    color={heatLevel(operator.share) === 'hot' ? 'danger' : 'warning'}
-                    aria-hidden="true"
-                  />
-                ) : null}
-              </span>
-              <span
-                css={styles.stripBar}
-                style={{ background: categoryColor[operatorCategory(operator.title)] }}
-              />
-            </button>
-          </EuiToolTip>
+            </span>
+            <span
+              css={styles.stripBar}
+              style={{ background: categoryColor[operatorCategory(operator.title)] }}
+            />
+          </button>
         );
       })}
     </div>
@@ -230,7 +168,6 @@ const DriverDetails = ({
   const selected = driver.operators.find(
     (operator, index) => operatorKey(operator, index) === selectedKey
   );
-  const hasUnrecordedWaits = driver.sleepCount > driver.sleeps.length;
 
   return (
     <div data-test-subj="esqlQueryProfileDriverOperators">
@@ -238,37 +175,14 @@ const DriverDetails = ({
         <strong>{driver.label}</strong>
       </EuiText>
       <EuiSpacer size="s" />
-      <Stats>
-        <Stat
-          label={i18n.translate('data.inspector.queryProfile.driverStartLabel', {
-            defaultMessage: 'Starts at',
-          })}
-          value={`+${formatDurationMillis(Math.max(driver.startMillis - origin, 0))}`}
-        />
-        <Stat
-          label={i18n.translate('data.inspector.queryProfile.driverDurationLabel', {
-            defaultMessage: 'Duration',
-          })}
-          value={formatDurationMillis(spanMillis(driver))}
-        />
-        {driver.cpuNanos !== undefined ? (
-          <Stat
-            label={i18n.translate('data.inspector.queryProfile.driverCpuLabel', {
-              defaultMessage: 'CPU',
-            })}
-            value={formatDurationMillis(driver.cpuNanos / 1e6)}
-          />
-        ) : null}
-        {driver.sleepCount > 0 ? (
-          <Stat
-            label={i18n.translate('data.inspector.queryProfile.driverWaitedLabel', {
-              defaultMessage: '{isLowerBound, select, true {Waited at least} other {Waited}}',
-              values: { isLowerBound: hasUnrecordedWaits },
-            })}
-            value={formatDurationMillis(driver.waitedMillis)}
-          />
-        ) : null}
-      </Stats>
+      <EuiDescriptionList
+        type="inline"
+        compressed
+        listItems={driverFacts(driver, origin).map(({ label, value }) => ({
+          title: label,
+          description: value,
+        }))}
+      />
       <EuiSpacer size="m" />
       <EuiText size="xs" color="subdued">
         <p>
@@ -379,19 +293,27 @@ export const TimelineDetails = ({
   }
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m" data-test-subj="esqlQueryProfileDetails">
-      {driver ? (
-        <DriverDetails
-          key={driver.id}
-          driver={driver}
-          origin={origin}
-          totalOperatorNanos={totalOperatorNanos}
-          selectedKey={selectedOperatorKey}
-          onSelectOperator={onSelectOperator}
-        />
-      ) : (
-        <PlanningDetails view={view} />
-      )}
-    </EuiPanel>
+    <>
+      <EuiSpacer size="m" />
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        paddingSize="m"
+        data-test-subj="esqlQueryProfileDetails"
+      >
+        {driver ? (
+          <DriverDetails
+            key={driver.id}
+            driver={driver}
+            origin={origin}
+            totalOperatorNanos={totalOperatorNanos}
+            selectedKey={selectedOperatorKey}
+            onSelectOperator={onSelectOperator}
+          />
+        ) : (
+          <PlanningDetails view={view} />
+        )}
+      </EuiPanel>
+    </>
   );
 };

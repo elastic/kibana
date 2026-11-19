@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TimelineDriver } from './types';
+import type { TimelineDriver } from '../profile/types';
 import { driverSpread, fullDomain, groupDrivers, laneBox } from './timeline_layout';
 
 const driver = (description: string, startMillis: number, stopMillis: number) =>
