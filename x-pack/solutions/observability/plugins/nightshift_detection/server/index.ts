@@ -16,6 +16,7 @@ import { bindSignals } from './setup/bind_signals';
 import { bindStrategies } from './setup/bind_strategies';
 import { bindState } from './setup/bind_state';
 import { bindTick } from './setup/bind_tick';
+import { bindWorkflows } from './setup/bind_workflows';
 
 export { config } from './config';
 
@@ -27,6 +28,7 @@ const pluginModule = new KibanaContainerModule((options) => {
   bindStrategies(options);
   bindState(options);
   bindServiceAccount(options);
+  bindWorkflows(options);
   bindTick(options);
   bindRoutes(options);
   bindOnSetup(options);

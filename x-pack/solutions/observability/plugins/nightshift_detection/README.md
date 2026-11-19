@@ -11,6 +11,30 @@ config. When loaded, `AvailabilityService` also requires the `nightshift.enabled
 Observability project on Serverless, the `nightshift:detection-engine` pricing feature and an
 Enterprise license.
 
+## Layout
+
+Server code is grouped by what it does, so a new feature adds a folder instead of growing a shared one:
+
+- `server/lib/<domain>/`: the logic. `engine/` runs a tick, `strategies/` holds what a tick runs, `signals/` and `state/` store what it finds and where it stopped, `service_account/` binds a space to its account, `workflows/` installs the managed workflows.
+- `server/routes/<feature>/`: one folder of routes per feature, built on `BaseEngineRoute`.
+- `server/setup/bind_<feature>.ts`: the DI bindings of one feature, loaded from `server/index.ts`.
+
+## Managed workflows
+
+`WorkflowInstaller` installs and turns on every workflow listed in `DETECTION_WORKFLOW_IDS`
+(`server/lib/workflows/workflow_registry.ts`). It installs each one off, bound to the space's service
+account, and checks it runs as that account. The setup turns them on as its last step, so a setup that
+fails or loses a race leaves nothing running. A workflow that cannot follow the others is turned off
+again.
+
+To add a workflow:
+
+1. Define it in `@kbn/workflows/managed` with `defineBoundWorkflow`, with `pluginId: 'nightshiftDetection'`,
+   under `managed/definitions/nightshift_detection/`, and register it in `managed/definitions/index.ts`.
+2. List its id in `DETECTION_WORKFLOW_IDS`.
+3. If it calls the plugin, add the route in `server/routes/<feature>/` and bind what it needs in
+   `server/setup/bind_<feature>.ts`.
+
 ## Elasticsearch clients
 
 Two clients, two identities:

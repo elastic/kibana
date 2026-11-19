@@ -22,7 +22,7 @@ import { SpaceRunLock } from '../lib/engine/space_run_lock';
 import { ScopedTickRunner } from '../lib/engine/scoped_tick_runner';
 import { DetectionAccountService } from '../lib/service_account/detection_account';
 import { DetectionSetupService } from '../lib/service_account/setup_service';
-import { DetectionWorkflowInstaller } from '../lib/workflows/detection_workflow_installer';
+import { WorkflowInstaller } from '../lib/workflows/workflow_installer';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
 import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
@@ -96,7 +96,7 @@ describe('module', () => {
     container.get(DetectionStateClient);
     container.get(DetectionAccountService);
     container.get(DetectionSetupService);
-    container.get(DetectionWorkflowInstaller);
+    container.get(WorkflowInstaller);
     container.get(ScopedTickRunner);
     container.get(SpaceRunLock);
     container.getAll(OnStart);
