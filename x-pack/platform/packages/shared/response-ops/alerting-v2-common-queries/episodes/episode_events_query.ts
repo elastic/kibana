@@ -48,13 +48,6 @@ export interface EpisodeEventWithTotalCountRow extends EpisodeEventRow {
   total_event_count: number;
 }
 
-const buildEpisodeEventsSource = (spaceId: string, episodeId: string) =>
-  // prettier-ignore
-  esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
-    .where`space_id == ${spaceId}`
-    .where`type == "alert"`
-    .where`episode.id == ${episodeId}`;
-
 /**
  * ES|QL query returning all events for a single alert episode, oldest first.
  */
@@ -63,7 +56,11 @@ export const buildEpisodeEventsQuery = (
   episodeId: string,
   { timeRange, status, limit }: BuildEpisodeEventsQueryOptions = {}
 ): TypedEsqlQuery<EpisodeEventRow> => {
-  let query = buildEpisodeEventsSource(spaceId, episodeId);
+  // prettier-ignore
+  let query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+    .where`space_id == ${spaceId}`
+    .where`type == "alert"`
+    .where`episode.id == ${episodeId}`;
 
   if (timeRange) {
     query = query.where`@timestamp >= ${timeRange.start}`;
@@ -96,10 +93,5 @@ export const buildEpisodeEventsWithTotalCountQuery = (
   episodeId: string
 ): TypedEsqlQuery<EpisodeEventWithTotalCountRow> =>
   asTypedEsqlQuery<EpisodeEventWithTotalCountRow>(
-    // prettier-ignore
-    buildEpisodeEventsSource(spaceId, episodeId)
-      .pipe`INLINE STATS total_event_count = COUNT(*)`
-      .pipe`EVAL data = JSON_EXTRACT(_source, "$.data")`
-      .sort([DEFAULT_TIME_FIELD, 'ASC'])
-      .keep(...ALERT_EPISODE_EVENT_FIELDS, 'total_event_count')
+    buildEpisodeEventsQuery(spaceId, episodeId).pipe`INLINE STATS total_event_count = COUNT(*)`
   );

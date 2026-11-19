@@ -67,11 +67,9 @@ describe('buildEpisodeEventsWithTotalCountQuery', () => {
     expect(queryString).not.toContain('LIMIT');
   });
 
-  it('counts every event before sorting and keeps the total on each row', () => {
+  it('counts every event and appends the total to each row', () => {
     expect(queryString).toContain('INLINE STATS total_event_count = COUNT(*)');
-    expect(queryString.indexOf('INLINE STATS')).toBeLessThan(queryString.indexOf('SORT'));
-    expect(queryString).toContain(
-      'KEEP @timestamp, `episode.id`, `episode.status`, `rule.id`, group_hash, severity, source, data, total_event_count'
-    );
+    expect(queryString.indexOf('INLINE STATS')).toBeGreaterThan(queryString.indexOf('KEEP'));
+    expect(queryString).not.toContain('LIMIT');
   });
 });
