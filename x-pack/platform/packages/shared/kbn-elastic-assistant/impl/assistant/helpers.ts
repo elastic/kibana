@@ -54,9 +54,11 @@ export const getDefaultConnector = (
   );
 
   const validConnectors = connectors?.filter((connector) => !connector.isMissingSecrets);
-  const defaultConnector = validConnectors?.find(
-    (connector) => connector.id === defaultAiConnectorId
-  );
+  // The setting can hold a stack connector alias of an inference endpoint, which the server
+  // resolves to the endpoint id, so fall back to the entry the server flagged as the default.
+  const defaultConnector =
+    validConnectors?.find((connector) => connector.id === defaultAiConnectorId) ??
+    validConnectors?.find((connector) => connector.isDefault);
 
   if (defaultConnector) {
     // If the user has set a default connector setting, and that connector exists, use it

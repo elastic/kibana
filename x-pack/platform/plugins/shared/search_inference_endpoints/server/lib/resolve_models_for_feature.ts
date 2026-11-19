@@ -92,7 +92,7 @@ export const resolveModelsForFeature = async ({
     }
     const connector = await fetchConnectorById(defaultConnectorId);
     return {
-      connectors: connector ? [connector] : [],
+      connectors: connector ? [{ ...connector, isDefault: true }] : [],
       warnings: [],
       soEntryFound: false,
     };
@@ -133,9 +133,14 @@ export const resolveModelsForFeature = async ({
       const parameters = featureResult.endpoints.find(
         ({ connectorId }) => connectorId === defaultConnectorId
       )?.parameters;
+      // The setting may hold a stack connector alias of an inference endpoint, in which case
+      // `defaultConnector.connectorId` is the endpoint id, so filter on both ids.
       connectors = [
-        parameters ? { ...defaultConnector, parameters } : defaultConnector,
-        ...merged.filter((c) => c.connectorId !== defaultConnectorId),
+        { ...defaultConnector, ...(parameters ? { parameters } : {}), isDefault: true },
+        ...merged.filter(
+          (c) =>
+            c.connectorId !== defaultConnectorId && c.connectorId !== defaultConnector.connectorId
+        ),
       ];
     }
   }

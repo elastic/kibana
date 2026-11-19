@@ -243,7 +243,7 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(getConnectorList).not.toHaveBeenCalled();
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [defaultConnector],
+        connectors: [{ ...defaultConnector, isDefault: true }],
         soEntryFound: false,
       },
     });
@@ -321,7 +321,7 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(getForFeature).not.toHaveBeenCalled();
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [defaultConnector],
+        connectors: [{ ...defaultConnector, isDefault: true }],
         soEntryFound: false,
       },
     });
@@ -345,7 +345,11 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(getConnectorById).toHaveBeenCalledWith('default', expect.anything());
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [defaultConnector, { ...recommended, isRecommended: true }, other],
+        connectors: [
+          { ...defaultConnector, isDefault: true },
+          { ...recommended, isRecommended: true },
+          other,
+        ],
         soEntryFound: false,
       },
     });
@@ -368,7 +372,10 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
 
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [defaultInCatalog, { ...recommended, isRecommended: true }],
+        connectors: [
+          { ...defaultInCatalog, isDefault: true },
+          { ...recommended, isRecommended: true },
+        ],
         soEntryFound: false,
       },
     });
@@ -482,7 +489,7 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(getConnectorList).not.toHaveBeenCalled();
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [defaultConnector],
+        connectors: [{ ...defaultConnector, isDefault: true }],
         soEntryFound: false,
       },
     });

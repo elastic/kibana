@@ -8,12 +8,14 @@
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useMemo } from 'react';
+import { ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID } from '../../../common/constants';
 import { useKibana } from '../lib/kibana';
 
 /**
- * Resolves the default AI connector id from the same server-side list the AI Assistant uses.
- * That list includes inference endpoints (for example an External Inference global model),
- * which are not stack connectors and would otherwise never match the configured default.
+ * Resolves the default AI connector id for the alert AI summary from the server-side model list,
+ * which includes inference endpoints (for example an External Inference global model) that are
+ * not stack connectors. The alert AI summary has its own inference feature, so a model assigned
+ * only to the AI Assistant does not change which model the summary uses.
  */
 export const useDefaultAIConnectorId = () => {
   const { http, notifications, settings } = useKibana().services;
@@ -21,7 +23,7 @@ export const useDefaultAIConnectorId = () => {
   const { data: connectors, isLoading } = useLoadConnectors({
     http,
     toasts: notifications.toasts,
-    featureId: 'elastic_assistant',
+    featureId: ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID,
   });
   const defaultConnectorId = getDefaultConnector(connectors, settings)?.id;
 

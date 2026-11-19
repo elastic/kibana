@@ -56,6 +56,8 @@ export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults' as const;
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults' as const;
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
 export const ALERTS_BATCH_MAX_SIZE = 20 as const;
+/** Inference feature id used to resolve the model for the alert AI summary. */
+export const ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID = 'alert_ai_summary' as const;
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
 export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;

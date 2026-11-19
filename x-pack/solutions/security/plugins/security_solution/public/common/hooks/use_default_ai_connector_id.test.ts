@@ -75,13 +75,13 @@ describe('useDefaultAIConnectorId', () => {
     expect(mockGetDefaultConnector).toHaveBeenCalledWith(mockConnectors, mockSettings);
   });
 
-  it('should load the connectors from the elastic_assistant inference feature, reporting load errors through toasts, so that inference endpoints are included', () => {
+  it('should load the connectors from the alert_ai_summary inference feature, reporting load errors through toasts, so that inference endpoints are included', () => {
     renderHook(() => useDefaultAIConnectorId());
 
     expect(mockUseLoadConnectors).toHaveBeenCalledWith({
       http: mockHttp,
       toasts: mockToasts,
-      featureId: 'elastic_assistant',
+      featureId: 'alert_ai_summary',
     });
   });
 
@@ -104,6 +104,36 @@ describe('useDefaultAIConnectorId', () => {
           id: 'custom-inference-endpoint',
           name: 'custom-inference-endpoint',
           isInferenceEndpoint: true,
+        },
+      ],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useDefaultAIConnectorId());
+
+    expect(result.current.defaultConnectorId).toBe('custom-inference-endpoint');
+  });
+
+  it('should return the endpoint the server flagged as default when the setting holds a stack connector alias', () => {
+    const { getDefaultConnector: actualGetDefaultConnector } = jest.requireActual(
+      '@kbn/elastic-assistant/impl/assistant/helpers'
+    );
+    mockGetDefaultConnector.mockImplementation(actualGetDefaultConnector);
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: mockHttp,
+        notifications: { toasts: mockToasts },
+        settings: { client: { get: jest.fn().mockReturnValue('.custom-stack-connector') } },
+      },
+    });
+    mockUseLoadConnectors.mockReturnValue({
+      data: [
+        { id: 'Anthropic-Claude-Sonnet-3-7', name: 'Anthropic Claude Sonnet 3.7' },
+        {
+          id: 'custom-inference-endpoint',
+          name: 'custom-inference-endpoint',
+          isInferenceEndpoint: true,
+          isDefault: true,
         },
       ],
       isLoading: false,
