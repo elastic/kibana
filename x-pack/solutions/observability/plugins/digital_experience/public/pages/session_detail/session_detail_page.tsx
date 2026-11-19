@@ -42,7 +42,7 @@ import { sessionSignals, shortSessionId, type SessionSignalId } from '../../util
 import { formatSessionDuration } from '../../utils/format_session_duration';
 import { pickSessionsListQuery } from '../../utils/sessions_list_query';
 import { JourneyFilters } from './components/journey_filters';
-import { isFlyoutPlacement, SessionSplitView } from './components/session_split_view';
+import { SessionSplitView } from './components/session_split_view';
 import { SessionsRail } from './components/sessions_rail';
 import { PageJourney } from './components/page_journey';
 import { SessionSummary } from './components/session_summary';
@@ -99,18 +99,11 @@ const RAIL_PLACEMENT_OPTIONS = [
     iconType: 'transitionRightIn',
   },
   {
-    placement: 'flyoutPush',
-    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.showFlyoutPush', {
-      defaultMessage: 'Show as a push flyout',
+    placement: 'flyout',
+    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.showFlyout', {
+      defaultMessage: 'Show as a flyout',
     }),
     iconType: 'menuRight',
-  },
-  {
-    placement: 'flyoutOverlay',
-    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.showFlyoutOverlay', {
-      defaultMessage: 'Show as an overlay flyout',
-    }),
-    iconType: 'layers',
   },
   {
     placement: 'hidden',
@@ -126,8 +119,7 @@ const RAIL_PLACEMENTS = RAIL_PLACEMENT_OPTIONS.map(({ placement }) => placement)
 const railMenuIcon: Record<(typeof RAIL_PLACEMENTS)[number], string> = {
   left: 'transitionLeftIn',
   right: 'transitionRightIn',
-  flyoutPush: 'menuRight',
-  flyoutOverlay: 'layers',
+  flyout: 'menuRight',
   hidden: 'transitionLeftIn',
 };
 
@@ -526,9 +518,7 @@ export function SessionDetailPage({
           source={query.source}
           placement={railPlacement === 'hidden' ? 'left' : railPlacement}
           onHide={() => setRailPlacement('hidden')}
-          onToggleFlyout={() =>
-            setRailPlacement(isFlyoutPlacement(railPlacement) ? 'left' : 'flyoutPush')
-          }
+          onToggleFlyout={() => setRailPlacement(railPlacement === 'flyout' ? 'left' : 'flyout')}
           headerHeight={railIsDocked ? headerHeight || undefined : undefined}
         />
       }

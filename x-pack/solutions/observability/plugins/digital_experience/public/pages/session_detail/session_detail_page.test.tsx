@@ -782,9 +782,7 @@ describe('SessionDetailPage', () => {
     const flyout = await screen.findByTestId('digitalExperienceSessionsFlyout');
     expect(within(flyout).getByTestId('digitalExperienceSessionsRail')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceSessionSplitView')).not.toBeInTheDocument();
-    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe(
-      '"flyoutPush"'
-    );
+    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"flyout"');
     // A flyout leaves the side navigation as the user had it.
     expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(false);
 
@@ -793,21 +791,6 @@ describe('SessionDetailPage', () => {
     expect(await screen.findByTestId('digitalExperienceSessionSplitView')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceSessionsFlyout')).not.toBeInTheDocument();
     mockChrome.getChromeStyle.mockReturnValue('classic');
-  });
-
-  it('shows the list as an overlay flyout when asked', async () => {
-    mockDetail.mockResolvedValue(detail());
-    renderPage();
-
-    await openSessionsListMenu();
-    fireEvent.click(screen.getByTestId('digitalExperienceSessionsListPlacement-flyoutOverlay'));
-
-    const flyout = await screen.findByTestId('digitalExperienceSessionsFlyout');
-    expect(within(flyout).getByTestId('digitalExperienceSessionsRail')).toBeInTheDocument();
-    expect(flyout).not.toHaveClass('euiFlyout--push');
-    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe(
-      '"flyoutOverlay"'
-    );
   });
 
   it('shows the list on the left for a choice stored before it could move', async () => {
