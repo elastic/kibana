@@ -29,23 +29,31 @@ export const ACTION_RESPONSES_INDEX_DEFAULT_NS =
 
 let actionsIndexSetup: Promise<void> | undefined;
 
+/** The `origin` fields every document with an origin writes, and the type each must have. */
+const ORIGIN_FIELD_TYPES = {
+  'origin.type': 'keyword',
+  'origin.run_id': 'keyword',
+  'origin.verified': 'boolean',
+} as const;
+
 const checkActionsOriginMappings = async (esClient: ElasticsearchClient): Promise<string[]> => {
-  const fields = ['origin.type', 'origin.execution_id'] as const;
+  const fields = Object.keys(ORIGIN_FIELD_TYPES) as Array<keyof typeof ORIGIN_FIELD_TYPES>;
   const mappings = await esClient.indices.getFieldMapping({
     index: ACTIONS_INDEX_DEFAULT_NS,
-    fields: [...fields],
+    fields,
   });
   const indices = Object.values(mappings);
 
   return fields.filter((field) => {
-    const leaf = field === 'origin.type' ? 'type' : 'execution_id';
+    const leaf = field.slice('origin.'.length);
+    const expectedType = ORIGIN_FIELD_TYPES[field];
     let missing = indices.length === 0;
     for (const { mappings: fieldMappings } of indices) {
       const property = fieldMappings[field]?.mapping[leaf];
       if (!property) {
         missing = true;
-      } else if (!('type' in property) || property.type !== 'keyword') {
-        throw new Error(`Expected ${field} to be mapped as keyword`);
+      } else if (!('type' in property) || property.type !== expectedType) {
+        throw new Error(`Expected ${field} to be mapped as ${expectedType}`);
       }
     }
 
@@ -77,7 +85,7 @@ const setUpActionsIndex = async (esClient: ElasticsearchClient, logger: Logger):
   });
   const missingFields = await checkActionsOriginMappings(esClient);
   if (missingFields.length > 0) {
-    throw new Error(`Missing keyword mappings for ${missingFields.join(', ')}`);
+    throw new Error(`Missing origin mappings for ${missingFields.join(', ')}`);
   }
 };
 

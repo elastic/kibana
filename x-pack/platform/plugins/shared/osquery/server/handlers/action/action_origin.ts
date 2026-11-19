@@ -6,20 +6,28 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER } from '@kbn/workflows-extensions/server';
+import { getEmitterWorkflowExecutionIdFromRequest } from '@kbn/workflows-extensions/server';
 
 /** A workflow run dispatched the action, through an osquery step or a `kibana.request` step. */
 export interface WorkflowActionOrigin {
   type: 'workflow';
   /** The workflow execution (run) that made the request. */
-  execution_id: string;
+  run_id: string;
+  /**
+   * Whether Kibana verified that the run exists and made the request. Always `false` until
+   * execution IDs can be verified (security-team#20085).
+   */
+  verified: false;
 }
 
 /**
  * What started an osquery action, written to the action document as `origin`. A union keyed by
- * `type`, so a new origin adds a member with its own fields and a matching mapping entry.
+ * `type`, shaped as planned in security-team#20087, so a new origin adds a member with its own
+ * fields and a matching mapping entry.
  */
 export type ActionOrigin = WorkflowActionOrigin;
+
+const RUN_ID_PATTERN = /^[A-Za-z0-9._:-]{1,256}$/;
 
 /**
  * The workflow origin of a request, or `undefined` when it did not come from a workflow run.
@@ -30,11 +38,11 @@ export type ActionOrigin = WorkflowActionOrigin;
  * identifies the run without any osquery-specific header.
  *
  * Only internal-origin requests count, as in `getEventChainContext`. That stops naive spoofing
- * from public API callers, but it is not a hard trust boundary: Kibana cannot yet verify an
- * execution ID, because no plugin contract exposes execution lookup. Treat the value as
- * attribution, not authorization.
+ * from public API callers, but it is not a trust boundary: `isInternalApiRequest` only checks
+ * that `x-elastic-internal-origin` is present, and Kibana cannot yet verify an execution ID. So
+ * the origin is recorded with `verified: false`. Treat it as attribution, not authorization.
  *
- * Store execution_id only: there is no public execution-to-workflow lookup contract, and
+ * Store the run ID only: there is no public execution-to-workflow lookup contract, and
  * `x-kibana-event-chain-visited-workflows` is not reliable for workflow attribution. Its caps
  * are MAX_VISITED_IDS_IN_HEADER (128 IDs) and MAX_VISITED_IDS_HEADER_BYTES (64 KiB); truncation
  * drops IDs from the end, so the current, last-appended workflow can be dropped and the tail
@@ -47,15 +55,14 @@ export const resolveWorkflowOrigin = (
     return undefined;
   }
 
-  const executionId = request.headers[EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER];
+  // The shared reader takes the first value of a repeated header and trims it.
+  const runId = getEmitterWorkflowExecutionIdFromRequest(request as KibanaRequest);
 
-  // Compare the whole match because `$` can also match before a final newline.
-  if (
-    typeof executionId !== 'string' ||
-    executionId.match(/^[A-Za-z0-9._:-]{1,256}$/)?.[0] !== executionId
-  ) {
+  // Compare the whole match because `$` can also match before a final newline. The pattern also
+  // rejects comma-joined values, which is how Node merges a repeated custom header.
+  if (runId === undefined || runId.match(RUN_ID_PATTERN)?.[0] !== runId) {
     return undefined;
   }
 
-  return { type: 'workflow', execution_id: executionId };
+  return { type: 'workflow', run_id: runId, verified: false };
 };

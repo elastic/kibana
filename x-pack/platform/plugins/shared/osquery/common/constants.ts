@@ -36,14 +36,6 @@ export const OSQUERY_SCHEDULED_INPUT_TYPE = 'osquery_scheduled';
  */
 export const OSQUERY_MAX_AGENTS_HEADER = 'x-osquery-max-agents';
 
-/**
- * Values of `origin.type` on the osquery action document: what started the action. Kibana sets
- * it on the server; callers cannot. Manual live queries and rule response actions carry no
- * `origin` and are told apart by `alert_ids`.
- */
-export const OSQUERY_ACTION_ORIGIN_TYPES = ['workflow'] as const;
-export type OsqueryActionOriginType = (typeof OSQUERY_ACTION_ORIGIN_TYPES)[number];
-
 export const API_VERSIONS = {
   public: {
     v1: '2023-10-31',

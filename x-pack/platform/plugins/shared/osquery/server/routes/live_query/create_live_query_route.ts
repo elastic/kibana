@@ -229,7 +229,8 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           }
 
           // Any workflow run that calls this route is recorded, whether it comes from an osquery
-          // step or a generic `kibana.request` step. Callers cannot set the origin themselves.
+          // step or a generic `kibana.request` step. The execution ID is not verified: any
+          // internal-origin caller that sends the header is recorded as Workflow (attribution only).
           const origin = osqueryContext.experimentalFeatures.workflowsExtensionsEnabled
             ? resolveWorkflowOrigin(request)
             : undefined;

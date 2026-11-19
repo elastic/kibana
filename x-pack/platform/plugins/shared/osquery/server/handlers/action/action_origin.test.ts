@@ -22,24 +22,19 @@ describe('resolveWorkflowOrigin', () => {
         isInternalApiRequest: true,
         headers: { [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: header },
       })
-    ).toEqual({ type: 'workflow', execution_id: header });
+    ).toEqual({ type: 'workflow', run_id: header, verified: false });
   });
 
   it.each<{ name: string; header: string | string[] | undefined }>([
     { name: 'missing', header: undefined },
     { name: 'empty', header: '' },
     { name: 'blank', header: '   ' },
-    { name: 'leading whitespace', header: ` ${executionId}` },
-    { name: 'trailing whitespace', header: `${executionId} ` },
     { name: '257 characters', header: 'a'.repeat(257) },
-    { name: 'single-value array', header: [executionId] },
-    { name: 'repeated values', header: [executionId, executionId] },
     { name: 'comma-joined values', header: `${executionId}, ${executionId}` },
     { name: 'embedded whitespace', header: 'execution id' },
     { name: 'slash', header: 'execution/id' },
     { name: 'non-ASCII character', header: 'exécution' },
     { name: 'control character', header: 'execution\tid' },
-    { name: 'trailing newline', header: `${executionId}\n` },
   ])('ignores a $name header', ({ header }) => {
     expect(
       resolveWorkflowOrigin({
@@ -47,6 +42,21 @@ describe('resolveWorkflowOrigin', () => {
         headers: { [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: header },
       })
     ).toBeUndefined();
+  });
+
+  it.each<{ name: string; header: string | string[] }>([
+    { name: 'leading whitespace', header: ` ${executionId}` },
+    { name: 'trailing whitespace', header: `${executionId} ` },
+    { name: 'single-value array', header: [executionId] },
+    { name: 'repeated array values', header: [executionId, 'other'] },
+    { name: 'trailing newline', header: `${executionId}\n` },
+  ])('normalizes a $name header like the other event-chain readers', ({ header }) => {
+    expect(
+      resolveWorkflowOrigin({
+        isInternalApiRequest: true,
+        headers: { [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: header },
+      })
+    ).toEqual({ type: 'workflow', run_id: executionId, verified: false });
   });
 
   it('ignores a valid execution ID on a non-internal request', () => {

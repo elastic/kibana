@@ -3124,9 +3124,9 @@ components:
               description: The saved query ID, if the live query was based on a saved query.
               type: string
             source:
-              description: Whether this was a manually run live query, triggered by a rule, or
-                labelled as Workflow. Workflow is a caller-asserted display
-                label, not provenance.
+              description: Whether the live query was run manually, by a rule, or by a
+                workflow. `Workflow` comes from an unverified request header and
+                is for display only.
               enum:
                 - Live
                 - Rule

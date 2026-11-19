@@ -56,7 +56,7 @@ interface ActionSource {
   agent_platforms?: string[];
   agent_policy_ids?: string[];
   alert_ids?: string[];
-  origin?: { type?: string; execution_id?: string };
+  origin?: { type?: string; run_id?: string; verified?: boolean };
   tags?: string[];
   queries?: ActionQuery[];
 }

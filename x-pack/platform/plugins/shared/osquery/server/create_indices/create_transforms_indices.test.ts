@@ -45,20 +45,31 @@ interface EsIndexMappings {
   properties: Record<string, unknown>;
 }
 
+const ORIGIN_FIELDS = ['origin.type', 'origin.run_id', 'origin.verified'] as const;
+type OriginField = (typeof ORIGIN_FIELDS)[number];
+
 const originFieldMappings = (
-  type: 'keyword' | 'text' = 'keyword',
-  executionId: 'keyword' | 'text' = 'keyword'
-): IndicesGetFieldMappingResponse => ({
-  [ACTIONS_INDEX_DEFAULT_NS]: {
-    mappings: {
-      'origin.type': { full_name: 'origin.type', mapping: { type: { type } } },
-      'origin.execution_id': {
-        full_name: 'origin.execution_id',
-        mapping: { execution_id: { type: executionId } },
-      },
+  overrides: Partial<Record<OriginField, string>> = {}
+): IndicesGetFieldMappingResponse => {
+  const types: Record<OriginField, string> = {
+    'origin.type': 'keyword',
+    'origin.run_id': 'keyword',
+    'origin.verified': 'boolean',
+    ...overrides,
+  };
+
+  return {
+    [ACTIONS_INDEX_DEFAULT_NS]: {
+      mappings: Object.fromEntries(
+        ORIGIN_FIELDS.map((field) => {
+          const leaf = field.slice('origin.'.length);
+
+          return [field, { full_name: field, mapping: { [leaf]: { type: types[field] } } }];
+        })
+      ),
     },
-  },
-});
+  } as IndicesGetFieldMappingResponse;
+};
 
 const createMockEsClient = (): MockEsClient => ({
   indices: {
@@ -143,9 +154,11 @@ function makeEsIndexMappings(
       agent_ids: { ignore_above: 1024, type: 'keyword' },
       tags: { ignore_above: 256, type: 'keyword' },
       origin: {
+        dynamic: false,
         properties: {
           type: { ignore_above: 256, type: 'keyword' },
-          execution_id: { ignore_above: 256, type: 'keyword' },
+          run_id: { ignore_above: 256, type: 'keyword' },
+          verified: { type: 'boolean' },
         },
       },
       ...overrides,
@@ -464,9 +477,11 @@ describe('createTransformIndices', () => {
         body: { properties: actionsMapping.properties },
       });
       expect(actionsMapping.properties?.origin).toEqual({
+        dynamic: false,
         properties: {
           type: { type: 'keyword', ignore_above: 256 },
-          execution_id: { type: 'keyword', ignore_above: 256 },
+          run_id: { type: 'keyword', ignore_above: 256 },
+          verified: { type: 'boolean' },
         },
       });
       expect(mockEsClient.indices.create).not.toHaveBeenCalled();
@@ -577,7 +592,7 @@ describe('createTransformIndices', () => {
       expect(mockEsClient.indices.getFieldMapping).toHaveBeenCalledTimes(1);
       expect(mockEsClient.indices.getFieldMapping).toHaveBeenCalledWith({
         index: ACTIONS_INDEX_DEFAULT_NS,
-        fields: ['origin.type', 'origin.execution_id'],
+        fields: [...ORIGIN_FIELDS],
       });
       expect(mockEsClient.indices.putMapping).not.toHaveBeenCalled();
     });
@@ -605,37 +620,35 @@ describe('createTransformIndices', () => {
       expect(mockEsClient.indices.getFieldMapping).toHaveBeenCalledTimes(1);
     });
 
-    it.each(['origin.type', 'origin.execution_id'])(
-      'repairs missing %s and re-checks',
-      async (field) => {
-        const { ensureActionsIndexMappings } = loadModule();
-        const missing = originFieldMappings();
-        Reflect.deleteProperty(missing[ACTIONS_INDEX_DEFAULT_NS].mappings, field);
-        mockEsClient.indices.getFieldMapping.mockResolvedValueOnce(missing);
-        await ensureActionsIndexMappings(mockEsClient as unknown as ElasticsearchClient, logger);
-        expect(mockEsClient.indices.putMapping).toHaveBeenCalledTimes(1);
-        expect(mockEsClient.indices.putMapping).toHaveBeenCalledWith({
-          index: ACTIONS_INDEX_DEFAULT_NS,
-          properties: { origin: actionsMapping.properties?.origin },
-        });
-        expect(mockEsClient.indices.getFieldMapping).toHaveBeenCalledTimes(2);
-        const [firstCheck, secondCheck] =
-          mockEsClient.indices.getFieldMapping.mock.invocationCallOrder;
-        const [putMapping] = mockEsClient.indices.putMapping.mock.invocationCallOrder;
-        expect(firstCheck).toBeLessThan(putMapping);
-        expect(putMapping).toBeLessThan(secondCheck);
-      }
-    );
+    it.each([...ORIGIN_FIELDS])('repairs missing %s and re-checks', async (field) => {
+      const { ensureActionsIndexMappings } = loadModule();
+      const missing = originFieldMappings();
+      Reflect.deleteProperty(missing[ACTIONS_INDEX_DEFAULT_NS].mappings, field);
+      mockEsClient.indices.getFieldMapping.mockResolvedValueOnce(missing);
+      await ensureActionsIndexMappings(mockEsClient as unknown as ElasticsearchClient, logger);
+      expect(mockEsClient.indices.putMapping).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.indices.putMapping).toHaveBeenCalledWith({
+        index: ACTIONS_INDEX_DEFAULT_NS,
+        properties: { origin: actionsMapping.properties?.origin },
+      });
+      expect(mockEsClient.indices.getFieldMapping).toHaveBeenCalledTimes(2);
+      const [firstCheck, secondCheck] =
+        mockEsClient.indices.getFieldMapping.mock.invocationCallOrder;
+      const [putMapping] = mockEsClient.indices.putMapping.mock.invocationCallOrder;
+      expect(firstCheck).toBeLessThan(putMapping);
+      expect(putMapping).toBeLessThan(secondCheck);
+    });
 
     it.each([
-      ['origin.type', 'text', 'keyword'],
-      ['origin.execution_id', 'keyword', 'text'],
+      ['origin.type', 'text'],
+      ['origin.run_id', 'text'],
+      ['origin.verified', 'keyword'],
     ] as const)(
-      'rejects conflicting %s without trying to repair it',
-      async (field, type, executionId) => {
+      'rejects conflicting %s (%s) without trying to repair it',
+      async (field, conflictingType) => {
         const { ensureActionsIndexMappings } = loadModule();
         mockEsClient.indices.getFieldMapping.mockResolvedValueOnce(
-          originFieldMappings(type, executionId)
+          originFieldMappings({ [field]: conflictingType })
         );
         await expect(
           ensureActionsIndexMappings(mockEsClient as unknown as ElasticsearchClient, logger)

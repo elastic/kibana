@@ -46,7 +46,6 @@ import { useUnifiedHistory } from './use_unified_history';
 import { useCursorPagination } from './use_cursor_pagination';
 import { useBulkGetUserProfiles } from './use_user_profiles';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { pagePathGetters } from '../common/page_paths';
 import { usePacks } from '../packs/use_packs';
 import { RunByColumn } from './components/run_by_column';
@@ -213,7 +212,7 @@ const UnifiedHistoryTableComponent = () => {
   const {
     filters: {
       q: searchValue,
-      sources: urlSources,
+      sources: selectedSources,
       runBy: selectedUserIds,
       start: startDate,
       end: endDate,
@@ -224,15 +223,6 @@ const UnifiedHistoryTableComponent = () => {
     setFilter,
     setFilters,
   } = useHistoryUrlParams();
-
-  // Only workflow steps write the Workflow source, so its filter is offered only while they are
-  // enabled. Rows already labelled Workflow keep that label either way.
-  const isWorkflowSourceEnabled = useIsExperimentalFeatureEnabled('workflowsExtensionsEnabled');
-  const selectedSources = useMemo(
-    () =>
-      isWorkflowSourceEnabled ? urlSources : urlSources.filter((source) => source !== 'workflow'),
-    [isWorkflowSourceEnabled, urlSources]
-  );
 
   const pageSize = urlPageSize ?? persistedPageSize;
 
@@ -713,7 +703,6 @@ const UnifiedHistoryTableComponent = () => {
             <SourceFilterPopover
               selectedSources={selectedSources}
               onSelectedSourcesChanged={handleSelectedSourcesChanged}
-              showWorkflowSource={isWorkflowSourceEnabled}
             />
             <RunByFilterPopover
               selectedUserIds={selectedUserIds}
@@ -742,7 +731,6 @@ const UnifiedHistoryTableComponent = () => {
       handleSelectedTagsChanged,
       selectedSources,
       handleSelectedSourcesChanged,
-      isWorkflowSourceEnabled,
       selectedUserIds,
       handleSelectedUsersChanged,
       startDate,

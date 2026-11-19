@@ -471,7 +471,8 @@ describe('createLiveQueryRoute', () => {
       expect(mockedCreateActionHandler).toHaveBeenCalledTimes(1);
       expect(mockedCreateActionHandler.mock.calls[0][2]?.origin).toEqual({
         type: 'workflow',
-        execution_id: executionId,
+        run_id: executionId,
+        verified: false,
       });
     });
 
@@ -498,21 +499,6 @@ describe('createLiveQueryRoute', () => {
         true,
       ],
       [
-        'a leading-whitespace execution ID',
-        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: ' execution-1' },
-        true,
-      ],
-      [
-        'a trailing-whitespace execution ID',
-        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1 ' },
-        true,
-      ],
-      [
-        'a single-value execution ID array',
-        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: ['execution-1'] },
-        true,
-      ],
-      [
         'an execution ID with embedded whitespace',
         { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution id' },
         true,
@@ -530,19 +516,6 @@ describe('createLiveQueryRoute', () => {
       [
         'an execution ID containing a control character',
         { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution\tid' },
-        true,
-      ],
-      [
-        'an execution ID with a trailing newline',
-        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1\n' },
-        true,
-      ],
-      [
-        'repeated execution IDs',
-        {
-          ...internalOrigin,
-          [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: ['execution-1', 'execution-2'],
-        },
         true,
       ],
       [

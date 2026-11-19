@@ -11,7 +11,7 @@ components:
       enum: [live, rule, scheduled, workflow]
 
     UnifiedHistorySource:
-      description: 'The display label for the history source. Workflow is a caller-asserted display label, not provenance.'
+      description: 'What ran the live query: manually, a rule, a schedule, or a workflow. `Workflow` comes from an unverified request header and is for display only.'
       type: string
       enum: [Live, Scheduled, Rule, Workflow]
 
@@ -105,7 +105,7 @@ components:
               type: string
               enum: [live]
             source:
-              description: 'Whether this was a manually run live query, triggered by a rule, or labelled as Workflow. Workflow is a caller-asserted display label, not provenance.'
+              description: 'Whether the live query was run manually, by a rule, or by a workflow. `Workflow` comes from an unverified request header and is for display only.'
               type: string
               enum: [Live, Rule, Workflow]
             actionId:

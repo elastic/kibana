@@ -176,38 +176,19 @@ describe('UnifiedHistoryTable', () => {
         ),
       });
 
-    it('requests workflow rows from the URL when workflow steps are enabled', () => {
-      mockSearch = '?sources=workflow,live';
-      mockHistory({ data: [] });
+    it.each([true, false])(
+      'requests workflow rows from the URL whether workflow steps are enabled (%p)',
+      (workflowsExtensionsEnabled) => {
+        mockSearch = '?sources=workflow,live';
+        mockHistory({ data: [] });
 
-      renderWithWorkflowSteps(true);
+        renderWithWorkflowSteps(workflowsExtensionsEnabled);
 
-      expect(useUnifiedHistoryMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({ sourceFilters: ['workflow', 'live'] })
-      );
-    });
-
-    it('drops workflow from the URL filter when workflow steps are disabled', () => {
-      mockSearch = '?sources=workflow,live';
-      mockHistory({ data: [] });
-
-      renderWithWorkflowSteps(false);
-
-      expect(useUnifiedHistoryMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({ sourceFilters: ['live'] })
-      );
-    });
-
-    it('sends no source filter when workflow was the only one and workflow steps are disabled', () => {
-      mockSearch = '?sources=workflow';
-      mockHistory({ data: [] });
-
-      renderWithWorkflowSteps(false);
-
-      expect(useUnifiedHistoryMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({ sourceFilters: undefined })
-      );
-    });
+        expect(useUnifiedHistoryMock).toHaveBeenLastCalledWith(
+          expect.objectContaining({ sourceFilters: ['workflow', 'live'] })
+        );
+      }
+    );
 
     it('still labels existing workflow rows as Workflow when workflow steps are disabled', () => {
       mockHistory({ data: [createMockWorkflowRow()] });

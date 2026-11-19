@@ -25,7 +25,7 @@ export type SourceFilterEnum = typeof SourceFilter.enum;
 export const SourceFilterEnum = SourceFilter.enum;
 
 /**
- * The display label for the history source. Workflow is a caller-asserted display label, not provenance.
+ * What ran the live query: manually, a rule, a schedule, or a workflow. `Workflow` comes from an unverified request header and is for display only.
  */
 export const UnifiedHistorySource = lazySchema(() =>
   z.enum(['Live', 'Scheduled', 'Rule', 'Workflow'])
@@ -169,12 +169,12 @@ export const LiveHistoryRow = lazySchema(() =>
        */
       sourceType: z.literal('live').describe('Identifies this as a live query history row.'),
       /**
-       * Whether this was a manually run live query, triggered by a rule, or labelled as Workflow. Workflow is a caller-asserted display label, not provenance.
+       * Whether the live query was run manually, by a rule, or by a workflow. `Workflow` comes from an unverified request header and is for display only.
        */
       source: z
         .enum(['Live', 'Rule', 'Workflow'])
         .describe(
-          'Whether this was a manually run live query, triggered by a rule, or labelled as Workflow. Workflow is a caller-asserted display label, not provenance.'
+          'Whether the live query was run manually, by a rule, or by a workflow. `Workflow` comes from an unverified request header and is for display only.'
         ),
       /**
        * The Fleet action ID for the live query.

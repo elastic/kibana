@@ -36,6 +36,26 @@ import {
 import type { DispatchEntryPoint } from './dispatch_source';
 import { resolveRuleRunDispatchSource } from './dispatch_source';
 
+/**
+ * How long a write waits for the `origin` mapping. Fleet has already dispatched the query by
+ * then, so a slow mapping update must not hold the response past the caller's HTTP timeout.
+ */
+export const ORIGIN_MAPPING_TIMEOUT_MS = 5_000;
+
+const withTimeout = async <T>(promise: Promise<T>, ms: number): Promise<T> => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`timed out after ${ms} ms`)), ms);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
 interface Metadata {
   currentUser: string | undefined;
   userProfileUid: string | undefined;
@@ -250,7 +270,11 @@ export const createActionHandler = async (
       // document carrying it is written, so it is never mapped dynamically.
       const logger = osqueryContext.logFactory.get('osquery');
       try {
-        await ensureActionsIndexMappings(esClientInternal, logger);
+        // The setup keeps running after a timeout and is cached once it succeeds.
+        await withTimeout(
+          ensureActionsIndexMappings(esClientInternal, logger),
+          ORIGIN_MAPPING_TIMEOUT_MS
+        );
       } catch (mappingError) {
         // Fleet actions are already dispatched, so keep the action readable without risking
         // dynamically mapped origin fields. The response must match the stored document.

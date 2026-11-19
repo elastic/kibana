@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { createActionHandler } from './create_action_handler';
+import { createActionHandler, ORIGIN_MAPPING_TIMEOUT_MS } from './create_action_handler';
 import { buildQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -90,7 +90,11 @@ describe('createActionHandler', () => {
   });
 
   describe('origin', () => {
-    const workflowOrigin = { type: 'workflow' as const, execution_id: 'exec-1' };
+    const workflowOrigin = {
+      type: 'workflow' as const,
+      run_id: 'exec-1',
+      verified: false as const,
+    };
     const liveDispatch = {
       entryPoint: 'live_query' as const,
       source: { kind: 'caller' as const },
@@ -110,19 +114,51 @@ describe('createActionHandler', () => {
       expect(result.response.origin).toEqual(workflowOrigin);
     });
 
-    it('applies the actions index mappings before writing a document with an origin', async () => {
+    it('waits for the actions index mappings before writing a document with an origin', async () => {
       const { context, bulk } = buildOsqueryContext();
+      let resolveMappings!: () => void;
+      mockedEnsureActionsIndexMappings.mockReturnValueOnce(
+        new Promise<void>((resolve) => {
+          resolveMappings = resolve;
+        })
+      );
 
-      await createActionHandler(
+      const pending = createActionHandler(
         context,
         { query: 'SELECT 1;', agent_ids: [TEST_AGENT] },
         { dispatch: liveDispatch, origin: workflowOrigin }
       );
-
+      await new Promise(setImmediate);
       expect(mockedEnsureActionsIndexMappings).toHaveBeenCalledTimes(1);
-      expect(mockedEnsureActionsIndexMappings.mock.invocationCallOrder[0]).toBeLessThan(
-        bulk.mock.invocationCallOrder[0]
-      );
+      expect(bulk).not.toHaveBeenCalled();
+
+      resolveMappings();
+      await pending;
+      expect(bulk).toHaveBeenCalledTimes(1);
+      expect(bulk.mock.calls[0][0].operations[1]).toMatchObject({ origin: workflowOrigin });
+    });
+
+    it('writes the action without origin when the mapping check does not finish in time', async () => {
+      jest.useFakeTimers();
+      try {
+        const { context, bulk, warn } = buildOsqueryContext();
+        mockedEnsureActionsIndexMappings.mockReturnValueOnce(new Promise<void>(() => {}));
+
+        const pending = createActionHandler(
+          context,
+          { query: 'SELECT 1;', agent_ids: [TEST_AGENT] },
+          { dispatch: liveDispatch, origin: workflowOrigin }
+        );
+        await jest.advanceTimersByTimeAsync(ORIGIN_MAPPING_TIMEOUT_MS);
+        const result = await pending;
+
+        expect(bulk).toHaveBeenCalledTimes(1);
+        expect(bulk.mock.calls[0][0].operations[1]).not.toHaveProperty('origin');
+        expect(result.response).not.toHaveProperty('origin');
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('timed out'));
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('writes no origin and skips the mapping check for a dispatch without one', async () => {

@@ -123,7 +123,7 @@ describe('getUnifiedHistoryRoute', () => {
             _source: {
               action_id: 'workflow-action',
               '@timestamp': '2026-11-18T12:00:00.000Z',
-              origin: { type: 'workflow', execution_id: 'execution-1' },
+              origin: { type: 'workflow', run_id: 'execution-1', verified: false },
               alert_ids: ['alert-1'],
               queries: [{ query: 'SELECT 1' }],
             },

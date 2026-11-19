@@ -49,33 +49,24 @@ const POPOVER_CONTENT_STYLE = { width: 200 };
 interface SourceFilterPopoverProps {
   selectedSources: SourceFilter[];
   onSelectedSourcesChanged: (sources: SourceFilter[]) => void;
-  /** Offer the Workflow option. Off while the workflow steps that write that source are disabled. */
-  showWorkflowSource: boolean;
 }
 
 const SourceFilterPopoverComponent: React.FC<SourceFilterPopoverProps> = ({
   selectedSources,
   onSelectedSourcesChanged,
-  showWorkflowSource,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
-  const sourceOptions = useMemo(
-    () =>
-      showWorkflowSource ? SOURCE_OPTIONS : SOURCE_OPTIONS.filter(({ key }) => key !== 'workflow'),
-    [showWorkflowSource]
-  );
 
   const selectableOptions = useMemo<EuiSelectableOption[]>(() => {
     const selectedSet = new Set(selectedSources);
 
-    return sourceOptions.map(({ key, label }) => ({
+    return SOURCE_OPTIONS.map(({ key, label }) => ({
       label,
       key,
       checked: selectedSet.has(key) ? 'on' : undefined,
       'data-test-subj': `history-source-filter-${key}`,
     }));
-  }, [selectedSources, sourceOptions]);
+  }, [selectedSources]);
 
   const handleChange = useCallback(
     (_: EuiSelectableOption[], __: unknown, changedOption: EuiSelectableOption) => {
@@ -94,7 +85,7 @@ const SourceFilterPopoverComponent: React.FC<SourceFilterPopoverProps> = ({
 
   const activeCount = selectedSources.length;
   const isFiltered = activeCount > 0;
-  const displayCount = isFiltered ? activeCount : sourceOptions.length;
+  const displayCount = isFiltered ? activeCount : SOURCE_OPTIONS.length;
 
   const triggerButton = (
     <EuiFilterButton

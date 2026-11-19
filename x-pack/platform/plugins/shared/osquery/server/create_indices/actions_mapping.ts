@@ -69,17 +69,22 @@ export const actionsMapping: MappingTypeMapping = {
       type: 'object',
       enabled: false,
     },
-    // What started the action (see `ActionOrigin`). Mapped explicitly so the first write cannot
-    // map it dynamically as `text`; new origin types add fields here.
+    // What started the action (see `ActionOrigin`), shaped as planned in security-team#20087.
+    // `dynamic: false` keeps any subfield that is not listed here out of the mapping, so a new
+    // field can never be mapped dynamically as `text`. New subfields are added here first.
     origin: {
+      dynamic: false,
       properties: {
         type: {
           type: 'keyword',
           ignore_above: 256,
         },
-        execution_id: {
+        run_id: {
           type: 'keyword',
           ignore_above: 256,
+        },
+        verified: {
+          type: 'boolean',
         },
       },
     },

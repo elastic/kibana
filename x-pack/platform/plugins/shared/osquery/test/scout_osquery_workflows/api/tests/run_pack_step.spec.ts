@@ -26,6 +26,7 @@ import {
   deleteTestSpace,
   findAgentActionIds,
   findPackActionDocs,
+  historyClient,
   indexFakeAgents,
   loadPrebuiltPacks,
   stepOf,
@@ -252,8 +253,9 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
 
   apiTest(
     'history: a pack dispatch records the workflow origin and is listed with source Workflow',
-    async ({ apiClient, esClient, kbnClient }) => {
+    async ({ apiClient, esClient }) => {
       const workflows = workflowsClient(apiClient, adminHeaders);
+      const history = historyClient(apiClient, adminHeaders, new Date().toISOString());
       const workflowId = await workflows.create(
         'osq-wf-pack-history-source',
         runPackStep(`pack: osq-wf-pack`)
@@ -273,27 +275,13 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
       // The execution ID comes from the engine's `x-kibana-workflow-execution-id`, not the step.
       const [action] = await findPackActionDocs(systemEs, packId, state.action_id);
       expect(action).toMatchObject({
-        origin: { type: 'workflow', execution_id: executionId },
+        origin: { type: 'workflow', run_id: executionId, verified: false },
       });
 
-      const history = async (sourceFilters?: string) => {
-        const { data } = await kbnClient.request<{
-          data: Array<{ actionId?: string; source: string }>;
-        }>({
-          method: 'GET',
-          path: `/api/osquery/history?pageSize=100${
-            sourceFilters ? `&sourceFilters=${sourceFilters}` : ''
-          }`,
-          headers: { 'elastic-api-version': '2023-10-31' },
-        });
-
-        return data.data.filter((row) => row.actionId === state.action_id);
-      };
-
       // One action for the whole pack, so one history row.
-      expect(await history()).toMatchObject([{ source: 'Workflow' }]);
-      expect(await history('workflow')).toMatchObject([{ source: 'Workflow' }]);
-      expect(await history('live,rule')).toHaveLength(0);
+      expect(await history(state.action_id)).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history(state.action_id, 'workflow')).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history(state.action_id, 'live,rule')).toHaveLength(0);
       await workflows.delete(workflowId);
     }
   );
