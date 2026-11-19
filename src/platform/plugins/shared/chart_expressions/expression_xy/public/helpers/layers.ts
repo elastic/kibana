@@ -87,10 +87,10 @@ export function toXRangeLowerBounds<T extends CommonXYLayerConfig>(layer: T): T 
   if (xColumn?.meta.type !== 'number_range') {
     return layer;
   }
-  const rows = layer.table.rows.map((row) => ({
-    ...row,
-    [xColumn.id]: row[xColumn.id] == null ? row[xColumn.id] : getRangeLowerBound(row[xColumn.id]),
-  }));
+  const rows = layer.table.rows.map((row) => {
+    const range = row[xColumn.id];
+    return { ...row, [xColumn.id]: range == null ? range : getRangeLowerBound(range) };
+  });
   const columns = layer.table.columns.map((column) =>
     column === xColumn ? { ...column, meta: { ...column.meta, params: { id: 'number' } } } : column
   );
