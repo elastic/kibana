@@ -75,6 +75,22 @@ describe('hasNoEsqlResults', () => {
     expect(dataViewsService.get).not.toHaveBeenCalled();
   });
 
+  it('uses the ES|QL variables and the time range, as the query that fetches the bounds does', async () => {
+    mockGetESQLSingleColumnValues.mockResolvedValue({
+      values: [3],
+      column,
+      indexPattern: 'logs-*',
+    });
+    const esqlVariables = [{ key: 'host', value: 'a', type: 'values' }] as never;
+    const timeRange = { from: 'now-15m', to: 'now' };
+
+    await hasNoEsqlResults({ ...request(), esqlVariables, timeRange });
+
+    expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
+      expect.objectContaining({ esqlVariables, timeRange })
+    );
+  });
+
   it('is true when the range has no values', async () => {
     mockGetESQLSingleColumnValues.mockResolvedValue({ values: [], column, indexPattern: 'logs-*' });
 

@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { FilterableSource } from '@kbn/data-source';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
@@ -72,6 +73,7 @@ export function hasNoResults$({
                 abortSignal: abortController.signal,
                 dataSource,
                 esqlQuery: valuesSourceFetchPlan.query,
+                esqlVariables: controlFetchContext.esqlVariables,
                 rangeFilter,
                 query: controlFetchContext.query,
                 timeRange,
@@ -113,6 +115,7 @@ export async function hasNoEsqlResults({
   abortSignal,
   dataSource,
   esqlQuery,
+  esqlVariables,
   filters,
   query,
   rangeFilter,
@@ -121,6 +124,7 @@ export async function hasNoEsqlResults({
   abortSignal: AbortSignal;
   dataSource: FilterableSource;
   esqlQuery?: string;
+  esqlVariables?: ESQLControlVariable[];
   filters?: Filter[];
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
@@ -132,6 +136,7 @@ export async function hasNoEsqlResults({
   // The values of the query that are in the range: there are none when the range has no results
   const result = await getESQLSingleColumnValues({
     query: `${esqlQuery}\n| LIMIT 1`,
+    timeRange,
     filter: buildESQLPreFilter({
       fetchContext: { query, filters: [...(filters ?? []), rangeFilter] },
       useGlobalFilters: true,
@@ -141,7 +146,7 @@ export async function hasNoEsqlResults({
     }),
     signal: abortSignal,
     search: dataService.search.search,
-    esqlVariables: [],
+    esqlVariables: esqlVariables ?? [],
     timezone: getControlsTimezone(),
   });
   if (!getESQLSingleColumnValues.isSuccess(result)) {
