@@ -10,6 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 import type {
   PointEventAnnotationRow,
@@ -82,6 +83,31 @@ describe('ES|QL annotation rendering', () => {
     expect(screen.getByText('message:')).toBeInTheDocument();
     expect(screen.getByText('count:')).toBeInTheDocument();
     expect(screen.getByText('12.00')).toBeInTheDocument();
+  });
+
+  it('sums skipped counts reported by different annotations in one bucket', () => {
+    const [annotation] = getAnnotationsGroupedByInterval(
+      [
+        { ...point, id: 'a', skippedCount: 2 },
+        { ...point, id: 'b', skippedCount: 3 },
+        { ...point, id: 'c' },
+      ],
+      [],
+      columns,
+      formatFactory,
+      'YYYY-MM-DD HH:mm',
+      false
+    );
+    const Tooltip = annotation.customTooltip;
+    if (!Tooltip) throw new Error('Expected an annotation tooltip');
+    render(
+      <I18nProvider>
+        <EuiThemeProvider>
+          <Tooltip datum={{ dataValue: 0 }} />
+        </EuiThemeProvider>
+      </I18nProvider>
+    );
+    expect(screen.getByText('+5 more…')).toBeInTheDocument();
   });
 
   it('renders dynamic range text and extra tooltip columns with their formatters', () => {

@@ -215,9 +215,39 @@ describe('toEsqlAnnotationDatatable', () => {
         ],
       },
     ]);
-    expect(merged.rows[9].skippedCount).toBeUndefined();
-    expect(merged.rows[10].skippedCount).toBe(2);
+    expect(merged.rows[9].skippedCount).toBe(2);
+    expect(merged.rows[10].skippedCount).toBeUndefined();
     expect(result.rows[9].skippedCount).toBe(2);
+  });
+
+  it('keeps skipped counts on the annotation that overflowed when annotations share a bucket', () => {
+    const overflowing = toEsqlAnnotationDatatable({
+      ...options,
+      datatable: {
+        ...datatable,
+        rows: Array.from({ length: 12 }, (_, index) => ({
+          ...datatable.rows[0],
+          'time-id': 1767225600000 + index * 1000,
+        })),
+      },
+    });
+    const sameBucketNeighbor = toEsqlAnnotationDatatable({
+      ...options,
+      annotation: { ...annotation, id: 'releases', label: 'Releases' },
+      datatable: {
+        ...datatable,
+        rows: [{ ...datatable.rows[0], 'time-id': 1767225600000 + 30 * 60 * 1000 }],
+      },
+    });
+
+    const merged = mergeAnnotationDatatables([overflowing, sameBucketNeighbor]);
+
+    const withSkipped = merged.rows.filter((row) => row.skippedCount);
+    expect(merged.rows).toHaveLength(11);
+    expect(withSkipped).toHaveLength(1);
+    expect(withSkipped[0].id).toBe('deployments');
+    expect(withSkipped[0].skippedCount).toBe(2);
+    expect(merged.rows.find((row) => row.id === 'releases')?.skippedCount).toBeUndefined();
   });
 
   it('keeps same-named columns from independent queries separate', () => {

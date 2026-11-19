@@ -90,8 +90,8 @@ const createCustomTooltip =
     isDarkMode: boolean
   ): CustomAnnotationTooltip =>
   () => {
-    const lastElement = rows[rows.length - 1];
-    const skippedCountFromRequest = lastElement.skippedCount || 0;
+    // Each annotation reports its own overflow on one of its rows, so sum across the bucket.
+    const skippedCountFromRequest = rows.reduce((sum, row) => sum + (row.skippedCount || 0), 0);
     const displayedSkippedCount =
       rows.length > DISPLAYED_COUNT_OF_ROWS ? rows.length - DISPLAYED_COUNT_OF_ROWS : 0;
     const skippedCount = skippedCountFromRequest + displayedSkippedCount;

@@ -144,30 +144,16 @@ const parseTimestamp = (value: unknown): number | undefined => {
   return date.isValid() ? date.valueOf() : undefined;
 };
 
+// skippedCount stays on the point of the annotation that overflowed its bucket; the renderer
+// sums it across the bucket's rows.
 export const mergeAnnotationDatatables = (tables: Datatable[]): Datatable => {
   const columns = new Map<string, DatatableColumn>();
-  const skippedPerBucket = new Map<string, number>();
   for (const table of tables) {
-    for (const column of table.columns) columns.set(column.id, column);
-    for (const row of table.rows) {
-      if (row.skippedCount)
-        skippedPerBucket.set(
-          row.timebucket,
-          (skippedPerBucket.get(row.timebucket) ?? 0) + row.skippedCount
-        );
+    for (const column of table.columns) {
+      columns.set(column.id, column);
     }
   }
-  const rows = tables
-    .flatMap((table) => table.rows.map(({ skippedCount, ...row }) => row))
-    .sort(sortByTime);
-  const lastPointPerBucket = new Map<string, DatatableRow>();
-  for (const row of rows) {
-    if (row.type === 'point') lastPointPerBucket.set(row.timebucket, row);
-  }
-  for (const [bucket, row] of lastPointPerBucket) {
-    const skippedCount = skippedPerBucket.get(bucket);
-    if (skippedCount) row.skippedCount = skippedCount;
-  }
+  const rows = tables.flatMap((table) => table.rows).sort(sortByTime);
   return wrapRowsInDatatable(rows, [...columns.values()]);
 };
 
