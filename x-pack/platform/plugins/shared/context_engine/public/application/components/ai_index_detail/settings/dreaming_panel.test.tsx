@@ -9,18 +9,18 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { AiIndexDreamingConfig } from '../../../../common/dreaming';
-import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
-import { useAiIndexDreaming } from '../../hooks/use_ai_index_dreaming';
-import { useAllDreamingTemplates } from '../../hooks/use_dreaming_templates';
-import { useSaveDreamingConfig } from '../../hooks/use_save_dreaming_config';
+import type { AiIndexDreamingConfig } from '../../../../../common/dreaming';
+import type { AiIndexHttpItem } from '../../../../../common/http_api/ai_indices';
+import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
+import { useAllDreamingTemplates } from '../../../hooks/use_dreaming_templates';
+import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
 import { DreamingPanel } from './dreaming_panel';
 
-jest.mock('../../hooks/use_ai_index_dreaming', () => ({ useAiIndexDreaming: jest.fn() }));
-jest.mock('../../hooks/use_save_dreaming_config', () => ({ useSaveDreamingConfig: jest.fn() }));
-jest.mock('../../hooks/use_dreaming_templates', () => ({ useAllDreamingTemplates: jest.fn() }));
+jest.mock('../../../hooks/use_ai_index_dreaming', () => ({ useAiIndexDreaming: jest.fn() }));
+jest.mock('../../../hooks/use_save_dreaming_config', () => ({ useSaveDreamingConfig: jest.fn() }));
+jest.mock('../../../hooks/use_dreaming_templates', () => ({ useAllDreamingTemplates: jest.fn() }));
 const navigateToContextEngine = jest.fn();
-jest.mock('../../hooks/use_navigation', () => ({
+jest.mock('../../../hooks/use_navigation', () => ({
   useNavigation: () => ({ navigateToContextEngine }),
 }));
 
@@ -93,6 +93,7 @@ describe('DreamingPanel', () => {
   it('shows a skeleton while the config loads', () => {
     renderPanel(aiIndexWith(undefined), true);
 
+    expect(screen.getByText('Dreaming')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexDreamingLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexDreamingSetUp')).not.toBeInTheDocument();
   });

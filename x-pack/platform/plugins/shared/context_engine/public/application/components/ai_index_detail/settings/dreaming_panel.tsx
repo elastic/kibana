@@ -35,23 +35,23 @@ import {
   DEFAULT_DREAMING_INTERVAL,
   DREAMING_DISABLED,
   type AiIndexDreamingConfig,
-} from '../../../../common/dreaming';
-import { matchingTemplateId } from '../../../../common/dreaming_templates';
-import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
-import { validateDreamingInterval } from '../../../../common/validation';
-import { useAiIndexDreaming } from '../../hooks/use_ai_index_dreaming';
-import { useAllDreamingTemplates } from '../../hooks/use_dreaming_templates';
-import { useNavigation } from '../../hooks/use_navigation';
-import { useSaveDreamingConfig } from '../../hooks/use_save_dreaming_config';
-import { getAiIndexDreamingTemplatePath } from '../../paths';
+} from '../../../../../common/dreaming';
+import { matchingTemplateId } from '../../../../../common/dreaming_templates';
+import type { AiIndexHttpItem } from '../../../../../common/http_api/ai_indices';
+import { validateDreamingInterval } from '../../../../../common/validation';
+import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
+import { useAllDreamingTemplates } from '../../../hooks/use_dreaming_templates';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
+import { getAiIndexDreamingTemplatePath } from '../../../paths';
 import {
   DreamingConfigEditor,
   draftBuildsAnything,
   draftOf,
   typesOfDraft,
   type DreamingConfigDraft,
-} from '../dreaming_config/dreaming_config_editor';
-import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
+} from '../../dreaming_config/dreaming_config_editor';
+import { AiIndexDetailPanelDescription } from '../ai_index_detail_panel_description';
 
 /** Maximum height of the dreaming config JSON, in pixels, before it scrolls. */
 export const DREAMING_JSON_MAX_HEIGHT = 480;
