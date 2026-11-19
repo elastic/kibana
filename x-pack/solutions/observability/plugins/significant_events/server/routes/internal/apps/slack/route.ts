@@ -14,6 +14,7 @@ import type {
   SlackAppAvailableChannelsResponse,
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,
+  SlackAppCancelReconnectResponse,
   SlackAppConfirmResponse,
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,
@@ -118,6 +119,29 @@ const disconnectSlackAppRoute = createServerRoute({
       if (error instanceof RelayRequestError) throwRelayError(error);
       throw error;
     }
+  },
+});
+
+const cancelReconnectSlackAppRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/apps/slack/reconnect/cancel',
+  options: {
+    access: 'internal',
+    summary: 'Cancel a Slack workspace reconnect',
+    description:
+      'Discards the reconnect in progress and keeps the current connection. With `tenantKey`, returns 409 if a different workspace is awaiting confirmation.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({ tenantKey: z.string().min(1).max(64).optional() }).nullish(),
+    })
+  ),
+  handler: async ({ params, request, server }): Promise<SlackAppCancelReconnectResponse> => {
+    return new SlackAppService(server).cancelReconnect(request, params?.body?.tenantKey);
   },
 });
 
@@ -244,6 +268,7 @@ export const internalSlackAppRoutes = {
   ...statusSlackAppRoute,
   ...confirmSlackAppRoute,
   ...disconnectSlackAppRoute,
+  ...cancelReconnectSlackAppRoute,
   ...bindingsSlackAppRoute,
   ...availableChannelsSlackAppRoute,
   ...bindChannelSlackAppRoute,

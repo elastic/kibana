@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import {
   RELAY_APP_CONNECTION_STATUS,
+  type SlackAppCancelReconnectResponse,
   type SlackAppConfirmResponse,
   type SlackAppConnectResponse,
   type RelayAppConnectionStatus,
@@ -25,6 +26,7 @@ const STATUS_ROUTE = '/internal/significant_events/apps/slack/status';
 const CONNECT_ROUTE = '/internal/significant_events/apps/slack/connect';
 const CONFIRM_ROUTE = '/internal/significant_events/apps/slack/confirm';
 const DISCONNECT_ROUTE = '/internal/significant_events/apps/slack/disconnect';
+const CANCEL_RECONNECT_ROUTE = '/internal/significant_events/apps/slack/reconnect/cancel';
 const POLL_INTERVAL_MS = 3_000;
 const POLL_TIMEOUT_MS = 2 * 60 * 1_000;
 
@@ -39,11 +41,15 @@ export interface UseRelayAppConnection {
   workspace?: SlackAppWorkspace;
   createdBy?: string;
   createdAt?: string;
+  /** A reconnect in progress; the current connection keeps working until it is confirmed. */
+  reconnect?: SlackAppStatusResponse['reconnect'];
   isMutating: boolean;
   retryStatusRequest: () => void;
   connect: () => Promise<void>;
-  /** Accepts the workspace awaiting confirmation; rejecting it is `disconnect`. */
+  /** Accepts the workspace awaiting confirmation; rejecting it is `disconnect`, or `cancelReconnect` for a reconnect. */
   confirm: (tenantKey: string) => Promise<void>;
+  /** Drops the reconnect in progress and keeps the current connection. */
+  cancelReconnect: (tenantKey?: string) => Promise<void>;
   /** With `tenantKey`, the server refuses if a different workspace is stored. */
   disconnect: (tenantKey?: string) => Promise<void>;
 }
@@ -64,7 +70,9 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     // Status is best-effort; surface nothing on transient errors.
     retry: false,
     refetchInterval: (data) => {
-      const stillInProgress = data?.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress;
+      const stillInProgress =
+        data?.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress ||
+        data?.reconnect?.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress;
       if (stillInProgress && !pollDeadlineRef.current) {
         pollDeadlineRef.current = Date.now() + POLL_TIMEOUT_MS;
       }
@@ -99,6 +107,34 @@ export function useRelayAppConnection(): UseRelayAppConnection {
       notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.nightshift.settings.apps.confirmError', {
           defaultMessage: 'Failed to confirm the Slack workspace',
+        }),
+      });
+    },
+    onSettled: () => {
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: RELAY_APP_CONNECTION_STATUS_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: RELAY_APP_BINDINGS_QUERY_KEY }),
+      ]);
+    },
+  });
+
+  const cancelReconnectMutation = useMutation<
+    SlackAppCancelReconnectResponse,
+    Error,
+    string | undefined
+  >({
+    mutationFn: (tenantKey) => {
+      pollDeadlineRef.current = 0;
+      return tenantKey
+        ? http.post<SlackAppCancelReconnectResponse>(CANCEL_RECONNECT_ROUTE, {
+            body: JSON.stringify({ tenantKey }),
+          })
+        : http.post<SlackAppCancelReconnectResponse>(CANCEL_RECONNECT_ROUTE);
+    },
+    onError: (error) => {
+      notifications.toasts.addError(getFormattedError(error), {
+        title: i18n.translate('xpack.nightshift.settings.apps.cancelReconnectError', {
+          defaultMessage: 'Failed to cancel the Slack reconnect',
         }),
       });
     },
@@ -142,8 +178,12 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     workspace: statusQuery.data?.workspace,
     createdBy: statusQuery.data?.createdBy,
     createdAt: statusQuery.data?.createdAt,
+    reconnect: statusQuery.data?.reconnect,
     isMutating:
-      connectMutation.isLoading || confirmMutation.isLoading || disconnectMutation.isLoading,
+      connectMutation.isLoading ||
+      confirmMutation.isLoading ||
+      cancelReconnectMutation.isLoading ||
+      disconnectMutation.isLoading,
     retryStatusRequest: () => {
       void statusQuery.refetch();
     },
@@ -172,6 +212,9 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     },
     confirm: async (tenantKey) => {
       await confirmMutation.mutateAsync(tenantKey);
+    },
+    cancelReconnect: async (tenantKey) => {
+      await cancelReconnectMutation.mutateAsync(tenantKey);
     },
     disconnect: async (tenantKey) => {
       await disconnectMutation.mutateAsync(tenantKey);

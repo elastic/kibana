@@ -35,6 +35,7 @@ jest.mock('../../../../data/automations/use_automations', () => ({
 const mockDisconnectWorkspace = jest.fn().mockResolvedValue(undefined);
 const mockConnectWorkspace = jest.fn().mockResolvedValue(undefined);
 const mockConfirmWorkspace = jest.fn().mockResolvedValue(undefined);
+const mockCancelReconnect = jest.fn().mockResolvedValue(undefined);
 const mockRetryStatusRequest = jest.fn();
 const mockUseRelayAppConnection = jest.fn();
 jest.mock('./use_relay_app_connection', () => ({
@@ -68,6 +69,7 @@ const connected = () => ({
   retryStatusRequest: mockRetryStatusRequest,
   connect: mockConnectWorkspace,
   confirm: mockConfirmWorkspace,
+  cancelReconnect: mockCancelReconnect,
   disconnect: mockDisconnectWorkspace,
 });
 
@@ -265,6 +267,35 @@ describe('SlackChannelsSection', () => {
     );
     fireEvent.click(screen.getByTestId('streamsSlackAppCancelButton'));
     expect(mockDisconnectWorkspace).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the channels and lets the user cancel while a reconnect awaits authorization', () => {
+    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
+    mockUseRelayAppConnection.mockReturnValue({
+      ...connected(),
+      reconnect: { status: 'oauth_in_progress' },
+    });
+
+    setup();
+
+    expect(screen.getByTestId('streamsSlackAppReconnectInProgress')).toBeInTheDocument();
+    expect(screen.getByTestId('streamsSlackAppOpenConnectChannelButton')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('streamsSlackAppCancelReconnectButton'));
+    expect(mockCancelReconnect).toHaveBeenCalledTimes(1);
+    expect(mockDisconnectWorkspace).not.toHaveBeenCalled();
+  });
+
+  it('cancels the reconnect, not the connection, when the new workspace is rejected', () => {
+    mockUseRelayAppConnection.mockReturnValue({
+      ...connected(),
+      reconnect: { status: 'pending_confirmation', workspace: { tenantKey: 'T999NEW' } },
+    });
+
+    setup();
+
+    fireEvent.click(screen.getByTestId('streamsSlackAppRejectWorkspaceButton'));
+    expect(mockCancelReconnect).toHaveBeenCalledWith('T999NEW');
+    expect(mockDisconnectWorkspace).not.toHaveBeenCalled();
   });
 
   it('shows the channels with a connected badge once the workspace is connected', async () => {
