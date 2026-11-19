@@ -7,12 +7,13 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { inject, injectable } from 'inversify';
-import type { CoreStart as CoreStartContract, KibanaRequest } from '@kbn/core/server';
-import { PluginStart } from '@kbn/core-di';
+import type { CoreStart as CoreStartContract, KibanaRequest, Logger } from '@kbn/core/server';
+import { Logger as CoreLogger, PluginStart } from '@kbn/core-di';
 import type { CoreDiServiceStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { NightshiftSourcesServerStart } from '@kbn/nightshift-sources-plugin/server';
 import { EngineHttpError } from '../errors/engine_http_error';
+import { getErrorMessage } from '../errors/get_error_message';
 import { DetectionEngineDataClient } from './es_client_tokens';
 import { EngineRunner } from './run_engine';
 import type { TickResult } from './tick_result';
@@ -35,7 +36,8 @@ export class TickService {
     @inject(CoreStart('elasticsearch'))
     private readonly elasticsearch: CoreStartContract['elasticsearch'],
     @inject(PluginStart<NightshiftSourcesServerStart>('nightshiftSources'))
-    private readonly nightshiftSources: NightshiftSourcesServerStart
+    private readonly nightshiftSources: NightshiftSourcesServerStart,
+    @inject(CoreLogger) private readonly logger: Logger
   ) {}
 
   /**
@@ -94,7 +96,12 @@ export class TickService {
     try {
       return await scope.get(EngineRunner).run({ now, skipBacklog, abortSignal });
     } finally {
-      await scope.unbindAllAsync();
+      // A failing cleanup must not replace the tick's result, or its own error, with another one.
+      try {
+        await scope.unbindAllAsync();
+      } catch (error) {
+        this.logger.warn(`Could not release the tick scope: ${getErrorMessage(error)}`);
+      }
     }
   }
 }
