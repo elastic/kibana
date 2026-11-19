@@ -62,15 +62,14 @@ export const sourceVerdictOf = (
       reason: `${lostIds.length} of the memories it came from were deleted, and it also came from agent conversations, which maintenance cannot read.`,
     };
   }
-  if (remainingIds.length > 0 || citesTraces) {
-    return { verdict: 'rewrite', lostIds, remainingIds };
-  }
   if ((ki.references ?? []).length >= MAX_KI_REFERENCES) {
     return {
       verdict: 'needs_review',
-      reason:
-        'Every memory it still cites was deleted, but it cites as many as it can hold, so older ones may remain.',
+      reason: `${lostIds.length} of the memories it came from were deleted, but it cites as many as it can hold, so older ones it no longer cites may remain.`,
     };
+  }
+  if (remainingIds.length > 0 || citesTraces) {
+    return { verdict: 'rewrite', lostIds, remainingIds };
   }
   return { verdict: 'tombstone', reason: 'Every memory it came from was deleted.' };
 };

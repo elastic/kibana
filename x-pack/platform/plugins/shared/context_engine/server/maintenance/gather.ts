@@ -92,6 +92,10 @@ export const toMaintenanceItem = (ki: DreamedKi): MaintenanceItem => {
 export const audienceOf = (ki: Pick<DreamedKi, 'permissions'>): string =>
   audienceKeyOf([ki.permissions]) ?? OPEN_AUDIENCE;
 
+/** Whether a KI belongs to one user. Maintenance leaves those alone. */
+export const isUserScoped = (ki: DreamedKi): boolean =>
+  ki.user_id !== undefined && ki.user_id !== null;
+
 const isMemory = (ki: DreamedKi): boolean => DREAMING_MEMORY_KI_TYPES.includes(ki.type);
 
 const newestFirst = (a: DreamedKi, b: DreamedKi): number =>
@@ -107,6 +111,8 @@ export const gatherMaintenance = async (
     kindOf(ki) !== undefined &&
     !isKiDeleted(ki) &&
     isVisibleInSpace(ki.permissions, spaceId);
+  const isReviewable = (ki: DreamedKi | undefined): ki is DreamedKi =>
+    isLiveItem(ki) && !isUserScoped(ki);
 
   const review = new Map<string, { ki: DreamedKi; reasons: Set<MaintenanceReviewReason> }>();
   const causeOf = new Map<string, number>();
@@ -122,7 +128,7 @@ export const gatherMaintenance = async (
   const changed = await reader.changedSince(since, afterId);
   const positionOf = new Map(changed.kis.map(({ id }, position) => [id, position]));
   changed.kis.forEach((ki, position) => {
-    if (isLiveItem(ki) && ki.governance?.provenance?.updated_by?.uri !== writerUri) {
+    if (isReviewable(ki) && ki.governance?.provenance?.updated_by?.uri !== writerUri) {
       add(ki, 'changed', position);
     }
   });
@@ -133,7 +139,7 @@ export const gatherMaintenance = async (
   const citingDeleted = deletedMemoryIds.length
     ? await reader.citing(deletedMemoryIds.map(kiUri), 'items')
     : [];
-  for (const ki of citingDeleted.filter(isLiveItem)) {
+  for (const ki of citingDeleted.filter(isReviewable)) {
     const cited = new Set(citedMemoryKiIds(ki));
     const causes = deletedMemoryIds
       .filter((id) => cited.has(id))
@@ -142,7 +148,7 @@ export const gatherMaintenance = async (
   }
 
   const changedFacts = new Map(
-    [...changed.kis, ...citingDeleted.filter(isLiveItem)]
+    [...changed.kis, ...citingDeleted.filter(isReviewable)]
       .filter((ki) => kindOf(ki) === 'fact')
       .map((ki) => [ki.id, ki])
   );
@@ -182,13 +188,13 @@ export const gatherMaintenance = async (
           entityId === ki.id && samePermissions(permissions, ki.permissions)
       )
       .map(({ cause }) => cause);
-    if (causes.length > 0 && isLiveItem(ki) && kindOf(ki) === 'entity') {
+    if (causes.length > 0 && isReviewable(ki) && kindOf(ki) === 'entity') {
       add(ki, 'about_facts_changed', Math.min(...causes));
     }
   }
 
   const swept = await reader.sweep(sweepAfterId, sweepSize);
-  swept.filter(isLiveItem).forEach((ki) => add(ki, 'sweep'));
+  swept.filter(isReviewable).forEach((ki) => add(ki, 'sweep'));
 
   const fixes: MaintenanceChange[] = [];
   const needsReview: MaintenanceChange[] = [];
@@ -281,7 +287,7 @@ export const gatherMaintenance = async (
         .filter(
           (neighbor) =>
             neighbor.id !== ki.id &&
-            isLiveItem(neighbor) &&
+            isReviewable(neighbor) &&
             kindOf(neighbor) === kindOf(ki) &&
             samePermissions(neighbor.permissions, ki.permissions)
         )
@@ -332,7 +338,11 @@ export const gatherMaintenance = async (
       brokenLinks.add(link.id);
     }
   }
-  const liveLinks = links.filter(({ id }) => !brokenLinks.has(id));
+  const liveLinks = links.filter(
+    ({ id, ki, from, to }) =>
+      !brokenLinks.has(id) &&
+      ![ki, known.get(from), known.get(to)].some((linked) => linked && isUserScoped(linked))
+  );
 
   const reviewedIds = new Set(reviewed.map(({ id }) => id));
   const unsettledIds = new Set([...fixes.map(({ id }) => id), ...rewrites.keys()]);
@@ -348,7 +358,7 @@ export const gatherMaintenance = async (
       entityId,
       factIds
         .map((factId) => known.get(factId))
-        .filter(isLiveItem)
+        .filter(isReviewable)
         .filter(
           (factKi) =>
             !unsettledIds.has(factKi.id) && samePermissions(factKi.permissions, entityPermissions)

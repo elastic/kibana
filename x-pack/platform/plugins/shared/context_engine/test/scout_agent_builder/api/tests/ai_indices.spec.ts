@@ -233,14 +233,14 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
             const outOfBounds = await apiClient.put(dreamingPath, {
               headers: internalHeaders,
               responseType: 'json',
-              body: { ...dreaming, maintenance: { enabled: true, neighbors: 50 } },
+              body: { ...dreaming, maintenance: { enabled: true, mode: 'apply', neighbors: 50 } },
             });
             expect(outOfBounds).toHaveStatusCode(400);
 
             const nothingToMaintain = await apiClient.put(dreamingPath, {
               headers: internalHeaders,
               responseType: 'json',
-              body: { enabled: false, maintenance: { enabled: true } },
+              body: { enabled: false, maintenance: { enabled: true, mode: 'apply' } },
             });
             expect(nothingToMaintain).toHaveStatusCode(400);
 

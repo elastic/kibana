@@ -162,6 +162,30 @@ describe('gatherMaintenance', () => {
     expect(output.batches[0].neighbors).toEqual([]);
   });
 
+  it('leaves out items that belong to one user, as items, neighbors and relationship ends', async () => {
+    const stored = [
+      memory('m-1'),
+      entity('entity-a'),
+      entity('entity-mine', { user_id: 'u-1' }),
+      entity('entity-b'),
+      relationship('entity-a', 'knows', 'entity-mine'),
+      relationship('entity-a', 'manages', 'entity-b', { user_id: 'u-1' }),
+    ];
+
+    const output = await gatherMaintenance(
+      fakeReader(stored, {
+        changed: [stored[1], stored[2]],
+        similar: { 'entity-a': ['entity-mine'] },
+      }),
+      options
+    );
+
+    expect(output.batches.flatMap(({ items }) => items.map(({ id }) => id))).toEqual(['entity-a']);
+    expect(output.batches[0].neighbors).toEqual([]);
+    expect(output.batches[0].relationships).toEqual([]);
+    expect(output.fixes).toEqual([]);
+  });
+
   it('tombstones items whose memories were all deleted, and rewrites those that lost some', async () => {
     const stored = [
       memory('m-1', { governance: deleted }),

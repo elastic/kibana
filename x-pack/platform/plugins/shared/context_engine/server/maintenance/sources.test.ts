@@ -118,12 +118,15 @@ describe('sourceVerdictOf', () => {
     });
   });
 
-  it('does not tombstone an item at the reference cap, whose older memories may remain', () => {
+  it('neither tombstones nor rewrites an item at the reference cap, whose older memories may remain', () => {
     const ids = Array.from({ length: 100 }, (_, index) => `m-${index}`);
     const atCap = fact({ references: derivedFrom(...ids.map((id) => `ki://${id}`)) });
 
     expect(sourceVerdictOf(atCap, new Map(ids.map((id) => memory(id, true)))).verdict).toBe(
       'needs_review'
     );
+    expect(
+      sourceVerdictOf(atCap, new Map(ids.map((id, index) => memory(id, index > 0)))).verdict
+    ).toBe('needs_review');
   });
 });

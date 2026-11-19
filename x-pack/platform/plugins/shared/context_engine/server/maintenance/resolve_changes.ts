@@ -36,8 +36,8 @@ import {
   type DreamedKiReference,
 } from '../dreaming/dreamed_ki';
 import { kiUri, relationshipId, relationshipKey } from '../dreaming/ids';
-import { derivedPermissions, isVisibleInSpace } from '../dreaming/permissions';
-import { audienceOf, parseRelationship } from './gather';
+import { derivedPermissions, isVisibleInSpace, samePermissions } from '../dreaming/permissions';
+import { audienceOf, isUserScoped, parseRelationship } from './gather';
 
 /** The writes of one change, in order: they stand or fall together. */
 export interface MaintenanceGroup {
@@ -196,6 +196,9 @@ export const resolveMaintenanceChanges = (
       if (audienceOf(ki) !== batch.audience) {
         return `${id} has different permissions than the batch`;
       }
+      if (isUserScoped(ki)) {
+        return `${id} belongs to one user`;
+      }
     }
     if (new Set(ids).size !== ids.length) {
       return 'an item is named twice';
@@ -245,8 +248,11 @@ export const resolveMaintenanceChanges = (
       ) {
         continue;
       }
-      const title = relationshipTitle({ from, relation: parsed.relation, to });
       const permissions = derivedPermissions([from.permissions, to.permissions], spaceId);
+      if (isUserScoped(link) || !samePermissions(link.permissions, permissions)) {
+        continue;
+      }
+      const title = relationshipTitle({ from, relation: parsed.relation, to });
       moves.set(id, {
         id,
         type: RELATIONSHIP_KI_TYPE,
@@ -364,6 +370,13 @@ export const resolveMaintenanceChanges = (
         rejected.push({ item, reason: 'a changed fact needs the content the newer one keeps' });
         continue;
       }
+      if (isPersonEdited(winner)) {
+        leaveForReview(
+          ids,
+          `The value changed, but a person edited the newer one, so it cannot keep the earlier value: ${reason}`
+        );
+        continue;
+      }
       merge(item, winner, [loser], { content }, reason);
       continue;
     }
@@ -430,16 +443,23 @@ export const resolveMaintenanceChanges = (
   const listed = new Map(batch.relationships.map((link) => [link.id, link]));
   const removed = new Set<string>();
   const pairOf = ({ from, to }: { from: string; to: string }) => [from, to].sort().join('|');
+  const isLive = (linkId: string) => {
+    const stored = kis.get(linkId);
+    return stored !== undefined && !isKiDeleted(stored);
+  };
   for (const { id, reason } of changeSet.relationships) {
     const item = `relationship ${id}`;
     const link = listed.get(id);
-    const stored = kis.get(id);
-    if (!link || !stored || isKiDeleted(stored) || removed.has(id)) {
+    if (!link || !isLive(id) || removed.has(id)) {
       rejected.push({ item, reason: `${id} is not a relationship in the batch` });
       continue;
     }
     const twin = batch.relationships.find(
-      (other) => other.id !== id && !removed.has(other.id) && pairOf(other) === pairOf(link)
+      (other) =>
+        other.id !== id &&
+        !removed.has(other.id) &&
+        isLive(other.id) &&
+        pairOf(other) === pairOf(link)
     );
     if (!twin) {
       rejected.push({ item, reason: 'it is neither a duplicate nor the inverse of another' });

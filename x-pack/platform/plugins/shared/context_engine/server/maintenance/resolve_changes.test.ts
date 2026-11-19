@@ -221,6 +221,32 @@ describe('resolveMaintenanceChanges', () => {
       expect(resolved.groups[1].moves.map(({ id }) => id)).toEqual([moved]);
     });
 
+    it('does not move a relationship that belongs to one user or whose permissions would widen', () => {
+      const kis = [entity('e-1'), entity('e-2'), entity('e-3'), entity('e-4')];
+      const scoped = { ...link('e-2', 'knows', 'e-3'), user_id: 'u-1' };
+      const narrower = { ...link('e-2', 'mentors', 'e-4'), permissions: restricted };
+
+      const resolved = resolve(
+        kis,
+        { merges: [{ survivor: 'e-1', absorbed: ['e-2'], reason: 'Same' }] },
+        { items: ['e-1', 'e-2'], links: { 'e-2': [scoped, narrower] } }
+      );
+
+      expect(resolved.groups[0].moves).toEqual([]);
+      expect(resolved.groups[0].tombstones).toEqual(['e-2']);
+    });
+
+    it('rejects an item that belongs to one user', () => {
+      const kis = [entity('e-1'), entity('e-2', { user_id: 'u-1' })];
+
+      const resolved = resolve(kis, {
+        merges: [{ survivor: 'e-1', absorbed: ['e-2'], reason: 'Same' }],
+      });
+
+      expect(resolved.groups).toEqual([]);
+      expect(resolved.rejected.map(({ reason }) => reason)).toEqual(['e-2 belongs to one user']);
+    });
+
     it('counts a memory that more than one merged item came from once', () => {
       const kis = [
         entity('e-1', {
@@ -348,6 +374,24 @@ describe('resolveMaintenanceChanges', () => {
           ],
         })
       );
+    });
+
+    it('leaves a value that changed for review when a person edited the newer fact', () => {
+      const edited = { ...newer, attributes: { ...newer.attributes, ...personEdited } };
+
+      const resolved = resolve([older, edited], {
+        contradictions: [
+          {
+            ids: ['f-old', 'f-new'],
+            label: 'changed',
+            content: 'Plan is Pro as of May 2026, up from Basic in February 2026.',
+            reason: 'Upgraded',
+          },
+        ],
+      });
+
+      expect(resolved.groups).toEqual([]);
+      expect(resolved.needsReview.map(({ id }) => id)).toEqual(['f-old', 'f-new']);
     });
 
     it('rejects a value that changed without what the newer fact now says', () => {
@@ -491,6 +535,29 @@ describe('resolveMaintenanceChanges', () => {
     expect(resolved.groups.map(({ tombstones }) => tombstones)).toEqual([[inverse.id]]);
     expect(resolved.rejected.map(({ reason }) => reason)).toEqual([
       'it is neither a duplicate nor the inverse of another',
+      'it is neither a duplicate nor the inverse of another',
+    ]);
+  });
+
+  it('keeps a relationship whose twin another batch already removed', () => {
+    const knows = link('e-1', 'knows', 'e-2');
+    const inverse = {
+      ...link('e-2', 'knows', 'e-1'),
+      governance: { lifecycle: { status: 'deleted' as const } },
+    };
+    const listed = [knows, inverse].map(({ id, attributes }) => {
+      const [from, relation, to] = String(attributes?.['memory.key']).split('|');
+      return { id, from, relation, to };
+    });
+
+    const resolved = resolve(
+      [entity('e-1'), entity('e-2'), knows, inverse],
+      { relationships: [{ id: knows.id, reason: 'Inverse of the other' }] },
+      { relationships: listed }
+    );
+
+    expect(resolved.groups).toEqual([]);
+    expect(resolved.rejected.map(({ reason }) => reason)).toEqual([
       'it is neither a duplicate nor the inverse of another',
     ]);
   });
