@@ -26,8 +26,6 @@ const scopeFilter = ({ space, userId }: SessionMemoryScope): QueryDslQueryContai
   { term: { user_id: userId } },
 ];
 
-const ignoreMissingStream = { ignore_unavailable: true };
-
 const toErrorMessage = ({ type, reason, caused_by: cause }: ErrorCause): string => {
   const message = reason ?? type;
   return cause?.reason ? `${message}: ${cause.reason}` : message;
@@ -89,7 +87,7 @@ export const createSessionMemoryService = (
   get: async (scope, id) => {
     const response = await esClient.search<StoredSessionMemory>({
       index: SESSION_MEMORY_DATA_STREAM,
-      ...ignoreMissingStream,
+      ignore_unavailable: true,
       query: { bool: { filter: [{ term: { id } }, ...scopeFilter(scope)] } },
       sort: [{ '@timestamp': 'desc' }],
       size: 1,
@@ -122,7 +120,7 @@ export const createSessionMemoryService = (
     // tombstones in the query instead would surface an older revision of a forgotten memory.
     const response = await esClient.search<StoredSessionMemory>({
       index: SESSION_MEMORY_DATA_STREAM,
-      ...ignoreMissingStream,
+      ignore_unavailable: true,
       query: { bool: { filter: [{ terms: { id: uniqueIds } }, ...scopeFilter(scope)] } },
       collapse: { field: 'id' },
       sort: [{ '@timestamp': 'desc' }],
