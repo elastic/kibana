@@ -42,23 +42,27 @@ describe('initTelemetry', () => {
   });
 
   describe('APM and OTel conflict detection', () => {
-    test('throws when the resolved APM configuration is active and OTel tracing is enabled', () => {
+    test('does not throw when APM uses the OTel-derived default and OTel tracing is enabled', () => {
       const apmConfig = new ApmConfiguration(
         REPO_ROOT,
         { telemetry: { tracing: { enabled: true, sample_rate: 1, exporters: [] } } },
         false
       );
 
-      jest
-        .spyOn(apmConfig, 'getConfig')
-        .mockReturnValue({ active: true, contextPropagationOnly: false });
-
       const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
       loadConfiguration.mockImplementationOnce(() => apmConfig);
 
-      expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).toThrow(
-        'Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously.'
-      );
+      const originalElasticApmActive = process.env.ELASTIC_APM_ACTIVE;
+      delete process.env.ELASTIC_APM_ACTIVE;
+      try {
+        expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).not.toThrow();
+      } finally {
+        if (originalElasticApmActive === undefined) {
+          delete process.env.ELASTIC_APM_ACTIVE;
+        } else {
+          process.env.ELASTIC_APM_ACTIVE = originalElasticApmActive;
+        }
+      }
     });
 
     test('throws when APM is explicitly active and OTel tracing is enabled', () => {
