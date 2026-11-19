@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { mapStatsResponse } from './map_stats_response';
 import type {
@@ -23,14 +24,102 @@ const META: StreamsUnit.StatsMeta = {
   window: { start: '2026-10-27T12:00:00.000Z', end: '2026-10-27T12:15:00.000Z' },
 };
 
+interface FailureClassFixture {
+  rate: number | null;
+  percentage: number | null;
+  breakdown?: Array<{
+    collection: string | null;
+    reason: string | null;
+    rate: number | null;
+    percentage: number | null;
+  }>;
+}
+
+const NO_FAILURE_CLASS: FailureClassFixture = { rate: null, percentage: null };
+
+/** A failure class as the API sends it. `unit` is what the destination type counts. */
+const failureClass = (
+  { rate, percentage, breakdown }: FailureClassFixture,
+  unit: string
+): StreamsUnit.StatsDestinationResult['events']['failed']['authentication'] => ({
+  rate: { value: rate, unit, time_unit: 's' },
+  percentage: percent(percentage),
+  ...(breakdown
+    ? {
+        breakdown: breakdown.map((cause) => ({
+          collection: cause.collection,
+          reason: cause.reason,
+          rate: { value: cause.rate, unit, time_unit: 's' },
+          percentage: percent(cause.percentage),
+        })),
+      }
+    : {}),
+});
+
+/**
+ * A delivery series over the window of the fixtures, in buckets of 30 seconds, as the API sends it.
+ * Each count of failures is the share of the attempts of a bucket that it ends at, and it rises to
+ * that share over the window, as when a credential has just been revoked. The rest was delivered.
+ */
+const deliverySeries = ({
+  unit,
+  attemptsPerBucket = 40,
+  authentication = 0,
+  authorization = 0,
+  other = 0,
+}: {
+  unit: string;
+  attemptsPerBucket?: number;
+  /** The share of the attempts, from 0 to 1, that each count ends at. */
+  authentication?: number;
+  authorization?: number;
+  other?: number;
+}): StreamsUnit.StatsDeliverySeries => {
+  const bucketMs = 30_000;
+  const start = Date.parse(META.window.start);
+  const count = (Date.parse(META.window.end) - start) / bucketMs;
+
+  return {
+    bucket_ms: bucketMs,
+    unit,
+    points: Array.from({ length: count }, (_, index) => {
+      const ramp = Math.min(1, (index / (count - 1)) * 1.6);
+      const part = (share: number) => Math.round(attemptsPerBucket * share * ramp);
+      const authenticationCount = part(authentication);
+      const authorizationCount = part(authorization);
+
+      return {
+        start: new Date(start + index * bucketMs).toISOString(),
+        total: attemptsPerBucket,
+        failed: authenticationCount + authorizationCount + part(other),
+        authentication: authenticationCount,
+        authorization: authorizationCount,
+      };
+    }),
+  };
+};
+
 const destinationResult = ({
   eventsRate = null,
   eventsTotal = null,
   failedRate = null,
+  failedPercentage = null,
+  failedUnit = '{item}',
+  authentication = NO_FAILURE_CLASS,
+  authorization = NO_FAILURE_CLASS,
   latencyAverage = null,
   series = { bucketMs: 300000, points: [] },
+  delivery,
   error,
-}: Partial<DestinationStatsView> & {
+}: Partial<Omit<DestinationStatsView, 'failed'>> & {
+  /** What the API sends when the request asks for the delivery series. */
+  delivery?: StreamsUnit.StatsDeliverySeries;
+  failedRate?: number | null;
+  failedPercentage?: number | null;
+  /** `{item}`, or `{request}` for a destination type that reports upload attempts, such as S3. */
+  failedUnit?: string;
+  authentication?: FailureClassFixture;
+  authorization?: FailureClassFixture;
   error?: StreamsUnit.StatsError;
 } = {}): StreamsUnit.StatsDestinationResult => ({
   ...(error ? { error } : {}),
@@ -41,13 +130,13 @@ const destinationResult = ({
       rate: perSecond(eventsRate),
       series: { bucket_ms: series.bucketMs, points: series.points },
     },
-    // The client does not read the failure classes yet, so they have no data here.
     failed: {
-      rate: perSecond(failedRate),
-      percentage: percent(null),
-      authentication: { rate: perSecond(null), percentage: percent(null) },
-      authorization: { rate: perSecond(null), percentage: percent(null) },
+      rate: { value: failedRate, unit: failedUnit, time_unit: 's' },
+      percentage: percent(failedPercentage),
+      authentication: failureClass(authentication, failedUnit),
+      authorization: failureClass(authorization, failedUnit),
     },
+    ...(delivery ? { delivery: { series: delivery } } : {}),
   },
 });
 
@@ -133,7 +222,10 @@ export type StatsFixtureScenario =
   | 'partial'
   | 'kindError'
   | 'unsupportedDestination'
-  | 'notFound';
+  | 'notFound'
+  | 'authFailures'
+  | 's3Failures'
+  | 'partialFailure';
 
 export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.StatsResponse> = {
   data: {
@@ -215,6 +307,128 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
     },
     meta: META,
   },
+  // `es-dev` is refused, in items. A request-level 401 has no cause in the breakdown. A per-document
+  // 403 names the data stream and the error type, for each of the data streams that it refused. The percentages are shares of 4.2 items a second.
+  authFailures: {
+    components: {
+      destinations: {
+        'es-prod': DESTINATIONS_WITH_DATA['es-prod'],
+        'es-dev': destinationResult({
+          eventsRate: 4.2,
+          eventsTotal: 3780,
+          failedRate: 2.4,
+          failedPercentage: 57.1,
+          latencyAverage: 0.17,
+          delivery: deliverySeries({
+            unit: '{item}',
+            authentication: 0.119,
+            authorization: 0.452,
+          }),
+          authentication: { rate: 0.5, percentage: 11.9 },
+          authorization: {
+            rate: 1.9,
+            percentage: 45.2,
+            breakdown: [
+              {
+                collection: 'logs-generic.otel-default',
+                reason: 'security_exception',
+                rate: 1.1,
+                percentage: 26.2,
+              },
+              {
+                collection: 'logs-nginx.access-default',
+                reason: 'security_exception',
+                rate: 0.5,
+                percentage: 11.9,
+              },
+              {
+                collection: 'metrics-system.cpu-default',
+                reason: 'security_exception',
+                rate: 0.3,
+                percentage: 7.1,
+              },
+            ],
+          },
+        }),
+      },
+      processors: {},
+      sources: {},
+    },
+    meta: META,
+  },
+  // An S3 destination counts upload attempts, so its failures are in requests while its incoming
+  // items stay in items. It has no collection, and its reason is the S3 error code.
+  s3Failures: {
+    components: {
+      destinations: {
+        's3-test': destinationResult({
+          eventsRate: 0.28,
+          eventsTotal: 100,
+          failedRate: 0.44,
+          failedPercentage: 100,
+          failedUnit: '{request}',
+          latencyAverage: 0.06,
+          delivery: deliverySeries({ unit: '{request}', authentication: 1 }),
+          authentication: {
+            rate: 0.44,
+            percentage: 100,
+            breakdown: [
+              { collection: null, reason: 'SignatureDoesNotMatch', rate: 0.44, percentage: 100 },
+            ],
+          },
+          authorization: { rate: 0, percentage: 0 },
+        }),
+      },
+      processors: {},
+      sources: {},
+    },
+    meta: META,
+  },
+  // A destination whose failure query failed has real values next to an error, and no failure rates.
+  partialFailure: {
+    components: {
+      destinations: {
+        'es-dev': destinationResult({
+          eventsRate: 4.2,
+          eventsTotal: 3780,
+          failedRate: 2.4,
+          latencyAverage: 0.17,
+          error: { code: 'error', reason: 'The stats query failed.' },
+        }),
+      },
+      processors: {},
+      sources: {},
+    },
+    meta: META,
+  },
+};
+
+/**
+ * The response with the delivery series only on the destinations that ask for it, as the API
+ * leaves it out of the others.
+ */
+const withRequestedSeries = (
+  response: StreamsUnit.StatsResponse,
+  components: StreamsUnit.StatsComponentRef[]
+): StreamsUnit.StatsResponse => {
+  const asked = new Set(
+    components.flatMap((ref) =>
+      ref.kind === 'destination' && ref.include?.delivery_series ? [ref.id] : []
+    )
+  );
+
+  return {
+    ...response,
+    components: {
+      ...response.components,
+      destinations: Object.fromEntries(
+        Object.entries(response.components.destinations).map(([id, { events, ...result }]) => {
+          const { delivery, ...otherEvents } = events;
+          return [id, { ...result, events: asked.has(id) && delivery ? events : otherEvents }];
+        })
+      ),
+    },
+  };
 };
 
 const createAbortError = () => new DOMException('The request was aborted', 'AbortError');
@@ -264,6 +478,23 @@ export const createFixtureUnitStatsClient = ({
       throw createServiceUnavailableError();
     }
 
-    return mapStatsResponse(STATS_FIXTURE_RESPONSES[scenario], components);
+    return mapStatsResponse(
+      withRequestedSeries(STATS_FIXTURE_RESPONSES[scenario], components),
+      components
+    );
   },
 });
+
+/**
+ * A repository client that answers the stats route from a fixture scenario, as the server does, for
+ * a story whose code builds its own stats client from the repository client of the page, such as
+ * the popover of a node, so that the real client maps the response.
+ */
+export const createFixtureStreamsRepositoryClient = (
+  scenario: StatsFixtureScenario
+): StreamsRepositoryClient =>
+  ({
+    fetch: async (_endpoint: string, { params }: { params: { body: StreamsUnit.StatsRequest } }) =>
+      withRequestedSeries(STATS_FIXTURE_RESPONSES[scenario], params.body.components ?? []),
+    // The type of the client is that of every route, and a story answers only this one.
+  } as unknown as StreamsRepositoryClient);

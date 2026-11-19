@@ -23,11 +23,11 @@ import {
   IN_VIEW_FIELD,
   buildEntitiesInViewConditions,
 } from './entities_in_view';
+import { buildLookback } from '../../queries/time_range';
 import {
   buildEntityAggregations,
   buildIdentityPrefilter,
   buildJoinedPageSteps,
-  buildLookback,
   buildStatsByEntityClause,
   getAlertsIndex,
   getEntityAlias,

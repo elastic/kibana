@@ -316,7 +316,6 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.trigger_actions_ui.enableExperimental (array?)',
   'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean?)',
   'xpack.trigger_actions_ui.rules.enabled (boolean?)',
-  'xpack.timelines.enableExperimental (array?)',
   'xpack.alerting.rules.run.alerts.max (number?)',
   'xpack.alerting.rulesSettings.enabled (boolean?)',
   'xpack.alerting.disabledRuleTypes (array?)',
