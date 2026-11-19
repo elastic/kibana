@@ -171,6 +171,8 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     await expect(modal.getByText('Will be converted', { exact: true })).toHaveCount(2);
     await expect(modal.getByText('Will remain unchanged', { exact: true })).toHaveCount(2);
     await expect(modal.getByRole('checkbox')).toHaveCount(0);
+    // the fixture's annotation layer only has manual annotations, so nothing is capped by a query limit
+    await expect(modal.getByTestId('lnsConvertToEsqlAnnotationLimitWarning')).toBeHidden();
     await lens.workspace.convertToEsqlModalConfirmButton.click();
     await expect(modal).toBeHidden();
     await expect(lens.workspace.convertToEsqlButton).toBeHidden();
@@ -312,6 +314,9 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       // two data layers and the annotation layer convert; the static reference line stays
       await expect(modal.getByText('Will be converted', { exact: true })).toHaveCount(3);
       await expect(modal.getByText('Will remain unchanged', { exact: true })).toHaveCount(1);
+      await expect(modal.getByTestId('lnsConvertToEsqlAnnotationLimitWarning')).toContainText(
+        /1000 most recent events/
+      );
       await lens.workspace.convertToEsqlModalConfirmButton.click();
       await expect(modal).toBeHidden();
       await expect.poll(() => lens.layers.getLayerCount()).toBe(4);
