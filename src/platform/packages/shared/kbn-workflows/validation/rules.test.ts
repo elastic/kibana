@@ -43,6 +43,8 @@ describe('workflow validation rules registry', () => {
         "missingRequiredInput",
         "parallelFanOutExceedsLimit",
         "schemaViolation",
+        "serviceAccountNotFound",
+        "serviceAccountUnavailable",
         "targetWorkflowNotFound",
         "unboundedParallelFanOut",
         "unknownInputKey",
