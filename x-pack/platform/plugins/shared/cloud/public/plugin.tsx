@@ -172,6 +172,11 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     return {
       CloudContextProvider,
       isCloudEnabled: this.isCloudEnabled,
+      isEce: getIsEce({
+        isCloudEnabled: this.isCloudEnabled,
+        isServerlessEnabled: this.isServerlessEnabled,
+        isSaasContainer: this.config.isSaasContainer,
+      }),
       cloudId: this.config.id,
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
