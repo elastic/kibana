@@ -22,6 +22,7 @@ import {
   DE_SPACE_RULES_HEALTH_PATH,
   EXCEPTIONS_PATH,
   RULES_ADD_PATH,
+  RULES_LIBRARIES_PATH,
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
@@ -33,6 +34,7 @@ import {
   CREATE_NEW_RULE,
   DE_SPACE_RULES_HEALTH,
   EXCEPTIONS,
+  RULE_LIBRARIES,
   RULES,
   SIEM_RULES,
 } from '../app/translations';
@@ -92,6 +94,18 @@ export const links: LinkItem = {
           globalSearchDisabled: true,
         },
       ],
+    },
+    {
+      id: SecurityPageName.rulesLibraries,
+      title: RULE_LIBRARIES,
+      description: i18n.translate('xpack.securitySolution.appLinks.ruleLibrariesDescription', {
+        defaultMessage: 'Browse prebuilt rules from several libraries and install them.',
+      }),
+      landingIcon: IconRollup,
+      path: RULES_LIBRARIES_PATH,
+      experimentalKey: 'ruleLibrariesEnabled',
+      skipUrlState: true,
+      hideTimeline: true,
     },
     {
       id: SecurityPageName.exceptions,
@@ -166,6 +180,7 @@ export const links: LinkItem = {
       }),
       linkIds: [
         SecurityPageName.rules,
+        SecurityPageName.rulesLibraries,
         SecurityPageName.cloudSecurityPostureBenchmarks,
         SecurityPageName.exceptions,
         SecurityPageName.alertAnalysisWorkflow,

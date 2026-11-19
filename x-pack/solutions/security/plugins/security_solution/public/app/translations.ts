@@ -108,6 +108,10 @@ export const ADD_RULES = i18n.translate('xpack.securitySolution.navigation.addRu
   defaultMessage: 'Add Rules',
 });
 
+export const RULE_LIBRARIES = i18n.translate('xpack.securitySolution.navigation.ruleLibraries', {
+  defaultMessage: 'Rule Libraries',
+});
+
 export const ALERT_ANALYSIS_WORKFLOW = i18n.translate(
   'xpack.securitySolution.navigation.alertAnalysisWorkflow',
   {

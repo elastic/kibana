@@ -121,6 +121,7 @@ export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
+export const RULES_LIBRARIES_PATH = `${RULES_PATH}/libraries` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const RULES_CHANGES_HISTORY_PATH = `${RULES_PATH}/id/:ruleId/changes-history` as const;

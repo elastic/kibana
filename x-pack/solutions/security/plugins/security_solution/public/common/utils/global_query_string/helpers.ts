@@ -18,6 +18,7 @@ export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
   pageName === SecurityPageName.rules ||
   pageName === SecurityPageName.rulesAdd ||
+  pageName === SecurityPageName.rulesLibraries ||
   pageName === SecurityPageName.rulesCreate ||
   pageName === SecurityPageName.exceptions;
 
