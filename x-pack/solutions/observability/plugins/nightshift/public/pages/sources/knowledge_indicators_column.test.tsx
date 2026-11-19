@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SignificantEventsWorkflowStatus, type Feature } from '@kbn/significant-events-schema';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
@@ -66,13 +66,6 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     });
   };
 
-  const expectWarningTooltip = async (trigger: HTMLElement, message: string) => {
-    fireEvent.mouseOver(trigger);
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(message);
-    fireEvent.mouseOut(trigger);
-    await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
-  };
-
   beforeEach(() => {
     jest.useFakeTimers();
     mockFetch.mockReset();
@@ -113,7 +106,7 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     });
     await advanceTime(10_000);
     await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(1));
-    expect(screen.getAllByText('2')).toHaveLength(sourceIds.length);
+    expect(screen.getAllByText('—')).toHaveLength(sourceIds.length);
 
     const requestsAfterFailure = mockFetch.mock.calls.length;
     await advanceTime(59_000);
@@ -123,12 +116,12 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     await advanceTime(1_000);
     expect(mockFetch).toHaveBeenCalledTimes(requestsAfterFailure + sourceIds.length);
     expect(mockAddError).toHaveBeenCalledTimes(1);
-    expect(screen.getAllByText('2')).toHaveLength(sourceIds.length);
+    expect(screen.getAllByText('—')).toHaveLength(sourceIds.length);
 
     mockFetch.mockResolvedValueOnce({ features: [createFeature('orders')] });
     await advanceTime(60_000);
     await screen.findByText('1');
-    expect(screen.getAllByText('2')).toHaveLength(sourceIds.length - 1);
+    expect(screen.getAllByText('—')).toHaveLength(sourceIds.length - 1);
 
     await advanceTime(10_000);
     expect(mockAddError).toHaveBeenCalledTimes(1);
@@ -150,7 +143,7 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(3));
   });
 
-  it('shows each source failure and recovery while another source remains forbidden', async () => {
+  it('shows unavailable counts independently while another source remains forbidden', async () => {
     const forbiddenError = Object.assign(new Error('Forbidden'), {
       body: { statusCode: 403, message: 'Cannot read source source-1' },
       response: { status: 403 },
@@ -184,46 +177,34 @@ describe('KnowledgeIndicatorsColumn polling', () => {
 
     renderColumns(['source-1', 'source-2']);
     await screen.findByText('2');
-    const forbiddenLabel =
-      'You do not have permission to read knowledge indicators for this source.';
-    const unavailableLabel =
-      'Could not refresh the KI feature count: KI features are temporarily unavailable';
-
-    await expectWarningTooltip(await screen.findByText(forbiddenLabel), forbiddenLabel);
-    expect(screen.getByText('—')).toBeInTheDocument();
-    expect(screen.queryByText(unavailableLabel)).not.toBeInTheDocument();
+    expect(screen.getByText('—')).toHaveTextContent(/^—$/);
     expect(mockAddError).toHaveBeenCalledTimes(1);
     expect(mockAddError.mock.calls[0][0]).toHaveProperty('message', 'Cannot read source source-1');
     expect(mockAddError.mock.calls[0][1]).toEqual({
       title: 'Could not refresh KI feature counts',
       toastMessage:
-        'Counts may be out of date. Check the warning icons in the Sources table for details.',
+        'Unavailable counts are shown as a dash. Refreshing will continue automatically.',
     });
 
     isSecondSourceFailing = true;
     await advanceTime(10_000);
-    await expectWarningTooltip(await screen.findByText(unavailableLabel), unavailableLabel);
-    expect(screen.getByText(forbiddenLabel)).toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getAllByText('—')).toHaveLength(2);
+    expect(screen.queryByText('2')).not.toBeInTheDocument();
     expect(mockAddError).toHaveBeenCalledTimes(1);
 
     isSecondSourceFailing = false;
     secondSourceFeatures = [createFeature('orders')];
     await advanceTime(60_000);
     await screen.findByText('1');
-    expect(screen.queryByText(unavailableLabel)).not.toBeInTheDocument();
-    expect(screen.getByText(forbiddenLabel)).toBeInTheDocument();
+    expect(screen.getByText('—')).toHaveTextContent(/^—$/);
     expect(mockAddError).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps the warning and keyboard focus during a retry without cached features', async () => {
+  it('shows a dash during a retry without cached features until the count recovers', async () => {
     mockFetch.mockRejectedValue(new Error('Feature fetch failed'));
     renderColumns();
-    const warningLabel = 'Could not refresh the KI feature count: Feature fetch failed';
-    const warning = await screen.findByText(warningLabel);
-    act(() => warning.focus());
-    expect(warning).toHaveFocus();
-    fireEvent.keyDown(warning, { key: 'Escape' });
+    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(1));
+    expect(screen.getByText('—')).toHaveTextContent(/^—$/);
 
     let completeRetry: ((response: { features: Feature[] }) => void) | undefined;
     mockFetch.mockReturnValueOnce(
@@ -232,15 +213,13 @@ describe('KnowledgeIndicatorsColumn polling', () => {
       })
     );
     await advanceTime(60_000);
-    expect(warning).toBeInTheDocument();
-    expect(warning).toHaveFocus();
+    expect(screen.getByText('—')).toHaveTextContent(/^—$/);
     expect(mockAddError).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      completeRetry?.({ features: [] });
+      completeRetry?.({ features: [createFeature('orders')] });
     });
-    await waitFor(() => expect(warning).not.toBeInTheDocument());
-    expect(screen.getByText('—')).toBeInTheDocument();
+    await screen.findByText('1');
     expect(mockAddError).toHaveBeenCalledTimes(1);
   });
 });
