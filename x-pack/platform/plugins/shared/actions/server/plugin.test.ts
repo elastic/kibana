@@ -233,15 +233,6 @@ describe('Actions Plugin', () => {
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
-      // The route handler context waits for the catalog load, which starts in start().
-      const startPlugin = () =>
-        plugin.start(coreMock.createStart(), {
-          licensing: licensingMock.createStart(),
-          taskManager: taskManagerMock.createStart(),
-          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
-          eventLog: eventLogMock.createStart(),
-        });
-
       it('should not throw error when ESO plugin has encryption key', async () => {
         await plugin.setup(coreSetup, {
           ...pluginsSetup,
@@ -251,7 +242,6 @@ describe('Actions Plugin', () => {
           },
         });
 
-        startPlugin();
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
           string,
@@ -279,7 +269,6 @@ describe('Actions Plugin', () => {
       it('should throw error when ESO plugin is missing encryption key', async () => {
         await plugin.setup(coreSetup, pluginsSetup);
 
-        startPlugin();
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
           string,
@@ -949,9 +938,10 @@ describe('Actions Plugin', () => {
 
         const trackSettled = (promise: Promise<unknown>) => {
           const state = { settled: false };
-          void promise.then(() => {
+          const markSettled = () => {
             state.settled = true;
-          });
+          };
+          promise.then(markSettled, markSettled);
           return state;
         };
 
@@ -965,14 +955,31 @@ describe('Actions Plugin', () => {
           await setupPlugin();
           const pluginStart = plugin.start(coreStart, pluginsStart);
 
+          const [, contextHandler] = coreSetup.http.registerRouteHandlerContext.mock
+            .calls[0] as unknown as [string, Function];
           const request = requestClient(pluginStart);
+          const routeContext = trackSettled(
+            contextHandler(
+              { core: { elasticsearch: { client: jest.fn() }, savedObjects: { client: {} } } },
+              httpServerMock.createKibanaRequest(),
+              httpServerMock.createResponseFactory()
+            )
+          );
+          // A disallowed requester makes the call reject right after the wait.
+          const unsecuredClient = trackSettled(
+            pluginStart.getUnsecuredActionsClient().bulkEnqueueExecution('not-allowed', [])
+          );
           const ready = trackSettled(pluginStart.whenCatalogReady());
 
           await jest.advanceTimersByTimeAsync(CATALOG_REQUEST_WAIT_MS - 1);
           expect(request.settled).toBe(false);
+          expect(routeContext.settled).toBe(false);
+          expect(unsecuredClient.settled).toBe(false);
 
           await jest.advanceTimersByTimeAsync(1);
           expect(request.settled).toBe(true);
+          expect(routeContext.settled).toBe(true);
+          expect(unsecuredClient.settled).toBe(true);
           expect(ready.settled).toBe(false);
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
         });
