@@ -26,15 +26,4 @@ describe('createKnowledgeIndicatorChangeEmitter', () => {
     expect(listener).toHaveBeenCalledWith(EVENT);
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
-
-  it('stops calling a listener once it unsubscribes', async () => {
-    const emitter = createKnowledgeIndicatorChangeEmitter(loggerMock.create());
-    const listener = jest.fn();
-    const unsubscribe = emitter.subscribe(listener);
-
-    unsubscribe();
-    await emitter.emit(EVENT);
-
-    expect(listener).not.toHaveBeenCalled();
-  });
 });

@@ -10,6 +10,7 @@ import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { deriveQueryType } from '@kbn/streams-schema';
 import { listAllSources } from '../../../routes/utils/list_all_sources';
 import type { IndicatorReader } from '../knowledge_indicator_client/indicator_reader';
+import { REVISION_SIZE_LIMIT } from '../knowledge_indicator_client/revision_reader';
 
 /** A query knowledge indicator of the request's space, as other plugins read it. */
 export interface QueryKnowledgeIndicator {
@@ -52,15 +53,20 @@ export interface KnowledgeIndicatorReader {
   /**
    * Every live query knowledge indicator of the space, rule-backed or not. Expired ones and those
    * of deleted sources are left out; those of disabled sources are kept, with `source_enabled: false`.
+   * Throws when the space has more than one read returns (10,000), rather than return part of them.
    */
   listQueryKnowledgeIndicators(): Promise<QueryKnowledgeIndicator[]>;
-  /** The live features of the given sources, of the given types (`entity`, `dependency`, ...). */
+  /**
+   * The live features of the given sources, of the given types (`entity`, `dependency`, ...). No
+   * types gives no features.
+   */
   listFeatures(params: {
     sourceIds: string[];
     types: string[];
   }): Promise<KnowledgeIndicatorFeature[]>;
 }
 
+/** Builds the reader on the plugin's own knowledge indicator reads and the request's sources. */
 export const createKnowledgeIndicatorReader = ({
   indicatorReader,
   getSourcesClient,
@@ -72,13 +78,21 @@ export const createKnowledgeIndicatorReader = ({
     // Enabled and disabled: a disabled source's knowledge indicators are still reported, while a
     // source missing from the catalog was deleted, and its leftovers are not.
     const sources = await listAllSources(await getSourcesClient());
-    const isEnabledBySourceId = new Map(sources.map(({ id, enabled }) => [id, enabled]));
-    const links = await indicatorReader.getQueryLinks([...isEnabledBySourceId.keys()], {
+    const sourceEnabledById = new Map(sources.map(({ id, enabled }) => [id, enabled]));
+    const links = await indicatorReader.getQueryLinks([...sourceEnabledById.keys()], {
       ruleUnbacked: 'include',
     });
 
+    // The read stops at its limit without saying so. A caller that deletes what is missing from
+    // the list, such as a rule reconciler, must never see a partial one.
+    if (links.length >= REVISION_SIZE_LIMIT) {
+      throw new Error(
+        `The space has ${REVISION_SIZE_LIMIT} or more query knowledge indicators, more than one read returns`
+      );
+    }
+
     return links.flatMap(({ query, source_id: sourceId, expires_at: expiresAt }) => {
-      const isSourceEnabled = isEnabledBySourceId.get(sourceId);
+      const isSourceEnabled = sourceEnabledById.get(sourceId);
       if (isSourceEnabled === undefined) {
         return [];
       }
@@ -101,6 +115,11 @@ export const createKnowledgeIndicatorReader = ({
   },
 
   listFeatures: async ({ sourceIds, types }) => {
+    // An empty type list would lift the type filter and return every feature.
+    if (types.length === 0) {
+      return [];
+    }
+
     const { hits } = await indicatorReader.getFeatures(sourceIds, { type: types });
 
     return hits.map(({ id, source_id: sourceId, type, subtype, title, properties, filter }) => ({

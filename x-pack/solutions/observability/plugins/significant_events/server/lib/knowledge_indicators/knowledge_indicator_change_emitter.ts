@@ -16,10 +16,12 @@ export interface KnowledgeIndicatorsChangeEvent {
   sourceIds: string[];
 }
 
+/** Handles one committed write. A failure is logged by the emitter and never reaches the writer. */
 export type KnowledgeIndicatorsChangeListener = (
   event: KnowledgeIndicatorsChangeEvent
 ) => Promise<void> | void;
 
+/** Fans a committed knowledge indicator write out to the listeners other plugins registered. */
 export interface KnowledgeIndicatorChangeEmitter {
   /** Registers a listener for every committed write; returns the unsubscribe function. */
   subscribe: (listener: KnowledgeIndicatorsChangeListener) => () => void;
@@ -27,6 +29,7 @@ export interface KnowledgeIndicatorChangeEmitter {
   emit: (event: KnowledgeIndicatorsChangeEvent) => Promise<void>;
 }
 
+/** Creates the emitter behind `onKnowledgeIndicatorsChange`; the plugin holds one for its lifetime. */
 export const createKnowledgeIndicatorChangeEmitter = (
   logger: Logger
 ): KnowledgeIndicatorChangeEmitter => {

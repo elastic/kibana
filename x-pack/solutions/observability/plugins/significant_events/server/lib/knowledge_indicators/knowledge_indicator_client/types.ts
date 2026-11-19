@@ -56,7 +56,8 @@ export interface KnowledgeIndicatorClientDeps {
   space: string;
   /**
    * Called after a write to a source's knowledge indicators commits. Must not throw or block: the
-   * write already happened.
+   * write already happened. A bulk write that fails part-way is not reported, though some of its
+   * revisions may have committed; readers that must converge re-read on a schedule as well.
    */
   onWrite?: (sourceId: string) => void;
   /** Test seam for the `search_embedding` model lookup. */

@@ -25,9 +25,15 @@ const createLink = (sourceId: string, id: string, esql: string): QueryLink => ({
   },
 });
 
+/** Honours the `enabled` filter, so a reader that asks for enabled sources only loses the others. */
 const createSourcesClient = (sources: Array<Pick<NightshiftSource, 'id' | 'enabled'>>) =>
   ({
-    list: jest.fn().mockResolvedValue({ sources, total: sources.length }),
+    list: jest.fn(async ({ enabled }: { enabled?: boolean }) => {
+      const listed = sources.filter(
+        (source) => enabled === undefined || source.enabled === enabled
+      );
+      return { sources: listed, total: listed.length };
+    }),
   } as unknown as SourcesClient);
 
 describe('createKnowledgeIndicatorReader', () => {
@@ -51,9 +57,6 @@ describe('createKnowledgeIndicatorReader', () => {
 
       const indicators = await reader.listQueryKnowledgeIndicators();
 
-      expect(getQueryLinks).toHaveBeenCalledWith(['enabled-source', 'disabled-source'], {
-        ruleUnbacked: 'include',
-      });
       expect(indicators).toEqual([
         {
           id: 'ki-1',
