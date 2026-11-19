@@ -21,7 +21,7 @@ const strategyList = CAUSAL_STRATEGIES.map(
 ).join('\n');
 
 /** The system prompt; the strategies are the checklist the eval suite scores against too. */
-export const CAUSAL_CHECKLIST_SYSTEM_PROMPT = `You audit how thoroughly an AI agent analysed an alert recovery. You get one round: the recovery request, each tool call the agent made with its arguments and result, and its final answer. Earlier rounds of the investigation are not shown, so only what this round did counts.
+export const CAUSAL_CHECKLIST_SYSTEM_PROMPT = `You audit how thoroughly an AI agent analysed an alert recovery. You get the answers of the investigation's earlier rounds, then one round: the recovery request, each tool call the agent made with its arguments and result, and its final answer. Earlier rounds' tool calls are not shown, so only what this round did counts.
 
 For every strategy below, decide its status:
 - "ran": a tool call in this round executed it. Give the number of that tool call. An answer that says it did something, or says it will, does not count without a tool call that did it.
@@ -61,11 +61,18 @@ export const recoveryChecklistOutputSchema = lazySchema(() =>
 export const recoveryChecklistPrompt = createPrompt({
   name: 'nightshift_recovery_causal_checklist',
   description: 'Audits which causal-analysis strategies a recovery round actually ran.',
-  input: lazySchema(() => z.object({ transcript: z.string().max(MAX_JUDGE_TEXT_LENGTH) })),
+  input: lazySchema(() =>
+    z.object({ earlier_answers: z.string().max(MAX_JUDGE_TEXT_LENGTH), transcript: z.string() })
+  ),
 })
   .version({
     system: { mustache: { template: withIdentifierRule(CAUSAL_CHECKLIST_SYSTEM_PROMPT) } },
-    template: { mustache: { template: 'Recovery round:\n{{{transcript}}}' } },
+    template: {
+      mustache: {
+        template:
+          'Answers of the earlier rounds (the hypotheses to revisit):\n{{{earlier_answers}}}\n\nRecovery round:\n{{{transcript}}}',
+      },
+    },
     tools: {
       [RECOVERY_CHECKLIST_TOOL_NAME]: {
         description: 'Return the status of every strategy and a one-sentence summary.',

@@ -266,7 +266,7 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
       );
     });
 
-    it("grades the recovery round's own analysis with the current report, with no ground truth", async () => {
+    it("grades the recovery round's own analysis with the current report, against the earlier answers and with no ground truth", async () => {
       const evaluate = jest
         .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
         .mockResolvedValue([okResult('nightshift_recovery_causal_checklist')]);
@@ -291,6 +291,8 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
                 message: 'Confirmed: rolling back the payments deploy cleared the alert.',
               },
             },
+            // The rounds before it, from the conversation: what the recovery's analysis revisits.
+            reference_data: { earlier_rounds: ['A bad deploy of the payments service.'] },
           },
         })
       );

@@ -124,7 +124,7 @@ export const CAUSAL_STRATEGIES: readonly CausalStrategy[] = [
     group: 'rigor',
     label: 'Revise earlier hypotheses',
     description:
-      'Explicitly keep, downgrade or dismiss each earlier hypothesis, with the evidence that decided it.',
+      "Explicitly keep, downgrade or dismiss each hypothesis of the earlier round's answer (given to you), with the evidence that decided it. Revisiting only some of them is not enough.",
     reportOnly: true,
   },
   {
@@ -152,4 +152,42 @@ export const checklistScore = (statuses: Record<string, StrategyStatus>): number
     return sum + (status === 'ran' ? 1 : status === 'blocked' ? 0.5 : 0);
   }, 0);
   return points / total;
+};
+
+/** A strategy as the judge reported it. */
+export interface ReportedStrategy {
+  id: string;
+  status: StrategyStatus;
+  step: number;
+  note: string;
+}
+
+/**
+ * Applies the citation rule: a tool-based strategy counts as `ran` or `blocked` only when it cites
+ * a tool call the round made (1 to `toolCallCount`). Without one it is `not_run`, so a judge slip
+ * cannot become credit. Report-only strategies need no call. Strategies the judge left out are
+ * `not_run`; `uncited` lists those it downgraded.
+ */
+export const applyCitationRule = (
+  reported: readonly ReportedStrategy[],
+  toolCallCount: number
+): { statuses: Record<string, StrategyStatus>; uncited: string[] } => {
+  const byId = new Map(reported.map((strategy) => [strategy.id, strategy]));
+  const uncited: string[] = [];
+  const statuses: Record<string, StrategyStatus> = {};
+  for (const { id, reportOnly } of CAUSAL_STRATEGIES) {
+    const strategy = byId.get(id);
+    if (!strategy || strategy.status === 'not_run') {
+      statuses[id] = 'not_run';
+    } else if (reportOnly) {
+      // Judged from the answer: it is either done explicitly or not, so there is nothing to block.
+      statuses[id] = strategy.status === 'ran' ? 'ran' : 'not_run';
+    } else if (strategy.step >= 1 && strategy.step <= toolCallCount) {
+      statuses[id] = strategy.status;
+    } else {
+      statuses[id] = 'not_run';
+      uncited.push(id);
+    }
+  }
+  return { statuses, uncited };
 };

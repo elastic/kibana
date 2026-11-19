@@ -328,14 +328,41 @@ failing.
 recovery prompt can be compared on the same cases. Each example holds the investigation's earlier
 round (`input.question` and `input.prior_response`), optionally that round's tool calls with bounded
 results (`input.prior_steps`, each `{ tool_id, params, result, note? }`), and the alert's identifiers
-(`input.alert`);
-[`compose.ts`](evals/recovery/compose.ts) builds the recovery prompt from the branch under test
-when the run starts, so the stored dataset never pins a prompt. The earlier round (request, numbered
-steps, answer) goes to the investigator as `context.earlier_round`, because it does not fit in the
-start route's 10,000-character message; the eval cannot write a native two-round conversation. The `customer0-recovery` tag holds
-the agent to evidence from within an hour of the recovery instead of the alert's timestamp.
+(`input.alert`, whose `recoveredAt` must be a real date). [`compose.ts`](evals/recovery/compose.ts)
+builds the recovery prompt from the branch under test when the run starts, so the stored dataset never
+pins a prompt, and the file is rejected on load if a case would compose to a message over the start
+route's 10,000-character limit. The earlier round (request, numbered steps, answer) goes to the
+investigator as `context.earlier_round`, because it does not fit in that message; the eval cannot
+write a native two-round conversation.
 
-The examples hold customer telemetry, so they are not in the repository. Register or refresh the
+The `customer0-recovery` tag ends the agent's queries at the recovery time, which keeps a later
+re-fire or fix out of the verdict, and forbids it chat and incident records. Because those records
+are off limits here, the eval's evidence-families judge leaves that family out; the online judge, in
+production, counts it. `rca_anti_leakage` is excluded from this eval, since a recovery round is
+meant to read the alert's whole earlier lifetime.
+
+The examples hold customer telemetry, so they are not in the repository. The dataset file is JSON
+with the shape the run validates:
+
+```json
+{
+  "description": "What the cases are, for the dataset list.",
+  "tags": ["nightshift", "customer0-recovery"],
+  "examples": [
+    {
+      "input": {
+        "question": "<the earlier round's request>",
+        "prior_response": "<the earlier round's answer>",
+        "prior_steps": [{ "tool_id": "nightshift_sandbox_bash", "params": {}, "result": "" }],
+        "alert": { "alertUuid": "…", "alertId": "…", "recoveredAt": "2026-11-12T09:17:53.302Z" }
+      },
+      "metadata": { "case_id": "recovery-…" }
+    }
+  ]
+}
+```
+
+`tags` must include `customer0-recovery` and every `case_id` must be distinct. Register or refresh the
 dataset by running the eval once with the examples file, and score it later without the file:
 
 ```bash
@@ -350,8 +377,25 @@ NIGHTSHIFT_DATASETS=recovery \
   --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
 
-The cases carry no reference answers, so the reference-based RCA judges skip them; the run is
-scored on execution success, tool-call health and the judges that need none.
+The cases carry no reference answers, so the reference-based RCA judges skip them. The recovery
+judges (`causal_checklist`, `root_cause_evidence` and `evidence_families`) share their prompts with
+the online evals and run on every case, next to execution success and tool-call health.
+
+#### Production replay
+
+`ns-recovery-production-1811` replays recovery rounds the production agent already ran, with the same
+recovery judges, so a prompt can be compared with what production did. No investigation runs, and the
+examples come from `NIGHTSHIFT_RECOVERY_PRODUCTION_FILE`, never the repository. Each example holds the
+recovery message in `input.question` and the round in `input.production`:
+`{ "steps": [{ "tool_id", "params", "result" }], "conclusion": "…", "summary"?: "…", "severity"?: "low" | "medium" | "high" | "critical" }`.
+The file has the same envelope as above.
+
+```bash
+NIGHTSHIFT_DATASETS=recovery-production \
+  NIGHTSHIFT_RECOVERY_PRODUCTION_FILE=/path/to/ns-recovery-production-1811.json \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
+```
 
 ## Connector sets
 

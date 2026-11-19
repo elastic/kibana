@@ -48,7 +48,8 @@ export const STORED_DATASETS: readonly StoredDataset[] = [
     eval: 'recovery',
     // Opt-in until a CI shard runs it: `NIGHTSHIFT_DATASETS=recovery`.
     shard: 'customer0-recovery',
-    // Its examples are the file of this name next to the recovery spec.
+    // Its examples hold customer telemetry, so they are not in the repository: the run that scores
+    // it registers them from NIGHTSHIFT_RECOVERY_EXAMPLES_FILE (see the README).
     name: 'ns-recovery-round-1811',
     // getDatasetCustomContext holds these to the recovery's time instead of the alert's.
     requiredTags: ['customer0-recovery'],

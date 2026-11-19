@@ -40,5 +40,7 @@ for (const storedDataset of selectStoredDatasets(
     bundledSynthetic: false,
     prepareExample: prepareRecoveryExample,
     extraEvaluators: createRecoveryEvaluators,
+    // It scores evidence after the resolution as leakage, which a recovery round is meant to read.
+    excludeEvaluators: ['rca_anti_leakage'],
   });
 }

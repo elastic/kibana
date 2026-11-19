@@ -224,10 +224,10 @@ export const waitForInvestigationToEnd = async (
   }
 };
 
-/** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+/** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,
   example: InvestigationExample,

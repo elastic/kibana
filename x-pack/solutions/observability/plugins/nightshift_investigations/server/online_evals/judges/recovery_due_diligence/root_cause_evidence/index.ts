@@ -6,8 +6,7 @@
  */
 
 import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
-import { MAX_JUDGE_INPUT_CHARS } from '../../alert_outcome_shared';
-import { renderRound, roundEvidenceSchema, truncate } from '../../render_round';
+import { renderRound, roundEvidenceSchema } from '../../render_round';
 import { capExplanation, runJudge } from '../../run_judge';
 import {
   RECOVERY_ROOT_CAUSE_TOOL_NAME,
@@ -21,7 +20,7 @@ export const evidenceLevel = (value: number): 'evidenced' | 'partial' | 'none' =
 
 export const recoveryRootCauseEvidenceJudge: RegisteredEvaluatorDefinition = {
   name: 'nightshift_recovery_root_cause_evidence',
-  version: '1.0.0',
+  version: '1.1.0',
   kind: 'llm',
   direction: 'maximize',
   description:
@@ -36,7 +35,7 @@ export const recoveryRootCauseEvidenceJudge: RegisteredEvaluatorDefinition = {
     const output = await runJudge({
       inferenceClient,
       prompt: recoveryRootCausePrompt,
-      input: { transcript: truncate(renderRound(round), MAX_JUDGE_INPUT_CHARS) },
+      input: { transcript: renderRound(round) },
       toolName: RECOVERY_ROOT_CAUSE_TOOL_NAME,
       outputSchema: recoveryRootCauseOutputSchema,
     });

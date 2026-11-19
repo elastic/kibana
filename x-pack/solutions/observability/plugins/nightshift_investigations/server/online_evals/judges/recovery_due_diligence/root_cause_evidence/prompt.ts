@@ -18,7 +18,9 @@ Score two things, each 0, 0.5 or 1:
 - mechanism_evidenced: does the answer name a specific mechanism for the alert-driving failure (what is failing and why), and do tool results support it directly? 1 = the mechanism is named and a result shows it at the request or log level, such as an error text tied to the failing requests. 0.5 = a plausible mechanism supported only by correlation, aggregates or one indirect result. 0 = unknown, or asserted without a result behind it.
 - closure_evidenced: does the answer say why the alerting system closed the alert (what changed for the rule, not only that the symptom persisted), and do tool results support it? Same scale.
 
-Also report unsupported_claim: true when the answer states a cause, a number or a time that no tool result contains.
+Facts stated in the recovery request itself, such as the alert's identifiers and its start and recovery times, are supported: restating them is not a claim to evidence.
+
+Also report unsupported_claim: true when the answer states a cause, a number or a time it presents as found that no tool result contains.
 
 "Unknown" is an honest answer and scores 0 on that item, but is not an unsupported claim.`;
 
@@ -53,7 +55,7 @@ export const recoveryRootCauseOutputSchema = lazySchema(() =>
 export const recoveryRootCausePrompt = createPrompt({
   name: 'nightshift_recovery_root_cause_evidence',
   description: 'Scores whether a recovery round evidenced the failure mechanism and the closure.',
-  input: lazySchema(() => z.object({ transcript: z.string().max(MAX_JUDGE_TEXT_LENGTH) })),
+  input: lazySchema(() => z.object({ transcript: z.string() })),
 })
   .version({
     system: { mustache: { template: withIdentifierRule(SYSTEM_PROMPT) } },

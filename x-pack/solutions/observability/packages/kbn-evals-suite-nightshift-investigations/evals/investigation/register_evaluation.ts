@@ -63,6 +63,7 @@ export const registerInvestigationEvaluation = ({
   metadata: experimentMetadata = {},
   prepareExample = (example) => example,
   extraEvaluators = () => [],
+  excludeEvaluators = [],
   // Experiment ids come from the build, suite, model and this name, so datasets that can run in one
   // build need distinct names or their scores merge.
   experimentName = orca
@@ -85,6 +86,8 @@ export const registerInvestigationEvaluation = ({
     evaluationConnector: EvalConnector;
     log: ToolingLog;
   }) => Array<Evaluator<InvestigationExample, InvestigationTaskOutput>>;
+  /** Evaluators to leave out, by name, when they do not apply to the dataset. */
+  excludeEvaluators?: string[];
   experimentName?: string;
 }): void => {
   evaluate.describe(`Nightshift investigations: ${name}`, { tag: suiteTags }, () => {
@@ -135,7 +138,7 @@ export const registerInvestigationEvaluation = ({
           executionSuccessEvaluator,
           ...efficiencyEvaluators,
           ...extraEvaluators(judgeDeps),
-        ];
+        ].filter(({ name: evaluatorName }) => !excludeEvaluators.includes(evaluatorName));
         const evaluatorsByName = new Map(evaluators.map((each) => [each.name, each]));
         assertScoresWithinQueryLimit({
           examples: dataset.examples.length,

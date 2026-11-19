@@ -11,7 +11,7 @@ import type { EvidenceRound } from '@kbn/evals-plugin/server';
 import { recoveryCausalChecklistJudge } from './causal_checklist';
 import { recoveryEvidenceFamiliesJudge } from './evidence_families';
 import { recoveryRootCauseEvidenceJudge } from './root_cause_evidence';
-import { CAUSAL_STRATEGY_IDS } from './strategies';
+import { CAUSAL_STRATEGY_IDS, applyCitationRule } from './strategies';
 import { TAG_PATTERN } from '../../score_tags';
 
 const round: EvidenceRound = {
@@ -41,8 +41,41 @@ const createInferenceClient = (output: unknown) => {
 const evaluate = (
   judge: typeof recoveryCausalChecklistJudge,
   inferenceClient?: BoundInferenceClient,
-  evidence: EvidenceRound = round
-) => judge.evaluate({ round: evidence, inferenceClient, log: loggingSystemMock.createLogger() });
+  evidence: EvidenceRound = round,
+  referenceData?: Record<string, unknown>
+) =>
+  judge.evaluate({
+    round: evidence,
+    referenceData,
+    inferenceClient,
+    log: loggingSystemMock.createLogger(),
+  });
+
+describe('applyCitationRule', () => {
+  const ran = (id: string, step: number) => ({ id, status: 'ran' as const, step, note: '' });
+
+  it('gives credit only to a tool-based strategy that cites a call the round made', () => {
+    const { statuses, uncited } = applyCitationRule(
+      [ran('alert_record', 2), ran('rule_execution_trace', 0), ran('refire_check', 9)],
+      2
+    );
+
+    expect(statuses.alert_record).toBe('ran');
+    expect(statuses.rule_execution_trace).toBe('not_run');
+    expect(statuses.refire_check).toBe('not_run');
+    expect(uncited).toEqual(['rule_execution_trace', 'refire_check']);
+  });
+
+  it('needs no citation for a strategy judged from the answer, which cannot be blocked', () => {
+    const { statuses } = applyCitationRule(
+      [ran('hypothesis_revision', 0), { id: 'gaps_named', status: 'blocked', step: 0, note: '' }],
+      0
+    );
+
+    expect(statuses.hypothesis_revision).toBe('ran');
+    expect(statuses.gaps_named).toBe('not_run');
+  });
+});
 
 describe('nightshift_recovery_causal_checklist', () => {
   it('scores ran strategies as 1 and blocked ones as half, and counts a strategy the judge left out as not run', async () => {
@@ -65,6 +98,43 @@ describe('nightshift_recovery_causal_checklist', () => {
       label: '1 ran / 1 blocked / 15 not run',
     });
     expect(scores[0].explanation).toContain('Not run: rule_definition');
+  });
+
+  it('does not count a strategy without a cited tool call, and says so', async () => {
+    const { inferenceClient } = createInferenceClient({
+      strategies: [
+        { id: 'alert_record', status: 'ran', step: 1, note: '' },
+        { id: 'rule_execution_trace', status: 'ran', step: 0, note: 'made up' },
+      ],
+      summary: 'Summary.',
+    });
+
+    const { scores } = await evaluate(recoveryCausalChecklistJudge, inferenceClient);
+
+    expect(scores[0].label).toBe('1 ran / 0 blocked / 16 not run');
+    expect(scores[0].explanation).toContain(
+      'Claimed without a cited tool call: rule_execution_trace'
+    );
+    expect(scores[0].metadata?.tags).toContain('strategy:rule_execution_trace:not_run');
+  });
+
+  it('passes the earlier rounds answers to the judge, and keeps the citation out of the tags', async () => {
+    const { prompt, inferenceClient } = createInferenceClient({
+      strategies: [{ id: 'alert_record', status: 'ran', step: 1, note: 'customer-specific text' }],
+      summary: 'Summary with customer-specific text.',
+    });
+
+    const { scores } = await evaluate(recoveryCausalChecklistJudge, inferenceClient, round, {
+      earlier_rounds: ['Hypothesis A: a bad deploy.'],
+    });
+
+    expect(prompt.mock.calls[0][0].input.earlier_answers).toContain('Hypothesis A: a bad deploy.');
+    expect(scores[0].metadata?.strategies).toContainEqual({
+      id: 'alert_record',
+      status: 'ran',
+      step: 1,
+    });
+    expect(JSON.stringify(scores[0].metadata)).not.toContain('customer');
   });
 
   it('tags every strategy with its status, from the fixed vocabulary only', async () => {
@@ -131,9 +201,22 @@ describe('nightshift_recovery_root_cause_evidence', () => {
 });
 
 describe('nightshift_recovery_evidence_families', () => {
-  it('reads the families from tool-call arguments and tags each one', async () => {
-    const { scores } = await evaluate(recoveryEvidenceFamiliesJudge);
+  it('scores the families the judge says were queried, each with a cited call, and tags them', async () => {
+    const { prompt, inferenceClient } = createInferenceClient({
+      families: [
+        { id: 'alert_documents', queried: true, step: 1 },
+        { id: 'rule_event_log', queried: true, step: 2 },
+        // A claim without a call the round made does not count.
+        { id: 'apm_metrics', queried: true, step: 0 },
+        { id: 'source_code', queried: false, step: 0 },
+      ],
+    });
 
+    const { scores } = await evaluate(recoveryEvidenceFamiliesJudge, inferenceClient);
+
+    expect(prompt.mock.calls[0][0].toolChoice).toEqual({
+      function: 'score_recovery_evidence_families',
+    });
     expect(scores).toEqual([
       expect.objectContaining({
         name: 'recovery_evidence_families',
@@ -144,13 +227,19 @@ describe('nightshift_recovery_evidence_families', () => {
     ]);
   });
 
-  it('does not apply to a round without tool calls', async () => {
-    const { scores, notApplicable } = await evaluate(recoveryEvidenceFamiliesJudge, undefined, {
-      ...round,
-      steps: [],
-    });
+  it('scores a round with no tool calls 0 instead of skipping it, without a model call', async () => {
+    const { prompt, inferenceClient } = createInferenceClient({ families: [] });
 
-    expect(scores).toEqual([]);
-    expect(notApplicable).toEqual({ reason: 'the round made no tool calls' });
+    const { scores, notApplicable } = await evaluate(
+      recoveryEvidenceFamiliesJudge,
+      inferenceClient,
+      { ...round, steps: [] }
+    );
+
+    expect(prompt).not.toHaveBeenCalled();
+    expect(notApplicable).toBeUndefined();
+    expect(scores).toEqual([
+      expect.objectContaining({ score: 0, label: '0/9 families', metadata: { tags: [] } }),
+    ]);
   });
 });

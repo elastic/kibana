@@ -6,52 +6,54 @@
  */
 
 import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
-import { roundEvidenceSchema } from '../../render_round';
-
-/** Families of evidence a round can read, each recognised from the tool-call arguments. */
-export const EVIDENCE_FAMILIES: ReadonlyArray<{ id: string; pattern: RegExp }> = [
-  { id: 'alert_documents', pattern: /\.alerts-|kibana\.alert\./ },
-  { id: 'rule_event_log', pattern: /\.kibana-event-log|event-log|rule_execution|event\.provider/ },
-  {
-    id: 'apm_metrics',
-    pattern: /metrics-apm|transaction\.(duration|name)|event\.success_count|\.1m/,
-  },
-  { id: 'apm_traces_errors', pattern: /traces-apm|logs-apm\.error|error\.exception|trace\.id/ },
-  { id: 'service_logs', pattern: /logging-[a-z0-9-]*:|logs-\*|:logs-/ },
-  { id: 'remote_clusters', pattern: /[/"\s=][a-z0-9-]+:(logs|metrics|traces)-/ },
-  { id: 'chat_or_incident_records', pattern: /nightshift_slack|slack_read|incident/i },
-  { id: 'source_code', pattern: /github\.com|git (clone|grep|ls-tree|log)|\/workspace\/repos/ },
-  { id: 'prior_memory', pattern: /\/workspace\/(memories|wiki)/ },
-];
+import { renderRound, roundEvidenceSchema } from '../../render_round';
+import { runJudge } from '../../run_judge';
+import { EVIDENCE_FAMILIES } from '../families';
+import {
+  RECOVERY_EVIDENCE_FAMILIES_TOOL_NAME,
+  queriedFamilies,
+  recoveryEvidenceFamiliesOutputSchema,
+  recoveryEvidenceFamiliesPrompt,
+} from './prompt';
 
 export const RECOVERY_EVIDENCE_FAMILIES_SCORE = 'recovery_evidence_families';
 
-interface CallArguments {
-  tool_id?: string;
-  arguments?: unknown;
-}
-
-/** The evidence families a round reached, from its tool calls' arguments alone. */
-export const familiesReached = (steps: readonly CallArguments[]): string[] => {
-  const text = steps
-    .map(({ tool_id: toolId, arguments: args }) => `${toolId ?? ''} ${JSON.stringify(args ?? {})}`)
-    .join('\n');
-  return EVIDENCE_FAMILIES.filter(({ pattern }) => pattern.test(text)).map(({ id }) => id);
-};
-
 export const recoveryEvidenceFamiliesJudge: RegisteredEvaluatorDefinition = {
   name: 'nightshift_recovery_evidence_families',
-  version: '1.0.0',
-  kind: 'code',
+  version: '2.0.0',
+  kind: 'llm',
   direction: 'maximize',
   description:
-    'Reference-free, no model call: how many kinds of data a recovery round queried (alert documents, rule event log, APM metrics and traces, service logs, remote clusters, chat records, source code, memory), read from the tool-call arguments.',
+    'Reference-free: how many kinds of data a recovery round actually queried (alert documents, rule event log, APM metrics and traces, service logs, remote clusters, chat records, source code, memory), judged from what each tool call targeted. A round with no tool calls scores 0.',
   evidenceSchema: roundEvidenceSchema,
-  async evaluate({ round }) {
+  async evaluate({ round, inferenceClient }) {
     if (round.steps.length === 0) {
-      return { scores: [], notApplicable: { reason: 'the round made no tool calls' } };
+      return {
+        scores: [
+          {
+            name: RECOVERY_EVIDENCE_FAMILIES_SCORE,
+            score: 0,
+            label: `0/${EVIDENCE_FAMILIES.length} families`,
+            explanation: 'The round made no tool calls.',
+            metadata: { tags: [] },
+          },
+        ],
+      };
     }
-    const reached = familiesReached(round.steps);
+    if (!inferenceClient) {
+      throw new Error(
+        'Inference client is required for the nightshift_recovery_evidence_families judge'
+      );
+    }
+    const output = await runJudge({
+      inferenceClient,
+      prompt: recoveryEvidenceFamiliesPrompt,
+      input: { transcript: renderRound(round) },
+      toolName: RECOVERY_EVIDENCE_FAMILIES_TOOL_NAME,
+      outputSchema: recoveryEvidenceFamiliesOutputSchema,
+    });
+    const reached = queriedFamilies(output, EVIDENCE_FAMILIES, round.steps.length);
+
     return {
       scores: [
         {

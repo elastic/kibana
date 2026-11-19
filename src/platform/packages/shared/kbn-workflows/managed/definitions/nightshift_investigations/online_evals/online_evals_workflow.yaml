@@ -95,7 +95,7 @@ steps:
       alert_rule_type: '${{ inputs.alert_rule_type }}'
 
   # An alert recovery grades the first round against the recovery round's conclusion, the ground
-  # truth. The recovery round itself isn't graded.
+  # truth. The recovery round's own analysis is graded by the step after this one.
   - name: score_alert_outcome
     type: nightshift.onlineEvals.score
     if: "${{ inputs.round_kind == 'alert_recovery' }}"

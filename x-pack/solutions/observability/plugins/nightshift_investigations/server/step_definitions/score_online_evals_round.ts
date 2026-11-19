@@ -144,7 +144,12 @@ const readRound = async ({
   input: ScoreInput;
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   request: KibanaRequest;
-}): Promise<{ agentId: string; round: ConversationRound; gradedRound: ConversationRound }> => {
+}): Promise<{
+  agentId: string;
+  round: ConversationRound;
+  gradedRound: ConversationRound;
+  earlierAnswers: string[];
+}> => {
   const agentBuilder = getAgentBuilder();
   if (!agentBuilder) {
     throw new OnlineEvalsStepError(
@@ -169,6 +174,13 @@ const readRound = async ({
     agentId: conversation.agent_id,
     round,
     gradedRound: getGradedRound(input, conversation.rounds, round),
+    // The conversation already holds the earlier rounds, so judges that revisit them get them here.
+    earlierAnswers: conversation.rounds
+      .slice(
+        0,
+        conversation.rounds.findIndex(({ id }) => id === round.id)
+      )
+      .map(({ response }) => response.message),
   };
 };
 
@@ -282,7 +294,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
 
         const request = context.contextManager.getFakeRequest();
 
-        const { agentId, round, gradedRound } = await readRound({
+        const { agentId, round, gradedRound, earlierAnswers } = await readRound({
           input,
           getAgentBuilder,
           request,
@@ -319,6 +331,11 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
                 alertOutcome:
                   input.round_kind === 'alert_recovery' && input.graded_report === 'first_round'
                     ? round.response.message
+                    : undefined,
+                // A recovery round's own analysis is judged against what the rounds before it said.
+                earlierAnswers:
+                  input.round_kind === 'alert_recovery' && input.graded_report === 'current'
+                    ? earlierAnswers
                     : undefined,
               }),
               judgeConnectorId,

@@ -15,7 +15,11 @@ const recoveryAlertSchema = lazySchema(() =>
     alertUuid: z.string().min(1).max(500),
     alertId: z.string().min(1).max(500),
     alertStart: z.string().max(100).optional(),
-    recoveredAt: z.string().max(100).optional(),
+    // The recovery time anchors what the agent may query, so a case without a real one is rejected.
+    recoveredAt: z
+      .string()
+      .max(100)
+      .refine((value) => !Number.isNaN(Date.parse(value)), 'recoveredAt must be a date'),
     ruleId: z.string().max(500).optional(),
     ruleName: z.string().max(500).optional(),
     ruleTypeId: z.string().max(500).optional(),

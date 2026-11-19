@@ -105,7 +105,9 @@ export const invokeJudge = async <TArgs>(
   { inferenceClient, log }: Pick<JudgeDeps, 'inferenceClient' | 'log'>,
   name: string,
   prompt: Parameters<BoundInferenceClient['prompt']>[0]['prompt'],
-  input: Record<string, unknown>
+  input: Record<string, unknown>,
+  // The tool the prompt defines; the investigation judges' prompts all call theirs `score`.
+  toolName: string = 'score'
 ): Promise<TArgs> =>
   withActiveInferenceSpan(
     name,
@@ -113,7 +115,11 @@ export const invokeJudge = async <TArgs>(
     () =>
       pRetry(
         async () => {
-          const response = await inferenceClient.prompt({ prompt, input, toolChoice: scoreTool });
+          const response = await inferenceClient.prompt({
+            prompt,
+            input,
+            toolChoice: toolName === 'score' ? scoreTool : ({ function: toolName } as ToolChoice),
+          });
           const toolCall = response.toolCalls[0];
           if (!toolCall) throw new Error(`No tool call returned by the ${name} judge`);
           return toolCall.function.arguments as TArgs;

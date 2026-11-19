@@ -14,7 +14,7 @@ const makeExample = (caseId: string) => ({
   input: {
     question: 'An alert fired.',
     prior_response: 'Earlier verdict.',
-    alert: { alertUuid: 'uuid', alertId: 'instance' },
+    alert: { alertUuid: 'uuid', alertId: 'instance', recoveredAt: '2026-11-12T09:17:53.302Z' },
   },
   metadata: { case_id: caseId },
 });
@@ -43,6 +43,29 @@ describe('readRecoveryExamplesFile', () => {
     expect(() =>
       readRecoveryExamplesFile(writeFile([{ ...makeExample('a'), input }]), 'ns-recovery-test')
     ).toThrow();
+  });
+
+  it('rejects a case without a real recovery time', () => {
+    const { alert } = makeExample('a').input;
+
+    for (const recoveredAt of [undefined, 'sometime yesterday']) {
+      const example = makeExample('a');
+      example.input.alert = { ...alert, recoveredAt } as typeof alert;
+
+      expect(() => readRecoveryExamplesFile(writeFile([example]), 'ns-recovery-test')).toThrow();
+    }
+  });
+
+  it('rejects a case whose recovery message is over the start route limit', () => {
+    const example = makeExample('a');
+    example.input.alert = {
+      ...example.input.alert,
+      ruleTags: Array.from({ length: 30 }, () => 'x'.repeat(400)),
+    } as typeof example.input.alert;
+
+    expect(() => readRecoveryExamplesFile(writeFile([example]), 'ns-recovery-test')).toThrow(
+      'the start route accepts'
+    );
   });
 
   it('rejects duplicate case ids', () => {
