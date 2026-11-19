@@ -223,6 +223,15 @@ export const ImportJsonEditor = ({
                 wordWrap: 'on',
                 wrappingIndent: 'indent',
                 automaticLayout: true,
+                // The scrollbar and its cursor marker show through the empty prompt
+                hideCursorInOverviewRuler: isEmpty,
+                overviewRulerBorder: !isEmpty,
+                // Replaces the CodeEditor scrollbar defaults, so they are repeated here
+                scrollbar: {
+                  useShadows: false,
+                  alwaysConsumeMouseWheel: false,
+                  vertical: isEmpty ? 'hidden' : 'auto',
+                },
               }}
             />
           </div>
