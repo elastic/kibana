@@ -41,12 +41,6 @@ jest.mock('@kbn/core-di-browser', () => {
       if (token === 'application') {
         return { capabilities: { actions: { show: mockCanReadConnectors } } };
       }
-      if (token === 'settings') {
-        return {
-          client: { get: () => mockAlertingV2ExperimentalFeaturesEnabled },
-          globalClient: { isDeclared: () => true, get: () => true },
-        };
-      }
       return {};
     },
     CoreStart: (key: string) => key,
