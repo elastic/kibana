@@ -180,7 +180,7 @@ authorized rebinding, rejection of unauthorized installation/rebinding/removal, 
 
 ```sh
 nvm use
-node scripts/scout run-tests --arch serverless --domain search --config src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/playwright.config.ts
+node scripts/scout run-tests --arch serverless --domain search --config x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/playwright.config.ts
 ```
 
 The `service_accounts` server configuration loads this example on local UIAM and stateful Elasticsearch.

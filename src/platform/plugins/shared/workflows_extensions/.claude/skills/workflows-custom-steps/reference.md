@@ -580,8 +580,8 @@ Useful files to grep for real-world patterns:
 | Public contract types | `src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts` |
 | `EditorHandlers` / `ConnectorIdSelectionHandler` types | `src/platform/packages/shared/kbn-workflows/types/v1.ts` (search `EditorHandlers`, `ConnectorIdSelectionHandler`) |
 | `getIndexSelectionHandler` | `src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts` |
-| `connectorIdSelection` consumer | `src/platform/plugins/shared/workflows_management/public/shared/lib/connectors_utils.ts` (`getCustomStepConnectorIdSelectionHandler`, `isCreateConnectorEnabledForStepType`) |
-| `getIndexSelectionHandler` in-tree usage | `src/platform/plugins/shared/workflows_management/public/common/context/internal_steps/editor_handlers/editor_handlers.ts` |
+| `connectorIdSelection` consumer | `x-pack/platform/plugins/shared/workflows_management/public/shared/lib/connectors_utils.ts` (`getCustomStepConnectorIdSelectionHandler`, `isCreateConnectorEnabledForStepType`) |
+| `getIndexSelectionHandler` in-tree usage | `x-pack/platform/plugins/shared/workflows_management/public/common/context/internal_steps/editor_handlers/editor_handlers.ts` |
 | Custom `selection` (cases templates) | `x-pack/platform/plugins/shared/cases/public/workflows/create_case_from_template.tsx` |
 | `connectorIdSelection` example | `x-pack/platform/plugins/shared/agent_builder/public/step_types/run_agent_step.ts` |
 | `BaseStepDefinition` + `StepCategory` | `src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts` |

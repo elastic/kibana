@@ -6,13 +6,11 @@
  */
 
 import {
-  ALL_TYPE_FILTER,
   getDiscoverEsqlQuery,
   getIndexManagementLocatorParams,
   getKiDisplayTitle,
   getStatusesForFilter,
   getListKiStatusFilterLabel,
-  getListKiTypeFilterLabel,
 } from './list_ki_helpers';
 
 describe('getDiscoverEsqlQuery', () => {
@@ -43,25 +41,14 @@ describe('getIndexManagementLocatorParams', () => {
   });
 });
 
-describe('getListKiTypeFilterLabel', () => {
-  it('returns All for the all filter value', () => {
-    expect(getListKiTypeFilterLabel(ALL_TYPE_FILTER.value)).toBe('All');
-  });
-
-  it('formats type labels', () => {
-    expect(getListKiTypeFilterLabel('playbook')).toBe('playbook');
-    expect(getListKiTypeFilterLabel('custom.type')).toBe('custom type');
-  });
-});
-
 describe('getKiDisplayTitle', () => {
   it('returns the title when set', () => {
     expect(getKiDisplayTitle('Refund playbook')).toBe('Refund playbook');
   });
 
-  it('returns None when title is missing', () => {
-    expect(getKiDisplayTitle()).toBe('None');
-    expect(getKiDisplayTitle('')).toBe('None');
+  it('returns Untitled when title is missing', () => {
+    expect(getKiDisplayTitle()).toBe('Untitled');
+    expect(getKiDisplayTitle('')).toBe('Untitled');
   });
 });
 

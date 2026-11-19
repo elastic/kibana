@@ -127,7 +127,7 @@ These are easy to miss during implementation or review — they are not always s
 | Dynamic output schema | Express via `editorHandlers.dynamicSchema.getOutputSchema({ input, config })` for autocomplete; **server still validates against the static `outputSchema`** in the common definition, so keep that schema as the union of all possible shapes |
 | Public async loader | Prefer async import to keep zod + step module out of the plugin's main bundle. Loaders that reject (or throw inside the registry) are caught and logged; one broken loader does NOT prevent other steps from registering — verify the log when a step is silently missing |
 | Conditional registration | Loaders run once. Return `undefined` only for a decision that cannot change after startup. Feature flags must be subscribed to in `start()` and checked in the handler — do not snapshot them with `firstValueFrom` |
-| Server + client registration | Every step id registered on the server must also be registered on the client, and vice versa. A server-only step runs but the editor flags it as an unknown type; a client-only step shows in the editor but fails at run time. A server-only plugin must add a browser side (`"browser": true`) to register the public definition. Conditional loaders must apply the same condition on both sides. Enforced by the Scout UI test in `test/scout/ui/tests/step_definitions_client_registration.spec.ts` |
+| Server + client registration | Every step id registered on the server must also be registered on the client, and vice versa. A server-only step runs but the editor flags it as an unknown type; a client-only step shows in the editor but fails at run time. A server-only plugin must add a browser side (`"browser": true`) to register the public definition. Conditional loaders must apply the same condition on both sides. Enforced by the Scout UI test in `test/scout/ui/tests/step_definitions_client_registration.spec.ts`, for the steps registered with the default configuration only: for a step behind a flag that is off by default, run the check locally in the PR that turns the flag on |
 | Registration timing | All `registerStepDefinition` calls happen in `setup()`, never `start()`. Engine and UI both `await workflowsExtensions.isReady()` before reading the registry |
 | Loops over user data | A loop with no I/O never frees the event loop, and concurrent runs add up to one long block (health checks fail, the pod restarts). Use a `for` loop (not `.map` / `.forEach` / `.reduce`), `await yieldToEventLoop()` from `@kbn/workflows/server` at the top of each iteration, then check `context.abortSignal.aborted`. Make helpers with loops `async` and `return await` them inside `try` |
 
@@ -203,7 +203,7 @@ When adding a new step:
    - [ ] All `registerStepDefinition` calls happen in `setup()`, never `start()`
 
 6. **Approval gate** — see [STEPS.md Step Definition Approval Process](../../dev_docs/STEPS.md#step-definition-approval-process)
-   - [ ] Local Scout API test was run; it printed an `echo … > approved_step_definitions/<step.id>.txt` command per offending step
+   - [ ] The step schema generation check was run locally (see STEPS.md); it printed an `echo … > approved_step_definitions/<step.id>.txt` command per offending step
    - [ ] Ran the printed `echo` command(s) from the kibana directory to create/update the per-step approval file(s)
    - [ ] PR description requests review from `@elastic/workflows-eng`
 
@@ -239,7 +239,7 @@ When reviewing a PR that adds or modifies a custom step:
 | Agent Builder | `x-pack/platform/plugins/shared/agent_builder/public/step_types/run_agent_step.ts` | `connectorIdSelection` with restricted `connectorTypes` and `enableCreation: false`; `dynamicSchema.getOutputSchema` extending the base schema |
 | Cases | `x-pack/platform/plugins/shared/cases/public/workflows/create_case_from_template.tsx` | Custom `input` `selection` with `dependsOnValues: ['input.owner']`; uses domain helpers (`collectSelectionSearchOptions`, `isValidOwner`) |
 | Cases (server) | `x-pack/platform/plugins/shared/cases/server/workflows/` | Many handlers built from a factory `(getCasesClient) => createServerStepDefinition(...)` — use the typed `CasesClient`, not `callKibanaApi` |
-| Internal index steps | `src/platform/plugins/shared/workflows_management/public/common/context/internal_steps/editor_handlers/editor_handlers.ts` | `getIndexSelectionHandler` constructed with different `allowWildcard` / `showAllIndices` per use case (search vs write vs delete) |
+| Internal index steps | `x-pack/platform/plugins/shared/workflows_management/public/common/context/internal_steps/editor_handlers/editor_handlers.ts` | `getIndexSelectionHandler` constructed with different `allowWildcard` / `showAllIndices` per use case (search vs write vs delete) |
 | Security Solution | `x-pack/solutions/security/plugins/security_solution/{server,public}/workflows/step_types/` | Async loader gated on a feature flag resolved from `core.getStartServices().featureFlags` |
 | Alerting v2 | `x-pack/platform/plugins/shared/alerting_v2/server/lib/workflow_extensions/register_step_definitions.ts` | Multiple step definitions registered from a single plugin |
 

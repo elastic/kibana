@@ -20,9 +20,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 
@@ -52,6 +55,77 @@ const unavailableValue = (tabIndex?: number, dataTestSubj?: string) => (
     &mdash;
   </EuiText>
 );
+
+const VISIBLE_ROLE_COUNT = 3;
+
+const ServiceAccountRoles = ({ roles, name }: { roles: string[]; name: string }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId({ prefix: 'serviceAccountRolesTitle' });
+
+  if (roles.length === 0) {
+    return unavailableValue();
+  }
+
+  const remainingRoleCount = roles.length - VISIBLE_ROLE_COUNT;
+
+  return (
+    <EuiBadgeGroup gutterSize="xs" data-test-subj="serviceAccountDisplayedRoles">
+      {roles.slice(0, VISIBLE_ROLE_COUNT).map((role) => (
+        <EuiBadge key={role} color="hollow" iconType="user">
+          {role}
+        </EuiBadge>
+      ))}
+      {remainingRoleCount > 0 && (
+        <EuiPopover
+          button={
+            <EuiBadge
+              onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+              onClickAriaLabel={i18n.translate(
+                'xpack.security.management.serviceAccounts.table.showAllRolesAriaLabel',
+                {
+                  defaultMessage: 'Show all {count} roles for {name}',
+                  values: { count: roles.length, name },
+                }
+              )}
+              data-test-subj="serviceAccountMoreRoles"
+            >
+              {i18n.translate('xpack.security.management.serviceAccounts.table.moreRoles', {
+                defaultMessage: '+{count} more',
+                values: { count: remainingRoleCount },
+              })}
+            </EuiBadge>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          panelPaddingSize="s"
+          aria-labelledby={popoverTitleId}
+          data-test-subj="serviceAccountRolesPopover"
+        >
+          <EuiPopoverTitle id={popoverTitleId}>
+            {i18n.translate('xpack.security.management.serviceAccounts.table.rolesPopoverTitle', {
+              defaultMessage: 'Roles for {name}',
+              values: { name },
+            })}
+          </EuiPopoverTitle>
+          <EuiBadgeGroup
+            gutterSize="xs"
+            data-test-subj="serviceAccountAllRoles"
+            role="region"
+            aria-labelledby={popoverTitleId}
+            tabIndex={0}
+            css={{ maxWidth: '20rem', maxHeight: 'min(40vh, 20rem)', overflowY: 'auto' }}
+          >
+            {roles.map((role) => (
+              <EuiBadge key={role} color="hollow" iconType="user">
+                {role}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        </EuiPopover>
+      )}
+    </EuiBadgeGroup>
+  );
+};
 
 const getCreatorLabel = (creator?: ServiceAccountDirectoryCreator) => {
   if (!creator) {
@@ -186,18 +260,9 @@ export const ServiceAccountsTable = ({
           defaultMessage: 'Roles',
         }),
         sortable: ({ roles }) => [...roles].sort().join(','),
-        render: (roles: string[]) =>
-          roles.length > 0 ? (
-            <EuiBadgeGroup gutterSize="xs">
-              {roles.map((role) => (
-                <EuiBadge key={role} color="hollow" iconType="user">
-                  {role}
-                </EuiBadge>
-              ))}
-            </EuiBadgeGroup>
-          ) : (
-            unavailableValue()
-          ),
+        render: (roles: string[], { name }: ServiceAccountTableItem) => (
+          <ServiceAccountRoles roles={roles} name={name} />
+        ),
       },
       {
         field: 'createdBy',
