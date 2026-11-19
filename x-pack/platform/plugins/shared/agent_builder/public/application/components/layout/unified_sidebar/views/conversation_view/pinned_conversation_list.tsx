@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 
 import {
   EuiDroppable,
@@ -79,6 +79,15 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
     fetchNextPage,
     scrollContainerRef,
   });
+  const sortedConversations = useMemo(
+    () =>
+      [...pinnedConversations].sort(
+        (first, second) =>
+          Date.parse(second.updated_at) - Date.parse(first.updated_at) ||
+          Date.parse(second.created_at) - Date.parse(first.created_at)
+      ),
+    [pinnedConversations]
+  );
   const isEmpty = pinnedConversations.length === 0;
   const showOverlay = isDragging && !isEmpty;
 
@@ -130,7 +139,7 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
                 {placeholderLabel}
               </div>
             )}
-            {pinnedConversations.map((conversation, index) => (
+            {sortedConversations.map((conversation, index) => (
               <DraggableConversationItem
                 key={conversation.id}
                 agentId={agentId}
