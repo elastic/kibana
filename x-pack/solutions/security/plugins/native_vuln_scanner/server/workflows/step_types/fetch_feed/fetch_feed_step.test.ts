@@ -92,6 +92,7 @@ describe('native_vuln.fetch_feed handler', () => {
       signal: expect.any(AbortSignal),
       etag: '"old"',
       includeUnfixed: false,
+      logger: expect.objectContaining({ warn: expect.any(Function) }),
     });
     expect(result.output).toEqual(
       expect.objectContaining({
@@ -124,6 +125,19 @@ describe('native_vuln.fetch_feed handler', () => {
     );
     expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('ubuntu:noble'));
     expect(getCachedFeed('ubuntu:noble', false)).toBeUndefined();
+  });
+
+  it('forwards downloadFeed degradation warnings to the run logger', async () => {
+    inventoryMock.mockResolvedValue(snapshot([ubuntuHost]));
+    downloadMock.mockImplementation(async (_os, options) => {
+      options?.logger?.warn('CSAF delta over cap; using the archive alone.');
+      return { status: 'ok', body: new Uint8Array(4) };
+    });
+
+    const { result, deps } = await run();
+
+    expect(result.error).toBeUndefined();
+    expect(deps.logger.warn).toHaveBeenCalledWith('CSAF delta over cap; using the archive alone.');
   });
 
   it('fails a 304 that has no cached feed behind it', async () => {

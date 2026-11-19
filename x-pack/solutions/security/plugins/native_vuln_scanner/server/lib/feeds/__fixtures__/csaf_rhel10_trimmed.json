@@ -1,0 +1,752 @@
+{
+ "document": {
+  "aggregate_severity": {
+   "namespace": "https://access.redhat.com/security/updates/classification/",
+   "text": "Critical"
+  },
+  "category": "csaf_security_advisory",
+  "csaf_version": "2.0",
+  "distribution": {
+   "text": "Copyright \u00a9 Red Hat, Inc. All rights reserved.",
+   "tlp": {
+    "label": "WHITE",
+    "url": "https://www.first.org/tlp/"
+   }
+  },
+  "lang": "en",
+  "notes": [
+   {
+    "category": "summary",
+    "text": "An update for cockpit is now available for Red Hat Enterprise Linux 10.",
+    "title": "Topic"
+   }
+  ],
+  "publisher": {
+   "category": "vendor",
+   "contact_details": "https://access.redhat.com/security/team/contact/",
+   "issuing_authority": "Red Hat Product Security is responsible for vulnerability handling across all Red Hat products and services.",
+   "name": "Red Hat Product Security",
+   "namespace": "https://www.redhat.com"
+  },
+  "references": [
+   {
+    "category": "self",
+    "summary": "https://access.redhat.com/errata/RHBA-2026:21388",
+    "url": "https://access.redhat.com/errata/RHBA-2026:21388"
+   },
+   {
+    "category": "self",
+    "summary": "Canonical URL",
+    "url": "https://security.access.redhat.com/data/csaf/v2/advisories/2026/rhba-2026_21388.json"
+   }
+  ],
+  "title": "Red Hat Bug Fix Advisory: cockpit bug fix and enhancement update",
+  "tracking": {
+   "current_release_date": "2026-11-07T05:03:28+00:00",
+   "generator": {
+    "date": "2026-11-07T05:03:28+00:00",
+    "engine": {
+     "name": "Red Hat SDEngine",
+     "version": "5.4.5"
+    }
+   },
+   "id": "RHBA-2026:21388",
+   "initial_release_date": "2026-05-27T16:49:47+00:00",
+   "revision_history": [
+    {
+     "date": "2026-05-27T16:49:47+00:00",
+     "number": "1",
+     "summary": "Initial version"
+    },
+    {
+     "date": "2026-05-27T16:49:47+00:00",
+     "number": "2",
+     "summary": "Last updated version"
+    },
+    {
+     "date": "2026-11-07T05:03:28+00:00",
+     "number": "3",
+     "summary": "Last generated version"
+    }
+   ],
+   "status": "final",
+   "version": "3"
+  }
+ },
+ "product_tree": {
+  "branches": [
+   {
+    "branches": [
+     {
+      "branches": [
+       {
+        "category": "product_name",
+        "name": "Red Hat Enterprise Linux AppStream (v. 10)",
+        "product": {
+         "name": "Red Hat Enterprise Linux AppStream (v. 10)",
+         "product_id": "AppStream-10.2.Z",
+         "product_identification_helper": {
+          "cpe": "cpe:/o:redhat:enterprise_linux:10.2"
+         }
+        }
+       },
+       {
+        "category": "product_name",
+        "name": "Red Hat Enterprise Linux BaseOS (v. 10)",
+        "product": {
+         "name": "Red Hat Enterprise Linux BaseOS (v. 10)",
+         "product_id": "BaseOS-10.2.Z",
+         "product_identification_helper": {
+          "cpe": "cpe:/o:redhat:enterprise_linux:10.2"
+         }
+        }
+       }
+      ],
+      "category": "product_family",
+      "name": "Red Hat Enterprise Linux"
+     },
+     {
+      "branches": [
+       {
+        "category": "product_version",
+        "name": "cockpit-packagekit-0:356.1-1.el10_2.noarch",
+        "product": {
+         "name": "cockpit-packagekit-0:356.1-1.el10_2.noarch",
+         "product_id": "cockpit-packagekit-0:356.1-1.el10_2.noarch",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-packagekit@356.1-1.el10_2?arch=noarch"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-storaged-0:356.1-1.el10_2.noarch",
+        "product": {
+         "name": "cockpit-storaged-0:356.1-1.el10_2.noarch",
+         "product_id": "cockpit-storaged-0:356.1-1.el10_2.noarch",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-storaged@356.1-1.el10_2?arch=noarch"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-bridge-0:356.1-1.el10_2.noarch",
+        "product": {
+         "name": "cockpit-bridge-0:356.1-1.el10_2.noarch",
+         "product_id": "cockpit-bridge-0:356.1-1.el10_2.noarch",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-bridge@356.1-1.el10_2?arch=noarch"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-doc-0:356.1-1.el10_2.noarch",
+        "product": {
+         "name": "cockpit-doc-0:356.1-1.el10_2.noarch",
+         "product_id": "cockpit-doc-0:356.1-1.el10_2.noarch",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-doc@356.1-1.el10_2?arch=noarch"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-system-0:356.1-1.el10_2.noarch",
+        "product": {
+         "name": "cockpit-system-0:356.1-1.el10_2.noarch",
+         "product_id": "cockpit-system-0:356.1-1.el10_2.noarch",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-system@356.1-1.el10_2?arch=noarch"
+         }
+        }
+       }
+      ],
+      "category": "architecture",
+      "name": "noarch"
+     },
+     {
+      "branches": [
+       {
+        "category": "product_version",
+        "name": "cockpit-0:356.1-1.el10_2.src",
+        "product": {
+         "name": "cockpit-0:356.1-1.el10_2.src",
+         "product_id": "cockpit-0:356.1-1.el10_2.src",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit@356.1-1.el10_2?arch=src"
+         }
+        }
+       }
+      ],
+      "category": "architecture",
+      "name": "src"
+     },
+     {
+      "branches": [
+       {
+        "category": "product_version",
+        "name": "cockpit-0:356.1-1.el10_2.aarch64",
+        "product": {
+         "name": "cockpit-0:356.1-1.el10_2.aarch64",
+         "product_id": "cockpit-0:356.1-1.el10_2.aarch64",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit@356.1-1.el10_2?arch=aarch64"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-ws-0:356.1-1.el10_2.aarch64",
+        "product": {
+         "name": "cockpit-ws-0:356.1-1.el10_2.aarch64",
+         "product_id": "cockpit-ws-0:356.1-1.el10_2.aarch64",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-ws@356.1-1.el10_2?arch=aarch64"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-ws-selinux-0:356.1-1.el10_2.aarch64",
+        "product": {
+         "name": "cockpit-ws-selinux-0:356.1-1.el10_2.aarch64",
+         "product_id": "cockpit-ws-selinux-0:356.1-1.el10_2.aarch64",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-ws-selinux@356.1-1.el10_2?arch=aarch64"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-debugsource-0:356.1-1.el10_2.aarch64",
+        "product": {
+         "name": "cockpit-debugsource-0:356.1-1.el10_2.aarch64",
+         "product_id": "cockpit-debugsource-0:356.1-1.el10_2.aarch64",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-debugsource@356.1-1.el10_2?arch=aarch64"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-debuginfo-0:356.1-1.el10_2.aarch64",
+        "product": {
+         "name": "cockpit-debuginfo-0:356.1-1.el10_2.aarch64",
+         "product_id": "cockpit-debuginfo-0:356.1-1.el10_2.aarch64",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-debuginfo@356.1-1.el10_2?arch=aarch64"
+         }
+        }
+       }
+      ],
+      "category": "architecture",
+      "name": "aarch64"
+     },
+     {
+      "branches": [
+       {
+        "category": "product_version",
+        "name": "cockpit-0:356.1-1.el10_2.ppc64le",
+        "product": {
+         "name": "cockpit-0:356.1-1.el10_2.ppc64le",
+         "product_id": "cockpit-0:356.1-1.el10_2.ppc64le",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit@356.1-1.el10_2?arch=ppc64le"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-ws-0:356.1-1.el10_2.ppc64le",
+        "product": {
+         "name": "cockpit-ws-0:356.1-1.el10_2.ppc64le",
+         "product_id": "cockpit-ws-0:356.1-1.el10_2.ppc64le",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-ws@356.1-1.el10_2?arch=ppc64le"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-ws-selinux-0:356.1-1.el10_2.ppc64le",
+        "product": {
+         "name": "cockpit-ws-selinux-0:356.1-1.el10_2.ppc64le",
+         "product_id": "cockpit-ws-selinux-0:356.1-1.el10_2.ppc64le",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-ws-selinux@356.1-1.el10_2?arch=ppc64le"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-debugsource-0:356.1-1.el10_2.ppc64le",
+        "product": {
+         "name": "cockpit-debugsource-0:356.1-1.el10_2.ppc64le",
+         "product_id": "cockpit-debugsource-0:356.1-1.el10_2.ppc64le",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-debugsource@356.1-1.el10_2?arch=ppc64le"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-debuginfo-0:356.1-1.el10_2.ppc64le",
+        "product": {
+         "name": "cockpit-debuginfo-0:356.1-1.el10_2.ppc64le",
+         "product_id": "cockpit-debuginfo-0:356.1-1.el10_2.ppc64le",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-debuginfo@356.1-1.el10_2?arch=ppc64le"
+         }
+        }
+       }
+      ],
+      "category": "architecture",
+      "name": "ppc64le"
+     },
+     {
+      "branches": [
+       {
+        "category": "product_version",
+        "name": "cockpit-0:356.1-1.el10_2.s390x",
+        "product": {
+         "name": "cockpit-0:356.1-1.el10_2.s390x",
+         "product_id": "cockpit-0:356.1-1.el10_2.s390x",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit@356.1-1.el10_2?arch=s390x"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-ws-0:356.1-1.el10_2.s390x",
+        "product": {
+         "name": "cockpit-ws-0:356.1-1.el10_2.s390x",
+         "product_id": "cockpit-ws-0:356.1-1.el10_2.s390x",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-ws@356.1-1.el10_2?arch=s390x"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-ws-selinux-0:356.1-1.el10_2.s390x",
+        "product": {
+         "name": "cockpit-ws-selinux-0:356.1-1.el10_2.s390x",
+         "product_id": "cockpit-ws-selinux-0:356.1-1.el10_2.s390x",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-ws-selinux@356.1-1.el10_2?arch=s390x"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-debugsource-0:356.1-1.el10_2.s390x",
+        "product": {
+         "name": "cockpit-debugsource-0:356.1-1.el10_2.s390x",
+         "product_id": "cockpit-debugsource-0:356.1-1.el10_2.s390x",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-debugsource@356.1-1.el10_2?arch=s390x"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-debuginfo-0:356.1-1.el10_2.s390x",
+        "product": {
+         "name": "cockpit-debuginfo-0:356.1-1.el10_2.s390x",
+         "product_id": "cockpit-debuginfo-0:356.1-1.el10_2.s390x",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-debuginfo@356.1-1.el10_2?arch=s390x"
+         }
+        }
+       }
+      ],
+      "category": "architecture",
+      "name": "s390x"
+     },
+     {
+      "branches": [
+       {
+        "category": "product_version",
+        "name": "cockpit-0:356.1-1.el10_2.x86_64",
+        "product": {
+         "name": "cockpit-0:356.1-1.el10_2.x86_64",
+         "product_id": "cockpit-0:356.1-1.el10_2.x86_64",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit@356.1-1.el10_2?arch=x86_64"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-ws-0:356.1-1.el10_2.x86_64",
+        "product": {
+         "name": "cockpit-ws-0:356.1-1.el10_2.x86_64",
+         "product_id": "cockpit-ws-0:356.1-1.el10_2.x86_64",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-ws@356.1-1.el10_2?arch=x86_64"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-ws-selinux-0:356.1-1.el10_2.x86_64",
+        "product": {
+         "name": "cockpit-ws-selinux-0:356.1-1.el10_2.x86_64",
+         "product_id": "cockpit-ws-selinux-0:356.1-1.el10_2.x86_64",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-ws-selinux@356.1-1.el10_2?arch=x86_64"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-debugsource-0:356.1-1.el10_2.x86_64",
+        "product": {
+         "name": "cockpit-debugsource-0:356.1-1.el10_2.x86_64",
+         "product_id": "cockpit-debugsource-0:356.1-1.el10_2.x86_64",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-debugsource@356.1-1.el10_2?arch=x86_64"
+         }
+        }
+       },
+       {
+        "category": "product_version",
+        "name": "cockpit-debuginfo-0:356.1-1.el10_2.x86_64",
+        "product": {
+         "name": "cockpit-debuginfo-0:356.1-1.el10_2.x86_64",
+         "product_id": "cockpit-debuginfo-0:356.1-1.el10_2.x86_64",
+         "product_identification_helper": {
+          "purl": "pkg:rpm/redhat/cockpit-debuginfo@356.1-1.el10_2?arch=x86_64"
+         }
+        }
+       }
+      ],
+      "category": "architecture",
+      "name": "x86_64"
+     }
+    ],
+    "category": "vendor",
+    "name": "Red Hat"
+   }
+  ],
+  "relationships": [
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-packagekit-0:356.1-1.el10_2.noarch as a component of Red Hat Enterprise Linux AppStream (v. 10)",
+     "product_id": "AppStream-10.2.Z:cockpit-packagekit-0:356.1-1.el10_2.noarch"
+    },
+    "product_reference": "cockpit-packagekit-0:356.1-1.el10_2.noarch",
+    "relates_to_product_reference": "AppStream-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-storaged-0:356.1-1.el10_2.noarch as a component of Red Hat Enterprise Linux AppStream (v. 10)",
+     "product_id": "AppStream-10.2.Z:cockpit-storaged-0:356.1-1.el10_2.noarch"
+    },
+    "product_reference": "cockpit-storaged-0:356.1-1.el10_2.noarch",
+    "relates_to_product_reference": "AppStream-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-0:356.1-1.el10_2.aarch64 as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.aarch64"
+    },
+    "product_reference": "cockpit-0:356.1-1.el10_2.aarch64",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-0:356.1-1.el10_2.ppc64le as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.ppc64le"
+    },
+    "product_reference": "cockpit-0:356.1-1.el10_2.ppc64le",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-0:356.1-1.el10_2.s390x as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.s390x"
+    },
+    "product_reference": "cockpit-0:356.1-1.el10_2.s390x",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-0:356.1-1.el10_2.src as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.src"
+    },
+    "product_reference": "cockpit-0:356.1-1.el10_2.src",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-0:356.1-1.el10_2.x86_64 as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.x86_64"
+    },
+    "product_reference": "cockpit-0:356.1-1.el10_2.x86_64",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-bridge-0:356.1-1.el10_2.noarch as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-bridge-0:356.1-1.el10_2.noarch"
+    },
+    "product_reference": "cockpit-bridge-0:356.1-1.el10_2.noarch",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-debuginfo-0:356.1-1.el10_2.aarch64 as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-debuginfo-0:356.1-1.el10_2.aarch64"
+    },
+    "product_reference": "cockpit-debuginfo-0:356.1-1.el10_2.aarch64",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-debuginfo-0:356.1-1.el10_2.ppc64le as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-debuginfo-0:356.1-1.el10_2.ppc64le"
+    },
+    "product_reference": "cockpit-debuginfo-0:356.1-1.el10_2.ppc64le",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-debuginfo-0:356.1-1.el10_2.s390x as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-debuginfo-0:356.1-1.el10_2.s390x"
+    },
+    "product_reference": "cockpit-debuginfo-0:356.1-1.el10_2.s390x",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-debuginfo-0:356.1-1.el10_2.x86_64 as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-debuginfo-0:356.1-1.el10_2.x86_64"
+    },
+    "product_reference": "cockpit-debuginfo-0:356.1-1.el10_2.x86_64",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-debugsource-0:356.1-1.el10_2.aarch64 as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-debugsource-0:356.1-1.el10_2.aarch64"
+    },
+    "product_reference": "cockpit-debugsource-0:356.1-1.el10_2.aarch64",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-debugsource-0:356.1-1.el10_2.ppc64le as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-debugsource-0:356.1-1.el10_2.ppc64le"
+    },
+    "product_reference": "cockpit-debugsource-0:356.1-1.el10_2.ppc64le",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-debugsource-0:356.1-1.el10_2.s390x as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-debugsource-0:356.1-1.el10_2.s390x"
+    },
+    "product_reference": "cockpit-debugsource-0:356.1-1.el10_2.s390x",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-debugsource-0:356.1-1.el10_2.x86_64 as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-debugsource-0:356.1-1.el10_2.x86_64"
+    },
+    "product_reference": "cockpit-debugsource-0:356.1-1.el10_2.x86_64",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-doc-0:356.1-1.el10_2.noarch as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-doc-0:356.1-1.el10_2.noarch"
+    },
+    "product_reference": "cockpit-doc-0:356.1-1.el10_2.noarch",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-system-0:356.1-1.el10_2.noarch as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-system-0:356.1-1.el10_2.noarch"
+    },
+    "product_reference": "cockpit-system-0:356.1-1.el10_2.noarch",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-ws-0:356.1-1.el10_2.aarch64 as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-ws-0:356.1-1.el10_2.aarch64"
+    },
+    "product_reference": "cockpit-ws-0:356.1-1.el10_2.aarch64",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-ws-0:356.1-1.el10_2.ppc64le as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-ws-0:356.1-1.el10_2.ppc64le"
+    },
+    "product_reference": "cockpit-ws-0:356.1-1.el10_2.ppc64le",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-ws-0:356.1-1.el10_2.s390x as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-ws-0:356.1-1.el10_2.s390x"
+    },
+    "product_reference": "cockpit-ws-0:356.1-1.el10_2.s390x",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-ws-0:356.1-1.el10_2.x86_64 as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-ws-0:356.1-1.el10_2.x86_64"
+    },
+    "product_reference": "cockpit-ws-0:356.1-1.el10_2.x86_64",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-ws-selinux-0:356.1-1.el10_2.aarch64 as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-ws-selinux-0:356.1-1.el10_2.aarch64"
+    },
+    "product_reference": "cockpit-ws-selinux-0:356.1-1.el10_2.aarch64",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-ws-selinux-0:356.1-1.el10_2.ppc64le as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-ws-selinux-0:356.1-1.el10_2.ppc64le"
+    },
+    "product_reference": "cockpit-ws-selinux-0:356.1-1.el10_2.ppc64le",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-ws-selinux-0:356.1-1.el10_2.s390x as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-ws-selinux-0:356.1-1.el10_2.s390x"
+    },
+    "product_reference": "cockpit-ws-selinux-0:356.1-1.el10_2.s390x",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   },
+   {
+    "category": "default_component_of",
+    "full_product_name": {
+     "name": "cockpit-ws-selinux-0:356.1-1.el10_2.x86_64 as a component of Red Hat Enterprise Linux BaseOS (v. 10)",
+     "product_id": "BaseOS-10.2.Z:cockpit-ws-selinux-0:356.1-1.el10_2.x86_64"
+    },
+    "product_reference": "cockpit-ws-selinux-0:356.1-1.el10_2.x86_64",
+    "relates_to_product_reference": "BaseOS-10.2.Z"
+   }
+  ]
+ },
+ "vulnerabilities": [
+  {
+   "cve": "CVE-2026-2950",
+   "title": "lodash: Lodash: Prototype pollution allows deletion of built-in prototype properties via array path bypass",
+   "discovery_date": "2026-03-31T20:01:38.424064+00:00",
+   "release_date": "2026-03-31T19:18:35.796000+00:00",
+   "scores": [
+    {
+     "cvss_v3": {
+      "attackComplexity": "LOW",
+      "attackVector": "NETWORK",
+      "availabilityImpact": "HIGH",
+      "baseScore": 6.5,
+      "baseSeverity": "MEDIUM",
+      "confidentialityImpact": "NONE",
+      "integrityImpact": "NONE",
+      "privilegesRequired": "LOW",
+      "scope": "UNCHANGED",
+      "userInteraction": "NONE",
+      "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+      "version": "3.1"
+     },
+     "products": [
+      "AppStream-10.2.Z:cockpit-packagekit-0:356.1-1.el10_2.noarch",
+      "AppStream-10.2.Z:cockpit-storaged-0:356.1-1.el10_2.noarch",
+      "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.aarch64",
+      "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.ppc64le",
+      "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.s390x",
+      "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.src",
+      "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.x86_64",
+      "BaseOS-10.2.Z:cockpit-bridge-0:356.1-1.el10_2.noarch",
+      "BaseOS-10.2.Z:cockpit-debuginfo-0:356.1-1.el10_2.aarch64",
+      "BaseOS-10.2.Z:cockpit-debuginfo-0:356.1-1.el10_2.ppc64le",
+      "BaseOS-10.2.Z:cockpit-debuginfo-0:356.1-1.el10_2.s390x",
+      "BaseOS-10.2.Z:cockpit-debuginfo-0:356.1-1.el10_2.x86_64",
+      "BaseOS-10.2.Z:cockpit-debugsource-0:356.1-1.el10_2.aarch64",
+      "BaseOS-10.2.Z:cockpit-debugsource-0:356.1-1.el10_2.ppc64le",
+      "BaseOS-10.2.Z:cockpit-debugsource-0:356.1-1.el10_2.s390x",
+      "BaseOS-10.2.Z:cockpit-debugsource-0:356.1-1.el10_2.x86_64",
+      "BaseOS-10.2.Z:cockpit-doc-0:356.1-1.el10_2.noarch",
+      "BaseOS-10.2.Z:cockpit-system-0:356.1-1.el10_2.noarch",
+      "BaseOS-10.2.Z:cockpit-ws-0:356.1-1.el10_2.aarch64",
+      "BaseOS-10.2.Z:cockpit-ws-0:356.1-1.el10_2.ppc64le",
+      "BaseOS-10.2.Z:cockpit-ws-0:356.1-1.el10_2.s390x",
+      "BaseOS-10.2.Z:cockpit-ws-0:356.1-1.el10_2.x86_64",
+      "BaseOS-10.2.Z:cockpit-ws-selinux-0:356.1-1.el10_2.aarch64",
+      "BaseOS-10.2.Z:cockpit-ws-selinux-0:356.1-1.el10_2.ppc64le",
+      "BaseOS-10.2.Z:cockpit-ws-selinux-0:356.1-1.el10_2.s390x",
+      "BaseOS-10.2.Z:cockpit-ws-selinux-0:356.1-1.el10_2.x86_64"
+     ]
+    }
+   ],
+   "product_status": {
+    "fixed": [
+     "AppStream-10.2.Z:cockpit-packagekit-0:356.1-1.el10_2.noarch",
+     "AppStream-10.2.Z:cockpit-storaged-0:356.1-1.el10_2.noarch",
+     "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.x86_64",
+     "BaseOS-10.2.Z:cockpit-bridge-0:356.1-1.el10_2.noarch",
+     "BaseOS-10.2.Z:cockpit-debuginfo-0:356.1-1.el10_2.x86_64",
+     "BaseOS-10.2.Z:cockpit-debugsource-0:356.1-1.el10_2.x86_64"
+    ]
+   },
+   "remediations": [
+    {
+     "category": "vendor_fix",
+     "date": "2026-05-27T16:49:47+00:00",
+     "details": "For details on how to apply this update, which includes the changes described in",
+     "url": "https://access.redhat.com/errata/RHBA-2026:21388",
+     "product_ids": [
+      "AppStream-10.2.Z:cockpit-packagekit-0:356.1-1.el10_2.noarch",
+      "AppStream-10.2.Z:cockpit-storaged-0:356.1-1.el10_2.noarch",
+      "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.aarch64",
+      "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.ppc64le",
+      "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.s390x",
+      "BaseOS-10.2.Z:cockpit-0:356.1-1.el10_2.src"
+     ]
+    }
+   ]
+  }
+ ]
+}

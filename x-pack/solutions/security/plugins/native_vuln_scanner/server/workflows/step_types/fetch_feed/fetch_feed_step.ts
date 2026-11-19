@@ -46,6 +46,7 @@ export const buildFetchFeedStepDefinition = ({
             signal,
             etag: known?.etag,
             includeUnfixed,
+            logger: { warn: (message) => logger.warn(message) },
           });
           if (result.status === 'unavailable') {
             logger.warn(
