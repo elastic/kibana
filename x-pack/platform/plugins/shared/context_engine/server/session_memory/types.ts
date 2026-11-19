@@ -59,6 +59,10 @@ export type ForgetResult =
   | { id: string; outcome: 'forgotten' | 'already_forgotten' | 'not_found' }
   | { id: string; outcome: 'failed'; error: string };
 
+/**
+ * Nothing refreshes the stream, so `get` and `forget` see a write only after the next refresh. A
+ * read right after `remember` or `forget` can still miss that write.
+ */
 export interface SessionMemoryService {
   /** Writes a new memory, or a revision of `input.id`, and returns the memory's id. */
   remember(scope: SessionMemoryScope, input: RememberInput): Promise<{ id: string }>;
