@@ -346,10 +346,22 @@ describe('digital experience apps', () => {
         expect(generate({ signedInRate: 0 }).some(userOf)).toBe(false);
         // Long enough for the sessions that expired before a return to be in range too
         const allSignedIn = generate({ signedInRate: 1 }, at(5400));
-        const sessionIds = new Set(allSignedIn.map((doc) => doc.attributes?.['session.id']));
-        expect(
-          allSignedIn.some((doc) => sessionIds.has(doc.attributes?.['session.previous_id']))
-        ).toBe(true);
+        const sessionIds = new Set<unknown>(
+          allSignedIn.flatMap((doc) => doc.attributes?.['session.id'] ?? [])
+        );
+        const userBySession = new Map(
+          allSignedIn.filter(userOf).map((doc) => [doc.attributes?.['session.id'], userOf(doc)])
+        );
+        // Only an expiry points to a session that was generated: a follow-up's previous ID is random
+        const expiries = allSignedIn.flatMap(({ attributes = {} }) =>
+          sessionIds.has(attributes['session.previous_id'])
+            ? [[attributes['session.previous_id'], attributes['session.id']]]
+            : []
+        );
+        expect(expiries.length).toBeGreaterThan(0);
+        expiries.forEach(([expired, returning]) =>
+          expect(userBySession.get(expired)).toBe(userBySession.get(returning))
+        );
         DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName }) =>
           sessionUsers(allSignedIn, serviceName).forEach((users) => expect(users.size).toBe(1))
         );
