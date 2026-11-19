@@ -138,10 +138,10 @@ describe('averageMatchedRepetitions', () => {
       [doc({ repetition: 0, score: 0.8 })]
     );
 
-    expect(pairScores(target, baseline).pairs).toHaveLength(1);
+    expect(pairScores(target, baseline, 'mean').pairs).toHaveLength(1);
   });
 
-  it('turns 5 examples x 3 repetitions into 5 pairs, not 15', () => {
+  it('turns 5 examples x 3 repetitions into 5 pairs', () => {
     const run = (score: number) =>
       [0, 1, 2, 3, 4].flatMap((example) =>
         [0, 1, 2].map((repetition) => doc({ exampleId: `ex-${example}`, repetition, score }))
@@ -149,7 +149,7 @@ describe('averageMatchedRepetitions', () => {
 
     const { target, baseline } = averageMatchedRepetitions(run(0.9), run(0.8));
 
-    expect(pairScores(run(0.9), run(0.8)).pairs).toHaveLength(15);
-    expect(pairScores(target, baseline).pairs).toHaveLength(5);
+    expect(pairScores(run(0.9), run(0.8), 'mean').pairs).toHaveLength(5);
+    expect(pairScores(target, baseline, 'mean').pairs).toHaveLength(5);
   });
 });

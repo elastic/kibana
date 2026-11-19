@@ -9,16 +9,19 @@ import type { ComparisonResult } from '@kbn/evals-common';
 import { applyHolmCorrection } from './holm_correction';
 import { evaluateRegressionGate, formatRegressionGateReport } from './regression_gate';
 
+const side = (mean: number) => ({ mean, used: 10, missing: 0, stability: null });
+
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
   datasetName: 'Dataset One',
   evaluatorName: 'Correctness',
   sampleSize: 20,
-  meanTarget: 0.6,
-  meanBaseline: 0.8,
+  target: side(0.6),
+  baseline: side(0.8),
   pValue: 0.01,
   direction: 'maximize',
   metricType: 'continuous_bounded',
+  repetitionWarning: false,
   hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
   ...overrides,
 });
@@ -46,8 +49,8 @@ describe('evaluateRegressionGate', () => {
         makeResult({
           evaluatorName: 'Latency',
           direction: 'minimize',
-          meanTarget: 5,
-          meanBaseline: 3,
+          target: side(5),
+          baseline: side(3),
         }),
       ],
     });
@@ -59,12 +62,12 @@ describe('evaluateRegressionGate', () => {
   it('does not trip on a significant improvement, in either direction', () => {
     const decision = evaluateRegressionGate({
       results: [
-        makeResult({ meanTarget: 0.9, meanBaseline: 0.7 }),
+        makeResult({ target: side(0.9), baseline: side(0.7) }),
         makeResult({
           evaluatorName: 'Latency',
           direction: 'minimize',
-          meanTarget: 2,
-          meanBaseline: 3,
+          target: side(2),
+          baseline: side(3),
         }),
       ],
     });
@@ -88,12 +91,12 @@ describe('evaluateRegressionGate', () => {
   it('does not trip when the means are equal, whatever the p-value', () => {
     const decision = evaluateRegressionGate({
       results: [
-        makeResult({ meanTarget: 0.7, meanBaseline: 0.7, pValue: 0.001 }),
+        makeResult({ target: side(0.7), baseline: side(0.7), pValue: 0.001 }),
         makeResult({
           evaluatorName: 'Latency',
           direction: 'minimize',
-          meanTarget: 3,
-          meanBaseline: 3,
+          target: side(3),
+          baseline: side(3),
           pValue: 0.001,
         }),
       ],
@@ -156,7 +159,7 @@ describe('evaluateRegressionGate', () => {
   it('still trips when the drop survives Holm correction and reports both p-values', () => {
     const results = [
       makeResult({ evaluatorName: 'Strong', pValue: 0.001 }),
-      makeResult({ evaluatorName: 'Other', pValue: 0.8, meanTarget: 0.8, meanBaseline: 0.8 }),
+      makeResult({ evaluatorName: 'Other', pValue: 0.8, target: side(0.8), baseline: side(0.8) }),
     ];
 
     const decision = evaluateRegressionGate({ results: applyHolmCorrection(results) });
@@ -355,8 +358,8 @@ describe('formatRegressionGateReport', () => {
         makeResult({
           evaluatorName: 'Latency',
           direction: 'minimize',
-          meanTarget: 5,
-          meanBaseline: 3,
+          target: side(5),
+          baseline: side(3),
           pValue: 0.0004,
         }),
       ],

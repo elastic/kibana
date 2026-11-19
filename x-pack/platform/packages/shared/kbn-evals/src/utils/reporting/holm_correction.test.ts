@@ -13,16 +13,19 @@ import {
   holmBonferroniAdjust,
 } from './holm_correction';
 
+const side = (mean: number) => ({ mean, used: 10, missing: 0, stability: null });
+
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
   datasetName: 'Dataset One',
   evaluatorName: 'Correctness',
   sampleSize: 20,
-  meanTarget: 0.8,
-  meanBaseline: 0.7,
+  target: side(0.8),
+  baseline: side(0.7),
   pValue: 0.03,
   direction: 'maximize',
   metricType: 'continuous_bounded',
+  repetitionWarning: false,
   hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
   ...overrides,
 });

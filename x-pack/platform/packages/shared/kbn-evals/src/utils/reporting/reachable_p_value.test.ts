@@ -5,9 +5,24 @@
  * 2.0.
  */
 
-import { compareScores } from '@kbn/evals-common';
+import { compareScores as compareSlices } from '@kbn/evals-common';
 import type { PairedScore } from '@kbn/evals-common';
 import { minimumReachablePValue } from './reachable_p_value';
+
+const compareScores = (pairs: PairedScore[]) =>
+  compareSlices(
+    pairs,
+    new Map(
+      pairs.map((pair) => [
+        `${pair.datasetId}|${pair.evaluatorName}`,
+        {
+          target: { used: 1, missing: 0, stability: null },
+          baseline: { used: 1, missing: 0, stability: null },
+          repetitionWarning: false,
+        },
+      ])
+    )
+  );
 
 const makePairs = (target: number[], baseline: number[]): PairedScore[] =>
   target.map((scoreTarget, i) => ({

@@ -9,7 +9,7 @@ import Fs from 'fs';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import type { Command, RunContext } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
-import { compareScores, pairScores } from '@kbn/evals-common';
+import { compareScores, pairScores, RepetitionPolicy } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
@@ -55,6 +55,7 @@ export const compareCmd = {
     --output           Append markdown output to a file instead of stdout
     --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
     --space-ids        Spaces the experiments were run in (same value as "evals run")
+    --repetition-policy  How repetitions of one example are compared: "mean" (default) or "median"
 
   Regression gate:
     --fail-on-regression            Exit non-zero if any evaluator got significantly worse
@@ -92,6 +93,7 @@ export const compareCmd = {
       'output',
       'refresh-url',
       'space-ids',
+      'repetition-policy',
       'regression-evaluators',
       'min-pairs',
     ],
@@ -107,6 +109,7 @@ export const compareCmd = {
       --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
       --space-ids        Spaces the experiments were run in
+      --repetition-policy             "mean" (default) or "median" of each example's repetitions
       --fail-on-regression            Exit 3 if any evaluator got significantly worse, 2 if the gate was inconclusive or not evaluated
       --regression-evaluators         Comma-separated evaluator names that can trip the gate (default: all)
       --min-pairs                     Minimum paired examples for an evaluator to be gated (default: ${DEFAULT_REGRESSION_MIN_PAIRS})
@@ -148,6 +151,14 @@ export const compareCmd = {
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
     }
+
+    const parsedPolicy = RepetitionPolicy.safeParse(
+      flagsReader.string('repetition-policy') ?? 'mean'
+    );
+    if (!parsedPolicy.success) {
+      throw createFlagError('--repetition-policy must be "mean" or "median".');
+    }
+    const repetitionPolicy = parsedPolicy.data;
 
     // Both only shape the gate; accepting them without it would look like a gated run that is not.
     if (!failOnRegression && (rawMinPairs !== undefined || rawRegressionEvaluators !== undefined)) {
@@ -362,38 +373,55 @@ export const compareCmd = {
       overlappingDatasetSet.has(score.example.dataset.id)
     );
 
-    // The gate pairs per example, not per repetition: repetitions of one example are not
-    // independent, and counting them as pairs would inflate n for --min-pairs and shrink every
-    // p-value. Without the gate, pairing stays per repetition so the report matches the evals UI and
-    // compare route, which still pair that way.
-    const averaged = failOnRegression
-      ? averageMatchedRepetitions(filteredTargetScores, filteredBaselineScores)
-      : undefined;
-    const { pairs, skippedMissingPairs, skippedNullScores } = averaged
-      ? pairScores(averaged.target, averaged.baseline)
-      : pairScores(filteredTargetScores, filteredBaselineScores);
+    const paired = pairScores(filteredTargetScores, filteredBaselineScores, repetitionPolicy);
+    const { skippedMissingPairs, skippedNullScores, rejectedSlices, repetitions } = paired;
+
+    const rejectedNames = rejectedSlices.map((s) => `${s.datasetName} / ${s.evaluatorName}`);
+    if (paired.pairs.length === 0 && rejectedSlices.length > 0) {
+      throw createFlagError(
+        `--repetition-policy median needs scores in [0, 1]. Every paired slice has a score outside that range: ${rejectedNames.join(
+          ', '
+        )}.`
+      );
+    }
+
+    // pairScores already reduces each example's repetitions to one pair. The gate additionally
+    // averages both sides over the repetition count they share (mean policy only): a mean of 3
+    // scores against a single score has a skewed difference even when nothing changed, and the
+    // signed-rank test reads that skew as a shift. Counts and repetition stats stay from the
+    // untrimmed scores so the report matches the un-gated one.
+    const averaged =
+      failOnRegression && repetitionPolicy === 'mean'
+        ? averageMatchedRepetitions(filteredTargetScores, filteredBaselineScores)
+        : undefined;
+    const pairs = averaged
+      ? pairScores(averaged.target, averaged.baseline, repetitionPolicy).pairs
+      : paired.pairs;
 
     if (pairs.length === 0) {
       throw nothingToCompare('No paired scores found between the two experiments.');
     }
 
     log.info(
-      `Paired ${pairs.length} ${
-        averaged ? 'example scores, repetitions averaged' : 'scores'
-      } (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
+      `Built ${pairs.length} pairs with repetition policy "${repetitionPolicy}" (skipped ${skippedMissingPairs} unpaired, ${skippedNullScores} null scores).`
     );
     if (averaged && averaged.trimmedExamples > 0) {
       log.warning(
-        `${averaged.trimmedExamples} example(s) had a different number of usable repetitions in the two runs; each was averaged over the count both runs have.`
+        `${averaged.trimmedExamples} example(s) had a different number of usable repetitions in the two runs; the gate averaged each over the count both runs have.`
+      );
+    }
+    if (rejectedSlices.length > 0) {
+      log.warning(
+        `Left out of the median comparison (score outside [0, 1]): ${rejectedNames.join(', ')}.`
       );
     }
 
-    // Averaged repetitions are fractions like 1/3 whose differences tie only up to roundoff, so the
-    // gated Wilcoxon rows are re-run with exact ties. The un-gated report keeps the shared result
-    // (as the UI does), while its outcome label is signed from rounded differences.
+    // Per-example aggregates are fractions like 1/3 whose differences tie only up to roundoff, so
+    // the gated Wilcoxon rows are re-run with exact ties. The un-gated report keeps the shared
+    // result (as the UI does), while its outcome label is signed from rounded differences.
     const comparisonResults = averaged
-      ? retestWilcoxonWithExactTies(compareScores(pairs), pairs)
-      : compareScores(pairs);
+      ? retestWilcoxonWithExactTies(compareScores(pairs, repetitions), pairs)
+      : compareScores(pairs, repetitions);
     if (comparisonResults.length === 0) {
       if (failOnRegression) throw nothingToCompare('No comparison results returned.');
       log.warning('No comparison results returned.');
@@ -459,6 +487,8 @@ export const compareCmd = {
         regressionGate: failOnRegression
           ? { minPairs, evaluators: regressionEvaluators }
           : undefined,
+        repetitionPolicy,
+        rejectedSlices: rejectedNames,
       });
 
       if (outputPath) {
@@ -472,6 +502,7 @@ export const compareCmd = {
         targetExperimentId,
         baselineExperimentId,
         results,
+        repetitionPolicy,
       });
 
       log.info(`\n\n${report.header.join('\n')}`);

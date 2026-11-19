@@ -6,6 +6,7 @@
  */
 
 import { PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
+import type { RepetitionPolicy } from '@kbn/evals-common';
 import { getEffectDirection } from './effect_direction';
 import type { EffectDirection, WithEffectSign } from './effect_direction';
 import { countHolmFamily, getEffectivePValue } from './holm_correction';
@@ -29,8 +30,8 @@ function formatSig(pValue: number | null, threshold: number): string {
   return pValue < threshold ? 'Yes' : 'No';
 }
 
-function formatNumber(value: number): string {
-  return Number.isFinite(value) ? value.toFixed(2) : '-';
+function formatNumber(value: number | null): string {
+  return value !== null && Number.isFinite(value) ? value.toFixed(2) : '-';
 }
 
 const OUTCOME_LABELS: Record<EffectDirection, string> = {
@@ -104,6 +105,8 @@ export function formatMarkdownCompareReport({
   skippedNullScores = 0,
   baselineBranch = 'main',
   regressionGate,
+  repetitionPolicy = 'mean',
+  rejectedSlices = [],
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
@@ -118,6 +121,8 @@ export function formatMarkdownCompareReport({
   baselineBranch?: string;
   /** When the regression gate runs, regressions it cannot trip on are marked "(not gated)". */
   regressionGate?: MarkdownRegressionGateOptions;
+  repetitionPolicy?: RepetitionPolicy;
+  rejectedSlices?: string[];
 }): string {
   const sortedResults = [...results].sort(
     (a, b) =>
@@ -131,6 +136,11 @@ export function formatMarkdownCompareReport({
   const multiplicityCorrected = sortedResults.some((result) => result.adjustedPValue !== undefined);
 
   const significantCount = sortedResults.filter(isSignificant).length;
+
+  // A suite with one repetition per example has no stability to show.
+  const showStability = sortedResults.some(
+    (result) => result.target.stability !== null || result.baseline.stability !== null
+  );
 
   const lines: string[] = [];
 
@@ -160,7 +170,14 @@ export function formatMarkdownCompareReport({
       : `Significance threshold: p < ${significanceThreshold}`
   );
   lines.push(
-    `Test per row is chosen from the scores: McNemar for pass/fail, otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS} and differences look normal).`
+    `Repetition policy: ${repetitionPolicy} (N counts examples${
+      showStability
+        ? "; stability is the mean standard deviation across an example's repetitions"
+        : ''
+    }).`
+  );
+  lines.push(
+    `Test per row is chosen from the scores: McNemar when every compared score is 0 or 1, otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS} and differences look normal).`
   );
   lines.push('');
 
@@ -178,7 +195,7 @@ export function formatMarkdownCompareReport({
   if (skippedMissingPairs > 0 || skippedNullScores > 0) {
     const parts: string[] = [];
     if (skippedMissingPairs > 0) {
-      parts.push(`${skippedMissingPairs} unpaired (ran in only one experiment)`);
+      parts.push(`${skippedMissingPairs} unpaired`);
     }
     if (skippedNullScores > 0) {
       parts.push(`${skippedNullScores} null scores`);
@@ -187,6 +204,20 @@ export function formatMarkdownCompareReport({
       `> **Note**: ${parts.join(
         ', '
       )} skipped. Comparison may be incomplete — the baseline could be a partial run.`
+    );
+  }
+
+  if (rejectedSlices.length > 0) {
+    lines.push(
+      `> **Note**: Left out of the median comparison (score outside [0, 1]): ${rejectedSlices.join(
+        ', '
+      )}.`
+    );
+  }
+
+  if (sortedResults.some((r) => r.repetitionWarning)) {
+    lines.push(
+      '> **Warning**: in rows marked N*, some examples have a different number of valid repetitions in the two runs, or null scores.'
     );
   }
 
@@ -211,29 +242,39 @@ export function formatMarkdownCompareReport({
 
   const renderTable = (rows: CorrectableComparisonResult[]) => {
     const tableLines: string[] = [];
-    const adjustedHeader = multiplicityCorrected ? ' Adj. p-value |' : '';
-    tableLines.push(
-      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | Test | p-value |${adjustedHeader} Sig | Outcome |`
-    );
-    tableLines.push(
-      `| --- | --- | --- | --- | --- | --- | --- | --- |${
-        multiplicityCorrected ? ' --- |' : ''
-      } --- | --- |`
-    );
+    const headers = [
+      'Dataset',
+      'Evaluator',
+      'N',
+      'Mean (PR)',
+      `Mean (${baselineBranch})`,
+      'Diff',
+      'Test',
+      'p-value',
+      ...(multiplicityCorrected ? ['Adj. p-value'] : []),
+      'Sig',
+      'Outcome',
+      ...(showStability ? [`Stability (PR/${baselineBranch})`] : []),
+    ];
+    tableLines.push(`| ${headers.join(' | ')} |`);
+    tableLines.push(`| ${headers.map(() => '---').join(' | ')} |`);
     rows.forEach((r) => {
-      const delta = r.meanTarget - r.meanBaseline;
+      const delta = r.target.mean - r.baseline.mean;
       const cols = [
         escapeTableCell(r.datasetName),
         escapeTableCell(r.evaluatorName),
-        String(r.sampleSize),
-        formatNumber(r.meanTarget),
-        formatNumber(r.meanBaseline),
+        `${r.sampleSize}${r.repetitionWarning ? '*' : ''}`,
+        formatNumber(r.target.mean),
+        formatNumber(r.baseline.mean),
         formatDifference(delta) + formatDiscordantPairs(r.hypothesisTest),
         getTestLabel(r.hypothesisTest.id),
         formatPValue(r.pValue),
         ...(multiplicityCorrected ? [formatPValue(r.adjustedPValue ?? null)] : []),
         formatSig(getEffectivePValue(r), significanceThreshold),
         formatOutcome(r, significanceThreshold, regressionGate),
+        ...(showStability
+          ? [`${formatNumber(r.target.stability)} / ${formatNumber(r.baseline.stability)}`]
+          : []),
       ];
       tableLines.push(`| ${cols.join(' | ')} |`);
     });

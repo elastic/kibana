@@ -264,7 +264,7 @@ describe('compareCmd exit codes', () => {
     expect(await runCompare(GATE)).toEqual({ exitCode: 0 });
   });
 
-  it('keeps pairing per repetition without --fail-on-regression', async () => {
+  it('averages repetitions per example without --fail-on-regression', async () => {
     const repeated = (experimentId: string, score: number) =>
       [0, 1, 2].flatMap((example) =>
         [0, 1, 2].map((repetition) =>
@@ -276,11 +276,45 @@ describe('compareCmd exit codes', () => {
     try {
       await runCompare([TARGET, BASELINE, '--format', 'markdown']);
       const markdown = write.mock.calls.map(([chunk]) => String(chunk)).join('');
-      // 3 examples x 3 repetitions, as the evals UI and compare route pair them.
-      expect(markdown).toMatch(/\| correctness \| 9 \|/);
+      // 3 examples x 3 repetitions: one pair per example, as the evals UI and compare route pair them.
+      expect(markdown).toMatch(/\| correctness \| 3 \|/);
     } finally {
       write.mockRestore();
     }
+  });
+
+  describe('repetition-aggregated pairs', () => {
+    // Every repetition of every example drops, so per-repetition pairing would see 6 pairs.
+    const repeatedRun = (experimentId: string, score: number, examples: number) =>
+      Array.from({ length: examples }, (_, example) => example).flatMap((example) =>
+        [0, 1, 2].map((repetition) =>
+          scoreDoc(experimentId, example, score, { repetition, totalRepetitions: 3 })
+        )
+      );
+
+    it('runs the gate on 2 pairs, not 6, for 2 examples x 3 repetitions', async () => {
+      stubScores(repeatedRun(TARGET, 0.4, 2), repeatedRun(BASELINE, 0.8, 2));
+
+      // Per-repetition pairing would give 6 pairs that all dropped: an exact Wilcoxon p of 2 / 2^6
+      // and a regression. Two aggregated pairs cannot reach significance, so the gate cannot trip.
+      const outcome = await runCompare([...GATE, '--min-pairs', '2']);
+
+      expect(outcome).not.toMatchObject({ exitCode: GATE_REGRESSION_EXIT_CODE });
+      expect(outcome).toMatchObject({ exitCode: GATE_INCONCLUSIVE_EXIT_CODE });
+    });
+
+    it('adjusts p-values over the aggregated pair counts', async () => {
+      stubScores(repeatedRun(TARGET, 0.4, 2), repeatedRun(BASELINE, 0.8, 2));
+      const write = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      try {
+        await runCompare([...GATE, '--format', 'markdown']);
+        const markdown = write.mock.calls.map(([chunk]) => String(chunk)).join('');
+        expect(markdown).toMatch(/\| correctness \| 2 \|/);
+        expect(markdown).toMatch(/Adj\. p-value/);
+      } finally {
+        write.mockRestore();
+      }
+    });
   });
 
   describe('multiplicity correction default', () => {

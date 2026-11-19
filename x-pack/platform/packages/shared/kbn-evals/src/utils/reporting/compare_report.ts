@@ -7,6 +7,7 @@
 
 import chalk from 'chalk';
 import { table } from 'table';
+import type { RepetitionPolicy } from '@kbn/evals-common';
 import { getEffectDirection } from './effect_direction';
 import type { EffectDirection, WithEffectSign } from './effect_direction';
 import { countHolmFamily, getEffectivePValue } from './holm_correction';
@@ -65,11 +66,13 @@ export function formatCompareReport({
   baselineExperimentId,
   results,
   significanceThreshold = DEFAULT_SIGNIFICANCE_THRESHOLD,
+  repetitionPolicy = 'mean',
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
   results: Array<WithEffectSign<CorrectableComparisonResult>>;
   significanceThreshold?: number;
+  repetitionPolicy?: RepetitionPolicy;
 }): {
   header: string[];
   summary: string;
@@ -107,7 +110,7 @@ export function formatCompareReport({
   const rowsByDataset = new Map<string, string[][]>();
 
   sortedResults.forEach((result) => {
-    const delta = result.meanTarget - result.meanBaseline;
+    const delta = result.target.mean - result.baseline.mean;
     const significant = isSignificant(result);
     const significanceLabel = !hasPValue(result)
       ? chalk.gray('n/a')
@@ -118,9 +121,9 @@ export function formatCompareReport({
     const rows = rowsByDataset.get(result.datasetName) ?? [];
     rows.push([
       result.evaluatorName,
-      result.sampleSize.toString(),
-      formatNumber(result.meanTarget),
-      formatNumber(result.meanBaseline),
+      `${result.sampleSize}${result.repetitionWarning ? '*' : ''}`,
+      formatNumber(result.target.mean),
+      formatNumber(result.baseline.mean),
       formatDifference(delta, getEffectDirection(result), significant) +
         formatDiscordantPairs(result.hypothesisTest),
       getTestLabel(result.hypothesisTest.id),
@@ -139,7 +142,15 @@ export function formatCompareReport({
           sortedResults
         )} comparisons)`
       : `Significance threshold: p < ${significanceThreshold}`,
+    `Repetition policy: ${repetitionPolicy}`,
   ];
+  if (sortedResults.some((result) => result.repetitionWarning)) {
+    header.push(
+      chalk.yellow(
+        'Warning: in rows marked N*, some examples have a different number of valid repetitions in the two runs, or null scores.'
+      )
+    );
+  }
   const summary = `Significant differences: ${significantCount}/${sortedResults.length}`;
   const tableOutput = [...rowsByDataset.entries()]
     .map(([datasetName, rows]) => {

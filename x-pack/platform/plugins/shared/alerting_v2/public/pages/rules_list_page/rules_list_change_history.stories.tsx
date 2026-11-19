@@ -22,6 +22,7 @@ import { LocatorProvider } from '../../application/locator_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { createStoryLocators } from '../../test_utils/story_locators';
 import { RulesListTable } from './rules_list_table';
+import { DEFAULT_VISIBLE_COLUMN_IDS } from './rules_list_columns';
 
 const storyLocators = createStoryLocators(action);
 
@@ -142,6 +143,8 @@ const RulesListChangeHistoryStory = (): JSX.Element => {
           onTableChange={noop}
           onBulkUpdateApiKey={noop}
           onUpdateApiKey={noop}
+          visibleColumnIds={[...DEFAULT_VISIBLE_COLUMN_IDS]}
+          onVisibleColumnIdsChange={action('visibleColumnIdsChange')}
         />
         {historySession && historyAdapter ? (
           <RuleChangeHistoryProvider

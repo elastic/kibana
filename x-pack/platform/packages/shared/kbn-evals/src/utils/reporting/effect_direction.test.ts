@@ -5,11 +5,26 @@
  * 2.0.
  */
 
-import { compareScores } from '@kbn/evals-common';
+import { compareScores as compareSlices } from '@kbn/evals-common';
 import type { PairedScore } from '@kbn/evals-common';
 import { attachEffectSigns, getEffectDirection, signedRankSum } from './effect_direction';
 import { applyHolmCorrection } from './holm_correction';
 import { evaluateRegressionGate } from './regression_gate';
+
+const compareScores = (pairs: PairedScore[]) =>
+  compareSlices(
+    pairs,
+    new Map(
+      pairs.map((pair) => [
+        `${pair.datasetId}|${pair.evaluatorName}`,
+        {
+          target: { used: 1, missing: 0, stability: null },
+          baseline: { used: 1, missing: 0, stability: null },
+          repetitionWarning: false,
+        },
+      ])
+    )
+  );
 
 const makePairs = (
   scores: ReadonlyArray<[target: number, baseline: number]>,
@@ -60,7 +75,7 @@ describe('Wilcoxon rows where the ranks and the mean disagree', () => {
 
     expect(row.hypothesisTest.id).toBe('wilcoxon_signed_rank');
     expect(row.pValue).toBeLessThan(0.05);
-    expect(row.meanTarget - row.meanBaseline).toBeLessThan(0);
+    expect(row.target.mean - row.baseline.mean).toBeLessThan(0);
     expect(row.effectSign).toBe(1);
     expect(getEffectDirection(row)).toBe('mixed');
   });
@@ -78,7 +93,7 @@ describe('Wilcoxon rows where the ranks and the mean disagree', () => {
 
   it('does not report a pass for the mirrored case, where the mean rises but most pairs got worse', () => {
     const [row] = compare(swapArms(mostlyBetterFewCollapse));
-    expect(row.meanTarget - row.meanBaseline).toBeGreaterThan(0);
+    expect(row.target.mean - row.baseline.mean).toBeGreaterThan(0);
     expect(row.effectSign).toBe(-1);
 
     const decision = evaluateRegressionGate({ results: [row] });
@@ -106,7 +121,7 @@ describe('getEffectDirection', () => {
     );
 
     expect(row.effectSign).toBe(1);
-    expect(row.meanTarget - row.meanBaseline).toBeLessThan(0);
+    expect(row.target.mean - row.baseline.mean).toBeLessThan(0);
     expect(getEffectDirection(row)).toBe('unchanged');
   });
 });

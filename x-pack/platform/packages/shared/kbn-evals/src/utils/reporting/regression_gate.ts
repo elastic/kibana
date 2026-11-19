@@ -164,7 +164,7 @@ export const evaluateRegressionGate = ({
       continue;
     }
 
-    const delta = result.meanTarget - result.meanBaseline;
+    const delta = result.target.mean - result.baseline.mean;
     const isSignificant = effectivePValue < significanceThreshold;
     const effect = getEffectDirection(result);
     if (isSignificant && effect === 'mixed') {

@@ -9,17 +9,20 @@ import type { ComparisonResult } from '@kbn/evals-common';
 import { formatCompareReport } from './compare_report';
 import { applyHolmCorrection } from './holm_correction';
 
+const side = (mean: number) => ({ mean, used: 10, missing: 0, stability: null });
+
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
   datasetName: 'Dataset One',
   evaluatorName: 'Correctness',
   sampleSize: 10,
-  meanTarget: 0.8,
-  meanBaseline: 0.7,
+  target: side(0.8),
+  baseline: side(0.7),
   pValue: 0.03,
   direction: 'maximize',
   metricType: 'continuous_bounded',
   hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
+  repetitionWarning: false,
   ...overrides,
 });
 
@@ -35,6 +38,7 @@ describe('formatCompareReport', () => {
       'Target: experiment-1',
       'Baseline: experiment-2',
       'Significance threshold: p < 0.05',
+      'Repetition policy: mean',
     ]);
     expect(summary).toBe('Significant differences: 1/1');
     expect(significantCount).toBe(1);
@@ -114,7 +118,7 @@ describe('formatCompareReport', () => {
   });
 
   it('formats positive differences with a "+" prefix', () => {
-    const results = [makeResult({ meanTarget: 0.9, meanBaseline: 0.5 })];
+    const results = [makeResult({ target: side(0.9), baseline: side(0.5) })];
 
     const { tableOutput } = formatCompareReport({
       targetExperimentId: 'experiment-1',
@@ -126,7 +130,7 @@ describe('formatCompareReport', () => {
   });
 
   it('formats negative differences without a "+" prefix', () => {
-    const results = [makeResult({ meanTarget: 0.3, meanBaseline: 0.8 })];
+    const results = [makeResult({ target: side(0.3), baseline: side(0.8) })];
 
     const { tableOutput } = formatCompareReport({
       targetExperimentId: 'experiment-1',
@@ -142,7 +146,7 @@ describe('formatCompareReport', () => {
       targetExperimentId: 'experiment-1',
       baselineExperimentId: 'experiment-2',
       results: [
-        { ...makeResult({ evaluatorName: 'Conflicted', meanTarget: 0.6 }), effectSign: 1 },
+        { ...makeResult({ evaluatorName: 'Conflicted', target: side(0.6) }), effectSign: 1 },
         { ...makeResult({ evaluatorName: 'Neutral', direction: 'neutral' }), effectSign: -1 },
         makeResult({ evaluatorName: 'Agreeing' }),
       ],
@@ -159,7 +163,10 @@ describe('formatCompareReport', () => {
       targetExperimentId: 'experiment-1',
       baselineExperimentId: 'experiment-2',
       results: [
-        { ...makeResult({ evaluatorName: 'Noise', meanTarget: 0.6, pValue: 0.4 }), effectSign: 1 },
+        {
+          ...makeResult({ evaluatorName: 'Noise', target: side(0.6), pValue: 0.4 }),
+          effectSign: 1,
+        },
       ],
     });
 
@@ -181,6 +188,17 @@ describe('formatCompareReport', () => {
     expect(significantCount).toBe(0);
   });
 
+  it('warns about rows with uneven repetitions and marks their N', () => {
+    const { header, tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: [makeResult({ repetitionWarning: true })],
+    });
+
+    expect(header[4]).toContain('Warning: in rows marked N*');
+    expect(tableOutput).toContain(' 10* ');
+  });
+
   it('handles empty results gracefully', () => {
     const { header, summary, tableOutput, significantCount } = formatCompareReport({
       targetExperimentId: 'experiment-1',
@@ -188,7 +206,7 @@ describe('formatCompareReport', () => {
       results: [],
     });
 
-    expect(header).toHaveLength(3);
+    expect(header).toHaveLength(4);
     expect(summary).toBe('Significant differences: 0/0');
     expect(tableOutput).toBe('');
     expect(significantCount).toBe(0);
@@ -207,7 +225,7 @@ describe('formatCompareReport', () => {
   });
 
   it('includes sample size and formatted means in the table', () => {
-    const results = [makeResult({ sampleSize: 42, meanTarget: 0.1234, meanBaseline: 0.5678 })];
+    const results = [makeResult({ sampleSize: 42, target: side(0.1234), baseline: side(0.5678) })];
 
     const { tableOutput } = formatCompareReport({
       targetExperimentId: 'experiment-1',
@@ -244,8 +262,8 @@ describe('formatCompareReport', () => {
     const results = [
       makeResult({
         metricType: 'binary',
-        meanTarget: 0.75,
-        meanBaseline: 0.5,
+        target: side(0.75),
+        baseline: side(0.5),
         hypothesisTest: {
           id: 'mcnemar',
           method: 'mid-p',
