@@ -3,7 +3,7 @@ navigation_title: "AWS RDS"
 type: reference
 description: "Use the AWS RDS connector to query, explore schema, and run SQL against Amazon Aurora MySQL and PostgreSQL databases through the RDS Data API."
 applies_to:
-  stack: preview 9.6
+  stack: preview 9.7
   serverless: preview
 ---
 
@@ -40,7 +40,7 @@ To configure the connector:
 
 ## Create connectors in {{kib}} [define-aws-rds-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
+You can create connectors in **{{stack-manage-app}} → {{connectors-ui}}**.
 
 ### Connector configuration [aws-rds-connector-configuration]
 
