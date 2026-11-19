@@ -49,7 +49,7 @@ import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../common/uti
 import { visitNestedSteps } from '../definition/definition_utils';
 import type { VisitNestedStepEntry, WorkflowStep } from '../definition/definition_utils';
 import { getElasticsearchConnectors } from '../spec/elasticsearch';
-import { WorkflowSchemaBase } from '../spec/schema';
+import { ElasticsearchRequestStepInputSchema, WorkflowSchemaBase } from '../spec/schema';
 
 const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(z.object({ type: z.string().min(1) }).passthrough()).min(1),
@@ -447,7 +447,8 @@ describe('managedWorkflowDefinitions', () => {
   // Mirrors the editor's Run validation (POST /api/workflows/test): every elasticsearch.* step's
   // `with` must satisfy the connector paramsSchema from spec/elasticsearch; a stored `valid: true`
   // does not cover it. Values that are whole-string {{ }} / ${{ }} templates or contain {% %} tags
-  // are skipped, as parseWorkflowYamlToJSON does. elasticsearch.request is allowlist-skipped.
+  // are skipped, as parseWorkflowYamlToJSON does. elasticsearch.request has no package connector,
+  // so it is checked against the input schema its editor contract uses.
   it.each(managedDefinitionsById)(
     '%s elasticsearch steps satisfy the connector params schema',
     (_id, definition) => {
@@ -464,28 +465,27 @@ describe('managedWorkflowDefinitions', () => {
         if (!step.type.startsWith('elasticsearch.')) {
           return;
         }
-        const connector = elasticsearchConnectorsByType.get(step.type);
-        if (!connector) {
-          if (step.type !== 'elasticsearch.request') {
-            failures.push({
-              path,
-              issuePaths: [],
-              error: `Unknown elasticsearch step type '${step.type}': extend the allowlist or add a package connector`,
-            });
-          }
+        const paramsSchema =
+          step.type === 'elasticsearch.request'
+            ? ElasticsearchRequestStepInputSchema
+            : elasticsearchConnectorsByType.get(step.type)?.paramsSchema;
+        if (!paramsSchema) {
+          failures.push({
+            path,
+            issuePaths: [],
+            error: `Unknown elasticsearch step type '${step.type}': add a package connector`,
+          });
           return;
         }
 
         const params = (step as { with?: unknown }).with;
-        const result = connector.paramsSchema.safeParse(params ?? {});
+        const result = paramsSchema.safeParse(params ?? {});
         if (result.success) {
           return;
         }
 
         const survivingIssues = result.error.issues.filter((issue) => {
-          if (issue.path.length === 0) {
-            return true;
-          }
+          // An empty path is `with` itself, which Run also skips when it is a whole-value template.
           let current: unknown = params;
           for (const segment of issue.path) {
             if (current === null || typeof current !== 'object') {
