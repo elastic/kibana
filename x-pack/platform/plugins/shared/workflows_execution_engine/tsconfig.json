@@ -47,7 +47,8 @@
     "@kbn/es-errors",
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/config"
   ],
   "exclude": ["target/**/*"]
 }
