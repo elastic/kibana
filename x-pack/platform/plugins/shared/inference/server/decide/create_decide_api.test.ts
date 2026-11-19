@@ -131,19 +131,23 @@ describe('createDecideApi', () => {
 
     expect(isInferenceRequestError(error)).toBe(true);
     expect(error.meta.status).toBe(404);
+    expect(error.message).toBe("Inference endpoint 'missing' not found");
   });
 
-  it('throws a 404 request error when Elasticsearch does not know the decision task type', async () => {
+  it('keeps a 400 for an endpoint with another task type', async () => {
     const { decide, transportRequest } = setup();
 
-    transportRequest.mockRejectedValue(responseError(400, 'Unknown task_type [decision]'));
+    transportRequest.mockRejectedValue(
+      responseError(400, 'Incompatible task_type, the requested type [decision] does not match')
+    );
 
-    const error = await decide({ input, inferenceId: 'my-decision' }, shouldRespond).catch(
+    const error = await decide({ input, inferenceId: 'my-chat-model' }, shouldRespond).catch(
       (thrown) => thrown
     );
 
-    expect(isInferenceRequestError(error)).toBe(true);
-    expect(error.meta.status).toBe(404);
+    expect(isInferenceRequestError(error)).toBe(false);
+    expect(isInferenceProviderError(error)).toBe(true);
+    expect(error.meta.status).toBe(400);
   });
 
   it('throws other Elasticsearch errors as provider errors with their status', async () => {

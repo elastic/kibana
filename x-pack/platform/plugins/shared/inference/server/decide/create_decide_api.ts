@@ -43,13 +43,13 @@ const toKeyedQuestions = (
 ): Record<string, DecisionQuestion> =>
   Object.fromEntries(questions.map((question, index) => [questionKey(index), question]));
 
-/** Maps Elasticsearch errors: a missing endpoint or task type is a 404 request error. */
+/** Maps Elasticsearch errors to inference errors. */
 const toInferenceError = ({
   error,
-  abortSignal,
+  options: { inferenceId, abortSignal },
 }: {
   error: Error;
-  abortSignal?: AbortSignal;
+  options: DecideOptions;
 }): Error => {
   if (isInferenceError(error)) {
     return error;
@@ -60,10 +60,10 @@ const toInferenceError = ({
   }
 
   if (error instanceof errors.ResponseError) {
-    const { statusCode, body } = error.meta;
+    const { statusCode } = error.meta;
 
-    if (statusCode === 404 || (statusCode === 400 && JSON.stringify(body).includes('task_type'))) {
-      return createInferenceRequestError(error.message, 404);
+    if (statusCode === 404) {
+      return createInferenceRequestError(`Inference endpoint '${inferenceId}' not found`, 404);
     }
 
     return createInferenceProviderError(error.message, { status: statusCode ?? undefined });
@@ -188,7 +188,7 @@ export function createDecideApi({
 
           return questions.length === 1 ? { answer: answers[0] } : { answers };
         } catch (error) {
-          const inferenceError = toInferenceError({ error, abortSignal: options.abortSignal });
+          const inferenceError = toInferenceError({ error, options });
 
           logger.debug(
             `Decision [${questionTypes}] failed after ${Date.now() - startedAt}ms: ${
