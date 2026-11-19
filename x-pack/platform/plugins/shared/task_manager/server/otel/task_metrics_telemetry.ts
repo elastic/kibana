@@ -17,8 +17,8 @@ import { BACKPRESSURE_REASONS, type BackpressureReason } from '../lib/backpressu
 import { getTaskTypeGroup } from '../metrics/lib';
 import type { TaskManagerMetrics } from '../metrics/task_metrics_collector';
 
-const ATTR_TASK_TYPE = 'task_type';
-const ATTR_TASK_TYPE_GROUP = 'task_type_group';
+const ATTR_TASK_TYPE = 'kibana.task.type';
+const ATTR_TASK_TYPE_GROUP = 'kibana.task.type_group';
 const ATTR_TASK_STATUS = 'kibana.task.status';
 const ATTR_ERROR_TYPE = 'error.type';
 const ATTR_CLAIM_STATUS = 'kibana.task_manager.claim.status';

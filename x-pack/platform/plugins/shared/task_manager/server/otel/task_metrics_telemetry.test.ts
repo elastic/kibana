@@ -69,15 +69,15 @@ describe('taskManagerMetricsTelemetry', () => {
       expect.arrayContaining([
         expect.objectContaining({
           attributes: {
-            task_type: 'alerting:.index-threshold',
-            task_type_group: 'alerting',
+            'kibana.task.type': 'alerting:.index-threshold',
+            'kibana.task.type_group': 'alerting',
             'kibana.task.status': 'success',
           },
           value: 1,
         }),
         expect.objectContaining({
           attributes: {
-            task_type: 'report',
+            'kibana.task.type': 'report',
             'kibana.task.status': 'error',
             'error.type': 'framework',
           },
@@ -86,10 +86,10 @@ describe('taskManagerMetricsTelemetry', () => {
       ])
     );
     expect(collected.get('kibana.task.execution.timeout.count')).toEqual([
-      expect.objectContaining({ attributes: { task_type: 'report' }, value: 1 }),
+      expect.objectContaining({ attributes: { 'kibana.task.type': 'report' }, value: 1 }),
     ]);
     expect(collected.get('kibana.task.execution.rescheduled_failure.count')).toEqual([
-      expect.objectContaining({ attributes: { task_type: 'report' }, value: 1 }),
+      expect.objectContaining({ attributes: { 'kibana.task.type': 'report' }, value: 1 }),
     ]);
   });
 
