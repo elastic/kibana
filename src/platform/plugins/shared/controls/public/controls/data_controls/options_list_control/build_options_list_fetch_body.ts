@@ -12,7 +12,6 @@ import type {
   OptionsListSelection,
   OptionsListSortingType,
 } from '@kbn/controls-schemas';
-import { ControlValuesSource } from '@kbn/controls-constants';
 import { getFilterableFieldSpec } from '@kbn/data-source';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
@@ -40,10 +39,60 @@ export type BuildOptionsListFetchBodyResult =
       response: OptionsListSuccessResponse | Pick<OptionsListSuccessResponse, 'suggestions'>;
     };
 
-export function buildOptionsListFetchBody({
-  valuesSource,
+type SharedFetchBodyArgs = {
+  dataSource?: FilterableSource;
+  fetchContext: FetchContext;
+  useGlobalFilters: boolean | undefined;
+  searchString: string;
+  sort: OptionsListSortingType;
+  searchTechnique: OptionsListSearchTechnique;
+  selectedOptions: OptionsListSelection[];
+  ignoreValidations: boolean | undefined;
+};
+
+export function buildEsqlFetchBody({
   esqlQuery,
-  dataSources,
+  dataSource,
+  fetchContext,
+  useGlobalFilters,
+  searchString,
+  sort,
+  searchTechnique,
+  selectedOptions,
+  ignoreValidations,
+}: SharedFetchBodyArgs & { esqlQuery?: string }): BuildOptionsListFetchBodyResult {
+  if (!esqlQuery) {
+    return { outcome: 'empty', response: { suggestions: [] } };
+  }
+
+  const timeRange = getFetchContextTimeRange(fetchContext, useGlobalFilters);
+
+  const body: OptionsListESQLFetchBody = {
+    kind: 'esql',
+    esql: esqlQuery,
+    timeRange,
+    filter: buildESQLPreFilter({
+      fetchContext,
+      useGlobalFilters,
+      dataSource,
+      timeRange,
+      esqlQuery,
+    }),
+    sort,
+    searchString,
+    searchTechnique,
+    selectedOptions,
+    esqlVariables: fetchContext.esqlVariables,
+    ignoreValidations,
+    isReload: fetchContext.isReload,
+    projectRouting: fetchContext.projectRouting,
+  };
+
+  return { outcome: 'fetch', body, showLoadingSuggestions: false };
+}
+
+export function buildDslFetchBody({
+  dataSource,
   field,
   fetchContext,
   useGlobalFilters,
@@ -54,54 +103,11 @@ export function buildOptionsListFetchBody({
   runPastTimeout,
   selectedOptions,
   ignoreValidations,
-}: {
-  valuesSource: ControlValuesSource;
-  esqlQuery?: string;
-  dataSources?: FilterableSource[];
+}: SharedFetchBodyArgs & {
   field?: FilterableField;
-  fetchContext: FetchContext;
-  useGlobalFilters: boolean | undefined;
-  searchString: string;
-  sort: OptionsListSortingType;
-  searchTechnique: OptionsListSearchTechnique;
   requestSize: number;
   runPastTimeout: boolean;
-  selectedOptions: OptionsListSelection[];
-  ignoreValidations: boolean | undefined;
 }): BuildOptionsListFetchBodyResult {
-  if (valuesSource === ControlValuesSource.ESQL) {
-    if (!esqlQuery) {
-      return { outcome: 'empty', response: { suggestions: [] } };
-    }
-
-    const timeRange = getFetchContextTimeRange(fetchContext, useGlobalFilters);
-    const dataSource = dataSources?.[0];
-
-    const body: OptionsListESQLFetchBody = {
-      kind: 'esql',
-      esql: esqlQuery,
-      timeRange,
-      filter: buildESQLPreFilter({
-        fetchContext,
-        useGlobalFilters,
-        dataSource,
-        timeRange,
-        esqlQuery,
-      }),
-      sort,
-      searchString,
-      searchTechnique,
-      selectedOptions,
-      esqlVariables: fetchContext.esqlVariables,
-      ignoreValidations,
-      isReload: fetchContext.isReload,
-      projectRouting: fetchContext.projectRouting,
-    };
-
-    return { outcome: 'fetch', body, showLoadingSuggestions: false };
-  }
-
-  const dataSource = dataSources?.[0];
   if (
     !dataSource ||
     !field ||

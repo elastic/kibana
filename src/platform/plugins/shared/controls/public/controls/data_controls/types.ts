@@ -31,12 +31,26 @@ export interface PublishesField {
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
+/**
+ * How `valuesSource$` is executed, based on the configured `ControlValuesSource` and the type of
+ * the data source.
+ * - `esql`: values are fetched with an ES|QL query. `query` is the user supplied query for
+ *   `ControlValuesSource.ESQL` and a generated query for `ControlValuesSource.FIELD`.
+ * - `dsl`: values are fetched with a DSL request on a data view field.
+ */
+export type ValuesSourceFetchPlan = { fetchMode: 'esql'; query?: string } | { fetchMode: 'dsl' };
+
+export interface PublishesValuesSourceFetchPlan {
+  valuesSourceFetchPlan$: PublishingSubject<ValuesSourceFetchPlan | undefined>;
+}
+
 export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'] &
   Partial<HasCustomPrepend> &
   HasEditCapabilities &
   PublishesDataSources &
   PublishesBlockingError &
   PublishesField &
+  PublishesValuesSourceFetchPlan &
   PublishesDataLoading &
   AppliesFilters &
   HasPanelCapabilities &

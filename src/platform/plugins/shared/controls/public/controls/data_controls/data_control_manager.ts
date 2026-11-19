@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
   distinctUntilChanged,
   filter,
+  map,
   merge,
   switchMap,
   tap,
@@ -25,10 +26,12 @@ import {
 } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 
+import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { Filter } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import { appendStatsByToQuery, formatEsqlIdentifier, formatEsqlSources } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
@@ -36,7 +39,7 @@ import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/sta
 
 import { dataService, dataViewsService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
-import type { DataControlApi, DataControlFieldFormatter } from './types';
+import type { DataControlApi, DataControlFieldFormatter, ValuesSourceFetchPlan } from './types';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
 import { getControlsTimezone } from '../utils';
@@ -301,6 +304,43 @@ export const initializeDataControlManager = async <EditorState extends object = 
       setBlockingError(e);
     }
   }
+  const valuesSourceFetchPlan$ = new BehaviorSubject<ValuesSourceFetchPlan | undefined>(undefined);
+  const valuesSourceFetchPlanSubscription = combineLatest([
+    dataControlStateManager.api.valuesSource$,
+    dataControlStateManager.api.esqlQuery$,
+    dataSources$,
+    field$,
+  ])
+    .pipe(
+      map(
+        ([valuesSource, esqlQuery, nextDataSources, field]): ValuesSourceFetchPlan | undefined => {
+          const dataSource = nextDataSources?.[0];
+          // The plan is not known until the data source is loaded
+          if (!dataSource) return undefined;
+          // A `ControlValuesSource.ESQL` control already has its own user supplied query.
+          if (valuesSource === ControlValuesSource.ESQL) {
+            return { fetchMode: 'esql', query: esqlQuery };
+          }
+          // An ES|QL source has no data view to search, so a field control on it runs a generated query.
+          if (isEsqlFilterableSource(dataSource)) {
+            return {
+              fetchMode: 'esql',
+              // The field is not loaded yet when it is undefined
+              query: field
+                ? appendStatsByToQuery(
+                    `FROM ${formatEsqlSources(dataSource.title)}`,
+                    formatEsqlIdentifier(field.name)
+                  )
+                : undefined,
+            };
+          }
+          return { fetchMode: 'dsl' };
+        }
+      ),
+      distinctUntilChanged(isEqual)
+    )
+    .subscribe((resolved) => valuesSourceFetchPlan$.next(resolved));
+
   const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(
     initialFilter ? [initialFilter] : undefined
   );
@@ -315,6 +355,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       setDataLoading,
       dataSources$,
       field$,
+      valuesSourceFetchPlan$,
       fieldFormatter,
       onEdit,
       appliedFilters$,
@@ -330,6 +371,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       dataViewIdSubscription.unsubscribe();
       fieldNameSubscription.unsubscribe();
       esqlQueryDataSourceSubscription.unsubscribe();
+      valuesSourceFetchPlanSubscription.unsubscribe();
       labelManager.cleanup();
     },
     internalApi: {
