@@ -40,7 +40,7 @@ import { matchingTemplateId } from '../../../../../common/dreaming_templates';
 import type { AiIndexHttpItem } from '../../../../../common/http_api/ai_indices';
 import { validateDreamingInterval } from '../../../../../common/validation';
 import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
-import { useAllDreamingTemplates } from '../../../hooks/use_dreaming_templates';
+import { useDreamingTemplates } from '../../../hooks/use_dreaming_templates';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
 import { getAiIndexDreamingTemplatePath } from '../../../paths';
@@ -116,7 +116,7 @@ const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
   const [editedEnabled, setEditedEnabled] = useState<boolean>();
   const [editedInterval, setEditedInterval] = useState<string>();
   const { saveConfig, isSaving } = useSaveDreamingConfig();
-  const { templates } = useAllDreamingTemplates();
+  const { templates } = useDreamingTemplates();
 
   const draft = edited ?? saved;
   const savedInstructions = dreaming.instructions ?? '';
