@@ -43,7 +43,10 @@ export const updateConnectorRoute = (
         const includeSpecVersionField = actionsConfigUtils.isCatalogEnabled();
         return {
           request: {
-            body: getUpdateConnectorBodySchemaV1(includeInboundEventsField),
+            body: getUpdateConnectorBodySchemaV1(
+              includeInboundEventsField,
+              includeSpecVersionField
+            ),
             params: updateConnectorParamsSchemaV1,
           },
           response: {
@@ -65,10 +68,22 @@ export const updateConnectorRoute = (
           const actions = await context.actions;
           const actionsClient = actions.getActionsClient();
           const { id }: UpdateConnectorParamsV1 = req.params;
+          try {
+            getUpdateConnectorBodySchemaV1(
+              actionsConfigUtils.isInboundEventsEnabled(),
+              actions.isCatalogFeatureFlagEnabled()
+            ).validate(req.body, {}, 'request body');
+          } catch (error) {
+            return res.badRequest({
+              body: error.message,
+            });
+          }
+
           const {
             name,
             config,
             secrets,
+            spec_version: specVersion,
             is_inbound_events_enabled: isInboundEventsEnabled,
           }: UpdateConnectorBodyV1 = req.body;
 
@@ -78,6 +93,7 @@ export const updateConnectorRoute = (
                 id,
                 action: {
                   name,
+                  specVersion,
                   config,
                   secrets,
                   ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),

@@ -11,6 +11,7 @@ import {
   CONNECTOR_CONFIG_KEY_MAX_LENGTH,
   CONNECTOR_ID_MAX_LENGTH,
   CONNECTOR_NAME_MAX_LENGTH,
+  CONNECTOR_SPEC_VERSION_MAX_LENGTH,
 } from '../../../../..';
 
 export const updateConnectorParamsSchema = schema.object({
@@ -42,6 +43,18 @@ const updateConnectorBodyFields = {
   ),
 };
 
+const specVersionUpdateField = {
+  spec_version: schema.maybe(
+    schema.string({
+      maxLength: CONNECTOR_SPEC_VERSION_MAX_LENGTH,
+      meta: {
+        description:
+          'The connector schema version to move to, as a major (for example, "1") or exact major.minor (for example, "1.3"). When omitted, versioned connectors keep their major and move to its latest accepted minor. Config and secrets replace the stored values and must be valid for the resulting version.',
+      },
+    })
+  ),
+};
+
 const isInboundEventsEnabledUpdateField = {
   is_inbound_events_enabled: schema.maybe(
     schema.boolean({
@@ -54,14 +67,18 @@ const isInboundEventsEnabledUpdateField = {
 };
 
 /** Update-connector body schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
-export const getUpdateConnectorBodySchema = (includeInboundEventsField: boolean) =>
+export const getUpdateConnectorBodySchema = (
+  includeInboundEventsField: boolean,
+  includeSpecVersionField: boolean
+) =>
   schema.object(
     {
       ...updateConnectorBodyFields,
+      ...(includeSpecVersionField ? specVersionUpdateField : {}),
       ...(includeInboundEventsField ? isInboundEventsEnabledUpdateField : {}),
     },
     { meta: { id: 'update_connector' } }
   );
 
 /** Flag-on schema so TypeOf includes the optional field. */
-export const updateConnectorBodySchema = getUpdateConnectorBodySchema(true);
+export const updateConnectorBodySchema = getUpdateConnectorBodySchema(true, true);
