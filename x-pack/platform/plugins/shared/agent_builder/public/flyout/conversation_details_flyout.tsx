@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Component, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ComponentType, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
@@ -167,6 +167,11 @@ type DetailsLoader = () => Promise<ConversationTemplateDetailsFlyoutModule>;
 type LoadedDetailsProps = Omit<DetailsTemplateProps, 'descriptor'>;
 
 const loadedDetailsByLoader = new WeakMap<DetailsLoader, ComponentType<LoadedDetailsProps>>();
+// React keeps a rejected lazy component rejected, so a failed load needs a fresh one. The rejection
+// is recorded when the load fails, because the flyout that started it may have closed by then. The
+// lazy component renders under its own Suspense: a retry after the rejection then re-renders only
+// that subtree, and `getLoadedDetails` is not asked for another component while the error shows. A
+// render error leaves the loaded module cached, so the other open flyouts stay mounted.
 const rejectedLoadedDetails = new WeakSet<ComponentType<LoadedDetailsProps>>();
 
 /**
@@ -175,7 +180,7 @@ const rejectedLoadedDetails = new WeakSet<ComponentType<LoadedDetailsProps>>();
  */
 const getLoadedDetails = (load: DetailsLoader): ComponentType<LoadedDetailsProps> => {
   const cached = loadedDetailsByLoader.get(load);
-  if (cached) {
+  if (cached && !rejectedLoadedDetails.has(cached)) {
     return cached;
   }
   const LoadedDetails: ComponentType<LoadedDetailsProps> = React.lazy(async () => {
@@ -216,24 +221,13 @@ const getLoadedDetails = (load: DetailsLoader): ComponentType<LoadedDetailsProps
 
 /** Shows the error state when a template's module fails to load or its flyout fails to render. */
 class DetailsErrorBoundary extends Component<
-  { load: DetailsLoader; onClose: () => void; children: ReactNode },
+  { onClose: () => void; children: ReactNode },
   { hasError: boolean }
 > {
   public state = { hasError: false };
 
   public static getDerivedStateFromError() {
     return { hasError: true };
-  }
-
-  public componentDidCatch() {
-    // React keeps a rejected lazy component rejected, so the next open needs a fresh one. Evicting
-    // any earlier, while React retries the render, would start a new load on every retry. A render
-    // error leaves a loaded module cached: evicting it would remount other open flyouts.
-    const { load } = this.props;
-    const cached = loadedDetailsByLoader.get(load);
-    if (cached && rejectedLoadedDetails.has(cached)) {
-      loadedDetailsByLoader.delete(load);
-    }
   }
 
   public render() {
@@ -280,14 +274,16 @@ export const ConversationDetailsFlyoutContent = ({
   if (detailsFlyout?.load) {
     const LoadedDetails = getLoadedDetails(detailsFlyout.load);
     return (
-      <DetailsErrorBoundary key={conversation.id} load={detailsFlyout.load} onClose={onClose}>
-        <LoadedDetails
-          {...renderProps}
-          tabs={tabs}
-          selectedTabId={effectiveSelectedTabId}
-          onTabChange={setSelectedTabId}
-          onClose={onClose}
-        />
+      <DetailsErrorBoundary key={conversation.id} onClose={onClose}>
+        <Suspense fallback={<LoadingDeclaration onClose={onClose} />}>
+          <LoadedDetails
+            {...renderProps}
+            tabs={tabs}
+            selectedTabId={effectiveSelectedTabId}
+            onTabChange={setSelectedTabId}
+            onClose={onClose}
+          />
+        </Suspense>
       </DetailsErrorBoundary>
     );
   }

@@ -489,6 +489,33 @@ describe('ConversationDetailsFlyoutContent', () => {
     consoleError.mockRestore();
   });
 
+  it('loads the template module again on the next open when a load rejects after its flyout closed', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    let rejectLoad: (error: Error) => void = () => {};
+    const load = jest
+      .fn<Promise<ConversationTemplateDetailsFlyoutModule>, []>()
+      .mockImplementationOnce(
+        () =>
+          new Promise((_, reject) => {
+            rejectLoad = reject;
+          })
+      )
+      .mockResolvedValue({ useDetailsFlyout: () => ({ header: { title: 'Loaded title' } }) });
+    const service = createService({ detailsFlyout: { load } });
+
+    const { unmount } = renderContent(service);
+    unmount();
+    await act(async () => rejectLoad(new Error('chunk failed')));
+
+    renderContent(service);
+    await act(async () => {});
+
+    expect(screen.getByRole('heading', { name: 'Loaded title' })).toBeInTheDocument();
+    expect(screen.queryByText(ERROR_BODY)).not.toBeInTheDocument();
+    expect(load).toHaveBeenCalledTimes(2);
+    consoleError.mockRestore();
+  });
+
   it('keeps other open flyouts for the template mounted when one fails to render', async () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
     const load = jest.fn(
