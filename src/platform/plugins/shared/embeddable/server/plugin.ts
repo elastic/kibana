@@ -34,6 +34,8 @@ import { getDrilldownRegistry } from './drilldowns/registry';
 import type { EmbeddableServerDefinition } from './embeddable_transforms/types';
 import { getEmbeddableServerRegistry } from './embeddable_transforms/registry';
 import { registerSearchRoute } from './search_route';
+import { getPanelTypeMigrationRegistry } from './panel_type_migrations/registry';
+import type { PanelTypeMigration } from './panel_type_migrations/types';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -55,6 +57,11 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
     type: string,
     transforms: EmbeddableServerDefinition<any, any>
   ) => void;
+  /**
+   * Registers a read-time migration that converts stored panels of one type into other panel types.
+   * Only one migration may be registered per source type.
+   */
+  registerPanelTypeMigration: (migration: PanelTypeMigration) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
 
@@ -79,6 +86,8 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
         throwOnUnmappedPanel?: EmbeddableServerDefinition['throwOnUnmappedPanel'];
       })
     | undefined;
+
+  getPanelTypeMigration: (from: string) => PanelTypeMigration | undefined;
 };
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -86,6 +95,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private migrateFn: PersistableStateMigrateFn | undefined;
   private drilldownRegistry = getDrilldownRegistry();
   private transformsRegistry = getEmbeddableServerRegistry(this.drilldownRegistry);
+  private panelTypeMigrationRegistry = getPanelTypeMigrationRegistry();
 
   public setup(core: CoreSetup): EmbeddableSetup {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
@@ -99,6 +109,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
         .registerDrilldown as EmbeddableSetup['registerDrilldown'],
       registerEmbeddableServerDefinition:
         this.transformsRegistry.registerEmbeddableServerDefinition,
+      registerPanelTypeMigration: this.panelTypeMigrationRegistry.registerPanelTypeMigration,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),
@@ -122,6 +133,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,
       getComparators: this.transformsRegistry.getComparators,
+      getPanelTypeMigration: this.panelTypeMigrationRegistry.getPanelTypeMigration,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),

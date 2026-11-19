@@ -18,3 +18,4 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { VisualizationsServerSetup, VisualizationsServerStart } from './types';
+export type { LegacyPanelMigration } from './legacy_panel_migrations/types';

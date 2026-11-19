@@ -16,6 +16,7 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import type { TimeRange, Query } from '@kbn/es-query';
 import type { KibanaContext } from '@kbn/data-plugin/public';
+import { VEGA_VIS_NAME } from '../common/constants';
 import type { VegaVisualizationDependencies } from './plugin';
 import type { VegaInspectorAdapters } from './vega_inspector';
 import type { VegaRenderDescriptor } from './data_model/types';
@@ -33,7 +34,7 @@ export interface RenderValue {
   visData: VegaRenderDescriptor;
   /** Parent-side only and not cloneable, unlike `visData`; the view never receives these. */
   inspectorAdapters?: VegaInspectorAdapters;
-  visType: 'vega';
+  visType: typeof VEGA_VIS_NAME;
   visConfig: VisParams;
 }
 
@@ -83,7 +84,7 @@ export const createVegaFn = (
       value: {
         visData: response,
         inspectorAdapters: context.inspectorAdapters,
-        visType: 'vega',
+        visType: VEGA_VIS_NAME,
         visConfig: {
           spec: args.spec,
         },
