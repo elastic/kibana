@@ -129,11 +129,7 @@ export const ChartsGrid: FC<{
                 fieldConfig={{ splitField: v.splitField, fn: v.fn, metricField: v.metricField }}
                 annotation={v}
                 interval={interval}
-                onLoading={(isLoading) => {
-                  if (isLoading) {
-                    onChartRenderCompleteCallback(index, true);
-                  }
-                }}
+                onLoading={(isLoading) => onChartRenderCompleteCallback(index, isLoading)}
                 onRenderComplete={() => {
                   onChartRenderCompleteCallback(index, false);
                 }}
