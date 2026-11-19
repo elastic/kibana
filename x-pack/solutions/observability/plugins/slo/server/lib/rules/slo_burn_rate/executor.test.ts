@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
 import apm from 'elastic-apm-node';
-import type { Rule, SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
 import type {
   IBasePath,
   IUiSettingsClient,
-  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
@@ -37,7 +35,6 @@ import {
   ALERT_GROUP,
   ALERT_GROUPING,
   ALERT_REASON,
-  SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { storedSloDefinitionSchema } from '@kbn/slo-schema';
@@ -65,6 +62,8 @@ import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
 import type { BurnRateAlert } from './executor';
 import { getRuleExecutor } from './executor';
+import { createEvaluationResponse, createGroupingsResponse } from './fixtures/evaluation';
+import { createBurnRateRuleSavedObject } from './fixtures/rule';
 import type {
   BurnRateAlertContext,
   BurnRateAlertState,
@@ -116,41 +115,6 @@ function createFindResponse(
   };
 }
 
-function createGetRuleResponse(
-  ruleId: string,
-  ruleParams: BurnRateRuleParams
-): SavedObject<Rule<BurnRateRuleParams>> {
-  return {
-    id: ruleId,
-    type: 'alert',
-    references: [],
-    attributes: {
-      id: ruleId,
-      enabled: true,
-      name: 'Fake Parent Rule for SLO Burn Rate',
-      alertTypeId: SLO_BURN_RATE_RULE_TYPE_ID,
-      consumer: 'observability',
-      schedule: { interval: '1m' },
-      params: ruleParams,
-      tags: [],
-      actions: [],
-      createdBy: 'nobody',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      updatedBy: 'nobody',
-      apiKey: 'some-fake-key',
-      apiKeyOwner: 'some-user',
-      muteAll: false,
-      mutedInstanceIds: [],
-      revision: 1,
-      executionStatus: {
-        status: 'ok',
-        lastExecutionDate: new Date(),
-      },
-    },
-  };
-}
-
 function getTimeRange() {
   const date = new Date(Date.now()).toISOString();
   return { dateStart: date, dateEnd: date };
@@ -179,6 +143,11 @@ describe('BurnRateRuleExecutor', () => {
     loggerMock = loggingSystemMock.createLogger();
     searchSourceClientMock = jest.fn() as any;
     uiSettingsClientMock = jest.fn() as any;
+    const alertsClientMock = publicAlertsClientMock.create();
+    alertsClientMock.report.mockImplementation(({ id }: { id: string }) => ({
+      uuid: `uuid-${id}`,
+      start: new Date().toISOString(),
+    }));
     servicesMock = {
       savedObjectsClient: soClientMock,
       scopedClusterClient: {
@@ -186,7 +155,7 @@ describe('BurnRateRuleExecutor', () => {
         asInternalUser: esClientMock,
         asSecondaryAuthUser: esClientMock,
       },
-      alertsClient: publicAlertsClientMock.create(),
+      alertsClient: alertsClientMock,
       alertFactory: {
         create: jest.fn(),
         done: jest.fn(),
@@ -421,8 +390,6 @@ describe('BurnRateRuleExecutor', () => {
           },
         },
       ]);
-      mockAlertReport(servicesMock.alertsClient!);
-
       const executor = getRuleExecutor(basePathMock);
 
       await executor({
@@ -561,12 +528,10 @@ describe('BurnRateRuleExecutor', () => {
 
       // evaluateDependencies mocks
       soClientMock.get.mockResolvedValueOnce(
-        createGetRuleResponse('parent-rule', dependencyRuleParams)
+        createBurnRateRuleSavedObject('parent-rule', dependencyRuleParams)
       );
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
       mockEvaluation(esClientMock, rows, { withGroupings: false });
-      mockAlertReport(servicesMock.alertsClient!);
-
       const executor = getRuleExecutor(basePathMock);
 
       await executor({
@@ -691,12 +656,10 @@ describe('BurnRateRuleExecutor', () => {
 
       // evaluateDependencies mocks
       soClientMock.get.mockResolvedValueOnce(
-        createGetRuleResponse('parent-rule', dependencyRuleParams)
+        createBurnRateRuleSavedObject('parent-rule', dependencyRuleParams)
       );
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
       mockEvaluation(esClientMock, [fooRow], { withGroupings: false });
-      mockAlertReport(servicesMock.alertsClient!);
-
       const executor = getRuleExecutor(basePathMock);
       await executor({
         params: ruleParams,
@@ -754,8 +717,6 @@ describe('BurnRateRuleExecutor', () => {
       // Mock summary repository es searches
       esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponse());
       esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponse());
-      mockAlertReport(servicesMock.alertsClient!);
-
       const executor = getRuleExecutor(basePathMock);
       await executor({
         params: ruleParams,
@@ -882,8 +843,6 @@ describe('BurnRateRuleExecutor', () => {
           groupings: { group: { by: { field: 'bar' } } },
         },
       ]);
-      mockAlertReport(servicesMock.alertsClient!);
-
       const executor = getRuleExecutor(basePathMock);
       await executor({
         params: ruleParams,
@@ -930,8 +889,6 @@ describe('BurnRateRuleExecutor', () => {
           groupings: { group: { by: { field: 'bar' } } },
         },
       ]);
-      mockAlertReport(servicesMock.alertsClient!);
-
       const executor = getRuleExecutor(basePathMock);
       await executor({
         params: ruleParams,
@@ -964,8 +921,6 @@ describe('BurnRateRuleExecutor', () => {
         { instanceId: '*', windowIndex: 0, shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
       ]);
       esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponseWithApmFields());
-      mockAlertReport(servicesMock.alertsClient!);
-
       const executor = getRuleExecutor(basePathMock);
       await executor({
         params: ruleParams,
@@ -1082,7 +1037,6 @@ describe('BurnRateRuleExecutor', () => {
       mockEvaluation(esClientMock, [
         { instanceId: '*', windowIndex: 0, shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
       ]);
-      mockAlertReport(servicesMock.alertsClient!);
       const executor = getRuleExecutor(basePathMock);
 
       await executor({
@@ -1162,61 +1116,24 @@ interface EvaluationRow {
   groupings?: Record<string, unknown>;
 }
 
-function generateEsqlResponse(rows: EvaluationRow[]): estypes.EsqlQueryResponse {
-  return {
-    columns: [
-      { name: 'instance_id', type: 'keyword' },
-      { name: 'window_index', type: 'integer' },
-      { name: 'short_window_burn_rate', type: 'double' },
-      { name: 'long_window_burn_rate', type: 'double' },
-    ],
-    values: rows.map(({ instanceId, windowIndex, shortWindowBurnRate, longWindowBurnRate }) => [
-      instanceId,
-      windowIndex,
-      shortWindowBurnRate,
-      longWindowBurnRate,
-    ]),
-  };
-}
-
-function generateGroupingsResponse(rows: EvaluationRow[]) {
-  return {
-    ...commonEsResponse,
-    hits: {
-      hits: rows.map(({ instanceId, groupings }) => ({
-        _index: '.slo-observability.sli-v3',
-        _id: instanceId,
-        _source: { slo: { instanceId, groupings } },
-      })),
-    },
-  };
-}
-
 function mockEvaluation(
   esClient: ElasticsearchClientMock,
   rows: EvaluationRow[],
   { withGroupings = true }: { withGroupings?: boolean } = {}
 ) {
-  esClient.esql.query.mockResolvedValueOnce(generateEsqlResponse(rows));
+  esClient.esql.query.mockResolvedValueOnce(
+    createEvaluationResponse(
+      rows.map(({ instanceId, windowIndex, shortWindowBurnRate, longWindowBurnRate }) => [
+        instanceId,
+        windowIndex,
+        shortWindowBurnRate,
+        longWindowBurnRate,
+      ])
+    )
+  );
   if (withGroupings && rows.length > 0) {
-    esClient.search.mockResolvedValueOnce(generateGroupingsResponse(rows));
+    esClient.search.mockResolvedValueOnce(createGroupingsResponse(rows));
   }
-}
-
-function mockAlertReport(
-  alertsClient: NonNullable<
-    RuleExecutorServices<
-      BurnRateAlertState,
-      BurnRateAlertContext,
-      BurnRateAllowedActionGroups,
-      BurnRateAlert
-    >['alertsClient']
-  >
-) {
-  jest.mocked(alertsClient.report).mockImplementation(({ id }) => ({
-    uuid: `uuid-${id}`,
-    start: new Date().toISOString(),
-  }));
 }
 
 function generateEsSummaryResponse() {

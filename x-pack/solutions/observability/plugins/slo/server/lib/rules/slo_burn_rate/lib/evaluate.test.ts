@@ -5,63 +5,35 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createKQLCustomIndicator, createSLO } from '../../../../services/fixtures/slo';
+import { createEvaluationResponse, createGroupingsResponse } from '../fixtures/evaluation';
 import { createBurnRateRule } from '../fixtures/rule';
 import { MAX_EVALUATION_RESULTS } from '../constants';
 import { buildEvaluationFilter, buildEvaluationQuery } from './build_query';
 import { evaluate, findBreachingInstances } from './evaluate';
 
-const COLUMNS = [
-  { name: 'instance_id', type: 'keyword' },
-  { name: 'window_index', type: 'integer' },
-  { name: 'short_window_burn_rate', type: 'double' },
-  { name: 'long_window_burn_rate', type: 'double' },
-];
-
-const esqlResponse = (
-  values: Array<[string, number, number, number]>
-): estypes.EsqlQueryResponse => ({
-  columns: COLUMNS,
-  values,
-});
-
-const groupingsResponse = (
-  hits: Array<{ instanceId: string; groupings: Record<string, unknown> }>
-): estypes.SearchResponse => ({
-  took: 1,
-  timed_out: false,
-  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-  hits: {
-    hits: hits.map(({ instanceId, groupings }) => ({
-      _index: '.slo-observability.sli-v3',
-      _id: instanceId,
-      _source: { slo: { instanceId, groupings } },
-    })),
-  },
-});
-
 describe('evaluate', () => {
+  const STARTED_AT = new Date('2023-01-01T00:00:00.000Z');
   let esClient: ElasticsearchClientMock;
   const slo = createSLO({ id: 'irrelevant', indicator: createKQLCustomIndicator() });
   const params = createBurnRateRule(slo);
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(esqlResponse([]));
+    esClient.esql.query.mockResolvedValue(createEvaluationResponse([]));
   });
 
   it('returns the breaching instances with the burn rates of their breaching window', async () => {
     esClient.esql.query.mockResolvedValueOnce(
-      esqlResponse([
+      createEvaluationResponse([
         ['host-a', 0, 20, 15],
         ['host-b', 3, 1.2, 1.1],
       ])
     );
     esClient.search.mockResolvedValueOnce(
-      groupingsResponse([
+      createGroupingsResponse([
         { instanceId: 'host-a', groupings: { host: { name: 'host-a' } } },
         { instanceId: 'host-b', groupings: { host: { name: 'host-b' } } },
       ])
@@ -92,11 +64,10 @@ describe('evaluate', () => {
   });
 
   it('only looks up the groupings of the breaching instances, within the evaluation filter', async () => {
-    const startedAt = new Date('2023-01-01T00:00:00.000Z');
-    esClient.esql.query.mockResolvedValueOnce(esqlResponse([['host-a', 0, 20, 15]]));
-    esClient.search.mockResolvedValueOnce(groupingsResponse([]));
+    esClient.esql.query.mockResolvedValueOnce(createEvaluationResponse([['host-a', 0, 20, 15]]));
+    esClient.search.mockResolvedValueOnce(createGroupingsResponse([]));
 
-    await evaluate(esClient, slo, params, startedAt);
+    await evaluate(esClient, slo, params, STARTED_AT);
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
     expect(esClient.search).toHaveBeenCalledWith(
@@ -106,7 +77,7 @@ describe('evaluate', () => {
         query: {
           bool: {
             filter: [
-              buildEvaluationFilter(startedAt, slo, params),
+              buildEvaluationFilter(STARTED_AT, slo, params),
               { terms: { 'slo.instanceId': ['host-a'] } },
             ],
           },
@@ -115,19 +86,19 @@ describe('evaluate', () => {
     );
   });
 
-  it('runs the evaluation query with its params and the SLO revision filter', async () => {
-    const startedAt = new Date('2023-01-01T00:00:00.000Z');
+  it('runs a single evaluation query bounded by the limit, with its params and the SLO revision filter', async () => {
+    await findBreachingInstances(esClient, slo, params, STARTED_AT, { limit: 10 });
 
-    await findBreachingInstances(esClient, slo, params, startedAt, { limit: 10 });
-
+    expect(esClient.esql.query).toHaveBeenCalledTimes(1);
     expect(esClient.esql.query).toHaveBeenCalledWith(
-      buildEvaluationQuery(startedAt, slo, params, 10)
+      buildEvaluationQuery(STARTED_AT, slo, params, 10)
     );
   });
 
   it('reads the result columns by name', async () => {
+    const { columns } = createEvaluationResponse([]);
     esClient.esql.query.mockResolvedValueOnce({
-      columns: [COLUMNS[3], COLUMNS[2], COLUMNS[1], COLUMNS[0]],
+      columns: [...columns].reverse(),
       values: [[15, 20, 1, 'host-a']],
     });
 
@@ -145,7 +116,7 @@ describe('evaluate', () => {
 
   it('throws when the evaluation returns an unknown window', async () => {
     esClient.esql.query.mockResolvedValueOnce(
-      esqlResponse([['host-a', params.windows.length, 20, 15]])
+      createEvaluationResponse([['host-a', params.windows.length, 20, 15]])
     );
 
     await expect(findBreachingInstances(esClient, slo, params, new Date())).rejects.toThrow(
@@ -155,13 +126,13 @@ describe('evaluate', () => {
 
   it('leaves the groupings undefined when none are found for an instance', async () => {
     esClient.esql.query.mockResolvedValueOnce(
-      esqlResponse([
+      createEvaluationResponse([
         ['host-a', 0, 20, 15],
         ['host-b', 0, 18, 16],
       ])
     );
     esClient.search.mockResolvedValueOnce(
-      groupingsResponse([{ instanceId: 'host-a', groupings: { host: { name: 'host-a' } } }])
+      createGroupingsResponse([{ instanceId: 'host-a', groupings: { host: { name: 'host-a' } } }])
     );
 
     const results = await evaluate(esClient, slo, params, new Date());
@@ -184,13 +155,6 @@ describe('evaluate', () => {
 
     expect(results).toEqual([]);
     expect(esClient.esql.query).not.toHaveBeenCalled();
-  });
-
-  it('runs a single ES|QL query bounded by the limit', async () => {
-    await findBreachingInstances(esClient, slo, params, new Date(), { limit: 1001 });
-
-    expect(esClient.esql.query).toHaveBeenCalledTimes(1);
-    expect(esClient.esql.query.mock.calls[0][0].query).toMatch(/\| LIMIT 1001$/);
   });
 
   it('caps the limit to the maximum ES|QL result size', async () => {
@@ -216,8 +180,8 @@ describe('evaluate', () => {
   });
 
   it('includes project_routing in both queries when projectRouting is provided', async () => {
-    esClient.esql.query.mockResolvedValueOnce(esqlResponse([['host-a', 0, 20, 15]]));
-    esClient.search.mockResolvedValueOnce(groupingsResponse([]));
+    esClient.esql.query.mockResolvedValueOnce(createEvaluationResponse([['host-a', 0, 20, 15]]));
+    esClient.search.mockResolvedValueOnce(createGroupingsResponse([]));
 
     await evaluate(esClient, slo, params, new Date(), { projectRouting: '_alias:_origin' });
 
@@ -230,8 +194,8 @@ describe('evaluate', () => {
   });
 
   it('omits project_routing from both queries when projectRouting is not provided', async () => {
-    esClient.esql.query.mockResolvedValueOnce(esqlResponse([['host-a', 0, 20, 15]]));
-    esClient.search.mockResolvedValueOnce(groupingsResponse([]));
+    esClient.esql.query.mockResolvedValueOnce(createEvaluationResponse([['host-a', 0, 20, 15]]));
+    esClient.search.mockResolvedValueOnce(createGroupingsResponse([]));
 
     await evaluate(esClient, slo, params, new Date());
 
