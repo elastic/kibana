@@ -51,6 +51,7 @@ describe('nightshift agent optimize workflow', () => {
         'response',
         'round_connector_id',
         'round_id',
+        'round_trace_id',
         'tool_calls',
         'tool_results',
         'workflow_context',

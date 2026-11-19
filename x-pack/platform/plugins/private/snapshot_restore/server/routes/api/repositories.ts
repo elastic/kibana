@@ -285,10 +285,8 @@ export function registerRepositoriesRoutes({
             };
 
             return {
-              body: {
-                cleaned: false,
-                error: wrapEsError(normalizedError),
-              },
+              cleaned: false,
+              error: wrapEsError(normalizedError),
             };
           });
 

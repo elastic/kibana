@@ -158,13 +158,17 @@ describe('session events', () => {
     const { results } = await service.saveEvents(jdoe, {
       sessionId: 'session-rejected',
       events: [
-        { ...base, type: 'user', id: 'question', content: 'Why is checkout slow?' },
+        { ...base, type: 'meta', id: 'bad-date', event_at: 'not-a-date' },
         { ...base, type: 'meta', id: 'meta' },
       ],
     });
 
     expect(results).toEqual([
-      { id: 'question', status: 'failed', error: expect.stringMatching(/inference|license/i) },
+      {
+        id: 'bad-date',
+        status: 'failed',
+        error: expect.stringMatching(/\[event_at\].*: failed to parse date field \[not-a-date\]/),
+      },
       { id: 'meta', status: 'created' },
     ]);
     expect(await countEvents({ session_id: 'session-rejected' })).toBe(1);

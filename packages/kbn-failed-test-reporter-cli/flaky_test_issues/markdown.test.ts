@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { testHistoryUrl } from '../failed_tests_reporter/test_history_dashboard';
 import {
+  andList,
   branchesByFailedBuilds,
+  dashboardButton,
+  dayStrip,
+  flakyDays,
   formatBuildLink,
   formatDateRange,
   formatFailedBranches,
@@ -18,7 +23,6 @@ import {
   formatFailureMessage,
   formatBranchRates,
   formatPercent,
-  testDashboardUrl,
   testsTable,
 } from './markdown';
 import { flakyTest } from './test_fixtures';
@@ -73,9 +77,9 @@ describe('formatBranchRates', () => {
   });
 
   it('lists only the branches clearing every threshold, highest rate first, in bold', () => {
-    expect(formatBranchRates(test, thresholds)).toBe('**`9.5` 3% (4 / 122)**');
+    expect(formatBranchRates(test, thresholds)).toBe('**`9.5` 3%&nbsp;(4&nbsp;/&nbsp;122)**');
     expect(formatBranchRates(test, { ...thresholds, minFailRate: 0.02 })).toBe(
-      '**`9.5` 3% (4 / 122)**<br>**`9.4` 2% (2 / 100)**'
+      '**`9.5` 3%&nbsp;(4&nbsp;/&nbsp;122)**<br>**`9.4` 2%&nbsp;(2&nbsp;/&nbsp;100)**'
     );
   });
 
@@ -85,17 +89,71 @@ describe('formatBranchRates', () => {
   });
 });
 
-describe('testDashboardUrl', () => {
-  it('filters the Scout dashboard on the test id, as a rison string', () => {
-    expect(testDashboardUrl('06fc533cda37130-a089b9a7d2f8995')).toBe(
-      "https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'06fc533cda37130-a089b9a7d2f8995'))))))))"
+describe('andList', () => {
+  it('joins the last two items with "and"', () => {
+    expect(andList([])).toBe('');
+    expect(andList(['a'])).toBe('a');
+    expect(andList(['a', 'b'])).toBe('a and b');
+    expect(andList(['a', 'b', 'c'])).toBe('a, b and c');
+  });
+});
+
+describe('dashboardButton', () => {
+  it("links a Kibana logo button to the test's history dashboard", () => {
+    expect(dashboardButton('t0')).toBe(
+      `[![Dashboard](https://img.shields.io/badge/-%20-005571?logo=kibana&logoColor=white)](${testHistoryUrl(
+        't0'
+      )})`
     );
-    // quotes and bangs are rison-escaped, spaces URL-encoded
-    expect(testDashboardUrl("it's a test!")).toContain("test.id:'it!'s%20a%20test!!'");
+  });
+});
+
+describe('flakyDays', () => {
+  const thresholds = { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03 };
+  const branch = (name: string, failedBuilds: number, failed?: number[], ran?: number[]) => ({
+    branch: name,
+    builds: 100,
+    failedBuilds,
+    buildFailRate: failedBuilds / 100,
+    ...(failed ? { failedDaysAgo: failed } : {}),
+    ...(ran ? { ranDaysAgo: ran } : {}),
+  });
+
+  it('merges the days of the branches the test is flaky on, leaving the others out', () => {
+    const test = flakyTest({
+      byBranch: [
+        branch('main', 10, [0, 2], [0, 1, 2]),
+        branch('9.6', 5, [5], [4, 5]),
+        // a stray failure on a branch it is not flaky on
+        branch('9.5', 1, [6], [6]),
+      ],
+    });
+    expect(flakyDays(test, thresholds, 7)).toEqual({
+      failed: new Set([0, 2, 5]),
+      ran: new Set([0, 1, 2, 4, 5]),
+    });
+  });
+
+  it('counts a run at the very start of the window as its first day', () => {
+    const test = flakyTest({ byBranch: [branch('main', 10, [7], [7])] });
+    expect(flakyDays(test, thresholds, 7)).toEqual({ failed: new Set([6]), ran: new Set([6]) });
+  });
+
+  it('knows no days for reports written before they were recorded', () => {
+    expect(flakyDays(flakyTest({ byBranch: [branch('main', 10)] }), thresholds, 7)).toBe(undefined);
+  });
+});
+
+describe('dayStrip', () => {
+  it('shows one square per day, oldest first, joined so that it never wraps', () => {
+    const strip = dayStrip({ failed: new Set([0, 4]), ran: new Set([0, 1, 2, 3, 4]) }, 7);
+    expect(strip.split('\u2060')).toEqual(['⬜', '⬜', '🟥', '🟩', '🟩', '🟩', '🟥']);
   });
 });
 
 describe('testsTable', () => {
+  const thresholds = { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03 };
+
   it('caps the rows and says how many tests are left', () => {
     const tests = Array.from({ length: 4 }, (_, index) =>
       flakyTest({ testId: `t${index}`, title: `test | ${index}` })
@@ -103,22 +161,28 @@ describe('testsTable', () => {
     const rendered = testsTable(tests, {
       withDashboardLinks: true,
       maxRows: 2,
-      thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03 },
+      thresholds,
+      lookbackDays: 7,
     });
 
     expect(rendered.split('\n')).toHaveLength(6);
-    expect(rendered).toContain('| Test | Flaky branches | Dashboard |');
+    expect(rendered).toContain('|  | Test | Flaky branches | Past&nbsp;7&nbsp;days |');
     expect(rendered).toContain(
-      `| test \\| 0 | **\`main\` 10% (49 / 509)** | [dashboard](${testDashboardUrl('t0')}) |`
+      `| ${dashboardButton('t0')} | test \\| 0 | **\`main\` 10%&nbsp;(49&nbsp;/&nbsp;509)** | ` +
+        `${['🟥', '🟩', '🟥', '🟥', '🟩', '🟥', '🟥'].join('\u2060')} |`
     );
     expect(rendered).toContain('and 2 more flaky tests in this file.');
-    expect(
-      testsTable(tests, {
-        withDashboardLinks: false,
-        maxRows: 10,
-        thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03 },
-      })
-    ).not.toContain('Dashboard');
+  });
+
+  it('leaves out the buttons when told to, and the days when the report has none', () => {
+    const rendered = testsTable([flakyTest()], {
+      withDashboardLinks: false,
+      maxRows: 10,
+      thresholds,
+    });
+    expect(rendered).toContain('| Test | Flaky branches |');
+    expect(rendered).not.toContain('Dashboard');
+    expect(rendered).not.toContain('Past');
   });
 });
 
@@ -159,12 +223,12 @@ describe('formatFullFailureMessage', () => {
 });
 
 describe('formatFailedBuilds', () => {
-  it('bolds the rate', () => {
+  it('puts the rate first, in bold, and keeps the counts on its line', () => {
     expect(formatFailedBuilds({ builds: 505, failedBuilds: 98, buildFailRate: 98 / 505 })).toBe(
-      '98 / 505 (**19%**)'
+      '**19%**&nbsp;(98&nbsp;/&nbsp;505)'
     );
     expect(formatFailedBuilds({ builds: 400, failedBuilds: 1, buildFailRate: 1 / 400 })).toBe(
-      '1 / 400 (**<1%**)'
+      '**<1%**&nbsp;(1&nbsp;/&nbsp;400)'
     );
   });
 });

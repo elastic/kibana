@@ -418,7 +418,14 @@ export default function ({ getService }: FtrProviderContext) {
       dataQuality: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_rules', 'manage_alerts'],
       manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
       apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
-      digital_experience: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_sessions'],
+      digital_experience: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'manage_sessions',
+        'url_create',
+      ],
       discover: [
         'all',
         'read',

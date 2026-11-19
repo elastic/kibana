@@ -20,6 +20,6 @@ export type { ProbeResult } from './source_probe';
 export { interpretPlanResult } from './plan_result';
 export type { PlanAvailability } from './plan_result';
 export type { MergeResult, PlanResult } from './types';
-export { executeEsql } from './esql_client';
+export { executeEsql, toEsqlRequestBody } from './esql_client';
 export type { EsqlQueryResult, EsqlStats, ExecuteEsqlOptions } from './esql_client';
 export { toSourceError, isVerificationError } from './errors/source_error';

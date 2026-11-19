@@ -202,7 +202,8 @@ export interface HuntCoordinatorCoreResult {
    */
   incomplete?: HuntIncompleteness[];
   /**
-   * Report IOCs excluded by adjudication and not searched by this run. Present only when
+   * Report IOCs excluded as ineligible (adjudicated out, deferred, or a non-routable
+   * `ip` / `cidr`) and not searched by this run. Present only when
    * the run used the report's IOC list (not a caller-supplied override) and at least one
    * searchable IOC was ineligible. This is not an `incomplete` gap: the run is complete,
    * it chose not to search those values.
@@ -635,8 +636,8 @@ const huntCoordinatorCore = async (
   // alone — still searched the report's IOCs and could confirm a hit on them.
   const iocs = callerIocs ?? reportContext?.iocs ?? [];
   const techniques = callerTechniques ?? reportContext?.techniques ?? [];
-  // Caller-supplied IOCs replace the report's list, so adjudication exclusions from the
-  // report are not coverage this run chose to skip (same gating as `truncated` below).
+  // Caller-supplied IOCs replace the report's list, so the report's ineligible-IOC exclusions
+  // are not coverage this run chose to skip (same gating as `truncated` below).
   const excludedIocs = callerIocs === undefined ? reportContext?.excluded_iocs : undefined;
   // Clamp after merge: request schema bounds caller `text`, but report-loaded
   // `content.body_text` has no such bound and must not exceed the Tier 2 contract.

@@ -36,7 +36,16 @@ const created: BulkResponseItem = { _index: '.ds-events', status: 201, result: '
 const inferenceFailure: BulkResponseItem = {
   _index: '.ds-events',
   status: 400,
-  error: { type: 'inference_exception', reason: 'Inference endpoint is unavailable' },
+  error: {
+    type: 'inference_exception',
+    reason: 'Exception when running inference',
+    caused_by: { type: 'status_exception', reason: 'Inference endpoint is unavailable' },
+  },
+};
+const versionConflict: BulkResponseItem = {
+  _index: '.ds-events',
+  status: 409,
+  error: { type: 'version_conflict_engine_exception', reason: 'document already exists' },
 };
 
 const bulkResponse = (items: BulkResponseItem[]): BulkResponse => ({
@@ -244,8 +253,10 @@ describe('createSessionEventsService', () => {
     expect(document).not.toHaveProperty('tool_name');
   });
 
-  it('reports each event as created or failed, in order', async () => {
-    esClient.bulk.mockResolvedValueOnce(bulkResponse([created, inferenceFailure, created]));
+  it('reports each event as created or failed, in order, with the cause of a wrapped error', async () => {
+    esClient.bulk.mockResolvedValueOnce(
+      bulkResponse([created, inferenceFailure, versionConflict, created])
+    );
 
     const { results } = await service.saveEvents(scope, {
       sessionId: 'session-1',
@@ -253,13 +264,19 @@ describe('createSessionEventsService', () => {
         { ...base, type: 'meta', id: 'first' },
         { ...base, type: 'user', id: 'second', content: 'Why is it slow?' },
         { ...base, type: 'meta', id: 'third' },
+        { ...base, type: 'meta', id: 'fourth' },
       ],
     });
 
     expect(results).toEqual([
       { id: 'first', status: 'created' },
-      { id: 'second', status: 'failed', error: 'Inference endpoint is unavailable' },
-      { id: 'third', status: 'created' },
+      {
+        id: 'second',
+        status: 'failed',
+        error: 'Exception when running inference: Inference endpoint is unavailable',
+      },
+      { id: 'third', status: 'failed', error: 'document already exists' },
+      { id: 'fourth', status: 'created' },
     ]);
   });
 

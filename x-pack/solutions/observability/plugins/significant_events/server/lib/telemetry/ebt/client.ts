@@ -11,9 +11,10 @@ import type {
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
   AgentToolEventSearchProps,
-  AgentToolEventStatusUpdateProps,
+  AgentToolFailedProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
+  KnowledgeIndicatorQueriesGenerationFailedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   DetectionScanProps,
@@ -32,7 +33,8 @@ import {
   SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_FAILED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
@@ -99,18 +101,6 @@ export class EbtTelemetryClient {
     request: KibanaRequest
   ) {
     this.report(SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE, params, request, 'origin');
-  }
-
-  public trackAgentToolEventStatusUpdate(
-    params: TrackParams<AgentToolEventStatusUpdateProps>,
-    request: KibanaRequest
-  ) {
-    this.report(
-      SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
-      params,
-      request,
-      'origin'
-    );
   }
 
   public trackSignificantEventsDiscoveryStarted(
@@ -187,5 +177,21 @@ export class EbtTelemetryClient {
     }
 
     report(context);
+  }
+
+  public trackAgentToolFailed(params: TrackParams<AgentToolFailedProps>, request: KibanaRequest) {
+    this.report(SIGNIFICANT_EVENTS_AGENT_TOOL_FAILED_EVENT_TYPE, params, request, 'origin');
+  }
+
+  public trackSignificantEventsQueriesGenerationFailed(
+    params: TrackParams<KnowledgeIndicatorQueriesGenerationFailedProps>,
+    request: KibanaRequest
+  ) {
+    this.report(
+      SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
+      params,
+      request,
+      'all'
+    );
   }
 }
