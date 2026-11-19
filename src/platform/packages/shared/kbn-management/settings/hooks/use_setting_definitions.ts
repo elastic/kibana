@@ -39,6 +39,12 @@ export interface UseSettingDefinitionsResult {
 
 const NO_DEFINITIONS: UiSettingsMetadataState = {};
 
+interface DefinitionsResult {
+  scope: UiSettingsScope;
+  definitions?: UiSettingsMetadataState;
+  error?: Error;
+}
+
 /**
  * React hook which fetches the full setting definitions for a scope. The definitions are not part
  * of the bootstrap payload, so every page that renders a settings form fetches them this way.
@@ -48,20 +54,28 @@ export const useSettingDefinitions = ({
   scope,
   isEnabled = true,
 }: UseSettingDefinitionsParams): UseSettingDefinitionsResult => {
-  const { value, loading, error, retry } = useAsyncRetry(async () => {
+  const { value, loading, retry } = useAsyncRetry(async (): Promise<
+    DefinitionsResult | undefined
+  > => {
     if (!isEnabled) {
       return undefined;
     }
-    return metadataClient.getAll(scope);
+    try {
+      return { scope, definitions: await metadataClient.getAll(scope) };
+    } catch (error) {
+      return { scope, error };
+    }
   }, [metadataClient, scope, isEnabled]);
 
-  // A retry keeps the previous error until it settles, so it is hidden while the request is in flight.
-  const loadError = isEnabled && !loading ? error : undefined;
+  // A result for another scope is never shown, so a form can't pair one scope's definitions with
+  // the other scope's client.
+  const current = isEnabled && value?.scope === scope ? value : undefined;
 
   return {
-    definitions: (isEnabled && value) || NO_DEFINITIONS,
-    isLoading: isEnabled && loading && !value,
-    loadError,
+    definitions: current?.definitions ?? NO_DEFINITIONS,
+    isLoading: isEnabled && !current?.definitions && (loading || !current),
+    // A retry keeps the previous error until it settles, so it is hidden while the request is in flight.
+    loadError: loading ? undefined : current?.error,
     retry,
   };
 };

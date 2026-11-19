@@ -114,6 +114,33 @@ describe('useSettingDefinitions', () => {
     expect(result.current.definitions).toEqual(nextDefinitions);
   });
 
+  it('reports loading, without the previous definitions, while a new scope is fetched', async () => {
+    const metadataClient = createMetadataClient();
+    const { result, rerender } = renderDefinitions({ metadataClient, scope: 'namespace' });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    let resolveGlobal: (value: UiSettingsMetadataState) => void = () => {};
+    metadataClient.getAll.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveGlobal = resolve;
+      })
+    );
+    rerender({ metadataClient, scope: 'global' });
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.definitions).toEqual({});
+    await waitFor(() => expect(metadataClient.getAll).toHaveBeenCalledWith('global'));
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.definitions).toEqual({});
+
+    const globalDefinitions = { 'test:global': { name: 'Global setting', value: true } };
+    await act(async () => {
+      resolveGlobal(globalDefinitions);
+    });
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.definitions).toEqual(globalDefinitions);
+  });
+
   it('ignores a response for a scope that is no longer requested', async () => {
     const metadataClient = createMetadataClient();
     const resolvers: Partial<Record<UiSettingsScope, (value: UiSettingsMetadataState) => void>> =
