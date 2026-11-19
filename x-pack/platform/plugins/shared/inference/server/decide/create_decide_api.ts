@@ -144,7 +144,7 @@ export function createDecideApi({
   return async (
     options: DecideOptions,
     ...questions: DecisionQuestion[]
-  ): Promise<{ answer: DecisionAnswer } | { answers: DecisionAnswer[] }> => {
+  ): Promise<{ answers: DecisionAnswer[] }> => {
     if (questions.length === 0) {
       throw createInferenceRequestError('decide() needs at least one question', 400);
     }
@@ -186,7 +186,7 @@ export function createDecideApi({
               }ms: ${JSON.stringify(answers)}`
           );
 
-          return questions.length === 1 ? { answer: answers[0] } : { answers };
+          return { answers };
         } catch (error) {
           const inferenceError = toInferenceError({ error, options });
 

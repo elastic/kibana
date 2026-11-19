@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { NonEmptyTuple } from 'type-fest';
+
 export interface DecisionPredicateQuestion {
   type: 'predicate';
   instructions: string;
@@ -61,9 +63,12 @@ export type DecisionAnswer<T extends DecisionType = DecisionType> = DecisionType
 
 export type DecisionAnswerFor<Q extends DecisionQuestion> = DecisionAnswer<Q['type']>;
 
-/** The answers to a list of questions, typed by position. */
+/**
+ * The answers to a list of questions, in the same order. Literal questions give a tuple typed by
+ * position; a list built at runtime gives `[DecisionAnswer, ...DecisionAnswer[]]`.
+ */
 export type DecisionAnswersFor<Q extends readonly DecisionQuestion[]> = {
-  [I in keyof Q]: DecisionAnswerFor<Q[I]>;
+  -readonly [I in keyof Q]: DecisionAnswerFor<Q[I]>;
 };
 
 export interface DecideOptions {
@@ -75,18 +80,12 @@ export interface DecideOptions {
 }
 
 /**
- * Asks a decision model bounded questions about an input: fast, cheap answers with
- * probabilities. Throws an inference request error with status 404 when the `decision` endpoint
- * doesn't exist.
+ * Asks a decision model one or more bounded questions about an input, in one call: fast, cheap
+ * answers with probabilities, in the questions' order. Throws an inference request error with
+ * status 404 when the `decision` endpoint doesn't exist.
  * @experimental The Elasticsearch `decision` inference task it calls is experimental.
  */
-export interface DecideAPI {
-  <const Q extends DecisionQuestion>(options: DecideOptions, question: Q): Promise<{
-    answer: DecisionAnswerFor<Q>;
-  }>;
-  /** Asks several questions about the same input in one call; answers follow the questions' order. */
-  <const Q extends [DecisionQuestion, DecisionQuestion, ...DecisionQuestion[]]>(
-    options: DecideOptions,
-    ...questions: Q
-  ): Promise<{ answers: DecisionAnswersFor<Q> }>;
-}
+export type DecideAPI = <const Q extends NonEmptyTuple<DecisionQuestion>>(
+  options: DecideOptions,
+  ...questions: Q
+) => Promise<{ answers: DecisionAnswersFor<Q> }>;

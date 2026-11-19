@@ -8,7 +8,12 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { DecisionChoiceQuestion, DecisionPredicateQuestion } from '@kbn/inference-common';
+import type {
+  DecisionAnswer,
+  DecisionChoiceQuestion,
+  DecisionPredicateQuestion,
+  DecisionQuestion,
+} from '@kbn/inference-common';
 import {
   InferenceTaskErrorCode,
   isInferenceProviderError,
@@ -70,12 +75,14 @@ const setup = ({ anonymizationRules = [] }: { anonymizationRules?: Anonymization
 };
 
 describe('createDecideApi', () => {
-  it('returns a single answer for one question, using the given inference id', async () => {
+  it('returns the answer to one question, using the given inference id', async () => {
     const { decide, transportRequest } = setup();
 
     transportRequest.mockResolvedValue(decisionResponse);
 
-    const result = await decide({ input, inferenceId: 'my-decision' }, shouldRespond);
+    const {
+      answers: [answer],
+    } = await decide({ input, inferenceId: 'my-decision' }, shouldRespond);
 
     expect(transportRequest).toHaveBeenCalledTimes(1);
     expect(transportRequest.mock.calls[0][0]).toEqual({
@@ -83,9 +90,9 @@ describe('createDecideApi', () => {
       path: '/_inference/decision/my-decision',
       body: { input, task_settings: { questions: { question_1: shouldRespond } } },
     });
-    expect(result).toEqual({ answer: { type: 'predicate', probability: 0.94 } });
+    expect(answer).toEqual({ type: 'predicate', probability: 0.94 });
 
-    const probability: number = result.answer.probability;
+    const probability: number = answer.probability;
     expect(probability).toBe(0.94);
   });
 
@@ -106,6 +113,20 @@ describe('createDecideApi', () => {
         },
       })
     );
+  });
+
+  it('accepts a list of questions built at runtime', async () => {
+    const { decide, transportRequest } = setup();
+
+    transportRequest.mockResolvedValue(decisionResponse);
+
+    const [first, ...rest]: DecisionQuestion[] = [shouldRespond, topic];
+    const { answers } = await decide({ input, inferenceId: 'my-decision' }, first, ...rest);
+
+    const [{ type }]: [DecisionAnswer, ...DecisionAnswer[]] = answers;
+
+    expect(type).toBe('predicate');
+    expect(answers).toHaveLength(2);
   });
 
   it('rejects a call without questions', async () => {
