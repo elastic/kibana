@@ -33,6 +33,10 @@ export const isGrabKeyboardShortcut = (event: KeyboardEvent) =>
 export const isKeyboardShortcut = (event: KeyboardEvent) =>
   isModifierKey(event) && isSingleQuote(event) && !isGrabKeyboardShortcut(event);
 
+/** ⌘ + C or Ctrl + C copies the hovered element in grab mode, matched on the physical key. */
+export const isCopyKeyboardShortcut = (event: KeyboardEvent): boolean =>
+  isModifierKey(event) && !event.shiftKey && !event.altKey && event.code === 'KeyC';
+
 /**
  * Check if Escape key was pressed.
  * @return {boolean} 'true' if Escape key was pressed, 'false' otherwise.

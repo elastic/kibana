@@ -154,6 +154,11 @@ describe('WorkflowExecutionList (stateful)', () => {
     expect(screen.getByTestId('workflowExecutionList')).toBeInTheDocument();
   });
 
+  it('hides the execution name column when runs do not use execution names', () => {
+    renderComponent();
+    expect(screen.queryByRole('columnheader', { name: 'Execution name' })).not.toBeInTheDocument();
+  });
+
   it('passes loading state from the hook', () => {
     mockUseWorkflowExecutions.mockReturnValue({
       data: null,

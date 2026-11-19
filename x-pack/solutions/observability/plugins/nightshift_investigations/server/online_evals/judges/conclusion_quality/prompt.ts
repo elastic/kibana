@@ -8,6 +8,7 @@
 import { createPrompt } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { gradeSchema } from '../run_judge';
+import { withIdentifierRule } from '../with_identifier_rule';
 import systemPromptText from './system_prompt.text';
 
 export const CONCLUSION_QUALITY_TOOL_NAME = 'score_conclusion';
@@ -23,7 +24,7 @@ export type ConclusionQualityOutput = z.infer<typeof conclusionQualityOutputSche
 
 export const conclusionQualityPrompt = createPrompt({
   name: 'nightshift_conclusion_quality',
-  description: "Grades the conclusion of a Nightshift investigation from the agent's final answer",
+  description: "Grades the conclusion of a nightshift investigation from the agent's final answer",
   input: lazySchema(() =>
     z.object({
       answer: z.string(),
@@ -33,7 +34,7 @@ export const conclusionQualityPrompt = createPrompt({
   .version({
     system: {
       mustache: {
-        template: systemPromptText,
+        template: withIdentifierRule(systemPromptText),
       },
     },
     template: {

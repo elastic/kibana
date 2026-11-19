@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { NonEmptyString } from '@kbn/io-ts-utils';
-import { Color } from '../color_palette';
+import { Color } from '../color';
 import type { MetricsExplorerViewAttributes } from './types';
 import { MetricsExplorerChartType, MetricsExplorerYAxisMode } from './types';
 

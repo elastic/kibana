@@ -5,13 +5,43 @@
  * 2.0.
  */
 
+import { ToolResultType } from '@kbn/agent-builder-common';
 import type { EvaluationResult, Evaluator } from '@kbn/evals';
+import { isRecord } from './dashboard_panels';
 import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './types';
 
 const DASHBOARD_GENERATE_TOOL_ID = 'platform.dashboard.generate_dashboard';
 
 const getLowerCaseSkillPaths = (output: DashboardAgentTaskOutput): string[] =>
   getSkillReadPaths(output).map((path) => path.toLowerCase());
+
+const FILE_READ_TOOL_IDS: ReadonlySet<unknown> = new Set(['read_file', 'filestore.read']);
+
+/**
+ * The path a file-read step requested. With `requireContent`, only a read that returned content
+ * counts, so a failed or empty read does not.
+ */
+export const getFileReadPath = (
+  step: Record<string, unknown>,
+  { requireContent = false }: { requireContent?: boolean } = {}
+): string | undefined => {
+  if (step.type !== 'tool_call' || !FILE_READ_TOOL_IDS.has(step.tool_id)) {
+    return undefined;
+  }
+  if (requireContent) {
+    const { results } = step;
+    const returnedContent =
+      Array.isArray(results) &&
+      results.length > 0 &&
+      !results.some((result) => isRecord(result) && result.type === ToolResultType.error);
+    if (!returnedContent) {
+      return undefined;
+    }
+  }
+  return isRecord(step.params) && typeof step.params.path === 'string' && step.params.path
+    ? step.params.path
+    : undefined;
+};
 
 export const getSkillReadPaths = (output: DashboardAgentTaskOutput): string[] => {
   const steps = output.steps ?? [];
@@ -22,11 +52,9 @@ export const getSkillReadPaths = (output: DashboardAgentTaskOutput): string[] =>
       continue;
     }
 
-    if (step.tool_id === 'read_file' || step.tool_id === 'filestore.read') {
-      const params = step.params as { path?: string } | undefined;
-      if (params?.path) {
-        paths.push(params.path);
-      }
+    const readPath = getFileReadPath(step);
+    if (readPath) {
+      paths.push(readPath);
     }
 
     if (step.tool_id === 'load_skill') {

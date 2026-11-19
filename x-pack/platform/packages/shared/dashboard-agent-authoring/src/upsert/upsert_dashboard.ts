@@ -9,20 +9,21 @@ import type { Logger } from '@kbn/logging';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { reportUnderPlannedIdentifiers } from '../controls';
 import { indexDashboard } from '../dashboard_state';
+import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
 import type { ResolvePanelContent } from '../panels';
 import type {
   ResolveAttachmentPanel,
   ResolveControlFieldCapabilities,
   ResolveEsqlControlColumnType,
 } from '../types';
-import type { PanelAuthoringNote } from '../resolve_panel';
+import type { PanelAuthoringNote, PanelHeightHint } from '../resolve_panel';
 import type { DashboardFailure } from '../utils';
 import { discardInvalidChanges, type DashboardValidator } from '../validate_dashboard';
 import { applyPlan } from './apply';
 import { getChangedIds, type ChangedIds } from './changed_ids';
-import { planUpsert } from './plan';
-import { resolvePlan } from './resolve';
-import type { DashboardUpsert } from './schema';
+import { planUpsert, type NewSection } from './plan';
+import { resolvePlan, type ResolvedPanel } from './resolve';
+import type { DashboardUpsert, UpsertPanelItem } from './schema';
 
 interface ExecuteDashboardUpsertParams {
   dashboardData?: DashboardAttachmentData;
@@ -39,7 +40,36 @@ export interface DashboardUpsertResult extends ChangedIds {
   dashboardData: DashboardAttachmentData;
   failures: DashboardFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
+  /** The height that panels resolved in this call need, for the layout step. */
+  panelHeightHints: PanelHeightHint[];
 }
+
+/**
+ * Leaves out each new section whose requested panels all failed, while planning or resolving, so
+ * the dashboard does not gain an empty section.
+ */
+const dropEmptiedNewSections = ({
+  newSections,
+  requestedPanels,
+  resolvedPanels,
+}: {
+  newSections: NewSection[];
+  requestedPanels: UpsertPanelItem[];
+  resolvedPanels: ResolvedPanel[];
+}): { newSections: NewSection[]; failures: DashboardFailure[] } => {
+  const isEmptied = ({ id }: NewSection): boolean =>
+    requestedPanels.some(({ section }) => section === id) &&
+    !resolvedPanels.some(({ target }) => target === id);
+  return {
+    newSections: newSections.filter((section) => !isEmptied(section)),
+    failures: newSections.filter(isEmptied).map(({ id, title }) => ({
+      type: DASHBOARD_FAILURE_TYPES.upsertDashboard,
+      kind: 'section',
+      identifier: id,
+      error: `Section "${title}" was not added because none of its panels could be created.`,
+    })),
+  };
+};
 
 const missingResolver = (message: string) => (): never => {
   throw new Error(message);
@@ -89,9 +119,14 @@ export const executeDashboardUpsert = async ({
     },
     logger,
   });
+  const { newSections, failures: emptySectionFailures } = dropEmptiedNewSections({
+    newSections: plan.newSections,
+    requestedPanels: upsert.panels ?? [],
+    resolvedPanels: panels,
+  });
   const nextDashboardData = applyPlan({
     dashboardData: originalDashboardData,
-    changes: { ...plan, panels, controls },
+    changes: { ...plan, newSections, panels, controls },
   });
 
   const validationResult = validator
@@ -108,11 +143,17 @@ export const executeDashboardUpsert = async ({
     failures: [
       ...plan.failures,
       ...failures,
+      ...emptySectionFailures,
       ...reportUnderPlannedIdentifiers(validationResult.failures, controls),
     ],
     panelAuthoringNotes: panels.flatMap(({ id, authoringNote }): PanelAuthoringNote[] =>
       authoringNote && !validationResult.discardedPanelIds.has(id)
         ? [{ panelId: id, authoringNote }]
+        : []
+    ),
+    panelHeightHints: panels.flatMap(({ id, heightHint }): PanelHeightHint[] =>
+      heightHint !== undefined && !validationResult.discardedPanelIds.has(id)
+        ? [{ panelId: id, heightPx: heightHint }]
         : []
     ),
   };

@@ -9,6 +9,8 @@ import { BehaviorSubject, of } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import type { ILicense } from '@kbn/licensing-types';
 import { SubscriptionStatusPlugin } from './plugin';
 
 const startPlugin = (flag$?: BehaviorSubject<boolean>) => {
@@ -23,6 +25,7 @@ const startPlugin = (flag$?: BehaviorSubject<boolean>) => {
   }
   const cloud = {
     ...cloudMock.createStart(),
+    isCloudEnabled: true,
     isServerlessEnabled: true,
     serverless: {
       projectId: 'project-id',
@@ -67,5 +70,38 @@ describe('SubscriptionStatusPlugin', () => {
     flag$.next(false);
 
     expect(set).toHaveBeenLastCalledWith(undefined);
+  });
+
+  describe('self-managed', () => {
+    const startSelfManaged = (license$: BehaviorSubject<ILicense>) => {
+      const plugin = new SubscriptionStatusPlugin();
+      plugin.setup(coreMock.createSetup(), {});
+      const core = coreMock.createStart();
+      plugin.start(core, {
+        cloud: { ...cloudMock.createStart(), isCloudEnabled: false },
+        licensing: { ...licensingMock.createStart(), license$ },
+      });
+      return core;
+    };
+
+    it('shows the badge for a trial license and removes it after an upgrade', async () => {
+      const license$ = new BehaviorSubject<ILicense>(
+        licensingMock.createLicense({
+          license: { type: 'trial', expiryDateInMillis: Date.now() + 10 * 24 * 60 * 60 * 1000 },
+        })
+      );
+      const core = startSelfManaged(license$);
+      const { set } = core.chrome.controls.subscriptionBadge;
+
+      await waitFor(() => expect(set).toHaveBeenCalledWith(expect.anything()));
+      expect(core.analytics.reportEvent).toHaveBeenCalledWith('subscription_status_badge_shown', {
+        hasBillingAccess: false,
+        licenseType: 'trial',
+      });
+
+      license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
+
+      await waitFor(() => expect(set).toHaveBeenLastCalledWith(undefined));
+    });
   });
 });

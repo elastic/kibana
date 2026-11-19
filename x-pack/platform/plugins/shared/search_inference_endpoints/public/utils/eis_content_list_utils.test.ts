@@ -19,8 +19,13 @@ import {
   getItemModelId,
   toGroupedModel,
 } from './eis_content_list_utils';
-import type { GroupedModel } from './eis_utils';
+import * as eisUtils from './eis_utils';
+import type { GroupedModel, TaskTypeCategory } from './eis_utils';
 import { EisModelStatus } from '../../common/types';
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 const model = (
   modelName: string,
@@ -32,7 +37,7 @@ const model = (
   modelCreator,
   modelStatus: EisModelStatus.GA,
   taskTypes: ['chat_completion'],
-  categories: ['LLM'],
+  categories: ['Generative'],
   endpoints: [
     {
       inference_id: `${modelName}-endpoint`,
@@ -117,7 +122,7 @@ describe('createEisFindItems', () => {
 
     expect(items.map((item) => toGroupedModel(item).categories.join(', '))).toEqual([
       'Embedding',
-      'LLM',
+      'Generative',
       'Rerank',
     ]);
   });
@@ -129,7 +134,29 @@ describe('createEisFindItems', () => {
 
     expect(items.map((item) => toGroupedModel(item).categories.join(', '))).toEqual([
       'Rerank',
-      'LLM',
+      'Generative',
+      'Embedding',
+    ]);
+  });
+
+  it('sorts type by the translated label instead of the category key', async () => {
+    const translatedLabels: Record<TaskTypeCategory, string> = {
+      Embedding: 'Zulu',
+      Generative: 'Mike',
+      Rerank: 'Alpha',
+      Decision: 'Bravo',
+    };
+    jest
+      .spyOn(eisUtils, 'getTaskTypeCategoryLabel')
+      .mockImplementation((category) => translatedLabels[category]);
+
+    const { items } = await findItems(
+      findParams({ sort: { field: EIS_TYPE_SORT_FIELD, direction: 'asc' } })
+    );
+
+    expect(items.map((item) => toGroupedModel(item).categories.join(', '))).toEqual([
+      'Rerank',
+      'Generative',
       'Embedding',
     ]);
   });
@@ -322,7 +349,7 @@ describe('createEisFindItems', () => {
         searchQuery: 'chat',
         filters: {
           [EIS_REGION_FILTER_ID]: { include: ['geo-us'] },
-          [EIS_CATEGORY_FILTER_ID]: { include: ['LLM'] },
+          [EIS_CATEGORY_FILTER_ID]: { include: ['Generative'] },
         },
       })
     );
@@ -340,7 +367,7 @@ describe('createEisFindItems', () => {
 
   it('excludes models by the task-type category dimension', async () => {
     const { items } = await findItems(
-      findParams({ filters: { [EIS_CATEGORY_FILTER_ID]: { exclude: ['LLM'] } } })
+      findParams({ filters: { [EIS_CATEGORY_FILTER_ID]: { exclude: ['Generative'] } } })
     );
 
     expect(items.map(({ title }) => title)).toEqual(['Alpha Embedder', 'Jina Reranker v2']);
@@ -438,6 +465,7 @@ describe('createEisFieldDefinitions', () => {
     expect(category.resolveIdToDisplay('Rerank')).toBe('Rerank');
     expect(category.resolveDisplayToId('embedding')).toBe('Embedding');
     expect(category.resolveFuzzyDisplayToIds?.('rer')).toEqual(['Rerank']);
+    expect(category.resolveDisplayToId('decision')).toBe('Decision');
   });
 
   it('resolves region option labels to the flyout keys', () => {

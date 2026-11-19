@@ -25,7 +25,6 @@ import type {
   ForEachStep,
   IfStep,
   KibanaStep,
-  MergeStep,
   ParallelStep,
   Step,
   SwitchStep,
@@ -87,7 +86,6 @@ export const isForeachStep = (step: Step): step is ForEachStep => step.type === 
 export const isWhileStep = (step: Step): step is WhileStep => step.type === 'while';
 export const isIfStep = (step: Step): step is IfStep => step.type === 'if';
 export const isParallelStep = (step: Step): step is ParallelStep => step.type === 'parallel';
-export const isMergeStep = (step: Step): step is MergeStep => step.type === 'merge';
 export const isSwitchStep = (step: Step): step is SwitchStep => step.type === 'switch';
 export const isBuiltInStepType = (type: string): type is BuiltInStepType =>
   BuiltInStepTypes.includes(type as BuiltInStepType);

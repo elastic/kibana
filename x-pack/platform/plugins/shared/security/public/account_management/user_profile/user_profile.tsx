@@ -57,6 +57,7 @@ import {
   type DarkModeValue,
   getUserAvatarColor,
   getUserAvatarInitials,
+  isValidUserProfileAvatarInitials,
   type LocaleValue,
   UserAvatar,
   type UserProfileData,
@@ -72,6 +73,21 @@ import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
+
+/** Validates avatar initials by grapheme, so an emoji with a skin tone counts as one character. */
+export const validateAvatarInitials = (value: string): string | undefined => {
+  if (!value) {
+    return i18n.translate('xpack.security.accountManagement.userProfile.initialsRequiredError', {
+      defaultMessage: 'Add initials',
+    });
+  }
+
+  if (!isValidUserProfileAvatarInitials(value)) {
+    return i18n.translate('xpack.security.accountManagement.userProfile.initialsMaxLengthError', {
+      defaultMessage: 'Enter no more than 2 characters.',
+    });
+  }
+};
 
 const formRowCSS = css`
   .euiFormRow__label {
@@ -529,24 +545,7 @@ function UserAvatarEditor({
               }
               fullWidth
             >
-              <FormField
-                name="data.avatar.initials"
-                maxLength={2}
-                validate={{
-                  required: i18n.translate(
-                    'xpack.security.accountManagement.userProfile.initialsRequiredError',
-                    { defaultMessage: 'Add initials' }
-                  ),
-                  maxLength: {
-                    value: 2,
-                    message: i18n.translate(
-                      'xpack.security.accountManagement.userProfile.initialsMaxLengthError',
-                      { defaultMessage: 'Enter no more than 2 characters.' }
-                    ),
-                  },
-                }}
-                fullWidth
-              />
+              <FormField name="data.avatar.initials" validate={validateAvatarInitials} fullWidth />
             </FormRow>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -1000,13 +999,19 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
           userSettings = userSettingsWithoutLocale;
         }
         const profileData = { ...values.data, userSettings };
-        submitActions.push(
-          update(
-            values.avatarType === 'image'
-              ? profileData
-              : { ...profileData, avatar: { ...profileData.avatar, imageUrl: null } }
-          )
-        );
+        if (values.avatarType === 'image') {
+          // Image mode hides the initials field, so invalid initials cannot be fixed in place. Drop them
+          // from the payload so the route does not reject the whole save.
+          const { initials, ...avatarWithoutInitials } = profileData.avatar;
+          const avatar = isValidUserProfileAvatarInitials(initials)
+            ? profileData.avatar
+            : avatarWithoutInitials;
+          submitActions.push(update({ ...profileData, avatar }));
+        } else {
+          submitActions.push(
+            update({ ...profileData, avatar: { ...profileData.avatar, imageUrl: null } })
+          );
+        }
       }
 
       if (submitActions.length === 0) {
@@ -1026,14 +1031,8 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
 
       resetInitialValues(values);
 
-      let isRefreshRequired = false;
-      if (
-        initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode ||
-        initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode ||
-        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale
-      ) {
-        isRefreshRequired = true;
-      }
+      const isRefreshRequired =
+        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale;
 
       if (
         values.data &&

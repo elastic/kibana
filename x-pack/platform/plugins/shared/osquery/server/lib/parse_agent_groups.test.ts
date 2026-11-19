@@ -497,7 +497,7 @@ describe('parseAgentSelection', () => {
         selection: { platformsSelected: ['linux', 'darwin'], policiesSelected: ['policy-1'] },
         expectedFragments: [
           'status:online',
-          'local_metadata.os.platform:(linux or darwin)',
+          'local_metadata.os.platform:("linux" or "darwin")',
           'policy_id:(policy-1)',
           'policy_id:policy-1#*',
         ],
@@ -514,6 +514,19 @@ describe('parseAgentSelection', () => {
       expectedFragments.forEach((fragment) => {
         expect(kueryCall).toContain(fragment);
       });
+      expect(() => fromKueryExpression(kueryCall ?? '')).not.toThrow();
+    });
+
+    it('quotes platform values so a KQL keyword cannot change the filter', async () => {
+      mockAgentService.listAgents = createSimpleMockResponse(['agent-1']);
+
+      await parseAgentSelection(mockSoClient, mockElasticsearchClient, mockContextWithServices, {
+        platformsSelected: ['not', 'pl"atform'],
+        spaceId: 'default',
+      });
+
+      const kueryCall = mockAgentService.listAgents.mock.calls[0][0].kuery;
+      expect(kueryCall).toContain('local_metadata.os.platform:("not" or "pl\\"atform")');
       expect(() => fromKueryExpression(kueryCall ?? '')).not.toThrow();
     });
 

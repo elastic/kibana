@@ -19,6 +19,8 @@ const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.su
 export interface EvalsSuiteShard {
   id: string;
   specFiles: string[];
+  /** Evaluation connector for this shard's steps, overriding the suite-wide judge. */
+  judge?: string;
 }
 
 export interface EvalsSuiteSpecModelGroup {
