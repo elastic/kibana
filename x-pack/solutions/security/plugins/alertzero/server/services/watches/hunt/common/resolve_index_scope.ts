@@ -71,19 +71,6 @@ export const unresolvedPatterns = (
   );
 };
 
-/** The resolve response without the dropped names, so discovery never offers a stream no search reads. */
-const withoutNames = (
-  resolved: IndicesResolveIndexResponse,
-  dropped: Set<string>
-): IndicesResolveIndexResponse =>
-  dropped.size === 0
-    ? resolved
-    : {
-        indices: resolved.indices.filter(({ name }) => !dropped.has(name)),
-        aliases: resolved.aliases.filter(({ name }) => !dropped.has(name)),
-        data_streams: resolved.data_streams.filter(({ name }) => !dropped.has(name)),
-      };
-
 /**
  * Whether an entry in `missing` may leave the searched list: a local concrete name. Wildcards,
  * `_all`, remote-qualified names, date math, selectors and comma lists stay, because a miss for
@@ -305,7 +292,8 @@ export const resolveHuntScope = async ({
     esClient,
     patterns: searched,
     logger,
-    resolved: withoutNames(resolved, dropped),
+    resolved,
+    unsearchableStreams: dropped,
   });
   const matches = matchDatasetsDeterministic({
     datasets: discovered,

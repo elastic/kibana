@@ -108,11 +108,18 @@ export const discoverHuntDatasets = async ({
   patterns,
   logger,
   resolved,
+  unsearchableStreams,
 }: {
   esClient: ElasticsearchClient;
   patterns: string[];
   logger?: Logger;
   resolved?: ResolvedDataStreams;
+  /**
+   * Streams the caller cannot search. They are never offered as a dataset or a search pattern,
+   * but they still count when a dataset is narrowed against its siblings, so dropping one does
+   * not widen a readable sibling's pattern onto indices it did not cover before.
+   */
+  unsearchableStreams?: ReadonlySet<string>;
 }): Promise<DiscoveredDataset[]> => {
   let dataStreamNames: string[];
   try {
@@ -222,5 +229,15 @@ export const discoverHuntDatasets = async ({
     }
   }
 
-  return datasets.sort((a, b) => a.index_pattern.localeCompare(b.index_pattern));
+  const searchable = (stream: string) => !unsearchableStreams?.has(stream);
+  return datasets
+    .filter((entry) => entry.data_streams.some(searchable))
+    .map((entry) => ({
+      ...entry,
+      data_streams: entry.data_streams.filter(searchable),
+      search_patterns: entry.search_patterns.filter(
+        (pattern) => !unsearchableStreams?.has(pattern.replace(/\*$/, ''))
+      ),
+    }))
+    .sort((a, b) => a.index_pattern.localeCompare(b.index_pattern));
 };

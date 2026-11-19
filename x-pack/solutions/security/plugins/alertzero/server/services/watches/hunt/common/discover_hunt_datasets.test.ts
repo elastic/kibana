@@ -134,6 +134,19 @@ describe('discoverHuntDatasets', () => {
     expect(byDataset.get('okta.system')?.search_patterns).toEqual(['logs-okta.system-*']);
   });
 
+  it('never offers an unsearchable stream, yet keeps narrowing its readable sibling against it', async () => {
+    mockDataStreams(['logs-windows-default', 'logs-windows-defender-default']);
+    const datasets = await discoverHuntDatasets({
+      esClient,
+      patterns: UNIVERSE,
+      unsearchableStreams: new Set(['logs-windows-defender-default']),
+    });
+
+    expect(datasets.map((d) => d.dataset)).toEqual(['windows']);
+    expect(datasets[0].data_streams).toEqual(['logs-windows-default']);
+    expect(datasets[0].search_patterns).toEqual(['logs-windows-default*']);
+  });
+
   it('uses the whole dataset as vendor when it has no dot', async () => {
     mockDataStreams(['logs-cisco_asa-default']);
 
