@@ -2,7 +2,7 @@
   "@elastic/security-entity-analytics": [
     "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics"
   ],
-  "@elastic/security-threat-hunting": [
+  "@elastic/security-investigations": [
     "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/flyout",
     "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations",
     "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation",

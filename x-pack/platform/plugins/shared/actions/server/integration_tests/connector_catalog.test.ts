@@ -18,7 +18,6 @@ import {
   createConnectorCatalogStorage,
 } from '../lib/connector_catalog';
 import { loadFixture } from '../lib/declarative_connectors/__fixtures__/load_fixture';
-import { ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG } from '../../common';
 import { setupTestServers } from './lib';
 
 const mockCaptured: { start?: PluginStartContract } = {};
@@ -36,7 +35,6 @@ jest.mock('../plugin', () => {
   return { ...actual, ActionsPlugin: CapturingActionsPlugin };
 });
 
-// The shipped `.abuseipdb` type is registered in-tree, so the seeded copy needs its own id.
 const CATALOG_TYPE_ID = '.declarative-abuseipdb';
 const CONNECTOR_ID = 'catalog-spec-connector';
 const EVENT_LOG_INDEX = '.kibana-event-log-*';
@@ -116,9 +114,9 @@ describe('Connector catalog at start', () => {
 
     const setupResult = await setupTestServers(
       {
-        feature_flags: { overrides: { [ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG]: true } },
         xpack: {
           actions: {
+            catalog: { enabled: true },
             preconfigured: {
               [CONNECTOR_ID]: {
                 name: 'Catalog spec connector',
@@ -131,6 +129,7 @@ describe('Connector catalog at start', () => {
         },
       },
       {
+        dev: true,
         beforeKibanaStart: async (esClient) => {
           const storage = createConnectorCatalogStorage({
             esClient,

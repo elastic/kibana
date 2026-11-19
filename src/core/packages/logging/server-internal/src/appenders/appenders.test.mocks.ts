@@ -9,7 +9,7 @@
 
 export const mockCreateLayout = jest.fn();
 jest.mock('../layouts/layouts', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { schema } = require('@kbn/config-schema');
   return {
     Layouts: {
@@ -54,6 +54,7 @@ jest.mock('@opentelemetry/api', () => {
 });
 jest.mock('@kbn/apm-config-loader', () => ({
   getConfiguration: jest.fn(() => ({ serviceName: 'kibana', serviceVersion: '9.0.0' })),
+  getKibanaName: jest.fn(),
 }));
 // @kbn/telemetry re-exports initTelemetry which transitively imports @kbn/tracing and
 // @kbn/metrics. Those packages load heavy OTel SDK modules at require-time that are

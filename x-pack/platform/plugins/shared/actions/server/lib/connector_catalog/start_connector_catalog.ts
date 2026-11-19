@@ -17,15 +17,13 @@ const getErrorMessage = (error: unknown): string =>
 export interface ConnectorCatalogHandle {
   /** Resolves when the first load is done, failed, timed out, or skipped. Never rejects. */
   ready: Promise<void>;
-  /** Takes each value of the catalog flag. Only the first value counts. */
-  onFlagValue: (enabled: boolean) => void;
-  /** Takes an error of the flag stream. Logs at warn and resolves ready. */
-  onFlagError: (error: unknown) => void;
-  /** Clears the deadline, aborts a running load, and makes later calls do nothing. */
+  /** Aborts a running load and resolves ready without logs. */
   stop: () => void;
 }
 
 interface StartConnectorCatalogDeps {
+  /** The catalog config. With false, nothing is read or written. */
+  isEnabled: boolean;
   storage: Pick<ConnectorCatalogStorage, 'getManifest' | 'getDefinitions'>;
   actionTypeRegistry: Pick<ActionTypeRegistry, 'has' | 'register'>;
   buildType: (definition: StoredCatalogDefinition) => CatalogActionType;
@@ -34,18 +32,36 @@ interface StartConnectorCatalogDeps {
 }
 
 /**
- * Reads the catalog and registers its types. Never writes, so a missing index stays missing.
- * Never rejects.
- * Ends when the load is done or the controller is aborted. A late result registers nothing.
- * An abort from outside (stop or deadline) ends it at once and quietly.
+ * Runs the first catalog load 1 time, in the background. It reads the catalog index and
+ * registers its types. It never writes. With the config off, nothing is read.
+ *
+ * Timeline:
+ *   start -> load ------------------------------> ready
+ *   start -> deadline (timeoutMs) -> abort ------> ready (warn)
+ *   start -> stop() -> abort ---------------------> ready (no logs)
  */
-const runLoad = async (
-  { storage, actionTypeRegistry, buildType, logger }: StartConnectorCatalogDeps,
-  controller: AbortController
-): Promise<void> => {
+export const startConnectorCatalog = ({
+  isEnabled,
+  storage,
+  actionTypeRegistry,
+  buildType,
+  logger,
+  timeoutMs = CATALOG_FIRST_LOAD_TIMEOUT_MS,
+}: StartConnectorCatalogDeps): ConnectorCatalogHandle => {
+  if (!isEnabled) {
+    return { ready: Promise.resolve(), stop: () => {} };
+  }
+
+  const controller = new AbortController();
   const { signal } = controller;
 
-  const load = async (): Promise<void> => {
+  let timedOut = false;
+  const deadline = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+
+  const firstLoad = async () => {
     const count = await loadCatalogConnectorTypes({
       storage,
       actionTypeRegistry,
@@ -53,98 +69,36 @@ const runLoad = async (
       logger,
       signal,
     });
+    // A result that arrives after an abort registers nothing and logs nothing.
     if (!signal.aborted) {
       logger.info(`Registered ${count} connector type(s) from the connector catalog.`);
     }
   };
 
-  let onAbort: (() => void) | undefined;
+  // Ends the wait at once on abort, even if a read hangs.
   const aborted = new Promise<void>((resolve) => {
-    if (signal.aborted) {
-      resolve();
-      return;
-    }
-    onAbort = () => resolve();
-    signal.addEventListener('abort', onAbort, { once: true });
+    signal.addEventListener('abort', () => resolve(), { once: true });
   });
 
-  try {
-    await Promise.race([load(), aborted]);
-  } catch (error) {
-    if (!signal.aborted) {
-      controller.abort();
-      logger.warn(`The first connector catalog load failed: ${getErrorMessage(error)}`);
-    }
-  } finally {
-    if (onAbort) {
-      signal.removeEventListener('abort', onAbort);
-    }
-  }
-};
-
-/**
- * Runs the first catalog load 1 time, when the first flag value is on.
- * With the flag off, nothing is read or written. Later flag values do nothing.
- */
-export const startConnectorCatalog = (deps: StartConnectorCatalogDeps): ConnectorCatalogHandle => {
-  const { logger, timeoutMs = CATALOG_FIRST_LOAD_TIMEOUT_MS } = deps;
-  const controller = new AbortController();
-
-  let resolveReady: () => void = () => {};
-  const ready = new Promise<void>((resolve) => {
-    resolveReady = resolve;
-  });
-  let decided = false;
-  let loading = false;
-
-  // 1 deadline for the whole first load, from this call. The flag provider can be slow or down,
-  // and a load can hang, so ready must not depend on either.
-  const deadline = setTimeout(() => {
-    if (loading) {
-      controller.abort();
-      logger.warn(
-        `The first connector catalog load timed out after ${timeoutMs} ms. Only in-tree connector types are available.`
-      );
-    } else if (!decided) {
-      logger.warn(
-        `The connector catalog flag was not available after ${timeoutMs} ms. Only in-tree connector types are available.`
-      );
-    }
-    decided = true;
-    resolveReady();
-  }, timeoutMs);
-
-  const finish = () => {
-    decided = true;
-    loading = false;
-    clearTimeout(deadline);
-    resolveReady();
-  };
+  const ready = Promise.race([firstLoad(), aborted])
+    .catch((error: unknown) => {
+      if (!signal.aborted) {
+        logger.warn(`The first connector catalog load failed: ${getErrorMessage(error)}`);
+      }
+    })
+    .finally(() => clearTimeout(deadline))
+    .then(() => {
+      if (timedOut) {
+        logger.warn(
+          `The first connector catalog load timed out after ${timeoutMs} ms. Only in-tree connector types are available.`
+        );
+      }
+    });
 
   return {
     ready,
-    onFlagValue: (enabled) => {
-      if (decided) {
-        return;
-      }
-      decided = true;
-      if (!enabled) {
-        finish();
-        return;
-      }
-      loading = true;
-      void runLoad(deps, controller).then(finish);
-    },
-    onFlagError: (error) => {
-      if (decided) {
-        return;
-      }
-      logger.warn(`The connector catalog flag could not be read: ${getErrorMessage(error)}`);
-      finish();
-    },
     stop: () => {
       controller.abort();
-      finish();
     },
   };
 };

@@ -15,5 +15,5 @@ export const getCatalogDefinitionDocId = ({ id, version }: CatalogDefinitionRef)
 
 export const getCatalogAssetDocId = (sha256: string): string => `asset:${sha256}`;
 
-// The flag read alone can wait 10 seconds for the provider, so the whole first load gets 30.
+// Budget for the whole first load: the index read, then building and registering the types.
 export const CATALOG_FIRST_LOAD_TIMEOUT_MS = 30_000;

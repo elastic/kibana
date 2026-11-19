@@ -37,11 +37,13 @@ async function waitForLicense(root: ReturnType<typeof createRootWithCorePlugins>
 interface SetupTestServersOptions {
   /** Runs after Elasticsearch starts and before Kibana starts. */
   beforeKibanaStart?: (esClient: ElasticsearchClient) => Promise<void>;
+  /** Starts Kibana in dev mode. Some config keys, such as xpack.actions.catalog.enabled, need it. */
+  dev?: boolean;
 }
 
 export async function setupTestServers(
   settings = {},
-  { beforeKibanaStart }: SetupTestServersOptions = {}
+  { beforeKibanaStart, dev = false }: SetupTestServersOptions = {}
 ) {
   const { startES } = createTestServers({
     adjustTimeout: (t) => jest.setTimeout(t),
@@ -54,7 +56,7 @@ export async function setupTestServers(
 
   const esServer = await startES();
 
-  const root = createRootWithCorePlugins(settings, { oss: false });
+  const root = createRootWithCorePlugins(settings, { oss: false, dev });
 
   try {
     await beforeKibanaStart?.(esServer.es.getClient());

@@ -42,6 +42,7 @@ import {
 import { assertNever } from '@kbn/std';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { UNKNOWN_ALERT_FIELD } from '../lib/alert_snapshot';
 import { assertNightshiftSpace } from '../lib/assert_nightshift_space';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -152,6 +153,12 @@ const significantEventIdOf = (
 };
 
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
+export const UNSUCCESSFUL_EXECUTION_STATUSES: readonly ExecutionStatus[] = [
+  ExecutionStatus.FAILED,
+  ExecutionStatus.TIMED_OUT,
+  ExecutionStatus.CANCELLED,
+];
+
 export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
 
 /** How an investigation run started, recorded as `inputs.context.entry_point`. */
@@ -325,7 +332,7 @@ export interface LifecycleCorrelation {
 
 /**
  * A lifecycle message's view of an investigation. Until Agent Builder titles it, the title is the
- * run's `title` input; the first pending proposal stands in for the top recommendation.
+ * run's `title` input; its recommendations are the pending proposals.
  */
 const toNotifiableInvestigation = (
   {
@@ -1030,7 +1037,7 @@ export class NightshiftInvestigationsClient {
     );
     if (
       TerminalExecutionStatuses.includes(execution.status) &&
-      (reopen || ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status))
+      (reopen || !UNSUCCESSFUL_EXECUTION_STATUSES.includes(execution.status))
     ) {
       throw new InvestigationNotFoundError(investigationId);
     }
@@ -1185,10 +1192,7 @@ export class NightshiftInvestigationsClient {
   ): Promise<{ execution: WorkflowExecutionDto; investigationId: string }> {
     if (!executionId || executionId.length > 500) throw new InvestigationNotFoundError(executionId);
     const { execution, inputs } = await this.readInvestigationExecution(undefined, executionId);
-    if (
-      execution.isTestRun ||
-      ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status)
-    ) {
+    if (execution.isTestRun || !UNSUCCESSFUL_EXECUTION_STATUSES.includes(execution.status)) {
       throw new InvestigationNotFoundError(executionId);
     }
     const investigationId = asString(inputs?.investigation_id) ?? executionId;
@@ -1616,6 +1620,15 @@ export class NightshiftInvestigationsClient {
       snapshot: alertSubject?.snapshot,
     });
 
+    // The recovery context has no `alerts`, so the rule type travels on its own for online evals.
+    // The step passes an empty string when the rule event has no type.
+    const snapshotRuleType = alertSubject?.snapshot?.rule_type_id;
+    const alertRuleType =
+      alertInput.ruleTypeId ||
+      (typeof snapshotRuleType === 'string' && snapshotRuleType !== UNKNOWN_ALERT_FIELD
+        ? snapshotRuleType
+        : '');
+
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
     const workflow = await this.getInvestigationWorkflow(spaceId);
@@ -1626,6 +1639,7 @@ export class NightshiftInvestigationsClient {
         source: 'alert',
         follow_up: ALERT_RECOVERED_FOLLOW_UP,
         entry_point: 'alert_recovery' satisfies InvestigationEntryPoint,
+        ...(alertRuleType ? { alert_rule_type: alertRuleType } : {}),
       },
     });
     this.telemetry?.reportInvestigationStarted({

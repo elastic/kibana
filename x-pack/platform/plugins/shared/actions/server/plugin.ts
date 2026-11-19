@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
@@ -23,6 +22,7 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { Subscription } from 'rxjs';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -341,8 +341,8 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
-  private connectorCatalogFeatureFlagSubscription?: Subscription;
   private setupContract?: PluginSetupContract;
+  private connectorCatalogFeatureFlagSubscription?: Subscription;
   private connectorCatalog?: ConnectorCatalogHandle;
   private resolveCatalogReady: () => void = () => {};
   private readonly catalogReady: Promise<void> = new Promise<void>((resolve) => {
@@ -653,14 +653,12 @@ export class ActionsPlugin
       );
     }
 
-    // The handle must exist first, because the first flag value can arrive synchronously.
     const connectorCatalog = this.startConnectorCatalog(core);
     this.connectorCatalogFeatureFlagSubscription = core.featureFlags
       .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
-      .subscribe({
-        next: (isConnectorCatalogEnabled: boolean) =>
-          connectorCatalog.onFlagValue(isConnectorCatalogEnabled),
-        error: (error: unknown) => connectorCatalog.onFlagError(error),
+      .subscribe((isCatalogEnabled: boolean) => {
+        return isCatalogEnabled;
+        // TODO: implement the connector catalog logic
       });
 
     const {
@@ -928,12 +926,9 @@ export class ActionsPlugin
       }).catch(() => {});
     }
 
-    // Spec types register after start, so an unknown id can only be judged once they are in.
-    void this.catalogReady.then(() => this.validateEnabledConnectorTypes(plugins));
-
     this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
-    return {
+    const startContract: PluginStartContract = {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
       },
@@ -983,6 +978,9 @@ export class ActionsPlugin
         }).getUsableOAuthConnectorIds({ profileUid, connectorIds });
       },
     };
+
+    this.validateEnabledConnectorTypes(plugins, connectorCatalog.ready);
+    return startContract;
   }
 
   private getUnsecuredSavedObjectsClient = (
@@ -1229,10 +1227,12 @@ export class ActionsPlugin
     };
   };
 
-  /** Creates the catalog handle. The flag subscription in `start()` drives it. */
+  /** Starts the first catalog load, driven by the `xpack.actions.catalog.enabled` config. */
   private startConnectorCatalog(core: CoreStart): ConnectorCatalogHandle {
     const { setupContract, actionTypeRegistry, logger } = this;
+    const isEnabled = this.actionsConfig.catalog.enabled;
     const handle = startConnectorCatalog({
+      isEnabled,
       storage: createConnectorCatalogStorage({
         esClient: core.elasticsearch.client.asInternalUser,
         logger,
@@ -1251,20 +1251,38 @@ export class ActionsPlugin
     return handle;
   }
 
-  private validateEnabledConnectorTypes = (plugins: ActionsPluginsStart) => {
+  /** Warns about allowlisted connector types that are still not registered after the first catalog load. */
+  private validateEnabledConnectorTypes = (
+    plugins: ActionsPluginsStart,
+    catalogReady: Promise<void>
+  ): void => {
+    const { enabledActionTypes } = this.actionsConfig;
     if (
-      !!plugins.serverless &&
-      this.actionsConfig.enabledActionTypes.length > 0 &&
-      this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any
+      !plugins.serverless ||
+      enabledActionTypes.length === 0 ||
+      enabledActionTypes[0] === AllowedHosts.Any
     ) {
-      this.actionsConfig.enabledActionTypes.forEach((connectorType) => {
-        if (!this.actionTypeRegistry?.has(connectorType)) {
-          this.logger.warn(
-            `Connector type "${connectorType}" in "xpack.actions.enabledActionTypes" is not registered.`
-          );
-        }
-      });
+      return;
     }
+
+    const pendingTypes = enabledActionTypes.filter(
+      (connectorType) => !this.actionTypeRegistry?.has(connectorType)
+    );
+    if (pendingTypes.length === 0) {
+      return;
+    }
+
+    // Catalog types register after start(), so check again once the first load has ended.
+    void catalogReady.then(() => {
+      const unavailableTypes = pendingTypes.filter(
+        (connectorType) => !this.actionTypeRegistry?.has(connectorType)
+      );
+      if (unavailableTypes.length > 0) {
+        this.logger.warn(
+          `Enabled connector types [${unavailableTypes.join(', ')}] are not registered.`
+        );
+      }
+    });
   };
 
   private getAxiosInstanceWithAuthHelper = (
