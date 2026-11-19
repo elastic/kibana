@@ -26,7 +26,7 @@ interface RegisteredRoute {
   config: {
     path: string;
     access: string;
-    security: { authz: { requiredPrivileges: string[] } };
+    security: { authz: { requiredPrivileges: string[]; extendedPrivileges: string[] } };
     options: { availability: unknown; body: { maxBytes: number } };
   };
   handler: RequestHandler;
@@ -52,6 +52,7 @@ describe('session events routes', () => {
   let featureFlagEnabled: boolean;
   let memoryEnabled: boolean;
   let profileUid: string | null;
+  let authzResult: Record<string, boolean>;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let aiIndexService: { get: jest.Mock };
   let auditLog: jest.Mock;
@@ -74,7 +75,9 @@ describe('session events routes', () => {
   const callRoute = (body: Record<string, unknown>) =>
     route.handler(
       createContext(),
-      httpServerMock.createKibanaRequest({ body: validateBody(body) }),
+      Object.assign(httpServerMock.createKibanaRequest({ body: validateBody(body) }), {
+        authzResult,
+      }),
       response
     );
 
@@ -91,6 +94,7 @@ describe('session events routes', () => {
     featureFlagEnabled = true;
     memoryEnabled = true;
     profileUid = 'u_jdoe_profile';
+    authzResult = { [apiPrivileges.manageMemory]: true };
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     aiIndexService = { get: jest.fn(async (id: string) => aiIndex(id)) };
     auditLog = jest.fn();
@@ -124,13 +128,14 @@ describe('session events routes', () => {
     });
   });
 
-  it('registers a public experimental route that needs the write and manage memory privileges and takes 10 MB', () => {
+  it('registers a public experimental route that needs write, checks manage memory and takes 10 MB', () => {
     expect(route.config).toMatchObject({
       path: '/api/context_engine/memory/_save_event',
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: [apiPrivileges.writeContextEngine, apiPrivileges.manageMemory],
+          requiredPrivileges: [apiPrivileges.writeContextEngine],
+          extendedPrivileges: [apiPrivileges.manageMemory],
         },
       },
       options: { availability: { stability: 'experimental' } },
@@ -218,14 +223,16 @@ describe('session events routes', () => {
   });
 
   describe('user_id', () => {
-    it("is the caller's id when it is left out", async () => {
+    it("is the caller's id when it is left out, without manage memory", async () => {
+      authzResult = { [apiPrivileges.manageMemory]: false };
+
       await callRoute({ session_id: 's1', events: [userEvent] });
 
       expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_jdoe_profile' });
       expect(response.ok).toHaveBeenCalledTimes(1);
     });
 
-    it('files the events under another user when user_id names one', async () => {
+    it('files the events under another user when user_id names one, with manage memory', async () => {
       await callRoute({ session_id: 's1', user_id: 'u_other', events: [userEvent] });
 
       expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_other' });
@@ -244,7 +251,33 @@ describe('session events routes', () => {
       expect(service.saveEvents).not.toHaveBeenCalled();
     });
 
-    it('saves for the named user when the caller has no profile', async () => {
+    it('returns 403, audits and saves nothing when user_id names another user without manage memory', async () => {
+      authzResult = { [apiPrivileges.manageMemory]: false };
+
+      await callRoute({ session_id: 's1', user_id: 'u_other', events: [userEvent] });
+
+      expect(response.forbidden).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining(apiPrivileges.manageMemory) },
+      });
+      expect(service.saveEvents).not.toHaveBeenCalled();
+      expect(auditedEvents()).toEqual([
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
+          user: { target: { id: 'u_other' } },
+        }),
+      ]);
+    });
+
+    it('accepts the caller naming itself in user_id without manage memory', async () => {
+      authzResult = { [apiPrivileges.manageMemory]: false };
+
+      await callRoute({ session_id: 's1', user_id: 'u_jdoe_profile', events: [userEvent] });
+
+      expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_jdoe_profile' });
+      expect(response.forbidden).not.toHaveBeenCalled();
+    });
+
+    it('saves for the named user when the caller has no profile, with manage memory', async () => {
       profileUid = null;
 
       await callRoute({ session_id: 's1', user_id: 'u_someone', events: [userEvent] });

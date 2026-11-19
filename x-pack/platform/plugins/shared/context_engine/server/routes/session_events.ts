@@ -8,7 +8,6 @@
 import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
-import type { RouteSecurity } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   AI_INDEX_API_VERSION,
@@ -24,7 +23,6 @@ import {
   MAX_SESSION_EVENT_USER_ID_LENGTH,
   SESSION_EVENTS_SAVE_PATH,
 } from '../../common/constants';
-import { apiPrivileges } from '../../common/features';
 import { validateIsoDate } from '../../common/validation';
 import { assertAiIndicesWritable } from '../ai_indices/assert_ai_indices_writable';
 import { AiIndexNotFoundError, AiIndexNotWritableError } from '../ai_indices/errors';
@@ -32,12 +30,13 @@ import type { AiIndexService } from '../ai_indices/service';
 import { sessionEventsSaveAuditEvent } from '../audit/audit_events';
 import type { SessionEventsService } from '../session_events/types';
 import { resolveSpaceId } from '../utils/resolve_space_id';
+import {
+  MANAGE_MEMORY_REQUIRED_MESSAGE,
+  MEMORY_WRITE_SECURITY,
+  canActOnUserMemory,
+} from './memory_user';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
 import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
-
-const WRITE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.writeContextEngine, apiPrivileges.manageMemory] },
-};
 
 const NO_PROFILE_MESSAGE =
   'The caller has no user profile, so its events cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.';
@@ -157,7 +156,7 @@ const saveEventsBodySchema = schema.object({
       maxLength: MAX_SESSION_EVENT_USER_ID_LENGTH,
       meta: {
         description:
-          "The user the events belong to. Defaults to the caller's user profile. Any user in the space can be named.",
+          "The user the events belong to. Defaults to the caller's user profile. Naming another user needs `contextEngine:manage_memory`.",
       },
     })
   ),
@@ -212,14 +211,14 @@ export const registerSessionEventsRoutes = ({
   router.versioned
     .post({
       path: SESSION_EVENTS_SAVE_PATH,
-      security: WRITE_SECURITY,
+      security: MEMORY_WRITE_SECURITY,
       access: 'public',
       summary: 'Save session events',
       description: [
         'Saves the events of an agent session, one document per event, so the session can be searched later. User and assistant messages are indexed for semantic search.',
         `Takes 1 to ${MAX_SESSION_EVENTS_PER_REQUEST} events and a body of up to 10 MB. A request that fails validation is rejected as a whole. Any field an event carries beyond the documented ones, such as a tool event's \`result\` or a tool call's \`args\`, is stored as sent, whatever its JSON type.`,
         'Each event gets its own result, in request order. A `failed` event, for example when its content could not be embedded, does not fail the request; resend it to retry. A resent event is stored again, and readers drop duplicates by session and event id.',
-        "The route needs the `contextEngine:manageMemory` privilege on top of `contextEngine:write`. It lets the caller save events for any user in the space by naming them in `user_id`. Without `user_id` the events belong to the caller's user profile, and a caller without one gets a 403. Each AI index in `ai_index_ids` must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index. Otherwise the request is rejected and nothing is saved.",
+        "The route needs the `contextEngine:write` privilege. Without `user_id` the events belong to the caller's user profile, and a caller without one gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`. Each AI index in `ai_index_ids` must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index. Otherwise the request is rejected and nothing is saved.",
         'Each request writes one `memory_save_event` audit event.',
         'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off, or when an AI index in `ai_index_ids` does not exist.',
       ].join('\n\n'),
@@ -242,7 +241,7 @@ export const registerSessionEventsRoutes = ({
             403: {
               body: errorResponseSchema,
               description:
-                '`user_id` is missing and the caller has no user profile, or the caller cannot write to one of the AI indices.',
+                '`user_id` is missing and the caller has no user profile, `user_id` names another user and the caller lacks `contextEngine:manage_memory`, or the caller cannot write to one of the AI indices.',
             },
             404: {
               body: errorResponseSchema,
@@ -268,8 +267,8 @@ export const registerSessionEventsRoutes = ({
         const space = resolveSpaceId(await getSpaces(), request);
         const { security, elasticsearch, userProfile } = await ctx.core;
         const esClient = elasticsearch.client.asCurrentUser;
-        const profileUid = (await userProfile.getCurrentProfileId()) ?? undefined;
-        const userId = requestedUserId ?? profileUid;
+        const callerUserId = (await userProfile.getCurrentProfileId()) ?? undefined;
+        const userId = requestedUserId ?? callerUserId;
 
         const audit = (outcome: { saved?: number; failed?: number; error?: Error }) =>
           security.audit.logger.log(
@@ -282,6 +281,10 @@ export const registerSessionEventsRoutes = ({
 
         if (userId === undefined) {
           return reject(forbidden(NO_PROFILE_MESSAGE), 'forbidden');
+        }
+
+        if (!canActOnUserMemory(request, userId, callerUserId)) {
+          return reject(forbidden(MANAGE_MEMORY_REQUIRED_MESSAGE), 'forbidden');
         }
 
         try {
