@@ -41,7 +41,7 @@ export const createInferenceEndpointExecutor = ({
   stream?: boolean;
 }): InferenceEndpointExecutor => {
   return {
-    async invoke({ body, signal, metadata, timeout = 180_000 }): Promise<Readable> {
+    async invoke({ body, signal, metadata, timeout = 15 * 60_000 }): Promise<Readable> {
       const { pluginId, productSolution, productFeature, interactionId, traceId, userId, spaceId } =
         metadata?.connectorTelemetry ?? {};
       const path = `/_inference/chat_completion/${encodeURIComponent(inferenceId)}`;
