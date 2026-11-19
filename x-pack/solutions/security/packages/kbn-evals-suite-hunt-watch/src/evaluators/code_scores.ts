@@ -343,9 +343,10 @@ export const scoreEvidenceHonesty = (expected: HuntExpected, artifacts: HuntArti
       const written = hasHuntStamp(actual.reportDoc);
       // The write rule: a confirmed hit is always stamped, and a run that found nothing is stamped
       // when `completed_successfully` (`complete` or `incomplete_final`), never for
-      // `incomplete_retryable`. The child's own `status` is `partial` on a hit-bearing
-      // `incomplete_final` run and on `incomplete_retryable`, so `status === 'partial'` alone
-      // cannot tell a stamped incomplete hunt from one that stamped nothing.
+      // `incomplete_retryable`. The child's own `status` is `partial` both on a hit-bearing
+      // `incomplete_retryable` run, which is stamped, and on one with no hit, which is not, so
+      // `status === 'partial'` alone cannot tell a stamped incomplete hunt from one that stamped
+      // nothing.
       const stampExpected =
         actual.coordinator?.completed_successfully === true ||
         actual.coordinator?.has_confirmed_hit === true;
