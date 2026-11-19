@@ -45,7 +45,6 @@ export const AwsConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
-    docsUrl: '',
   },
 
   auth: {

@@ -999,6 +999,38 @@
       "approvedBy": "@elastic/nightshift-sre-agent-team",
       "oasdiffId": "request-property-any-of-removed",
       "prUrl": "https://github.com/elastic/kibana/pull/303236"
+    },
+    {
+      "path": "/api/spaces/space",
+      "method": "post",
+      "reason": "Intentional: space avatar initials are now limited to 2 graphemes instead of 2 UTF-16 code units, so a value like an emoji with a skin tone modifier is accepted. The schema maxLength is now a 64 code unit size cap, and the 2 character limit is enforced by a grapheme check. Initials stay at most 2 user-visible characters, but clients that validate the response against the old maxLength of 2 can see longer strings.",
+      "approvedBy": "@elastic/kibana-security",
+      "oasdiffId": "response-property-max-length-increased",
+      "prUrl": "https://github.com/elastic/kibana/pull/305167"
+    },
+    {
+      "path": "/api/spaces/space/{id}",
+      "method": "get",
+      "reason": "Intentional: space avatar initials are now limited to 2 graphemes instead of 2 UTF-16 code units, so a value like an emoji with a skin tone modifier is accepted. The schema maxLength is now a 64 code unit size cap, and the 2 character limit is enforced by a grapheme check. Initials stay at most 2 user-visible characters, but clients that validate the response against the old maxLength of 2 can see longer strings.",
+      "approvedBy": "@elastic/kibana-security",
+      "oasdiffId": "response-property-max-length-increased",
+      "prUrl": "https://github.com/elastic/kibana/pull/305167"
+    },
+    {
+      "path": "/api/spaces/space/{id}",
+      "method": "put",
+      "reason": "Intentional: space avatar initials are now limited to 2 graphemes instead of 2 UTF-16 code units, so a value like an emoji with a skin tone modifier is accepted. The schema maxLength is now a 64 code unit size cap, and the 2 character limit is enforced by a grapheme check. Initials stay at most 2 user-visible characters, but clients that validate the response against the old maxLength of 2 can see longer strings.",
+      "approvedBy": "@elastic/kibana-security",
+      "oasdiffId": "response-property-max-length-increased",
+      "prUrl": "https://github.com/elastic/kibana/pull/305167"
+    },
+    {
+      "path": "/api/fleet/epm/packages/_bulk",
+      "method": "post",
+      "reason": "False-positive: oasdiff matches anyOf subschemas by content, so adding the informational x-kibana-planned-max-length extension to both 'packages' item variants is reported as removing them. No subschema was removed and request validation is unchanged.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/301658"
     }
   ]
 }

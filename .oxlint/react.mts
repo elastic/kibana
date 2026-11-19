@@ -131,8 +131,8 @@ export const reactOverrides: OxlintOverride[] = [
       'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
       'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
       'src/platform/plugins/shared/workflows_extensions/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
@@ -140,12 +140,13 @@ export const reactOverrides: OxlintOverride[] = [
     rules: strictReactRules,
   },
   {
-    // Cases runs `display-name` with `ignoreTranspilerName` in ESLint. Oxlint's version also flags
-    // `React.memo(Component)` when `Component` already sets `displayName` (166 reports here).
+    // Oxlint's `display-name` with `ignoreTranspilerName` also flags `React.memo(Component)` when
+    // `Component` already sets `displayName`, so cases runs eslint-plugin-react's version.
     files: ['x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}'],
     excludeFiles: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
     rules: {
       'react/display-name': 'off',
+      '@kbn/compat/react-display-name': ['error', { ignoreTranspilerName: true }],
     },
   },
   {

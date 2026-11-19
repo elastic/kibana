@@ -76,7 +76,6 @@ module.exports = {
           '@typescript-eslint/no-unsafe-function-type': 'off',
           '@typescript-eslint/no-empty-object-type': 'off',
           // ##
-          '@typescript-eslint/no-var-requires': 'error',
           'no-unused-expressions': 'off',
         },
         eslintConfigPrettierRules

@@ -12,10 +12,14 @@
  * for several apps in different states of health, for Digital Experience development.
  *
  * Data shape (OTel-native, no APM enrichment):
- * - `logs-generic.otel-default`: `browser.navigation`, `browser.navigation_timing`,
+ * - `logs-browser.otel-default`: `browser.navigation`, `browser.navigation_timing`,
  *   `browser.resource_timing`, `browser.web_vital`, `browser.user_action.click` and
  *   `exception` events
- * - `traces-generic.otel-default`: fetch/XHR CLIENT spans
+ * - `traces-browser.otel-default`: fetch/XHR CLIENT spans
+ * - both are sorted by `service.name`, `session.id` and `@timestamp` (latest first), the dedicated
+ *   browser dataset of elastic/observability-dev#6361: the run installs their index templates,
+ *   built from the cluster's OTel templates. A data stream created before them keeps its sort
+ *   until it rolls over, so use `--clean` once
  * - `logs-rum.replay.otel-default`: session replay, with the `replayRate` and `errorReplayRate`
  *   options only (see Session replay below)
  * - non-zero timings and web vital values always carry a fractional part, so they map as `float`;
@@ -97,6 +101,12 @@
  *   memory before it is written, and a `heavy` marathon session weighs 90 MB at the median and up to
  *   175 MB: use `light` or `typical` with long sessions, or fewer `--workers`. A session ends at the
  *   time it is generated for, so use a range longer than the session (`--from=now-3h` for marathon)
+ * - ongoingSessions (boolean, default: false): start every session at the time it is generated for
+ *   and write its events as they happen, instead of ending it there. With `--live`, a session then
+ *   grows minute by minute for as long as it runs, like real traffic, instead of showing up whole
+ *   when it ends. The run starts with the sessions in progress at `--from`: each run, and each
+ *   worker, first simulates the sessions started up to 2, 3 or 5 hours before it (`typical`, `long`
+ *   or `marathon`) to find them, and keeps the ones in progress in memory
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible
@@ -108,6 +118,7 @@
  *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts edgeCases=true,scale=3
  *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts replayRate=0.3,errorReplayRate=0.5
  *   node scripts/synthtrace digital_experience_browser --from=now-3h --to=now --scenarioOpts replayRate=1,sessionLength=marathon,scale=0.05
+ *   node scripts/synthtrace digital_experience_browser --live --scenarioOpts sessionLength=long,ongoingSessions=true
  */
 
 import type { Scenario } from '../cli/scenario';
@@ -127,6 +138,7 @@ const scenario: Scenario<OtelDocument> = async ({ scenarioOpts, logger, from }) 
   logger.info(`Generating EDOT Browser data with ${JSON.stringify(opts)}; ${SEED_LOG_HINT}`);
 
   return {
+    bootstrap: ({ otelEsClient }) => otelEsClient.installBrowserIndexTemplates(),
     generate: ({ range, clients: { otelEsClient } }) =>
       withClient(
         otelEsClient,
