@@ -27,6 +27,12 @@ describe('entity_utils', () => {
       expect(getValuesAtPath({ a: { b: 'c' } }, ['a', 'b'])).toEqual(['c']);
     });
 
+    it('reads a large multivalued flat field without exceeding the engine argument limit', () => {
+      const values = Array.from({ length: 500_000 }, (_, index) => `host-${index}`);
+
+      expect(getValuesAtPath({ 'host.name': values }, ['host', 'name'])).toHaveLength(500_000);
+    });
+
     it('walks arrays of objects', () => {
       expect(getValuesAtPath({ a: [{ b: 'c1' }, { b: 'c2' }] }, ['a', 'b']).sort()).toEqual([
         'c1',

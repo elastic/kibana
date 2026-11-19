@@ -870,6 +870,41 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     it.each(KEY_FIELDS)('does not read a _source path from the alert hits for %s', (field) => {
       expect(String(stepIn('count_alerts')?.with?.[field])).not.toContain('_source');
     });
+
+    describe('detecting an incomplete key list', () => {
+      const keysTruncated = (otherDocCount: Record<KeyField, number>): unknown => {
+        const expression = String(stepIn('count_alerts')?.with?.keys_truncated)
+          .replace(/^\$\{\{/, '')
+          .replace(/\}\}$/, '')
+          .trim();
+        const aggregation = (field: KeyField) => ({
+          buckets: [],
+          sum_other_doc_count: otherDocCount[field],
+        });
+
+        return createWorkflowLiquidEngine().evalValueSync(expression, {
+          steps: {
+            load_alerts: {
+              output: {
+                aggregations: {
+                  host_ids: aggregation('host_ids'),
+                  host_names: aggregation('host_names'),
+                  user_names: aggregation('user_names'),
+                },
+              },
+            },
+          },
+        });
+      };
+
+      it('is false when every bucket list is complete', () => {
+        expect(keysTruncated({ host_ids: 0, host_names: 0, user_names: 0 })).toBe(false);
+      });
+
+      it.each(KEY_FIELDS)('is true when %s has values beyond its buckets', (field) => {
+        expect(keysTruncated({ host_ids: 0, host_names: 0, user_names: 0, [field]: 3 })).toBe(true);
+      });
+    });
   });
 
   describe('the truncation clear', () => {
@@ -973,6 +1008,37 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     it('keeps the model summary when the clear stands', () => {
       expect(render('summary_markdown', 50, 50, 'false_positive', 'Cleared.')).toBe('Cleared.');
+    });
+
+    describe('when the host or user key list is incomplete', () => {
+      const renderWithKeys = (field: string, verdict: string, keysTruncated: boolean): string =>
+        createWorkflowLiquidEngine().parseAndRenderSync(
+          String(stepIn('block_truncated_clear')?.with?.[field]),
+          {
+            steps: {
+              ...contextFor(10, 10, verdict, 'Cleared.').steps,
+              count_alerts: { output: { keys_truncated: keysTruncated } },
+            },
+          }
+        );
+
+      it('returns inconclusive when the incomplete lookup would clear the attack', () => {
+        expect(renderWithKeys('verdict', 'false_positive', true)).toBe('inconclusive');
+      });
+
+      it('replaces the summary when the incomplete lookup blocks a clear', () => {
+        expect(renderWithKeys('summary_markdown', 'false_positive', true)).toBe(
+          'Evidence was truncated, so this cannot be cleared as a false positive.'
+        );
+      });
+
+      it('keeps true_positive', () => {
+        expect(renderWithKeys('verdict', 'true_positive', true)).toBe('true_positive');
+      });
+
+      it('keeps false_positive when the key lists are complete', () => {
+        expect(renderWithKeys('verdict', 'false_positive', false)).toBe('false_positive');
+      });
     });
 
     it('runs after the payload guard and before emit', () => {

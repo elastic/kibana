@@ -48,3 +48,11 @@ export const readSourceNumber = (source: SourceDocument, path: string): number |
   const values = Array.isArray(value) ? value : [value];
   return values.find((item): item is number => typeof item === 'number');
 };
+
+/** How many distinct strings and numbers sit at `path`; a scalar counts as a one-element list. */
+export const countDistinctSourceValues = (source: SourceDocument, path: string): number => {
+  const value = readSourceValue(source, path);
+  const values = Array.isArray(value) ? value : [value];
+  return new Set(values.filter((item) => typeof item === 'string' || typeof item === 'number'))
+    .size;
+};

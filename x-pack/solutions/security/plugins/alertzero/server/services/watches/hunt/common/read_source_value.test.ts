@@ -6,6 +6,7 @@
  */
 
 import {
+  countDistinctSourceValues,
   readSourceNumber,
   readSourceString,
   readSourceStrings,
@@ -56,5 +57,17 @@ describe('typed readers', () => {
   it('treats a scalar as a one-element list and a missing field as empty', () => {
     expect(readSourceStrings({ 'event.type': 'start' }, 'event.type')).toEqual(['start']);
     expect(readSourceStrings({}, 'event.type')).toEqual([]);
+  });
+});
+
+describe('countDistinctSourceValues', () => {
+  it.each([
+    ['a scalar', { 'process.pid': 42 }, 1],
+    ['a one-element array', { process: { pid: [42] } }, 1],
+    ['repeated identical values', { 'process.pid': [42, 42] }, 1],
+    ['different values', { 'process.pid': [42, 43] }, 2],
+    ['an absent field', { 'host.name': 'h1' }, 0],
+  ])('counts %s', (_label, source, expected) => {
+    expect(countDistinctSourceValues(source, 'process.pid')).toBe(expected);
   });
 });

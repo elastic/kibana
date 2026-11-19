@@ -236,7 +236,10 @@ steps:
       # from each hit's `_source`: an alert built from an event on a columnar index
       # mode (`logsdb_columnar`) stores a flat `_source` (`{ "host.id": ... }`), so a
       # nested path such as `_source.host.id` finds nothing and both lookups would
-      # silently match no documents. `size` covers every cited alert (`size` above).
+      # silently match no documents. `size` covers one value per cited alert, but a
+      # multivalued field can have more distinct values than that, so `count_alerts`
+      # records whether any list is incomplete (`sum_other_doc_count`) and
+      # `block_truncated_clear` then stops the run from clearing the attack.
       aggregations:
         earliest_original_time:
           min:
@@ -265,6 +268,7 @@ steps:
       host_ids: "${{ steps.load_alerts.output.aggregations.host_ids.buckets | map: 'key' }}"
       host_names: "${{ steps.load_alerts.output.aggregations.host_names.buckets | map: 'key' }}"
       user_names: "${{ steps.load_alerts.output.aggregations.user_names.buckets | map: 'key' }}"
+      keys_truncated: "${{ steps.load_alerts.output.aggregations.host_ids.sum_other_doc_count > 0 or steps.load_alerts.output.aggregations.host_names.sum_other_doc_count > 0 or steps.load_alerts.output.aggregations.user_names.sum_other_doc_count > 0 }}"
       # ±2h is applied by the raw-event range as Elasticsearch date math. The
       # discovery timestamp is only the fallback when the alerts have no
       # `kibana.alert.original_time`.
@@ -674,7 +678,8 @@ steps:
         {{ consts.supported_verdicts | join: ", " }}, or the summary was empty.
         No classification was produced.
 
-  # A truncated entity or event page is missing evidence. The review closes the
+  # A truncated entity or event page, or an incomplete host or user key list, is
+  # missing evidence. The review closes the
   # attack on `false_positive`, so that verdict becomes `inconclusive` before it is
   # emitted. `true_positive` is left alone: truncation blocks a clear, not an
   # escalation.
@@ -684,9 +689,9 @@ steps:
   - name: block_truncated_clear
     type: data.set
     with:
-      downgraded: "${{ (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' }}"
-      verdict: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
-      summary_markdown: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}Evidence was truncated, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
+      downgraded: "${{ (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50 or steps.count_alerts.output.keys_truncated == true) and steps.analyze.output.structured_output.verdict == 'false_positive' }}"
+      verdict: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50 or steps.count_alerts.output.keys_truncated == true) and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
+      summary_markdown: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50 or steps.count_alerts.output.keys_truncated == true) and steps.analyze.output.structured_output.verdict == 'false_positive' %}Evidence was truncated, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
 
   # A world claim may only cite an id from the hits. An entity-store claim may
   # cite `entity.id` or the hit `_id`; the prompt renders both. A raw-event claim

@@ -794,4 +794,30 @@ describe('makeRehydrateProcessSelectors on flat _source (columnar index modes)',
     expect(await rehydrate(flatStart({ 'event.type': ['end'] }))).toHaveLength(0);
     expect(await rehydrate(flatStart({ 'host.name': undefined }))).toHaveLength(0);
   });
+
+  it('accepts a one-element array and repeated identical values for the process fields', async () => {
+    const selectors = await rehydrate(
+      flatStart({
+        'process.entity_id': ['ent-1'],
+        'process.pid': [4312, 4312],
+        'process.name': ['powershell.exe', 'powershell.exe'],
+      })
+    );
+
+    expect(selectors).toHaveLength(1);
+    expect(selectors[0]).toMatchObject({
+      entityId: 'ent-1',
+      pid: 4312,
+      processName: 'powershell.exe',
+    });
+  });
+
+  it.each([
+    ['process.entity_id', ['ent-1', 'ent-2']],
+    ['process.pid', [4312, 9001]],
+    ['process.name', ['powershell.exe', 'cmd.exe']],
+    ['process.executable', ['C:\\Windows\\powershell.exe', 'C:\\Windows\\cmd.exe']],
+  ])('skips a record whose %s holds several different values', async (field, values) => {
+    expect(await rehydrate(flatStart({ [field]: values }))).toHaveLength(0);
+  });
 });

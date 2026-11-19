@@ -46,7 +46,11 @@ export const getValuesAtPath = (obj: unknown, path: readonly string[]): unknown[
   for (let end = 1; end <= path.length; end++) {
     const key = path.slice(0, end).join('.');
     if (Object.prototype.hasOwnProperty.call(record, key)) {
-      values.push(...getValuesAtPath(record[key], path.slice(end)));
+      // Appended one by one: spreading a large multivalued field into `push` exceeds the
+      // engine's argument limit.
+      for (const value of getValuesAtPath(record[key], path.slice(end))) {
+        values.push(value);
+      }
     }
   }
   return values;

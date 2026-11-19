@@ -7,7 +7,12 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { splitRemoteCluster } from '../../../../../common/remote_cluster';
-import { readSourceNumber, readSourceString, readSourceStrings } from '../common/read_source_value';
+import {
+  countDistinctSourceValues,
+  readSourceNumber,
+  readSourceString,
+  readSourceStrings,
+} from '../common/read_source_value';
 import { STALE_PROCESS_AGE_MS } from './select_process_actions';
 import type { ProcessSelector } from './types';
 
@@ -95,10 +100,28 @@ interface ExitedAggregations {
   exited: { buckets: Array<{ key: string; exited_at: { value_as_string: string } }> };
 }
 
+/**
+ * The fields that identify one process. A selector is built from the first value of each, so a
+ * record where any of them holds several different values could mix two processes and is skipped.
+ * A single value, a one-element array and repeated identical values are all unambiguous.
+ */
+const PROCESS_IDENTITY_FIELDS = [
+  'process.entity_id',
+  'process.pid',
+  'process.name',
+  'process.executable',
+] as const;
+
+const hasAmbiguousProcess = (source: RehydrateSource): boolean =>
+  PROCESS_IDENTITY_FIELDS.some((field) => countDistinctSourceValues(source, field) > 1);
+
 const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate | undefined => {
   const hostName =
     readSourceString(source, 'host.name') ?? readSourceString(source, 'host.hostname');
   if (!hostName) {
+    return undefined;
+  }
+  if (hasAmbiguousProcess(source)) {
     return undefined;
   }
   const entityId = readSourceString(source, 'process.entity_id');
