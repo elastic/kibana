@@ -10,6 +10,7 @@ import type { WebVitalAggregations } from '../../../lib/helpers/web_vitals';
 import type {
   ByEnvironmentAggregations,
   EnvironmentAggregations,
+  PickerAggregations,
 } from '../../../lib/otel/environments';
 
 // The aggregations `search_requests.ts` asks for, by the same names.
@@ -38,10 +39,14 @@ export type LogsAggregations = ByEnvironmentAggregations<{
 }>;
 
 /**
- * `spansSearch`: every environment for the picker, and in the selected one the applications of the
- * logs (`inLogs`) and the others (`spansOnly`), each absent when its size would be 0.
+ * `spansSearch`: the environments of the requests with an outcome for the picker, and in the
+ * selected one the applications of the logs (`inLogs`) and the others (`spansOnly`), each absent
+ * when its size would be 0.
  */
-export type SpansAggregations = ByEnvironmentAggregations<{
-  inLogs?: { buckets: SpansBucket[] };
-  spansOnly?: { buckets: SpansBucket[] };
-}>;
+export interface SpansAggregations {
+  picker: PickerAggregations;
+  inEnvironment: {
+    inLogs?: { buckets: SpansBucket[] };
+    spansOnly?: { buckets: SpansBucket[] };
+  };
+}

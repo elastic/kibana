@@ -61,7 +61,7 @@ const setup = ({
     const isLogs = index.startsWith('logs');
     return {
       aggregations: {
-        ...(isLogs ? logEnvironments : spanEnvironments),
+        ...(isLogs ? logEnvironments : { picker: spanEnvironments }),
         inEnvironment: isLogs
           ? { applications: { buckets: logs } }
           : { inLogs: { buckets: inLogs }, spansOnly: { buckets: spansOnly } },

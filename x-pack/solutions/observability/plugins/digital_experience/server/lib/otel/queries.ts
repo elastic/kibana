@@ -103,6 +103,12 @@ export const inEnvironmentFilter = (
     ? { bool: { filter: [environmentFilter(ENVIRONMENT_FIELDS, environment), ...filters] } }
     : environmentFilter(ENVIRONMENT_FIELDS, environment);
 
+/** Up to 100 environments for the picker, and the documents without one. */
+export const environmentPicker = () => ({
+  ...environmentTerms(MAX_ENVIRONMENTS),
+  environmentNotDefined: { filter: environmentNotDefinedFilter(ENVIRONMENT_FIELDS) },
+});
+
 /**
  * Up to 100 environments for the picker, whatever the selected one, and `aggs` in that one, and in
  * the documents of `filters` too.
@@ -114,8 +120,7 @@ export const byEnvironment = <
   aggs: TAggs,
   filters: estypes.QueryDslQueryContainer[] = []
 ) => ({
-  ...environmentTerms(MAX_ENVIRONMENTS),
-  environmentNotDefined: { filter: environmentNotDefinedFilter(ENVIRONMENT_FIELDS) },
+  ...environmentPicker(),
   inEnvironment: { filter: inEnvironmentFilter(environment, filters), aggs },
 });
 

@@ -86,9 +86,11 @@ const spansAggregations = (
   failed = 0,
   { environments = [] as string[], environmentNames = [] as string[], notDefined = 0 } = {}
 ) => ({
-  environments: terms(...environments),
-  environmentNames: terms(...environmentNames),
-  environmentNotDefined: { doc_count: notDefined },
+  picker: {
+    environments: terms(...environments),
+    environmentNames: terms(...environmentNames),
+    environmentNotDefined: { doc_count: notDefined },
+  },
   inEnvironment: { requests: { doc_count: requests }, failed: { doc_count: failed } },
 });
 

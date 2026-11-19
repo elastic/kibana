@@ -15,9 +15,13 @@ export interface EnvironmentAggregations {
   environmentNames: TermsAggregation;
 }
 
-/** The `byEnvironment` aggregations: every environment, and `TMetrics` in the selected one. */
-export type ByEnvironmentAggregations<TMetrics> = EnvironmentAggregations & {
+/** The `environmentPicker` aggregations: every environment, and the documents without one. */
+export type PickerAggregations = EnvironmentAggregations & {
   environmentNotDefined: { doc_count: number };
+};
+
+/** The `byEnvironment` aggregations: every environment, and `TMetrics` in the selected one. */
+export type ByEnvironmentAggregations<TMetrics> = PickerAggregations & {
   inEnvironment: TMetrics;
 };
 
@@ -35,7 +39,7 @@ export const environmentsOf = (
 
 /** The environments for the picker, "Not defined" included when some documents have none. */
 export const pickerEnvironments = (
-  ...aggregations: Array<ByEnvironmentAggregations<unknown> | undefined>
+  ...aggregations: Array<PickerAggregations | undefined>
 ): string[] => {
   const notDefinedCount = aggregations.reduce(
     (total, aggregation) => total + (aggregation?.environmentNotDefined.doc_count ?? 0),

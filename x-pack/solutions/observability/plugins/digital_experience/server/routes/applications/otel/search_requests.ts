@@ -22,10 +22,12 @@ import {
 import {
   browserDocuments,
   byEnvironment,
+  environmentPicker,
   environmentTerms,
   eventCount,
   failedRequests,
   httpRequestDocuments,
+  inEnvironmentFilter,
   otelSearchDefaults,
   requestsWithOutcome,
   webVital,
@@ -145,9 +147,19 @@ export const spansSearch = ({
         filter: [...browserDocuments(start, end), ...httpRequestDocuments()],
       },
     },
-    aggs: byEnvironment(environment, {
-      ...(serviceNames.length > 0 && { inLogs: inLogsApplications(serviceNames) }),
-      ...(spansOnlySize > 0 && { spansOnly: spansOnlyApplications(spansOnlySize, serviceNames) }),
-    }),
+    aggs: {
+      // Only the requests with an outcome, as the rows show: an environment whose spans have none
+      // would list no application.
+      picker: { ...requestsWithOutcome(), aggs: environmentPicker() },
+      inEnvironment: {
+        filter: inEnvironmentFilter(environment),
+        aggs: {
+          ...(serviceNames.length > 0 && { inLogs: inLogsApplications(serviceNames) }),
+          ...(spansOnlySize > 0 && {
+            spansOnly: spansOnlyApplications(spansOnlySize, serviceNames),
+          }),
+        },
+      },
+    },
   };
 };

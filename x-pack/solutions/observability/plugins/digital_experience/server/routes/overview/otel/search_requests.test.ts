@@ -282,14 +282,25 @@ describe('spansSearch', () => {
 
   it('lists up to 100 environments per field of the application, whatever the selected one', () => {
     const request = spansSearch({ ...PARAMS, environment: 'production' });
+    const picker = request.aggs?.picker as { filter: unknown; aggs: Record<string, unknown> };
 
-    expect(request.aggs?.environments).toEqual({
+    expect(picker.aggs.environments).toEqual({
       terms: { field: 'service.environment', size: 100 },
     });
-    expect(request.aggs?.environmentNames).toEqual({
+    expect(picker.aggs.environmentNames).toEqual({
       terms: { field: 'resource.attributes.deployment.environment.name', size: 100 },
     });
-    expect(request.aggs).toHaveProperty('environmentNotDefined');
+    expect(picker.aggs).toHaveProperty('environmentNotDefined');
+    // Only the requests with an outcome, as only those show.
+    expect(picker.filter).toEqual({
+      bool: {
+        should: [
+          { exists: { field: 'http.response.status_code' } },
+          { term: { 'status.code': 'Error' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
     expect(inEnvironmentOf(request).filter).toEqual({
       bool: {
         should: [

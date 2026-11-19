@@ -10,7 +10,7 @@ import type {
   ValueCountAggregation,
 } from '../../../lib/helpers/aggregations';
 import type { WebVitalAggregations } from '../../../lib/helpers/web_vitals';
-import type { ByEnvironmentAggregations } from '../../../lib/otel/environments';
+import type { ByEnvironmentAggregations, PickerAggregations } from '../../../lib/otel/environments';
 import type { FilterOptionsAggregations } from '../../../lib/otel/overview_filters';
 
 // The aggregations `search_requests.ts` asks for, by the same names.
@@ -39,8 +39,14 @@ export type OverviewLogsAggregations = ByEnvironmentAggregations<
 > &
   FilterOptionsAggregations;
 
-/** `spansSearch`: the HTTP requests in the selected environment, and every environment. */
-export type OverviewSpansAggregations = ByEnvironmentAggregations<{
-  requests: { doc_count: number };
-  failed: { doc_count: number };
-}>;
+/**
+ * `spansSearch`: the HTTP requests in the selected environment, and the environments of the
+ * requests with an outcome for the picker.
+ */
+export interface OverviewSpansAggregations {
+  picker: PickerAggregations;
+  inEnvironment: {
+    requests: { doc_count: number };
+    failed: { doc_count: number };
+  };
+}
