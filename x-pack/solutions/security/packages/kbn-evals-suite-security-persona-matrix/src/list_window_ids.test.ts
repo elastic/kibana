@@ -26,6 +26,14 @@ const pagedSearch = (pages: Array<Array<{ _id: string; sort: string[] }>>) => {
   return search;
 };
 
+const clientWith = (search: jest.Mock, extras: Record<string, unknown> = {}) =>
+  ({
+    search,
+    openPointInTime: jest.fn(async () => ({ id: 'pit-1' })),
+    closePointInTime: jest.fn(async () => ({ succeeded: true })),
+    ...extras,
+  } as unknown as EsClient);
+
 describe('listWindowIds', () => {
   it('pages the window with search_after and collects every _id', async () => {
     const search = pagedSearch([
@@ -36,7 +44,7 @@ describe('listWindowIds', () => {
       [{ _id: 'c', sort: ['2'] }],
       [],
     ]);
-    const ids = await listWindowIds({ search } as unknown as EsClient, 'idx', WINDOW);
+    const ids = await listWindowIds(clientWith(search), 'idx', WINDOW);
     expect(ids).toEqual(['a', 'b', 'c']);
     expect(search).toHaveBeenCalledTimes(3);
     // search_after must carry the previous page's last sort payload.
@@ -50,17 +58,43 @@ describe('listWindowIds', () => {
   // the data gate could execute. Paging must sort on `_shard_doc`, never `_id`.
   it('never sorts on _id (ES 8 disables _id fielddata)', async () => {
     const search = pagedSearch([[{ _id: 'a', sort: ['0'] }], []]);
-    await listWindowIds({ search } as unknown as EsClient, 'idx', WINDOW);
+    await listWindowIds(clientWith(search), 'idx', WINDOW);
     for (const [body] of search.mock.calls) {
       expect(JSON.stringify(body.sort)).not.toContain('_id"');
       expect(body.sort).toContain('_shard_doc');
     }
   });
 
+  // Regression (Libra PRRT_kwDOAHeGUM65U7hs): ES only accepts a `_shard_doc`
+  // sort inside a point-in-time search; without a PIT the request fails with
+  // "[_shard_doc] sort field cannot be used without [point in time]". The
+  // search must open a PIT, pass `pit` (not `index`), and close it afterwards.
+  it('searches inside a PIT and closes it', async () => {
+    const search = pagedSearch([[{ _id: 'a', sort: ['0'] }], []]);
+    const client = clientWith(search);
+    const openPointInTime = client.openPointInTime as jest.Mock;
+    const closePointInTime = client.closePointInTime as jest.Mock;
+    await listWindowIds(client, 'idx', WINDOW);
+    expect(openPointInTime).toHaveBeenCalledWith({ index: 'idx', keep_alive: '2m' });
+    for (const [body] of search.mock.calls) {
+      expect(body).not.toHaveProperty('index');
+      expect(body.pit).toMatchObject({ id: 'pit-1' });
+      expect(body.sort).toContain('_shard_doc');
+    }
+    expect(closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
+  });
+
+  it('closes the PIT even when a search page throws', async () => {
+    const search = jest.fn().mockRejectedValueOnce(new Error('search failed'));
+    const client = clientWith(search);
+    await expect(listWindowIds(client, 'idx', WINDOW)).rejects.toThrow('search failed');
+    expect(client.closePointInTime as jest.Mock).toHaveBeenCalledWith({ id: 'pit-1' });
+  });
+
   it('stops instead of looping when a page does not advance', async () => {
     const stuck = { _id: 'a', sort: ['0'] };
     const search = jest.fn(async () => ({ hits: { hits: [stuck] } }));
-    const ids = await listWindowIds({ search } as unknown as EsClient, 'idx', WINDOW);
+    const ids = await listWindowIds(clientWith(search), 'idx', WINDOW);
     expect(ids).toEqual(['a']);
     // First page + one repeat confirming the cursor is stuck, then stop.
     expect(search.mock.calls.length).toBeLessThanOrEqual(3);

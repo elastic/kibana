@@ -15,13 +15,17 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 
+const PIT_KEEP_ALIVE = '2m';
+
 /**
- * Every doc `_id` in the time window, paged via search_after.
+ * Every doc `_id` in the time window, paged via search_after inside a
+ * point-in-time (PIT).
  *
- * Paging sorts on `_shard_doc`, never `_id`: since ES 8 fielddata on the `_id`
- * field is disabled by default (`indices.id_field_data.enabled: false`), so a
- * sort on `_id` fails the whole search with "Fielddata access on the _id field
- * is disallowed" and the caller's setup throws before any evaluation runs.
+ * The PIT is required: `_shard_doc` — the only safe paging sort here — is only
+ * accepted inside a PIT search, and sorting on `_id` is rejected outright on
+ * ES 8+ ("Fielddata access on the _id field is disallowed",
+ * `indices.id_field_data.enabled: false`), which would fail the caller's setup
+ * before any evaluation runs.
  */
 export const listWindowIds = async (
   esClient: EsClient,
@@ -29,26 +33,35 @@ export const listWindowIds = async (
   window: { start: string; end: string }
 ): Promise<string[]> => {
   const ids: string[] = [];
-  let searchAfter: string[] | undefined;
-  for (;;) {
-    const response = await esClient.search<{ _id: string; sort: string[] }>({
-      index,
-      size: 1000,
-      sort: ['_shard_doc'],
-      ...(searchAfter ? { search_after: searchAfter } : {}),
-      query: { range: { '@timestamp': { gte: window.start, lt: window.end } } },
-    });
-    const hits = response.hits?.hits ?? [];
-    if (hits.length === 0) break;
-    const last = hits[hits.length - 1];
-    // Guard against a page that does not advance (bad sort payload): stop instead
-    // of looping — and do it BEFORE collecting the page, or the repeated page's
-    // ids land in the result twice.
-    const nextAfter = last.sort as string[];
-    if (searchAfter && JSON.stringify(nextAfter) === JSON.stringify(searchAfter)) break;
-    for (const hit of hits) if (hit._id !== undefined) ids.push(hit._id);
-    if (nextAfter === undefined || nextAfter.length === 0) break;
-    searchAfter = nextAfter;
+  const { id: pitId } = await esClient.openPointInTime({ index, keep_alive: PIT_KEEP_ALIVE });
+  try {
+    let searchAfter: string[] | undefined;
+    for (;;) {
+      const response = await esClient.search<{ _id: string; sort: string[] }>({
+        pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE },
+        size: 1000,
+        sort: ['_shard_doc'],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+        query: { range: { '@timestamp': { gte: window.start, lt: window.end } } },
+      });
+      const hits = response.hits?.hits ?? [];
+      if (hits.length === 0) break;
+      const last = hits[hits.length - 1];
+      // Guard against a page that does not advance (bad sort payload): stop instead
+      // of looping — and do it BEFORE collecting the page, or the repeated page's
+      // ids land in the result twice.
+      const nextAfter = last.sort as string[];
+      if (searchAfter && JSON.stringify(nextAfter) === JSON.stringify(searchAfter)) break;
+      for (const hit of hits) if (hit._id !== undefined) ids.push(hit._id);
+      if (nextAfter === undefined || nextAfter.length === 0) break;
+      searchAfter = nextAfter;
+    }
+  } finally {
+    try {
+      await esClient.closePointInTime({ id: pitId });
+    } catch {
+      // The PIT expired (or the node is gone); nothing to release.
+    }
   }
   return ids;
 };
