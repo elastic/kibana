@@ -22,7 +22,7 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
 import type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
-import { registerStepDefinitions } from './step_types';
+import { registerMaintenanceStepDefinitions, registerStepDefinitions } from './step_types';
 import type {
   AgentBuilderIntegration,
   ContextEnginePluginSetup,
@@ -66,19 +66,7 @@ export class ContextEnginePlugin
     setupDeps.workflowsExtensions.registerStepDefinition(() =>
       import('./step_types/verify_ki_step').then((m) => m.VerifyKiStepDefinition)
     );
-    setupDeps.workflowsExtensions.registerStepDefinition(() =>
-      import('./step_types/gather_maintenance').then((m) => m.gatherMaintenanceStepDefinition)
-    );
-    setupDeps.workflowsExtensions.registerStepDefinition(() =>
-      import('./step_types/apply_maintenance_changes').then(
-        (m) => m.applyMaintenanceChangesStepDefinition
-      )
-    );
-    setupDeps.workflowsExtensions.registerStepDefinition(() =>
-      import('./step_types/record_maintenance_run').then(
-        (m) => m.recordMaintenanceRunStepDefinition
-      )
-    );
+    registerMaintenanceStepDefinitions(setupDeps.workflowsExtensions);
 
     this.setupAgentBuilderStart(core);
     registerStepDefinitions({

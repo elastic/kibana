@@ -277,6 +277,7 @@ export const gatherMaintenance = async (
     }
   }
   const reviewed = [...chunksOf.values()].flat(2);
+  const fixedIds = new Set(fixes.map(({ id }) => id));
   const similar = reviewed.length
     ? await reader.similar(reviewed, neighbors)
     : new Map<string, DreamedKi[]>();
@@ -287,6 +288,7 @@ export const gatherMaintenance = async (
         .filter(
           (neighbor) =>
             neighbor.id !== ki.id &&
+            !fixedIds.has(neighbor.id) &&
             isReviewable(neighbor) &&
             kindOf(neighbor) === kindOf(ki) &&
             samePermissions(neighbor.permissions, ki.permissions)

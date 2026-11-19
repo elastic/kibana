@@ -162,6 +162,27 @@ describe('gatherMaintenance', () => {
     expect(output.batches[0].neighbors).toEqual([]);
   });
 
+  it('never shows as a neighbor an item the run tombstones', async () => {
+    const stored = [
+      memory('m-1'),
+      memory('m-gone', { governance: deleted }),
+      fact('fact-a'),
+      fact('fact-dead', { references: derivedFrom('m-gone') }),
+    ];
+
+    const output = await gatherMaintenance(
+      fakeReader(stored, {
+        changed: [stored[1], stored[2]],
+        similar: { 'fact-a': ['fact-dead'] },
+      }),
+      options
+    );
+
+    expect(output.fixes).toEqual([expect.objectContaining({ id: 'fact-dead' })]);
+    expect(output.batches[0].items[0].neighbor_ids).toBeUndefined();
+    expect(output.batches[0].neighbors).toEqual([]);
+  });
+
   it('leaves out items that belong to one user, as items, neighbors and relationship ends', async () => {
     const stored = [
       memory('m-1'),
