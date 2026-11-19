@@ -874,14 +874,19 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     describe('detecting an incomplete key list', () => {
       const keysTruncated = (
         otherDocCount: Record<KeyField, number>,
-        hostIdKeys: string[] = ['host-1']
+        hostIdKeys: string[] = ['host-1'],
+        hostNameKeys: string[] = []
       ): unknown => {
         const expression = String(stepIn('count_alerts')?.with?.keys_truncated)
           .replace(/^\$\{\{/, '')
           .replace(/\}\}$/, '')
           .trim();
         const aggregation = (field: KeyField) => ({
-          buckets: field === 'host_ids' ? hostIdKeys.map((key) => ({ key })) : [],
+          buckets: {
+            host_ids: hostIdKeys,
+            host_names: hostNameKeys,
+            user_names: [] as string[],
+          }[field].map((key) => ({ key })),
           sum_other_doc_count: otherDocCount[field],
         });
 
@@ -918,6 +923,10 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
       it('counts incomplete host names when there are no host ids and events match on names', () => {
         expect(keysTruncated({ ...complete, host_names: 3 }, [])).toBe(true);
+      });
+
+      it('is false when there are no host ids and the host names are complete', () => {
+        expect(keysTruncated(complete, [], ['WIN-1', 'WIN-2'])).toBe(false);
       });
     });
   });
