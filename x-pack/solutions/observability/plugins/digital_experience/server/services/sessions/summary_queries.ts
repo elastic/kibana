@@ -215,7 +215,7 @@ const VITAL_EVALS = CORE_WEB_VITALS.map(
   (vital) => `${vital} = CASE(vital == ${escapeStringValue(vital)}, vital_value, null)`
 );
 
-const vitalStats = (vital: CoreWebVital): Stat[] => {
+const vitalStatsOf = (vital: CoreWebVital): Stat[] => {
   const { good, needsImprovement } = CORE_WEB_VITAL_THRESHOLDS[vital];
   return [
     [`${vital}_p75`, `PERCENTILE(${vital}, 75)`],
@@ -242,26 +242,41 @@ const SESSION_STATS: Stat[] = [
     `COUNT(*) WHERE is_http_request AND (COALESCE(${HTTP_RESPONSE_STATUS_CODE} >= 400, false) OR no_response)`,
   ],
   ...ATTRIBUTE_STATS,
-  ...CORE_WEB_VITALS.flatMap(vitalStats),
 ];
 
-// Only the session branch has these columns, so its row is the only non-null value.
-const MERGED_SESSION_STATS: Stat[] = SESSION_STATS.map(([column]) => [column, `MAX(${column})`]);
+const VITAL_STATS: Stat[] = CORE_WEB_VITALS.flatMap(vitalStatsOf);
 
-// On the source fields rather than `is_page_view`, whose COALESCE keeps Lucene from applying it.
+// A session without a web vital has no row in the vitals branch.
+const VITAL_COUNT_EVALS = VITAL_STATS.flatMap(([column, aggregation]) =>
+  aggregation.startsWith('COUNT(') ? [`${column} = COALESCE(${column}, 0)`] : []
+);
+
+// Only one branch has each of these columns, so its row is the only non-null value.
+const MERGED_STATS: Stat[] = [...SESSION_STATS, ...VITAL_STATS].map(([column]) => [
+  column,
+  `MAX(${column})`,
+]);
+
+// The branch filters are on the source fields: the COALESCE of `event` and `span` keeps Lucene
+// from applying them.
 const PAGE_VIEW_FILTER = `${OTEL_EVENT_NAME} IN (${texts(
   PAGE_VIEW_EVENTS
 )}) OR ${OTEL_SPAN_NAME} IN (${texts(PAGE_VIEW_EVENTS)})`;
+const WEB_VITAL_FILTER = `(${OTEL_EVENT_NAME} == ${escapeStringValue(
+  EVENT_WEB_VITAL
+)} OR ${OTEL_SPAN_NAME} == ${escapeStringValue(
+  EVENT_WEB_VITAL
+)}) AND ${SOURCE_WEB_VITAL_VALUE_FIELD} IS NOT NULL`;
 
 const renderStats = (stats: readonly Stat[], indent: string): string =>
   stats.map(([column, aggregation]) => `${column} = ${aggregation}`).join(`,\n${indent}`);
 
 /**
  * One row per session of `sessionIds`, rebuilt from its events since `?rebuild_from`: its counts,
- * times, latest attributes and web vitals, and its journey. One branch aggregates per session, the
- * other the first and last view of each page, which the last stage merges per session. Counts what
- * the applications list counts, with the same event names and request outcomes. Design and
- * measurements: "Summary query" in the plugin README.
+ * times, latest attributes and web vitals, and its journey. One branch aggregates per session, one
+ * the first and last view of each page and one the web vitals, which the last stage merges per
+ * session. Counts what the applications list counts, with the same event names and request
+ * outcomes. Design: "Summary query" in the plugin README; measurements: `query_performance.md`.
  */
 export const sessionSummaryQuery = (
   { changedTo, rebuildFrom }: { changedTo: string; rebuildFrom: string },
@@ -278,22 +293,23 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
     SPAN_KIND_CLIENT
   )}, false) AND ${HTTP_REQUEST_METHOD} IS NOT NULL,
        no_response = COALESCE(${STATUS_CODE} == ${escapeStringValue(SPAN_STATUS_ERROR)}, false),
-       vital = CASE((event == ${escapeStringValue(EVENT_WEB_VITAL)} OR span == ${escapeStringValue(
-    EVENT_WEB_VITAL
-  )}) AND ${SOURCE_WEB_VITAL_VALUE_FIELD} IS NOT NULL, TO_LOWER(${SOURCE_WEB_VITAL_NAME_FIELD}), null),
-       vital_value = ${SOURCE_WEB_VITAL_VALUE_FIELD},
        ${SEEN_EVALS.join(',\n       ')}
-| EVAL ${VITAL_EVALS.join(', ')}
 | FORK (STATS ${renderStats(SESSION_STATS, '              ')}
           BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
        (WHERE ${PAGE_VIEW_FILTER}
         | STATS first_view = MIN(@timestamp), last_view = MAX(@timestamp)
             BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, page_url = ${SOURCE_URL_FIELD})
-| STATS ${renderStats(MERGED_SESSION_STATS, '        ')},
+       (WHERE ${WEB_VITAL_FILTER}
+        | EVAL vital = TO_LOWER(${SOURCE_WEB_VITAL_NAME_FIELD}), vital_value = ${SOURCE_WEB_VITAL_VALUE_FIELD}
+        | EVAL ${VITAL_EVALS.join(', ')}
+        | STATS ${renderStats(VITAL_STATS, '                ')}
+            BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
+| STATS ${renderStats(MERGED_STATS, '        ')},
         pages = TOP(first_view, ${SESSIONS_JOURNEY_URL_CANDIDATES}, "asc", page_url) WHERE page_url IS NOT NULL,
         exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
   BY service, session
 | EVAL ${ATTRIBUTE_EVALS.join(',\n       ')}
+| EVAL ${VITAL_COUNT_EVALS.join(', ')}
 | DROP ${RAW_PREFIX}*
 | LIMIT ${maxRows}`,
   params: [{ rebuild_from: rebuildFrom }, { changed_to: changedTo }],
