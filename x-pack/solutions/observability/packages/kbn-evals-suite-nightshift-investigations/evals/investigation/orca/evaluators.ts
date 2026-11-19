@@ -36,6 +36,12 @@ import {
   reportHasFindings,
 } from './report';
 
+/**
+ * The version of every score ORCA's verifier gives. Main's earlier flag judges wrote the same score
+ * names with no version, and the version is stored with each score, so runs can be split by grader.
+ */
+export const ORCA_GRADER = 'check_prediction';
+
 export const ORCA_RCA_ACCURACY_EVALUATOR = 'orca_rca_accuracy';
 export const ORCA_RCA_DEPTH_EVALUATOR = 'orca_rca_depth';
 export const ORCA_HALLUCINATION_EVALUATOR = 'orca_hallucination';
@@ -236,6 +242,7 @@ const createPortedOrcaEvaluators = (
     kind: 'LLM',
     direction,
     getModel: getModelFactory(deps.evaluationConnector),
+    getVersion: () => ORCA_GRADER,
     evaluate: async ({ output, metadata }) => {
       const expected = getOrcaExpected(metadata);
       if (expected && (expected.events.length === 0) !== (appliesTo === 'control')) {

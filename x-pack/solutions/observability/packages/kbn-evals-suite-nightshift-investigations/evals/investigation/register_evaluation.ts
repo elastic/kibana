@@ -194,11 +194,7 @@ export const registerInvestigationEvaluation = ({
                 ...experimentMetadata,
                 ...knowledgeMetadata,
                 concurrency,
-                // The ORCA scores come from the ported verifier, not main's earlier flag judges,
-                // so runs can be split by grader.
-                ...(orca
-                  ? { telemetry_cutoffs: cutoffs.length, orca_grader: 'check_prediction' }
-                  : {}),
+                ...(orca ? { telemetry_cutoffs: cutoffs.length } : {}),
               },
               task,
             },

@@ -119,6 +119,22 @@ const verdict = (flag: string, score: number, flagMatch: boolean) => ({
 });
 
 describe('ORCA graders', () => {
+  it("versions every verifier score with the grader, which main's flag judges left unversioned", () => {
+    const { deps } = judgeReturning({});
+    const versions = Object.fromEntries(
+      createOrcaEvaluators(deps, { rubrics: RUBRICS, legacy: false }).map((each) => [
+        each.name,
+        each.getVersion?.(),
+      ])
+    );
+    expect(versions).toMatchObject({
+      orca_rca_accuracy: 'check_prediction',
+      orca_rca_depth: 'check_prediction',
+      orca_hallucination: 'check_prediction',
+      orca_control: 'check_prediction',
+    });
+  });
+
   it('scores accuracy, depth and hallucination from one incident judge call', async () => {
     const { deps, prompt } = judgeReturning({
       rubrics: [verdict('paymentFailure', 3, true), verdict('paymentUnreachable', 0, false)],

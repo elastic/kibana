@@ -114,18 +114,26 @@ describe('ORCA report.md', () => {
     );
   });
 
-  it('fails the run when too few of the reports it tried to write were written', () => {
+  it('fails the run when too few of the reports it tried to write can be graded', () => {
     const written = output({ orca_report_md: '# Report' });
     const failed = output({ case_id: 'cart', orca_report_error: 'model unavailable' });
+    const truncated = output({
+      case_id: 'ads',
+      orca_report_md: '# Re',
+      orca_report_truncated: true,
+    });
+    const missing = output({ case_id: 'ship' });
     // A run ORCA leaves out gets no report, so it does not count against the writer.
     const skipped = output({ execution_error: 'harness failed' });
     expect(() =>
       assertOrcaReportsWritten([written, written, written, written, failed])
     ).not.toThrow();
     expect(() => assertOrcaReportsWritten([written, failed, skipped, skipped])).toThrow(
-      '1 of 2 ORCA report.md written, below the 80% threshold:\n- cart: model unavailable'
+      '1 of 2 ORCA report.md usable, below the 80% threshold:\n- cart: report.md was not written: model unavailable'
     );
-    expect(() => assertOrcaReportsWritten([failed])).toThrow('0 of 1 ORCA report.md written');
+    expect(() => assertOrcaReportsWritten([written, truncated, missing])).toThrow(
+      '1 of 3 ORCA report.md usable, below the 80% threshold:\n- ads: report.md was too large to keep whole\n- ship: the run has no report.md'
+    );
     expect(() => assertOrcaReportsWritten([skipped])).not.toThrow();
   });
 

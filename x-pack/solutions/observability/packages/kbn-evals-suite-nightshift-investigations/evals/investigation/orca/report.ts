@@ -141,22 +141,25 @@ export const addOrcaReport = async (
 };
 
 /**
- * Fails the run when too few of the report.md it tried to write were written: a run without one is
- * left out of every ORCA score, so a broken writer would otherwise leave a green eval unscored.
+ * Fails the run when too few of the report.md it tried to write can be graded: a failed, missing or
+ * truncated one leaves the run out of every ORCA score, so a broken writer would otherwise leave a
+ * green eval unscored.
  */
 export const assertOrcaReportsWritten = (
   outputs: readonly InvestigationTaskOutput[],
   minimumRate: number = MIN_EXECUTION_SUCCESS_RATE
 ): void => {
+  // Only a run ORCA can grade gets a report.md; the rest are left out before the writer runs.
   const attempted = outputs.filter((output) => !orcaRunUnscoredReason(output));
-  const failed = attempted.filter((output) => output.orca_report_error !== undefined);
-  const written = attempted.length - failed.length;
-  if (attempted.length === 0 || written / attempted.length >= minimumRate) return;
+  const failed = attempted.flatMap((output) => {
+    const reason = orcaReportUnscoredReason(output);
+    return reason ? [{ caseId: output.case_id, reason }] : [];
+  });
+  const usable = attempted.length - failed.length;
+  if (attempted.length === 0 || usable / attempted.length >= minimumRate) return;
   throw new Error(
-    `${written} of ${attempted.length} ORCA report.md written, below the ${Math.round(
+    `${usable} of ${attempted.length} ORCA report.md usable, below the ${Math.round(
       minimumRate * 100
-    )}% threshold:\n${failed
-      .map(({ case_id: caseId, orca_report_error: error }) => `- ${caseId}: ${error}`)
-      .join('\n')}`
+    )}% threshold:\n${failed.map(({ caseId, reason }) => `- ${caseId}: ${reason}`).join('\n')}`
   );
 };
