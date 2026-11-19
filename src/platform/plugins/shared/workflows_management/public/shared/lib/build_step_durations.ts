@@ -136,7 +136,6 @@ export const getStepDurationShare = (totalMs: number, denominatorMs: number): nu
 // Per-character width estimate for the 11px tabular-nums chip font, plus 6px of horizontal
 // padding (3px each side) and the lane's 4px right padding. The floor/ceiling prevent the lane
 // from being either too narrow (clipping) or absurdly wide.
-// Note: Monaco adds its own 16px for the folding chevron on top of the value returned here.
 const CHARS_PX = 6.6;
 const CHIP_H_PADDING_PX = 6;
 // Mirrors `paddingRight` on the lane container in use_step_duration_decorations.ts.
@@ -144,9 +143,21 @@ const LANE_RIGHT_PADDING_PX = 4;
 const GUTTER_MIN_PX = 34;
 const GUTTER_MAX_PX = 160;
 
+// Monaco adds its own 16px for the folding chevron on top of `lineDecorationsWidth`, so the
+// lane is `lineDecorationsWidth + MONACO_FOLDING_WIDTH_PX` wide.
+const MONACO_FOLDING_WIDTH_PX = 16;
+
 /**
- * Estimates the lane width needed to fit the longest label without clipping.
- * Monaco adds its own 16px for the folding chevron on top of the value returned here.
+ * Width reserved at the lane's left edge for the fold chevron while chips are shown: the 8px
+ * left padding the workflows editor puts on chevrons (see get_monaco_workflow_overrides_styles.ts)
+ * plus the ~19.6px glyph, rounded up. The chip is laid out to the right of this slot so the two
+ * never overlap.
+ */
+export const CHEVRON_SLOT_PX = 28;
+
+/**
+ * Estimates the `lineDecorationsWidth` needed to fit the longest label to the right of the
+ * chevron slot without clipping. Monaco adds its own 16px for the folding chevron on top of it.
  */
 export const getDurationGutterWidth = (labels: Iterable<string>): number => {
   let maxLen = 0;
@@ -154,6 +165,10 @@ export const getDurationGutterWidth = (labels: Iterable<string>): number => {
     if (label.length > maxLen) maxLen = label.length;
   }
   // Err wide: the lane has `overflow: hidden`, so a clipped number violates "always show".
-  const estimated = Math.ceil(maxLen * CHARS_PX) + CHIP_H_PADDING_PX + LANE_RIGHT_PADDING_PX;
+  const estimated =
+    Math.ceil(maxLen * CHARS_PX) +
+    CHIP_H_PADDING_PX +
+    LANE_RIGHT_PADDING_PX +
+    (CHEVRON_SLOT_PX - MONACO_FOLDING_WIDTH_PX);
   return Math.min(GUTTER_MAX_PX, Math.max(GUTTER_MIN_PX, estimated));
 };
