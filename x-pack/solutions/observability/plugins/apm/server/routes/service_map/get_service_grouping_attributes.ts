@@ -35,12 +35,6 @@ export interface ServiceGroupingAttributeValues {
 /** Labels for each service, keyed by `service.name`, to group services by attribute. */
 export type ServiceGroupingAttributes = Record<string, ServiceGroupingAttributeValues>;
 
-interface ServiceAttributeBucket {
-  key?: string | number | null;
-  service_namespace?: { buckets?: Array<{ key?: string | number }> };
-  kubernetes_namespace?: { buckets?: Array<{ key?: string | number }> };
-}
-
 interface SavedGroupServicesBucket {
   services?: { buckets?: Array<{ key?: string | number }> };
 }
@@ -133,16 +127,9 @@ async function getNamespaceAttributes({
     },
   });
 
-  const buckets =
-    (response.aggregations as { services?: { buckets?: ServiceAttributeBucket[] } } | undefined)
-      ?.services?.buckets ?? [];
-
-  for (const bucket of buckets) {
-    if (bucket.key == null) {
-      continue;
-    }
-    const serviceNamespace = bucket.service_namespace?.buckets?.[0]?.key;
-    const kubernetesNamespace = bucket.kubernetes_namespace?.buckets?.[0]?.key;
+  for (const bucket of response.aggregations?.services.buckets ?? []) {
+    const serviceNamespace = bucket.service_namespace.buckets[0]?.key;
+    const kubernetesNamespace = bucket.kubernetes_namespace.buckets[0]?.key;
     attributes.set(String(bucket.key), {
       ...(serviceNamespace != null ? { serviceNamespace: String(serviceNamespace) } : {}),
       ...(kubernetesNamespace != null ? { kubernetesNamespace: String(kubernetesNamespace) } : {}),
