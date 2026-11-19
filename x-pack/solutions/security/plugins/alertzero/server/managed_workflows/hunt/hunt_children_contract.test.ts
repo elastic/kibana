@@ -235,7 +235,7 @@ describe('system-security-hunt-execute', () => {
     expect(update.with?.conversation_id).toBe(add.with?.conversation_id);
   });
 
-  // The agent no longer renders this card, so `render_inline` is what shows it in the thread.
+  // `render_inline` is the only thing that shows this card in the thread; the agent does not render it.
   it('shows the SSE card inline on both the add and the update', () => {
     expect(stepNamed(workflow, 'add_sse_attachment').with?.render_inline).toBe(true);
     expect(stepNamed(workflow, 'update_sse_attachment').with?.render_inline).toBe(true);

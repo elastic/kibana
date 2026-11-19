@@ -132,7 +132,7 @@ describe('Hunt Watch worker chain', () => {
     );
   });
 
-  // The agent no longer renders this card, so `render_inline` is what shows it in the thread.
+  // `render_inline` is the only thing that shows this card in the thread; the agent does not render it.
   it('attaches the threat report as an inline card', () => {
     const attach = stepIn(findOrCreateInvestigation.steps, 'attach_threat_report');
 
