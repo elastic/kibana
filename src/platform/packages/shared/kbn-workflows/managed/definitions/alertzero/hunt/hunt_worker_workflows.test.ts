@@ -1602,6 +1602,55 @@ describe('Hunt Watch worker: a retired_incomplete hunt', () => {
     );
   });
 
+  describe('when nothing reached the environment', () => {
+    const nothingSearched = {
+      reason: 'nothing_searched',
+      detail: 'IOC Hunt mapped no searchable term and Behavior Hunt executed no query.',
+    };
+
+    it('closes with a short message that is not a clean result and says how to replay', () => {
+      expect(conclusion(retiredContext('retired_incomplete', [nothingSearched]))).toBe(
+        [
+          '### Hunt Watch run completed: nothing was searched',
+          '- **Report:** `rpt-1`',
+          '- **What this means:** no search ran, so this says nothing about whether the environment is clean. The report will not be swept again on its own; a manual run targeting this report replays it.',
+          '- **Run:** `exec-1` ([full per-stage detail](https://kibana/exec-1))',
+        ].join('\n')
+      );
+    });
+
+    it('stays short when other gaps are recorded beside it', () => {
+      const message = conclusion(
+        retiredContext('retired_incomplete', [
+          { reason: 'input_truncated', detail: 'x' },
+          nothingSearched,
+        ])
+      );
+
+      expect(message).toContain('### Hunt Watch run completed: nothing was searched');
+      expect(message).not.toContain('**Hunt:**');
+      expect(message).not.toContain('**Packaging:**');
+    });
+
+    it('keeps the long form when some search ran and a gap remained', () => {
+      const message = conclusion(
+        retiredContext('retired_incomplete', [{ reason: 'input_truncated', detail: 'x' }])
+      );
+
+      expect(message).toContain(
+        '### Hunt Watch run completed: the report is retired without a full search'
+      );
+      expect(message).toContain('**Packaging:**');
+    });
+
+    it('keeps the long form for a hunt that was not retired', () => {
+      const message = conclusion(retiredContext('success', [nothingSearched]));
+
+      expect(message).toContain('### Hunt Watch run completed\n');
+      expect(message).not.toContain('nothing was searched');
+    });
+  });
+
   it('keeps the generic completed heading for a successful hunt', () => {
     const message = conclusion(retiredContext('success'));
     expect(message).toContain('### Hunt Watch run completed\n');

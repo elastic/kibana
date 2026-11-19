@@ -123,12 +123,15 @@ const buildNoHitClosureSummary = ({
   reportId,
   dismissHold,
   retired,
+  nothingSearched,
   gapPhrase,
   gapDescription,
 }: {
   reportId: string;
   dismissHold: DismissHold;
   retired: boolean;
+  /** The run recorded that no search ran at all, whatever else it also could not search. */
+  nothingSearched: boolean;
   gapPhrase?: string;
   /** What was not searched, bounded; this closure summary is the Investigation's own summary. */
   gapDescription?: string;
@@ -145,6 +148,9 @@ const buildNoHitClosureSummary = ({
   }
   if (!retired) {
     return `${found}. Closing: nothing in this environment matched the report at the confirming-index bar.`;
+  }
+  if (nothingSearched) {
+    return 'Hunt Watch searched nothing for this report: it had nothing Hunt Watch could search. This is not a statement that the environment is clean.';
   }
   const unsearched = gapPhrase
     ? `${gapPhrase} left part of the report unsearched`
@@ -286,6 +292,8 @@ export const runPackageReport = async ({
           reportId,
           dismissHold,
           retired,
+          nothingSearched:
+            unsearched?.gaps.some(({ reason }) => reason === 'nothing_searched') ?? false,
           gapPhrase: hasGaps ? gapCountPhrase(unsearched) : undefined,
           gapDescription: hasGaps ? describeGaps(unsearched, MAX_CLOSURE_GAP_CHARS) : undefined,
         }),

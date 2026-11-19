@@ -434,6 +434,74 @@ const describeOutcome = (
   };
 };
 
+/** Whether the run recorded that nothing reached the environment, in any of the places a gap can sit. */
+const hasNothingSearchedGap = (result: HuntCoordinatorCoreResult): boolean =>
+  [
+    ...(result.incomplete ?? []),
+    ...(result.tier1.incomplete ?? []),
+    ...(result.tier2?.incomplete ?? []),
+  ].some(({ reason }) => reason === 'nothing_searched');
+
+/** Scope resolution threw before any search: no gap is recorded, and no index was ever resolved. */
+const isScopeResolutionFailure = (result: HuntCoordinatorCoreResult): boolean =>
+  result.tier1.status === 'no_searchable_terms' &&
+  result.index_patterns.length === 0 &&
+  !hasNothingSearchedGap(result);
+
+const describeNothingSearchedIocs = (result: HuntCoordinatorCoreResult): string => {
+  const excluded = result.excluded_report_iocs?.count ?? 0;
+  return excluded > 0
+    ? `IOC Hunt had nothing left to search after ${plural(excluded, 'indicator')} ${
+        excluded === 1 ? 'was' : 'were'
+      } excluded as not worth searching`
+    : 'The report has nothing IOC Hunt could search';
+};
+
+const describeNothingSearchedBehaviors = (result: HuntCoordinatorCoreResult): string => {
+  const { tier2 } = result;
+  if (tier2 && tier2.behaviors.length > 0 && !tier2.behaviors.some((b) => b.execution?.executed)) {
+    return `Behavior Hunt derived ${plural(
+      tier2.behaviors.length,
+      'behavior'
+    )} from the report, but none produced a query that could run`;
+  }
+  if (tier2 && tier2.behaviors.length === 0 && (tier2.incomplete?.length ?? 0) > 0) {
+    return 'Behavior Hunt could not derive a searchable behavior from the report';
+  }
+  switch (result.tier2_skipped_reason) {
+    case 'configured_never':
+      return 'Behavior Hunt was turned off for this run';
+    case 'no_inference':
+      return result.tier2_skip_detail
+        ? 'the model call that chooses where Behavior Hunt runs failed'
+        : 'no model was available for Behavior Hunt';
+    case 'no_tier2_targets':
+      return 'this space has no data source Behavior Hunt can run on';
+    case 'no_report_text':
+      return 'the report has no body text for Behavior Hunt';
+    case 'tier2_failed':
+      return 'Behavior Hunt failed before running a query';
+    case 'no_searchable_input':
+      return 'the report gave Behavior Hunt nothing to work from';
+    default:
+      return 'Behavior Hunt found no behavior in the report to search for';
+  }
+};
+
+/**
+ * The short form for a hunt whose searches returned nothing because none ran. It names the reason
+ * once and makes no statement about retries or the raw error, which the Investigation carries.
+ */
+const buildNothingSearchedNarrative = (result: HuntCoordinatorCoreResult): string => {
+  const reason = isScopeResolutionFailure(result)
+    ? 'Hunt Watch could not work out which indices to search.'
+    : `${describeNothingSearchedIocs(result)}, and ${describeNothingSearchedBehaviors(result)}.`;
+  return [
+    `### Hunt Watch searched nothing for this report\n${reason} This is not a statement that the environment is clean.`,
+    `_Hunt run ${code(result.run_id)}._`,
+  ].join('\n\n');
+};
+
 /** One short clause for the run conclusion, e.g. "confirmed hit: Tier 1 matched 121 documents; Tier 2 confirmed 2 of 5 behaviors". */
 export const buildHuntHeadline = (result: HuntCoordinatorCoreResult): string => {
   if (result.status === 'blocked') {
@@ -481,12 +549,20 @@ export const buildHuntNarrative = (
   result: HuntCoordinatorCoreResult,
   ctx: HuntNarrativeContext = {}
 ): string => {
-  const { heading, summary } = describeOutcome(result, ctx);
-  const blocks: string[] = [`### ${heading}`, summary];
   const terminal =
     result.status === 'blocked' ||
     result.tier2_skipped_reason === 'report_not_found' ||
     result.tier2_skipped_reason === 'extraction_pending';
+  if (
+    !terminal &&
+    result.report_id &&
+    !result.has_confirmed_hit &&
+    (hasNothingSearchedGap(result) || isScopeResolutionFailure(result))
+  ) {
+    return buildNothingSearchedNarrative(result);
+  }
+  const { heading, summary } = describeOutcome(result, ctx);
+  const blocks: string[] = [`### ${heading}`, summary];
   if (!terminal) {
     blocks.push(describeCoverage(result).join('\n'));
     blocks.push(describeSearch(result).join('\n'));

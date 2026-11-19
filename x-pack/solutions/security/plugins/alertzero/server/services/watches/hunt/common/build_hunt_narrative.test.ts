@@ -398,12 +398,12 @@ describe('buildHuntNarrative', () => {
     const narrative = buildHuntNarrative(
       result({
         completeness: 'incomplete_final',
-        incomplete: [{ reason: 'nothing_searched', detail: 'D' }],
+        incomplete: [{ reason: 'input_truncated', detail: 'D' }],
       }),
       ctx
     );
 
-    expect(narrative).toContain('- nothing searched: D');
+    expect(narrative).toContain('- input truncated: D');
   });
 
   it('says a retryable run with no hit leaves the report unmarked and eligible', () => {
@@ -589,6 +589,249 @@ describe('buildHuntNarrative', () => {
 
     expect(narrative.length).toBeLessThanOrEqual(MAX_HUNT_NARRATIVE_CHARS);
     expect(narrative.endsWith('…')).toBe(true);
+  });
+});
+
+describe('buildHuntNarrative when no search ran', () => {
+  const NOT_CLEAN = 'This is not a statement that the environment is clean.';
+  const nothingSearchedGap = {
+    reason: 'nothing_searched' as const,
+    detail: 'IOC Hunt mapped no searchable term and Behavior Hunt executed no query.',
+  };
+
+  const nothingSearched = (
+    overrides: Partial<HuntCoordinatorCoreResult> = {}
+  ): HuntCoordinatorCoreResult =>
+    result({
+      status: 'tier1_only',
+      tier1: tier1({ status: 'no_searchable_terms' }),
+      tier2_targets: [],
+      tier2_target_sources: [],
+      incomplete: [nothingSearchedGap],
+      completeness: 'incomplete_final',
+      ...overrides,
+    });
+
+  const expectedText = (reason: string, runId = 'run-1') =>
+    `### Hunt Watch searched nothing for this report\n${reason} ${NOT_CLEAN}\n\n_Hunt run \`${runId}\`._`;
+
+  const noIocs = 'The report has nothing IOC Hunt could search';
+
+  it('says Hunt Watch could not work out which indices to search when scope resolution failed', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        status: 'tier1_only',
+        index_patterns: [],
+        tier2_targets: [],
+        tier2_target_sources: [],
+        tier1: tier1({ status: 'no_searchable_terms' }),
+        completeness: 'incomplete_final',
+      }),
+      ctx
+    );
+    expect(narrative).toBe(expectedText('Hunt Watch could not work out which indices to search.'));
+  });
+
+  describe('the Behavior Hunt clause, with nothing for IOC Hunt to search', () => {
+    const unexecuted = behavior({ execution: { executed: false, row_count: 0, hit: false } });
+
+    it.each([
+      [
+        '1: behaviors derived and none executed',
+        { tier2: tier2([unexecuted, unexecuted, unexecuted]) },
+        'Behavior Hunt derived 3 behaviors from the report, but none produced a query that could run',
+      ],
+      [
+        '2: no behaviors and Behavior Hunt recorded gaps',
+        {
+          tier2: tier2([], {
+            incomplete: [{ reason: 'generation_failed', detail: 'catalog unavailable' }],
+          }),
+        },
+        'Behavior Hunt could not derive a searchable behavior from the report',
+      ],
+      [
+        '3: configured_never',
+        { tier2_skipped_reason: 'configured_never' as const },
+        'Behavior Hunt was turned off for this run',
+      ],
+      [
+        '4: no_inference with a detail',
+        {
+          tier2_skipped_reason: 'no_inference' as const,
+          tier2_skip_detail: 'ECONNRESET to gateway',
+        },
+        'the model call that chooses where Behavior Hunt runs failed',
+      ],
+      [
+        '5: no_inference',
+        { tier2_skipped_reason: 'no_inference' as const },
+        'no model was available for Behavior Hunt',
+      ],
+      [
+        '6: no_tier2_targets',
+        { tier2_skipped_reason: 'no_tier2_targets' as const },
+        'this space has no data source Behavior Hunt can run on',
+      ],
+      [
+        '7: no_report_text',
+        { tier2_skipped_reason: 'no_report_text' as const },
+        'the report has no body text for Behavior Hunt',
+      ],
+      [
+        '8: tier2_failed',
+        { tier2_skipped_reason: 'tier2_failed' as const },
+        'Behavior Hunt failed before running a query',
+      ],
+      [
+        '9: no_searchable_input',
+        { tier2_skipped_reason: 'no_searchable_input' as const },
+        'the report gave Behavior Hunt nothing to work from',
+      ],
+      [
+        '10: Behavior Hunt ran clean and found no behavior',
+        { tier2: tier2([]) },
+        'Behavior Hunt found no behavior in the report to search for',
+      ],
+    ])('row %s', (_label, overrides, clause) => {
+      expect(buildHuntNarrative(nothingSearched(overrides), ctx)).toBe(
+        expectedText(`${noIocs}, and ${clause}.`)
+      );
+    });
+
+    it('names one behavior in the singular', () => {
+      expect(buildHuntNarrative(nothingSearched({ tier2: tier2([unexecuted]) }), ctx)).toContain(
+        'derived 1 behavior from the report'
+      );
+    });
+
+    it('never repeats the raw skip detail', () => {
+      const narrative = buildHuntNarrative(
+        nothingSearched({
+          tier2_skipped_reason: 'no_inference',
+          tier2_skip_detail: 'ECONNRESET to gateway',
+        }),
+        ctx
+      );
+      expect(narrative).not.toContain('ECONNRESET');
+      expect(narrative).not.toContain('gateway');
+    });
+  });
+
+  describe('the IOC clause', () => {
+    it('counts excluded indicators in the plural', () => {
+      expect(
+        buildHuntNarrative(
+          nothingSearched({
+            excluded_report_iocs: { count: 3 },
+            tier2_skipped_reason: 'configured_never',
+          }),
+          ctx
+        )
+      ).toBe(
+        expectedText(
+          'IOC Hunt had nothing left to search after 3 indicators were excluded as not worth searching, and Behavior Hunt was turned off for this run.'
+        )
+      );
+    });
+
+    it('counts one excluded indicator in the singular', () => {
+      expect(
+        buildHuntNarrative(
+          nothingSearched({
+            excluded_report_iocs: { count: 1 },
+            tier2_skipped_reason: 'no_inference',
+          }),
+          ctx
+        )
+      ).toContain('after 1 indicator was excluded as not worth searching');
+    });
+
+    it('gives both facts when indicators were excluded and Behavior Hunt derived behaviors that could not run', () => {
+      const unexecuted = behavior({ execution: { executed: false, row_count: 0, hit: false } });
+      expect(
+        buildHuntNarrative(
+          nothingSearched({
+            excluded_report_iocs: { count: 2 },
+            tier2: tier2([unexecuted, unexecuted]),
+          }),
+          ctx
+        )
+      ).toBe(
+        expectedText(
+          'IOC Hunt had nothing left to search after 2 indicators were excluded as not worth searching, and Behavior Hunt derived 2 behaviors from the report, but none produced a query that could run.'
+        )
+      );
+    });
+  });
+
+  it('leaves out the search scope, the coverage section and the report title', () => {
+    const narrative = buildHuntNarrative(
+      nothingSearched({ tier2_skipped_reason: 'configured_never' }),
+      ctx
+    );
+    expect(narrative).not.toContain('What was searched');
+    expect(narrative).not.toContain('Coverage');
+    expect(narrative).not.toContain(ctx.reportTitle);
+  });
+
+  it('stays under 400 characters with a UUID run id and a three-digit count', () => {
+    const unexecuted = behavior({ execution: { executed: false, row_count: 0, hit: false } });
+    const narrative = buildHuntNarrative(
+      nothingSearched({
+        run_id: '8522435f-2add-564e-917a-93436c64a5dc',
+        excluded_report_iocs: { count: 120 },
+        tier2: tier2(Array.from({ length: 120 }, () => unexecuted)),
+      }),
+      ctx
+    );
+    expect(narrative.length).toBeLessThan(400);
+  });
+
+  describe('keeps the long form', () => {
+    it('when IOC Hunt found no environment hits and Behavior Hunt was skipped', () => {
+      const narrative = buildHuntNarrative(
+        result({
+          tier1: tier1({ status: 'no_environment_hits' }),
+          tier2_skipped_reason: 'configured_never',
+        }),
+        ctx
+      );
+      expect(narrative).toContain('What was searched');
+      expect(narrative).not.toContain('searched nothing');
+    });
+
+    it('when IOC Hunt had nothing to search but one behavior executed and matched no rows', () => {
+      const executedNoRows = behavior({ execution: { executed: true, row_count: 0, hit: false } });
+      const narrative = buildHuntNarrative(
+        result({
+          tier1: tier1({ status: 'no_searchable_terms' }),
+          tier2: tier2([executedNoRows]),
+        }),
+        ctx
+      );
+      expect(narrative).toContain('What was searched');
+      expect(narrative).not.toContain('searched nothing');
+    });
+
+    it('when IOC Hunt found no environment hits and there was no model', () => {
+      const narrative = buildHuntNarrative(
+        result({
+          tier1: tier1({ status: 'no_environment_hits' }),
+          tier2_skipped_reason: 'no_inference',
+          unavailable_model_tiers: ['frontier'],
+        }),
+        ctx
+      );
+      expect(narrative).toContain('What was searched');
+      expect(narrative).not.toContain('searched nothing');
+    });
+
+    it('when the run has no report id, because the short form speaks of the report', () => {
+      const narrative = buildHuntNarrative(nothingSearched({ report_id: undefined }), ctx);
+      expect(narrative).toContain('What was searched');
+      expect(narrative).not.toContain('searched nothing for this report');
+    });
   });
 });
 
