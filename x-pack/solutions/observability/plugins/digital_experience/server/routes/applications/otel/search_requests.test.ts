@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { logsSearch, spansSearch } from './search_requests';
 
 interface ApplicationsAggregation {
@@ -12,9 +13,13 @@ interface ApplicationsAggregation {
   aggs: Record<string, unknown>;
 }
 
-const applicationsOf = (request: ReturnType<typeof logsSearch>) =>
+const applicationsOf = (request: estypes.SearchRequest) =>
   (request.aggs?.inEnvironment as { aggs: { applications: ApplicationsAggregation } }).aggs
     .applications;
+
+const spansAggsOf = (request: estypes.SearchRequest) =>
+  (request.aggs?.inEnvironment as { aggs: Record<string, ApplicationsAggregation | undefined> })
+    .aggs;
 
 const PARAMS = {
   start: 10,
@@ -104,7 +109,7 @@ describe('spansSearch', () => {
   });
 
   it('counts the requests with a response status or an error span status', () => {
-    expect(applicationsOf(spansSearch(SPANS_PARAMS)).aggs.requests).toEqual({
+    expect(spansAggsOf(spansSearch(SPANS_PARAMS)).inLogs?.aggs.requests).toEqual({
       filter: {
         bool: {
           should: [
@@ -118,7 +123,7 @@ describe('spansSearch', () => {
   });
 
   it('counts a request as failed from an HTTP status of 400 or an error span status', () => {
-    expect(applicationsOf(spansSearch(SPANS_PARAMS)).aggs.failed).toEqual({
+    expect(spansAggsOf(spansSearch(SPANS_PARAMS)).inLogs?.aggs.failed).toEqual({
       filter: {
         bool: {
           should: [
@@ -131,11 +136,66 @@ describe('spansSearch', () => {
     });
   });
 
-  it('reads only the applications the logs search found', () => {
-    expect(applicationsOf(spansSearch(SPANS_PARAMS)).terms).toEqual({
+  it('reads the applications of the logs by name', () => {
+    expect(spansAggsOf(spansSearch(SPANS_PARAMS)).inLogs?.terms).toEqual({
       field: 'service.name',
       size: 2,
       include: ['web', 'shop'],
     });
+  });
+
+  it('fills the rest of the cap with the other applications, most requests first', () => {
+    expect(spansAggsOf(spansSearch(SPANS_PARAMS)).spansOnly?.terms).toEqual({
+      field: 'service.name',
+      size: 998,
+      order: { requests: 'desc' },
+      exclude: ['web', 'shop'],
+    });
+  });
+
+  it('leaves out the other applications without any request to show', () => {
+    expect(spansAggsOf(spansSearch(SPANS_PARAMS)).spansOnly?.aggs.withRequests).toEqual({
+      bucket_selector: {
+        buckets_path: { requests: 'requests>_count' },
+        script: 'params.requests > 0',
+      },
+    });
+  });
+
+  it('measures both groups the same way', () => {
+    const { inLogs, spansOnly } = spansAggsOf(spansSearch(SPANS_PARAMS));
+
+    expect(spansOnly?.aggs).toMatchObject(inLogs?.aggs ?? {});
+  });
+
+  it('omits inLogs without applications in the logs', () => {
+    const aggs = spansAggsOf(spansSearch({ ...PARAMS, serviceNames: [] }));
+
+    expect(aggs.inLogs).toBeUndefined();
+    expect(aggs.spansOnly?.terms).toEqual({
+      field: 'service.name',
+      size: 1000,
+      order: { requests: 'desc' },
+    });
+  });
+
+  it('omits spansOnly when the logs fill the cap', () => {
+    const serviceNames = Array.from({ length: 1000 }, (_, index) => `app-${index}`);
+    const aggs = spansAggsOf(spansSearch({ ...PARAMS, serviceNames }));
+
+    expect(aggs.inLogs?.terms.size).toBe(1000);
+    expect(aggs.spansOnly).toBeUndefined();
+  });
+
+  it('lists up to 100 environments per field for the picker, whatever the filter', () => {
+    const request = spansSearch({ ...PARAMS, serviceNames: [], environment: 'production' });
+
+    expect(request.aggs?.environments).toEqual({
+      terms: { field: 'service.environment', size: 100 },
+    });
+    expect(request.aggs?.environmentNames).toEqual({
+      terms: { field: 'resource.attributes.deployment.environment.name', size: 100 },
+    });
+    expect(request.aggs).toHaveProperty('environmentNotDefined');
   });
 });

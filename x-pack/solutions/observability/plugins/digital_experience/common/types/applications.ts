@@ -87,8 +87,9 @@ export interface ApplicationsResponse {
   applications: ApplicationSummary[];
   /**
    * The environments in the time range, whatever the `environment` filter, for the picker. Each
-   * environment field keeps its 100 most used: Classic RUM has one, EDOT Browser two
-   * (`service.environment` and `deployment.environment.name`), so up to 300 in total. Names longer than the route accepts are left out.
+   * environment field keeps its 100 most used per search: Classic RUM has one field in one search,
+   * EDOT Browser two (`service.environment` and `deployment.environment.name`) in both its logs and
+   * traces searches, so up to 500 in total. Names longer than the route accepts are left out.
    */
   environments: string[];
   /** Page loads over the time range in the selected environment, per source. */

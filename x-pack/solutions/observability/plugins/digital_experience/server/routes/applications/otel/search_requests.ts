@@ -12,7 +12,6 @@ import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import { LAST_SEEN_AGGREGATION } from '../../../lib/helpers/aggregations';
 import type { HistogramParams } from '../../../lib/helpers/time_series';
 import { dateHistogram } from '../../../lib/helpers/time_series';
-import { environmentFilter } from '../../../lib/helpers/environment';
 import {
   EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
@@ -21,7 +20,6 @@ import {
   OTEL_TRACES_INDEX,
 } from '../../../../common/otel_data';
 import {
-  ENVIRONMENT_FIELDS,
   browserDocuments,
   byEnvironment,
   environmentTerms,
@@ -43,7 +41,7 @@ export interface SearchParams {
 }
 
 export interface SpansSearchParams extends SearchParams {
-  /** The applications `logsSearch` found, so both searches cover the same ones. */
+  /** The applications `logsSearch` found: read by name, and excluded from the spans-only ones. */
   serviceNames: string[];
 }
 
@@ -93,35 +91,63 @@ export const logsSearch = ({
   }),
 });
 
-/** HTTP requests (client spans with a method) and the failed ones per application, from traces. */
+const SPANS_METRICS = {
+  ...environmentTerms(MAX_ENVIRONMENTS_PER_APPLICATION),
+  lastSeen: LAST_SEEN_AGGREGATION,
+  requests: requestsWithOutcome(),
+  failed: failedRequests(),
+};
+
+/** The applications of the logs, by name. */
+const inLogsApplications = (serviceNames: string[]) => ({
+  terms: { field: SERVICE_NAME, size: serviceNames.length, include: serviceNames },
+  aggs: SPANS_METRICS,
+});
+
+/**
+ * The other applications, most requests first. Those whose spans have no outcome, so no request to
+ * show, are left out; ordering by a sub-aggregation is approximate across shards.
+ */
+const spansOnlyApplications = (size: number, serviceNames: string[]) => ({
+  terms: {
+    field: SERVICE_NAME,
+    size,
+    order: { requests: 'desc' as const },
+    ...(serviceNames.length > 0 && { exclude: serviceNames }),
+  },
+  aggs: {
+    ...SPANS_METRICS,
+    withRequests: {
+      bucket_selector: {
+        buckets_path: { requests: 'requests>_count' },
+        script: 'params.requests > 0',
+      },
+    },
+  },
+});
+
+/**
+ * HTTP requests (client spans with a method) and the failed ones per application, from traces:
+ * `inLogs` for the applications `logsSearch` found, and `spansOnly` for the others, which fill the
+ * rest of the cap. Either is omitted when its size would be 0.
+ */
 export const spansSearch = ({
   start,
   end,
   environment,
   serviceNames,
-}: SpansSearchParams): estypes.SearchRequest => ({
-  ...otelSearchDefaults(OTEL_TRACES_INDEX),
-  query: {
-    bool: {
-      filter: [...browserDocuments(start, end), ...httpRequestDocuments()],
-    },
-  },
-  // Only the selected environment: the picker's environments come from the logs, which define the
-  // applications.
-  aggs: {
-    inEnvironment: {
-      filter: environmentFilter(ENVIRONMENT_FIELDS, environment),
-      aggs: {
-        applications: {
-          terms: { field: SERVICE_NAME, size: serviceNames.length, include: serviceNames },
-          aggs: {
-            ...environmentTerms(MAX_ENVIRONMENTS_PER_APPLICATION),
-            lastSeen: LAST_SEEN_AGGREGATION,
-            requests: requestsWithOutcome(),
-            failed: failedRequests(),
-          },
-        },
+}: SpansSearchParams): estypes.SearchRequest => {
+  const spansOnlySize = MAX_APPLICATIONS_PER_SOURCE - serviceNames.length;
+  return {
+    ...otelSearchDefaults(OTEL_TRACES_INDEX),
+    query: {
+      bool: {
+        filter: [...browserDocuments(start, end), ...httpRequestDocuments()],
       },
     },
-  },
-});
+    aggs: byEnvironment(environment, {
+      ...(serviceNames.length > 0 && { inLogs: inLogsApplications(serviceNames) }),
+      ...(spansOnlySize > 0 && { spansOnly: spansOnlyApplications(spansOnlySize, serviceNames) }),
+    }),
+  };
+};

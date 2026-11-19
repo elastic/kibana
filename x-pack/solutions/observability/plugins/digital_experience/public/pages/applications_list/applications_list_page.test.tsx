@@ -259,6 +259,29 @@ describe('ApplicationsListPage', () => {
     ).toHaveLength(4);
   });
 
+  it('shows 0 page loads and dashes for the error rate and vitals of an application with only HTTP requests', async () => {
+    respondWith([
+      app({
+        source: 'otel',
+        pageLoads: 0,
+        lcp: null,
+        inp: null,
+        cls: null,
+        fcp: null,
+        ttfb: null,
+        httpRequests: { count: 8, failedCount: 1 },
+      }),
+    ]);
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceApplicationLink');
+    const table = screen.getByTestId('digitalExperienceApplicationsTable');
+    expect(within(table).getByText('0')).toBeInTheDocument();
+    // Error rate, LCP, INP and CLS; FCP and TTFB are hidden by default.
+    expect(within(table).getAllByText('—')).toHaveLength(4);
+    expect(screen.getByTestId('digitalExperienceFailedHttp')).toHaveTextContent('12.5%');
+  });
+
   it('shows the loading state, not the empty prompt, while the request is pending', () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
     renderPage();

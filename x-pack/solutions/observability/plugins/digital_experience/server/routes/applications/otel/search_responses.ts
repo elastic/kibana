@@ -37,7 +37,11 @@ export type LogsAggregations = ByEnvironmentAggregations<{
   pageLoadsOverTime: { histogram: DateHistogramAggregation };
 }>;
 
-/** `spansSearch`: the applications in the selected environment only. */
-export interface SpansAggregations {
-  inEnvironment: { applications: { buckets: SpansBucket[] } };
-}
+/**
+ * `spansSearch`: every environment for the picker, and in the selected one the applications of the
+ * logs (`inLogs`) and the others (`spansOnly`), each absent when its size would be 0.
+ */
+export type SpansAggregations = ByEnvironmentAggregations<{
+  inLogs?: { buckets: SpansBucket[] };
+  spansOnly?: { buckets: SpansBucket[] };
+}>;

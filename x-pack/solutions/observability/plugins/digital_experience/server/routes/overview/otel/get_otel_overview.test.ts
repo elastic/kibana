@@ -81,7 +81,14 @@ const logsAggregations = ({
   },
 });
 
-const spansAggregations = (requests = 0, failed = 0) => ({
+const spansAggregations = (
+  requests = 0,
+  failed = 0,
+  { environments = [] as string[], environmentNames = [] as string[], notDefined = 0 } = {}
+) => ({
+  environments: terms(...environments),
+  environmentNames: terms(...environmentNames),
+  environmentNotDefined: { doc_count: notDefined },
   inEnvironment: { requests: { doc_count: requests }, failed: { doc_count: failed } },
 });
 
@@ -276,6 +283,17 @@ describe('getOtelOverview', () => {
       esClient,
       environment: 'production',
     });
+
+    expect(environments).toEqual(['ENVIRONMENT_NOT_DEFINED', 'production', 'staging']);
+  });
+
+  it('adds the environments of the HTTP requests, so one without logs can be picked', async () => {
+    const esClient = setup({
+      logs: logsAggregations({ environments: ['production'] }),
+      spans: spansAggregations(4, 1, { environmentNames: ['staging'], notDefined: 1 }),
+    });
+
+    const { environments } = await getOtelOverview({ ...PARAMS, esClient });
 
     expect(environments).toEqual(['ENVIRONMENT_NOT_DEFINED', 'production', 'staging']);
   });

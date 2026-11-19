@@ -28,7 +28,6 @@ import {
   eventCount,
   failedRequests,
   httpRequestDocuments,
-  inEnvironmentFilter,
   otelSearchDefaults,
   requestsWithOutcome,
   serviceDocuments,
@@ -149,15 +148,14 @@ export const spansSearch = ({
       ],
     },
   },
-  // Only the selected environment: the picker's environments come from the logs. The page filter
-  // is not applied: a request's `url.full` is the URL requested, not the page it was made from.
-  aggs: {
-    inEnvironment: {
-      filter: inEnvironmentFilter(environment, documentFilters(filters)),
-      aggs: {
-        requests: requestsWithOutcome(),
-        failed: failedRequests(),
-      },
+  // Every environment too, so one with HTTP requests only can be picked. The page filter is not
+  // applied: a request's `url.full` is the URL requested, not the page it was made from.
+  aggs: byEnvironment(
+    environment,
+    {
+      requests: requestsWithOutcome(),
+      failed: failedRequests(),
     },
-  },
+    documentFilters(filters)
+  ),
 });

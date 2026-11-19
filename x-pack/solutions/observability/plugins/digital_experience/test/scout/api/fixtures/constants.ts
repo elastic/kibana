@@ -35,6 +35,14 @@ export const applicationTabPath = (
 
 export const APPLICATIONS_IN_TIME_RANGE_PATH = `${APPLICATIONS_PATH}?start=${TIME_RANGE.rangeFrom}&end=${TIME_RANGE.rangeTo}`;
 
+/** Only HTTP requests (no logs) of the OTel applications fall in this range. */
+export const HTTP_ONLY_TIME_RANGE = {
+  rangeFrom: '2021-01-18T12:30:00.000Z',
+  rangeTo: '2021-01-18T12:34:00.000Z',
+} as const;
+
+export const APPLICATIONS_IN_HTTP_ONLY_TIME_RANGE_PATH = `${APPLICATIONS_PATH}?start=${HTTP_ONLY_TIME_RANGE.rangeFrom}&end=${HTTP_ONLY_TIME_RANGE.rangeTo}`;
+
 export const SESSIONS_ENABLE_PATH = 'internal/digital_experience/sessions/enable';
 
 export {

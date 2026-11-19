@@ -280,6 +280,27 @@ describe('spansSearch', () => {
     });
   });
 
+  it('lists up to 100 environments per field of the application, whatever the selected one', () => {
+    const request = spansSearch({ ...PARAMS, environment: 'production' });
+
+    expect(request.aggs?.environments).toEqual({
+      terms: { field: 'service.environment', size: 100 },
+    });
+    expect(request.aggs?.environmentNames).toEqual({
+      terms: { field: 'resource.attributes.deployment.environment.name', size: 100 },
+    });
+    expect(request.aggs).toHaveProperty('environmentNotDefined');
+    expect(inEnvironmentOf(request).filter).toEqual({
+      bool: {
+        should: [
+          { term: { 'service.environment': 'production' } },
+          { term: { 'resource.attributes.deployment.environment.name': 'production' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
   it('counts a request as failed from an HTTP status of 400 or an error span status', () => {
     expect(inEnvironmentOf(spansSearch(PARAMS)).aggs.failed).toEqual({
       filter: {

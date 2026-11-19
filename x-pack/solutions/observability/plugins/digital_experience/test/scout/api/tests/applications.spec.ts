@@ -14,6 +14,7 @@ import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 const {
   APM_ONLY_ROLE,
+  APPLICATIONS_IN_HTTP_ONLY_TIME_RANGE_PATH,
   APPLICATIONS_IN_TIME_RANGE_PATH,
   APPLICATIONS_PATH,
   COMMON_HEADERS,
@@ -92,6 +93,39 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
       });
       expect(findApplication(applications, SERVICE_NAME, 'otel')).toMatchObject({
         pageLoads: { count: 1 },
+      });
+    }
+  );
+
+  apiTest(
+    'lists the EDOT Browser applications that only have HTTP requests in the time range',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+      const response = await apiClient.get(APPLICATIONS_IN_HTTP_ONLY_TIME_RANGE_PATH, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const { applications } = response.body as ApplicationsResponse;
+      const noPageLoads = {
+        pageLoads: { count: 0 },
+        jsErrors: { count: 0, perPageLoad: null },
+        webVitals: { lcp: { p75Ms: null, sampleCount: 0 } },
+      };
+
+      expect(findApplication(applications, OTEL_APPS.shop, 'otel')).toMatchObject({
+        ...noPageLoads,
+        environments: ['production'],
+        httpRequests: { count: 4, failedCount: 0, failedRatio: 0 },
+        lastSeen: '2021-01-18T12:33:00.000Z',
+      });
+      expect(findApplication(applications, OTEL_APPS.checkout, 'otel')).toMatchObject({
+        ...noPageLoads,
+        environments: ['production'],
+        httpRequests: { count: 4, failedCount: 1, failedRatio: 0.25 },
+        lastSeen: '2021-01-18T12:33:30.000Z',
       });
     }
   );

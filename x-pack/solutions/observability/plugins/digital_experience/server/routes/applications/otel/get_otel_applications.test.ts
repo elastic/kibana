@@ -45,12 +45,14 @@ const pageLoadsOnly = (key: string) => ({
 
 const setup = ({
   logs,
-  spans,
+  inLogs = [],
+  spansOnly = [],
   logEnvironments = envs(),
   spanEnvironments = envs(),
 }: {
   logs: unknown[];
-  spans: unknown[];
+  inLogs?: unknown[];
+  spansOnly?: unknown[];
   logEnvironments?: ReturnType<typeof envs>;
   spanEnvironments?: ReturnType<typeof envs>;
 }) => {
@@ -60,7 +62,9 @@ const setup = ({
     return {
       aggregations: {
         ...(isLogs ? logEnvironments : spanEnvironments),
-        inEnvironment: { applications: { buckets: isLogs ? logs : spans } },
+        inEnvironment: isLogs
+          ? { applications: { buckets: logs } }
+          : { inLogs: { buckets: inLogs }, spansOnly: { buckets: spansOnly } },
       },
     };
   }) as never);
@@ -96,7 +100,7 @@ describe('getOtelApplications', () => {
           lastSeen: { value: Date.parse('2021-01-18T12:12:00.000Z') },
         },
       ],
-      spans: [
+      inLogs: [
         {
           key: 'web',
           ...envs(['canary']),
@@ -159,14 +163,14 @@ describe('getOtelApplications', () => {
           lastSeen: '2021-01-18T12:12:00.000Z',
         },
       ],
-      environments: ['production', 'staging'],
+      environments: ['production', 'staging', 'canary'],
       pageLoadsOverTime: [],
       sessionsOverTime: null,
     });
   });
 
   it('matches web vital names in any case and orders the applications by page loads', async () => {
-    const esClient = setup({ logs: [], spans: [] });
+    const esClient = setup({ logs: [] });
 
     await getOtelApplications({
       esClient,
@@ -193,7 +197,7 @@ describe('getOtelApplications', () => {
   });
 
   it('queries the OTel logs and traces for browser SDKs only', async () => {
-    const esClient = setup({ logs: [pageLoadsOnly('web')], spans: [] });
+    const esClient = setup({ logs: [pageLoadsOnly('web')] });
 
     await getOtelApplications({
       esClient,
@@ -214,7 +218,6 @@ describe('getOtelApplications', () => {
   it('lists "Not defined" when the logs have documents without an environment', async () => {
     const esClient = setup({
       logs: [pageLoadsOnly('web')],
-      spans: [],
       logEnvironments: envs(['production'], [], 2),
     });
 
@@ -228,10 +231,9 @@ describe('getOtelApplications', () => {
     expect(environments).toEqual(['production', 'ENVIRONMENT_NOT_DEFINED']);
   });
 
-  it('lists only the environments of the logs, which define the applications', async () => {
+  it('merges the environments of the logs and the spans, "Not defined" included', async () => {
     const esClient = setup({
       logs: [pageLoadsOnly('web')],
-      spans: [],
       logEnvironments: envs(['production']),
       spanEnvironments: envs(['traces-only'], [], 2),
     });
@@ -243,11 +245,11 @@ describe('getOtelApplications', () => {
       histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
-    expect(environments).toEqual(['production']);
+    expect(environments).toEqual(['production', 'traces-only', 'ENVIRONMENT_NOT_DEFINED']);
   });
 
-  it('searches the HTTP requests of the applications found in the logs only', async () => {
-    const esClient = setup({ logs: [pageLoadsOnly('web'), pageLoadsOnly('shop')], spans: [] });
+  it('searches the HTTP requests of the applications found in the logs, and the others', async () => {
+    const esClient = setup({ logs: [pageLoadsOnly('web'), pageLoadsOnly('shop')] });
 
     await getOtelApplications({
       esClient,
@@ -257,31 +259,107 @@ describe('getOtelApplications', () => {
     });
 
     const [, [spansRequest]] = esClient.search.mock.calls;
-    const { applications } = (
-      spansRequest?.aggs?.inEnvironment as { aggs: { applications: { terms: unknown } } }
+    const { inLogs, spansOnly } = (
+      spansRequest?.aggs?.inEnvironment as {
+        aggs: Record<'inLogs' | 'spansOnly', { terms: unknown }>;
+      }
     ).aggs;
-    expect(applications.terms).toEqual({
+    expect(inLogs.terms).toEqual({ field: 'service.name', size: 2, include: ['web', 'shop'] });
+    expect(spansOnly.terms).toEqual({
       field: 'service.name',
-      size: 2,
-      include: ['web', 'shop'],
+      size: 998,
+      order: { requests: 'desc' },
+      exclude: ['web', 'shop'],
     });
   });
 
-  it('skips the spans search without applications in the logs', async () => {
-    const esClient = setup({ logs: [], spans: [] });
+  it('lists the applications with only HTTP requests when the logs have none', async () => {
+    const esClient = setup({
+      logs: [],
+      spansOnly: [
+        {
+          key: 'otel-checkout',
+          ...envs(['production']),
+          requests: { doc_count: 4 },
+          failed: { doc_count: 1 },
+          lastSeen: { value: Date.parse('2021-01-18T12:33:30.000Z') },
+        },
+      ],
+    });
 
-    await getOtelApplications({
+    const { applications } = await getOtelApplications({
       esClient,
       start: 10,
       end: 20,
       histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
 
-    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(esClient.search).toHaveBeenCalledTimes(2);
+    expect(applications).toEqual([
+      {
+        serviceName: 'otel-checkout',
+        source: 'otel',
+        environments: ['production'],
+        pageLoads: { count: 0 },
+        sessions: null,
+        webVitals: {
+          lcp: NO_VITAL,
+          inp: NO_VITAL,
+          cls: { p75: null, sampleCount: 0, ratings: null },
+          fcp: NO_VITAL,
+          ttfb: NO_VITAL,
+        },
+        jsErrors: { count: 0, perPageLoad: null },
+        httpRequests: { count: 4, failedCount: 1, failedRatio: 0.25 },
+        lastSeen: '2021-01-18T12:33:30.000Z',
+      },
+    ]);
+  });
+
+  it('lists the applications of the logs before the ones with only HTTP requests', async () => {
+    const esClient = setup({
+      logs: [pageLoadsOnly('web')],
+      inLogs: [
+        {
+          key: 'web',
+          ...envs(),
+          requests: { doc_count: 2 },
+          failed: { doc_count: 0 },
+          lastSeen: { value: null },
+        },
+      ],
+      spansOnly: [
+        {
+          key: 'api-only',
+          ...envs(),
+          requests: { doc_count: 9 },
+          failed: { doc_count: 0 },
+          lastSeen: { value: null },
+        },
+      ],
+    });
+
+    const { applications } = await getOtelApplications({
+      esClient,
+      start: 10,
+      end: 20,
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
+    });
+
+    expect(
+      applications.map(({ serviceName, pageLoads, httpRequests }) => [
+        serviceName,
+        pageLoads.count,
+        httpRequests.count,
+      ])
+    ).toEqual([
+      ['web', 1, 2],
+      ['api-only', 0, 9],
+    ]);
   });
 
   it('filters "Not defined" to documents without either environment field', async () => {
-    const esClient = setup({ logs: [pageLoadsOnly('web')], spans: [] });
+    const esClient = setup({ logs: [pageLoadsOnly('web')] });
 
     await getOtelApplications({
       esClient,
@@ -312,7 +390,7 @@ describe('getOtelApplications', () => {
   });
 
   it('filters by environment on both environment fields', async () => {
-    const esClient = setup({ logs: [pageLoadsOnly('web')], spans: [] });
+    const esClient = setup({ logs: [pageLoadsOnly('web')] });
 
     await getOtelApplications({
       esClient,

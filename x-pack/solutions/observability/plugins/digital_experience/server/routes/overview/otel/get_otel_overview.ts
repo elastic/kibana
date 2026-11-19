@@ -51,7 +51,7 @@ const searchOtelOverview = async ({
       logs,
       spans
     ),
-    environments: sortEnvironments(pickerEnvironments(logs)),
+    environments: sortEnvironments(pickerEnvironments(logs, spans)),
     filters: toFilterOptions(logs),
   };
 };

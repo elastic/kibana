@@ -34,7 +34,12 @@ export const environmentsOf = (
 ];
 
 /** The environments for the picker, "Not defined" included when some documents have none. */
-export const pickerEnvironments = <TMetrics>(
-  aggregations?: ByEnvironmentAggregations<TMetrics>
-): string[] =>
-  withNotDefined(environmentsOf(aggregations), aggregations?.environmentNotDefined.doc_count ?? 0);
+export const pickerEnvironments = (
+  ...aggregations: Array<ByEnvironmentAggregations<unknown> | undefined>
+): string[] => {
+  const notDefinedCount = aggregations.reduce(
+    (total, aggregation) => total + (aggregation?.environmentNotDefined.doc_count ?? 0),
+    0
+  );
+  return withNotDefined(environmentsOf(...aggregations), notDefinedCount);
+};

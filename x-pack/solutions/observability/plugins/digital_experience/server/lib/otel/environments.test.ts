@@ -47,6 +47,22 @@ describe('pickerEnvironments', () => {
     expect(pickerEnvironments(aggregations(0))).toEqual(['production', 'staging']);
   });
 
+  it('merges several aggregations, with "Not defined" when any has it', () => {
+    expect(pickerEnvironments(aggregations(1), aggregations(1))).toEqual([
+      'production',
+      'staging',
+      ENVIRONMENT_NOT_DEFINED_VALUE,
+    ]);
+    expect(
+      pickerEnvironments(aggregations(0), {
+        environments: terms('canary'),
+        environmentNames: terms('production'),
+        environmentNotDefined: { doc_count: 1 },
+        inEnvironment: {},
+      })
+    ).toEqual(['production', 'staging', 'canary', ENVIRONMENT_NOT_DEFINED_VALUE]);
+  });
+
   it('is empty without aggregations, as when the index does not exist', () => {
     expect(pickerEnvironments()).toEqual([]);
   });

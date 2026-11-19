@@ -46,8 +46,8 @@ export interface ApplicationOverviewResponse {
   /**
    * The environments this application reported in the time range, whatever the `environment`
    * filter, for the picker. Each environment field (`service.environment` and
-   * `deployment.environment.name`) keeps its 100 most used, so up to 200 in total. Names longer than
-   * the route accepts are left out.
+   * `deployment.environment.name`) keeps its 100 most used in both the logs and traces searches, so
+   * up to 400 in total. Names longer than the route accepts are left out.
    */
   environments: string[];
   /**

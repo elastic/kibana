@@ -39,10 +39,8 @@ export type OverviewLogsAggregations = ByEnvironmentAggregations<
 > &
   FilterOptionsAggregations;
 
-/** `spansSearch`: the HTTP requests in the selected environment only. */
-export interface OverviewSpansAggregations {
-  inEnvironment: {
-    requests: { doc_count: number };
-    failed: { doc_count: number };
-  };
-}
+/** `spansSearch`: the HTTP requests in the selected environment, and every environment. */
+export type OverviewSpansAggregations = ByEnvironmentAggregations<{
+  requests: { doc_count: number };
+  failed: { doc_count: number };
+}>;
