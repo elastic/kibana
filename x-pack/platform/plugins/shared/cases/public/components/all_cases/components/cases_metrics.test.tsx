@@ -284,6 +284,29 @@ describe('Cases metrics', () => {
       expect(await screen.findByText(text)).toBeInTheDocument();
     });
 
+    it('adds the sentence that each case counts once to the info icon', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_avg',
+              display: 'value',
+              aggregateBy: 'case',
+            },
+          ]}
+          kpiResults={[{ id: 'tta', type: 'value', format: 'duration', value: 101 }]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      await userEvent.hover(await screen.findByTestId('cases-kpi-tile-tta-date-hint'));
+
+      expect(await screen.findByText(/Each case counts once\./)).toBeInTheDocument();
+    });
+
     it('shows the date hint for a custom tile with the closed date', async () => {
       const closedDateMetric: CustomKpiMetricConfiguration = {
         id: 'c1',

@@ -204,6 +204,13 @@ export const KPI_METRIC_ALERT_ACKNOWLEDGE_HINT = i18n.translate(
   }
 );
 
+export const KPI_METRIC_ALERT_EACH_CASE_ONCE_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricAlertEachCaseOnceHint',
+  {
+    defaultMessage: 'Each case counts once.',
+  }
+);
+
 export const KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT = i18n.translate(
   'xpack.cases.casesStats.kpiMetricAlertAcknowledgeAssignedHint',
   {

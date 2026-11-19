@@ -353,6 +353,15 @@ export const ACKNOWLEDGE_TRIGGER_ASSIGNED_OR_IN_PROGRESS = i18n.translate(
   }
 );
 
+export const AGGREGATE_BY_CASE = i18n.translate('xpack.cases.kpiMetrics.aggregateByCase', {
+  defaultMessage: 'Count each case once',
+});
+
+export const AGGREGATE_BY_CASE_HELP = i18n.translate('xpack.cases.kpiMetrics.aggregateByCaseHelp', {
+  defaultMessage:
+    'The alerts of one case give one value for the case. The tile aggregates the case values.',
+});
+
 export const PREDEFINED_LABELS: Record<string, string> = {
   open_cases: i18n.translate('xpack.cases.kpiMetrics.predefinedOpenCases', {
     defaultMessage: 'Open cases',

@@ -306,6 +306,24 @@ describe('kpi metric form', () => {
       expect(toKpiMetricRequest(toKpiMetricFormState(metric), metric)).toEqual(metric);
     });
 
+    it('reads the per-case mode and writes it only when it is not the default or was saved', () => {
+      const state = toKpiMetricFormState(alertMetric);
+
+      expect(state.aggregateBy).toBe('alert');
+      expect(toKpiMetricRequest(state, alertMetric)).toEqual(alertMetric);
+      expect(toKpiMetricRequest({ ...state, aggregateBy: 'case' }, alertMetric)).toEqual({
+        ...alertMetric,
+        aggregateBy: 'case',
+      });
+
+      const saved = { ...alertMetric, aggregateBy: 'case' as const };
+
+      expect(toKpiMetricRequest(toKpiMetricFormState(saved), saved)).toEqual(saved);
+      expect(
+        toKpiMetricRequest({ ...toKpiMetricFormState(saved), aggregateBy: 'alert' }, saved)
+      ).toEqual({ ...alertMetric, aggregateBy: 'alert' });
+    });
+
     it('writes no trigger for a metric that is not an alert metric', () => {
       const openCases: KpiMetricRequest = {
         kind: 'predefined',

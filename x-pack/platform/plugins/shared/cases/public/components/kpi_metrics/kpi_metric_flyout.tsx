@@ -222,15 +222,25 @@ const KpiMetricGroupByRows: React.FC<KpiMetricRowsProps> = ({
 KpiMetricGroupByRows.displayName = 'KpiMetricGroupByRows';
 
 const KpiMetricAlertOptionRows: React.FC<KpiMetricRowsProps> = ({ state, update }) => (
-  <EuiFormRow label={i18n.ACKNOWLEDGE_TRIGGER} helpText={i18n.ACKNOWLEDGE_TRIGGER_HELP} fullWidth>
-    <EuiSelect
-      fullWidth
-      options={ACKNOWLEDGE_TRIGGER_OPTIONS}
-      value={state.acknowledgeTrigger}
-      onChange={(e) => update({ acknowledgeTrigger: toAcknowledgeTrigger(e.target.value) })}
-      data-test-subj="kpi-metric-acknowledge-trigger"
-    />
-  </EuiFormRow>
+  <>
+    <EuiFormRow label={i18n.ACKNOWLEDGE_TRIGGER} helpText={i18n.ACKNOWLEDGE_TRIGGER_HELP} fullWidth>
+      <EuiSelect
+        fullWidth
+        options={ACKNOWLEDGE_TRIGGER_OPTIONS}
+        value={state.acknowledgeTrigger}
+        onChange={(e) => update({ acknowledgeTrigger: toAcknowledgeTrigger(e.target.value) })}
+        data-test-subj="kpi-metric-acknowledge-trigger"
+      />
+    </EuiFormRow>
+    <EuiFormRow fullWidth helpText={i18n.AGGREGATE_BY_CASE_HELP}>
+      <EuiSwitch
+        label={i18n.AGGREGATE_BY_CASE}
+        checked={state.aggregateBy === 'case'}
+        onChange={(e) => update({ aggregateBy: e.target.checked ? 'case' : 'alert' })}
+        data-test-subj="kpi-metric-aggregate-by-case"
+      />
+    </EuiFormRow>
+  </>
 );
 KpiMetricAlertOptionRows.displayName = 'KpiMetricAlertOptionRows';
 

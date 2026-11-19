@@ -21,6 +21,7 @@ import type { KpiMetricRequest } from '../../../common/types/api';
 import { isKpiExtendedKeywordField } from '../../../common/utils/kpi_metrics';
 import type {
   KpiAcknowledgeTrigger,
+  KpiAggregateBy,
   KpiMetricAggregationType,
   KpiMetricDateField,
   KpiMetricDirection,
@@ -58,9 +59,14 @@ export interface KpiMetricFormState {
    * The acknowledge trigger of an alert metric
    */
   acknowledgeTrigger: KpiAcknowledgeTrigger;
+  /**
+   * The value of an alert metric for each alert or for each case
+   */
+  aggregateBy: KpiAggregateBy;
 }
 
 export const DEFAULT_ACKNOWLEDGE_TRIGGER: KpiAcknowledgeTrigger = 'assigned_or_in_progress';
+export const DEFAULT_AGGREGATE_BY: KpiAggregateBy = 'alert';
 
 export interface KpiMetricFormErrors {
   label?: string;
@@ -193,6 +199,7 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
     groupByField: '',
     groupBySize: String(DEFAULT_KPI_BREAKDOWN_SIZE),
     acknowledgeTrigger: DEFAULT_ACKNOWLEDGE_TRIGGER,
+    aggregateBy: DEFAULT_AGGREGATE_BY,
   };
 
   if (metric == null) {
@@ -206,6 +213,7 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
         kind: 'predefined',
         predefinedId: metric.predefinedId,
         acknowledgeTrigger: metric.acknowledgeTrigger ?? DEFAULT_ACKNOWLEDGE_TRIGGER,
+        aggregateBy: metric.aggregateBy ?? DEFAULT_AGGREGATE_BY,
       },
       metric.threshold
     );
@@ -290,8 +298,9 @@ const toThreshold = (state: KpiMetricFormState): KpiMetricThreshold | undefined 
 };
 
 /**
- * Returns the options of an alert metric. The trigger is written when it is not the default, or when the
- * saved metric already had it. The other saved options stay as they are, because this form does not edit them.
+ * Returns the options of an alert metric. The trigger and the per-case mode are written when they are not the
+ * default, or when the saved metric already had them. The other saved options stay as they are,
+ * because this form does not edit them.
  */
 const toAlertOptions = (
   state: KpiMetricFormState,
@@ -307,7 +316,9 @@ const toAlertOptions = (
       : undefined;
 
   return {
-    ...(saved?.aggregateBy != null && { aggregateBy: saved.aggregateBy }),
+    ...((saved?.aggregateBy != null || state.aggregateBy !== DEFAULT_AGGREGATE_BY) && {
+      aggregateBy: state.aggregateBy,
+    }),
     ...(saved?.dateBasis != null && { dateBasis: saved.dateBasis }),
     ...(saved?.caseQuery != null && { caseQuery: saved.caseQuery }),
     ...((saved?.acknowledgeTrigger != null ||

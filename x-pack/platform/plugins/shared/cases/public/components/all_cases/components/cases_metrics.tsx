@@ -22,6 +22,7 @@ import { isAnalyticsPredefinedKpiMetric } from '../../../../common/constants';
 import type { KpiMetricResult } from '../../../../common/types/api';
 import type {
   CustomKpiMetricConfiguration,
+  KpiAcknowledgeTrigger,
   KpiMetricConfiguration,
 } from '../../../../common/types/domain';
 import { CaseStatuses } from '../../../../common/types/domain';
@@ -35,6 +36,7 @@ import {
   KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT,
   KPI_METRIC_ALERT_ACKNOWLEDGE_HINT,
   KPI_METRIC_ALERT_ACKNOWLEDGE_IN_PROGRESS_HINT,
+  KPI_METRIC_ALERT_EACH_CASE_ONCE_HINT,
   KPI_METRIC_CLOSED_DATE_HINT,
   KPI_METRIC_UNKNOWN,
 } from '../translations';
@@ -168,6 +170,16 @@ const getBreakdownTileValues = (
   return { label, result, isLoading: isLoadingKpiResults };
 };
 
+const getAcknowledgeRuleHint = (trigger?: KpiAcknowledgeTrigger): string => {
+  if (trigger === 'assigned') {
+    return KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT;
+  }
+
+  return trigger === 'in_progress'
+    ? KPI_METRIC_ALERT_ACKNOWLEDGE_IN_PROGRESS_HINT
+    : KPI_METRIC_ALERT_ACKNOWLEDGE_HINT;
+};
+
 const getDateHint = (metric: KpiMetricConfiguration): string | undefined => {
   if (metric.kind === 'custom') {
     return metric.dateField === 'closed_at' ? KPI_METRIC_CLOSED_DATE_HINT : undefined;
@@ -177,13 +189,9 @@ const getDateHint = (metric: KpiMetricConfiguration): string | undefined => {
     return;
   }
 
-  if (metric.acknowledgeTrigger === 'assigned') {
-    return KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT;
-  }
+  const rule = getAcknowledgeRuleHint(metric.acknowledgeTrigger);
 
-  return metric.acknowledgeTrigger === 'in_progress'
-    ? KPI_METRIC_ALERT_ACKNOWLEDGE_IN_PROGRESS_HINT
-    : KPI_METRIC_ALERT_ACKNOWLEDGE_HINT;
+  return metric.aggregateBy === 'case' ? `${rule} ${KPI_METRIC_ALERT_EACH_CASE_ONCE_HINT}` : rule;
 };
 
 const getKpiTileValues = (

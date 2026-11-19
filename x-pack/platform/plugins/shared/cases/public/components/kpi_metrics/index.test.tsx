@@ -416,6 +416,26 @@ describe('KpiMetricsSettings', () => {
       );
     });
 
+    it('saves the per-case mode of an alert metric', async () => {
+      const alertMetric = {
+        id: 'alert-1',
+        kind: 'predefined' as const,
+        predefinedId: 'alert_time_to_acknowledge_median',
+        display: 'value' as const,
+      };
+      renderWithTestingProviders(
+        <KpiMetricsSettings kpiMetrics={[alertMetric]} isLoading={false} onSave={onSave} />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.click(await screen.findByTestId('kpi-metric-aggregate-by-case'));
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      await waitFor(() =>
+        expect(onSave).toHaveBeenCalledWith([{ ...alertMetric, aggregateBy: 'case' }])
+      );
+    });
+
     it('does not show the acknowledge trigger for a case search metric', async () => {
       renderWithTestingProviders(
         <KpiMetricsSettings
@@ -431,6 +451,7 @@ describe('KpiMetricsSettings', () => {
 
       expect(await screen.findByTestId('kpi-metric-predefined-id')).toBeInTheDocument();
       expect(screen.queryByTestId('kpi-metric-acknowledge-trigger')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-metric-aggregate-by-case')).not.toBeInTheDocument();
     });
 
     it('shows a duration in the unit of the threshold', async () => {
