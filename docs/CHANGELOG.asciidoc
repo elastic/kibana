@@ -160,13 +160,13 @@ Data ingestion and Fleet::
 // * Fix uploading a new version of an installed custom package failing when a data stream created before the package was installed uses the package's index template. The error for a data stream that the package doesn't own now names the stream and the supported options ({kibana-pull}306214[#306214]).
 Data management::
 * Fix the **Auto-follow patterns** page failing to load, with an "Error loading auto-follow patterns" message, when an auto-follow pattern created through the {es} API has no `follow_index_pattern` ({kibana-pull}303787[#303787]).
-* Fix the **Create pipeline from CSV** file picker accepting files that {kib} then failed to parse because they were larger than 10 MB. The picker now shows and enforces the 10 MB limit instead of the file upload size limit, which is 500 MB by default ({kibana-pull}301246[#301246]).
+* Fix the **Create pipeline from CSV** file picker showing the file upload size limit, which is 500 MB by default, when {kib} can't parse CSV files larger than 10 MB. The picker now shows the 10 MB limit, and processing a larger file shows a "File too large" error ({kibana-pull}301246[#301246]).
 Discover::
 * Fix the "No matching data view" error in the **Surrounding documents** and **Single document** views when you use a default data view, such as **All logs**, and the page reloads, for example after you change the theme ({kibana-pull}304432[#304432]).
 Elastic Observability solution::
 * Fix APM service dashboards and service metrics dashboards crashing the page with an `Embeddable has been destroyed` error ({kibana-pull}302552[#302552]).
 * Fix the Synthetics APIs that run a monitor test manually running tests on Elastic managed locations for users who lack permission to use them. The APIs now return a `403` error, like the disabled **Run test manually** option in the UI ({kibana-pull}302483[#302483]).
-* Fix Synthetics monitor status rule notifications showing the wrong time when you pass `context.checkedAt` to `FormatDate` and {kib} doesn't run in UTC. Use the new `context.timestamp` action variable, an ISO 8601 time, with `FormatDate` instead ({kibana-pull}302776[#302776]).
+* Fix Synthetics monitor status rule notifications showing the wrong time when you pass `context.checkedAt` to `FormatDate`, because that variable is already formatted without a timezone offset. Use the new `context.timestamp` action variable, an ISO 8601 time, with `FormatDate` instead ({kibana-pull}302776[#302776]).
 // !!DEFERRED!! Not on the 8.19 branch (backport failed with merge conflicts, as of 2026-11-19). Re-verify against the next BC.
 // * Fix grouped Metric threshold and Custom threshold rules not raising a no-data alert for a group that stops reporting when the rule runs much less often than its time window, for example a 5-minute check interval with a 1-minute window ({kibana-pull}303559[#303559]).
 Elastic Security solution::
