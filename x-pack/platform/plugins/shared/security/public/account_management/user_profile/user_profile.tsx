@@ -64,6 +64,7 @@ import {
   useUpdateUserProfile,
 } from '@kbn/user-profile-components';
 
+import { ChromeColorEditor } from './chrome_color_editor';
 import { usePrimeUserLocale } from './use_prime_user_locale';
 import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
 import type { AuthenticatedUser } from '../../../common';
@@ -143,6 +144,10 @@ export interface UserProfileFormValues {
       contrastMode: ContrastModeValue;
       locale: LocaleValue;
       rememberSelectedSpace: boolean;
+      /** Hex colors for the chrome background. An empty string means the default. */
+      chromeColor: string;
+      chromeColorLight: string;
+      chromeColorDark: string;
     };
   };
   avatarType: 'initials' | 'image';
@@ -292,6 +297,16 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       <FormRow name="data.userSettings.contrastMode" fullWidth>
         <ContrastKeyPadMenu name="data.userSettings.contrastMode" />
       </FormRow>
+
+      <ChromeColorEditor
+        namePrefix="data.userSettings"
+        values={{
+          chromeColor: formik.values.data.userSettings.chromeColor,
+          chromeColorLight: formik.values.data.userSettings.chromeColorLight,
+          chromeColorDark: formik.values.data.userSettings.chromeColorDark,
+        }}
+        onChange={(key, value) => formik.setFieldValue(`data.userSettings.${key}`, value)}
+      />
     </EuiDescribedFormGroup>
   );
 };
@@ -966,6 +981,9 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
               data.userSettings?.locale ||
               toCanonicalLocaleId(i18n.getLocale(), getAvailableLocales()),
             rememberSelectedSpace: data.userSettings?.rememberSelectedSpace ?? true,
+            chromeColor: data.userSettings?.chromeColor || '',
+            chromeColorLight: data.userSettings?.chromeColorLight || '',
+            chromeColorDark: data.userSettings?.chromeColorDark || '',
           },
         }
       : undefined,

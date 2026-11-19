@@ -27,6 +27,8 @@
     "@kbn/ui-chrome-layout",
     "@kbn/core-chrome-browser-components",
     "@kbn/core-chrome-browser-hooks",
-    "@kbn/core-notifications-browser"
+    "@kbn/core-notifications-browser",
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-user-settings-common"
   ]
 }

@@ -20,6 +20,8 @@ dependsOn:
   - '@kbn/config'
   - '@kbn/shared-ux-utility'
   - '@kbn/core-theme-browser-internal-types'
+  - '@kbn/core-user-profile-browser'
+  - '@kbn/core-user-settings-common'
 tags:
   - shared-browser
   - package

@@ -27,11 +27,13 @@ export type ChromeLayoutProps = ChromeLayoutComponentProps;
  * @param props - Props for the ChromeLayout component.
  * @returns The rendered ChromeLayout component.
  */
-export const ChromeLayout = ({ children, ...props }: ChromeLayoutProps) => {
+export const ChromeLayout = ({ children, background, ...props }: ChromeLayoutProps) => {
   return (
     <LayoutStateProvider {...props}>
       <LayoutGlobalCSS />
-      <ChromeLayoutComponent {...props}>{children}</ChromeLayoutComponent>
+      <ChromeLayoutComponent {...props} background={background}>
+        {children}
+      </ChromeLayoutComponent>
     </LayoutStateProvider>
   );
 };

@@ -66,6 +66,16 @@ export interface UserSettingsData {
    * `agentBuilderAnnouncementModalSeen`; read for backward compatibility.
    */
   agentBuilderAnnouncementModalSeenBySpaceJson?: string;
+  /**
+   * Base hex color (e.g. `#0B64DD`) for the chrome (header + side navigation) background.
+   * An empty string or `undefined` means the default chrome color. Light and dark mode shades
+   * are derived from it unless overridden by `chromeColorLight` / `chromeColorDark`.
+   */
+  chromeColor?: string;
+  /** Optional hex color override used for the chrome background in light mode. */
+  chromeColorLight?: string;
+  /** Optional hex color override used for the chrome background in dark mode. */
+  chromeColorDark?: string;
 }
 
 // Register the known Kibana user settings fields with the core user-profile common package.

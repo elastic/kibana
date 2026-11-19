@@ -178,7 +178,11 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
       .post('/internal/security/user_profile/_data', { body: JSON.stringify(data) })
       .then(() => {
         this._cache.clear();
-        this.internalDataUpdates$.next(updated);
+        // Emit only what was written, like `update()` does. Consumers use this to tell which
+        // settings changed (e.g. to re-apply the color mode only when `darkMode` was part of the
+        // write), so the merged profile would make every partial update look like it touched all
+        // the user's settings.
+        this.internalDataUpdates$.next(data);
       })
       .catch((err) => {
         this._userProfile$.next(previous);

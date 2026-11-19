@@ -599,6 +599,7 @@
     "@kbn/core-user-profile-server": "workspace:*",
     "@kbn/core-user-profile-server-internal": "workspace:*",
     "@kbn/core-user-profile-server-mocks": "workspace:*",
+    "@kbn/core-user-settings-common": "workspace:*",
     "@kbn/core-user-settings-server": "workspace:*",
     "@kbn/core-user-settings-server-internal": "workspace:*",
     "@kbn/core-user-settings-server-mocks": "workspace:*",

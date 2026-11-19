@@ -14,6 +14,7 @@ import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 export interface LayoutServiceStartDeps {
   application: InternalApplicationStart;
@@ -22,6 +23,8 @@ export interface LayoutServiceStartDeps {
   docLinks: DocLinksStart;
   customBranding: CustomBrandingStart;
   notifications: NotificationsStart;
+  /** Used to apply the user's chrome color preference. */
+  userProfile: UserProfileService;
 }
 
 /**

@@ -96,7 +96,10 @@ export class RenderingService implements IRenderingService {
   ) {
     const startServices = this.contextDeps.getValue()!;
 
-    const layout: LayoutService = new GridLayout(renderCoreDeps);
+    const layout: LayoutService = new GridLayout({
+      ...renderCoreDeps,
+      userProfile: startServices.userProfile,
+    });
 
     const Layout = layout.getComponent();
 

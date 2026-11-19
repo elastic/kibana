@@ -85,6 +85,9 @@ describe('useUserProfileForm', () => {
             "initials": "fn",
           },
           "userSettings": Object {
+            "chromeColor": "",
+            "chromeColorDark": "",
+            "chromeColorLight": "",
             "contrastMode": "system",
             "darkMode": "system",
             "locale": "en",
@@ -97,6 +100,46 @@ describe('useUserProfileForm', () => {
         },
       }
     `);
+  });
+
+  it('should initialise the chrome colors from user profile data', () => {
+    const data: UserProfileData = {
+      avatar: {},
+      userSettings: {
+        chromeColor: '#0B64DD',
+        chromeColorLight: '#ECF1F9',
+        chromeColorDark: '#07101F',
+      },
+    };
+    const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+    expect(result.current.values.data?.userSettings).toEqual(
+      expect.objectContaining({
+        chromeColor: '#0B64DD',
+        chromeColorLight: '#ECF1F9',
+        chromeColorDark: '#07101F',
+      })
+    );
+  });
+
+  it('should save the chrome colors without asking for a page reload', async () => {
+    const data: UserProfileData = { avatar: {} };
+    const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+    await act(async () => {
+      await result.current.setFieldValue('data.userSettings.chromeColor', '#0B64DD');
+    });
+    await act(async () => {
+      await result.current.submitForm();
+    });
+
+    expect(profileUpdateBody().userSettings).toEqual(
+      expect.objectContaining({ chromeColor: '#0B64DD', chromeColorLight: '', chromeColorDark: '' })
+    );
+    expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(coreStart.notifications.toasts.addSuccess.mock.calls[0])).not.toContain(
+      'Reload'
+    );
   });
 
   it('should initialise rememberSelectedSpace from user profile data', () => {
@@ -351,6 +394,61 @@ describe('useUserProfileForm', () => {
   });
 
   describe('Dark Mode Form', () => {
+    it('should register a chrome color change as an unsaved change', async () => {
+      render(
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={mockAuthenticatedUser()} data={{}} />
+          </Providers>
+        )
+      );
+
+      expect(screen.queryByText(/unsaved change/)).not.toBeInTheDocument();
+
+      await userEvent.type(
+        screen.getByTestId('euiColorPickerAnchor userProfile-chromeColor'),
+        '#0B64DD'
+      );
+
+      expect(await screen.findByText('1 unsaved change')).toBeInTheDocument();
+    });
+
+    it('should display the chrome color picker, previews and per mode overrides', () => {
+      const data: UserProfileData = { userSettings: { chromeColor: '#0B64DD' } };
+
+      render(
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={mockAuthenticatedUser()} data={data} />
+          </Providers>
+        )
+      );
+
+      // EuiColorPicker appends the provided `data-test-subj` to its own anchor test subject.
+      expect(
+        screen.getByTestId('euiColorPickerAnchor userProfile-chromeColor')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('userProfileChromeColorPreviewLight')).toBeInTheDocument();
+      expect(screen.getByTestId('userProfileChromeColorPreviewDark')).toBeInTheDocument();
+      expect(screen.getByTestId('userProfileChromeColorAdvanced')).toBeInTheDocument();
+    });
+
     it('should display if the User is not a cloud user', () => {
       const data: UserProfileData = {};
 

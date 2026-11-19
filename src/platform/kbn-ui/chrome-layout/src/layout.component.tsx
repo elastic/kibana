@@ -22,6 +22,11 @@ import { useLayoutState } from './layout_state_context';
 export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {
   // application
   children: Slot;
+  /**
+   * Optional CSS color for the layout root. It shows behind the header and navigation (and around
+   * a framed application panel). When omitted, the page background shows through.
+   */
+  background?: string;
 }
 
 /**
@@ -30,7 +35,11 @@ export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {
  * @param props - ChromeLayoutComponentProps
  * @returns The rendered ChromeLayoutComponent.
  */
-export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutComponentProps) => {
+export const ChromeLayoutComponent = ({
+  children,
+  background,
+  ...props
+}: ChromeLayoutComponentProps) => {
   const layoutState = useLayoutState();
   const styles = useLayoutStyles(layoutState);
 
@@ -71,7 +80,7 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
   );
 
   return (
-    <div css={styles.css} style={styles.style}>
+    <div css={styles.css} style={background ? { ...styles.style, background } : styles.style}>
       {banner}
       {header}
       {navigation}

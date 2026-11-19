@@ -33,6 +33,12 @@ const LazyColorThemeToggle = lazy(() =>
   }))
 );
 
+const LazyChromeColorToggle = lazy(() =>
+  import('@kbn/developer-toolbar').then(({ LiveChromeColorToggle }) => ({
+    default: LiveChromeColorToggle,
+  }))
+);
+
 const LazyMeasureButton = lazy(() =>
   import('@kbn/design-tools').then(({ MeasureButton }) => ({
     default: MeasureButton,
@@ -85,6 +91,21 @@ export class DeveloperToolbarPlugin
       children: (
         <Suspense fallback={null}>
           <LazyColorThemeToggle theme={core.theme as InternalThemeServiceStart} />
+        </Suspense>
+      ),
+    });
+
+    this.registerItem({
+      id: 'Chrome Color',
+      children: (
+        <Suspense fallback={null}>
+          <LazyChromeColorToggle
+            theme={core.theme as InternalThemeServiceStart}
+            userProfile={core.userProfile}
+            onError={(error) =>
+              core.notifications.toasts.addError(error, { title: 'Chrome color' })
+            }
+          />
         </Suspense>
       ),
     });
