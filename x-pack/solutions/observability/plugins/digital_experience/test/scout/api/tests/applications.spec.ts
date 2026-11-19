@@ -26,6 +26,8 @@ const {
   STAGING_ENVIRONMENT,
   TIME_RANGE,
   TRACE_ONLY_APPS,
+  TRACE_ONLY_TIME_RANGE,
+  withQuery,
 } = testData;
 
 apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
@@ -157,6 +159,35 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
       expect(applications.map(({ serviceName }) => serviceName)).not.toContain(
         withoutOutcome.serviceName
       );
+    }
+  );
+
+  apiTest(
+    'lists only the applications of the trace-only environment it offers',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+      const { withRequests } = TRACE_ONLY_APPS;
+      // Covers both ranges, so another application is listed without the filter.
+      const range = { start: TIME_RANGE.rangeFrom, end: TRACE_ONLY_TIME_RANGE.rangeTo };
+      const listApplications = async (environment?: string) => {
+        const response = await apiClient.get(
+          withQuery(APPLICATIONS_PATH, { ...range, ...(environment ? { environment } : {}) }),
+          { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
+        );
+        expect(response).toHaveStatusCode(200);
+        return (response.body as ApplicationsResponse).applications;
+      };
+
+      const unfiltered = await listApplications();
+      expect(findApplication(unfiltered, withRequests.serviceName, 'otel')).toBeDefined();
+      expect(findApplication(unfiltered, OTEL_APPS.shop, 'otel')).toBeDefined();
+
+      const filtered = await listApplications(withRequests.environment);
+      expect(findApplication(filtered, withRequests.serviceName, 'otel')).toMatchObject({
+        environments: [withRequests.environment],
+        httpRequests: { count: 1, failedCount: 0, failedRatio: 0 },
+      });
+      expect(findApplication(filtered, OTEL_APPS.shop, 'otel')).toBeUndefined();
     }
   );
 
