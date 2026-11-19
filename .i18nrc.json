@@ -241,6 +241,7 @@
     "cpsUtils": "src/platform/packages/shared/kbn-cps-utils",
     "dashboardsSelector": "src/platform/packages/shared/dashboards/dashboards-selector",
     "devComments": "src/platform/packages/private/kbn-dev-comments",
+    "developerToolbarProfilers": "src/platform/plugins/private/developer_toolbar_profilers",
     "kbnDesignTools": "src/platform/packages/shared/kbn-design-tools",
     "kbnInspectComponent": "src/platform/plugins/private/inspect_component",
     "kql": "src/platform/plugins/shared/kql",
@@ -257,7 +258,7 @@
       "src/platform/plugins/shared/workflows_management",
       "x-pack/platform/plugins/shared/agent_builder_workflows"
     ],
-    "workflowsExecutionEngine": "src/platform/plugins/shared/workflows_execution_engine",
+    "workflowsExecutionEngine": "x-pack/platform/plugins/shared/workflows_execution_engine",
     "workflowsExtensions": "src/platform/plugins/shared/workflows_extensions",
     "aiInfra": "x-pack/platform/plugins/shared/ai_infra/product_doc_base",
     "alertsFiltersForm": "x-pack/platform/packages/shared/response-ops/alerts-filters-form",

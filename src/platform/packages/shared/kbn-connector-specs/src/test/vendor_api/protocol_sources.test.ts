@@ -668,8 +668,9 @@ describe('protocol sources', () => {
         log,
       });
 
-    const offlineCheck = (connector: ConnectorSpec) =>
-      updateVendorApi({
+    // Only what a re-record would write and complain about; the rest of the result is the run's.
+    const offlineCheck = async (connector: ConnectorSpec) => {
+      const { changed, problems } = await updateVendorApi({
         connector,
         directory,
         check: true,
@@ -679,6 +680,8 @@ describe('protocol sources', () => {
         now,
         log,
       });
+      return { changed, problems };
+    };
 
     beforeEach(async () => {
       directory = await fs.mkdtemp(path.join(os.tmpdir(), 'protocol-sources-'));

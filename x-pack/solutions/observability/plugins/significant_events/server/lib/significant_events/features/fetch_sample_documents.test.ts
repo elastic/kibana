@@ -389,6 +389,54 @@ describe('fetchSampleDocuments', () => {
     );
   });
 
+  it('backfills unused entity-filtered slots with diverse documents before random ones', async () => {
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([{ name: 'service.name', type: 'keyword' }]);
+    getSampleDocumentsEsqlMock.mockImplementation(async ({ whereCondition }) => ({
+      hits: whereCondition
+        ? [createHit('entity-1')]
+        : Array.from({ length: 10 }, (_, i) => createHit(`random-${i + 1}`)),
+      total: 10,
+    }));
+    getDiverseSampleDocumentsMock.mockResolvedValueOnce({
+      hits: Array.from({ length: 6 }, (_, i) => createHit(`diverse-${i + 1}`)),
+    });
+
+    const { documents } = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [
+        createFeature({
+          id: 'feature-1',
+          updatedAt: '2026-01-02T00:00:00.000Z',
+          field: 'service.name',
+          value: 'checkout',
+        }),
+      ],
+      logger,
+      size: 10,
+      entityFilteredRatio: 0.4,
+      diverseRatio: 0.2,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
+      iteration: 3,
+    });
+
+    expect(documents.map((document) => document._id)).toEqual([
+      'entity-1',
+      'diverse-1',
+      'diverse-2',
+      'diverse-3',
+      'diverse-4',
+      'diverse-5',
+      'random-1',
+      'random-2',
+      'random-3',
+      'random-4',
+    ]);
+  });
+
   it('falls back to random documents when entity-filtered ES|QL sampling fails', async () => {
     const esClient = {} as ElasticsearchClient;
     const features = [

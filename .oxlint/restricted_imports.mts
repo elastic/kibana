@@ -446,7 +446,7 @@ export const restrictedImportsOverrides: OxlintOverride[] = [
   {
     files: [
       'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
       'src/platform/plugins/shared/workflows_extensions/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
