@@ -228,6 +228,34 @@ describe('QueryBarTopRowTopRow', () => {
         });
       });
     });
+
+    it.each([
+      { isDirty: false, ariaLabel: /^Updated 2\d seconds ago\. Refresh/, cachedIcon: true },
+      { isDirty: true, ariaLabel: /^Needs updating$/, cachedIcon: false },
+    ])(
+      'should render the cached results state when isDirty is $isDirty',
+      async ({ isDirty, ariaLabel, cachedIcon }) => {
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext({
+            query: kqlQuery,
+            screenTitle: 'Another Screen',
+            isDirty,
+            indexPatterns: [stubIndexPattern],
+            timeHistory: mockTimeHistory,
+            useBackgroundSearchButton: value,
+            cachedResultsLoadedAt: new Date(Date.now() - 20 * 1000).toISOString(),
+          })
+        );
+
+        await waitFor(() => {
+          const submitButton = getByTestId(submitId);
+          expect(submitButton.getAttribute('aria-label')).toMatch(ariaLabel);
+          expect(Boolean(submitButton.querySelector('[data-euiicon-type="clockCounter"]'))).toBe(
+            cachedIcon
+          );
+        });
+      }
+    );
   });
 
   it('does not disable submit, date picker, or fast mode just because the ES|QL query is empty', async () => {
@@ -545,6 +573,58 @@ describe('QueryBarTopRowTopRow', () => {
         // Advance past the 500ms delay — button should now be enabled.
         act(() => jest.advanceTimersByTime(500));
         expect(button).toBeEnabled();
+      });
+    });
+
+    describe('when the app disables background search', () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      const renderLoadingQueryBar = (onCancel?: () => void) => {
+        const stateSubject = new Subject<SearchSessionState>();
+        const data = dataPluginMock.createStartContract();
+        data.search.session = getSessionServiceMock({ state$: stateSubject.asObservable() });
+        jest.mocked(data.search.session.getSearchSessionIndicatorUiConfig).mockReturnValue({
+          isDisabled: () => ({
+            disabled: true,
+            reasonText: 'Search storage is disabled by the app.',
+          }),
+        });
+
+        const renderResult = render(
+          wrapQueryBarTopRowInContext(
+            {
+              query: kqlQuery,
+              showQueryInput: false,
+              isDirty: false,
+              indexPatterns: [stubIndexPattern],
+              timeHistory: mockTimeHistory,
+              isLoading: true,
+              onCancel,
+              useBackgroundSearchButton: true,
+            },
+            { servicesOverride: { data } }
+          )
+        );
+        act(() => stateSubject.next(SearchSessionState.Loading));
+        act(() => jest.advanceTimersByTime(500));
+
+        return renderResult;
+      };
+
+      // With onCancel the query bar shows the cancel split button, without it the submit one.
+      it.each([
+        { button: 'queryCancelButton-secondary-button', onCancel: jest.fn() },
+        { button: 'querySubmitButton-secondary-button', onCancel: undefined },
+      ])('keeps $button disabled while a search is loading', ({ button, onCancel }) => {
+        const { getByTestId } = renderLoadingQueryBar(onCancel);
+
+        expect(getByTestId(button)).toBeDisabled();
       });
     });
   });
@@ -1369,6 +1449,82 @@ describe('QueryBarTopRowTopRow', () => {
         expect.anything()
       );
       expect(hoverPickerTooltipText()).toContain('12:05:00.000');
+    });
+  });
+
+  describe('legacy date picker props', () => {
+    beforeEach(() => {
+      useNewDateRangePickerFlag = false;
+    });
+
+    const renderLegacyPicker = (props: Record<string, unknown> = {}) =>
+      render(
+        wrapQueryBarTopRowInContext({
+          enableDateRangePicker: false,
+          isDirty: false,
+          timeHistory: mockTimeHistory,
+          ...props,
+        })
+      );
+
+    const openQuickSelect = async () => {
+      await userEvent.click(await screen.findByTestId('superDatePickerToggleQuickMenuButton'));
+    };
+
+    it('uses the quick ranges from the advanced setting by default', async () => {
+      renderLegacyPicker();
+      await openQuickSelect();
+
+      expect(await screen.findByText('Today')).toBeInTheDocument();
+    });
+
+    it('replaces the quick ranges from the advanced setting with commonlyUsedRanges', async () => {
+      renderLegacyPicker({
+        legacyDatePickerProps: {
+          commonlyUsedRanges: [{ start: 'now-3d', end: 'now', label: 'Last 3 days' }],
+        },
+      });
+      await openQuickSelect();
+
+      expect(await screen.findByText('Last 3 days')).toBeInTheDocument();
+      expect(screen.queryByText('Today')).not.toBeInTheDocument();
+    });
+
+    describe('minDate', () => {
+      beforeEach(() => {
+        Element.prototype.scrollIntoView = jest.fn();
+      });
+
+      const openStartDateCalendar = async () => {
+        await userEvent.click(await screen.findByTestId('superDatePickerstartDatePopoverButton'));
+        await waitFor(() => {
+          expect(document.querySelector('.react-datepicker')).toBeInTheDocument();
+        });
+      };
+
+      const getDisabledDays = () =>
+        document.querySelectorAll('.react-datepicker__day--disabled').length;
+
+      it('does not disable calendar days when minDate is not provided', async () => {
+        renderLegacyPicker({
+          dateRangeFrom: '2026-01-20T00:00:00.000Z',
+          dateRangeTo: 'now',
+        });
+        await openStartDateCalendar();
+
+        expect(getDisabledDays()).toBe(0);
+      });
+
+      it('disables the calendar days before minDate', async () => {
+        renderLegacyPicker({
+          dateRangeFrom: '2026-01-20T00:00:00.000Z',
+          dateRangeTo: 'now',
+          legacyDatePickerProps: { minDate: moment('2026-01-15T00:00:00.000Z') },
+        });
+        await openStartDateCalendar();
+
+        expect(getDisabledDays()).toBeGreaterThan(0);
+      });
     });
   });
 });

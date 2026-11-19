@@ -144,12 +144,11 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
 
 /**
  * Context passed to the {@link AttachmentTypeDefinition.toSurfaceComposition} function: the
- * request and space it renders for, like {@link AttachmentFormatContext}, the agent that rendered
- * it, and the space's public Kibana URL, undefined when Kibana has none.
+ * request and space it renders for, like {@link AttachmentFormatContext}, and the agent that
+ * rendered it.
  */
 export interface AttachmentSurfaceCompositionContext extends AttachmentFormatContext {
   agentId: string;
-  kibanaUrl: string | undefined;
 }
 
 /**

@@ -13,14 +13,20 @@ import type {
   RunQuotasResponse,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
+import { RUN_QUOTAS_QUERY_KEY } from '../query_keys';
 
-const RUN_QUOTAS_QUERY_KEY = ['nightshiftRunQuotas'] as const;
+const RUN_QUOTAS_POLL_INTERVAL_MS = 5_000;
 
-export const useRunQuotas = () => {
+export const useRunQuotas = ({
+  enabled = true,
+  poll = false,
+}: { enabled?: boolean; poll?: boolean } = {}) => {
   const { significantEventsRepositoryClient } = useKibana().services.significantEvents;
 
   return useQuery<RunQuotasResponse, Error>({
     queryKey: RUN_QUOTAS_QUERY_KEY,
+    enabled,
+    refetchInterval: poll ? RUN_QUOTAS_POLL_INTERVAL_MS : false,
     queryFn: ({ signal }: QueryFunctionContext) =>
       significantEventsRepositoryClient.fetch('GET /internal/significant_events/run_quotas', {
         signal: signal ?? null,

@@ -10,7 +10,7 @@ import type { EuiStepStatus } from '@elastic/eui';
 import { EuiPanel, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';

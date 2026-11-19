@@ -51,16 +51,20 @@ export type {
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
+  AuthorizationServiceContract,
   AuditServiceContract,
   ServiceAccountsServiceContract,
   CoreSecurityDelegateHandle,
   CoreSecurityDelegateServiceAccounts,
   ResolvedServiceAccountWorkload,
+  ResolveBoundWorkloadsOptions,
   ServiceAccountBoundWorkloadRef,
 } from './src/api_provider';
 export type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
+  AuthzRequestHandlerContext,
+  UiamAuthzRequestHandlerContext,
   AuditRequestHandlerContext,
 } from './src/request_handler_context';
 export type {
@@ -101,5 +105,10 @@ export {
   groupSecurityPrivileges,
   flattenSecurityPrivileges,
 } from './src/authz';
+export type { CoreAuthorizationService } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';
-export type { UiamProjectType, UiamClientAuthenticationParams } from './src/uiam';
+export type {
+  UiamProjectType,
+  UiamClientAuthenticationParams,
+  CoreUiamAuthorizationService,
+} from './src/uiam';

@@ -71,8 +71,7 @@ export const getThemeSettings = (
         defaultMessage:
           `The UI theme that the Kibana UI should use. ` +
           `Set to 'Enabled' to enable the dark theme, or 'Disabled' to disable it. ` +
-          `Set to 'Sync with system' to have the Kibana UI theme follow the system theme. ` +
-          `A page reload is required for the setting to be applied.`,
+          `Set to 'Sync with system' to have the Kibana UI theme follow the system theme.`,
       }),
       type: 'select',
       options: ['enabled', 'disabled', 'system'],
@@ -93,7 +92,6 @@ export const getThemeSettings = (
         }),
         docLinksKey: 'generalSettings',
       },
-      requiresPageReload: true,
       schema: schema.oneOf([
         schema.literal('enabled'),
         schema.literal('disabled'),

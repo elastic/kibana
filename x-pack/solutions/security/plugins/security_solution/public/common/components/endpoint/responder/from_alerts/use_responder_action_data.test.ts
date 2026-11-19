@@ -14,7 +14,7 @@ import {
   useResponderActionData,
   useWithResponderActionDataFromAlert,
 } from './use_responder_action_data';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { ICPSManager } from '@kbn/cps-utils';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,

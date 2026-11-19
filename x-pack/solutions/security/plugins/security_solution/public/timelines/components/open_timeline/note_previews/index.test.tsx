@@ -21,11 +21,8 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../../data_view_manager/hooks/__mocks__/use_data_view';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const mockDispatch = jest.fn();
@@ -34,9 +31,7 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 jest.mock('../../../../data_view_manager/hooks/use_data_view');
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
 jest.mock('react-redux-v7', () => {
   const original = jest.requireActual('react-redux-v7');
@@ -78,10 +73,8 @@ describe('NotePreviews', () => {
     });
     (useSelectedPatterns as jest.Mock).mockReturnValue(['test1', 'test2']);
     jest.mocked(useDataView).mockReturnValue(withIndices(['test1', 'test2']));
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout: jest.fn() });
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   test('it renders a note preview for each note when isModal is false', () => {
@@ -354,30 +347,7 @@ describe('NotePreviews', () => {
       );
     };
 
-    it('should open the legacy expandable flyout when the new flyout is disabled', () => {
-      const openFlyout = jest.fn();
-      (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout });
-
-      const { getByTestId } = renderWithNote();
-
-      fireEvent.click(getByTestId('notes-toggle-event-details'));
-
-      expect(openFlyout).toHaveBeenCalledWith({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: 'event1',
-            indexName: 'test1,test2',
-            scopeId: 'test-timeline-id',
-          },
-        },
-      });
-      expect(flyoutApi.openDocumentFlyoutFromPattern).not.toHaveBeenCalled();
-    });
-
-    it('should open the new document flyout (from pattern) when the new flyout is enabled', () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
+    it('should open the document flyout (from pattern)', () => {
       const { getByTestId } = renderWithNote();
 
       fireEvent.click(getByTestId('notes-toggle-event-details'));

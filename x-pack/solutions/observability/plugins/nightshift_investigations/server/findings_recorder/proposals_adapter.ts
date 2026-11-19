@@ -54,7 +54,14 @@ export const createRecorderProposals = ({
       spaceId: getSpaceId(request),
       conversationId,
       // These carry no action workflow: the analyst carries each one out and marks it applied.
-      proposal: { ...proposal, origin: 'nightshift', category: PROPOSAL_CATEGORY_TODO },
+      // Dropping one is therefore not a judgement about an action the agent would have taken,
+      // so declining it — and closing the investigation on top of it — asks for no reason.
+      proposal: {
+        ...proposal,
+        origin: 'nightshift',
+        category: PROPOSAL_CATEGORY_TODO,
+        skipDiscardReason: true,
+      },
     });
   },
 });

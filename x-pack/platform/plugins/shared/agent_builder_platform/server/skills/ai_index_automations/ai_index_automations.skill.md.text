@@ -49,12 +49,18 @@ Whatever the strategy, a generated workflow has to:
   detections a distribution aggregation whose observed counts every threshold must quote. Sample
   with `function_score` + `random_score` so repeated runs see different records rather than always
   the first-ingested ones.
-- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required, and set its
-  `connector-id` to `.google-gemini-3.5-flash-chat_completion`. That is the default model for
-  every prompt step in every automation this skill produces: the templates carry it, and a
-  workflow you assemble outside the templates carries it too, on each `ai.prompt` and `ai.agent`
-  step. Use a different connector only when the user names one; they can change it after the save,
-  in the workflow editor, without your involvement.
+- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required, and take its
+  model from a `connector_id` const, left `""`:
+  ```yaml
+  connector-id: "{{ consts.connector_id }}"
+  connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"
+  ```
+  An empty `connector_id` is the default model for every prompt step in every automation this
+  skill produces: Context Engine's own, the `context_engine_prompt` feature. The templates carry
+  these two lines, and a workflow you assemble outside the templates carries them too, on each
+  `ai.prompt` and `ai.agent` step. Use a different connector only when the user names one, by
+  setting `connector_id`; they can change it after the save, in the workflow editor, without your
+  involvement.
 - **Retry `ai.prompt` outside a `parallel` branch**: `on-failure.retry` with three attempts,
   exponential delay and jitter. Rate limits, transient connector errors and a structured output
   that failed to parse once are the ordinary failures of a model call, and without the retry each

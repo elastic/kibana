@@ -140,7 +140,7 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
   const { featureFlags } = useKibana().services;
   const isNewHomePageEnabled = featureFlags.useBooleanValue(
     USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
-    false
+    true
   );
 
   const PageComponent = isNewHomePageEnabled ? EntityAnalyticsNewHomePage : EntityAnalyticsHomePage;

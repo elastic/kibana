@@ -83,8 +83,9 @@ export interface HuntExpected {
   skipped?: string[];
   /**
    * When true, the CODE `Proposal Convergence` evaluator requires that actioned
-   * Proposals for the same subject (target plus criticality level, as packaging keys it)
-   * are minted once across this run's Investigations,
+   * Proposals for the same subject (the agent/process or identity packaging keys it
+   * by, plus the action workflow and process key where applicable) are minted once
+   * across this run's Investigations,
    * and that at least one converging Investigation (or the live Proposal's comment)
    * records the "Also raised by" / "no second Proposal" convergence text. Used by
    * multi-candidate rows that share principals across report ids.
@@ -102,9 +103,29 @@ export interface HuntExpected {
  */
 export type HuntFault = 'investigation_locked';
 
+/**
+ * How a row's CODE misses gate the run (see `assertCodeScoresPass`):
+ *  - `invariant`: a contract every subject model must hold (scope gate, fault handling, no
+ *    Proposal without a hit). A miss fails any model.
+ *  - `capability`: the pinned outcome needs the subject model to ground its Tier 2 query, so it
+ *    separates strong models from weak ones. A miss fails reference models only and is reported
+ *    for every other model.
+ * An untagged row is `invariant`.
+ */
+export type HuntGate = 'invariant' | 'capability';
+
+// The index signature keeps this assignable to the `Example` metadata constraint
+// (`Record<string, unknown>`); an interface has no implicit one.
+export interface HuntRowMetadata {
+  [key: string]: unknown;
+  gate?: HuntGate;
+}
+
 export interface HuntWatchExample {
   id: string;
   cohort: HuntCohort;
+  /** Forwarded to every evaluator by the executor, unlike `id`. */
+  metadata?: HuntRowMetadata | null;
   input: {
     spaceId: string;
     /** Named report ids for the manual trigger. */

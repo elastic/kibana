@@ -13,10 +13,7 @@ import type {
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
 } from '@kbn/workflows';
-import type {
-  WorkflowsManagementClient,
-  WorkflowsServerPluginSetup,
-} from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
@@ -35,7 +32,10 @@ interface WorkflowExecutionGetParams {
   request: KibanaRequest;
   id: string;
   spaceId: string;
-  options?: Parameters<WorkflowsManagementClient['getWorkflowExecution']>[2];
+  options?: Omit<
+    Parameters<WorkflowsServerPluginSetup['management']['getWorkflowExecution']>[2],
+    'request'
+  >;
 }
 
 interface WorkflowExecutionCancelParams {
@@ -267,7 +267,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
   }
 
   async getExecution({ id, spaceId, options, request }: WorkflowExecutionGetParams) {
-    return this.managementApi.getClient(request).getWorkflowExecution(id, spaceId, options);
+    return this.managementApi.getWorkflowExecution(id, spaceId, { ...options, request });
   }
 
   async cancelExecution({ id, spaceId, request }: WorkflowExecutionCancelParams): Promise<void> {

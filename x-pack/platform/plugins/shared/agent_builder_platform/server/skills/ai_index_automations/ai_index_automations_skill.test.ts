@@ -263,12 +263,13 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('names the default connector for every prompt step, inside and outside the templates', () => {
-      expect(content).toMatch(
-        /set its\s+`connector-id` to `\.google-gemini-3\.5-flash-chat_completion`/
+      expect(content).toContain('connector-id: "{{ consts.connector_id }}"');
+      expect(content).toContain(
+        'connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"'
       );
-      expect(content).toMatch(/default model for\s+every prompt step in every automation/);
+      expect(content).toMatch(/default model for every prompt step in every automation/);
       expect(content).toMatch(
-        /a\s+workflow you assemble outside the templates carries it too, on each `ai\.prompt` and `ai\.agent`\s+step/
+        /a workflow you assemble outside the templates carries them too, on each\s+`ai\.prompt` and `ai\.agent` step/
       );
       expect(content).toMatch(/Use a different connector only when the user names one/);
     });

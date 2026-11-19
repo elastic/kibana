@@ -80,12 +80,14 @@ export function discover({
         coreContext.env.packageInfo.version,
         pkg.manifest
       );
+      const initialization = Promise.withResolvers<void>();
       const initializerContext = createPluginInitializerContext({
         coreContext,
         opaqueId: Symbol(pkg.id),
         manifest,
         instanceInfo,
         nodeInfo,
+        initialization,
       });
 
       return new PluginWrapper({
@@ -93,6 +95,7 @@ export function discover({
         manifest,
         opaqueId: initializerContext.opaqueId,
         initializerContext,
+        initialization,
       });
     })
   );
@@ -141,6 +144,7 @@ function createPlugin$(
     map((manifest) => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       const opaqueId = Symbol(manifest.id);
+      const initialization = Promise.withResolvers<void>();
       return new PluginWrapper({
         path,
         manifest,
@@ -151,7 +155,9 @@ function createPlugin$(
           manifest,
           instanceInfo,
           nodeInfo,
+          initialization,
         }),
+        initialization,
       });
     }),
     catchError((err) => [err])

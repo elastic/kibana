@@ -17,7 +17,7 @@ const MAX_ROUND_TEXT_LENGTH = 65_536;
 
 /**
  * Shared Zod input schema for post-execution optimizer steps that inspect a completed
- * Nightshift investigation round (`cortexOptimize`, `memoryOptimize`, `decisionTreePrepare`,
+ * Nightshift investigation round (`wikiOptimize`, `memoryOptimize`, `decisionTreePrepare`,
  * `decisionTreeReinforce`).
  */
 export const investigationRoundInputsSchema = {
@@ -66,6 +66,16 @@ export type InvestigationTranscriptStep =
       isError: boolean;
     };
 
+export interface PersistedEarlierRound {
+  id: string;
+  startedAt: string;
+  prompt: string;
+  response: string;
+  steps: InvestigationTranscriptStep[];
+  rawSteps: ConversationRoundStep[];
+  toolCalls: InvestigationToolCall[];
+}
+
 export interface LoadedInvestigationRound {
   /**
    * Where the transcript came from. `conversation_unreadable` carries no transcript: the caller
@@ -81,6 +91,11 @@ export interface LoadedInvestigationRound {
   roundIndex?: number;
   /** Total number of rounds in `conversation.rounds` when resolved from a conversation. */
   roundCount?: number;
+  /** Earlier completed rounds before `roundIndex`, in chronological order, when `roundIndex > 0`. */
+  earlierRounds?: PersistedEarlierRound[];
+  /** The request and final answer of the round before this one, which a follow-up message refers to. */
+  previousUserMessage?: string;
+  previousAssistantMessage?: string;
   traceId?: string;
   startedAt?: string;
   /** Interleaved reasoning and tool-call steps normalized from the round or hook fallback. */
@@ -408,12 +423,37 @@ export const loadInvestigationRound = async ({
           const rawRoundSteps = round.steps as unknown as RawRoundStep[];
           const steps = stepsFromRound(rawRoundSteps);
           const roundToolCalls = toolCallsFromRoundSteps(rawRoundSteps);
-          const traceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+          // A round resumed after human-in-the-loop has one trace per execution; use the latest.
+          const traceId = Array.isArray(round.trace_id) ? round.trace_id.at(-1) : round.trace_id;
+          const previousUserMessage =
+            resolvedIndex > 0 ? conversation.rounds[resolvedIndex - 1]?.input?.message : undefined;
+          const previousAssistantMessage =
+            resolvedIndex > 0
+              ? conversation.rounds[resolvedIndex - 1]?.response?.message
+              : undefined;
+          const earlierRounds: PersistedEarlierRound[] | undefined =
+            resolvedIndex > 0
+              ? conversation.rounds.slice(0, resolvedIndex).map((earlier) => {
+                  const earlierRaw = earlier.steps as unknown as RawRoundStep[];
+                  return {
+                    id: earlier.id,
+                    startedAt: earlier.started_at,
+                    prompt: earlier.input?.message ?? '',
+                    response: earlier.response?.message ?? '',
+                    steps: stepsFromRound(earlierRaw),
+                    rawSteps: earlier.steps,
+                    toolCalls: toolCallsFromRoundSteps(earlierRaw),
+                  };
+                })
+              : undefined;
           return {
             source: 'persisted_round',
             roundId: round.id,
             roundIndex: resolvedIndex,
             roundCount,
+            ...(earlierRounds ? { earlierRounds } : {}),
+            ...(previousUserMessage ? { previousUserMessage } : {}),
+            ...(previousAssistantMessage ? { previousAssistantMessage } : {}),
             traceId,
             startedAt: round.started_at,
             steps,

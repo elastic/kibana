@@ -14,7 +14,7 @@ import {
 } from '@kbn/significant-events-schema';
 
 type EpisodeContextSource = Pick<SignificantEvent, '@timestamp'> &
-  Partial<Pick<SignificantEvent, 'source_ids' | 'causal_features' | 'blast_radius' | 'confidence'>>;
+  Partial<Pick<SignificantEvent, 'source_ids' | 'causal_features' | 'blast_radius'>>;
 
 export const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
   const uuids = (signals ?? [])
@@ -118,7 +118,6 @@ export const mergeEpisodeContext = (
   sourceIds: string[];
   causalFeatures: CausalFeature[];
   blastRadius: BlastRadiusEntry[];
-  confidence: number;
 } => {
   const contexts: EpisodeContextSource[] = [
     ...priorDocs,
@@ -151,19 +150,10 @@ export const mergeEpisodeContext = (
     b: { entry: { feature_id: string } }
   ) => a.entry.feature_id.localeCompare(b.entry.feature_id);
 
-  const confidences = contexts.flatMap((ctx) =>
-    ctx.confidence === undefined ? [] : [ctx.confidence]
-  );
-  const confidence =
-    confidences.length === 0
-      ? 0
-      : confidences.reduce((acc, value) => acc + value, 0) / confidences.length;
-
   return {
     sourceIds: [...sourceIds].sort(),
     causalFeatures: [...causal.values()].sort(byFeatureId).map(({ entry }) => entry),
     blastRadius: [...blast.values()].sort(byFeatureId).map(({ entry }) => entry),
-    confidence,
   };
 };
 

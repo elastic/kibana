@@ -7,10 +7,11 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
+import { runPackStepDefinition } from './step_types/run_pack/run_pack_step';
 import { runQueryStepDefinition } from './step_types/run_query/run_query_step';
 
 /**
- * Registers the osquery step only when the flag is on and the optional `workflowsExtensions`
+ * Registers the osquery steps only when the flag is on and the optional `workflowsExtensions`
  * plugin is present. Returns whether anything was registered.
  */
 export const registerOsqueryWorkflowSteps = ({
@@ -25,6 +26,7 @@ export const registerOsqueryWorkflowSteps = ({
   }
 
   workflowsExtensions.registerStepDefinition(runQueryStepDefinition);
+  workflowsExtensions.registerStepDefinition(runPackStepDefinition);
 
   return true;
 };

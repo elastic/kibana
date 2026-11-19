@@ -120,26 +120,27 @@ export async function update(
 
   let expectedVersion = existing.version;
   if (shouldChangeAccessMode) {
+    // passing the version makes the change fail with a conflict if another save landed since `existing` was read
     const changeAccessModeResponse = await services.savedObjects.client.changeAccessMode(
-      [{ type: DASHBOARD_SAVED_OBJECT_TYPE, id }],
+      [{ type: DASHBOARD_SAVED_OBJECT_TYPE, id, version: existing.version }],
       {
         accessMode: desiredAccessMode,
       }
     );
 
-    if (changeAccessModeResponse.objects[0]?.error) {
-      throw changeAccessModeResponse.objects[0].error;
+    const [changeResult] = changeAccessModeResponse.objects;
+    if (changeResult?.error) {
+      throw changeResult.error;
     }
 
     /**
-     * `changeAccessMode`  updates the same saved object and advances its version, so the object
-     * read earlier is stale
+     * `changeAccessMode` updates the same saved object and advances its version, so the version
+     * read earlier is stale; update the expected version
      */
-    existing = await services.savedObjects.client.get<DashboardSavedObjectAttributes>(
-      DASHBOARD_SAVED_OBJECT_TYPE,
-      id
-    );
-    expectedVersion = existing.version;
+    if (!changeResult?.version) {
+      throw new Error('Unexpected error: changeAccessMode did not return an updated version.');
+    }
+    expectedVersion = changeResult.version;
   }
 
   // Unchanged content creates no new version. The sequence is stored with the update, so the version
