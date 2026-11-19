@@ -34,8 +34,10 @@ export const useFailedAutomationRuns = (
   { enabled = true }: { enabled?: boolean } = {}
 ): FailedAutomationRun[] => {
   const api = useWorkflowsApi();
+  // An AI index can list the same workflow twice; one failed run must count once.
+  const uniqueWorkflowIds = [...new Set(workflowIds)];
   const results = useQueries({
-    queries: workflowIds.map((workflowId) => ({
+    queries: uniqueWorkflowIds.map((workflowId) => ({
       queryKey: latestWorkflowExecutionQueryKey(workflowId),
       queryFn: () => fetchLatestWorkflowExecution(api, workflowId),
       enabled,
@@ -43,7 +45,7 @@ export const useFailedAutomationRuns = (
     })),
   });
 
-  return workflowIds.flatMap((workflowId, index) => {
+  return uniqueWorkflowIds.flatMap((workflowId, index) => {
     const execution = results[index]?.data?.execution;
     return execution && FAILED_STATUSES.has(execution.status) ? [{ workflowId, execution }] : [];
   });

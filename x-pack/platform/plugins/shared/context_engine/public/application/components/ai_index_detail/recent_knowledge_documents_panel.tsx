@@ -109,14 +109,44 @@ const RecentKnowledgeDocumentRow = ({ aiIndexId, ki }: { aiIndexId: string; ki: 
   );
 };
 
+const getEmptyText = ({
+  isManaged,
+  isMemoryEnabled,
+}: {
+  isManaged: boolean;
+  isMemoryEnabled: boolean;
+}): string => {
+  // Users cannot add sources to a managed AI index, so do not ask them to.
+  if (isManaged) {
+    return i18n.translate(
+      'xpack.contextEngine.aiIndexDetail.overview.recentDocuments.emptyManagedBody',
+      { defaultMessage: "Knowledge documents appear here after Elastic's automation runs." }
+    );
+  }
+  if (isMemoryEnabled) {
+    return i18n.translate(
+      'xpack.contextEngine.aiIndexDetail.overview.recentDocuments.emptyMemoryBody',
+      {
+        defaultMessage:
+          "Knowledge documents appear here after you add a source, or after dreaming processes your agent's memories.",
+      }
+    );
+  }
+  return i18n.translate('xpack.contextEngine.aiIndexDetail.overview.recentDocuments.emptyBody', {
+    defaultMessage: 'Knowledge documents appear here after you add a source.',
+  });
+};
+
 interface RecentKnowledgeDocumentsPanelProps {
   aiIndexId: string;
+  isManaged: boolean;
   isMemoryEnabled: boolean;
 }
 
 /** The most recently updated Knowledge documents of the AI index. */
 export const RecentKnowledgeDocumentsPanel = ({
   aiIndexId,
+  isManaged,
   isMemoryEnabled,
 }: RecentKnowledgeDocumentsPanelProps) => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
@@ -194,20 +224,7 @@ export const RecentKnowledgeDocumentsPanel = ({
         </>
       ) : (
         <AiIndexDetailPanelDescription data-test-subj="contextOverviewRecentDocumentsEmpty">
-          {isMemoryEnabled
-            ? i18n.translate(
-                'xpack.contextEngine.aiIndexDetail.overview.recentDocuments.emptyMemoryBody',
-                {
-                  defaultMessage:
-                    "Knowledge documents appear here after you add a source, or after dreaming processes your agent's memories.",
-                }
-              )
-            : i18n.translate(
-                'xpack.contextEngine.aiIndexDetail.overview.recentDocuments.emptyBody',
-                {
-                  defaultMessage: 'Knowledge documents appear here after you add a source.',
-                }
-              )}
+          {getEmptyText({ isManaged, isMemoryEnabled })}
         </AiIndexDetailPanelDescription>
       )}
     </EuiPanel>

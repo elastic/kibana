@@ -49,11 +49,15 @@ const listKiResult = (
   ...overrides,
 });
 
-const renderPanel = (isMemoryEnabled = false) =>
+const renderPanel = ({ isMemoryEnabled = false, isManaged = false } = {}) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <RecentKnowledgeDocumentsPanel aiIndexId="my-index" isMemoryEnabled={isMemoryEnabled} />
+        <RecentKnowledgeDocumentsPanel
+          aiIndexId="my-index"
+          isManaged={isManaged}
+          isMemoryEnabled={isMemoryEnabled}
+        />
       </EuiProvider>
     </I18nProvider>
   );
@@ -171,10 +175,20 @@ describe('RecentKnowledgeDocumentsPanel', () => {
     expect(screen.queryByTestId('contextOverviewRecentDocumentsError')).not.toBeInTheDocument();
   });
 
+  it('does not ask to add a source on a managed AI index', () => {
+    mockUseListKi.mockReturnValue(listKiResult({ kis: [] }));
+
+    renderPanel({ isManaged: true, isMemoryEnabled: true });
+
+    expect(screen.getByTestId('contextOverviewRecentDocumentsEmpty')).toHaveTextContent(
+      /^Knowledge documents appear here after Elastic's automation runs\.$/
+    );
+  });
+
   it('mentions dreaming in the empty state while memory is on', () => {
     mockUseListKi.mockReturnValue(listKiResult({ kis: [] }));
 
-    renderPanel(true);
+    renderPanel({ isMemoryEnabled: true });
 
     expect(screen.getByTestId('contextOverviewRecentDocumentsEmpty')).toHaveTextContent(
       "Knowledge documents appear here after you add a source, or after dreaming processes your agent's memories."

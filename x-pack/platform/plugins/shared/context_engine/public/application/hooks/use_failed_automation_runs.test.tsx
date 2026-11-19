@@ -76,6 +76,19 @@ describe('useFailedAutomationRuns', () => {
     );
   });
 
+  it('counts a workflow listed twice only once', async () => {
+    const { result } = renderHook(
+      () => useFailedAutomationRuns(['wf-failed', 'wf-ok', 'wf-failed']),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    await waitFor(() => {
+      expect(result.current.map(({ workflowId }) => workflowId)).toEqual(['wf-failed']);
+    });
+  });
+
   it('does not fetch while disabled', () => {
     const { result } = renderHook(
       () => useFailedAutomationRuns(['wf-failed'], { enabled: false }),
