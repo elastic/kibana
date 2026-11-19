@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { RuleAction, RuleSystemAction } from '@kbn/alerting-plugin/common';
@@ -190,79 +190,87 @@ export class DefaultRuleService {
   ) {
     this.settings = settings;
     const interval = this.getMinimumRuleInterval();
-    const refreshIfExists = async (ruleType: DefaultRuleType, name: string) => {
-      if (await this.getExistingAlert(ruleType)) {
-        await this.upsertDefaultRule(ruleType, name, interval, previousDefaultConnectors);
-      }
-    };
-    await Promise.all([
-      settings.defaultStatusRuleEnabled === false
-        ? undefined
-        : refreshIfExists(SYNTHETICS_STATUS_RULE, `Synthetics status internal rule`),
-      settings.defaultTLSRuleEnabled === false
-        ? undefined
-        : refreshIfExists(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`),
-    ]);
+    const ruleTypes: DefaultRuleType[] = [SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE];
+    await Promise.all(
+      ruleTypes.map(async (ruleType) => {
+        const alert = await this.getExistingAlert(ruleType);
+        if (alert) {
+          await this.updateExistingRule(ruleType, alert, interval, {
+            previousDefaultConnectors,
+            failOnConnectorError: true,
+          });
+        }
+      })
+    );
   }
 
-  async upsertDefaultRule(
-    ruleType: DefaultRuleType,
-    name: string,
-    interval: string,
-    previousDefaultConnectors?: string[]
-  ) {
-    const rulesClient = await (await this.context.alerting)?.getRulesClient();
-
+  async upsertDefaultRule(ruleType: DefaultRuleType, name: string, interval: string) {
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
-      const currentIntervalInMs = parseDuration(alert.schedule.interval);
-      const minimumIntervalInMs = parseDuration(interval);
-      const settings = await this.getSettings();
-      const settingsManagedConnectorIds = new Set([
-        ...(previousDefaultConnectors ?? []),
-        ...(settings?.defaultConnectors ?? []),
-      ]);
-      // Only settings-managed connectors are rebuilt; actions users added on the rule are kept.
-      const userAddedActions = alert.actions
-        .filter(
-          (action): action is RuleAction =>
-            'group' in action && !settingsManagedConnectorIds.has(action.id)
-        )
-        .map((action) => omit(action, 'actionTypeId'));
-      const preservedSystemActions = alert.actions
-        .filter((action): action is RuleSystemAction => !('group' in action))
-        .map((action) => omit(action, 'actionTypeId'));
-      const actions = [...userAddedActions, ...(await this.getAlertActions(ruleType))];
-      const {
-        actions: actionsFromRules = [],
-        systemActions = [],
-        ...updatedAlert
-      } = await rulesClient.update({
-        id: alert.id,
-        data: {
-          actions,
-          systemActions: preservedSystemActions,
-          name: alert.name,
-          tags: alert.tags,
-          schedule: {
-            interval:
-              currentIntervalInMs < minimumIntervalInMs ? interval : alert.schedule.interval,
-          },
-          params: alert.params,
-        },
-      });
-      return {
-        ...updatedAlert,
-        actions: [...actionsFromRules, ...systemActions],
-        ruleTypeId: updatedAlert.alertTypeId,
-      };
+      return this.updateExistingRule(ruleType, alert, interval);
     }
 
     return await this.createDefaultRuleIfNotExist(ruleType, name, interval);
   }
 
-  async getAlertActions(ruleType: DefaultRuleType) {
-    const { actionConnectors, settings } = await this.getActionConnectors();
+  private async updateExistingRule(
+    ruleType: DefaultRuleType,
+    alert: NonNullable<Awaited<ReturnType<DefaultRuleService['getExistingAlert']>>>,
+    interval: string,
+    {
+      previousDefaultConnectors = [],
+      failOnConnectorError = false,
+    }: { previousDefaultConnectors?: string[]; failOnConnectorError?: boolean } = {}
+  ) {
+    const rulesClient = await (await this.context.alerting)?.getRulesClient();
+    const currentIntervalInMs = parseDuration(alert.schedule.interval);
+    const minimumIntervalInMs = parseDuration(interval);
+    const settings = await this.getSettings();
+    const settingsManagedConnectorIds = new Set([
+      ...previousDefaultConnectors,
+      ...(settings?.defaultConnectors ?? []),
+    ]);
+    // Only settings-managed connectors are rebuilt; actions users added on the rule are kept.
+    const userAddedActions = alert.actions
+      .filter(
+        (action): action is RuleAction =>
+          'group' in action && !settingsManagedConnectorIds.has(action.id)
+      )
+      .map((action) => omit(action, 'actionTypeId'));
+    const preservedSystemActions = alert.actions
+      .filter((action): action is RuleSystemAction => !('group' in action))
+      .map((action) => pick(action, ['id', 'params', 'uuid']));
+    const actions = [
+      ...userAddedActions,
+      ...(await this.getAlertActions(ruleType, failOnConnectorError)),
+    ];
+    const {
+      actions: actionsFromRules = [],
+      systemActions = [],
+      ...updatedAlert
+    } = await rulesClient.update({
+      id: alert.id,
+      data: {
+        actions,
+        systemActions: preservedSystemActions,
+        name: alert.name,
+        tags: alert.tags,
+        schedule: {
+          interval: currentIntervalInMs < minimumIntervalInMs ? interval : alert.schedule.interval,
+        },
+        params: alert.params,
+        artifacts: alert.artifacts ?? undefined,
+      },
+    });
+    return {
+      ...updatedAlert,
+      actions: [...actionsFromRules, ...systemActions],
+      ruleTypeId: updatedAlert.alertTypeId,
+    };
+  }
+
+  async getAlertActions(ruleType: DefaultRuleType, failOnConnectorError = false) {
+    const { actionConnectors, settings } = await this.getActionConnectors(failOnConnectorError);
 
     const defaultActions = (actionConnectors ?? []).filter((act) =>
       settings?.defaultConnectors?.includes(act.id)
@@ -296,7 +304,7 @@ export class DefaultRuleService {
     }
   }
 
-  async getActionConnectors() {
+  async getActionConnectors(failOnError = false) {
     const actionsClient = (await this.context.actions)?.getActionsClient();
     if (!this.settings) {
       this.settings = await getSyntheticsDynamicSettings(this.soClient);
@@ -305,6 +313,9 @@ export class DefaultRuleService {
     try {
       actionConnectors = await actionsClient.getAll();
     } catch (error) {
+      if (failOnError) {
+        throw error;
+      }
       this.server.logger.error(`Error getting connectors, Error: ${error.message}`, { error });
     }
     return { actionConnectors, settings: this.settings };

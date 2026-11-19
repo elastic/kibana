@@ -585,11 +585,15 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(response).toHaveStatusCode(200);
-          const actionConnectorIds = (
-            response.body as { actions: Array<{ id: string }> }
-          ).actions.map(({ id }) => id);
+          const { actions } = response.body as {
+            actions: Array<{ id: string; params: Record<string, unknown> }>;
+          };
+          const actionConnectorIds = actions.map(({ id }) => id);
 
           expect(actionConnectorIds).toContain(connectorIds.index);
+          expect(actions.find(({ id }) => id === connectorIds.index)?.params).toMatchObject({
+            documents: [{ monitorName: 'user-added' }],
+          });
           expect(actionConnectorIds).toContain(connectorIds.email);
           expect(actionConnectorIds).not.toContain(connectorIds.webhook);
         });
