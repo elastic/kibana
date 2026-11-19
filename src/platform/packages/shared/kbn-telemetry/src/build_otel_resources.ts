@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getConfiguration } from '@kbn/apm-config-loader';
+import { getConfiguration, getKibanaName } from '@kbn/apm-config-loader';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 import {
   ATTR_SERVICE_INSTANCE_ID,
@@ -58,6 +58,11 @@ export function buildOtelResources(serviceName: string = 'kibana') {
 const deriveAttributesFromApmConfig = (serviceName: string): Record<string, string> => {
   // telemetry.sdk.language is always known for this Node.js process.
   const attrs: Record<string, string> = { 'telemetry.sdk.language': 'nodejs' };
+
+  const kibanaName = getKibanaName();
+  if (kibanaName) {
+    attrs['kibana.name'] = kibanaName;
+  }
 
   // TODO: Since we are deprecating `elastic.apm.*` settings, we should provide a way to set these attributes in the `telemetry.*` config.
   const apmConfig = getConfiguration(serviceName);

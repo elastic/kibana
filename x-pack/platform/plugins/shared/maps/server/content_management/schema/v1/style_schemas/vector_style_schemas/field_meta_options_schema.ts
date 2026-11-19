@@ -10,7 +10,7 @@ import { z, lazySchema } from '@kbn/zod';
 export const fieldMetaOptionsSchema = lazySchema(() =>
   z
     .object({
-      isEnabled: z.boolean().meta({
+      is_enabled: z.boolean().meta({
         description:
           'When set to true, dynamic style domain range and categories are calculated from entire data. Domain range and categories are fetched in seperate Elasticsearch aggregation request. Styling is consistent as users pan, zoom, and filter map. When set to false, dynamic style domain range and categories are calculated from local data and recalculated when local data changes. Styling maybe inconsistent as users pan, zoom, and filter.',
       }),

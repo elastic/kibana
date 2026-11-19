@@ -80,3 +80,4 @@ monaco-marker-data-provider
 @opentelemetry/resources
 @opentelemetry/sdk-metrics
 @opentelemetry/sdk-trace
+tabbable
