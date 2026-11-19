@@ -87,6 +87,7 @@ function getConfig(overrides = {}) {
       ...defaultInboundEventsLimitConfigs,
     },
     connectorSigningKeys: { enabled: false },
+    connectorCatalog: { enabled: false },
     ...overrides,
   };
 }
@@ -152,6 +153,7 @@ describe('Actions Plugin', () => {
           ...defaultInboundEventsLimitConfigs,
         },
         connectorSigningKeys: { enabled: false },
+        connectorCatalog: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -599,6 +601,7 @@ describe('Actions Plugin', () => {
           ...defaultInboundEventsLimitConfigs,
         },
         connectorSigningKeys: { enabled: false },
+        connectorCatalog: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -1007,6 +1010,7 @@ describe('Actions Plugin', () => {
                 ...defaultInboundEventsLimitConfigs,
               },
               connectorSigningKeys: { enabled: false },
+              connectorCatalog: { enabled: false },
             })
           );
           const enabledPluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);

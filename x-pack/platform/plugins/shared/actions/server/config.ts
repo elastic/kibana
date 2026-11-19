@@ -395,6 +395,9 @@ export const configSchema = schema.object({
   connectorSigningKeys: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  connectorCatalog: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

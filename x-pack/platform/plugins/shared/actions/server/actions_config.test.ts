@@ -59,6 +59,7 @@ const defaultActionsConfig: ActionsConfig = {
     ...defaultInboundEventsLimitConfigs,
   },
   connectorSigningKeys: { enabled: false },
+  connectorCatalog: { enabled: false },
 };
 
 describe('ensureUriAllowed', () => {
@@ -1247,5 +1248,20 @@ describe('getEnabledEmailServices()', () => {
       },
     });
     expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+});
+
+describe('isConnectorCatalogEnabled()', () => {
+  test('returns false by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isConnectorCatalogEnabled()).toBe(false);
+  });
+
+  test('returns true when connectorCatalog.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      connectorCatalog: { enabled: true },
+    });
+    expect(acu.isConnectorCatalogEnabled()).toBe(true);
   });
 });

@@ -70,6 +70,7 @@ const createActionsConfigMock = () => {
       connector: { limit: 300, windowMs: 60_000 },
     }),
     isConnectorSigningKeysEnabled: jest.fn().mockReturnValue(false),
+    isConnectorCatalogEnabled: jest.fn().mockReturnValue(false),
     isEarsExperimentalEnabled: jest.fn().mockReturnValue(false),
   };
   return mocked;

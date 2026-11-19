@@ -602,6 +602,7 @@ const BaseActionsConfig: ActionsConfig = {
     ...defaultInboundEventsLimitConfigs,
   },
   connectorSigningKeys: { enabled: false },
+  connectorCatalog: { enabled: false },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {
