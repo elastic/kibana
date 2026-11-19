@@ -31,6 +31,7 @@ import type { SignificantEventsServer } from '../../types';
 import type {
   SlackAppAvailableChannelsResponse,
   SlackAppBindingsResponse,
+  SlackAppCancelReconnectResponse,
   SlackAppConfirmResponse,
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,
@@ -131,6 +132,26 @@ const toWorkspaceDetails = (
     workspace,
     ...(createdBy ? { createdBy } : {}),
     ...(createdAt ? { createdAt } : {}),
+  };
+};
+
+const toReconnect = ({
+  pendingInstall,
+}: RelayAppConnectionAttributes): SlackAppStatusResponse['reconnect'] => {
+  if (!pendingInstall) {
+    return undefined;
+  }
+  const { tenantKey, tenantName, tenantUrl } = pendingInstall;
+  if (!tenantKey) {
+    return { status: RELAY_APP_CONNECTION_STATUS.oauthInProgress };
+  }
+  return {
+    status: RELAY_APP_CONNECTION_STATUS.pendingConfirmation,
+    workspace: {
+      tenantKey,
+      ...(tenantName ? { name: tenantName } : {}),
+      ...(tenantUrl ? { url: tenantUrl } : {}),
+    },
   };
 };
 
@@ -300,7 +321,7 @@ export class SlackAppService {
 
   private async revokeStoredCredentials(
     request: KibanaRequest,
-    connection: RelayAppConnectionAttributes | undefined,
+    connection: Pick<RelayAppConnectionAttributes, 'apiKeyId' | 'serviceAccountId'> | undefined,
     context: string
   ): Promise<void> {
     if (connection?.apiKeyId) {
@@ -309,6 +330,52 @@ export class SlackAppService {
     if (connection?.serviceAccountId) {
       await this.revokeServiceAccount(request, connection.serviceAccountId, context);
     }
+  }
+
+  private async unbindBestEffort(
+    relayClient: RelayClientContract,
+    tenantKey: string,
+    context: string
+  ): Promise<void> {
+    await relayClient.unbind(tenantKey).catch((error) => {
+      this.logger.warn(`Failed to unbind from Relay ${context}: ${this.toErrorMessage(error)}`);
+    });
+  }
+
+  private async discardPendingInstall(
+    request: KibanaRequest,
+    relayClient: RelayClientContract | undefined,
+    connection: RelayAppConnectionAttributes,
+    context: string
+  ): Promise<void> {
+    const { pendingInstall } = connection;
+    if (!pendingInstall) {
+      return;
+    }
+    if (relayClient && pendingInstall.claimId && !pendingInstall.tenantKey) {
+      await relayClient.cancelInstall(pendingInstall.claimId).catch((error) => {
+        this.logger.debug(
+          `Could not cancel the Relay install claim ${context}: ${this.toErrorMessage(error)}`
+        );
+      });
+    }
+    if (relayClient && pendingInstall.tenantKey) {
+      await this.unbindBestEffort(relayClient, pendingInstall.tenantKey, context);
+    }
+    await this.revokeStoredCredentials(request, pendingInstall, context);
+  }
+
+  private async dropPendingInstall(
+    request: KibanaRequest,
+    soClient: SavedObjectsClientContract,
+    relayClient: RelayClientContract | undefined,
+    connection: RelayAppConnectionAttributes,
+    context: string
+  ): Promise<RelayAppConnectionAttributes> {
+    await this.discardPendingInstall(request, relayClient, connection, context);
+    const { pendingInstall: _pendingInstall, ...liveConnection } = connection;
+    await this.writeConnection(soClient, liveConnection);
+    return liveConnection;
   }
 
   private async mintApiKeyCredential(request: KibanaRequest): Promise<MintedRelayCredential> {
@@ -549,6 +616,20 @@ export class SlackAppService {
       throw error;
     }
 
+    if (existingConnection?.status === RELAY_APP_CONNECTION_STATUS.connected) {
+      await this.discardPendingInstall(
+        request,
+        relayClient,
+        existingConnection,
+        'before a new reconnect'
+      );
+      await this.writeConnection(soClient, {
+        ...existingConnection,
+        pendingInstall: { claimId: installResponse.claim_id, ...credential.stored },
+      });
+      return { authorizeUrl: installResponse.authorize_url };
+    }
+
     // A prior connection may already hold a live credential. Revoke it only after
     // startInstall succeeds — revoking up front would brick a working connection
     // if startInstall then failed, since the SO write also only happens on success.
@@ -667,14 +748,97 @@ export class SlackAppService {
       }
     }
 
+    const current =
+      canAdvanceInstall &&
+      connection.status === RELAY_APP_CONNECTION_STATUS.connected &&
+      connection.pendingInstall?.claimId &&
+      !connection.pendingInstall.tenantKey
+        ? await this.advanceReconnect(
+            request,
+            soClient,
+            relayClient,
+            connection,
+            connection.pendingInstall.claimId
+          )
+        : connection;
+
+    const reconnect = toReconnect(current);
     return {
       available: true,
-      status: isAwaitingConfirmation(connection)
+      status: isAwaitingConfirmation(current)
         ? RELAY_APP_CONNECTION_STATUS.pendingConfirmation
-        : connection.status,
-      ...(connection.error ? { error: connection.error } : {}),
-      ...toWorkspaceDetails(connection),
+        : current.status,
+      ...(current.error ? { error: current.error } : {}),
+      ...toWorkspaceDetails(current),
+      ...(reconnect ? { reconnect } : {}),
     };
+  }
+
+  private async advanceReconnect(
+    request: KibanaRequest,
+    soClient: SavedObjectsClientContract,
+    relayClient: RelayClientContract,
+    connection: RelayAppConnectionAttributes,
+    claimId: string
+  ): Promise<RelayAppConnectionAttributes> {
+    const { pendingInstall } = connection;
+    if (!pendingInstall) {
+      return connection;
+    }
+    try {
+      const claim = await relayClient.fetchClaim(claimId);
+      if (claim.status !== 'complete') {
+        return connection;
+      }
+      if (!claim.tenant_key) {
+        this.logger.warn('Slack app reconnect failed: completed claim has no tenant key');
+        return await this.dropPendingInstall(
+          request,
+          soClient,
+          relayClient,
+          connection,
+          'after reconnect failure'
+        );
+      }
+      if (claim.tenant_key === connection.tenantKey) {
+        const { pendingInstall: _pendingInstall, ...liveConnection } = connection;
+        const promoted = {
+          ...liveConnection,
+          apiKeyId: pendingInstall.apiKeyId,
+          serviceAccountId: pendingInstall.serviceAccountId,
+          tenantName: claim.tenant_name,
+          tenantUrl: claim.tenant_url,
+        };
+        await this.writeConnection(soClient, promoted);
+        await this.revokeStoredCredentials(request, connection, 'after reconnecting the workspace');
+        return promoted;
+      }
+      const awaitingConfirmation = {
+        ...connection,
+        pendingInstall: {
+          ...pendingInstall,
+          claimId: undefined,
+          tenantKey: claim.tenant_key,
+          tenantName: claim.tenant_name,
+          tenantUrl: claim.tenant_url,
+        },
+      };
+      await this.writeConnection(soClient, awaitingConfirmation);
+      return awaitingConfirmation;
+    } catch (error) {
+      if (error instanceof RelayRequestError && error.isTerminal) {
+        this.logger.warn(`Slack app reconnect failed: ${this.toErrorMessage(error)}`);
+        return this.dropPendingInstall(
+          request,
+          soClient,
+          relayClient,
+          connection,
+          'after reconnect failure'
+        );
+      }
+      this.logger.warn(`Failed to poll Relay reconnect claim: ${this.toErrorMessage(error)}`);
+      return connection;
+    }
   }
 
   /**
@@ -692,13 +856,23 @@ export class SlackAppService {
     const soClient = this.getSoClient(request);
     const saved = await this.readConnectionObject(soClient);
     const connection = saved?.attributes;
-    if (!saved || !connection?.tenantKey || !isAwaitingConfirmation(connection)) {
-      throw new SlackAppUnavailableError('No Slack workspace is awaiting confirmation');
-    }
     const workspaceChanged = new StatusError(
       'The Slack workspace awaiting confirmation has changed. Review it and confirm again.',
       409
     );
+    if (saved && connection?.pendingInstall?.tenantKey) {
+      return this.confirmReconnect(
+        request,
+        soClient,
+        relayClient,
+        saved,
+        tenantKey,
+        workspaceChanged
+      );
+    }
+    if (!saved || !connection?.tenantKey || !isAwaitingConfirmation(connection)) {
+      throw new SlackAppUnavailableError('No Slack workspace is awaiting confirmation');
+    }
     if (connection.tenantKey !== tenantKey) {
       throw workspaceChanged;
     }
@@ -717,6 +891,98 @@ export class SlackAppService {
     }
     this.publishConnector(connection.tenantKey);
     return { status: RELAY_APP_CONNECTION_STATUS.connected };
+  }
+
+  private async confirmReconnect(
+    request: KibanaRequest,
+    soClient: SavedObjectsClientContract,
+    relayClient: RelayClientContract,
+    saved: SavedObject<RelayAppConnectionAttributes>,
+    tenantKey: string,
+    workspaceChanged: StatusError
+  ): Promise<SlackAppConfirmResponse> {
+    const { attributes: connection, version } = saved;
+    const { pendingInstall, ...liveConnection } = connection;
+    if (!pendingInstall?.tenantKey || pendingInstall.tenantKey !== tenantKey) {
+      throw workspaceChanged;
+    }
+
+    try {
+      await this.writeConnection(
+        soClient,
+        {
+          ...liveConnection,
+          tenantKey: pendingInstall.tenantKey,
+          tenantName: pendingInstall.tenantName,
+          tenantUrl: pendingInstall.tenantUrl,
+          apiKeyId: pendingInstall.apiKeyId,
+          serviceAccountId: pendingInstall.serviceAccountId,
+          createdBy: this.server.security.authc.getCurrentUser(request)?.username,
+          createdAt: new Date().toISOString(),
+        },
+        version
+      );
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+        throw workspaceChanged;
+      }
+      throw error;
+    }
+
+    if (connection.tenantKey) {
+      await this.unbindBestEffort(relayClient, connection.tenantKey, 'after switching workspace');
+    }
+    await this.revokeStoredCredentials(request, connection, 'after switching workspace');
+    this.publishConnector(pendingInstall.tenantKey);
+    return { status: RELAY_APP_CONNECTION_STATUS.connected };
+  }
+
+  /** With `tenantKey`, refuses to cancel if a different workspace is awaiting confirmation. */
+  async cancelReconnect(
+    request: KibanaRequest,
+    tenantKey?: string
+  ): Promise<SlackAppCancelReconnectResponse> {
+    const soClient = this.getSoClient(request);
+    const [relayClient, connection] = await Promise.all([
+      this.getRelayClient(),
+      this.readConnection(soClient),
+    ]);
+
+    if (!connection?.pendingInstall) {
+      return { status: 'cancelled' };
+    }
+    if (tenantKey && connection.pendingInstall.tenantKey !== tenantKey) {
+      throw new StatusError(
+        'The Slack workspace awaiting confirmation has changed. Review it and try again.',
+        409
+      );
+    }
+
+    const { pendingInstall } = connection;
+    let current = connection;
+    if (relayClient && pendingInstall.claimId && !pendingInstall.tenantKey) {
+      try {
+        await relayClient.cancelInstall(pendingInstall.claimId);
+        current = { ...connection, pendingInstall: { ...pendingInstall, claimId: undefined } };
+      } catch (error) {
+        if (!(error instanceof RelayRequestError && error.statusCode === 409)) {
+          throw error;
+        }
+        current = await this.advanceReconnect(
+          request,
+          soClient,
+          relayClient,
+          connection,
+          pendingInstall.claimId
+        );
+        if (!current.pendingInstall?.tenantKey) {
+          return { status: 'cancelled' };
+        }
+      }
+    }
+
+    await this.dropPendingInstall(request, soClient, relayClient, current, 'on reconnect cancel');
+    return { status: 'cancelled' };
   }
 
   async listBindings(
@@ -843,6 +1109,7 @@ export class SlackAppService {
     this.withdrawConnector();
 
     await this.revokeStoredCredentials(request, connection, 'on disconnect');
+    await this.discardPendingInstall(request, relayClient, connection, 'on disconnect');
 
     if (relayClient && connection.tenantKey) {
       try {
@@ -852,6 +1119,7 @@ export class SlackAppService {
         this.logger.warn(`Failed to unbind from Relay on disconnect: ${message}`);
         await this.writeConnection(soClient, {
           ...connection,
+          pendingInstall: undefined,
           status: RELAY_APP_CONNECTION_STATUS.error,
           apiKeyId: null,
           serviceAccountId: null,
@@ -861,7 +1129,11 @@ export class SlackAppService {
       }
     }
 
-    const { error: _staleError, ...retainedConnection } = connection;
+    const {
+      error: _staleError,
+      pendingInstall: _pendingInstall,
+      ...retainedConnection
+    } = connection;
     await this.writeConnection(soClient, {
       ...retainedConnection,
       status: RELAY_APP_CONNECTION_STATUS.notConnected,

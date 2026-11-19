@@ -48,6 +48,17 @@ export interface SlackAppStatusResponse {
   createdBy?: string;
   /** ISO timestamp of when the install started; present with `workspace`. */
   createdAt?: string;
+  /** A reconnect in progress; the connection keeps working until it is confirmed. */
+  reconnect?: {
+    status:
+      | typeof RELAY_APP_CONNECTION_STATUS.oauthInProgress
+      | typeof RELAY_APP_CONNECTION_STATUS.pendingConfirmation;
+    workspace?: SlackAppWorkspace;
+  };
+}
+
+export interface SlackAppCancelReconnectResponse {
+  status: 'cancelled';
 }
 
 export interface SlackAppConfirmResponse {

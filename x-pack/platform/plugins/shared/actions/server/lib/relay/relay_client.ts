@@ -167,6 +167,10 @@ export class RelayClient implements RelayClientContract {
     };
   }
 
+  async cancelInstall(claimId: string): Promise<void> {
+    await this.post('/v1/slack/install/cancel', { claim_id: claimId });
+  }
+
   /** Unbind a single workspace binding identified by its tenant key. */
   async unbind(tenantKey: string): Promise<void> {
     await this.post('/v1/slack/uninstall', { tenant_key: tenantKey });

@@ -53,7 +53,23 @@ const relayAppConnectionAttributesV3 = relayAppConnectionAttributesV2.extends({
   serviceAccountId: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
 });
 
-export type RelayAppConnectionAttributes = TypeOf<typeof relayAppConnectionAttributesV3>;
+const relayAppConnectionAttributesV4 = relayAppConnectionAttributesV3.extends({
+  // A reconnect in progress. The top-level fields keep describing the live connection until it is confirmed.
+  pendingInstall: schema.maybe(
+    schema.object({
+      claimId: schema.maybe(schema.string()),
+      apiKeyId: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
+      serviceAccountId: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
+      tenantKey: schema.maybe(schema.string()),
+      tenantName: schema.maybe(schema.string()),
+      tenantUrl: schema.maybe(schema.string()),
+    })
+  ),
+});
+
+export type RelayAppConnectionAttributes = TypeOf<typeof relayAppConnectionAttributesV4>;
+
+export type RelayAppPendingInstall = NonNullable<RelayAppConnectionAttributes['pendingInstall']>;
 
 export const getRelayAppConnectionSavedObjectType = (): SavedObjectsType => ({
   name: RELAY_APP_CONNECTION_SO_TYPE,
@@ -91,6 +107,13 @@ export const getRelayAppConnectionSavedObjectType = (): SavedObjectsType => ({
       schemas: {
         forwardCompatibility: relayAppConnectionAttributesV3.extends({}, { unknowns: 'ignore' }),
         create: relayAppConnectionAttributesV3,
+      },
+    },
+    '4': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: relayAppConnectionAttributesV4.extends({}, { unknowns: 'ignore' }),
+        create: relayAppConnectionAttributesV4,
       },
     },
   },

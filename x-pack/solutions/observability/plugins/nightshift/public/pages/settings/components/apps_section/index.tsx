@@ -34,6 +34,7 @@ import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
   RELAY_APP_CONNECTION_STATUS,
   type RelayAppConnectionStatus,
+  type SlackAppStatusResponse,
   type SlackAppWorkspace,
 } from '@kbn/significant-events-plugin/common';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
@@ -61,10 +62,12 @@ export function SlackChannelsSection({ canEdit }: SlackChannelsSectionProps) {
     workspace,
     createdBy,
     createdAt,
+    reconnect,
     isMutating,
     retryStatusRequest,
     connect,
     confirm,
+    cancelReconnect,
     disconnect,
   } = connection;
   const available = connection.available && !hasStatusRequestError;
@@ -106,6 +109,8 @@ export function SlackChannelsSection({ canEdit }: SlackChannelsSectionProps) {
               canEdit={canEdit}
               isMutating={isMutating}
               workspaceName={workspace?.name}
+              isReconnecting={reconnect !== undefined}
+              onReconnect={connect}
               onDisconnect={disconnect}
             />
           ) : undefined
@@ -143,8 +148,10 @@ export function SlackChannelsSection({ canEdit }: SlackChannelsSectionProps) {
             createdAt={createdAt}
             canEdit={canEdit}
             isMutating={isMutating}
+            reconnect={reconnect}
             onConnect={connect}
             onConfirm={confirm}
+            onCancelReconnect={cancelReconnect}
             onDisconnect={disconnect}
           />
         )}
@@ -161,8 +168,10 @@ interface SlackConnectionBodyProps {
   createdAt?: string;
   canEdit: boolean;
   isMutating: boolean;
+  reconnect?: SlackAppStatusResponse['reconnect'];
   onConnect: () => void;
   onConfirm: (tenantKey: string) => Promise<void>;
+  onCancelReconnect: (tenantKey?: string) => Promise<void>;
   onDisconnect: (tenantKey?: string) => Promise<void>;
 }
 
@@ -175,8 +184,10 @@ function SlackConnectionBody({
   createdAt,
   canEdit,
   isMutating,
+  reconnect,
   onConnect,
   onConfirm,
+  onCancelReconnect,
   onDisconnect,
 }: SlackConnectionBodyProps) {
   if (status === RELAY_APP_CONNECTION_STATUS.pendingConfirmation && workspace) {
@@ -230,7 +241,64 @@ function SlackConnectionBody({
   }
 
   if (status === RELAY_APP_CONNECTION_STATUS.connected) {
-    return <SlackConnectionBindings canEdit={canEdit} />;
+    return (
+      <>
+        {reconnect?.status === RELAY_APP_CONNECTION_STATUS.pendingConfirmation &&
+          reconnect.workspace && (
+            <>
+              <ConfirmWorkspaceCallout
+                workspace={reconnect.workspace}
+                canEdit={canEdit}
+                isMutating={isMutating}
+                onConfirm={onConfirm}
+                onReject={onCancelReconnect}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {reconnect?.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress && (
+          <>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              data-test-subj="streamsSlackAppReconnectInProgress"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('xpack.nightshift.settings.apps.slackReconnectAwaitingAuth', {
+                    defaultMessage:
+                      'Waiting for authorization… The current workspace stays connected.',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  color="danger"
+                  onClick={() => void onCancelReconnect().catch(() => undefined)}
+                  isDisabled={!canEdit || isMutating}
+                  data-test-subj="streamsSlackAppCancelReconnectButton"
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_SLACK_CONNECTION,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  })}
+                >
+                  {i18n.translate('xpack.nightshift.settings.apps.slackCancel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <SlackConnectionBindings canEdit={canEdit} />
+      </>
+    );
   }
 
   // not_connected or error
@@ -447,10 +515,19 @@ interface WorkspaceMenuProps {
   canEdit: boolean;
   isMutating: boolean;
   workspaceName?: string;
+  isReconnecting: boolean;
+  onReconnect: () => void;
   onDisconnect: () => Promise<void>;
 }
 
-function WorkspaceMenu({ canEdit, isMutating, workspaceName, onDisconnect }: WorkspaceMenuProps) {
+function WorkspaceMenu({
+  canEdit,
+  isMutating,
+  workspaceName,
+  isReconnecting,
+  onReconnect,
+  onDisconnect,
+}: WorkspaceMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
@@ -487,6 +564,24 @@ function WorkspaceMenu({ canEdit, isMutating, workspaceName, onDisconnect }: Wor
       >
         <EuiContextMenuPanel
           items={[
+            <EuiContextMenuItem
+              key="reconnect"
+              icon="refresh"
+              disabled={isReconnecting}
+              onClick={() => {
+                setIsMenuOpen(false);
+                onReconnect();
+              }}
+              data-test-subj="streamsSlackAppReconnectButton"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.RECONNECT_SLACK_CONNECTION,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
+            >
+              {i18n.translate('xpack.nightshift.settings.apps.slackReconnectWorkspace', {
+                defaultMessage: 'Reconnect workspace',
+              })}
+            </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="disconnect"
               icon="linkSlash"

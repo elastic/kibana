@@ -78,6 +78,7 @@ export type {
   SlackAppAvailableChannelsResponse,
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,
+  SlackAppCancelReconnectResponse,
   SlackAppConfirmResponse,
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,

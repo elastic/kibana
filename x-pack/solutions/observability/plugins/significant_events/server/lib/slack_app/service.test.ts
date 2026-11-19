@@ -23,6 +23,7 @@ const request = {} as unknown as KibanaRequest;
 const startInstall = jest.fn();
 const fetchClaim = jest.fn();
 const unbind = jest.fn();
+const cancelInstall = jest.fn().mockResolvedValue(undefined);
 const getAgent = jest.fn();
 const getRegistry = jest.fn();
 
@@ -117,7 +118,9 @@ function createHarness({
     kibanaVersion: '9.2.0',
     isServerless,
     actions: { registerDynamicConnector, unregisterDynamicConnector, inMemoryConnectors },
-    relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind, uiamEnabled } : undefined,
+    relayClient: hasRelayClient
+      ? { startInstall, fetchClaim, cancelInstall, unbind, uiamEnabled }
+      : undefined,
     core: {
       savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
       featureFlags: { getBooleanValue$ },
@@ -368,9 +371,14 @@ describe('SlackAppService', () => {
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
     });
 
-    it('invalidates the previous key after a successful reconnect', async () => {
-      const { server, soClient, invalidateAsInternalUser, grantAsInternalUser } = createHarness();
-      // An existing connection is found via readConnection.
+    it('keeps a connected workspace live and records the reconnect as a pending install', async () => {
+      const {
+        server,
+        soClient,
+        invalidateAsInternalUser,
+        grantAsInternalUser,
+        unregisterDynamicConnector,
+      } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
           status: RELAY_APP_CONNECTION_STATUS.connected,
@@ -384,14 +392,39 @@ describe('SlackAppService', () => {
 
       await new SlackAppService(server).connect(request);
 
-      // The old key is invalidated after the new install succeeds.
-      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['old-key'] });
-      // The new in-progress state is written to the same fixed SO id.
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+      expect(unregisterDynamicConnector).not.toHaveBeenCalled();
       expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
-        expect.objectContaining({ apiKeyId: 'new-key', claimId: 'claim-2' }),
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'old-key',
+          tenantKey: 'tenant-A',
+          pendingInstall: { claimId: 'claim-2', apiKeyId: 'new-key', serviceAccountId: null },
+        }),
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
+    });
+
+    it('discards the previous pending install when a reconnect is started again', async () => {
+      const { server, soClient, invalidateAsInternalUser, grantAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'old-key',
+          tenantKey: 'tenant-A',
+          pendingInstall: { apiKeyId: 'pending-key', tenantKey: 'tenant-B' },
+        },
+      });
+      grantAsInternalUser.mockResolvedValue({ id: 'new-key', name: 'k', api_key: 'secret' });
+      startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'claim-3' });
+      unbind.mockResolvedValue(undefined);
+
+      await new SlackAppService(server).connect(request);
+
+      expect(unbind).toHaveBeenCalledWith('tenant-B');
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['pending-key'] });
+      expect(invalidateAsInternalUser).not.toHaveBeenCalledWith({ ids: ['old-key'] });
     });
 
     // Regression: invalidating the old key up front (before startInstall) would
@@ -420,7 +453,7 @@ describe('SlackAppService', () => {
       expect(soClient.create).not.toHaveBeenCalled();
     });
 
-    it('revokes a leftover service account after a successful API-key reconnect', async () => {
+    it('revokes a leftover service account when an in-progress install is restarted', async () => {
       const {
         server,
         soClient,
@@ -430,10 +463,9 @@ describe('SlackAppService', () => {
       } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
-          status: RELAY_APP_CONNECTION_STATUS.connected,
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           apiKeyId: 'old-key',
           serviceAccountId: 'sa-leftover',
-          tenantKey: 'tenant-A',
           surface: 'slack',
         },
       });
@@ -533,7 +565,7 @@ describe('SlackAppService', () => {
       });
       soClient.get.mockResolvedValue({
         attributes: {
-          status: RELAY_APP_CONNECTION_STATUS.connected,
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           serviceAccountId: 'sa-existing',
           apiKeyId: null,
           surface: 'slack',
@@ -1414,6 +1446,222 @@ describe('SlackAppService', () => {
       });
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
       expect(soClient.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('reconnecting a connected workspace', () => {
+    const liveConnection = {
+      status: RELAY_APP_CONNECTION_STATUS.connected,
+      apiKeyId: 'old-key',
+      tenantKey: 'tenant-A',
+      tenantName: 'Workspace A',
+    };
+    const pendingInstall = { claimId: 'claim-2', apiKeyId: 'new-key', serviceAccountId: null };
+
+    const getStatus = (server: SignificantEventsServer) =>
+      new SlackAppService(server).getStatus(request, { canAdvanceInstall: true });
+
+    it('promotes the new credential when the claim lands on the same workspace', async () => {
+      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({ attributes: { ...liveConnection, pendingInstall } });
+      fetchClaim.mockResolvedValue({
+        status: 'complete',
+        tenant_key: 'tenant-A',
+        tenant_name: 'Workspace A2',
+      });
+
+      const status = await getStatus(server);
+
+      expect(status.status).toBe(RELAY_APP_CONNECTION_STATUS.connected);
+      expect(status.reconnect).toBeUndefined();
+      const [, written] = soClient.create.mock.calls[0];
+      expect(written).toMatchObject({
+        status: RELAY_APP_CONNECTION_STATUS.connected,
+        apiKeyId: 'new-key',
+        tenantKey: 'tenant-A',
+        tenantName: 'Workspace A2',
+      });
+      expect(written).not.toHaveProperty('pendingInstall');
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['old-key'] });
+    });
+
+    it('asks for confirmation, leaving the live workspace untouched, when the claim lands on another workspace', async () => {
+      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({ attributes: { ...liveConnection, pendingInstall } });
+      fetchClaim.mockResolvedValue({
+        status: 'complete',
+        tenant_key: 'tenant-B',
+        tenant_name: 'Workspace B',
+      });
+
+      const status = await getStatus(server);
+
+      expect(status).toMatchObject({
+        status: RELAY_APP_CONNECTION_STATUS.connected,
+        workspace: { tenantKey: 'tenant-A' },
+        reconnect: {
+          status: RELAY_APP_CONNECTION_STATUS.pendingConfirmation,
+          workspace: { tenantKey: 'tenant-B', name: 'Workspace B' },
+        },
+      });
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('keeps the live workspace when the install fails', async () => {
+      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({ attributes: { ...liveConnection, pendingInstall } });
+      fetchClaim.mockRejectedValue(
+        new RelayRequestError('/v1/slack/install/claim', 400, 'claim expired')
+      );
+
+      const status = await getStatus(server);
+
+      expect(status.status).toBe(RELAY_APP_CONNECTION_STATUS.connected);
+      expect(status.reconnect).toBeUndefined();
+      expect(invalidateAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['new-key'] });
+    });
+
+    describe('confirm', () => {
+      const awaitingConfirmation = {
+        ...liveConnection,
+        pendingInstall: { apiKeyId: 'new-key', tenantKey: 'tenant-B', tenantName: 'Workspace B' },
+      };
+
+      it('switches to the new workspace and retires the old one', async () => {
+        const { server, soClient, invalidateAsInternalUser, registerDynamicConnector } =
+          createHarness();
+        soClient.get.mockResolvedValue({ attributes: awaitingConfirmation, version: 'v1' });
+        unbind.mockResolvedValue(undefined);
+
+        await new SlackAppService(server).confirm(request, 'tenant-B');
+
+        const [, written, options] = soClient.create.mock.calls[0];
+        expect(written).toMatchObject({
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'new-key',
+          tenantKey: 'tenant-B',
+        });
+        expect(written).not.toHaveProperty('pendingInstall');
+        expect(options).toMatchObject({ version: 'v1' });
+        expect(unbind).toHaveBeenCalledWith('tenant-A');
+        expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['old-key'] });
+        expect(registerDynamicConnector).toHaveBeenCalledWith(
+          expect.objectContaining({
+            secrets: expect.objectContaining({ tenantKey: 'tenant-B' }),
+          })
+        );
+      });
+
+      it('refuses a workspace other than the one awaiting confirmation', async () => {
+        const { server, soClient } = createHarness();
+        soClient.get.mockResolvedValue({ attributes: awaitingConfirmation });
+
+        await expect(
+          new SlackAppService(server).confirm(request, 'tenant-C')
+        ).rejects.toMatchObject({ statusCode: 409 });
+        expect(soClient.create).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('cancelReconnect', () => {
+      const awaitingConfirmation = {
+        ...liveConnection,
+        pendingInstall: { apiKeyId: 'new-key', tenantKey: 'tenant-B' },
+      };
+
+      it('discards the pending install and keeps the live workspace', async () => {
+        const { server, soClient, invalidateAsInternalUser, unregisterDynamicConnector } =
+          createHarness();
+        soClient.get.mockResolvedValue({ attributes: awaitingConfirmation });
+        unbind.mockResolvedValue(undefined);
+
+        await new SlackAppService(server).cancelReconnect(request, 'tenant-B');
+
+        expect(unbind).toHaveBeenCalledWith('tenant-B');
+        expect(invalidateAsInternalUser).toHaveBeenCalledTimes(1);
+        expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['new-key'] });
+        const [, written] = soClient.create.mock.calls[0];
+        expect(written).toMatchObject({
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'old-key',
+          tenantKey: 'tenant-A',
+        });
+        expect(written).not.toHaveProperty('pendingInstall');
+        expect(unregisterDynamicConnector).not.toHaveBeenCalled();
+      });
+
+      it('refuses when a different workspace is awaiting confirmation', async () => {
+        const { server, soClient } = createHarness();
+        soClient.get.mockResolvedValue({ attributes: awaitingConfirmation });
+
+        await expect(
+          new SlackAppService(server).cancelReconnect(request, 'tenant-C')
+        ).rejects.toMatchObject({ statusCode: 409 });
+        expect(soClient.create).not.toHaveBeenCalled();
+      });
+
+      describe('while the install is still waiting for authorization', () => {
+        const waiting = { ...liveConnection, pendingInstall };
+
+        it('cancels the claim so a late OAuth completion is refused, then discards the new credential', async () => {
+          const { server, soClient, invalidateAsInternalUser } = createHarness();
+          soClient.get.mockResolvedValue({ attributes: waiting });
+
+          await new SlackAppService(server).cancelReconnect(request);
+
+          expect(cancelInstall).toHaveBeenCalledTimes(1);
+          expect(cancelInstall).toHaveBeenCalledWith('claim-2');
+          expect(invalidateAsInternalUser).toHaveBeenCalledTimes(1);
+          expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['new-key'] });
+          expect(soClient.create.mock.calls[0][1]).not.toHaveProperty('pendingInstall');
+        });
+
+        it('keeps the new credential when the claim already completed on the same workspace', async () => {
+          const { server, soClient, invalidateAsInternalUser } = createHarness();
+          soClient.get.mockResolvedValue({ attributes: waiting });
+          cancelInstall.mockRejectedValueOnce(
+            new RelayRequestError('/v1/slack/install/cancel', 409, 'not cancellable')
+          );
+          fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: 'tenant-A' });
+
+          await new SlackAppService(server).cancelReconnect(request);
+
+          expect(soClient.create.mock.calls[0][1]).toMatchObject({ apiKeyId: 'new-key' });
+          expect(invalidateAsInternalUser).toHaveBeenCalledTimes(1);
+          expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['old-key'] });
+        });
+
+        it('discards the other workspace when the claim already completed on it', async () => {
+          const { server, soClient, invalidateAsInternalUser } = createHarness();
+          soClient.get.mockResolvedValue({ attributes: waiting });
+          cancelInstall.mockRejectedValueOnce(
+            new RelayRequestError('/v1/slack/install/cancel', 409, 'not cancellable')
+          );
+          fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: 'tenant-B' });
+          unbind.mockResolvedValue(undefined);
+
+          await new SlackAppService(server).cancelReconnect(request);
+
+          expect(unbind).toHaveBeenCalledWith('tenant-B');
+          expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['new-key'] });
+          expect(invalidateAsInternalUser).not.toHaveBeenCalledWith({ ids: ['old-key'] });
+        });
+
+        it('leaves the pending install in place when the Relay cannot be reached', async () => {
+          const { server, soClient, invalidateAsInternalUser } = createHarness();
+          soClient.get.mockResolvedValue({ attributes: waiting });
+          cancelInstall.mockRejectedValueOnce(
+            new RelayRequestError('/v1/slack/install/cancel', 502)
+          );
+
+          await expect(new SlackAppService(server).cancelReconnect(request)).rejects.toBeInstanceOf(
+            RelayRequestError
+          );
+          expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+          expect(soClient.create).not.toHaveBeenCalled();
+        });
+      });
     });
   });
 
