@@ -62,7 +62,8 @@ privilege runs the setup, and the server only binds the space to the account it 
 
 `POST /internal/nightshift/detection/service_account/_enable` with `{ "serviceAccountId": "<id>" }`
 binds the space to an existing account. Calling it again with the same id changes nothing; another
-space can reuse the account.
+space can reuse the account. Two `_enable` calls for the same space never run together: the second answers 409 while the first
+holds the space's setup lock, and succeeds when called again.
 
 Setting a space up also installs and enables its continuous detection workflow, `system-nightshift-continuous-detection-<space>`,
 bound to the same account. It runs every minute and calls `POST /internal/nightshift/detection/_tick`

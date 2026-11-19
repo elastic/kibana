@@ -22,6 +22,7 @@ import { SpaceRunLock } from '../lib/engine/space_run_lock';
 import { ScopedTickRunner } from '../lib/engine/scoped_tick_runner';
 import { DetectionAccountService } from '../lib/service_account/detection_account';
 import { DetectionSetupService } from '../lib/service_account/setup_service';
+import { SpaceSetupLock } from '../lib/service_account/space_setup_lock';
 import { WorkflowInstaller } from '../lib/workflows/workflow_installer';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
 import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
@@ -99,6 +100,7 @@ describe('module', () => {
     container.get(WorkflowInstaller);
     container.get(ScopedTickRunner);
     container.get(SpaceRunLock);
+    container.get(SpaceSetupLock);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
 

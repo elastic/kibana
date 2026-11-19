@@ -12,6 +12,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { EngineHttpError } from '../errors/engine_http_error';
 import { DetectionAccountService } from './detection_account';
 import { DetectionSetupService } from './setup_service';
+import type { SpaceSetupLock } from './space_setup_lock';
 
 const request = httpServerMock.createKibanaRequest();
 const WORKLOAD = { workloadType: 'detection_engine', workloadId: 'detection_engine' };
@@ -26,6 +27,7 @@ function createSetup({
   onSummaryRead,
   installWorkflow = async () => {},
   enableWorkflowError,
+  isSetupLockHeld = false,
 }: {
   roleCount?: number;
   boundAccountId?: string;
@@ -41,8 +43,11 @@ function createSetup({
   installWorkflow?: () => Promise<void>;
   /** Makes turning the installed workflow on fail. */
   enableWorkflowError?: Error;
+  /** Another `_enable` holds the space's setup lock. */
+  isSetupLockHeld?: boolean;
 } = {}) {
   let currentAccountId = boundAccountId;
+  const installWorkflowMock = jest.fn(installWorkflow);
   const enableWorkflow = jest.fn(async () => {
     if (enableWorkflowError) {
       throw enableWorkflowError;
@@ -96,11 +101,16 @@ function createSetup({
   } as unknown as SpacesPluginStart;
   const env = { packageInfo: { buildFlavor: 'serverless' } } as PluginInitializerContext['env'];
   const logger: Logger = loggingSystemMock.createLogger();
+  const setupLock: Pick<SpaceSetupLock, 'run'> = {
+    run: async ({ callback }) =>
+      isSetupLockHeld ? { ran: false } : { ran: true, result: await callback() },
+  };
 
   return {
     service: new DetectionSetupService(
       new DetectionAccountService(security, elasticsearch),
-      { install: installWorkflow, enable: enableWorkflow },
+      { install: installWorkflowMock, enable: enableWorkflow },
+      setupLock,
       security,
       elasticsearch,
       spaces,
@@ -109,6 +119,7 @@ function createSetup({
     ),
     bindWorkload,
     unbindWorkload,
+    installWorkflow: installWorkflowMock,
     enableWorkflow,
     rebind: (serviceAccountId: string) => {
       currentAccountId = serviceAccountId;
@@ -220,6 +231,19 @@ describe('DetectionSetupService.enable', () => {
     // must not switch on the workflow the winning call is still setting up.
     expect(setup.unbindWorkload).not.toHaveBeenCalled();
     expect(setup.enableWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('fails with 409 and touches nothing while another setup holds the space', async () => {
+    const { service, bindWorkload, installWorkflow, enableWorkflow } = createSetup({
+      isSetupLockHeld: true,
+    });
+
+    await expect(
+      service.enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).rejects.toMatchObject({ statusCode: 409, message: expect.stringContaining('in progress') });
+    expect(bindWorkload).not.toHaveBeenCalled();
+    expect(installWorkflow).not.toHaveBeenCalled();
+    expect(enableWorkflow).not.toHaveBeenCalled();
   });
 
   it('refuses with 400 when the role of the account does not exist, binding nothing', async () => {
