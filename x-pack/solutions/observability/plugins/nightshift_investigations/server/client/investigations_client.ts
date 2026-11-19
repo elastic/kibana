@@ -332,7 +332,7 @@ export interface LifecycleCorrelation {
 
 /**
  * A lifecycle message's view of an investigation. Until Agent Builder titles it, the title is the
- * run's `title` input; the first pending proposal stands in for the top recommendation.
+ * run's `title` input; its recommendations are the pending proposals.
  */
 const toNotifiableInvestigation = (
   {
