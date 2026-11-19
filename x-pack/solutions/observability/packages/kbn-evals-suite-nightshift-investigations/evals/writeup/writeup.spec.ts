@@ -142,12 +142,16 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
       writeFileSync(join(outDir, 'report.md'), report);
       log.info(`\n${summary}\n\nReport: ${join(outDir, 'report.md')}`);
 
-      // Scores grade the prompt; replies that never came back mean the run itself is broken.
-      const failed = runs
-        .map(({ output }) => output as WriteupTaskOutput)
-        .filter(({ reply }) => !reply);
+      // Scores grade the prompt; replies that never came back mean the run itself is broken. Both
+      // prompts' misses are logged before either check, so a failing run shows all of them.
+      const outputs = runs.map(({ output }) => output as WriteupTaskOutput);
+      const failed = outputs.filter(({ reply }) => !reply);
       for (const { case_id: caseId, error } of failed) {
         log.warning(`No reply for ${caseId}: ${error}`);
+      }
+      const paired = baseline ? pairedReplies(outputs) : undefined;
+      for (const { caseId, error } of paired?.baselineMissing ?? []) {
+        log.warning(`No baseline reply for ${caseId}: ${error}`);
       }
       expect(
         (runs.length - failed.length) / runs.length,
@@ -156,11 +160,7 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
 
       // With a baseline, the head to head is the point of the run (a PR's before and after), so a
       // baseline that mostly failed to reply leaves nothing to compare and fails the run too.
-      if (baseline) {
-        const paired = pairedReplies(runs.map(({ output }) => output as WriteupTaskOutput));
-        for (const { caseId, error } of paired.baselineMissing) {
-          log.warning(`No baseline reply for ${caseId}: ${error}`);
-        }
+      if (paired) {
         expect(
           paired.compared / paired.total,
           `Too few rounds have both replies to compare (${paired.compared} of ${paired.total})`

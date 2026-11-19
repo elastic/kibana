@@ -326,7 +326,8 @@ describe('loadPromptArm', () => {
         encoding: 'utf8',
       }).trim();
     mkdirSync(origin);
-    gitIn(origin, 'init', '-q');
+    // resolvePromptCommit fetches 40-character ids, so pin SHA-1 whatever init.defaultObjectFormat is.
+    gitIn(origin, 'init', '-q', '--object-format=sha1');
     gitIn(origin, 'config', 'uploadpack.allowAnySHA1InWant', 'true');
     gitIn(origin, 'commit', '-q', '--allow-empty', '-m', 'first');
     gitIn(tmp, 'clone', '-q', `file://${origin}`, clone);
