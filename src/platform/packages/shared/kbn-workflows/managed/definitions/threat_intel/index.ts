@@ -44,7 +44,7 @@ export const THREAT_INTEL_ENRICH_REPORT_WORKFLOW = {
   id: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 6,
+  version: 7,
   visibility: VISIBILITY,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'enrich_threat_report.yaml');
