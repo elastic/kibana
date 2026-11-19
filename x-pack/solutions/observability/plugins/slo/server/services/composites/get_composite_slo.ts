@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
 import { compositeSloWithSummaryResponseSchema } from '@kbn/slo-schema';
+import type { CompositeSLOWithSummary } from '../../domain/models';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SummaryClient } from '../summary_client';
 import type { CompositeSLORepository } from './composite_slo_repository';
@@ -44,7 +45,7 @@ export class GetCompositeSLO {
   private async executeOne(
     id: string,
     persistedSummaryById: Map<string, PersistedCompositeSummary>
-  ): Promise<CompositeSLOWithSummaryResponse> {
+  ): Promise<CompositeSLOWithSummary> {
     const compositeSlo = await this.compositeRepository.findById(id);
     const persisted = persistedSummaryById.get(id);
 

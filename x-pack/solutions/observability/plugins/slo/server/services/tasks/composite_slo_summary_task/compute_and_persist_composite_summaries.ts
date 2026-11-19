@@ -23,7 +23,7 @@ import type {
   SLODefinition,
   StoredCompositeSLODefinition,
 } from '../../../domain/models';
-import { toRichRollingTimeWindow, type TimeWindow } from '../../../domain/models/time_window';
+import type { TimeWindow } from '../../../domain/models/time_window';
 import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
 import { DefaultBurnRatesClient } from '../../burn_rates_client';
 import { buildCompositeSloSummaryDocId } from '../../composites/composite_slo_summary_index';
@@ -270,14 +270,13 @@ async function fetchMemberSummaries(
         { slo: SLODefinition; instanceId: string; timeWindowOverride: TimeWindow }
       >();
       for (const { compositeSlo } of items) {
-        const richTimeWindow = toRichRollingTimeWindow(compositeSlo.timeWindow);
         for (const member of compositeSlo.members) {
           const slo = memberDefinitionMap.get(member.sloId);
           if (!slo) continue;
           const instanceId = member.instanceId ?? ALL_VALUE;
-          const key = buildMemberSummaryKey(member.sloId, instanceId, richTimeWindow);
+          const key = buildMemberSummaryKey(member.sloId, instanceId, compositeSlo.timeWindow);
           if (!seen.has(key)) {
-            seen.set(key, { slo, instanceId, timeWindowOverride: richTimeWindow });
+            seen.set(key, { slo, instanceId, timeWindowOverride: compositeSlo.timeWindow });
           }
         }
       }
@@ -322,13 +321,12 @@ function buildBulkOps(
 
     for (const { compositeSlo } of items) {
       try {
-        const richTimeWindow = toRichRollingTimeWindow(compositeSlo.timeWindow);
         const unresolvedMemberIds: string[] = [];
         const memberSummaries: MemberSummaryData[] = compositeSlo.members.flatMap((member) => {
           const key = buildMemberSummaryKey(
             member.sloId,
             member.instanceId ?? ALL_VALUE,
-            richTimeWindow
+            compositeSlo.timeWindow
           );
           const slo = memberDefinitionMap.get(member.sloId);
           const result = summaryResultMap.get(key);
