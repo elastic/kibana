@@ -68,6 +68,8 @@ export interface ConversationTemplateDetailsFlyoutDescriptor {
     description?: ReactNode;
     /** Shows a spinner after the title, for work the header reflects (e.g. a sync). */
     isLoading?: boolean;
+    /** Accessible name of the `isLoading` spinner, saying what is loading. */
+    loadingLabel?: string;
     metaBlocks?: FlyoutHeaderMetaBlockProps[];
     badges?: FlyoutHeaderBadgeProps[];
     infoBlocks?: FlyoutHeaderInfoBlockProps[];

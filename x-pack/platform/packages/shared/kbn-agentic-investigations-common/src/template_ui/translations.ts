@@ -33,6 +33,9 @@ export const TEMPLATE_UI_LABELS = Object.freeze({
   noAssignees: i18n.translate('xpack.agenticInvestigations.templateUi.noAssignees', {
     defaultMessage: 'None',
   }),
+  syncingAttachments: i18n.translate('xpack.agenticInvestigations.escalationSync.syncing', {
+    defaultMessage: 'Syncing attachments from linked investigations',
+  }),
 });
 
 /** One-line summaries for the conversation events the timeline surfaces. */

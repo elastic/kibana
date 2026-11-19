@@ -23,6 +23,7 @@ import {
   conversationToEscalationHeader,
   conversationToInvestigation,
 } from './conversation_to_investigation';
+import { TEMPLATE_UI_LABELS } from './translations';
 import type {
   EscalationDetailsFlyoutContext,
   InvestigationDetailsFlyoutContext,
@@ -248,6 +249,7 @@ export const useEscalationDetailsFlyout = (
       title: conversation.title,
       description: <EscalationSince createdAt={conversation.created_at} />,
       isLoading: isSyncing,
+      loadingLabel: TEMPLATE_UI_LABELS.syncingAttachments,
       infoBlocks: toInfoBlocks({
         status,
         statusNode: renderStatus?.({
