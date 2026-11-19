@@ -5,26 +5,12 @@
  * 2.0.
  */
 
-import { Parser, Walker } from '@elastic/esql';
 import { validateQuery } from '@kbn/esql-language';
+import { isCircularSource } from '../../common/ai_index_source';
 import type { AiIndexDest, AiIndexSource } from '../../common/http_api/ai_indices';
 import { previewQuery } from '../ki_verification/verifiers/esql_attribute';
 import { formatValidationError } from '../ki_verification/verifiers/esql_valid_syntax';
-import { matchesGlob } from '../utils/matches_glob';
 import { InvalidEsqlSourceError } from './errors';
-
-const isCircularSource = (query: string, dest: string): boolean => {
-  const { root } = Parser.parse(query);
-  const targets: string[] = [];
-  Walker.walk(root, {
-    visitSource: ({ prefix, index, name }) => {
-      if (prefix === undefined) {
-        targets.push(...(index?.valueUnquoted ?? name).split(','));
-      }
-    },
-  });
-  return targets.some((target) => matchesGlob(target.trim(), dest));
-};
 
 const validateSingleEsqlSource = async (
   query: string,

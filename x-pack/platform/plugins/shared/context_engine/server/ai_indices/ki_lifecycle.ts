@@ -8,7 +8,7 @@
 import { Parser, Walker, WrappingPrettyPrinter, mutate } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { matchesGlob } from '../utils/matches_glob';
+import { matchesGlob } from '../../common/matches_glob';
 
 const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
 const KI_EXPIRES_AT_FIELD = 'expires_at';
