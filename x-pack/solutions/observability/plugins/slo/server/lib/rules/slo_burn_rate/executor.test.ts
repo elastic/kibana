@@ -358,27 +358,14 @@ describe('BurnRateRuleExecutor', () => {
       expect(result).toEqual({ state: {} });
     });
 
-    it('does not schedule an alert when long windows burn rates are below the threshold', async () => {
+    it('reports no alert and the alert limit as not reached when no instance is breaching', async () => {
       const slo = createSLO({ objective: { target: 0.9 } });
-      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      const ruleParams = someRuleParamsWithWindows({
+        sloId: slo.id,
+        dependencies: [{ ruleId: 'parent-rule', actionGroupsToSuppressOn: [ALERT_ACTION.id] }],
+      });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-      const buckets = [
-        {
-          instanceId: 'foo',
-          windows: [
-            { shortWindowBurnRate: 2.1, longWindowBurnRate: 0.9 },
-            { shortWindowBurnRate: 1.2, longWindowBurnRate: 0.9 },
-          ],
-        },
-        {
-          instanceId: 'bar',
-          windows: [
-            { shortWindowBurnRate: 2.1, longWindowBurnRate: 0.9 },
-            { shortWindowBurnRate: 1.2, longWindowBurnRate: 0.9 },
-          ],
-        },
-      ];
-      mockEvaluation(esClientMock, ruleParams, buckets);
+      mockEvaluation(esClientMock, []);
 
       const executor = getRuleExecutor(basePathMock);
       await executor({
@@ -397,68 +384,27 @@ describe('BurnRateRuleExecutor', () => {
         isServerless: false,
       });
 
+      expect(esClientMock.esql.query).toHaveBeenCalledTimes(1);
+      expect(esClientMock.search).not.toHaveBeenCalled();
+      expect(soClientMock.get).not.toHaveBeenCalled();
       expect(servicesMock.alertsClient?.report).not.toHaveBeenCalled();
       expect(servicesMock.alertsClient?.setAlertData).not.toHaveBeenCalled();
       expect(servicesMock.alertsClient?.setAlertLimitReached).toHaveBeenCalledWith(false);
     });
 
-    it('does not schedule an alert when the short window burn rate is below the threshold', async () => {
-      const slo = createSLO({ objective: { target: 0.9 } });
-      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
-      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-      const buckets = [
-        {
-          instanceId: 'foo',
-          windows: [
-            { shortWindowBurnRate: 0.9, longWindowBurnRate: 2.1 },
-            { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
-          ],
-        },
-        {
-          instanceId: 'bar',
-          windows: [
-            { shortWindowBurnRate: 0.9, longWindowBurnRate: 2.1 },
-            { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
-          ],
-        },
-      ];
-      mockEvaluation(esClientMock, ruleParams, buckets);
-
-      const executor = getRuleExecutor(basePathMock);
-      await executor({
-        params: ruleParams,
-        startedAt: new Date(),
-        startedAtOverridden: false,
-        services: servicesMock,
-        executionId: 'irrelevant',
-        logger: loggerMock,
-        previousStartedAt: null,
-        rule: {} as SanitizedRuleConfig,
-        spaceId: asSpaceId('irrelevant'),
-        state: {},
-        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        getTimeRange,
-        isServerless: false,
-      });
-
-      expect(servicesMock.alertsClient?.report).not.toHaveBeenCalled();
-      expect(servicesMock.alertsClient?.setAlertData).not.toHaveBeenCalled();
-    });
-
-    it('schedules an alert when both windows of first window definition burn rate have reached the threshold', async () => {
+    it('reports an alert for each breaching instance with the action group, burn rates and groupings of its breaching window', async () => {
       const slo = createSLO({
         objective: { target: 0.9 },
         groupBy: ['group.by.field', 'client.geo.continent_name'],
       });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-      const buckets = [
+      mockEvaluation(esClientMock, [
         {
           instanceId: 'foo,asia',
-          windows: [
-            { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
-            { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
-          ],
+          windowIndex: 0,
+          shortWindowBurnRate: 2.1,
+          longWindowBurnRate: 2.3,
           groupings: {
             group: { by: { field: 'foo' } },
             client: { geo: { continent_name: 'asia' } },
@@ -466,23 +412,16 @@ describe('BurnRateRuleExecutor', () => {
         },
         {
           instanceId: 'bar,asia',
-          windows: [
-            { shortWindowBurnRate: 2.2, longWindowBurnRate: 2.5 },
-            { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
-          ],
+          windowIndex: 0,
+          shortWindowBurnRate: 2.2,
+          longWindowBurnRate: 2.5,
           groupings: {
             group: { by: { field: 'bar' } },
             client: { geo: { continent_name: 'asia' } },
           },
         },
-      ];
-      mockEvaluation(esClientMock, ruleParams, buckets);
-
-      // @ts-ignore
-      servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
-        uuid: `uuid-${id}`,
-        start: new Date().toISOString(),
-      }));
+      ]);
+      mockAlertReport(servicesMock.alertsClient!);
 
       const executor = getRuleExecutor(basePathMock);
 
@@ -591,7 +530,7 @@ describe('BurnRateRuleExecutor', () => {
       });
     });
 
-    it('schedules a suppressed alert when both windows of first window definition burn rate have reached the threshold but the dependency matches', async () => {
+    it('reports suppressed alerts when the dependency is breaching for the same instances', async () => {
       const slo = createSLO({
         objective: { target: 0.9 },
         groupBy: ['group.by.field'],
@@ -599,47 +538,34 @@ describe('BurnRateRuleExecutor', () => {
       const dependencyRuleParams = someRuleParamsWithWindows({ sloId: slo.id });
       const ruleParams = someRuleParamsWithWindows({
         sloId: slo.id,
-        dependencies: [{ ruleId: `partent-rule`, actionGroupsToSuppressOn: [ALERT_ACTION.id] }],
+        dependencies: [{ ruleId: 'parent-rule', actionGroupsToSuppressOn: [ALERT_ACTION.id] }],
       });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-      const buckets = [
+      const rows = [
         {
           instanceId: 'foo',
-          windows: [
-            { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
-            { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
-          ],
-          groupings: {
-            group: { by: { field: 'foo' } },
-          },
+          windowIndex: 0,
+          shortWindowBurnRate: 2.1,
+          longWindowBurnRate: 2.3,
+          groupings: { group: { by: { field: 'foo' } } },
         },
         {
           instanceId: 'bar',
-          windows: [
-            { shortWindowBurnRate: 2.2, longWindowBurnRate: 2.5 },
-            { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
-          ],
-          groupings: {
-            group: { by: { field: 'bar' } },
-          },
+          windowIndex: 0,
+          shortWindowBurnRate: 2.2,
+          longWindowBurnRate: 2.5,
+          groupings: { group: { by: { field: 'bar' } } },
         },
       ];
-      mockEvaluation(esClientMock, ruleParams, buckets);
+      mockEvaluation(esClientMock, rows);
 
-      // evaluateDependendes mocks
+      // evaluateDependencies mocks
       soClientMock.get.mockResolvedValueOnce(
         createGetRuleResponse('parent-rule', dependencyRuleParams)
       );
-
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-
-      mockEvaluation(esClientMock, dependencyRuleParams, buckets, { withGroupings: false });
-
-      // @ts-ignore
-      servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
-        uuid: `uuid-${id}`,
-        start: new Date().toISOString(),
-      }));
+      mockEvaluation(esClientMock, rows, { withGroupings: false });
+      mockAlertReport(servicesMock.alertsClient!);
 
       const executor = getRuleExecutor(basePathMock);
 
@@ -739,42 +665,96 @@ describe('BurnRateRuleExecutor', () => {
       });
     });
 
-    it('schedules an alert when both windows of second window definition burn rate have reached the threshold', async () => {
+    it('only suppresses the alerts of the instances for which the dependency is breaching', async () => {
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
+      const dependencyRuleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      const ruleParams = someRuleParamsWithWindows({
+        sloId: slo.id,
+        dependencies: [{ ruleId: 'parent-rule', actionGroupsToSuppressOn: [ALERT_ACTION.id] }],
+      });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      const fooRow = {
+        instanceId: 'foo',
+        windowIndex: 0,
+        shortWindowBurnRate: 2.1,
+        longWindowBurnRate: 2.3,
+        groupings: { group: { by: { field: 'foo' } } },
+      };
+      const barRow = {
+        instanceId: 'bar',
+        windowIndex: 0,
+        shortWindowBurnRate: 2.2,
+        longWindowBurnRate: 2.5,
+        groupings: { group: { by: { field: 'bar' } } },
+      };
+      mockEvaluation(esClientMock, [fooRow, barRow]);
+
+      // evaluateDependencies mocks
+      soClientMock.get.mockResolvedValueOnce(
+        createGetRuleResponse('parent-rule', dependencyRuleParams)
+      );
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      mockEvaluation(esClientMock, [fooRow], { withGroupings: false });
+      mockAlertReport(servicesMock.alertsClient!);
+
+      const executor = getRuleExecutor(basePathMock);
+      await executor({
+        params: ruleParams,
+        startedAt: new Date(),
+        startedAtOverridden: false,
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: asSpaceId('irrelevant'),
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+        isServerless: false,
+      });
+
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledTimes(2);
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'foo', actionGroup: SUPPRESSED_PRIORITY_ACTION.id })
+      );
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'bar', actionGroup: ALERT_ACTION.id })
+      );
+      expect(servicesMock.alertsClient!.setAlertData).toHaveBeenCalledWith({
+        id: 'foo',
+        context: expect.objectContaining({ suppressedAction: ALERT_ACTION.id }),
+      });
+      expect(servicesMock.alertsClient!.setAlertData).toHaveBeenCalledWith({
+        id: 'bar',
+        context: expect.objectContaining({ suppressedAction: null }),
+      });
+    });
+
+    it('reports the action group, durations and threshold of the breaching window', async () => {
       const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-      const buckets = [
+      mockEvaluation(esClientMock, [
         {
           instanceId: 'foo',
-          windows: [
-            { shortWindowBurnRate: 1.0, longWindowBurnRate: 2.0 },
-            { shortWindowBurnRate: 1.9, longWindowBurnRate: 1.2 },
-          ],
-          groupings: {
-            group: { by: { field: 'foo' } },
-          },
+          windowIndex: 1,
+          shortWindowBurnRate: 1.9,
+          longWindowBurnRate: 1.2,
+          groupings: { group: { by: { field: 'foo' } } },
         },
         {
           instanceId: 'bar',
-          windows: [
-            { shortWindowBurnRate: 1.0, longWindowBurnRate: 2.0 },
-            { shortWindowBurnRate: 1.5, longWindowBurnRate: 1.1 },
-          ],
-          groupings: {
-            group: { by: { field: 'bar' } },
-          },
+          windowIndex: 1,
+          shortWindowBurnRate: 1.5,
+          longWindowBurnRate: 1.1,
+          groupings: { group: { by: { field: 'bar' } } },
         },
-      ];
-      mockEvaluation(esClientMock, ruleParams, buckets);
+      ]);
       // Mock summary repository es searches
       esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponse());
       esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponse());
-
-      // @ts-ignore
-      servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
-        uuid: `uuid-${id}`,
-        start: new Date().toISOString(),
-      }));
+      mockAlertReport(servicesMock.alertsClient!);
 
       const executor = getRuleExecutor(basePathMock);
       await executor({
@@ -886,27 +866,23 @@ describe('BurnRateRuleExecutor', () => {
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
       jest.mocked(servicesMock.alertsClient!.getAlertLimitValue).mockReturnValue(1);
-      const breachingWindows = [
-        { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
-        { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
-      ];
-      const buckets = [
+      mockEvaluation(esClientMock, [
         {
           instanceId: 'foo',
-          windows: breachingWindows,
+          windowIndex: 0,
+          shortWindowBurnRate: 2.1,
+          longWindowBurnRate: 2.3,
           groupings: { group: { by: { field: 'foo' } } },
         },
         {
           instanceId: 'bar',
-          windows: breachingWindows,
+          windowIndex: 0,
+          shortWindowBurnRate: 2.1,
+          longWindowBurnRate: 2.3,
           groupings: { group: { by: { field: 'bar' } } },
         },
-      ];
-      mockEvaluation(esClientMock, ruleParams, buckets);
-      jest.mocked(servicesMock.alertsClient!.report).mockImplementation(({ id }) => ({
-        uuid: `uuid-${id}`,
-        start: new Date().toISOString(),
-      }));
+      ]);
+      mockAlertReport(servicesMock.alertsClient!);
 
       const executor = getRuleExecutor(basePathMock);
       await executor({
@@ -933,29 +909,62 @@ describe('BurnRateRuleExecutor', () => {
       expect(servicesMock.alertsClient!.setAlertLimitReached).toHaveBeenCalledWith(true);
     });
 
+    it('reports every breaching instance without flagging the limit when they exactly reach it', async () => {
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
+      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      jest.mocked(servicesMock.alertsClient!.getAlertLimitValue).mockReturnValue(2);
+      mockEvaluation(esClientMock, [
+        {
+          instanceId: 'foo',
+          windowIndex: 0,
+          shortWindowBurnRate: 2.1,
+          longWindowBurnRate: 2.3,
+          groupings: { group: { by: { field: 'foo' } } },
+        },
+        {
+          instanceId: 'bar',
+          windowIndex: 1,
+          shortWindowBurnRate: 1.5,
+          longWindowBurnRate: 1.1,
+          groupings: { group: { by: { field: 'bar' } } },
+        },
+      ]);
+      mockAlertReport(servicesMock.alertsClient!);
+
+      const executor = getRuleExecutor(basePathMock);
+      await executor({
+        params: ruleParams,
+        startedAt: new Date(),
+        startedAtOverridden: false,
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: asSpaceId('irrelevant'),
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+        isServerless: false,
+      });
+
+      expect(esClientMock.esql.query.mock.calls[0][0].query).toMatch(/\| LIMIT 3$/);
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledTimes(2);
+      expect(servicesMock.alertsClient!.setAlertLimitReached).toHaveBeenCalledWith(false);
+    });
+
     it('includes APM service and transaction fields in alert when available in SLO summary', async () => {
       const slo = createSLO({
         objective: { target: 0.9 },
       });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-      const buckets = [
-        {
-          instanceId: '*',
-          windows: [
-            { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
-            { shortWindowBurnRate: 1.2, longWindowBurnRate: 1.5 },
-          ],
-        },
-      ];
-      mockEvaluation(esClientMock, ruleParams, buckets);
+      mockEvaluation(esClientMock, [
+        { instanceId: '*', windowIndex: 0, shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
+      ]);
       esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponseWithApmFields());
-
-      // @ts-ignore
-      servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
-        uuid: `uuid-${id}`,
-        start: new Date().toISOString(),
-      }));
+      mockAlertReport(servicesMock.alertsClient!);
 
       const executor = getRuleExecutor(basePathMock);
       await executor({
@@ -1013,7 +1022,7 @@ describe('BurnRateRuleExecutor', () => {
       const ruleId = 'rule-123';
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-      mockEvaluation(esClientMock, ruleParams, []);
+      mockEvaluation(esClientMock, []);
       const executor = getRuleExecutor(basePathMock);
 
       await executor({
@@ -1070,7 +1079,10 @@ describe('BurnRateRuleExecutor', () => {
       const slo = createSLO({ objective: { target: 0.9 } });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-      mockEvaluation(esClientMock, ruleParams, []);
+      mockEvaluation(esClientMock, [
+        { instanceId: '*', windowIndex: 0, shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
+      ]);
+      mockAlertReport(servicesMock.alertsClient!);
       const executor = getRuleExecutor(basePathMock);
 
       await executor({
@@ -1100,6 +1112,10 @@ describe('BurnRateRuleExecutor', () => {
       );
       expect(withSpanMock).toHaveBeenCalledWith(
         { name: 'slo_burn_rate_executor:es_query', type: 'rule' },
+        expect.any(Function)
+      );
+      expect(withSpanMock).toHaveBeenCalledWith(
+        { name: 'slo_burn_rate_executor:groupings_query', type: 'rule' },
         expect.any(Function)
       );
       expect(withSpanMock).toHaveBeenCalledWith(
@@ -1135,19 +1151,18 @@ function someRuleParamsWithWindows(params: Partial<BurnRateRuleParams> = {}): Bu
   };
 }
 
-interface ResponseBucket {
+/**
+ * A row of the evaluation query result, i.e. an instance breaching the window at `windowIndex`.
+ */
+interface EvaluationRow {
   instanceId: string;
-  windows: Array<{
-    shortWindowBurnRate: number;
-    longWindowBurnRate: number;
-  }>;
-  groupings?: Record<string, unknown> | undefined;
+  windowIndex: number;
+  shortWindowBurnRate: number;
+  longWindowBurnRate: number;
+  groupings?: Record<string, unknown>;
 }
 
-function generateEsqlResponse(
-  params: BurnRateRuleParams,
-  buckets: ResponseBucket[]
-): estypes.EsqlQueryResponse {
+function generateEsqlResponse(rows: EvaluationRow[]): estypes.EsqlQueryResponse {
   return {
     columns: [
       { name: 'instance_id', type: 'keyword' },
@@ -1155,26 +1170,20 @@ function generateEsqlResponse(
       { name: 'short_window_burn_rate', type: 'double' },
       { name: 'long_window_burn_rate', type: 'double' },
     ],
-    values: buckets.flatMap(({ instanceId, windows }) => {
-      const windowIndex = windows.findIndex(
-        ({ shortWindowBurnRate, longWindowBurnRate }, index) =>
-          shortWindowBurnRate >= params.windows[index].burnRateThreshold &&
-          longWindowBurnRate >= params.windows[index].burnRateThreshold
-      );
-      if (windowIndex === -1) {
-        return [];
-      }
-      const { shortWindowBurnRate, longWindowBurnRate } = windows[windowIndex];
-      return [[instanceId, windowIndex, shortWindowBurnRate, longWindowBurnRate]];
-    }),
+    values: rows.map(({ instanceId, windowIndex, shortWindowBurnRate, longWindowBurnRate }) => [
+      instanceId,
+      windowIndex,
+      shortWindowBurnRate,
+      longWindowBurnRate,
+    ]),
   };
 }
 
-function generateGroupingsResponse(buckets: ResponseBucket[]) {
+function generateGroupingsResponse(rows: EvaluationRow[]) {
   return {
     ...commonEsResponse,
     hits: {
-      hits: buckets.map(({ instanceId, groupings }) => ({
+      hits: rows.map(({ instanceId, groupings }) => ({
         _index: '.slo-observability.sli-v3',
         _id: instanceId,
         _source: { slo: { instanceId, groupings } },
@@ -1185,15 +1194,29 @@ function generateGroupingsResponse(buckets: ResponseBucket[]) {
 
 function mockEvaluation(
   esClient: ElasticsearchClientMock,
-  params: BurnRateRuleParams,
-  buckets: ResponseBucket[],
+  rows: EvaluationRow[],
   { withGroupings = true }: { withGroupings?: boolean } = {}
 ) {
-  const esqlResponse = generateEsqlResponse(params, buckets);
-  esClient.esql.query.mockResolvedValueOnce(esqlResponse);
-  if (withGroupings && esqlResponse.values.length > 0) {
-    esClient.search.mockResolvedValueOnce(generateGroupingsResponse(buckets));
+  esClient.esql.query.mockResolvedValueOnce(generateEsqlResponse(rows));
+  if (withGroupings && rows.length > 0) {
+    esClient.search.mockResolvedValueOnce(generateGroupingsResponse(rows));
   }
+}
+
+function mockAlertReport(
+  alertsClient: NonNullable<
+    RuleExecutorServices<
+      BurnRateAlertState,
+      BurnRateAlertContext,
+      BurnRateAllowedActionGroups,
+      BurnRateAlert
+    >['alertsClient']
+  >
+) {
+  jest.mocked(alertsClient.report).mockImplementation(({ id }) => ({
+    uuid: `uuid-${id}`,
+    start: new Date().toISOString(),
+  }));
 }
 
 function generateEsSummaryResponse() {
