@@ -10,11 +10,7 @@ import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
 import { seedEndpointHosts, type SeededEndpointHosts } from '../../common/seed_endpoint_hosts';
 import { PARALLEL_HOST_SEED_TIMEOUT_MS } from '../../common/get_file_spec_helpers';
-import {
-  ENDPOINT_DEFAULT_SORT_DIRECTION,
-  ENDPOINT_DEFAULT_SORT_FIELD,
-  HOST_METADATA_LIST_ROUTE,
-} from '../../../../../common/endpoint/constants';
+import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 import { EndpointSortableField } from '../../../../../common/endpoint/types';
 
 // enrolled_at is only the default sort; it has no column.
@@ -85,8 +81,8 @@ spaceTest.describe('Endpoint list sorting', { tag: tags.stateful.classic }, () =
     expect(searchParams.has('sortField')).toBe(false);
     expect(searchParams.has('sortDirection')).toBe(false);
     const { sortField, sortDirection } = await response.json();
-    expect(sortField).toBe(ENDPOINT_DEFAULT_SORT_FIELD);
-    expect(sortDirection).toBe(ENDPOINT_DEFAULT_SORT_DIRECTION);
+    expect(sortField).toBe('enrolled_at');
+    expect(sortDirection).toBe('desc');
     for (const host of seeded?.hosts ?? []) {
       await expect(endpointList.rowFor(host.hostname)).toBeVisible();
     }
