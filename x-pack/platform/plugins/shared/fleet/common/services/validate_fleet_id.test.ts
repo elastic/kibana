@@ -156,11 +156,11 @@ describe('isPathTraversalId / validateNoPathTraversalId', () => {
   ];
 
   describe('isPathTraversalId', () => {
-    it.each(safeIds)('returns false for safe id %p', (id) => {
+    it.each(safeIds)('returns false for safe id %j', (id) => {
       expect(isPathTraversalId(id)).toBe(false);
     });
 
-    it.each(traversalIds)('returns true for traversal id %p', (id) => {
+    it.each(traversalIds)('returns true for traversal id %j', (id) => {
       expect(isPathTraversalId(id)).toBe(true);
     });
   });
@@ -174,11 +174,11 @@ describe('isPathTraversalId / validateNoPathTraversalId', () => {
       expect(() => validateNoPathTraversalId(null)).not.toThrow();
     });
 
-    it.each(safeIds)('does not throw for safe id %p', (id) => {
+    it.each(safeIds)('does not throw for safe id %j', (id) => {
       expect(() => validateNoPathTraversalId(id)).not.toThrow();
     });
 
-    it.each(traversalIds)('throws for traversal id %p', (id) => {
+    it.each(traversalIds)('throws for traversal id %j', (id) => {
       expect(() => validateNoPathTraversalId(id)).toThrow('path traversal');
     });
 
@@ -193,11 +193,11 @@ describe('isPathTraversalId / validateNoPathTraversalId', () => {
   });
 
   describe('validateNoPathTraversalIdSchema', () => {
-    it.each(safeIds)('returns undefined for safe id %p', (id) => {
+    it.each(safeIds)('returns undefined for safe id %j', (id) => {
       expect(validateNoPathTraversalIdSchema(id)).toBeUndefined();
     });
 
-    it.each(traversalIds)('returns an error message for traversal id %p', (id) => {
+    it.each(traversalIds)('returns an error message for traversal id %j', (id) => {
       expect(validateNoPathTraversalIdSchema(id)).toMatch(/path traversal/);
     });
   });
