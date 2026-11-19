@@ -50,7 +50,10 @@ const allowAll = (): jest.Mocked<ProposalPrivilegesChecker> => ({
   canManage: jest.fn().mockResolvedValue(true),
 });
 
-const createContext = (input: Record<string, unknown>): StepHandlerContext<never, never> =>
+const createContext = (
+  input: Record<string, unknown>,
+  runInputs?: Record<string, unknown>
+): StepHandlerContext<never, never> =>
   ({
     input,
     rawInput: input,
@@ -59,6 +62,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
       getContext: jest.fn().mockReturnValue({
         execution: { id: EXECUTION_ID, executedBy: 'worker-user' },
         workflow: { id: WORKFLOW_ID, spaceId: SPACE_ID },
+        inputs: runInputs,
       }),
       getScopedEsClient: jest.fn(),
       getFakeRequest: jest.fn().mockReturnValue(FAKE_REQUEST),
@@ -625,6 +629,22 @@ describe('proposals.updateProposal step', () => {
       proposalId: 'proposal-1',
       status: 'succeeded',
       decision: undefined,
+    });
+  });
+
+  it('should name the release mark its run was started for, from the run inputs', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'executing' });
+
+    await updateDefinition(update).handler(
+      createContext(
+        { proposalId: 'proposal-1', status: 'executing' },
+        { proposalId: 'proposal-1', releasedAt: '2026-09-01T00:02:00.000Z' }
+      )
+    );
+
+    expect(update).toHaveBeenCalledWith(expect.anything(), SPACE_ID, {
+      ...CALLER,
+      releasedAt: '2026-09-01T00:02:00.000Z',
     });
   });
 

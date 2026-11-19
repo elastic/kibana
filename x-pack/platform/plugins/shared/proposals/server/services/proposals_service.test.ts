@@ -31,7 +31,13 @@ import { ProposalsService } from './proposals_service';
 
 const SPACE_ID = 'default';
 const GATE_CALLER = { workflowId: 'system-create-proposal', executionId: 'exec-1' };
-const RESOLVE_CALLER = { workflowId: 'system-resolve-proposal', executionId: 'exec-2' };
+/** The release mark every released gateless fixture below carries. */
+const RELEASED_AT = '2026-09-01T00:02:00.000Z';
+const RESOLVE_CALLER = {
+  workflowId: 'system-resolve-proposal',
+  executionId: 'exec-2',
+  releasedAt: RELEASED_AT,
+};
 const EXECUTION_ID = 'exec-1';
 const request = httpServerMock.createKibanaRequest();
 
@@ -4384,6 +4390,7 @@ describe('ProposalsService — gateless proposals', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           approved: true,
           decidedBy: 'decider',
+          releasedAt: expect.any(String),
         },
         waitForCompletion: false,
       });
@@ -4392,6 +4399,9 @@ describe('ProposalsService — gateless proposals', () => {
       const [[markWrite]] = storage.index.mock.calls;
       expect(markWrite.if_seq_no).toBe(7);
       expect(markWrite.document).toMatchObject({ gateReleasedAt: expect.any(String) });
+      // The run is started for that mark, which is how `update` knows it until it is recorded.
+      const [[{ inputs }]] = workflowsApi.executeWorkflow.mock.calls;
+      expect(inputs.releasedAt).toBe(markWrite.document.gateReleasedAt);
       expect(markWrite.document.resolveExecutionId).toBeUndefined();
       // The decision is the resolve workflow's to write.
       expect(released).toMatchObject({
@@ -4572,6 +4582,7 @@ describe('ProposalsService — gateless proposals', () => {
       expect(proposal.gateReleasedAt).toBeUndefined();
       expect(proposal.resolveExecutionId).toBeUndefined();
       expect(proposal.rationale).toBeUndefined();
+      expect(proposal.liftedGateReleasedAt).toBe(RELEASED_AT);
       const [[write]] = storage.index.mock.calls;
       expect(write.if_seq_no).toBe(7);
     });
@@ -4634,6 +4645,7 @@ describe('ProposalsService — gateless proposals', () => {
         expect(proposal.status).toBe('pending');
         expect(proposal.gateReleasedAt).toBeUndefined();
         expect(proposal.rationale).toBeUndefined();
+        expect(proposal.liftedGateReleasedAt).toBe(MARKED_AT);
         expect(storage.index).toHaveBeenCalledWith(expect.objectContaining({ if_seq_no: 7 }));
       });
 
@@ -4887,14 +4899,34 @@ describe('ProposalsService — gateless proposals', () => {
         expect(storage.index).not.toHaveBeenCalled();
       });
 
-      it('refuses another workflow before the run is recorded', async () => {
+      it.each([
+        ['another workflow', GATE_CALLER],
+        [
+          'a resolve run an earlier, lifted approval started',
+          { ...RESOLVE_CALLER, releasedAt: '2026-09-01T00:00:00.000Z' },
+        ],
+        ['a resolve run no approval started', { ...RESOLVE_CALLER, releasedAt: undefined }],
+      ])('refuses %s before the run is recorded', async (_label, caller) => {
         const storage = createStorage({ ...approved, resolveExecutionId: undefined });
         const { service } = createService(storage);
 
         await expect(
-          service.update({ id: 'proposal-1', status: 'expired' }, SPACE_ID, GATE_CALLER)
+          service.update({ id: 'proposal-1', status: 'expired' }, SPACE_ID, caller)
         ).rejects.toBeInstanceOf(ProposalConflictError);
         expect(storage.index).not.toHaveBeenCalled();
+      });
+
+      it('accepts the resolve run started for the mark before the run is recorded', async () => {
+        const storage = createStorage({ ...approved, resolveExecutionId: undefined });
+        const { service } = createService(storage);
+
+        const updated = await service.update(
+          { id: 'proposal-1', decision: 'approved', status: 'executing' },
+          SPACE_ID,
+          { ...RESOLVE_CALLER, executionId: 'exec-unrecorded' }
+        );
+
+        expect(updated).toMatchObject({ decision: 'approved', status: 'executing' });
       });
     });
 

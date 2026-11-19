@@ -31,7 +31,14 @@ describe('resolve-proposal workflow', () => {
       const inputs = workflow.triggers.find(({ type }) => type === 'manual')?.inputs;
 
       expect(Object.keys(inputs?.properties ?? {}).sort()).toEqual(
-        ['actionWorkflowId', 'approved', 'autoApproved', 'decidedBy', 'proposalId'].sort()
+        [
+          'actionWorkflowId',
+          'approved',
+          'autoApproved',
+          'decidedBy',
+          'proposalId',
+          'releasedAt',
+        ].sort()
       );
       expect(inputs?.required).toEqual(['proposalId', 'approved']);
       expect(inputs?.additionalProperties).toBe(false);

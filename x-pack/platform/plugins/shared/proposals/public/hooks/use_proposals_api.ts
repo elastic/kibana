@@ -51,22 +51,35 @@ export const RETRY_WAIT_MS = 30_000;
 
 const awaitingRetrySince = new Map<string, number>();
 
+type LiftableProposal = Pick<Proposal, 'id'> &
+  Partial<Pick<Proposal, 'gate' | 'gateReleasedAt' | 'liftedGateReleasedAt'>>;
+
 /**
- * Whether this read of the proposal shows its decision, or no decision can follow. A gateless
- * proposal read as undecided without a release mark has none on its way: the server lifts the
- * mark of an approval whose resolve run ended without deciding it.
+ * Whether this read shows that the gateless approval which stamped `releasedAt` will not decide
+ * the proposal: the server lifted that mark because the approval's resolve run ended without
+ * deciding it. A read from before the approval cannot show it, since only the lift keeps the mark.
+ */
+const isApprovalLifted = (
+  { gate, gateReleasedAt, liftedGateReleasedAt }: Omit<LiftableProposal, 'id'>,
+  releasedAt: string | undefined
+): boolean =>
+  isGatelessProposal({ gate }) &&
+  gateReleasedAt === undefined &&
+  releasedAt !== undefined &&
+  liftedGateReleasedAt === releasedAt;
+
+/**
+ * Whether this read of the proposal shows its decision, or no decision can follow: the unseen
+ * approval of a gateless proposal was lifted (see `isApprovalLifted`).
  */
 export const isDecisionShown = (
-  proposal:
-    | (Pick<Proposal, 'decision' | 'status' | 'supersededBy'> &
-        Partial<Pick<Proposal, 'gate' | 'gateReleasedAt'>>)
-    | undefined
+  proposal: (Pick<Proposal, 'decision' | 'status' | 'supersededBy'> & LiftableProposal) | undefined
 ): boolean =>
   proposal !== undefined &&
   (Boolean(proposal.decision) ||
     isTerminal(proposal.status) ||
     proposal.supersededBy !== undefined ||
-    (isGatelessProposal(proposal) && proposal.gateReleasedAt === undefined));
+    isApprovalLifted(proposal, inFlightDecisions.unseenReleasedAt(proposal.id)));
 
 /** Whether this read of the proposal shows that it can no longer be decided as it was shown. */
 const hasMovedOn = (
@@ -90,7 +103,13 @@ const isBeingDecided = (proposal: Pick<Proposal, 'gate' | 'status' | 'gateReleas
 const hasUnseenDecision = (
   proposal: Pick<
     Proposal,
-    'id' | 'decision' | 'status' | 'supersededBy' | 'gate' | 'gateReleasedAt'
+    | 'id'
+    | 'decision'
+    | 'status'
+    | 'supersededBy'
+    | 'gate'
+    | 'gateReleasedAt'
+    | 'liftedGateReleasedAt'
   >
 ): boolean => inFlightDecisions.hasUnseen(proposal.id) && !isDecisionShown(proposal);
 
@@ -98,7 +117,13 @@ const hasUnseenDecision = (
 export const isInFlux = (
   proposal: Pick<
     Proposal,
-    'id' | 'decision' | 'status' | 'supersededBy' | 'gate' | 'gateReleasedAt'
+    | 'id'
+    | 'decision'
+    | 'status'
+    | 'supersededBy'
+    | 'gate'
+    | 'gateReleasedAt'
+    | 'liftedGateReleasedAt'
   >
 ): boolean => {
   if (hasUnseenDecision(proposal) || isProposalSettling(proposal) || isBeingDecided(proposal)) {
@@ -284,12 +309,13 @@ const DECISION_POLL_MAX_ATTEMPTS = 8;
 /**
  * Polls the proposal until a read of it satisfies `isDone`, for at most
  * `DECISION_POLL_MAX_ATTEMPTS` reads. A failed read counts as not done yet.
+ * Returns the read that satisfied `isDone`, if any.
  */
 const pollProposal = async (
   http: HttpSetup,
   id: string,
   isDone: (proposal: ProposalWithMetadata) => boolean
-): Promise<void> => {
+): Promise<ProposalWithMetadata | undefined> => {
   for (let attempt = 0; attempt < DECISION_POLL_MAX_ATTEMPTS; attempt++) {
     try {
       const proposal = await http.get<ProposalWithMetadata>(
@@ -297,13 +323,14 @@ const pollProposal = async (
         { version: PROPOSALS_API_VERSION }
       );
       if (isDone(proposal)) {
-        return;
+        return proposal;
       }
     } catch {
       // Treated the same as "not done yet".
     }
     await new Promise((resolve) => setTimeout(resolve, DECISION_POLL_INTERVAL_MS));
   }
+  return undefined;
 };
 
 /**
@@ -342,13 +369,34 @@ const refreshOnConflict = async (
  * swallow it and keep polling on the same schedule rather than rejecting, which would otherwise
  * surface "could not be recorded" for a decision the gate had already released.
  */
-const waitForDecision = (http: HttpSetup, id: string): Promise<void> =>
-  pollProposal(http, id, (proposal) => Boolean(proposal.decision));
+const waitForDecision = async (http: HttpSetup, id: string): Promise<void> => {
+  await pollProposal(http, id, (proposal) => Boolean(proposal.decision));
+};
 
-/** Waits for the decision, then marks it unseen until a read of the proposal shows it. */
-const settleDecision = async (http: HttpSetup, kind: DecisionKind, id: string): Promise<void> => {
-  await waitForDecision(http, id);
-  inFlightDecisions.markUnseen(kind, id);
+/**
+ * Waits for the decision, then marks it unseen until a read of the proposal shows it. An approval
+ * the server lifted while this waited is not marked: no read of it would ever show a decision, and
+ * a row whose data already shows the lift is not rendered again to notice the mark.
+ */
+const settleDecision = async (
+  http: HttpSetup,
+  kind: DecisionKind,
+  id: string,
+  decided?: Proposal
+): Promise<void> => {
+  const releasedAt =
+    kind === 'approve' && decided !== undefined && isGatelessProposal(decided)
+      ? decided.gateReleasedAt
+      : undefined;
+  const settled = await pollProposal(
+    http,
+    id,
+    (proposal) => Boolean(proposal.decision) || isApprovalLifted(proposal, releasedAt)
+  );
+  if (settled !== undefined && isApprovalLifted(settled, releasedAt)) {
+    return;
+  }
+  inFlightDecisions.markUnseen(kind, id, releasedAt);
 };
 
 /**
@@ -367,8 +415,8 @@ export const useApproveProposal = () => {
         body: JSON.stringify(body),
       }),
     onMutate: ({ id }) => inFlightDecisions.start('approve', id),
-    onSuccess: async (_data, { id }) => {
-      await settleDecision(services.http!, 'approve', id);
+    onSuccess: async (approved, { id }) => {
+      await settleDecision(services.http!, 'approve', id, approved);
       await invalidateProposals(queryClient);
     },
     onError: (error, { id }) => refreshOnConflict(services.http!, queryClient, error, id),

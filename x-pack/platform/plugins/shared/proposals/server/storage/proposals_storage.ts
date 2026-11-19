@@ -82,6 +82,7 @@ const storageSettings = {
       // Set only on a gateless action proposal once its approval started the
       // resolve run; absent everywhere else.
       resolveExecutionId: types.keyword({}),
+      liftedGateReleasedAt: types.date({}),
 
       createdAt: types.date({}),
       createdBy: types.object({

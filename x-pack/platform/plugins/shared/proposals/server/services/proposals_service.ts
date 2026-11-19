@@ -116,6 +116,8 @@ export interface UpdateProposalParams {
 export interface ProposalWorkflowCaller {
   workflowId: string;
   executionId: string;
+  /** The release mark a gateless approval started this resolve run for, as its `releasedAt` input. */
+  releasedAt?: string;
 }
 
 export interface ProposalsServiceDeps {
@@ -207,17 +209,19 @@ const isReleasedGatelessAction = (
 ) => proposal.actionWorkflowId !== undefined && proposal.gateReleasedAt !== undefined;
 
 /**
- * Whether `caller` is the resolve run a gateless approval started. Until the
- * approval has recorded that run, any run of the resolve workflow is taken for
- * it: its `system-` id is reserved, and the run can write before it is recorded.
+ * Whether `caller` is the resolve run a gateless approval started. The run can
+ * write before the approval records it, so until then it is known by the mark
+ * it was started for: a run of an earlier, lifted approval carries another.
  */
 const isOwningResolveRun = (
   proposal: Pick<Proposal, 'actionWorkflowId' | 'gateReleasedAt' | 'resolveExecutionId'>,
-  { workflowId, executionId }: ProposalWorkflowCaller
+  { workflowId, executionId, releasedAt }: ProposalWorkflowCaller
 ): boolean =>
   isReleasedGatelessAction(proposal) &&
   workflowId === RESOLVE_PROPOSAL_WORKFLOW_ID &&
-  (proposal.resolveExecutionId === undefined || proposal.resolveExecutionId === executionId);
+  (proposal.resolveExecutionId === undefined
+    ? releasedAt === proposal.gateReleasedAt
+    : proposal.resolveExecutionId === executionId);
 
 /** An undecided gateless approval whose resolve run went unrecorded for too long. */
 const isUnrecordedRelease = (proposal: Proposal, now: number): boolean =>
@@ -749,9 +753,10 @@ export class ProposalsService {
    * The release mark is stamped first, under the loaded sequence number, so the
    * first approver wins and no revision can land before the decision does. The
    * mark is reverted if the run cannot be started, since nothing would ever
-   * decide the proposal otherwise. Once started, the run's execution id is
-   * recorded so a run that ends without settling the proposal is followed up
-   * on read (see `settleOrphans`).
+   * decide the proposal otherwise. The run is given the mark as `releasedAt`,
+   * which is how `update` knows it until it is recorded. Once started, the
+   * run's execution id is recorded so a run that ends without settling the
+   * proposal is followed up on read (see `settleOrphans`).
    *
    * The decision lands asynchronously, as it does behind a gate: the returned
    * record is still undecided.
@@ -792,7 +797,13 @@ export class ProposalsService {
           workflowId: RESOLVE_PROPOSAL_WORKFLOW_ID,
           spaceId,
           request,
-          inputs: { proposalId: id, actionWorkflowId, approved: true, decidedBy: username },
+          inputs: {
+            proposalId: id,
+            actionWorkflowId,
+            approved: true,
+            decidedBy: username,
+            releasedAt: released.proposal.gateReleasedAt,
+          },
           waitForCompletion: false,
         }));
     } catch (error) {
@@ -2079,17 +2090,20 @@ export class ProposalsService {
 
   /**
    * Clears what an approval whose resolve run never decided left behind on a
-   * gateless proposal: the mark, the approver's rationale, and the run. Guarded
-   * by the loaded sequence number, like every other write.
+   * gateless proposal: the mark, the approver's rationale, and the run. The
+   * mark is kept as `liftedGateReleasedAt`, so the approver can tell this read
+   * from one that predates its approval. Guarded by the loaded sequence number,
+   * like every other write.
    */
   private async liftRelease({ proposal, seqNo, primaryTerm }: StoredProposal): Promise<Proposal> {
     const {
       id,
-      gateReleasedAt: _gateReleasedAt,
+      gateReleasedAt,
       rationale: _rationale,
       resolveExecutionId: _resolveExecutionId,
-      ...document
+      ...rest
     } = proposal;
+    const document = { ...rest, liftedGateReleasedAt: gateReleasedAt };
     await this.writeDocument(id, document, { seqNo, primaryTerm });
     return stripRanks({ id, ...document });
   }

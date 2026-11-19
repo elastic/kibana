@@ -11,6 +11,7 @@ import {
   settleIncompleteProposalStepCommonDefinition,
 } from '@kbn/proposals-common';
 import type { ProposalsService } from '../services/proposals_service';
+import { getWorkflowCaller } from './get_workflow_caller';
 import { parseStepInput } from './parse_step_input';
 import { toStepError } from './to_step_error';
 
@@ -34,8 +35,8 @@ export const getSettleIncompleteProposalStepDefinition = ({
           settleIncompleteProposalStepCommonDefinition.inputSchema,
           context.input
         );
-        const { workflow, execution } = context.contextManager.getContext();
-        const { spaceId } = workflow;
+        const workflowContext = context.contextManager.getContext();
+        const { spaceId } = workflowContext.workflow;
         const service = getProposalsService();
 
         // Same adopt the loop does before every write: a revision appended
@@ -56,7 +57,7 @@ export const getSettleIncompleteProposalStepDefinition = ({
             executionError: input.executionError,
           },
           spaceId,
-          { workflowId: workflow.id, executionId: execution.id }
+          getWorkflowCaller(workflowContext)
         );
 
         return {

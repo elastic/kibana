@@ -27,7 +27,10 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useCurrentUserProfile } from '../../../user_profiles';
 
 /** The part of the proposal that shows whether its decision is visible in this row's data. */
-type ProposalDecisionData = Pick<Proposal, 'decision' | 'status' | 'supersededBy'>;
+type ProposalDecisionData = Pick<
+  Proposal,
+  'id' | 'decision' | 'status' | 'supersededBy' | 'gate' | 'gateReleasedAt' | 'liftedGateReleasedAt'
+>;
 
 export interface ProposalDecision {
   /** The caller lacks the proposals decide capability. */

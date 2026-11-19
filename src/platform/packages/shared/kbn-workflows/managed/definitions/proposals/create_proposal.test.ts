@@ -378,9 +378,10 @@ describe('create-investigation-proposal workflow', () => {
     });
 
     it.each(RESOLVE_STEPS)('%s passes exactly the inputs the child declares', (name) => {
+      // `releasedAt` is only for a run that a gateless approval starts.
       const declared = Object.keys(
         resolveWorkflow.triggers.find(({ type }) => type === 'manual')?.inputs?.properties ?? {}
-      );
+      ).filter((input) => input !== 'releasedAt');
       const inputs = step(name)?.with?.inputs as Record<string, unknown>;
 
       expect(Object.keys(inputs).sort()).toEqual(declared.sort());

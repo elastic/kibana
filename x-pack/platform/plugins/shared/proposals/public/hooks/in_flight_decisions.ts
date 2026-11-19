@@ -11,8 +11,14 @@ export type DecisionKind = 'approve' | 'decline';
 
 type Listener = () => void;
 
+interface UnseenDecision {
+  kind: DecisionKind;
+  /** The release mark the approval stamped, which the server keeps if it lifts the approval. */
+  releasedAt?: string;
+}
+
 const counts = new Map<string, number>();
-const unseen = new Map<string, DecisionKind>();
+const unseen = new Map<string, UnseenDecision>();
 const listeners = new Set<Listener>();
 
 const keyOf = (kind: DecisionKind, id: string): string => `${kind}:${id}`;
@@ -56,8 +62,8 @@ export const inFlightDecisions = {
     return counts.has(keyOf(kind, id));
   },
 
-  markUnseen(kind: DecisionKind, id: string): void {
-    unseen.set(id, kind);
+  markUnseen(kind: DecisionKind, id: string, releasedAt?: string): void {
+    unseen.set(id, { kind, releasedAt });
     notify();
   },
 
@@ -68,8 +74,13 @@ export const inFlightDecisions = {
   },
 
   hasUnseen(id: string, kind?: DecisionKind): boolean {
-    const unseenKind = unseen.get(id);
-    return unseenKind !== undefined && (kind === undefined || unseenKind === kind);
+    const decision = unseen.get(id);
+    return decision !== undefined && (kind === undefined || decision.kind === kind);
+  },
+
+  /** The release mark of the unseen decision, when it was an approval that stamped one. */
+  unseenReleasedAt(id: string): string | undefined {
+    return unseen.get(id)?.releasedAt;
   },
 
   /** Empties the store. For tests. */

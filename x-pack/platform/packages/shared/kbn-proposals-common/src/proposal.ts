@@ -270,6 +270,13 @@ export const proposalSchema = lazySchema(() =>
      * up on read. Absent on a gated proposal, whose gate starts that run itself.
      */
     resolveExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+    /**
+     * The `gateReleasedAt` of the last gateless approval whose resolve run
+     * ended without deciding the proposal, and whose mark was lifted so it can
+     * be decided again. Lets the approver tell its own approval was lifted
+     * apart from a read that predates it.
+     */
+    liftedGateReleasedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
 
     createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
     createdBy: proposalUserSchema.optional(),
