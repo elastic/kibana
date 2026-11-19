@@ -22,6 +22,9 @@ export interface EvaluationAfterKey extends AggregationsCompositeAggregateKey {
   instanceId: string;
 }
 
+export const EVALUATION_PAGE_SIZE = 1000;
+const CANDIDATES_PAGE_SIZE = 10_000;
+
 export const LONG_WINDOW = 'LONG';
 export const SHORT_WINDOW = 'SHORT';
 const BURN_RATE = 'BURN_RATE';
@@ -191,11 +194,86 @@ function buildGroupingAgg() {
   };
 }
 
-export function buildQuery(
+function buildSloRevisionFilter(slo: SLODefinition, dateRange: { from: Date; to: Date }) {
+  return [
+    { term: { 'slo.id': slo.id } },
+    { term: { 'slo.revision': slo.revision } },
+    {
+      range: {
+        '@timestamp': {
+          gte: dateRange.from.toISOString(),
+          lt: dateRange.to.toISOString(),
+        },
+      },
+    },
+  ];
+}
+
+/**
+ * Builds the query listing the instances with a bad slice or bad occurrences in any short window.
+ * Bad occurrences are compared per instance since no indexed field marks them, unlike bad slices.
+ */
+export function buildCandidatesQuery(
   startedAt: Date,
   slo: SLODefinition,
   params: BurnRateRuleParams,
   afterKey?: EvaluationAfterKey
+) {
+  const delayInSeconds = getDelayInSecondsFromSLO(slo);
+  const shortDateRanges = params.windows.map((winDef) =>
+    getLookbackDateRange(
+      startedAt,
+      new Duration(winDef.shortWindow.value, toDurationUnit(winDef.shortWindow.unit)),
+      delayInSeconds
+    )
+  );
+  const dateRange = {
+    from: new Date(Math.min(...shortDateRanges.map(({ from }) => from.getTime()))),
+    to: shortDateRanges[0].to,
+  };
+  const isTimesliceBudgetingMethod = slo.budgetingMethod === 'timeslices';
+
+  return {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...buildSloRevisionFilter(slo, dateRange),
+          ...(isTimesliceBudgetingMethod ? [{ term: { 'slo.isGoodSlice': 0 } }] : []),
+        ],
+      },
+    },
+    aggs: {
+      instances: {
+        composite: {
+          ...(afterKey ? { after: afterKey } : {}),
+          size: CANDIDATES_PAGE_SIZE,
+          sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
+        },
+        ...(isTimesliceBudgetingMethod
+          ? {}
+          : {
+              aggs: {
+                ...OCCURRENCE_AGGS,
+                hasBadOccurrences: {
+                  bucket_selector: {
+                    buckets_path: { good: 'good', total: 'total' },
+                    script: { source: 'params.total > params.good' },
+                  },
+                },
+              },
+            }),
+      },
+    },
+  };
+}
+
+export function buildQuery(
+  startedAt: Date,
+  slo: SLODefinition,
+  params: BurnRateRuleParams,
+  afterKey?: EvaluationAfterKey,
+  instanceIds?: string[]
 ) {
   const delayInSeconds = getDelayInSecondsFromSLO(slo);
   const burnRateWindows = params.windows.map((winDef) => {
@@ -223,16 +301,8 @@ export function buildQuery(
     query: {
       bool: {
         filter: [
-          { term: { 'slo.id': slo.id } },
-          { term: { 'slo.revision': slo.revision } },
-          {
-            range: {
-              '@timestamp': {
-                gte: longestDateRange.from.toISOString(),
-                lt: longestDateRange.to.toISOString(),
-              },
-            },
-          },
+          ...buildSloRevisionFilter(slo, longestDateRange),
+          ...(instanceIds ? [{ terms: { 'slo.instanceId': instanceIds } }] : []),
         ],
       },
     },
@@ -240,7 +310,7 @@ export function buildQuery(
       instances: {
         composite: {
           ...(afterKey ? { after: afterKey } : {}),
-          size: 1000,
+          size: EVALUATION_PAGE_SIZE,
           sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
         },
         aggs: {

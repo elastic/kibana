@@ -385,12 +385,7 @@ describe('BurnRateRuleExecutor', () => {
           ],
         },
       ];
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, buckets, { instanceId: 'bar' })
-      );
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, [], { instanceId: 'bar' })
-      );
+      mockEvaluation(esClientMock, ruleParams, buckets);
 
       const executor = getRuleExecutor(basePathMock);
       await executor({
@@ -433,12 +428,7 @@ describe('BurnRateRuleExecutor', () => {
           ],
         },
       ];
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, buckets, { instanceId: 'bar' })
-      );
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, [], { instanceId: 'bar' })
-      );
+      mockEvaluation(esClientMock, ruleParams, buckets);
 
       const executor = getRuleExecutor(basePathMock);
       await executor({
@@ -492,12 +482,7 @@ describe('BurnRateRuleExecutor', () => {
           },
         },
       ];
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, buckets, { instanceId: 'bar' })
-      );
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, [], { instanceId: 'bar' })
-      );
+      mockEvaluation(esClientMock, ruleParams, buckets);
 
       // @ts-ignore
       servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
@@ -645,12 +630,7 @@ describe('BurnRateRuleExecutor', () => {
           },
         },
       ];
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, buckets, { instanceId: 'bar' })
-      );
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, [], { instanceId: 'bar' })
-      );
+      mockEvaluation(esClientMock, ruleParams, buckets);
 
       // evaluateDependendes mocks
       soClientMock.get.mockResolvedValueOnce(
@@ -659,12 +639,7 @@ describe('BurnRateRuleExecutor', () => {
 
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
 
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, buckets, { instanceId: 'bar' })
-      );
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, [], { instanceId: 'bar' })
-      );
+      mockEvaluation(esClientMock, ruleParams, buckets);
 
       // @ts-ignore
       servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
@@ -796,12 +771,7 @@ describe('BurnRateRuleExecutor', () => {
           },
         },
       ];
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, buckets, { instanceId: 'bar' })
-      );
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, [], { instanceId: 'bar' })
-      );
+      mockEvaluation(esClientMock, ruleParams, buckets);
       // Mock summary repository es searches
       esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponse());
       esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponse());
@@ -932,12 +902,7 @@ describe('BurnRateRuleExecutor', () => {
           ],
         },
       ];
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, buckets, { instanceId: '*' })
-      );
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, [], { instanceId: '*' })
-      );
+      mockEvaluation(esClientMock, ruleParams, buckets);
       esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponseWithApmFields());
 
       // @ts-ignore
@@ -1002,9 +967,7 @@ describe('BurnRateRuleExecutor', () => {
       const ruleId = 'rule-123';
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, [], { instanceId: '*' })
-      );
+      mockEvaluation(esClientMock, ruleParams, []);
       const executor = getRuleExecutor(basePathMock);
 
       await executor({
@@ -1061,9 +1024,15 @@ describe('BurnRateRuleExecutor', () => {
       const slo = createSLO({ objective: { target: 0.9 } });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
-      esClientMock.search.mockResolvedValueOnce(
-        generateEsResponse(ruleParams, [], { instanceId: '*' })
-      );
+      mockEvaluation(esClientMock, ruleParams, [
+        {
+          instanceId: '*',
+          windows: [
+            { shortWindowBurnRate: 2.1, longWindowBurnRate: 0.9 },
+            { shortWindowBurnRate: 1.2, longWindowBurnRate: 0.9 },
+          ],
+        },
+      ]);
       const executor = getRuleExecutor(basePathMock);
 
       await executor({
@@ -1089,6 +1058,10 @@ describe('BurnRateRuleExecutor', () => {
       );
       expect(withSpanMock).toHaveBeenCalledWith(
         { name: 'slo_burn_rate_executor:eval', type: 'rule' },
+        expect.any(Function)
+      );
+      expect(withSpanMock).toHaveBeenCalledWith(
+        { name: 'slo_burn_rate_executor:candidates_query', type: 'rule' },
         expect.any(Function)
       );
       expect(withSpanMock).toHaveBeenCalledWith(
@@ -1137,20 +1110,33 @@ interface ResponseBucket {
   groupings?: Record<string, unknown> | undefined;
 }
 
-interface AfterKey {
-  instanceId: string;
+function mockEvaluation(
+  esClient: ElasticsearchClientMock,
+  params: BurnRateRuleParams,
+  buckets: ResponseBucket[]
+) {
+  esClient.search.mockResolvedValueOnce(generateCandidatesResponse(buckets));
+  if (buckets.length > 0) {
+    esClient.search.mockResolvedValueOnce(generateEsResponse(params, buckets));
+  }
 }
 
-function generateEsResponse(
-  params: BurnRateRuleParams,
-  buckets: ResponseBucket[],
-  afterKey: AfterKey
-) {
+function generateCandidatesResponse(buckets: ResponseBucket[]) {
   return {
     ...commonEsResponse,
     aggregations: {
       instances: {
-        after: afterKey,
+        buckets: buckets.map(({ instanceId }) => ({ key: { instanceId }, doc_count: 1 })),
+      },
+    },
+  };
+}
+
+function generateEsResponse(params: BurnRateRuleParams, buckets: ResponseBucket[]) {
+  return {
+    ...commonEsResponse,
+    aggregations: {
+      instances: {
         doc_count: buckets.length ? 100 : 0,
         buckets: buckets
           .map((bucket) => {

@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { get } from 'lodash';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { chunk, get } from 'lodash';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { BURN_RATE_EXECUTOR_SPAN_NAMES } from '../constants';
 import type { SLODefinition } from '../../../../domain/models';
 import { Duration, toDurationUnit } from '../../../../domain/models';
@@ -16,7 +16,9 @@ import type { BurnRateRuleParams } from '../types';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
 import type { EvaluationAfterKey } from './build_query';
 import {
+  buildCandidatesQuery,
   buildQuery,
+  EVALUATION_PAGE_SIZE,
   generateAboveThresholdKey,
   generateBurnRateKey,
   generateWindowId,
@@ -73,42 +75,89 @@ export interface EvalutionAggResults {
   };
 }
 
-async function queryAllResults(
-  esClient: ElasticsearchClient,
-  slo: SLODefinition,
-  params: BurnRateRuleParams,
-  startedAt: Date,
-  projectRouting?: string,
-  buckets: EvaluationBucket[] = [],
-  lastAfterKey?: { instanceId: string }
-): Promise<EvaluationBucket[]> {
-  const queryAndAggs = buildQuery(startedAt, slo, params, lastAfterKey);
-  const results = await withSpan(
-    { name: BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY, type: 'rule' },
-    () =>
-      esClient.search<undefined, EvalutionAggResults>({
-        index: SLI_DESTINATION_INDEX_PATTERN,
-        ...(projectRouting ? { project_routing: projectRouting } : {}),
-        ...queryAndAggs,
-      })
+interface CandidatesAggResults {
+  instances: {
+    after_key?: EvaluationAfterKey;
+    buckets: Array<Pick<EvaluationBucket, 'key'>>;
+  };
+}
+
+interface EvaluationContext {
+  esClient: ElasticsearchClient;
+  slo: SLODefinition;
+  params: BurnRateRuleParams;
+  startedAt: Date;
+  projectRouting?: string;
+}
+
+async function searchInstances<TAggregations>(
+  { esClient, projectRouting }: EvaluationContext,
+  spanName: string,
+  request: Omit<SearchRequest, 'index'>
+): Promise<TAggregations> {
+  const results = await withSpan({ name: spanName, type: 'rule' }, () =>
+    esClient.search<undefined, TAggregations>({
+      index: SLI_DESTINATION_INDEX_PATTERN,
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
+      ...request,
+    })
   );
 
   if (!results.aggregations) {
     throw new Error('Elasticsearch query failed to return a valid aggregation');
   }
-  if (results.aggregations.instances.buckets.length === 0) {
-    return buckets;
+  return results.aggregations;
+}
+
+async function findCandidateInstanceIds(context: EvaluationContext): Promise<string[]> {
+  const { slo, params, startedAt } = context;
+  const instanceIds: string[] = [];
+  let afterKey: EvaluationAfterKey | undefined;
+  do {
+    const { instances } = await searchInstances<CandidatesAggResults>(
+      context,
+      BURN_RATE_EXECUTOR_SPAN_NAMES.CANDIDATES_QUERY,
+      buildCandidatesQuery(startedAt, slo, params, afterKey)
+    );
+    instanceIds.push(...instances.buckets.map(({ key }) => key.instanceId));
+    afterKey = instances.after_key;
+  } while (afterKey);
+
+  return instanceIds;
+}
+
+async function evaluateCandidates(context: EvaluationContext): Promise<EvaluationBucket[]> {
+  const { slo, params, startedAt } = context;
+  const candidateIds = await findCandidateInstanceIds(context);
+  const buckets: EvaluationBucket[] = [];
+  // Chunks match the composite page size, so each chunk is evaluated in a single page.
+  for (const instanceIds of chunk(candidateIds, EVALUATION_PAGE_SIZE)) {
+    const { instances } = await searchInstances<EvalutionAggResults>(
+      context,
+      BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY,
+      buildQuery(startedAt, slo, params, undefined, instanceIds)
+    );
+    buckets.push(...instances.buckets);
   }
 
-  return queryAllResults(
-    esClient,
-    slo,
-    params,
-    startedAt,
-    projectRouting,
-    [...buckets, ...results.aggregations.instances.buckets],
-    results.aggregations.instances.after_key
-  );
+  return buckets;
+}
+
+async function evaluateAllInstances(context: EvaluationContext): Promise<EvaluationBucket[]> {
+  const { slo, params, startedAt } = context;
+  const buckets: EvaluationBucket[] = [];
+  let afterKey: EvaluationAfterKey | undefined;
+  do {
+    const { instances } = await searchInstances<EvalutionAggResults>(
+      context,
+      BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY,
+      buildQuery(startedAt, slo, params, afterKey)
+    );
+    buckets.push(...instances.buckets);
+    afterKey = instances.after_key;
+  } while (afterKey);
+
+  return buckets;
 }
 
 export async function evaluate(
@@ -118,7 +167,18 @@ export async function evaluate(
   startedAt: Date,
   projectRouting?: string
 ) {
-  const buckets = await queryAllResults(esClient, slo, params, startedAt, projectRouting);
+  if (params.windows.length === 0) {
+    return [];
+  }
+
+  const context: EvaluationContext = { esClient, slo, params, startedAt, projectRouting };
+  // Only instances with bad events in a short window can reach a positive burn rate threshold.
+  const canPrefilterCandidates = params.windows.every(
+    ({ burnRateThreshold }) => burnRateThreshold > 0
+  );
+  const buckets = canPrefilterCandidates
+    ? await evaluateCandidates(context)
+    : await evaluateAllInstances(context);
   return transformBucketToResults(buckets, params);
 }
 

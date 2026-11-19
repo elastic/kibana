@@ -6,7 +6,7 @@
  */
 
 import { createBurnRateRule } from '../fixtures/rule';
-import { buildQuery } from './build_query';
+import { buildCandidatesQuery, buildQuery } from './build_query';
 import {
   createKQLCustomIndicator,
   createSLO,
@@ -41,5 +41,52 @@ describe('buildQuery()', () => {
     });
     const rule = createBurnRateRule(slo);
     expect(buildQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
+  });
+
+  it('should only evaluate the given instances', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
+    const rule = createBurnRateRule(slo);
+
+    const { query } = buildQuery(STARTED_AT, slo, rule, undefined, ['host-a', 'host-b']);
+
+    expect(query.bool.filter).toContainEqual({
+      terms: { 'slo.instanceId': ['host-a', 'host-b'] },
+    });
+  });
+});
+
+describe('buildCandidatesQuery()', () => {
+  it('should look up the instances with bad occurrences in the short windows', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
+    const rule = createBurnRateRule(slo);
+    expect(buildCandidatesQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
+  });
+
+  it('should cover the longest short window, whatever the windows order', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
+    const rule = createBurnRateRule(slo);
+    const reversedRule = { ...rule, windows: [...rule.windows].reverse() };
+
+    expect(buildCandidatesQuery(STARTED_AT, slo, reversedRule).query).toEqual(
+      buildCandidatesQuery(STARTED_AT, slo, rule).query
+    );
+  });
+
+  it('should look up the instances with a bad slice in the short windows', () => {
+    const slo = createSLOWithTimeslicesBudgetingMethod({
+      id: 'test-slo',
+      indicator: createKQLCustomIndicator(),
+    });
+    const rule = createBurnRateRule(slo);
+    expect(buildCandidatesQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
+  });
+
+  it('should continue after the given key', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
+    const rule = createBurnRateRule(slo);
+
+    const { aggs } = buildCandidatesQuery(STARTED_AT, slo, rule, { instanceId: 'host-a' });
+
+    expect(aggs.instances.composite.after).toEqual({ instanceId: 'host-a' });
   });
 });
