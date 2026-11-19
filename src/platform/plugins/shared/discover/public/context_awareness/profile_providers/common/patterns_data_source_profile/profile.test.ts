@@ -13,7 +13,8 @@ import type {
 } from '@kbn/unified-data-table';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
-import { DataSourceCategory } from '../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../profiles';
+import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { createPatternsDataSourceProfileProvider } from './profile';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
@@ -46,6 +47,36 @@ const getConfiguration = (
 };
 
 describe('Patterns numeric column widths', () => {
+  it('does not compact numbers when the pattern alias was overwritten with a number', async () => {
+    const provider = createPatternsDataSourceProfileProvider({
+      ...createProfileProviderSharedServicesMock(),
+      aiops: undefined,
+    });
+    const resolution = await provider.resolve({
+      rootContext: { profileId: 'default-root-profile', solutionType: SolutionType.Default },
+      dataSource: createEsqlDataSource(),
+      query: {
+        esql: 'FROM logs | STATS total = COUNT(*) BY Pattern = CATEGORIZE(message) | EVAL Pattern = 1',
+      },
+    });
+    const accessor = provider.profile.getColumnsConfiguration;
+    if (!resolution.isMatch || !accessor) {
+      throw new Error('Expected Patterns profile');
+    }
+    expect(
+      accessor(() => ({}), {
+        context: resolution.context,
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      })({
+        columns: ['total', 'Pattern'],
+        dataSource: createMockEsqlSource([
+          { name: 'total', type: 'number', source: 'esql-result' },
+          { name: 'Pattern', type: 'number', source: 'esql-result' },
+        ]),
+      })
+    ).toEqual({});
+  });
+
   it('uses response types to compact arbitrary numeric aliases and leaves the pattern flexible', () => {
     const configuration = getConfiguration();
     expect(Object.keys(configuration)).toEqual(['events', 'average']);

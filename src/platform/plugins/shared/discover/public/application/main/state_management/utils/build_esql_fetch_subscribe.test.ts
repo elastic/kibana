@@ -11,6 +11,15 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { DEFAULT_COLUMNS_SETTING } from '@kbn/discover-utils';
+import { createMemoryHistory } from 'history';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import {
+  createContextAwarenessMocks,
+  createProfileProviderSharedServicesMock,
+} from '../../../../context_awareness/__mocks__';
+import { registerProfileProviders } from '../../../../context_awareness/profile_providers/register_profile_providers';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -142,6 +151,85 @@ const setupTest = async ({
 // Testing buildEsqlFetchSubscribe through the state container
 // since the logic is pretty intertwined with the state management
 describe('buildEsqlFetchSubscribe', () => {
+  test.each([
+    {
+      esql: 'FROM logs | STATS count = COUNT(*) BY Pattern = CATEGORIZE(message)',
+      columns: ['count', 'Pattern'],
+    },
+    {
+      esql: 'FROM logs | STATS total = COUNT(*), average = AVG(bytes) BY category = CATEGORIZE(message) | KEEP category, average, total',
+      columns: ['category', 'average', 'total'],
+    },
+  ])(
+    'saves response aliases and order despite configured space defaults: $esql',
+    async ({ esql, columns }) => {
+      const services = createDiscoverServicesMock();
+      expect(services.uiSettings.get(DEFAULT_COLUMNS_SETTING)).toEqual(['default_column']);
+      services.history = createMemoryHistory({
+        initialEntries: [setStateToKbnUrl('_a', { query: { esql } }, { useHash: false }, '/')],
+      });
+      const {
+        profilesManagerMock,
+        rootProfileServiceMock,
+        dataSourceProfileServiceMock,
+        documentProfileServiceMock,
+      } = createContextAwarenessMocks({ shouldRegisterProviders: false });
+      services.aiops = undefined;
+      registerProfileProviders({
+        rootProfileService: rootProfileServiceMock,
+        dataSourceProfileService: dataSourceProfileServiceMock,
+        documentProfileService: documentProfileServiceMock,
+        sharedServices: createProfileProviderSharedServicesMock(),
+        enabledExperimentalProfileIds: [],
+        services,
+      });
+      services.profilesManager = profilesManagerMock;
+      const save = jest
+        .spyOn(services.discoverSessionService, 'save')
+        .mockImplementation(async (session) => ({
+          ...session,
+          id: 'patterns-session',
+          managed: false,
+        }));
+      const toolkit = getDiscoverInternalStateMock({
+        services,
+        persistedDataViews: [dataViewMock],
+      });
+      lastTestToolkit = toolkit;
+      await toolkit.initializeTabs();
+      expect(toolkit.getCurrentTab().appState.columns).toBeUndefined();
+      const { dataStateContainer } = await toolkit.initializeSingleTab({
+        tabId: toolkit.getCurrentTab().id,
+        skipWaitForDataFetching: true,
+      });
+      lastTestDataState = dataStateContainer;
+      dataStateContainer.cancel();
+      dataStateContainer.cleanupEsql();
+      dataStateContainer.data$.documents$.next({
+        fetchStatus: FetchStatus.PARTIAL,
+        query: { esql },
+        result: [],
+        dataSource: makeEsqlSource(columns, esql),
+      });
+      await waitFor(() => expect(toolkit.getCurrentTab().appState.columns).toEqual(columns));
+      await toolkit.saveDiscoverSession();
+      expect(save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tabs: [
+            expect.objectContaining({
+              columns,
+              serializedSearchSource: expect.objectContaining({ query: { esql } }),
+            }),
+          ],
+        }),
+        expect.anything()
+      );
+      expect(toolkit.internalState.getState().persistedDiscoverSession?.tabs[0].columns).toEqual(
+        columns
+      );
+    }
+  );
+
   afterEach(() => {
     // Cancel pending URL state storage updates (uses Promise.resolve().then(flush) batching)
     // and stop leaked throttled middleware timers (lodash.throttle with 300ms trailing setTimeout)

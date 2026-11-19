@@ -43,7 +43,10 @@ export const createPatternsDataSourceProfileProvider = (
         const previous = prev(params);
         const { columns = [], dataSource, settings } = params ?? {};
         const hasFlexiblePattern = columns.some(
-          (name) => context.patternColumns.includes(name) && !settings?.columns?.[name]?.width
+          (name) =>
+            context.patternColumns.includes(name) &&
+            dataSource?.getColumn(name)?.type === 'string' &&
+            !settings?.columns?.[name]?.width
         );
         if (!hasFlexiblePattern || dataSource?.kind !== 'esql') {
           return previous;

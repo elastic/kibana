@@ -24,7 +24,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { cloneDeep } from 'lodash';
-import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
+import { ENABLE_ESQL, getInitialESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import {
   DISCOVER_QUERY_MODE_KEY,
   isPersistedQueryMode,
@@ -92,13 +92,25 @@ export function getInitialAppState({
     mergedState.dataSource = createEsqlDataSource();
   }
 
+  if (
+    isOfAggregateQueryType(mergedState.query) &&
+    hasTransformationalCommand(mergedState.query.esql)
+  ) {
+    return mergedState;
+  }
+
   return handleSourceColumnState(mergedState, services.uiSettings);
 }
 
 function getDefaultColumns(
   persistedTab: DiscoverSessionTab | undefined,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  query: Query | AggregateQuery | undefined
 ) {
+  // Document-field defaults must not become an explicit selection for transformed results.
+  if (isOfAggregateQueryType(query) && hasTransformationalCommand(query.esql)) {
+    return persistedTab?.columns ? [...persistedTab.columns] : undefined;
+  }
   if (persistedTab?.columns && persistedTab.columns.length > 0) {
     return [...persistedTab.columns];
   }
@@ -218,7 +230,7 @@ function getDefaultAppState({
     dataView && 'getFieldByName' in dataView
       ? getSortArray(persistedTab?.sort ?? [], dataView, isEsqlQuery)
       : persistedTab?.sort ?? [];
-  const columns = getDefaultColumns(persistedTab, uiSettings);
+  const columns = getDefaultColumns(persistedTab, uiSettings, query);
   const chartHidden = getChartHidden(storage, 'discover');
   const tableHidden = getTableHidden(storage, 'discover');
   const sidebarHidden = getSidebarHidden(storage, 'discover');
