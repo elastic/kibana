@@ -8,10 +8,10 @@
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID } from '../../../common/constants';
 import { useKibana } from '../lib/kibana';
+import { useResolveConnectorAlias } from './use_resolve_connector_alias';
 
 // Value of the default connector setting when no default is configured.
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
@@ -45,22 +45,15 @@ export const useDefaultAIConnectorId = () => {
     defaultSetting !== NO_DEFAULT_CONNECTOR &&
     !connectors.some(({ id }) => id === defaultSetting);
 
-  const { data: aliasTargetId, isFetching: isResolvingAlias } = useQuery({
-    queryKey: ['security-solution', 'alert-ai-summary-default-connector', defaultSetting],
-    queryFn: async () => {
-      const { connector } = await http.get<{ connector: { connectorId: string } }>(
-        `/internal/inference/connectors/${encodeURIComponent(defaultSetting ?? '')}`
-      );
-      return connector.connectorId;
-    },
+  const { resolvedConnectorId, isResolving } = useResolveConnectorAlias({
+    connectorId: defaultSetting,
     enabled: needsAliasLookup,
-    retry: false,
   });
 
   const defaultConnectorId =
-    connectors?.find(({ id }) => id === aliasTargetId)?.id ??
+    connectors?.find(({ id }) => id === resolvedConnectorId)?.id ??
     getDefaultConnector(connectors, settings)?.id;
-  const isLoading = isLoadingConnectors || (needsAliasLookup && isResolvingAlias);
+  const isLoading = isLoadingConnectors || (needsAliasLookup && isResolving);
 
   return useMemo(
     () => ({
