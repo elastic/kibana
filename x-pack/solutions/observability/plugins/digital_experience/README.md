@@ -372,28 +372,34 @@ in one ES|QL query. Its shape, with the aggregations elided:
 ```esql
 FROM traces-*.otel-*, logs-*.otel-*
 | WHERE <window> AND <browser SDK> AND attributes.session.id IN (<5,000 ids>)
-| EVAL <event flags>, seen_<group> = <timestamp of events with any field of the group>,
-       lcp = CASE(vital == "lcp", vital_value, null), ...
+| EVAL <event flags>, seen_<group> = <timestamp of events with any field of the group>
 | FORK (STATS <counts>, start_time, end_time,
-              raw_<field> = LAST(TO_STRING(<field>), seen_<group>),
-              lcp_p75 = PERCENTILE(lcp, 75), lcp_samples = COUNT(lcp), ...
+              raw_<field> = LAST(TO_STRING(<field>), seen_<group>)
           BY service, session)
        (WHERE event_name IN (<page views>) OR name IN (<page views>)
         | STATS first_view = MIN(@timestamp), last_view = MAX(@timestamp)
             BY service, session, page_url = attributes.url.full)
-| STATS <every session column> = MAX(<column>),
+       (WHERE (event_name == "browser.web_vital" OR name == "browser.web_vital") AND <has a value>
+        | EVAL lcp = CASE(vital == "lcp", vital_value, null), ...
+        | STATS lcp_p75 = PERCENTILE(lcp, 75), lcp_samples = COUNT(lcp), ...
+            BY service, session)
+| STATS <every session and vital column> = MAX(<column>),
         pages = TOP(first_view, 30, "asc", page_url) WHERE page_url IS NOT NULL,
         exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
   BY service, session
 | EVAL attribute_<name> = COALESCE(<cleaned raw_<field>>, ...)
+| EVAL <vital count> = COALESCE(<vital count>, 0), ...
 | DROP raw_*
 ```
 
 - **The journey is its own branch.** Grouping every aggregation by page URL as well was the main
   cost of the query. The second branch reads only page views and runs alongside the session stats;
-  the last `STATS` merges them, taking each session column from the one row that has it. Its filter
-  is on the source fields, as `is_page_view` wraps them in `COALESCE`, which keeps Lucene from
-  applying it.
+  the last `STATS` merges them, taking each column from the one row that has it. The branch filters
+  are on the source fields, as the event flags wrap them in `COALESCE`, which keeps Lucene from
+  applying them.
+- **So are the web vitals**, which are about 7% of the events: computing their columns, p75s and
+  counts on every event cost 19% to 32% of the query. A session without a vital has no row in
+  their branch, so its vital counts are set to 0 after the merge.
 - **A column per web vital**, so its p75 and sample count need no filter, and the thresholds
   compare a number instead of the vital's name.
 - **Attributes are cleaned once per session.** The query keeps the raw fields of each group's
@@ -406,9 +412,12 @@ FROM traces-*.otel-*, logs-*.otel-*
 
 On 5,000 sessions of synthtrace data, the `FORK` version takes 10% to 27% less time and 5% to 15%
 less data-node CPU than aggregating per page URL first, depending on the segment layout, with
-identical rows ([#306059](https://github.com/elastic/kibana/issues/306059)). A change to the query
-should be checked the same way: run the old and new query on the same session ids and compare
-every column of every row.
+identical rows ([#306059](https://github.com/elastic/kibana/issues/306059)), and the vitals branch
+another 19% to 32%. The measurements behind the task's design, where the time goes, and what was
+tried and dropped are in
+[`server/services/sessions/query_performance.md`](server/services/sessions/query_performance.md),
+with how to check a change: run the old and new query on the same session ids and compare every
+column of every row.
 
 ### Enabling sessions
 
