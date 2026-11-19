@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_HITL_GRAPH_NODE_ID_LENGTH } from '../../../common/hitl';
 import {
   DataSetStepSchema,
@@ -105,11 +105,13 @@ export const WorkflowExecuteAsyncGraphNodeSchema = GraphNodeSchema.extend({
 });
 export type WorkflowExecuteAsyncGraphNode = z.infer<typeof WorkflowExecuteAsyncGraphNodeSchema>;
 
-export const WorkflowAwaitExecutionsGraphNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('workflow.awaitExecutions'),
-  configuration: WorkflowAwaitExecutionsStepSchema,
-});
+export const WorkflowAwaitExecutionsGraphNodeSchema = lazySchema(() =>
+  GraphNodeSchema.extend({
+    id: z.string(),
+    type: z.literal('workflow.awaitExecutions'),
+    configuration: WorkflowAwaitExecutionsStepSchema,
+  })
+);
 export type WorkflowAwaitExecutionsGraphNode = z.infer<
   typeof WorkflowAwaitExecutionsGraphNodeSchema
 >;

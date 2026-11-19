@@ -26,7 +26,7 @@ import {
   type PollPolicy,
   type ServerPollStepDefinition,
 } from '@kbn/workflows-extensions/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import { hasExecutionChain } from '../../utils';
@@ -61,10 +61,12 @@ export const AWAIT_EXECUTIONS_POLL_CEILINGS: PollCeilings = {
   maxWaitMs: 60_000,
 };
 
-const AwaitExecutionsStateSchema = z.object({
-  executionIds: z.array(z.string()),
-  mode: WorkflowAwaitExecutionsModeSchema,
-});
+const AwaitExecutionsStateSchema = lazySchema(() =>
+  z.object({
+    executionIds: z.array(z.string()),
+    mode: WorkflowAwaitExecutionsModeSchema,
+  })
+);
 type AwaitExecutionsState = z.infer<typeof AwaitExecutionsStateSchema>;
 
 type AwaitExecutionsPhaseResult = DurablePhaseResult<
