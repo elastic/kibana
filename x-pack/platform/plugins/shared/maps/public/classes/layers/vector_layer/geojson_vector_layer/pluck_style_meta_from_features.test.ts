@@ -391,8 +391,8 @@ describe('pluckCategoricalStyleMetaFromFeatures', () => {
     const dynamicColorProperty = new DynamicColorProperty(
       {
         type: COLOR_MAP_TYPE.CATEGORICAL,
-        colorCategory: 'palette_0',
-        fieldMetaOptions: { isEnabled: true },
+        color_category: 'palette_0',
+        field_meta_options: { is_enabled: true },
       },
       VECTOR_STYLES.LINE_COLOR,
       field,
@@ -421,8 +421,8 @@ describe('pluckCategoricalStyleMetaFromFeatures', () => {
     const dynamicColorProperty = new DynamicColorProperty(
       {
         type: COLOR_MAP_TYPE.CATEGORICAL,
-        colorCategory: 'palette_0',
-        fieldMetaOptions: { isEnabled: true },
+        color_category: 'palette_0',
+        field_meta_options: { is_enabled: true },
       },
       VECTOR_STYLES.LINE_COLOR,
       field,
