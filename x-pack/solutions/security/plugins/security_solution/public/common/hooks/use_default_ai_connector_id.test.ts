@@ -8,19 +8,20 @@
 import { renderHook } from '@testing-library/react';
 import { useDefaultAIConnectorId } from './use_default_ai_connector_id';
 import { useKibana } from '../lib/kibana';
-import { useAIConnectors } from './use_ai_connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 
 jest.mock('../lib/kibana');
-jest.mock('./use_ai_connectors');
+jest.mock('@kbn/inference-connectors');
 jest.mock('@kbn/elastic-assistant/impl/assistant/helpers');
 
 const mockUseKibana = useKibana as jest.Mock;
-const mockUseAIConnectors = useAIConnectors as jest.Mock;
+const mockUseLoadConnectors = useLoadConnectors as jest.Mock;
 const mockGetDefaultConnector = getDefaultConnector as jest.Mock;
 
 describe('useDefaultAIConnectorId', () => {
   const mockSettings = {};
+  const mockHttp = {};
   const mockConnectors = [
     { id: 'connector-1', name: 'Connector 1' },
     { id: 'connector-2', name: 'Connector 2' },
@@ -31,12 +32,13 @@ describe('useDefaultAIConnectorId', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
+        http: mockHttp,
         settings: mockSettings,
       },
     });
 
-    mockUseAIConnectors.mockReturnValue({
-      aiConnectors: mockConnectors,
+    mockUseLoadConnectors.mockReturnValue({
+      data: mockConnectors,
       isLoading: false,
     });
 
@@ -71,9 +73,18 @@ describe('useDefaultAIConnectorId', () => {
     expect(mockGetDefaultConnector).toHaveBeenCalledWith(mockConnectors, mockSettings);
   });
 
+  it('should load the connectors from the elastic_assistant inference feature so that inference endpoints are included', () => {
+    renderHook(() => useDefaultAIConnectorId());
+
+    expect(mockUseLoadConnectors).toHaveBeenCalledWith({
+      http: mockHttp,
+      featureId: 'elastic_assistant',
+    });
+  });
+
   it('should return isLoading true when connectors are loading', () => {
-    mockUseAIConnectors.mockReturnValue({
-      aiConnectors: mockConnectors,
+    mockUseLoadConnectors.mockReturnValue({
+      data: mockConnectors,
       isLoading: true,
     });
 
@@ -83,8 +94,8 @@ describe('useDefaultAIConnectorId', () => {
   });
 
   it('should return isLoading false when connectors are not loading', () => {
-    mockUseAIConnectors.mockReturnValue({
-      aiConnectors: mockConnectors,
+    mockUseLoadConnectors.mockReturnValue({
+      data: mockConnectors,
       isLoading: false,
     });
 
