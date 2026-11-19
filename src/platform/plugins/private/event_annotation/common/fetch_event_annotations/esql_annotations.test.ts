@@ -140,6 +140,38 @@ describe('toEsqlAnnotationDatatable', () => {
     ]);
   });
 
+  it('limits ranges per start bucket like points, without letting ranges hide points', () => {
+    const rangeAnnotation = { ...annotation, endTimeColumn: 'end' };
+    const columns: Datatable['columns'] = [
+      ...datatable.columns,
+      { id: 'end-id', name: 'end', meta: { type: 'date' } },
+    ];
+    const ranges = toEsqlAnnotationDatatable({
+      ...options,
+      annotation: rangeAnnotation,
+      datatable: {
+        ...datatable,
+        columns,
+        rows: Array.from({ length: 12 }, (_, index) => ({
+          ...datatable.rows[0],
+          'time-id': 1767225600000 + index * 1000,
+          'end-id': '2026-01-01T03:00:00Z',
+        })),
+      },
+    });
+    expect(ranges.rows).toHaveLength(10);
+    expect(ranges.rows[9].skippedCount).toBe(2);
+    expect(ranges.rows.slice(0, 9).every((row) => row.skippedCount === undefined)).toBe(true);
+
+    const points = toEsqlAnnotationDatatable({
+      ...options,
+      annotation: { ...annotation, id: 'p' },
+    });
+    const merged = mergeAnnotationDatatables([ranges, points]);
+    expect(merged.rows.filter((row) => row.type === 'point')).toHaveLength(2);
+    expect(merged.rows.filter((row) => row.skippedCount)).toHaveLength(1);
+  });
+
   it.each(['missing', 'message'])('rejects missing or non-date time columns: %s', (timeColumn) => {
     expect(() =>
       toEsqlAnnotationDatatable({ ...options, annotation: { ...annotation, timeColumn } })

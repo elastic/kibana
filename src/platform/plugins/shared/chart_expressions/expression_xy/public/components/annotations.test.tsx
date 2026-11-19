@@ -136,4 +136,31 @@ describe('ES|QL annotation rendering', () => {
     expect(screen.getByText('12.00')).toBeInTheDocument();
     expect(screen.getByText(/ — /)).toBeInTheDocument();
   });
+
+  it('shows the skipped count in a range tooltip', () => {
+    const range: ManualRangeEventAnnotationRow & DatatableRow = {
+      ...point,
+      id: 'events:0',
+      type: 'range',
+      endTime: '2026-01-01T01:30:00.000Z',
+      skippedCount: 4,
+    };
+    render(
+      <I18nProvider>
+        <EuiThemeProvider>
+          <Annotations
+            groupedLineAnnotations={[]}
+            rangeAnnotations={[range]}
+            columns={columns}
+            formatFactory={formatFactory}
+            timeFormat="YYYY-MM-DD HH:mm"
+            isHorizontal={false}
+            paddingMap={{}}
+            outsideDimension={8}
+          />
+        </EuiThemeProvider>
+      </I18nProvider>
+    );
+    expect(screen.getByText('+4 more…')).toBeInTheDocument();
+  });
 });

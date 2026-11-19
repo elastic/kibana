@@ -113,22 +113,22 @@ export const toEsqlAnnotationDatatable = ({
     });
   }
 
+  // Ranges and points are limited separately per start bucket, so many ranges cannot hide points.
   const limitedRows: DatatableRow[] = [];
-  const lastPointPerBucket = new Map<string, DatatableRow>();
+  const lastKeptRowPerBucket = new Map<string, DatatableRow>();
   const countPerBucket = new Map<string, number>();
   for (const row of rows.sort(sortByTime)) {
-    if (row.type === 'range') {
-      limitedRows.push(row);
-      continue;
-    }
-    const count = (countPerBucket.get(row.timebucket) ?? 0) + 1;
-    countPerBucket.set(row.timebucket, count);
+    const bucketKey = `${row.type}:${row.timebucket}`;
+    const count = (countPerBucket.get(bucketKey) ?? 0) + 1;
+    countPerBucket.set(bucketKey, count);
     if (count <= ANNOTATIONS_PER_BUCKET) {
       limitedRows.push(row);
-      lastPointPerBucket.set(row.timebucket, row);
-    } else {
-      const lastPoint = lastPointPerBucket.get(row.timebucket);
-      if (lastPoint) lastPoint.skippedCount = count - ANNOTATIONS_PER_BUCKET;
+      lastKeptRowPerBucket.set(bucketKey, row);
+      continue;
+    }
+    const lastKeptRow = lastKeptRowPerBucket.get(bucketKey);
+    if (lastKeptRow) {
+      lastKeptRow.skippedCount = count - ANNOTATIONS_PER_BUCKET;
     }
   }
 

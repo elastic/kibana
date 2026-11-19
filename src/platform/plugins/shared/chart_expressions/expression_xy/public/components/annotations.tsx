@@ -413,6 +413,20 @@ export const Annotations = ({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </div>
+                {row.skippedCount ? (
+                  <div css={styles.tooltipSkippedCount}>
+                    <EuiSpacer size="xs" />
+                    <EuiHorizontalRule margin="none" />
+                    <EuiSpacer size="xs" />
+                    <div css={styles.tooltipRow}>
+                      <FormattedMessage
+                        id="expressionXY.annotations.skippedCount"
+                        defaultMessage="+{value} more…"
+                        values={{ value: row.skippedCount }}
+                      />
+                    </div>
+                  </div>
+                ) : null}
               </EuiPanel>
             )}
             dataValues={[
