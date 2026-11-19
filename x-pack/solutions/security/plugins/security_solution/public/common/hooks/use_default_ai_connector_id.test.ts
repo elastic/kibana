@@ -22,6 +22,7 @@ const mockGetDefaultConnector = getDefaultConnector as jest.Mock;
 describe('useDefaultAIConnectorId', () => {
   const mockSettings = {};
   const mockHttp = {};
+  const mockToasts = {};
   const mockConnectors = [
     { id: 'connector-1', name: 'Connector 1' },
     { id: 'connector-2', name: 'Connector 2' },
@@ -33,6 +34,7 @@ describe('useDefaultAIConnectorId', () => {
     mockUseKibana.mockReturnValue({
       services: {
         http: mockHttp,
+        notifications: { toasts: mockToasts },
         settings: mockSettings,
       },
     });
@@ -73,11 +75,12 @@ describe('useDefaultAIConnectorId', () => {
     expect(mockGetDefaultConnector).toHaveBeenCalledWith(mockConnectors, mockSettings);
   });
 
-  it('should load the connectors from the elastic_assistant inference feature so that inference endpoints are included', () => {
+  it('should load the connectors from the elastic_assistant inference feature, reporting load errors through toasts, so that inference endpoints are included', () => {
     renderHook(() => useDefaultAIConnectorId());
 
     expect(mockUseLoadConnectors).toHaveBeenCalledWith({
       http: mockHttp,
+      toasts: mockToasts,
       featureId: 'elastic_assistant',
     });
   });
@@ -90,6 +93,7 @@ describe('useDefaultAIConnectorId', () => {
     mockUseKibana.mockReturnValue({
       services: {
         http: mockHttp,
+        notifications: { toasts: mockToasts },
         settings: { client: { get: jest.fn().mockReturnValue('custom-inference-endpoint') } },
       },
     });

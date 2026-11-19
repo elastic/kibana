@@ -16,10 +16,11 @@ import { useKibana } from '../lib/kibana';
  * which are not stack connectors and would otherwise never match the configured default.
  */
 export const useDefaultAIConnectorId = () => {
-  const { http, settings } = useKibana().services;
+  const { http, notifications, settings } = useKibana().services;
 
   const { data: connectors, isLoading } = useLoadConnectors({
     http,
+    toasts: notifications.toasts,
     featureId: 'elastic_assistant',
   });
   const defaultConnectorId = getDefaultConnector(connectors, settings)?.id;

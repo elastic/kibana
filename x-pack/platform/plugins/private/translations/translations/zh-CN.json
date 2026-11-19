@@ -60632,7 +60632,6 @@
     "xpack.securitySolution.headerPage.pageSubtitle": "上一事件：{beat}",
     "xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage": "已将 {fieldOrValue} 添加到时间线",
     "xpack.securitySolution.hooks.useAddToTimeline.template.addedFieldMessage": "已将 {fieldOrValue} 添加到时间线模板",
-    "xpack.securitySolution.hooks.useGetAIConnectors.fetchError": "获取 AI 连接器时出现错误",
     "xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage": "无法加载已保存查询",
     "xpack.securitySolution.host.details.architectureLabel": "架构",
     "xpack.securitySolution.host.details.endpoint.endpointPolicy": "终端集成策略",
