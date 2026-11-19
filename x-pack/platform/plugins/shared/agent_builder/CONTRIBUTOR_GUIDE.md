@@ -1201,7 +1201,7 @@ Agent Builder renders the conversation details flyout with `@kbn/flyout-template
 - `useDetailsFlyout(props)`: a hook that returns a `ConversationTemplateDetailsFlyoutDescriptor`. Its `header` has a plain-text `title`, an optional `description`, an `isLoading` spinner named by `loadingLabel`, and lists of meta blocks, badges and info blocks. Its optional `footer` has a `primary` and a `secondary` action. The parts take `@kbn/flyout-template`'s props, so an info block value can be any React node, and the secondary action can take `variant: 'ai'`.
 - `Provider` (optional): wraps the flyout, so `useDetailsFlyout` and the values it returns can use your plugin's own contexts, such as its Kibana services or query client. The flyout renders outside them.
 
-`load` is called the first time a flyout for the template opens. Until it resolves, the flyout shows a "Summary" header with a spinner, in the same flyout the loaded header replaces. Use a dynamic `import()` so the module stays out of your plugin's page-load bundle. Without `load`, the flyout is titled "Summary" and has no footer.
+`load` is called the first time a flyout for the template opens, and again on the next open after a load that failed. Until it resolves, the flyout shows a "Summary" header with a spinner, in the same flyout the loaded header replaces. Use a dynamic `import()` so the module stays out of your plugin's page-load bundle. Without `load`, the flyout is titled "Summary" and has no footer.
 
 ```tsx
 agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', (context) => ({

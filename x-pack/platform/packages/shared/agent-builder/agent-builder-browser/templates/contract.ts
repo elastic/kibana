@@ -136,10 +136,11 @@ export interface ConversationTemplateUIDefinition {
   /** Optional flyout content; capture capabilities from the template registration context. */
   detailsFlyout?: {
     /**
-     * Loads the module that describes the flyout's header and footer. Called once, the first time
-     * a flyout for this template opens; the flyout shows its loading state until it resolves. Use
-     * a dynamic `import()` so the module stays out of the page-load bundle. Without it, the flyout
-     * is titled "Summary" and has no footer.
+     * Loads the module that describes the flyout's header and footer. Called the first time a
+     * flyout for this template opens, and again on the next open after a load that failed; the
+     * flyout shows its loading state until it resolves. Use a dynamic `import()` so the module
+     * stays out of the page-load bundle. Without it, the flyout is titled "Summary" and has no
+     * footer.
      */
     load?: () => Promise<ConversationTemplateDetailsFlyoutModule>;
     /**
