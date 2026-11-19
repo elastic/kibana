@@ -30,14 +30,15 @@ import { Chart, Heatmap, ScaleType, Settings, TooltipType, Tooltip } from '@elas
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
+import { ChartTooltipFooterMessage } from '@kbn/visualizations-components';
 import {
-  ChartTooltipFooterMessage,
   getAccessorByDimension,
   getFormatByAccessor,
   getFilterDrilldownWarningMessage,
   getOverridesFor,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
+  sortRowsByRangeLowerBound,
 } from '@kbn/chart-expressions-common';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
@@ -470,6 +471,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         });
       }
     }
+
+    chartData = sortRowsByRangeLowerBound(chartData, xAxisColumn, args.gridConfig.xSortPredicate);
+    chartData = sortRowsByRangeLowerBound(chartData, yAxisColumn, args.gridConfig.ySortPredicate);
 
     const xScaleType = isTimeBasedX ? ScaleType.Time : args.gridConfig.xScaleType;
 

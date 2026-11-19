@@ -17,12 +17,14 @@ import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
 
-import { searchStrategyRequestSchema } from '@kbn/timelines-plugin/common/api/search_strategy';
+import {
+  searchStrategyRequestSchema,
+  EntityType,
+} from '@kbn/securitysolution-timeline-search-strategy';
 import type {
   TimelineFactoryQueryTypes,
   TimelineStrategyRequestType,
-} from '@kbn/timelines-plugin/common/search_strategy/timeline';
-import { EntityType } from '@kbn/timelines-plugin/common/search_strategy/timeline';
+} from '@kbn/securitysolution-timeline-search-strategy';
 import { timelineFactory } from './factory';
 import type { TimelineFactory } from './factory/types';
 import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_aggregate';

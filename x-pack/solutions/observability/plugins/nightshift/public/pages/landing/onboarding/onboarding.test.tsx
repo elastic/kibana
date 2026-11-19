@@ -14,10 +14,15 @@ import { useConnectorsByType } from '../../../data/sandbox_connectors/use_connec
 import { useOnboarding } from './use_onboarding';
 import { NightshiftOnboarding } from './onboarding';
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useCurrentEuiBreakpoint: () => 'xl',
+}));
+
 const mockStartSuggestions = jest.fn();
 
 jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({ services: {} }),
+  useKibana: () => ({ services: { http: { basePath: { get: () => '/s/onboarding-test' } } } }),
 }));
 jest.mock('../../../components/ui/flyout_share_url_button', () => ({
   useFlyoutShareUrlCustomAction: () => ({}),
@@ -41,9 +46,7 @@ jest.mock('../../../data/automations/use_automations', () => ({
   }),
 }));
 jest.mock('../header', () => ({ NightshiftHeader: () => null }));
-jest.mock('./intro_banner', () => ({
-  OnboardingIntroBanner: () => <div data-test-subj="introBannerStub" />,
-}));
+jest.mock('./intro_banner_video', () => ({ IntroBannerVideo: () => null }));
 jest.mock('./nightshift_setup_prompt', () => ({ NightshiftSetupPrompt: () => null }));
 jest.mock('./add_data_step', () => ({
   ...jest.requireActual('./add_data_step'),
@@ -109,8 +112,21 @@ const stepsCard = () => screen.getByTestId('nightshiftOnboardingSteps');
 
 describe('NightshiftOnboarding', () => {
   beforeEach(() => {
+    window.localStorage.clear();
     mockOnboarding();
     mockStartSuggestions.mockReset();
+  });
+
+  it('keeps the intro banner dismissed on reload', () => {
+    mockConnectors({ '.new_relic': 1 });
+    const { unmount } = renderOnboarding();
+
+    fireEvent.click(screen.getByTestId('nightshiftOnboardingIntroBannerDismiss'));
+    expect(screen.queryByTestId('nightshiftOnboardingIntroBanner')).not.toBeInTheDocument();
+
+    unmount();
+    renderOnboarding();
+    expect(screen.queryByTestId('nightshiftOnboardingIntroBanner')).not.toBeInTheDocument();
   });
 
   describe('Add data step', () => {
@@ -268,18 +284,6 @@ describe('NightshiftOnboarding', () => {
       expect(linkedSteps()).toEqual(['addData', 'connectSources', 'investigate']);
       expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
       expect(screen.queryByText('Back to suggestions')).not.toBeInTheDocument();
-    });
-
-    it('keeps the intro banner on Add data and Connect other sources, not on later steps', () => {
-      renderOnboarding(investigation);
-
-      expect(screen.queryByTestId('introBannerStub')).not.toBeInTheDocument();
-
-      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
-      expect(screen.getByTestId('introBannerStub')).toBeInTheDocument();
-
-      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-addData'));
-      expect(screen.getByTestId('introBannerStub')).toBeInTheDocument();
     });
 
     it('returns to a completed step and forward again through the card, not by rerunning', () => {

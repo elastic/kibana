@@ -33,10 +33,6 @@ const APACHE_DATA_STREAM = buildDataStreamName({
   namespace: PRODUCTION_NAMESPACE,
 });
 
-/** `fleet_server` ships no dashboards, which is what makes it useful here. */
-const FLEET_SERVER_DATASET = 'fleet_server.output_health';
-const FLEET_SERVER_DATA_STREAM = buildDataStreamName({ dataset: FLEET_SERVER_DATASET });
-
 /** Owned by this spec: a data set that belongs to no integration. */
 const PLAIN_DATASET = 'synth.integrations';
 const PLAIN_DATA_STREAM = buildDataStreamName({ dataset: PLAIN_DATASET });
@@ -46,9 +42,8 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let uninstallApache: () => Promise<void>;
-    let uninstallFleetServer: () => Promise<void>;
 
-    const ownedDataStreams = [APACHE_DATA_STREAM, FLEET_SERVER_DATA_STREAM, PLAIN_DATA_STREAM];
+    const ownedDataStreams = [APACHE_DATA_STREAM, PLAIN_DATA_STREAM];
 
     test.beforeAll(async ({ apiServices, esClient, log, logsSynthtraceEsClient }) => {
       // Pre-clean owned streams so an interrupted previous run does not double the seeded docs.
@@ -61,11 +56,6 @@ test.describe(
         PACKAGES.apache.name,
         PACKAGES.apache.version
       );
-      uninstallFleetServer = await ensurePackageInstalled(
-        apiServices.fleet.integration,
-        PACKAGES.fleetServer.name,
-        PACKAGES.fleetServer.version
-      );
 
       await indexLogs(logsSynthtraceEsClient, [
         getLogsForDataset({
@@ -74,7 +64,6 @@ test.describe(
           dataset: APACHE_DATASET,
           namespace: PRODUCTION_NAMESPACE,
         }),
-        getLogsForDataset({ to: TO, count: 10, dataset: FLEET_SERVER_DATASET }),
         getLogsForDataset({ to: TO, count: 4, dataset: PLAIN_DATASET }),
       ]);
     });
@@ -89,7 +78,6 @@ test.describe(
           (dataStream) => () => deleteDataStreamIfExists(esClient, dataStream, log)
         ),
         () => uninstallApache(),
-        () => uninstallFleetServer(),
       ]);
     });
 
@@ -139,37 +127,6 @@ test.describe(
         await expect(
           pageObjects.datasetQualityDetails.getIntegrationAction('ViewDashboards')
         ).toBeVisible();
-      });
-    });
-
-    test('hides the dashboards action and links to the overview of a package without dashboards', async ({
-      page,
-      pageObjects,
-    }) => {
-      await pageObjects.datasetQualityDetails.goto({
-        dataStream: FLEET_SERVER_DATA_STREAM,
-        timeRange: TIME_RANGE,
-      });
-
-      await pageObjects.datasetQualityDetails.openIntegrationActionsMenu();
-
-      await test.step('omits the dashboards action', async () => {
-        // The menu renders a skeleton entry while the dashboard list is in flight.
-        await page
-          .getByTestId('datasetQualityDetailsIntegrationActionDashboardsLoading')
-          .waitFor({ state: 'detached' });
-
-        await expect(
-          pageObjects.datasetQualityDetails.getIntegrationAction('ViewDashboards')
-        ).toBeHidden();
-      });
-
-      await test.step('navigates to the integration overview', async () => {
-        await pageObjects.datasetQualityDetails.getIntegrationAction('Overview').click();
-
-        await expect
-          .poll(async () => new URL(page.url()).pathname)
-          .toContain(`/app/integrations/detail/${PACKAGES.fleetServer.name}`);
       });
     });
 

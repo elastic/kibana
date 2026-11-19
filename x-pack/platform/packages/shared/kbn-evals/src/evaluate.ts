@@ -25,6 +25,7 @@ import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
   createCachedTokensEvaluator,
+  createEstimatedCostEvaluator,
   createInputTokensEvaluator,
   createLatencyEvaluator,
   createOutputTokensEvaluator,
@@ -197,7 +198,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
   reportDisplayOptions: [
     async ({ evaluators }, use) => {
-      const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+      const { inputTokens, outputTokens, cachedTokens, estimatedCost, toolCalls, latency } =
         evaluators.traceBasedEvaluators;
 
       await use({
@@ -213,6 +214,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           [
             cachedTokens.name,
             { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            estimatedCost.name,
+            { decimalPlaces: 4, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
           ],
           [toolCalls.name, { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'min', 'max'] }],
           [
@@ -477,6 +482,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             log,
           }),
           cachedTokens: createCachedTokensEvaluator({
+            traceEsClient,
+            log,
+          }),
+          estimatedCost: createEstimatedCostEvaluator({
             traceEsClient,
             log,
           }),

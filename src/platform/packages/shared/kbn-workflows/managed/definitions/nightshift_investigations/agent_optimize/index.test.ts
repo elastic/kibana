@@ -51,6 +51,7 @@ describe('nightshift agent optimize workflow', () => {
         'response',
         'round_connector_id',
         'round_id',
+        'round_trace_id',
         'tool_calls',
         'tool_results',
         'workflow_context',
@@ -144,8 +145,13 @@ describe('nightshift agent optimize workflow', () => {
         name: 'reinforce_decision_trees',
         type: 'nightshift.decisionTreeReinforce',
       }),
+      expect.objectContaining({
+        name: 'score_memory_online_evals',
+        type: 'nightshift.onlineEvals.scoreMemory',
+        'on-failure': { continue: true },
+      }),
     ]);
-    expect(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.version).toBe(4);
+    expect(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.version).toBe(5);
   });
 
   // A parallel branch has no per-branch timeout: it inherits `branch-timeout`. Reinforcement
@@ -285,6 +291,7 @@ describe('nightshift agent optimize workflow', () => {
       'resolve_model',
       'ensure_reinforcement_agent',
       'reinforce_decision_trees',
+      'score_memory_online_evals',
     ]);
   });
 

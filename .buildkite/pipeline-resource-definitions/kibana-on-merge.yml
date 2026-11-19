@@ -23,8 +23,9 @@ spec:
         ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_COMMIT_STATUS_CONTEXT: buildkite/on-merge
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+        # Suite issues replace per-test ones; set to 'true' to fall back to the legacy reporting
+        REPORT_FAILED_TESTS_PER_TEST_ISSUES: 'false'
         REPORT_FAILING_SUITES: 'true'
-        FAILING_SUITES_REPO: elastic/appex-qa-ai
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         SCOUT_REPORTER_ENABLED: 'true'

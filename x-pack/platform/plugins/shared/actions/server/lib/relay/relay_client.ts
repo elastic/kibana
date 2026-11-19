@@ -13,6 +13,8 @@ import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { request } from '../axios_utils';
 import { RelayRequestError } from './relay_error';
 import type {
+  RelayAvailableChannel,
+  RelayAvailableChannelsPage,
   RelayBinding,
   RelayBindingsPage,
   RelayCallbackResponse,
@@ -93,6 +95,20 @@ interface RelayReadResponseBody {
 const parseRetryAfterSeconds = (value: unknown): number | undefined => {
   const seconds = Number(Array.isArray(value) ? value[0] : value);
   return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
+};
+
+const toHeaders = (axiosHeaders: Record<string, unknown> = {}): Headers => {
+  const headers = new Headers();
+
+  for (const [name, value] of Object.entries(axiosHeaders)) {
+    for (const item of Array.isArray(value) ? value : [value]) {
+      if (item !== undefined && item !== null) {
+        headers.append(name, String(item));
+      }
+    }
+  }
+
+  return headers;
 };
 
 export class RelayClient implements RelayClientContract {
@@ -201,6 +217,27 @@ export class RelayClient implements RelayClientContract {
     );
 
     return { bindings, nextCursor: body?.next_cursor };
+  }
+
+  async listAvailableChannels(tenantKey: string): Promise<RelayAvailableChannelsPage> {
+    const path = `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/channels`;
+    const response = await this.get(`${path}?status=available`);
+    const body = response.data as
+      | { channels?: RelayAvailableChannel[]; truncated?: boolean }
+      | undefined;
+
+    if (!Array.isArray(body?.channels)) {
+      throw new RelayRequestError(
+        path,
+        response.status,
+        'Relay invalid response format missing expected `channels` array'
+      );
+    }
+
+    return {
+      channels: body.channels.map(({ scope_id, display_name }) => ({ scope_id, display_name })),
+      truncated: body.truncated === true,
+    };
   }
 
   /** Claim an unclaimed channel (put-if-absent). The caller must hold a registration for the tenant. */
@@ -332,7 +369,7 @@ export class RelayClient implements RelayClientContract {
     }
 
     const response = await this.sendRequest(url, body, 'post', signal);
-    return { status: response.status };
+    return { status: response.status, headers: toHeaders(response.headers) };
   }
 
   private async post(path: string, body: unknown): Promise<AxiosResponse> {

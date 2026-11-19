@@ -6,7 +6,7 @@
  */
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { getTableTabItems } from './table_tab_items';
 
 type TableItem = TimelineEventsDetailsItem & {

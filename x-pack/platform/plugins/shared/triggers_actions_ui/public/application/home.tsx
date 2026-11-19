@@ -14,7 +14,7 @@ import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import {
   getCreateRuleRoute,
   getCreateRuleFromTemplateRoute,
@@ -53,7 +53,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     notifications: { toasts },
     ruleTypeRegistry,
     application: { navigateToApp },
-    cps,
     setBreadcrumbs,
     showClassicBadge,
   } = useKibana().services;
@@ -176,7 +175,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           }}
           http={http}
           toasts={toasts}
-          cps={cps}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
           showClassicBadge={showClassicBadge}
