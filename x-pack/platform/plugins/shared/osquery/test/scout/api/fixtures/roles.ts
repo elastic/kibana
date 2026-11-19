@@ -105,6 +105,45 @@ export const RULE_AUTHOR_RUN_SAVED_ONLY_ROLE: KibanaRole = {
   ],
 };
 
+/**
+ * Roles built on osquery `minimal_read`, so the Packs and Saved queries read sub-privileges are
+ * granted only where listed. Used to check that running a referenced pack or saved query
+ * requires read access to it, as the UI already does.
+ */
+const osqueryMinimalRole = (osquery: string[]): KibanaRole => ({
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [{ base: [], spaces: ['*'], feature: { osquery: ['minimal_read', ...osquery] } }],
+});
+
+export const RUN_SAVED_MINIMAL_ROLE = osqueryMinimalRole(['run_saved_queries']);
+export const RUN_SAVED_WITH_PACKS_READ_ROLE = osqueryMinimalRole([
+  'run_saved_queries',
+  'packs_read',
+]);
+export const RUN_SAVED_WITH_SAVED_QUERIES_READ_ROLE = osqueryMinimalRole([
+  'run_saved_queries',
+  'saved_queries_read',
+]);
+export const WRITE_LIVE_MINIMAL_ROLE = osqueryMinimalRole(['live_queries_all']);
+
+/** Rule author who can run saved queries but holds neither Packs nor Saved queries read. */
+export const RULE_AUTHOR_RUN_SAVED_MINIMAL_ROLE: KibanaRole = {
+  elasticsearch: T1_ANALYST_ROLE.elasticsearch,
+  kibana: [
+    {
+      base: [],
+      spaces: ['*'],
+      feature: {
+        ...COMMON_KIBANA_FEATURES,
+        siemV5: ['all'],
+        securitySolutionRulesV2: ['all'],
+        securitySolutionCases: ['all'],
+        osquery: ['minimal_read', 'run_saved_queries'],
+      },
+    },
+  ],
+};
+
 export const T2_ANALYST_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],

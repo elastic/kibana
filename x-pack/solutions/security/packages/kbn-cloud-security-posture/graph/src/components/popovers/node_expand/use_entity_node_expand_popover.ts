@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps, NodeViewModel } from '../../types';
 import type { GraphTelemetryHandler } from '../../graph_telemetry';
@@ -55,6 +56,7 @@ export const useEntityNodeExpandPopover = (
   euidApi?: EuidFilterApi,
   onTelemetryEvent?: GraphTelemetryHandler
 ) => {
+  const isDarkMode = useKibanaIsDarkMode();
   const itemsFn = useCallback(
     (node: NodeProps) => {
       const docMode = getNodeDocumentMode(node.data);
@@ -181,9 +183,10 @@ export const useEntityNodeExpandPopover = (
         },
         showEntityRelationshipsDisabled: !isEnriched || isInitialEntity,
         showEntityDetailsDisabled: isSingleEntity && !isEnriched,
+        isDarkMode,
       });
     },
-    [scopeId, onOpenEventPreview, euidApi, onTelemetryEvent]
+    [scopeId, onOpenEventPreview, euidApi, onTelemetryEvent, isDarkMode]
   );
 
   return useNodeExpandPopover({

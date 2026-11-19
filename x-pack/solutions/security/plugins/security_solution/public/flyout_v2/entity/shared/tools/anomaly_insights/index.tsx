@@ -27,6 +27,8 @@ export interface AnomalyInsightsProps {
   entityId?: string;
   /** `resolved` shows the anomalies of the whole resolution group; defaults to `single`. */
   mode?: EntityViewMode;
+  /** Scope the tool was opened from; a scope that pins a time range sets the tab's initial window. */
+  scopeId?: string;
   /** Opens the originating entity flyout as a child. */
   onOpenEntity?: () => void;
 }
@@ -35,7 +37,7 @@ export interface AnomalyInsightsProps {
  * Tool flyout displaying the full behavioral anomalies view for an entity.
  */
 export const AnomalyInsights = memo(
-  ({ entityType, value, entityId, mode, onOpenEntity }: AnomalyInsightsProps) => {
+  ({ entityType, value, entityId, mode, scopeId, onOpenEntity }: AnomalyInsightsProps) => {
     return (
       <>
         <EuiFlyoutHeader hasBorder>
@@ -52,6 +54,7 @@ export const AnomalyInsights = memo(
             entityName={value}
             entityType={entityType}
             mode={mode}
+            scopeId={scopeId}
           />
         </EuiFlyoutBody>
       </>

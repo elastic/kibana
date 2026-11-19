@@ -146,6 +146,16 @@ describe('mergeSourceMonitor', () => {
     expect(result[ConfigKey.NTLM]).toBeNull();
   });
 
+  it('omits the derived schedule interval from the monitor response', () => {
+    const result = mapSavedObjectToMonitor({
+      monitor: {
+        attributes: { ...testMonitor, schedule_interval_seconds: 180 },
+      } as any,
+    });
+
+    expect(result).not.toHaveProperty('schedule_interval_seconds');
+  });
+
   it('should not omit null or undefined values', () => {
     const result = mapSavedObjectToMonitor({ monitor: { attributes: testMonitor } } as any);
 

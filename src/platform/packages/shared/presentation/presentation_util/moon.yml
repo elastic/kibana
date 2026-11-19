@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-mount-utils-browser'
+  - '@kbn/core-overlays-browser'
 tags:
   - shared-browser
   - package
@@ -33,6 +34,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

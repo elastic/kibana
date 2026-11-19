@@ -66,7 +66,10 @@ export function registerConversationWorkflowEventBridge(
   conversationEventBus.onAttachmentEvents((request, { conversationId, events }) => {
     void forwardBatch(
       request,
-      events.map((event) => toAttachmentTriggerEvent(conversationId, event))
+      events.flatMap((event) => {
+        const trigger = toAttachmentTriggerEvent(conversationId, event);
+        return trigger ? [trigger] : [];
+      })
     );
   });
 

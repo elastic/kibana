@@ -8,6 +8,11 @@
 #     → track_convergence → if(converged) break
 #   } → if(allFailed) fail → identify_computed → output
 #
+# The loop has its own time budget, below the workflow timeout. Running out of
+# it, or any other loop failure, ends the loop but not the run: with at least
+# one successful iteration the persisted features are kept and the remaining
+# steps still run.
+#
 # Concurrency is keyed per source slug so only one identification run can be
 # active for a given source in a space at any time; overlapping triggers are
 # dropped. Every request targets the space that runs the workflow.
@@ -61,22 +66,35 @@ triggers:
         description: "Stop the loop after this many healthy-successful passes without a new feature (degraded iterations are neutral and not counted)."
       - name: sampleSize
         type: number
+        default: 20
         description: "Number of documents sampled per iteration."
       - name: featureTtlDays
         type: number
         description: "Number of days before a KI feature expires and is cleaned up."
       - name: entityFilteredRatio
         type: number
+        default: 0.4
         description: "Fraction (0–1) of sample allocated to entity-filtered (must_not) documents."
       - name: diverseRatio
         type: number
+        default: 0.4
         description: "Fraction (0–1) of sample allocated to diverse (unfiltered) documents."
       - name: maxExcludedFeaturesInPrompt
         type: number
+        default: 10
         description: "Maximum number of excluded KI features sent in the LLM prompt."
       - name: maxEntityFilters
         type: number
+        default: 10
         description: "Maximum number of entity filters applied during sampling."
+      - name: samplingTimeoutMs
+        type: number
+        default: 60000
+        description: "Deadline (ms) per ES|QL sampling query during features identification sampling."
+      - name: computedFeaturesTimeoutMs
+        type: number
+        default: 60000
+        description: "Deadline (ms) for the whole computed-feature generation pass."
       - name: maxPreviouslyIdentifiedFeatures
         type: number
         description: "Maximum number of previously identified features sent in the LLM prompt."
@@ -104,6 +122,10 @@ steps:
   - name: identify_loop
     type: while
     condition: "${{ variables.iterationResults.size < inputs.maxIterations }}"
+    # Leaves the rest of the workflow timeout to identify_computed.
+    timeout: "13m"
+    on-failure:
+      continue: true
     steps:
       # 2a: Sample documents for this iteration.
       - name: prepare
@@ -123,6 +145,7 @@ steps:
             entityFilteredRatio: "${{ inputs.entityFilteredRatio }}"
             diverseRatio: "${{ inputs.diverseRatio }}"
             maxEntityFilters: "${{ inputs.maxEntityFilters }}"
+            samplingTimeoutMs: "${{ inputs.samplingTimeoutMs }}"
 
       # 2b: If no documents were returned, stop the loop.
       - name: check_docs
@@ -144,6 +167,7 @@ steps:
           body:
             connectorId: "${{ inputs.connectorId }}"
             runId: "${{ execution.id }}"
+            parentWorkflowExecutionId: "${{ parent.executionId }}"
             iteration: "${{ variables.iterationResults.size | plus: 1 }}"
             documents: "${{ steps.prepare.output.documents }}"
             samplingTelemetry: "${{ steps.prepare.output.samplingTelemetry }}"
@@ -198,16 +222,16 @@ steps:
                 type: loop.break
 
   # -----------------------------------------------------------------------
-  # Step 3: Fail if iterations ran but none succeeded.
+  # Step 3: Fail if no iteration succeeded, unless the source had no documents.
   # -----------------------------------------------------------------------
   - name: check_all_failed
     type: if
-    condition: "${{ variables.iterationResults.size > 0 and variables.hasSuccess == false }}"
+    condition: "${{ variables.hasSuccess == false and steps.prepare.output.hasDocuments != false }}"
     steps:
       - name: all_failed
         type: workflow.fail
         with:
-          message: "All LLM iterations failed for source {{ inputs.sourceId }}"
+          message: "All LLM iterations failed for source {{ inputs.sourceId }}{% if steps.identify_loop.error.message %}: {{ steps.identify_loop.error.message }}{% endif %}"
 
   # -----------------------------------------------------------------------
   # Step 4: Identify computed features.
@@ -233,6 +257,7 @@ steps:
         end: "${{ inputs.end }}"
         runId: "${{ execution.id }}"
         featureTtlDays: "${{ inputs.featureTtlDays }}"
+        computedFeaturesTimeoutMs: "${{ inputs.computedFeaturesTimeoutMs }}"
 
   # -----------------------------------------------------------------------
   # Step 5: Output results.

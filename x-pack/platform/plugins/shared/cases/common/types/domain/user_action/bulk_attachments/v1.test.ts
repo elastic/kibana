@@ -6,61 +6,35 @@
  */
 
 import { UserActionTypes } from '../action/v1';
-import { UserActionsRt } from '../v1';
-import { BulkAttachmentsUserActionPayloadRt, BulkAttachmentsUserActionRt } from './v1';
+import { UserActionsSchema } from '../v1';
+import { BulkAttachmentsUserActionSchema } from './v1';
 
-describe('Bulk attachments', () => {
-  const payload = {
-    bulkAttachments: {
-      attachmentType: 'security.alert',
-      count: 3,
-    },
+describe('BulkAttachmentsUserActionSchema', () => {
+  const userAction = {
+    type: UserActionTypes.bulkAttachments,
+    payload: { bulkAttachments: { attachmentType: 'security.alert', count: 3 } },
   };
 
-  describe('BulkAttachmentsUserActionPayloadRt', () => {
-    it('has expected attributes in request', () => {
-      expect(BulkAttachmentsUserActionPayloadRt.decode(payload)).toStrictEqual({
-        _tag: 'Right',
-        right: payload,
-      });
-    });
-
-    it('removes foo:bar attributes from bulkAttachments', () => {
-      const query = BulkAttachmentsUserActionPayloadRt.decode({
-        bulkAttachments: { ...payload.bulkAttachments, foo: 'bar' },
-      });
-
-      expect(query).toStrictEqual({ _tag: 'Right', right: payload });
-    });
+  it('accepts a bulkAttachments user action', () => {
+    expect(BulkAttachmentsUserActionSchema.parse(userAction)).toEqual(userAction);
   });
 
-  describe('BulkAttachmentsUserActionRt', () => {
-    const userAction = { type: UserActionTypes.bulkAttachments, payload };
-
-    it('has expected attributes in request', () => {
-      expect(BulkAttachmentsUserActionRt.decode(userAction)).toStrictEqual({
-        _tag: 'Right',
-        right: userAction,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = BulkAttachmentsUserActionRt.decode({ ...userAction, foo: 'bar' });
-
-      expect(query).toStrictEqual({ _tag: 'Right', right: userAction });
-    });
+  it('strips unknown fields in bulkAttachments', () => {
+    expect(
+      BulkAttachmentsUserActionSchema.parse({
+        ...userAction,
+        payload: {
+          bulkAttachments: { ...userAction.payload.bulkAttachments, ids: ['attachment-1'] },
+        },
+      })
+    ).toEqual(userAction);
   });
 
-  describe('UserActionsRt', () => {
-    const userAction = {
-      type: UserActionTypes.bulkAttachments,
-      payload,
+  it('is part of UserActionsSchema', () => {
+    const fullUserAction = {
+      ...userAction,
       created_at: '2026-10-16T12:00:00.000Z',
-      created_by: {
-        full_name: 'Leslie Knope',
-        username: 'lknope',
-        email: 'leslie.knope@elastic.co',
-      },
+      created_by: { full_name: null, username: 'lknope', email: null },
       owner: 'securitySolution',
       action: 'delete',
       comment_id: null,
@@ -68,22 +42,8 @@ describe('Bulk attachments', () => {
       version: 'WzQ3LDFc',
     };
 
-    it('decodes a bulkAttachments user action', () => {
-      expect(UserActionsRt.decode([userAction])).toStrictEqual({
-        _tag: 'Right',
-        right: [userAction],
-      });
-    });
-
-    it('strips unknown fields in bulkAttachments without failing', () => {
-      const query = UserActionsRt.decode([
-        {
-          ...userAction,
-          payload: { bulkAttachments: { ...payload.bulkAttachments, ids: ['attachment-1'] } },
-        },
-      ]);
-
-      expect(query).toStrictEqual({ _tag: 'Right', right: [userAction] });
-    });
+    const result = UserActionsSchema.safeParse([fullUserAction]);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual([fullUserAction]);
   });
 });

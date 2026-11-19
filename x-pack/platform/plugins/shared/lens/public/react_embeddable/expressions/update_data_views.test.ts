@@ -56,6 +56,26 @@ describe('getUsedDataViews', () => {
     expect(dataViews.create).not.toHaveBeenCalled();
   });
 
+  it.each([undefined, {}])(
+    'publishes the DataView of an ES|QL layer that has no persisted spec (%p)',
+    async (persistedSpecs) => {
+      const result = await getUsedDataViews([], persistedSpecs, dataViews, { layers, http });
+
+      expect(result).toEqual([shimDataView]);
+      expect(dataViews.create).not.toHaveBeenCalled();
+    }
+  );
+
+  it('publishes the DataView of the dataset when it resolves to another id than the layer and there is no spec', async () => {
+    const registered = { id: 'another-id' } as unknown as DataView;
+    mockRegisterEsqlSourceInDataViewsCache.mockResolvedValue(registered);
+
+    const result = await getUsedDataViews([], undefined, dataViews, { layers, http });
+
+    expect(result).toEqual([registered]);
+    expect(dataViews.create).not.toHaveBeenCalled();
+  });
+
   it('registers the DataView from the schema the source was just created with', async () => {
     await getUsedDataViews([], { [spec.id!]: spec }, dataViews, { layers, http });
 
@@ -265,8 +285,10 @@ describe('getUsedDataViews', () => {
       http,
     });
 
-    expect(result).toEqual([created]);
-    expect(mockRegisterEsqlSourceInDataViewsCache).not.toHaveBeenCalled();
+    expect(result).toEqual([created, shimDataView]);
+    expect(dataViews.create).toHaveBeenCalledTimes(1);
+    expect(dataViews.create).toHaveBeenCalledWith(formBasedSpec);
+    expect(mockRegisterEsqlSourceInDataViewsCache).toHaveBeenCalledTimes(1);
   });
 
   it('creates the DataView from the spec when no ES|QL context is given', async () => {

@@ -138,7 +138,10 @@ describe('SubjectsService', () => {
       hidden: true,
     });
     expect(manager.getActive()).toHaveLength(2);
-    expect(manager.drainChanges()).toEqual([]);
+    expect(manager.drainChanges().map(({ kind, hidden }) => [kind, hidden])).toEqual([
+      ['added', true],
+      ['added', true],
+    ]);
   });
 
   it('is hidden in the conversation and not rendered inline', async () => {
@@ -271,6 +274,25 @@ describe('SubjectsService', () => {
         isHolderOpen: jest.fn(),
       })
     ).rejects.toBeInstanceOf(InvestigationAttachmentInvalidRequestError);
+  });
+
+  it('finds the claim holder of a subject, and none for a key no claim can hold', async () => {
+    const { service } = setup();
+    const thread = { type: 'slack_thread' as const, id: 'slack:T1:C1:1700000000.000100' };
+    await service.claimSubjects({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [thread],
+      isHolderOpen: jest.fn(),
+    });
+
+    await expect(service.findClaimHolder(thread, SPACE_ID)).resolves.toBe('conv-1');
+    await expect(
+      service.findClaimHolder({ type: 'slack_thread', id: 'x'.repeat(10_000) }, SPACE_ID)
+    ).resolves.toBeUndefined();
+    await expect(
+      service.findClaimHolder({ type: 'slack_thread', id: '' }, SPACE_ID)
+    ).resolves.toBeUndefined();
   });
 
   it('lists the subjects of investigations', async () => {

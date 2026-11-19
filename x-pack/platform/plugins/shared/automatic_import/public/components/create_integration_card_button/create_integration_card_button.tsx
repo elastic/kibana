@@ -21,6 +21,7 @@ import { AutomaticImportTelemetryEventType } from '../../../common/telemetry/typ
 import { useKibana } from '../../common/hooks/use_kibana';
 import type { Services } from '../../services/types';
 import type { AutomaticImportPluginStart } from '../../types';
+import type { CreateIntegrationSideCardButtonProps } from './types';
 import autoImportIntegrationsImage from '../../common/images/auto_import_integrations.svg';
 
 interface ServicesWithOptionalAutomaticImportTelemetry extends Services {
@@ -102,112 +103,133 @@ const useStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => ({
   `,
 });
 
-export const CreateIntegrationSideCardButton = React.memo(() => {
-  const services = useKibana().services as ServicesWithOptionalAutomaticImportTelemetry;
-  const { getUrlForApp, navigateToUrl } = services.application;
-  const telemetry = services.automaticImport?.telemetry ?? services.telemetry;
-  const { euiTheme } = useEuiTheme();
-  const styles = useStyles(euiTheme);
+export const CreateIntegrationSideCardButton = React.memo<CreateIntegrationSideCardButtonProps>(
+  ({ canCreate, canUpload }) => {
+    const services = useKibana().services as ServicesWithOptionalAutomaticImportTelemetry;
+    const { getUrlForApp, navigateToUrl } = services.application;
+    const telemetry = services.automaticImport?.telemetry ?? services.telemetry;
+    const { euiTheme } = useEuiTheme();
+    const styles = useStyles(euiTheme);
 
-  const createHref = useMemo(
-    () => getUrlForApp('integrations', { path: '/create' }),
-    [getUrlForApp]
-  );
+    const createHref = useMemo(
+      () => getUrlForApp('integrations', { path: '/create' }),
+      [getUrlForApp]
+    );
 
-  const uploadHref = useMemo(
-    () => getUrlForApp('integrations', { path: '/upload' }),
-    [getUrlForApp]
-  );
+    const uploadHref = useMemo(
+      () => getUrlForApp('integrations', { path: '/upload' }),
+      [getUrlForApp]
+    );
 
-  const navigateToCreate = useCallback(
-    (ev: React.MouseEvent<HTMLAnchorElement>) => {
-      ev.preventDefault();
-      navigateToUrl(createHref);
-    },
-    [createHref, navigateToUrl]
-  );
+    const navigateToCreate = useCallback(
+      (ev: React.MouseEvent<HTMLAnchorElement>) => {
+        ev.preventDefault();
+        navigateToUrl(createHref);
+      },
+      [createHref, navigateToUrl]
+    );
 
-  const navigateToUpload = useCallback(
-    (ev: React.MouseEvent<HTMLAnchorElement>) => {
-      ev.preventDefault();
-      telemetry?.reportEvent(AutomaticImportTelemetryEventType.UploadIntegrationClicked, {});
-      navigateToUrl(uploadHref);
-    },
-    [uploadHref, navigateToUrl, telemetry]
-  );
+    const navigateToUpload = useCallback(
+      (ev: React.MouseEvent<HTMLAnchorElement>) => {
+        ev.preventDefault();
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.UploadIntegrationClicked, {});
+        navigateToUrl(uploadHref);
+      },
+      [uploadHref, navigateToUrl, telemetry]
+    );
 
-  return (
-    <EuiFlexGroup justifyContent="center">
-      <EuiPanel
-        hasShadow={false}
-        hasBorder
-        data-test-subj="createIntegrationCardButton"
-        css={styles.panel}
+    if (!canCreate && !canUpload) {
+      return null;
+    }
+
+    const uploadLink = (
+      <EuiLink
+        href={uploadHref}
+        onClick={navigateToUpload}
+        data-test-subj="uploadIntegrationPackageLink"
       >
-        <EuiFlexGroup direction="column" css={styles.panelContent}>
-          <EuiFlexItem css={styles.title}>
-            <FormattedMessage
-              id="xpack.automaticImport.createIntegrationTitle"
-              defaultMessage="Can't find an integration?"
-            />
-          </EuiFlexItem>
+        <FormattedMessage
+          id="xpack.automaticImport.createIntegrationUploadLink"
+          defaultMessage="upload an integration package"
+        />
+      </EuiLink>
+    );
 
-          <EuiFlexGroup direction="row" wrap={false} css={styles.contentRow}>
-            <EuiFlexItem grow={false} css={styles.imageContainer}>
-              <img alt="" src={autoImportIntegrationsImage} css={styles.image} />
+    return (
+      <EuiFlexGroup justifyContent="center">
+        <EuiPanel
+          hasShadow={false}
+          hasBorder
+          data-test-subj="createIntegrationCardButton"
+          css={styles.panel}
+        >
+          <EuiFlexGroup direction="column" css={styles.panelContent}>
+            <EuiFlexItem css={styles.title}>
+              <FormattedMessage
+                id="xpack.automaticImport.createIntegrationTitle"
+                defaultMessage="Can't find an integration?"
+              />
             </EuiFlexItem>
-            <EuiFlexItem css={styles.descriptionContainer}>
-              <EuiText size="xs" css={styles.descriptionText}>
-                <FormattedMessage
-                  id="xpack.automaticImport.createIntegrationDescription"
-                  defaultMessage="Use AI to create a new one or {uploadLink}"
-                  values={{
-                    uploadLink: (
-                      <EuiLink
-                        href={uploadHref}
-                        onClick={navigateToUpload}
-                        data-test-subj="uploadIntegrationPackageLink"
-                      >
-                        <FormattedMessage
-                          id="xpack.automaticImport.createIntegrationUploadLink"
-                          defaultMessage="upload an integration package"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
+
+            <EuiFlexGroup direction="row" wrap={false} css={styles.contentRow}>
+              <EuiFlexItem grow={false} css={styles.imageContainer}>
+                <img alt="" src={autoImportIntegrationsImage} css={styles.image} />
+              </EuiFlexItem>
+              <EuiFlexItem css={styles.descriptionContainer}>
+                <EuiText size="xs" css={styles.descriptionText}>
+                  {canCreate && canUpload ? (
+                    <FormattedMessage
+                      id="xpack.automaticImport.createIntegrationDescription"
+                      defaultMessage="Use AI to create a new one or {uploadLink}"
+                      values={{ uploadLink }}
+                    />
+                  ) : canCreate ? (
+                    <FormattedMessage
+                      id="xpack.automaticImport.createIntegrationDescriptionCreateOnly"
+                      defaultMessage="Use AI to create a new one"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.automaticImport.createIntegrationDescriptionUploadOnly"
+                      defaultMessage="You can {uploadLink}"
+                      values={{ uploadLink }}
+                    />
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            {canCreate && (
+              // eslint-disable-next-line @elastic/eui/href-or-on-click
+              <EuiButton
+                color="primary"
+                size="s"
+                iconType="plusCircle"
+                iconSide="left"
+                fullWidth
+                href={createHref}
+                onClick={navigateToCreate}
+                data-test-subj="createNewIntegrationLink"
+                css={styles.ctaButton}
+              >
+                <span css={styles.ctaButtonText}>
+                  <FormattedMessage
+                    id="xpack.automaticImport.createIntegrationButton"
+                    defaultMessage="Create integration"
+                  />
+                </span>
+                <span css={styles.ctaButtonTextShort}>
+                  <FormattedMessage
+                    id="xpack.automaticImport.createIntegrationButtonShort"
+                    defaultMessage="Create"
+                  />
+                </span>
+              </EuiButton>
+            )}
           </EuiFlexGroup>
-
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-          <EuiButton
-            color="primary"
-            size="s"
-            iconType="plusCircle"
-            iconSide="left"
-            fullWidth
-            href={createHref}
-            onClick={navigateToCreate}
-            data-test-subj="createNewIntegrationLink"
-            css={styles.ctaButton}
-          >
-            <span css={styles.ctaButtonText}>
-              <FormattedMessage
-                id="xpack.automaticImport.createIntegrationButton"
-                defaultMessage="Create integration"
-              />
-            </span>
-            <span css={styles.ctaButtonTextShort}>
-              <FormattedMessage
-                id="xpack.automaticImport.createIntegrationButtonShort"
-                defaultMessage="Create"
-              />
-            </span>
-          </EuiButton>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiFlexGroup>
-  );
-});
+        </EuiPanel>
+      </EuiFlexGroup>
+    );
+  }
+);
 CreateIntegrationSideCardButton.displayName = 'CreateIntegrationCardButton';

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 const translateUnit = (totalCount: number) =>
-  i18n.translate('xpack.triggersActionsUI.alertsTable.alertsCountUnit', {
+  i18n.translate('xpack.responseOpsAlertsTable.alertsTable.alertsCountUnit', {
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
   });

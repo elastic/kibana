@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { StartServicesAccessor } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common/tools';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -16,6 +17,12 @@ import {
   DEFAULT_ALERTS_INDEX,
   SecurityAgentBuilderAttachments,
 } from '../../../../common/constants';
+import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import { readRules } from '../../../lib/detection_engine/rule_management/logic/detection_rules_client/read_rules';
+
+interface InvestigateRuleSkillDeps {
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
+}
 
 // Most ids one get_alerts_by_ids call accepts. The rule tuning proposal workflow
 // (kbn-workflows managed definitions) slices its harvested ids to this value.
@@ -170,6 +177,9 @@ these are the candidates for an exception condition (Step 4), so request exactly
   \`destination.address\`, \`destination.port\` (fields with no value return null — ignore them),
 - every field listed in the rule's \`investigation_fields\` (from the attachment, Step 1) —
   these are the rule author's designated fields and the strongest exception candidates.
+
+Call \`security.alerts\` with \`detail\` set to \`full\` for this query. It needs the fields above,
+and the summary detail does not return them.
 
 These are the only alerts you can speak about with certainty — they carry a human verdict.
 
@@ -384,10 +394,9 @@ If the alert data is insufficient for a confident diagnosis:
    determine the root cause from available data. Here is the evidence for manual review."
 `;
 
-export const createInvestigateRuleSkill = (): SkillDefinition<
-  'investigate-rule',
-  'skills/security/rules'
-> =>
+export const createInvestigateRuleSkill = ({
+  getStartServices,
+}: InvestigateRuleSkillDeps): SkillDefinition<'investigate-rule', 'skills/security/rules'> =>
   defineSkillType({
     id: 'investigate-rule',
     name: 'investigate-rule',
@@ -437,11 +446,23 @@ export const createInvestigateRuleSkill = (): SkillDefinition<
           }
 
           try {
+            // `origin` must be the rule's saved-object id: the rule card reads it that way for
+            // Update rule, View rule and Apply to rule form. The model passes the rule_id, so
+            // look the rule up first to get its saved-object id.
+            const [, startPlugins] = await getStartServices();
+            const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(
+              context.request
+            );
+            const rule = await readRules({ rulesClient, id: undefined, ruleId: String(ruleId) });
+            if (!rule) {
+              throw new Error(`Rule with rule_id "${ruleId}" was not found`);
+            }
+
             const created = await context.attachments.add(
               {
                 id: attachmentId,
                 type: SecurityAgentBuilderAttachments.rule,
-                origin: String(ruleId),
+                origin: rule.id,
                 description: `Rule: ${ruleId}`,
               },
               ATTACHMENT_REF_ACTOR.agent,

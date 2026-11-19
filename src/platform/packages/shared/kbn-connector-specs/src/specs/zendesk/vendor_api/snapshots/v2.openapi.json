@@ -1,0 +1,1865 @@
+{
+  "components": {
+    "parameters": {
+      "CursorPaginationPage": {
+        "explode": true,
+        "in": "query",
+        "name": "page",
+        "schema": {
+          "properties": {
+            "after": {
+              "type": "string"
+            },
+            "before": {
+              "type": "string"
+            },
+            "size": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "style": "deepObject"
+      },
+      "CursorPaginationSort": {
+        "in": "query",
+        "name": "sort",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "DualPaginationPage": {
+        "explode": true,
+        "in": "query",
+        "name": "page",
+        "schema": {
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "properties": {
+                "after": {
+                  "type": "string"
+                },
+                "before": {
+                  "type": "string"
+                },
+                "size": {
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        },
+        "style": "deepObject"
+      },
+      "PerPage": {
+        "in": "query",
+        "name": "per_page",
+        "schema": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "SearchInclude": {
+        "in": "query",
+        "name": "include",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "TicketId": {
+        "in": "path",
+        "name": "ticket_id",
+        "required": true,
+        "schema": {
+          "format": "int64",
+          "type": "integer"
+        }
+      },
+      "TicketSortBy": {
+        "in": "query",
+        "name": "sort_by",
+        "schema": {
+          "enum": [
+            "id",
+            "subject",
+            "deleted_at",
+            "created_at",
+            "updated_at",
+            "status",
+            "requester",
+            "requester.name",
+            "group",
+            "assignee",
+            "assignee.name"
+          ],
+          "type": "string"
+        }
+      },
+      "TicketSortOrder": {
+        "in": "query",
+        "name": "sort_order",
+        "schema": {
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "type": "string"
+        }
+      },
+      "TicketSupportTypeScope": {
+        "in": "query",
+        "name": "support_type_scope",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "TicketsInclude": {
+        "in": "query",
+        "name": "include",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "UsersInclude": {
+        "in": "query",
+        "name": "include",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "AttachmentBaseObject": {
+        "properties": {
+          "content_type": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "content_url": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "deleted": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "file_name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "height": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "inline": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "malware_access_override": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "malware_scan_result": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "mapped_content_url": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "size": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "url": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "width": {
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AttachmentObject": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AttachmentBaseObject"
+          },
+          {
+            "$ref": "#/components/schemas/AttachmentThumbnails"
+          }
+        ],
+        "type": "object"
+      },
+      "AttachmentThumbnails": {
+        "properties": {
+          "thumbnails": {
+            "items": {
+              "$ref": "#/components/schemas/AttachmentBaseObject"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CollaboratorObject": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CurrentUserResponse": {
+        "properties": {
+          "user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserObject"
+              },
+              {
+                "properties": {
+                  "authenticity_token": {
+                    "readOnly": true,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "EmailCCObject": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FollowerObject"
+          },
+          {
+            "properties": {
+              "action": {
+                "enum": [
+                  "put",
+                  "delete"
+                ],
+                "type": "string"
+              },
+              "user_email": {
+                "type": "string"
+              },
+              "user_id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "user_name": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
+      "FollowerObject": {
+        "properties": {
+          "action": {
+            "enum": [
+              "put",
+              "delete"
+            ],
+            "type": "string"
+          },
+          "user_email": {
+            "format": "email",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "user_name": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchResponse": {
+        "properties": {
+          "count": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "facets": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "next_page": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "previous_page": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SearchResultObject"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SearchResultObject": {
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "result_type": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SharingAgreementInput": {
+        "properties": {
+          "custom_fields": {
+            "items": {
+              "$ref": "#/components/schemas/TicketFieldValueInput"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TicketAuditViaObject": {
+        "properties": {
+          "channel": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "source": {
+            "additionalProperties": true,
+            "readOnly": true,
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "TicketCommentObject": {
+        "properties": {
+          "add_short_url": {
+            "type": "boolean"
+          },
+          "attachments": {
+            "items": {
+              "$ref": "#/components/schemas/AttachmentObject"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "audit_id": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "author_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "body": {
+            "type": "string"
+          },
+          "channel_back": {
+            "type": "string"
+          },
+          "channel_source_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "html_body": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "readOnly": true,
+            "type": "object"
+          },
+          "plain_body": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "translate_to": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "uploads": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "via": {
+            "$ref": "#/components/schemas/TicketAuditViaObject"
+          }
+        },
+        "type": "object"
+      },
+      "TicketCommentsResponse": {
+        "properties": {
+          "comments": {
+            "items": {
+              "$ref": "#/components/schemas/TicketCommentObject"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TicketFieldValueInput": {
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "TicketObject": {
+        "properties": {
+          "additional_collaborators": {
+            "items": {
+              "$ref": "#/components/schemas/CollaboratorObject"
+            },
+            "type": "array",
+            "writeOnly": true
+          },
+          "allow_attachments": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "allow_channelback": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "assignee_email": {
+            "format": "email",
+            "type": "string",
+            "writeOnly": true
+          },
+          "assignee_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "attribute_value_ids": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array",
+            "writeOnly": true
+          },
+          "brand_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "collaborator_ids": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "collaborators": {
+            "items": {
+              "$ref": "#/components/schemas/CollaboratorObject"
+            },
+            "type": "array",
+            "writeOnly": true
+          },
+          "comment": {
+            "$ref": "#/components/schemas/TicketCommentObject"
+          },
+          "created_at": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "custom_fields": {
+            "items": {
+              "$ref": "#/components/schemas/TicketFieldValueInput"
+            },
+            "type": "array"
+          },
+          "custom_status_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "due_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "email_cc_ids": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "email_ccs": {
+            "items": {
+              "$ref": "#/components/schemas/EmailCCObject"
+            },
+            "nullable": true,
+            "type": "array",
+            "writeOnly": true
+          },
+          "encoded_id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "external_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/TicketFieldValueInput"
+            },
+            "type": "array"
+          },
+          "follower_ids": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "followers": {
+            "items": {
+              "$ref": "#/components/schemas/FollowerObject"
+            },
+            "type": "array",
+            "writeOnly": true
+          },
+          "followup_ids": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "forum_topic_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "from_messaging_channel": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "generated_timestamp": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "group_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "has_incidents": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "id": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "is_public": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "macro_id": {
+            "format": "int64",
+            "type": "integer",
+            "writeOnly": true
+          },
+          "macro_ids": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array",
+            "writeOnly": true
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "writeOnly": true
+          },
+          "organization_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "origin_zrn": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "priority": {
+            "enum": [
+              "urgent",
+              "high",
+              "normal",
+              "low"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "problem_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "raw_subject": {
+            "type": "string"
+          },
+          "recipient": {
+            "type": "string"
+          },
+          "requester": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "properties": {
+                  "email": {
+                    "format": "email",
+                    "type": "string"
+                  },
+                  "locale": {
+                    "type": "string"
+                  },
+                  "locale_id": {
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "organization_id": {
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "verified": {
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            ],
+            "writeOnly": true
+          },
+          "requester_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "safe_update": {
+            "type": "boolean",
+            "writeOnly": true
+          },
+          "satisfaction_probability": {
+            "readOnly": true,
+            "type": "number"
+          },
+          "satisfaction_rating": {
+            "additionalProperties": true,
+            "readOnly": true,
+            "type": "object"
+          },
+          "sharing_agreement_ids": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "sharing_agreements": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SharingAgreementInput"
+              },
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SharingAgreementInput"
+                },
+                "type": "array"
+              }
+            ],
+            "writeOnly": true
+          },
+          "status": {
+            "enum": [
+              "new",
+              "open",
+              "pending",
+              "hold",
+              "solved",
+              "closed"
+            ],
+            "type": "string"
+          },
+          "subject": {
+            "nullable": true,
+            "type": "string"
+          },
+          "submitter_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "support_type": {
+            "enum": [
+              "agent",
+              "ai_agent"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "suspended_ticket_id": {
+            "format": "int64",
+            "type": "integer",
+            "writeOnly": true
+          },
+          "suspension_type_id": {
+            "format": "int64",
+            "type": "integer",
+            "writeOnly": true
+          },
+          "system_metadata": {
+            "properties": {
+              "client": {
+                "type": "string"
+              },
+              "ip_address": {
+                "type": "string"
+              }
+            },
+            "type": "object",
+            "writeOnly": true
+          },
+          "tags": {
+            "oneOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "tde_workspace": {
+            "properties": {
+              "previous_workspace": {
+                "properties": {
+                  "id": {
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "type": {
+                "enum": [
+                  "ADD",
+                  "CHANGE",
+                  "DELETE"
+                ],
+                "type": "string"
+              },
+              "workspace": {
+                "properties": {
+                  "id": {
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object",
+            "writeOnly": true
+          },
+          "ticket_form_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "tpe_voice_comment": {
+            "properties": {
+              "agent_id": {
+                "format": "int64",
+                "nullable": true,
+                "type": "integer"
+              },
+              "answering_machine_detection_status": {
+                "nullable": true,
+                "type": "string"
+              },
+              "app_id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "app_name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "author_id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "call_connected_at": {
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
+              "call_disposition": {
+                "nullable": true,
+                "type": "string"
+              },
+              "call_ended_at": {
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
+              "call_id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "call_recording_consent": {
+                "nullable": true,
+                "type": "string"
+              },
+              "call_recording_consent_action": {
+                "nullable": true,
+                "type": "string"
+              },
+              "call_recording_consent_keypress": {
+                "nullable": true,
+                "type": "string"
+              },
+              "call_started_at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "call_type": {
+                "nullable": true,
+                "type": "string"
+              },
+              "callback_number": {
+                "nullable": true,
+                "type": "string"
+              },
+              "callback_requested_at": {
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
+              "completion_status": {
+                "nullable": true,
+                "type": "string"
+              },
+              "connection_attempts": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "consultation_time": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "direction": {
+                "type": "string"
+              },
+              "disconnection_reason": {
+                "nullable": true,
+                "type": "string"
+              },
+              "dnis": {
+                "nullable": true,
+                "type": "string"
+              },
+              "duration": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "end_user_id": {
+                "format": "int64",
+                "nullable": true,
+                "type": "integer"
+              },
+              "end_user_location": {
+                "nullable": true,
+                "type": "string"
+              },
+              "exceeded_queue_time": {
+                "nullable": true,
+                "type": "boolean"
+              },
+              "extension": {
+                "nullable": true,
+                "type": "string"
+              },
+              "external_id": {
+                "type": "string"
+              },
+              "from_line": {
+                "type": "string"
+              },
+              "from_line_nickname": {
+                "nullable": true,
+                "type": "string"
+              },
+              "hold_time": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "intent": {
+                "nullable": true,
+                "type": "string"
+              },
+              "ivr_destination_group_name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "ivr_time_spent": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "language": {
+                "nullable": true,
+                "type": "string"
+              },
+              "line_type": {
+                "type": "string"
+              },
+              "longest_hold_time": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "number_of_holds": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "outside_business_hours": {
+                "nullable": true,
+                "type": "boolean"
+              },
+              "overflowed_to": {
+                "nullable": true,
+                "type": "string"
+              },
+              "phone_name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "public": {
+                "type": "boolean"
+              },
+              "quality_score": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "queue_name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "queue_time": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "recorded": {
+                "type": "boolean"
+              },
+              "recording_time": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "recording_type": {
+                "type": "string"
+              },
+              "recording_url": {
+                "nullable": true,
+                "type": "string"
+              },
+              "sentiment_agent": {
+                "nullable": true,
+                "type": "string"
+              },
+              "sentiment_call": {
+                "nullable": true,
+                "type": "string"
+              },
+              "sentiment_customer": {
+                "nullable": true,
+                "type": "string"
+              },
+              "sentiment_trend": {
+                "nullable": true,
+                "type": "string"
+              },
+              "short_summary": {
+                "nullable": true,
+                "type": "string"
+              },
+              "summary": {
+                "nullable": true,
+                "type": "string"
+              },
+              "talk_time": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "time_to_answer": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "title": {
+                "type": "string"
+              },
+              "to_line": {
+                "type": "string"
+              },
+              "to_line_nickname": {
+                "nullable": true,
+                "type": "string"
+              },
+              "transcript": {
+                "nullable": true,
+                "type": "string"
+              },
+              "via_id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "video_recording_url": {
+                "nullable": true,
+                "type": "string"
+              },
+              "voicemail": {
+                "nullable": true,
+                "type": "boolean"
+              },
+              "voicemail_requested_at": {
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
+              "wait_time": {
+                "nullable": true,
+                "type": "integer"
+              }
+            },
+            "type": "object",
+            "writeOnly": true
+          },
+          "type": {
+            "enum": [
+              "problem",
+              "incident",
+              "question",
+              "task"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "updated_stamp": {
+            "format": "date-time",
+            "type": "string",
+            "writeOnly": true
+          },
+          "url": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "via": {
+            "$ref": "#/components/schemas/ViaObject"
+          },
+          "via_followup_source_id": {
+            "format": "int64",
+            "type": "integer",
+            "writeOnly": true
+          },
+          "via_id": {
+            "format": "int64",
+            "type": "integer",
+            "writeOnly": true
+          },
+          "voice_comment": {
+            "additionalProperties": true,
+            "properties": {
+              "answered_by_id": {
+                "format": "int64",
+                "nullable": true,
+                "type": "integer"
+              },
+              "call_duration": {
+                "type": "integer"
+              },
+              "from": {
+                "type": "string"
+              },
+              "location": {
+                "nullable": true,
+                "type": "string"
+              },
+              "recording_url": {
+                "nullable": true,
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "transcription_text": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "type": "object",
+            "writeOnly": true
+          }
+        },
+        "type": "object"
+      },
+      "TicketResponse": {
+        "properties": {
+          "ticket": {
+            "$ref": "#/components/schemas/TicketObject"
+          }
+        },
+        "type": "object"
+      },
+      "TicketsResponse": {
+        "properties": {
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/TicketObject"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UserForAdmin": {
+        "properties": {
+          "active": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "agent_brand_ids": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "alias": {
+            "type": "string"
+          },
+          "chat_only": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "custom_role_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "default_group_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "details": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "external_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "iana_time_zone": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "last_login_at": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "locale_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "moderator": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "only_private_comments": {
+            "type": "boolean"
+          },
+          "organization_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "phone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "photo": {
+            "additionalProperties": true,
+            "nullable": true,
+            "type": "object"
+          },
+          "remote_photo_url": {
+            "type": "string"
+          },
+          "report_csv": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "restricted_agent": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "role": {
+            "type": "string"
+          },
+          "role_type": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "integer"
+          },
+          "separation": {
+            "properties": {
+              "brand_id": {
+                "format": "int64",
+                "readOnly": true,
+                "type": "integer"
+              },
+              "scope": {
+                "enum": [
+                  "account",
+                  "brand"
+                ],
+                "readOnly": true,
+                "type": "string"
+              }
+            },
+            "readOnly": true,
+            "required": [
+              "scope"
+            ],
+            "type": "object"
+          },
+          "shared": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "shared_agent": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "shared_phone_number": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "signature": {
+            "type": "string"
+          },
+          "suspended": {
+            "type": "boolean"
+          },
+          "suspension_details": {
+            "nullable": true,
+            "properties": {
+              "channels": {
+                "items": {
+                  "enum": [
+                    "all",
+                    "messaging"
+                  ],
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "readOnly": true,
+            "required": [
+              "channels"
+            ],
+            "type": "object"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ticket_restriction": {
+            "nullable": true,
+            "type": "string"
+          },
+          "time_zone": {
+            "type": "string"
+          },
+          "two_factor_auth_enabled": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "url": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "user_fields": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "Users",
+        "type": "object"
+      },
+      "UserForEndUser": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "iana_time_zone": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "locale": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "locale_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "organization_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "photo": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "role": {
+            "type": "string"
+          },
+          "shared_phone_number": {
+            "type": "boolean"
+          },
+          "time_zone": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "url": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "UserObject": {
+        "additionalProperties": true,
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/UserForAdmin"
+          },
+          {
+            "$ref": "#/components/schemas/UserForEndUser"
+          }
+        ]
+      },
+      "ViaObject": {
+        "properties": {
+          "channel": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "source": {
+            "additionalProperties": true,
+            "properties": {
+              "from": {
+                "properties": {
+                  "address": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "id": {
+                    "format": "int64",
+                    "nullable": true,
+                    "type": "integer"
+                  },
+                  "name": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "title": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "rel": {
+                "nullable": true,
+                "type": "string"
+              },
+              "to": {
+                "properties": {
+                  "address": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Support API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v2/search": {
+      "get": {
+        "operationId": "ListSearchResults",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_order",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/SearchInclude"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/tickets": {
+      "get": {
+        "operationId": "ListTickets",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "external_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/TicketSortBy"
+          },
+          {
+            "$ref": "#/components/parameters/TicketSortOrder"
+          },
+          {
+            "$ref": "#/components/parameters/TicketSupportTypeScope"
+          },
+          {
+            "$ref": "#/components/parameters/DualPaginationPage"
+          },
+          {
+            "$ref": "#/components/parameters/PerPage"
+          },
+          {
+            "$ref": "#/components/parameters/CursorPaginationSort"
+          },
+          {
+            "$ref": "#/components/parameters/TicketsInclude"
+          },
+          {
+            "in": "query",
+            "name": "start_time",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/tickets/{ticket_id}": {
+      "get": {
+        "operationId": "ShowTicket",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TicketId"
+          },
+          {
+            "$ref": "#/components/parameters/TicketsInclude"
+          },
+          {
+            "in": "query",
+            "name": "reduced_payload_size",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "remove_duplicate_fields",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/tickets/{ticket_id}/comments": {
+      "get": {
+        "operationId": "ListTicketComments",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_inline_images",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PerPage"
+          },
+          {
+            "in": "query",
+            "name": "sort_order",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CursorPaginationPage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketCommentsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/TicketId"
+        }
+      ]
+    },
+    "/api/v2/users/me": {
+      "get": {
+        "operationId": "ShowCurrentUser",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UsersInclude"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://{subdomain}.{domain}.com",
+      "variables": {
+        "domain": {
+          "default": "zendesk"
+        },
+        "subdomain": {
+          "default": "example"
+        }
+      }
+    }
+  ]
+}

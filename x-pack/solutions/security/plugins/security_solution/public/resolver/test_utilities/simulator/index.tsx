@@ -49,6 +49,11 @@ export class Simulator {
    * Simulator which allows you to explicitly simulate resize events and trigger animation frames
    */
   private readonly sideEffectSimulator: SideEffectSimulator;
+  /**
+   * The mocked core services passed to Resolver through `KibanaContextProvider`. Tests can assert
+   * against them, e.g. `coreStart.overlays.openSystemFlyout`.
+   */
+  public readonly coreStart: ReturnType<typeof coreMock.createStart>;
 
   /**
    * An `enzyme` supported CSS selector for process node elements.
@@ -82,7 +87,6 @@ export class Simulator {
     history,
     filters,
     shouldUpdate,
-    useLegacyExpandableFlyout = false,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -103,7 +107,6 @@ export class Simulator {
     history: HistoryPackageHistoryInterface;
     filters: TimeFilters;
     shouldUpdate: boolean;
-    useLegacyExpandableFlyout?: boolean;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
@@ -125,9 +128,9 @@ export class Simulator {
     this.history = history;
 
     // Used for `KibanaContextProvider`
-    const coreStart = coreMock.createStart();
+    this.coreStart = coreMock.createStart();
 
-    coreStart.settings.client.get.mockImplementation(uiSetting);
+    this.coreStart.settings.client.get.mockImplementation(uiSetting);
 
     this.sideEffectSimulator = sideEffectSimulatorFactory();
 
@@ -138,12 +141,11 @@ export class Simulator {
         history={this.history}
         sideEffectSimulator={this.sideEffectSimulator}
         store={this.store}
-        coreStart={coreStart}
+        coreStart={this.coreStart}
         databaseDocumentID={databaseDocumentID}
         indices={indices}
         filters={filters}
         shouldUpdate={shouldUpdate}
-        useLegacyExpandableFlyout={useLegacyExpandableFlyout}
         renderCellActions={cellActionRenderer}
       />
     );

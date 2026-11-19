@@ -5,4 +5,28 @@
  * 2.0.
  */
 
+import {
+  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+  type JsonSchema,
+} from '@kbn/workflows';
+
 export const INLINE_WORKFLOW_TAG = 'alertingv2-action-policy';
+
+export const INPUTS = 'inputs';
+// The dispatcher schedules inline workflows with `{ payload }`.
+export const PAYLOAD_INPUT = 'payload';
+
+/**
+ * Trigger inputs declared by every inline action policy workflow, so templates reference
+ * `{{ inputs.payload.* }}`.
+ */
+export const INLINE_WORKFLOW_INPUTS: JsonSchema = {
+  type: 'object',
+  properties: {
+    [PAYLOAD_INPUT]: {
+      $ref: `${KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}`,
+    },
+  },
+  required: [PAYLOAD_INPUT],
+};

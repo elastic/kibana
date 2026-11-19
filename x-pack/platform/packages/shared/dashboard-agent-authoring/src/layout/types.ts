@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/as-code-dashboard-schema';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-constants';
 
 export interface LayoutGrid {
   x: number;
@@ -29,8 +29,13 @@ export interface LayoutPanel extends LayoutPanelKind {
   title?: string;
   /** Set for a panel whose kind changed in this call: the kind its current grid was sized for. */
   retypedFrom?: LayoutPanelKind;
-  /** Set for a markdown panel whose text changed in this call, since its grid was sized for the old text. */
+  /**
+   * Set for a markdown panel whose text, or a custom content panel whose template, changed in this
+   * call, since its grid was sized for the old content.
+   */
   textChanged?: true;
+  /** The grid height a panel needs, from the height its content declared. */
+  heightRows?: number;
   /** The text of a markdown panel, or the config of a custom content panel, to size it by. */
   content?: string;
   /** Omitted for a panel added to its container in this call, which the layout call places. */
@@ -50,7 +55,7 @@ export interface LayoutSection {
   removed?: LayoutGrid[];
 }
 
-/** The dashboard as it is after the operations, with the grids of the panels already placed. */
+/** The dashboard as it is after the changes, with the grids of the panels already placed. */
 export interface LayoutRequest {
   /** Where panels and sections go, from the user or the authoring agent. */
   instructions?: string;

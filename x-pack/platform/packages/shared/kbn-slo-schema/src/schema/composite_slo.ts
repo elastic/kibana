@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
+import { MAX_DURATION_STRING_LENGTH } from './limits';
 
 const COMPOSITE_SLO_MIN_MEMBERS = 2;
 const COMPOSITE_SLO_MAX_MEMBERS = 25;
 
-const compositeSloIdSchema = z
-  .string()
-  .min(8)
-  .max(48)
-  .regex(
-    /^[a-z0-9-_]+$/,
-    'Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores'
-  );
+const compositeSloIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(8)
+    .max(48)
+    .regex(
+      /^[a-z0-9-_]+$/,
+      'Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores'
+    )
+);
 
 const compositeTagsSchema = z.array(z.string()).max(30);
 
@@ -25,10 +28,12 @@ const compositeTargetSchema = z.object({ target: z.number() });
 
 const compositeOccurrencesBudgetingMethodSchema = z.literal('occurrences');
 
-const compositeRollingTimeWindowSchema = z.object({
-  duration: z.string(),
-  type: z.literal('rolling'),
-});
+const compositeRollingTimeWindowSchema = lazySchema(() =>
+  z.object({
+    duration: z.string().max(MAX_DURATION_STRING_LENGTH),
+    type: z.literal('rolling'),
+  })
+);
 
 const compositeSloMemberSchema = z.object({
   sloId: compositeSloIdSchema,

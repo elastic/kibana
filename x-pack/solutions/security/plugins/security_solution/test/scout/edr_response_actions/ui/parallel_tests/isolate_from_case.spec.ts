@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import { getResponseActionsAccessRole } from '../fixtures/response_actions_access_role';
+import { getResponseActionsAccessRole } from '../../common/response_actions_access_role';
 import { attachAlertToCase } from '../fixtures/attach_alert_to_case';
 import { spaceTest, tags } from '../fixtures';
 import { seedHostWithAlert, type SeededHostAlert } from '../../common/seed_endpoint_hosts';

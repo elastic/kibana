@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { fetchGroupMemberIds } from './fetch_group_member_ids';
+import { fetchGroupMemberIds, fetchGroupMembers } from './fetch_group_member_ids';
 
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 
@@ -74,6 +74,36 @@ describe('fetchGroupMemberIds', () => {
 
     await expect(fetchGroupMemberIds(esClient, 'default', ['host:a'])).rejects.toThrow(
       'too many members'
+    );
+  });
+});
+
+describe('fetchGroupMembers', () => {
+  it("returns each member's id with the asked-for fields of its record, nested", async () => {
+    const esClient = buildClient([['host:a1', 'host:a']]);
+    esClient.search.mockResolvedValueOnce({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: {
+        hits: [
+          {
+            _index: 'entities',
+            _id: 'host:a1',
+            fields: { 'entity.id': ['host:a1'], [RESOLVED_TO_FIELD]: ['host:a'] },
+            _source: { 'asset.criticality': 'high_impact' },
+          },
+        ],
+      },
+    });
+
+    expect(await fetchGroupMembers(esClient, 'default', ['host:a'], ['asset.criticality'])).toEqual(
+      {
+        'host:a': [{ id: 'host:a1', record: { asset: { criticality: 'high_impact' } } }],
+      }
+    );
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ _source: ['asset.criticality'] })
     );
   });
 });

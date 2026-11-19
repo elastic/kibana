@@ -23,6 +23,7 @@ import type { SearchOpts, StoreOpts } from '../task_store';
 import type { TaskEvent } from '../task_events';
 import { asTaskClaimEvent } from '../task_events';
 import { asOk, asErr, isOk, unwrap } from '../lib/result_type';
+import { getUnreadableTaskError } from '../lib/errors';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import type { OwnershipClaimingOpts, TaskClaimingOpts } from '../queries/task_claiming';
@@ -1344,6 +1345,123 @@ describe('TaskClaiming', () => {
         staleTasks: 0,
       });
       expect(result.docs.length).toEqual(3);
+    });
+
+    describe('unreadable tasks', () => {
+      const setupClaimWithUnreadableTask = () => {
+        const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+        store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+        const fetchedTasks = [
+          mockInstance({ id: `id-1`, taskType: 'report', version: '123' }),
+          mockInstance({ id: `id-2`, taskType: 'report', version: '123' }),
+          mockInstance({ id: `id-3`, taskType: 'report', version: '123' }),
+        ];
+
+        const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+        store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+        store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+        store.bulkPartialUpdate.mockResolvedValueOnce(
+          fetchedTasks.map(({ id }) =>
+            asOk({ id, version: `${id}-claimed`, attempts: 3, status: TaskStatus.Running })
+          )
+        );
+        store.bulkGet.mockResolvedValueOnce([
+          asOk({ ...fetchedTasks[0], version: 'id-1-claimed' }),
+          asErr({
+            type: 'task',
+            id: 'id-2',
+            error: getUnreadableTaskError(`Task "id-2"'s params field has invalid JSON: {invalid`),
+          }),
+          asErr({
+            type: 'task',
+            id: 'id-3',
+            error: {
+              error: 'Internal Server Error',
+              message: "Unable to decrypt the task's API keys: Decryption unavailable",
+              statusCode: 500,
+            },
+          }),
+        ]);
+
+        const taskClaiming = new TaskClaiming({
+          logger: taskManagerLogger,
+          strategy: CLAIM_STRATEGY_MGET,
+          definitions: taskDefinitions,
+          taskStore: store,
+          excludedTaskTypes: [],
+          maxAttempts: 2,
+          getAvailableCapacity: () => 10,
+          taskPartitioner,
+        });
+
+        return { store, taskClaiming };
+      };
+
+      const claim = async (taskClaiming: TaskClaiming) =>
+        unwrap(
+          await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+            claimOwnershipUntil: new Date(),
+          })
+        ) as ClaimOwnershipResult;
+
+      test('marks a task with an unreadable document as failed, and leaves tasks with other errors', async () => {
+        const { store, taskClaiming } = setupClaimWithUnreadableTask();
+        store.bulkPartialUpdate.mockResolvedValueOnce([
+          asOk({ id: 'id-2', version: 'id-2-failed', status: TaskStatus.Failed }),
+        ]);
+
+        const result = await claim(taskClaiming);
+
+        expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(2);
+        expect(store.bulkPartialUpdate).toHaveBeenLastCalledWith([
+          {
+            id: 'id-2',
+            version: 'id-2-claimed',
+            status: TaskStatus.Failed,
+            attempts: 2,
+            startedAt: null,
+            retryAt: null,
+            ownerId: null,
+          },
+        ]);
+        expect(result.docs.map(({ id }) => id)).toEqual(['id-1']);
+        expect(result.stats.tasksErrors).toBe(2);
+        expect(taskManagerLogger.warn).not.toHaveBeenCalled();
+      });
+
+      test('logs a warning when an unreadable task cannot be marked as failed', async () => {
+        const { store, taskClaiming } = setupClaimWithUnreadableTask();
+        store.bulkPartialUpdate.mockResolvedValueOnce([
+          asErr({
+            type: 'task',
+            id: 'id-2',
+            status: 409,
+            error: { type: 'version_conflict_engine_exception', reason: 'conflict' },
+          }),
+        ]);
+
+        const result = await claim(taskClaiming);
+
+        expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+          'Error marking unreadable task id-2:task as failed during claim: {"type":"version_conflict_engine_exception","reason":"conflict"}',
+          { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+        );
+        expect(result.docs.map(({ id }) => id)).toEqual(['id-1']);
+      });
+
+      test('logs a warning when marking unreadable tasks as failed throws', async () => {
+        const { store, taskClaiming } = setupClaimWithUnreadableTask();
+        store.bulkPartialUpdate.mockRejectedValueOnce(new Error('Bulk update failed'));
+
+        const result = await claim(taskClaiming);
+
+        expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+          'Error marking unreadable tasks as failed during claim: Bulk update failed',
+          { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+        );
+        expect(result.docs.map(({ id }) => id)).toEqual(['id-1']);
+      });
     });
 
     test('should skip tasks where bulkGet returns a newer task document than the bulkPartialUpdate', async () => {

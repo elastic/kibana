@@ -18,7 +18,7 @@ import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/
 import {
   AlertingV2ActionPoliciesLocatorDefinition,
   createAlertingV2HostApp,
-} from '../../../../locators';
+} from '../../../../../common/locators';
 
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',

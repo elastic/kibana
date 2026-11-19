@@ -15,6 +15,12 @@ import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from '.
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema> & {
   projectRouting?: string;
   esqlApproximation?: boolean;
+  /**
+   * Sequence of the latest change history version. It is bumped with every versioned write, under the
+   * saved object's optimistic concurrency control, so concurrent saves can never share a sequence.
+   * Absent on dashboards that have not been saved since it was introduced.
+   */
+  historySequence?: number;
 } & {
   /**
    * To avoid defining a new SO version, I am adding the new key `pinned_panels` here

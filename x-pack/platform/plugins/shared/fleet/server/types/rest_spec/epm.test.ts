@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { UpdatePackageRequestSchema } from './epm';
+import {
+  BulkInstallPackagesFromRegistryRequestSchema,
+  GetInfoRequestSchema,
+  UpdatePackageRequestSchema,
+} from './epm';
 
 describe('UpdatePackageRequestSchema', () => {
   it('accepts a namespace_customization_settings entry with an ilm_policy', () => {
@@ -40,5 +44,23 @@ describe('UpdatePackageRequestSchema', () => {
         namespace_customization_enabled_for: ['a'.repeat(101)],
       })
     ).toThrow();
+  });
+});
+
+describe('reporting mode string fields', () => {
+  // These fields use the string helpers' warn() mode: overlong input is recorded in the
+  // kibana.schema.string_length_violation.length histogram instead of being rejected.
+  it('accepts an overlong pkgName', () => {
+    expect(() =>
+      GetInfoRequestSchema.params.validate({ pkgName: 'a'.repeat(1000), pkgVersion: '1.0.0' })
+    ).not.toThrow();
+  });
+
+  it('accepts overlong package names in a bulk install', () => {
+    expect(() =>
+      BulkInstallPackagesFromRegistryRequestSchema.body.validate({
+        packages: ['a'.repeat(1000), { name: 'b'.repeat(1000), version: '1.0.0' }],
+      })
+    ).not.toThrow();
   });
 });

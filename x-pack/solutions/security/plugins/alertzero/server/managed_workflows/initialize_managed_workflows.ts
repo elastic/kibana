@@ -48,19 +48,24 @@ export const initializeManagedWorkflows = async ({
     ...ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
   ] as const;
 
-  const globalWorkflowInstalls = await Promise.allSettled(
-    globalWorkflowIds.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
-  );
-  for (const [index, result] of globalWorkflowInstalls.entries()) {
-    if (result.status === 'rejected') {
+  // One pass with `_bulk` writes, so start-up holds at most one of the Elasticsearch threads that
+  // logins also write with. See docs/managed_workflow_startup_install.md.
+  try {
+    const { failed } = await client.installMany(
+      globalWorkflowIds.map((id) => ({ id, spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+    );
+    for (const { id, error } of failed) {
       canReconcile = false;
-      logger.error(
-        // Covers rule and action workflows, so this stays generic.
-        `Failed to install managed AlertZero workflow "${globalWorkflowIds[index]}": ${
-          result.reason instanceof Error ? result.reason.message : String(result.reason)
-        }`
-      );
+      // Covers rule and action workflows, so this stays generic.
+      logger.error(`Failed to install managed AlertZero workflow "${id}": ${error.message}`);
     }
+  } catch (error) {
+    canReconcile = false;
+    logger.error(
+      `Failed to install managed AlertZero workflows: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 
   if (canReconcile) {

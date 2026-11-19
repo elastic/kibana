@@ -13,7 +13,7 @@
     // Route privileges (read_nightshift, manage_nightshift) are registered by the `nightshift`
     // obs plugin's feature. It can't be a requiredPlugin (cycle via significantEvents), but it
     // must be loaded for the routes to be accessible — the serverless configs keep both in sync.
-    "requiredPlugins": [],
+    "requiredPlugins": ["taskManager"],
     "optionalPlugins": ["features"],
     "requiredBundles": []
   }

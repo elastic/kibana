@@ -11,9 +11,11 @@ import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Misp } from './misp';
 import {
+  AddAttributeInputSchema,
   AddSightingInputSchema,
   CheckIndicatorInputSchema,
   CreateEventInputSchema,
+  GetEventInputSchema,
   SearchAttributesInputSchema,
 } from './types';
 
@@ -77,6 +79,48 @@ describe('Misp', () => {
       expect(AddSightingInputSchema.safeParse({}).success).toBe(false);
     });
 
+    it('accepts numeric event ids and UUIDs only', () => {
+      expect(GetEventInputSchema.safeParse({ eventId: '42' }).success).toBe(true);
+      expect(
+        GetEventInputSchema.safeParse({ eventId: '5d1b6a2e-1f4c-4a9e-9b1e-0c2a3d4e5f60' }).success
+      ).toBe(true);
+      expect(GetEventInputSchema.safeParse({ eventId: 'event-42' }).success).toBe(false);
+      expect(SearchAttributesInputSchema.safeParse({ eventId: 'abc' }).success).toBe(false);
+    });
+
+    it.each(['42', '5d1b6a2e-1f4c-4a9e-9b1e-0c2a3d4e5f60'])(
+      'searchAttributes filters by event id or UUID: %s',
+      (eventId) => {
+        expect(SearchAttributesInputSchema.safeParse({ eventId }).success).toBe(true);
+      }
+    );
+
+    it('accepts only MISP attribute types and categories', () => {
+      const base = { eventId: '1', value: '1.2.3.4' };
+      expect(AddAttributeInputSchema.safeParse({ ...base, type: 'ip-dst' }).success).toBe(true);
+      expect(AddAttributeInputSchema.safeParse({ ...base, type: 'ipv4' }).success).toBe(false);
+      expect(
+        AddAttributeInputSchema.safeParse({ ...base, type: 'ip-dst', category: 'Network' }).success
+      ).toBe(false);
+      expect(
+        AddAttributeInputSchema.safeParse({ ...base, type: 'ip-dst', category: 'Network activity' })
+          .success
+      ).toBe(true);
+    });
+
+    it.each([
+      'dom-hash',
+      'filename-pattern',
+      'ssh-fingerprint',
+      'integer',
+      'azure-application-id',
+      'uuid',
+      'onion-address',
+    ])('accepts the %s attribute type, which the OpenAPI spec leaves out', (type) => {
+      const base = { eventId: '1', value: '1.2.3.4' };
+      expect(AddAttributeInputSchema.safeParse({ ...base, type }).success).toBe(true);
+    });
+
     it('defaults createEvent published to false', () => {
       expect(CreateEventInputSchema.parse({ info: 'Alert' })).toEqual({
         info: 'Alert',
@@ -113,6 +157,19 @@ describe('Misp', () => {
         count: 1,
         attributes: [{ id: '1', value: '1.2.3.4' }],
       });
+    });
+
+    it('sends an event UUID as the eventid filter', async () => {
+      mockClient.post.mockResolvedValue({ data: { response: { Attribute: [] } } });
+      const eventId = '5d1b6a2e-1f4c-4a9e-9b1e-0c2a3d4e5f60';
+
+      await Misp.actions.searchAttributes.handler(mockContext, { eventId, limit: 5, page: 1 });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        `${BASE_URL}/attributes/restSearch`,
+        expect.objectContaining({ eventid: eventId }),
+        { headers: jsonHeaders }
+      );
     });
   });
 
@@ -294,6 +351,36 @@ describe('Misp', () => {
       await expect(Misp.test.handler(noUrl)).rejects.toThrow(
         'missing the required URL configuration field'
       );
+    });
+  });
+
+  describe('checkWarninglist input bounds', () => {
+    it.each([
+      [1000, true],
+      [1001, false],
+    ])('%d values valid=%s', (count, expected) => {
+      const values = Array.from(
+        { length: count },
+        (_, i) => `10.0.${Math.floor(i / 256)}.${i % 256}`
+      );
+      expect(Misp.actions.checkWarninglist.input.safeParse({ values }).success).toBe(expected);
+    });
+  });
+
+  describe('attribute value length', () => {
+    const { actions } = Misp;
+    const inputs: Array<[string, (value: string) => Record<string, unknown>]> = [
+      ['searchAttributes', (value) => ({ value })],
+      ['searchEvents', (value) => ({ value })],
+      ['checkIndicator', (value) => ({ value })],
+      ['addSighting', (value) => ({ value })],
+      ['checkWarninglist', (value) => ({ values: [value] })],
+      ['addAttribute', (value) => ({ eventId: '1', type: 'text', value })],
+    ];
+
+    it.each(inputs)('%s accepts values up to the 65,535-character TEXT column', (action, build) => {
+      expect(actions[action].input.safeParse(build('a'.repeat(65_535))).success).toBe(true);
+      expect(actions[action].input.safeParse(build('a'.repeat(65_536))).success).toBe(false);
     });
   });
 });

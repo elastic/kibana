@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseAssignees } from '../../../common/types/domain_zod/user/v1';
+import type { CaseAssignees } from '../../../common/types/domain/user/v1';
 
 /**
  * Case-default fields a user can edit directly from the template render panel. These map to the

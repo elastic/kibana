@@ -6,6 +6,9 @@
  */
 
 import type { Workspace } from '../types';
+import { createWorkspace } from '../services/workspace/graph_client_workspace';
+import { getIcon } from '../helpers/style_choices';
+import { createGraphStore, type GraphStore } from './store';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import { setDatasource } from './datasource';
 import { loadFields } from './fields';
@@ -275,6 +278,173 @@ describe('workspace state', () => {
     environment.store.dispatch(clearNodeSelection());
     environment.store.dispatch(colorSelectedNodes('red'));
     expect(environment.store.getState().workspace.nodesById.selected.color).toBe('blue');
+  });
+
+  describe('topology and history snapshots', () => {
+    const workspaces: Workspace[] = [];
+    const setup = () => {
+      const workspace = createWorkspace({
+        changeHandler: jest.fn(),
+        topologyChangeHandler: () =>
+          store.dispatch(workspaceChanged(createWorkspaceState(workspace))),
+      });
+      workspaces.push(workspace);
+      const { mockedDeps } = createMockGraphStore({});
+      mockedDeps.getWorkspace.mockReturnValue(workspace);
+      mockedDeps.notifyReact.mockImplementation(() =>
+        store.dispatch(workspaceChanged(createWorkspaceState(workspace)))
+      );
+      const store: GraphStore = createGraphStore(mockedDeps);
+      workspace.mergeGraph({
+        nodes: ['first', 'second', 'third'].map((term) => ({
+          id: '',
+          field: 'field',
+          term,
+          label: term,
+          color: 'blue',
+          icon: getIcon('folder'),
+          data: { field: 'field', term },
+        })),
+        edges: [{ source: 0, target: 1, weight: 5, width: 3, doc_count: 7 }],
+      });
+      workspace.stopLayout();
+      return { store, workspace };
+    };
+    afterEach(() => {
+      workspaces.forEach((workspace) => workspace.stopLayout());
+      workspaces.length = 0;
+    });
+
+    it('removes selected groups and their dangling edges', () => {
+      const { store, workspace } = setup();
+      workspace.mergeIds('field..third', 'field..second');
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..third', replace: true }));
+
+      workspace.deleteSelection();
+
+      expect(store.getState().workspace.nodeIds).toEqual(['field..first']);
+      expect(store.getState().workspace.edgeIds).toEqual([]);
+      expect(workspace.nodesMap['field..second']).toBeUndefined();
+      expect(workspace.edges).toEqual([]);
+    });
+
+    it('moves selected nodes into the blocklist', () => {
+      const { store, workspace } = setup();
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
+
+      workspace.blocklistSelection();
+
+      expect(store.getState().workspace.nodeIds).toEqual(['field..second', 'field..third']);
+      expect(store.getState().workspace.blocklistedNodeIds).toEqual(['field..first']);
+      expect(store.getState().workspace.edgeIds).toEqual([]);
+      expect(store.getState().workspace.selectedNodeIds).toEqual([]);
+    });
+
+    it('keeps normalized blocklisted IDs consistent when the runtime contains an existing ID', () => {
+      const { store, workspace } = setup();
+      const selected = workspace.nodesMap['field..first'];
+      workspace.blocklistedNodes.push({ ...selected, label: 'Existing' });
+      store.dispatch(setNodeLabel({ nodeId: selected.id, label: 'Selected' }));
+      store.dispatch(toggleNodeSelection({ nodeId: selected.id, replace: true }));
+
+      workspace.blocklistSelection();
+
+      const { blocklistedNodeIds, blocklistedNodesById, nodeIds } = store.getState().workspace;
+      expect(nodeIds).not.toContain(selected.id);
+      expect(blocklistedNodeIds).toEqual([selected.id]);
+      expect(blocklistedNodeIds).toEqual(Object.keys(blocklistedNodesById));
+      expect(blocklistedNodesById[selected.id].label).toBe('Selected');
+    });
+
+    it('removes all nodes when deleting with no selection', () => {
+      const { store, workspace } = setup();
+
+      workspace.deleteSelection();
+
+      expect(store.getState().workspace.nodeIds).toEqual([]);
+      expect(store.getState().workspace.nodesById).toEqual({});
+      expect(store.getState().workspace.edgeIds).toEqual([]);
+    });
+
+    it('does not blocklist nodes when there is no selection', () => {
+      const { store, workspace } = setup();
+
+      workspace.blocklistSelection();
+
+      expect(store.getState().workspace.nodeIds).toEqual([
+        'field..first',
+        'field..second',
+        'field..third',
+      ]);
+      expect(store.getState().workspace.blocklistedNodeIds).toEqual([]);
+    });
+
+    it('groups selected top-level nodes without reparenting already grouped nodes', () => {
+      const { store, workspace } = setup();
+      workspace.mergeIds('field..first', 'field..second');
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..second', replace: false }));
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: false }));
+
+      workspace.groupSelections(workspace.nodesMap['field..third']);
+
+      expect(store.getState().workspace.nodesById['field..first'].parentId).toBe('field..third');
+      expect(store.getState().workspace.nodesById['field..second'].parentId).toBe('field..first');
+      expect(store.getState().workspace.selectedNodeIds).toEqual(['field..third']);
+      workspace.ungroup(workspace.nodesMap['field..third']);
+      expect(store.getState().workspace.nodesById['field..first'].parentId).toBeUndefined();
+      expect(store.getState().workspace.nodesById['field..second'].parentId).toBe('field..first');
+    });
+
+    it('removes individual and all blocklisted nodes', () => {
+      const { store, workspace } = setup();
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..second', replace: false }));
+      const first = workspace.nodesMap['field..first'];
+      workspace.blocklistSelection();
+
+      workspace.unblockNode(first);
+
+      expect(store.getState().workspace.blocklistedNodeIds).toEqual(['field..second']);
+      expect(store.getState().workspace.blocklistedNodesById['field..first']).toBeUndefined();
+      workspace.unblockAll();
+      expect(store.getState().workspace.blocklistedNodeIds).toEqual([]);
+      expect(store.getState().workspace.blocklistedNodesById).toEqual({});
+    });
+
+    it('undoes and redoes topology changes while publishing serializable snapshots', () => {
+      const { store, workspace } = setup();
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
+      const historyLength = workspace.undoLog.length;
+      workspace.deleteSelection();
+      expect(workspace.undoLog).toHaveLength(historyLength + 1);
+      expect(store.getState().workspace.nodeIds).toEqual(['field..second', 'field..third']);
+
+      workspace.undo();
+      expect(store.getState().workspace.nodeIds).toContain('field..first');
+      expect(workspace.redoLog).toHaveLength(1);
+      workspace.redo();
+      expect(store.getState().workspace.nodeIds).not.toContain('field..first');
+      const snapshot = createWorkspaceState(workspace);
+      expect(JSON.parse(JSON.stringify(snapshot))).toEqual(snapshot);
+    });
+
+    it('preserves history across runtime snapshots and initialization across undo and redo', () => {
+      const { store, workspace } = setup();
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
+      workspace.deleteSelection();
+      const undoLog = [...workspace.undoLog];
+      store.dispatch(initializeWorkspace());
+      store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+      expect(workspace.undoLog).toEqual(undoLog);
+
+      workspace.undo();
+      expect(workspaceInitializedSelector(store.getState())).toBe(true);
+      const redoLog = [...workspace.redoLog];
+      store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+      expect(workspace.redoLog).toEqual(redoLog);
+      workspace.redo();
+      expect(workspaceInitializedSelector(store.getState())).toBe(true);
+    });
   });
 
   it('keeps edge selection single-valued', () => {

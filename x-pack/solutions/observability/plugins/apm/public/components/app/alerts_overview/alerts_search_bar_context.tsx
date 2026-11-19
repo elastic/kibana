@@ -9,7 +9,7 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 import { useHistory } from 'react-router-dom';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { isEnvironmentDefined } from '../../../../common/environment_filter_values';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';

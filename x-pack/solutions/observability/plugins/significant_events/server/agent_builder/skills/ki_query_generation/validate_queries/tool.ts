@@ -22,16 +22,19 @@ import {
   validateKIQueries,
   type ValidatedKIQuery,
 } from '@kbn/nightshift-ai';
+import { timeoutSignal } from '@kbn/std';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '../../../../../common/constants';
 import type { GetScopedClients } from '../../../../routes/types';
 import { assertCanReadSignificantEvents } from '../../../../routes/utils/assert_can_manage_significant_events';
 import type { SignificantEventsServer } from '../../../../types';
+import type { EbtTelemetryClient } from '../../../../lib/telemetry/ebt';
+import { reportToolFailure } from '../../../tools/tool_failure';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../../utils/resolve_source_slugs';
 
@@ -117,10 +120,12 @@ export const createValidateQueriesTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   getScopedClients: GetScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }): BuiltinSkillBoundedTool<typeof validateQueriesSchema> => {
   return {
     id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
@@ -134,7 +139,7 @@ export const createValidateQueriesTool = ({
 
         const scopedClients = await getScopedClients({ request: context.request });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const [source] = resolveSourcesBySlug(catalog, [slug]);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
         // Stored features and queries are read as the internal user, and the results tell whether a
         // feature or a query exists, so check the caller's own data access first.
         await scopedClients.sourcesClient.assertReadable(source.id);
@@ -175,50 +180,61 @@ export const createValidateQueriesTool = ({
           description: query.description,
           esql: query.esql.query,
         }));
-        const signal = AbortSignal.any([
-          getRequestAbortSignal(context.request),
-          AbortSignal.timeout(TOOL_EXECUTION_TIMEOUT_MS),
-        ]);
-        const validationContext = await createQueryValidationContext({
-          sources: target.sources,
-          esClient: scopedClients.streamDataEsClient,
-          existingQueries,
-          signal,
-          logger,
-        });
-        const { results, acceptedQueries } = await validateKIQueries({
-          queries,
-          features,
-          context: validationContext,
-          esClient: scopedClients.streamDataEsClient,
-          signal,
-          logger,
-          queryValidationTimeoutMs: scopedClients.tuningConfig.query_validation_timeout_ms,
-          collectQueryAttempts: true,
-        });
+        const deadline = timeoutSignal(TOOL_EXECUTION_TIMEOUT_MS);
+        try {
+          const signal = AbortSignal.any([getRequestAbortSignal(context.request), deadline]);
+          const validationContext = await createQueryValidationContext({
+            sources: target.sources,
+            esClient: scopedClients.streamDataEsClient,
+            existingQueries,
+            signal,
+            logger,
+          });
+          const { results, acceptedQueries } = await validateKIQueries({
+            queries,
+            features,
+            context: validationContext,
+            esClient: scopedClients.streamDataEsClient,
+            signal,
+            logger,
+            queryValidationTimeoutMs: scopedClients.tuningConfig.query_validation_timeout_ms,
+            collectQueryAttempts: true,
+          });
 
-        const validatedQueries: AcceptedQuery[] = acceptedQueries.map(({ esql, ...query }) => ({
-          ...query,
-          esql: { query: esql },
-        }));
-        const finalized = results.every(({ valid }) => valid === true);
+          const validatedQueries: AcceptedQuery[] = acceptedQueries.map(({ esql, ...query }) => ({
+            ...query,
+            esql: { query: esql },
+          }));
+          const finalized = results.every(({ valid }) => valid === true);
 
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                ...toSourceRef(source),
-                queries: results,
-                finalized,
-                ...(finalized ? { finalized_queries: validatedQueries } : {}),
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  ...toSourceRef(source),
+                  queries: results,
+                  finalized,
+                  ...(finalized ? { finalized_queries: validatedQueries } : {}),
+                },
               },
-            },
-          ],
-        };
+            ],
+          };
+        } finally {
+          deadline.dispose();
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        logger.warn(`KI query validation failed: ${message}`);
+        reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+          errorLogMessage: `KI query validation failed: ${message}`,
+          errorLogLevel: 'warn',
+          logger,
+          telemetry,
+          request: context.request,
+          runContext: context.runContext,
+        });
         return {
           results: [{ type: ToolResultType.error, data: { message } }],
         };

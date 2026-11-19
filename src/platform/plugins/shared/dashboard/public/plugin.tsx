@@ -68,6 +68,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
@@ -151,6 +152,12 @@ export interface DashboardStart {
    * The API of the loaded dashboard rendered with `publishAsAppClientApi`, if any.
    */
   dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
+
+  /**
+   * Checks whether two dashboard states are equal.
+   * Panel and pinned panel configs are compared with the comparators provided by their embeddable definitions.
+   */
+  areEqual: (a: DashboardState, b: DashboardState) => Promise<boolean>;
 }
 
 export class DashboardPlugin
@@ -181,6 +188,15 @@ export class DashboardPlugin
       eventType: DASHBOARD_SAVED_EVENT,
       schema: dashboardSavedEventSchema,
     });
+
+    // Lazy-load via @kbn/change-history-ui/telemetry to avoid pulling React UI into page-load bundle.
+    void import('@kbn/change-history-ui/telemetry')
+      .then(({ registerChangeHistoryTelemetryEvents }) => {
+        registerChangeHistoryTelemetryEvents(core.analytics);
+      })
+      .catch(() => {
+        // Telemetry registration must not break plugin setup.
+      });
 
     if (share) {
       share.url.locators.create(
@@ -408,6 +424,13 @@ export class DashboardPlugin
         return findService;
       },
       dashboardAppClientApi$,
+      areEqual: async (a: DashboardState, b: DashboardState) => {
+        const { areEqual } = await import('./dashboard_renderer/dashboard_module');
+        return areEqual(a, b, async (type: string, embeddableState: object) => {
+          const definition = await plugins.embeddable.getEmbeddableDefinition(type);
+          return definition?.getComparators?.(embeddableState);
+        });
+      },
     };
   }
 

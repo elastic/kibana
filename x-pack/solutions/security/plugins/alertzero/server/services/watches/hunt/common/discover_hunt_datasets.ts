@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { joinRemoteCluster, splitRemoteCluster } from '../../../../../common/remote_cluster';
 
 export interface DiscoveredDataset {
   /** Searchable glob for Tier 1/2, e.g. 'logs-okta.system-*' */
@@ -55,20 +56,24 @@ export const MAX_NAMESPACE_PATTERNS_PER_DATASET = 16;
  * alone. This parser always takes the shortest namespace, so
  * `logs-cisco_asa.log-prod-eu` reads as dataset `cisco_asa.log-prod`,
  * namespace `eu`. The resulting `index_pattern` still matches the stream.
+ *
+ * A cross-cluster name (`infosec_zocalo:logs-aws.cloudtrail-default`) is parsed on its
+ * index part, and its alias comes back as `cluster` rather than leaking into `type`.
  */
 export const parseDataStreamName = (
   name: string
-): { type: string; dataset: string; namespace: string } | undefined => {
-  const firstDash = name.indexOf('-');
-  const lastDash = name.lastIndexOf('-');
+): { cluster?: string; type: string; dataset: string; namespace: string } | undefined => {
+  const { cluster, index } = splitRemoteCluster(name);
+  const firstDash = index.indexOf('-');
+  const lastDash = index.lastIndexOf('-');
   if (firstDash === -1 || lastDash === firstDash) return undefined;
 
-  const type = name.slice(0, firstDash);
-  const dataset = name.slice(firstDash + 1, lastDash);
-  const namespace = name.slice(lastDash + 1);
+  const type = index.slice(0, firstDash);
+  const dataset = index.slice(firstDash + 1, lastDash);
+  const namespace = index.slice(lastDash + 1);
   if (type === '' || dataset === '' || namespace === '') return undefined;
 
-  return { type, dataset, namespace };
+  return { ...(cluster === undefined ? {} : { cluster }), type, dataset, namespace };
 };
 
 // Fleet datasets are `<package>.<stream>` and package names use `_`, never `.` or `-`, so
@@ -124,7 +129,7 @@ export const discoverHuntDatasets = async ({
       }));
     dataStreamNames = response.data_streams
       .map((stream) => stream.name)
-      .filter((name) => !name.startsWith('.'));
+      .filter((name) => !splitRemoteCluster(name).index.startsWith('.'));
   } catch (err) {
     logger?.warn(
       `Hunt dataset discovery failed for pattern(s) "${patterns.join(',')}": ${
@@ -135,41 +140,49 @@ export const discoverHuntDatasets = async ({
   }
 
   const byPattern = new Map<string, DiscoveredDataset>();
+  const clusterOf = new Map<DiscoveredDataset, string | undefined>();
   for (const name of dataStreamNames) {
     const parsed = parseDataStreamName(name);
     if (!parsed || isInternalDataset(parsed.dataset)) continue;
 
-    const indexPattern = `${parsed.type}-${parsed.dataset}-*`;
+    const indexPattern = joinRemoteCluster({
+      cluster: parsed.cluster,
+      index: `${parsed.type}-${parsed.dataset}-*`,
+    });
     const existing = byPattern.get(indexPattern);
     if (existing) {
       if (!existing.data_streams.includes(name)) existing.data_streams.push(name);
       continue;
     }
-    byPattern.set(indexPattern, {
+    const entry: DiscoveredDataset = {
       index_pattern: indexPattern,
       dataset: parsed.dataset,
       vendor: vendorToken(parsed.dataset),
       data_streams: [name],
       search_patterns: [indexPattern],
-    });
+    };
+    byPattern.set(indexPattern, entry);
+    clusterOf.set(entry, parsed.cluster);
   }
 
   // Sorted by dataset name with a code-point compare, so every sibling that extends a
   // name with a dash sits directly after it ('-' orders before '.', '_' and every
   // letter). That turns sibling detection into one forward walk per dataset instead
-  // of a full pass over the list, which matters once an estate has thousands.
+  // of a full pass over the list, which matters once an estate has thousands. The same
+  // dataset on another cluster sorts in between and is skipped: a pattern only reaches
+  // siblings on its own cluster.
   const datasets = Array.from(byPattern.values()).sort((a, b) =>
     a.dataset < b.dataset ? -1 : a.dataset > b.dataset ? 1 : 0
   );
   for (let i = 0; i < datasets.length; i++) {
     const entry = datasets[i];
+    const cluster = clusterOf.get(entry);
     const siblings: DiscoveredDataset[] = [];
-    for (
-      let j = i + 1;
-      j < datasets.length && datasets[j].dataset.startsWith(`${entry.dataset}-`);
-      j++
-    ) {
-      siblings.push(datasets[j]);
+    for (let j = i + 1; j < datasets.length; j++) {
+      const other = datasets[j];
+      if (other.dataset === entry.dataset) continue;
+      if (!other.dataset.startsWith(`${entry.dataset}-`)) break;
+      if (clusterOf.get(other) === cluster) siblings.push(other);
     }
     if (siblings.length === 0) {
       entry.search_patterns = [entry.index_pattern];

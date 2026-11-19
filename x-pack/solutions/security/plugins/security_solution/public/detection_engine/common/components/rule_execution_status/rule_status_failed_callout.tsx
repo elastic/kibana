@@ -134,7 +134,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
           )}
         </>
       </EuiCallOut>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
     </div>
   );
 };

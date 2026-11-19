@@ -1,0 +1,63 @@
+{
+  "addComment": {
+    "input": {
+      "cardId": "5abbe4b7ddc1b351ef961415"
+    }
+  },
+  "createCard": {
+    "input": {
+      "listId": "5abbe4b7ddc1b351ef961416"
+    }
+  },
+  "getBoard": {
+    "input": {
+      "boardId": "5abbe4b7ddc1b351ef961414"
+    }
+  },
+  "getCard": {
+    "input": {
+      "cardId": "5abbe4b7ddc1b351ef961415"
+    }
+  },
+  "getCardComments": {
+    "input": {
+      "cardId": "5abbe4b7ddc1b351ef961415"
+    }
+  },
+  "listBoardCards": {
+    "input": {
+      "boardId": "5abbe4b7ddc1b351ef961414"
+    }
+  },
+  "listBoardLabels": {
+    "input": {
+      "boardId": "5abbe4b7ddc1b351ef961414"
+    }
+  },
+  "listBoardLists": {
+    "input": {
+      "boardId": "5abbe4b7ddc1b351ef961414"
+    }
+  },
+  "listBoardMembers": {
+    "input": {
+      "boardId": "5abbe4b7ddc1b351ef961414"
+    }
+  },
+  "listListCards": {
+    "input": {
+      "listId": "5abbe4b7ddc1b351ef961416"
+    }
+  },
+  "search": {
+    "input": {
+      "idBoards": "5abbe4b7ddc1b351ef961414"
+    }
+  },
+  "updateCard": {
+    "input": {
+      "cardId": "5abbe4b7ddc1b351ef961415",
+      "idList": "5abbe4b7ddc1b351ef961416"
+    }
+  }
+}

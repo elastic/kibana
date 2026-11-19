@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { lazySchema, type z } from '@kbn/zod';
 import {
   allOrAnyString,
   groupingsSchema,
@@ -14,35 +14,27 @@ import {
   sloDefinitionSchema,
   summarySchema,
 } from '../schema';
-import {
-  allOrAnyString as allOrAnyStringZod,
-  groupingsSchema as groupingsSchemaZod,
-  metaSchema as metaSchemaZod,
-  remoteSchema as remoteSchemaZod,
-  sloDefinitionSchema as sloDefinitionSchemaZod,
-  summarySchema as summarySchemaZod,
-} from '../schema/zod';
 import type { SLODefinitionResponse } from './routes/find_definition';
 
-const sloWithDataResponseSchema = t.intersection([
-  sloDefinitionSchema,
-  t.type({ summary: summarySchema, groupings: groupingsSchema, instanceId: allOrAnyString }),
-  t.partial({
-    meta: metaSchema,
-    remote: remoteSchema,
-  }),
-]);
+const sloWithDataResponseSchema = lazySchema(() =>
+  sloDefinitionSchema
+    .extend({
+      summary: summarySchema,
+      groupings: groupingsSchema,
+      instanceId: allOrAnyString.describe(
+        "the value derived from the groupBy field, if present, otherwise '*'"
+      ),
+      meta: metaSchema.optional(),
+      remote: remoteSchema.optional(),
+    })
+    .meta({
+      id: 'SLOWithSummaryResponse',
+      description: 'The SLO definition with its computed summary',
+      additionalProperties: true,
+    })
+);
 
-// Zod twin — io-ts version stays alive until its last consumer (test_helpers/fixtures.ts) is updated.
-const sloWithDataResponseSchemaZod = sloDefinitionSchemaZod.extend({
-  summary: summarySchemaZod,
-  groupings: groupingsSchemaZod,
-  instanceId: allOrAnyStringZod,
-  meta: metaSchemaZod.optional(),
-  remote: remoteSchemaZod.optional(),
-});
+type SLOWithSummaryResponse = z.input<typeof sloWithDataResponseSchema>;
 
-type SLOWithSummaryResponse = t.OutputOf<typeof sloWithDataResponseSchema>;
-
-export { sloWithDataResponseSchema, sloWithDataResponseSchemaZod };
+export { sloWithDataResponseSchema };
 export type { SLODefinitionResponse, SLOWithSummaryResponse };

@@ -11,6 +11,8 @@ import {
   DEFAULT_AI_INDEX_QUERY_LIMIT,
   DEFAULT_FEEDBACK_ANALYSIS_INTERVAL,
   DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM,
+  DEFAULT_KI_GROUP_PREVIEW_SIZE,
+  DEFAULT_KI_GROUPS,
   DEFAULT_KI_PAGE_SIZE,
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
@@ -28,10 +30,15 @@ import {
   MAX_AI_INDEX_TRACES,
   MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
   MAX_AI_INDEX_TRACE_VALUE_LENGTH,
+  MAX_AI_INDEX_USER_ID_LENGTH,
   MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
   MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
   MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
   MAX_INDEX_NAME_BYTES,
+  MAX_KI_CONTENT_LENGTH,
+  MAX_KI_EXCLUDE_TYPES,
+  MAX_KI_GROUP_PREVIEW_SIZE,
+  MAX_KI_GROUPS,
   MAX_KI_PAGE_SIZE,
   MAX_KI_SEARCH_QUERY_LENGTH,
   MAX_KI_TYPE_FILTER_LENGTH,
@@ -39,6 +46,8 @@ import {
 } from '../../../common/constants';
 import type { ImprovementAction } from '../../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
+import { KI_STATUSES, type KiStatus } from '../../../common/ki_lifecycle_status';
+import { DEFAULT_KI_LIST_SORT, KI_LIST_SORTS, type KiListSort } from '../../../common/ki_list_sort';
 import {
   KI_LIFECYCLE_STATUSES,
   MAX_KI_ID_LENGTH,
@@ -53,7 +62,6 @@ import {
   validateSignalWindowCoversInterval,
 } from '../../../common/validation';
 import { validateSignalFilter } from '../../ai_indices/signal_filter';
-
 const aiIndexIdSchema = schema.string({
   minLength: 1,
   maxLength: MAX_AI_INDEX_ID_LENGTH,
@@ -63,6 +71,21 @@ const aiIndexIdSchema = schema.string({
 
 export const aiIndexIdParamsSchema = schema.object({
   aiIndexId: aiIndexIdSchema,
+});
+
+const userIdFilterSchema = schema.maybe(
+  schema.string({
+    minLength: 1,
+    maxLength: MAX_AI_INDEX_USER_ID_LENGTH,
+    meta: {
+      description:
+        'When set, limits reads to documents with this `user_id` and documents with no `user_id`. When omitted, no user filter is applied.',
+    },
+  })
+);
+
+export const describeAiIndexQuerySchema = schema.object({
+  user_id: userIdFilterSchema,
 });
 
 const signalTimeRangeSchema = schema.oneOf(
@@ -265,7 +288,9 @@ const aiIndexPropertiesSchema = {
   memory_enabled: schema.maybe(
     schema.boolean({
       meta: {
-        description: 'Whether this AI index accepts memory writes. Defaults to true when omitted.',
+        description:
+          'Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.',
+        deprecated: true,
       },
     })
   ),
@@ -327,27 +352,126 @@ const kiLifecycleStatusesQuerySchema = schema.oneOf(
   }
 );
 
+const kiListStatusQuerySchema = schema.oneOf(
+  KI_STATUSES.map((status) => schema.literal(status)) as [Type<KiStatus>],
+  {
+    meta: {
+      description:
+        'Knowledge Indicator status: a stored governance.lifecycle.status value, or `expired` for active KIs past expires_at.',
+    },
+  }
+);
+
+const kiListStatusesQuerySchema = schema.oneOf(
+  [
+    kiListStatusQuerySchema,
+    schema.arrayOf(kiListStatusQuerySchema, {
+      maxSize: KI_STATUSES.length,
+    }),
+  ],
+  {
+    meta: {
+      description:
+        'When set, filter by KI status. `expired` matches KIs past expires_at that are not deleted or failed, and `active` excludes them. When omitted, deleted KIs are excluded.',
+    },
+  }
+);
+
+const validateInteger = (value: number): string | undefined =>
+  Number.isInteger(value) ? undefined : 'must be an integer';
+
+const kiTypeQuerySchema = (description: string) =>
+  schema.string({
+    minLength: 1,
+    maxLength: MAX_KI_TYPE_FILTER_LENGTH,
+    meta: { description },
+  });
+
+const kiExcludeTypesQuerySchema = (description: string) =>
+  schema.oneOf(
+    [
+      kiTypeQuerySchema('A Knowledge Indicator type.'),
+      schema.arrayOf(kiTypeQuerySchema('A Knowledge Indicator type.'), {
+        maxSize: MAX_KI_EXCLUDE_TYPES,
+      }),
+    ],
+    { meta: { description } }
+  );
+
+const kiGroupTypesQuerySchema = schema.oneOf(
+  [
+    kiTypeQuerySchema('A Knowledge Indicator type.'),
+    schema.arrayOf(kiTypeQuerySchema('A Knowledge Indicator type.'), { maxSize: MAX_KI_GROUPS }),
+  ],
+  {
+    meta: {
+      description:
+        'When set, exactly these types are the groups (types without a match are left out) and `max_groups` is ignored. `total_other` counts all other KIs.',
+    },
+  }
+);
+
+const kiListSortQuerySchema = schema.oneOf(
+  KI_LIST_SORTS.map((value) => schema.literal(value)) as [Type<KiListSort>],
+  {
+    defaultValue: DEFAULT_KI_LIST_SORT,
+    meta: {
+      description:
+        'Sort order. `updated` is newest first, `title` is A to Z (case-insensitive, KIs without a title last). When `query` is set, results rank by best match first and `sort` only breaks ties.',
+    },
+  }
+);
+
+const kiSearchQuerySchema = schema.maybe(
+  schema.string({
+    minLength: 1,
+    maxLength: MAX_KI_SEARCH_QUERY_LENGTH,
+    meta: { description: 'When set, fuzzy full-text search over KI title and description.' },
+  })
+);
+
 export const listKisQuerySchema = schema.object({
   size: schema.number({
     min: 0,
     max: MAX_KI_PAGE_SIZE,
     defaultValue: DEFAULT_KI_PAGE_SIZE,
+    validate: validateInteger,
   }),
-  type: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: MAX_KI_TYPE_FILTER_LENGTH,
-      meta: { description: 'When set, return only KIs of this type.' },
-    })
+  type: schema.maybe(kiTypeQuerySchema('When set, return only KIs of this type.')),
+  exclude_types: schema.maybe(
+    kiExcludeTypesQuerySchema(
+      'When set, leave out KIs of these types. KIs without a type are kept. `total` follows this filter, `summary` does not.'
+    )
   ),
-  lifecycle_status: schema.maybe(kiLifecycleStatusesQuerySchema),
-  query: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: MAX_KI_SEARCH_QUERY_LENGTH,
-      meta: { description: 'When set, fuzzy full-text search over KI title and description.' },
-    })
+  status: schema.maybe(kiListStatusesQuerySchema),
+  sort: kiListSortQuerySchema,
+  query: kiSearchQuerySchema,
+});
+
+export const listKiGroupsQuerySchema = schema.object({
+  max_groups: schema.number({
+    min: 1,
+    max: MAX_KI_GROUPS,
+    defaultValue: DEFAULT_KI_GROUPS,
+    validate: validateInteger,
+    meta: { description: 'The most type groups to return, biggest first.' },
+  }),
+  types: schema.maybe(kiGroupTypesQuerySchema),
+  exclude_types: schema.maybe(
+    kiExcludeTypesQuerySchema(
+      'When set, KIs of these types are left out before grouping: `total`, the groups and `total_other` cover only the other KIs. KIs without a type are kept.'
+    )
   ),
+  preview_size: schema.number({
+    min: 1,
+    max: MAX_KI_GROUP_PREVIEW_SIZE,
+    defaultValue: DEFAULT_KI_GROUP_PREVIEW_SIZE,
+    validate: validateInteger,
+    meta: { description: 'The number of KIs returned in each group.' },
+  }),
+  status: schema.maybe(kiListStatusesQuerySchema),
+  sort: kiListSortQuerySchema,
+  query: kiSearchQuerySchema,
 });
 
 export const getKiQuerySchema = schema.object({
@@ -357,6 +481,28 @@ export const getKiQuerySchema = schema.object({
     meta: { description: 'The Elasticsearch index that stores the Knowledge Indicator.' },
   }),
   lifecycle_status: schema.maybe(kiLifecycleStatusesQuerySchema),
+});
+
+export const updateKiQuerySchema = schema.object({
+  index: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: MAX_INDEX_NAME_BYTES,
+      meta: {
+        description:
+          'The backing Elasticsearch index for this Knowledge Indicator. Only needed when the AI index destination matches more than one physical index; omit it otherwise.',
+      },
+    })
+  ),
+});
+
+export const updateKiBodySchema = schema.object({
+  ki: schema.object({
+    content: schema.string({
+      maxLength: MAX_KI_CONTENT_LENGTH,
+      meta: { description: 'The content for the Knowledge Indicator.' },
+    }),
+  }),
 });
 
 export const queryAiIndicesBodySchema = schema.object({
@@ -395,6 +541,7 @@ export const queryAiIndicesBodySchema = schema.object({
       },
     })
   ),
+  user_id: userIdFilterSchema,
 });
 
 export const deleteAiIndexQuerySchema = schema.object({
@@ -520,9 +667,6 @@ export const aiIndexHttpItemResponseSchema = () =>
         description: 'Whether the AI Index is managed by a plugin and therefore immutable.',
       },
     }),
-    memory_enabled: schema.boolean({
-      meta: { description: 'Whether this AI Index accepts memory writes.' },
-    }),
     date_created: schema.string({
       meta: { description: 'ISO 8601 timestamp of when the AI Index was created.' },
     }),
@@ -611,6 +755,33 @@ export const deleteAiIndexResponseSchema = () =>
     // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
     errors: schema.arrayOf(schema.string(), {
       meta: { description: 'Best-effort cleanup errors after the entry was deleted, if any.' },
+    }),
+  });
+
+export const updateKiResponseSchema = () =>
+  schema.object({
+    id: schema.string({
+      meta: { description: 'The document ID of the updated Knowledge Indicator.' },
+    }),
+    status: schema.oneOf([schema.literal('updated'), schema.literal('noop')], {
+      meta: { description: 'Whether the update changed the document or was a no-op.' },
+    }),
+  });
+
+export const deleteKiResponseSchema = () =>
+  schema.object({
+    id: schema.string({
+      meta: {
+        description:
+          'The document ID of the deleted Knowledge Indicator. The document is retained and can be restored.',
+      },
+    }),
+  });
+
+export const restoreKiResponseSchema = () =>
+  schema.object({
+    id: schema.string({
+      meta: { description: 'The document ID of the restored Knowledge Indicator.' },
     }),
   });
 

@@ -44,8 +44,27 @@ describe('transformWorkflowToGraph', () => {
     );
     const triggerEdges = r.edges.filter((e) => e.target === 'first');
     expect(triggerEdges).toHaveLength(2);
+    expect(
+      r.nodes.filter((node) => node.type === 'trigger').map((node) => node.data.label)
+    ).toEqual(['Manual', 'Scheduled']);
     // sequential
     expect(r.edges).toContainEqual(expect.objectContaining({ source: 'first', target: 'second' }));
+  });
+
+  it('labels unknown trigger types with the id unless getTriggerLabel is provided', () => {
+    const workflow = minimal({
+      triggers: [{ type: 'slack2.message', enabled: true }] as unknown as WorkflowYaml['triggers'],
+    });
+
+    const unlabeled = transformWorkflowToGraph(workflow);
+    expect(unlabeled.nodes.find((node) => node.type === 'trigger')?.data.label).toBe(
+      'slack2.message'
+    );
+
+    const labeled = transformWorkflowToGraph(workflow, () => 'Slack - Message');
+    expect(labeled.nodes.find((node) => node.type === 'trigger')?.data.label).toBe(
+      'Slack - Message'
+    );
   });
 
   it('labels if-branch edges as true / false', () => {
@@ -514,29 +533,6 @@ describe('transformWorkflowToGraph', () => {
       })
     );
     expect(r.edges).toContainEqual(expect.objectContaining({ source: 'step1', target: 'step2' }));
-  });
-
-  it('handles merge step with a single contained body', () => {
-    const r = transformWorkflowToGraph(
-      minimal({
-        steps: [
-          {
-            name: 'atomic',
-            type: 'merge',
-            steps: [
-              { name: 'm1', type: 'http' },
-              { name: 'm2', type: 'http' },
-            ],
-          },
-          { name: 'after', type: 'http' },
-        ] as unknown as WorkflowYaml['steps'],
-      })
-    );
-    // merge node connects to its first inner step
-    expect(r.edges).toContainEqual(expect.objectContaining({ source: 'atomic', target: 'm1' }));
-    // the merge node itself (not m2) is the exit point for the next step
-    const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
-    expect(sourcesIntoAfter).toEqual(['atomic']);
   });
 
   it('falls through via if gate when both branches are empty', () => {
@@ -1406,24 +1402,6 @@ describe('transformWorkflowToGraph — structure', () => {
     );
   });
 
-  it('keeps a merge step body attached to the step instead of in the sequence', () => {
-    const r = transform([
-      {
-        name: 'combine',
-        type: 'merge',
-        steps: [
-          { name: 'm1', type: 'http' },
-          { name: 'm2', type: 'http' },
-        ],
-      },
-      { name: 'after', type: 'http' },
-    ]);
-    expect(r.structure?.items).toEqual([
-      step('combine', { attached: [step('m1'), step('m2')] }),
-      step('after'),
-    ]);
-  });
-
   it('places every node exactly once', () => {
     const r = transform([
       { name: 'a', type: 'http' },
@@ -1465,7 +1443,6 @@ describe('transformWorkflowToGraph — structure', () => {
           }
         }
         if (item.kind === 'container') collect(item.body);
-        if (item.kind === 'step' && item.attached) collect(item.attached);
         for (const lane of item.lanes) collect(lane.items);
       }
     };

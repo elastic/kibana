@@ -62,7 +62,7 @@ const EXTRACTED_AT = '2024-05-31T12:00:00.000Z';
 const makeReport = ({
   id,
   iocs,
-  sourceName = 'maltrail',
+  sourceName = 'indicator list',
   sourceUrl = 'https://example.com/trail.txt',
   trailLabel,
   extractedAt = EXTRACTED_AT,
@@ -197,12 +197,12 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
 
     it('labels an IPv6 value ipv6-addr rather than ipv4-addr', () => {
       const ops = buildBulkOpsForTest(
-        [makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '2001:db8::1' }] })],
+        [makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '2606:4700:4700::1111' }] })],
         NOW
       );
       const indicator = (ops[0].upsert.threat as { indicator: Record<string, unknown> }).indicator;
       expect(indicator.type).toBe('ipv6-addr');
-      expect(indicator.ip).toBe('2001:db8::1');
+      expect(indicator.ip).toBe('2606:4700:4700::1111');
     });
   });
 
@@ -233,15 +233,15 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
   describe('two reports citing the SAME IOC', () => {
     it('produces two separate ops (one per report×IOC) with distinct report_ids in scriptParams', () => {
       const reports = [
-        makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '10.0.0.1' }] }),
-        makeReport({ id: 'r2', iocs: [{ type: 'ip', value: '10.0.0.1' }] }),
+        makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '203.0.113.10' }] }),
+        makeReport({ id: 'r2', iocs: [{ type: 'ip', value: '203.0.113.10' }] }),
       ];
       const ops = buildBulkOpsForTest(reports, NOW);
 
       // Two ops with the SAME indicator _id — one per citing report, same space.
       expect(ops).toHaveLength(2);
-      expect(ops[0]._id).toBe('default:ip:10.0.0.1');
-      expect(ops[1]._id).toBe('default:ip:10.0.0.1');
+      expect(ops[0]._id).toBe('default:ip:203.0.113.10');
+      expect(ops[1]._id).toBe('default:ip:203.0.113.10');
 
       // Different report_ids in scriptParams — when the Painless script runs,
       // each will append its own entry to sources[] on the live doc, resulting
@@ -275,12 +275,12 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
-  describe('maltrail report', () => {
+  describe('indicator-list report', () => {
     it('carries trail label + per-IOC reference in scriptParams when present', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
-            id: 'r-maltrail',
+            id: 'r-indicator-list',
             iocs: [
               {
                 type: 'ip',
@@ -288,10 +288,9 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
                 reference: 'https://blog.example.com/malware-analysis',
               },
             ],
-            sourceName: 'maltrail',
-            sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
-            trailLabel: 'cobaltstrike',
+            sourceName: 'indicator list',
+            sourceUrl: 'https://feeds.example.test/indicators.txt',
+            trailLabel: 'test-indicators',
           }),
         ],
         NOW
@@ -299,8 +298,8 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
 
       expect(ops).toHaveLength(1);
       const { scriptParams } = ops[0];
-      expect(scriptParams.provider).toBe('maltrail');
-      expect(scriptParams.trail).toBe('cobaltstrike');
+      expect(scriptParams.provider).toBe('indicator list');
+      expect(scriptParams.trail).toBe('test-indicators');
       // Per-IOC reference wins over source.url
       expect(scriptParams.reference).toBe('https://blog.example.com/malware-analysis');
     });
@@ -309,20 +308,17 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
-            id: 'r-maltrail-noref',
+            id: 'r-indicator-list-noref',
             iocs: [{ type: 'ip', value: '9.9.9.9' }],
-            sourceName: 'maltrail',
-            sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
-            trailLabel: 'cobaltstrike',
+            sourceName: 'indicator list',
+            sourceUrl: 'https://feeds.example.test/indicators.txt',
+            trailLabel: 'test-indicators',
           }),
         ],
         NOW
       );
 
-      expect(ops[0].scriptParams.reference).toBe(
-        'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt'
-      );
+      expect(ops[0].scriptParams.reference).toBe('https://feeds.example.test/indicators.txt');
     });
 
     it('removes credentials from report and IOC provenance before promotion', () => {
@@ -368,7 +364,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
-  describe('non-maltrail report (back-compat)', () => {
+  describe('report without indicator-list metadata (back-compat)', () => {
     it('produces a valid op with a single sources[] entry and no trail field', () => {
       const ops = buildBulkOpsForTest(
         [
@@ -411,6 +407,45 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       );
       expect(ops).toHaveLength(1);
       expect(ops[0]._id).toBe('default:ip:1.2.3.4');
+    });
+  });
+
+  describe('non-routable IPs are kept out of promotion', () => {
+    it.each([
+      ['CGNAT', { type: 'ip', value: '100.64.0.7', tier: 'uncertain' }],
+      ['benchmarking range', { type: 'ip', value: '198.18.0.9', tier: 'contextual' }],
+      ['multicast', { type: 'ip', value: '239.255.255.250', tier: 'uncertain' }],
+      ['loopback', { type: 'ip', value: '127.0.0.1', tier: 'discriminating' }],
+      // Must carry a promotable tier: without one, isPromotableTier already drops it and
+      // the non-routable check is never what the assertion proves.
+      [
+        'IPv6 loopback written out in full',
+        { type: 'ip', value: '0:0:0:0:0:0:0:1', tier: 'discriminating' },
+      ],
+      ['private CIDR', { type: 'cidr', value: '10.20.0.0/16', tier: 'contextual' }],
+    ])('does not upsert a promotable-tier %s', (_label, ioc) => {
+      const ops = buildBulkOpsForTest([makeReport({ id: 'r-private', iocs: [ioc] })], NOW);
+      expect(ops).toHaveLength(0);
+    });
+
+    it('still promotes a public IP and a public CIDR from the same report', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-mixed',
+            iocs: [
+              { type: 'ip', value: '100.64.0.7', tier: 'uncertain' },
+              { type: 'ip', value: '203.0.113.10', tier: 'discriminating' },
+              { type: 'cidr', value: '203.0.113.0/24', tier: 'contextual' },
+            ],
+          }),
+        ],
+        NOW
+      );
+      expect(ops.map((op) => op._id)).toEqual([
+        'default:ip:203.0.113.10',
+        'default:cidr:203.0.113.0/24',
+      ]);
     });
   });
 
@@ -554,7 +589,7 @@ describe('promote task runner', () => {
     _id: id,
     sort: [extractedAt, 1],
     _source: {
-      source: { name: 'maltrail', url: 'https://example.com/trail.txt' },
+      source: { name: 'indicator list', url: 'https://example.com/trail.txt' },
       severity: { level: 'high' },
       // Needs a promotable tier: only `discriminating` and `contextual` reach the
       // index, so an untiered IOC produces no bulk operations at all.

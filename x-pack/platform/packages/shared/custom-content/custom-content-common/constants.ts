@@ -11,6 +11,10 @@ export const CUSTOM_CONTENT_SCRIPT_PATTERN = /<script[\s>/]/i;
 
 export const CUSTOM_CONTENT_MAX_PROMPT_LENGTH = 10_000;
 export const CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH = 1_000_000;
+/** Most queries one panel can hold; each one is fetched on every refresh. */
+export const CUSTOM_CONTENT_MAX_ESQL_QUERIES = 10;
+/** Most characters all the queries of a panel can hold together: what one query could hold before a panel could have several. */
+export const CUSTOM_CONTENT_MAX_ESQL_QUERIES_TOTAL_LENGTH = CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH;
 /** Maximum UTF-8 byte size of a rendered template. Enforced server-side on both the generation and agent paths. */
 export const CUSTOM_CONTENT_MAX_TEMPLATE_BYTES = 500_000;
 /** Character (code-point) cap for schema validation — set well above the byte cap so ASCII content has headroom but keep in sync with CUSTOM_CONTENT_MAX_TEMPLATE_BYTES for byte-level checks. */
@@ -25,3 +29,12 @@ export const CUSTOM_CONTENT_DEFAULT_HEIGHT = 320;
 /** Matches the renderer's iframe-container floor; below it the host container overflows. */
 export const CUSTOM_CONTENT_MIN_HEIGHT = 200;
 export const CUSTOM_CONTENT_MAX_HEIGHT = 1200;
+
+export const CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID = 'custom_content_update_panel';
+
+/**
+ * Id of the dashboard generation tool, which custom content flows name or match on. Inlined rather
+ * than imported from the `agent_builder_dashboards` plugin to avoid a plugin dependency for a
+ * string; keep in sync with `dashboardTools.generateDashboard` there.
+ */
+export const CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID = 'platform.dashboard.generate_dashboard';

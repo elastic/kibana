@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/workflows-topics",
+  "owner": ["@elastic/workflows-eng"],
+  "description": "Topic types for the workflows event bus. A producer and a consumer depend on this package instead of on each other.",
+  "group": "platform",
+  "visibility": "shared"
+}

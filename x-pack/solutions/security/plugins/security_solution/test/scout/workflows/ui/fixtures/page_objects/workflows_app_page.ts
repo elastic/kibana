@@ -21,7 +21,7 @@ const APP_LOAD_TIMEOUT = 120_000;
  * reading back an executed step's result. Trimmed from the workflows_management
  * Scout page objects to the flow these exception-step tests need: type YAML in
  * the Monaco editor, save, run, wait for a terminal execution status, then read
- * a step's output/error JSON from the execution panel.
+ * a step's output/error JSON from the step detail.
  */
 export class WorkflowsAppPage {
   public readonly yamlEditor: Locator;
@@ -40,19 +40,22 @@ export class WorkflowsAppPage {
   }
 
   /**
-   * Open the editor for a brand-new workflow. "Create workflow" opens the
-   * agentic-first landing; "Start manually" opens the blank editor.
+   * Open the editor for a brand-new workflow. With existing workflows, "Create workflow"
+   * opens the agentic-first landing; with none, the list page already shows that landing
+   * and hides the header button. "Start manually" opens the blank editor.
    */
   async gotoNewWorkflow(): Promise<void> {
     await this.page.gotoApp(WORKFLOWS_APP_ID);
-    await this.page.testSubj.waitForSelector('createWorkflowButton', {
-      state: 'visible',
-      timeout: APP_LOAD_TIMEOUT,
-    });
-    await this.page.testSubj.click('createWorkflowButton');
-    await this.page.testSubj.click('agenticFirstStartManuallyButton', {
-      timeout: APP_LOAD_TIMEOUT,
-    });
+    const createButton = this.page.testSubj.locator('createWorkflowButton');
+    const startManuallyButton = this.page.testSubj.locator('agenticFirstStartManuallyButton');
+    await Promise.race([
+      createButton.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT }),
+      startManuallyButton.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT }),
+    ]);
+    if (await createButton.isVisible()) {
+      await createButton.click();
+    }
+    await startManuallyButton.click({ timeout: APP_LOAD_TIMEOUT });
     await this.yamlEditor.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT });
   }
 
@@ -221,9 +224,10 @@ export class WorkflowsAppPage {
       return this.readLegacyStepResultJson(type);
     }
 
-    const section = this.executionPanel.locator(
-      `[data-test-subj="workflowStepDataSection_${type}"]`
-    );
+    const section = this.page.testSubj
+      .locator('workflowExecutionStepFlyout')
+      .or(this.page.testSubj.locator('workflowExecutionPanel'))
+      .locator(`[data-test-subj="workflowStepDataSection_${type}"]`);
     await section.waitFor({ state: 'visible' });
     const code = section.locator('[data-test-subj="workflowStepResultJsonCode"]');
     if (!(await code.isVisible())) {

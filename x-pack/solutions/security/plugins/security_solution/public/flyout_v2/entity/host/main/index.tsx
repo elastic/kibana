@@ -19,7 +19,13 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
-import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_TYPE,
+  type FlyoutOrigin,
+  type GraphEntryPoint,
+} from '../../../../common/lib/telemetry';
+import { getGraphEntryPoint } from '../../../shared/utils/get_graph_entry_point';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
@@ -88,6 +94,11 @@ export interface HostProps {
    * Stable identifier for the host panel context (defaults to `scopeId` or a static fallback).
    */
   contextID?: string;
+  /**
+   * Where the graph reached from this flyout was opened from (e.g. the AI chat attachment). Used by
+   * the graph preview and the graph view it opens; defaults to the entity flyout entry point.
+   */
+  graphEntryPoint?: GraphEntryPoint;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -109,6 +120,7 @@ export const Host: FC<HostProps> = memo(function Host({
   mode: requestedMode = 'single',
   scopeId = '',
   contextID,
+  graphEntryPoint,
 }) {
   const { services } = useKibana();
   const { uiSettings } = services;
@@ -143,6 +155,7 @@ export const Host: FC<HostProps> = memo(function Host({
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
+  const entryPoint = graphEntryPoint ?? getGraphEntryPoint({ mode: 'entity' });
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
@@ -269,6 +282,7 @@ export const Host: FC<HostProps> = memo(function Host({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedHost.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (
@@ -335,6 +349,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: EntityType.host,
             entityName: hostName,
             entityId: entityStoreEntityId,
+            scopeId,
             onShowEntity: onShowHost,
             title: hostName,
             subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
@@ -349,6 +364,7 @@ export const Host: FC<HostProps> = memo(function Host({
             value: hostName,
             entityId: entityStoreEntityId,
             mode,
+            scopeId,
             onOpenEntity: onShowHost,
             title: hostName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -398,6 +414,7 @@ export const Host: FC<HostProps> = memo(function Host({
             title: hostName,
             flyoutType: FLYOUT_TYPE.HOST,
             origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
+            entryPoint,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -430,6 +447,7 @@ export const Host: FC<HostProps> = memo(function Host({
       onShowHost,
       onShowRelatedEntityFromGraph,
       onShowRelatedEntityFromResolution,
+      entryPoint,
     ]
   );
 
@@ -462,6 +480,7 @@ export const Host: FC<HostProps> = memo(function Host({
             onCriticalitySave={onCriticalitySave}
           />
         )}
+        {isGroupView && !tabs && <EuiSpacer size="l" />}
         {tabsNode}
         {tabs && <EuiSpacer size="l" />}
         {tabs && selectedTabId === TABLE_TAB_ID && observedHost.entityRecord ? (
@@ -489,6 +508,7 @@ export const Host: FC<HostProps> = memo(function Host({
             hideHeaderIcons
             riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
             isGroupView={isGroupView}
+            graphEntryPoint={entryPoint}
           />
         )}
       </EuiFlyoutBody>

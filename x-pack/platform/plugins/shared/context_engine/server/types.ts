@@ -10,6 +10,7 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -23,6 +24,7 @@ import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
+import type { SessionEventsService } from './session_events/types';
 import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
@@ -50,6 +52,11 @@ export interface ContextEnginePluginStart {
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsServiceApi;
+  /**
+   * Writes as the internal user, so callers check privileges before using it. The user in each
+   * call is the end user the events belong to, and is never checked against the authenticated user.
+   */
+  getSessionEventsService: () => SessionEventsService;
 }
 
 /** Duck-typed so Context Engine does not depend on `@kbn/workflows-management-plugin` (Moon cycle). */
@@ -70,6 +77,7 @@ export interface ContextEngineSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   /** Optional in the manifest; without it a feedback analysis schedule cannot be enabled. */
   workflowsManagement?: { management: WorkflowEnablementApi };
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface ContextEngineStartDependencies {

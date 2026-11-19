@@ -21,7 +21,7 @@ export const evalsSuggestions = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/evals/suggest_evals.sh',
     label: 'Suggest Evals',
     key: 'evals-suggestions',
-    agents: spotAgent('n2-standard-2', spotZones.centralFCA),
+    agents: spotAgent('n2-standard-2', spotZones.n2),
     env: { EVALS_SUGGESTIONS_MODE: 'comment' },
     soft_fail: true,
     timeout_in_minutes: 10,

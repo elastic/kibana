@@ -27,6 +27,7 @@ description: GitHub interactions via gh CLI for the Kibana repo. Use when perfor
 
 - Always open PRs as draft: `gh pr create --draft`.
 - Check CI status: `gh pr checks`.
+- For fast feedback without the full build, comment `run static checks` on the PR (only when the user asks).
 - View PR details: `gh pr view`.
 - View PR diff: `gh pr diff`.
 - List PR files: `gh pr diff --name-only`.

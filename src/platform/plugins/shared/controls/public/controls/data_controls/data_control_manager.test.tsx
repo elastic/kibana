@@ -85,7 +85,7 @@ describe('initializeDataControlManager', () => {
       });
 
       test('should set data view', () => {
-        const dataViews = dataControlManager!.api.dataViews$.value;
+        const dataViews = dataControlManager!.api.dataSources$.value;
         expect(dataViews).not.toBeUndefined();
         expect(dataViews!.length).toBe(1);
         expect(dataViews![0].id).toBe('myDataViewId');
@@ -128,7 +128,7 @@ describe('initializeDataControlManager', () => {
       });
 
       test('should clear blocking error when valid data view id provided', (done) => {
-        dataControlManager!.api.dataViews$.pipe(skip(1), first()).subscribe((dataView) => {
+        dataControlManager!.api.dataSources$.pipe(skip(1), first()).subscribe((dataView) => {
           expect(dataView).not.toBeUndefined();
           expect(dataControlManager!.api.blockingError$.value).toBeUndefined();
           done();

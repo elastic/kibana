@@ -19,17 +19,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import dateMath from '@kbn/datemath';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash/fp';
-import {
-  EntityDetailsLeftPanelTab,
-  RiskScoreLeftPanelSubTab,
-} from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { RiskScoreLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type {
   CriticalityLevel,
   CriticalityLevelWithUnassigned,
@@ -69,7 +64,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useNewEntityAnalyticsPage } from '../../../../hooks/use_new_entity_analytics_page';
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
-import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
 import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useMissingRiskEnginePrivileges } from '../../../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../../../risk_engine_privileges_callout';
@@ -80,11 +74,20 @@ export interface RiskInputsTabProps<T extends EntityType> {
   entityId?: string;
   /** Navigates to the alert preview for a risk-input row. */
   onShowAlert: (id: string, indexName: string) => void;
-  /** Initial sub-tab to select. Takes precedence over the expandable-flyout URL state. Used by
-   *  the v2 tool flyout which has no expandable-flyout state. With the new entity analytics page
-   *  flag on this is the only view shown (no sub-tab toggle): the right panel's risk summary
-   *  decides whether the entity or the resolution-group score is being explained. */
+  /** Sub-tab to select. Changing it remounts the tab content on that sub-tab. With the new entity
+   *  analytics page flag on this is the only view shown (no sub-tab toggle): the right panel's risk
+   *  summary decides whether the entity or the resolution-group score is being explained. */
   subTab?: RiskScoreLeftPanelSubTab;
+  /** Called when the user toggles the sub-tab. Lets the caller persist the selection (e.g. in the
+   *  legacy expandable-flyout URL state). Optional: the tab keeps the selection locally either way. */
+  onSubTabChange?: (subTab: RiskScoreLeftPanelSubTab) => void;
+  /** Initial risk score history range. Defaults to the last 90 days. */
+  historyDefaultRange?: HistoryRange;
+}
+
+interface HistoryRange {
+  from: string;
+  to: string;
 }
 
 const RISK_INPUTS_ALERTS_CONTEXT = buildExecutionContext(
@@ -112,35 +115,6 @@ const FIRST_RECORD_PAGINATION = {
 export const EXPAND_ALERT_TEST_ID = 'risk-input-alert-preview-button';
 export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
 
-interface RiskScorePanelProps extends FlyoutPanelProps {
-  params: {
-    path: {
-      tab: EntityDetailsLeftPanelTab.RISK_INPUTS;
-      subTab?: RiskScoreLeftPanelSubTab;
-    };
-  };
-}
-
-function isRiskScoreFlyoutPanelProps(
-  panelLeft: FlyoutPanelProps | undefined
-): panelLeft is RiskScorePanelProps {
-  const params = panelLeft?.params;
-  if (!params || typeof params !== 'object' || !('path' in params)) {
-    return false;
-  }
-
-  const path = params.path as { tab?: unknown; subTab?: unknown };
-  if (path?.tab !== EntityDetailsLeftPanelTab.RISK_INPUTS) {
-    return false;
-  }
-
-  return (
-    path.subTab === undefined ||
-    (typeof path.subTab === 'string' &&
-      Object.values(RiskScoreLeftPanelSubTab).includes(path.subTab as RiskScoreLeftPanelSubTab))
-  );
-}
-
 const toFixedView = (subTab: RiskScoreLeftPanelSubTab | undefined): RiskScoreLeftPanelSubTab =>
   subTab === RiskScoreLeftPanelSubTab.RESOLUTION
     ? RiskScoreLeftPanelSubTab.RESOLUTION
@@ -151,36 +125,16 @@ export const RiskInputsTab = <T extends EntityType>({
   entityName,
   entityId,
   onShowAlert,
-  subTab: subTabProp,
+  subTab,
+  onSubTabChange,
+  historyDefaultRange,
 }: RiskInputsTabProps<T>) => {
-  const panels = useStableExpandableFlyoutState();
-  const { openLeftPanel } = useExpandableFlyoutApi();
-  const subTabFromState = isRiskScoreFlyoutPanelProps(panels.left)
-    ? panels.left.params.path.subTab
-    : undefined;
-  const subTab = subTabFromState ?? subTabProp;
   const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
   // With the new entity analytics page the view is fixed by the caller: the resolution-group score
   // when the right panel showed the group score, the entity score otherwise. Undefined keeps the
   // legacy behavior (toggle between both views when a resolution score exists).
   const fixedView = isNewEntityAnalyticsPage ? toFixedView(subTab) : undefined;
   const needsResolutionData = fixedView !== RiskScoreLeftPanelSubTab.ENTITY;
-
-  // Keeps the expandable-flyout URL state in sync with the user's manual tab
-  // toggle so that clicking the same flyout link twice still forces a remount.
-  const onSubTabChange = useCallback(
-    (newSubTab: RiskScoreLeftPanelSubTab) => {
-      if (!isRiskScoreFlyoutPanelProps(panels.left)) return;
-      openLeftPanel({
-        ...panels.left,
-        params: {
-          ...panels.left.params,
-          path: { tab: EntityDetailsLeftPanelTab.RISK_INPUTS, subTab: newSubTab },
-        },
-      });
-    },
-    [openLeftPanel, panels.left]
-  );
 
   const { data: watchlists } = useGetWatchlists({
     executionContext: RISK_INPUTS_WATCHLISTS_CONTEXT,
@@ -337,6 +291,7 @@ export const RiskInputsTab = <T extends EntityType>({
       liveCriticality={liveCriticality}
       onShowAlert={onShowAlert}
       onSubTabChange={onSubTabChange}
+      historyDefaultRange={historyDefaultRange}
     />
   );
 };
@@ -364,7 +319,8 @@ interface RiskInputsTabContentProps<T extends EntityType> {
   /** The level on the entity store record right now. Undefined when we could not read it. */
   liveCriticality: CriticalityLevelWithUnassigned | undefined;
   onShowAlert: (id: string, indexName: string) => void;
-  onSubTabChange: (subTab: RiskScoreLeftPanelSubTab) => void;
+  onSubTabChange?: (subTab: RiskScoreLeftPanelSubTab) => void;
+  historyDefaultRange?: HistoryRange;
 }
 
 const RiskInputsTabContent = <T extends EntityType>({
@@ -387,12 +343,13 @@ const RiskInputsTabContent = <T extends EntityType>({
   liveCriticality,
   onShowAlert,
   onSubTabChange,
+  historyDefaultRange = DEFAULT_HISTORY_RANGE,
 }: RiskInputsTabContentProps<T>) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const euidApi = useEntityStoreEuidApi();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
   const [userSelectedView, setUserSelectedView] = useState(subTab);
-  const [historyRange, setHistoryRange] = useState(DEFAULT_HISTORY_RANGE);
+  const [historyRange, setHistoryRange] = useState(historyDefaultRange);
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | undefined>(undefined);
   const isRiskScoreHistoryEnabled = useIsExperimentalFeatureEnabled('riskScoreHistoryEnabled');
 
@@ -449,7 +406,7 @@ const RiskInputsTabContent = <T extends EntityType>({
     [pitEntry, historyEntityId, entityType, historyEntityName]
   );
 
-  const onHistoryRangeChange = useCallback((range: { from: string; to: string }) => {
+  const onHistoryRangeChange = useCallback((range: HistoryRange) => {
     setHistoryRange(range);
     setSelectedTimestamp((current) =>
       isTimestampWithinRange(current, range) ? current : undefined
@@ -461,10 +418,7 @@ const RiskInputsTabContent = <T extends EntityType>({
       const newSubTab = id as RiskScoreLeftPanelSubTab;
       setUserSelectedView(newSubTab);
       setSelectedTimestamp(undefined);
-      // Keep the expandable-flyout URL state in sync so that clicking the same
-      // right-panel link again produces a URL change, which forces a remount and
-      // resets userSelectedView to the correct value (v1 mode only; no-op in v2).
-      onSubTabChange(newSubTab);
+      onSubTabChange?.(newSubTab);
     },
     [onSubTabChange]
   );
@@ -1135,12 +1089,9 @@ const formatContribution = (value: number): string => {
   return fixedValue;
 };
 
-const DEFAULT_HISTORY_RANGE = { from: 'now-90d', to: 'now' };
+const DEFAULT_HISTORY_RANGE: HistoryRange = { from: 'now-90d', to: 'now' };
 
-const isTimestampWithinRange = (
-  timestamp: string | undefined,
-  range: { from: string; to: string }
-): boolean => {
+const isTimestampWithinRange = (timestamp: string | undefined, range: HistoryRange): boolean => {
   if (timestamp === undefined) {
     return false;
   }

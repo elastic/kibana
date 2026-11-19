@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
+  is,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
 } from '@kbn/slo-schema';
@@ -29,8 +30,8 @@ export function ApmIndicatorOverview({ slo }: Props) {
 
   const indicator = slo.indicator;
   if (
-    !apmTransactionDurationIndicatorSchema.is(indicator) ||
-    !apmTransactionErrorRateIndicatorSchema.is(indicator)
+    !is(apmTransactionDurationIndicatorSchema, indicator) ||
+    !is(apmTransactionErrorRateIndicatorSchema, indicator)
   ) {
     return null;
   }

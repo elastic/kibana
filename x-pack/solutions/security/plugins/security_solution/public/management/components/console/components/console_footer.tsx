@@ -25,6 +25,7 @@ export const ConsoleFooter = memo(() => {
   return (
     <EuiPanel
       hasShadow={false}
+      hasBorder={false}
       paddingSize="none"
       color="transparent"
       data-test-subj={getTestId('footer')}

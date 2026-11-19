@@ -44,6 +44,7 @@ const exampleAlert: Required<ActionPolicyWorkflowPayloadAlert> = {
   space_id: 'default',
   group_hash: 'hash-1',
   alert_id: 'alert-1',
+  alert_url: 'https://kibana.example.com/app/observability/alerting/alerts/alert-1',
   alert_status: 'active',
   severity: 'critical',
   data: {},
@@ -51,6 +52,7 @@ const exampleAlert: Required<ActionPolicyWorkflowPayloadAlert> = {
 
 const exampleRuleValue: Required<ActionPolicyWorkflowPayloadRule> = {
   name: 'CPU spike',
+  grouping_fields: ['host.name'],
 };
 
 const alertItemSchema = (schema: JsonSchema): JsonSchema => {
@@ -133,6 +135,10 @@ describe('alertingV2NotificationGroup builtin workflow input definition', () => 
       Object.keys(exampleRuleValue),
       'ActionPolicyWorkflowPayloadRule'
     );
+  });
+
+  it('requires only name on rules values, so payloads built before grouping_fields stay valid', () => {
+    expect(ruleValueSchema(schema).required).toEqual(['name']);
   });
 
   it('allows null rule_id on alert items (ActionPolicyWorkflowPayloadAlert.rule_id is RuleId | null)', () => {

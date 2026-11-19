@@ -9,11 +9,18 @@ import { useEffect } from 'react';
 import { ALERTZERO_PLUGIN_NAME } from '@kbn/alertzero-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-export const useAlertZeroDocTitle = (pageTitle: string): void => {
+/**
+ * Sets the browser tab. Chrome appends "Elastic".
+ * Omit `pageTitle` on the landing page so the tab is "AlertZero - Elastic".
+ * A page name becomes "[page] - AlertZero - Elastic".
+ */
+export const useAlertZeroDocTitle = (pageTitle?: string): void => {
   const { services } = useKibana();
 
   useEffect(() => {
-    services.chrome?.docTitle.change(`${pageTitle} - ${ALERTZERO_PLUGIN_NAME}`);
+    services.chrome?.docTitle.change(
+      pageTitle ? [pageTitle, ALERTZERO_PLUGIN_NAME] : ALERTZERO_PLUGIN_NAME
+    );
     return () => {
       services.chrome?.docTitle.reset();
     };
