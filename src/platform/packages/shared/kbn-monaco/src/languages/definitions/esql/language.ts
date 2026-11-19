@@ -40,6 +40,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     const language = monarchCreate({
       ...monarchDefinitions,
       functions: esqlFunctionNames,
+      literals: [...monarchDefinitions.literals, 'DEFAULT'],
     });
 
     monaco.languages.setMonarchTokensProvider(ESQL_LANG_ID, language);

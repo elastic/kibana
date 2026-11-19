@@ -235,6 +235,7 @@ describe('full-text match marks on columns', () => {
           'drop',
           'enrich',
           'eval',
+          'fillnull',
           'grok',
           'highlight',
           'inline stats',

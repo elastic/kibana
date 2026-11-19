@@ -91,6 +91,10 @@ describe('Console nested ES|QL lexer rules', () => {
   });
 
   describe('esqlLanguageAttributes', () => {
+    it('recognizes FILLNULL and DEFAULT as keywords', () => {
+      expect(keywords).toEqual(expect.arrayContaining(['fillnull', 'default', 'on']));
+    });
+
     it('exports keywords and builtinFunctions', () => {
       expect(esqlLanguageAttributes.keywords).toEqual(keywords);
       expect(esqlLanguageAttributes.builtinFunctions).toEqual(builtinFunctions);
