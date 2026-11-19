@@ -92,12 +92,8 @@ const withText = (current: DreamedKi, { title, description, content }: Text) => 
   ...(content !== undefined && { content: renderContent(content, accessPatternsOf(current)) }),
 });
 
-const changesText = (current: DreamedKi, text: Text): boolean => {
-  const next: Text = withText(current, text);
-  return (['title', 'description', 'content'] as const).some(
-    (key) => next[key] !== undefined && next[key] !== current[key]
-  );
-};
+const sameText = (a: Text, b: Text): boolean =>
+  a.title === b.title && a.description === b.description && a.content === b.content;
 
 const memoryUrisOf = (ki: DreamedKi): string[] =>
   (ki.references ?? []).filter(({ relation }) => relation === 'derived_from').map(({ uri }) => uri);
@@ -180,13 +176,14 @@ export const resolveMaintenanceChanges = (
   const needsReview: MaintenanceChange[] = [];
   const rejected: Array<{ item: string; reason: string }> = [];
   const reviewed = new Map(batch.items.map((item) => [item.id, item]));
-  const shown = new Set([...reviewed.keys(), ...batch.neighbors.map(({ id }) => id)]);
+  const shown = new Map([...batch.items, ...batch.neighbors].map((item) => [item.id, item]));
   const claimed = new Set<string>();
 
   const problemWith = (ids: readonly string[]): string | undefined => {
     for (const id of ids) {
       const ki = kis.get(id);
-      if (!shown.has(id)) {
+      const shownItem = shown.get(id);
+      if (!shownItem) {
         return `${id} is not in the batch`;
       }
       if (claimed.has(id)) {
@@ -205,6 +202,9 @@ export const resolveMaintenanceChanges = (
       }
       if (isUserScoped(ki)) {
         return `${id} belongs to one user`;
+      }
+      if (!sameText(ki, shownItem)) {
+        return `${id} changed after it was reviewed`;
       }
     }
     if (new Set(ids).size !== ids.length) {
@@ -334,23 +334,15 @@ export const resolveMaintenanceChanges = (
       rejected.push({ item, reason: 'facts and entities cannot be merged together' });
       continue;
     }
-    const edited = group.filter((ki) => isPersonEdited(ki));
-    if (edited.length > 1) {
+    if (group.some((ki) => isPersonEdited(ki))) {
       leaveForReview(
         ids,
-        `They look like duplicates, but a person edited more than one: ${reason}`
+        `They look like duplicates, but a person edited one, so its text cannot take in the others: ${reason}`
       );
       continue;
     }
-    const survivor = edited[0] ?? kiOf(survivorId);
-    const absorbed = group.filter(({ id }) => id !== survivor.id);
-    if (edited.length > 0 && changesText(survivor, text)) {
-      leaveForReview(
-        ids,
-        `They look like duplicates, but a person edited the one to keep, so it cannot take the combined text: ${reason}`
-      );
-      continue;
-    }
+    const survivor = kiOf(survivorId);
+    const absorbed = group.filter(({ id }) => id !== survivorId);
     if (userLinked(absorbed)) {
       leaveForReview(
         ids,

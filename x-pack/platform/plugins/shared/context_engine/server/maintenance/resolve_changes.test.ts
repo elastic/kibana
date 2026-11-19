@@ -267,39 +267,46 @@ describe('resolveMaintenanceChanges', () => {
       );
     });
 
-    it('keeps the person-edited item, and leaves a group with two for review', () => {
-      const kis = [
-        entity('e-1'),
-        entity('e-2', { attributes: personEdited }),
-        entity('e-3', { attributes: personEdited }),
-      ];
-
-      const swapped = resolve(kis, {
-        merges: [{ survivor: 'e-1', absorbed: ['e-2'], reason: 'Same' }],
-      });
-      const twoEdited = resolve(kis, {
-        merges: [{ survivor: 'e-2', absorbed: ['e-3'], reason: 'Same' }],
-      });
-
-      expect(swapped.groups[0].writes[0].id).toBe('e-2');
-      expect(swapped.groups[0].tombstones).toEqual(['e-1']);
-      expect(twoEdited.groups).toEqual([]);
-      expect(twoEdited.needsReview.map(({ id }) => id)).toEqual(['e-2', 'e-3']);
-    });
-
-    it('leaves a merge for review when it would change the text of the person-edited item', () => {
+    it('leaves a merge with a person-edited item for review, with or without merged text', () => {
       const kis = [entity('e-1'), entity('e-2', { attributes: personEdited })];
 
-      const retitled = resolve(kis, {
-        merges: [{ survivor: 'e-1', absorbed: ['e-2'], title: 'Bob Smith', reason: 'Same' }],
+      const withText = resolve(kis, {
+        merges: [{ survivor: 'e-2', absorbed: ['e-1'], title: 'Bob Smith', reason: 'Same' }],
       });
-      const sameTitle = resolve(kis, {
-        merges: [{ survivor: 'e-1', absorbed: ['e-2'], title: 'Entity e-2', reason: 'Same' }],
+      const withoutText = resolve(kis, {
+        merges: [{ survivor: 'e-1', absorbed: ['e-2'], reason: 'Same' }],
       });
 
-      expect(retitled.groups).toEqual([]);
-      expect(retitled.needsReview.map(({ id }) => id)).toEqual(['e-1', 'e-2']);
-      expect(sameTitle.groups[0].tombstones).toEqual(['e-1']);
+      expect(withText.groups).toEqual([]);
+      expect(withText.needsReview.map(({ id }) => id)).toEqual(['e-2', 'e-1']);
+      expect(withoutText.groups).toEqual([]);
+      expect(withoutText.needsReview.map(({ id }) => id)).toEqual(['e-1', 'e-2']);
+    });
+
+    it('rejects a change to an item whose text changed after the batch was gathered', () => {
+      const kis = [entity('e-1'), entity('e-2')];
+      const gathered = [entity('e-1', { title: 'Bob' }), entity('e-2')];
+
+      const resolved = resolveMaintenanceChanges(
+        changeSet({ merges: [{ survivor: 'e-1', absorbed: ['e-2'], reason: 'Same' }] }),
+        {
+          batch: {
+            audience: 'open',
+            items: gathered.map((ki) => ({ ...toMaintenanceItem(ki), reasons: ['changed'] })),
+            neighbors: [],
+            about_facts: [],
+            relationships: [],
+          },
+          kis: new Map(kis.map((ki) => [ki.id, ki])),
+          links: new Map(),
+          spaceId: 'default',
+        }
+      );
+
+      expect(resolved.groups).toEqual([]);
+      expect(resolved.rejected).toEqual([
+        { item: 'merge into e-1', reason: 'e-1 changed after it was reviewed' },
+      ]);
     });
 
     it('leaves a merge for review when a relationship that belongs to one user links an item to absorb', () => {

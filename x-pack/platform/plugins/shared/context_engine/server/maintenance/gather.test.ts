@@ -183,14 +183,16 @@ describe('gatherMaintenance', () => {
     expect(output.batches[0].neighbors).toEqual([]);
   });
 
-  it('leaves out items that belong to one user, as items, neighbors and relationship ends', async () => {
+  it('leaves out items and relationships that belong to one user, even broken ones', async () => {
     const stored = [
       memory('m-1'),
       entity('entity-a'),
       entity('entity-mine', { user_id: 'u-1' }),
       entity('entity-b'),
+      entity('entity-gone', { governance: deleted }),
       relationship('entity-a', 'knows', 'entity-mine'),
       relationship('entity-a', 'manages', 'entity-b', { user_id: 'u-1' }),
+      relationship('entity-a', 'mentors', 'entity-gone', { user_id: 'u-1' }),
     ];
 
     const output = await gatherMaintenance(

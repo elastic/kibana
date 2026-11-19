@@ -303,7 +303,9 @@ export const gatherMaintenance = async (
   }
   const links = known.size
     ? (await reader.citing([...known.keys()].map(kiUri), 'relationships'))
-        .filter((ki) => !isKiDeleted(ki) && isVisibleInSpace(ki.permissions, spaceId))
+        .filter(
+          (ki) => !isKiDeleted(ki) && !isUserScoped(ki) && isVisibleInSpace(ki.permissions, spaceId)
+        )
         .map(parseRelationship)
         .filter((link): link is ParsedRelationship => link !== undefined)
     : [];
@@ -341,9 +343,9 @@ export const gatherMaintenance = async (
     }
   }
   const liveLinks = links.filter(
-    ({ id, ki, from, to }) =>
+    ({ id, from, to }) =>
       !brokenLinks.has(id) &&
-      ![ki, known.get(from), known.get(to)].some((linked) => linked && isUserScoped(linked))
+      ![known.get(from), known.get(to)].some((linked) => linked && isUserScoped(linked))
   );
 
   const reviewedIds = new Set(reviewed.map(({ id }) => id));

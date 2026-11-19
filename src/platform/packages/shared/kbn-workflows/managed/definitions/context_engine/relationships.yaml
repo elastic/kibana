@@ -411,7 +411,7 @@ steps:
                 - Link a fact only to the entities it is about, with relation about: from is the fact, to is the entity. Never use another type from or to a fact.
                 - Link an EXISTING FACT only to an entity in ITEMS that it is about. A fact that only mentions an entity's name in passing is not about it.
                 - Every other type links two entities. Use one only when its description fits both ends; otherwise leave the pair unlinked.
-                - Never link a pair the other way round when an EXISTING relationship already links it: with "Priya manages Alex", do not create "Alex reports_to Priya".
+                - Never create the inverse of an EXISTING relationship, one that states the same thing from the other end: with "Priya manages Alex", do not create "Alex reports_to Priya". A relationship that states something else, such as "Alex mentors Priya", is fine.
                 - Leave out EXISTING relationships that do not change.
                 - An empty list is a valid answer.
 
