@@ -1147,6 +1147,72 @@ describe('getKiGroups', () => {
     expect({ total, totalOther }).toEqual({ total: 10, totalOther: 3 });
   });
 
+  it('uses exactly the given types as groups, as params, and counts all other KIs as other', async () => {
+    query
+      .mockResolvedValueOnce(
+        groupBucketsResponse([
+          [3, 'policy', 9, false],
+          [6, null, 9, true],
+        ])
+      )
+      .mockResolvedValueOnce(rowsResponse([]));
+
+    const result = await getKiGroups(esClient, {
+      ...OPTIONS,
+      types: ['faq', 'policy'],
+      query: 'refund',
+    });
+
+    // "faq" has no match for the search: it is left out, the client shows it as 0.
+    expect(result).toEqual({
+      total: 9,
+      total_other: 6,
+      groups: [{ type: 'policy', count: 3, kis: [] }],
+    });
+    expect(queryText(0)).toContain(
+      'EVAL group_type = CASE(type IS NOT NULL AND BYTE_LENGTH(type) <= 256 AND type IN (?groupType0, ?groupType1), type, NULL)'
+    );
+    // maxGroups (5) is ignored: one bucket per given type.
+    expect(queryText(0)).toContain('| LIMIT 2');
+    expect(query.mock.calls[1][0].params).toEqual([
+      { searchQuery: 'refund' },
+      { groupType0: 'faq' },
+      { groupType1: 'policy' },
+    ]);
+  });
+
+  it('leaves out the excluded types before grouping, as params', async () => {
+    query
+      .mockResolvedValueOnce(
+        groupBucketsResponse([
+          [3, 'policy', 5, false],
+          [2, null, 5, true],
+        ])
+      )
+      .mockResolvedValueOnce(rowsResponse([]));
+
+    const result = await getKiGroups(esClient, { ...OPTIONS, excludeTypes: ['faq', 'runbook'] });
+
+    // total and total_other cover only the KIs outside the excluded types.
+    expect(result).toEqual({
+      total: 5,
+      total_other: 2,
+      groups: [{ type: 'policy', count: 3, kis: [] }],
+    });
+    expect(queryText(0)).toContain(
+      [
+        '| WHERE (type IS NULL OR type NOT IN (?excludeType0, ?excludeType1))',
+        'EVAL group_type = CASE(type IS NOT NULL AND BYTE_LENGTH(type) <= 256, type, NULL)',
+      ].join('\n| ')
+    );
+    expect(query.mock.calls[1][0].params).toEqual([
+      { excludeType0: 'faq' },
+      { excludeType1: 'runbook' },
+    ]);
+    // An excluded type can't be a group, so the group rows need no exclude filter.
+    expect(query.mock.calls[2][0].params).toEqual([{ type: 'policy' }]);
+  });
+
   it('applies status, search and sort to buckets and rows', async () => {
     query
       .mockResolvedValueOnce(groupBucketsResponse([[1, 'faq', 2, false]]))

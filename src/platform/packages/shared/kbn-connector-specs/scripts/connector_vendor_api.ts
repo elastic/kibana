@@ -162,7 +162,15 @@ run(
       for (const { connector, directory } of connectors) {
         try {
           // Uncached, so the vendor's latest spec is compared.
-          const drift = await detectDrift({ connector, directory, fetchText, now, log });
+          const drift = await detectDrift({
+            connector,
+            directory,
+            fetchText,
+            now,
+            log,
+            // The connector's folder, for links in its issue
+            folder: path.relative(REPO_ROOT, path.dirname(directory)),
+          });
           log.info(`${drift.connector}: ${drift.outcome} (${drift.verdict})`);
           report.push(drift);
         } catch (error) {
