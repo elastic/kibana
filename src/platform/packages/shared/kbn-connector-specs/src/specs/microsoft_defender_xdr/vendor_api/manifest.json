@@ -1,0 +1,208 @@
+{
+  "operations": {
+    "addAlertComment": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/security/alerts_v2/{alert-id}/comments",
+        "source": "v1"
+      }
+    ],
+    "addIncidentComment": [
+      {
+        "method": "post",
+        "path": "/security/incidents/{incident-id}/comments",
+        "source": "v1"
+      }
+    ],
+    "createDetectionRule": [
+      {
+        "method": "post",
+        "path": "/security/rules/detectionRules",
+        "source": "v1"
+      }
+    ],
+    "deleteDetectionRule": [
+      {
+        "method": "delete",
+        "path": "/security/rules/detectionRules/{detectionRule-id}",
+        "source": "v1"
+      }
+    ],
+    "getAlert": [
+      {
+        "method": "get",
+        "path": "/security/alerts_v2/{alert-id}",
+        "source": "v1"
+      }
+    ],
+    "getDetectionRule": [
+      {
+        "method": "get",
+        "path": "/security/rules/detectionRules/{detectionRule-id}",
+        "source": "v1"
+      }
+    ],
+    "getIncident": [
+      {
+        "method": "get",
+        "path": "/security/incidents/{incident-id}",
+        "source": "v1"
+      }
+    ],
+    "getPassiveDnsRecords": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "$skip",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/security/threatIntelligence/hosts/{host-id}/passivedns",
+        "source": "v1"
+      }
+    ],
+    "getThreatIntelHost": [
+      {
+        "method": "get",
+        "path": "/security/threatIntelligence/hosts/{host-id}",
+        "source": "v1"
+      }
+    ],
+    "getThreatIntelHostReputation": [
+      {
+        "method": "get",
+        "path": "/security/threatIntelligence/hosts/{host-id}/reputation",
+        "source": "v1"
+      }
+    ],
+    "getWhoisRecord": [
+      {
+        "method": "get",
+        "path": "/security/threatIntelligence/hosts/{host-id}/whois",
+        "source": "v1"
+      }
+    ],
+    "listAlerts": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "$skip",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/security/alerts_v2",
+        "source": "v1"
+      }
+    ],
+    "listDetectionRules": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "$skip",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/security/rules/detectionRules",
+        "source": "v1"
+      }
+    ],
+    "listIncidents": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "$skip",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/security/incidents",
+        "source": "v1"
+      }
+    ],
+    "listSecureScores": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "$skip",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/security/secureScores",
+        "source": "v1"
+      }
+    ],
+    "mergeIncidents": [
+      {
+        "method": "post",
+        "path": "/security/incidents/mergeIncidents",
+        "source": "v1"
+      }
+    ],
+    "runHuntingQuery": [
+      {
+        "method": "post",
+        "path": "/security/runHuntingQuery",
+        "source": "v1"
+      }
+    ],
+    "updateAlert": [
+      {
+        "method": "patch",
+        "path": "/security/alerts_v2/{alert-id}",
+        "source": "v1"
+      }
+    ],
+    "updateDetectionRule": [
+      {
+        "method": "patch",
+        "path": "/security/rules/detectionRules/{detectionRule-id}",
+        "source": "v1"
+      }
+    ],
+    "updateIncident": [
+      {
+        "method": "patch",
+        "path": "/security/incidents/{incident-id}",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "v1.0",
+      "fetchedAt": "2026-11-18T13:18:50.360Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/microsoftgraph/msgraph-metadata/master/openapi/v1.0/openapi.yaml"
+    }
+  }
+}

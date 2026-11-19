@@ -1,0 +1,232 @@
+overlay: 1.0.0
+info:
+  title: Microsoft Graph Security API corrections
+  version: 1.0.0
+actions:
+  - target: $..required[?@ == '@odata.type']
+    description: >-
+      The Graph API spec marks @odata.type as required on nearly every schema, but the
+      API never enforces it on write operations. Connectors do not send it; removing it
+      from required arrays prevents false request-violation findings.
+    remove: true
+
+  - target: $.paths['/security/alerts_v2/{alert-id}/comments'].post.requestBody.content['application/json'].schema.items
+    description: >-
+      The spec declares the addAlertComment request body as an array of alertComment,
+      but the API also accepts a single object with a "comment" property
+      (https://learn.microsoft.com/en-us/graph/api/security-alert-post-comments).
+      Remove the array constraint so the schema becomes a plain object.
+    remove: true
+
+  - target: $.paths['/security/alerts_v2/{alert-id}/comments'].post.requestBody.content['application/json'].schema.type
+    description: Remove 'array' type to allow object body for addAlertComment.
+    remove: true
+
+  - target: $.paths['/security/alerts_v2/{alert-id}/comments'].post.requestBody.content['application/json'].schema
+    description: >-
+      Replace the (now gutted) array schema with an object schema matching what the
+      connector sends: { comment: string }.
+    update:
+      type: object
+      properties:
+        comment:
+          type: string
+      required:
+        - comment
+
+  - target: $.components.schemas['microsoft.graph.security.alertDetermination'].enum
+    description: >-
+      Remove the existing alertDetermination enum so it can be replaced with a broader
+      one that includes compromisedUser and confirmationNeeded.
+    remove: true
+
+  - target: $.components.schemas['microsoft.graph.security.alertDetermination']
+    description: >-
+      Add the full determination enum including values the connector uses
+      (compromisedUser, confirmationNeeded) per
+      https://learn.microsoft.com/en-us/graph/api/resources/security-alert.
+      Both alert and incident schemas reference this shared enum type.
+    update:
+      enum:
+        - unknown
+        - apt
+        - malware
+        - securityPersonnel
+        - securityTesting
+        - unwantedSoftware
+        - other
+        - multiStagedAttack
+        - compromisedAccount
+        - compromisedUser
+        - phishing
+        - maliciousUserActivity
+        - notMalicious
+        - notEnoughDataToValidate
+        - confirmedActivity
+        - confirmationNeeded
+        - lineOfBusinessApplication
+        - unknownFutureValue
+
+  - target: $.paths
+    description: >-
+      The v1.0 OpenAPI spec omits POST /security/incidents/{incident-id}/comments.
+      The endpoint exists and is documented at
+      https://learn.microsoft.com/en-us/graph/api/security-incident-post-comments
+      (mirrors the alerts_v2 comment pattern).
+    update:
+      /security/incidents/{incident-id}/comments:
+        parameters:
+          - in: path
+            name: incident-id
+            required: true
+            schema:
+              type: string
+        post:
+          operationId: security.incidents.PostComments
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    comment:
+                      type: string
+                  required:
+                    - comment
+            required: true
+          responses:
+            2XX:
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/microsoft.graph.security.alertComment'
+            4XX:
+              $ref: '#/components/responses/error'
+            5XX:
+              $ref: '#/components/responses/error'
+
+  - target: $.paths
+    description: >-
+      The v1.0 OpenAPI spec omits GET /security/threatIntelligence/hosts/{host-id}/passivedns.
+      The endpoint exists and is documented at
+      https://learn.microsoft.com/en-us/graph/api/security-host-list-passivedns
+    update:
+      /security/threatIntelligence/hosts/{host-id}/passivedns:
+        parameters:
+          - in: path
+            name: host-id
+            required: true
+            schema:
+              type: string
+        get:
+          operationId: security.threatIntelligence.hosts.ListPassiveDns
+          parameters:
+            - $ref: '#/components/parameters/top'
+            - $ref: '#/components/parameters/skip'
+            - $ref: '#/components/parameters/filter'
+            - $ref: '#/components/parameters/count'
+          responses:
+            2XX:
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      value:
+                        type: array
+                        items:
+                          type: object
+                      '@odata.nextLink':
+                        type: string
+                        nullable: true
+            4XX:
+              $ref: '#/components/responses/error'
+            5XX:
+              $ref: '#/components/responses/error'
+          x-ms-pageable:
+            nextLinkName: '@odata.nextLink'
+            operationName: listMore
+
+  - target: $.paths
+    description: >-
+      The v1.0 OpenAPI spec omits POST /security/incidents/mergeIncidents (OData action).
+      The endpoint exists; its parameters (incidentIds, incidentComment, mergeReasons) are
+      declared in the OData $metadata at
+      https://graph.microsoft.com/v1.0/$metadata#microsoft.graph.security.mergeIncidents
+    update:
+      /security/incidents/mergeIncidents:
+        post:
+          operationId: security.incidents.MergeIncidents
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    incidentIds:
+                      type: array
+                      items:
+                        type: string
+                    incidentComment:
+                      type: string
+                    mergeReasons:
+                      type: string
+                  required:
+                    - incidentIds
+                    - incidentComment
+            required: true
+          responses:
+            2XX:
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/microsoft.graph.security.incident'
+            4XX:
+              $ref: '#/components/responses/error'
+            5XX:
+              $ref: '#/components/responses/error'
+
+  - target: $.paths
+    description: >-
+      The v1.0 OpenAPI spec omits POST /security/runHuntingQuery (OData action).
+      The endpoint exists and is documented at
+      https://learn.microsoft.com/en-us/graph/api/security-security-runhuntingquery
+    update:
+      /security/runHuntingQuery:
+        post:
+          operationId: security.RunHuntingQuery
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    Query:
+                      type: string
+                    Timespan:
+                      type: string
+                  required:
+                    - Query
+            required: true
+          responses:
+            2XX:
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      schema:
+                        type: array
+                        items:
+                          type: object
+                      results:
+                        type: array
+                        items:
+                          type: object
+                      stats:
+                        type: object
+                        nullable: true
+            4XX:
+              $ref: '#/components/responses/error'
+            5XX:
+              $ref: '#/components/responses/error'

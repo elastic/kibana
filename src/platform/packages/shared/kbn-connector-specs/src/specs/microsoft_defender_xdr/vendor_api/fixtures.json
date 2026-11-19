@@ -1,0 +1,14 @@
+{
+  "runHuntingQuery": {
+    "input": {
+      "query": "DeviceEvents | where ActionType == 'ProcessCreated' | limit 10"
+    },
+    "queries": [
+      {
+        "source": "v1",
+        "method": "POST",
+        "path": "/security/runHuntingQuery"
+      }
+    ]
+  }
+}
