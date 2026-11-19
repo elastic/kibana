@@ -79,6 +79,10 @@
 - [Google Cloud IAM](/reference/connectors-kibana/gcp-iam-action-type.md): Disable service accounts, revoke leaked keys, and grant or revoke IAM role bindings.
 - [Google Cloud Secret Manager](/reference/connectors-kibana/gcp-secret-manager-action-type.md): Inspect secrets, add and disable secret versions, and read access policy.
 
+**Endpoint security**
+
+- [Microsoft Defender for Endpoint](/reference/connectors-kibana/microsoft-defender-for-endpoint-action-type.md): Contain and investigate devices in Microsoft Defender for Endpoint — list, isolate, and release devices, run live response scripts and antivirus scans, and manage block and allow indicators.
+
 **Email security**
 
 - [Sublime Security](/reference/connectors-kibana/sublime-security-action-type.md): Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security.
