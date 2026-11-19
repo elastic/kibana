@@ -111,6 +111,7 @@ import {
   connectedDestinations,
   getSourceDisplaySignals,
   getUnitSources,
+  sourceConnectedDestinationIds,
   withUnitSources,
 } from '../../../streams_layout/sources/source_models';
 import { CreateSourceModal } from '../../../streams_layout/sources/create_source_modal';
@@ -1001,6 +1002,9 @@ function StreamsCanvasInner() {
                   }
                   indicesStatus={resolvedIndicesStatus}
                   indicesError={resolvedIndicesError}
+                  hasConnectedSource={sourceConnectedDestinationIds(unitDefinition).has(
+                    flyoutDestination.id
+                  )}
                   destinationDetailRef={destinationsController.destinationDetailRefs.get(
                     flyoutDestination.id
                   )}

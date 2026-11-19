@@ -52,6 +52,10 @@ import {
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUnitId } from '../../../hooks/use_unit_id';
+import {
+  useCanvasSearchHref,
+  useNavigateToCanvasSearch,
+} from '../../stream_management/data_management/stream_detail_canvas/use_navigate_to_canvas_search';
 import { SourceFilter, type SourceFilterOption } from '../sources/source_filter';
 import {
   buildDestinationIndexRows,
@@ -147,6 +151,9 @@ interface DestinationIndicesTableProps {
   indices: ResolvedDestinationIndex[];
   indicesStatus: ResolvedIndicesStatus;
   indicesError?: ResolvedIndicesError;
+  hasConnectedSource: boolean;
+  /** When set, the empty state links to the Map searched for this query. */
+  mapSearchQuery?: string;
   destinationDetailRef?: DestinationDetailActorRef;
   /** Called on mount; the details then follow the page time range and the indices. */
   onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
@@ -158,12 +165,67 @@ interface DestinationIndicesTableProps {
   showToolbar?: boolean;
 }
 
+const MapSearchLink = ({ query }: { query: string }) => {
+  const href = useCanvasSearchHref(query);
+  const navigateToCanvasSearch = useNavigateToCanvasSearch();
+
+  return (
+    <EuiLink
+      href={href}
+      onClick={(event: React.MouseEvent) => {
+        if (isModifiedClick(event)) {
+          return;
+        }
+        event.preventDefault();
+        navigateToCanvasSearch(query);
+      }}
+      data-test-subj="streamsDestinationIndicesShowOnMapLink"
+    >
+      <FormattedMessage
+        id="xpack.streams.destinations.indices.mapLinkLabel"
+        defaultMessage="the Map"
+      />
+    </EuiLink>
+  );
+};
+
+const EmptyIndicesMessage = ({
+  hasConnectedSource,
+  mapSearchQuery,
+}: Pick<DestinationIndicesTableProps, 'hasConnectedSource' | 'mapSearchQuery'>) => {
+  if (hasConnectedSource) {
+    return (
+      <FormattedMessage
+        id="xpack.streams.destinations.indices.emptyDescription"
+        defaultMessage="No indices match this destination's write scope yet."
+      />
+    );
+  }
+  if (mapSearchQuery) {
+    return (
+      <FormattedMessage
+        id="xpack.streams.destinations.indices.noConnectedSourcesWithMapLinkDescription"
+        defaultMessage="No sources are connected to this destination yet. Connect one on {mapLink} to start sending data."
+        values={{ mapLink: <MapSearchLink query={mapSearchQuery} /> }}
+      />
+    );
+  }
+  return (
+    <FormattedMessage
+      id="xpack.streams.destinations.indices.noConnectedSourcesDescription"
+      defaultMessage="No sources are connected to this destination yet. Connect one to start sending data."
+    />
+  );
+};
+
 /** Paginated, sortable list of a destination's indices with their stats. */
 export const DestinationIndicesTable = ({
   destinationId,
   indices,
   indicesStatus,
   indicesError,
+  hasConnectedSource,
+  mapSearchQuery,
   destinationDetailRef,
   onShowDestinationDetail,
   onHideDestinationDetail,
@@ -470,9 +532,9 @@ export const DestinationIndicesTable = ({
     return (
       <EuiText size="s" color="subdued" data-test-subj="streamsDestinationIndicesEmpty">
         <p>
-          <FormattedMessage
-            id="xpack.streams.destinations.indices.emptyDescription"
-            defaultMessage="No indices match this destination's write scope yet."
+          <EmptyIndicesMessage
+            hasConnectedSource={hasConnectedSource}
+            mapSearchQuery={mapSearchQuery}
           />
         </p>
       </EuiText>
