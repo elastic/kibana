@@ -48,6 +48,21 @@ describe('toTypeColumns', () => {
     );
   });
 
+  it('does not label a column named like an inherited property of an object', () => {
+    const result = toTypeColumns([
+      { name: '__proto__', kind: 'attribute' },
+      { name: 'constructor', kind: 'attribute' },
+      { name: 'toString', kind: 'attribute' },
+    ]);
+
+    expect(result).toEqual([
+      { name: '__proto__', kind: 'attribute' },
+      { name: 'constructor', kind: 'attribute' },
+      { name: 'toString', kind: 'attribute' },
+    ]);
+    result.forEach((column) => expect(column).not.toHaveProperty('label'));
+  });
+
   it('never returns the source fields of an attribute', () => {
     toTypeColumns(columns).forEach((column) => expect(column).not.toHaveProperty('fieldByPlan'));
   });
