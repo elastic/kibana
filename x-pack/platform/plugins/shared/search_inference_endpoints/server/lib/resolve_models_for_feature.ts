@@ -136,8 +136,19 @@ export const resolveModelsForFeature = async ({
         ({ connectorId }) =>
           connectorId === defaultConnectorId || connectorId === defaultConnector.connectorId
       )?.parameters;
+      // An alias default replaces the endpoint's own merged entry, which used to stay in the list
+      // with its recommended flag, so carry the flag over.
+      const isAlias = defaultConnector.connectorId !== defaultConnectorId;
+      const isRecommended = isAlias
+        ? merged.find((c) => c.connectorId === defaultConnector.connectorId)?.isRecommended
+        : undefined;
       connectors = [
-        { ...defaultConnector, ...(parameters ? { parameters } : {}), isDefault: true },
+        {
+          ...defaultConnector,
+          ...(parameters ? { parameters } : {}),
+          ...(isRecommended ? { isRecommended } : {}),
+          isDefault: true,
+        },
         ...merged.filter(
           (c) =>
             c.connectorId !== defaultConnectorId && c.connectorId !== defaultConnector.connectorId
