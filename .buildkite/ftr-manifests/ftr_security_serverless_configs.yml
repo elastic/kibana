@@ -18,9 +18,6 @@ disabled:
   # QA suites that are run out-of-band
   - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.cloud.ts
 
-  # MKI only configs files
-  - x-pack/solutions/security/test/serverless/functional/configs/config.mki_only.ts
-
   # Detection Rules Management base configs
   - x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/detections_response/rules_management/configs/serverless/rules_management.essentials.config.ts
   - x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/detections_response/rules_management/configs/serverless/rules_management.complete.config.ts
