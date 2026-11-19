@@ -17,12 +17,8 @@ project:
   owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations
 dependsOn:
-  - '@kbn/dev-cli-errors'
-  - '@kbn/dev-cli-runner'
-  - '@kbn/es-snapshot-loader'
   - '@kbn/evals'
   - '@kbn/evals-common'
-  - '@kbn/kibana-api-cli'
   - '@kbn/scout'
   - '@kbn/tooling-log'
   - '@kbn/agent-builder-common'
@@ -31,6 +27,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/inference-tracing'
   - '@kbn/repo-info'
+  - '@kbn/fs'
   - '@kbn/nightshift-decision-trees'
   - '@kbn/nightshift-investigations-plugin'
   - '@kbn/nightshift-shared'
@@ -41,6 +38,8 @@ dependsOn:
   - '@kbn/config'
   - '@kbn/config-schema'
   - '@kbn/std'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
 tags:
   - functional-tests
   - package

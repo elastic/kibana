@@ -9,7 +9,7 @@
 
 // Command registry - the main command registry instance and related utilities
 export * from './registry';
-export type { ESQLCommandSummary } from './registry/types';
+export type { ESQLCommandSummary, ESQLCommandSummaryContext, FieldSummary } from './registry/types';
 
 // Command definitions - constants, types, and utilities for defining commands
 export * from './definitions/constants';
@@ -24,7 +24,17 @@ export { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from './registry/constants';
 export { METADATA_FIELDS } from './registry/options/metadata';
 export { getRecommendedQueriesTemplates } from './registry/options/recommended_queries';
 export type { QueryTemplate } from './registry/options/recommended_queries';
-export { TIME_SYSTEM_PARAMS } from './definitions/utils/literals';
+export {
+  TIME_SYSTEM_PARAMS,
+  GEOTILE_PRECISION_PARAM,
+  GEOHEX_PRECISION_PARAM,
+  GEOHASH_PRECISION_PARAM,
+  GEOTILE_PRECISION_SYSTEM_PARAM,
+  GEOHEX_PRECISION_SYSTEM_PARAM,
+  GEOHASH_PRECISION_SYSTEM_PARAM,
+  GEO_PRECISION_SYSTEM_PARAMS,
+  GEO_PRECISION_SYSTEM_PARAM_DESCRIPTIONS,
+} from './definitions/utils/literals';
 export { withAutoSuggest } from './definitions/utils/autocomplete/helpers';
 export { getIndexSourcesFromQuery, shouldBeQuotedSource } from './definitions/utils/sources';
 export { getPromqlBracketsToClose } from './definitions/utils/ast';

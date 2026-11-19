@@ -183,7 +183,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               })}
               text={i18n.translate('xpack.nightshift.settings.maintenance.noManageBody', {
                 defaultMessage:
-                  'You can view pause status, but pausing or resuming requires the Nightshift Manage engines privilege.',
+                  'You can view pause status, but pausing or resuming requires the nightshift Manage engines privilege.',
               })}
             />
             <EuiSpacer />

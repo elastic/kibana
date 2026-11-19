@@ -15,7 +15,20 @@ import { visitAllImportStatements } from '../helpers/visit_all_import_statements
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
 import { formatSuggestions } from '../helpers/report';
-import { isImportableFrom } from '../helpers/groups';
+import type { ImportViolation } from '../helpers/groups';
+import { getImportViolation } from '../helpers/groups';
+
+const SUGGESTIONS: Record<ImportViolation, string> = {
+  ILLEGAL_IMPORT: formatSuggestions([
+    `Please review the dependencies in your module's manifest (kibana.jsonc).`,
+    `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
+    `Address the conflicting dependencies by refactoring the code`,
+  ]),
+  CORE_PRIVATE_IMPORT: formatSuggestions([
+    `Import the public Core package instead (@kbn/core-<domain>-server, @kbn/core-<domain>-browser, or @kbn/core-<domain>-common).`,
+    `If the public package does not expose what you need, ask @elastic/kibana-core for a public API.`,
+  ]),
+};
 
 export const NoGroupCrossingImportsRule: CreateOnceRule = {
   meta: {
@@ -24,6 +37,7 @@ export const NoGroupCrossingImportsRule: CreateOnceRule = {
     },
     messages: {
       ILLEGAL_IMPORT: `⚠ Illegal import statement: "{{importerPackage}}" ({{importerGroup}}) is importing "{{importedPackage}}" ({{importedGroup}}/{{importedVisibility}}). File: {{sourcePath}}\n{{suggestion}}\n`,
+      CORE_PRIVATE_IMPORT: `⚠ Illegal import statement: "{{importedPackage}}" is private to Core and can only be imported from src/core. File: {{sourcePath}}\n{{suggestion}}\n`,
     },
   },
   createOnce(context) {
@@ -50,11 +64,12 @@ export const NoGroupCrossingImportsRule: CreateOnceRule = {
         }
 
         const imported = classifier.classify(result.absolute);
+        const violation = getImportViolation(self, imported);
 
-        if (!isImportableFrom(self, imported.group, imported.visibility)) {
+        if (violation) {
           context.report({
             node,
-            messageId: 'ILLEGAL_IMPORT',
+            messageId: violation,
             data: {
               importerPackage: self.pkgInfo?.pkgId ?? 'unknown',
               importerGroup: self.group,
@@ -62,14 +77,9 @@ export const NoGroupCrossingImportsRule: CreateOnceRule = {
               importedGroup: imported.group,
               importedVisibility: imported.visibility,
               sourcePath: relativePath,
-              suggestion: formatSuggestions([
-                `Please review the dependencies in your module's manifest (kibana.jsonc).`,
-                `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
-                `Address the conflicting dependencies by refactoring the code`,
-              ]),
+              suggestion: SUGGESTIONS[violation],
             },
           });
-          return;
         }
       };
     });

@@ -9,12 +9,13 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
+  SESSIONS_DEFAULT_CONCURRENCY,
   SESSIONS_DEFAULT_FREQUENCY,
-  SESSIONS_MAX_PARTITIONS,
+  SESSIONS_MAX_CONCURRENCY,
   timeValueSeconds,
 } from '../common/sessions';
 
-/** Transforms accept a frequency between 1s and 1h. */
+/** The summaries task runs between every second and every hour. */
 export const validateFrequency = (value: string): string | undefined => {
   const seconds = timeValueSeconds(value);
   if (seconds == null) {
@@ -24,19 +25,21 @@ export const validateFrequency = (value: string): string | undefined => {
 };
 
 const digitalExperienceConfig = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
   sessions: schema.object({
-    /** How often the sessions transform checks for changed sessions. Longer is cheaper but staler. */
+    /** How often the summaries task looks for changed sessions. Longer is cheaper but staler. */
     frequency: schema.string({
       defaultValue: SESSIONS_DEFAULT_FREQUENCY,
       maxLength: 8,
       validate: validateFrequency,
     }),
-    /** Number of transforms that split sessions by `session.id` range, to spread the work. */
-    partitions: schema.number({
-      defaultValue: 1,
+    /**
+     * How many summary queries of 5,000 sessions the task runs at once. More finishes busy windows
+     * sooner, for more Elasticsearch CPU and about 50 MB more Kibana memory each.
+     */
+    concurrency: schema.number({
+      defaultValue: SESSIONS_DEFAULT_CONCURRENCY,
       min: 1,
-      max: SESSIONS_MAX_PARTITIONS,
+      max: SESSIONS_MAX_CONCURRENCY,
       validate: (value) => (Number.isInteger(value) ? undefined : 'must be a whole number'),
     }),
   }),
@@ -44,6 +47,7 @@ const digitalExperienceConfig = schema.object({
 
 export const config: PluginConfigDescriptor = {
   schema: digitalExperienceConfig,
+  deprecations: ({ unused }) => [unused('enabled', { level: 'warning' })],
 };
 
 export type DigitalExperienceConfig = TypeOf<typeof digitalExperienceConfig>;

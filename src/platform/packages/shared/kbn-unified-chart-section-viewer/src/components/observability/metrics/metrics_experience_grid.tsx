@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import useToggle from 'react-use/lib/useToggle';
@@ -22,7 +22,7 @@ import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
 import { GridSettingsFlyout } from '../../flyout';
-import type { UnifiedMetricsGridProps } from '../../../types';
+import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import {
   useDimensionsWipe,
   useDiscoverFieldForBreakdown,
@@ -46,6 +46,8 @@ export const MetricsExperienceGrid = ({
   isComponentVisible,
   isTabSelected,
   breakdownField,
+  onBreakdownFieldChange,
+  setBreakdownFieldNames,
 }: UnifiedMetricsGridProps) => {
   const {
     searchTerm,
@@ -108,6 +110,23 @@ export const MetricsExperienceGrid = ({
     onDimensionsChange
   );
 
+  useEffect(() => {
+    setBreakdownFieldNames?.(allDimensions.map(({ name }) => name));
+  }, [allDimensions, setBreakdownFieldNames]);
+
+  useEffect(() => () => setBreakdownFieldNames?.(undefined), [setBreakdownFieldNames]);
+
+  // Deselecting the breakdown field also clears it in Discover, otherwise it would be re-applied on the next mount
+  const onToolbarDimensionsChange = useCallback(
+    (nextDimensions: Dimension[]) => {
+      if (breakdownField && !nextDimensions.some(({ name }) => name === breakdownField)) {
+        onBreakdownFieldChange?.(undefined);
+      }
+      onDimensionsChange(nextDimensions);
+    },
+    [breakdownField, onBreakdownFieldChange, onDimensionsChange]
+  );
+
   useResetPageOnDimensionsChange(selectedDimensions, onPageChange);
 
   useDimensionsWipe({
@@ -152,7 +171,7 @@ export const MetricsExperienceGrid = ({
     allDimensions,
     metricItems,
     renderToggleActions,
-    onDimensionsChange,
+    onDimensionsChange: onToolbarDimensionsChange,
     isLoading: isDiscoverLoading,
     onOpenGridSettings,
   });

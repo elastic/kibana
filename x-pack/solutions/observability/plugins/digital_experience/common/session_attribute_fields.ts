@@ -6,19 +6,29 @@
  */
 
 /**
- * Candidate source fields per summarized attribute, in priority order. The dest
- * pipeline keeps the first non-empty value, so the same attribute can come from
- * the event or resource scope. The Overview filters read the same lists, so a filter value
- * means what it does in the sessions.
+ * Candidate source fields per summarized attribute, in priority order. The session summary keeps
+ * the first non-empty value, so the same attribute can come from the event or resource scope. The
+ * Overview filters read the same lists, so a filter value means what it does in the sessions.
  */
 export const SESSION_ATTRIBUTE_FIELDS = {
+  // `deployment.environment.name` replaces the deprecated `deployment.environment`, which
+  // `service.environment` aliases. These are the fields of `ENVIRONMENT_FIELDS` in
+  // `server/lib/otel/queries.ts`, by their stored names, which the raw search of the applications
+  // list matches. A session keeps the first one that an event has, where the raw search matches
+  // any, so they only differ for an application that sets different values in them.
+  environment: [
+    'resource.attributes.deployment.environment.name',
+    'resource.attributes.deployment.environment',
+  ],
+  // The fields of EDOT Browser's `setUser()`, which writes the name as `user.full_name`. It always
+  // writes `user.id`, so the id comes last or a name would never show.
   user: [
     'attributes.user.email',
     'resource.attributes.user.email',
+    'attributes.user.full_name',
+    'resource.attributes.user.full_name',
     'attributes.user.id',
     'resource.attributes.user.id',
-    'attributes.user.name',
-    'resource.attributes.user.name',
   ],
   browser: [
     'resource.attributes.browser.name',
@@ -50,3 +60,5 @@ export const SESSION_ATTRIBUTE_FIELDS = {
   region: ['attributes.client.geo.region_name', 'resource.attributes.client.geo.region_name'],
   city: ['attributes.client.geo.city_name', 'resource.attributes.client.geo.city_name'],
 } as const;
+
+export type SessionAttribute = keyof typeof SESSION_ATTRIBUTE_FIELDS;

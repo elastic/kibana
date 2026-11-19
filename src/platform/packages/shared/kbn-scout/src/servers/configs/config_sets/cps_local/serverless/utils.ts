@@ -9,7 +9,7 @@
 
 const isSecurityTestEndpointsPluginPath = (arg: string): boolean =>
   arg.startsWith('--plugin-path=') &&
-  arg.includes('x-pack/platform/test/security_functional/plugins/test_endpoints');
+  arg.includes('x-pack/platform/test_plugins/security_functional/plugins/test_endpoints');
 
 /**
  * The inherited UIAM config adds securityTestEndpoints for API tests. CPS local

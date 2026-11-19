@@ -43,7 +43,6 @@ describe('IP Overview Component', () => {
       indexPatterns: [],
       jobNameById: {},
       scopeId: PageScope.default,
-      isFlyoutOpen: false,
     };
 
     test('it renders the default IP Overview', () => {

@@ -16,7 +16,7 @@ import {
 import * as fs from 'fs';
 import Path from 'path';
 import { URL } from 'url';
-import { parseString } from 'xml2js';
+import { parseString, parseStringPromise } from 'xml2js';
 import { resolveLocalArtifactsPath } from '../utils/local_artifacts';
 import { getFetchOptions } from '../../proxy';
 import { LATEST_PRODUCT_VERSION } from '../../../../common/consts';
@@ -112,6 +112,28 @@ export const fetchArtifactVersions = async ({
       resolve({ versions: record, publishedProducts: [...publishedProducts] });
     });
   });
+};
+
+/**
+ * Version of a local (`file://`) repository: the newest `LastModified` of its index, so a newer
+ * bundle always compares greater. Remote repositories have no version.
+ */
+export const fetchLocalRepositoryVersion = async ({
+  artifactRepositoryUrl,
+}: {
+  artifactRepositoryUrl: string;
+}): Promise<string | undefined> => {
+  const parsedUrl = new URL(artifactRepositoryUrl);
+  if (parsedUrl.protocol !== 'file:') {
+    return undefined;
+  }
+  const result: ListBucketResponse = await parseStringPromise(
+    (await fetchLocalFile(parsedUrl)).toString()
+  );
+  const lastModified = (result.ListBucketResult.Contents ?? [])
+    .map((entry) => entry.LastModified?.[0])
+    .filter((value): value is string => Boolean(value));
+  return lastModified.length > 0 ? lastModified.sort().reverse()[0] : undefined;
 };
 
 function fetchLocalFile(parsedUrl: URL): Promise<Buffer> {

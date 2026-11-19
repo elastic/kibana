@@ -57,8 +57,8 @@ export const TimelineModal = React.memo<TimelineModalProps>(
     const isFullScreen =
       useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
 
-    // Only returns a value when the new flyout system is enabled, undefined otherwise (in which
-    // case usePaneStyles falls back to its static default)
+    // Returns undefined while Timeline isn't visible, in which case usePaneStyles falls back to
+    // its static default
     const dynamicZIndex = useUnmanagedFlyoutZIndex({
       id: TIMELINE_UNMANAGED_FLYOUT_ID,
       active: visible,
