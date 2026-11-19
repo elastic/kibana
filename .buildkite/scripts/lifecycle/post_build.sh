@@ -35,10 +35,9 @@ if [[ "${GITHUB_PR_NUMBER:-}" ]]; then
 fi
 
 if [[ "${REPORT_FAILED_TESTS_TO_GITHUB:-}" == "true" ]] && [[ "$(buildkite-agent meta-data keys)" == *_github_test_reporting* ]]; then
-  echo "--- Bootstrap Kibana"
-  export KBN_BOOTSTRAP_NO_PREBUILT=true
-  .buildkite/scripts/bootstrap.sh
-
   echo "--- Report failed tests to GitHub"
-  node "$(dirname "${0}")/report_failed_test_issues.ts"
+  # Best-effort, the build result must not depend on it.
+  KBN_BOOTSTRAP_NO_PREBUILT=true .buildkite/scripts/bootstrap.sh \
+    && node "$(dirname "${0}")/report_failed_test_issues.ts" \
+    || echo "Failed to report failed tests to GitHub"
 fi

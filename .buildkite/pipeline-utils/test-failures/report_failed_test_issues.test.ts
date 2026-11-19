@@ -17,10 +17,15 @@ const mockExecFileSync = jest.fn();
 const mockGetCurrentBuild = jest.fn();
 const mockSetMetadata = jest.fn();
 const mockSetAnnotation = jest.fn();
+const mockAnnotateTestFailures = jest.fn();
 
 jest.mock('child_process', () => ({
   ...jest.requireActual('child_process'),
   execFileSync: (...args: unknown[]) => mockExecFileSync(...args),
+}));
+
+jest.mock('./annotate.ts', () => ({
+  annotateTestFailures: (...args: unknown[]) => mockAnnotateTestFailures(...args),
 }));
 
 jest.mock('../index.ts', () => ({
@@ -31,16 +36,17 @@ jest.mock('../index.ts', () => ({
   })),
 }));
 
+let created = 0;
 const job = (id: string, stepId: string, parallelGroupIndex?: number): Job =>
   ({
     id,
     name: 'FTR Configs',
+    created_at: new Date(created++ * 60000).toISOString(),
     step: { id: stepId },
     parallel_group_index: parallelGroupIndex,
   } as Job);
 
-const reporting = (scout: boolean, failures = 1) =>
-  JSON.stringify({ junit: !scout, scout, failures });
+const reporting = (scout: boolean) => JSON.stringify({ junit: !scout, scout });
 
 const SCOUT_REPORT = '.scout/reports/scout-playwright-test-failures-run/scout-failures-run.ndjson';
 
@@ -59,6 +65,21 @@ describe('getPendingSteps', () => {
     };
 
     expect(ids(getPendingSteps(build))).toEqual([['a1', 'a2'], ['b1']]);
+  });
+
+  it('orders the attempts of a step by creation time', () => {
+    const [a1, a2, a3] = [job('a1', 'ftr'), job('a2', 'ftr'), job('a3', 'ftr')];
+    const build = {
+      jobs: [a3, a1, a2],
+      meta_data: {
+        a1_github_test_reporting: reporting(false),
+        a2_github_test_reporting: reporting(false),
+        a3_github_test_reporting: reporting(false),
+        a2_github_test_reported: 'true',
+      },
+    };
+
+    expect(ids(getPendingSteps(build))).toEqual([['a3']]);
   });
 
   it('skips steps whose latest attempt was reported and jobs that recorded no reports', () => {
@@ -107,10 +128,7 @@ describe('reportFailedTestIssues', () => {
       jobs,
       meta_data: {
         ...Object.fromEntries(
-          jobs.map(({ id }) => [
-            `${id}_github_test_reporting`,
-            reporting(false, failuresByJob[id] ?? 1),
-          ])
+          jobs.map(({ id }) => [`${id}_github_test_reporting`, reporting(false)])
         ),
         ...Object.fromEntries(reported.map((id) => [`${id}_github_test_reported`, 'true'])),
       },
@@ -167,16 +185,15 @@ describe('reportFailedTestIssues', () => {
         );
         mkdirSync(Path.join(options.cwd, 'target/test_failures'), { recursive: true });
         for (const { jobId } of Object.values(origins)) {
-          if (failuresByJob[jobId] === 0) {
-            continue;
+          for (let index = 0; index < (failuresByJob[jobId] ?? 1); index++) {
+            writeFileSync(
+              Path.join(options.cwd, `target/test_failures/${jobId}_${index}.json`),
+              JSON.stringify({
+                jobId,
+                githubIssue: `https://github.com/elastic/kibana/issues/${jobId}`,
+              })
+            );
           }
-          writeFileSync(
-            Path.join(options.cwd, `target/test_failures/${jobId}.json`),
-            JSON.stringify({
-              jobId,
-              githubIssue: `https://github.com/elastic/kibana/issues/${jobId}`,
-            })
-          );
         }
       }
     });
@@ -196,9 +213,14 @@ describe('reportFailedTestIssues', () => {
       ['a2_github_test_reported', 'true'],
       ['b1_github_test_reported', 'true'],
     ]);
+    expect(mockAnnotateTestFailures).toHaveBeenCalledWith([
+      expect.stringMatching(/a2\/target\/test_failures\/a1_0\.json$/),
+      expect.stringMatching(/a2\/target\/test_failures\/a2_0\.json$/),
+      expect.stringMatching(/b1\/target\/test_failures\/b1_0\.json$/),
+    ]);
   });
 
-  it('downloads and reports eligible Scout failures and annotates their issue links', async () => {
+  it('downloads and reports eligible Scout failures and refreshes the failure summaries', async () => {
     mockGetCurrentBuild.mockResolvedValue({
       web_url: WEB_URL,
       jobs: [job('scout1', 'scout')],
@@ -232,12 +254,9 @@ describe('reportFailedTestIssues', () => {
       '{"id":"scout-failure"}\n'
     );
     expect(mockSetMetadata).toHaveBeenCalledWith('scout1_github_test_reported', 'true');
-    expect(mockSetAnnotation).toHaveBeenCalledWith(
-      'failed-test-github-issues',
-      'error',
-      `**GitHub failure issues**\n\n[[issue]](https://github.com/elastic/kibana/issues/scout1) [[job]](${WEB_URL}#scout1)`,
-      true
-    );
+    expect(mockAnnotateTestFailures).toHaveBeenCalledWith([
+      expect.stringMatching(/scout1\/target\/test_failures\/scout1_0\.json$/),
+    ]);
   });
 
   it('keeps the originating job link when an earlier attempt fails and its retry passes', async () => {
@@ -256,25 +275,22 @@ describe('reportFailedTestIssues', () => {
       expect.objectContaining({ jobId: 'a1', jobUrl: `${WEB_URL}#a1` }),
       expect.objectContaining({ jobId: 'a2', jobUrl: `${WEB_URL}#a2` }),
     ]);
-    expect(mockSetAnnotation).toHaveBeenCalledWith(
-      'failed-test-github-issues',
-      'error',
-      `**GitHub failure issues**\n\n[[issue]](https://github.com/elastic/kibana/issues/a1) [[job]](${WEB_URL}#a1)`,
-      true
-    );
+    expect(mockAnnotateTestFailures).toHaveBeenCalledWith([
+      expect.stringMatching(/a2\/target\/test_failures\/a1_0\.json$/),
+    ]);
     expect(reporterBuildUrls()).toEqual([`--build-url=${WEB_URL}#a2`, `--build-url=${WEB_URL}#b1`]);
   });
 
   it('keeps a failed step pending and skips reported steps when Post-Build is retried', async () => {
     failingReporterJob = 'a2';
-    let annotation = '';
-    mockSetAnnotation.mockImplementation((_context, _style, value: string, append = false) => {
-      annotation = append ? annotation + value : value;
-    });
 
-    await expect(run()).rejects.toThrow('Failed to report failed tests for 1 steps');
+    await run();
+    expect(mockSetAnnotation).toHaveBeenCalledWith(
+      'failed-test-github-issues-errors',
+      'warning',
+      'Failed to report failed tests to GitHub for 1 steps, see the Post-Build log.'
+    );
     expect(mockSetMetadata.mock.calls).toEqual([['b1_github_test_reported', 'true']]);
-    expect(annotation).toContain(`[[job]](${WEB_URL}#b1)`);
 
     mockExecFileSync.mockClear();
     mockSetMetadata.mockClear();
@@ -283,8 +299,6 @@ describe('reportFailedTestIssues', () => {
     await run(['b1']);
     expect(reporterBuildUrls()).toEqual([`--build-url=${WEB_URL}#a2`]);
     expect(mockSetMetadata.mock.calls).toEqual([['a2_github_test_reported', 'true']]);
-    expect(annotation).toContain(`[[job]](${WEB_URL}#b1)`);
-    expect(annotation).toContain(`[[job]](${WEB_URL}#a2)`);
 
     mockExecFileSync.mockClear();
     await run(['a2', 'b1']);
@@ -294,14 +308,19 @@ describe('reportFailedTestIssues', () => {
   it('reports the other steps and keeps a step pending when its reports fail to download', async () => {
     failingDownloadJob = 'a1';
 
-    await expect(run()).rejects.toThrow('Failed to report failed tests for 1 steps');
+    await run();
+    expect(mockSetAnnotation).toHaveBeenCalledWith(
+      'failed-test-github-issues-errors',
+      'warning',
+      'Failed to report failed tests to GitHub for 1 steps, see the Post-Build log.'
+    );
 
     expect(reporterBuildUrls()).toEqual([`--build-url=${WEB_URL}#b1`]);
     expect(mockSetMetadata.mock.calls).toEqual([['b1_github_test_reported', 'true']]);
   });
 
   it('only downloads and reports new test-step retries after an earlier Post-Build run', async () => {
-    failuresByJob = { a1: 30, a2: 20, b1: 0, a3: 1 };
+    failuresByJob = { a1: 3, a2: 2, b1: 0, a3: 1 };
     await run();
     mockExecFileSync.mockClear();
     mockSetMetadata.mockClear();
@@ -320,25 +339,17 @@ describe('reportFailedTestIssues', () => {
     expect(mockSetMetadata.mock.calls).toEqual([['a3_github_test_reported', 'true']]);
   });
 
-  it('skips reporting and fails when the failures of all reports exceed the limit', async () => {
-    failuresByJob = { a1: 30, a2: 30, b1: 0 };
-
-    await expect(run()).rejects.toThrow('60 failed tests exceed the GitHub reporting limit');
-
-    expect(reporterBuildUrls()).toEqual([]);
-    expect(mockSetMetadata).not.toHaveBeenCalled();
-    expect(mockSetAnnotation).toHaveBeenCalledWith(
-      'failed-test-github-issues',
-      'error',
-      expect.stringContaining('Skipped reporting 60 failed tests')
-    );
-  });
-
-  it('reports when the failures of all reports are exactly at the limit', async () => {
-    failuresByJob = { a1: 25, a2: 24, b1: 1 };
+  it('stops reporting further steps once 20 failures were reported', async () => {
+    failuresByJob = { a1: 12, a2: 8, b1: 1 };
 
     await run();
 
-    expect(reporterBuildUrls()).toHaveLength(2);
+    expect(reporterBuildUrls()).toEqual([`--build-url=${WEB_URL}#a2`]);
+    expect(mockSetMetadata.mock.calls).toEqual([['a2_github_test_reported', 'true']]);
+    expect(mockSetAnnotation).toHaveBeenCalledWith(
+      'failed-test-github-issues-limit',
+      'warning',
+      'Stopped reporting to GitHub after 20 failed tests, 1 steps were not reported.'
+    );
   });
 });

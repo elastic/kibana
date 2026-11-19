@@ -8,8 +8,8 @@
  */
 
 import { execSync } from 'child_process';
-import { mkdirSync, readdirSync, readFileSync, statSync } from 'fs';
-import { join } from 'path';
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, statSync } from 'fs';
+import { basename, join } from 'path';
 import { BuildkiteClient } from '../index.ts';
 import type { Artifact } from '../buildkite/types/artifact.ts';
 
@@ -149,7 +149,8 @@ export const getSlackMessage = (
   );
 };
 
-export const annotateTestFailures = async () => {
+/** Publishes the build's test failures; `reportedFiles` replace the failure files jobs uploaded. */
+export const annotateTestFailures = async (reportedFiles: string[] = []) => {
   const exec = (cmd: string) => execSync(cmd, { stdio: 'inherit' });
 
   const failureDir = 'target/process-test-failures';
@@ -167,6 +168,13 @@ export const annotateTestFailures = async () => {
   exec(
     `.buildkite/scripts/common/download_artifact.sh --include-retried-jobs "target/test_failures/*.json" "${failureDir}"`
   );
+
+  // Post-Build's copies name the GitHub issues it filed, the copies from the test jobs don't.
+  const downloadDir = join(failureDir, 'target/test_failures');
+  mkdirSync(downloadDir, { recursive: true });
+  for (const file of reportedFiles) {
+    copyFileSync(file, join(downloadDir, basename(file)));
+  }
 
   const failures: TestFailure[] = recursiveReadDir(failureDir)
     .map((file) => {

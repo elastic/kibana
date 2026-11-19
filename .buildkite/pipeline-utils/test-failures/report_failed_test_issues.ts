@@ -8,13 +8,13 @@
  */
 
 import { execFileSync } from 'child_process';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'fs';
 import Path from 'path';
 import { globby } from 'globby';
 import { BuildkiteClient } from '../index.ts';
 import type { Build } from '../buildkite/types/build.ts';
 import type { Job } from '../buildkite/types/job.ts';
-import type { TestFailure } from './annotate.ts';
+import { annotateTestFailures } from './annotate.ts';
 
 const buildkite = new BuildkiteClient();
 
@@ -23,14 +23,13 @@ const REPORTS = {
   junit: { download: 'target/junit/*.xml', glob: 'target/junit/**/*.xml' },
   scout: { download: `${SCOUT_DIR}*/*`, glob: `${SCOUT_DIR}*/scout-failures-*.ndjson` },
 } as const;
-const MAX_REPORTED_FAILURES = 50;
+const MAX_REPORTED_FAILURES = 20;
 
 /** What a failed test job recorded about its reports in post_command.sh. */
 interface ReportingAttempt {
   job: Job;
   junit: boolean;
   scout: boolean;
-  failures: number;
 }
 
 /** Groups the not yet reported attempts with test reports by step, oldest attempt first. */
@@ -48,6 +47,10 @@ export const getPendingSteps = (build: Pick<Build, 'jobs' | 'meta_data'>): Repor
 
   return [...steps.values()]
     .map((attempts) =>
+      // The API does not document the order of a step's attempts.
+      attempts.sort((a, b) => a.job.created_at.localeCompare(b.job.created_at))
+    )
+    .map((attempts) =>
       attempts.slice(
         attempts.findLastIndex(({ job }) => build.meta_data[`${job.id}_github_test_reported`]) + 1
       )
@@ -62,22 +65,19 @@ export const reportFailedTestIssues = async (): Promise<void> => {
     return;
   }
 
-  const failureCount = pending.flat().reduce((sum, { failures }) => sum + failures, 0);
-  if (failureCount > MAX_REPORTED_FAILURES) {
-    buildkite.setAnnotation(
-      'failed-test-github-issues',
-      'error',
-      `Skipped reporting ${failureCount} failed tests to GitHub (limit ${MAX_REPORTED_FAILURES}).`
-    );
-    throw new Error(`${failureCount} failed tests exceed the GitHub reporting limit`);
-  }
-
   mkdirSync('target', { recursive: true });
   const root = mkdtempSync(Path.resolve('target', 'failed-test-issues-'));
   const reporter = Path.resolve('scripts/report_failed_tests.js');
-  const links: string[] = [];
+  const reportedFiles: string[] = [];
   let failedSteps = 0;
+  let failureCount = 0;
+  let skippedSteps = 0;
   for (const attempts of pending) {
+    // Mass failures would exhaust the GitHub rate limit, the remaining steps are left unreported.
+    if (failureCount >= MAX_REPORTED_FAILURES) {
+      skippedSteps += 1;
+      continue;
+    }
     const { job } = attempts[attempts.length - 1];
     const directory = Path.join(root, job.id);
     try {
@@ -132,29 +132,39 @@ export const reportFailedTestIssues = async (): Promise<void> => {
       );
       buildkite.setMetadata(`${job.id}_github_test_reported`, 'true');
 
-      for (const file of await globby('target/test_failures/*.json', { cwd: directory })) {
-        const { githubIssue, jobId }: TestFailure = JSON.parse(
-          readFileSync(Path.join(directory, file), 'utf8')
-        );
-        if (githubIssue) {
-          links.push(`[[issue]](${githubIssue}) [[job]](${build.web_url}#${jobId})`);
-        }
-      }
+      const failures = await globby('target/test_failures/*.json', {
+        cwd: directory,
+        absolute: true,
+      });
+      failureCount += failures.length;
+      reportedFiles.push(...failures);
     } catch (error) {
       console.error(`Failed to report failed tests for job ${job.id}`, error);
       failedSteps += 1;
     }
   }
 
-  if (links.length) {
+  if (reportedFiles.length) {
+    // Refreshes the failure annotation, PR comment and Slack summary with the filed issues.
+    try {
+      await annotateTestFailures(reportedFiles);
+    } catch (error) {
+      console.error('Failed to refresh the test failure summaries', error);
+    }
+  }
+  if (skippedSteps) {
     buildkite.setAnnotation(
-      'failed-test-github-issues',
-      'error',
-      `**GitHub failure issues**\n\n${[...new Set(links)].join('<br />\n')}`,
-      true
+      'failed-test-github-issues-limit',
+      'warning',
+      `Stopped reporting to GitHub after ${failureCount} failed tests, ${skippedSteps} steps were not reported.`
     );
   }
+  // Reporting problems are annotated instead of thrown, so they never fail the build.
   if (failedSteps) {
-    throw new Error(`Failed to report failed tests for ${failedSteps} steps`);
+    buildkite.setAnnotation(
+      'failed-test-github-issues-errors',
+      'warning',
+      `Failed to report failed tests to GitHub for ${failedSteps} steps, see the Post-Build log.`
+    );
   }
 };
