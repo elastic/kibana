@@ -88,7 +88,7 @@ export const SESSIONS_LIST_MAX_FACET_LENGTHS = {
 
 export type SessionWebVitals = Record<CoreWebVital, number | null>;
 
-export type SessionsHealth = 'missing' | 'healthy' | 'lagging' | 'degraded';
+export type SessionsHealth = 'missing' | 'disabled' | 'healthy' | 'lagging' | 'degraded';
 
 export interface SessionsSettings {
   /** How often the summaries task runs, as a time value such as `1m`. */
@@ -107,6 +107,11 @@ export interface SessionsRunError {
 export interface SessionsStatus {
   /** True once sessions are enabled: the summaries task is scheduled. */
   installed: boolean;
+  /**
+   * True when a user with the manage sessions privilege turned sessions off: the task no longer
+   * runs, the summaries built so far are kept, and only such a user can turn them back on.
+   */
+  disabled: boolean;
   health: SessionsHealth;
   /** Version of the summaries the task writes, and of this Kibana's. */
   installedVersion: number | null;
@@ -117,8 +122,8 @@ export interface SessionsStatus {
    */
   rebuilding: boolean;
   /**
-   * True when the task's API key was invalidated or expired: it can't run until a user with the
-   * manage sessions privilege enables sessions again.
+   * True when the task's API key was invalidated or expired: it can't run until a user who can set
+   * sessions up enables them again, which the app does by itself.
    */
   apiKeyInvalid: boolean;
   /** How far the summaries are behind, in seconds: every event before `summarizedUntil` is in. */
@@ -133,8 +138,9 @@ export interface SessionsStatus {
   /** Sessions are kept for this many days, so older time ranges have none. */
   retentionDays: number;
   /**
-   * True when sessions aren't set up and the current user can set them up, with every privilege
-   * enabling checks: the app then sets them up without asking.
+   * True when sessions aren't set up, or their API key no longer works, and the current user has
+   * every privilege enabling checks: the app then sets them up without asking. Never once they
+   * were turned off.
    */
   autoEnable: boolean;
 }

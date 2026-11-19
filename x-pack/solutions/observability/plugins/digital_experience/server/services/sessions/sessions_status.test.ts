@@ -43,6 +43,7 @@ const healthyState: SessionsTaskState = {
 
 const MISSING: SessionsStatus = {
   installed: false,
+  disabled: false,
   health: 'missing',
   installedVersion: null,
   currentVersion: SESSIONS_VERSION,
@@ -109,9 +110,37 @@ describe('getSessionsStatus', () => {
     });
   });
 
+  it('reports sessions that were turned off, neither rebuilding nor failing', async () => {
+    mockTask(
+      {
+        ...healthyState,
+        caughtUp: false,
+        apiKeyInvalid: true,
+        lastError: { message: 'x', at: secondsAgo(30) },
+      },
+      { enabled: false }
+    );
+
+    expect(await getSessionsStatus({ taskManager, settings, withDetails: true, now: NOW })).toEqual(
+      {
+        ...MISSING,
+        installed: true,
+        disabled: true,
+        health: 'disabled',
+        installedVersion: SESSIONS_VERSION,
+        lagSeconds: 90,
+        summarizedUntil: healthyState.checkpoint,
+        lastRunAt: healthyState.lastRunAt,
+        lastSuccessAt: healthyState.lastSuccessAt,
+        enabledBy: 'ana',
+      }
+    );
+  });
+
   it('reports healthy, caught-up summaries and who enabled them', async () => {
     expect(await statusOf(healthyState)).toEqual({
       installed: true,
+      disabled: false,
       health: 'healthy',
       installedVersion: SESSIONS_VERSION,
       currentVersion: SESSIONS_VERSION,

@@ -73,6 +73,7 @@ describe('enableSessions', () => {
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient();
     taskManager = taskManagerMock.createStart();
+    taskManager.bulkEnable.mockResolvedValue({ tasks: [], errors: [] });
     logger = loggingSystemMock.createLogger();
     jest.mocked(checkSessionsPrivileges).mockResolvedValue();
   });
@@ -106,7 +107,22 @@ describe('enableSessions', () => {
       }),
       { request, regenerateApiKey: true, includeRunningTasks: true }
     );
+    // A no-op unless sessions were turned off.
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith([SESSIONS_TASK_ID], true, { request });
     expect(taskManager.runSoon).toHaveBeenCalledWith(SESSIONS_TASK_ID);
+  });
+
+  it('fails at the task step when the task cannot be turned back on', async () => {
+    taskManager.bulkEnable.mockResolvedValue({
+      tasks: [],
+      errors: [{ type: 'task', id: SESSIONS_TASK_ID, error: { type: 'conflict', reason: 'x' } }],
+    });
+
+    const error = await enableError();
+
+    expect(error).toBeInstanceOf(SessionsEnableError);
+    expect(error.step).toBe('task');
+    expect(taskManager.runSoon).not.toHaveBeenCalled();
   });
 
   it('checks the privileges first, then runs the steps in order', async () => {
@@ -117,6 +133,7 @@ describe('enableSessions', () => {
       esClient.asInternalUser.indices.putIndexTemplate,
       esClient.asCurrentUser.indices.create,
       taskManager.ensureScheduled,
+      taskManager.bulkEnable,
       taskManager.runSoon,
     ].map((fn) => fn.mock.invocationCallOrder[0]);
     expect(order).toEqual([...order].sort((a, b) => a - b));

@@ -17,8 +17,8 @@ import {
 } from '../../../ebt_constants';
 import type { Formatters } from '../../../hooks/use_formatters';
 import {
-  ASK_ADMIN_TEXT,
   EnableError,
+  SET_UP_BY_OTHERS_TEXT,
   SessionsRetentionCallout,
   SessionsStatusCallout,
   type EnableProps,
@@ -26,7 +26,8 @@ import {
 
 /**
  * Why the EDOT Browser applications may be missing or incomplete, as they are read from the
- * sessions: not set up or being set up, being built, failing or behind, or not kept that far back.
+ * sessions: not set up or being set up, being built, turned off, failing or behind, or not kept
+ * that far back.
  * Nothing shows when the sessions can answer for the whole time range.
  */
 export function SessionsSourceStatus({
@@ -40,7 +41,7 @@ export function SessionsSourceStatus({
   rangeStart: number | undefined;
   formatters: Formatters;
 }) {
-  const { canManage, onEnable, enabling, enableError } = enableProps;
+  const { canEnable, onEnable, enabling, enableError } = enableProps;
 
   if (!status.installed && enabling) {
     return (
@@ -76,11 +77,11 @@ export function SessionsSourceStatus({
                 defaultMessage:
                   'EDOT Browser applications are listed from sessions, which a background task builds from your EDOT Browser data with an API key granted on behalf of whoever sets them up.',
               })}{' '}
-              {canManage ? null : ASK_ADMIN_TEXT}
+              {canEnable ? null : SET_UP_BY_OTHERS_TEXT}
             </p>
           }
           actionProps={
-            canManage
+            canEnable
               ? {
                   primary: {
                     children: i18n.translate(

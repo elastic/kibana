@@ -703,6 +703,7 @@ export function ApplicationsListPage() {
             status={sessionsStatus}
             rangeStart={response?.pageLoadsOverTime.histogram.start}
             formatters={formatters}
+            canEnable={sessionsStatus.autoEnable}
             canManage={canManageSessions(application.capabilities)}
             onEnable={enableSessions}
             enabling={enablingSessions}

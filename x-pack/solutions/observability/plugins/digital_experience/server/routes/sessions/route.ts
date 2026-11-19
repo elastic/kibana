@@ -7,6 +7,7 @@
 
 import { forbidden, internal, notFound } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
+import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 import { isResponseError } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
@@ -33,6 +34,8 @@ import {
   enableSessions,
   type SessionsEnableStep,
 } from '../../services/sessions/enable_sessions';
+import { disableSessions } from '../../services/sessions/disable_sessions';
+import { canManageSessionsInAllSpaces } from '../../services/sessions/manage_sessions_privilege';
 import { SessionsPrivilegesError } from '../../services/sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../services/sessions/sessions_restricted_read_error';
 import { getSessionsStatus } from '../../services/sessions/sessions_status';
@@ -44,6 +47,7 @@ import { listSessions } from './list_sessions';
 
 export const SESSIONS_STATUS_ENDPOINT = 'GET /internal/digital_experience/sessions/status';
 export const SESSIONS_ENABLE_ENDPOINT = 'POST /internal/digital_experience/sessions/enable';
+export const SESSIONS_DISABLE_ENDPOINT = 'POST /internal/digital_experience/sessions/disable';
 export const SESSIONS_LIST_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/sessions';
 export const SESSION_DETAIL_ENDPOINT =
@@ -66,6 +70,30 @@ const LOAD_FAILED_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api
 
 const ENABLE_FAILED_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api.enableFailed', {
   defaultMessage: 'Could not enable sessions. Check the Kibana server logs for details.',
+});
+
+const MANAGE_IN_ALL_SPACES_MESSAGE = i18n.translate(
+  'xpack.digitalExperience.sessions.api.manageInAllSpaces',
+  {
+    defaultMessage:
+      'Turning sessions off or back on requires the Manage session summaries privilege of Digital Experience in all spaces.',
+  }
+);
+
+const TURNED_OFF_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api.turnedOff', {
+  defaultMessage:
+    'Sessions were turned off. Turning them back on requires the Manage session summaries privilege of Digital Experience in all spaces.',
+});
+
+const DISABLE_FAILED_MESSAGE = i18n.translate(
+  'xpack.digitalExperience.sessions.api.disableFailed',
+  {
+    defaultMessage: 'Could not turn sessions off. Check the Kibana server logs for details.',
+  }
+);
+
+const NOT_SET_UP_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api.notSetUp', {
+  defaultMessage: 'Sessions are not set up.',
 });
 
 const NO_TASK_MANAGER_MESSAGE = i18n.translate(
@@ -137,7 +165,7 @@ const statusRoute = createDigitalExperienceServerRoute({
   security: {
     authz: {
       requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read],
-      // Only users who can set sessions up also see who did, whose access the task runs with.
+      // Only users who manage sessions also see who set them up, whose access the task runs with.
       extendedPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
     },
   },
@@ -164,7 +192,8 @@ const statusRoute = createDigitalExperienceServerRoute({
       logger.error(`Could not read the sessions status: ${describeError(error)}`);
       throw internal(LOAD_FAILED_MESSAGE);
     }
-    if (status.installed || !canManage || !taskManager) {
+    const needsSetUp = !status.installed || (status.apiKeyInvalid && !status.disabled);
+    if (!needsSetUp || !taskManager) {
       return status;
     }
     const { elasticsearch } = await context.core;
@@ -180,11 +209,37 @@ const statusRoute = createDigitalExperienceServerRoute({
   },
 });
 
+/** Logs turning sessions on or off to the audit log, as the user it's done as. */
+const sessionsAudit = (security: SecurityRequestHandlerContext, verb: 'enable' | 'disable') => {
+  const username = security.authc.getCurrentUser()?.username ?? null;
+  return {
+    username,
+    log: (outcome: 'success' | 'failure', error?: Error) =>
+      security.audit.logger.log({
+        message:
+          outcome === 'success'
+            ? `User [${username}] ${verb}d Digital Experience sessions`
+            : `Failed attempt by user [${username}] to ${verb} Digital Experience sessions`,
+        event: {
+          action: `digital_experience_sessions_${verb}`,
+          category: ['configuration'],
+          type: ['change'],
+          outcome,
+        },
+        ...(error ? { error: { code: error.name, message: error.message } } : {}),
+      }),
+  };
+};
+
 const enableRoute = createDigitalExperienceServerRoute({
   endpoint: SESSIONS_ENABLE_ENDPOINT,
   options: { access: 'internal' },
   security: {
-    authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] },
+    authz: {
+      // Setting sessions up is gated by the index privileges the task needs, which it checks.
+      requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read],
+      extendedPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
+    },
   },
   handler: async ({
     context,
@@ -195,26 +250,33 @@ const enableRoute = createDigitalExperienceServerRoute({
     logger,
   }): Promise<SessionsStatus> => {
     const { elasticsearch, security } = await context.core;
-    const { taskManager, canEncrypt } = await getSessionsServices();
+    const { taskManager, canEncrypt, authz } = await getSessionsServices();
     if (!taskManager) {
       throw internal(NO_TASK_MANAGER_MESSAGE);
     }
-    const enabledBy = security.authc.getCurrentUser()?.username ?? null;
-    const audit = (outcome: 'success' | 'failure', error?: Error) =>
-      security.audit.logger.log({
-        message:
-          outcome === 'success'
-            ? `User [${enabledBy}] enabled Digital Experience sessions`
-            : `Failed attempt by user [${enabledBy}] to enable Digital Experience sessions`,
-        event: {
-          action: 'digital_experience_sessions_enable',
-          category: ['configuration'],
-          type: ['change'],
-          outcome,
-        },
-        ...(error ? { error: { code: error.name, message: error.message } } : {}),
-      });
+    const withDetails =
+      request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
+    const getStatus = async () => {
+      try {
+        return await getSessionsStatus({ taskManager, settings: sessionsSettings, withDetails });
+      } catch (error) {
+        throw toReadError(error, logger, 'the sessions status');
+      }
+    };
 
+    // Anyone can set sessions up or give them a working key again. Turning them back on, or
+    // changing whose access a working task runs with, is for managers.
+    const current = await getStatus();
+    const needsSetUp = !current.installed || (current.apiKeyInvalid && !current.disabled);
+    if (!needsSetUp && !(await canManageSessionsInAllSpaces(authz, request))) {
+      if (current.disabled) {
+        throw forbidden(TURNED_OFF_MESSAGE);
+      }
+      // Set up by someone else since the app asked, as when two users open it at once.
+      return current;
+    }
+
+    const audit = sessionsAudit(security, 'enable');
     try {
       await enableSessions({
         esClient: elasticsearch.client,
@@ -226,13 +288,52 @@ const enableRoute = createDigitalExperienceServerRoute({
         logger,
       });
     } catch (error) {
-      audit('failure', error);
+      audit.log('failure', error);
       throw toEnableError(error, logger);
     }
-    audit('success');
-    logger.info(`Sessions enabled by [${enabledBy}]`);
+    audit.log('success');
+    logger.info(`Sessions enabled by [${audit.username}]`);
+    return getStatus();
+  },
+});
+
+const disableRoute = createDigitalExperienceServerRoute({
+  endpoint: SESSIONS_DISABLE_ENDPOINT,
+  options: { access: 'internal' },
+  security: {
+    authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] },
+  },
+  handler: async ({
+    context,
+    request,
+    sessionsSettings,
+    getSessionsServices,
+    logger,
+  }): Promise<SessionsStatus> => {
+    const { security } = await context.core;
+    const { taskManager, authz } = await getSessionsServices();
+    if (!taskManager) {
+      throw internal(NO_TASK_MANAGER_MESSAGE);
+    }
+    if (!(await canManageSessionsInAllSpaces(authz, request))) {
+      throw forbidden(MANAGE_IN_ALL_SPACES_MESSAGE);
+    }
+
+    const audit = sessionsAudit(security, 'disable');
+    let disabled: boolean;
     try {
-      // Only users who can set sessions up get here.
+      disabled = await disableSessions({ taskManager, request });
+    } catch (error) {
+      audit.log('failure', error);
+      logger.error(`Could not disable sessions: ${describeError(error)}`);
+      throw internal(DISABLE_FAILED_MESSAGE);
+    }
+    if (!disabled) {
+      throw notFound(NOT_SET_UP_MESSAGE);
+    }
+    audit.log('success');
+    logger.info(`Sessions disabled by [${audit.username}]`);
+    try {
       return await getSessionsStatus({
         taskManager,
         settings: sessionsSettings,
@@ -351,6 +452,7 @@ const detailRoute = createDigitalExperienceServerRoute({
 export const sessionsRouteRepository = {
   ...statusRoute,
   ...enableRoute,
+  ...disableRoute,
   ...listRoute,
   ...detailRoute,
 };

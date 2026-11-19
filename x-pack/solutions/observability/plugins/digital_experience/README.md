@@ -47,10 +47,11 @@ privileges like the app.
 - **Sessions states:** as EDOT Browser applications are read from the sessions index only, a callout
   above the summary says when it can't answer for the whole range, unless only Classic RUM is
   selected:
-  - not set up: a **Set up sessions** button for users with the **Set up session summaries**
-    privilege, who rarely see it as the app sets sessions up for them (see
-    [Enabling sessions](#enabling-sessions)), and whom to ask for everyone else; while they are set
-    up, a message says so;
+  - not set up: the app sets them up for any user who can (see
+    [Enabling sessions](#enabling-sessions)), with a **Set up sessions** button to retry a failed
+    setup; everyone else is told who sets them up; while they are set up, a message says so;
+  - turned off: the summaries built so far are still listed, with a **Turn sessions on** button for
+    users who manage sessions in all spaces, and whom to ask for everyone else;
   - being built, after they are set up or after an upgrade with a new `SESSIONS_VERSION`: applications
     and metrics may be missing or incomplete;
   - an API key that no longer works, a failing summaries task, or summaries that are behind: the
@@ -250,11 +251,13 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
 A tab of EDOT Browser applications only, as sessions are built from EDOT Browser data (see
 [Sessions](#sessions)).
 
-- **Status:** before sessions are set up, the tab shows a **Set up sessions** button to users with the
-  **Set up session summaries** privilege and tells everyone else whom to ask. A failed setup names the
-  step that failed. Once set up, a callout flags an API key that no longer works (with a **Set up
-  sessions again** button for those users), a failing
-  run of the summaries task with its error, or summaries that are behind. A line next to the time
+- **Status:** before sessions are set up, the app sets them up for a user who can, and tells everyone
+  else who sets them up. A failed setup names the step that failed, with a **Set up sessions**
+  button to retry. Once set up, a callout flags sessions that were turned off, an API key that no
+  longer works (re-granted by itself for a user who can set sessions up, with a **Set up sessions
+  again** button to retry), a failing run of the summaries task with its error, or summaries that
+  are behind. Users who manage sessions in all spaces get a **Turn sessions off** action above the
+  list, behind a confirmation, and a **Turn sessions on** button once they are off. A line next to the time
   picker says up to when events are in. While the sessions index is first built, an empty list says
   sessions are being built.
 - **KPIs:** sessions, sessions with JS errors, sessions with failed requests, median duration, page
@@ -441,18 +444,23 @@ column of every row.
 
 ### Enabling sessions
 
-Sessions are set up with `POST /internal/digital_experience/sessions/enable`, which requires the
-`manage_digital_experience_sessions` API privilege. As the applications list needs them, the app
-calls it by itself, once per visit, when sessions aren't set up and status reports `autoEnable`:
-the user has the privilege below, Task Manager is available, Kibana can store an API key, and the
-user passes the Elasticsearch checks below, which status runs so that users who would fail write
-no failed audit event. Otherwise the **Set up sessions** button stays the way to set them up. The
-first such user to open the app is the one whose access the summaries hold (see the security note
-below). Only the **Sessions → Set up
-session summaries** sub-feature privilege grants it. It is not part of **All**, as setting sessions up
-runs the task with the user's data access for every reader, and it can only be granted in all
-spaces, as the task and index serve every space. The user also needs these Elasticsearch privileges;
-when any is missing the request fails with a 403 listing them, before anything is written:
+Sessions are set up with `POST /internal/digital_experience/sessions/enable`, which requires only
+`read_digital_experience`: the Elasticsearch privileges below are the real gate. As the applications
+list needs them, the app calls it by itself, once per visit, when status reports `autoEnable`:
+sessions aren't set up (or their API key no longer works) and weren't turned off, Task Manager is
+available, Kibana can store an API key, and the user passes the Elasticsearch checks below, which
+status runs so that users who would fail write no failed audit event. The **Set up sessions** button
+retries a failed setup. The first such user to open the app is the one whose access the summaries
+hold (see the security note below).
+
+Once sessions work, changing that identity, or turning sessions off and back on, takes the
+**Sessions → Manage session summaries** sub-feature privilege, part of **All**, in all spaces:
+the task and index serve every space. Kibana only enforces all spaces in the role editor and role
+API, so the routes also check `manage_digital_experience_sessions` globally. For anyone else,
+enabling sessions that already work answers their current status without changing anything, so an
+automatic setup that races another user's is harmless. The user also needs these Elasticsearch
+privileges; when any is missing the request fails with a 403 listing them, before anything is
+written:
 
 - `traces-*.otel-*`, `logs-*.otel-*`: `read`, `view_index_metadata`
 - `digital-experience-sessions-*`: `read`, `view_index_metadata`, `index`, `create_index`
@@ -480,7 +488,7 @@ After the checks, enabling runs these steps, and a failure answers 500 naming th
 2. `template`: puts the `digital-experience-sessions-browser` index template, as Kibana's internal user.
 3. `index`: creates the sessions index, as the user.
 4. `task`: schedules the summaries task with an API key that Task Manager grants on the user's behalf,
-   and runs it right away.
+   turns it back on if it was turned off, and runs it right away.
 
 Every step is safe to repeat, and the steps before a failed one are harmless on their own, so
 enabling again retries from where it failed. Enabling again also gives the task a new key, granted
@@ -488,20 +496,26 @@ on behalf of whoever enabled it last, and Task Manager invalidates the previous 
 its state, so its summaries are kept. The task never runs as the Kibana internal user: only the
 index template is the internal user's. Each enable writes a `digital_experience_sessions_enable`
 audit event, successful or not. Status reports who last enabled sessions, and why the last run
-failed, only to users who can set them up: Elasticsearch errors can name that user, their roles
+failed, only to users who manage sessions: Elasticsearch errors can name that user, their roles
 and indices, so the others get a generic message. A run in progress doesn't stop enabling again
 from replacing the key. Without Task Manager, sessions can't be enabled.
 
 Like any granted key, the task's key has the access the user had when it was granted, and no
 expiration. Anyone with `manage_api_key` or `manage_security`, or the enabling user with
 `manage_own_api_key`, can invalidate it. The task's runs then fail with a 401, which status reports
-as `apiKeyInvalid`. A user with the privilege then sets sessions up again from the applications list
-or the Sessions tab, which grants a new key on their behalf. Nothing re-grants it by itself, as the
-app only sets sessions up when they aren't: the task reads what the user who set sessions up can
-read, so only an explicit action changes whose data the summaries hold.
+as `apiKeyInvalid`. The app then sets sessions up again for the next user who can, which grants a
+new key on their behalf; while that user lacks the Elasticsearch privileges, the callout stays.
 
-There is no disable action. Removing the task (`digital_experience:sessions-summaries`) with the
-Task Manager API stops it and invalidates its key.
+`POST /internal/digital_experience/sessions/disable` turns sessions off for every space. It
+requires `manage_digital_experience_sessions` in all spaces, answers 404 when sessions aren't set
+up, and writes a `digital_experience_sessions_disable` audit event. It disables the summaries task,
+keeping its state, its key and the sessions index, so readers still see the summaries built so far,
+marked as turned off (`disabled`, health `disabled`). The app never sets turned-off sessions up by
+itself, and enabling them answers 403 to anyone who doesn't manage sessions in all spaces. Turning
+them back on grants a new key, Task Manager invalidates the old one, and the task carries on from
+its checkpoint, rebuilding what it missed within the lookback. Removing the task
+(`digital_experience:sessions-summaries`) with the Task Manager API also stops it and invalidates
+its key, after which sessions are set up again like the first time.
 
 ### Scaling and freshness
 
@@ -552,8 +566,8 @@ readers also need `read` on `digital-experience-sessions-*` (and on the source i
 session detail timeline). Without it they answer 403 naming those privileges; other failures are
 logged and answer 500 without Elasticsearch details:
 
-- `GET /internal/digital_experience/sessions/status`: whether sessions are set up, the task's health,
-  lag and last error, whether it is still building, how many days sessions are kept, and whether the
+- `GET /internal/digital_experience/sessions/status`: whether sessions are set up or turned off, the
+  task's health, lag and last error, whether it is still building, how many days sessions are kept, and whether the
   app should set them up for the current user (`autoEnable`).
 - `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets (browser,
   OS, country, entry page), the `environment`, `withJsErrors`, `withFailedRequests` and

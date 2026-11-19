@@ -39,10 +39,12 @@ jest.mock('@kbn/server-route-repository-client', () => ({
 
 const STATUS_ENDPOINT = 'GET /internal/digital_experience/sessions/status';
 const ENABLE_ENDPOINT = 'POST /internal/digital_experience/sessions/enable';
+const DISABLE_ENDPOINT = 'POST /internal/digital_experience/sessions/disable';
 const LIST_ENDPOINT = 'GET /internal/digital_experience/applications/{serviceName}/sessions';
 
 const status = (overrides: Partial<SessionsStatus> = {}): SessionsStatus => ({
   installed: true,
+  disabled: false,
   health: 'healthy',
   installedVersion: 1,
   currentVersion: 1,
@@ -131,6 +133,9 @@ const respondWith = ({
     if (endpoint === ENABLE_ENDPOINT) {
       return status();
     }
+    if (endpoint === DISABLE_ENDPOINT) {
+      return status({ disabled: true, health: 'disabled' });
+    }
     if (list instanceof Error) {
       throw list;
     }
@@ -210,71 +215,53 @@ beforeEach(() => {
 
 describe('SessionsTab', () => {
   describe('when sessions are not set up', () => {
-    it('lets a user who can set sessions up do so, then lists the sessions', async () => {
+    it('sets sessions up by itself for a user who can, once, then lists the sessions', async () => {
       respondWith({ sessionsStatus: notSetUp() });
-      renderTab();
-
-      expect(await screen.findByTestId('digitalExperienceSessionsNotEnabled')).toHaveTextContent(
-        'A background task builds them from your EDOT Browser data every minute'
-      );
-      fireEvent.click(screen.getByTestId('digitalExperienceSessionsEnable'));
+      mockFetch.mockImplementationOnce(async () => ({ ...notSetUp(), autoEnable: true }));
+      renderTab({ manageSessions: false });
 
       expect(
         await screen.findByTestId('digitalExperienceSessionRow-session-1')
       ).toBeInTheDocument();
-      expect(mockFetch).toHaveBeenCalledWith(ENABLE_ENDPOINT, {});
+      expect(fetchesOf(ENABLE_ENDPOINT)).toEqual([[ENABLE_ENDPOINT, {}]]);
       expect(screen.queryByTestId('digitalExperienceSessionsNotEnabled')).not.toBeInTheDocument();
     });
 
-    it('shows why setting them up failed', async () => {
+    it('shows why setting them up failed, with a button to try again', async () => {
       mockFetch.mockImplementation(async (endpoint: string) => {
         if (endpoint === ENABLE_ENDPOINT) {
           throw forbidden('Missing privileges: index:traces-*:read');
         }
-        return notSetUp();
+        return { ...notSetUp(), autoEnable: true };
       });
       renderTab();
-
-      fireEvent.click(await screen.findByTestId('digitalExperienceSessionsEnable'));
 
       expect(await screen.findByTestId('digitalExperienceSessionsEnableError')).toHaveTextContent(
         'Missing privileges: index:traces-*:read'
       );
+      expect(screen.getByTestId('digitalExperienceSessionsNotEnabled')).toHaveTextContent(
+        'A background task builds them from your EDOT Browser data every minute'
+      );
+      fireEvent.click(screen.getByTestId('digitalExperienceSessionsEnable'));
+      await waitFor(() => expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(2));
     });
 
-    it('tells other users to ask an administrator, without a button', async () => {
+    it('tells other users who sets sessions up, without a button, whatever their Kibana privileges', async () => {
       respondWith({ sessionsStatus: notSetUp() });
-      renderTab({ manageSessions: false });
+      renderTab({ manageSessions: true });
 
       expect(await screen.findByTestId('digitalExperienceSessionsNotEnabled')).toHaveTextContent(
-        'Ask an administrator with the Set up session summaries privilege'
+        'They are set up automatically when someone who can read your EDOT Browser data in full'
       );
       expect(screen.queryByTestId('digitalExperienceSessionsEnable')).not.toBeInTheDocument();
+      expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(0);
       expect(listRequests()).toHaveLength(0);
     });
   });
 
   describe('when the API key of sessions no longer works', () => {
-    it('shows the warning with a button instead of granting a new key by itself', async () => {
-      respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
-      renderTab();
-
-      expect(
-        await screen.findByTestId('digitalExperienceSessionsApiKeyInvalid')
-      ).toBeInTheDocument();
-      expect(screen.getByTestId('digitalExperienceSessionsUpdate')).toHaveTextContent(
-        'Set up sessions again'
-      );
-      // The task reads what the user who set sessions up can read, so nobody changes that by
-      // visiting the tab.
-      expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(0);
-      expect(
-        await screen.findByTestId('digitalExperienceSessionRow-session-1')
-      ).toBeInTheDocument();
-    });
-
-    it('grants a new key when a manager sets sessions up again, and shows a failure', async () => {
-      respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
+    it('grants a new key by itself for a user who can, and shows a failure with a retry', async () => {
+      respondWith({ sessionsStatus: status({ apiKeyInvalid: true, autoEnable: true }) });
       const respond = mockFetch.getMockImplementation();
       let enableFails = true;
       mockFetch.mockImplementation(async (endpoint: string, ...rest: unknown[]) => {
@@ -283,9 +270,7 @@ describe('SessionsTab', () => {
         }
         return respond?.(endpoint, ...rest);
       });
-      renderTab();
-
-      fireEvent.click(await screen.findByTestId('digitalExperienceSessionsUpdate'));
+      renderTab({ manageSessions: false });
 
       expect(await screen.findByTestId('digitalExperienceSessionsEnableError')).toHaveTextContent(
         'Missing privileges: cluster:read_security'
@@ -306,12 +291,12 @@ describe('SessionsTab', () => {
       expect(screen.queryByTestId('digitalExperienceSessionsEnableError')).not.toBeInTheDocument();
     });
 
-    it('tells other users who to ask, and never grants a key for them', async () => {
+    it('tells other users who sets sessions up, and never grants a key for them', async () => {
       respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
-      renderTab({ manageSessions: false });
+      renderTab({ manageSessions: true });
 
       expect(await screen.findByTestId('digitalExperienceSessionsApiKeyInvalid')).toHaveTextContent(
-        'Ask an administrator with the Set up session summaries privilege'
+        'They are set up automatically when someone who can read'
       );
       expect(screen.queryByTestId('digitalExperienceSessionsUpdate')).not.toBeInTheDocument();
       expect(
@@ -381,6 +366,73 @@ describe('SessionsTab', () => {
     );
     expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceSessionsDegraded')).not.toBeInTheDocument();
+  });
+
+  describe('turning sessions off and back on', () => {
+    const turnedOff = () => status({ disabled: true, health: 'disabled' });
+
+    it('lets a manager turn sessions off after confirming, keeping the list', async () => {
+      respondWith();
+      renderTab();
+
+      fireEvent.click(await screen.findByTestId('digitalExperienceSessionsTurnOff'));
+      expect(screen.getByTestId('digitalExperienceSessionsTurnOffModal')).toHaveTextContent(
+        'The sessions built so far are kept'
+      );
+      expect(fetchesOf(DISABLE_ENDPOINT)).toHaveLength(0);
+      fireEvent.click(screen.getByTestId('digitalExperienceSessionsTurnOffConfirm'));
+
+      expect(await screen.findByTestId('digitalExperienceSessionsDisabled')).toBeInTheDocument();
+      expect(fetchesOf(DISABLE_ENDPOINT)).toEqual([[DISABLE_ENDPOINT, {}]]);
+      expect(screen.queryByTestId('digitalExperienceSessionsTurnOffModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('digitalExperienceSessionsTurnOff')).not.toBeInTheDocument();
+      expect(screen.getByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
+    });
+
+    it('keeps sessions on when the manager cancels', async () => {
+      respondWith();
+      renderTab();
+
+      fireEvent.click(await screen.findByTestId('digitalExperienceSessionsTurnOff'));
+      fireEvent.click(screen.getByTestId('digitalExperienceSessionsTurnOffCancel'));
+
+      expect(screen.queryByTestId('digitalExperienceSessionsTurnOffModal')).not.toBeInTheDocument();
+      expect(fetchesOf(DISABLE_ENDPOINT)).toHaveLength(0);
+    });
+
+    it('does not offer turning sessions off to other users', async () => {
+      respondWith();
+      renderTab({ manageSessions: false });
+
+      await screen.findByTestId('digitalExperienceSessionRow-session-1');
+      expect(screen.queryByTestId('digitalExperienceSessionsTurnOff')).not.toBeInTheDocument();
+    });
+
+    it('lets a manager turn sessions back on', async () => {
+      respondWith({ sessionsStatus: turnedOff() });
+      renderTab();
+
+      fireEvent.click(await screen.findByTestId('digitalExperienceSessionsTurnOn'));
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('digitalExperienceSessionsDisabled')).not.toBeInTheDocument()
+      );
+      expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(1);
+    });
+
+    it('tells other users who can turn sessions back on, and never does it for them', async () => {
+      respondWith({ sessionsStatus: turnedOff() });
+      renderTab({ manageSessions: false });
+
+      expect(await screen.findByTestId('digitalExperienceSessionsDisabled')).toHaveTextContent(
+        'Manage session summaries privilege of Digital Experience in all spaces can turn them back on'
+      );
+      expect(screen.queryByTestId('digitalExperienceSessionsTurnOn')).not.toBeInTheDocument();
+      expect(
+        await screen.findByTestId('digitalExperienceSessionRow-session-1')
+      ).toBeInTheDocument();
+      expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(0);
+    });
   });
 
   it('says up to when events are in healthy sessions, with nothing to flag', async () => {

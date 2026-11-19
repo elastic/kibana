@@ -66,6 +66,7 @@ const mockSourceFilter = (sourceFilter?: ApplicationSummary['source']) =>
 
 const HEALTHY_SESSIONS: SessionsStatus = {
   installed: true,
+  disabled: false,
   health: 'healthy',
   installedVersion: 2,
   currentVersion: 2,
@@ -102,6 +103,9 @@ const mockSessionsStatus = (overrides: Partial<SessionsStatusState> = {}) =>
     enable: enableSessions,
     enabling: false,
     enableError: undefined,
+    disable: jest.fn(),
+    disabling: false,
+    disableError: undefined,
     ...overrides,
   });
 
@@ -673,6 +677,7 @@ describe('ApplicationsListPage', () => {
       'digitalExperienceApplicationsSessionsRebuilding',
       'digitalExperienceSessionsLagging',
       'digitalExperienceSessionsDegraded',
+      'digitalExperienceSessionsDisabled',
       'digitalExperienceSessionsRetention',
     ];
 
@@ -687,9 +692,9 @@ describe('ApplicationsListPage', () => {
     });
 
     it('offers to set sessions up, and explains the empty list', async () => {
-      mockSessionsStatus({ status: NOT_SET_UP });
+      mockSessionsStatus({ status: { ...NOT_SET_UP, autoEnable: true } });
       respondWith([]);
-      renderPage({ manageSessions: true });
+      renderPage();
 
       expect(
         await screen.findByText('EDOT Browser applications show up here once sessions are set up.')
@@ -700,14 +705,14 @@ describe('ApplicationsListPage', () => {
       expect(enableSessions).toHaveBeenCalledTimes(1);
     });
 
-    it('asks for an administrator when the user cannot set sessions up', async () => {
+    it('says who sets sessions up when the user cannot, whatever their Kibana privileges', async () => {
       mockSessionsStatus({ status: NOT_SET_UP });
       respondWith([]);
-      renderPage();
+      renderPage({ manageSessions: true });
 
       expect(
         await screen.findByTestId('digitalExperienceApplicationsSessionsNotEnabled')
-      ).toHaveTextContent('Ask an administrator');
+      ).toHaveTextContent('They are set up automatically when someone who can read');
       expect(
         screen.queryByTestId('digitalExperienceApplicationsSessionsEnable')
       ).not.toBeInTheDocument();
@@ -742,6 +747,7 @@ describe('ApplicationsListPage', () => {
     it.each([
       ['behind', { health: 'lagging', lagSeconds: 600 }, 'digitalExperienceSessionsLagging'],
       ['failing', { health: 'degraded' }, 'digitalExperienceSessionsDegraded'],
+      ['turned off', { health: 'disabled', disabled: true }, 'digitalExperienceSessionsDisabled'],
     ] as const)('says when sessions are %s', async (_, overrides, callout) => {
       mockSessionsStatus({ status: { ...HEALTHY_SESSIONS, ...overrides } });
       respondWith([app({ source: 'otel' })]);
@@ -749,6 +755,27 @@ describe('ApplicationsListPage', () => {
 
       expect(await screen.findByTestId(callout)).toBeInTheDocument();
     });
+
+    it.each([true, false])(
+      'offers to turn sessions back on only to managers (manager: %s)',
+      async (manageSessions) => {
+        mockSessionsStatus({
+          status: { ...HEALTHY_SESSIONS, disabled: true, health: 'disabled', autoEnable: false },
+        });
+        respondWith([app({ source: 'otel' })]);
+        renderPage({ manageSessions });
+
+        const callout = await screen.findByTestId('digitalExperienceSessionsDisabled');
+        const turnOn = screen.queryByTestId('digitalExperienceSessionsTurnOn');
+        if (manageSessions) {
+          fireEvent.click(turnOn as HTMLElement);
+          expect(enableSessions).toHaveBeenCalledTimes(1);
+        } else {
+          expect(turnOn).not.toBeInTheDocument();
+          expect(callout).toHaveTextContent('can turn them back on');
+        }
+      }
+    );
 
     it('says sessions are not kept that far back, from when', async () => {
       respondWith(

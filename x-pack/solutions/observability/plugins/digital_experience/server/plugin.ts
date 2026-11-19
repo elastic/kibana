@@ -14,6 +14,7 @@ import type {
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type {
@@ -42,6 +43,8 @@ interface DigitalExperienceSetupDeps {
 
 interface DigitalExperienceStartDeps {
   taskManager?: TaskManagerStartContract;
+  /** Optional: checks the manage sessions privilege in all spaces. */
+  security?: SecurityPluginStart;
 }
 
 export class Plugin
@@ -81,7 +84,11 @@ export class Plugin
         sessionsSettings: this.config.sessions,
         getSessionsServices: async () => {
           const [, pluginsStart] = await core.getStartServices();
-          return { taskManager: pluginsStart.taskManager, canEncrypt };
+          return {
+            taskManager: pluginsStart.taskManager,
+            canEncrypt,
+            authz: pluginsStart.security?.authz,
+          };
         },
       },
       runDevModeChecks: this.initializerContext.env.mode.dev,

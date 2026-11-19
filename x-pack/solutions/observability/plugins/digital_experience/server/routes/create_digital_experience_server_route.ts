@@ -9,6 +9,7 @@ import { notFound } from '@hapi/boom';
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository-utils';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
+import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { DIGITAL_EXPERIENCE_ENABLED_FLAG } from '../../common/feature_flags';
 import type { SessionsSettings } from '../../common/sessions';
@@ -20,6 +21,8 @@ export interface SessionsServices {
   taskManager: TaskManagerStartContract | undefined;
   /** Whether Kibana can store the task's API key, which needs an encryption key. */
   canEncrypt: boolean;
+  /** Checks privileges across spaces; undefined without the security plugin. */
+  authz: AuthorizationServiceSetup | undefined;
 }
 
 export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHandlerResources {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
 import { omitBy, isUndefined } from 'lodash';
 import {
@@ -47,6 +47,7 @@ import {
   SessionsRetentionCallout,
   SessionsStatusCallout,
 } from './components/sessions_status_prompts';
+import { TurnOffSessionsButton } from './components/turn_off_sessions_button';
 import {
   SESSIONS_HIDDEN_BY_DEFAULT,
   SESSIONS_OPTIONAL_COLUMNS,
@@ -175,11 +176,14 @@ function SessionsList({
   source,
   status,
   onRefreshStatus,
+  headerAction,
 }: {
   serviceName: string;
   source: ApplicationSource;
   status: SessionsStatus;
   onRefreshStatus: () => void;
+  /** Shown beside how fresh the sessions are. */
+  headerAction?: ReactNode;
 }) {
   const { rebuilding } = status;
   const apiClient = useApiClient();
@@ -306,7 +310,12 @@ function SessionsList({
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <SessionsFreshness status={status} formatters={formatters} />
+          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <SessionsFreshness status={status} formatters={formatters} />
+            </EuiFlexItem>
+            {headerAction && <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TimeRangePicker onRefresh={refreshAll} />
@@ -373,8 +382,24 @@ export function SessionsTab({
 }) {
   const { application } = useKibanaServices();
   const canManage = canManageSessions(application.capabilities);
-  const { status, error, refresh, enable, enabling, enableError } = useSessionsStatus();
-  const enableProps = { canManage, onEnable: enable, enabling, enableError };
+  const {
+    status,
+    error,
+    refresh,
+    enable,
+    enabling,
+    enableError,
+    disable,
+    disabling,
+    disableError,
+  } = useSessionsStatus();
+  const enableProps = {
+    canEnable: status?.autoEnable === true,
+    canManage,
+    onEnable: enable,
+    enabling,
+    enableError,
+  };
 
   // A failed background refresh keeps the last status.
   if (error && !status) {
@@ -407,6 +432,15 @@ export function SessionsTab({
         source={source}
         status={status}
         onRefreshStatus={refresh}
+        headerAction={
+          canManage && !status.disabled ? (
+            <TurnOffSessionsButton
+              onDisable={disable}
+              disabling={disabling}
+              disableError={disableError}
+            />
+          ) : undefined
+        }
       />
     </>
   );

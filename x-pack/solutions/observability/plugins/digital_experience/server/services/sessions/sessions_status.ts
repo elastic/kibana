@@ -24,6 +24,7 @@ import type { SessionsTaskState } from './sessions_task';
 
 const MISSING_STATUS: SessionsStatus = {
   installed: false,
+  disabled: false,
   health: 'missing',
   installedVersion: null,
   currentVersion: SESSIONS_VERSION,
@@ -39,7 +40,8 @@ const MISSING_STATUS: SessionsStatus = {
   autoEnable: false,
 };
 
-const getTask = async (
+/** The summaries task, or undefined before sessions are set up. */
+export const getSessionsTask = async (
   taskManager: TaskManagerStartContract
 ): Promise<ConcreteTaskInstance | undefined> => {
   try {
@@ -84,18 +86,32 @@ export const getSessionsStatus = async ({
   withDetails?: boolean;
   now?: number;
 }): Promise<SessionsStatus> => {
-  const task = taskManager ? await getTask(taskManager) : undefined;
+  const task = taskManager ? await getSessionsTask(taskManager) : undefined;
   if (!task) {
     return MISSING_STATUS;
   }
   const state: SessionsTaskState = task.state;
   const installedVersion = state.version ?? null;
-  const rebuilding = state.caughtUp !== true || installedVersion !== SESSIONS_VERSION;
   const summarizedUntil = state.checkpoint ?? null;
   const lagSeconds =
     summarizedUntil === null
       ? null
       : Math.max(0, Math.round((now - Date.parse(summarizedUntil)) / 1000));
+  const shared = {
+    ...MISSING_STATUS,
+    installed: true,
+    installedVersion,
+    lagSeconds,
+    summarizedUntil,
+    lastRunAt: state.lastRunAt ?? null,
+    lastSuccessAt: state.lastSuccessAt ?? null,
+    enabledBy: withDetails ? task.userScope?.userName ?? null : null,
+  };
+  // Turned off on purpose: neither rebuilding nor failing, as the task doesn't run.
+  if (task.enabled === false) {
+    return { ...shared, disabled: true, health: 'disabled' };
+  }
+  const rebuilding = state.caughtUp !== true || installedVersion !== SESSIONS_VERSION;
   // A rejected key that the task no longer has: sessions were enabled again since, with a new key
   // that no run has used yet, so the failure is the old key's.
   const replacedKeyFailed =
@@ -115,17 +131,10 @@ export const getSessionsStatus = async ({
     lagSeconds > sessionsLagThresholdSeconds(settings.frequency);
 
   return {
-    ...MISSING_STATUS,
-    installed: true,
+    ...shared,
     health: healthOf({ apiKeyInvalid, lastError, lagging }),
-    installedVersion,
     rebuilding,
     apiKeyInvalid,
-    lagSeconds,
-    summarizedUntil,
-    lastRunAt: state.lastRunAt ?? null,
-    lastSuccessAt: state.lastSuccessAt ?? null,
     lastError,
-    enabledBy: withDetails ? task.userScope?.userName ?? null : null,
   };
 };

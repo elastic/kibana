@@ -47,6 +47,7 @@
     "@kbn/server-route-repository-client",
     "@kbn/server-route-repository-utils",
     "@kbn/scout-oblt",
+    "@kbn/security-plugin-types-server",
     "@kbn/task-manager-plugin",
     "@kbn/timerange",
     "@kbn/typed-react-router-config",

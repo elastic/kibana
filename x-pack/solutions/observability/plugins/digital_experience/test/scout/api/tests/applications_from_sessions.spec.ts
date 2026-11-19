@@ -20,9 +20,7 @@ import { findApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
-const { APPLICATIONS_PATH, COMMON_HEADERS, SESSIONS_ENABLE_PATH } = testData;
-
-const SESSIONS_STATUS_PATH = 'internal/digital_experience/sessions/status';
+const { APPLICATIONS_PATH, COMMON_HEADERS, SESSIONS_ENABLE_PATH, SESSIONS_STATUS_PATH } = testData;
 
 const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
