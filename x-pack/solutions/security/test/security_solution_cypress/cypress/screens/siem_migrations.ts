@@ -15,6 +15,7 @@ export const ONBOARDING_SIEM_MIGRATION_CARDS = {
   SELECT_CONNECTORS: getDataTestSubjectSelector('connector-selector'),
   MIGRATE_RULES: '#migrate_rules',
   MIGRATE_DASHBOARDS: '#migrate_dashboards',
+  MIGRATE_WORKFLOWS: '#migrate_workflows',
 };
 
 export const UPLOAD_RULES_BTN = getDataTestSubjectSelector('startMigrationUploadRulesButton');
@@ -31,6 +32,22 @@ export const UPLOAD_DASHBOARDS_FLYOUT = getDataTestSubjectSelector(
 );
 export const UPLOAD_DASHBOARDS_FILE_PICKER = getDataTestSubjectSelector('dashboardsFilePicker');
 export const VIEW_DASHBOARDS_BTN = getDataTestSubjectSelector('viewDashboardsButton');
+export const UPLOAD_WORKFLOWS_BTN = getDataTestSubjectSelector(
+  'startWorkflowMigrationUploadButton'
+);
+export const UPLOAD_WORKFLOWS_FLYOUT = getDataTestSubjectSelector(
+  'workflowMigrationDataInputFlyout'
+);
+export const UPLOAD_WORKFLOWS_FILE_PICKER = getDataTestSubjectSelector('tinesStoriesFilePicker');
+export const UPLOAD_WORKFLOWS_SUBMIT_BTN = getDataTestSubjectSelector('uploadTinesStoriesButton');
+export const WORKFLOWS_FLYOUT_TRANSLATE_BTN = getDataTestSubjectSelector(
+  'workflowDataFlyoutTranslateButton'
+);
+export const WORKFLOWS_CARD_BODY = getDataTestSubjectSelector('startWorkflowMigrationsCardBody');
+export const WORKFLOWS_UI_DISABLED_CALLOUT = getDataTestSubjectSelector(
+  'workflowsUiDisabledCallout'
+);
+export const MISSING_PRIVILEGES_CALLOUT = getDataTestSubjectSelector('missingPrivilegesGroup');
 
 export const START_MIGRATION_FROM_FLYOUT_BTN = getDataTestSubjectSelector('startMigrationButton');
 
