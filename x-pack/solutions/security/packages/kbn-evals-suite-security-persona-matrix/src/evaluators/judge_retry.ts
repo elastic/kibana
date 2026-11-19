@@ -6,6 +6,7 @@
  */
 
 import type { BoundInferenceClient } from '@kbn/inference-common';
+import { withRetry } from '@kbn/evals';
 
 /**
  * Retry budget for an invalid verdict. Each attempt re-sends a submission of up to hundreds
@@ -34,17 +35,41 @@ export const describeJudgeFailure = (error: unknown): string => {
 };
 
 /**
- * Wraps a bound client so every `prompt` call (one judge call each, retries included) is counted.
- * The judge's cost is otherwise invisible: a score from a retried verdict looks like any other.
+ * Attempts per judge request that fails in transport (dropped connection, 429, 502-504), separate
+ * from `JUDGE_MAX_RETRIES`, which re-asks for an invalid verdict. The HTTP layer under the judge
+ * makes a single attempt.
+ */
+export const JUDGE_TRANSPORT_MAX_ATTEMPTS = 3;
+
+/**
+ * Wraps a bound client so every `prompt` request is counted (validity retries and transport
+ * retries alike) and a transient transport failure is retried. The judge's cost is otherwise
+ * invisible: a score from a retried verdict looks like any other.
  */
 export const countingJudgeClient = (
-  inferenceClient: BoundInferenceClient
+  inferenceClient: BoundInferenceClient,
+  { log }: { log?: { warning: (message: string) => void } } = {}
 ): { client: BoundInferenceClient; calls: () => number } => {
   let calls = 0;
   const client: BoundInferenceClient = Object.create(inferenceClient);
   client.prompt = ((...args: Parameters<BoundInferenceClient['prompt']>) => {
-    calls++;
-    return inferenceClient.prompt(...args);
+    const send = () => {
+      calls++;
+      return inferenceClient.prompt(...args);
+    };
+    // A streamed response is an Observable, which withRetry cannot await; the judges never stream.
+    if ((args[0] as { stream?: boolean } | undefined)?.stream) return send();
+    return withRetry(send as () => Promise<unknown>, {
+      maxAttempts: JUDGE_TRANSPORT_MAX_ATTEMPTS,
+      label: 'judge prompt',
+      onRetry: ({ attempt, maxAttempts, delayMs, error }) =>
+        warnSafely(
+          log,
+          `[persona-matrix] judge request failed (attempt ${attempt}/${maxAttempts}), retrying in ${delayMs}ms: ${messageOf(
+            error
+          )}`
+        ),
+    });
   }) as BoundInferenceClient['prompt'];
   return { client, calls: () => calls };
 };
