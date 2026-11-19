@@ -55,7 +55,7 @@ Before drafting, say which issue you picked and where it came from, e.g. "Using 
 
    Done when you can state the user-visible problem, the user-visible change, and how to observe it. Ask for whatever is missing instead of guessing.
 4. **Draft.** Read [references/conventions.md](references/conventions.md), then write the title, the body and the suggested labels following it and the rules below. In Update mode, carry over from the existing body (see "Carry over in Update mode").
-5. **Self-check** the draft against "Before showing the draft" and fix every miss.
+5. **Self-check** the draft against the rules below and fix every miss. Count the visible prose words, check that every template checklist item is copied verbatim and the summary count matches the ticks, and in Update mode that every image and video from the old body is still there.
 6. **Write** the body to a new file, `/tmp/pr-body-<branch>-<YYYYMMDD-HHMMSS>.md` (replace `/` in the branch name with `-`), and the title alone to the matching `/tmp/pr-title-<branch>-<YYYYMMDD-HHMMSS>.txt`. Never reuse a file from another session. Inside an editor (Cursor, VS Code), open the body there with `cursor <path>` or `code <path>` and keep it out of chat; in a terminal-only session, or if the command fails, show the body in chat. Either way, show in chat: the file paths, the title (and the old title in Update mode), the labels, the checklist ticks you inferred, any test steps you inferred but didn't verify, and what you dropped from the old body.
 7. **Revise** on feedback by editing the same files, then summarize what changed. The user may also edit the files directly: re-read them before asking for approval.
 8. **Write mode** stops here.
@@ -140,17 +140,3 @@ Formatting:
 - Tick only what's verified in the session, confirmed by the user, carried over from the author's ticks, or evident from the diff and labels.
 - Checklist `<summary>`: the count first, then why the unchecked items don't apply, e.g. "4 of 8 checked. The others don't apply: no UI text, user docs, config keys or functional tests changed". If an unchecked item does apply, name it: "4 of 8 checked. Flaky Test Runner still to run; the others don't apply".
 - Fill in risks honestly: level, what could go wrong, and why it's acceptable or how it's mitigated. The `<summary>` gives the level and the main risk, e.g. "Medium: agent tool contract changes with no fallback".
-
-## Before showing the draft
-
-Check each item and fix any miss before step 6:
-
-- Title follows references/conventions.md: `[Area]` prefix, starts with an action verb, sentence case, under 80 characters, no issue number or code names.
-- The `Fixes` / `Closes` / `Part of` line uses a full issue URL and the right keyword.
-- Visible prose is about 150 words or less; count it.
-- The problem and the solution use UI names; code names appear only in Review notes.
-- UI changes have a Before/After table, with real media or descriptive placeholders.
-- How to test ends with an expected result in user terms.
-- Every template checklist item is present verbatim, and the summary count matches the ticks.
-- Every `<details>` has a useful one-line `<summary>` and its own visible `##` heading.
-- Update mode: every image and video from the old body is still present.
