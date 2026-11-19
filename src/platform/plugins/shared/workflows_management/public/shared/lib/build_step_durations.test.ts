@@ -490,20 +490,23 @@ describe('getStepDurationShare', () => {
 // ---------------------------------------------------------------------------
 
 describe('getDurationGutterWidth', () => {
+  // The estimate adds CHEVRON_SLOT_PX - 16 = 12px for the chevron slot on top of Monaco's own 16px.
   it('returns the floor for an empty label set', () => {
-    // 0 chars: ceil(0 * 6.6) + 6 + 4 = 10 < 34 floor → 34.
+    // 0 chars: ceil(0 * 6.6) + 6 + 4 + 12 = 22 < 34 floor → 34.
     expect(getDurationGutterWidth([])).toBe(34);
   });
 
-  it('returns the floor for short labels, and the estimate once it exceeds the floor', () => {
-    // '~1s' (3 chars): ceil(3 * 6.6) + 6 + 4 = 30 < 34 floor → 34.
-    expect(getDurationGutterWidth(['~1s'])).toBe(34);
-    // '<1ms' (4 chars): ceil(4 * 6.6) + 6 + 4 = 37 > 34 floor → 37.
-    expect(getDurationGutterWidth(['<1ms'])).toBe(37);
+  it('returns the estimate for short labels, and the floor when it falls below it', () => {
+    // '1' (1 char): ceil(1 * 6.6) + 6 + 4 + 12 = 29 < 34 floor → 34.
+    expect(getDurationGutterWidth(['1'])).toBe(34);
+    // '~1s' (3 chars): ceil(3 * 6.6) + 6 + 4 + 12 = 42 > 34 floor → 42.
+    expect(getDurationGutterWidth(['~1s'])).toBe(42);
+    // '<1ms' (4 chars): ceil(4 * 6.6) + 6 + 4 + 12 = 49 > 34 floor → 49.
+    expect(getDurationGutterWidth(['<1ms'])).toBe(49);
   });
 
   it('returns a wider value for long labels', () => {
-    // '~1m 30s' (7 chars): ceil(7 * 6.6) + 6 + 4 = 57 > 34 floor → 57.
+    // '~1m 30s' (7 chars): ceil(7 * 6.6) + 6 + 4 + 12 = 69 > 34 floor → 69.
     const w = getDurationGutterWidth(['~1m 30s']);
     expect(w).toBeGreaterThan(34);
     expect(w).toBeLessThanOrEqual(160);
@@ -515,8 +518,8 @@ describe('getDurationGutterWidth', () => {
   });
 
   it('uses the longest label when multiple are present', () => {
-    const wShort = getDurationGutterWidth(['~1s']); // 3 chars → 34 (floor)
-    const wLong = getDurationGutterWidth(['~1s', '~1m 30s']); // 7 chars → 57
+    const wShort = getDurationGutterWidth(['~1s']); // 3 chars → 42
+    const wLong = getDurationGutterWidth(['~1s', '~1m 30s']); // 7 chars → 69
     expect(wLong).toBeGreaterThan(wShort);
   });
 });

@@ -40,11 +40,22 @@ import {
 type MockEventHandler = (...args: unknown[]) => void;
 type ScrollChangeCallback = (e: unknown) => void;
 type MouseMoveCallback = (e: {
-  target: { type: number; position: { lineNumber: number } | null };
+  target: { type: number; position: { lineNumber: number } | null; element?: Element | null };
   event: { browserEvent: { clientX: number; clientY: number } };
 }) => void;
 
 const GUTTER_LINE_DECORATIONS_TYPE = 2; // MouseTargetType.GUTTER_LINE_DECORATIONS
+
+// The element Monaco reports under the pointer in the lines-decorations gutter: the duration chip's
+// lane div, or the fold chevron that shares the same box.
+const gutterTarget = (lineNumber: number, className: string) => ({
+  type: GUTTER_LINE_DECORATIONS_TYPE,
+  position: { lineNumber },
+  element: Object.assign(document.createElement('div'), { className }),
+});
+const chipTarget = (lineNumber: number) => gutterTarget(lineNumber, 'cldr step-duration-gutter');
+const chevronTarget = (lineNumber: number) =>
+  gutterTarget(lineNumber, 'cldr codicon codicon-folding-expanded');
 
 jest.mock('@kbn/monaco', () => {
   const actual = jest.requireActual('@kbn/monaco');
@@ -260,6 +271,19 @@ describe('useStepDurationDecorations', () => {
       expect(stepADec!.options.linesDecorationsClassName).toContain('step-duration-gutter');
     });
 
+    it('draws the chip above the fold decoration that shares its gutter box', () => {
+      const editor = createMockEditor();
+      const { store } = renderHookWithProviders(editor);
+
+      act(() => {
+        store.dispatch(setExecution(makeExecution()));
+      });
+
+      const { set } = (editor as ReturnType<typeof createMockEditor>)._decorationsCollection;
+      const [decorations]: [monaco.editor.IModelDeltaDecoration[]] = set.mock.calls.at(-1)!;
+      expect(decorations.find((d) => d.range.startLineNumber === 5)!.options.zIndex).toBe(1);
+    });
+
     it('applies elevated tone class when step is ≥40% of execution duration', () => {
       const editor = createMockEditor();
       const { store } = renderHookWithProviders(editor);
@@ -381,6 +405,36 @@ describe('useStepDurationDecorations', () => {
       const { styles } = result.current.styles;
       expect(styles).toContain(`.${stepAClass}::before{content:"<1ms";}`);
       expect(styles).toContain(`.${stepCClass}::before{content:"~1ms";}`);
+    });
+  });
+
+  // ── fold chevron slot ─────────────────────────────────────────────────────
+
+  describe('fold chevron slot', () => {
+    it('pins the fold chevron to the left slot only while chips are shown', () => {
+      const editor = createMockEditor();
+      const { result, store } = renderHookWithProviders(editor);
+
+      expect(result.current.styles.styles).not.toContain('justify-content:flex-start');
+
+      act(() => {
+        store.dispatch(setExecution(makeExecution()));
+      });
+
+      expect(result.current.styles.styles).toContain('.codicon-folding-expanded');
+      expect(result.current.styles.styles).toContain('justify-content:flex-start');
+    });
+
+    it('reserves the chevron slot to the left of the chip', () => {
+      const { result, store } = renderHookWithProviders(createMockEditor());
+
+      act(() => {
+        store.dispatch(setExecution(makeExecution()));
+      });
+
+      expect(result.current.styles.styles).toContain(
+        `padding-left:${buildStepDurationsModule.CHEVRON_SLOT_PX}px`
+      );
     });
   });
 
@@ -529,7 +583,7 @@ describe('useStepDurationDecorations', () => {
       // Show tooltip first via a mouse-move over the gutter at step-a's line.
       act(() => {
         extEditor._fireMouseMove({
-          target: { type: GUTTER_LINE_DECORATIONS_TYPE, position: { lineNumber: 5 } },
+          target: chipTarget(5),
           event: { browserEvent: { clientX: 100, clientY: 100 } },
         });
       });
@@ -557,7 +611,7 @@ describe('useStepDurationDecorations', () => {
 
       act(() => {
         extEditor._fireMouseMove({
-          target: { type: GUTTER_LINE_DECORATIONS_TYPE, position: { lineNumber: 5 } },
+          target: chipTarget(5),
           event: { browserEvent: { clientX: 100, clientY: 100 } },
         });
       });
@@ -575,7 +629,7 @@ describe('useStepDurationDecorations', () => {
     const hoverStepA = (extEditor: ReturnType<typeof createMockEditor>) =>
       act(() => {
         extEditor._fireMouseMove({
-          target: { type: GUTTER_LINE_DECORATIONS_TYPE, position: { lineNumber: 5 } },
+          target: chipTarget(5),
           event: { browserEvent: { clientX: 100, clientY: 100 } },
         });
       });
@@ -810,6 +864,55 @@ describe('useStepDurationDecorations', () => {
 
       const tipEl = getTipEl();
       expect(!tipEl || tipEl.style.display === 'none' || tipEl.style.display === '').toBe(true);
+    });
+
+    it('does not show the chip tooltip while the pointer is over the fold chevron', () => {
+      const editor = createMockEditor();
+      const extEditor = editor as ReturnType<typeof createMockEditor>;
+      const { store } = renderHookWithProviders(editor);
+
+      act(() => {
+        store.dispatch(setExecution(makeMultiRunExecution()));
+      });
+      act(() => {
+        extEditor._fireMouseMove({
+          target: chevronTarget(5),
+          event: { browserEvent: { clientX: 100, clientY: 100 } },
+        });
+      });
+
+      // The chevron keeps Monaco's native fold tooltip; ours must not stack on top of it.
+      expect(getTipEl()?.style.display).toBe('none');
+    });
+
+    it('renders a lone tooltip line at regular weight', () => {
+      const editor = createMockEditor();
+      const extEditor = editor as ReturnType<typeof createMockEditor>;
+      const { store } = renderHookWithProviders(editor);
+
+      act(() => {
+        store.dispatch(setExecution(makeExecution()));
+      });
+      hoverStepA(extEditor);
+
+      const tipEl = getTipEl();
+      expect(tipEl?.textContent).toBe('50% of total run time');
+      expect(tipEl?.querySelector('strong')).toBeNull();
+    });
+
+    it('emphasises only the heading line when the tooltip has several lines', () => {
+      const editor = createMockEditor();
+      const extEditor = editor as ReturnType<typeof createMockEditor>;
+      const { store } = renderHookWithProviders(editor);
+
+      act(() => {
+        store.dispatch(setExecution(makeMultiRunExecution()));
+      });
+      hoverStepA(extEditor);
+
+      const bolds = getTipEl()?.querySelectorAll('strong') ?? [];
+      expect(bolds).toHaveLength(1);
+      expect(bolds[0].textContent).toContain('2 completed runs');
     });
 
     it('removes the tooltip element from document.body on unmount', () => {
