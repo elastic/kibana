@@ -6,6 +6,7 @@
  */
 
 import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/api';
 import { apiTest } from '../fixtures';
 import {
   unenrollAgent,
@@ -54,7 +55,8 @@ apiTest.describe(
         });
 
         await apiTest.step('unenroll the agent from Fleet', async () => {
-          await unenrollAgent(apiClient, requestHeaders, agentId);
+          const response = await unenrollAgent(apiClient, requestHeaders, agentId);
+          expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
         });
 
         await apiTest.step('the agent acknowledges the unenroll', async () => {
