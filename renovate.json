@@ -1319,7 +1319,7 @@
     },
     {
       "groupName": "agent-builder gen-ai dependencies",
-      "matchDepNames": ["@a2a-js/sdk", "@modelcontextprotocol/sdk", "just-bash"],
+      "matchDepNames": ["@a2a-js/sdk", "@modelcontextprotocol/sdk", "@modelcontextprotocol/server", "just-bash"],
       "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Search", "Team:Enterprise Search"],

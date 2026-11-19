@@ -4294,6 +4294,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: 1.32.1
         version: 1.32.1(@cfworker/json-schema@4.1.1)(supports-color@10.2.2)(zod@4.6.5)
+      '@modelcontextprotocol/server':
+        specifier: 2.4.0
+        version: 2.4.0
       '@moonrepo/cli':
         specifier: 2.6.2
         version: 2.6.2
@@ -8869,12 +8872,6 @@ importers:
 
   src/platform/plugins/shared/visualizations: {}
 
-  x-pack/platform/plugins/shared/workflows_execution_engine: {}
-
-  x-pack/platform/plugins/shared/workflows_extensions: {}
-
-  x-pack/platform/plugins/shared/workflows_management: {}
-
   src/platform/test: {}
 
   src/platform/test_plugins/analytics/analytics_ftr_helpers: {}
@@ -9641,6 +9638,12 @@ importers:
 
   x-pack/platform/plugins/shared/usage_api: {}
 
+  x-pack/platform/plugins/shared/workflows_execution_engine: {}
+
+  x-pack/platform/plugins/shared/workflows_extensions: {}
+
+  x-pack/platform/plugins/shared/workflows_management: {}
+
   x-pack/platform/test: {}
 
   x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector: {}
@@ -10023,11 +10026,11 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
-
   x-pack/solutions/security/test_helpers/detections-response-ftr-services: {}
 
   x-pack/solutions/security/test_plugins/resolver_test: {}
+
+  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
 
   x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding: {}
 
@@ -12539,6 +12542,10 @@ packages:
   '@mixmark-io/domino@2.2.0':
     resolution: {integrity: sha512-Y28PR25bHXUg88kCV7nivXrP2Nj2RueZ3/l/jdx6J9f8J4nsEGcgX0Qe6lt7Pa+J79+kPiJU3LguR6O/6zrLOw==}
 
+  '@modelcontextprotocol/core@2.4.0':
+    resolution: {integrity: sha512-z8QBKqdfXLPzkLQuG4xp8hrVEMm1PZ1IgxMN2sMbJiFiAKOWXnAzogXn2W4aqIBlP1ea6U5yiqVquvUNM1Cj6Q==}
+    engines: {node: '>=20'}
+
   '@modelcontextprotocol/sdk@1.32.1':
     resolution: {integrity: sha512-2DdE+SJDtzLEEWzY1ZjY7Q+VcPhcV1KisD3zI4u0XZyktsjHum1mwbMI+JaulUBi2OZk+KJAi2uPXzxichPkdw==}
     engines: {node: '>=18'}
@@ -12548,6 +12555,10 @@ packages:
     peerDependenciesMeta:
       '@cfworker/json-schema':
         optional: true
+
+  '@modelcontextprotocol/server@2.4.0':
+    resolution: {integrity: sha512-rgR9yxSaAJ+bcsi/XroT/S2AfPiIWloXAnrdfYSCms9ivVju0ishu/wW0J21Ho6+ZOR1r7RyeRbjiRuF87ix5Q==}
+    engines: {node: '>=20'}
 
   '@mongodb-js/saslprep@1.5.5':
     resolution: {integrity: sha512-0PV4mvjGd2Q2/viDvXuoSNzTjQngHvtuWUry1vqvcK4Q/CTeO1zEKMf9set01DMocJnogl/pyNAdvyk+Pe0kQA==}
@@ -29022,6 +29033,10 @@ snapshots:
 
   '@mixmark-io/domino@2.2.0': {}
 
+  '@modelcontextprotocol/core@2.4.0':
+    dependencies:
+      zod: 4.6.5
+
   '@modelcontextprotocol/sdk@1.32.1(@cfworker/json-schema@4.1.1)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
       '@hono/node-server': 2.1.8(hono@4.13.19)
@@ -29045,6 +29060,11 @@ snapshots:
       '@cfworker/json-schema': 4.1.1
     transitivePeerDependencies:
       - supports-color
+
+  '@modelcontextprotocol/server@2.4.0':
+    dependencies:
+      '@modelcontextprotocol/core': 2.4.0
+      zod: 4.6.5
 
   '@mongodb-js/saslprep@1.5.5':
     dependencies:

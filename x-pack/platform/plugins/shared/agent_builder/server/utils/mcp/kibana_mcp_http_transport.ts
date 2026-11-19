@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
-import type {
-  MessageExtraInfo,
-  RequestInfo,
-  JSONRPCMessage,
-  RequestId,
-} from '@modelcontextprotocol/sdk/types.js';
+import type { JSONRPCMessage, RequestId, Transport } from '@modelcontextprotocol/server';
 import {
-  ErrorCode,
+  DEFAULT_NEGOTIATED_PROTOCOL_VERSION,
   isInitializeRequest,
-  isJSONRPCError,
   isJSONRPCRequest,
   isJSONRPCResponse,
-  JSONRPCMessageSchema,
+  parseJSONRPCMessage,
+  ProtocolErrorCode,
   SUPPORTED_PROTOCOL_VERSIONS,
-  DEFAULT_NEGOTIATED_PROTOCOL_VERSION,
-} from '@modelcontextprotocol/sdk/types.js';
+} from '@modelcontextprotocol/server';
 import { randomUUID } from 'node:crypto';
 
 import type { KibanaResponseFactory, KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { IKibanaResponse } from '@kbn/core/server';
+
+/** JSON-RPC code the 2025-era Streamable HTTP transport uses for HTTP-level rejections (406/415). */
+const HTTP_REJECTION_ERROR_CODE = -32000;
 
 /**
  * Server transport for Streamable HTTP: this implements the MCP Streamable HTTP transport specification.
@@ -60,7 +56,7 @@ export class KibanaMcpHttpTransport implements Transport {
   sessionId?: string;
   onclose?: () => void;
   onerror?: (error: Error) => void;
-  onmessage?: (message: JSONRPCMessage, extra?: MessageExtraInfo) => void;
+  onmessage?: (message: JSONRPCMessage) => void;
 
   constructor(options: { sessionIdGenerator?: () => string; logger: Logger }) {
     this.sessionIdGenerator = options.sessionIdGenerator;
@@ -135,7 +131,7 @@ export class KibanaMcpHttpTransport implements Transport {
           body: JSON.stringify({
             jsonrpc: '2.0',
             error: {
-              code: ErrorCode.ConnectionClosed,
+              code: HTTP_REJECTION_ERROR_CODE,
               message: 'Not Acceptable: Client must accept application/json',
             },
             id: null,
@@ -152,7 +148,7 @@ export class KibanaMcpHttpTransport implements Transport {
           body: JSON.stringify({
             jsonrpc: '2.0',
             error: {
-              code: ErrorCode.ConnectionClosed,
+              code: HTTP_REJECTION_ERROR_CODE,
               message: 'Unsupported Media Type: Content-Type must be application/json',
             },
             id: null,
@@ -161,16 +157,15 @@ export class KibanaMcpHttpTransport implements Transport {
       }
 
       const rawMessage = request.body;
-      const requestInfo: RequestInfo = { headers: request.headers };
       let messages: JSONRPCMessage[];
 
       // handle batch and single messages
       if (Array.isArray(rawMessage)) {
         this._logger.debug(`Processing batch request with ${rawMessage.length} messages`);
-        messages = rawMessage.map((msg) => JSONRPCMessageSchema.parse(msg));
+        messages = rawMessage.map(parseJSONRPCMessage);
       } else {
         this._logger.debug('Processing single message request');
-        messages = [JSONRPCMessageSchema.parse(rawMessage)];
+        messages = [parseJSONRPCMessage(rawMessage)];
       }
 
       // Check if this is an initialization request
@@ -183,7 +178,7 @@ export class KibanaMcpHttpTransport implements Transport {
             body: JSON.stringify({
               jsonrpc: '2.0',
               error: {
-                code: ErrorCode.InvalidRequest,
+                code: ProtocolErrorCode.InvalidRequest,
                 message: 'Invalid Request: Server already initialized',
               },
               id: null,
@@ -196,7 +191,7 @@ export class KibanaMcpHttpTransport implements Transport {
             body: JSON.stringify({
               jsonrpc: '2.0',
               error: {
-                code: ErrorCode.InvalidRequest,
+                code: ProtocolErrorCode.InvalidRequest,
                 message: 'Invalid Request: Only one initialization request is allowed',
               },
               id: null,
@@ -224,7 +219,7 @@ export class KibanaMcpHttpTransport implements Transport {
 
         // handle each message
         for (const message of messages) {
-          this.onmessage?.(message, { requestInfo });
+          this.onmessage?.(message);
         }
         return response;
       } else {
@@ -254,7 +249,7 @@ export class KibanaMcpHttpTransport implements Transport {
 
         // handle each message
         for (const message of messages) {
-          this.onmessage?.(message, { requestInfo });
+          this.onmessage?.(message);
         }
 
         // Wait for the response to be ready
@@ -267,7 +262,7 @@ export class KibanaMcpHttpTransport implements Transport {
         body: JSON.stringify({
           jsonrpc: '2.0',
           error: {
-            code: ErrorCode.ParseError,
+            code: ProtocolErrorCode.ParseError,
             message: 'Parse error',
             data: String(error),
           },
@@ -285,7 +280,7 @@ export class KibanaMcpHttpTransport implements Transport {
       this._logger.debug('Processing outgoing message');
 
       let requestId = options?.relatedRequestId;
-      if (isJSONRPCResponse(message) || isJSONRPCError(message)) {
+      if (isJSONRPCResponse(message)) {
         requestId = message.id;
       }
 
@@ -305,7 +300,7 @@ export class KibanaMcpHttpTransport implements Transport {
         throw new Error(error);
       }
 
-      if (isJSONRPCResponse(message) || isJSONRPCError(message)) {
+      if (isJSONRPCResponse(message)) {
         this._logger.debug(`Processing response for request ${String(requestId)}`);
         this._requestResponseMap.set(requestId, message);
         const relatedIds = Array.from(this._requestToStreamMapping.entries())
@@ -370,7 +365,7 @@ export class KibanaMcpHttpTransport implements Transport {
       body: JSON.stringify({
         jsonrpc: '2.0',
         error: {
-          code: ErrorCode.InvalidRequest,
+          code: ProtocolErrorCode.InvalidRequest,
           message: 'Method not allowed.',
         },
         id: null,
@@ -402,7 +397,7 @@ export class KibanaMcpHttpTransport implements Transport {
       body: JSON.stringify({
         jsonrpc: '2.0',
         error: {
-          code: ErrorCode.InvalidRequest,
+          code: ProtocolErrorCode.InvalidRequest,
           message: `Bad Request: Unsupported protocol version [${protocolVersion}] (supported versions: ${SUPPORTED_PROTOCOL_VERSIONS.join(
             ', '
           )})`,

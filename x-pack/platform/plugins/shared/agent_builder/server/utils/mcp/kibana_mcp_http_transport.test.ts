@@ -9,9 +9,9 @@ import { KibanaMcpHttpTransport } from './kibana_mcp_http_transport';
 import type { KibanaRequest, KibanaResponseFactory, RouteMethod } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { CallToolResult, JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js';
+import type { CallToolResult, JSONRPCMessage } from '@modelcontextprotocol/server';
 import { randomUUID } from 'node:crypto';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/server';
 import { z } from '@kbn/zod/v4';
 
 const mockLoggerFactory = loggingSystemMock.create();
@@ -72,10 +72,12 @@ async function createTestServer(
     { capabilities: { logging: {} } }
   );
 
-  mcpServer.tool(
+  mcpServer.registerTool(
     'greet',
-    'A simple greeting tool',
-    { name: z.string().describe('Name to greet') },
+    {
+      description: 'A simple greeting tool',
+      inputSchema: { name: z.string().describe('Name to greet') },
+    },
     async ({ name }): Promise<CallToolResult> => {
       return { content: [{ type: 'text', text: `Hello, ${name}!` }] };
     }
@@ -252,7 +254,7 @@ describe('KibanaMcpHttpTransport', () => {
                   },
                 },
                 required: ['name'],
-                $schema: 'http://json-schema.org/draft-07/schema#',
+                $schema: 'https://json-schema.org/draft/2020-12/schema',
               },
             },
           ],
@@ -524,7 +526,7 @@ describe('KibanaMcpHttpTransport', () => {
                   },
                 },
                 required: ['name'],
-                $schema: 'http://json-schema.org/draft-07/schema#',
+                $schema: 'https://json-schema.org/draft/2020-12/schema',
               },
             },
           ],

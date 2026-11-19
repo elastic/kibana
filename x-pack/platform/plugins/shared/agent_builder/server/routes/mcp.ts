@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import { McpServer, ProtocolErrorCode } from '@modelcontextprotocol/server';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
-import type { InternalToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalToolDefinition, ToolRegistry } from '@kbn/agent-builder-server';
+import type {
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
+} from '@kbn/core/server';
 import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
+import { isModernMcpRequest, serveModernMcpRequest } from '../utils/mcp/modern_mcp_request';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
@@ -57,6 +63,85 @@ export function filterToolsByNamespace(
     return namespaceSet.has(toolNamespace);
   });
 }
+
+const createMcpServer = async ({
+  registry,
+  namespace,
+}: {
+  registry: ToolRegistry;
+  namespace?: string;
+}): Promise<McpServer> => {
+  const server = new McpServer(
+    { name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION },
+    {
+      maxToolInputElements: MCP_MAX_TOOL_INPUT_ELEMENTS,
+      // Tools are resolved per request and Kibana never pushes notifications.
+      capabilities: { tools: { listChanged: false } },
+    }
+  );
+
+  const allTools = await registry.list({});
+  const tools = filterToolsByNamespace(allTools, namespace).filter((tool) => !tool.excludeFromMcp);
+  const idMapping = createToolIdMappings(tools);
+
+  // Expose tools scoped to the request
+  for (const tool of tools) {
+    const toolSchema = await tool.getSchema();
+    server.registerTool(
+      idMapping.get(tool.id) ?? tool.id,
+      {
+        description: tool.description,
+        inputSchema: toolSchema.shape,
+        annotations: tool.annotations,
+      },
+      async (args: { [x: string]: any }) => {
+        const toolResult = await registry.execute({
+          toolId: tool.id,
+          toolParams: args,
+          source: 'mcp',
+        });
+        return {
+          content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
+        };
+      }
+    );
+  }
+
+  return server;
+};
+
+/** Serves a 2025-era (initialize handshake) MCP request through the Kibana transport. */
+const serveLegacyMcpRequest = async ({
+  request,
+  response,
+  server,
+  logger,
+}: {
+  request: KibanaRequest;
+  response: KibanaResponseFactory;
+  server: McpServer;
+  logger: Logger;
+}): Promise<IKibanaResponse> => {
+  const transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
+  const close = async () => {
+    await transport.close().catch((error) => {
+      logger.error('MCP Server: Error closing transport', { error });
+    });
+    await server.close().catch((error) => {
+      logger.error('MCP Server: Error closing server', { error });
+    });
+  };
+
+  request.events.aborted$.subscribe(close);
+
+  try {
+    await server.connect(transport);
+    return await transport.handleRequest(request, response);
+  } catch (error) {
+    await close();
+    throw error;
+  }
+};
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -112,92 +197,31 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        let transport: KibanaMcpHttpTransport | undefined;
-        let server: McpServer | undefined;
-
-        try {
-          transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
-
-          // Instantiate new MCP server upon every request, no session persistence
-          server = new McpServer(
-            {
-              name: MCP_SERVER_NAME,
-              version: MCP_SERVER_VERSION,
-            },
-            { maxToolInputElements: MCP_MAX_TOOL_INPUT_ELEMENTS }
-          );
-
-          const { tools: toolService } = getInternalServices();
-
-          const registry = await toolService.getRegistry({ request });
-          const allTools = await registry.list({});
-          const tools = filterToolsByNamespace(allTools, request.query.namespace).filter(
-            (tool) => !tool.excludeFromMcp
-          );
-
-          const idMapping = createToolIdMappings(tools);
-
-          // Expose tools scoped to the request
-          for (const tool of tools) {
-            const toolSchema = await tool.getSchema();
-            server.registerTool(
-              idMapping.get(tool.id) ?? tool.id,
-              {
-                description: tool.description,
-                inputSchema: toolSchema.shape,
-                annotations: tool.annotations,
-              },
-              async (args: { [x: string]: any }) => {
-                const toolResult = await registry.execute({
-                  toolId: tool.id,
-                  toolParams: args,
-                  source: 'mcp',
-                });
-                return {
-                  content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
-                };
-              }
-            );
-          }
-
-          request.events.aborted$.subscribe(async () => {
-            await transport?.close().catch((error) => {
-              logger.error('MCP Server: Error closing transport', { error });
-            });
-            await server?.close().catch((error) => {
-              logger.error('MCP Server: Error closing server', { error });
-            });
+        // Instantiate a new MCP server for every request, no session persistence
+        const createServer = async () =>
+          createMcpServer({
+            registry: await getInternalServices().tools.getRegistry({ request }),
+            namespace: request.query.namespace,
           });
 
-          await server.connect(transport);
-
-          return await transport.handleRequest(request, response);
+        try {
+          if (await isModernMcpRequest(request)) {
+            return await serveModernMcpRequest({ request, response, createServer });
+          }
+          return await serveLegacyMcpRequest({
+            request,
+            response,
+            server: await createServer(),
+            logger,
+          });
         } catch (error) {
-          logger.error('MCP Server: Error handling request', { error });
-          try {
-            await transport?.close();
-          } catch (closeError) {
-            logger.error('MCP Server: Error closing transport during error handling', {
-              error: closeError,
-            });
-          }
-          if (server) {
-            try {
-              await server.close();
-            } catch (closeError) {
-              logger.error('MCP Server: Error closing server during error handling', {
-                error: closeError,
-              });
-            }
-          }
-
           logger.error('MCP Server: Error handling request', { error });
           return response.customError({
             statusCode: 500,
             body: {
               message: `Internal server error: ${error}`,
               attributes: {
-                code: ErrorCode.InternalError,
+                code: ProtocolErrorCode.InternalError,
               },
             },
           });
