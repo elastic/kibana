@@ -14,6 +14,7 @@
     "@kbn/core",
     "@kbn/core-di",
     "@kbn/core-di-server",
+    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-pricing-common",
     "@kbn/core-plugins-server",
     "@kbn/core-http-server",

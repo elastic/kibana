@@ -24,7 +24,7 @@ export const EMSVectorTileStyleSchema = lazySchema(() =>
 export const heatmapStyleSchema = lazySchema(() =>
   z
     .object({
-      colorRampName: z
+      color_ramp_name: z
         .union([
           z.literal('Blues'),
           z.literal('Greens'),

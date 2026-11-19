@@ -13,10 +13,11 @@
  * Experience applications list shows `otel`, mobile and `classic` apps.
  *
  * Data shape:
- * - EDOT Browser: OTel-native logs and spans in `logs-generic.otel-default` and
- *   `traces-generic.otel-default`
- * - EDOT React Native: OTel-native logs and spans in the same data streams, on Android and iOS,
- *   with the `app.launch` and screen spans that some of the apps create themselves
+ * - EDOT Browser: OTel-native logs and spans in `logs-browser.otel-default` and
+ *   `traces-browser.otel-default`, sorted by session (see `digital_experience_browser`)
+ * - EDOT React Native: OTel-native logs and spans in `logs-generic.otel-default` and
+ *   `traces-generic.otel-default`, on Android and iOS, with the `app.launch` and screen spans that
+ *   some of the apps create themselves
  * - classic RUM (`storefront-web`): page-load transactions with a few XHR spans in
  *   `traces-apm.rum-default`. Minimal on purpose: no marks or experience metrics. Page loads end
  *   at their generated time, so the first ones of a run may start before `--from`.
@@ -26,6 +27,10 @@
  * - includeRawAttribution (boolean, default: false): write web vital attribution JSON bodies
  * - environments (boolean, default: false): spread the EDOT Browser apps over several
  *   environments. The classic RUM app then runs in `production`.
+ * - signedInRate (number from 0 to 1, default: each app's share): share of EDOT Browser sessions
+ *   with a signed-in user (see `digital_experience_browser`)
+ * - frustration (boolean, default: true): report rage, dead and error clicks in EDOT Browser
+ *   sessions (see `digital_experience_browser`)
  * - scale (number, default: 1): multiplies the number of sessions/page loads per minute
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible
@@ -63,6 +68,7 @@ const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logg
   );
 
   return {
+    bootstrap: ({ otelEsClient }) => otelEsClient.installBrowserIndexTemplates(),
     generate: ({ range, clients: { otelEsClient, apmEsClient } }) => [
       withClient(
         otelEsClient,
