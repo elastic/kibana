@@ -5,7 +5,7 @@
     - 'src/platform/packages/shared/kbn-workflows/**/*.*'
     - 'src/platform/packages/shared/kbn-workflows-ui/**/*.*'
     - 'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.*'
-    - 'src/platform/plugins/shared/workflows_extensions/**/*.*'
+    - 'x-pack/platform/plugins/shared/workflows_extensions/**/*.*'
     - 'x-pack/platform/plugins/shared/workflows_management/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/**/*.*'
