@@ -385,6 +385,47 @@ describe('edotBrowser', () => {
       });
     });
 
+    it('writes frustration signals with the distro logger, without a severity', () => {
+      const click = { pageX: 120.4, pageY: 480, tagName: 'BUTTON', cssSelector: '#pay' };
+      const url = 'https://shop.example.com/checkout';
+      const [rage] = client
+        .frustration({ kind: 'rage_click', clickCount: 5, url, ...click })
+        .serialize();
+      const [error] = client
+        .frustration({
+          kind: 'error_click',
+          exception: { type: 'TypeError', message: 'x is undefined' },
+          url,
+          ...click,
+        })
+        .serialize();
+      const [dead] = client
+        .frustration({ kind: 'dead_click', url, ...click, cssSelector: undefined })
+        .serialize();
+
+      expect(rage).toMatchObject({
+        _index: LOGS_INDEX,
+        event_name: 'browser.frustration.rage_click',
+        scope: { name: '@elastic/opentelemetry-browser' },
+      });
+      expect(rage).not.toHaveProperty('severity_number');
+      expect(rage.attributes).toEqual({
+        'browser.css_selector': '#pay',
+        'browser.tag_name': 'BUTTON',
+        'browser.page.x': 120,
+        'browser.page.y': 480,
+        'url.full': url,
+        'browser.frustration.click_count': 5,
+      });
+      expect(error.attributes).toMatchObject({
+        'exception.type': 'TypeError',
+        'exception.message': 'x is undefined',
+      });
+      expect(error.attributes).not.toHaveProperty(['browser.frustration.click_count']);
+      expect(dead.event_name).toBe('browser.frustration.dead_click');
+      expect(dead.attributes).not.toHaveProperty(['browser.css_selector']);
+    });
+
     it('writes exceptions with ERROR severity', () => {
       const [doc] = client
         .exception({ type: 'TypeError', message: 'x is undefined', stacktrace: 'TypeError: ...' })
@@ -571,6 +612,42 @@ describe('edotBrowser', () => {
         expect(attributes).not.toHaveProperty(['session.previous_id'])
       );
     });
+
+    it('stamps the user on logs and spans like setUser()', () => {
+      const signals = (userClient: ReturnType<typeof createClient>) => [
+        ...userClient.exception({ type: 'Error', message: 'boom', stacktrace: '' }).serialize(),
+        ...userClient
+          .httpRequest({ method: 'GET', url: 'https://api.example.com/', statusCode: 200 })
+          .serialize(),
+      ];
+      const anonymous = createClient('session-1');
+      const signedIn = anonymous.withUser({
+        id: 'usr_1',
+        email: 'ada@example.com',
+        fullName: 'Ada Lovelace',
+        account: 'acme',
+      });
+
+      signals(signedIn).forEach(({ attributes }) =>
+        expect(attributes).toMatchObject({
+          'session.id': 'session-1',
+          'user.id': 'usr_1',
+          'user.email': 'ada@example.com',
+          'user.full_name': 'Ada Lovelace',
+          'elastic.user.account': 'acme',
+        })
+      );
+      signals(signedIn.withUser({ id: 'usr_2' })).forEach(({ attributes }) => {
+        expect(attributes).toMatchObject({ 'user.id': 'usr_2' });
+        expect(attributes).not.toHaveProperty(['user.email']);
+      });
+      // `clearUser()`, and the client it came from, which is unchanged
+      [signedIn.withUser(), anonymous].forEach((userClient) =>
+        signals(userClient).forEach(({ attributes }) =>
+          expect(attributes).not.toHaveProperty(['user.id'])
+        )
+      );
+    });
   });
 
   describe('planDocuments', () => {
@@ -665,6 +742,7 @@ describe('edotBrowser', () => {
       end,
       reportExceptions,
       reportResourceTimings,
+      frustrationRandom,
     }: {
       seed?: number;
       pageViews?: number;
@@ -677,6 +755,7 @@ describe('edotBrowser', () => {
       end?: number;
       reportExceptions?: boolean;
       reportResourceTimings?: boolean;
+      frustrationRandom?: () => number;
     } = {}) =>
       edotBrowser
         .session({
@@ -688,6 +767,7 @@ describe('edotBrowser', () => {
           dwell,
           reportExceptions,
           reportResourceTimings,
+          frustrationRandom,
           random: seededRandom(seed),
         })
         .flatMap((event) => event.serialize());
@@ -982,6 +1062,38 @@ describe('edotBrowser', () => {
       }
     });
 
+    it('reports frustration signals only with a source of its own, leaving the rest as it is', () => {
+      const frustrationOf = (docs: EdotBrowserDocument[]) =>
+        docs.filter(
+          (doc) => 'event_name' in doc && String(doc.event_name).startsWith('browser.frustration.')
+        );
+      const sessions = Array.from({ length: 20 }, (_, seed) => ({
+        without: createSession({ seed, health: HEALTH_PROFILES.critical }),
+        with: createSession({
+          seed,
+          health: HEALTH_PROFILES.critical,
+          frustrationRandom: seededRandom(seed + 100),
+        }),
+      }));
+      const kinds = new Set(
+        sessions.flatMap((session) =>
+          frustrationOf(session.with).map((doc) => ('event_name' in doc ? doc.event_name : ''))
+        )
+      );
+
+      expect([...kinds].sort()).toEqual([
+        'browser.frustration.dead_click',
+        'browser.frustration.error_click',
+        'browser.frustration.rage_click',
+      ]);
+      sessions.forEach((session) => {
+        expect(frustrationOf(session.without)).toEqual([]);
+        if (frustrationOf(session.with).length === 0) {
+          expect(session.with).toEqual(session.without);
+        }
+      });
+    });
+
     it('writes timings as 0 for phases that did not happen, and with a fractional part otherwise', () => {
       const docs = Array.from({ length: 10 }, (_, seed) => createSession({ seed })).flat();
       const timings = docs.flatMap(({ attributes = {} }) =>
@@ -1162,6 +1274,32 @@ describe('edotBrowser', () => {
 
       it('sends nothing for a site without GET requests', () => {
         expect(idleTab({ ...SITE, pages: [{ path: '/' }] })).toEqual([]);
+      });
+    });
+
+    it('stamps the user from the page load where the user signs in', () => {
+      const { documents, events } = edotBrowser.sessionWithDocuments({
+        end: TIMESTAMP,
+        client: createClient('abc'),
+        site: SITE,
+        health: HEALTH_PROFILES.healthy,
+        pageViews: 3,
+        hardNavigationRate: 1,
+        random: seededRandom(1),
+        signIn: { user: { id: 'usr_1' }, atDocument: 1 },
+      });
+      const docs = events.flatMap((event) => event.serialize());
+      const [firstLoad, secondLoad] = documents.map(({ start }) => start);
+
+      expect(documents.length).toBeGreaterThan(1);
+      docs.forEach((doc) => {
+        const at = Number(doc['@timestamp']);
+        if (at < secondLoad) {
+          expect(at).toBeGreaterThanOrEqual(firstLoad);
+          expect(doc.attributes).not.toHaveProperty(['user.id']);
+        } else {
+          expect(doc.attributes?.['user.id']).toBe('usr_1');
+        }
       });
     });
 
