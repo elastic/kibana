@@ -227,6 +227,33 @@ const cutText = (text: string, maxLength: number): string => {
   return text.slice(0, splitsPair ? maxLength - 1 : maxLength);
 };
 
+const SLACK_BROADCASTS = new Set(['!here', '!channel', '!everyone']);
+
+const toPlainToken = (token: string): string => {
+  const separator = token.indexOf('|');
+  const target = separator === -1 ? token : token.slice(0, separator);
+  const label = separator === -1 ? '' : token.slice(separator + 1);
+  const prefix = target.startsWith('#') || target.startsWith('@') ? target[0] : '';
+  if (label) {
+    return label.startsWith(prefix) ? label : `${prefix}${label}`;
+  }
+  if (/^(https?|mailto):/i.test(target)) {
+    return target;
+  }
+  return SLACK_BROADCASTS.has(target) ? `@${target.slice(1)}` : '';
+};
+
+/** Slack markup as one readable line; ids Slack sends without a name are dropped. */
+export const toSlackPlainText = (text: string | undefined): string =>
+  (text ?? '')
+    .replace(/<([^<>]*)>/g, (_, token: string) => toPlainToken(token))
+    .replace(/(^|[\s(])\*([^*\n]+)\*(?=$|[\s).,!?:;])/g, '$1$2')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+
 /** The message's `text` plus the block and attachment lines it does not already contain. */
 export const readSlackMessageText = (
   source: SlackRecord,

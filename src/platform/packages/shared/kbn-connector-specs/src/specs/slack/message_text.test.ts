@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readSlackMessageText } from './message_text';
+import { readSlackMessageText, toSlackPlainText } from './message_text';
 
 const MAX = 1000;
 
@@ -317,5 +317,23 @@ describe('readSlackMessageText', () => {
     expect(readSlackMessageText({ text: 'x'.repeat(20), attachments: [{ text: 'y' }] }, 10)).toBe(
       'x'.repeat(10)
     );
+  });
+});
+
+describe('toSlackPlainText', () => {
+  it.each<[string, string, string]>([
+    [
+      'a labelled link as its label',
+      'see <https://x.example/a|Alert details> now',
+      'see Alert details now',
+    ],
+    ['a bare link as its URL', 'see <https://x.example/a>', 'see https://x.example/a'],
+    ['a named channel and person', 'in <#C1|alerts> by <@U1|ana>', 'in #alerts by @ana'],
+    ['an id without a name dropped', '<@U1> why is checkout slow?', 'why is checkout slow?'],
+    ['a broadcast', '<!here> disk full', '@here disk full'],
+    ['bold markers and entities undone', '*CRITICAL:* 5*3 &lt;b&gt; &amp;', 'CRITICAL: 5*3 <b> &'],
+    ['whitespace collapsed', 'a\n\n  b', 'a b'],
+  ])('reads %s', (_, text, expected) => {
+    expect(toSlackPlainText(text)).toBe(expected);
   });
 });
