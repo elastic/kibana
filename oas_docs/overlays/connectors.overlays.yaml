@@ -137,16 +137,6 @@ actions:
               examples:
                 ingestEventsResponse:
                   $ref: '../examples/ingest_events_response.yaml'
-  # Hide connector schema versions until the feature is released
-  - target: "$.components.schemas.Kibana_HTTP_APIs_new_connector.properties.spec_version"
-    description: 'Hide spec_version in create connector requests'
-    remove: true
-  - target: "$.components.schemas.Kibana_HTTP_APIs_connector_response.properties.spec_version"
-    description: 'Hide spec_version in connector responses'
-    remove: true
-  - target: "$.components.schemas.Kibana_HTTP_APIs_connector_response_with_references_count.properties.spec_version"
-    description: 'Hide spec_version in get all connectors responses'
-    remove: true
   # Remove the automated empty connector config and secrets
   # (targets component schemas because the request bodies now use $ref)
   - target: "$.components.schemas.Kibana_HTTP_APIs_new_connector.properties.config"
