@@ -7,7 +7,11 @@
 
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import { DirectorService, type AlertStatusTransition } from '../../director/director';
+import {
+  DirectorService,
+  type AlertStatusTransition,
+  type DirectorServiceContract,
+} from '../../director/director';
 import { guardedExpandStep } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../metrics/counters';
 import {
@@ -34,7 +38,7 @@ const countNewTransitions = (
   transitions: readonly AlertStatusTransition[],
   seen: Set<string>
 ): Partial<Record<RuleExecutionCounter, number>> => {
-  const counters: Partial<Record<RuleExecutionCounter, number>> = {};
+  const counters = new Map<RuleExecutionCounter, number>();
   for (const { episodeId, status } of transitions) {
     const counter = TRANSITION_COUNTER[status];
     if (!counter) {
@@ -45,16 +49,16 @@ const countNewTransitions = (
       continue;
     }
     seen.add(key);
-    counters[counter] = (counters[counter] ?? 0) + 1;
+    counters.set(counter, (counters.get(counter) ?? 0) + 1);
   }
-  return counters;
+  return Object.fromEntries(counters);
 };
 
 @injectable()
 export class DirectorStep implements RuleExecutionStep {
   public readonly name = 'director';
 
-  constructor(@inject(DirectorService) private readonly director: DirectorService) {}
+  constructor(@inject(DirectorService) private readonly director: DirectorServiceContract) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;

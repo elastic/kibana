@@ -362,8 +362,6 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(result.type).toBe('continue');
 
-    // The synthetic empty batch keeps the pipeline moving but is not a query
-    // result, so queryBatchesProcessed is absent (defaults to 0 downstream).
     // @ts-expect-error: meta is present on the result
     expect(result.meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 0,

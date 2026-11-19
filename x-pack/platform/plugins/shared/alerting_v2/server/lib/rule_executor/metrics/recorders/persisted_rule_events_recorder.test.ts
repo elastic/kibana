@@ -328,7 +328,8 @@ describe('PersistedRuleEventsRecorder', () => {
     const known = createAlertEvent({ type: 'alert', status: 'breached' });
     const unknown = createAlertEvent({
       type: 'alert',
-      status: 'something_unexpected' as AlertEvent['status'],
+      // @ts-expect-error: this is a test case for an unknown status
+      status: 'something_unexpected',
     });
 
     recorder.record(
@@ -342,8 +343,6 @@ describe('PersistedRuleEventsRecorder', () => {
       })
     );
 
-    // The unknown status maps to no counter, so it must not add a status key
-    // (nor an `undefined` one) — it only contributes to the overall total.
     expect(collector.snapshot().counters).toEqual({
       ruleEventsGenerated: 2,
       breachedEventsGenerated: 1,

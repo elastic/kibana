@@ -132,11 +132,6 @@ apiTest.describe(
         expect(run['metrics.recoveredEventsGenerated']).toBe(0);
         expect(run['metrics.noDataEventsGenerated']).toBe(0);
 
-        // The fixture's `state_transition.pending.count: 0` drives the first
-        // breach straight to `active`, so the one new episode reports exactly
-        // one activation and no other transition. Asserting the non-zero value
-        // guards against the executor dropping the director's counter before it
-        // is written (which the zero-default would otherwise mask).
         expect(run['metrics.episodesTransitionedToActive']).toBe(1);
         expect(run['metrics.episodesTransitionedToRecovering']).toBe(0);
         expect(run['metrics.episodesTransitionedToInactive']).toBe(0);
@@ -172,9 +167,6 @@ apiTest.describe(
           match: reportedStatus('success'),
         });
 
-        // A run that matches nothing receives no query batches (the executor
-        // injects a synthetic empty batch only to keep the pipeline moving), so
-        // every counter — including queryBatchesProcessed — is zero.
         expect(run).toMatchObject(ZEROED_COUNTERS);
         expect(run.reason).toBeUndefined();
       }

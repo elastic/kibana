@@ -14,12 +14,8 @@ import {
   createAlertEvent,
   createRuleResponse,
 } from '../test_utils';
-import { createDirectorService } from '../../director/director.mock';
-import type { DirectorRunResult, DirectorService } from '../../director/director';
+import { createDirectorService, createMockDirectorService } from '../../director/director.mock';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
-
-const createStubDirector = (result: DirectorRunResult): DirectorService =>
-  ({ run: jest.fn().mockResolvedValue(result) } as unknown as DirectorService);
 
 describe('DirectorStep', () => {
   const createEmptyEsqlResponse = () => ({
@@ -103,7 +99,8 @@ describe('DirectorStep', () => {
   });
 
   it('emits episode transition counters grouped by destination status', async () => {
-    const director = createStubDirector({
+    const director = createMockDirectorService();
+    director.run.mockResolvedValue({
       alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
       stats: {
         newEpisodeIds: [],
@@ -143,7 +140,8 @@ describe('DirectorStep', () => {
       previousStatus: 'inactive' as const,
       status: 'active' as const,
     };
-    const director = createStubDirector({
+    const director = createMockDirectorService();
+    director.run.mockResolvedValue({
       alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
       stats: { newEpisodeIds: [], statusTransitions: [transition] },
       previousAlertStateByGroupHash: new Map(),
@@ -168,7 +166,8 @@ describe('DirectorStep', () => {
   });
 
   it('does not emit a counter for transitions to pending', async () => {
-    const director = createStubDirector({
+    const director = createMockDirectorService();
+    director.run.mockResolvedValue({
       alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
       stats: {
         newEpisodeIds: [],

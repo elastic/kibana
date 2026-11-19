@@ -19,7 +19,7 @@ import type { QueryServiceContract } from '../../services/query_service/query_se
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
 import type { EsqlResponseFormatServiceContract } from '../../services/esql_response_format_service/esql_response_format_service';
 import { EsqlResponseFormatServiceToken } from '../../services/esql_response_format_service/tokens';
-import { guardedExpandStep, withAtLeastOne } from '../stream_utils';
+import { guardedExpandStep, tap, withAtLeastOne } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../metrics/counters';
 import { getQueryRowLimit } from '../../../config';
 import { ConfigService } from '../../services/config_service/config_service';
@@ -84,17 +84,10 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           format,
         });
 
-        // `withAtLeastOne` injects one empty batch when the query returns
-        // nothing so downstream recovery / no-data classification still runs.
-        // That synthetic batch is not a query result, so track how many batches
-        // the stream actually produced to keep it out of `queryBatchesProcessed`.
-        let queryBatches = 0;
-        const trackedStream = (async function* () {
-          for await (const batch of esqlRowBatchStream) {
-            queryBatches += 1;
-            yield batch;
-          }
-        })();
+        let hasRealBatch = false;
+        const trackedStream = tap(esqlRowBatchStream, () => {
+          hasRealBatch = true;
+        });
 
         let totalRows = 0;
         let loggedRowsDropped = false;
@@ -106,9 +99,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
             [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
           };
 
-          // Zero only for the synthetic fallback; every real batch bumps the
-          // counter before `withAtLeastOne` forwards it.
-          if (queryBatches > 0) {
+          if (hasRealBatch) {
             counters[RULE_EXECUTION_COUNTERS.queryBatchesProcessed] = 1;
           }
 
