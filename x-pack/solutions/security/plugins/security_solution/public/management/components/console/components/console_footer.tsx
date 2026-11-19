@@ -31,7 +31,7 @@ export const ConsoleFooter = memo(() => {
       data-test-subj={getTestId('footer')}
     >
       <EuiText size="xs" color={textColor} className="font-style-italic">
-        {footerContent || <>&nbsp;</>}
+        {footerContent || '\u00a0'}
       </EuiText>
     </EuiPanel>
   );

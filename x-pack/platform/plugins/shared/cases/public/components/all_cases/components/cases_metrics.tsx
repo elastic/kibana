@@ -90,7 +90,7 @@ const CasesMetricsComponent: React.FC<CasesMetricsProps> = ({
             description={
               <>
                 {ATTC_STAT}
-                &nbsp;
+                {'\u00a0'}
                 <EuiIconTip
                   content={ATTC_DESCRIPTION}
                   position="right"

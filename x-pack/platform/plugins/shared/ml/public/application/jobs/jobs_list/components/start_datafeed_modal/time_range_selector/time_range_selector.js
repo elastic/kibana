@@ -17,6 +17,59 @@ import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { ManagedJobsWarningCallout } from '../../confirm_modals/managed_jobs_warning_callout';
 import { TimeRangeSelectorWrapper } from './time_range_selector_wrapper';
 
+const DatePickerWithInput = ({ date, onChange, minDate, setIsValid, tab }) => {
+  const [dateString, setDateString] = useState(date.format(TIME_FORMAT));
+  const [currentTab, setCurrentTab] = useState(tab);
+
+  useEffect(() => {
+    if (currentTab !== tab) {
+      // if the tab has changed, reset the text to be the same as the date prop
+      setDateString(date.format(TIME_FORMAT));
+      setCurrentTab(tab);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
+  function onTextChange(e) {
+    const val = e.target.value;
+    setDateString(val);
+
+    const newDate = moment(val);
+    if (newDate.isValid()) {
+      setIsValid(true);
+      onChange(newDate);
+    } else {
+      setIsValid(false);
+    }
+  }
+
+  function onCalendarChange(newDate) {
+    setDateString(newDate.format(TIME_FORMAT));
+    setIsValid(true);
+    onChange(newDate);
+  }
+
+  return (
+    <>
+      <EuiFieldText
+        value={dateString}
+        onChange={onTextChange}
+        placeholder={TIME_FORMAT}
+        aria-label={i18n.translate('xpack.ml.jobsList.startDatafeedModal.enterDateText"', {
+          defaultMessage: 'Enter date',
+        })}
+      />
+      <EuiDatePicker
+        selected={date}
+        onChange={onCalendarChange}
+        minDate={minDate}
+        inline
+        showTimeSelect
+      />
+    </>
+  );
+};
+
 export class TimeRangeSelector extends Component {
   constructor(props) {
     super(props);
@@ -245,59 +298,6 @@ function TabStack({ title, items, switchState, switchFunc }) {
     </div>
   );
 }
-
-const DatePickerWithInput = ({ date, onChange, minDate, setIsValid, tab }) => {
-  const [dateString, setDateString] = useState(date.format(TIME_FORMAT));
-  const [currentTab, setCurrentTab] = useState(tab);
-
-  useEffect(() => {
-    if (currentTab !== tab) {
-      // if the tab has changed, reset the text to be the same as the date prop
-      setDateString(date.format(TIME_FORMAT));
-      setCurrentTab(tab);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
-
-  function onTextChange(e) {
-    const val = e.target.value;
-    setDateString(val);
-
-    const newDate = moment(val);
-    if (newDate.isValid()) {
-      setIsValid(true);
-      onChange(newDate);
-    } else {
-      setIsValid(false);
-    }
-  }
-
-  function onCalendarChange(newDate) {
-    setDateString(newDate.format(TIME_FORMAT));
-    setIsValid(true);
-    onChange(newDate);
-  }
-
-  return (
-    <>
-      <EuiFieldText
-        value={dateString}
-        onChange={onTextChange}
-        placeholder={TIME_FORMAT}
-        aria-label={i18n.translate('xpack.ml.jobsList.startDatafeedModal.enterDateText"', {
-          defaultMessage: 'Enter date',
-        })}
-      />
-      <EuiDatePicker
-        selected={date}
-        onChange={onCalendarChange}
-        minDate={minDate}
-        inline
-        showTimeSelect
-      />
-    </>
-  );
-};
 
 TimeRangeSelector.propTypes = {
   startTime: PropTypes.object.isRequired,

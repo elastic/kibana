@@ -133,7 +133,7 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
       return content ? (
         <div className="eui-textBreakAll" css={{ width: '100%' }}>
           {content}
-          {policyNoLongerAvailableMessage && <>&nbsp;{`(${POLICY_NOT_FOUND_MESSAGE})`}</>}
+          {policyNoLongerAvailableMessage && `\u00a0(${POLICY_NOT_FOUND_MESSAGE})`}
         </div>
       ) : (
         content

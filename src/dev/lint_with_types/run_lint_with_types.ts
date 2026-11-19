@@ -116,7 +116,7 @@ export function runLintWithTypes() {
     },
     {
       description:
-        'Run oxlint type-aware rules (tsgolint) across every TS project, scoping rules per project like the previous per-project ESLint run',
+        'Run oxlint type-aware rules (tsrs) across every TS project, scoping rules per project like the previous per-project ESLint run',
       flags: {
         string: ['project'],
         boolean: ['fix'],

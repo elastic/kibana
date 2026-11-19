@@ -29,9 +29,9 @@ export function RuleUpgradeCallout({
           title={
             <>
               <strong>{i18n.UPGRADE_STATUS}</strong>
-              &nbsp;
+              {'\u00a0'}
               <ActionRequiredBadge />
-              &nbsp;
+              {'\u00a0'}
               {i18n.RULE_HAS_CONFLICTS(numOfNonSolvableConflicts + numOfSolvableConflicts)}
             </>
           }
@@ -57,9 +57,9 @@ export function RuleUpgradeCallout({
           title={
             <>
               <strong>{i18n.UPGRADE_STATUS}</strong>
-              &nbsp;
+              {'\u00a0'}
               <ReviewRequiredBadge />
-              &nbsp;
+              {'\u00a0'}
               {i18n.RULE_HAS_CONFLICTS(numOfSolvableConflicts)}
             </>
           }
@@ -82,7 +82,7 @@ export function RuleUpgradeCallout({
         title={
           <>
             <strong>{i18n.UPGRADE_STATUS}</strong>
-            &nbsp;
+            {'\u00a0'}
             <ReadyForUpgradeBadge />
           </>
         }

@@ -25,7 +25,7 @@ export const UpdateStatus: React.FC<UpdateStatusProps> = ({ isUpdating, updatedA
         ) : (
           <>
             {UPDATED}
-            &nbsp;
+            {'\u00a0'}
             <FormattedRelative value={new Date(updatedAt)} />
           </>
         )}

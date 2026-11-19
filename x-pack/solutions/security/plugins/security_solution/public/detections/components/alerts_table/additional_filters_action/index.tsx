@@ -114,7 +114,7 @@ export const AdditionalFiltersAction = ({
             {i18n.ADDITIONAL_FILTERS_ACTIONS}
             {additionalFilterCount > 0 && (
               <>
-                &nbsp;
+                {'\u00a0'}
                 <EuiNotificationBadge
                   data-test-subj="additionalFiltersCountBadge"
                   color="subdued"

@@ -22,9 +22,9 @@ const ValueContainer: FC<PropsWithChildren<{ text?: ReactElement }>> = ({ text, 
   <>
     {text && (
       <>
-        &nbsp;
+        {'\u00a0'}
         <span>{text}</span>
-        &nbsp;
+        {'\u00a0'}
       </>
     )}
     {children}

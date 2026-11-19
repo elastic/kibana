@@ -21,7 +21,7 @@ node scripts/lint_with_types --help
 
 ## How it works
 
-Type-aware rules are run by [oxlint](https://oxc.rs/docs/guide/usage/linter.html) in `--type-aware` mode, which delegates to [tsgolint](https://github.com/oxc-project/tsgolint), a Go port of the type-aware `typescript-eslint` rules running on `typescript-go`. It builds a TypeScript program for every `tsconfig.json` in the repo and lints all projects in parallel in a single process.
+Type-aware rules are run by [oxlint](https://oxc.rs/docs/guide/usage/linter.html) in `--type-aware` mode, which delegates to [tsrs](https://github.com/oxc-project/tsrs), a Rust port of TypeScript that implements the type-aware `typescript-eslint` rules (it replaced [tsgolint](https://github.com/oxc-project/tsgolint), the Go equivalent). oxlint picks the `tsrs-lint` binary from the `tsrs` package automatically. It builds a TypeScript program for every `tsconfig.json` in the repo and lints all projects in parallel in a single process.
 
 The `no-floating-promises` scope is expressed as globs relative to each TypeScript project directory. `node scripts/lint_with_types` expands those globs against every project in `TS_PROJECTS` into a repo-root oxlint config (`.oxlintrc.with_types.json`, deleted after the run) so that a file is checked exactly when the project owning it selects it.
 
