@@ -25,6 +25,7 @@ export type SignalSource =
 export type SignalFormulaKind =
   | 'average'
   | 'inverse_average'
+  | 'container_average'
   | 'restart_delta'
   | 'matching_value_count'
   | 'minimum'
@@ -53,6 +54,7 @@ export type SignalTemplateVariant = SignalTemplateVariantBase &
         formulaKind:
           | 'average'
           | 'inverse_average'
+          | 'container_average'
           | 'restart_delta'
           | 'minimum'
           | 'maximum'
@@ -82,20 +84,26 @@ export interface SignalTemplate {
   variants: readonly SignalTemplateVariant[];
 }
 
+/** One schema's contribution to a check; several when a check merges schemas per entity. */
+export interface SignalMeasurement {
+  schema: SignalSchema;
+  dataset: string;
+  field: string;
+  formula: string;
+  source: SignalSource;
+}
+
 export interface SignalCheck {
   signal: string;
   type_ki_id: string;
   subtype: string;
-  schema: SignalSchema;
-  dataset: string;
-  field: string;
+  measurements: SignalMeasurement[];
   scope?: Condition;
   breakdown: string[];
-  formula: string;
   window: string;
   direction: SignalDirection;
+  comparison: SignalComparison;
   threshold: number;
-  source: SignalSource;
   esql_preview: string;
 }
 
