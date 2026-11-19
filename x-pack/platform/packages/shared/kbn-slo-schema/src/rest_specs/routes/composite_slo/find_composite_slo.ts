@@ -6,10 +6,8 @@
  */
 import { z, searchFilter, lazySchema } from '@kbn/zod';
 import { MAX_KEYWORD_LENGTH } from '../../../schema/limits';
-import {
-  compositeStatusSchema,
-  compositeSloWithSummaryResponseSchema,
-} from '../../../schema/composite_slo';
+import { statusSchema } from '../../../schema/common';
+import { compositeSloWithSummaryResponseSchema } from '../../../schema/composite_slo';
 
 const findCompositeSLOQuerySchema = lazySchema(() =>
   z.object({
@@ -25,7 +23,7 @@ const findCompositeSLOQuerySchema = lazySchema(() =>
       .string()
       .max(MAX_KEYWORD_LENGTH)
       .transform((raw) => raw.split(',').map((s) => s.trim()))
-      .pipe(z.array(compositeStatusSchema).min(1))
+      .pipe(z.array(statusSchema).min(1))
       .optional(),
   })
 );

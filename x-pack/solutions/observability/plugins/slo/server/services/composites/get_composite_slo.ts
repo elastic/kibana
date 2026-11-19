@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
 import { compositeSloWithSummaryResponseSchema } from '@kbn/slo-schema';
-import { z } from '@kbn/zod';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SummaryClient } from '../summary_client';
 import type { CompositeSLORepository } from './composite_slo_repository';
@@ -25,15 +24,6 @@ export class GetCompositeSLO {
     private summaryClient: SummaryClient,
     private esClient: ElasticsearchClient
   ) {}
-
-  public async executeBatch(
-    ids: string[],
-    spaceId: string
-  ): Promise<CompositeSLOWithSummaryResponse[]> {
-    const persistedSummaryById = await this.loadPersistedSummaries(ids, spaceId);
-    const results = await Promise.all(ids.map((id) => this.executeOne(id, persistedSummaryById)));
-    return z.array(compositeSloWithSummaryResponseSchema).encode(results);
-  }
 
   public async execute(id: string, spaceId: string): Promise<CompositeSLOWithSummaryResponse> {
     const persistedSummaryById = await this.loadPersistedSummaries([id], spaceId);

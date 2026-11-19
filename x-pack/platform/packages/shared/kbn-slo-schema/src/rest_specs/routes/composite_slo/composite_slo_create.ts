@@ -6,14 +6,12 @@
  */
 import { z, displayName, description, lazySchema } from '@kbn/zod';
 import {
-  compositeSloIdSchema,
   compositeTagsSchema,
-  compositeTargetSchema,
-  compositeOccurrencesBudgetingMethodSchema,
   compositeRollingTimeWindowSchema,
   compositeSloMembersSchema,
   compositeMethodSchema,
 } from '../../../schema/composite_slo';
+import { occurrencesBudgetingMethodSchema, sloIdSchema, targetSchema } from '../../../schema/slo';
 
 const createCompositeSLOBodySchema = lazySchema(() =>
   z.object({
@@ -22,9 +20,9 @@ const createCompositeSLOBodySchema = lazySchema(() =>
     members: compositeSloMembersSchema,
     compositeMethod: compositeMethodSchema,
     timeWindow: compositeRollingTimeWindowSchema,
-    budgetingMethod: compositeOccurrencesBudgetingMethodSchema,
-    objective: compositeTargetSchema,
-    id: compositeSloIdSchema.optional(),
+    budgetingMethod: occurrencesBudgetingMethodSchema,
+    objective: targetSchema,
+    id: sloIdSchema.optional(),
     tags: compositeTagsSchema.optional(),
     enabled: z.boolean().optional(),
   })
