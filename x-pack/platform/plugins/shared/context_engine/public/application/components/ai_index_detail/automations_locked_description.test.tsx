@@ -41,6 +41,17 @@ describe('AutomationsLockedDescription', () => {
     );
   });
 
+  it.each([{ ctrlKey: true }, { metaKey: true }, { shiftKey: true }, { button: 1 }])(
+    'lets the browser handle the click with %o',
+    (eventInit) => {
+      renderWithProviders(<AutomationsLockedDescription aiIndexId="my-index" />);
+
+      fireEvent.click(screen.getByTestId('contextAutomationsLockedAddSourceLink'), eventInit);
+
+      expect(navigateToContextEngine).not.toHaveBeenCalled();
+    }
+  );
+
   it('navigates to the Sources tab when the link is clicked', () => {
     renderWithProviders(<AutomationsLockedDescription aiIndexId="my-index" />);
 

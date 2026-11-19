@@ -7,6 +7,7 @@
 
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { getAiIndexSourcesPath } from '../../paths';
@@ -18,16 +19,13 @@ interface AutomationsLockedDescriptionProps {
 export const AutomationsLockedDescription = ({ aiIndexId }: AutomationsLockedDescriptionProps) => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const sourcesPath = getAiIndexSourcesPath(aiIndexId);
+  const { href, onClick } = getRouterLinkProps({
+    href: createContextEngineUrl(sourcesPath),
+    onClick: () => navigateToContextEngine(sourcesPath),
+  });
 
   const addSourceLink = (
-    <EuiLink
-      href={createContextEngineUrl(sourcesPath)}
-      onClick={(event: React.MouseEvent) => {
-        event.preventDefault();
-        navigateToContextEngine(sourcesPath);
-      }}
-      data-test-subj="contextAutomationsLockedAddSourceLink"
-    >
+    <EuiLink href={href} onClick={onClick} data-test-subj="contextAutomationsLockedAddSourceLink">
       <FormattedMessage
         id="xpack.contextEngine.aiIndexDetail.automations.lockedAddSourceLink"
         defaultMessage="Add a source"
