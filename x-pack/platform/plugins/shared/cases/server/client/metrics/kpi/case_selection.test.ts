@@ -57,6 +57,66 @@ describe('case selection', () => {
         { exists: { field: 'case.closed_at' } },
       ]);
     });
+
+    describe('case query', () => {
+      const context = { spaceId: 'kpi-demo', owner: 'cases' };
+      // an admin text with an or that names another space
+      const caseQuery = 'case.category: Incident or space_id: other';
+      const getFilter = (
+        ...args: Parameters<typeof buildCaseSelectionSearch>
+      ): Array<Record<string, unknown>> =>
+        buildCaseSelectionSearch(...args).body.query?.bool?.filter as Array<
+          Record<string, unknown>
+        >;
+
+      it('keeps the case query in its own clause and the forced clauses separate', () => {
+        const filter = getFilter(context, { caseQuery });
+
+        expect(filter.slice(0, 2)).toEqual([
+          { term: { space_id: 'kpi-demo' } },
+          { term: { owner: 'cases' } },
+        ]);
+        expect(filter).toHaveLength(4);
+        expect(JSON.stringify(filter[3])).toContain('other');
+        expect(JSON.stringify(filter.slice(0, 3))).not.toContain('other');
+      });
+
+      it('has the close date range and the case query for the close date basis', () => {
+        const filter = getFilter(
+          { ...context, from: '2026-11-01T00:00:00.000Z' },
+          { basis: 'case_closed_at', caseQuery: 'case.category: Incident' }
+        );
+
+        expect(filter).toEqual(
+          expect.arrayContaining([
+            { range: { 'case.closed_at': { gte: '2026-11-01T00:00:00.000Z' } } },
+            { exists: { field: 'case.closed_at' } },
+          ])
+        );
+        expect(JSON.stringify(filter[filter.length - 1])).toContain('Incident');
+      });
+
+      it('has no close date range for the attach date basis', () => {
+        const filter = getFilter(
+          { ...context, from: '2026-11-01T00:00:00.000Z', to: '2026-11-08T00:00:00.000Z' },
+          { basis: 'attached_at', caseQuery: 'case.category: Incident' }
+        );
+
+        expect(JSON.stringify(filter)).not.toContain('case.closed_at');
+        expect(filter).toEqual(
+          expect.arrayContaining([
+            { range: { 'case.updated_at': { gte: '2026-11-01T00:00:00.000Z' } } },
+          ])
+        );
+        expect(JSON.stringify(filter)).not.toContain('2026-11-08');
+      });
+
+      it('throws for a case query that does not parse', () => {
+        expect(() =>
+          buildCaseSelectionSearch(context, { caseQuery: 'case.category: "IR" or (case.status: *' })
+        ).toThrow();
+      });
+    });
   });
 
   describe('readCaseSelection', () => {

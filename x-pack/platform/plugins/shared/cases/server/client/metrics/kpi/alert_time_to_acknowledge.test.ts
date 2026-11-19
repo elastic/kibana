@@ -887,5 +887,96 @@ describe('alert time to acknowledge', () => {
       ).resolves.toEqual([]);
       expect(reader.msearch).not.toHaveBeenCalled();
     });
+
+    describe('case query', () => {
+      const queryMetric: PredefinedKpiMetricConfiguration = {
+        ...avgMetric,
+        id: 'tta-query',
+        caseQuery: 'case.category: Incident',
+      };
+      const range = {
+        ...context,
+        from: '2026-11-01T00:00:00.000Z',
+        to: '2026-11-08T00:00:00.000Z',
+      };
+      const caseResponse = (ids: string[]): estypes.MsearchResponseItem =>
+        ({
+          ...searchResponse([]),
+          hits: {
+            total: { value: ids.length, relation: 'eq' as const },
+            hits: ids.map((id) => ({ _index: '.cases', _id: id, _source: { case: { id } } })),
+          },
+        } as estypes.MsearchResponseItem);
+
+      it('selects the cases first and keeps the attach date range for the attachments', async () => {
+        const eventQueue = [searchResponse([eventHit('c1', '2026-11-04T11:00:00.000Z')])];
+
+        reader.msearch.mockImplementation(async (requests: Array<{ index: string }>) => {
+          if (requests[0].index === 'cases') {
+            return [caseResponse(['c1']), caseResponse([])];
+          }
+
+          return requests[0].index === 'activity'
+            ? [eventQueue.shift() ?? searchResponse([])]
+            : [
+                searchResponse([attachmentHit('c1', '2026-11-04T10:00:00.000Z', ['a1'])]),
+                searchResponse([]),
+              ];
+        });
+        alertsService.getAlertGeneratedTimes.mockResolvedValue(
+          alerts({ a1: { start: '2026-11-04T10:00:00.000Z' } })
+        );
+
+        const [result] = await runAlertTimeToAcknowledgeMetrics({
+          metrics: [queryMetric],
+          context: range,
+          reader,
+          alertsService,
+        });
+
+        expect(result).toEqual(expect.objectContaining({ id: 'tta-query', value: 3600 }));
+
+        const [[selection]] = reader.msearch.mock.calls[0];
+        expect(selection.index).toBe('cases');
+        expect(JSON.stringify(selection.body.query)).not.toContain('case.closed_at');
+
+        const attachmentCall = reader.msearch.mock.calls.find(
+          ([requests]) => requests[0].index === 'attachments'
+        );
+        const [[attachments]] = attachmentCall;
+        expect(attachments.body.query.bool.filter).toEqual(
+          expect.arrayContaining([
+            { terms: { 'case.id': ['c1'] } },
+            { range: { '@timestamp': { gte: range.from, lte: range.to } } },
+          ])
+        );
+      });
+
+      it('gives an error and runs no search for a case query that does not parse', async () => {
+        const [result] = await runAlertTimeToAcknowledgeMetrics({
+          metrics: [{ ...queryMetric, caseQuery: 'case.category: "IR" or (case.status: *' }],
+          context: range,
+          reader,
+          alertsService,
+        });
+
+        expect(result).toEqual(expect.objectContaining({ id: 'tta-query', type: 'error' }));
+        expect(reader.msearch).not.toHaveBeenCalled();
+      });
+
+      it('gives null and runs no attachment search when the case query selects no case', async () => {
+        reader.msearch.mockResolvedValue([caseResponse([]), caseResponse([])]);
+
+        const [result] = await runAlertTimeToAcknowledgeMetrics({
+          metrics: [queryMetric],
+          context: range,
+          reader,
+          alertsService,
+        });
+
+        expect(result).toEqual({ id: 'tta-query', type: 'value', format: 'duration', value: null });
+        expect(reader.msearch).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 });

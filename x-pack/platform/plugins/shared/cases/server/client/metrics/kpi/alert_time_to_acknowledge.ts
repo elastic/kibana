@@ -10,6 +10,7 @@ import { MAX_KPI_ACKNOWLEDGE_EVENTS, MAX_KPI_ALERTS } from '../../../../common/c
 import type { KpiMetricResult } from '../../../../common/types/api';
 import type {
   KpiAcknowledgeTrigger,
+  KpiDateBasis,
   PredefinedKpiMetricConfiguration,
 } from '../../../../common/types/domain';
 import { AttachmentType } from '../../../../common/types/domain';
@@ -23,6 +24,7 @@ import { buildCaseSelectionSearch, readCaseSelection } from './case_selection';
 import type { KpiQueryContext, KpiSearchRequest } from './query_builder';
 import { buildForcedFilters } from './query_builder';
 import { isIncompleteKpiSearchResponse, toKpiMetricError } from './result';
+import { getKpiMetricQueryError } from './validation';
 
 type AlertDurationAggregation = 'avg' | 'median';
 
@@ -450,6 +452,8 @@ const readPeriodData = async (
 };
 
 interface PeriodsReadArgs {
+  basis?: KpiDateBasis;
+  caseQuery?: string;
   context: KpiQueryContext;
   previousPeriod?: KpiPeriod;
   reader: CasesAnalyticsV2ReaderContract;
@@ -503,10 +507,13 @@ const readAttachedAtPeriods = async ({
 };
 
 /**
- * Reads the alert data of the periods. The date range applies to the close date of the case, so the engine
- * first selects the cases that closed in the range. The attachment search then uses the selected case ids and no date range.
+ * Reads the alert data of the periods when the engine first selects the cases. With the close date basis,
+ * the selected cases closed in the range, and the attachment search has no date range. With the attach date basis
+ * and a case query, the attachment search keeps the date range. In both cases it uses the selected case ids.
  */
-const readCaseClosedAtPeriods = async ({
+const readSelectedCasePeriods = async ({
+  basis,
+  caseQuery,
   context,
   previousPeriod,
   reader,
@@ -519,7 +526,11 @@ const readCaseClosedAtPeriods = async ({
   let selections: CaseSelection[];
 
   try {
-    const responses = await reader.msearch(periodContexts.map(buildCaseSelectionSearch));
+    const responses = await reader.msearch(
+      periodContexts.map((periodContext) =>
+        buildCaseSelectionSearch(periodContext, { basis, caseQuery })
+      )
+    );
     selections = periodContexts.map((_, position) => readCaseSelection(responses[position]));
   } catch (error) {
     return FAILED_PERIODS;
@@ -537,8 +548,9 @@ const readCaseClosedAtPeriods = async ({
           const selection = selections[position];
 
           return buildAlertAttachmentSearch({
-            spaceId: context.spaceId,
-            owner: context.owner,
+            ...(basis === 'case_closed_at'
+              ? { spaceId: context.spaceId, owner: context.owner }
+              : periodContexts[position]),
             caseIds: selection.type === 'ids' ? selection.ids : [],
           });
         })
@@ -591,24 +603,54 @@ export const runAlertTimeToAcknowledgeMetrics = async ({
     return [];
   }
 
-  const args = { context, previousPeriod: getPreviousPeriod(context), reader, alertsService };
-  const bases = Array.from(new Set(metrics.map(({ dateBasis }) => dateBasis ?? 'attached_at')));
-  const periodsByBasis = new Map<string, Periods>(
+  const previousPeriod = getPreviousPeriod(context);
+  const getGroupKey = ({ dateBasis, caseQuery }: PredefinedKpiMetricConfiguration): string =>
+    JSON.stringify([dateBasis ?? 'attached_at', caseQuery?.trim() ?? '']);
+  const queryErrors = new Map(
+    metrics.flatMap(({ id, caseQuery }) => {
+      const error = caseQuery != null ? getKpiMetricQueryError(caseQuery) : undefined;
+      return error != null ? [[id, error] as const] : [];
+    })
+  );
+  const groups = new Map(
+    metrics
+      .filter(({ id }) => !queryErrors.has(id))
+      .map((metric) => [getGroupKey(metric), metric] as const)
+  );
+  const periodsByGroup = new Map<string, Periods>(
     await Promise.all(
-      bases.map(
-        async (basis): Promise<[string, Periods]> => [
-          basis,
-          basis === 'case_closed_at'
-            ? await readCaseClosedAtPeriods(args)
-            : await readAttachedAtPeriods(args),
-        ]
+      Array.from(groups.entries()).map(
+        async ([key, { dateBasis, caseQuery }]): Promise<[string, Periods]> => {
+          const args = {
+            basis: dateBasis ?? 'attached_at',
+            caseQuery,
+            context,
+            previousPeriod,
+            reader,
+            alertsService,
+          };
+          const hasCaseQuery = caseQuery != null && caseQuery.trim() !== '';
+
+          return [
+            key,
+            args.basis === 'case_closed_at' || hasCaseQuery
+              ? await readSelectedCasePeriods(args)
+              : await readAttachedAtPeriods(args),
+          ];
+        }
       )
     )
   );
 
   return metrics.map((metric) => {
-    const { id, predefinedId, dateBasis } = metric;
-    const { current, previous } = periodsByBasis.get(dateBasis ?? 'attached_at') ?? FAILED_PERIODS;
+    const { id, predefinedId } = metric;
+    const queryError = queryErrors.get(id);
+
+    if (queryError != null) {
+      return toKpiMetricError(id, queryError);
+    }
+
+    const { current, previous } = periodsByGroup.get(getGroupKey(metric)) ?? FAILED_PERIODS;
 
     if (current.type === 'error') {
       return toKpiMetricError(id, current.message);
