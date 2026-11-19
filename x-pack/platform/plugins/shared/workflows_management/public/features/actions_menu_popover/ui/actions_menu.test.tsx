@@ -1,0 +1,450 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { ActionsMenu } from './actions_menu';
+import type { ActionGroup, ActionOption, ActionOptionData } from '../types';
+
+jest.mock('../../../hooks/use_kibana');
+
+jest.mock('../../validate_workflow_yaml/model/use_workflow_json_schema', () => ({
+  useWorkflowJsonSchema: () => ({ jsonSchema: {}, uri: null }),
+}));
+
+const mockLeafOption: ActionOption = {
+  id: 'manual',
+  label: 'Manual',
+  description: 'Trigger - Manually start from the UI',
+  iconType: 'play',
+  iconColor: 'success',
+};
+
+const mockLeafOption2: ActionOption = {
+  id: 'alert',
+  label: 'Alert',
+  description: 'Trigger - When an alert from rule is created',
+  iconType: 'bell',
+  iconColor: '#6092C0',
+};
+
+const mockGroup: ActionGroup = {
+  id: 'triggers',
+  label: 'Triggers',
+  description: 'Choose which event starts a workflow',
+  iconType: 'bolt',
+  iconColor: '#6092C0',
+  options: [mockLeafOption, mockLeafOption2],
+};
+
+const mockFlowControlOption: ActionOption = {
+  id: 'if',
+  label: 'If Condition',
+  description: 'Define condition with KQL to execute the action',
+  iconType: 'branch',
+  iconColor: '#54B399',
+};
+
+const mockHttpOption: ActionOption = {
+  id: 'http',
+  label: 'HTTP Request',
+  description: 'Make an HTTP request',
+  iconType: 'globe',
+};
+
+const mockFlowControlGroup: ActionGroup = {
+  id: 'flowControl',
+  label: 'Flow control',
+  description: 'Branch and loop steps',
+  iconType: 'branch',
+  iconColor: '#54B399',
+  options: [mockFlowControlOption],
+};
+
+const mockOptions: ActionOptionData[] = [mockGroup, mockHttpOption, mockFlowControlGroup];
+
+jest.mock('../lib/get_action_options', () => ({
+  getActionOptions: jest.fn(() => mockOptions),
+  getIconGlyphColor: jest.fn(() => undefined),
+  flattenOptions: jest.fn((options: ActionOptionData[]) => {
+    const flat: ActionOptionData[] = [];
+    const flatten = (items: ActionOptionData[]) => {
+      for (const item of items) {
+        flat.push(item);
+        if ('options' in item) {
+          flatten(item.options);
+        }
+      }
+    };
+    flatten(options);
+    return flat;
+  }),
+}));
+
+jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
+  StepIcon: () => <span data-test-subj="mocked-step-icon" />,
+}));
+
+const renderComponent = (props = {}) =>
+  render(
+    <I18nProvider>
+      <ActionsMenu onActionSelected={jest.fn()} {...props} />
+    </I18nProvider>
+  );
+
+describe('ActionsMenu', () => {
+  it('renders the title "Actions menu"', () => {
+    renderComponent();
+    expect(screen.getByText('Actions menu')).toBeInTheDocument();
+  });
+
+  it('renders top-level options', () => {
+    renderComponent();
+    expect(screen.getByText('Triggers')).toBeInTheDocument();
+    expect(screen.getByText('HTTP Request')).toBeInTheDocument();
+    expect(screen.getByText('Flow control')).toBeInTheDocument();
+  });
+
+  it('renders option descriptions', () => {
+    renderComponent();
+    expect(screen.getByText('Choose which event starts a workflow')).toBeInTheDocument();
+    expect(screen.getByText('Make an HTTP request')).toBeInTheDocument();
+  });
+
+  it('calls onActionSelected when a leaf option is clicked', () => {
+    const onActionSelected = jest.fn();
+    renderComponent({ onActionSelected });
+
+    const options = screen.getAllByRole('option');
+    const httpOption = options.find((opt) => opt.textContent?.includes('HTTP Request'));
+    expect(httpOption).toBeDefined();
+    fireEvent.click(httpOption!);
+
+    expect(onActionSelected).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'http', label: 'HTTP Request' })
+    );
+  });
+
+  it('navigates into a group when a group option is clicked', () => {
+    renderComponent();
+
+    const options = screen.getAllByRole('option');
+    const triggersOption = options.find((opt) => opt.textContent?.includes('Triggers'));
+    expect(triggersOption).toBeDefined();
+    fireEvent.click(triggersOption!);
+
+    expect(screen.getByText('Manual')).toBeInTheDocument();
+    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(screen.getByText('All actions')).toBeInTheDocument();
+    expect(screen.getByText('Triggers')).toBeInTheDocument();
+  });
+
+  it('navigates back from a group when All actions breadcrumb is clicked', () => {
+    renderComponent();
+
+    const options = screen.getAllByRole('option');
+    const triggersOption = options.find((opt) => opt.textContent?.includes('Triggers'));
+    fireEvent.click(triggersOption!);
+    expect(screen.getByText('All actions')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('All actions'));
+
+    expect(screen.getByText('Actions menu')).toBeInTheDocument();
+    expect(screen.getByText('Triggers')).toBeInTheDocument();
+    expect(screen.getByText('HTTP Request')).toBeInTheDocument();
+  });
+
+  it('calls onActionSelected when a child leaf option is selected within a group', () => {
+    const onActionSelected = jest.fn();
+    renderComponent({ onActionSelected });
+
+    const options = screen.getAllByRole('option');
+    const triggersOption = options.find((opt) => opt.textContent?.includes('Triggers'));
+    fireEvent.click(triggersOption!);
+
+    const childOptions = screen.getAllByRole('option');
+    const manualOption = childOptions.find((opt) => opt.textContent?.includes('Manual'));
+    expect(manualOption).toBeDefined();
+    fireEvent.click(manualOption!);
+
+    expect(onActionSelected).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'manual', label: 'Manual' })
+    );
+  });
+
+  it('renders a search input', () => {
+    renderComponent();
+    const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+    expect(searchInput).toBeInTheDocument();
+  });
+
+  it('allows text selection in the preview pane', () => {
+    const { container } = renderComponent();
+    const previewPane = container.querySelector('[data-test-subj="actionsMenuPreview"]');
+
+    expect(previewPane).not.toBeNull();
+    if (!previewPane) {
+      throw new Error('Preview pane not found');
+    }
+    expect(fireEvent.mouseDown(previewPane)).toBe(true);
+  });
+
+  describe('keyboard navigation', () => {
+    beforeEach(() => {
+      Element.prototype.scrollIntoView = jest.fn();
+    });
+
+    const getKeyboardActiveLabel = () => {
+      const active = document.querySelector('.actionsMenu-keyboardActive');
+      return active?.textContent ?? null;
+    };
+
+    it('selects the first item on ArrowDown and the last on ArrowUp from search', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).toContain('Triggers');
+      const activeDescendantId = searchInput.getAttribute('aria-activedescendant');
+      expect(activeDescendantId).not.toBeNull();
+      expect(document.getElementById(activeDescendantId ?? '')).toHaveTextContent('Triggers');
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
+      // Wrap: from first Up goes to last actionable root item
+      expect(getKeyboardActiveLabel()).toContain('Flow control');
+    });
+
+    it('scrolls each newly active option into view', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      const scrollIntoView = Element.prototype.scrollIntoView as jest.Mock;
+      const expectActiveOptionScrolled = () => {
+        const activeOption = document.getElementById(
+          searchInput.getAttribute('aria-activedescendant') ?? ''
+        );
+        expect(scrollIntoView.mock.contexts[scrollIntoView.mock.contexts.length - 1]).toBe(
+          activeOption
+        );
+      };
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expectActiveOptionScrolled();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expectActiveOptionScrolled();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
+      expectActiveOptionScrolled();
+    });
+
+    it('wraps from the last item back to the first on ArrowDown', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
+      expect(getKeyboardActiveLabel()).toContain('Flow control');
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).toContain('Triggers');
+    });
+
+    it('enters a category on ArrowRight and focuses the first child', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).toContain('Triggers');
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowRight' });
+
+      expect(screen.getByText('Manual')).toBeInTheDocument();
+      // Children are sorted A–Z, so Alert is first (also appears in the preview panel).
+      expect(getKeyboardActiveLabel()).toContain('Alert');
+    });
+
+    it('enters a category on Enter and focuses the first child', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.keyDown(searchInput, { key: 'Enter' });
+
+      expect(screen.getByText('Manual')).toBeInTheDocument();
+      expect(getKeyboardActiveLabel()).toContain('Alert');
+    });
+
+    it('leaves a category on ArrowLeft and focuses the category just left', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.keyDown(searchInput, { key: 'ArrowRight' });
+      expect(getKeyboardActiveLabel()).toContain('Alert');
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowLeft' });
+
+      expect(screen.getByText('HTTP Request')).toBeInTheDocument();
+      expect(getKeyboardActiveLabel()).toContain('Triggers');
+    });
+
+    it('does nothing on ArrowRight for a leaf item', () => {
+      const onActionSelected = jest.fn();
+      renderComponent({ onActionSelected });
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).toContain('HTTP Request');
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowRight' });
+
+      expect(getKeyboardActiveLabel()).toContain('HTTP Request');
+      expect(screen.queryByText('Manual')).not.toBeInTheDocument();
+      expect(onActionSelected).not.toHaveBeenCalled();
+    });
+
+    it('adds a leaf on Enter', () => {
+      const onActionSelected = jest.fn();
+      renderComponent({ onActionSelected });
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.keyDown(searchInput, { key: 'Enter' });
+
+      expect(onActionSelected).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'http', label: 'HTTP Request' })
+      );
+    });
+
+    it('activates the option hovered after keyboard navigation', () => {
+      const onActionSelected = jest.fn();
+      renderComponent({ onActionSelected });
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.mouseMove(screen.getByText('HTTP Request'));
+      fireEvent.keyDown(searchInput, { key: 'Enter' });
+
+      expect(onActionSelected).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'http', label: 'HTTP Request' })
+      );
+    });
+
+    it('returns to search and clears selection when typing', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText(
+        'Search step, command or # to go to a step'
+      ) as HTMLInputElement;
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).toContain('Triggers');
+
+      expect(fireEvent.keyDown(searchInput, { key: 'a' })).toBe(true);
+      fireEvent.change(searchInput, { target: { value: 'a' } });
+
+      expect(getKeyboardActiveLabel()).toBeNull();
+      expect(document.activeElement).toBe(searchInput);
+      expect(searchInput.value).toBe('a');
+    });
+
+    it('preserves native search editing after list navigation', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText(
+        'Search step, command or # to go to a step'
+      ) as HTMLInputElement;
+      fireEvent.change(searchInput, { target: { value: 'tr' } });
+      searchInput.focus();
+      searchInput.setSelectionRange(1, 1);
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expect(getKeyboardActiveLabel()).not.toBeNull();
+
+      expect(fireEvent.keyDown(searchInput, { key: 'Backspace' })).toBe(true);
+      expect(getKeyboardActiveLabel()).toBeNull();
+      expect(searchInput.value).toBe('tr');
+      expect(searchInput.selectionStart).toBe(1);
+    });
+  });
+});
+
+describe('ActionsMenu — insertion context', () => {
+  const clickOption = (text: string) => {
+    const option = screen.getAllByRole('option').find((opt) => opt.textContent?.includes(text));
+    expect(option).toBeDefined();
+    fireEvent.click(option!);
+  };
+
+  it('step mode hides the Triggers group and shows the context label', () => {
+    renderComponent({ insertionContext: { mode: 'step' } });
+    expect(screen.getByTestId('actionsMenuContextLabel')).toHaveTextContent('Inserting a step');
+    expect(screen.queryByText('Triggers')).not.toBeInTheDocument();
+    expect(screen.getByText('HTTP Request')).toBeInTheDocument();
+  });
+
+  it('error mode hides Triggers and Flow control', () => {
+    renderComponent({ insertionContext: { mode: 'error' } });
+    expect(screen.getByTestId('actionsMenuContextLabel')).toHaveTextContent(
+      'Adding an error-handling route'
+    );
+    expect(screen.queryByText('Triggers')).not.toBeInTheDocument();
+    expect(screen.queryByText('Flow control')).not.toBeInTheDocument();
+    expect(screen.queryByText('If Condition')).not.toBeInTheDocument();
+    expect(screen.getByText('HTTP Request')).toBeInTheDocument();
+  });
+
+  it('compact presentation shows a single-column menu with the root title', () => {
+    renderComponent({
+      presentation: 'compact',
+      insertionContext: { mode: 'error' },
+      rootTitle: 'Add fallback step',
+      onClose: jest.fn(),
+    });
+    expect(screen.getByTestId('actionsMenuCompact')).toBeInTheDocument();
+    expect(screen.getByText('Add fallback step')).toBeInTheDocument();
+    expect(screen.queryByTestId('actionsMenuContextLabel')).not.toBeInTheDocument();
+  });
+
+  it('trigger mode lists trigger leaves at the root', () => {
+    renderComponent({ insertionContext: { mode: 'trigger' } });
+    expect(screen.getByTestId('actionsMenuContextLabel')).toHaveTextContent('Adding a trigger');
+    expect(screen.getByText('Manual')).toBeInTheDocument();
+    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(screen.queryByText('HTTP Request')).not.toBeInTheDocument();
+    expect(screen.queryByText('Triggers')).not.toBeInTheDocument();
+  });
+
+  it('selecting a step fires onActionSelected immediately', () => {
+    const onActionSelected = jest.fn();
+    renderComponent({
+      insertionContext: { mode: 'step' },
+      onActionSelected,
+    });
+    clickOption('HTTP Request');
+    expect(onActionSelected).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'http', label: 'HTTP Request' })
+    );
+  });
+
+  it('selecting a trigger fires onActionSelected immediately', () => {
+    const onActionSelected = jest.fn();
+    renderComponent({ insertionContext: { mode: 'trigger' }, onActionSelected });
+    clickOption('Manual');
+    expect(onActionSelected).toHaveBeenCalledWith(expect.objectContaining({ id: 'manual' }));
+  });
+});

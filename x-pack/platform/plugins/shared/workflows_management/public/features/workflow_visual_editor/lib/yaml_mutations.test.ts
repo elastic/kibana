@@ -1,0 +1,419 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { parse } from 'yaml';
+import { writeFragmentValue } from './fragment_yaml';
+import type { StepFormField } from './step_form_schema';
+import {
+  appendTrigger,
+  collectStepNames,
+  countTriggers,
+  deleteStepByName,
+  deleteTrigger,
+  getStepFragment,
+  getStepSourceRange,
+  getTriggerFragment,
+  insertStepAfterName,
+  insertStepIntoBranch,
+  prependStep,
+  replaceStepFragment,
+  replaceTriggerFragment,
+  setStepFallback,
+  uniqueStepName,
+} from './yaml_mutations';
+
+const BASE = `name: demo
+# top comment
+triggers:
+  - type: manual
+steps:
+  - name: first
+    type: console
+    with:
+      message: "hello {{ inputs.name }}" # keep me
+  - name: second
+    type: http
+    with:
+      url: https://example.com
+`;
+
+describe('yaml_mutations', () => {
+  describe('appendTrigger / deleteTrigger', () => {
+    it('appends to triggers and removes by index', () => {
+      const added = appendTrigger(BASE, 'type: scheduled\nwith:\n  every: 5m\n');
+      expect(parse(added.yaml).triggers).toEqual([
+        { type: 'manual' },
+        { type: 'scheduled', with: { every: '5m' } },
+      ]);
+      const removed = deleteTrigger(added.yaml, 0);
+      expect(parse(removed.yaml).triggers).toEqual([{ type: 'scheduled', with: { every: '5m' } }]);
+    });
+
+    it('counts the triggers a workflow declares', () => {
+      const added = appendTrigger(BASE, 'type: scheduled\nwith:\n  every: 5m\n');
+
+      expect(countTriggers(BASE)).toBe(1);
+      expect(countTriggers(added.yaml)).toBe(2);
+      expect(countTriggers(deleteTrigger(BASE, 0).yaml)).toBe(0);
+    });
+
+    it('drops the triggers key when the last trigger is removed', () => {
+      const r = deleteTrigger(BASE, 0);
+      expect(parse(r.yaml).triggers).toBeUndefined();
+    });
+
+    it('extracts and replaces a trigger fragment by index', () => {
+      const fragment = getTriggerFragment(BASE, 0);
+      expect(fragment).toContain('type: manual');
+      const replaced = replaceTriggerFragment(
+        BASE,
+        0,
+        'type: manual\ninputs:\n  - name: env\n    type: string\n'
+      );
+      expect(replaced.success).toBe(true);
+      expect(parse(replaced.yaml).triggers[0]).toEqual({
+        type: 'manual',
+        inputs: [{ name: 'env', type: 'string' }],
+      });
+    });
+  });
+
+  describe('setStepFallback', () => {
+    it('adds on-failure.fallback and keeps sibling on-failure keys', () => {
+      const withRetry = BASE.replace(
+        '  - name: second\n    type: http\n',
+        '  - name: second\n    type: http\n    on-failure:\n      retry:\n        max-attempts: 3\n'
+      );
+      const r = setStepFallback(withRetry, 'second', 'name: notify\ntype: console\n');
+      expect(r.success).toBe(true);
+      const second = parse(r.yaml).steps[1];
+      expect(second['on-failure']).toEqual({
+        retry: { 'max-attempts': 3 },
+        fallback: [{ name: 'notify', type: 'console' }],
+      });
+    });
+  });
+
+  describe('deleteStepByName', () => {
+    it('removes a top-level step including its error branch', () => {
+      const withFallback = setStepFallback(BASE, 'first', 'name: notify\ntype: console\n').yaml;
+      const r = deleteStepByName(withFallback, 'first');
+      const names = collectStepNames(r.yaml);
+      expect([...names]).toEqual(['second']);
+    });
+
+    it('removing the only fallback step clears the parent on-failure', () => {
+      const withFallback = setStepFallback(BASE, 'first', 'name: notify\ntype: console\n').yaml;
+      const r = deleteStepByName(withFallback, 'notify');
+      expect(parse(r.yaml).steps[0]['on-failure']).toBeUndefined();
+      expect(parse(r.yaml).steps[0].name).toBe('first');
+    });
+
+    it('keeps retry config when only the fallback list is emptied', () => {
+      const withRetry = BASE.replace(
+        '  - name: second\n    type: http\n',
+        '  - name: second\n    type: http\n    on-failure:\n      retry:\n        max-attempts: 3\n'
+      );
+      const withFallback = setStepFallback(
+        withRetry,
+        'second',
+        'name: notify\ntype: console\n'
+      ).yaml;
+      const r = deleteStepByName(withFallback, 'notify');
+      expect(parse(r.yaml).steps[1]['on-failure']).toEqual({ retry: { 'max-attempts': 3 } });
+    });
+  });
+
+  describe('getStepFragment / replaceStepFragment round-trip', () => {
+    it('extracts a mapping fragment with its comments and puts it back verbatim', () => {
+      const fragment = getStepFragment(BASE, 'first');
+      expect(fragment).toContain('name: first');
+      expect(fragment).toContain('# keep me');
+      expect(fragment).not.toContain('- name');
+
+      const edited = `${fragment}retry:\n  max-attempts: 2\n`;
+      const r = replaceStepFragment(BASE, 'first', edited);
+      expect(r.success).toBe(true);
+      expect(r.yaml).toContain('# keep me');
+      expect(r.yaml).toContain('# top comment');
+      expect(parse(r.yaml).steps[0]).toEqual({
+        name: 'first',
+        type: 'console',
+        with: { message: 'hello {{ inputs.name }}' },
+        retry: { 'max-attempts': 2 },
+      });
+      expect(parse(r.yaml).steps[1].name).toBe('second');
+    });
+
+    it('preserves unknown keys and Liquid expressions in the fragment', () => {
+      const fragment =
+        'name: first\ntype: console\nx-custom: 1 # unknown\nwith:\n  message: "{{ a | json }}"\n';
+      const r = replaceStepFragment(BASE, 'first', fragment);
+      expect(r.yaml).toContain('x-custom: 1 # unknown');
+      expect(r.yaml).toContain('"{{ a | json }}"');
+    });
+  });
+
+  describe('getStepSourceRange', () => {
+    it('returns the range of a top-level step, slicing to its own text', () => {
+      const range = getStepSourceRange(BASE, 'first');
+      expect(range).toBeDefined();
+      const [start, end] = range!;
+      expect(BASE.slice(start, end)).toBe(
+        'name: first\n    type: console\n    with:\n      message: "hello {{ inputs.name }}" # keep me\n'
+      );
+    });
+
+    it('returns the range of the last step, up to end of document', () => {
+      const range = getStepSourceRange(BASE, 'second');
+      expect(range).toBeDefined();
+      const [start, end] = range!;
+      expect(BASE.slice(start, end)).toBe(
+        'name: second\n    type: http\n    with:\n      url: https://example.com\n'
+      );
+      expect(BASE.slice(end)).toBe('');
+    });
+
+    it('returns the range of a step nested in an if branch', () => {
+      const withIf = `name: demo
+steps:
+  - name: gate
+    type: if
+    condition: x
+    steps:
+      - name: yes
+        type: console
+    else:
+      - name: no
+        type: console
+`;
+      const range = getStepSourceRange(withIf, 'yes');
+      expect(range).toBeDefined();
+      const [start, end] = range!;
+      expect(withIf.slice(start, end)).toBe('name: yes\n        type: console\n');
+    });
+
+    it('returns the range of a fallback step under on-failure', () => {
+      const withFallback = `name: demo
+steps:
+  - name: first
+    type: console
+    on-failure:
+      fallback:
+        - name: recover
+          type: console
+`;
+      const range = getStepSourceRange(withFallback, 'recover');
+      expect(range).toBeDefined();
+      const [start, end] = range!;
+      expect(withFallback.slice(start, end)).toBe('name: recover\n          type: console\n');
+    });
+
+    it('returns undefined for a step that does not exist', () => {
+      expect(getStepSourceRange(BASE, 'missing')).toBeUndefined();
+    });
+  });
+
+  describe('uniqueStepName', () => {
+    it('suffixes on collision', () => {
+      expect(uniqueStepName('a', new Set(['a', 'a_2']))).toBe('a_3');
+      expect(uniqueStepName('b', new Set(['a']))).toBe('b');
+    });
+  });
+
+  describe('block style for freshly-populated sequences', () => {
+    // A new workflow starts with `triggers: []` / `steps: []` — the `yaml`
+    // library remembers these were written inline and keeps them on one line
+    // even after splicing in real content, unless the mutation resets the
+    // style. Regression for an unreadable single-line `triggers`/`steps`.
+    const freshWorkflow = `name: demo
+enabled: false
+triggers: []
+steps: []
+`;
+
+    it('appendTrigger renders the triggers array in block style', () => {
+      const r = appendTrigger(freshWorkflow, 'type: manual\n');
+      expect(r.success).toBe(true);
+      expect(r.yaml).not.toMatch(/triggers: \[/);
+      expect(r.yaml).toMatch(/triggers:\n\s+- type: manual/);
+    });
+
+    it('prependStep renders the steps array in block style', () => {
+      const r = prependStep(freshWorkflow, 'name: first\ntype: console\n');
+      expect(r.success).toBe(true);
+      expect(r.yaml).not.toMatch(/steps: \[/);
+      expect(r.yaml).toMatch(/steps:\n\s+- name: first/);
+    });
+
+    it('a second insert into an already-populated (previously inline) array stays block style', () => {
+      const once = appendTrigger(freshWorkflow, 'type: manual\n').yaml;
+      const twice = appendTrigger(once, 'type: scheduled\nwith:\n  every: 5m\n');
+      expect(twice.success).toBe(true);
+      expect(twice.yaml).not.toMatch(/triggers: \[/);
+      expect(parse(twice.yaml).triggers).toEqual([
+        { type: 'manual' },
+        { type: 'scheduled', with: { every: '5m' } },
+      ]);
+    });
+
+    it('insertStepIntoBranch renders a freshly-created branch array in block style', () => {
+      const withEmptyElse = `name: demo
+steps:
+  - name: gate
+    type: if
+    condition: x
+    steps:
+      - name: yes
+        type: console
+    else: []
+`;
+      const r = insertStepIntoBranch(withEmptyElse, 'name: no\ntype: console\n', 'gate', {
+        kind: 'else',
+      });
+      expect(r.success).toBe(true);
+      expect(r.yaml).not.toMatch(/else: \[/);
+      expect(r.yaml).toMatch(/else:\n\s+- name: no/);
+    });
+  });
+
+  describe('a switch whose first case is added through the form', () => {
+    const workflow = `name: demo
+triggers:
+  - type: manual
+steps:
+  - name: route
+    type: switch
+    expression: x
+    cases: []
+`;
+    const casesField: StepFormField = {
+      key: 'cases',
+      path: ['cases'],
+      label: 'cases',
+      required: false,
+      kind: 'switch-cases',
+    };
+    const multiLineStep = [
+      'name: report',
+      'type: data.set',
+      'with:',
+      '  text: |-',
+      '    line one',
+      '    **Evidence:** {{ x }}',
+      '    done',
+      '',
+    ].join('\n');
+
+    it('keeps the cases and the steps inserted under them in block style, so multi-line text stays a block scalar', () => {
+      const fragment = getStepFragment(workflow, 'route') ?? '';
+      const edited = replaceStepFragment(
+        workflow,
+        'route',
+        writeFragmentValue(fragment, casesField, [{ match: 'a', steps: [] }], 2)
+      );
+      expect(edited.success).toBe(true);
+
+      const inserted = insertStepIntoBranch(edited.yaml, multiLineStep, 'route', {
+        kind: 'case',
+        index: 0,
+        match: 'a',
+      });
+
+      expect(inserted.success).toBe(true);
+      expect(inserted.yaml).not.toMatch(/cases: \[/);
+      expect(inserted.yaml).toContain('text: |-\n');
+      // No multi-line double-quoted scalar: the form `**Evidence:**` line must stay content.
+      expect(inserted.yaml).not.toMatch(/text: "line one/);
+      expect(parse(inserted.yaml).steps[0].cases[0].steps[0].with.text).toBe(
+        'line one\n**Evidence:** {{ x }}\ndone'
+      );
+    });
+  });
+
+  describe('steps under switch cases, default and parallel branches', () => {
+    const branching = `name: demo
+triggers:
+  - type: manual
+steps:
+  - name: route
+    type: switch
+    expression: x
+    cases:
+      - match: a
+        steps: []
+    default: []
+  - name: fan_out
+    type: parallel
+    branches:
+      - name: left
+        steps: []
+`;
+    const child = 'name: child\ntype: console\n';
+    const withMessage = 'name: child\ntype: console\nwith:\n  message: hi\n';
+    const slots = [
+      {
+        label: 'default',
+        owner: 'route',
+        slot: { kind: 'default' } as const,
+        path: ['steps', 0, 'default', 0],
+      },
+      {
+        label: 'case',
+        owner: 'route',
+        slot: { kind: 'case', index: 0, match: 'a' } as const,
+        path: ['steps', 0, 'cases', 0, 'steps', 0],
+      },
+      {
+        label: 'branch',
+        owner: 'fan_out',
+        slot: { kind: 'branch', index: 0 } as const,
+        path: ['steps', 1, 'branches', 0, 'steps', 0],
+      },
+    ];
+    const getAt = (value: unknown, path: ReadonlyArray<string | number>): any =>
+      path.reduce<any>((acc, key) => acc?.[key], value);
+
+    it.each(slots)('replaceStepFragment edits a step inserted into the $label slot', (s) => {
+      const inserted = insertStepIntoBranch(branching, child, s.owner, s.slot).yaml;
+      const r = replaceStepFragment(inserted, 'child', withMessage);
+      expect(r.error).toBeUndefined();
+      expect(r.success).toBe(true);
+      expect(getAt(parse(r.yaml), s.path).with).toEqual({ message: 'hi' });
+    });
+
+    it.each(slots)('getStepFragment finds a step in the $label slot', (s) => {
+      const inserted = insertStepIntoBranch(branching, child, s.owner, s.slot).yaml;
+      expect(getStepFragment(inserted, 'child')).toContain('name: child');
+    });
+
+    it.each(slots)('deleteStepByName removes a step from the $label slot', (s) => {
+      const inserted = insertStepIntoBranch(branching, child, s.owner, s.slot).yaml;
+      const r = deleteStepByName(inserted, 'child');
+      expect(r.success).toBe(true);
+      expect(collectStepNames(r.yaml).has('child')).toBe(false);
+    });
+
+    it('insertStepAfterName appends in the same default sequence as its anchor', () => {
+      const inserted = insertStepIntoBranch(branching, child, 'route', { kind: 'default' }).yaml;
+      const r = insertStepAfterName(inserted, 'name: sibling\ntype: console\n', 'child');
+      expect(r.success).toBe(true);
+      expect(parse(r.yaml).steps[0].default.map((s: { name: string }) => s.name)).toEqual([
+        'child',
+        'sibling',
+      ]);
+    });
+
+    it('collectStepNames includes nested steps but not a parallel branch name', () => {
+      const inserted = insertStepIntoBranch(branching, child, 'fan_out', {
+        kind: 'branch',
+        index: 0,
+      }).yaml;
+      expect([...collectStepNames(inserted)].sort()).toEqual(['child', 'fan_out', 'route']);
+    });
+  });
+});

@@ -521,7 +521,7 @@ Report documentation issues alongside code issues.
   caller asked for.
 - **Workflow visual builder coverage**: A PR that adds `'workflows'` to `supportedFeatureIds` must add a step
   of the connector to the graph rebuild `connectors` fixture
-  (`src/platform/plugins/shared/workflows_management/test/scout/ui/fixtures/graph_rebuild/`). Flag the PR when
+  (`x-pack/platform/plugins/shared/workflows_management/test/scout/ui/fixtures/graph_rebuild/`). Flag the PR when
   the fixture has no step of this connector, or when a `knownGaps` entry was added without a reason.
 
 ### Security

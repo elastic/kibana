@@ -202,7 +202,7 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
 
   useEffect(() => {
     if (!isEdit && !usingCustomIdentifier && name) {
-      const slug = toSlugIdentifier(name).slice(0, CONNECTOR_ID_MAX_LENGTH);
+      const slug = toSlugIdentifier(name).slice(0, CONNECTOR_ID_MAX_LENGTH).replace(/-+$/, '');
       setFieldValue('id', slug);
     }
   }, [name, isEdit, setFieldValue, usingCustomIdentifier]);

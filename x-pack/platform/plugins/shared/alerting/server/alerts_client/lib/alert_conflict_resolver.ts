@@ -17,6 +17,7 @@ import type {
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
   ALERT_INSTANCE_ID,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
@@ -118,14 +119,24 @@ export async function resolveAlertConflicts(
   logAlreadyWritten(logger, logTags, ruleInfoMessage, outcomes.alreadyWritten);
 
   const createdAlerts = getCreatedAlerts(outcomes);
-  const deleteCreated = () =>
+  const alreadyWritten = [...outcomes.alreadyWritten];
+  const deleteCreated = async () =>
     deleteCreatedAlerts({
       esClient,
       logger,
       logTags,
       ruleInfoMessage,
       refresh: bulkRequest.refresh,
-      createdAlerts,
+      createdAlerts: [
+        ...createdAlerts,
+        ...(await getAlertsWrittenByEarlierAttempts({
+          esClient,
+          logger,
+          logTags,
+          ruleInfoMessage,
+          alreadyWritten,
+        })),
+      ],
     });
 
   try {
@@ -158,6 +169,7 @@ export async function resolveAlertConflicts(
 
       outcomes = groupByOutcome(pairRequestsWithResponses(retryRequest, retryResponse.items));
       createdAlerts.push(...getCreatedAlerts(outcomes));
+      alreadyWritten.push(...outcomes.alreadyWritten);
       permanentCount += outcomes.permanent.length;
       logAlreadyWritten(logger, logTags, ruleInfoMessage, outcomes.alreadyWritten);
       logRetryResult(logger, logTags, ruleInfoMessage, retryRequest.length, outcomes);
@@ -244,8 +256,7 @@ function countErrorTypes(attempts: BulkItemAttempt[]): Record<string, number> {
   return counts;
 }
 
-// Creates that conflicted are left out because the existing doc can be from an earlier run. The
-// seq_no and primary_term keep the delete from removing changes users made to the doc since.
+// The seq_no and primary_term keep the delete from removing changes users made to the doc since.
 function getCreatedAlerts(outcomes: Record<BulkItemOutcome, BulkItemAttempt[]>): AlertDocRef[] {
   return outcomes.success.flatMap(({ res }) => {
     const created = res.create;
@@ -259,6 +270,63 @@ function getCreatedAlerts(outcomes: Record<BulkItemOutcome, BulkItemAttempt[]>):
       },
     ];
   });
+}
+
+// A create conflicts when its doc exists already, written either by an earlier attempt of this
+// request whose response was lost or by an earlier run. Only docs this run wrote that nobody has
+// changed since (still at version 1) are returned, so deleting them keeps history and user edits.
+async function getAlertsWrittenByEarlierAttempts({
+  esClient,
+  logger,
+  logTags,
+  ruleInfoMessage,
+  alreadyWritten,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  logTags: { tags: string[] };
+  ruleInfoMessage: string;
+  alreadyWritten: BulkItemAttempt[];
+}): Promise<AlertDocRef[]> {
+  const candidates = alreadyWritten.flatMap(({ req, res }) =>
+    res.create?._id
+      ? [
+          {
+            _id: res.create._id,
+            _index: res.create._index,
+            executionUuid: get(req.doc, ALERT_RULE_EXECUTION_UUID),
+          },
+        ]
+      : []
+  );
+  if (candidates.length === 0) return [];
+
+  try {
+    const { docs } = await retryTransientEsErrors(
+      () =>
+        esClient.mget<unknown>({
+          docs: candidates.map(({ _id, _index }) => ({ _id, _index })),
+          _source_includes: [ALERT_RULE_EXECUTION_UUID],
+        }),
+      { logger }
+    );
+    return candidates.flatMap(({ _id, _index, executionUuid }, index) => {
+      const doc = docs[index];
+      if (!doc || !('found' in doc) || !doc.found) return [];
+      const isWrittenByThisRun =
+        executionUuid !== undefined &&
+        get(doc._source, ALERT_RULE_EXECUTION_UUID) === executionUuid;
+      if (!isWrittenByThisRun || doc._version !== 1) return [];
+      if (doc._seq_no == null || doc._primary_term == null) return [];
+      return [{ _id, _index, if_seq_no: doc._seq_no, if_primary_term: doc._primary_term }];
+    });
+  } catch (err) {
+    logger.warn(
+      `Error fetching ${candidates.length} alerts that already existed ${ruleInfoMessage}, they are not deleted - ${err.message}`,
+      logTags
+    );
+    return [];
+  }
 }
 
 // The caller fails the run and keeps the previous task state when writes stay unresolved. The
