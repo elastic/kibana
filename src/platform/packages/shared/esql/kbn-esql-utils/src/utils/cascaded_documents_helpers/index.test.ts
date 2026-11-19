@@ -320,6 +320,18 @@ describe('cascaded documents helpers utils', () => {
           'no_stats_command',
         ],
         [
+          'the query could not be parsed',
+          // the parser reports this on the result rather than throwing, and the half built AST
+          // declares no STATS command, which is not the same thing as a query that has none
+          'FROM kibana_sample_data_logs | STATS count = COUNT(bytes) BY',
+          'parse_failure',
+        ],
+        [
+          'a command the parser does not recognise precedes the STATS command',
+          'FRM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip',
+          'parse_failure',
+        ],
+        [
           'the STATS command declares no grouping options',
           'FROM kibana_sample_data_logs | STATS count = COUNT(*)',
           'no_grouping_options',
