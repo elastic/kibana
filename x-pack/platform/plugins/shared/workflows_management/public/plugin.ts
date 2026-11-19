@@ -13,6 +13,7 @@ import type {
   AppUpdater,
   CoreSetup,
   CoreStart,
+  HttpStart,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
@@ -20,6 +21,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
+import { type RecentlyAccessed, RecentlyAccessedService } from '@kbn/recently-accessed';
 import {
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
@@ -31,6 +33,10 @@ import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 import type { DeepLinksParams } from './deep_links';
 import { getDeepLinks } from './deep_links';
+import {
+  getRecentlyViewedWorkflowsNavItems$,
+  RECENTLY_VIEWED_WORKFLOWS_KEY,
+} from './features/recently_viewed_workflows/model/recently_viewed_workflows';
 import { triggerSchemas } from './trigger_schemas';
 import { registerConnectorEventTriggersPublic } from './triggers/register_connector_event_triggers';
 import type {
@@ -66,6 +72,7 @@ export class WorkflowsPlugin
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
+  private recentlyViewedWorkflows?: RecentlyAccessed;
   private readonly pagesEnabled: boolean;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementPublicConfig>) {
@@ -147,6 +154,21 @@ export class WorkflowsPlugin
     this.availabilityService.setLicense$(plugins.licensing.license$);
 
     this.subscribeAppVisibilityChanges(core);
+
+    plugins.navigation.registerNavigationLinks({
+      id: 'workflowsLinks',
+      target: PLUGIN_ID,
+      lists: [
+        {
+          id: 'recent',
+          title: i18n.translate('workflows.nav.recentTitle', { defaultMessage: 'Recent' }),
+          items$: getRecentlyViewedWorkflowsNavItems$(
+            core.http,
+            this.getRecentlyViewedWorkflows(core.http)
+          ),
+        },
+      ],
+    });
 
     return {
       setUnavailableInServerlessTier: (options) => {
@@ -295,6 +317,15 @@ export class WorkflowsPlugin
     }
   }
 
+  /** The side navigation and the app must share one history to see each other's updates. */
+  private getRecentlyViewedWorkflows(http: HttpStart): RecentlyAccessed {
+    this.recentlyViewedWorkflows ??= new RecentlyAccessedService().start({
+      http,
+      key: RECENTLY_VIEWED_WORKFLOWS_KEY,
+    });
+    return this.recentlyViewedWorkflows;
+  }
+
   /** Creates the start services to be used in the Kibana services context of the workflows application */
   private async createWorkflowsStartServices(
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
@@ -311,6 +342,7 @@ export class WorkflowsPlugin
         availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),
         agentBuilder,
+        recentlyViewed: this.getRecentlyViewedWorkflows(coreStart.http),
       },
     };
 

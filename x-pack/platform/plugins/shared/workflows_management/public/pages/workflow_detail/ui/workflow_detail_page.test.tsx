@@ -221,7 +221,7 @@ describe('WorkflowDetailPage', () => {
       }
     );
 
-    return { ...view, navigateToApp, historyRef, store };
+    return { ...view, navigateToApp, historyRef, store, services };
   };
 
   beforeEach(() => {
@@ -253,6 +253,26 @@ describe('WorkflowDetailPage', () => {
 
       expect(mockLoadConnectors).toHaveBeenCalled();
       expect(mockLoadWorkflow).toHaveBeenCalledWith({ id: 'test-workflow-123' });
+    });
+
+    it('records the loaded workflow as recently viewed', () => {
+      const { services } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(services.workflowsManagement.recentlyViewed.add).toHaveBeenCalledWith(
+        '/app/workflows/test-workflow-123',
+        'Test Workflow',
+        'test-workflow-123'
+      );
+    });
+
+    it('does not record the previous workflow while another one loads', () => {
+      const { services } = renderWithProviders({ id: 'other-workflow' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(services.workflowsManagement.recentlyViewed.add).not.toHaveBeenCalled();
     });
 
     it('stores the replay run mode before opening the modal', () => {

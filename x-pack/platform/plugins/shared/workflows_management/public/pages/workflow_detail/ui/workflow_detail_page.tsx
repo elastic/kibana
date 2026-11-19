@@ -53,6 +53,7 @@ import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
 import { WorkflowChangeHistoryProvider } from '../../../features/change_history';
+import { getRecentlyViewedWorkflowPath } from '../../../features/recently_viewed_workflows/model/recently_viewed_workflows';
 import { WorkflowDependentsProvider } from '../../../features/workflow_dependents/ui/workflow_dependents_provider';
 import { WorkflowExecutionFlyout } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail_old';
@@ -97,7 +98,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const [loadWorkflow, { isLoading: isLoadingWorkflow, error }] =
     useAsyncThunkState(loadWorkflowThunk);
   const telemetry = useTelemetry();
-  const { application } = useKibana().services;
+  const { application, workflowsManagement } = useKibana().services;
   const location = useLocation<WorkflowDetailLocationState | undefined>();
   const { euiTheme } = useEuiTheme();
 
@@ -148,6 +149,13 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       });
     }
   }, [isReady, workflowId, activeTab, telemetry]);
+
+  // The store still holds the previous workflow until the new one loads.
+  useEffect(() => {
+    if (id && workflowId === id && workflowName) {
+      workflowsManagement.recentlyViewed.add(getRecentlyViewedWorkflowPath(id), workflowName, id);
+    }
+  }, [id, workflowId, workflowName, workflowsManagement.recentlyViewed]);
 
   useEffect(() => {
     loadConnectors(); // dispatch load connectors on mount

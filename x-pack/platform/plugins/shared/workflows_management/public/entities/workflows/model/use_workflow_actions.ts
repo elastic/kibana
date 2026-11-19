@@ -26,6 +26,7 @@ import type {
   WorkflowStepTriggerTab,
   WorkflowTriggerTab,
 } from '../../../features/run_workflow/ui/types';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
@@ -86,6 +87,7 @@ export function useWorkflowActions() {
   const queryClient = useQueryClient();
   const api = useWorkflowsApi();
   const telemetry = useTelemetry();
+  const { workflowsManagement } = useKibana().services;
 
   const updateWorkflow = useMutation<
     UpdatedWorkflowResponseDto,
@@ -258,6 +260,7 @@ export function useWorkflowActions() {
           origin: 'workflow_list',
           error: undefined,
         });
+        workflowsManagement.recentlyViewed.remove(workflowId);
       });
 
       // Refetch to ensure data is in sync with server

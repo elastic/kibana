@@ -29,6 +29,12 @@ const mockParseImportFile = parseImportFile as jest.MockedFunction<typeof parseI
 
 jest.mock('../../../features/import_workflows/lib/parse_import_file');
 jest.mock('../../../hooks/use_telemetry');
+const mockRemoveRecentlyViewed = jest.fn();
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: { workflowsManagement: { recentlyViewed: { remove: mockRemoveRecentlyViewed } } },
+  }),
+}));
 jest.mock('@kbn/workflows-ui', () => ({
   useRunWorkflow: ({ onSuccess, onError }: { onSuccess: Function; onError: Function }) => ({
     mutate: jest.fn((...args: unknown[]) => {
@@ -1233,6 +1239,20 @@ describe('useWorkflowActions – import mutations', () => {
       expect(mockWorkflowApi.bulkDeleteWorkflows).toHaveBeenCalledWith(['wf-1', 'wf-2']);
     });
 
+    it('should remove the deleted workflows from the recently viewed history', async () => {
+      mockWorkflowApi.bulkDeleteWorkflows.mockResolvedValueOnce(undefined);
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.deleteWorkflows.mutate({ ids: ['wf-1', 'wf-2'] });
+      });
+
+      await waitFor(() => expect(result.current.deleteWorkflows.isSuccess).toBe(true));
+
+      expect(mockRemoveRecentlyViewed.mock.calls).toEqual([['wf-1'], ['wf-2']]);
+    });
+
     it('should optimistically remove workflows from list', async () => {
       const listData: WorkflowListDto = {
         results: [
@@ -1297,6 +1317,7 @@ describe('useWorkflowActions – import mutations', () => {
       const rolledBack = queryClient.getQueryData<WorkflowListDto>(['workflows', 'list']);
       expect(rolledBack?.results).toHaveLength(1);
       expect(rolledBack?.total).toBe(1);
+      expect(mockRemoveRecentlyViewed).not.toHaveBeenCalled();
     });
 
     it('should report telemetry on success for each deleted workflow', async () => {
