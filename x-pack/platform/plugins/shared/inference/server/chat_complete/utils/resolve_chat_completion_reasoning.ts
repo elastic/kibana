@@ -13,8 +13,13 @@ import type { ChatCompletionReasoning } from '@kbn/inference-common';
 // Remove once Elasticsearch exposes parameter capabilities for inference endpoints.
 const MODELS_REJECTING_TOOLS_WITHOUT_NONE_REASONING = ['gpt-5', 'gpt-6'];
 
-// Narrower than the list above: sent straight to OpenAI, where older gpt-5 models reject `none`.
-const OPENAI_MODELS_REQUIRING_NONE_REASONING_EFFORT_WITH_TOOLS = ['gpt-5-6', 'gpt-6'];
+// Narrower than the list above: sent straight to OpenAI, where older gpt-5 models and other
+// gpt-6 models (e.g. gpt-6-astra, gpt-6.1-sol) reject `none`.
+const OPENAI_MODELS_REQUIRING_NONE_REASONING_EFFORT_WITH_TOOLS = [
+  'gpt-5-6',
+  'gpt-6-luna',
+  'gpt-6-sol',
+];
 
 const modelMatchesAny = (model: string, candidates: readonly string[]): boolean => {
   // Normalize ids like `openai/gpt-5`, `openai-gpt-5.4` or `.openai-gpt-5.4-chat_completion`.
@@ -65,7 +70,7 @@ export const resolveChatCompletionReasoning = ({
 
 /**
  * Resolve the `reasoning_effort` to send to the OpenAI Chat Completions API, which rejects
- * function tools on gpt-5.6 and gpt-6 models unless the effort is explicitly `none`.
+ * function tools on gpt-5.6, gpt-6-luna and gpt-6-sol models unless the effort is explicitly `none`.
  */
 export const resolveOpenAIReasoningEffort = ({
   hasNativeTools,

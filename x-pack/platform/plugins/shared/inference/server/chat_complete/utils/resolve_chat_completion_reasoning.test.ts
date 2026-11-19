@@ -115,14 +115,32 @@ describe('resolveChatCompletionReasoning', () => {
 
 describe('resolveOpenAIReasoningEffort', () => {
   it('returns none when native tools are present and the model requires it', () => {
-    const models = ['gpt-5.6-terra', 'gpt-5.6-luna-2026-09-01', 'openai/gpt-5.6-sol', 'gpt-6-luna'];
+    const models = [
+      'gpt-5.6-terra',
+      'gpt-5.6-luna-2026-09-01',
+      'openai/gpt-5.6-sol',
+      'gpt-6-luna',
+      'gpt-6-luna-pro',
+      'gpt-6-sol',
+    ];
     for (const model of models) {
       expect(resolveOpenAIReasoningEffort({ hasNativeTools: true, model })).toBe('none');
     }
   });
 
   it('returns undefined for models that default to or reject none', () => {
-    const models = ['gpt-5', 'gpt-5-mini', 'gpt-5.4', 'gpt-5.5', 'gpt-5.60', 'gpt-4.1', 'o3-mini'];
+    const models = [
+      'gpt-5',
+      'gpt-5-mini',
+      'gpt-5.4',
+      'gpt-5.5',
+      'gpt-5.60',
+      'gpt-6-astra',
+      'gpt-6-astra-pro',
+      'gpt-6.1-sol',
+      'gpt-4.1',
+      'o3-mini',
+    ];
     for (const model of models) {
       expect(resolveOpenAIReasoningEffort({ hasNativeTools: true, model })).toBeUndefined();
     }
