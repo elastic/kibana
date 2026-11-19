@@ -211,6 +211,7 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
         onScroll={(event) => setIsScrolled(event.currentTarget.scrollTop > 0)}
       >
         <TimeRuler durationMillis={spanMillis(domain)} />
+        <div css={styles.snapToTop} />
         {timeline.planning ? (
           <Lane
             label={planningLabel()}

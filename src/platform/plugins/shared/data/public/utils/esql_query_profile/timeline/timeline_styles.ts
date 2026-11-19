@@ -33,8 +33,18 @@ export const useTimelineStyles = () => {
       lanes: css`
         max-height: ${euiTheme.base * 22}px;
         overflow-y: auto;
+        /*
+         * A view that stops a few pixels from the top would leave the first row half under the ruler,
+         * so near the top it settles at the top. The padding is the height of the ruler, which is
+         * where the first row starts.
+         */
+        scroll-snap-type: y proximity;
+        scroll-padding-top: calc(${euiTheme.size.base} + 2 * ${euiTheme.size.xs});
         /* The ruler's z-index stays inside the lanes, so it does not compete with anything outside. */
         isolation: isolate;
+      `,
+      snapToTop: css`
+        scroll-snap-align: start;
       `,
       ruler: css`
         position: sticky;
