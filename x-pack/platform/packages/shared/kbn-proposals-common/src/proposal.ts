@@ -240,6 +240,12 @@ export const proposalSchema = lazySchema(() =>
     rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
     executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
     /**
+     * When the producing agent retired this undecided gateless proposal without a
+     * successor (`status: superseded`, no `supersededBy`, no decision). The
+     * moment it stopped being open, which no `decidedAt` records.
+     */
+    retiredAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    /**
      * The `executionError` of the attempt this proposal re-offers: copied from
      * the predecessor when a failed proposal is cloned, then carried through
      * revisions untouched, since revising runs nothing. It therefore names the

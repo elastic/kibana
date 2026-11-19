@@ -59,13 +59,15 @@ export interface ExistingRecorderProposal {
   actionWorkflowId?: string;
   actionInput?: Record<string, unknown>;
   expiresAt?: string;
+  /** No gate workflow owns it, so it can be retired with no replacement. */
+  retirable?: boolean;
   /** Set once a person approved or declined a gated proposal and its gate is being resumed. */
   gateReleasedAt?: string;
 }
 
 /**
  * What the final pass needs from the proposals plugin: what is already proposed, the workflows a
- * proposal can carry, and to propose or revise.
+ * proposal can carry, and to propose, revise or retire.
  */
 export interface RecorderProposals {
   /**
@@ -92,6 +94,11 @@ export interface RecorderProposals {
     proposalId: string;
     proposal: RecordedProposal;
   }) => Promise<boolean>;
+  /**
+   * Retires exactly `proposalId` with no replacement, never a later revision of it. Resolves
+   * false, writing nothing, when it is no longer an undecided gateless proposal.
+   */
+  retire: (args: { request: KibanaRequest; proposalId: string }) => Promise<boolean>;
 }
 
 export interface FindingsPassDeps {
@@ -302,6 +309,7 @@ const buildProposalsContext = (
         proposal.impact ? `impact: ${proposal.impact}` : undefined,
         proposal.confidence ? `confidence: ${proposal.confidence}` : undefined,
         proposal.actionWorkflowId ? `action_workflow_id: ${proposal.actionWorkflowId}` : undefined,
+        proposal.retirable ? undefined : 'cannot be retired',
       ]
         .filter(Boolean)
         .join(', ');
@@ -326,9 +334,9 @@ const buildProposalsContext = (
     sections.push(
       `Open (${open.length} of ${MAX_OPEN_PROPOSALS} open slots used${
         full
-          ? ', so no new action can be added: supersede one only to refine that same action, and leave a different action out'
+          ? ', so a new action can be added only after retiring an obsolete one: supersede one only to refine that same action, never retire one that still needs doing to make room, and otherwise leave a different action out'
           : ''
-      } — leave unchanged ones out; set supersedes to an ID such as P1 to refine or replace in place):\n${lines.join(
+      } — leave unchanged ones out; set supersedes to an ID such as P1 to refine or replace in place; list obsolete IDs in retire_proposals):\n${lines.join(
         '\n'
       )}`
     );
@@ -351,9 +359,10 @@ const buildProposalsContext = (
 };
 
 /**
- * Writes the final pass's proposals: a revision in place for each that supersedes an open one or
- * repeats its title, and a new proposal for the rest while fewer than {@link MAX_OPEN_PROPOSALS}
- * are open. What it does not write is logged, so a dropped action is never silent.
+ * Writes the final pass's proposals, in three steps: a revision in place for each that supersedes
+ * an open one or repeats its title; then the retirements, which free slots; then a new proposal
+ * for the rest while fewer than {@link MAX_OPEN_PROPOSALS} are open. What it does not write is
+ * logged, so a dropped action is never silent.
  */
 const writeRecorderProposals = async ({
   proposals,
@@ -361,6 +370,7 @@ const writeRecorderProposals = async ({
   conversationId,
   openByHandle,
   wanted,
+  retire,
   listedActions,
   logger,
 }: {
@@ -370,6 +380,8 @@ const writeRecorderProposals = async ({
   /** The open proposals as the model was shown them, by lower-cased handle. */
   openByHandle: ReadonlyMap<string, ExistingRecorderProposal>;
   wanted: readonly RecordedProposal[];
+  /** References, such as `P1`, to open proposals the model found obsolete. */
+  retire: readonly string[];
   /** Only workflows the catalog listed may run. */
   listedActions: ReadonlySet<string>;
   logger: Logger;
@@ -412,9 +424,14 @@ const writeRecorderProposals = async ({
   let openCount = openLatest.length;
   const touchedIds = new Set<string>();
   const emittedTitles = new Set<string>();
+  const fresh: RecordedProposal[] = [];
   const skipped: string[] = [];
   const changedByPerson: string[] = [];
   const failures: string[] = [];
+  // A merge supersedes one proposal and retires the other, and nothing says which retirement
+  // belongs to which revision. So when any revision does not land, no proposal is retired: the
+  // retired one's work may have been meant to live on in it.
+  let revisionMissed = false;
 
   // One proposal that cannot be written does not stop the ones after it.
   const write = async <T>(title: string, fn: () => Promise<T>): Promise<T | undefined> => {
@@ -433,6 +450,7 @@ const writeRecorderProposals = async ({
       proposals.revise({ request, proposalId: target.id, proposal })
     );
     if (revised === false) changedByPerson.push(`"${target.title}"`);
+    if (!revised) revisionMissed = true;
   };
 
   for (const proposal of wanted) {
@@ -440,6 +458,7 @@ const writeRecorderProposals = async ({
     const key = titleKey(title);
     if (workflowId && !listedActions.has(workflowId)) {
       skipped.push(`"${title}": action workflow [${workflowId}] is not offered`);
+      if (supersedes) revisionMissed = true;
       continue;
     }
 
@@ -447,6 +466,7 @@ const writeRecorderProposals = async ({
       const target = resolveShown(supersedes);
       if (!target) {
         skipped.push(`"${title}": supersedes [${supersedes}], which is not an open proposal`);
+        revisionMissed = true;
         continue;
       }
       const current = stillOpen(target.id);
@@ -454,10 +474,12 @@ const writeRecorderProposals = async ({
       // and the model's text was written from the version they replaced.
       if (!current) {
         changedByPerson.push(`"${target.title}"`);
+        revisionMissed = true;
         continue;
       }
       if (touchedIds.has(current.id)) {
         skipped.push(`"${title}": [${supersedes}] was already updated in this pass`);
+        revisionMissed = true;
         continue;
       }
       if (
@@ -465,11 +487,13 @@ const writeRecorderProposals = async ({
         (emittedTitles.has(key) || closedTitles.has(key) || openByTitle.has(key))
       ) {
         skipped.push(`"${title}": another proposal already has this title`);
+        revisionMissed = true;
         continue;
       }
       const mismatch = workflowMismatch(current, proposal);
       if (mismatch) {
         skipped.push(`"${title}": ${mismatch}`);
+        revisionMissed = true;
         continue;
       }
       await revise(current, proposal);
@@ -481,6 +505,7 @@ const writeRecorderProposals = async ({
     if (shownSame && !stillOpen(shownSame.id)) {
       emittedTitles.add(key);
       changedByPerson.push(`"${shownSame.title}"`);
+      revisionMissed = true;
       continue;
     }
     if (closedTitles.has(key)) continue;
@@ -491,19 +516,58 @@ const writeRecorderProposals = async ({
       const mismatch = workflowMismatch(sameOpen, proposal);
       if (mismatch) {
         skipped.push(`"${title}": ${mismatch}`);
+        revisionMissed = true;
         continue;
       }
       await revise(sameOpen, proposal);
       continue;
     }
 
+    emittedTitles.add(key);
+    fresh.push(proposal);
+  }
+
+  // Before the new proposals, so the slots they free can take them.
+  const heldBack: string[] = [];
+  for (const ref of retire) {
+    const target = resolveShown(ref);
+    if (!target) {
+      skipped.push(`retire [${ref}]: not an open proposal`);
+      continue;
+    }
+    if (revisionMissed) {
+      heldBack.push(`"${target.title}"`);
+      continue;
+    }
+    const current = stillOpen(target.id);
+    if (!current) {
+      changedByPerson.push(`"${target.title}"`);
+      continue;
+    }
+    if (touchedIds.has(current.id)) {
+      skipped.push(`retire "${current.title}": it was updated in this pass`);
+      continue;
+    }
+    if (!current.retirable) {
+      skipped.push(`retire "${current.title}": a gate workflow owns it, so it cannot be retired`);
+      continue;
+    }
+    touchedIds.add(current.id);
+    const retired = await write(current.title, () =>
+      proposals.retire({ request, proposalId: current.id })
+    );
+    if (retired) openCount--;
+    if (retired === false) changedByPerson.push(`"${current.title}"`);
+  }
+
+  for (const proposal of fresh) {
+    const { title } = proposal;
     if (openCount >= MAX_OPEN_PROPOSALS) {
       skipped.push(
         `"${title}": ${openCount} proposals are already open, the most an investigation holds is ${MAX_OPEN_PROPOSALS}`
       );
       continue;
     }
-    emittedTitles.add(key);
     const created = await write(title, async () => {
       await proposals.propose({ request, conversationId, proposal });
       return true;
@@ -516,6 +580,13 @@ const writeRecorderProposals = async ({
       `Findings recorder left ${changedByPerson.join(
         ', '
       )} for ${conversationId} unchanged: a person revised or decided it during the pass`
+    );
+  }
+  if (heldBack.length > 0) {
+    logger.info(
+      `Findings recorder did not retire ${heldBack.join(
+        ', '
+      )} for ${conversationId}: a revision in the same pass was not written`
     );
   }
   if (skipped.length > 0) {
@@ -990,11 +1061,11 @@ const runTrackedFindingsPass = async (
       ]);
     }
     const proposals = deps.getProposals?.();
-    if (final && proposals && record.proposals?.length) {
+    if (final && proposals && (record.proposals?.length || record.retire_proposals?.length)) {
       // Only workflows the catalog listed may run: the model may name one that does not exist,
       // or one that is not an always-gate action of this space. Such a proposal is not written.
       const listedActions = new Set(actions.map(({ workflowId }) => workflowId));
-      const wanted = record.proposals;
+      const { proposals: wanted = [], retire_proposals: retire = [] } = record;
       writes.push([
         'proposals',
         () =>
@@ -1004,6 +1075,7 @@ const runTrackedFindingsPass = async (
             conversationId,
             openByHandle,
             wanted,
+            retire,
             listedActions,
             logger,
           }),

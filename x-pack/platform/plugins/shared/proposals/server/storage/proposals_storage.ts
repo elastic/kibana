@@ -75,6 +75,7 @@ const storageSettings = {
       rationale: types.text({}),
       executionError: types.text({}),
       previousExecutionError: types.text({}),
+      retiredAt: types.date({}),
 
       // Absent on every document written before gateless proposals existed,
       // which the readers treat as `workflow`.
