@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AvailabilityUnavailableReason } from '../availability/availability_service';
+
 /** What one strategy did in a tick. */
 export interface StrategyRunResult {
   id: string;
@@ -27,4 +29,10 @@ export interface StrategyRunResult {
 export type TickResult =
   | { run_id: string; status: 'completed'; strategies: StrategyRunResult[] }
   | { run_id: string; status: 'busy'; strategies: [] }
-  | { run_id: string; status: 'unavailable'; strategies: [] };
+  | {
+      run_id: string;
+      status: 'unavailable';
+      /** The first requirement this deployment does not meet. */
+      reason: AvailabilityUnavailableReason;
+      strategies: [];
+    };

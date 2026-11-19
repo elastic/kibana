@@ -56,7 +56,7 @@ export class EngineRunner {
   constructor(
     @inject(RunContext) private readonly runContext: RunContext,
     @inject(AvailabilityService)
-    private readonly availability: Pick<AvailabilityService, 'isAvailable'>,
+    private readonly availability: Pick<AvailabilityService, 'getUnavailableReason'>,
     @inject(StrategyCatalog) private readonly catalog: StrategyCatalog,
     @inject(DetectionStateClient) private readonly state: DetectionStateClient,
     @inject(SpaceRunLock) private readonly spaceRunLock: Pick<SpaceRunLock, 'run'>,
@@ -92,8 +92,9 @@ export class EngineRunner {
     const { runId, spaceId } = this.runContext;
 
     // 1. Availability: nothing is read or written while the engine is off for this deployment.
-    if (!(await this.availability.isAvailable())) {
-      return { run_id: runId, status: 'unavailable', strategies: [] };
+    const unavailableReason = await this.availability.getUnavailableReason();
+    if (unavailableReason !== undefined) {
+      return { run_id: runId, status: 'unavailable', reason: unavailableReason, strategies: [] };
     }
 
     // 2. One run per space at a time. The lock is released when the callback ends, however it ends.
