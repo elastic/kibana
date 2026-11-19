@@ -158,9 +158,8 @@ export const ALERTING_V2_FEATURES = {
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.all, ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
           // Templates are Fleet-installed catalog objects — grant read only so
-          // rules.all cannot mutate them through the SO client. Alert imports
-          // are managed from the Import alerts page, which requires rules access.
-          all: [RULE_SAVED_OBJECT_TYPE, IMPORT_CONFIG_SAVED_OBJECT_TYPE],
+          // rules.all cannot mutate them through the SO client.
+          all: [RULE_SAVED_OBJECT_TYPE],
           read: [RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         },
       },
@@ -170,11 +169,7 @@ export const ALERTING_V2_FEATURES = {
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
           all: [],
-          read: [
-            RULE_SAVED_OBJECT_TYPE,
-            RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-            IMPORT_CONFIG_SAVED_OBJECT_TYPE,
-          ],
+          read: [RULE_SAVED_OBJECT_TYPE, RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         },
       },
     },
