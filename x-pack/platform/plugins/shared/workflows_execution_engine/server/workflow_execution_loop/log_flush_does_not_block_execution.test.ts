@@ -71,7 +71,6 @@ describe('workflow execution log flush', () => {
         flushWorkflowAndSteps: jest.fn().mockResolvedValue(undefined),
       },
       stepIoService: {
-        rehydrate: jest.fn().mockResolvedValue(undefined),
         getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
       },
       eventQueue,

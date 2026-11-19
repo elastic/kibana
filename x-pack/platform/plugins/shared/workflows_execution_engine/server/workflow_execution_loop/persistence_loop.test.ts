@@ -23,7 +23,7 @@ const makeParams = (
       executionCursor: workflowExecutionCursor,
     },
     stepIoService: {
-      flush: jest.fn().mockResolvedValue(undefined),
+      getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
     },
     workflowExecutionState: {
       flushWorkflowAndSteps: jest

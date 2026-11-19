@@ -11,26 +11,18 @@ import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 /**
- * Advanced integration tests for the output eviction feature.
+ * Advanced integration tests for output retention.
  *
- * These tests cover three untested interactions:
+ * The cache budget is 1 byte, so an output is not kept in the LRU. Resume is the
+ * boundary that drops it: `load()` omits outputs, and the next read fetches the
+ * ones that node names.
  *
- * 1. on-failure:continue + eviction — verify that failed steps (null output, no recorded size)
- *    never corrupt evictedOutputIdsAndBytes, and that a downstream step can complete despite
- *    eviction being active. On a pause/resume cycle, rehydration targets only the large completed
- *    predecessor, not the failed step.
- *
- * 2. if/then/else + eviction + resume — before the if-condition evaluates, prepareContext()
- *    must load the evicted predecessor. On resume, final_step loads only the taken-branch
- *    steps; the never-executed else branch is correctly absent from the eviction state.
- *
- * 3. on-failure:retry + eviction boundary — failed retry attempts must never appear in
- *    evictedOutputIdsAndBytes. The eviction threshold boundary (step_small below threshold vs
- *    step_large above) is validated: only step_large is a rehydration candidate on resume.
- *
- * Note: eviction via the deferred flush cycle only produces observable rehydration when
- * at least two flush cycles separate a step's completion from the next step that references it.
- * The scenarios below use pause/resume (a guaranteed eviction boundary) to produce rehydration.
+ * 1. on-failure:continue — a failed step stores null. After resume the consumer
+ *    still completes, and the completed predecessor is fetched.
+ * 2. if/then/else — `prepareContext` loads the taken branch. The else branch
+ *    never ran, so it has no execution to fetch.
+ * 3. on-failure:retry — the first attempt succeeds, so there is no failed
+ *    attempt. After resume the consumer fetches the outputs it names.
  */
 
 // ---------------------------------------------------------------------------
@@ -40,13 +32,11 @@ describe('output eviction: on-failure:continue does not corrupt eviction state',
   let fixture: WorkflowRunFixture;
 
   // Workflow:
-  //   step_large (20KB, IS evicted after flush) → step_fail (constantlyFailing, continue:true) →
+  //   step_large (20KB) → step_fail (constantlyFailing, continue:true) →
   //   pause (wait: 20m) → step_consumer (references both step_large and step_fail outputs)
   //
-  // Eviction threshold: 10KB.
-  // - step_large (20KB): recordOutputSize called → IS eviction candidate
-  // - step_fail: throws, output=null, recordOutputSize NOT called → NOT eviction candidate
-  // - After resume: step_consumer must rehydrate step_large (evicted) but NOT step_fail
+  // The 1-byte cache does not keep step_large. step_fail stores null.
+  // After resume, step_consumer fetches step_large.
   const yaml = `
 name: continue-eviction-interaction
 enabled: false
@@ -82,8 +72,7 @@ steps:
     beforeAll(async () => {
       fixture = new WorkflowRunFixture();
       (fixture.configMock as Record<string, unknown>).eviction = {
-        minPayloadSize: new ByteSizeValue(10 * 1024),
-        maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
+        maxCacheSize: new ByteSizeValue(1),
       };
       await fixture.runWorkflow({ workflowYaml: yaml });
     });
@@ -103,7 +92,7 @@ steps:
       expect(steps.find((s) => s.stepId === 'pause')?.status).toBe(ExecutionStatus.WAITING);
     });
 
-    it('step_fail output in ES is null (failed steps never have output, are not eviction candidates)', () => {
+    it('step_fail output in ES is null', () => {
       const stepFail = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).find(
         (s) => s.stepId === 'step_fail'
       );
@@ -150,10 +139,9 @@ steps:
       expect(rehydratedIds).toContain(stepLargeExec?.id);
     });
 
-    it('step_fail output remains null after rehydration (failed steps produce no output — rehydration is a no-op for them)', () => {
-      // load() marks ALL non-data.set steps as "evicted" (including failed ones) for memory
-      // efficiency. rehydrateOutputs() will fetch step_fail from ES and get null output back.
-      // This is correct: null output is the faithful representation of a failed step's state.
+    it('step_fail output remains null after resume', () => {
+      // Resume fetches step_fail because the consumer names it, and Elasticsearch
+      // still has null. Null is the failed step's output.
       const stepFailExec = Array.from(
         fixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).find((s) => s.stepId === 'step_fail');
@@ -226,8 +214,7 @@ steps:
     beforeAll(async () => {
       fixture = new WorkflowRunFixture();
       (fixture.configMock as Record<string, unknown>).eviction = {
-        minPayloadSize: new ByteSizeValue(10 * 1024),
-        maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
+        maxCacheSize: new ByteSizeValue(1),
       };
       await fixture.runWorkflow({ workflowYaml: yaml });
     });
@@ -333,9 +320,9 @@ describe('output eviction: on-failure:retry + eviction boundary + targeted rehyd
   // The pause is what creates the eviction boundary.
   //
   // Key invariants tested:
-  //   - step_small (below 10KB threshold) is never rehydrated
-  //   - step_large is rehydrated on resume
-  //   - no failed step executions appear in rehydration calls
+  //   - step_large is fetched on resume because the consumer names it
+  //   - step_small's stored output is intact
+  //   - the retry target succeeds on the first attempt, so there is no failed attempt
   const yaml = `
 name: retry-eviction-boundary-resume
 enabled: false
@@ -352,7 +339,7 @@ steps:
     type: slack
     connector-id: ${FakeConnectors.slack1.name}
     with:
-      message: 'small step output, below eviction threshold'
+      message: 'small step output'
 
   - name: step_retry_target
     type: slack
@@ -379,8 +366,7 @@ steps:
     beforeAll(async () => {
       fixture = new WorkflowRunFixture();
       (fixture.configMock as Record<string, unknown>).eviction = {
-        minPayloadSize: new ByteSizeValue(10 * 1024),
-        maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
+        maxCacheSize: new ByteSizeValue(1),
       };
       await fixture.runWorkflow({ workflowYaml: yaml });
     });
@@ -430,7 +416,7 @@ steps:
       expect(stepConsumer?.output as string).toContain('20000');
     });
 
-    it('step_large was rehydrated (above threshold, referenced in template)', () => {
+    it('step_large was fetched because the consumer names it', () => {
       const stepLargeExec = Array.from(
         fixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).find((s) => s.stepId === 'step_large');
@@ -443,12 +429,9 @@ steps:
       expect(rehydratedIds).toContain(stepLargeExec?.id);
     });
 
-    it('step_small output is intact after rehydration (load() marks all non-data.set steps as evicted; threshold only gates live-execution eviction)', () => {
-      // The eviction threshold (10KB) prevents step_small from being evicted during live execution.
-      // However, load() on resume marks ALL non-data.set steps as "evicted with 0 bytes" for
-      // memory efficiency — regardless of their original size. rehydrateOutputs() then fetches
-      // step_small from ES and restores its output. This is expected: the threshold only applies
-      // to the deferred eviction during execution, not to the resume load path.
+    it('step_small output is intact after resume', () => {
+      // Resume omits every output, whatever its size. step_small is still stored
+      // in Elasticsearch, and the consumer can read it.
       const stepSmallExec = Array.from(
         fixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).find((s) => s.stepId === 'step_small');

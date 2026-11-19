@@ -59,38 +59,11 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
       return values;
     }),
     write: jest.fn(write),
-    setStepInput: (id: string, input: JsonValue) => {
-      inputs.set(id, input);
-    },
-    setStepOutput: (id: string, output: JsonValue | null, sizeBytes?: number) => {
-      write(id, 'output', output, sizeBytes);
-    },
-    getStepInput: jest.fn((id: string) => inputs.get(id)),
-    getStepOutput: jest.fn((id: string) => outputs.get(id)),
-    getStepError: jest.fn((id: string) => state.getStepExecution(id)?.error),
-    getLatestStepIO: jest.fn((stepId: string) => {
-      const latest = state.getLatestStepExecution(stepId);
-      if (!latest) return undefined;
-      return {
-        input: inputs.get(latest.id),
-        output: outputs.get(latest.id),
-        error: latest.error,
-      };
-    }),
-    getDataSetVariables: jest.fn(() => ({} as Record<string, unknown>)),
     getOutputSizeStats: jest.fn(() => {
       let totalBytes = 0;
       for (const bytes of sizes.values()) totalBytes += bytes;
       return { totalBytes, stepCount: sizes.size };
     }),
-    hasEvictedOutputs: jest.fn().mockReturnValue(false),
-    pinOutputsForRead: jest.fn(),
-    rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
-    rehydrate: jest.fn().mockResolvedValue(undefined),
-    load: jest.fn().mockResolvedValue(undefined),
-    releaseLoaded: jest.fn(),
-    releaseReadPins: jest.fn(),
-    releaseTransientlyRehydratedOutputs: jest.fn(),
   } as unknown as StepIoService;
 }
 

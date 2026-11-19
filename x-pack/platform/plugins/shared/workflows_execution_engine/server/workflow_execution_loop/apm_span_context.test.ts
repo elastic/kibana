@@ -91,7 +91,6 @@ const createStepExecutionRuntime = () =>
       getDependencies: jest.fn(() => ({ config: {} })),
       prepareContext: jest.fn().mockResolvedValue(undefined),
       releaseContext: jest.fn(),
-      releaseReadPins: jest.fn(),
     },
   } as unknown as StepExecutionRuntime);
 

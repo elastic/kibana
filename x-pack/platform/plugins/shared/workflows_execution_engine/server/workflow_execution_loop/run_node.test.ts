@@ -132,7 +132,7 @@ describe('runNode', () => {
         getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
       },
       stepIoService: {
-        releaseTransientlyRehydratedOutputs: jest.fn(),
+        getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
       },
       signal: taskAbortController.signal,
     } as unknown as RunNodeTestParams;
