@@ -72,4 +72,7 @@ export const PrebuiltRuleAsset = lazySchema(() =>
   PrebuiltAssetBaseProps.and(TypeSpecificCreatePropsInternal).and(PrebuiltRuleAssetIdentityFields)
 );
 
-export type PrebuiltRuleAssetRecord = PrebuiltRuleAsset & { library_id?: string };
+export type PrebuiltRuleAssetRecord = PrebuiltRuleAsset & {
+  library_id?: string;
+  library_path?: string;
+};

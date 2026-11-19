@@ -20,7 +20,7 @@ describe('parseItem', () => {
       'rules/linux/a.json',
       Buffer.from(JSON.stringify({ type: 'security-rule', attributes }))
     );
-    expect(item).toEqual({ rule_id: 'abc', version: 1, attributes });
+    expect(item).toEqual({ rule_id: 'abc', version: 1, path: 'rules/linux/a.json', attributes });
   });
 
   it('parses a yaml security-rule document', () => {
@@ -33,6 +33,15 @@ attributes:
     process where true
 `;
     const item = parseItem('rules/linux/a.yml', Buffer.from(yaml));
-    expect(item).toEqual({ rule_id: 'abc', version: 1, attributes });
+    expect(item).toEqual({ rule_id: 'abc', version: 1, path: 'rules/linux/a.yml', attributes });
+  });
+
+  it('records the path inside the library when the source path has a prefix', () => {
+    const item = parseItem(
+      'main/v1.0.0/rules/linux/a.json',
+      Buffer.from(JSON.stringify({ type: 'security-rule', attributes })),
+      'rules/linux/a.json'
+    );
+    expect(item.path).toBe('rules/linux/a.json');
   });
 });

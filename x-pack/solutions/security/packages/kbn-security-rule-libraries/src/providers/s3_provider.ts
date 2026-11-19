@@ -83,7 +83,7 @@ export class S3Provider implements RuleLibraryProvider {
         const chunk = await Promise.all(
           batch
             .slice(j, j + CONCURRENCY)
-            .map(async (key) => parseItem(key, await client.object(key)))
+            .map(async (key) => parseItem(key, await client.object(key), key.slice(root.length)))
         );
         items.push(...chunk.filter(keep));
       }

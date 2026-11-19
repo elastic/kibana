@@ -57,6 +57,8 @@ export interface RuleLibraryAttributes {
 export interface RuleLibraryItem {
   rule_id: string;
   version: number;
+  // File path inside the library, e.g. `rules/linux/reverse_shell.yml`.
+  path: string;
   attributes: Record<string, unknown>;
 }
 

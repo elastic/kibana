@@ -8,8 +8,10 @@
 import { createHash } from 'node:crypto';
 import { inflateSync } from 'node:zlib';
 import { ensureOk, send } from '../http';
+import { openSshSession } from './ssh_transport';
+import type { SshSession, SshTarget } from './ssh_transport';
 
-// Git smart-HTTP protocol v2 client (ls-refs + fetch). Ported from the git-rule-delivery POC; HTTPS/HTTP only, no SSH.
+// Git protocol v2 client (ls-refs + fetch) over smart-HTTP or SSH. Ported from the git-rule-delivery POC.
 
 const FLUSH = Buffer.from('0000');
 const DELIM = Buffer.from('0001');
@@ -48,11 +50,25 @@ export interface GitClient {
   listRefs(prefixes: string[]): Promise<GitRef[]>;
   listFiles(commitSha: string, isMatch: (path: string) => boolean): Promise<GitFile[]>;
   fetchBlobs(blobIds: string[]): Promise<Map<string, Buffer>>;
+  close(): Promise<void>;
 }
 
 export interface GitClientOptions {
   url: string;
   headers?: Record<string, string>;
+}
+
+export interface SshGitClientOptions {
+  target: SshTarget;
+  privateKey: string;
+  knownHosts: string;
+}
+
+// How bytes reach the server: the advertisement is its v2 greeting, runCommand sends one request body.
+export interface GitTransport {
+  getAdvertisement(): Promise<Buffer>;
+  runCommand(body: Buffer): Promise<Buffer>;
+  close(): Promise<void>;
 }
 
 const pktLine = (text: string): Buffer => {
@@ -242,29 +258,65 @@ export const parseTree = (data: Buffer): GitTreeEntry[] => {
   return entries;
 };
 
-export const createGitClient = ({ url, headers = {} }: GitClientOptions): GitClient => {
+const createHttpTransport = ({ url, headers = {} }: GitClientOptions): GitTransport => {
   const repoUrl = url.replace(/\/$/, '');
 
-  const runCommand = async (command: string, args: string[]): Promise<Buffer> => {
-    const body = Buffer.concat([
-      pktLine(`command=${command}\n`),
-      DELIM,
-      ...args.map((arg) => pktLine(`${arg}\n`)),
-      FLUSH,
-    ]);
-    return ensureOk(
-      await send(`${repoUrl}/git-upload-pack`, {
-        method: 'POST',
-        headers: {
-          ...GIT_HEADERS,
-          ...headers,
-          'Content-Type': 'application/x-git-upload-pack-request',
-          Accept: 'application/x-git-upload-pack-result',
-        },
-        body,
-      })
-    );
+  return {
+    getAdvertisement: async () =>
+      ensureOk(
+        await send(`${repoUrl}/info/refs?service=git-upload-pack`, {
+          headers: { ...GIT_HEADERS, ...headers },
+        })
+      ),
+    runCommand: async (body) =>
+      ensureOk(
+        await send(`${repoUrl}/git-upload-pack`, {
+          method: 'POST',
+          headers: {
+            ...GIT_HEADERS,
+            ...headers,
+            'Content-Type': 'application/x-git-upload-pack-request',
+            Accept: 'application/x-git-upload-pack-result',
+          },
+          body,
+        })
+      ),
+    close: async () => {},
   };
+};
+
+// The SSH session is opened on first use and reused for every request until close().
+const createSshTransport = ({
+  target,
+  privateKey,
+  knownHosts,
+}: SshGitClientOptions): GitTransport => {
+  let session: Promise<SshSession> | undefined;
+  const getSession = (): Promise<SshSession> => {
+    session ??= openSshSession({ target, privateKey, knownHosts });
+    return session;
+  };
+
+  return {
+    getAdvertisement: async () => (await getSession()).advertisement,
+    runCommand: async (body) => (await getSession()).exchange(body),
+    close: async () => {
+      const opened = await session?.catch(() => undefined);
+      await opened?.close();
+    },
+  };
+};
+
+const createClientOnTransport = (transport: GitTransport): GitClient => {
+  const runCommand = async (command: string, args: string[]): Promise<Buffer> =>
+    transport.runCommand(
+      Buffer.concat([
+        pktLine(`command=${command}\n`),
+        DELIM,
+        ...args.map((arg) => pktLine(`${arg}\n`)),
+        FLUSH,
+      ])
+    );
 
   const fetchPack = async (args: string[]): Promise<Buffer> => {
     const response = await runCommand('fetch', [...args, 'no-progress', 'done']);
@@ -285,11 +337,7 @@ export const createGitClient = ({ url, headers = {} }: GitClientOptions): GitCli
   };
 
   const getCapabilities = async (): Promise<string[]> => {
-    const advertisement = ensureOk(
-      await send(`${repoUrl}/info/refs?service=git-upload-pack`, {
-        headers: { ...GIT_HEADERS, ...headers },
-      })
-    );
+    const advertisement = await transport.getAdvertisement();
     const lines = readPktLines(advertisement).flatMap((line) =>
       line.kind === 'data' ? [line.payload.toString().trim()] : []
     );
@@ -348,5 +396,11 @@ export const createGitClient = ({ url, headers = {} }: GitClientOptions): GitCli
     return blobs;
   };
 
-  return { getCapabilities, listRefs, listFiles, fetchBlobs };
+  return { getCapabilities, listRefs, listFiles, fetchBlobs, close: transport.close };
 };
+
+export const createGitClient = (options: GitClientOptions): GitClient =>
+  createClientOnTransport(createHttpTransport(options));
+
+export const createSshGitClient = (options: SshGitClientOptions): GitClient =>
+  createClientOnTransport(createSshTransport(options));

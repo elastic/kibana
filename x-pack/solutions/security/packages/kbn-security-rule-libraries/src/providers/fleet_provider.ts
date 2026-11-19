@@ -14,8 +14,13 @@ import type { ItemBatch, RuleLibraryProvider } from './types';
 
 const DEFAULT_PACKAGE = 'security_detection_engine';
 
+const RULES_FOLDER = 'kibana/security_rule/';
+
 const isRulePath = (path: string): boolean =>
-  path.includes('/kibana/security_rule/') && path.endsWith('.json');
+  path.includes(`/${RULES_FOLDER}`) && path.endsWith('.json');
+
+// Archive entries start with `<package>-<version>/`, which changes on every release.
+const toLibraryPath = (path: string): string => path.slice(path.indexOf(`/${RULES_FOLDER}`) + 1);
 
 export class FleetProvider implements RuleLibraryProvider {
   private readonly packages: PackageClient;
@@ -78,7 +83,7 @@ export class FleetProvider implements RuleLibraryProvider {
 
     await archiveIterator.traverseEntries(async ({ path, buffer }) => {
       if (!buffer) return;
-      const item = parseItem(path, buffer);
+      const item = parseItem(path, buffer, toLibraryPath(path));
       if (!keep(item)) return;
       batch.push(item);
       if (batch.length >= BATCH_SIZE) await flush();

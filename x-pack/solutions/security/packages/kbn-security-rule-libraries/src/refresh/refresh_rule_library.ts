@@ -36,10 +36,10 @@ const writeBatch = async (
   items: RuleLibraryItem[]
 ): Promise<void> => {
   const { saved_objects: saved } = await client.bulkCreate(
-    items.map(({ rule_id: ruleId, version, attributes }) => ({
+    items.map(({ rule_id: ruleId, version, path, attributes }) => ({
       type: PREBUILT_RULE_SO_TYPE,
       id: `${libraryId}_${ruleId}_${version}`,
-      attributes: { ...attributes, library_id: libraryId, managed: true },
+      attributes: { ...attributes, library_id: libraryId, library_path: path, managed: true },
     })),
     { overwrite: true }
   );

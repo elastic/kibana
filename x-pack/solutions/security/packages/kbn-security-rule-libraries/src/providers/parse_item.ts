@@ -19,12 +19,16 @@ const parseDocument = (
   return doc as { type?: string; attributes?: Record<string, unknown> };
 };
 
-export const parseItem = (path: string, data: Buffer): RuleLibraryItem => {
+export const parseItem = (
+  path: string,
+  data: Buffer,
+  libraryPath: string = path
+): RuleLibraryItem => {
   const { type, attributes } = parseDocument(path, data.toString('utf8'));
   const ruleId = attributes?.rule_id;
   const version = attributes?.version;
   if (type !== 'security-rule' || typeof ruleId !== 'string' || typeof version !== 'number') {
     throw new Error(`${path}: not a security-rule document with rule_id and version`);
   }
-  return { rule_id: ruleId, version, attributes: attributes ?? {} };
+  return { rule_id: ruleId, version, path: libraryPath, attributes: attributes ?? {} };
 };
