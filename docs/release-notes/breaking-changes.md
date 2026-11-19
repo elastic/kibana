@@ -184,7 +184,7 @@ $$$kibana-246359$$$
 
 **Impact**<br> Starting in 9.4.0, requests that create or update a role with more than 100 index names in one privilege entry fail validation in Kibana. Other security API requests can also fail when an array exceeds its new limit. Existing roles are not changed, but saving them through Kibana can fail.
 
-**Action**<br> Upgrade to 9.4.10 or later to allow up to 1,000 entries in each affected role array. For other security API arrays, split requests into smaller batches or reduce array sizes to the limits accepted by the API.
+**Action**<br> Upgrade to 9.4.10 or later to allow up to 1,000 entries in each affected role array. For other security API arrays, reduce array sizes to the limits accepted by the API. Split requests into smaller batches only for bulk endpoints.
 
 View [#246359]({{kib-pull}}246359).
 ::::
