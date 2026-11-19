@@ -221,15 +221,14 @@ describe('resolveMaintenanceChanges', () => {
       expect(resolved.groups[1].moves.map(({ id }) => id)).toEqual([moved]);
     });
 
-    it('does not move a relationship that belongs to one user or whose permissions would widen', () => {
-      const kis = [entity('e-1'), entity('e-2'), entity('e-3'), entity('e-4')];
-      const scoped = { ...link('e-2', 'knows', 'e-3'), user_id: 'u-1' };
+    it('does not move a relationship whose permissions would widen', () => {
+      const kis = [entity('e-1'), entity('e-2'), entity('e-4')];
       const narrower = { ...link('e-2', 'mentors', 'e-4'), permissions: restricted };
 
       const resolved = resolve(
         kis,
         { merges: [{ survivor: 'e-1', absorbed: ['e-2'], reason: 'Same' }] },
-        { items: ['e-1', 'e-2'], links: { 'e-2': [scoped, narrower] } }
+        { items: ['e-1', 'e-2'], links: { 'e-2': [narrower] } }
       );
 
       expect(resolved.groups[0].moves).toEqual([]);
@@ -286,6 +285,34 @@ describe('resolveMaintenanceChanges', () => {
       expect(swapped.groups[0].tombstones).toEqual(['e-1']);
       expect(twoEdited.groups).toEqual([]);
       expect(twoEdited.needsReview.map(({ id }) => id)).toEqual(['e-2', 'e-3']);
+    });
+
+    it('leaves a merge for review when it would change the text of the person-edited item', () => {
+      const kis = [entity('e-1'), entity('e-2', { attributes: personEdited })];
+
+      const retitled = resolve(kis, {
+        merges: [{ survivor: 'e-1', absorbed: ['e-2'], title: 'Bob Smith', reason: 'Same' }],
+      });
+      const sameTitle = resolve(kis, {
+        merges: [{ survivor: 'e-1', absorbed: ['e-2'], title: 'Entity e-2', reason: 'Same' }],
+      });
+
+      expect(retitled.groups).toEqual([]);
+      expect(retitled.needsReview.map(({ id }) => id)).toEqual(['e-1', 'e-2']);
+      expect(sameTitle.groups[0].tombstones).toEqual(['e-1']);
+    });
+
+    it('leaves a merge for review when a relationship that belongs to one user links an item to absorb', () => {
+      const kis = [entity('e-1'), entity('e-2')];
+
+      const resolved = resolve(
+        kis,
+        { merges: [{ survivor: 'e-1', absorbed: ['e-2'], reason: 'Same' }] },
+        { links: { 'e-2': [{ ...link('e-2', 'knows', 'e-9'), user_id: 'u-1' }] } }
+      );
+
+      expect(resolved.groups).toEqual([]);
+      expect(resolved.needsReview.map(({ id }) => id)).toEqual(['e-1', 'e-2']);
     });
 
     it('rejects items outside the batch or its audience, mixed kinds, and items changed twice', () => {
@@ -431,6 +458,17 @@ describe('resolveMaintenanceChanges', () => {
       const resolved = resolve([edited, newer], {
         contradictions: [{ ids: ['f-old', 'f-new'], label: 'conflict', reason: 'Both claim' }],
       });
+
+      expect(resolved.groups).toEqual([]);
+      expect(resolved.needsReview.map(({ id }) => id)).toEqual(['f-old', 'f-new']);
+    });
+
+    it('leaves the pair for review when a relationship that belongs to one user links the older fact', () => {
+      const resolved = resolve(
+        [older, newer],
+        { contradictions: [{ ids: ['f-old', 'f-new'], label: 'conflict', reason: 'Both claim' }] },
+        { links: { 'f-old': [{ ...link('f-old', 'about', 'e-9'), user_id: 'u-1' }] } }
+      );
 
       expect(resolved.groups).toEqual([]);
       expect(resolved.needsReview.map(({ id }) => id)).toEqual(['f-old', 'f-new']);

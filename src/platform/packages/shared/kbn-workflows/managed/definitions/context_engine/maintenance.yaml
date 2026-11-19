@@ -159,7 +159,7 @@ steps:
                 - contradictions: two facts that cannot both be true now.
                   - label changed: each was true at a different time, such as a plan that moved from Basic to Pro. Give content for the newer one that states the latest value and the earlier ones with when they held, such as "28 mpg as of May 2023, down from 30 in February 2023".
                   - label conflict: they cannot both be true and nothing shows a change over time. The one seen last is kept.
-                - rewrites: a fact with lost_source_ids lost some of the memories it came from. Rewrite its content from its remaining_memories only, dropping what only the lost ones stated.
+                - rewrites: a fact with lost_source_ids lost some of the memories it came from. Rewrite its content from its remaining_memories only, dropping what only the lost ones stated. Give a new title too when the current one states something only the lost ones stated.
                 - summaries: an entity whose facts changed (reasons has about_facts_changed). Give content that sums up its FACTS ABOUT and its own content, with exact values. An entity with lost_source_ids lost some of the memories it came from: sum up its FACTS ABOUT and remaining_memories only, not its own content.
                 - relationships: remove a relationship that repeats another between the same two items, or is the inverse of another, such as "Alex reports_to Priya" next to "Priya manages Alex". Keep the one that reads most naturally.
 

@@ -92,6 +92,13 @@ const withText = (current: DreamedKi, { title, description, content }: Text) => 
   ...(content !== undefined && { content: renderContent(content, accessPatternsOf(current)) }),
 });
 
+const changesText = (current: DreamedKi, text: Text): boolean => {
+  const next: Text = withText(current, text);
+  return (['title', 'description', 'content'] as const).some(
+    (key) => next[key] !== undefined && next[key] !== current[key]
+  );
+};
+
 const memoryUrisOf = (ki: DreamedKi): string[] =>
   (ki.references ?? []).filter(({ relation }) => relation === 'derived_from').map(({ uri }) => uri);
 
@@ -210,6 +217,8 @@ export const resolveMaintenanceChanges = (
   };
 
   const kiOf = (id: string): DreamedKi => kis.get(id) as DreamedKi;
+  const userLinked = (tombstoned: readonly DreamedKi[]): boolean =>
+    tombstoned.some(({ id }) => (links.get(id) ?? []).some(isUserScoped));
 
   const absorbedInto = new Map<string, string>();
   const retitled = new Map<string, string>();
@@ -249,7 +258,7 @@ export const resolveMaintenanceChanges = (
         continue;
       }
       const permissions = derivedPermissions([from.permissions, to.permissions], spaceId);
-      if (isUserScoped(link) || !samePermissions(link.permissions, permissions)) {
+      if (!samePermissions(link.permissions, permissions)) {
         continue;
       }
       const title = relationshipTitle({ from, relation: parsed.relation, to });
@@ -334,13 +343,22 @@ export const resolveMaintenanceChanges = (
       continue;
     }
     const survivor = edited[0] ?? kiOf(survivorId);
-    merge(
-      item,
-      survivor,
-      group.filter(({ id }) => id !== survivor.id),
-      text,
-      reason
-    );
+    const absorbed = group.filter(({ id }) => id !== survivor.id);
+    if (edited.length > 0 && changesText(survivor, text)) {
+      leaveForReview(
+        ids,
+        `They look like duplicates, but a person edited the one to keep, so it cannot take the combined text: ${reason}`
+      );
+      continue;
+    }
+    if (userLinked(absorbed)) {
+      leaveForReview(
+        ids,
+        `They look like duplicates, but a relationship that belongs to one user links an item to absorb: ${reason}`
+      );
+      continue;
+    }
+    merge(item, survivor, absorbed, text, reason);
   }
 
   for (const { ids, label, content, reason } of changeSet.contradictions) {
@@ -362,6 +380,13 @@ export const resolveMaintenanceChanges = (
       leaveForReview(
         ids,
         `They contradict each other, and a person edited the older one: ${reason}`
+      );
+      continue;
+    }
+    if (userLinked([loser])) {
+      leaveForReview(
+        ids,
+        `They contradict each other, but a relationship that belongs to one user links the older one: ${reason}`
       );
       continue;
     }
