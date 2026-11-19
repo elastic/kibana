@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import type { Criteria } from '@elastic/eui';
 import {
   useActiveFilters,
@@ -29,11 +29,7 @@ import { UpdateApiKeyConfirmationModal } from '../../components/rule/modals/upda
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
 import type { RuleContentListItem } from './rules_data_source';
 import { toRulesQueryParams } from './rules_query_params';
-import {
-  RULES_LIST_DEFAULT_SORT,
-  SORT_FIELD_TO_COLUMN_ID,
-  type RulesListColumnId,
-} from './rules_list_columns';
+import { RULES_LIST_DEFAULT_SORT, SORT_FIELD_TO_COLUMN_ID } from './rules_list_columns';
 import { useRulesListVisibleColumns } from './use_rules_list_visible_columns';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
 
@@ -79,13 +75,16 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
 
   const { visibleColumnIds, setVisibleColumnIds } = useRulesListVisibleColumns();
 
-  const onVisibleColumnIdsChange = (ids: RulesListColumnId[]) => {
-    setVisibleColumnIds(ids);
-    const sortedColumnId = SORT_FIELD_TO_COLUMN_ID[sortField];
-    if (sortedColumnId && !ids.includes(sortedColumnId)) {
+  const sortedColumnId = SORT_FIELD_TO_COLUMN_ID[sortField];
+  const isSortedColumnHidden =
+    sortedColumnId !== undefined && !visibleColumnIds.includes(sortedColumnId);
+
+  // Content List restores sort from the URL and localStorage independently of column visibility.
+  useEffect(() => {
+    if (isSortedColumnHidden) {
       setSort(RULES_LIST_DEFAULT_SORT.field, RULES_LIST_DEFAULT_SORT.direction);
     }
-  };
+  }, [isSortedColumnHidden, setSort]);
 
   const onTableChange = ({ page: tablePage, sort }: Criteria<RuleApiResponse>) => {
     if (sort) {
@@ -261,7 +260,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         isBulkTogglingEnabled={bulkEnableMutation.isLoading || bulkDisableMutation.isLoading}
         onTableChange={onTableChange}
         visibleColumnIds={visibleColumnIds}
-        onVisibleColumnIdsChange={onVisibleColumnIdsChange}
+        onVisibleColumnIdsChange={setVisibleColumnIds}
       />
       {expandedRule ? (
         <RuleSummaryFlyout

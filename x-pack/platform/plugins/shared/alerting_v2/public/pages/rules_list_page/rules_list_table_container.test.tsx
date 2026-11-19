@@ -130,7 +130,12 @@ const mockOnCloneInFlyout = jest.fn();
 const renderContainer = ({
   total = mockRules.length,
   locators,
-}: { total?: number; locators?: ReturnType<typeof createMockLocators> } = {}) => {
+  initialSort = { field: 'name', direction: 'asc' },
+}: {
+  total?: number;
+  locators?: ReturnType<typeof createMockLocators>;
+  initialSort?: { field: string; direction: 'asc' | 'desc' };
+} = {}) => {
   return render(
     <MockLocatorProvider locators={locators}>
       <I18nProvider>
@@ -144,7 +149,7 @@ const renderContainer = ({
             }),
           }}
           features={{
-            sorting: { initialSort: { field: 'name', direction: 'asc' } },
+            sorting: { initialSort },
             pagination: { initialPageSize: 20 },
             search: true,
             selection: false,
@@ -1017,6 +1022,20 @@ describe('RulesListTableContainer', () => {
 
       await openColumnSelector();
       fireEvent.click(screen.getByTestId('dataGridColumnSelectorToggleColumnVisibility-kind'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('columnheader', { name: /Name/ })).toHaveAttribute(
+          'aria-sort',
+          'ascending'
+        );
+      });
+    });
+
+    it('falls back to the default sort on mount when the sorted column is hidden', async () => {
+      localStorage.setItem(RULES_LIST_VISIBLE_COLUMNS_STORAGE_KEY, JSON.stringify(['source']));
+
+      renderContainer({ initialSort: { field: 'kind', direction: 'asc' } });
+      await waitForRules();
 
       await waitFor(() => {
         expect(screen.getByRole('columnheader', { name: /Name/ })).toHaveAttribute(
