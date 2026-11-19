@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusContextMenu } from './status_context_menu';
-import { TestProviders } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 
 jest.mock('../actions/status/use_should_disable_status');
@@ -24,91 +25,79 @@ describe('StatusContextMenu', () => {
   });
 
   it('renders', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <StatusContextMenu
-          currentStatus={CaseStatuses.open}
-          totalAlerts={0}
-          syncAlertsEnabled={false}
-          onStatusChanged={onStatusChanged}
-        />
-      </TestProviders>
+    renderWithTestingProviders(
+      <StatusContextMenu
+        currentStatus={CaseStatuses.open}
+        totalAlerts={0}
+        syncAlertsEnabled={false}
+        onStatusChanged={onStatusChanged}
+      />
     );
 
-    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeTruthy();
+    expect(screen.getByTestId('case-view-status-dropdown')).toBeInTheDocument();
   });
 
   it('renders a simple status badge when disabled', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <StatusContextMenu
-          disabled={true}
-          currentStatus={CaseStatuses.open}
-          totalAlerts={0}
-          syncAlertsEnabled={false}
-          onStatusChanged={onStatusChanged}
-        />
-      </TestProviders>
+    renderWithTestingProviders(
+      <StatusContextMenu
+        disabled={true}
+        currentStatus={CaseStatuses.open}
+        totalAlerts={0}
+        syncAlertsEnabled={false}
+        onStatusChanged={onStatusChanged}
+      />
     );
 
-    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="case-status-badge-open"]`).exists()).toBeTruthy();
+    expect(screen.queryByTestId('case-view-status-dropdown')).not.toBeInTheDocument();
+    expect(screen.getByTestId('case-status-badge-open')).toBeInTheDocument();
   });
 
   it('renders the current status correctly', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <StatusContextMenu
-          currentStatus={CaseStatuses.closed}
-          totalAlerts={0}
-          syncAlertsEnabled={false}
-          onStatusChanged={onStatusChanged}
-        />
-      </TestProviders>
+    renderWithTestingProviders(
+      <StatusContextMenu
+        currentStatus={CaseStatuses.closed}
+        totalAlerts={0}
+        syncAlertsEnabled={false}
+        onStatusChanged={onStatusChanged}
+      />
     );
 
-    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toBe(
-      'Closed'
-    );
+    expect(screen.getByTestId('case-view-status-dropdown')).toHaveTextContent('Closed');
   });
 
   it('changes the status', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <StatusContextMenu
-          currentStatus={CaseStatuses.open}
-          totalAlerts={0}
-          syncAlertsEnabled={false}
-          onStatusChanged={onStatusChanged}
-        />
-      </TestProviders>
+    renderWithTestingProviders(
+      <StatusContextMenu
+        currentStatus={CaseStatuses.open}
+        totalAlerts={0}
+        syncAlertsEnabled={false}
+        onStatusChanged={onStatusChanged}
+      />
     );
 
-    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
-    wrapper
-      .find(`[data-test-subj="case-view-status-dropdown-in-progress"] button`)
-      .simulate('click');
+    await userEvent.click(
+      within(screen.getByTestId('case-status-badge-popover-button-open')).getByRole('button')
+    );
+    await userEvent.click(await screen.findByTestId('case-view-status-dropdown-in-progress'));
 
     expect(onStatusChanged).toHaveBeenCalledWith('in-progress');
   });
 
   it('does not render the button at all if the status cannot change', async () => {
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
-    const wrapper = mount(
-      <TestProviders>
-        <StatusContextMenu
-          currentStatus={CaseStatuses.open}
-          totalAlerts={0}
-          syncAlertsEnabled={false}
-          onStatusChanged={onStatusChanged}
-        />
-      </TestProviders>
+    renderWithTestingProviders(
+      <StatusContextMenu
+        currentStatus={CaseStatuses.open}
+        totalAlerts={0}
+        syncAlertsEnabled={false}
+        onStatusChanged={onStatusChanged}
+      />
     );
 
-    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
-    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown-open"] button`)).toHaveLength(
-      0
+    await userEvent.click(
+      within(screen.getByTestId('case-status-badge-popover-button-open')).getByRole('button')
     );
+    expect(screen.queryByTestId('case-view-status-dropdown-open')).not.toBeInTheDocument();
 
     expect(onStatusChanged).not.toHaveBeenCalled();
   });
@@ -117,18 +106,18 @@ describe('StatusContextMenu', () => {
     const mockShouldDisableStatus = jest.fn().mockReturnValue(false);
     (useShouldDisableStatus as jest.Mock).mockReturnValue(mockShouldDisableStatus);
 
-    const wrapper = mount(
-      <TestProviders>
-        <StatusContextMenu
-          currentStatus={CaseStatuses.open}
-          totalAlerts={0}
-          syncAlertsEnabled={false}
-          onStatusChanged={onStatusChanged}
-        />
-      </TestProviders>
+    renderWithTestingProviders(
+      <StatusContextMenu
+        currentStatus={CaseStatuses.open}
+        totalAlerts={0}
+        syncAlertsEnabled={false}
+        onStatusChanged={onStatusChanged}
+      />
     );
 
-    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
+    await userEvent.click(
+      within(screen.getByTestId('case-status-badge-popover-button-open')).getByRole('button')
+    );
 
     expect(mockShouldDisableStatus).toHaveBeenCalledWith([{ status: CaseStatuses.open }]);
   });
@@ -136,37 +125,37 @@ describe('StatusContextMenu', () => {
   it('handles all statuses being disabled', async () => {
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
 
-    const wrapper = mount(
-      <TestProviders>
-        <StatusContextMenu
-          currentStatus={CaseStatuses.open}
-          totalAlerts={0}
-          syncAlertsEnabled={false}
-          onStatusChanged={onStatusChanged}
-        />
-      </TestProviders>
+    renderWithTestingProviders(
+      <StatusContextMenu
+        currentStatus={CaseStatuses.open}
+        totalAlerts={0}
+        syncAlertsEnabled={false}
+        onStatusChanged={onStatusChanged}
+      />
     );
 
-    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
-    expect(wrapper.find('EuiContextMenuItem')).toHaveLength(0);
+    await userEvent.click(
+      within(screen.getByTestId('case-status-badge-popover-button-open')).getByRole('button')
+    );
+    expect(screen.queryAllByRole('menuitem')).toHaveLength(0);
   });
 
   it('correctly evaluates each status option', async () => {
-    (useShouldDisableStatus as jest.Mock).mockReturnValue(false);
-
-    const wrapper = mount(
-      <TestProviders>
-        <StatusContextMenu
-          currentStatus={CaseStatuses.open}
-          totalAlerts={0}
-          syncAlertsEnabled={false}
-          onStatusChanged={onStatusChanged}
-        />
-      </TestProviders>
+    renderWithTestingProviders(
+      <StatusContextMenu
+        currentStatus={CaseStatuses.open}
+        totalAlerts={0}
+        syncAlertsEnabled={false}
+        onStatusChanged={onStatusChanged}
+      />
     );
 
-    expect(
-      wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).exists()
-    ).toBeFalsy();
+    await userEvent.click(
+      within(screen.getByTestId('case-status-badge-popover-button-open')).getByRole('button')
+    );
+
+    expect(await screen.findByTestId('case-view-status-dropdown-open')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-status-dropdown-in-progress')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-status-dropdown-closed')).toBeInTheDocument();
   });
 });
