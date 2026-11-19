@@ -204,8 +204,16 @@ export const seedHostWithAlert = async ({
             : undefined,
         () => systemEsClient.indices.delete({ index: eventsIndex, ignore_unavailable: true }),
         () =>
+          // On serverless the alerts index is a data stream, which rejects a delete by id
+          // (only create ops are allowed). A delete by query works on both.
           alertId
-            ? systemEsClient.delete({ index: alertsIndex, id: alertId, refresh: 'wait_for' })
+            ? systemEsClient.deleteByQuery({
+                index: alertsIndex,
+                query: { ids: { values: [alertId] } },
+                conflicts: 'proceed',
+                ignore_unavailable: true,
+                refresh: true,
+              })
             : undefined,
         () => systemEsClient.close(),
         () => seeded.cleanup(),
