@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import type { ConversationStarter } from '@kbn/agent-builder-common';
 import { useResolvedAgent } from '../../../hooks/agents/use_resolved_agent';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
@@ -18,18 +19,29 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { resolveConversationStarters } from './resolve_conversation_starters';
 
 // TEMP, visual check only, remove before committing: hardcoded starters instead of the agent's.
-// Pick short, long or mixed below, or set TEMP_HARDCODED_STARTERS to undefined to turn it off.
+// Pick short, prompts, mixed or one below, or set TEMP_HARDCODED_STARTERS to undefined to turn it off.
 const TEMP_STARTERS = {
-  short: ['Investigate latency spike', 'Summarize suspicious logins', 'Failed logins by country'],
-  long: [
-    'What changed in the last hour that could explain the latency spike?',
-    'Summarize suspicious login activity from the past 24 hours in a dashboard',
-    'Help me write a query to find failed logins by country',
+  short: [
+    { label: 'Investigate latency spike' },
+    { label: 'Summarize suspicious logins' },
+    { label: 'Failed logins by country' },
   ],
-  mixed: ['Investigate latency spike', 'Help me write a query to find failed logins by country'],
-  one: ['Investigate latency spike'],
+  prompts: [
+    {
+      label: 'Top errors',
+      prompt: 'Show me the top 10 errors from the last 24 hours grouped by service',
+    },
+    {
+      label: 'Suspicious logins',
+      prompt: 'Summarize suspicious login activity from the past 24 hours in a dashboard',
+    },
+    { label: 'Failed logins by country' },
+  ],
+  mixed: [{ label: 'Investigate latency spike' }, { label: 'A label of exactly 30 characters' }],
+  one: [{ label: 'Investigate latency spike' }],
 };
-const TEMP_HARDCODED_STARTERS: string[] | undefined = TEMP_STARTERS.long;
+const TEMP_HARDCODED_STARTERS: { label: string; prompt?: string }[] | undefined =
+  TEMP_STARTERS.prompts;
 
 /**
  * The starters to show for the selected agent, and how to send one. Nothing is returned while the
@@ -65,10 +77,10 @@ export const useConversationStarters = () => {
   );
 
   const onSelect = useCallback(
-    (starter: string) => {
+    ({ label, prompt }: ConversationStarter) => {
       // The starter is sent instead of what was typed, so the unsent draft doesn't come back later.
       clearDraft();
-      void submitMessage(starter);
+      void submitMessage(prompt ?? label);
     },
     [clearDraft, submitMessage]
   );

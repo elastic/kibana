@@ -12,6 +12,7 @@ export {
   agentBuilderDefaultAiIndexId,
   kiRetrievalSkillId,
   type AgentDefinition,
+  type ConversationStarter,
   type AgentApprovals,
   type AgentConfiguration,
   type AgentCapabilities,
@@ -44,7 +45,8 @@ export {
   AGENT_NAME_MAX_LENGTH,
   AGENT_DESCRIPTION_MAX_LENGTH,
   MAX_CONVERSATION_STARTERS,
-  CONVERSATION_STARTER_MAX_LENGTH,
+  CONVERSATION_STARTER_LABEL_MAX_LENGTH,
+  CONVERSATION_STARTER_PROMPT_MAX_LENGTH,
   validateAgentId,
 } from './agent_ids';
 export { SELF_AGENT_ID } from './constants';

@@ -12,6 +12,7 @@ import type {
   AgentAccessControl,
   AgentAccessControlMode,
   AgentApprovals,
+  ConversationStarter,
   ToolSelection,
 } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
@@ -28,7 +29,12 @@ const storageSettings = {
       space: types.keyword({}),
       description: types.text({}),
       labels: types.keyword({}),
-      conversation_starters: types.keyword({}),
+      conversation_starter_items: types.object({
+        properties: {
+          label: types.keyword({}),
+        },
+        dynamic: false,
+      }),
       avatar_color: types.keyword({}),
       avatar_symbol: types.keyword({}),
       created_by_id: types.keyword({}),
@@ -78,7 +84,7 @@ export interface AgentProperties {
   space: string;
   description: string;
   labels?: string[];
-  conversation_starters?: string[];
+  conversation_starter_items?: ConversationStarter[];
   avatar_color?: string;
   avatar_symbol?: string;
   created_by_id?: string;

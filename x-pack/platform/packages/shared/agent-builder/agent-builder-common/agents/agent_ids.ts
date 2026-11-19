@@ -17,7 +17,8 @@ export const agentIdMaxLength = 64;
 export const AGENT_NAME_MAX_LENGTH = 256;
 export const AGENT_DESCRIPTION_MAX_LENGTH = 2000;
 export const MAX_CONVERSATION_STARTERS = 3;
-export const CONVERSATION_STARTER_MAX_LENGTH = 200;
+export const CONVERSATION_STARTER_LABEL_MAX_LENGTH = 30;
+export const CONVERSATION_STARTER_PROMPT_MAX_LENGTH = 1000;
 
 export const validateAgentId = ({
   agentId,

@@ -189,7 +189,10 @@ describe('Agent Routes - experimental access-control gate', () => {
       const handler = getCreateHandler();
       expect(handler).toBeDefined();
 
-      const conversationStarters = ['first', 'second'];
+      const conversationStarters = [
+        { label: 'first' },
+        { label: 'second', prompt: 'Second prompt' },
+      ];
       mockCreate.mockResolvedValue({ ...mockProfile, conversation_starters: conversationStarters });
 
       const result = await handler!(
@@ -251,12 +254,15 @@ describe('Agent Routes - experimental access-control gate', () => {
 
       await handler!(
         createMockContext(false),
-        { params: { id: 'agent-1' }, body: { conversation_starters: ['first', 'second'] } },
+        {
+          params: { id: 'agent-1' },
+          body: { conversation_starters: [{ label: 'first', prompt: 'First prompt' }] },
+        },
         mockResponse
       );
 
       expect(mockUpdate).toHaveBeenCalledWith('agent-1', {
-        conversation_starters: ['first', 'second'],
+        conversation_starters: [{ label: 'first', prompt: 'First prompt' }],
       });
     });
 

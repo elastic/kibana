@@ -72,7 +72,7 @@ describe('NewConversationPrompt', () => {
     } as never);
     mockedUseNowrapFitsContainer.mockReturnValue(true);
     mockUseConversationStarters.mockReturnValue({
-      starters: ['first'],
+      starters: [{ label: 'first' }],
       onSelect: jest.fn(),
       isDisabled: false,
     });

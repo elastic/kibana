@@ -55,14 +55,20 @@ describe('useConversationStarters', () => {
     mockUseConversationContext.mockReturnValue({ sessionTag: 'tag' } as never);
     mockUseCurrentUser.mockReturnValue({ currentUser: { user: { username: 'elastic' } } } as never);
     mockUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft });
-    mockAgent({ id: 'agent-1', conversation_starters: ['first', 'second'] });
+    mockAgent({
+      id: 'agent-1',
+      conversation_starters: [{ label: 'first' }, { label: 'second', prompt: 'Second prompt' }],
+    });
   });
 
   it('returns the starters of the selected agent', () => {
     const { result } = renderHook(() => useConversationStarters());
 
     expect(mockUseResolvedAgent).toHaveBeenCalledWith('agent-1');
-    expect(result.current.starters).toEqual(['first', 'second']);
+    expect(result.current.starters).toEqual([
+      { label: 'first' },
+      { label: 'second', prompt: 'Second prompt' },
+    ]);
   });
 
   it('returns no starters while the agent is loading', () => {
@@ -82,7 +88,11 @@ describe('useConversationStarters', () => {
   });
 
   it('returns no starters when the agent is bound and the user cannot invoke it', () => {
-    mockAgent({ id: 'agent-1', service_account_id: 'sa-1', conversation_starters: ['first'] });
+    mockAgent({
+      id: 'agent-1',
+      service_account_id: 'sa-1',
+      conversation_starters: [{ label: 'first' }],
+    });
     mockUseUiPrivileges.mockReturnValue({ invokeBoundAgents: false } as never);
 
     const { result } = renderHook(() => useConversationStarters());
@@ -98,21 +108,31 @@ describe('useConversationStarters', () => {
     expect(result.current.starters).toEqual([]);
   });
 
-  it('sends the selected starter as a message', () => {
+  it('sends the label of a starter without a prompt', () => {
     const { result } = renderHook(() => useConversationStarters());
 
     act(() => {
-      result.current.onSelect('first');
+      result.current.onSelect({ label: 'first' });
     });
 
     expect(submitMessage).toHaveBeenCalledWith('first');
+  });
+
+  it('sends the prompt of a starter instead of its label', () => {
+    const { result } = renderHook(() => useConversationStarters());
+
+    act(() => {
+      result.current.onSelect({ label: 'second', prompt: 'Second prompt' });
+    });
+
+    expect(submitMessage).toHaveBeenCalledWith('Second prompt');
   });
 
   it('clears the unsent draft of the new conversation when a starter is sent', () => {
     const { result } = renderHook(() => useConversationStarters());
 
     act(() => {
-      result.current.onSelect('first');
+      result.current.onSelect({ label: 'first' });
     });
 
     expect(mockUseInputDraft).toHaveBeenCalledWith({

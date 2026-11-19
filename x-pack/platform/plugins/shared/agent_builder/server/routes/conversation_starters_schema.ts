@@ -7,19 +7,34 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  CONVERSATION_STARTER_MAX_LENGTH,
+  CONVERSATION_STARTER_LABEL_MAX_LENGTH,
+  CONVERSATION_STARTER_PROMPT_MAX_LENGTH,
   MAX_CONVERSATION_STARTERS,
 } from '@kbn/agent-builder-common';
 
-/** Up to MAX_CONVERSATION_STARTERS non-blank strings, each at most CONVERSATION_STARTER_MAX_LENGTH long. */
+const rejectBlank = (value: string) =>
+  value.trim().length === 0 ? 'Conversation starter text must not be blank.' : undefined;
+
+/** Up to MAX_CONVERSATION_STARTERS starters, each with a non-blank label and an optional prompt. */
 export const conversationStartersSchema = ({ description }: { description: string }) =>
   schema.arrayOf(
-    schema.string({
-      minLength: 1,
-      maxLength: CONVERSATION_STARTER_MAX_LENGTH,
-      validate: (starter) =>
-        starter.trim().length === 0 ? 'Conversation starters must not be blank.' : undefined,
-      meta: { description: 'Text of a conversation starter.' },
+    schema.object({
+      label: schema.string({
+        minLength: 1,
+        maxLength: CONVERSATION_STARTER_LABEL_MAX_LENGTH,
+        validate: rejectBlank,
+        meta: { description: 'Short text shown on the conversation starter card.' },
+      }),
+      prompt: schema.maybe(
+        schema.string({
+          minLength: 1,
+          maxLength: CONVERSATION_STARTER_PROMPT_MAX_LENGTH,
+          validate: rejectBlank,
+          meta: {
+            description: 'Message sent when the card is clicked. When omitted, the label is sent.',
+          },
+        })
+      ),
     }),
     {
       maxSize: MAX_CONVERSATION_STARTERS,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ConversationStarter } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   AgentType,
@@ -206,14 +207,20 @@ describe('fromEs', () => {
 
   it('converts conversation_starters from the document', () => {
     const document = getSampleDoc();
-    document._source!.conversation_starters = ['first', 'second'];
+    document._source!.conversation_starter_items = [
+      { label: 'first' },
+      { label: 'second', prompt: 'Second prompt' },
+    ];
 
-    expect(fromEs(document).conversation_starters).toEqual(['first', 'second']);
+    expect(fromEs(document).conversation_starters).toEqual([
+      { label: 'first' },
+      { label: 'second', prompt: 'Second prompt' },
+    ]);
   });
 
   it('keeps an empty conversation_starters list', () => {
     const document = getSampleDoc();
-    document._source!.conversation_starters = [];
+    document._source!.conversation_starter_items = [];
 
     expect(fromEs(document).conversation_starters).toEqual([]);
   });
@@ -479,7 +486,7 @@ describe('createRequestToEs', () => {
       id: 'id',
       name: 'name',
       description: 'description',
-      conversation_starters: ['first', 'second'],
+      conversation_starters: [{ label: 'first' }, { label: 'second', prompt: 'Second prompt' }],
       configuration: { tools: [] },
     };
 
@@ -490,7 +497,11 @@ describe('createRequestToEs', () => {
       creationDate: new Date(),
     });
 
-    expect(docProperties.conversation_starters).toEqual(['first', 'second']);
+    expect(docProperties.conversation_starter_items).toEqual([
+      { label: 'first' },
+      { label: 'second', prompt: 'Second prompt' },
+    ]);
+    expect(docProperties).not.toHaveProperty('conversation_starters');
   });
 
   describe('approvals', () => {
@@ -628,13 +639,13 @@ describe('createRequestToEs', () => {
 
 describe('updateRequestToEs', () => {
   describe('conversation_starters', () => {
-    const getCurrentProps = (conversationStarters?: string[]): AgentProperties => ({
+    const getCurrentProps = (conversationStarters?: ConversationStarter[]): AgentProperties => ({
       id: 'id',
       type: AgentType.chat,
       name: 'name',
       description: 'description',
       space: 'space',
-      conversation_starters: conversationStarters,
+      conversation_starter_items: conversationStarters,
       config: { tools: [] },
       access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: 'test-user-id',
@@ -653,21 +664,24 @@ describe('updateRequestToEs', () => {
       });
 
     it('replaces the stored conversation_starters', () => {
-      const result = update(getCurrentProps(['old']), { conversation_starters: ['new'] });
+      const result = update(getCurrentProps([{ label: 'old' }]), {
+        conversation_starters: [{ label: 'new', prompt: 'New prompt' }],
+      });
 
-      expect(result.conversation_starters).toEqual(['new']);
+      expect(result.conversation_starter_items).toEqual([{ label: 'new', prompt: 'New prompt' }]);
+      expect(result).not.toHaveProperty('conversation_starters');
     });
 
     it('keeps the stored conversation_starters when the update omits them', () => {
-      const result = update(getCurrentProps(['old']), { name: 'new name' });
+      const result = update(getCurrentProps([{ label: 'old' }]), { name: 'new name' });
 
-      expect(result.conversation_starters).toEqual(['old']);
+      expect(result.conversation_starter_items).toEqual([{ label: 'old' }]);
     });
 
     it('stores an empty list to remove all conversation_starters', () => {
-      const result = update(getCurrentProps(['old']), { conversation_starters: [] });
+      const result = update(getCurrentProps([{ label: 'old' }]), { conversation_starters: [] });
 
-      expect(result.conversation_starters).toEqual([]);
+      expect(result.conversation_starter_items).toEqual([]);
     });
   });
 

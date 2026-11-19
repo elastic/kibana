@@ -25,34 +25,55 @@ describe('ConversationStartersList', () => {
     );
   });
 
-  it('renders a card per starter', () => {
-    render(<ConversationStartersList starters={['first', 'second']} onSelect={jest.fn()} />, {
-      wrapper,
-    });
+  it('renders a card with the label of each starter', () => {
+    render(
+      <ConversationStartersList
+        starters={[{ label: 'first' }, { label: 'second' }]}
+        onSelect={jest.fn()}
+      />,
+      { wrapper }
+    );
 
     expect(screen.getAllByTestId('agentBuilderConversationStarter')).toHaveLength(2);
     expect(screen.getByText('first')).toBeInTheDocument();
     expect(screen.getByText('second')).toBeInTheDocument();
   });
 
-  it('calls onSelect with the full starter text when a card is clicked', () => {
-    const onSelect = jest.fn();
-    const longStarter = 'Summarize suspicious login activity from the past 24 hours in a dashboard';
-    render(<ConversationStartersList starters={['short', longStarter]} onSelect={onSelect} />, {
-      wrapper,
-    });
+  it('shows the label and not the prompt', () => {
+    render(
+      <ConversationStartersList
+        starters={[{ label: 'Top errors', prompt: 'Show me the top 10 errors' }]}
+        onSelect={jest.fn()}
+      />,
+      { wrapper }
+    );
 
-    fireEvent.click(screen.getByText(longStarter));
+    expect(screen.getByText('Top errors')).toBeInTheDocument();
+    expect(screen.queryByText('Show me the top 10 errors')).not.toBeInTheDocument();
+  });
+
+  it('calls onSelect with the starter when a card is clicked', () => {
+    const onSelect = jest.fn();
+    const starter = { label: 'Top errors', prompt: 'Show me the top 10 errors' };
+    render(
+      <ConversationStartersList starters={[{ label: 'other' }, starter]} onSelect={onSelect} />,
+      {
+        wrapper,
+      }
+    );
+
+    fireEvent.click(screen.getByText('Top errors'));
 
     expect(onSelect).toHaveBeenCalledTimes(1);
-    expect(onSelect).toHaveBeenCalledWith(longStarter);
+    expect(onSelect).toHaveBeenCalledWith(starter);
   });
 
   it('does not call onSelect when disabled', () => {
     const onSelect = jest.fn();
-    render(<ConversationStartersList starters={['first']} onSelect={onSelect} isDisabled />, {
-      wrapper,
-    });
+    render(
+      <ConversationStartersList starters={[{ label: 'first' }]} onSelect={onSelect} isDisabled />,
+      { wrapper }
+    );
 
     fireEvent.click(screen.getByText('first'));
 
@@ -62,21 +83,25 @@ describe('ConversationStartersList', () => {
   it('renders the same cards when stacked', () => {
     const onSelect = jest.fn();
     render(
-      <ConversationStartersList starters={['first', 'second']} onSelect={onSelect} isStacked />,
-      {
-        wrapper,
-      }
+      <ConversationStartersList
+        starters={[{ label: 'first' }, { label: 'second' }]}
+        onSelect={onSelect}
+        isStacked
+      />,
+      { wrapper }
     );
 
     expect(screen.getAllByTestId('agentBuilderConversationStarter')).toHaveLength(2);
 
     fireEvent.click(screen.getByText('second'));
 
-    expect(onSelect).toHaveBeenCalledWith('second');
+    expect(onSelect).toHaveBeenCalledWith({ label: 'second' });
   });
 
   it('labels the group for assistive technology', () => {
-    render(<ConversationStartersList starters={['first']} onSelect={jest.fn()} />, { wrapper });
+    render(<ConversationStartersList starters={[{ label: 'first' }]} onSelect={jest.fn()} />, {
+      wrapper,
+    });
 
     expect(screen.getByRole('group', { name: 'Conversation starters' })).toBeInTheDocument();
   });

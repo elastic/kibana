@@ -17,11 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-
-/** Starters up to this length show as compact cards, longer ones as wider cards that wrap. */
-const COMPACT_STARTER_MAX_LENGTH = 30;
-const WIDE_CARD_MAX_LINES = 3;
-const WIDE_CARD_MIN_WIDTH = '200px';
+import type { ConversationStarter } from '@kbn/agent-builder-common';
 
 const groupAriaLabel = i18n.translate('xpack.agentBuilder.conversationStarters.groupAriaLabel', {
   defaultMessage: 'Conversation starters',
@@ -35,16 +31,13 @@ const componentStyles = (euiThemeContext: UseEuiTheme) => {
     group: css`
       width: 100%;
     `,
-    rowGroup: css`
-      align-items: flex-start;
-    `,
-    wideItem: css`
-      flex: 0 1 calc((100% - 2 * ${euiTheme.size.base}) / 3);
-      min-inline-size: ${WIDE_CARD_MIN_WIDTH};
+    item: css`
+      min-inline-size: 0;
+      max-inline-size: 100%;
     `,
     content: css`
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: ${euiTheme.size.xs};
       padding: ${euiTheme.size.s} ${euiTheme.size.m};
       text-align: left;
@@ -57,27 +50,19 @@ const componentStyles = (euiThemeContext: UseEuiTheme) => {
       display: flex;
       align-items: center;
       flex-shrink: 0;
-      block-size: ${lineHeight};
     `,
-    text: css`
+    label: css`
       min-inline-size: 0;
-      overflow-wrap: anywhere;
-    `,
-    compactText: css`
-      white-space: nowrap;
-    `,
-    wideText: css`
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: ${WIDE_CARD_MAX_LINES};
       overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     `,
   };
 };
 
 export interface ConversationStartersListProps {
-  starters: readonly string[];
-  onSelect: (starter: string) => void;
+  starters: readonly ConversationStarter[];
+  onSelect: (starter: ConversationStarter) => void;
   isDisabled?: boolean;
   /** Stacks full-width cards in a column, for narrow containers like the flyout. */
   isStacked?: boolean;
@@ -95,9 +80,6 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
     return null;
   }
 
-  const isCompact =
-    !isStacked && starters.every((starter) => starter.length <= COMPACT_STARTER_MAX_LENGTH);
-
   return (
     <EuiFlexGroup
       role="group"
@@ -107,15 +89,11 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
       responsive={false}
       gutterSize={isStacked ? 's' : 'm'}
       justifyContent="center"
-      css={[styles.group, !isStacked && styles.rowGroup]}
+      css={styles.group}
       data-test-subj="agentBuilderConversationStarters"
     >
       {starters.map((starter) => (
-        <EuiFlexItem
-          key={starter}
-          grow={false}
-          css={isCompact || isStacked ? undefined : styles.wideItem}
-        >
+        <EuiFlexItem key={starter.label} grow={false} css={styles.item}>
           <EuiCard
             hasBorder
             textAlign="left"
@@ -128,9 +106,7 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
                   {/* TODO: the design uses a plain diagonal arrow; swap "external" once EUI has one */}
                   <EuiIcon type="external" size="s" color="text" aria-hidden />
                 </span>
-                <span css={[styles.text, isCompact ? styles.compactText : styles.wideText]}>
-                  {starter}
-                </span>
+                <span css={styles.label}>{starter.label}</span>
               </span>
             }
             isDisabled={isDisabled}
