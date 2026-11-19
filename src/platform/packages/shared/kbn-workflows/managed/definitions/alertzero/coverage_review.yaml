@@ -249,7 +249,9 @@ steps:
               {% endif %}{{ steps.gap.output.description }}
               {% if steps.gap.output.evidence != null and steps.gap.output.evidence != '' %}
               **Evidence**
-              {{ steps.gap.output.evidence }}
+              ~~~text
+              {{ steps.gap.output.evidence | replace: '~~~', '~ ~ ~' }}
+              ~~~
               {% endif %}
               **On approval**
               If you approve, the agent checks whether a rule already covers this gap. It then makes one proposal: enable a disabled rule, install a prebuilt rule, confirm an enabled rule, or draft a new rule. You must approve this second proposal before anything changes. If you dismiss, the gap is removed from future coverage checks.
@@ -546,7 +548,8 @@ steps:
 
   # Evidence shared by every proposal comment below. Links carry the space prefix:
   # the review runs in the space of the sweep that started it, and a link without
-  # it opens the default space.
+  # it opens the default space. The indicator content is fenced as in post_indicator,
+  # so its `*` and `#` lines render as text, not as emphasis and headings.
   - name: compose_evidence
     type: data.set
     with:
@@ -570,7 +573,9 @@ steps:
         {% endif %}{{ steps.gap.output.description }}
         {% if steps.gap.output.evidence != null and steps.gap.output.evidence != '' %}
         **Evidence**
-        {{ steps.gap.output.evidence }}
+        ~~~text
+        {{ steps.gap.output.evidence | replace: '~~~', '~ ~ ~' }}
+        ~~~
         {% endif %}
 
   # Body shared by the four report proposals below: what the check found and that
