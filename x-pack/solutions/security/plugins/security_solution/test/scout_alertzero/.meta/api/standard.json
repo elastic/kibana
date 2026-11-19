@@ -117,6 +117,34 @@
       }
     },
     {
+      "id": "fee0ad2838f6d0b-f57530a36a3e5ae",
+      "title": "Hunt Watch - scope check with nothing searchable in the default data view still blocks the sweep at the gate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_index_scope_nothing_searchable.spec.ts",
+        "line": 48,
+        "column": 32
+      }
+    },
+    {
+      "id": "0248eca7be0cdde-ce94fda2a0eff91",
+      "title": "Hunt Watch - scope check with unreadable names in the default data view hunts the readable names and records the rest, with the real service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_index_scope_unreadable_pattern.spec.ts",
+        "line": 59,
+        "column": 21
+      }
+    },
+    {
       "id": "973daa931f715ba-491b49ea72ca709",
       "title": "Hunt Watch - internal API restriction returns 400 when an admin omits the internal-origin header",
       "expectedStatus": "passed",

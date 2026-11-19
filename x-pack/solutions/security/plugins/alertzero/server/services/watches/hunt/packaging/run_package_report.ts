@@ -359,6 +359,12 @@ export const runPackageReport = async ({
       });
   const { proposals, converged, alreadyOpenCount, mintSuppression } = resolved;
 
+  // A confirmed hit still reaches here when the hunt retired the report
+  // (`incomplete_final` stamped the gate). Name the gaps on the report-scoped subject and in
+  // the Investigation summary so the SSE path does not look like a clean full search.
+  const unsearched =
+    huntStatus === 'retired_incomplete' ? dedupeCoverageGaps(coordinator.coverageGaps) : undefined;
+
   const subjects = deriveCoverageSubjects({
     spaceId,
     state: {
@@ -371,9 +377,11 @@ export const runPackageReport = async ({
         dismissHold,
         converged,
         alreadyOpen: alreadyOpenCount,
+        unsearched,
       }),
       coordinator,
       reportContext,
+      unsearched,
     },
     investigationConversationId,
   });
@@ -406,7 +414,17 @@ export const runPackageReport = async ({
     // pointer to the Proposal, is a decision left for a follow-up.
     dismiss: decided.dismiss && dismissHold === 'none',
     dismissHold,
-    closureSummary: decided.closureSummary,
+    // The Investigation's own summary once its Proposals settle. A retired run says so here
+    // too, the way the no-hit closure does, or the closed Investigation reads as a full search.
+    closureSummary:
+      unsearched && unsearched.gaps.length > 0
+        ? `${decided.closureSummary} ${gapCountPhrase(
+            unsearched
+          )} left part of the report unsearched, so the report is retired without a full search. Not searched: ${describeGaps(
+            unsearched,
+            MAX_CLOSURE_GAP_CHARS
+          )}.`
+        : decided.closureSummary,
     expectedProposalCount,
     mintSuppression,
   };
