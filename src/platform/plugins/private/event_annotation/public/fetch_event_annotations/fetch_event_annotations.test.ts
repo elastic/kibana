@@ -429,6 +429,35 @@ describe('getFetchEventAnnotations', () => {
       expect(result?.rows.map(({ id }) => id)).toEqual(['esql-events', 'ann1']);
     });
 
+    it('clips rows to the chart time range when the query has no time filter and no time field', async () => {
+      jest.mocked(dataMock.search.esql).mockResolvedValueOnce({
+        rawResponse: { columns: [], values: [], is_running: false },
+        datatable: {
+          type: 'datatable',
+          columns: [{ id: 'time-id', name: 'time', meta: { type: 'date' } }],
+          rows: [
+            { 'time-id': '2022-06-15T08:00:00Z' },
+            { 'time-id': '2022-07-05T08:00:00Z' },
+            { 'time-id': '2022-08-15T08:00:00Z' },
+          ],
+        },
+      });
+      const result = await runGetFetchEventAnnotations({
+        interval: '1h',
+        groups: [
+          {
+            type: 'event_annotation_group',
+            ignoreGlobalFilters: false,
+            annotations: [annotation],
+          },
+        ],
+      });
+      expect(jest.mocked(dataMock.search.esql).mock.calls[0][0].kibanaQueryContext).toEqual(
+        expect.not.objectContaining({ timeField: expect.anything() })
+      );
+      expect(result?.rows.map(({ time }) => time)).toEqual(['2022-07-05T08:00:00.000Z']);
+    });
+
     it('does not swallow query failures', async () => {
       jest.mocked(dataMock.search.esql).mockRejectedValueOnce(new Error('Query failed'));
       await expect(
