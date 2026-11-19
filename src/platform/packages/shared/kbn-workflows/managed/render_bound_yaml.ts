@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Placeholder a bound workflow YAML uses as its `settings.run_as` value. */
+/** Placeholder a bound workflow YAML uses as its `settings.run_as` value, replaced at install. */
 export const SERVICE_ACCOUNT_ID_TOKEN = '__SERVICE_ACCOUNT_ID__';
 
 const RUN_AS_TOKEN_LINE = new RegExp(`^( {2}run_as: )${SERVICE_ACCOUNT_ID_TOKEN}$`, 'm');
@@ -15,7 +15,7 @@ const RUN_AS_TOKEN_LINE = new RegExp(`^( {2}run_as: )${SERVICE_ACCOUNT_ID_TOKEN}
 /** Replaces the `run_as: __SERVICE_ACCOUNT_ID__` placeholder with the quoted service account id. */
 export const renderRunAs = (yaml: string, serviceAccountId: string): string => {
   if (typeof serviceAccountId !== 'string' || serviceAccountId.trim().length === 0) {
-    throw new Error('A bound Nightshift workflow requires a serviceAccountId');
+    throw new Error('A bound workflow requires a serviceAccountId');
   }
   if (!RUN_AS_TOKEN_LINE.test(yaml)) {
     throw new Error(`The workflow YAML has no "run_as: ${SERVICE_ACCOUNT_ID_TOKEN}" setting`);

@@ -3245,6 +3245,9 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/significant_event
 # Nightshift investigations managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift
 
+# Nightshift detection managed workflows
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_detection @elastic/nightshift
+
 # Context Engine managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/context_engine @elastic/context-eng
 
