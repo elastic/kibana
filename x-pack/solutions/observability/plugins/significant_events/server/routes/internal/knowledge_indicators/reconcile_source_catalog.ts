@@ -13,6 +13,7 @@ import type {
   SourceChangeListener,
   SourcesClient,
 } from '@kbn/nightshift-sources-plugin/server';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
@@ -239,6 +240,13 @@ export async function reconcileSourceRevision({
   }
 
   return async () => {
+    // Before waiting: a run of this revision that is still going would otherwise fail this step
+    // until it ends, then leave a second run to be scheduled for the same query.
+    if (
+      isRunOfRevision(await loadLatestExecution(sourceToSchedule), sourceToSchedule.esql_updated_at)
+    ) {
+      return;
+    }
     const runningSources = await loadRunningSources(onboardingClient, request);
     if (runningSources.has(sourceToSchedule.id)) {
       throw new StatusError('Waiting for the previous onboarding execution to finish', 409);
@@ -299,6 +307,20 @@ const clearOnboardingReservation = async ({
     },
   });
 };
+
+/**
+ * Whether a run is onboarding the current query, or did: it started at or after the revision of the
+ * source query and is going or completed. A cancelled or failed run onboarded nothing, so it does
+ * not count. Continuous onboarding starts runs without a reservation, so the knowledge state alone
+ * cannot tell. A revision that is not a date never matches.
+ */
+const isRunOfRevision = (
+  execution: Pick<WorkflowExecutionListItemDto, 'startedAt' | 'status'> | undefined,
+  revision: string
+): boolean =>
+  execution !== undefined &&
+  (execution.status === ExecutionStatus.COMPLETED || !isTerminalStatus(execution.status)) &&
+  Date.parse(execution.startedAt) >= Date.parse(revision);
 
 const isOnboardingScheduled = async (
   state: {

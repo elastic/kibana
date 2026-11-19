@@ -7,8 +7,8 @@
 
 import { setTimeout as delay } from 'timers/promises';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
+import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
+import type { WorkflowExecutionDto, WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
@@ -26,7 +26,7 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
-import type { SourceType } from '@kbn/nightshift-shared';
+import { dayKey, resolveDailyWindow, type SourceType } from '@kbn/nightshift-shared';
 import { StatusError } from '../errors/status_error';
 import { isStartedBefore, WorkflowExecutionService } from './workflow_execution_service';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
@@ -255,6 +255,22 @@ export const parseSourceFromKiConcurrencyKey = (key: string): ISourceRunIdentity
 
 export const MAX_SOURCES_PER_QUERY = 10000;
 
+const EXECUTED_STATUSES = Object.values(ExecutionStatus).filter(
+  (status) => status !== ExecutionStatus.SKIPPED
+);
+
+/** The steps of the onboarding workflow that consume one `ki_extraction` unit when they are allowed. */
+const BUDGET_STEP_IDS = ['check_budget', 'check_fallback_budget'];
+
+/** The UTC days on which a run consumed a `ki_extraction` unit. */
+const getConsumedExtractionDays = (execution: WorkflowExecutionDto | null): string[] =>
+  (execution?.stepExecutions ?? [])
+    .filter(({ stepId, output }) => BUDGET_STEP_IDS.includes(stepId) && isBudgetAllowed(output))
+    .map(({ startedAt }) => dayKey(resolveDailyWindow(new Date(startedAt))));
+
+const isBudgetAllowed = (output: unknown): boolean =>
+  typeof output === 'object' && output !== null && 'allowed' in output && output.allowed === true;
+
 /** How long a cancel waits for the source's runs to stop. */
 const CANCEL_WAIT_TIMEOUT_MS = 30_000;
 const CANCEL_WAIT_POLL_INTERVAL_MS = 1_000;
@@ -280,17 +296,27 @@ export class SignificantEventsKIsOnboardingClient {
   private readonly telemetry: EbtTelemetryClient;
   private readonly logger: Logger;
   private readonly getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
+  private readonly releaseExtractionQuota?: (args: { date: string }) => Promise<void>;
+  /**
+   * A cancelled run stays active until it winds down, so every later cancel for the source lists
+   * it again. Remembering the runs already released keeps each unit from being given back twice.
+   * Per process: another node can still release a run once more, which only allows one extra run.
+   */
+  private readonly releasedExtractionRunIds = new Set<string>();
 
   constructor({
     managementApi,
     telemetry,
     logger,
     getSourcesClient,
+    releaseExtractionQuota,
   }: {
     managementApi: WorkflowsServerPluginSetup['management'];
     telemetry: EbtTelemetryClient;
     logger: Logger;
     getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
+    /** Gives one `ki_extraction` unit of the given UTC day (`YYYY-MM-DD`) back to the daily limit. */
+    releaseExtractionQuota?: (args: { date: string }) => Promise<void>;
   }) {
     this.workflowExecutionService = new WorkflowExecutionService({
       managementApi,
@@ -317,6 +343,7 @@ export class SignificantEventsKIsOnboardingClient {
     this.telemetry = telemetry;
     this.logger = logger;
     this.getSourcesClient = getSourcesClient;
+    this.releaseExtractionQuota = releaseExtractionQuota;
   }
 
   /**
@@ -507,11 +534,13 @@ export class SignificantEventsKIsOnboardingClient {
     sourceSlug,
     request,
   }: ISourceRunIdentity & { request: KibanaRequest }): Promise<string | null> {
-    const executionId = await this.workflowExecutionService.cancelActive({
+    const cancelled = await this.workflowExecutionService.cancelActiveExecutions({
       spaceId: request.spaceId,
       request,
       concurrencyGroupKey: buildConcurrencyKey({ sourceId, sourceSlug }),
     });
+    // Before the sub-workflow cancels: one failing there must not leave the units unreleased.
+    await this.releaseConsumedExtractions({ executions: cancelled, request });
     await Promise.all(
       this.subWorkflowExecutionServices.map(({ service, concurrencyKeyPrefix }) =>
         service.cancelActive({
@@ -524,7 +553,50 @@ export class SignificantEventsKIsOnboardingClient {
         })
       )
     );
-    return executionId;
+    return cancelled[0]?.id ?? null;
+  }
+
+  /**
+   * Gives back the `ki_extraction` unit of each cancelled run that consumed one, on the day it was
+   * consumed. A run consumed one when its budget step was allowed: a denied run, or one cancelled
+   * before reaching that step, took nothing. A failed release is logged and not thrown, because the
+   * cancel already happened and the cost is a source waiting for the next day's limit.
+   */
+  private async releaseConsumedExtractions({
+    executions,
+    request,
+  }: {
+    executions: WorkflowExecutionListItemDto[];
+    request: KibanaRequest;
+  }): Promise<void> {
+    const { releaseExtractionQuota } = this;
+    if (!releaseExtractionQuota) {
+      return;
+    }
+    const unreleased = executions.filter(({ id }) => !this.releasedExtractionRunIds.has(id));
+    unreleased.forEach(({ id }) => this.releasedExtractionRunIds.add(id));
+    await Promise.all(
+      unreleased.map(async ({ id }) => {
+        try {
+          const execution = await this.workflowExecutionService.getExecution({
+            request,
+            id,
+            spaceId: request.spaceId,
+            options: { includeOutput: true },
+          });
+          await Promise.all(
+            getConsumedExtractionDays(execution).map((date) => releaseExtractionQuota({ date }))
+          );
+        } catch (error) {
+          this.releasedExtractionRunIds.delete(id);
+          this.logger.warn(
+            `Could not release the knowledge indicators extraction unit of cancelled execution ${id}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      })
+    );
   }
 
   /**
@@ -643,7 +715,10 @@ export class SignificantEventsKIsOnboardingClient {
     return results;
   }
 
-  /** Returns the newest onboarding execution for one source. */
+  /**
+   * Returns the newest onboarding execution for one source that actually ran. A `skipped` one was
+   * dropped by the concurrency limit while another run held the slot, so it would hide that run.
+   */
   async getLatestExecution({
     sourceId,
     sourceSlug,
@@ -654,6 +729,7 @@ export class SignificantEventsKIsOnboardingClient {
     const { results } = await this.workflowExecutionService.getExecutions(
       {
         concurrencyGroupKey: buildConcurrencyKey({ sourceId, sourceSlug }),
+        statuses: EXECUTED_STATUSES,
         size: 1,
         sortField: 'createdAt',
         sortOrder: 'desc',

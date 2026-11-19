@@ -817,19 +817,17 @@ describe('durable source revision reconciliation', () => {
   };
 
   it('starts onboarding for a new source without deleting knowledge', async () => {
-    const { reconcile, state, scheduleSourceOnboarding, kiClient, source, onboardingClient } =
-      setup();
+    const { reconcile, state, scheduleSourceOnboarding, kiClient, source } = setup();
     state.revision = undefined;
     state.onboardingScheduled = false;
     await reconcile();
     expect(scheduleSourceOnboarding).toHaveBeenCalledWith(source);
     expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
     expect(state.revision).toBe('revision-2');
-    expect(onboardingClient.getLatestExecution).not.toHaveBeenCalled();
   });
 
   it('clears an old reservation when the revision changes and schedules the new revision', async () => {
-    const { reconcile, state, checkpoint, scheduleSourceOnboarding, onboardingClient } = setup();
+    const { reconcile, state, checkpoint, scheduleSourceOnboarding } = setup();
     state.onboardingReservedAt = Date.now();
 
     await reconcile();
@@ -840,7 +838,6 @@ describe('durable source revision reconciliation', () => {
       onboardingReservedAt: null,
     });
     expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
-    expect(onboardingClient.getLatestExecution).not.toHaveBeenCalled();
   });
 
   it('retries failed cleanup before scheduling the replacement exactly once', async () => {
@@ -957,5 +954,68 @@ describe('durable source revision reconciliation', () => {
     expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
     expect(state.onboardingReservedAt).toBeGreaterThan(staleReservation);
     expect(onboardingClient.getLatestExecution).toHaveBeenCalledTimes(1);
+  });
+
+  describe('a new source that continuous onboarding already started', () => {
+    const REVISION = '2026-11-17T12:32:29.000Z';
+    const setupNewSource = () => {
+      const harness = setup();
+      harness.source.esql_updated_at = REVISION;
+      harness.state.revision = REVISION;
+      harness.state.onboardingScheduled = false;
+      return harness;
+    };
+
+    it('neither waits nor schedules while that run is going', async () => {
+      const { reconcile, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+      const run = { ...runningExecution('source-slug'), startedAt: '2026-11-17T12:32:30.000Z' };
+      onboardingClient.getLatestExecution.mockResolvedValue(run);
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([run]);
+
+      await expect(reconcile()).resolves.toBeUndefined();
+
+      expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    });
+
+    it('does not schedule a second run once that run completed', async () => {
+      const { reconcile, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+      onboardingClient.getLatestExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        startedAt: '2026-11-17T12:32:30.000Z',
+      });
+
+      await reconcile();
+
+      expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    });
+
+    it.each([ExecutionStatus.CANCELLED, ExecutionStatus.FAILED])(
+      'schedules the source when the run of this revision ended %s',
+      async (status) => {
+        const { reconcile, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+        onboardingClient.getLatestExecution.mockResolvedValue({
+          status,
+          startedAt: '2026-11-17T12:32:30.000Z',
+        });
+
+        await reconcile();
+
+        expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('still waits for a run of an older query to stop', async () => {
+      const { reconcile, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+      const olderRun = {
+        ...runningExecution('source-slug'),
+        startedAt: '2026-11-17T12:00:00.000Z',
+      };
+      onboardingClient.getLatestExecution.mockResolvedValue(olderRun);
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([olderRun]);
+
+      await expect(reconcile()).rejects.toThrow('previous onboarding');
+
+      expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    });
   });
 });

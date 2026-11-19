@@ -48,7 +48,13 @@ const onboardingKeyOf = (sourceId: string): string =>
 
 const createClient = (
   overrides: Record<string, jest.Mock> = {},
-  { sourceType = 'logs' }: { sourceType?: 'logs' | 'metrics' } = {}
+  {
+    sourceType = 'logs',
+    releaseExtractionQuota,
+  }: {
+    sourceType?: 'logs' | 'metrics';
+    releaseExtractionQuota?: (args: { date: string }) => Promise<void>;
+  } = {}
 ) => {
   const managementApi = createMockManagementApi(overrides);
   const telemetry = { trackOnboardingScheduled: jest.fn() };
@@ -67,6 +73,7 @@ const createClient = (
     telemetry: telemetry as never,
     logger: loggerMock.create(),
     getSourcesClient,
+    releaseExtractionQuota,
   });
   return { client, managementApi, telemetry };
 };
@@ -759,6 +766,126 @@ describe('SignificantEventsKIsOnboardingClient', () => {
         'features-exec',
         'queries-exec',
       ]);
+    });
+  });
+
+  describe('cancelBySource and the extraction limit', () => {
+    const request = httpServerMock.createKibanaRequest();
+    const budgetStep = (stepId: string, output: unknown, startedAt: string) => ({
+      stepId,
+      output,
+      startedAt,
+    });
+    const cancelWithRuns = async (
+      stepExecutionsByRun: Record<string, unknown[]>,
+      releaseExtractionQuota: jest.Mock
+    ) => {
+      const { client, managementApi } = createClient(
+        {
+          getWorkflowExecutions: jest.fn(async ({ workflowId }: { workflowId: string }) => ({
+            results:
+              workflowId === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID
+                ? Object.keys(stepExecutionsByRun).map((id) => ({
+                    id,
+                    status: ExecutionStatus.RUNNING,
+                  }))
+                : [],
+          })),
+          getWorkflowExecution: jest.fn(async (id: string) => ({
+            id,
+            stepExecutions: stepExecutionsByRun[id],
+          })),
+        },
+        { releaseExtractionQuota }
+      );
+      await client.cancelBySource({ sourceId: 'nginx-id', sourceSlug: 'nginx', request });
+      return managementApi;
+    };
+
+    it('gives back the unit of a run whose budget step was allowed, on the day the step started', async () => {
+      const release = jest.fn().mockResolvedValue(undefined);
+
+      await cancelWithRuns(
+        {
+          logs: [
+            budgetStep('check_budget', { allowed: true, limit: 3 }, '2026-11-17T23:59:58.000Z'),
+          ],
+          metrics: [
+            budgetStep(
+              'check_fallback_budget',
+              { allowed: true, limit: 3 },
+              '2026-11-18T00:00:02.000Z'
+            ),
+          ],
+        },
+        release
+      );
+
+      expect(release.mock.calls.map(([args]) => args)).toEqual([
+        { date: '2026-11-17' },
+        { date: '2026-11-18' },
+      ]);
+    });
+
+    it('gives back nothing for a denied run or a run cancelled before its budget step', async () => {
+      const release = jest.fn().mockResolvedValue(undefined);
+
+      await cancelWithRuns(
+        {
+          denied: [
+            budgetStep('check_budget', { allowed: false, limit: 3 }, '2026-11-17T12:00:00.000Z'),
+          ],
+          early: [],
+        },
+        release
+      );
+
+      expect(release).not.toHaveBeenCalled();
+    });
+
+    it('gives a unit back once when the source is cancelled again while the run winds down', async () => {
+      const release = jest.fn().mockResolvedValue(undefined);
+      const { client } = createClient(
+        {
+          getWorkflowExecutions: jest.fn(async ({ workflowId }: { workflowId: string }) => ({
+            results:
+              workflowId === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID
+                ? [{ id: 'logs', status: ExecutionStatus.RUNNING }]
+                : [],
+          })),
+          getWorkflowExecution: jest.fn(async () => ({
+            stepExecutions: [
+              budgetStep('check_budget', { allowed: true, limit: 3 }, '2026-11-17T12:00:00.000Z'),
+            ],
+          })),
+        },
+        { releaseExtractionQuota: release }
+      );
+      const identity = { sourceId: 'nginx-id', sourceSlug: 'nginx', request };
+
+      await client.cancelBySource(identity);
+      await client.cancelBySource(identity);
+
+      expect(release).toHaveBeenCalledTimes(1);
+    });
+
+    it('still cancels the run when the release fails', async () => {
+      const release = jest.fn().mockRejectedValue(new Error('saved objects unavailable'));
+
+      const managementApi = await cancelWithRuns(
+        {
+          logs: [
+            budgetStep('check_budget', { allowed: true, limit: 3 }, '2026-11-17T12:00:00.000Z'),
+          ],
+        },
+        release
+      );
+
+      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'logs',
+        'default',
+        request
+      );
     });
   });
 
