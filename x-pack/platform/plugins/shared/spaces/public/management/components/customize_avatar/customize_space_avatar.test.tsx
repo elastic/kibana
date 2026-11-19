@@ -59,3 +59,21 @@ test('invokes onChange callback when avatar is customized', () => {
     customAvatarInitials: true,
   });
 });
+
+test('truncates typed initials to 2 graphemes', () => {
+  const changeHandler = jest.fn();
+
+  const wrapper = mountWithIntl(
+    <CustomizeSpaceAvatar space={space} validator={validator} onChange={changeHandler} />
+  );
+
+  wrapper
+    .find('input[name="spaceInitials"]')
+    .simulate('change', { target: { value: '\u{1F44D}\u{1F3FD}A\u{1F44D}' } });
+
+  expect(changeHandler).toHaveBeenCalledWith({
+    ...space,
+    initials: '\u{1F44D}\u{1F3FD}A',
+    customAvatarInitials: true,
+  });
+});

@@ -22,7 +22,6 @@ import { CustomContentComponent } from '@kbn/custom-content-renderer';
 import {
   CUSTOM_CONTENT_DEFAULT_HEIGHT,
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-  toEsqlQueryState,
 } from '@kbn/custom-content-common';
 import type { VisualizationServices } from '../services';
 import {
@@ -65,8 +64,8 @@ export interface VisualizeCustomContentProps {
   services: VisualizationServices;
   /** The HTML/Liquid template and its declared height. */
   visualization: Record<string, unknown> & { template?: string; height?: number };
-  /** ES|QL query backing the template. Absent for static content. */
-  esql?: string;
+  /** ES|QL queries backing the template, the first read as `rows`. None for static content. */
+  esqlQueries: readonly string[];
   timeRange?: TimeRange;
   registerActionButtons?: InlineRenderCallbacks['registerActionButtons'];
 }
@@ -81,7 +80,7 @@ export interface VisualizeCustomContentProps {
 export const VisualizeCustomContent = ({
   services,
   visualization,
-  esql,
+  esqlQueries,
   timeRange,
   registerActionButtons,
 }: VisualizeCustomContentProps) => {
@@ -116,7 +115,7 @@ export const VisualizeCustomContent = ({
       // global time range rather than the preview range from the local date picker.
       const serializedState = {
         template,
-        esql_query: toEsqlQueryState(esql),
+        esql_query: esqlQueries.length ? esqlQueries : undefined,
         title: newTitle,
         description: newDescription,
       };
@@ -126,7 +125,7 @@ export const VisualizeCustomContent = ({
         path: dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create',
       });
     },
-    [template, esql, embeddable]
+    [template, esqlQueries, embeddable]
   );
 
   // `registerActionButtons` is optional in the render contract; without it there is no
@@ -168,7 +167,7 @@ export const VisualizeCustomContent = ({
         <FallbackVisualizationActions buttons={localActionButtons} />
       )}
       {/* A static panel has no query to re-range, so the picker would do nothing. */}
-      {esql && (
+      {esqlQueries.length > 0 && (
         <div css={visualizationHeaderStyles} className={visualizationTimePickerContainerClassName}>
           <SearchBar {...searchBarProps} />
         </div>
@@ -178,7 +177,7 @@ export const VisualizeCustomContent = ({
         <CustomContentComponent
           services={services.customContent}
           embeddableId="agent-builder-custom-content"
-          esqlQueries={esql ? [esql] : []}
+          esqlQueries={esqlQueries}
           timeRange={effectiveTimeRange}
           generationVersion={0}
           savedTemplate={template}

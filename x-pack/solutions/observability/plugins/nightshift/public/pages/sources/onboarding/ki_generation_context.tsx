@@ -25,6 +25,7 @@ import React, {
 import { useBlocksNewActivity } from '../../../data/maintenance/use_significant_events_maintenance';
 import { useFetchSources } from '../../../data/sources/use_fetch_sources';
 import type { ScheduleOnboardingOptions } from '../../../data/sources/use_onboarding_api';
+import { UNKNOWN_ERROR_MESSAGE } from '../../../common/errors';
 import { useBulkOnboarding } from './use_bulk_onboarding';
 import type { OnboardingConfig } from './types';
 
@@ -154,7 +155,7 @@ export function KiGenerationProvider({
 
       if (initialStatusFetchDoneRef.current) {
         if (statusResult.status === SignificantEventsWorkflowStatus.Failed) {
-          onFailed?.(statusResult.error ?? 'Unknown error');
+          onFailed?.(statusResult.error ?? UNKNOWN_ERROR_MESSAGE);
         }
         if (statusResult.status === SignificantEventsWorkflowStatus.Completed) {
           onCompleted?.();

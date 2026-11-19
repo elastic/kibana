@@ -13,8 +13,8 @@ import {
   ACL_LEVELS,
   compareLevels,
   isGeneralAccessLevel,
-  type AclLevel,
-  type EntryLevel,
+  type AclAccess,
+  type EntryAccess,
 } from '../levels';
 import type { AccessPolicy } from '../policy';
 import { PRINCIPAL_TYPES, type Principal, type PrincipalType } from '../principals';
@@ -29,11 +29,11 @@ export interface BuildAclReadFilterParams {
    * The caller. Leave it out for a request without a principal, which only general access serves.
    */
   principal?: Principal;
-  /** The level the caller needs, usually `view`. */
-  level: EntryLevel;
+  /** The access the caller needs, usually `view`. */
+  access: EntryAccess;
   /**
    * Spaces where the caller has recovery authority. At `view`, the caller sees every object of the
-   * type there, whatever its ACL. At any other level, these spaces get the same ACL check as
+   * type there, whatever its ACL. At any other access, these spaces get the same ACL check as
    * `ordinarySpaces`, because recovery never lets a caller use, edit, or delete an object. `['*']`
    * stands for every space the search covers.
    */
@@ -56,7 +56,7 @@ const SPACES_FIELD = 'namespaces';
 const VERSION = `${ACL_FIELD}.version`;
 const OWNER_TYPE = `${ACL_FIELD}.owner.type`;
 const OWNER_ID = `${ACL_FIELD}.owner.id`;
-const GENERAL_ACCESS = `${ACL_FIELD}.general_access`;
+const GENERAL_ACCESS = `${ACL_FIELD}.general.access`;
 const ENTRIES = `${ACL_FIELD}.entries`;
 const ENTRY_TYPE = `${ENTRIES}.type`;
 const ENTRY_ID = `${ENTRIES}.id`;
@@ -66,32 +66,33 @@ const ENTRY_ADDED_AT = `${ENTRIES}.added_at`;
 const otherKinds = (kind: PrincipalType) => PRINCIPAL_TYPES.filter((other) => other !== kind);
 
 /**
- * Builds the query clause that keeps only the objects of one type that the caller can access at
- * `level`. It applies the same rules as reading a single object, so a list never shows an object
- * that opening it would deny. In recovery spaces, the clause matches every object at `view`,
- * whatever its ACL. At other levels, it applies the ACL there too.
+ * Builds the query clause that keeps only the objects of one type that the caller can reach with
+ * the requested `access`. It applies the same rules as reading a single object, so a list never
+ * shows an object that opening it would deny. In recovery spaces, the clause matches every object
+ * when the requested access is `view`, whatever its ACL. For any other access, it applies the ACL
+ * there too.
  *
  * The clause holds `nested` queries on `acl.entries` in most cases, and Elasticsearch rejects any
  * search that holds one when `search.allow_expensive_queries` is `false`. The caller must never
  * retry such a search without the clause. Some clauses hold none, for example one for recovery
- * spaces only at `view`. Such a clause still filters completely, so its search can run.
+ * spaces only, with `view` access. Such a clause still filters completely, so its search can run.
  *
- * @param params The type's policy, the caller, the level they need, and the spaces to search.
+ * @param params The type's policy, the caller, the access they need, and the spaces to search.
  * @returns A query clause to add to the search's filters. It matches nothing when both space lists
  * are empty.
  */
 export const buildAclReadFilter = ({
   policy,
   principal,
-  level,
+  access,
   recoverySpaces,
   ordinarySpaces,
 }: BuildAclReadFilterParams): estypes.QueryDslQueryContainer => {
   // Recovery lets a caller view any object, but never use, edit, or delete it. So above `view`, a
   // recovery space gets the same ACL check as an ordinary space.
-  const aclExemptSpaces = level === 'view' ? recoverySpaces : [];
+  const aclExemptSpaces = access === 'view' ? recoverySpaces : [];
   const aclCheckedSpaces =
-    level === 'view' ? ordinarySpaces : [...ordinarySpaces, ...recoverySpaces];
+    access === 'view' ? ordinarySpaces : [...ordinarySpaces, ...recoverySpaces];
 
   const should: estypes.QueryDslQueryContainer[] = [];
   if (aclExemptSpaces.length > 0) {
@@ -99,15 +100,15 @@ export const buildAclReadFilter = ({
   }
 
   if (aclCheckedSpaces.length > 0) {
-    const grants: estypes.QueryDslQueryContainer[] = [generalAccessClause(policy, level)];
+    const grants: estypes.QueryDslQueryContainer[] = [generalAccessClause(policy, access)];
     if (principal) {
-      grants.push(ownerClause(principal), entryClause(policy, principal, level));
+      grants.push(ownerClause(principal), entryClause(policy, principal, access));
     }
 
     const ordinary: estypes.QueryDslQueryContainer[] = [
       { bool: { filter: [VALID_CLAUSE], should: grants, minimum_should_match: 1 } },
     ];
-    if (compareLevels(policy.defaultGeneralAccessLevel, level) >= 0) {
+    if (compareLevels(policy.defaultGeneralAccess, access) >= 0) {
       ordinary.push(ABSENT_CLAUSE);
     }
 
@@ -184,15 +185,15 @@ const VALID_CLAUSE: estypes.QueryDslQueryContainer = deepFreeze({
 });
 
 /**
- * General access is the lowest stored value the type allows, so it reaches `level` when some
+ * General access is the lowest stored value the type allows, so it reaches `access` level when some
  * allowed value reaches it and no allowed value falls short. Values the type doesn't allow are
  * ignored.
  */
 const generalAccessClause = (
   policy: AccessPolicy,
-  level: EntryLevel
+  access: EntryAccess
 ): estypes.QueryDslQueryContainer => {
-  const { atLeast, below } = partitionLevels(policy.generalAccessLevels, level);
+  const { atLeast, below } = partitionLevels(policy.generalAccess, access);
   if (atLeast.length === 0) {
     return { match_none: {} };
   }
@@ -207,7 +208,7 @@ const generalAccessClause = (
 
 /**
  * The caller is the owner. The owner of a valid ACL acts at `manage`, so this doesn't depend on the
- * level.
+ * access level.
  */
 const ownerClause = (principal: Principal): estypes.QueryDslQueryContainer => ({
   bool: {
@@ -217,16 +218,17 @@ const ownerClause = (principal: Principal): estypes.QueryDslQueryContainer => ({
 });
 
 /**
- * One entry names the caller and grants at least `level`. The `nested` query keeps the kind, the
- * ID, and the level of one entry together, so separate entries never combine into a grant that
- * none of them holds. An entry grants the lowest level the type allows among its stored levels.
+ * One entry names the caller and grants at least `access` level. The `nested` query keeps the
+ * kind, the ID, and the access level of one entry together, so separate entries never combine
+ * into a grant that none of them holds. An entry grants the lowest access level the type allows
+ * among its stored levels.
  */
 const entryClause = (
   policy: AccessPolicy,
   principal: Principal,
-  level: EntryLevel
+  access: EntryAccess
 ): estypes.QueryDslQueryContainer => {
-  const { atLeast, below } = partitionLevels(policy.entryLevels, level);
+  const { atLeast, below } = partitionLevels(policy.entryAccess, access);
   if (atLeast.length === 0) {
     return { match_none: {} };
   }
@@ -268,9 +270,9 @@ const excludeValues = (
   values.length > 0 ? [{ terms: { [field]: [...values] } }] : [];
 
 /**
- * Splits the levels a type allows into those that reach `level` and those below it.
+ * Splits the levels a type allows into those that reach `access` level and those below it.
  */
-const partitionLevels = <T extends AclLevel>(allowed: readonly T[], level: AclLevel) => ({
-  atLeast: allowed.filter((value) => compareLevels(value, level) >= 0),
-  below: allowed.filter((value) => compareLevels(value, level) < 0),
+const partitionLevels = <T extends AclAccess>(allowed: readonly T[], access: AclAccess) => ({
+  atLeast: allowed.filter((value) => compareLevels(value, access) >= 0),
+  below: allowed.filter((value) => compareLevels(value, access) < 0),
 });

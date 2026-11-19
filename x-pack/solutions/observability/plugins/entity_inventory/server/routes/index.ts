@@ -6,11 +6,13 @@
  */
 
 import { listRoute } from './list/route';
+import { planRoute } from './plan/route';
 import { typesRoute } from './types/route';
 
 export const entityInventoryRouteRepository = {
   ...typesRoute,
   ...listRoute,
+  ...planRoute,
 };
 
 export type EntityInventoryRouteRepository = typeof entityInventoryRouteRepository;

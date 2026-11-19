@@ -14,19 +14,58 @@ import { LatencyAggregationType } from '../../../../../common/latency_aggregatio
 import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
 
 const options: Array<{ value: LatencyAggregationType; text: string }> = [
-  { value: LatencyAggregationType.avg, text: 'Average' },
-  { value: LatencyAggregationType.p95, text: '95th percentile' },
-  { value: LatencyAggregationType.p99, text: '99th percentile' },
+  {
+    value: LatencyAggregationType.avg,
+    text: i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.option.avg', {
+      defaultMessage: 'Average',
+    }),
+  },
+  {
+    value: LatencyAggregationType.p95,
+    text: i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.option.p95', {
+      defaultMessage: '95th percentile',
+    }),
+  },
+  {
+    value: LatencyAggregationType.p99,
+    text: i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.option.p99', {
+      defaultMessage: '99th percentile',
+    }),
+  },
+];
+
+const compactOptions: Array<{ value: LatencyAggregationType; text: string }> = [
+  {
+    value: LatencyAggregationType.avg,
+    text: i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.compactOption.avg', {
+      defaultMessage: 'Avg',
+    }),
+  },
+  {
+    value: LatencyAggregationType.p95,
+    text: i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.compactOption.p95', {
+      defaultMessage: 'p95th',
+    }),
+  },
+  {
+    value: LatencyAggregationType.p99,
+    text: i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.compactOption.p99', {
+      defaultMessage: 'p99th',
+    }),
+  },
 ];
 
 export function LatencyAggregationTypeSelect({
   latencyAggregationType,
   onChange,
   ebt,
+  compact = false,
 }: {
   latencyAggregationType?: LatencyAggregationType;
   onChange: (value: LatencyAggregationType) => void;
   ebt?: EbtClickAttrsWithoutAction;
+  /** Short option labels and no prepend, for narrow chart headers (e.g. flyouts). */
+  compact?: boolean;
 }) {
   return (
     <EuiSelect
@@ -38,10 +77,14 @@ export function LatencyAggregationTypeSelect({
       aria-label={i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.selector', {
         defaultMessage: 'Metric selector',
       })}
-      prepend={i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.prepend', {
-        defaultMessage: 'Metric',
-      })}
-      options={options}
+      prepend={
+        compact
+          ? undefined
+          : i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.prepend', {
+              defaultMessage: 'Metric',
+            })
+      }
+      options={compact ? compactOptions : options}
       value={latencyAggregationType}
       onChange={(nextOption) => onChange(nextOption.target.value as LatencyAggregationType)}
     />
