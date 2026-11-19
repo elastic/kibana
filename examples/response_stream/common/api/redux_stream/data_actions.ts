@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const SLICE_NAME = 'development';
+export const SLICE_NAME = 'development';
 
 // Plain action creators so the server can build stream actions without loading Redux Toolkit.
 const createDataAction =

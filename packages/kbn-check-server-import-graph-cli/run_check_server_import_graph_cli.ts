@@ -10,7 +10,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 
-import { checkServerImportGraph } from './src/check_server_import_graph';
+import { BANNED_NODE_MODULES, checkServerImportGraph } from './src/check_server_import_graph';
 
 run(
   async ({ log, flagsReader }) => {
@@ -30,7 +30,7 @@ run(
     usage: 'node scripts/check_server_import_graph [--module <name>]...',
     description:
       'Statically walks the import graph from every server entry point and fails when a banned ' +
-      'node module (`BANNED_NODE_MODULES` by default) is reachable from it.',
+      `node module (${[...BANNED_NODE_MODULES].join(', ')} by default) is reachable from it.`,
     flags: {
       string: ['module'],
       help: `

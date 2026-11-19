@@ -10,10 +10,17 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { getInitialState } from '../stream_state';
-import { addToEntity, deleteEntity, error, reset, updateProgress } from './data_actions';
+import {
+  SLICE_NAME,
+  addToEntity,
+  deleteEntity,
+  error,
+  reset,
+  updateProgress,
+} from './data_actions';
 
 export const dataSlice = createSlice({
-  name: 'development',
+  name: SLICE_NAME,
   initialState: getInitialState(),
   reducers: {},
   extraReducers: (builder) => {
