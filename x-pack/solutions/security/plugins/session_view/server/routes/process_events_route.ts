@@ -35,7 +35,7 @@ import {
   sessionTimestampSchema,
   sessionViewIndexPatternSchema,
 } from './validation';
-import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
+import { normalizeEventSource } from '../../common/utils/normalize_event_source';
 
 export const registerProcessEventsRoute = (
   router: IRouter,
@@ -153,9 +153,9 @@ export const fetchEventsAndScopedAlerts = async (
 
   let events = search.hits.hits;
 
-  // Normalize args fields to ensure consistent array structure
+  // Columnar indices return flat `_source`; normalize to the nested, array-typed shape the UI expects
   events = events.map((hit) => {
-    hit._source = normalizeEventProcessArgs(hit._source as ProcessEvent);
+    hit._source = normalizeEventSource(hit._source as object | undefined);
     return hit;
   });
 

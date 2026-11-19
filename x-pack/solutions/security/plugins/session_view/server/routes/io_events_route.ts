@@ -9,7 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ProcessEvent, Aggregate } from '../../common';
+import type { Aggregate } from '../../common';
 import {
   IO_EVENTS_ROUTE,
   IO_EVENTS_PER_PAGE,
@@ -19,7 +19,7 @@ import {
   PROCESS_EVENTS_PER_PAGE,
   IO_EVENT_FIELDS,
 } from '../../common/constants';
-import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
+import { normalizeEventSource } from '../../common/utils/normalize_event_source';
 import {
   sessionEntityIdSchema,
   sessionTimestampSchema,
@@ -89,7 +89,7 @@ export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
           });
 
           const events = search.hits.hits.map((hit) => {
-            hit._source = normalizeEventProcessArgs(hit._source as ProcessEvent);
+            hit._source = normalizeEventSource(hit._source as object | undefined);
             return hit;
           });
           const total =

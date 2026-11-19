@@ -28,9 +28,9 @@ type NestedProcessFieldKey = keyof Pick<
 >;
 
 /**
- * Normalizes the args field in a ProcessSelf object to ensure consistent array structure
+ * Normalizes, in place, the args field of a ProcessSelf object and its leaders to string arrays.
  */
-const normalizeArgsField = (process: ProcessSelf): void => {
+export const normalizeProcessArgsInPlace = (process: ProcessSelf): void => {
   // Normalize main process args
   process.args = normalizeArray(process.args);
 
@@ -62,7 +62,7 @@ export const normalizeEventProcessArgs = (eventSource: ProcessEvent) => {
   if (!eventSource || !eventSource.process) return eventSource;
 
   const clonedEvent = structuredClone(eventSource);
-  normalizeArgsField(clonedEvent.process!);
+  normalizeProcessArgsInPlace(clonedEvent.process!);
 
   return clonedEvent;
 };
