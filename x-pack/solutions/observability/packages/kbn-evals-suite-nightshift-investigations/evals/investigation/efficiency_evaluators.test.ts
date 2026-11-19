@@ -137,10 +137,23 @@ describe('countSandboxEgressDenials', () => {
             `cd /tmp && curl -sSf "https://github.com/elastic/kibana/pulls" | head`,
             `curl: (22) ${http403}`
           ),
+          // An explicit port is the same host, and operators need no spaces around them.
+          command(
+            'cd /tmp&&curl -f 2>&1 https://github.com:443/elastic/kibana/issues',
+            `curl: (22) ${http403}`
+          ),
+          bash([
+            {
+              type: 'error',
+              data: {
+                message: `fatal: unable to access 'https://github.com:443/elastic/beats/': ${http403}\n`,
+              },
+            },
+          ]),
         ],
       },
     ] as unknown as ConversationRound[];
-    expect(countSandboxEgressDenials(rounds)).toBe(3);
+    expect(countSandboxEgressDenials(rounds)).toBe(5);
   });
 
   it("doesn't count another host's 403 as the firewall's", () => {
@@ -162,6 +175,13 @@ describe('countSandboxEgressDenials', () => {
             `curl -f "$CONNECTOR_CONFIG_URL/_query" -d '{"query":"FROM logs-* | WHERE url.full == \\"https://github.com/elastic/kibana\\""}'`,
             `curl: (22) ${http403}`
           ),
+          // curl and a github.com URL in different commands of one line.
+          command(
+            'echo https://github.com/elastic/kibana;curl -f "$CONNECTOR_CONFIG_URL/_search"',
+            `curl: (22) ${http403}`
+          ),
+          // A host that only starts with github.com is another host.
+          command('curl -f https://github.com.example.net/x', `curl: (22) ${http403}`),
           // git refused by another host is that host's answer.
           command(
             'git clone https://git.example.com/repo',
