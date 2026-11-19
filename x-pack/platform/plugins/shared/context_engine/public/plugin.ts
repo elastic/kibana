@@ -66,6 +66,19 @@ export class ContextEnginePlugin
     setupDeps.workflowsExtensions.registerStepDefinition(() =>
       import('./step_types/verify_ki_step').then((m) => m.VerifyKiStepDefinition)
     );
+    setupDeps.workflowsExtensions.registerStepDefinition(() =>
+      import('./step_types/gather_maintenance').then((m) => m.gatherMaintenanceStepDefinition)
+    );
+    setupDeps.workflowsExtensions.registerStepDefinition(() =>
+      import('./step_types/apply_maintenance_changes').then(
+        (m) => m.applyMaintenanceChangesStepDefinition
+      )
+    );
+    setupDeps.workflowsExtensions.registerStepDefinition(() =>
+      import('./step_types/record_maintenance_run').then(
+        (m) => m.recordMaintenanceRunStepDefinition
+      )
+    );
 
     this.setupAgentBuilderStart(core);
     registerStepDefinitions({
