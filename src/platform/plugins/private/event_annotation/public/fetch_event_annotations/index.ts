@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { from, switchMap } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EventAnnotationPluginStart, EventAnnotationStartDependencies } from '../plugin';
 
@@ -14,10 +15,7 @@ import type {
   FetchEventAnnotationsExpressionFunctionDefinition,
   FetchEventAnnotationsStartDependencies,
 } from '../../common/fetch_event_annotations';
-import {
-  getFetchEventAnnotationsMeta,
-  requestEventAnnotations,
-} from '../../common/fetch_event_annotations';
+import { getFetchEventAnnotationsMeta } from '../../common/fetch_event_annotations';
 
 export function fetchEventAnnotations({
   getStartDependencies,
@@ -26,9 +24,13 @@ export function fetchEventAnnotations({
 }): FetchEventAnnotationsExpressionFunctionDefinition {
   return {
     ...getFetchEventAnnotationsMeta(),
-    fn: (input, args, context) => {
-      return requestEventAnnotations(input, args, context, getStartDependencies);
-    },
+    // Async chunk: the request logic is only needed when a chart renders annotations.
+    fn: (input, args, context) =>
+      from(import('../../common/fetch_event_annotations/request_event_annotations')).pipe(
+        switchMap(({ requestEventAnnotations }) =>
+          requestEventAnnotations(input, args, context, getStartDependencies)
+        )
+      ),
   };
 }
 

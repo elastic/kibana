@@ -23,11 +23,9 @@ import moment from 'moment';
 import type { ESCalendarInterval, ESFixedInterval } from '@elastic/charts';
 import { roundDateToESInterval } from '@elastic/charts';
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
 import { handleRequest } from './handle_request';
-import { mergeAnnotationDatatables, toEsqlAnnotationDatatable } from './esql_annotations';
 import {
   ANNOTATIONS_PER_BUCKET,
   getCalculatedInterval,
@@ -98,47 +96,25 @@ export const requestEventAnnotations = (
       )
     );
     const timezone = getTimeZone(uiSettings);
-    // Started without awaiting so ES|QL and DSL requests run concurrently
-    const esqlTablesPromise = Promise.all(
-      esqlAnnotations.map(async (annotation) => {
-        const { datatable } = await esql(
-          {
-            query: annotation.query,
-            timeZone: timezone,
-            kibanaQueryContext: {
-              timeRange,
-              timeField: annotation.timeField,
-              esqlVariables: input.esqlVariables,
-            },
-            approximation: input.isApproximate,
-            projectRouting: input.projectRouting,
-            dropNullColumns: false,
-            columnMetadata: true,
-            includeExecutionMetadata: true,
-          },
-          {
+    // Split into an async chunk: most charts have no ES|QL annotations, so keep the ES|QL fetch
+    // out of the plugin's page-load bundle. Started without awaiting so ES|QL and DSL requests
+    // run concurrently.
+    const esqlTablesPromise = esqlAnnotations.length
+      ? import('./esql_annotations').then(({ fetchEsqlAnnotationDatatables }) =>
+          fetchEsqlAnnotationDatatables({
+            annotations: esqlAnnotations,
+            esql,
+            input,
+            interval,
+            timezone,
+            timeRange,
             abortSignal,
-            sessionId: getSearchSessionId(),
+            inspectorAdapters,
+            searchSessionId: getSearchSessionId(),
             executionContext: getExecutionContext(),
-            includeDataTable: true,
-            inspector: {
-              adapter: inspectorAdapters.requests ?? new RequestAdapter(),
-              title: i18n.translate(
-                'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.title',
-                {
-                  defaultMessage: 'Annotations',
-                }
-              ),
-              description: i18n.translate('eventAnnotation.esqlAnnotation.inspectorDescription', {
-                defaultMessage: 'This request fetches annotation events using ES|QL.',
-              }),
-            },
-          }
-        );
-        if (!datatable) throw new Error('The ES|QL annotation request did not return a datatable.');
-        return toEsqlAnnotationDatatable({ annotation, datatable, interval, timezone, timeRange });
-      })
-    );
+          })
+        )
+      : Promise.resolve<Datatable[]>([]);
 
     const fetchDslTable = async (): Promise<Datatable> => {
       const uniqueDataViewsToLoad = args.groups
@@ -234,7 +210,9 @@ export const requestEventAnnotations = (
     };
 
     const [esqlTables, dslTable] = await Promise.all([esqlTablesPromise, fetchDslTable()]);
-    return esqlTables.length ? mergeAnnotationDatatables([dslTable, ...esqlTables]) : dslTable;
+    if (!esqlTables.length) return dslTable;
+    const { mergeAnnotationDatatables } = await import('./esql_annotations');
+    return mergeAnnotationDatatables([dslTable, ...esqlTables]);
   });
 };
 

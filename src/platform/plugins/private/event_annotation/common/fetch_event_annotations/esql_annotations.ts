@@ -12,7 +12,16 @@ import { roundDateToESInterval } from '@elastic/charts';
 import type { ESCalendarInterval, ESFixedInterval } from '@elastic/charts';
 import { parseEsInterval } from '@kbn/data-plugin/common';
 import type { TimeRange } from '@kbn/data-plugin/common';
-import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { ExpressionValueSearchContext } from '@kbn/data-plugin/common';
+import type { ISearchMethods } from '@kbn/search-types';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type {
+  Datatable,
+  DatatableColumn,
+  DatatableRow,
+  ExecutionContext,
+} from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EsqlEventAnnotationOutput } from '../esql_event_annotation';
 import { annotationColumns } from '../types';
@@ -161,3 +170,65 @@ export const mergeAnnotationDatatables = (tables: Datatable[]): Datatable => {
   }
   return wrapRowsInDatatable(rows, [...columns.values()]);
 };
+
+export const fetchEsqlAnnotationDatatables = ({
+  annotations,
+  esql,
+  input,
+  interval,
+  timezone,
+  timeRange,
+  abortSignal,
+  inspectorAdapters,
+  searchSessionId,
+  executionContext,
+}: {
+  annotations: EsqlEventAnnotationOutput[];
+  esql: ISearchMethods['esql'];
+  input: ExpressionValueSearchContext;
+  interval: string;
+  timezone: string;
+  timeRange: TimeRange;
+  abortSignal: AbortSignal;
+  inspectorAdapters: Adapters;
+  searchSessionId: string | undefined;
+  executionContext: ReturnType<ExecutionContext['getExecutionContext']>;
+}): Promise<Datatable[]> =>
+  Promise.all(
+    annotations.map(async (annotation) => {
+      const { datatable } = await esql(
+        {
+          query: annotation.query,
+          timeZone: timezone,
+          kibanaQueryContext: {
+            timeRange,
+            timeField: annotation.timeField,
+            esqlVariables: input.esqlVariables,
+          },
+          approximation: input.isApproximate,
+          projectRouting: input.projectRouting,
+          dropNullColumns: false,
+          columnMetadata: true,
+          includeExecutionMetadata: true,
+        },
+        {
+          abortSignal,
+          sessionId: searchSessionId,
+          executionContext,
+          includeDataTable: true,
+          inspector: {
+            adapter: inspectorAdapters.requests ?? new RequestAdapter(),
+            title: i18n.translate(
+              'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.title',
+              { defaultMessage: 'Annotations' }
+            ),
+            description: i18n.translate('eventAnnotation.esqlAnnotation.inspectorDescription', {
+              defaultMessage: 'This request fetches annotation events using ES|QL.',
+            }),
+          },
+        }
+      );
+      if (!datatable) throw new Error('The ES|QL annotation request did not return a datatable.');
+      return toEsqlAnnotationDatatable({ annotation, datatable, interval, timezone, timeRange });
+    })
+  );
