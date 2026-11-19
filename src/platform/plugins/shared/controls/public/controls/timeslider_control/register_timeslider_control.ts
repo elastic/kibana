@@ -12,15 +12,11 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { untilPluginStartServicesReady } from '../../services/kibana_services';
 
 export function registerTimeSliderControl(embeddable: EmbeddableSetup) {
-  embeddable.registerEmbeddablePublicDefinition(
-    TIME_SLIDER_CONTROL,
-    async () => {
-      const [{ getTimesliderControlFactory }] = await Promise.all([
-        import('../../controls_module'),
-        untilPluginStartServicesReady(),
-      ]);
-      return getTimesliderControlFactory();
-    },
-    true
-  );
+  embeddable.registerEmbeddablePublicDefinition(TIME_SLIDER_CONTROL, async () => {
+    const [{ getTimesliderControlFactory }] = await Promise.all([
+      import('../../controls_module'),
+      untilPluginStartServicesReady(),
+    ]);
+    return getTimesliderControlFactory();
+  });
 }

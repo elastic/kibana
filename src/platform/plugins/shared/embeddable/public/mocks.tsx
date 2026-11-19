@@ -65,7 +65,6 @@ const createStartContract = (): Start => {
     getAddFromLibraryComponent: jest.fn(),
     getAddFromLibraryContentComponent: jest.fn(),
     getEmbeddableDefinition: jest.fn(),
-    shouldBlockLoadingUntilApiAvailable: jest.fn((_type: string) => false),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getLegacyURLTransform: jest.fn(),
     hasLegacyURLTransform: jest.fn(),

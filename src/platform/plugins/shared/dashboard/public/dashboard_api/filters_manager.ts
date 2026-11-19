@@ -17,12 +17,9 @@ import {
   filter,
   first,
   map,
-  of,
   skip,
   switchMap,
-  takeUntil,
-  type Observable,
-  Subject,
+  type Subject,
 } from 'rxjs';
 
 import type { Filter } from '@kbn/es-query';
@@ -32,15 +29,9 @@ import {
   type AppliesFilters,
 } from '@kbn/presentation-publishing';
 
-import { embeddableService } from '../services/kibana_services';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
-
-const apiPublishesAwaitingRequiredFilters = <ApiType extends object>(
-  api: ApiType
-): api is ApiType & { awaitingRequiredFilters$: Observable<boolean> } =>
-  Boolean((api as { awaitingRequiredFilters$?: Observable<boolean> }).awaitingRequiredFilters$);
 
 export const initializeFiltersManager = (
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>,
@@ -50,74 +41,47 @@ export const initializeFiltersManager = (
 ) => {
   const publishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-  /**
-   * `undefined` until we know whether any pinned panel is waiting on a required value (while panels that
-   * block loading have not mounted yet). Consumers must not treat `undefined` as "not waiting", but it must not
-   * show the awaiting screen either: loading is just paused.
-   */
-  const awaitingRequiredFilters$ = new BehaviorSubject<boolean | undefined>(undefined);
+  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(false);
 
-  /**
-   * Before a pinned panel has mounted its API is not available, so its awaiting state is unknown if its type is
-   * registered as blocking loading until then; once it has mounted, its live `awaitingRequiredFilters$` takes over.
-   */
-  const isUnmountedPanelBlocking = (uuid: string): boolean => {
-    const panel = layoutManager.api.layout$.getValue().pinnedPanels[uuid];
-    return Boolean(panel && embeddableService.shouldBlockLoadingUntilApiAvailable(panel.type));
-  };
-
-  /** whether any pinned panel itself reports that it is waiting on a required value */
-  const childAwaitingRequired$ = new BehaviorSubject<boolean | undefined>(undefined);
-
-  const awaitingRequiredSubscription = combineLatest([
-    layoutManager.api.layout$,
-    layoutManager.api.children$,
-  ])
-    .pipe(
-      switchMap(([layout, children]) => {
+  const test = combineCompatibleChildrenApis<
+    { awaitingRequiredFilters$?: BehaviorSubject<boolean> },
+    boolean
+  >(
+    {
+      children$: layoutManager.api.children$.pipe(
         // only pinned panels can be required
-        const pinnedIds = Object.keys(layout.pinnedPanels);
-        if (pinnedIds.length === 0) return of(false);
-
-        return combineLatest(
-          pinnedIds.map((uuid): Observable<boolean | undefined> => {
-            const child = children[uuid];
-            if (!child) return of(isUnmountedPanelBlocking(uuid) ? undefined : false);
-            return apiPublishesAwaitingRequiredFilters(child)
-              ? child.awaitingRequiredFilters$
-              : of(false);
-          })
-        ).pipe(map((values) => (values.includes(undefined) ? undefined : values.some(Boolean))));
-      }),
-      distinctUntilChanged()
-    )
-    .subscribe((awaitingRequired) => childAwaitingRequired$.next(awaitingRequired));
-
-  /**
-   * With auto-apply on, the dashboard's awaiting state follows the children. With auto-apply off, it takes
-   * the children's value once (when it is first known) and afterwards only when filters are published, in
-   * both directions: supplying a required value keeps the awaiting screen up, and clearing one keeps the
-   * grid up, until the user applies the change.
-   */
-  const awaitingSyncSubscription = combineLatest([
-    childAwaitingRequired$,
-    settingsManager.api.settings.autoApplyFilters$,
-  ]).subscribe(([childAwaiting, autoApply]) => {
-    if (childAwaiting === undefined) return;
-    if (autoApply || awaitingRequiredFilters$.getValue() === undefined) {
-      awaitingRequiredFilters$.next(childAwaiting);
+        map((children) => {
+          const pinnedIds = Object.keys(layoutManager.api.layout$.getValue().pinnedPanels);
+          return Object.values(children).filter((child) => pinnedIds.includes(child.uuid));
+        })
+      ),
+    },
+    'awaitingRequiredFilters$',
+    (
+      unknownApi: unknown
+    ): unknownApi is { awaitingRequiredFilters$?: BehaviorSubject<boolean> } => {
+      return Boolean(
+        unknownApi &&
+          (unknownApi as { awaitingRequiredFilters$?: BehaviorSubject<boolean> })
+            ?.awaitingRequiredFilters$ !== undefined
+      );
+    },
+    false,
+    (values) => {
+      return values.some((awaitingRequired) => awaitingRequired);
     }
+  ).subscribe((a) => {
+    console.log('jlkfdasjlkdfsad', { a });
+    awaitingRequiredFilters$.next(a);
   });
 
   const childFiltersLoading$ = combineLatest([
     layoutManager.internalApi.childrenLoading$,
-    // use the children's own flag, not the deferred one: it must not block unpublished filters
-    // from updating, since that is what lets the user publish them
-    childAwaitingRequired$,
+    awaitingRequiredFilters$,
   ])
     .pipe(
       map(([childrenLoading, awaitingRequiredFilters]) => {
-        return childrenLoading ? awaitingRequiredFilters !== false : false;
+        return childrenLoading ? awaitingRequiredFilters : false;
       }),
       combineLatestWith(
         combineCompatibleChildrenApis<AppliesFilters, boolean>(
@@ -162,11 +126,7 @@ export const initializeFiltersManager = (
       unpublishedChildFilters$.next(allChildFilters);
     });
 
-  const filtersPublished$ = new Subject<void>();
   const publishFilters = () => {
-    const childAwaiting = childAwaitingRequired$.getValue();
-    if (childAwaiting !== undefined) awaitingRequiredFilters$.next(childAwaiting);
-    filtersPublished$.next();
     const published = publishedChildFilters$.getValue();
     const unpublished = unpublishedChildFilters$.getValue();
     if (!deepEqual(published, unpublished)) {
@@ -186,17 +146,9 @@ export const initializeFiltersManager = (
 
   /** when auto-apply is `false`, publish the first set of filters once the children are done loading them */
   if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
-    unpublishedChildFilters$
-      .pipe(
-        skip(1),
-        // a change to whether a required value is supplied must be published by the user, not automatically
-        filter(() => awaitingRequiredFilters$.getValue() !== true),
-        takeUntil(filtersPublished$),
-        first()
-      )
-      .subscribe(() => {
-        publishFilters();
-      });
+    unpublishedChildFilters$.pipe(skip(1), first()).subscribe(() => {
+      publishFilters();
+    });
   }
 
   /** when auto-apply is `false` and the dashboard is reset, wait for new filters to be updated and publish them */
@@ -238,8 +190,6 @@ export const initializeFiltersManager = (
     cleanup: () => {
       autoPublishFiltersSubscription.unsubscribe();
       filterManagerSubscription.unsubscribe();
-      awaitingRequiredSubscription.unsubscribe();
-      awaitingSyncSubscription.unsubscribe();
       forcePublishSubscription.unsubscribe();
     },
   };

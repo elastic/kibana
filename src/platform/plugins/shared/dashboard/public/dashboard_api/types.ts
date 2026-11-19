@@ -266,8 +266,6 @@ export type DashboardApi = CanExpandPanels &
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     publishFilters: () => void;
-    /** `undefined` until it is known whether any pinned panel still needs a required value */
-    awaitingRequiredFilters$: PublishingSubject<boolean | undefined>;
 
     publishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
     unpublishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
