@@ -299,6 +299,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * Focuses the ES|QL quick search visor's natural language input on mount instead of the editor.
    */
   autoFocusVisor?: boolean;
+  /**
+   * Sends the ES|QL quick search visor's restored natural language prompt on mount and runs the
+   * generated query without the review step.
+   */
+  autoSubmitVisor?: boolean;
 
   /**
    * Optional configuration for ES|QL variables.
@@ -1657,6 +1662,7 @@ export const QueryBarTopRow = React.memo(
                     initialState={props.visorInitialState}
                     onInitialStateChange={props.onVisorInitialStateChange}
                     autoFocus={props.autoFocusVisor}
+                    autoSubmit={props.autoSubmitVisor}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}

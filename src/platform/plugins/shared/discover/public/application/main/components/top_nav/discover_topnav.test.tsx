@@ -41,6 +41,7 @@ const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
     onQuerySubmit,
     disableSubmitAction,
     showDatePicker,
+    autoSubmitVisor,
   } = props;
 
   return (
@@ -49,6 +50,7 @@ const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
       data-has-data-view-picker-component-props={String(Boolean(dataViewPickerComponentProps))}
       data-has-data-view-picker-override={String(Boolean(dataViewPickerOverride))}
       data-disable-submit-action={String(Boolean(disableSubmitAction))}
+      data-auto-submit-visor={String(Boolean(autoSubmitVisor))}
       data-date-picker-disabled={
         typeof showDatePicker === 'object' ? String(showDatePicker.disabled) : 'false'
       }
@@ -291,6 +293,30 @@ describe('Discover topnav component', () => {
         'false'
       );
     });
+  });
+
+  test('sends the prompt the tab was opened with only on the first mount', async () => {
+    const { toolkit, props } = await setup();
+    const tabId = toolkit.getCurrentTab().id;
+    toolkit.internalState.dispatch(
+      internalStateActions.setAutoSubmitVisor({ tabId, autoSubmitVisor: true })
+    );
+
+    const { unmount } = renderTestComponent({ toolkit, props });
+
+    await waitFor(() => expect(toolkit.getCurrentTab().autoSubmitVisor).toBe(false));
+    expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
+      'data-auto-submit-visor',
+      'true'
+    );
+
+    unmount();
+    renderTestComponent({ toolkit, props });
+
+    expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
+      'data-auto-submit-visor',
+      'false'
+    );
   });
 
   describe('date picker', () => {

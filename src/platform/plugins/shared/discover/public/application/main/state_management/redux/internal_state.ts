@@ -232,6 +232,11 @@ const internalStateSliceDef = createSlice({
         tab.skipInitialFetch = action.payload.skipInitialFetch;
       }),
 
+    setAutoSubmitVisor: (state, action: TabAction<Pick<TabState, 'autoSubmitVisor'>>) =>
+      withTab(state, action.payload, (tab) => {
+        tab.autoSubmitVisor = action.payload.autoSubmitVisor;
+      }),
+
     setIsDataViewLoading: (state, action: TabAction<Pick<TabState, 'isDataViewLoading'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.isDataViewLoading = action.payload.isDataViewLoading;

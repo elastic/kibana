@@ -104,6 +104,27 @@ describe('useNlGeneration', () => {
     expect(result.current.nlValue).toBe('');
   });
 
+  it('onNlSubmit applies the result without review when skipReview is set', async () => {
+    const onNlResult = jest.fn();
+    (coreStart.http.post as jest.Mock).mockResolvedValue({ content: 'FROM logs | LIMIT 10' });
+
+    const { result } = renderHook(
+      () => useControlledNlGeneration({ ...defaultParams, onNlResult }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    act(() => result.current.setNlValue('show me logs'));
+    await act(async () => {
+      await result.current.onNlSubmit({ skipReview: true });
+    });
+
+    expect(onNlResult).not.toHaveBeenCalled();
+    expect(defaultParams.onUpdateAndSubmitQuery).toHaveBeenCalledWith('FROM logs | LIMIT 10');
+    expect(result.current.nlValue).toBe('');
+  });
+
   it('onNlSubmit shows the server error message on failure', async () => {
     (coreStart.http.post as jest.Mock).mockRejectedValue({
       body: { message: 'Connector unavailable', statusCode: 503 },

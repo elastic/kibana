@@ -212,6 +212,7 @@ describe('InternalStateStore', () => {
     expect(newTab.globalState.refreshInterval?.pause).toBe(true);
     expect(newTab.skipInitialFetch).toBe(true);
     expect(newTab.autoFocusVisor).toBe(true);
+    expect(newTab.autoSubmitVisor).toBe(true);
     expect(newTab.uiState.visor).toEqual({ nlValue: 'show me logs' });
     expect(selectTab(store.getState(), initialTabId).appState).toEqual(initialTab.appState);
   });

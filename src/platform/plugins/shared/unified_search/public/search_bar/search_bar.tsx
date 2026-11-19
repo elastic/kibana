@@ -203,6 +203,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   visorInitialState?: QueryBarTopRowProps['visorInitialState'];
   onVisorInitialStateChange?: QueryBarTopRowProps['onVisorInitialStateChange'];
   autoFocusVisor?: QueryBarTopRowProps['autoFocusVisor'];
+  autoSubmitVisor?: QueryBarTopRowProps['autoSubmitVisor'];
 
   hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
@@ -888,6 +889,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           visorInitialState={this.props.visorInitialState}
           onVisorInitialStateChange={this.props.onVisorInitialStateChange}
           autoFocusVisor={this.props.autoFocusVisor}
+          autoSubmitVisor={this.props.autoSubmitVisor}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}

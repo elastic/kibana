@@ -368,6 +368,38 @@ describe('Quick search visor', () => {
       expect(nlInput.selectionStart).toBe('show me logs'.length);
     });
 
+    it('sends the restored prompt once on mount and applies the result without review when autoSubmit is set', async () => {
+      (corePluginMock.http.post as jest.Mock).mockResolvedValue({
+        content: 'FROM logs | LIMIT 10',
+      });
+      const onNlResult = jest.fn();
+      const onUpdateAndSubmitQuery = jest.fn();
+      const visorProps = {
+        ...props,
+        autoSubmit: true,
+        initialState: { nlValue: 'show me logs' },
+        onNlResult,
+        onUpdateAndSubmitQuery,
+      };
+      const { getByTestId, rerender } = renderWithI18n(renderWithEnterprise(visorProps));
+
+      await waitFor(() =>
+        expect(onUpdateAndSubmitQuery).toHaveBeenCalledWith('FROM logs | LIMIT 10')
+      );
+      expect(corePluginMock.http.post).toHaveBeenCalledWith(
+        '/internal/esql/nl_to_esql',
+        expect.objectContaining({
+          body: JSON.stringify({ nlInstruction: 'show me logs', currentQuery: 'FROM test_index' }),
+        })
+      );
+      expect(onNlResult).not.toHaveBeenCalled();
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveValue('');
+
+      rerenderVisor(rerender, { ...visorProps, query: 'FROM logs | LIMIT 10' });
+      await act(async () => {});
+      expect(corePluginMock.http.post).toHaveBeenCalledTimes(1);
+    });
+
     it('should switch to filter mode and back to natural language', async () => {
       const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
       await waitFor(() => {

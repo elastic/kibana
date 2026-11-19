@@ -600,6 +600,7 @@ export const openInNewTab: InternalStateThunkActionCreator<
       profileState?: ProfileStateMap;
       skipInitialFetch?: boolean;
       autoFocusVisor?: boolean;
+      autoSubmitVisor?: boolean;
       uiState?: TabState['uiState'];
     }
   ],
@@ -613,6 +614,7 @@ export const openInNewTab: InternalStateThunkActionCreator<
   profileState,
   skipInitialFetch,
   autoFocusVisor,
+  autoSubmitVisor,
   uiState,
 }) =>
   function openInNewTabThunkFn(dispatch, getState) {
@@ -629,6 +631,7 @@ export const openInNewTab: InternalStateThunkActionCreator<
       profileState: cloneDeep(profileState) ?? {},
       skipInitialFetch,
       autoFocusVisor,
+      autoSubmitVisor,
       uiState: { ...DEFAULT_TAB_STATE.uiState, ...uiState },
     };
 
@@ -656,7 +659,7 @@ export const openInNewTab: InternalStateThunkActionCreator<
   };
 
 /**
- * Opens a new ES|QL tab with the given tab's query and filters, without running it, and the prompt pre-filled to ask in natural language
+ * Opens a new ES|QL tab that sends the natural language prompt right away, with the given tab's query and filters as context
  */
 export const openAskInEsqlTab: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView; prompt: string }>],
@@ -681,11 +684,12 @@ export const openAskInEsqlTab: InternalStateThunkActionCreator<
         appState: { query: { esql: getInitialESQLQuery(dataView, query, filters) } },
         globalState: {
           timeRange: draftTimeRange ?? globalState.timeRange ?? services.timefilter.getTime(),
-          // The new tab must not fetch until the user asks, so auto-refresh starts paused
+          // Only the generated query should run, so auto-refresh starts paused
           refreshInterval: { ...refreshInterval, pause: true },
         },
         skipInitialFetch: true,
         autoFocusVisor: true,
+        autoSubmitVisor: true,
         uiState: { visor: { nlValue: prompt } },
       })
     );

@@ -319,6 +319,7 @@ export function createSearchBar({
             visorInitialState={props.visorInitialState}
             onVisorInitialStateChange={props.onVisorInitialStateChange}
             autoFocusVisor={props.autoFocusVisor}
+            autoSubmitVisor={props.autoSubmitVisor}
             hasDirtyState={props.hasDirtyState}
             esqlVariablesConfig={props.esqlVariablesConfig}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}

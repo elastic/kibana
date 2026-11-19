@@ -25,6 +25,12 @@ export const clearInferenceConnectorCache = (): void => {
   hasInferenceConnector = undefined;
 };
 
+export interface NlSubmitOptions {
+  // Applies the result directly even when the host reviews generated queries, for a prompt that
+  // arrived with the editor and so has no query of the user's to protect yet
+  skipReview?: boolean;
+}
+
 interface UseNlGenerationParams {
   query: string;
   nlValue: string;
@@ -92,67 +98,70 @@ export const useNlGeneration = ({
     setNlValue('');
   }, [setNlValue]);
 
-  const onNlSubmit = useCallback(async () => {
-    const trimmed = nlValue.trim();
-    if (!trimmed || isNlLoading) return;
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
-    setIsNlLoading(true);
-    const startTime = Date.now();
-    let appliedContent = false;
-    try {
-      const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
-        body: JSON.stringify({ nlInstruction: trimmed, currentQuery: query }),
-        signal: abortController.signal,
-      });
-      if (abortController.signal.aborted) return;
-      if (result.content) {
-        trackNlResult(
-          trimmed.length,
-          query.length,
-          startTime,
-          true,
-          undefined,
-          result.content.length
+  const onNlSubmit = useCallback(
+    async ({ skipReview = false }: NlSubmitOptions = {}) => {
+      const trimmed = nlValue.trim();
+      if (!trimmed || isNlLoading) return;
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+      setIsNlLoading(true);
+      const startTime = Date.now();
+      let appliedContent = false;
+      try {
+        const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
+          body: JSON.stringify({ nlInstruction: trimmed, currentQuery: query }),
+          signal: abortController.signal,
+        });
+        if (abortController.signal.aborted) return;
+        if (result.content) {
+          trackNlResult(
+            trimmed.length,
+            query.length,
+            startTime,
+            true,
+            undefined,
+            result.content.length
+          );
+          if (onNlResult && !skipReview) {
+            // The prompt stays until the generated query is kept
+            onNlResult(result.content, { onAccept: () => setNlValue(''), onReject: onNlReject });
+          } else {
+            appliedContent = true;
+            onUpdateAndSubmitQuery(result.content);
+          }
+        }
+      } catch (error) {
+        if (abortController.signal.aborted) return;
+        reportEsqlError(error, { errorType: 'NlToEsql' });
+        const errorCode = String(
+          (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
         );
-        if (onNlResult) {
-          // The prompt stays until the generated query is kept
-          onNlResult(result.content, { onAccept: () => setNlValue(''), onReject: onNlReject });
-        } else {
-          appliedContent = true;
-          onUpdateAndSubmitQuery(result.content);
+        trackNlResult(trimmed.length, query.length, startTime, false, errorCode || undefined);
+        const message = (error as { body?: { message?: string } })?.body?.message ?? nlErrorMessage;
+        core.notifications.toasts.addDanger({ title: message });
+      } finally {
+        if (abortControllerRef.current === abortController) {
+          abortControllerRef.current = null;
+          if (appliedContent) {
+            setNlValue('');
+          }
+          setIsNlLoading(false);
         }
       }
-    } catch (error) {
-      if (abortController.signal.aborted) return;
-      reportEsqlError(error, { errorType: 'NlToEsql' });
-      const errorCode = String(
-        (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
-      );
-      trackNlResult(trimmed.length, query.length, startTime, false, errorCode || undefined);
-      const message = (error as { body?: { message?: string } })?.body?.message ?? nlErrorMessage;
-      core.notifications.toasts.addDanger({ title: message });
-    } finally {
-      if (abortControllerRef.current === abortController) {
-        abortControllerRef.current = null;
-        if (appliedContent) {
-          setNlValue('');
-        }
-        setIsNlLoading(false);
-      }
-    }
-  }, [
-    nlValue,
-    setNlValue,
-    isNlLoading,
-    query,
-    core.http,
-    core.notifications.toasts,
-    onNlResult,
-    onNlReject,
-    onUpdateAndSubmitQuery,
-    trackNlResult,
-  ]);
+    },
+    [
+      nlValue,
+      setNlValue,
+      isNlLoading,
+      query,
+      core.http,
+      core.notifications.toasts,
+      onNlResult,
+      onNlReject,
+      onUpdateAndSubmitQuery,
+      trackNlResult,
+    ]
+  );
 
   return { isNlLoading, hasConnector, onNlSubmit, onStopGeneration };
 };
