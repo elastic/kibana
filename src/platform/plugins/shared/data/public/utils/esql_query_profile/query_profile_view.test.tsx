@@ -322,6 +322,14 @@ describe('QueryProfileView', () => {
       );
       expect(fills).toEqual([60, 30, 10, 0]);
 
+      // EuiProgress also writes its value in a live region, which screen readers must not announce
+      // because the button already says it.
+      const liveRegions = Array.from(strip.querySelectorAll('[aria-live]'));
+      expect(liveRegions.length).toBeGreaterThan(0);
+      liveRegions.forEach((region) =>
+        expect(region.closest('[aria-hidden="true"]')).not.toBeNull()
+      );
+
       await userEvent.click(dataLane);
 
       expect(screen.queryByTestId('esqlQueryProfileOperatorStrip')).not.toBeInTheDocument();

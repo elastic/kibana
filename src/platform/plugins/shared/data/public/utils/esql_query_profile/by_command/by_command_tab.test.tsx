@@ -38,5 +38,7 @@ describe('ByCommandTab', () => {
 
     // The text matchers of the testing library collapse whitespace, so the raw text is compared.
     expect(screen.getByTestId('esqlQueryProfileCommand').textContent).toContain(text);
+    // And the browser has to keep those spaces when it draws the text.
+    expect(window.getComputedStyle(screen.getByText(/WHERE name ==/)).whiteSpace).toBe('pre-wrap');
   });
 });
