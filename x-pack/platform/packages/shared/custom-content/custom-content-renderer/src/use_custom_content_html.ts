@@ -53,9 +53,9 @@ export interface UseCustomContentHtmlResult {
   noContent: boolean;
 }
 
-/** Keeps the same array while its items are the same, for callers that build the list inline. */
 const NO_COLUMNS: ReadonlySet<string> = new Set();
 
+/** Keeps the same array while its items are the same, for callers that build the list inline. */
 const useStableList = (list: readonly string[]): readonly string[] => {
   const stable = useRef(list);
   const isSame =

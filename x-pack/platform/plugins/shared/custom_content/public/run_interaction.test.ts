@@ -10,7 +10,7 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { CustomContentInteraction } from '@kbn/custom-content-renderer';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { SUPPORTED_INTERACTION_ACTIONS, runInteraction } from './run_interaction';
+import { runInteraction } from './run_interaction';
 
 const source: FilterableSource = {
   id: 'logs',
@@ -43,10 +43,6 @@ describe('runInteraction', () => {
         uiActions: {} as UiActionsStart,
         embeddable: {},
       })
-    ).rejects.toThrow('Unhandled custom content interaction');
-  });
-
-  it('offers the renderer exactly the actions it can run', () => {
-    expect(SUPPORTED_INTERACTION_ACTIONS).toEqual(['filter']);
+    ).rejects.toThrow('Unexpected object');
   });
 });

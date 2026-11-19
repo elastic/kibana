@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { assertNever } from '@kbn/std';
 import type {
   CustomContentInteraction,
   CustomContentInteractionAction,
@@ -32,8 +33,4 @@ export const runInteraction = async (
     default:
       return assertNever(action);
   }
-};
-
-const assertNever = (action: never): never => {
-  throw new Error(`Unhandled custom content interaction: ${String(action)}`);
 };

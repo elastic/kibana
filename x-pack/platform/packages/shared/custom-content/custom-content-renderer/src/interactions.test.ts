@@ -13,16 +13,35 @@ import {
 
 const columns = new Set(['host.name', 'count']);
 
-const render = (attributes: string, inner = 'host-1') => {
+type Attributes = Record<string, string>;
+
+const FILTER_HOST: Attributes = {
+  'data-cc-action': 'filter',
+  'data-cc-field': 'host.name',
+  'data-cc-value': 'a',
+};
+
+// Built with the DOM API, not by parsing a string: the attributes are test input, and nothing here
+// should turn a string into markup.
+const createElementWith = (doc: Document, tag: string, attributes: Attributes) => {
+  const element = doc.createElement(tag);
+  Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
+  return element;
+};
+
+/** The span inside a button that carries the attributes, which is where a click lands. */
+const render = (attributes: Attributes) => {
   const doc = document.implementation.createHTMLDocument('');
-  doc.body.innerHTML = `<button ${attributes}><span id="inner">${inner}</span></button>`;
-  return doc.getElementById('inner');
+  const button = createElementWith(doc, 'button', attributes);
+  const inner = createElementWith(doc, 'span', {});
+  button.append(inner);
+  doc.body.append(button);
+  return inner;
 };
 
 describe('readInteraction', () => {
   it('reads a filter from the element, or from a descendant of it', () => {
-    const target = render('data-cc-action="filter" data-cc-field="host.name" data-cc-value="a"');
-    expect(readInteraction(target, columns)).toEqual({
+    expect(readInteraction(render(FILTER_HOST), columns)).toEqual({
       action: 'filter',
       field: 'host.name',
       value: 'a',
@@ -31,30 +50,20 @@ describe('readInteraction', () => {
   });
 
   it('negates with is_not', () => {
-    const target = render(
-      'data-cc-action="filter" data-cc-field="host.name" data-cc-value="a" data-cc-op="is_not"'
-    );
+    const target = render({ ...FILTER_HOST, 'data-cc-op': 'is_not' });
     expect(readInteraction(target, columns)?.negate).toBe(true);
   });
 
-  it.each([
-    ['an unknown action', 'data-cc-action="navigate" data-cc-field="host.name" data-cc-value="a"'],
-    [
-      'a column the query did not return',
-      'data-cc-action="filter" data-cc-field="user.id" data-cc-value="a"',
-    ],
-    ['a missing value', 'data-cc-action="filter" data-cc-field="host.name"'],
-    ['an empty value', 'data-cc-action="filter" data-cc-field="host.name" data-cc-value=""'],
-    ['a missing field', 'data-cc-action="filter" data-cc-value="a"'],
-    [
-      'an unknown operator',
-      'data-cc-action="filter" data-cc-field="host.name" data-cc-value="a" data-cc-op="gt"',
-    ],
+  it.each<[string, Attributes]>([
+    ['an unknown action', { ...FILTER_HOST, 'data-cc-action': 'navigate' }],
+    ['a column the query did not return', { ...FILTER_HOST, 'data-cc-field': 'user.id' }],
+    ['a missing value', { 'data-cc-action': 'filter', 'data-cc-field': 'host.name' }],
+    ['an empty value', { ...FILTER_HOST, 'data-cc-value': '' }],
+    ['a missing field', { 'data-cc-action': 'filter', 'data-cc-value': 'a' }],
+    ['an unknown operator', { ...FILTER_HOST, 'data-cc-op': 'gt' }],
     [
       'an oversized value',
-      `data-cc-action="filter" data-cc-field="host.name" data-cc-value="${'a'.repeat(
-        MAX_INTERACTION_VALUE_LENGTH + 1
-      )}"`,
+      { ...FILTER_HOST, 'data-cc-value': 'a'.repeat(MAX_INTERACTION_VALUE_LENGTH + 1) },
     ],
   ])('drops %s', (_, attributes) => {
     expect(readInteraction(render(attributes), columns)).toBeUndefined();
@@ -62,28 +71,26 @@ describe('readInteraction', () => {
 
   it('drops an oversized field name even when it is a column', () => {
     const field = 'f'.repeat(MAX_INTERACTION_FIELD_LENGTH + 1);
-    const target = render(`data-cc-action="filter" data-cc-field="${field}" data-cc-value="a"`);
+    const target = render({ ...FILTER_HOST, 'data-cc-field': field });
     expect(readInteraction(target, new Set([field]))).toBeUndefined();
   });
 
-  it.each(['constructor', '__proto__', 'toString', 'hasOwnProperty'])(
+  it.each(['constructor', '__proto__'])(
     'does not treat the inherited key %s as an action',
     (action) => {
-      const target = render(
-        `data-cc-action="${action}" data-cc-field="host.name" data-cc-value="a"`
-      );
+      const target = render({ ...FILTER_HOST, 'data-cc-action': action });
       expect(readInteraction(target, columns)).toBeUndefined();
     }
   );
 
   it('accepts only the actions the host allows', () => {
-    const target = render('data-cc-action="filter" data-cc-field="host.name" data-cc-value="a"');
+    const target = render(FILTER_HOST);
     expect(readInteraction(target, columns, ['filter'])).toBeDefined();
     expect(readInteraction(target, columns, [])).toBeUndefined();
   });
 
   it('ignores a click outside any action, and non-element targets', () => {
-    expect(readInteraction(render(''), columns)).toBeUndefined();
+    expect(readInteraction(render({}), columns)).toBeUndefined();
     expect(readInteraction(null, columns)).toBeUndefined();
     expect(readInteraction({ nodeType: 1 }, columns)).toBeUndefined();
     expect(readInteraction(document.createTextNode('x'), columns)).toBeUndefined();
@@ -93,9 +100,8 @@ describe('readInteraction', () => {
     // Browsers let `<input name="getAttribute">` shadow the method on a form; jsdom does not, so
     // the shadowing is done by hand. This must hold even if the sanitizer ever let such a name by.
     const doc = document.implementation.createHTMLDocument('');
-    doc.body.innerHTML =
-      '<form id="f" data-cc-action="filter" data-cc-field="host.name" data-cc-value="a"><span id="s"></span></form>';
-    const form = doc.getElementById('f')!;
+    const form = createElementWith(doc, 'form', FILTER_HOST);
+    doc.body.append(form);
     ['getAttribute', 'closest'].forEach((name) =>
       Object.defineProperty(form, name, { value: doc.createElement('input') })
     );

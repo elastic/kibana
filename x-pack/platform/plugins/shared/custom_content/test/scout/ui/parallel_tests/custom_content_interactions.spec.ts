@@ -15,12 +15,14 @@ import { spaceTest, type CustomContentTestFixtures } from '../fixtures';
 const DASHBOARD_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
 
-// An index of its own with no time field: the dashboard's time range then does not filter the
-// panel, and the rows do not depend on when the test runs.
-const HOSTS_INDEX = 'custom-content-interactions-scout';
+// An index with no time field: the dashboard's time range then does not filter the panel, and the
+// rows do not depend on when the test runs. Spaces isolate saved objects, not indices, so every
+// worker gets an index named after its space, and no worker can delete another's.
 const HOSTS = ['web-1', 'web-2', 'web-3'];
 
-const HOSTS_QUERY = `FROM ${HOSTS_INDEX} | STATS requests = COUNT(*) BY host | SORT host`;
+const getHostsIndex = (spaceId: string) => `custom-content-interactions-${spaceId}`;
+const getHostsQuery = (spaceId: string) =>
+  `FROM ${getHostsIndex(spaceId)} | STATS requests = COUNT(*) BY host | SORT host`;
 
 const dashboardRole: KibanaRole = {
   elasticsearch: {
@@ -71,14 +73,15 @@ spaceTest.describe(
     spaceTest.beforeAll(async ({ scoutSpace, esClient }) => {
       await scoutSpace.savedObjects.cleanStandardList();
       await scoutSpace.savedObjects.load(DASHBOARD_ARCHIVE);
-      await esClient.indices.delete({ index: HOSTS_INDEX, ignore_unavailable: true });
+      const index = getHostsIndex(scoutSpace.id);
+      await esClient.indices.delete({ index, ignore_unavailable: true });
       await esClient.indices.create({
-        index: HOSTS_INDEX,
+        index,
         mappings: { properties: { host: { type: 'keyword' } } },
       });
       await esClient.bulk({
         refresh: true,
-        operations: HOSTS.flatMap((host) => [{ index: { _index: HOSTS_INDEX } }, { host }]),
+        operations: HOSTS.flatMap((host) => [{ index: { _index: index } }, { host }]),
       });
     });
 
@@ -89,7 +92,10 @@ spaceTest.describe(
 
     spaceTest.afterAll(async ({ scoutSpace, esClient }) => {
       await scoutSpace.savedObjects.cleanStandardList();
-      await esClient.indices.delete({ index: HOSTS_INDEX, ignore_unavailable: true });
+      await esClient.indices.delete({
+        index: getHostsIndex(scoutSpace.id),
+        ignore_unavailable: true,
+      });
     });
 
     const addHostsPanel = async (
@@ -97,20 +103,21 @@ spaceTest.describe(
         dashboard,
         customContentPanel,
       }: Pick<CustomContentTestFixtures['pageObjects'], 'dashboard' | 'customContentPanel'>,
-      template: string
+      template: string,
+      spaceId: string
     ) => {
       await dashboard.openAddPanelFlyout();
       await customContentPanel.openFromAddPanelFlyout();
       await customContentPanel.setTemplate(template);
-      await customContentPanel.setEsqlQuery(HOSTS_QUERY);
+      await customContentPanel.setEsqlQuery(getHostsQuery(spaceId));
       await customContentPanel.applyAndClose();
     };
 
     spaceTest(
       'a click adds a filter to the dashboard, and the next click on it flips the same filter',
-      async ({ pageObjects }) => {
+      async ({ pageObjects, scoutSpace }) => {
         const { customContentPanel, filterBar } = pageObjects;
-        await addHostsPanel(pageObjects, HOST_TEMPLATE);
+        await addHostsPanel(pageObjects, HOST_TEMPLATE, scoutSpace.id);
 
         const iframe = customContentPanel.getPanelIframe();
         await expect(iframe.getByRole('button', { name: 'web-1', exact: true })).toBeVisible();
@@ -145,9 +152,9 @@ spaceTest.describe(
 
     spaceTest(
       'a click on a field the query did not return adds nothing',
-      async ({ pageObjects }) => {
+      async ({ pageObjects, scoutSpace }) => {
         const { customContentPanel, filterBar } = pageObjects;
-        await addHostsPanel(pageObjects, MIXED_TEMPLATE);
+        await addHostsPanel(pageObjects, MIXED_TEMPLATE, scoutSpace.id);
 
         const iframe = customContentPanel.getPanelIframe();
         await expect(

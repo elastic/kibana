@@ -12,6 +12,7 @@
     "@kbn/i18n",
     "@kbn/data-plugin",
     "@kbn/data-source",
+    "@kbn/std",
     "@kbn/esql-utils",
     "@kbn/es-query",
     "@kbn/search-types",

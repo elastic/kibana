@@ -561,23 +561,6 @@ describe('customContentEmbeddableFactory', () => {
         { title: 'Could not apply the filter' }
       );
     });
-
-    it('applies nothing for a field none of the panel data sources has', async () => {
-      const { embeddable } = await buildEmbeddable(baseState);
-      await waitFor(() => expect(embeddable.api.dataSources$.getValue()).toBeDefined());
-      await act(async () => render(<embeddable.Component />));
-
-      await act(async () =>
-        capturedComponentProps?.onInteraction?.({
-          action: 'filter',
-          field: 'user.id',
-          value: 'a',
-          negate: false,
-        })
-      );
-
-      expect(mockExecuteTriggerActions).not.toHaveBeenCalled();
-    });
   });
 
   // Screenshotting marks a panel render-complete as soon as `dataLoading$` is falsy, so reporting

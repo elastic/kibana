@@ -6,8 +6,8 @@
  */
 
 import { generateFilters, type FilterManager } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import type { FilterableSource } from '@kbn/data-source';
+import { getConvertedValueForField, type Filter } from '@kbn/es-query';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { FilterInteraction } from '@kbn/custom-content-renderer';
 import type { InteractionHost } from './interaction_host';
@@ -41,7 +41,7 @@ export const buildInteractionFilters = (
   // keyword in another.
   for (const source of dataSources) {
     const sourceField = source.fields.find(isFilterableField);
-    const filterValue = sourceField && toFieldValue(sourceField.type, value);
+    const filterValue = sourceField && toFieldValue(sourceField, value);
     if (sourceField && filterValue !== undefined) {
       return generateFilters(filterManager, sourceField, filterValue, negate ? '-' : '+', source);
     }
@@ -49,13 +49,37 @@ export const buildInteractionFilters = (
   return [];
 };
 
-/** The value as the field holds it: text stays text, a number is parsed, and a bad number is none. */
-const toFieldValue = (type: string | undefined, value: string): string | number | undefined => {
-  if (type !== 'number') return value;
-  // `Number()` alone would turn " " into 0 and "0x10" into 16.
-  if (!PLAIN_NUMBER.test(value)) return undefined;
+/**
+ * Whether text is a number the field can hold. `Number()` alone would turn " " into 0 and "0x10"
+ * into 16, and `1e-999` is finite only because it underflowed to 0: a filter on any of them is not
+ * the value that was clicked.
+ */
+const isPlainNumber = (value: string): boolean => {
+  if (!PLAIN_NUMBER.test(value)) return false;
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : undefined;
+  if (!Number.isFinite(parsed)) return false;
+  const [mantissa] = value.split(/e/i);
+  return !(parsed === 0 && /[1-9]/.test(mantissa));
+};
+
+/**
+ * The value as the field holds it, with the platform's own conversion (the one `buildPhraseFilter`
+ * applies): text for a number field becomes a number and `true` / `false` become booleans. It matters
+ * beyond the query: `generateFilters` finds a filter that is already there with `===`, so `true` has
+ * to be the boolean a click on a chart would have used. Nothing at all when the text is not a value
+ * of that type, where a click on a chart never has the problem, as its cells are typed.
+ */
+const toFieldValue = (
+  field: FilterableField,
+  value: string
+): string | number | boolean | undefined => {
+  if (field.type === 'number' && !isPlainNumber(value)) return undefined;
+  try {
+    return getConvertedValueForField(field, value);
+  } catch {
+    // The text is neither `true` nor `false`, for a boolean field.
+    return undefined;
+  }
 };
 
 /** Applies the filters through the platform trigger, so the dashboard decides what happens to them. */

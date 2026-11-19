@@ -229,6 +229,43 @@ describe('useCustomContentHtml', () => {
       ]);
     });
 
+    it('reports the names of the columns of every query, for the host to validate clicks against', async () => {
+      mockFetchEsqlData
+        .mockResolvedValueOnce({
+          columns: [{ name: 'host', type: 'keyword' }],
+          values: [],
+          all_columns: [],
+        })
+        .mockResolvedValueOnce({
+          columns: [{ name: 'n', type: 'long' }],
+          values: [],
+          all_columns: [],
+        });
+
+      const { result } = renderHook(() =>
+        useCustomContentHtml({
+          ...esqlParams,
+          esqlQueries: [...esqlParams.esqlQueries, 'FROM metrics | STATS n = COUNT()'],
+        })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.columns).toEqual(new Set(['host', 'n']));
+    });
+
+    it('reports no columns for a static panel', async () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({
+          ...baseParams,
+          savedTemplate: '<p>static</p>',
+        })
+      );
+
+      await waitFor(() => expect(result.current.noContent).toBe(false));
+      expect(result.current.columns.size).toBe(0);
+    });
+
     it('refetches only when the additional queries change, not when the list is rebuilt', async () => {
       const { result, rerender } = renderHook(
         ({ queries }) =>

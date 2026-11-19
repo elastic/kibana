@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useCustomContentHtml } from './use_custom_content_html';
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
@@ -130,8 +131,7 @@ export const CustomContentComponent = ({
 
   const hasInteractions = isInteractive && onInteraction !== undefined;
   // The listener outlives renders, so it reads what is current instead of closing over it.
-  const latest = useRef({ columns, onInteraction, interactionActions });
-  latest.current = { columns, onInteraction, interactionActions };
+  const latest = useLatest({ columns, onInteraction, interactionActions });
   const detachListener = useRef<(() => void) | undefined>();
 
   // A new srcDoc is a new document, so the listener is attached on every load.
@@ -157,7 +157,7 @@ export const CustomContentComponent = ({
       detachListener.current = () =>
         EventTarget.prototype.removeEventListener.call(frameDocument, 'click', onClick);
     },
-    [hasInteractions]
+    [hasInteractions, latest]
   );
 
   useEffect(() => () => detachListener.current?.(), []);

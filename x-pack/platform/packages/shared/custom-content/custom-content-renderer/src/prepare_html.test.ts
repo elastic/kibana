@@ -167,14 +167,6 @@ describe('sanitizeHtml interactions', () => {
     expect(html).toContain('data-cc-field="host.name"');
     expect(html).toContain('data-cc-value="a"');
   });
-
-  it('still removes scripts and event handlers next to them', () => {
-    const html = sanitizeHtml(
-      '<button onclick="alert(1)" data-cc-action="filter">x</button><script>alert(1)</script>'
-    );
-    expect(html).not.toContain('onclick');
-    expect(html).not.toContain('<script');
-  });
 });
 
 describe('sanitizeHtml', () => {

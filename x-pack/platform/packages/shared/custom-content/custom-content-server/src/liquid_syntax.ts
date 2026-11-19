@@ -13,6 +13,10 @@ import {
 
 const liquid = new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
 
+// Parsed tags keep a reference to the source token and to the engine that parsed them. Neither is
+// part of the template, and walking into the engine would read its internals as if they were one.
+const SKIPPED_KEYS: ReadonlySet<string> = new Set(['token', 'liquid']);
+
 /**
  * The name of the first forbidden filter the parsed template applies, or undefined. The tree is
  * walked generically (every `filters` list, whatever tag holds it: output, assign, capture, loops)
@@ -31,14 +35,15 @@ const findForbiddenFilter = (node: unknown, seen = new Set<unknown>()): string |
     return undefined;
   }
 
-  const { filters, token, ...rest } = node as { filters?: unknown; token?: unknown };
+  const { filters } = node as { filters?: unknown };
   if (Array.isArray(filters)) {
     for (const filter of filters) {
       const name = (filter as { name?: unknown } | null)?.name;
       if (typeof name === 'string' && CUSTOM_CONTENT_FORBIDDEN_FILTERS.includes(name)) return name;
     }
   }
-  for (const value of Object.values(rest)) {
+  for (const [key, value] of Object.entries(node)) {
+    if (SKIPPED_KEYS.has(key)) continue;
     const found = findForbiddenFilter(value, seen);
     if (found) return found;
   }

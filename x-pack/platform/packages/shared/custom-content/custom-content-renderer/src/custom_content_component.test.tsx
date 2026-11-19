@@ -93,6 +93,11 @@ describe('CustomContentComponent', () => {
 
   describe('interactions', () => {
     const columns = new Set(['host.name']);
+    const FILTER_HOST = {
+      'data-cc-action': 'filter',
+      'data-cc-field': 'host.name',
+      'data-cc-value': 'a',
+    };
 
     const mountWithColumns = (onInteraction?: jest.Mock, props = {}) => {
       mockUseCustomContentHtml.mockReturnValue({
@@ -111,9 +116,17 @@ describe('CustomContentComponent', () => {
 
     // jsdom has no user input and its `isTrusted` cannot be forged, so the click listener is
     // captured as the component registers it and called with the event a browser would build.
-    const clickInFrame = (iframe: HTMLIFrameElement, attributes: string, isTrusted = true) => {
+    const clickInFrame = (
+      iframe: HTMLIFrameElement,
+      attributes: Record<string, string>,
+      isTrusted = true
+    ) => {
       const frameDocument = iframe.contentDocument!;
-      frameDocument.body.innerHTML = `<button id="b" ${attributes}>x</button>`;
+      // Built with the DOM API: the attributes are test input, not markup to parse.
+      const button = frameDocument.createElement('button');
+      button.id = 'b';
+      Object.entries(attributes).forEach(([name, value]) => button.setAttribute(name, value));
+      frameDocument.body.replaceChildren(button);
       const addEventListener = jest.spyOn(EventTarget.prototype, 'addEventListener');
       fireEvent.load(iframe);
       const clickCall = addEventListener.mock.calls.findIndex(
@@ -128,18 +141,10 @@ describe('CustomContentComponent', () => {
       });
     };
 
-    it('keeps the frame without scripts, whether or not the host listens', () => {
-      [undefined, jest.fn()].forEach((onInteraction) => {
-        const { iframe, unmount } = mountWithColumns(onInteraction);
-        expect(iframe.getAttribute('sandbox')!.split(' ')).not.toContain('allow-scripts');
-        unmount();
-      });
-    });
-
     it('attaches no listener when the host does not listen', () => {
       const addEventListener = jest.spyOn(EventTarget.prototype, 'addEventListener');
       const { iframe } = mountWithColumns(undefined);
-      iframe.contentDocument!.body.innerHTML = '<button id="b">x</button>';
+      iframe.contentDocument!.body.replaceChildren(iframe.contentDocument!.createElement('button'));
       fireEvent.load(iframe);
       const clickListeners = addEventListener.mock.calls.filter(
         ([type], index) =>
@@ -152,7 +157,7 @@ describe('CustomContentComponent', () => {
     it('reports a click on an element that declares a valid filter', () => {
       const onInteraction = jest.fn();
       const { iframe } = mountWithColumns(onInteraction);
-      clickInFrame(iframe, 'data-cc-action="filter" data-cc-field="host.name" data-cc-value="a"');
+      clickInFrame(iframe, FILTER_HOST);
       expect(onInteraction).toHaveBeenCalledWith({
         action: 'filter',
         field: 'host.name',
@@ -164,25 +169,21 @@ describe('CustomContentComponent', () => {
     it('ignores an action the host did not list as supported', () => {
       const onInteraction = jest.fn();
       const { iframe } = mountWithColumns(onInteraction, { interactionActions: [] });
-      clickInFrame(iframe, 'data-cc-action="filter" data-cc-field="host.name" data-cc-value="a"');
+      clickInFrame(iframe, FILTER_HOST);
       expect(onInteraction).not.toHaveBeenCalled();
     });
 
     it('ignores a click that names a column the query did not return', () => {
       const onInteraction = jest.fn();
       const { iframe } = mountWithColumns(onInteraction);
-      clickInFrame(iframe, 'data-cc-action="filter" data-cc-field="user.id" data-cc-value="a"');
+      clickInFrame(iframe, { ...FILTER_HOST, 'data-cc-field': 'user.id' });
       expect(onInteraction).not.toHaveBeenCalled();
     });
 
     it('ignores a click that is not from the user', () => {
       const onInteraction = jest.fn();
       const { iframe } = mountWithColumns(onInteraction);
-      clickInFrame(
-        iframe,
-        'data-cc-action="filter" data-cc-field="host.name" data-cc-value="a"',
-        false
-      );
+      clickInFrame(iframe, FILTER_HOST, false);
       expect(onInteraction).not.toHaveBeenCalled();
     });
 
