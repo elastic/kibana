@@ -20,7 +20,7 @@ import {
   RULE_DISABLED_EBT_EVENT_TYPE,
   RULE_ENABLED_EBT_EVENT_TYPE,
   RULE_UPDATED_EBT_EVENT_TYPE,
-} from '../../../../../server/lib/telemetry/rule_ebt_schema';
+} from '../../../../../server/lib/telemetry/rules/rule_ebt_schema';
 import { apiTest, buildCreateRuleData } from '../fixtures';
 
 // The rules service sends a non-UI request, reported on the `api` channel with no app.
@@ -69,6 +69,7 @@ apiTest.describe(
       );
       await apiServices.alertingV2.rules.update(created.id, {
         metadata: { name: 'ebt-renamed-rule' },
+        schedule: { every: '5m' },
       });
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
@@ -78,6 +79,7 @@ apiTest.describe(
       expect(event.properties).toMatchObject({
         rule_id: created.id,
         enabled: true,
+        updated_fields: ['metadata.name', 'schedule.every'],
         origin: API_ORIGIN,
       });
       expect(event.properties.origin.app).toBeUndefined();

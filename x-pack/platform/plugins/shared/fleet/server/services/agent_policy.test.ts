@@ -1294,7 +1294,7 @@ describe('Agent policy', () => {
           agentlessSoClient,
           esClient,
           'mocked',
-          { revoke: true }
+          { revoke: true, unenrolledReason: 'agentless' }
         );
       } finally {
         deleteAgentlessAgentSpy.mockRestore();
@@ -2836,6 +2836,46 @@ describe('Agent policy', () => {
     beforeEach(() => {
       soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    });
+
+    it('should not copy denied overrides stored before they were rejected', async () => {
+      const basePolicy = {
+        id: 'source-policy',
+        name: 'source',
+        namespace: 'default',
+        is_managed: false,
+        overrides: {
+          receivers: { otlp: {} },
+          'service.pipelines': {},
+          'agent.download.timeout': '2h',
+        },
+      } as unknown as AgentPolicy;
+      const getSpy = jest
+        .spyOn(agentPolicyService, 'get')
+        .mockResolvedValueOnce(basePolicy)
+        .mockResolvedValueOnce({ ...basePolicy, id: 'copied-policy' });
+      const createSpy = jest
+        .spyOn(agentPolicyService, 'create')
+        .mockResolvedValue({ ...basePolicy, id: 'copied-policy' });
+      const deploySpy = jest.spyOn(agentPolicyService, 'deployPolicy').mockResolvedValue();
+
+      try {
+        await agentPolicyService.copy(soClient, esClient, 'source-policy', { name: 'copy' });
+
+        expect(createSpy).toHaveBeenCalledWith(
+          soClient,
+          esClient,
+          expect.objectContaining({
+            name: 'copy',
+            overrides: { 'agent.download.timeout': '2h' },
+          }),
+          undefined
+        );
+      } finally {
+        getSpy.mockRestore();
+        createSpy.mockRestore();
+        deploySpy.mockRestore();
+      }
     });
 
     it('should throw error for agent policy which has managed package policy', async () => {

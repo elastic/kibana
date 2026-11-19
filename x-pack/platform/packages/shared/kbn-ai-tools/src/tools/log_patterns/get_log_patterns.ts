@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import type {
   AggregationsAggregationContainer,
   AggregationsCategorizeTextAggregation,
@@ -420,66 +421,70 @@ export async function getSigEventsLogPatternsEsql({
   kql,
   fields,
 }: SigEventsLogPatternEsqlOptions): Promise<LogPatternEsqlEntry[]> {
-  const signal = AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
-  const columns = await getEsqlColumnSchema({
-    esClient: esClient.client,
-    index: samplingSource,
-    start,
-    end,
-    signal,
-  });
-  // Both `text` and `match_only_text` mappings report as `text` in `column.type`.
-  const textColumnNames = new Set(
-    columns.filter((column) => column.type === 'text').map((column) => column.name)
-  );
-  const eligibleFields = fields.filter((field) => textColumnNames.has(field));
+  const signal = timeoutSignal(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
+  try {
+    const columns = await getEsqlColumnSchema({
+      esClient: esClient.client,
+      index: samplingSource,
+      start,
+      end,
+      signal,
+    });
+    // Both `text` and `match_only_text` mappings report as `text` in `column.type`.
+    const textColumnNames = new Set(
+      columns.filter((column) => column.type === 'text').map((column) => column.name)
+    );
+    const eligibleFields = fields.filter((field) => textColumnNames.has(field));
 
-  if (!eligibleFields.length) {
-    return [];
+    if (!eligibleFields.length) {
+      return [];
+    }
+
+    const totalDocs = await runEsqlCountQuery({
+      esClient,
+      samplingSource,
+      start,
+      end,
+      kql,
+    });
+    if (totalDocs === 0) {
+      return [];
+    }
+
+    const samplingProbability =
+      MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
+
+    const filter = { bool: { filter: [...kqlQuery(kql), ...dateRangeQuery(start, end)] } };
+
+    const perField = await Promise.all(
+      eligibleFields.map(async (field) => {
+        // Metadata-free, so it works on ES|QL views as well as concrete indices.
+        const rows = await categorizeWithNoiseExclusion({
+          esClient,
+          indices: samplingSource,
+          field,
+          total: totalDocs,
+          samplingProbability,
+          filter,
+        });
+
+        return rows.map((row) => ({
+          field,
+          pattern: row.pattern,
+          count: row.count,
+          sample: row.sample,
+        }));
+      })
+    );
+
+    return uniqBy(
+      // Dedupe by sample so `message` and `body.text` don't repeat the same representative line.
+      perField.flat().sort((a, b) => b.count - a.count),
+      (pattern) => pattern.sample
+    );
+  } finally {
+    signal.dispose();
   }
-
-  const totalDocs = await runEsqlCountQuery({
-    esClient,
-    samplingSource,
-    start,
-    end,
-    kql,
-  });
-  if (totalDocs === 0) {
-    return [];
-  }
-
-  const samplingProbability =
-    MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
-
-  const filter = { bool: { filter: [...kqlQuery(kql), ...dateRangeQuery(start, end)] } };
-
-  const perField = await Promise.all(
-    eligibleFields.map(async (field) => {
-      // Metadata-free, so it works on ES|QL views as well as concrete indices.
-      const rows = await categorizeWithNoiseExclusion({
-        esClient,
-        indices: samplingSource,
-        field,
-        total: totalDocs,
-        samplingProbability,
-        filter,
-      });
-
-      return rows.map((row) => ({
-        field,
-        pattern: row.pattern,
-        count: row.count,
-        sample: row.sample,
-      }));
-    })
-  );
-
-  return uniqBy(
-    // Dedupe by sample so `message` and `body.text` don't repeat the same representative line.
-    perField.flat().sort((a, b) => b.count - a.count),
-    (pattern) => pattern.sample
-  );
 }
 
 async function runEsqlCountQuery({

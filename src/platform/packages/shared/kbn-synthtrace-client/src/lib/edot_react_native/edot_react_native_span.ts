@@ -9,9 +9,25 @@
 
 import type { EdotSpan, EdotSpanDocument } from '../edot_shared/edot_span';
 
+export const MOBILE_SPAN_KIND = {
+  CLIENT: 'Client',
+  INTERNAL: 'Internal',
+  SERVER: 'Server',
+} as const;
+
+export const MOBILE_SPAN_STATUS = {
+  UNSET: 'Unset',
+  OK: 'Ok',
+  ERROR: 'Error',
+} as const;
+
+export type EdotReactNativeSpanKind = (typeof MOBILE_SPAN_KIND)[keyof typeof MOBILE_SPAN_KIND];
+export type EdotReactNativeSpanStatus =
+  (typeof MOBILE_SPAN_STATUS)[keyof typeof MOBILE_SPAN_STATUS];
+
 export type EdotReactNativeSpanDocument = EdotSpanDocument<
-  'Client' | 'Internal',
-  'Unset' | 'Ok' | 'Error'
+  EdotReactNativeSpanKind,
+  EdotReactNativeSpanStatus
 >;
 
 /** OTel-native span of EDOT Android or EDOT iOS. */

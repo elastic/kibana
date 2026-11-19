@@ -6,7 +6,7 @@
  */
 
 import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
-import { HuntIncompleteReason, HuntIoc } from '../components/hunt.gen';
+import { HuntIncompleteReason, HuntIoc, HuntIocType } from '../components/hunt.gen';
 
 /**
  * `hunt_result` payload the hunt writes onto a Significant Security Event attachment.
@@ -22,6 +22,77 @@ import { HuntIncompleteReason, HuntIoc } from '../components/hunt.gen';
  */
 export const isoDatetimeSchema = lazySchema(() => isoDateTime().max(64));
 
+/** Allowlisted ECS keys stored as event / hit evidence (`fields`). At most 8 per event. */
+export const HUNT_EVIDENCE_FIELD_KEYS = [
+  'process.name',
+  'process.command_line',
+  'process.parent.name',
+  'process.executable',
+  'file.path',
+  'file.hash.sha256',
+  'dns.question.name',
+  'destination.ip',
+  'destination.domain',
+  'source.ip',
+  'url.full',
+  'event.action',
+] as const;
+
+export type HuntEvidenceFieldKey = (typeof HUNT_EVIDENCE_FIELD_KEYS)[number];
+
+const HUNT_EVIDENCE_FIELD_KEY_SET: ReadonlySet<string> = new Set(HUNT_EVIDENCE_FIELD_KEYS);
+
+/** Max keys and value length for evidence `fields` on hits and SSE events. */
+export const HUNT_EVIDENCE_FIELDS_MAX_KEYS = 8;
+export const HUNT_EVIDENCE_FIELD_VALUE_MAX = 256;
+
+/**
+ * Max entries in `matched.iocs` on a hit or SSE event (`HuntForThreatHit` and the SSE
+ * `eventRefSchema` both cap the array here). One IOC can match several ECS fields on one
+ * document, so producers cap the list to this before it reaches either schema.
+ */
+export const HUNT_MATCHED_IOCS_MAX = 10;
+
+/**
+ * Max length of a hit's `host` / `user` on the wire and on an SSE event ref. Mirrors the
+ * generated `HuntForThreatHit` schema, so producers truncate before the envelope validates.
+ */
+export const HUNT_HIT_NAME_MAX = 512;
+
+/**
+ * IOC types Tier 1 matches case-insensitively (the clause folds case, attribution folds both
+ * sides). Readers building a pivot for one of these must fold case the same way.
+ */
+export const HUNT_CASE_INSENSITIVE_IOC_TYPES: ReadonlySet<string> = new Set(['hash', 'domain']);
+
+/**
+ * Bounded evidence map: allowlisted keys only, at most
+ * {@link HUNT_EVIDENCE_FIELDS_MAX_KEYS}, values at most
+ * {@link HUNT_EVIDENCE_FIELD_VALUE_MAX} characters.
+ */
+export const huntEvidenceFieldsSchema = lazySchema(() =>
+  z
+    .record(z.string().min(1).max(128), z.string().max(HUNT_EVIDENCE_FIELD_VALUE_MAX))
+    .superRefine((fields, ctx) => {
+      const keys = Object.keys(fields);
+      if (keys.length > HUNT_EVIDENCE_FIELDS_MAX_KEYS) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `fields accepts at most ${HUNT_EVIDENCE_FIELDS_MAX_KEYS} keys`,
+        });
+      }
+      for (const key of keys) {
+        if (!HUNT_EVIDENCE_FIELD_KEY_SET.has(key)) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `fields key "${key}" is not allowlisted`,
+            path: [key],
+          });
+        }
+      }
+    })
+);
+
 const huntResultPerIndexSchema = lazySchema(() =>
   z.object({
     index: z.string().min(1).max(256),
@@ -31,37 +102,75 @@ const huntResultPerIndexSchema = lazySchema(() =>
   })
 );
 
-const huntResultTier1Schema = lazySchema(() =>
+const huntResultPerIocSchema = lazySchema(() =>
   z.object({
-    // `scope_blocked`: no required index existed, so Tier 1 never ran. A failed run, never clean.
-    status: z.enum([
-      'scope_blocked',
-      'no_searchable_terms',
-      'no_environment_hits',
-      'environment_hits_found',
-    ]),
-    counts: z
-      .object({
-        total_hits: z.number().int().min(0),
-        returned_hits: z.number().int().min(0),
-        affected_hosts: z.number().int().min(0),
-        affected_users: z.number().int().min(0),
-      })
-      // Returned hits are the sampled subset of total hits. Without this the UI and the agent
-      // formatter both suppress a larger `returned_hits` (they only surface it when it is the
-      // smaller number) and present the lower total as if the result set were complete.
-      .refine((counts) => counts.returned_hits <= counts.total_hits, {
-        message: 'returned_hits cannot exceed total_hits',
-        path: ['returned_hits'],
-      }),
-    per_index: z.array(huntResultPerIndexSchema).max(20),
-    resolved_iocs: z.array(HuntIoc).max(50),
-    // Tier 1 can produce more rows than either array holds (500 `_index` buckets, 100
-    // request IOCs). Same contract as the Tier 2 `affected_*_truncated` flags: set when the
-    // producer dropped rows, so a reader does not take the list as the whole breakdown.
-    per_index_truncated: z.boolean().optional(),
-    resolved_iocs_truncated: z.boolean().optional(),
+    type: HuntIocType,
+    value: z.string().min(1).max(2048),
+    field: z.string().min(1).max(128),
+    count: z.number().int().min(0),
+    host_count: z.number().int().min(0).optional(),
+    user_count: z.number().int().min(0).optional(),
+    first_seen: isoDatetimeSchema.optional(),
+    last_seen: isoDatetimeSchema.optional(),
   })
+);
+
+const huntResultTier1Schema = lazySchema(() =>
+  z
+    .object({
+      // `scope_blocked`: no required index existed, so Tier 1 never ran. A failed run, never clean.
+      status: z.enum([
+        'scope_blocked',
+        'no_searchable_terms',
+        'no_environment_hits',
+        'environment_hits_found',
+      ]),
+      counts: z
+        .object({
+          total_hits: z.number().int().min(0),
+          returned_hits: z.number().int().min(0),
+          affected_hosts: z.number().int().min(0),
+          affected_users: z.number().int().min(0),
+        })
+        // Returned hits are the sampled subset of total hits. Without this the UI and the agent
+        // formatter both suppress a larger `returned_hits` (they only surface it when it is the
+        // smaller number) and present the lower total as if the result set were complete.
+        .refine((counts) => counts.returned_hits <= counts.total_hits, {
+          message: 'returned_hits cannot exceed total_hits',
+          path: ['returned_hits'],
+        }),
+      per_index: z.array(huntResultPerIndexSchema).max(20),
+      // Optional on the SSE copy only: Tier 1 always writes it on HuntForThreatResult, and
+      // the SSE mapper may omit it (`searched_ioc_count` stands in). Readers treat absence as [].
+      resolved_iocs: z.array(HuntIoc).max(50).optional(),
+      // Tier 1 can produce more rows than either array holds (500 `_index` buckets, 100
+      // request IOCs). Same contract as the Tier 2 `affected_*_truncated` flags: set when the
+      // producer dropped rows, so a reader does not take the list as the whole breakdown.
+      per_index_truncated: z.boolean().optional(),
+      resolved_iocs_truncated: z.boolean().optional(),
+      /**
+       * Non-zero per-IOC hit buckets. One event can match several IOCs, so do not sum
+       * counts against total_hits; each count alone must stay within the total.
+       */
+      per_ioc: z.array(huntResultPerIocSchema).max(30).optional(),
+      per_ioc_truncated: z.boolean().optional(),
+      /** Deduped searchable IOCs Tier 1 queried (whether or not they hit). */
+      searched_ioc_count: z.number().int().min(0).optional(),
+    })
+    .superRefine((tier1, ctx) => {
+      if (!tier1.per_ioc) {
+        return;
+      }
+      for (const [index, entry] of tier1.per_ioc.entries()) {
+        if (entry.count > tier1.counts.total_hits) {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'per_ioc[].count cannot exceed tier1.counts.total_hits',
+            path: ['per_ioc', index, 'count'],
+          });
+        }
+      }
+    })
 );
 
 /**

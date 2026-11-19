@@ -38,7 +38,8 @@ export interface ExampleMetadata {
     | 'enhance'
     | 'discover_results'
     | 'layout_edit'
-    | 'edit_scenario';
+    | 'edit_scenario'
+    | 'ml_panels';
   /** `logs_dissect` is the sample logs index read through a `DISSECT` query attached from Discover. */
   dataSource: 'logs' | 'logs_dissect';
   enhanceMode?: EnhanceMode;
@@ -152,6 +153,29 @@ export const enhanceExample = ({
 });
 
 /**
+ * Bare enhance request over the seeded messy logs dashboard, where the user
+ * answers the mode question with free text that names specific charts. The
+ * agent edits only those charts, with the default presentation applied to them.
+ */
+export const scopedEnhanceExample = ({
+  question,
+  answer,
+  panelIds,
+}: {
+  question: string;
+  answer: string;
+  panelIds: string[];
+}): DashboardDatasetExample => ({
+  input: { question, dashboard: MESSY_LOGS_DASHBOARD, modeAnswer: { text: answer } },
+  metadata: { behaviour: 'enhance', dataSource: 'logs' } satisfies ExampleMetadata,
+  output: {
+    route: 'dashboard',
+    scopedEnhance: { panelIds },
+    goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
+  },
+});
+
+/**
  * Dashboard request over Discover ES|QL results that parse the sample logs
  * with `DISSECT`, attached the way the "AI Agent" action attaches them. The
  * derived columns are not mapped on the index, so controls may only use
@@ -214,5 +238,25 @@ export const layoutEditExample = ({
     ...(gold.replaceConfirmation
       ? {}
       : { goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID] }),
+  },
+});
+
+/**
+ * Dashboard request for ML anomaly panels, whose config schemas are only in skill references.
+ * `panelConfigTypes` are the panel types the prompt asks for.
+ */
+export const mlPanelExample = ({
+  question,
+  panelConfigTypes,
+}: {
+  question: string;
+  panelConfigTypes: readonly string[];
+}): DashboardDatasetExample => ({
+  input: { question },
+  metadata: { behaviour: 'ml_panels', dataSource: 'logs' } satisfies ExampleMetadata,
+  output: {
+    route: 'dashboard',
+    panelConfigTypes,
+    goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
   },
 });

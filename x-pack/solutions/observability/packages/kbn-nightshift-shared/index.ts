@@ -126,12 +126,15 @@ export { SOURCE_TYPES, sourceTypeSchema, type SourceType } from './src/sources/s
 export {
   analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceLocalIndexExpressions,
   getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
   type ISourceReadTargets,
   type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';
+
+export { toFromSourceQuery } from './src/sources/to_from_source_query';
 
 export {
   NIGHTSHIFT_USAGE_PARENT_ID,
@@ -140,12 +143,23 @@ export {
   NIGHTSHIFT_DISCOVERY_USAGE_ID,
   NIGHTSHIFT_INVESTIGATION_USAGE_ID,
   NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_WIKI_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID,
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
   NIGHTSHIFT_ONLINE_EVALS_USAGE_ID,
 } from './src/nightshift_usage_ids';
 
 export { conditionToESQLFilterAst } from './src/condition_to_esql_filter';
+
+export {
+  DEFAULT_RUN_QUOTA_TIME_ZONE,
+  MAX_RUN_LIMIT,
+  MIN_RUN_LIMIT,
+  dayKey,
+  resolveDailyWindow,
+  type RunQuotaWindow,
+} from './src/run_quota_window';
 
 export {
   isNightshiftSpaceGatedEndpoint,
@@ -162,6 +176,7 @@ export {
 
 export {
   createHttpServiceAccountsApi,
+  ensureNightshiftServiceAccount,
   ensureNightshiftServiceAccounts,
   getSecurityRoleUrl,
   NightshiftServiceAccountSetupError,
@@ -181,5 +196,6 @@ export {
   getNightshiftServiceAccountName,
   NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
   type NightshiftServiceAccountIds,
+  type NightshiftInvestigationAccountKind,
   type NightshiftServiceAccountKind,
 } from './src/service_accounts/service_account';

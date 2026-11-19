@@ -61,6 +61,7 @@ describe('Nightshift investigation agent type', () => {
 
     expect(base).toMatchObject({
       enable_elastic_capabilities: false,
+      capabilities: { api_tools: { enabled: false } },
       skill_ids: [],
       workflow_ids: ['system-nightshift-sandbox-materialize-workspace-bound-default'],
       post_execution_workflow_ids: ['system-nightshift-agent-optimize-bound-default'],
@@ -121,6 +122,61 @@ describe('Nightshift investigation agent type', () => {
     ]);
     expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
     expect(base.instructions).not.toContain('{{decision_trees_section}}');
+  });
+
+  it('hydrates and reinforces decision trees when Wiki and Memory are off', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        wikiEnabled: false,
+        memoryEnabled: false,
+        decisionTreesEnabled: true,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-default',
+    ]);
+    expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
+  });
+
+  it('keeps hydrating knowledge but drops the optimize hook when learning is disabled', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        wikiEnabled: true,
+        memoryEnabled: true,
+        decisionTreesEnabled: true,
+        learningEnabled: false,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
+    expect(base.post_execution_workflow_ids).toBeUndefined();
+    expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
+  });
+
+  it('forwards disabled learning through registration', async () => {
+    const agentBuilder = agentBuilderMocks.createSetup();
+
+    registerInvestigationAgentType(agentBuilder, {
+      sandboxEnabled: true,
+      wikiEnabled: true,
+      memoryEnabled: true,
+      learningEnabled: false,
+    });
+
+    const [[type]] = jest.mocked(agentBuilder.agents.registerType).mock.calls;
+    const base = await baseFor(type);
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
+    expect(base.post_execution_workflow_ids).toBeUndefined();
   });
 
   it('drops both wiki workflows when wiki is disabled', async () => {
@@ -192,6 +248,24 @@ describe('Nightshift investigation agent type', () => {
     ]) {
       expect(instructions).not.toContain(tool);
     }
+  });
+
+  it('tells the agent how to shape and write its reply', async () => {
+    const { instructions } = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: true, wikiEnabled: true })
+    );
+
+    // A request to investigate, a question and a request for more each get their own shape.
+    expect(instructions).toContain('**The first message, or a later request to investigate:**');
+    expect(instructions).toContain('**A question**');
+    expect(instructions).toContain('**A request for more**');
+    expect(instructions).toContain('**First sentence: 20 words or fewer**');
+    expect(instructions).toContain('**Keep the names, explain the mechanics.**');
+    expect(instructions).toContain('**When a table says it better, use one**');
+    // A last check before sending, which the length rules depend on.
+    expect(instructions).toContain('**Before you send**');
+    // A long table goes in an attachment the reply shows inline.
+    expect(instructions).toContain('`<render_attachment id="<attachment_id>"/>`');
   });
 
   it("runs its hooks through the space's bound hook entry points", async () => {

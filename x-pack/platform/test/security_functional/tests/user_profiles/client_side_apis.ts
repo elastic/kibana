@@ -7,6 +7,7 @@
 
 import { parse as parseCookie } from 'tough-cookie';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
@@ -36,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       for (const userPrefix of ['one', 'two', 'three']) {
         const response = await supertestWithoutAuth
           .post('/internal/security/login')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxx')
           .send({
             providerType: 'basic',
@@ -51,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', cookie)
           .send({
-            avatar: { initials: `some-initials-${userPrefix}` },
+            avatar: { initials: userPrefix.slice(0, 2) },
           })
           .expect(200);
 
@@ -100,7 +102,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             `testEndpointsUserProfilesAppUserProfile_user_${userPrefix}`
           );
           expect(userProfileText).to.equal(
-            `user_${userPrefix}:{"avatar":{"color":null,"initials":"some-initials-${userPrefix}","imageUrl":null}}`
+            `user_${userPrefix}:{"avatar":{"color":null,"initials":"${userPrefix.slice(
+              0,
+              2
+            )}","imageUrl":null}}`
           );
         }
       });

@@ -42,10 +42,10 @@ describe('stableStringify', () => {
     expect(stableStringify(obj)).toBe('{"a":{"b":4,"z":3},"z":{"a":2,"c":1}}');
   });
 
-  it('handles circular references by replacing with [Circular]', () => {
+  it('handles circular references by replacing with [Circular: N]', () => {
     const obj: Record<string, unknown> = { a: 1 };
     obj.self = obj;
-    expect(stableStringify(obj)).toBe('{"a":1,"self":"[Circular]"}');
+    expect(stableStringify(obj)).toBe('{"a":1,"self":"[Circular: 0]"}');
   });
 
   it('supports the space option for pretty-printing', () => {

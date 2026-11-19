@@ -125,6 +125,8 @@ export interface AppendEventsRequest {
   skipIfTerminalExistsFor?: string;
   /** Changes the active execution in the same write. */
   activeExecution?: ActiveExecutionUpdate;
+  /** Drops this background execution from the pending list in the same write; refused once it is gone. */
+  consumeBackgroundExecution?: string;
 }
 
 export interface ReplaceRoundEventsRequest {

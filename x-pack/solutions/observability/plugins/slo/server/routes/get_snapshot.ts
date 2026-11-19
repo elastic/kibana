@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { getSnapshotParamsSchema } from '@kbn/slo-schema';
+import { getSnapshotParamsSchema, snapshotResponseSchema } from '@kbn/slo-schema';
 import { SnapshotService } from '../services/snapshot_service';
 import { createSloServerRoute } from './utils/create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -28,6 +28,9 @@ export const getSnapshotRoute = createSloServerRoute({
     },
   },
   params: getSnapshotParamsSchema,
+  responses: {
+    200: { description: 'Successful response', body: () => snapshotResponseSchema },
+  },
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     const { id } = params.path;
     const { at, instanceId } = params.query;

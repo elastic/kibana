@@ -181,6 +181,7 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
     >
       <EuiBasicTable
         className="transform__TransformTable__messagesPaneTable"
+        hasBackground={false}
         items={pageOfMessages}
         columns={columns}
         compressed={true}
