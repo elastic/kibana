@@ -581,6 +581,21 @@ describe('proposals.updateProposal step', () => {
     });
   });
 
+  it('should name its own run, so the service can find the action execution it started', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
+
+    await updateDefinition(update).handler(
+      createContext({ proposalId: 'proposal-1', status: 'succeeded' })
+    );
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        writtenBy: { executionId: EXECUTION_ID, request: FAKE_REQUEST },
+      }),
+      SPACE_ID
+    );
+  });
+
   it('should resolve the decider from the execution request, not the passed username', async () => {
     const update = jest
       .fn()

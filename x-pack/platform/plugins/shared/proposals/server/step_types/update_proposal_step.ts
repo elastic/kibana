@@ -77,6 +77,7 @@ export const getUpdateProposalStepDefinition = ({
             dismissReason: input.dismissReason,
             rationale: input.rationale,
             executionError: input.executionError,
+            writtenBy: { executionId: workflowContext.execution.id, request },
           },
           spaceId
         );

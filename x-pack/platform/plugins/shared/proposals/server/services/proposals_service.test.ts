@@ -131,6 +131,7 @@ const createWorkflowsApi = () => ({
   ]),
   resumeWorkflowExecution: jest.fn().mockResolvedValue({ resumedBy: 'analyst' }),
   executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-2' }),
+  getChildWorkflowExecutions: jest.fn().mockResolvedValue([]),
 });
 
 /** A deadline that has already passed, independent of the clock the suite runs at. */
@@ -1563,6 +1564,69 @@ describe('ProposalsService', () => {
       expect(proposal.decisionMode).toBe('manual');
       // Stamped by the service, so the recorded moment is the moment written.
       expect(proposal.decidedAt).toEqual(expect.any(String));
+    });
+
+    describe('action execution', () => {
+      const executing = () =>
+        baseDocument({
+          decision: 'approved',
+          status: 'executing',
+          decidedAt: '2026-09-01T01:00:00Z',
+        });
+      const writtenBy = { executionId: 'resolve-exec', request };
+
+      it('stamps the action run started by the settling run', async () => {
+        const storage = createStorage(executing());
+        const { service, workflowsApi } = createService(storage);
+        workflowsApi.getChildWorkflowExecutions.mockResolvedValue([
+          { workflowId: 'some-other-workflow', executionId: 'other-exec' },
+          { workflowId: 'system-alertzero-action-create-rule', executionId: 'action-exec' },
+        ]);
+
+        const proposal = await service.update(
+          { id: 'proposal-1', status: 'succeeded', writtenBy },
+          SPACE_ID
+        );
+
+        expect(workflowsApi.getChildWorkflowExecutions).toHaveBeenCalledWith(
+          'resolve-exec',
+          SPACE_ID,
+          request
+        );
+        expect(proposal.actionExecutionId).toBe('action-exec');
+        expect(storage.index).toHaveBeenCalledWith(
+          expect.objectContaining({
+            document: expect.objectContaining({ actionExecutionId: 'action-exec' }),
+          })
+        );
+      });
+
+      it('looks nothing up for an update that does not settle the action', async () => {
+        const storage = createStorage(baseDocument());
+        const { service, workflowsApi } = createService(storage);
+
+        await service.update(
+          { id: 'proposal-1', decision: 'approved', status: 'executing', writtenBy },
+          SPACE_ID
+        );
+
+        expect(workflowsApi.getChildWorkflowExecutions).not.toHaveBeenCalled();
+      });
+
+      it('still settles the proposal when the run cannot be read', async () => {
+        const storage = createStorage(executing());
+        const { service, workflowsApi, logger } = createService(storage);
+        workflowsApi.getChildWorkflowExecutions.mockRejectedValue(new Error('forbidden'));
+
+        const proposal = await service.update(
+          { id: 'proposal-1', status: 'failed', executionError: 'boom', writtenBy },
+          SPACE_ID
+        );
+
+        expect(proposal.status).toBe('failed');
+        expect(proposal.actionExecutionId).toBeUndefined();
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('forbidden'));
+      });
     });
 
     describe('decision telemetry', () => {

@@ -326,10 +326,15 @@ sequenceDiagram
     Note over AW: Runs under the analyst's API key,<br/>so the result is attributed to them.
     AW-->>R: output
     R->>S: proposals.updateProposal(succeeded)
+    S->>I: status=succeeded, actionExecutionId=<the action's run>
     R-->>G: resolution: settled
 ```
 
 Dismissal follows the same shape down the gate's negative branch, so no action runs, and settles at `dismissed` + `no_action`.
+
+**`actionExecutionId` links what actually ran.** When the resolve run settles an action as `succeeded` or `failed`, `proposals.updateProposal` passes its own execution id, and the service stamps the newest child of that run whose workflow is the proposal's `actionWorkflowId`. The read runs as the resolve run's identity (the approver, or the Worker under autonomy). It is best-effort: if the run cannot be read, the settle is still written and only the link is missing. A cloned retry starts without one; the failed original keeps the link to its own run.
+
+`ApprovalContent` (`@kbn/proposals-ui`) shows every action proposal's workflow as a link to the Workflows app, its `actionInput` as collapsed JSON under **Input parameters**, and, once `actionExecutionId` is set, a **View execution** link. So the approver sees which workflow runs and with what input, and afterwards where to look for what it did.
 
 **The decision is asynchronous.** The resume call returns before the post-gate steps run, so the route's response body still describes an undecided proposal. Callers must invalidate and refetch rather than trust it — `useApproveProposal` and `useDismissProposal` both do.
 
@@ -457,7 +462,7 @@ Rule 3 is the non-obvious one and the easiest to get wrong: the gate passes exac
 
 See `definitions/alertzero/actions/action_create_detection_rule.yaml` for a worked example.
 
-A user can author one too, in the Workflows app: the same four rules apply, and the workflow lives in their space instead of the global one. Declare `approvalPolicy: always-gate` so it never runs without a person approving it.
+A user can author one too, in the Workflows app: the same four rules apply, and the workflow lives in their space instead of the global one. Declare `approvalPolicy: always-gate` so it never runs without a person approving it. Keep user-authored actions to low-harm ones (opening a case or an issue, paging someone) for now: the workflow and its input are validated when the proposal is created, not again when it is approved, and nothing deduplicates the same action proposed from two conversations.
 
 ### The action catalog
 

@@ -15,6 +15,7 @@ import { ApprovalActorTime } from './approval_actor_time';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
 import { DeclineReasonForm } from './decline_reason_form';
 import { ApprovalContentBody } from './approval_content_body';
+import { ApprovalActionDetails } from './approval_action_details';
 import { ApprovalStatusCallouts } from './approval_status_callouts';
 import { ApprovalContentFooter } from './approval_content_footer';
 import {
@@ -330,6 +331,15 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         <ApprovalContentBody
           mode={contentMode}
           comment={proposal.comment}
+          actionDetails={
+            proposal.actionWorkflowId ? (
+              <ApprovalActionDetails
+                proposal={proposal}
+                basePath={basePath}
+                data-test-subj={dataTestSubj}
+              />
+            ) : undefined
+          }
           banner={banner}
           bannerSuffix={bannerSuffix}
           actionError={actionError}

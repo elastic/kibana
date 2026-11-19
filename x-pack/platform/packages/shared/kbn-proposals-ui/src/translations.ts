@@ -126,4 +126,14 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   expiredCalloutTitle: i18n.translate('xpack.proposals.approvalModal.expiredCallout', {
     defaultMessage: 'Expired and can no longer be applied',
   }),
+  /** Precedes the linked workflow name, e.g. "Runs workflow Open a follow-up case". */
+  actionWorkflowLabel: i18n.translate('xpack.proposals.approvalModal.actionDetails.workflowLabel', {
+    defaultMessage: 'Runs workflow',
+  }),
+  viewExecution: i18n.translate('xpack.proposals.approvalModal.actionDetails.viewExecution', {
+    defaultMessage: 'View execution',
+  }),
+  actionInputToggle: i18n.translate('xpack.proposals.approvalModal.actionDetails.inputToggle', {
+    defaultMessage: 'Input parameters',
+  }),
 });

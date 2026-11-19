@@ -24,6 +24,8 @@ interface ApprovalContentBodyProps {
   mode: 'view' | 'declining';
   /** The proposal's own markdown. Omitted entirely renders no comment block at all. */
   comment?: string;
+  /** What an action proposal runs, below the comment. Hidden while `'declining'`, like it. */
+  actionDetails?: React.ReactNode;
   /** `undefined` for a still-pending decision, which has no outcome to report yet. */
   banner?: ApprovalOutcomeBanner;
   /** Appended to the banner title after a ` • `: who decided and when, then any reason. */
@@ -58,6 +60,7 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
   ({
     mode,
     comment,
+    actionDetails,
     banner,
     bannerSuffix,
     actionError,
@@ -69,7 +72,10 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
 
     // Declining with no banner or error leaves nothing to show, so no empty padded box sits
     // between the header and the reason form.
-    const hasContent = (mode === 'view' && comment !== undefined) || banner || actionError;
+    const hasContent =
+      (mode === 'view' && (comment !== undefined || Boolean(actionDetails))) ||
+      banner ||
+      actionError;
     if (!hasContent) {
       return null;
     }
@@ -96,6 +102,8 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
             </EuiMarkdownFormat>
           </div>
         )}
+
+        {mode === 'view' && actionDetails}
 
         {banner && (
           // eslint-disable-next-line @kbn/kbn-ui/prefer_kbn_ui_callout

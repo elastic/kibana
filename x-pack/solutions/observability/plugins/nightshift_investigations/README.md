@@ -201,6 +201,10 @@ The findings recorder's final pass proposes up to three actions. By default each
 
 When one fits a proposal, the recorder sets its id and input. Approving the proposal runs the workflow as the person who approved it. Managed action workflows (another solution's) are not shown. A workflow id the catalog did not list is dropped, and an input the workflow refuses turns the proposal into a to-do. See the proposals plugin README for the action workflow contract.
 
+The approve dialog shows what will run: a link to the workflow, and under **Input parameters** (collapsed) the exact `actionInput` the recorder filled in. Once the workflow has run, the dialog also links to that execution, so the analyst can see what it did and what it returned.
+
+**Use this for low-harm actions only for now**, such as opening a case or an issue, or paging someone. The input is written by the model from findings that come from logs, so it is only checked against the workflow's input schema. The workflow and input are not re-checked at approval time, and nothing stops two investigations from proposing (and two people from approving) the same action. Do not wire up rollbacks, restarts or other changes to production systems until those checks exist. Where an input names a target (a cluster, namespace or service), constrain it with `enum` or `pattern` instead of a free string.
+
 ## Service accounts
 
 Nightshift runs investigations only as the agent service account, `nightshift_agent`. There is no fallback that runs them as the user who starts them, so a space can use Nightshift only after an admin sets it up. Until then, every Nightshift page shows the onboarding with "Enable Elastic Nightshift" as its first step: users with `manage_security` and the Nightshift Manage engines privilege get the button, others are told to ask an administrator, and the step says so when service accounts are turned off. The plan and the remaining PRs are tracked in elastic/obs-execution#570.

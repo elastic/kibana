@@ -106,6 +106,12 @@ export interface UpdateProposalParams {
   dismissReason?: DismissReason;
   rationale?: string;
   executionError?: string;
+  /**
+   * The workflow run writing this update, as whoever it runs as. When it settles an action
+   * (`succeeded`/`failed`), the action's own execution is looked up among this run's children
+   * and stamped as `actionExecutionId`.
+   */
+  writtenBy?: { executionId: string; request: KibanaRequest };
 }
 
 export interface ProposalsServiceDeps {
@@ -727,13 +733,50 @@ export class ProposalsService {
       );
     }
 
-    return this.applyUpdate(stored, params);
+    const actionExecutionId = await this.findActionExecutionId(stored.proposal, params, spaceId);
+    return this.applyUpdate(stored, { ...params, actionExecutionId });
+  }
+
+  /**
+   * The action workflow run started by `writtenBy`, if this update settles one. The resolve run
+   * executes the action as a direct child, so it is the newest child of that run whose workflow
+   * is the proposal's action. Best-effort: an unreadable run only costs the link, so it is logged
+   * rather than failing a settle the action has already earned.
+   */
+  private async findActionExecutionId(
+    proposal: Proposal,
+    { status, writtenBy }: UpdateProposalParams,
+    spaceId: string
+  ): Promise<string | undefined> {
+    const { actionWorkflowId, actionExecutionId } = proposal;
+    if (
+      !writtenBy ||
+      !actionWorkflowId ||
+      actionExecutionId !== undefined ||
+      (status !== 'succeeded' && status !== 'failed')
+    ) {
+      return undefined;
+    }
+    try {
+      const children = await this.deps
+        .getWorkflowsApi()
+        .getChildWorkflowExecutions(writtenBy.executionId, spaceId, writtenBy.request);
+      return children.filter(({ workflowId }) => workflowId === actionWorkflowId).at(-1)
+        ?.executionId;
+    } catch (error) {
+      this.deps.logger.warn(
+        `Could not resolve the action execution for proposal [${proposal.id}]: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
   }
 
   /** `update` against a record already loaded, written under that load's sequence number. */
   private async applyUpdate(
     { proposal, seqNo, primaryTerm }: StoredProposal,
-    params: UpdateProposalParams
+    params: Omit<UpdateProposalParams, 'writtenBy'> & { actionExecutionId?: string }
   ): Promise<Proposal> {
     const { id } = params;
 
@@ -798,6 +841,9 @@ export class ProposalsService {
       ...(params.dismissReason !== undefined ? { dismissReason: params.dismissReason } : {}),
       ...(params.rationale !== undefined ? { rationale: params.rationale } : {}),
       ...(params.executionError !== undefined ? { executionError: params.executionError } : {}),
+      ...(params.actionExecutionId !== undefined
+        ? { actionExecutionId: params.actionExecutionId }
+        : {}),
     };
     const { id: _id, ...document } = updated;
 
@@ -870,6 +916,8 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      // The retry has not run yet; the original keeps the link to the run that failed.
+      actionExecutionId: undefined,
       // The original was released to reach `failed`, and inheriting the mark
       // would refuse every revision of the retry for good.
       gateReleasedAt: undefined,
