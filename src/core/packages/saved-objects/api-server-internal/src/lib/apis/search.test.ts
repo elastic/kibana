@@ -124,7 +124,7 @@ describe('search', () => {
           type: ['index-pattern'],
           runtime_mappings: { [field]: { type: 'keyword' } },
         })
-      ).rejects.toThrowError(`'runtime_mappings' contains forbidden fields: ${field}`);
+      ).rejects.toThrow(`'runtime_mappings' contains forbidden fields: ${field}`);
     }
   );
 

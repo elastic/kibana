@@ -400,7 +400,7 @@ describe('searchDsl/getSortParams', () => {
     it.each(['acl.owner.id', 'acl.general.access', 'acl.entries.added_at'])(
       'refuses to sort one type by %s',
       (sortField) => {
-        expect(() => getSortingParams(mappingsWithAcl as any, 'saved', sortField)).toThrowError(
+        expect(() => getSortingParams(mappingsWithAcl as any, 'saved', sortField)).toThrow(
           `Unable to sort by field ${sortField}`
         );
       }
@@ -409,7 +409,7 @@ describe('searchDsl/getSortParams', () => {
     it('refuses to sort several types by an ACL field', () => {
       expect(() =>
         getSortingParams(mappingsWithAcl as any, ['saved', 'pending'], 'acl.owner.id')
-      ).toThrowError('Unable to sort by field acl.owner.id');
+      ).toThrow('Unable to sort by field acl.owner.id');
     });
 
     it('refuses an ACL field in the sort array', () => {
@@ -418,7 +418,7 @@ describe('searchDsl/getSortParams', () => {
           { field: 'title' },
           { field: 'acl.owner.id', order: 'asc' },
         ])
-      ).toThrowError('Unable to sort by field acl.owner.id');
+      ).toThrow('Unable to sort by field acl.owner.id');
     });
   });
 });
