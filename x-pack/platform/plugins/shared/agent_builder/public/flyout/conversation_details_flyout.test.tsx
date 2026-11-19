@@ -489,6 +489,51 @@ describe('ConversationDetailsFlyoutContent', () => {
     consoleError.mockRestore();
   });
 
+  it('keeps other open flyouts for the template mounted when one fails to render', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const load = jest.fn(
+      async (): Promise<ConversationTemplateDetailsFlyoutModule> => ({
+        useDetailsFlyout: ({ conversation }) => {
+          const [clicks, setClicks] = useState(0);
+          if (conversation.id === 'broken') {
+            throw new Error('render failed');
+          }
+          return {
+            header: { title: conversation.title },
+            footer: {
+              primary: { label: `Clicked ${clicks}`, onClick: () => setClicks(clicks + 1) },
+            },
+          };
+        },
+      })
+    );
+    const service = createService({ detailsFlyout: { load } });
+    const healthy = createConversation({ id: 'healthy', title: 'Healthy' });
+
+    const { rerender } = renderContent(service, healthy);
+    await act(async () => {});
+    fireEvent.click(screen.getByRole('button', { name: 'Clicked 0' }));
+
+    renderContent(service, createConversation({ id: 'broken' }));
+    await act(async () => {});
+    expect(screen.getByText(ERROR_BODY)).toBeInTheDocument();
+
+    rerender(
+      <ConversationDetailsFlyoutContent
+        isOpenedFromChat={false}
+        conversation={{ ...healthy, title: 'Healthy, polled' }}
+        conversationTemplatesService={service}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole('heading', { name: 'Healthy, polled' })).toBeInTheDocument();
+    expect(screen.queryByTestId('flyoutHeaderTitleLoading')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Clicked 1' })).toBeInTheDocument();
+    expect(load).toHaveBeenCalledTimes(1);
+    consoleError.mockRestore();
+  });
+
   it('renders a single tab as the body, with no tab bar', () => {
     renderContent(createService({ tabs: ['test.first'] }));
 

@@ -165,6 +165,7 @@ type DetailsLoader = () => Promise<ConversationTemplateDetailsFlyoutModule>;
 type LoadedDetailsProps = Omit<DetailsTemplateProps, 'descriptor'>;
 
 const loadedDetailsByLoader = new WeakMap<DetailsLoader, ComponentType<LoadedDetailsProps>>();
+const rejectedLoadedDetails = new WeakSet<ComponentType<LoadedDetailsProps>>();
 
 /**
  * One lazy component per template loader, so the module loads the first time a flyout for the
@@ -175,8 +176,11 @@ const getLoadedDetails = (load: DetailsLoader): ComponentType<LoadedDetailsProps
   if (cached) {
     return cached;
   }
-  const LoadedDetails = React.lazy(async () => {
-    const { useDetailsFlyout, Provider } = await load();
+  const LoadedDetails: ComponentType<LoadedDetailsProps> = React.lazy(async () => {
+    const { useDetailsFlyout, Provider } = await load().catch((error) => {
+      rejectedLoadedDetails.add(LoadedDetails);
+      throw error;
+    });
     const Details = ({
       conversation,
       isOpenedFromChat,
@@ -221,8 +225,13 @@ class DetailsErrorBoundary extends Component<
 
   public componentDidCatch() {
     // React keeps a rejected lazy component rejected, so the next open needs a fresh one. Evicting
-    // any earlier, while React retries the render, would start a new load on every retry.
-    loadedDetailsByLoader.delete(this.props.load);
+    // any earlier, while React retries the render, would start a new load on every retry. A render
+    // error leaves a loaded module cached: evicting it would remount other open flyouts.
+    const { load } = this.props;
+    const cached = loadedDetailsByLoader.get(load);
+    if (cached && rejectedLoadedDetails.has(cached)) {
+      loadedDetailsByLoader.delete(load);
+    }
   }
 
   public render() {
