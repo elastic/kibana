@@ -147,6 +147,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
         {props.panelSettingsApi && panelSettings.state ? (
           <>
             <PanelSettingsFlyoutSections
+              section="titleAndDescription"
               api={props.panelSettingsApi}
               state={panelSettings.state}
               updateState={panelSettings.updateState}
@@ -410,6 +411,17 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             }}
           />
         </EuiFormRow>
+        {props.panelSettingsApi && panelSettings.state ? (
+          <>
+            <EuiSpacer size="m" />
+            <PanelSettingsFlyoutSections
+              section="panelOptions"
+              api={props.panelSettingsApi}
+              state={panelSettings.state}
+              updateState={panelSettings.updateState}
+            />
+          </>
+        ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

@@ -184,6 +184,7 @@ export const LinksEditor = ({
         {panelSettingsApi && panelSettings.state ? (
           <>
             <PanelSettingsFlyoutSections
+              section="titleAndDescription"
               api={panelSettingsApi}
               state={panelSettings.state}
               updateState={panelSettings.updateState}
@@ -254,6 +255,17 @@ export const LinksEditor = ({
             </div>
           </EuiFormRow>
         </EuiForm>
+        {panelSettingsApi && panelSettings.state ? (
+          <>
+            <EuiSpacer size="m" />
+            <PanelSettingsFlyoutSections
+              section="panelOptions"
+              api={panelSettingsApi}
+              state={panelSettings.state}
+              updateState={panelSettings.updateState}
+            />
+          </>
+        ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">

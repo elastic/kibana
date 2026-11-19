@@ -41,6 +41,8 @@ export interface PanelSettingsAccordionsProps {
   panelOptions?: React.ReactNode;
   /** Whether the sections are expanded when first rendered */
   initialIsOpen?: boolean;
+  /** Renders only this section, so a host can place the sections in different spots. Both by default */
+  section?: 'titleAndDescription' | 'panelOptions';
 }
 
 const SettingsAccordion = ({
@@ -98,6 +100,7 @@ export const PanelSettingsAccordions = ({
   sectionCss,
   panelOptions,
   initialIsOpen,
+  section,
 }: PanelSettingsAccordionsProps) => {
   const { uiSettings } = core;
   const defaultTitle = api.defaultTitle$?.value;
@@ -116,149 +119,156 @@ export const PanelSettingsAccordions = ({
 
   const timeRange = state.timeRange ?? fallbackTimeRange;
 
+  const showTitleAndDescription = !section || section === 'titleAndDescription';
+  const showPanelOptions = !section || section === 'panelOptions';
+
   return (
     <>
-      <SettingsAccordion
-        sectionCss={sectionCss}
-        initialIsOpen={initialIsOpen}
-        id="titleAndDescription"
-        title={i18n.translate('embeddableApi.panelSettings.titleAndDescriptionLabel', {
-          defaultMessage: 'Title and description',
-        })}
-      >
-        <EuiFormRow fullWidth>
-          <EuiSwitch
-            checked={!state.hideTitle}
-            data-test-subj="customEmbeddablePanelHideTitleSwitch"
-            label={i18n.translate('embeddableApi.panelSettings.showTitleLabel', {
-              defaultMessage: 'Show title',
-            })}
-            onChange={(e) => updateState({ hideTitle: !e.target.checked })}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('embeddableApi.panelSettings.titleLabel', {
-            defaultMessage: 'Title',
+      {showTitleAndDescription ? (
+        <SettingsAccordion
+          sectionCss={sectionCss}
+          initialIsOpen={initialIsOpen}
+          id="titleAndDescription"
+          title={i18n.translate('embeddableApi.panelSettings.titleAndDescriptionLabel', {
+            defaultMessage: 'Title and description',
           })}
-          labelAppend={
-            defaultTitle && (
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="resetCustomEmbeddablePanelTitleButton"
-                onClick={() => updateState({ title: defaultTitle })}
-                disabled={state.hideTitle || state.title === defaultTitle}
-                aria-label={i18n.translate(
-                  'embeddableApi.panelSettings.resetTitleButtonAriaLabel',
-                  { defaultMessage: 'Reset title to default' }
-                )}
-              >
-                {i18n.translate('embeddableApi.panelSettings.resetButtonLabel', {
-                  defaultMessage: 'Reset to default',
-                })}
-              </EuiButtonEmpty>
-            )
-          }
         >
-          <EuiFieldText
-            fullWidth
-            data-test-subj="customEmbeddablePanelTitleInput"
-            disabled={state.hideTitle}
-            value={state.title ?? ''}
-            onChange={(e) => updateState({ title: e.target.value })}
-            aria-label={i18n.translate('embeddableApi.panelSettings.titleInputAriaLabel', {
-              defaultMessage: 'Enter a custom title for your panel',
-            })}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('embeddableApi.panelSettings.descriptionLabel', {
-            defaultMessage: 'Description',
-          })}
-          labelAppend={
-            defaultDescription && (
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
-                onClick={() => updateState({ description: defaultDescription })}
-                disabled={state.description === defaultDescription}
-                aria-label={i18n.translate(
-                  'embeddableApi.panelSettings.resetDescriptionButtonAriaLabel',
-                  { defaultMessage: 'Reset description to default' }
-                )}
-              >
-                {i18n.translate('embeddableApi.panelSettings.resetButtonLabel', {
-                  defaultMessage: 'Reset to default',
-                })}
-              </EuiButtonEmpty>
-            )
-          }
-        >
-          <EuiTextArea
-            fullWidth
-            data-test-subj="customEmbeddablePanelDescriptionInput"
-            value={state.description ?? ''}
-            onChange={(e) => updateState({ description: e.target.value })}
-            aria-label={i18n.translate('embeddableApi.panelSettings.descriptionInputAriaLabel', {
-              defaultMessage: 'Enter a custom description for your panel',
-            })}
-          />
-        </EuiFormRow>
-      </SettingsAccordion>
-      <SettingsAccordion
-        sectionCss={sectionCss}
-        initialIsOpen={initialIsOpen}
-        id="panelOptions"
-        title={i18n.translate('embeddableApi.panelSettings.panelOptionsLabel', {
-          defaultMessage: 'Panel options',
-        })}
-      >
-        <EuiFormRow fullWidth>
-          <EuiSwitch
-            checked={!state.hideBorder}
-            data-test-subj="customizePanelBorderlessToggle"
-            label={i18n.translate('embeddableApi.panelSettings.showBorderLabel', {
-              defaultMessage: 'Show panel border',
-            })}
-            onChange={(e) => updateState({ hideBorder: !e.target.checked })}
-          />
-        </EuiFormRow>
-        {panelOptions}
-        {apiSupportsPanelTimeRange(api) ? (
           <EuiFormRow fullWidth>
             <EuiSwitch
-              checked={state.hasOwnTimeRange}
-              data-test-subj="customizePanelShowCustomTimeRange"
-              label={i18n.translate('embeddableApi.panelSettings.customTimeRangeLabel', {
-                defaultMessage: 'Apply custom time range',
+              checked={!state.hideTitle}
+              data-test-subj="customEmbeddablePanelHideTitleSwitch"
+              label={i18n.translate('embeddableApi.panelSettings.showTitleLabel', {
+                defaultMessage: 'Show title',
               })}
-              onChange={(e) => updateState({ hasOwnTimeRange: e.target.checked })}
+              onChange={(e) => updateState({ hideTitle: !e.target.checked })}
             />
           </EuiFormRow>
-        ) : null}
-        {apiSupportsPanelTimeRange(api) && state.hasOwnTimeRange ? (
           <EuiFormRow
             fullWidth
-            label={i18n.translate('embeddableApi.panelSettings.timeRangeLabel', {
-              defaultMessage: 'Time range',
+            label={i18n.translate('embeddableApi.panelSettings.titleLabel', {
+              defaultMessage: 'Title',
             })}
+            labelAppend={
+              defaultTitle && (
+                <EuiButtonEmpty
+                  size="xs"
+                  data-test-subj="resetCustomEmbeddablePanelTitleButton"
+                  onClick={() => updateState({ title: defaultTitle })}
+                  disabled={state.hideTitle || state.title === defaultTitle}
+                  aria-label={i18n.translate(
+                    'embeddableApi.panelSettings.resetTitleButtonAriaLabel',
+                    { defaultMessage: 'Reset title to default' }
+                  )}
+                >
+                  {i18n.translate('embeddableApi.panelSettings.resetButtonLabel', {
+                    defaultMessage: 'Reset to default',
+                  })}
+                </EuiButtonEmpty>
+              )
+            }
           >
-            <EuiSuperDatePicker
-              width="full"
-              start={timeRange?.from}
-              end={timeRange?.to}
-              onTimeChange={({ start, end }) =>
-                updateState({ timeRange: { from: start, to: end } })
-              }
-              showUpdateButton={false}
-              dateFormat={dateFormat}
-              commonlyUsedRanges={commonlyUsedRanges}
-              data-test-subj="customizePanelTimeRangeDatePicker"
+            <EuiFieldText
+              fullWidth
+              data-test-subj="customEmbeddablePanelTitleInput"
+              disabled={state.hideTitle}
+              value={state.title ?? ''}
+              onChange={(e) => updateState({ title: e.target.value })}
+              aria-label={i18n.translate('embeddableApi.panelSettings.titleInputAriaLabel', {
+                defaultMessage: 'Enter a custom title for your panel',
+              })}
             />
           </EuiFormRow>
-        ) : null}
-      </SettingsAccordion>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('embeddableApi.panelSettings.descriptionLabel', {
+              defaultMessage: 'Description',
+            })}
+            labelAppend={
+              defaultDescription && (
+                <EuiButtonEmpty
+                  size="xs"
+                  data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
+                  onClick={() => updateState({ description: defaultDescription })}
+                  disabled={state.description === defaultDescription}
+                  aria-label={i18n.translate(
+                    'embeddableApi.panelSettings.resetDescriptionButtonAriaLabel',
+                    { defaultMessage: 'Reset description to default' }
+                  )}
+                >
+                  {i18n.translate('embeddableApi.panelSettings.resetButtonLabel', {
+                    defaultMessage: 'Reset to default',
+                  })}
+                </EuiButtonEmpty>
+              )
+            }
+          >
+            <EuiTextArea
+              fullWidth
+              data-test-subj="customEmbeddablePanelDescriptionInput"
+              value={state.description ?? ''}
+              onChange={(e) => updateState({ description: e.target.value })}
+              aria-label={i18n.translate('embeddableApi.panelSettings.descriptionInputAriaLabel', {
+                defaultMessage: 'Enter a custom description for your panel',
+              })}
+            />
+          </EuiFormRow>
+        </SettingsAccordion>
+      ) : null}
+      {showPanelOptions ? (
+        <SettingsAccordion
+          sectionCss={sectionCss}
+          initialIsOpen={initialIsOpen}
+          id="panelOptions"
+          title={i18n.translate('embeddableApi.panelSettings.panelOptionsLabel', {
+            defaultMessage: 'Panel options',
+          })}
+        >
+          <EuiFormRow fullWidth>
+            <EuiSwitch
+              checked={!state.hideBorder}
+              data-test-subj="customizePanelBorderlessToggle"
+              label={i18n.translate('embeddableApi.panelSettings.showBorderLabel', {
+                defaultMessage: 'Show panel border',
+              })}
+              onChange={(e) => updateState({ hideBorder: !e.target.checked })}
+            />
+          </EuiFormRow>
+          {panelOptions}
+          {apiSupportsPanelTimeRange(api) ? (
+            <EuiFormRow fullWidth>
+              <EuiSwitch
+                checked={state.hasOwnTimeRange}
+                data-test-subj="customizePanelShowCustomTimeRange"
+                label={i18n.translate('embeddableApi.panelSettings.customTimeRangeLabel', {
+                  defaultMessage: 'Apply custom time range',
+                })}
+                onChange={(e) => updateState({ hasOwnTimeRange: e.target.checked })}
+              />
+            </EuiFormRow>
+          ) : null}
+          {apiSupportsPanelTimeRange(api) && state.hasOwnTimeRange ? (
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate('embeddableApi.panelSettings.timeRangeLabel', {
+                defaultMessage: 'Time range',
+              })}
+            >
+              <EuiSuperDatePicker
+                width="full"
+                start={timeRange?.from}
+                end={timeRange?.to}
+                onTimeChange={({ start, end }) =>
+                  updateState({ timeRange: { from: start, to: end } })
+                }
+                showUpdateButton={false}
+                dateFormat={dateFormat}
+                commonlyUsedRanges={commonlyUsedRanges}
+                data-test-subj="customizePanelTimeRangeDatePicker"
+              />
+            </EuiFormRow>
+          ) : null}
+        </SettingsAccordion>
+      ) : null}
     </>
   );
 };

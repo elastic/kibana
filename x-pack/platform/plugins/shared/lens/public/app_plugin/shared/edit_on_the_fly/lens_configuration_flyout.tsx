@@ -616,9 +616,10 @@ export function LensEditConfigurationFlyout({
             direction="column"
             gutterSize="none"
           >
-            {/* Title and description, and panel options, come first */}
+            {/* Title and description come first, panel options stay at the end */}
             {panelSettingsApi && panelSettings.state ? (
               <PanelSettingsAccordions
+                section="titleAndDescription"
                 api={panelSettingsApi}
                 state={panelSettings.state}
                 updateState={panelSettings.updateState}
@@ -727,6 +728,18 @@ export function LensEditConfigurationFlyout({
                 </div>
               </EuiAccordion>
             </EuiFlexItem>
+            {panelSettingsApi && panelSettings.state ? (
+              <PanelSettingsAccordions
+                section="panelOptions"
+                api={panelSettingsApi}
+                state={panelSettings.state}
+                updateState={panelSettings.updateState}
+                fallbackTimeRange={globalTimeRange}
+                sectionCss={css`
+                  padding: 0 ${euiTheme.euiTheme.size.base};
+                `}
+              />
+            ) : null}
           </EuiFlexGroup>
           {isModalVisible && esqlConvertAttributes ? (
             <ConvertToEsqlModal
