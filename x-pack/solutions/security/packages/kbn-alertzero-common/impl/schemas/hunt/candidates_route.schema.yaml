@@ -14,8 +14,10 @@ paths:
         scheduled-shaped sweep. A sweep also holds back reports that are
         unlikely to give the hunt anything to search: extracted.relevance
         below 0.5 with no indicator, no technique and no behavior mapped to a
-        technique. A report pending a retry in the space is exempt, and so is
-        one named in report_ids.
+        technique. Three kinds of report are exempt: one pending a retry in the
+        space, one that enrichment read only as excerpts
+        (extracted.core.context_mode is degraded_context), and one named in
+        report_ids.
       summary: Get candidate report ids for the next hunt run
       tags:
         - AlertZero API
