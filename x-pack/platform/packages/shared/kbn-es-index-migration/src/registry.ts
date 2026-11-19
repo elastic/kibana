@@ -67,7 +67,7 @@ export const createMigrationRegistry = ({
         throw new Error(
           `es-index-migration [${definition.id}]: execution is "auto" but the registry was ` +
             `created without a taskManager. Pass one to createMigrationRegistry, or use ` +
-            `"lifecycle" and call reconcile() yourself.`
+            `"manual" and call reconcile() yourself.`
         );
       }
 

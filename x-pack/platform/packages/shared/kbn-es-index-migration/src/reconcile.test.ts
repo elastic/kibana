@@ -53,7 +53,7 @@ const definition = defineMigration({
   id: 'test-migration',
   resource: { kind: 'index', name: () => INDEX },
   baseline: 1,
-  execution: 'lifecycle',
+  execution: 'manual',
   versions: {
     2: { change: 'additive', mappings: v2Mappings },
     3: { change: 'additive', mappings: v3Mappings },
@@ -204,7 +204,7 @@ describe('defineMigration', () => {
     id: 'x',
     resource: { kind: 'index' as const, name: () => INDEX },
     baseline: 1,
-    execution: 'lifecycle' as const,
+    execution: 'manual' as const,
     versions: { 2: { change: 'additive' as const, mappings: v2Mappings } },
   };
 

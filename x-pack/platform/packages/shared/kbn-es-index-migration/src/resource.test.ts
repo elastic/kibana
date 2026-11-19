@@ -53,7 +53,7 @@ const build = (resource: MigrationResource) =>
     id: 'scoped',
     resource,
     baseline: 1,
-    execution: 'lifecycle',
+    execution: 'manual',
     versions: { 2: { change: 'additive', mappings: { properties: {} } } },
   });
 

@@ -19,7 +19,7 @@ const definition = defineMigration({
   id: 'multi-space',
   resource: { kind: 'index', name: (namespace) => `.entities-${namespace}` },
   baseline: 1,
-  execution: 'lifecycle',
+  execution: 'manual',
   versions: { 2: { change: 'additive', mappings: { properties: {} } } },
 });
 

@@ -137,24 +137,21 @@ describe('last-run reporting', () => {
     expect(status.lastRunRecorded).toBe('never_run');
   });
 
-  it.each(['lifecycle', 'triggered'] as const)(
-    'says no record is kept for "%s", so a blank is not read as success',
-    async (execution) => {
-      const status = await getMigrationStatus({
-        definition: build(execution),
-        esClient,
-        namespaces: ['default'],
-      });
+  it('says no record is kept for a manual migration, so a blank is not read as success', async () => {
+    const status = await getMigrationStatus({
+      definition: build('manual'),
+      esClient,
+      namespaces: ['default'],
+    });
 
-      // The error exists, but in the plugin's own startup logs - not here.
-      expect(status.lastRunRecorded).toBe('not_applicable');
-      expect(status.lastRun).toBeUndefined();
-    }
-  );
+    // The error exists, but wherever the consumer called reconcile from - not here.
+    expect(status.lastRunRecorded).toBe('not_applicable');
+    expect(status.lastRun).toBeUndefined();
+  });
 
   it('ignores a supplied record for a non-auto migration', async () => {
     const status = await getMigrationStatus({
-      definition: build('lifecycle'),
+      definition: build('manual'),
       esClient,
       namespaces: ['default'],
       lastRun,

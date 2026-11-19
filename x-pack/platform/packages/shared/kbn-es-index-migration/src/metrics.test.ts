@@ -107,13 +107,13 @@ describe('recordRun', () => {
   });
 
   it('carries the identifying attributes on every run', () => {
-    recordRun(result(), 'lifecycle');
+    recordRun(result(), 'manual');
 
     expect(add).toHaveBeenCalledWith(
       1,
       expect.objectContaining({
         migration_id: 'asset-criticality',
-        execution_mode: 'lifecycle',
+        execution_mode: 'manual',
         namespace: 'default',
         outcome: 'migrated',
       })

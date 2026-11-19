@@ -63,7 +63,7 @@ because it is part of the schedule. Raise `timeout` when migrations are heavy (a
 many namespaces) and lower it when they are trivially fast, so a wedged run releases its slot
 sooner.
 
-For `lifecycle` or `triggered` migrations, skip the task wiring and call `reconcile` yourself:
+For `manual` migrations, skip the task wiring and call `reconcile` yourself:
 
 ```ts
 const result = await reconcile({
@@ -98,8 +98,7 @@ this space get used.
 `execution` says **who pulls the trigger**, never how the work is done:
 
 - `auto` - a background task runs it unattended
-- `lifecycle` - the plugin calls `reconcile` from its own startup path
-- `triggered` - runs only when an operator or API invokes it
+- `manual` - the consumer calls `reconcile` itself, from wherever it chooses
 
 `auto` needs a Task Manager, and the consumer supplies its own. That is what lets a package own a
 background task without becoming a plugin, and Task Manager's claim then provides
@@ -112,15 +111,15 @@ Two guards exist so the wiring cannot be silently wrong. Declaring `auto` withou
 Calling `register` after `start` also throws, since Task Manager only accepts definitions during
 setup and the task may already have run.
 
-**Run history is persisted for `auto` only.** The other two modes hand their `ReconcileResult`
-straight back to a caller who is standing there to receive it; `auto` fires with nobody watching,
-so its outcome is kept in the task's state to stay answerable later. A consequence worth knowing:
-the status of a `lifecycle` migration shows the version gap but not the last error, which lives in
-the plugin's own startup logs. A missing error there does not mean success.
+**Run history is persisted for `auto` only.** A `manual` migration hands its `ReconcileResult`
+straight back to the caller who asked for it. `auto` fires with nobody watching, so its outcome is
+kept in the task's state to stay answerable later. A consequence worth knowing: the status of a
+`manual` migration shows the version gap but not the last error, which lives wherever the consumer
+called `reconcile` from. A missing error there does not mean success.
 
 The library always owns classification, locking, idempotency, retry, status and metrics. The
-consumer only chooses when it runs and how it orders against its own work. Both halves matter: if
-consumers could override the first, every adopter would drift apart; if they could not control the
+consumer only chooses when it runs and how it orders against its own work. Both halves matter. If
+consumers could override the first, every adopter would drift apart. If they could not control the
 second, the biggest existing migrations could not adopt it at all.
 
 ## Two Elasticsearch behaviours this encodes
@@ -130,9 +129,10 @@ Both were confirmed against a live cluster, and both are easy to get wrong:
 - **The version is read from and written to the concrete index, never the index template.** A
   template update does not touch indices that already exist, so a template's `_meta` always reports
   what the current code intends - it can never reveal that an index is behind.
-- **`_meta` is replaced wholesale, not merged.** Every write therefore sends the complete object.
-  A partial write would erase the version, and the next reconcile would fall back to `baseline` and
-  re-apply everything.
+- **`_meta` is replaced wholesale, not merged.** Every write therefore reads what is already on the
+  index and merges into it. Writing only our own key would erase anything another owner keeps -
+  Asset Criticality keeps its own `version` there - and that owner would then believe its migration
+  never ran and re-run it on every startup.
 
 ## Scope: per-namespace or global
 
@@ -176,7 +176,7 @@ Reconciles of the same migration and namespace are shared within a process: a se
 the first one's promise rather than a second run. Applying the same additive mappings twice is
 harmless, but a data step is the plugin's own code and may not be idempotent.
 
-Across nodes, `auto` is covered by Task Manager's claim. `lifecycle` and `triggered` are driven by
+Across nodes, `auto` is covered by Task Manager's claim. `manual` migrations are driven by
 their caller, so avoiding a concurrent run there is the caller's responsibility.
 
 ## Status
@@ -197,7 +197,7 @@ sustained above zero is the signal that something is stuck.
 | `never_run` | An `auto` migration that has not run yet |
 | `not_applicable` | Not `auto`, so no record is kept - the error is in the plugin's own logs |
 
-Without that distinction, a blank error on a `lifecycle` migration reads as "it succeeded" when it
+Without that distinction, a blank error on a `manual` migration reads as "it succeeded" when it
 actually means "we never kept a record."
 
 ## Metrics

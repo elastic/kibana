@@ -81,7 +81,7 @@ export const assetCriticalityMigration = defineMigration({
   baseline: 1,
 
   // Invoked by an internal route for the POC. Nothing runs it unattended.
-  execution: 'triggered',
+  execution: 'manual',
 
   /**
    * v1 is declared rather than left implicit so the gate has a predecessor to check v2

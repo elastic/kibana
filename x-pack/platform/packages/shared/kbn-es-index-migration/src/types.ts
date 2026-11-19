@@ -24,10 +24,15 @@ export type ExecutionMode =
    * plugin - and gives once-per-cluster execution for free via the task claim.
    */
   | 'auto'
-  /** The plugin calls `reconcile` from its own lifecycle. */
-  | 'lifecycle'
-  /** Runs only when an operator or an API invokes it. */
-  | 'triggered';
+  /**
+   * The consumer calls `reconcile` itself, from wherever it chooses - plugin start, an
+   * install step, or an operator-facing route.
+   *
+   * Deliberately one mode rather than separate values for startup and on-request. The
+   * library behaves identically either way, so splitting them would describe a
+   * difference that does not exist and invite someone to rely on it.
+   */
+  | 'manual';
 
 /**
  * A change that only ever adds to the index shape. Applied automatically.

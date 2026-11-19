@@ -18,7 +18,7 @@ import type { ExecutionMode, MigrationDefinition } from './types';
 
 const build = (
   id: string,
-  execution: ExecutionMode = 'lifecycle',
+  execution: ExecutionMode = 'manual',
   index = `.${id}`
 ): MigrationDefinition =>
   defineMigration({
@@ -72,7 +72,7 @@ describe('createMigrationRegistry', () => {
     registry.register(build('asset-criticality'));
 
     expect(() =>
-      registry.register(build('asset-criticality', 'lifecycle', '.something-else'))
+      registry.register(build('asset-criticality', 'manual', '.something-else'))
     ).toThrow(/already registered as "asset-criticality"/);
   });
 
@@ -217,14 +217,11 @@ describe('guards', () => {
     expect(() => registry.register(build('a', 'auto'))).not.toThrow();
   });
 
-  it.each(['lifecycle', 'triggered'] as const)(
-    'allows "%s" without a taskManager, since its caller drives it',
-    (execution) => {
-      const registry = createMigrationRegistry({ pluginId: 'securitySolution' });
+  it('allows "manual" without a taskManager, since its caller drives it', () => {
+    const registry = createMigrationRegistry({ pluginId: 'securitySolution' });
 
-      expect(() => registry.register(build('a', execution))).not.toThrow();
-    }
-  );
+    expect(() => registry.register(build('a', 'manual'))).not.toThrow();
+  });
 
   it('refuses registration after start, which Task Manager would have missed', async () => {
     const registry = createMigrationRegistry({

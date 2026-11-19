@@ -92,7 +92,7 @@ describe('declared Asset Criticality migration', () => {
     expect(name('migpoc-library')).toContain('migpoc-library');
   });
 
-  it('is triggered only, so nothing runs it unattended', () => {
-    expect(assetCriticalityMigration.execution).toBe('triggered');
+  it('is manual, so nothing runs it unattended', () => {
+    expect(assetCriticalityMigration.execution).toBe('manual');
   });
 });
