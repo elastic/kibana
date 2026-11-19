@@ -4200,7 +4200,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/workflows_execution_engine
       '@kbn/workflows-extensions':
         specifier: workspace:*
-        version: link:src/platform/plugins/shared/workflows_extensions
+        version: link:x-pack/platform/plugins/shared/workflows_extensions
       '@kbn/workflows-extensions-example':
         specifier: workspace:*
         version: link:examples/workflows_extensions_example
@@ -8871,7 +8871,7 @@ importers:
 
   x-pack/platform/plugins/shared/workflows_execution_engine: {}
 
-  src/platform/plugins/shared/workflows_extensions: {}
+  x-pack/platform/plugins/shared/workflows_extensions: {}
 
   x-pack/platform/plugins/shared/workflows_management: {}
 
