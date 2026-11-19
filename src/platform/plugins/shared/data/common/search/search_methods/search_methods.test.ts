@@ -320,7 +320,9 @@ describe('SearchMethodsService', () => {
           expect(adapter.getRequests()).toEqual([]);
         });
 
-        it('removes the entry of a response that arrives after the request was aborted', async () => {
+        it('keeps the entry of a partial response that arrives after the request was aborted', async () => {
+          // Cancelling a running request resolves with its partial result; callers (e.g. Discover)
+          // read that result's warnings from the Inspector entry
           const adapter = new RequestAdapter();
           const controller = new AbortController();
           mockSearch.mockImplementation(() => {
@@ -333,7 +335,9 @@ describe('SearchMethodsService', () => {
             { inspector: inspectorFor(adapter), abortSignal: controller.signal }
           );
 
-          expect(adapter.getRequests()).toEqual([]);
+          const requests = adapter.getRequests();
+          expect(requests).toHaveLength(1);
+          expect(requests[0].status).toBe(RequestStatus.OK);
         });
 
         it('removes only the aborted entry, leaving the others in place', async () => {

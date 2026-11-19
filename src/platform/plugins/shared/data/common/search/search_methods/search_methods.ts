@@ -121,8 +121,8 @@ export class SearchMethodsService implements ISearchMethods {
           id: requestId,
         });
 
-    // A request aborted on purpose while it ran (e.g. superseded, or ended along with a sibling) is
-    // not worth showing in Inspector, so its entry is removed rather than left PENDING.
+    // A request that failed because it was aborted on purpose (e.g. superseded, or ended along with
+    // a sibling) is not worth showing in Inspector, so its entry is removed rather than left PENDING.
     const dropEntryIfAborted = (): boolean => {
       if (!options?.abortSignal?.aborted) return false;
       if (requestResponder) options?.inspector?.adapter.resetRequest(requestId);
@@ -154,14 +154,14 @@ export class SearchMethodsService implements ISearchMethods {
         ? { ...response.rawResponse, values: [] }
         : response.rawResponse;
 
-      if (!dropEntryIfAborted()) {
-        // Stats use the normalized rows so Inspector agrees with what the caller receives
-        requestResponder?.stats(getEsqlInspectorStats(rawResponse));
-        requestResponder?.ok({
-          json: { rawResponse: response.rawResponse },
-          requestParams: response.requestParams,
-        });
-      }
+      // A response that resolves after an abort is a partial result the user asked for (cancel),
+      // and callers read its warnings and cluster details from this entry, so it is always logged.
+      // Stats use the normalized rows so Inspector agrees with what the caller receives
+      requestResponder?.stats(getEsqlInspectorStats(rawResponse));
+      requestResponder?.ok({
+        json: { rawResponse: response.rawResponse },
+        requestParams: response.requestParams,
+      });
 
       const datatable = options?.includeDataTable
         ? mapEsqlResponseToDatatable(rawResponse, {
