@@ -305,6 +305,19 @@ download_artifact() {
   retry 3 1 timeout 10m buildkite-agent artifact download "$@"
 }
 
+# Snapshot distributable that build_kibana.sh publishes for test steps to consume
+kibana_test_snapshot_archive() {
+  local hostArch distributionArch
+  hostArch="$(command uname -m)"
+  case "$hostArch" in
+    x86_64 | amd64) distributionArch="x86_64" ;;
+    aarch64 | arm64) distributionArch="aarch64" ;;
+    *) distributionArch="$hostArch" ;;
+  esac
+
+  echo "kibana-$(jq -r .version "${KIBANA_DIR:-.}/package.json")-SNAPSHOT-linux-$distributionArch.tar.zst"
+}
+
 print_if_dry_run() {
   if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
     echo "DRY_RUN is enabled."

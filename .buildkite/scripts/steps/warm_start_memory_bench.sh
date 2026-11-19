@@ -5,7 +5,7 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 BENCH_CONFIG_PATH="src/platform/packages/shared/kbn-core-server-benchmarks/ci_warm_start_memory.benchmark.config.ts"
-ARTIFACT_FILENAME="kibana-default.tar.zst"
+ARTIFACT_FILENAME="$KIBANA_TEST_SNAPSHOT_ARCHIVE"
 WORK_DIR="target/warm-start-memory-bench"
 BASELINE_BUILD_DIR="${WORK_DIR}/baseline"
 TARGET_BUILD_DIR="${WORK_DIR}/target"

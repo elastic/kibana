@@ -85,7 +85,7 @@ The archive is created under each worktree's `target/` directory. Its platform a
 
 ### Option 2: Use Buildkite artifacts from PR CI
 
-PR CI uploads the Linux Kibana archive as `kibana-default.tar.zst` during the post-build step. The `ci:build-cloud-image` label triggers an additional cloud-image build that consumes that same archive, but the label is not the thing that creates the raw Kibana distributable.
+PR CI uploads the Linux Kibana archive as `kibana-<version>-SNAPSHOT-linux-x86_64.tar.zst` during the post-build step. The `ci:build-cloud-image` label triggers an additional cloud-image build that consumes that same archive, but the label is not the thing that creates the raw Kibana distributable.
 
 By default, this path is only feasible from a Linux host, Linux workstation, or Linux VM because the default PR CI artifacts include Linux binaries and cannot run directly on macOS. If you are working on macOS and want a CI-built macOS artifact, add the `ci:build-all-platforms` label to the PR, trigger a new PR CI run, and download the matching Darwin archive from that new build.
 
@@ -98,11 +98,11 @@ Use this option when you need the exact distributable artifact produced by CI. Y
 ![Buildkite Canvas with Build Kibana Distribution step](./assets/buildkite_canvas_build_kibana_distribution.png)
 
 4. Select the **Artifacts** tab for that step.
-5. Download `kibana-default.tar.zst`. This is the generic Linux Kibana distributable used by downstream CI steps.
+5. Download the `kibana-<version>-SNAPSHOT-linux-x86_64.tar.zst` archive, for example `kibana-9.5.0-SNAPSHOT-linux-x86_64.tar.zst`. This is the generic Linux Kibana distributable used by downstream CI steps.
 
 ![Buildkite Build Kibana Distribution artifacts tab](./assets/buildkite_distribution_artifacts.png)
 
-The step also uploads a versioned archive such as `kibana-9.5.0-SNAPSHOT-linux-x86_64.tar.zst`. Either archive can be used for profiling; `kibana-default.tar.zst` is stable to document and script against. These default PR artifacts are Linux artifacts, so run them on Linux.
+These default PR artifacts are Linux artifacts, so run them on Linux.
 
 For macOS users:
 
@@ -147,7 +147,7 @@ unpack_kibana_archive "$BASELINE_ARCHIVE" /tmp/kibana-memory-profile/baseline
 unpack_kibana_archive "$CANDIDATE_ARCHIVE" /tmp/kibana-memory-profile/candidate
 ```
 
-Replace `<baseline-kibana-archive>` and `<candidate-kibana-archive>` with the archive filenames from each `target/` directory. If you downloaded `kibana-default.tar.zst` from CI, use the downloaded file path instead.
+Replace `<baseline-kibana-archive>` and `<candidate-kibana-archive>` with the archive filenames from each `target/` directory. If you downloaded the archive from CI, use the downloaded file path instead.
 
 ## Create a local peak-memory probe
 

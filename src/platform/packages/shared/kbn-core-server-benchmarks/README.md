@@ -41,7 +41,7 @@ run never reads as a clean result.
 `.buildkite/scripts/steps/warm_start_memory_bench.sh` runs on every pull request as a
 non-blocking step. It compares two prebuilt distributables and never builds Kibana:
 
-- **target** — the `kibana-default.tar.zst` the PR's own build step already uploaded
+- **target** — the `kibana-<version>-SNAPSHOT-linux-<arch>.tar.zst` the PR's own build step already uploaded
 - **baseline** — the same artifact from the `kibana-on-merge` build for `GITHUB_PR_MERGE_BASE`
 
 The step skips itself when the baseline artifact has expired or the PR reused a

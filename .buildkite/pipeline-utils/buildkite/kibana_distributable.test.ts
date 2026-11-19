@@ -11,7 +11,6 @@ import nock from 'nock';
 
 import { BuildkiteClient } from './client.ts';
 import {
-  KIBANA_DISTRIBUTABLE_ARTIFACT,
   buildHasKibanaDistributable,
   createTimeBoundedClient,
   findBuildWithKibanaDistributable,
@@ -25,6 +24,8 @@ const artifactsPath = (buildNumber: number) =>
   `/v2/organizations/elastic/pipelines/${PIPELINE}/builds/${buildNumber}/artifacts`;
 
 const buildFixture = (number: number): Build => ({ id: `uuid-${number}`, number } as Build);
+
+const DISTRIBUTABLE = 'kibana-9.5.0-SNAPSHOT-linux-x86_64.tar.zst';
 
 describe('kibana_distributable', () => {
   let client: BuildkiteClient;
@@ -50,7 +51,7 @@ describe('kibana_distributable', () => {
       nock(BASE_URL)
         .get(artifactsPath(1))
         .query({ per_page: 100 })
-        .reply(200, [{ filename: 'junit.xml' }, { filename: KIBANA_DISTRIBUTABLE_ARTIFACT }]);
+        .reply(200, [{ filename: 'junit.xml' }, { filename: DISTRIBUTABLE }]);
 
       await expect(buildHasKibanaDistributable(client, PIPELINE, 1)).resolves.toBe(true);
     });
@@ -59,7 +60,7 @@ describe('kibana_distributable', () => {
       nock(BASE_URL)
         .get(artifactsPath(1))
         .query({ per_page: 100 })
-        .reply(200, [{ filename: 'other', path: `target/${KIBANA_DISTRIBUTABLE_ARTIFACT}` }]);
+        .reply(200, [{ filename: 'other', path: `target/${DISTRIBUTABLE}` }]);
 
       await expect(buildHasKibanaDistributable(client, PIPELINE, 1)).resolves.toBe(true);
     });
@@ -86,7 +87,7 @@ describe('kibana_distributable', () => {
       nock(BASE_URL)
         .get(artifactsPath(2))
         .query({ per_page: 100 })
-        .reply(200, [{ filename: KIBANA_DISTRIBUTABLE_ARTIFACT }]);
+        .reply(200, [{ filename: DISTRIBUTABLE }]);
 
       const build = await findBuildWithKibanaDistributable(client, PIPELINE, [
         buildFixture(3),
@@ -104,7 +105,7 @@ describe('kibana_distributable', () => {
       nock(BASE_URL)
         .get(artifactsPath(1))
         .query({ per_page: 100 })
-        .reply(200, [{ filename: KIBANA_DISTRIBUTABLE_ARTIFACT }]);
+        .reply(200, [{ filename: DISTRIBUTABLE }]);
 
       const build = await findBuildWithKibanaDistributable(client, PIPELINE, [
         buildFixture(2),
