@@ -2212,9 +2212,8 @@ describe('WorkflowContextManager', () => {
       testContainer = createTestContainer(workflow);
     });
 
-    // prepareContext resolves rehydration targets (via resolveRehydrationTargets)
-    // and then fetches them with readBatch. Full coverage of the static-analysis
-    // branches lives in the resolveRehydrationTargets unit tests.
+    // prepareContext asks resolveRehydrationTargets for the ids, then fetches
+    // them with readBatch. This node has no predecessors, so both batches are empty.
     it('fetches the resolved output and input ids with readBatch', async () => {
       await testContainer.underTest.prepareContext();
 

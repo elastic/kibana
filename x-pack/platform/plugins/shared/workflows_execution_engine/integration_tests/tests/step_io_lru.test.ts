@@ -9,13 +9,12 @@
  * Integration tests for the LRU-based StepIoService.
  *
  * Covers:
- * 1. Linear workflow — outputs flow through `write`→LRU→`read` correctly.
- * 2. data.set variables — the new inline `getVariables()` in WorkflowContextManager.
- * 3. Pause + resume — on resume `load()` excludes outputs, forcing `prepareForRead`
- *    to rehydrate from ES via `getStepExecutionsByIds`.
- * 4. Small `maxCacheSize` on pause/resume — even when the LRU cannot hold any item
- *    (1-byte budget), outputs are still retrievable after resume because `prepareForRead`
- *    fetches from ES and `read()` falls back to state when the item is too large to cache.
+ * 1. Linear workflow — outputs flow through `write`, the LRU, and `readBatch`.
+ * 2. data.set variables — `getVariables()` in WorkflowContextManager.
+ * 3. Pause + resume — on resume `load()` excludes outputs, so `prepareContext`
+ *    fetches them from Elasticsearch through `readBatch`.
+ * 4. Small `maxCacheSize` on pause/resume — a 1-byte budget cannot keep the output.
+ *    `readBatch` still returns it for the node, and the consumer renders it.
  * 5. Null output is not confused with a cache miss — a failed step's null output
  *    does not block downstream steps that tolerate the missing value.
  */
@@ -124,8 +123,8 @@ describe('StepIoService (LRU): pause + resume triggers ES rehydration', () => {
 
   // Workflow: before_pause → pause (wait) → after_pause reads before_pause output.
   // On resume, the LRU cache is cold (new StepIoService instance) and WorkflowExecutionState
-  // loads metadata without outputs (excludeFields: ['output']). prepareForRead must fetch
-  // the output from ES via getStepExecutionsByIds.
+  // loads metadata without outputs (excludeFields: ['output']). prepareContext fetches
+  // the output from ES through readBatch.
   const yaml = `
 name: lru-pause-resume
 enabled: false
@@ -193,9 +192,9 @@ steps:
       expect(afterPause?.output).toBe('xxx');
     });
 
-    it('getStepExecutionsByIds was called to rehydrate outputs (load() excludes output fields)', () => {
+    it('getStepExecutionsByIds was called to load outputs (load() excludes output fields)', () => {
       // load() fetches step docs with excludeFields: ['output']. The LRU cache is empty at
-      // resume time. prepareForRead detects the cache miss and fetches from ES.
+      // resume time. prepareContext's readBatch misses and fetches from ES.
       const rehydrationCalls = getByIdsSpy.mock.calls.filter(
         (call) => Array.isArray(call[1]) && call[1].includes('output')
       );
@@ -211,9 +210,9 @@ describe('StepIoService (LRU): tiny maxCacheSize does not break resume', () => {
   let fixture: WorkflowRunFixture;
 
   // Same shape as suite 3 but with maxCacheSize: 1 byte.
-  // On resume, load() creates a fresh state with no outputs. prepareForRead fetches
-  // from ES but cannot cache the result (item exceeds maxSize). read() returns undefined;
-  // the Liquid template renders it as empty string. The workflow still completes.
+  // On resume, load() creates a fresh state with no outputs. The output does not fit
+  // the cache, so readBatch returns it for this node and does not keep it. The
+  // consumer still renders the payload.
   const yaml = `
 name: lru-tiny-cache
 enabled: false
@@ -269,6 +268,13 @@ steps:
       );
       expect(exec?.status).toBe(ExecutionStatus.COMPLETED);
       expect(exec?.error).toBeUndefined();
+    });
+
+    it('consumer renders the producer output even though it does not fit the cache', () => {
+      const steps = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values());
+      const consumer = steps.find((s) => s.stepId === 'consumer');
+      expect(consumer?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(consumer?.output).toBe('xxx');
     });
 
     it('getStepExecutionsByIds was called (cache always misses with maxCacheSize: 1)', () => {

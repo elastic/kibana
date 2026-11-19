@@ -60,7 +60,7 @@ export interface StepIoLifecycle {
  * the LRU cache and `WorkflowExecutionState`.
  *
  * `readBatch` is the only fetch. Outputs that fit stay in the LRU. Outputs
- * that do not exist only in the returned map. Flush is
+ * that do not fit exist only in the returned map. Flush is
  * `WorkflowExecutionState`'s responsibility.
  */
 export class StepIoService implements StepIoWriter, StepIoLifecycle {

@@ -183,8 +183,8 @@ describe('extractReferencedStepIds', () => {
 
   it('should extract step ID from an enter-while node with a bare KQL condition', () => {
     // Authoring a while condition as KQL (no {{ }}) is fully supported by
-    // evaluateCondition, but the referenced step must still be discovered so it
-    // can be rehydrated if its output was evicted. Mirrors the enter-if KQL case.
+    // evaluateCondition, but the referenced step must still be discovered so
+    // prepareContext can fetch its output. Mirrors the enter-if KQL case.
     const node = {
       id: 'test-while',
       type: 'enter-while',
@@ -198,8 +198,8 @@ describe('extractReferencedStepIds', () => {
 
   it('should extract step ID from an exit-while node with a bare KQL condition', () => {
     // The exit-while node re-evaluates this condition on every iteration. If the
-    // referenced step is not discovered here, prepareForRead never rehydrates it,
-    // so an evicted source renders blank and the loop exits prematurely.
+    // referenced step is not discovered here, prepareContext never fetches it,
+    // so a dropped output renders blank and the loop exits prematurely.
     const node = {
       id: 'exit-while',
       type: 'exit-while',
