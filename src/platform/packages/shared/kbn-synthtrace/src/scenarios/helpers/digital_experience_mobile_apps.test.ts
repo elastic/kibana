@@ -19,7 +19,7 @@ import {
   type OtelLogDocument,
   type Timerange,
 } from '@kbn/synthtrace-client';
-import { getDefaultSeed } from './digital_experience_apps';
+import { getDefaultSeed, sessionTimeOf } from './digital_experience_apps';
 import {
   DIGITAL_EXPERIENCE_MOBILE_APPS,
   DIGITAL_EXPERIENCE_NATIVE_APPS,
@@ -574,20 +574,33 @@ describe('digital experience mobile apps', () => {
       });
     });
 
-    it('points session.previous_id only to sessions the run has written', () => {
+    it("points session.previous_id to the installation's previous session in the run", () => {
       // Longer than an installation cycle, so that the installations come back
       const run = timerange(range.from, new Date(FROM + 2 * 60 * 60_000));
-      const starts = logsOf(collectNative(run, 0.25)).filter(
-        ({ event_name: eventName }) => eventName === EVENT_SESSION_START
-      );
-      const sessionIds = new Set(starts.map(({ attributes }) => attributes?.['session.id']));
-      const previousIds = starts.flatMap(({ attributes }) =>
-        attributes?.['session.previous_id'] ? [attributes['session.previous_id']] : []
-      );
+      const starts = logsOf(collectNative(run, 0.25))
+        .filter(({ event_name: eventName }) => eventName === EVENT_SESSION_START)
+        .sort((a, b) => Number(a['@timestamp']) - Number(b['@timestamp']));
+      const startsByInstallation = new Map<unknown, OtelLogDocument[]>();
+      starts.forEach((start) => {
+        const installationId = start.resource?.attributes?.['app.installation.id'];
+        startsByInstallation.set(installationId, [
+          ...(startsByInstallation.get(installationId) ?? []),
+          start,
+        ]);
+      });
 
-      expect(previousIds.length).toBeGreaterThan(0);
-      expect(previousIds.length).toBeLessThan(starts.length);
-      previousIds.forEach((previousId) => expect(sessionIds).toContain(previousId));
+      const returning = [...startsByInstallation.values()].filter(({ length }) => length > 1);
+      expect(returning.length).toBeGreaterThan(0);
+      startsByInstallation.forEach(([first, ...later]) => {
+        // The run doesn't have the session before an installation's first one
+        expect(first.attributes).not.toHaveProperty('session.previous_id');
+        later.forEach((start, i) => {
+          const previous = i === 0 ? first : later[i - 1];
+          expect(start.attributes?.['session.previous_id']).toBe(
+            previous.attributes?.['session.id']
+          );
+        });
+      });
     });
 
     it('runs the newest version everywhere for a rollout without hours', () => {
@@ -597,21 +610,29 @@ describe('digital experience mobile apps', () => {
         ...app,
         versions: [{ ...newest, rollout: { initialAdoption: 0, hours: 0 } }, ...older],
       };
-      const versions = new Set(
-        logsOf(
-          generateEdotNativeSessions(range, {
-            environment: 'test',
-            from: FROM,
-            scale: 1,
-            platform: 'both',
-            seed: 'digital-experience-native-test',
-            apps: [immediate],
-          }).flatMap((generator) =>
-            Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
-          )
-        ).map(({ resource }) => resource?.attributes?.['service.version'])
+      // The run starts on the tick of a session, which therefore starts with the rollout
+      const perMinute = app.sessionsPerMinute;
+      const from = sessionTimeOf(Math.ceil((perMinute * FROM) / 60_000), perMinute);
+      const immediateLogs = logsOf(
+        generateEdotNativeSessions(timerange(new Date(from), range.to), {
+          environment: 'test',
+          from,
+          scale: 1,
+          platform: 'both',
+          seed: 'digital-experience-native-test',
+          apps: [immediate],
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+        )
       );
-      expect(versions).toEqual(new Set([newest.serviceVersion]));
+
+      const timesOfStarts = immediateLogs
+        .filter(({ event_name: eventName }) => eventName === EVENT_SESSION_START)
+        .map((doc) => Number(doc['@timestamp']));
+      expect(timesOfStarts).toContain(from);
+      expect(
+        new Set(immediateLogs.map(({ resource }) => resource?.attributes?.['service.version']))
+      ).toEqual(new Set([newest.serviceVersion]));
     });
 
     it('rejects a rollout of a version other than the newest', () => {
