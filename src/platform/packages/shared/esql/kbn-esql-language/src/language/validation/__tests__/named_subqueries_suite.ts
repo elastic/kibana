@@ -19,6 +19,10 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
           query: 'LET a = (FROM index | KEEP keywordField); FROM a | KEEP keywordField',
         },
         {
+          name: 'a LET and an index providing distinct fields in the same FROM',
+          query: 'LET a = (ROW letField = 1); FROM a, other_index | KEEP letField, doubleField',
+        },
+        {
           name: 'a LET inside a FROM subquery',
           query:
             'LET a = (FROM index | KEEP keywordField); FROM (FROM a), other_index | KEEP keywordField',
@@ -46,14 +50,14 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
       });
     });
 
-    it.each([
-      'LET a = (ROW x = 1); TS a',
-      'LET index = (ROW x = 1); TS index',
-    ])('does not treat a LET binding as an index for TS: %s', async (query) => {
-      const { expectErrors } = await setup();
+    it.each(['LET a = (ROW x = 1); TS a', 'LET index = (ROW x = 1); TS index'])(
+      'does not treat a LET binding as an index for TS: %s',
+      async (query) => {
+        const { expectErrors } = await setup();
 
-      await expectErrors(query, ['Subqueries are not supported in TS command']);
-    });
+        await expectErrors(query, ['Subqueries are not supported in TS command']);
+      }
+    );
 
     describe('METADATA', () => {
       it.each([
