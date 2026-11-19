@@ -13,5 +13,6 @@ export {
   isAlertTimeToAcknowledgeMetric,
   runAlertTimeToAcknowledgeMetrics,
 } from './alert_time_to_acknowledge';
+export { buildCaseSelectionSearch, readCaseSelection } from './case_selection';
 export { toKpiMetricError } from './result';
 export { getKpiMetricFieldError, getKpiMetricQueryError } from './validation';

@@ -6,7 +6,11 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { MAX_KPI_ACKNOWLEDGE_EVENTS, MAX_KPI_ALERTS } from '../../../../common/constants';
+import {
+  MAX_KPI_ACKNOWLEDGE_EVENTS,
+  MAX_KPI_ALERTS,
+  MAX_KPI_FILTER_CASE_IDS,
+} from '../../../../common/constants';
 import type { PredefinedKpiMetricConfiguration } from '../../../../common/types/domain';
 import type { AlertGeneratedTimes } from '../../../services/alerts';
 import { createAlertServiceMock } from '../../../services/mocks';
@@ -738,6 +742,143 @@ describe('alert time to acknowledge', () => {
         (10 + 30 + 100) / 3,
         (10 + 30 + 100) / 3,
       ]);
+    });
+
+    describe('case close date basis', () => {
+      const closedMetric: PredefinedKpiMetricConfiguration = {
+        ...avgMetric,
+        id: 'tta-closed',
+        dateBasis: 'case_closed_at',
+      };
+      const caseHit = (id: string) => ({
+        _index: '.cases',
+        _id: id,
+        _source: { case: { id } },
+      });
+      const caseResponse = (ids: string[], total: number = ids.length) =>
+        ({
+          ...searchResponse([]),
+          hits: { total: { value: total, relation: 'eq' as const }, hits: ids.map(caseHit) },
+        } as estypes.MsearchResponseItem);
+
+      // the case selection comes first, then the attachments, then the events
+      const mockClosedSearches = ({
+        selections,
+        attachments = [],
+        events = [],
+      }: {
+        selections: estypes.MsearchResponseItem[];
+        attachments?: estypes.MsearchResponseItem[];
+        events?: estypes.MsearchResponseItem[];
+      }) => {
+        const eventQueue = [...events];
+
+        reader.msearch.mockImplementation(async (requests: Array<{ index: string }>) => {
+          if (requests[0].index === 'cases') {
+            return selections;
+          }
+
+          return requests[0].index === 'activity'
+            ? [eventQueue.shift() ?? searchResponse([])]
+            : attachments;
+        });
+      };
+
+      it('counts an alert attached before the range on a case that closed in the range', async () => {
+        mockClosedSearches({
+          selections: [caseResponse(['c1'])],
+          attachments: [searchResponse([attachmentHit('c1', '2026-10-01T10:00:00.000Z', ['a1'])])],
+          events: [searchResponse([eventHit('c1', '2026-10-01T11:00:00.000Z')])],
+        });
+        alertsService.getAlertGeneratedTimes.mockResolvedValue(
+          alerts({ a1: { start: '2026-10-01T10:00:00.000Z' } })
+        );
+
+        const [result] = await runAlertTimeToAcknowledgeMetrics({
+          metrics: [closedMetric],
+          context: { ...context, from: '2026-11-01T00:00:00.000Z', to: '2026-11-08T00:00:00.000Z' },
+          reader,
+          alertsService,
+        });
+
+        expect(result).toEqual(
+          expect.objectContaining({ id: 'tta-closed', type: 'value', value: 3600 })
+        );
+
+        const attachmentCall = reader.msearch.mock.calls.find(
+          ([requests]) => requests[0].index === 'attachments'
+        );
+        const [[attachmentRequest]] = attachmentCall;
+        expect(attachmentRequest.body.query.bool.filter).toEqual(
+          expect.arrayContaining([{ terms: { 'case.id': ['c1'] } }])
+        );
+        expect(JSON.stringify(attachmentRequest.body.query)).not.toContain('range');
+      });
+
+      it('gives null and runs no attachment search when no case closed in the range', async () => {
+        mockClosedSearches({ selections: [caseResponse([]), caseResponse([])] });
+
+        const [result] = await runAlertTimeToAcknowledgeMetrics({
+          metrics: [closedMetric],
+          context: { ...context, from: '2026-11-01T00:00:00.000Z', to: '2026-11-08T00:00:00.000Z' },
+          reader,
+          alertsService,
+        });
+
+        expect(result).toEqual({
+          id: 'tta-closed',
+          type: 'value',
+          format: 'duration',
+          value: null,
+          previousValue: null,
+        });
+        expect(
+          reader.msearch.mock.calls.some(([requests]) => requests[0].index === 'attachments')
+        ).toBe(false);
+        expect(alertsService.getAlertGeneratedTimes).not.toHaveBeenCalled();
+      });
+
+      it('gives an error over the case limit', async () => {
+        mockClosedSearches({ selections: [caseResponse([], MAX_KPI_FILTER_CASE_IDS + 1)] });
+
+        const [result] = await runAlertTimeToAcknowledgeMetrics({
+          metrics: [closedMetric],
+          context,
+          reader,
+          alertsService,
+        });
+
+        expect(result).toEqual(expect.objectContaining({ id: 'tta-closed', type: 'error' }));
+      });
+
+      it('searches once for each date basis and keeps the attached date search for the other metric', async () => {
+        mockClosedSearches({
+          selections: [caseResponse(['c1'])],
+          attachments: [searchResponse([attachmentHit('c1', '2026-11-04T10:00:00.000Z', ['a1'])])],
+          events: [searchResponse([eventHit('c1', '2026-11-04T11:00:00.000Z')])],
+        });
+        alertsService.getAlertGeneratedTimes.mockResolvedValue(
+          alerts({ a1: { start: '2026-11-04T10:00:00.000Z' } })
+        );
+
+        const results = await runAlertTimeToAcknowledgeMetrics({
+          metrics: [closedMetric, { ...avgMetric, id: 'tta-attached' }],
+          context: { ...context, from: '2026-11-01T00:00:00.000Z', to: '2026-11-08T00:00:00.000Z' },
+          reader,
+          alertsService,
+        });
+
+        expect(results.map(({ id }) => id)).toEqual(['tta-closed', 'tta-attached']);
+
+        const indices = reader.msearch.mock.calls.map(([requests]) => requests[0].index as string);
+        expect(indices.filter((index) => index === 'cases')).toHaveLength(1);
+        const attachedSearch = reader.msearch.mock.calls.find(
+          ([requests]) =>
+            requests[0].index === 'attachments' &&
+            JSON.stringify(requests[0].body.query).includes('"range"')
+        );
+        expect(attachedSearch).toBeDefined();
+      });
     });
 
     it('runs no search with no metric', async () => {

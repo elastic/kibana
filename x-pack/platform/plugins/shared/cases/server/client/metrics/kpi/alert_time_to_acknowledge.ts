@@ -16,7 +16,10 @@ import { AttachmentType } from '../../../../common/types/domain';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../../common/utils/attachments';
 import type { CasesAnalyticsV2ReaderContract } from '../../../cases_analytics_v2/reader';
 import type { AlertGeneratedTimes, AlertService } from '../../../services/alerts';
+import type { KpiPeriod } from './period';
 import { getPreviousPeriod } from './period';
+import type { CaseSelection } from './case_selection';
+import { buildCaseSelectionSearch, readCaseSelection } from './case_selection';
 import type { KpiQueryContext, KpiSearchRequest } from './query_builder';
 import { buildForcedFilters } from './query_builder';
 import { isIncompleteKpiSearchResponse, toKpiMetricError } from './result';
@@ -446,10 +449,132 @@ const readPeriodData = async (
   }
 };
 
+interface PeriodsReadArgs {
+  context: KpiQueryContext;
+  previousPeriod?: KpiPeriod;
+  reader: CasesAnalyticsV2ReaderContract;
+  alertsService: AlertService;
+}
+
+interface Periods {
+  current: PeriodData;
+  previous?: PeriodData;
+}
+
+const FAILED_PERIODS: Periods = { current: { type: 'error', message: FAILED_MESSAGE } };
+
+const EMPTY_PERIOD: PeriodData = {
+  type: 'data',
+  pairs: [],
+  alerts: new Map(),
+  events: new Map(),
+};
+
+/**
+ * Reads the alert data of the periods. The date range applies to the attach time of the alert.
+ */
+const readAttachedAtPeriods = async ({
+  context,
+  previousPeriod,
+  reader,
+  alertsService,
+}: PeriodsReadArgs): Promise<Periods> => {
+  let responses: estypes.MsearchResponseItem[];
+
+  try {
+    responses = await reader.msearch([
+      buildAlertAttachmentSearch(context),
+      ...(previousPeriod != null
+        ? [buildAlertAttachmentSearch({ ...context, ...previousPeriod })]
+        : []),
+    ]);
+  } catch (error) {
+    return FAILED_PERIODS;
+  }
+
+  const [current, previous] = await Promise.all([
+    readPeriodData(responses[0], context, reader, alertsService),
+    previousPeriod != null
+      ? readPeriodData(responses[1], { ...context, ...previousPeriod }, reader, alertsService)
+      : undefined,
+  ]);
+
+  return { current, previous };
+};
+
+/**
+ * Reads the alert data of the periods. The date range applies to the close date of the case, so the engine
+ * first selects the cases that closed in the range. The attachment search then uses the selected case ids and no date range.
+ */
+const readCaseClosedAtPeriods = async ({
+  context,
+  previousPeriod,
+  reader,
+  alertsService,
+}: PeriodsReadArgs): Promise<Periods> => {
+  const periodContexts = [
+    context,
+    ...(previousPeriod != null ? [{ ...context, ...previousPeriod }] : []),
+  ];
+  let selections: CaseSelection[];
+
+  try {
+    const responses = await reader.msearch(periodContexts.map(buildCaseSelectionSearch));
+    selections = periodContexts.map((_, position) => readCaseSelection(responses[position]));
+  } catch (error) {
+    return FAILED_PERIODS;
+  }
+
+  const searchedPositions = selections.flatMap((selection, position) =>
+    selection.type === 'ids' && selection.ids.length > 0 ? [position] : []
+  );
+  let attachmentResponses: estypes.MsearchResponseItem[] = [];
+
+  if (searchedPositions.length > 0) {
+    try {
+      attachmentResponses = await reader.msearch(
+        searchedPositions.map((position) => {
+          const selection = selections[position];
+
+          return buildAlertAttachmentSearch({
+            spaceId: context.spaceId,
+            owner: context.owner,
+            caseIds: selection.type === 'ids' ? selection.ids : [],
+          });
+        })
+      );
+    } catch (error) {
+      return FAILED_PERIODS;
+    }
+  }
+
+  const [current, previous] = await Promise.all(
+    periodContexts.map(async (periodContext, position): Promise<PeriodData> => {
+      const selection = selections[position];
+
+      if (selection.type === 'error') {
+        return { type: 'error', message: selection.message };
+      }
+
+      return selection.ids.length === 0
+        ? EMPTY_PERIOD
+        : readPeriodData(
+            attachmentResponses[searchedPositions.indexOf(position)],
+            periodContext,
+            reader,
+            alertsService
+          );
+    })
+  );
+
+  return { current, previous };
+};
+
 /**
  * Calculates the alert time to acknowledge metrics. The attachments come from the analytics reader,
  * and the alert times come from the alerts service, which reads as the current user.
  * When the range has a start, each metric also gets the value of the previous period.
+ * The metrics with the same date basis share the searches.
  */
 export const runAlertTimeToAcknowledgeMetrics = async ({
   metrics,
@@ -466,29 +591,24 @@ export const runAlertTimeToAcknowledgeMetrics = async ({
     return [];
   }
 
-  const previousPeriod = getPreviousPeriod(context);
-  let responses: estypes.MsearchResponseItem[];
-
-  try {
-    responses = await reader.msearch([
-      buildAlertAttachmentSearch(context),
-      ...(previousPeriod != null
-        ? [buildAlertAttachmentSearch({ ...context, ...previousPeriod })]
-        : []),
-    ]);
-  } catch (error) {
-    return metrics.map(({ id }) => toKpiMetricError(id, FAILED_MESSAGE));
-  }
-
-  const [current, previous] = await Promise.all([
-    readPeriodData(responses[0], context, reader, alertsService),
-    previousPeriod != null
-      ? readPeriodData(responses[1], { ...context, ...previousPeriod }, reader, alertsService)
-      : undefined,
-  ]);
+  const args = { context, previousPeriod: getPreviousPeriod(context), reader, alertsService };
+  const bases = Array.from(new Set(metrics.map(({ dateBasis }) => dateBasis ?? 'attached_at')));
+  const periodsByBasis = new Map<string, Periods>(
+    await Promise.all(
+      bases.map(
+        async (basis): Promise<[string, Periods]> => [
+          basis,
+          basis === 'case_closed_at'
+            ? await readCaseClosedAtPeriods(args)
+            : await readAttachedAtPeriods(args),
+        ]
+      )
+    )
+  );
 
   return metrics.map((metric) => {
-    const { id, predefinedId } = metric;
+    const { id, predefinedId, dateBasis } = metric;
+    const { current, previous } = periodsByBasis.get(dateBasis ?? 'attached_at') ?? FAILED_PERIODS;
 
     if (current.type === 'error') {
       return toKpiMetricError(id, current.message);
