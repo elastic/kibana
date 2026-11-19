@@ -18,25 +18,32 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EntityResolutionFileUploader } from '../entity_resolution_file_uploader';
+import { ResolutionRulesHealth } from './resolution_rules_health';
+import { ResolutionRulesBanner } from './resolution_rules_banner';
 
 export const EntityResolutionTab: React.FC = () => {
   return (
-    <EuiFlexGroup gutterSize="xl">
-      <EuiFlexItem grow={3}>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityResolution.uploadDescription"
-            defaultMessage="Bulk link entities to resolution targets by importing a CSV file. Each row uses identity fields to find matching entities and links them to a primary entity specified by its entity ID."
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EntityResolutionFileUploader />
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <WhatIsEntityResolutionPanel />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem grow={3}>
+          <EuiSpacer size="m" />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityResolution.uploadDescription"
+              defaultMessage="Bulk link entities to resolution targets by importing a CSV file. Each row uses identity fields to find matching entities and links them to a primary entity specified by its entity ID."
+            />
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EntityResolutionFileUploader />
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <WhatIsEntityResolutionPanel />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <ResolutionRulesBanner />
+      <ResolutionRulesHealth />
+    </>
   );
 };
 

@@ -21,3 +21,8 @@ export const ADD_ENTITIES_ACCORDION_TEST_ID = `${PREFIX}AddEntitiesAccordion` as
 export const ADD_ENTITIES_SHOWING_TEST_ID = `${PREFIX}AddEntitiesShowing` as const;
 export const CONFIRM_RESOLUTION_MODAL_TEST_ID = `${PREFIX}ConfirmResolutionModal` as const;
 export const RESOLUTION_EMPTY_STATE_TEST_ID = `${PREFIX}ResolutionEmptyState` as const;
+export const RESOLUTION_RULE_CHECK_TEST_ID = `${PREFIX}ResolutionRuleCheck` as const;
+export const RESOLUTION_RULES_HEALTH_TEST_ID = `${PREFIX}ResolutionRulesHealth` as const;
+export const RESOLUTION_RULES_BANNER_TEST_ID = `${PREFIX}ResolutionRulesBanner` as const;
+export const RESOLUTION_RULES_BANNER_BUTTON_TEST_ID =
+  `${PREFIX}ResolutionRulesBannerButton` as const;

@@ -25,6 +25,8 @@ export { registerResolutionLink } from './resolution/link';
 export { registerResolutionUnlink } from './resolution/unlink';
 export { registerResolutionGroup } from './resolution/group';
 export { registerResolutionRulesList } from './resolution/rules/list';
+export { registerResolutionEntityCheck } from './resolution/entity_check';
+export { registerResolutionRulesHealth } from './resolution/rules_health';
 export { registerResolutionRulesEnable } from './resolution/rules/enable';
 export { registerResolutionRulesDisable } from './resolution/rules/disable';
 export { registerCustomResolutionRulesRoutes } from './resolution/custom_rules';
