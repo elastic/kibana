@@ -188,6 +188,43 @@ export const describeArtifactListPage = (
           });
         }
       );
+
+      const { updateCriteria } = artifact;
+      if (updateCriteria) {
+        spaceTest(
+          `WRITE user can change the condition field`,
+          async ({ browserAuth, pageObjects, apiServices }) => {
+            await apiServices.endpointArtifacts.ensureList({
+              listId: artifact.listId,
+              type: artifact.listType,
+            });
+            await apiServices.endpointArtifacts.createItem({
+              name: artifact.artifactName,
+              listId: artifact.listId,
+              entries: artifact.entries,
+              osTypes: artifact.osTypes,
+            });
+
+            await browserAuth.loginAsEndpointPolicyManager();
+            await pageObjects.artifactListPage.goto(artifact.urlPath);
+            await pageObjects.artifactListPage.waitForList(pagePrefix);
+            await expect(pageObjects.artifactListPage.cardTitle(pagePrefix)).toContainText(
+              artifact.artifactName
+            );
+
+            await pageObjects.artifactListPage.openEdit(pagePrefix);
+            await pageObjects.policyArtifactsPage.replaceEventFiltersCondition(
+              updateCriteria.field,
+              updateCriteria.value
+            );
+            await pageObjects.artifactListPage.submitFlyout(pagePrefix);
+
+            await expect(pageObjects.artifactListPage.criteria(updateCriteria.selector)).toHaveText(
+              updateCriteria.expected
+            );
+          }
+        );
+      }
     }
   );
 };
