@@ -34,8 +34,21 @@ export class PubSubExamplePlugin implements Plugin {
     core.pubsub.registerTopic(pingTopic);
     core.pubsub.subscribe(pingTopic, {
       consumer: 'echo',
-      handler: (event) => {
-        this.logger.info(`echo ${event.id} from ${event.data.source}: ${event.data.message}`);
+      delivery: 'durable',
+      handler: async (event) => {
+        const latencyMs = Date.now() - Date.parse(event.acceptedAt);
+        this.logger.info(
+          `echo ${event.id} from ${event.data.source}: ${event.data.message} (latency ${latencyMs}ms)`
+        );
+
+        const { message } = event.data;
+        if (message.startsWith('fail:')) {
+          throw new Error(`echo failed on purpose: ${message}`);
+        }
+        const sleepMs = message.startsWith('sleep:') ? Number(message.slice('sleep:'.length)) : NaN;
+        if (Number.isFinite(sleepMs)) {
+          await new Promise((resolve) => setTimeout(resolve, sleepMs));
+        }
       },
     });
     core.pubsub.subscribe(pingTopic, {
@@ -89,6 +102,10 @@ export class PubSubExamplePlugin implements Plugin {
   }
 
   public start(core: CoreStart) {
+    if (process.env.PUBSUB_EXAMPLE_TIMER === 'off') {
+      return;
+    }
+
     this.timer = setInterval(() => {
       void core.pubsub
         .publish(pingTopic, {

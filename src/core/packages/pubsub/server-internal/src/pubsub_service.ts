@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import {
   assertTopicName,
+  type PubSubDurableDelegate,
   type PubSubEvent,
   type PubSubEventInit,
   type PubSubPublishResult,
@@ -40,6 +41,9 @@ interface Subscription {
   readonly consumer: string;
   readonly handler: SubscriptionHandler;
   readonly queue: AcceptedEvent[];
+  readonly delivery: 'in-process' | 'durable';
+  /** True once the durable delegate has taken over delivery, so no in-memory queue is used. */
+  durableBound: boolean;
   running: boolean;
   /** Events dropped since this queue last drained, while it was at the cap. */
   droppedWhileFull: number;
@@ -62,6 +66,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
   private readonly subscriptions: Subscription[] = [];
   /** In dev mode, data that does not survive the JSON round trip is rejected instead of delivered mangled. */
   private readonly checkJsonRoundTrip: boolean;
+  private durableDelegate: PubSubDurableDelegate | undefined;
   private phase: Phase = 'created';
 
   constructor(coreContext: CoreContext) {
@@ -84,6 +89,9 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
       subscribe: (pluginId, topic, subscription) => {
         this.subscribe(pluginId, topic, subscription);
       },
+      registerDurableDelegate: (delegate) => {
+        this.registerDurableDelegate(delegate);
+      },
     };
   }
 
@@ -99,6 +107,16 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
           `Pubsub consumer "${subscription.consumer}" subscribed to topic "${subscription.topic}", which no plugin registered. It will receive no events.`
         );
       });
+
+    const unserved = this.subscriptions.filter(
+      (subscription) => subscription.delivery === 'durable' && !subscription.durableBound
+    );
+    if (unserved.length > 0) {
+      const names = unserved.map(({ consumer, topic }) => `"${consumer}" (${topic})`).join(', ');
+      this.logger.warn(
+        `No durable pubsub delegate was registered. Durable consumers are served in process: ${names}.`
+      );
+    }
 
     this.phase = 'started';
 
@@ -147,6 +165,10 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     this.logger.trace(
       `Plugin "${pluginId}" published event "${event.id}" on topic "${topic.name}".`
     );
+    if (this.hasDurableSubscription(event.topic)) {
+      await this.durableDelegate?.append(event);
+    }
+
     this.enqueue(event);
 
     return { id: event.id, acceptedAt: event.acceptedAt };
@@ -171,7 +193,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
   private subscribe<TData>(
     pluginId: string,
     topic: Topic<TData>,
-    { consumer, handler }: PubSubSubscription<TData>
+    { consumer, handler, delivery = 'in-process' }: PubSubSubscription<TData>
   ): void {
     if (this.phase !== 'setup') {
       throw new Error(
@@ -193,19 +215,59 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
       );
     }
 
-    this.subscriptions.push({
+    const subscription: Subscription = {
       topic: topic.name,
       consumer: scopedConsumer,
       handler: (event) => handler(event as PubSubEvent<TData>),
       queue: [],
+      delivery,
+      durableBound: false,
       running: false,
       droppedWhileFull: 0,
+    };
+    this.subscriptions.push(subscription);
+
+    if (delivery === 'durable' && this.durableDelegate) {
+      this.bindDurable(this.durableDelegate, subscription);
+    }
+  }
+
+  private registerDurableDelegate(delegate: PubSubDurableDelegate): void {
+    if (this.phase !== 'setup') {
+      throw new Error('Cannot register the durable pubsub delegate outside of setup.');
+    }
+
+    if (this.durableDelegate) {
+      throw new Error('A durable pubsub delegate is already registered.');
+    }
+
+    this.durableDelegate = delegate;
+    this.subscriptions
+      .filter((subscription) => subscription.delivery === 'durable')
+      .forEach((subscription) => this.bindDurable(delegate, subscription));
+  }
+
+  private bindDurable(delegate: PubSubDurableDelegate, subscription: Subscription): void {
+    subscription.durableBound = true;
+    delegate.onSubscribe({
+      topic: subscription.topic,
+      consumer: subscription.consumer,
+      deliver: async (event) => {
+        const frozen = Object.freeze({ ...event });
+        await runWithoutRequestContext(() => subscription.handler(frozen));
+      },
     });
+  }
+
+  private hasDurableSubscription(topic: string): boolean {
+    return this.subscriptions.some(
+      (subscription) => subscription.topic === topic && subscription.durableBound
+    );
   }
 
   private enqueue(event: AcceptedEvent): void {
     this.subscriptions
-      .filter((subscription) => subscription.topic === event.topic)
+      .filter((subscription) => subscription.topic === event.topic && !subscription.durableBound)
       .forEach((subscription) => {
         if (subscription.queue.length >= PUBSUB_MAX_PENDING_EVENTS) {
           this.noteQueueFull(subscription, event.topic);

@@ -10,6 +10,9 @@
 export { assertTopicName, defineTopic } from './src/topic';
 export type { Topic } from './src/topic';
 export type {
+  PubSubDurableDelegate,
+  PubSubDurableEvent,
+  PubSubDurableSubscription,
   PubSubEvent,
   PubSubHandler,
   PubSubSetup,

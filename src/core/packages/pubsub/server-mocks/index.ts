@@ -14,6 +14,7 @@ const createSetupContract = (): jest.Mocked<PubSubSetup> => {
   return {
     registerTopic: jest.fn(),
     subscribe: jest.fn(),
+    registerDurableDelegate: jest.fn(),
   };
 };
 
@@ -27,6 +28,7 @@ const createInternalSetupContract = (): jest.Mocked<InternalPubSubSetup> => {
   return {
     registerTopic: jest.fn(),
     subscribe: jest.fn(),
+    registerDurableDelegate: jest.fn(),
   };
 };
 

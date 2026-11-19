@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/pubsub-durable-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "PoC: durable, cross-node delivery for core.pubsub, backed by an Elasticsearch index and Task Manager.",
+  "plugin": {
+    "id": "pubsubDurable",
+    "browser": false,
+    "server": true,
+    "requiredPlugins": ["taskManager"]
+  }
+}

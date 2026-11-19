@@ -1530,6 +1530,7 @@ packages:
   - 'x-pack/platform/plugins/shared/observability_ai_assistant'
   - 'x-pack/platform/plugins/shared/osquery'
   - 'x-pack/platform/plugins/shared/proposals'
+  - 'x-pack/platform/plugins/shared/pubsub_durable'
   - 'x-pack/platform/plugins/shared/query_activity'
   - 'x-pack/platform/plugins/shared/rule_registry'
   - 'x-pack/platform/plugins/shared/sample_data_ingest'
