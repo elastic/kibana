@@ -40,10 +40,14 @@ function assertRunOpen(runSignal: AbortSignal): void {
   }
 }
 
+function createAbortError(signal: AbortSignal): Error {
+  return new Error(String(signal.reason ?? 'aborted'));
+}
+
 /** Rejects when the signal aborts, so a generator that ignores its signal cannot hold the run. */
 function rejectOnAbort(signal: AbortSignal): Promise<never> {
   return new Promise((_resolve, reject) => {
-    const fail = () => reject(new Error(String(signal.reason ?? 'aborted')));
+    const fail = () => reject(createAbortError(signal));
     if (signal.aborted) {
       fail();
       return;
@@ -194,6 +198,12 @@ export class EngineRunner {
     }
 
     try {
+      // An aborted run starts no generator: one that ignores its signal and returns at once would
+      // win the race below, and the cancelled run would store its signals.
+      if (controller.signal.aborted) {
+        throw createAbortError(controller.signal);
+      }
+
       const generated: GenerateResult = await Promise.race([
         strategy.generator.generate({
           spaceId,
@@ -201,7 +211,8 @@ export class EngineRunner {
           window: { from, to },
           esClient: this.dataClient,
           history: {
-            readHistory: ({ series, from: historyFrom, to: historyTo }) =>
+            // The read stops with the strategy, even when the generator passes no signal of its own.
+            readHistory: ({ series, from: historyFrom, to: historyTo, abortSignal }) =>
               this.signalStore.readHistory({
                 spaceId,
                 strategy: strategyId,
@@ -209,6 +220,9 @@ export class EngineRunner {
                 series,
                 from: historyFrom,
                 to: historyTo,
+                abortSignal: abortSignal
+                  ? AbortSignal.any([controller.signal, abortSignal])
+                  : controller.signal,
               }),
           },
           abortSignal: controller.signal,
@@ -231,6 +245,8 @@ export class EngineRunner {
           scheduledMinute,
         });
         if (wrapped.dropped) {
+          // Not an error, and the generator state still moves: the reading fails the signal
+          // schema, so reading the window again would drop it again.
           notes.push(wrapped.note);
           return [];
         }

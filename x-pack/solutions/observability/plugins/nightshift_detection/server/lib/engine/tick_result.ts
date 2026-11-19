@@ -15,6 +15,10 @@ export interface StrategyRunResult {
   to: number;
   /** Signals written. */
   signals: number;
+  /**
+   * Minutes before `from` the strategy never read: it was too far behind, or the tick skipped the
+   * backlog.
+   */
   skipped_minutes: number;
   notes: string[];
   /** Set when the strategy failed or ran out of time; its generator state did not move. */

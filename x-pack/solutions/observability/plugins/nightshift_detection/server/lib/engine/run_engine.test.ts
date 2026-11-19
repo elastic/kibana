@@ -14,7 +14,7 @@ import type { DetectionStrategy } from '../strategies/detection_strategy';
 import { InMemorySignalStore } from '../../test_utils/in_memory_signal_store';
 import { InMemorySavedObjectsRepository } from '../../test_utils/in_memory_saved_objects_repository';
 import { createTestStrategy, TEST_STRATEGY_ID } from '../../test_utils/test_strategy';
-import { EngineRunner } from './run_engine';
+import { EngineRunner, RUN_BUDGET_MS } from './run_engine';
 import type { SpaceRunLock } from './space_run_lock';
 
 const SPACE_ID = 'default';
@@ -87,6 +87,10 @@ function createFailingStrategy(): DetectionStrategy {
 }
 
 describe('EngineRunner', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('writes the signals of a due strategy and moves its generator state', async () => {
     const { runner, state, signals } = createRunner();
 
@@ -202,6 +206,55 @@ describe('EngineRunner', () => {
     expect(result).toMatchObject({
       strategies: [{ id: 'waits_for_abort', error: 'aborted' }],
     });
+    expect(held.has(SPACE_ID)).toBe(false);
+  });
+
+  it('stores nothing from a run aborted before it starts, even from a generator that returns at once', async () => {
+    const { runner, state, signals } = createRunner();
+    const controller = new AbortController();
+    controller.abort('the request went away');
+
+    const result = await runner.run({ now: NOW, abortSignal: controller.signal });
+
+    expect(result).toMatchObject({
+      strategies: [{ id: TEST_STRATEGY_ID, signals: 0, error: 'the request went away' }],
+    });
+    expect(signals.written).toHaveLength(0);
+    expect(
+      await state.readGeneratorStates({ spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })
+    ).toEqual(new Map());
+  });
+
+  it('stops a generator that ignores its signal once the run budget is spent', async () => {
+    jest.useFakeTimers();
+    let generatorStarted: () => void = () => {};
+    const started = new Promise<void>((resolve) => {
+      generatorStarted = resolve;
+    });
+    const ignoresAbort: DetectionStrategy = {
+      descriptor: { ...createTestStrategy().descriptor, id: 'ignores_abort' },
+      generator: {
+        generate: () => {
+          generatorStarted();
+          return new Promise(() => {});
+        },
+      },
+    };
+    const { lock, held } = createSpaceRunLock();
+    const { runner, state } = createRunner({ strategies: [ignoresAbort], lock });
+
+    const running = runner.run({ now: NOW });
+    await started;
+    await jest.advanceTimersByTimeAsync(RUN_BUDGET_MS);
+    const result = await running;
+
+    expect(result).toMatchObject({
+      status: 'completed',
+      strategies: [{ id: 'ignores_abort', error: 'the run budget is spent' }],
+    });
+    expect(
+      await state.readGeneratorStates({ spaceId: SPACE_ID, strategyIds: ['ignores_abort'] })
+    ).toEqual(new Map());
     expect(held.has(SPACE_ID)).toBe(false);
   });
 
