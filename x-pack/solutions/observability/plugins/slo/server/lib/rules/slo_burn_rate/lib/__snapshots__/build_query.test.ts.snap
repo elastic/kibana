@@ -1,5 +1,112 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`buildCandidatesQuery() should return a query for instances with bad occurrences in the longest short window 1`] = `
+Object {
+  "aggs": Object {
+    "instances": Object {
+      "composite": Object {
+        "size": 1000,
+        "sources": Array [
+          Object {
+            "instanceId": Object {
+              "terms": Object {
+                "field": "slo.instanceId",
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "slo.id": "test-slo",
+          },
+        },
+        Object {
+          "term": Object {
+            "slo.revision": 1,
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "2022-12-31T17:57:00.000Z",
+              "lt": "2022-12-31T23:57:00.000Z",
+            },
+          },
+        },
+        Object {
+          "script": Object {
+            "script": Object {
+              "source": "(doc['slo.numerator'].size() == 0 ? 0 : doc['slo.numerator'].value) < (doc['slo.denominator'].size() == 0 ? 0 : doc['slo.denominator'].value)",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+}
+`;
+
+exports[`buildCandidatesQuery() should return a query for instances with bad slices in the longest short window 1`] = `
+Object {
+  "aggs": Object {
+    "instances": Object {
+      "composite": Object {
+        "after": Object {
+          "instanceId": "example",
+        },
+        "size": 1000,
+        "sources": Array [
+          Object {
+            "instanceId": Object {
+              "terms": Object {
+                "field": "slo.instanceId",
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "slo.id": "test-slo",
+          },
+        },
+        Object {
+          "term": Object {
+            "slo.revision": 1,
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "2022-12-31T17:56:00.000Z",
+              "lt": "2022-12-31T23:56:00.000Z",
+            },
+          },
+        },
+        Object {
+          "term": Object {
+            "slo.isGoodSlice": 0,
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+}
+`;
+
 exports[`buildQuery() should return a valid query for occurrences 1`] = `
 Object {
   "aggs": Object {

@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { get } from 'lodash';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { chunk, get } from 'lodash';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { BURN_RATE_EXECUTOR_SPAN_NAMES } from '../constants';
 import type { SLODefinition } from '../../../../domain/models';
 import { Duration, toDurationUnit } from '../../../../domain/models';
@@ -16,10 +16,12 @@ import type { BurnRateRuleParams } from '../types';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
 import type { EvaluationAfterKey } from './build_query';
 import {
+  buildCandidatesQuery,
   buildQuery,
   generateAboveThresholdKey,
   generateBurnRateKey,
   generateWindowId,
+  INSTANCES_PAGE_SIZE,
   LONG_WINDOW,
   SHORT_WINDOW,
 } from './build_query';
@@ -66,47 +68,32 @@ export interface EvaluationBucket {
   WINDOW_3_LONG_ABOVE_THRESHOLD?: { value: number };
 }
 
+interface InstancesPage<TBucket> {
+  after_key?: EvaluationAfterKey;
+  buckets: TBucket[];
+}
+
 export interface EvalutionAggResults {
-  instances: {
-    after_key?: EvaluationAfterKey;
-    buckets: EvaluationBucket[];
-  };
+  instances: InstancesPage<EvaluationBucket>;
 }
 
-async function queryAllResults(
-  esClient: ElasticsearchClient,
-  slo: SLODefinition,
-  params: BurnRateRuleParams,
-  startedAt: Date,
-  projectRouting?: string,
-  buckets: EvaluationBucket[] = [],
-  lastAfterKey?: { instanceId: string }
-): Promise<EvaluationBucket[]> {
-  const queryAndAggs = buildQuery(startedAt, slo, params, lastAfterKey);
-  const results = await withSpan(
-    { name: BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY, type: 'rule' },
-    () =>
-      esClient.search<undefined, EvalutionAggResults>({
-        index: SLI_DESTINATION_INDEX_PATTERN,
-        ...(projectRouting ? { project_routing: projectRouting } : {}),
-        ...queryAndAggs,
-      })
-  );
+async function queryAllPages<TBucket>(
+  queryPage: (afterKey?: EvaluationAfterKey) => Promise<InstancesPage<TBucket>>,
+  afterKey?: EvaluationAfterKey,
+  collected: TBucket[] = []
+): Promise<TBucket[]> {
+  const { buckets, after_key: nextAfterKey } = await queryPage(afterKey);
+  const allBuckets = [...collected, ...buckets];
 
-  if (!results.aggregations) {
-    throw new Error('Elasticsearch query failed to return a valid aggregation');
-  }
-  const { buckets: pageBuckets, after_key: afterKey } = results.aggregations.instances;
-  const allBuckets = [...buckets, ...pageBuckets];
-
-  // The bucket_selector removes non-alerting instances from each page, so an empty page can still
-  // be followed by pages with alerting instances. Only a missing after_key marks the last page.
-  if (!afterKey) {
-    return allBuckets;
-  }
-
-  return queryAllResults(esClient, slo, params, startedAt, projectRouting, allBuckets, afterKey);
+  // A page can be empty because the bucket_selector removed all of its instances, so only a missing
+  // after_key marks the last page.
+  return nextAfterKey ? queryAllPages(queryPage, nextAfterKey, allBuckets) : allBuckets;
 }
+
+// A window can only trigger for an instance with bad events in its short window when its threshold
+// is positive. With a threshold of 0 or less, instances without bad events can trigger too.
+const allThresholdsArePositive = ({ windows }: BurnRateRuleParams): boolean =>
+  windows.every(({ burnRateThreshold }) => burnRateThreshold > 0);
 
 export async function evaluate(
   esClient: ElasticsearchClient,
@@ -115,7 +102,47 @@ export async function evaluate(
   startedAt: Date,
   projectRouting?: string
 ) {
-  const buckets = await queryAllResults(esClient, slo, params, startedAt, projectRouting);
+  const searchInstances = async <TBucket>(
+    request: Omit<SearchRequest, 'index'>
+  ): Promise<InstancesPage<TBucket>> => {
+    const results = await withSpan(
+      { name: BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY, type: 'rule' },
+      () =>
+        esClient.search<undefined, { instances: InstancesPage<TBucket> }>({
+          index: SLI_DESTINATION_INDEX_PATTERN,
+          ...(projectRouting ? { project_routing: projectRouting } : {}),
+          ...request,
+        })
+    );
+    if (!results.aggregations) {
+      throw new Error('Elasticsearch query failed to return a valid aggregation');
+    }
+    return results.aggregations.instances;
+  };
+
+  const evaluateInstances = (instanceIds?: string[]) =>
+    queryAllPages<EvaluationBucket>((afterKey) =>
+      searchInstances(buildQuery(startedAt, slo, params, afterKey, instanceIds))
+    );
+
+  if (!allThresholdsArePositive(params)) {
+    return transformBucketToResults(await evaluateInstances(), params);
+  }
+
+  const candidates = await queryAllPages<{ key: EvaluationAfterKey }>((afterKey) =>
+    searchInstances(buildCandidatesQuery(startedAt, slo, params, afterKey))
+  );
+  const buckets = await chunk(
+    candidates.map(({ key }) => key.instanceId),
+    INSTANCES_PAGE_SIZE
+  ).reduce<Promise<EvaluationBucket[]>>(
+    async (evaluated, instanceIds) => [
+      ...(await evaluated),
+      ...(await evaluateInstances(instanceIds)),
+    ],
+    Promise.resolve([])
+  );
+
   return transformBucketToResults(buckets, params);
 }
 

@@ -10,6 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createKQLCustomIndicator, createSLO } from '../../../../services/fixtures/slo';
 import { createBurnRateRule } from '../fixtures/rule';
 import type { EvaluationAfterKey } from './build_query';
+import { INSTANCES_PAGE_SIZE } from './build_query';
 import type { EvaluationBucket } from './evaluate';
 import { evaluate } from './evaluate';
 
@@ -33,6 +34,12 @@ const alertingBucket = (instanceId: string): Omit<EvaluationBucket, 'groupings'>
   WINDOW_0_LONG_BURN_RATE: { value: 20 },
   WINDOW_0_SHORT_ABOVE_THRESHOLD: { value: 1 },
   WINDOW_0_LONG_ABOVE_THRESHOLD: { value: 1 },
+});
+
+const candidateBucket = (instanceId: string) => ({ key: { instanceId }, doc_count: 1 });
+
+const instanceIdsFilter = (instanceIds: string[]) => ({
+  terms: { 'slo.instanceId': instanceIds },
 });
 
 describe('evaluate', () => {
@@ -65,9 +72,69 @@ describe('evaluate', () => {
     );
   });
 
-  it('keeps paging past pages without alerting instances until there is no after_key', async () => {
+  it('evaluates only the instances with bad events in the longest short window', async () => {
     const slo = createSLO({ id: 'irrelevant', indicator: createKQLCustomIndicator() });
     const params = createBurnRateRule(slo);
+    esClient.search
+      .mockResolvedValueOnce(
+        aggResponse([candidateBucket('instance-a'), candidateBucket('instance-b')], {
+          instanceId: 'instance-b',
+        })
+      )
+      .mockResolvedValueOnce(aggResponse([]))
+      .mockResolvedValueOnce(aggResponse([alertingBucket('instance-a')]));
+
+    const results = await evaluate(esClient, slo, params, new Date());
+
+    expect(esClient.search).toHaveBeenCalledTimes(3);
+    expect(esClient.search.mock.calls[2][0]).toMatchObject({
+      query: {
+        bool: { filter: expect.arrayContaining([instanceIdsFilter(['instance-a', 'instance-b'])]) },
+      },
+    });
+    expect(results.map(({ instanceId }) => instanceId)).toEqual(['instance-a']);
+  });
+
+  it('skips the evaluation query when no instance has bad events', async () => {
+    const slo = createSLO({ id: 'irrelevant', indicator: createKQLCustomIndicator() });
+    const params = createBurnRateRule(slo);
+
+    const results = await evaluate(esClient, slo, params, new Date());
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(results).toEqual([]);
+  });
+
+  it('evaluates the candidate instances in batches of one page', async () => {
+    const slo = createSLO({ id: 'irrelevant', indicator: createKQLCustomIndicator() });
+    const params = createBurnRateRule(slo);
+    const instanceIds = Array.from({ length: INSTANCES_PAGE_SIZE + 1 }, (_, i) => `instance-${i}`);
+    esClient.search.mockResolvedValueOnce(aggResponse(instanceIds.map(candidateBucket)));
+
+    await evaluate(esClient, slo, params, new Date());
+
+    expect(esClient.search).toHaveBeenCalledTimes(3);
+    expect(esClient.search.mock.calls[1][0]).toMatchObject({
+      query: {
+        bool: { filter: expect.arrayContaining([instanceIdsFilter(instanceIds.slice(0, -1))]) },
+      },
+    });
+    expect(esClient.search.mock.calls[2][0]).toMatchObject({
+      query: {
+        bool: { filter: expect.arrayContaining([instanceIdsFilter(instanceIds.slice(-1))]) },
+      },
+    });
+  });
+
+  it('evaluates every instance and pages past empty pages when a threshold is not positive', async () => {
+    const slo = createSLO({ id: 'irrelevant', indicator: createKQLCustomIndicator() });
+    const rule = createBurnRateRule(slo);
+    const params = {
+      ...rule,
+      windows: rule.windows.map((window, index) =>
+        index === 0 ? { ...window, burnRateThreshold: 0 } : window
+      ),
+    };
     esClient.search
       .mockResolvedValueOnce(aggResponse([], { instanceId: 'page-1-last' }))
       .mockResolvedValueOnce(
@@ -78,6 +145,9 @@ describe('evaluate', () => {
     const results = await evaluate(esClient, slo, params, new Date());
 
     expect(esClient.search).toHaveBeenCalledTimes(3);
+    expect(esClient.search.mock.calls[0][0]).not.toMatchObject({
+      query: { bool: { filter: expect.arrayContaining([{ terms: expect.anything() }]) } },
+    });
     expect(esClient.search.mock.calls[1][0]).toMatchObject({
       aggs: { instances: { composite: { after: { instanceId: 'page-1-last' } } } },
     });

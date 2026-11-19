@@ -6,7 +6,7 @@
  */
 
 import { createBurnRateRule } from '../fixtures/rule';
-import { buildQuery } from './build_query';
+import { buildCandidatesQuery, buildQuery } from './build_query';
 import {
   createKQLCustomIndicator,
   createSLO,
@@ -41,5 +41,38 @@ describe('buildQuery()', () => {
     });
     const rule = createBurnRateRule(slo);
     expect(buildQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
+  });
+
+  it('should restrict the query to the given instances', () => {
+    const slo = createSLO({
+      id: 'test-slo',
+      indicator: createKQLCustomIndicator(),
+    });
+    const rule = createBurnRateRule(slo);
+    expect(
+      buildQuery(STARTED_AT, slo, rule, undefined, ['instance-a']).query.bool.filter
+    ).toContainEqual({ terms: { 'slo.instanceId': ['instance-a'] } });
+  });
+});
+
+describe('buildCandidatesQuery()', () => {
+  it('should return a query for instances with bad occurrences in the longest short window', () => {
+    const slo = createSLO({
+      id: 'test-slo',
+      indicator: createKQLCustomIndicator(),
+    });
+    const rule = createBurnRateRule(slo);
+    expect(buildCandidatesQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
+  });
+
+  it('should return a query for instances with bad slices in the longest short window', () => {
+    const slo = createSLOWithTimeslicesBudgetingMethod({
+      id: 'test-slo',
+      indicator: createKQLCustomIndicator(),
+    });
+    const rule = createBurnRateRule(slo);
+    expect(
+      buildCandidatesQuery(STARTED_AT, slo, rule, { instanceId: 'example' })
+    ).toMatchSnapshot();
   });
 });

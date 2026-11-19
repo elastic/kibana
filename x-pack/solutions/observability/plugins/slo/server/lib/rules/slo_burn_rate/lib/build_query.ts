@@ -22,6 +22,7 @@ export interface EvaluationAfterKey extends AggregationsCompositeAggregateKey {
   instanceId: string;
 }
 
+export const INSTANCES_PAGE_SIZE = 1000;
 export const LONG_WINDOW = 'LONG';
 export const SHORT_WINDOW = 'SHORT';
 const BURN_RATE = 'BURN_RATE';
@@ -53,6 +54,17 @@ const TIMESLICE_AGGS = {
 const OCCURRENCE_AGGS = {
   good: { sum: { field: 'slo.numerator' } },
   total: { sum: { field: 'slo.denominator' } },
+};
+
+const BAD_SLICE_FILTER = { term: { 'slo.isGoodSlice': 0 } };
+
+const BAD_OCCURRENCES_FILTER = {
+  script: {
+    script: {
+      source:
+        "(doc['slo.numerator'].size() == 0 ? 0 : doc['slo.numerator'].value) < (doc['slo.denominator'].size() == 0 ? 0 : doc['slo.denominator'].value)",
+    },
+  },
 };
 
 function buildWindowAgg(
@@ -195,7 +207,8 @@ export function buildQuery(
   startedAt: Date,
   slo: SLODefinition,
   params: BurnRateRuleParams,
-  afterKey?: EvaluationAfterKey
+  afterKey?: EvaluationAfterKey,
+  instanceIds?: string[]
 ) {
   const delayInSeconds = getDelayInSecondsFromSLO(slo);
   const burnRateWindows = params.windows.map((winDef) => {
@@ -233,6 +246,7 @@ export function buildQuery(
               },
             },
           },
+          ...(instanceIds ? [{ terms: { 'slo.instanceId': instanceIds } }] : []),
         ],
       },
     },
@@ -240,13 +254,53 @@ export function buildQuery(
       instances: {
         composite: {
           ...(afterKey ? { after: afterKey } : {}),
-          size: 1000,
+          size: INSTANCES_PAGE_SIZE,
           sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
         },
         aggs: {
           ...buildWindowAggs(startedAt, slo, burnRateWindows, delayInSeconds),
           ...buildEvaluation(burnRateWindows),
           ...buildGroupingAgg(),
+        },
+      },
+    },
+  };
+}
+
+/** Finds the instances with at least one bad event in the longest short window of the rule. */
+export function buildCandidatesQuery(
+  startedAt: Date,
+  slo: SLODefinition,
+  params: BurnRateRuleParams,
+  afterKey?: EvaluationAfterKey
+) {
+  const longestShortDuration = params.windows
+    .map(({ shortWindow }) => new Duration(shortWindow.value, toDurationUnit(shortWindow.unit)))
+    .reduce((longest, duration) => (duration.isLongerOrEqualThan(longest) ? duration : longest));
+  const { from, to } = getLookbackDateRange(
+    startedAt,
+    longestShortDuration,
+    getDelayInSecondsFromSLO(slo)
+  );
+
+  return {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'slo.id': slo.id } },
+          { term: { 'slo.revision': slo.revision } },
+          { range: { '@timestamp': { gte: from.toISOString(), lt: to.toISOString() } } },
+          slo.budgetingMethod === 'timeslices' ? BAD_SLICE_FILTER : BAD_OCCURRENCES_FILTER,
+        ],
+      },
+    },
+    aggs: {
+      instances: {
+        composite: {
+          ...(afterKey ? { after: afterKey } : {}),
+          size: INSTANCES_PAGE_SIZE,
+          sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
         },
       },
     },
