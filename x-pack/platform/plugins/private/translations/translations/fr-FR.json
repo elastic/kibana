@@ -39268,7 +39268,6 @@
     "xpack.lens.config.cannotConvertToEsqlFormulaReason": "Les opérations de formule seront prises en charge dans une prochaine mise à jour.",
     "xpack.lens.config.cannotConvertToEsqlIncludeEmptyRowsReason": "L'option \"Inclure les lignes vides\" sera prise en charge dans une prochaine mise à jour.",
     "xpack.lens.config.cannotConvertToEsqlOperationReason": "La prise en charge d'une ou plusieurs fonctions utilisées sera disponible dans une prochaine mise à jour.",
-    "xpack.lens.config.cannotConvertToEsqlQueryAnnotationsTooltip": "Les annotations basées sur une requête seront prises en charge dans une prochaine mise à jour.",
     "xpack.lens.config.cannotConvertToEsqlReducedTimeRangeReason": "La période réduite sera prise en charge dans une prochaine mise à jour.",
     "xpack.lens.config.cannotConvertToEsqlReferenceLineTooltip": "Seules les lignes de référence à valeur statique sont prises en charge pour la conversion.",
     "xpack.lens.config.cannotConvertToEsqlRuntimeFieldReason": "Les champs runtime seront pris en charge dans une prochaine mise à jour.",

@@ -39432,7 +39432,6 @@
     "xpack.lens.config.cannotConvertToEsqlFormulaReason": "数式操作は今後のアップデートでサポートされる予定です。",
     "xpack.lens.config.cannotConvertToEsqlIncludeEmptyRowsReason": "「空の行を含める」は今後のアップデートでサポートされる予定です。",
     "xpack.lens.config.cannotConvertToEsqlOperationReason": "使用されている1つ以上の機能は今後のアップデートでサポートされる予定です。",
-    "xpack.lens.config.cannotConvertToEsqlQueryAnnotationsTooltip": "クエリベースのアノテーションは今後のアップデートでサポートされる予定です。",
     "xpack.lens.config.cannotConvertToEsqlReducedTimeRangeReason": "時間範囲の短縮は今後のアップデートでサポートされる予定です。",
     "xpack.lens.config.cannotConvertToEsqlReferenceLineTooltip": "変換にサポートされているのは、静的な値参照行のみです。",
     "xpack.lens.config.cannotConvertToEsqlRuntimeFieldReason": "ランタイムフィールドは今後のアップデートでサポートされる予定です。",

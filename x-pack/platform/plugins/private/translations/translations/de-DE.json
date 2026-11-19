@@ -39338,7 +39338,6 @@
     "xpack.lens.config.cannotConvertToEsqlFormulaReason": "Formeloperationen werden in einem kommenden Update unterstützt.",
     "xpack.lens.config.cannotConvertToEsqlIncludeEmptyRowsReason": "„Leere Zeilen einbeziehen“ wird in einem kommenden Update unterstützt.",
     "xpack.lens.config.cannotConvertToEsqlOperationReason": "Der Support für eine oder mehrere der verwendeten Funktionen wird in einem kommenden Update verfügbar sein.",
-    "xpack.lens.config.cannotConvertToEsqlQueryAnnotationsTooltip": "Abfragebasierte Anmerkungen werden in einem kommenden Update unterstützt.",
     "xpack.lens.config.cannotConvertToEsqlReducedTimeRangeReason": "Reduzierter Zeitbereich wird in einem kommenden Update unterstützt.",
     "xpack.lens.config.cannotConvertToEsqlReferenceLineTooltip": "Für die Konvertierung werden nur Referenzlinien mit statischen Werten unterstützt.",
     "xpack.lens.config.cannotConvertToEsqlRuntimeFieldReason": "Laufzeit-Felder werden in einem kommenden Update unterstützt.",
