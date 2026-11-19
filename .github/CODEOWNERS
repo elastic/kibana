@@ -2925,8 +2925,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /x-pack/solutions/security/test/serverless/api_integration/test_suites/ @elastic/security-solution
 /x-pack/solutions/security/test/serverless/ @elastic/security-solution
 /x-pack/solutions/security/test/serverless/functional/configs/config.ts @elastic/security-solution @elastic/appex-qa
-/x-pack/solutions/security/test/serverless/functional/configs/config.mki_only.ts @elastic/security-solution @elastic/appex-qa
-/x-pack/solutions/security/test/serverless/functional/configs/index.mki_only.ts @elastic/security-solution @elastic/appex-qa @elastic/contextual-security-apps @elastic/siem-beacon
 /x-pack/solutions/security/test/serverless/functional/configs/config.feature_flags.ts @elastic/security-solution
 
 #CC# /x-pack/solutions/security/plugins/security_solution/ @elastic/security-solution
