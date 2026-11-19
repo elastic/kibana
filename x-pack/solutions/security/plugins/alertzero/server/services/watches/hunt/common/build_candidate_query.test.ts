@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { buildCandidateQuery } from './build_candidate_query';
+import { NOTHING_TO_HUNT_FILTER } from './nothing_to_hunt_filter';
 import { buildHuntInvestigationConversationId } from './hunt_investigation_id';
 import { buildHuntSpaceFilterTerms } from './space_filter';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
@@ -856,6 +857,131 @@ describe('buildCandidateQuery', () => {
           ])
       );
       expect(result.skipped).toEqual([{ id: 'rpt-both', reason: 'not_usable' }]);
+    });
+  });
+
+  describe('the nothing-to-hunt gate', () => {
+    const pendingInSpace = (spaceId: string) => ({
+      nested: {
+        path: 'evidence',
+        query: {
+          bool: {
+            filter: [
+              { term: { 'evidence.space_id': spaceId } },
+              { term: { 'evidence.coverage_pending': true } },
+            ],
+          },
+        },
+      },
+    });
+    const gateBody = (spaceId: string) => ({
+      bool: { filter: [NOTHING_TO_HUNT_FILTER], must_not: [pendingInSpace(spaceId)] },
+    });
+
+    const mockCount = (
+      esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>,
+      count: number
+    ) =>
+      esClient.count.mockResolvedValue({
+        count,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      });
+
+    const runScheduled = async (
+      params: Partial<Parameters<typeof buildCandidateQuery>[2]> = {},
+      scopedLogger = loggingSystemMock.createLogger()
+    ) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      mockCount(esClient, 4);
+      await buildCandidateQuery(esClient, scopedLogger, {
+        trigger: 'scheduled',
+        spaceId: 'hunt-a',
+        ...params,
+      });
+      return { esClient, scopedLogger };
+    };
+
+    it('holds back nothing-to-hunt reports on a scheduled sweep, except ones pending in this space', async () => {
+      const { esClient } = await runScheduled();
+      expect(searchBodyOf(esClient).query.bool.filter).toContainEqual({
+        bool: { must_not: [gateBody('hunt-a')] },
+      });
+    });
+
+    it('applies to a manual trigger with empty or absent report_ids, which is a sweep', async () => {
+      const empty = await runScheduled({ trigger: 'manual', report_ids: [] });
+      const absent = await runScheduled({ trigger: 'manual' });
+      expect(JSON.stringify(searchBodyOf(empty.esClient).query)).toContain('extracted.relevance');
+      expect(JSON.stringify(searchBodyOf(absent.esClient).query)).toContain('extracted.relevance');
+    });
+
+    it('does not apply to named ids', async () => {
+      const { esClient } = await runScheduled({ trigger: 'manual', report_ids: ['rpt-1'] });
+      expect(JSON.stringify(searchBodyOf(esClient).query)).not.toContain('extracted.relevance');
+    });
+
+    it('cuts strictly below 0.5', async () => {
+      const { esClient } = await runScheduled();
+      const query = JSON.stringify(searchBodyOf(esClient).query);
+      expect(query).toContain('"lt":0.5');
+      expect(query).not.toContain('"lte"');
+    });
+
+    describe('the held-back count', () => {
+      it('counts usable, unhunted, in-lookback reports that match the gate', async () => {
+        const { esClient } = await runScheduled({ lookbackDays: 14 });
+        expect(esClient.count).toHaveBeenCalledTimes(1);
+        const [request] = esClient.count.mock.calls[0];
+        expect(request?.index).toBe(HUNT_REPORTS_INDEX);
+        expect(request?.ignore_unavailable).toBe(false);
+        const filter = (request?.query?.bool?.filter ?? []) as unknown[];
+        expect(filter).toContain(HUNT_USABLE_FILTER);
+        expect(filter).toContainEqual(gateBody('hunt-a'));
+        // the gate is matched here, not excluded
+        expect(filter).not.toContainEqual({ bool: { must_not: [gateBody('hunt-a')] } });
+        // the same hunted and lookback clauses the selection used
+        const selected = searchBodyOf(esClient).query.bool.filter;
+        const clausesNotInCount = selected.filter(
+          (clause: unknown) =>
+            !filter.some((c: unknown) => JSON.stringify(c) === JSON.stringify(clause))
+        );
+        expect(clausesNotInCount).toEqual([{ bool: { must_not: [gateBody('hunt-a')] } }]);
+      });
+
+      it('logs the count at info', async () => {
+        const { scopedLogger } = await runScheduled();
+        expect(scopedLogger.info).toHaveBeenCalledWith(
+          expect.stringContaining(
+            '4 report(s) held back: nothing to hunt (relevance below 0.5, no indicators, no techniques)'
+          )
+        );
+      });
+
+      it('is not issued for named ids', async () => {
+        const { esClient, scopedLogger } = await runScheduled({
+          trigger: 'manual',
+          report_ids: ['rpt-1'],
+        });
+        expect(esClient.count).not.toHaveBeenCalled();
+        expect(scopedLogger.info).not.toHaveBeenCalled();
+      });
+
+      it('never fails the sweep: a count error is a warning and the selection stands', async () => {
+        const scopedLogger = loggingSystemMock.createLogger();
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        esClient.search.mockResolvedValue(searchResponseOf(['rpt-1']));
+        esClient.count.mockRejectedValue(new Error('count boom'));
+
+        const result = await buildCandidateQuery(esClient, scopedLogger, {
+          trigger: 'scheduled',
+          spaceId: 'hunt-a',
+        });
+
+        expect(result.ids).toEqual(['rpt-1']);
+        expect(scopedLogger.warn).toHaveBeenCalledWith(expect.stringContaining('count boom'));
+        expect(scopedLogger.info).not.toHaveBeenCalled();
+      });
     });
   });
 });
