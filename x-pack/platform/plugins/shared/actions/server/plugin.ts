@@ -638,8 +638,8 @@ export class ActionsPlugin
 
     this.connectorCatalogFeatureFlagSubscription = core.featureFlags
       .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
-      .subscribe((isConnectorCatalogEnabled: boolean) => {
-        return isConnectorCatalogEnabled;
+      .subscribe((isCatalogEnabled: boolean) => {
+        return isCatalogEnabled;
         // TODO: implement the connector catalog logic
       });
 

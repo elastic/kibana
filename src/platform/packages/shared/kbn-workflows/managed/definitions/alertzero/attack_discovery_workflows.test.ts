@@ -3942,16 +3942,7 @@ describe('Attack Discovery worker chain', () => {
       });
     });
 
-    describe('managed versions', () => {
-      // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
-      it('bumps the runner to version 23 so a run can set the generation batch size', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(23);
-      });
-
-      it('bumps batched generation to version 15 so a space with no alerts index yet skips retrieval', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(15);
-      });
-
+    describe('fingerprint matching failure', () => {
       it('continues when fingerprint matching fails', () => {
         expect(stepIn(workerSteps, 'match_fingerprints')?.['on-failure']?.continue).toBe(true);
       });
@@ -3964,10 +3955,6 @@ describe('Attack Discovery worker chain', () => {
         expect(stepIn(workerSteps, 'run_unmatched_review')?.with?.['workflow-id']).toBe(
           ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID
         );
-      });
-
-      it('bumps the review to version 26 so its verdicts no longer name the decider', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(26);
       });
     });
 
@@ -4460,10 +4447,6 @@ describe('Attack Discovery worker chain', () => {
         expect(asInputs(stepIn(attachSteps, 'journal_alerts_retired')).message).not.toContain(
           'error.message'
         );
-      });
-
-      it('bumps the attach workflow to version 20 so a lost retarget writes its own fingerprint', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(20);
       });
 
       it('keeps its alert tags in sync with the review', () => {

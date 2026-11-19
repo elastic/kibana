@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', () => {
     loadTestFile(require.resolve('./custom_integration'));
-    loadTestFile(require.resolve('./general'));
+    // general (cookies) migrated to Scout: src/core/packages/core/test/scout/api/tests/cookies.spec.ts
     loadTestFile(require.resolve('./event_annotations'));
     loadTestFile(require.resolve('./saved_objects'));
     // short_url migrated to Scout: src/platform/plugins/shared/share/test/scout/api/tests/*_short_url.spec.ts

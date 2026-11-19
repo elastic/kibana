@@ -11,6 +11,36 @@ const escapeRegExpLiteral = (value: string): string => value.replace(/[.*+?^${}(
 export const compileGlob = (pattern: string): RegExp =>
   new RegExp(`^${pattern.split('*').map(escapeRegExpLiteral).join('.*')}$`);
 
+/**
+ * Whether `text` matches an Elasticsearch-style glob, where `*` is the only wildcard. A
+ * two-pointer scan that remembers the last `*`, so it takes at most pattern times text steps
+ * and cannot backtrack catastrophically the way a regular expression with many `.*` can.
+ */
+export const globMatches = (pattern: string, text: string): boolean => {
+  let p = 0;
+  let t = 0;
+  let star = -1;
+  let resume = 0;
+  while (t < text.length) {
+    if (p < pattern.length && pattern[p] === '*') {
+      star = p;
+      resume = t;
+      p += 1;
+    } else if (p < pattern.length && pattern[p] === text[t]) {
+      p += 1;
+      t += 1;
+    } else if (star !== -1) {
+      p = star + 1;
+      resume += 1;
+      t = resume;
+    } else {
+      return false;
+    }
+  }
+  while (p < pattern.length && pattern[p] === '*') p += 1;
+  return p === pattern.length;
+};
+
 /** The literal text before a pattern's first `*`; the whole pattern when it has none. */
 export const literalPrefix = (pattern: string): string => pattern.split('*')[0];
 
@@ -20,7 +50,7 @@ export const literalPrefix = (pattern: string): string => pattern.split('*')[0];
  * deliberately conservative.
  */
 export const globsOverlap = (candidate: string, other: string): boolean => {
-  if (!candidate.includes('*')) return compileGlob(other).test(candidate);
+  if (!candidate.includes('*')) return globMatches(other, candidate);
   const a = literalPrefix(candidate);
   const b = literalPrefix(other);
   return a.startsWith(b) || b.startsWith(a);
@@ -40,7 +70,7 @@ export const clusterCovers = (
     return entryCluster === candidateCluster;
   }
   if (candidateCluster.includes('*')) return entryCluster === candidateCluster;
-  return compileGlob(entryCluster).test(candidateCluster);
+  return globMatches(entryCluster, candidateCluster);
 };
 
 /**

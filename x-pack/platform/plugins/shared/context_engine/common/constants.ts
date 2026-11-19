@@ -16,6 +16,7 @@ export const AI_INDEX_BY_ID_PATH = `${AI_INDEX_PATH}/{aiIndexId}`;
 export const AI_INDEX_QUERY_PATH = `${AI_INDEX_PATH}/_query`;
 export const AI_INDEX_DESCRIBE_PATH = `${AI_INDEX_BY_ID_PATH}/_describe`;
 export const AI_INDEX_DREAMING_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/dreaming`;
+export const DREAMING_TEMPLATES_PATH = `${INTERNAL_API_PATH}/dreaming_templates`;
 export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/ki_summary`;
 export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
@@ -33,12 +34,14 @@ export const MAX_KI_PAGE_SIZE = 100;
 /** Page size for summary-only KI list requests, no rows. */
 export const KI_SUMMARY_PAGE_SIZE = 0;
 
-/** Default and maximum number of type groups in a KI groups response. Also the `exclude_types` max size. */
+/** Default and maximum number of type groups in a KI groups response. */
 export const DEFAULT_KI_GROUPS = 5;
 export const MAX_KI_GROUPS = 10;
+/** The most types an `exclude_types` filter takes: the tile types plus the "Other" groups. */
+export const MAX_KI_EXCLUDE_TYPES = DEFAULT_KI_GROUPS + MAX_KI_GROUPS;
 /** Default and maximum number of preview rows per KI type group. */
 export const DEFAULT_KI_GROUP_PREVIEW_SIZE = 3;
-export const MAX_KI_GROUP_PREVIEW_SIZE = 25;
+export const MAX_KI_GROUP_PREVIEW_SIZE = 50;
 
 /** Also the longest type that can form a group, since the client must be able to send it back. */
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
