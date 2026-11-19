@@ -1,0 +1,8 @@
+{
+  "callTool": {
+    "input": {
+      "name": "who_am_i",
+      "arguments": {}
+    }
+  }
+}

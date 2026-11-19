@@ -1,0 +1,587 @@
+{
+  "tools": [
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "file_ids": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "prompt": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_ids",
+          "prompt"
+        ],
+        "type": "object"
+      },
+      "name": "ai_extract_freeform"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "file_ids": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array"
+          },
+          "scope": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "template_key": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_ids",
+          "template_key",
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "ai_extract_structured_from_metadata_template"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "hub_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "question": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "hub_id",
+          "question"
+        ],
+        "type": "object"
+      },
+      "name": "ai_qa_hub"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "file_ids": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "question": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_ids",
+          "question"
+        ],
+        "type": "object"
+      },
+      "name": "ai_qa_multi_file"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "file_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "question": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_id",
+          "question"
+        ],
+        "type": "object"
+      },
+      "name": "ai_qa_single_file"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "file_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "version_id": {
+            "pattern": "^\\d+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_file_content"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "file_id": {
+            "pattern": "^\\d+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_file_details"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "folder_id": {
+            "pattern": "^\\d+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "folder_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_folder_details"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "hub_id": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "hub_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_hub_details"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "hub_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "limit": {
+            "default": 50,
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "marker": {
+            "default": "",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hub_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_hub_items"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "default": [
+              "id",
+              "type",
+              "message",
+              "created_by",
+              "created_at"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "file_id": {
+            "pattern": "^\\d+$",
+            "type": "string"
+          },
+          "limit": {
+            "default": 100,
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "offset": {
+            "default": 0,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "file_id"
+        ],
+        "type": "object"
+      },
+      "name": "list_file_comments"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "folder_id": {
+            "pattern": "^\\d+$",
+            "type": "string"
+          },
+          "limit": {
+            "default": 30,
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "offset": {
+            "default": 0,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "folder_id"
+        ],
+        "type": "object"
+      },
+      "name": "list_folder_content_by_folder_id"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "default": 50,
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "marker": {
+            "default": "",
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "name": "list_hubs"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "ancestor_folder_id": {
+            "type": "string"
+          },
+          "created_at_range": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "deleted_at_range": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "file_extensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "default": 30,
+            "maximum": 200,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "mdfilters": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "filters": {
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "minItems": 1,
+                        "type": "array"
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "gt": {
+                            "type": [
+                              "string",
+                              "number"
+                            ]
+                          },
+                          "lt": {
+                            "type": [
+                              "string",
+                              "number"
+                            ]
+                          }
+                        },
+                        "type": "object"
+                      }
+                    ]
+                  },
+                  "type": "object"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "templateKey": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "scope",
+                "templateKey"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "query": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "updated_at_range": {
+            "maxLength": 100,
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      },
+      "name": "search_files_keyword"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "ancestor_folder_id": {
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "from": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "limit": {
+            "default": 30,
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "query": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "query_params": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "required": [
+          "from",
+          "query"
+        ],
+        "type": "object"
+      },
+      "name": "search_files_metadata"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "ancestor_folder_id": {
+            "type": "string"
+          },
+          "created_at_range": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "deleted_at_range": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "folder_name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "limit": {
+            "default": 30,
+            "maximum": 200,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "updated_at_range": {
+            "maxLength": 100,
+            "type": "string"
+          }
+        },
+        "required": [
+          "folder_name"
+        ],
+        "type": "object"
+      },
+      "name": "search_folders_by_name"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {},
+        "type": "object"
+      },
+      "name": "who_am_i"
+    }
+  ]
+}

@@ -1,0 +1,839 @@
+{
+  "tools": [
+    {
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "access_level": {
+            "type": "string"
+          },
+          "allow_download": {
+            "additionalProperties": false,
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "audience": {
+            "type": "string"
+          },
+          "emails": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "expires": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "path_or_file_id": {
+            "pattern": "^(?:/.*|ns:[0-9]+//.*|id:[A-Za-z0-9_-]+)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path_or_file_id"
+        ],
+        "type": "object"
+      },
+      "name": "create_shared_link",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "access_level": {
+            "type": "string"
+          },
+          "allow_download": {
+            "type": "boolean"
+          },
+          "audience": {
+            "type": "string"
+          },
+          "content_type": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
+          },
+          "expires": {
+            "type": "string"
+          },
+          "password_protected": {
+            "type": "boolean"
+          },
+          "path": {
+            "type": "string"
+          },
+          "path_display": {
+            "type": "string"
+          },
+          "share_errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "shared_with": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "warning": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "url",
+          "created",
+          "audience",
+          "access_level",
+          "password_protected",
+          "allow_download",
+          "content_type",
+          "path",
+          "path_display"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "path_or_file_id": {
+            "pattern": "^(?:/.*|ns:[0-9]+//.*|id:[A-Za-z0-9_-]+)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path_or_file_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_file_content",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "content_link": {
+            "type": "string"
+          },
+          "error_message": {
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": false,
+            "properties": {
+              "file_id": {
+                "type": "string"
+              },
+              "filename": {
+                "type": "string"
+              },
+              "path_display": {
+                "type": "string"
+              },
+              "server_modified": {
+                "type": "string"
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "size_bytes": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "path_or_file_id": {
+            "pattern": "^(?:/.*|ns:[0-9]+//.*|id:[A-Za-z0-9_-]+)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path_or_file_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_file_metadata",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "file": {
+            "additionalProperties": false,
+            "properties": {
+              "client_modified": {
+                "type": "string"
+              },
+              "ext": {
+                "type": "string"
+              },
+              "has_explicit_shared_members": {
+                "type": "boolean"
+              },
+              "id": {
+                "type": "string"
+              },
+              "is_downloadable": {
+                "type": "boolean"
+              },
+              "mime_type": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "path_display": {
+                "type": "string"
+              },
+              "path_lower": {
+                "type": "string"
+              },
+              "permissions": {
+                "additionalProperties": false,
+                "properties": {
+                  "can_read": {
+                    "type": "boolean"
+                  },
+                  "can_write": {
+                    "type": "boolean"
+                  }
+                },
+                "type": [
+                  "null",
+                  "object"
+                ]
+              },
+              "rev": {
+                "type": "string"
+              },
+              "server_modified": {
+                "type": "string"
+              },
+              "sharing_info": {
+                "additionalProperties": false,
+                "properties": {
+                  "is_parent_shared_folder_read_only": {
+                    "type": "boolean"
+                  },
+                  "last_modifier": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "display_name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "email_verified": {
+                        "type": "boolean"
+                      },
+                      "user_id": {
+                        "type": "string"
+                      }
+                    },
+                    "type": [
+                      "null",
+                      "object"
+                    ]
+                  },
+                  "modified_by": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "type": [
+                      "null",
+                      "object"
+                    ]
+                  },
+                  "parent_shared_folder_id": {
+                    "type": "string"
+                  },
+                  "read_only": {
+                    "type": "boolean"
+                  }
+                },
+                "type": [
+                  "null",
+                  "object"
+                ]
+              },
+              "size": {
+                "type": "integer"
+              },
+              "size_display": {
+                "type": "string"
+              },
+              "tag": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "folder": {
+            "additionalProperties": false,
+            "properties": {
+              "descendants_count": {
+                "type": "integer"
+              },
+              "folder_size": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "path_display": {
+                "type": "string"
+              },
+              "path_lower": {
+                "type": "string"
+              },
+              "permissions": {
+                "additionalProperties": false,
+                "properties": {
+                  "can_read": {
+                    "type": "boolean"
+                  },
+                  "can_write": {
+                    "type": "boolean"
+                  }
+                },
+                "type": [
+                  "null",
+                  "object"
+                ]
+              },
+              "sharing_info": {
+                "additionalProperties": false,
+                "properties": {
+                  "is_parent_shared_folder_read_only": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "value": {
+                        "type": "boolean"
+                      }
+                    },
+                    "type": [
+                      "null",
+                      "object"
+                    ]
+                  },
+                  "is_team_folder": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "value": {
+                        "type": "boolean"
+                      }
+                    },
+                    "type": [
+                      "null",
+                      "object"
+                    ]
+                  },
+                  "no_access": {
+                    "type": "boolean"
+                  },
+                  "parent_shared_folder_id": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "type": [
+                      "null",
+                      "object"
+                    ]
+                  },
+                  "read_only": {
+                    "type": "boolean"
+                  },
+                  "shared_folder_id": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "type": [
+                      "null",
+                      "object"
+                    ]
+                  },
+                  "shared_folder_name": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "type": [
+                      "null",
+                      "object"
+                    ]
+                  },
+                  "traverse_only": {
+                    "type": "boolean"
+                  }
+                },
+                "type": [
+                  "null",
+                  "object"
+                ]
+              },
+              "tag": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "metadata_type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "properties": {
+          "cursor": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "max_results": {
+            "maximum": 600,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "object_types": {
+            "items": {
+              "enum": [
+                "file",
+                "folder"
+              ],
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "path": {
+            "pattern": "^(?:|/.*|ns:[0-9]+//.*)$",
+            "type": "string"
+          },
+          "recursive": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "name": "list_folder",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "entries": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "client_modified": {
+                  "type": "string"
+                },
+                "file": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "size": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": [
+                    "null",
+                    "object"
+                  ]
+                },
+                "file_id": {
+                  "type": "string"
+                },
+                "folder": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": [
+                    "null",
+                    "object"
+                  ]
+                },
+                "modified_time": {
+                  "type": "string"
+                },
+                "mount": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": [
+                    "null",
+                    "object"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "object_type": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "path_display": {
+                  "type": "string"
+                }
+              },
+              "type": [
+                "null",
+                "object"
+              ]
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "has_more": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "entries",
+          "cursor",
+          "has_more"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "path": {
+            "pattern": "^(?:|/.*|ns:[0-9]+//.*|id:[A-Za-z0-9_-]+)$",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "name": "list_shared_links",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "links": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "access_level": {
+                  "type": "string"
+                },
+                "allow_download": {
+                  "type": "boolean"
+                },
+                "audience": {
+                  "type": "string"
+                },
+                "expires": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "link_type": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "password_protected": {
+                  "type": "boolean"
+                },
+                "path_lower": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "type": [
+                "null",
+                "object"
+              ]
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          }
+        },
+        "required": [
+          "links",
+          "has_more",
+          "cursor"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "file_categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "file_extensions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "file_status": {
+            "type": "string"
+          },
+          "filename_only": {
+            "type": "boolean"
+          },
+          "last_modified_after": {
+            "type": "string"
+          },
+          "last_modified_before": {
+            "type": "string"
+          },
+          "max_results": {
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "order_by": {
+            "type": "string"
+          },
+          "path": {
+            "pattern": "^(?:|/.*|ns:[0-9]+//.*|id:[A-Za-z0-9_-]+)$",
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "reverse_order": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "name": "search",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "matches": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "file_id": {
+                  "type": "string"
+                },
+                "last_modified": {
+                  "type": "string"
+                },
+                "match_type": {
+                  "type": "string"
+                },
+                "mime_type": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "object_type": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "path_display": {
+                  "type": "string"
+                },
+                "rank": {
+                  "maximum": 2147483647,
+                  "minimum": -2147483648,
+                  "type": "integer"
+                },
+                "size": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "type": [
+                "null",
+                "object"
+              ]
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "total_results": {
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "matches",
+          "has_more",
+          "cursor",
+          "total_results"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "who_am_i",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "home_namespace_id": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "root_namespace_id": {
+            "type": "string"
+          },
+          "team_id": {
+            "type": "string"
+          },
+          "team_name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  ]
+}

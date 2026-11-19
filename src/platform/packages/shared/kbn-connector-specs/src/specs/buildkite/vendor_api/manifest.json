@@ -1,0 +1,122 @@
+{
+  "operations": {
+    "callTool": [
+      {
+        "name": "tools/call current_user",
+        "source": "mcp"
+      },
+      {
+        "name": "tools/list",
+        "source": "mcp"
+      }
+    ],
+    "cancelBuild": [
+      {
+        "name": "tools/call cancel_build",
+        "source": "mcp"
+      }
+    ],
+    "createBuild": [
+      {
+        "name": "tools/call create_build",
+        "source": "mcp"
+      }
+    ],
+    "createBuildAnnotation": [
+      {
+        "name": "tools/call create_annotation",
+        "source": "mcp"
+      }
+    ],
+    "getBuild": [
+      {
+        "name": "tools/call get_build",
+        "source": "mcp"
+      }
+    ],
+    "getJobLog": [
+      {
+        "name": "tools/call read_logs",
+        "source": "mcp"
+      }
+    ],
+    "getPipeline": [
+      {
+        "name": "tools/call get_pipeline",
+        "source": "mcp"
+      }
+    ],
+    "listArtifacts": [
+      {
+        "name": "tools/call list_artifacts_for_build",
+        "source": "mcp"
+      }
+    ],
+    "listBuildAnnotations": [
+      {
+        "name": "tools/call list_annotations",
+        "source": "mcp"
+      }
+    ],
+    "listBuilds": [
+      {
+        "name": "tools/call list_builds",
+        "source": "mcp"
+      }
+    ],
+    "listJobs": [
+      {
+        "name": "tools/call list_jobs",
+        "source": "mcp"
+      }
+    ],
+    "listPipelines": [
+      {
+        "name": "tools/call list_pipelines",
+        "source": "mcp"
+      }
+    ],
+    "listTools": [
+      {
+        "name": "tools/list",
+        "source": "mcp"
+      }
+    ],
+    "rebuild": [
+      {
+        "name": "tools/call rebuild_build",
+        "source": "mcp"
+      }
+    ],
+    "retryFailedJobs": [
+      {
+        "name": "tools/call list_jobs",
+        "source": "mcp"
+      }
+    ],
+    "retryJob": [
+      {
+        "name": "tools/call retry_job",
+        "source": "mcp"
+      }
+    ],
+    "unblockJob": [
+      {
+        "name": "tools/call unblock_job",
+        "source": "mcp"
+      }
+    ]
+  },
+  "sources": {
+    "mcp": {
+      "captured": true,
+      "endpoints": [
+        "https://mcp.buildkite.com/direct"
+      ],
+      "fetchedAt": "2026-11-17T16:34:11.158Z",
+      "format": "mcp",
+      "note": "Buildkite's MCP server answers initialize with 401, so its tools/list can't be fetched. Captured once on 2026-11-17 with a read-only API access token, and committed as the snapshot. The server lists its tools the same way for every organization, and the capture holds no organization, pipeline or user data. Refreshing it means capturing it again with a token.",
+      "url": "https://mcp.buildkite.com/direct"
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "operations": {
+    "aiExtractFreeform": [
+      {
+        "name": "tools/call ai_extract_freeform",
+        "source": "mcp"
+      }
+    ],
+    "aiExtractStructuredFromMetadataTemplate": [
+      {
+        "name": "tools/call ai_extract_structured_from_metadata_template",
+        "source": "mcp"
+      }
+    ],
+    "aiQaHub": [
+      {
+        "name": "tools/call ai_qa_hub",
+        "source": "mcp"
+      }
+    ],
+    "aiQaMultiFile": [
+      {
+        "name": "tools/call ai_qa_multi_file",
+        "source": "mcp"
+      }
+    ],
+    "aiQaSingleFile": [
+      {
+        "name": "tools/call ai_qa_single_file",
+        "source": "mcp"
+      }
+    ],
+    "callTool": [
+      {
+        "name": "tools/call who_am_i",
+        "source": "mcp"
+      }
+    ],
+    "getComments": [
+      {
+        "name": "tools/call list_file_comments",
+        "source": "mcp"
+      }
+    ],
+    "getFileContent": [
+      {
+        "name": "tools/call get_file_content",
+        "source": "mcp"
+      }
+    ],
+    "getFileDetails": [
+      {
+        "name": "tools/call get_file_details",
+        "source": "mcp"
+      }
+    ],
+    "getFolderDetails": [
+      {
+        "name": "tools/call get_folder_details",
+        "source": "mcp"
+      }
+    ],
+    "getHubDetails": [
+      {
+        "name": "tools/call get_hub_details",
+        "source": "mcp"
+      }
+    ],
+    "getHubItems": [
+      {
+        "name": "tools/call get_hub_items",
+        "source": "mcp"
+      }
+    ],
+    "listFolderContent": [
+      {
+        "name": "tools/call list_folder_content_by_folder_id",
+        "source": "mcp"
+      }
+    ],
+    "listHubs": [
+      {
+        "name": "tools/call list_hubs",
+        "source": "mcp"
+      }
+    ],
+    "listTools": [
+      {
+        "name": "tools/list",
+        "source": "mcp"
+      }
+    ],
+    "searchByMetadata": [
+      {
+        "name": "tools/call search_files_metadata",
+        "source": "mcp"
+      }
+    ],
+    "searchFilesKeyword": [
+      {
+        "name": "tools/call search_files_keyword",
+        "source": "mcp"
+      }
+    ],
+    "searchFoldersByName": [
+      {
+        "name": "tools/call search_folders_by_name",
+        "source": "mcp"
+      }
+    ],
+    "whoAmI": [
+      {
+        "name": "tools/call who_am_i",
+        "source": "mcp"
+      }
+    ]
+  },
+  "sources": {
+    "mcp": {
+      "captured": true,
+      "endpoints": [
+        "https://mcp.box.com"
+      ],
+      "fetchedAt": "2026-11-17T15:26:02.006Z",
+      "format": "mcp",
+      "note": "Box's MCP server answers initialize with 401, so its tools/list can't be fetched. Captured once on 2026-11-17 with a throwaway Box developer token, and committed as the snapshot. Refreshing it means capturing it again with credentials. The tool list may also depend on the account's plan, so a tool missing here may exist for another account.",
+      "url": "https://mcp.box.com"
+    }
+  }
+}

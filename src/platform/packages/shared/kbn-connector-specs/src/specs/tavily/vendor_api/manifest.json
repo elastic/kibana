@@ -1,0 +1,52 @@
+{
+  "operations": {
+    "callTool": [
+      {
+        "name": "tools/call tavily_search",
+        "source": "mcp"
+      }
+    ],
+    "listTools": [
+      {
+        "name": "tools/list",
+        "source": "mcp"
+      }
+    ],
+    "tavilyCrawl": [
+      {
+        "name": "tools/call tavily_crawl",
+        "source": "mcp"
+      }
+    ],
+    "tavilyExtract": [
+      {
+        "name": "tools/call tavily_extract",
+        "source": "mcp"
+      }
+    ],
+    "tavilyMap": [
+      {
+        "name": "tools/call tavily_map",
+        "source": "mcp"
+      }
+    ],
+    "tavilySearch": [
+      {
+        "name": "tools/call tavily_search",
+        "source": "mcp"
+      }
+    ]
+  },
+  "sources": {
+    "mcp": {
+      "captured": true,
+      "endpoints": [
+        "https://mcp.tavily.com/mcp/"
+      ],
+      "fetchedAt": "2026-11-17T17:36:45.206Z",
+      "format": "mcp",
+      "note": "Tavily's MCP server answers initialize with 401, so its tools/list can't be fetched. Captured once on 2026-11-17 with a free-tier API key, sent as the bearer token the connector itself uses; the server advertises its own OAuth authorization server, but accepts an API key. It answers over server-sent events, so a capture takes the JSON out of the data: frame. Refreshing it means capturing it again with a key.",
+      "url": "https://mcp.tavily.com/mcp/"
+    }
+  }
+}
