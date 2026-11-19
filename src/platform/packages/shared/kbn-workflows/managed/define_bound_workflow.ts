@@ -21,9 +21,8 @@ export interface IBoundWorkflowValues extends ManagedWorkflowTemplateValues {
  * id suffix, and bound to a service account. `yaml` carries the `run_as: __SERVICE_ACCOUNT_ID__`
  * placeholder that installing replaces. `pluginId` is the plugin that owns the workflow.
  *
- * Bump `version` whenever `yaml` changes. The plugin hashes the template function's source, which
- * only holds the renderer call and not the YAML, so without a new version an installed space keeps
- * the old workflow.
+ * The plugin hashes the YAML each install renders, so an edit to `yaml` reaches the installed
+ * spaces on their next reconciliation, with no `version` bump.
  */
 export function defineBoundWorkflow<TId extends string, TPluginId extends string>({
   id,
