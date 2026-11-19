@@ -179,19 +179,21 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       throw error;
     }
 
+    if (items.length > DEFAULT_PARALLEL_MAX_FAN_OUT) {
+      // Keep the expression only. The rejected list is not queued for persistence.
+      this.stepExecutionRuntime.setInput({ foreach: foreachInput });
+      throw new Error(
+        `Parallel step "${this.node.stepId}" fan-out of ${items.length} exceeds the maximum of ${DEFAULT_PARALLEL_MAX_FAN_OUT}. ` +
+          `Reduce the size of the "foreach" list.`
+      );
+    }
+
     // Snapshot the evaluated list so a later branch reads foreach.item from
     // input instead of re-evaluating the expression after a flush.
     this.stepExecutionRuntime.setInput({
       foreach: foreachInput,
       items,
     });
-
-    if (items.length > DEFAULT_PARALLEL_MAX_FAN_OUT) {
-      throw new Error(
-        `Parallel step "${this.node.stepId}" fan-out of ${items.length} exceeds the maximum of ${DEFAULT_PARALLEL_MAX_FAN_OUT}. ` +
-          `Reduce the size of the "foreach" list.`
-      );
-    }
 
     if (items.length === 0) {
       this.workflowLogger.logDebug(

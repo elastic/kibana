@@ -648,6 +648,10 @@ describe('EnterParallelNodeImpl', () => {
     node = makeNode({ foreach: JSON.stringify(items) });
     await expect(build().run()).rejects.toThrow(/exceeds the maximum/);
     expect(stepRuntime.finishStep).not.toHaveBeenCalled();
+    expect(stepRuntime.setInput).toHaveBeenCalledTimes(1);
+    expect(stepRuntime.setInput).toHaveBeenCalledWith({
+      foreach: JSON.stringify(items),
+    });
   });
 
   it('clamps an out-of-range concurrency to the ceiling', async () => {
