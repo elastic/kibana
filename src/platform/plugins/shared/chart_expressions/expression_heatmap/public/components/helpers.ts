@@ -19,6 +19,7 @@ import { getOriginalId } from '@kbn/transpose-utils';
 
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { FormatFactory, IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { getLowerBound } from '@kbn/chart-expressions-common';
 import { defaultPaletteParams } from '../constants';
 import type { HeatmapSortPredicate } from '../../common/types';
 
@@ -117,19 +118,16 @@ export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | und
   return minMax;
 };
 
-/** Hard cap on how many Y steps a fill may cover. A wider domain is left alone. */
-export const MAX_NEW_BUCKETS = 100;
-
 /** Numeric key, or the lower bound of an ES|QL range such as "0.4..0.45". */
 const bucketLowerBound = (value: unknown): number | undefined => {
   if (typeof value === 'number') {
-    return Number.isFinite(value) ? value : undefined;
+    return value;
   }
-  // Same "low..high" split as NumberRangeFormat and sortRowsByRangeLowerBound.
+  // Categorical labels stay out. getLowerBound('10') would otherwise become 10.
   if (typeof value !== 'string' || !value.includes('..')) {
     return undefined;
   }
-  const lower = Number(value.split('..')[0]);
+  const lower = getLowerBound(value);
   return Number.isFinite(lower) ? lower : undefined;
 };
 
@@ -171,7 +169,6 @@ export const fillMissingHeatmapYBuckets = (
 
   const span = maxIndex - minIndex + 1;
   if (
-    span > MAX_NEW_BUCKETS ||
     rowsByIndex.size === span ||
     !Number.isSafeInteger(minIndex) ||
     !Number.isSafeInteger(maxIndex)

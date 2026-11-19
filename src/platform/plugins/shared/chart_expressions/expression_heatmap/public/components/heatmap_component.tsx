@@ -473,10 +473,14 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
     }
 
-    const yInterval = yAxisColumn
-      ? datatableUtilities.getNumberHistogramInterval(yAxisColumn)
-      : undefined;
-    chartData = fillMissingHeatmapYBuckets(chartData, yAccessor, valueAccessor, yInterval);
+    // DSL histograms already include or drop empty rows via the agg toggle. Only ES|QL
+    // numeric buckets need the client to insert the missing steps.
+    if (isEsqlMode) {
+      const yInterval = yAxisColumn
+        ? datatableUtilities.getNumberHistogramInterval(yAxisColumn)
+        : undefined;
+      chartData = fillMissingHeatmapYBuckets(chartData, yAccessor, valueAccessor, yInterval);
+    }
 
     chartData = sortRowsByRangeLowerBound(chartData, xAxisColumn, args.gridConfig.xSortPredicate);
     chartData = sortRowsByRangeLowerBound(chartData, yAxisColumn, args.gridConfig.ySortPredicate);

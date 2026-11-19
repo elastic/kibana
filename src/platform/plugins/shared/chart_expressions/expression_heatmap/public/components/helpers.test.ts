@@ -10,7 +10,6 @@
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import {
-  MAX_NEW_BUCKETS,
   applyPaletteParams,
   fillMissingHeatmapYBuckets,
   getDataMinMax,
@@ -305,12 +304,6 @@ describe('fillMissingHeatmapYBuckets', () => {
     const rows = [row(0, 1), row(0.35, 2)];
 
     expect(fillMissingHeatmapYBuckets(rows, 'y', 'value', undefined)).toBe(rows);
-  });
-
-  it('does nothing when the domain exceeds the new-bucket cap', () => {
-    const rows = [row(0, 1), row(MAX_NEW_BUCKETS, 2)];
-
-    expect(fillMissingHeatmapYBuckets(rows, 'y', 'value', 1)).toBe(rows);
   });
 
   it('does nothing when a bucket index is past the safe integer range', () => {
