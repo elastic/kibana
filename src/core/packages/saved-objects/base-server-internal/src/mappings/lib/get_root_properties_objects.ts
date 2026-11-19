@@ -29,7 +29,7 @@ import { getRootProperties } from './get_root_properties';
  *  @return {EsPropertyMappings}
  */
 
-// Root object fields that are not a type's attributes. "acl" is never a valid saved object type.
+// Root properties that have an object mapping but are not a saved object type.
 const omittedRootProps = ['migrationVersion', 'references', 'acl'];
 
 export function getRootPropertiesObjects(mappings: IndexMapping) {

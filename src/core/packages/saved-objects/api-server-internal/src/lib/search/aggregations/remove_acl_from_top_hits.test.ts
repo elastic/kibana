@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { removeAclFromTopHits } from './remove_acl_from_top_hits';
+import { hasTopHits, removeAclFromTopHits } from './remove_acl_from_top_hits';
 
 const hitWithAcl = () => ({
   _id: 'dashboard:1',
@@ -82,5 +82,26 @@ describe('removeAclFromTopHits', () => {
       max: { value: 3 },
     };
     expect(removeAclFromTopHits(response)).toEqual(response);
+  });
+});
+
+describe('hasTopHits', () => {
+  it('finds a top_hits at the root', () => {
+    expect(hasTopHits({ top: { top_hits: { size: 1 } } })).toBe(true);
+  });
+
+  it('finds a top_hits under aggs and under aggregations', () => {
+    expect(
+      hasTopHits({ byType: { terms: { field: 'type' }, aggs: { top: { top_hits: {} } } } })
+    ).toBe(true);
+    expect(
+      hasTopHits({ byType: { terms: { field: 'type' }, aggregations: { top: { top_hits: {} } } } })
+    ).toBe(true);
+  });
+
+  it('is false without a top_hits', () => {
+    expect(
+      hasTopHits({ byType: { terms: { field: 'type' }, aggs: { max: { max: { field: 'a' } } } } })
+    ).toBe(false);
   });
 });

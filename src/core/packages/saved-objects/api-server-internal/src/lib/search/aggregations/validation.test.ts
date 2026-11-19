@@ -582,19 +582,24 @@ describe('validateAndConvertAggregations and the stored ACL', () => {
     ['a sort with options', { sort: [{ 'acl.owner.id': { order: 'asc', missing: '_last' } }] }],
     ['a string sort', { sort: ['acl.owner.id'] }],
     ['a wildcard sort', { sort: ['*'] }],
+    ['docvalue_fields', { docvalue_fields: ['type', 'acl.owner.id'] }],
+    ['a docvalue_fields string', { docvalue_fields: 'acl' }],
+    ['stored_fields', { stored_fields: ['acl.entries.id'] }],
+    ['highlight fields', { highlight: { fields: { 'foo.title': {}, 'acl.owner.id': {} } } }],
+    ['a highlight fields list', { highlight: { fields: [{ 'foo.title': {} }, { acl: {} }] } }],
   ])('throws for the ACL in %s of top_hits', (_, topHits) => {
     expect(() => validate({ top: { top_hits: topHits } } as AggsMap)).toThrow(
       '[top.top_hits] Invalid attribute path'
     );
   });
 
-  // `find` removes the ACL values these options return, so they accept any field, as before.
+  // `find` removes the ACL values that a pattern returns, so patterns stay accepted, as before.
   it.each([
     ['docvalue_fields', { docvalue_fields: ['*'] }],
-    ['docvalue_fields with an ACL field', { docvalue_fields: ['acl.owner.id'] }],
+    ['docvalue_fields with an ACL pattern', { docvalue_fields: ['acl.*'] }],
     ['stored_fields', { stored_fields: '*' }],
     ['highlight', { highlight: { fields: { '*': {} } } }],
-    ['highlight with an ACL field', { highlight: { fields: { 'acl.*': {} } } }],
+    ['highlight with an ACL pattern', { highlight: { fields: { 'acl.*': {} } } }],
   ])('accepts %s in top_hits', (_, topHits) => {
     expect(validate({ top: { top_hits: topHits } })).toEqual({
       top: { top_hits: { ...topHits, _source: { excludes: ['acl', 'acl.*'] } } },

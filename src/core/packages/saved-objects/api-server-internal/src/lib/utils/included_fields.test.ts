@@ -36,9 +36,10 @@ describe('getRootFields', () => {
 describe('includedFields', () => {
   const rootFields = getRootFields();
 
-  it('adds the stored ACL, which `getRootFields` leaves out', () => {
+  it('adds the stored ACL, which `getRootFields` leaves out, only when asked', () => {
     expect(rootFields).not.toContain('acl');
-    expect(includedFields('config', 'foo')).toContain('acl');
+    expect(includedFields('config', 'foo')).not.toContain('acl');
+    expect(includedFields('config', 'foo', true)).toEqual(['config.foo', ...rootFields, 'acl']);
   });
 
   it('returns undefined if fields are not provided', () => {
@@ -47,33 +48,26 @@ describe('includedFields', () => {
 
   it('accepts type and field as string', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toEqual(['config.foo', ...rootFields, 'acl']);
+    expect(fields).toEqual(['config.foo', ...rootFields]);
   });
 
   it('accepts type as array and field as string', () => {
     const fields = includedFields(['config', 'secret'], 'foo');
-    expect(fields).toEqual(['config.foo', 'secret.foo', ...rootFields, 'acl']);
+    expect(fields).toEqual(['config.foo', 'secret.foo', ...rootFields]);
   });
 
   it('accepts type as string and field as array', () => {
     const fields = includedFields('config', ['foo', 'bar']);
-    expect(fields).toEqual(['config.foo', 'config.bar', ...rootFields, 'acl']);
+    expect(fields).toEqual(['config.foo', 'config.bar', ...rootFields]);
   });
 
   it('accepts type as array and field as array', () => {
     const fields = includedFields(['config', 'secret'], ['foo', 'bar']);
-    expect(fields).toEqual([
-      'config.foo',
-      'config.bar',
-      'secret.foo',
-      'secret.bar',
-      ...rootFields,
-      'acl',
-    ]);
+    expect(fields).toEqual(['config.foo', 'config.bar', 'secret.foo', 'secret.bar', ...rootFields]);
   });
 
   it('uses wildcard when type is not provided', () => {
     const fields = includedFields(undefined, 'foo');
-    expect(fields).toEqual(['*.foo', ...rootFields, 'acl']);
+    expect(fields).toEqual(['*.foo', ...rootFields]);
   });
 });

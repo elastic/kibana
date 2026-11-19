@@ -208,6 +208,8 @@ describe('ACL storage in Saved Objects', () => {
   it('leaves the ACL out of results by default', async () => {
     const { id } = getFixture('dotted root keys are indexed');
     expect(await repository.get(TYPE, id)).not.toHaveProperty('acl');
+    const { saved_objects: bulkGot } = await repository.bulkGet([{ type: TYPE, id }]);
+    expect(bulkGot[0]).not.toHaveProperty('acl');
     expect((await repository.resolve(TYPE, id)).saved_object).not.toHaveProperty('acl');
 
     const { saved_objects: objects } = await repository.find({ type: TYPE, perPage: 1000 });
@@ -333,7 +335,8 @@ describe('ACL storage in Saved Objects', () => {
             top_hits: {
               size: 100,
               _source: ['acl', `${TYPE}.title`],
-              // Elasticsearch returns ACL values for these, and `find` removes them.
+              // Patterns stay accepted. Elasticsearch returns ACL values for them, and `find`
+              // removes those.
               docvalue_fields: ['type', 'acl.*'],
               highlight: {
                 fields: { '*': {} },
@@ -361,6 +364,7 @@ describe('ACL storage in Saved Objects', () => {
       ['a filter', { filter: `${TYPE}.acl.owner.id: ${OWNER_ID}` }],
       ['an aggregation', { aggs: { owners: { terms: { field: `${TYPE}.acl.owner.id` } } } }],
       ['a sort', { sortField: 'acl.owner.id' }],
+      ['a top_hits option', { aggs: { top: { top_hits: { docvalue_fields: ['acl.owner.id'] } } } }],
     ])('rejects the ACL in %s', async (_, options) => {
       await expect(repository.find({ type: TYPE, ...options })).rejects.toMatchObject({
         output: { statusCode: 400 },

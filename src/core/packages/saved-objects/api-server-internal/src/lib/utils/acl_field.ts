@@ -9,8 +9,10 @@
 
 import { ACL_FIELD, ACL_MAPPING } from '@kbn/ols';
 
+/** A mapping node: a field with a type, an object with properties, or both (such as `nested`). */
 interface MappingNode {
-  properties?: Record<string, MappingNode>;
+  readonly type?: string;
+  readonly properties?: Readonly<Record<string, MappingNode>>;
 }
 
 const collectPaths = (path: string, node: MappingNode): string[] => [
@@ -21,10 +23,7 @@ const collectPaths = (path: string, node: MappingNode): string[] => [
 ];
 
 /** The `acl` field and every field under it, as its mapping defines them. */
-export const ACL_FIELD_PATHS: readonly string[] = collectPaths(
-  ACL_FIELD,
-  ACL_MAPPING as unknown as MappingNode
-);
+export const ACL_FIELD_PATHS: readonly string[] = collectPaths(ACL_FIELD, ACL_MAPPING);
 
 /**
  * Checks whether `value` matches `pattern`, where `*` matches any run of characters, dots included,

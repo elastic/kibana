@@ -31,11 +31,13 @@ export function getRootFields() {
 }
 
 /**
- * Provides an array of paths for ES source filtering
+ * Provides an array of paths for ES source filtering. The stored ACL is fetched only when the
+ * caller asked for it with `includeAcl`.
  */
 export function includedFields(
   type: string | string[] = '*',
-  fields?: string[] | string
+  fields?: string[] | string,
+  includeAcl = false
 ): string[] | undefined {
   if (!fields || fields.length === 0) {
     return;
@@ -52,7 +54,7 @@ export function includedFields(
       }, [])
       .concat(ROOT_FIELDS)
       // `ROOT_FIELDS` lists the root fields that callers can use, for example in aggregations, so it
-      // leaves out the stored ACL. The ACL is added here to keep it on source-filtered reads.
-      .concat(ACL_FIELD)
+      // leaves out the stored ACL.
+      .concat(includeAcl ? [ACL_FIELD] : [])
   );
 }

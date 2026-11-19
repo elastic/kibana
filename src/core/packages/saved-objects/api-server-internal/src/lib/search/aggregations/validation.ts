@@ -137,19 +137,24 @@ const ACL_SOURCE_EXCLUDES = [ACL_FIELD, `${ACL_FIELD}.*`];
 
 /**
  * Keeps the stored ACL out of the documents that a `top_hits` aggregation returns. Its source filter
- * always excludes the ACL. `docvalue_fields` and `highlight` accept any field, as before, because
- * `find` removes the ACL values they return (see `removeAclFromTopHits`). A sort on the ACL is
- * refused, because the order of the hits would still show the ACL values.
+ * always excludes the ACL. A sort on the ACL is refused, because the order of the hits would show
+ * the ACL values. `docvalue_fields`, `stored_fields`, and `highlight.fields` entries that name the
+ * ACL or a field under it are refused too. Patterns such as `*` stay accepted, as before, and
+ * `find` removes the ACL values they return (see `removeAclFromTopHits`).
  */
 const hideAclFromTopHits = (
   topHits: Record<string, any>,
   { currentPath }: ValidationContext
 ): Record<string, any> => {
-  const aclSortField = castArray(topHits.sort ?? [])
-    .flatMap((sort) => (isPlainObject(sort) ? Object.keys(sort) : [sort]))
-    .find((name): name is string => typeof name === 'string' && matchesAclField(name));
-  if (aclSortField !== undefined) {
-    throw new Error(`[${currentPath.join('.')}] Invalid attribute path: ${aclSortField}`);
+  const aclField =
+    sortFieldNames(topHits.sort).find(matchesAclField) ??
+    [
+      ...fieldNames(topHits.docvalue_fields),
+      ...fieldNames(topHits.stored_fields),
+      ...highlightFieldNames(topHits.highlight),
+    ].find((name) => !name.includes('*') && matchesAclField(name));
+  if (aclField !== undefined) {
+    throw new Error(`[${currentPath.join('.')}] Invalid attribute path: ${aclField}`);
   }
 
   const { _source: source } = topHits;
@@ -164,6 +169,24 @@ const hideAclFromTopHits = (
     },
   };
 };
+
+/** The strings of a field option: one field, or a list of fields. */
+const fieldNames = (fields: unknown): string[] =>
+  castArray(fields ?? []).filter((field): field is string => typeof field === 'string');
+
+/** The field names of a `sort` option: a field, an object keyed by field, or a list of either. */
+const sortFieldNames = (sort: unknown): string[] =>
+  castArray(sort ?? []).flatMap((entry) =>
+    isPlainObject(entry) ? Object.keys(entry as object) : fieldNames(entry)
+  );
+
+/** The field names of a `highlight` option: `fields` is keyed by field, or lists such objects. */
+const highlightFieldNames = (highlight: unknown): string[] =>
+  isPlainObject(highlight)
+    ? castArray((highlight as Record<string, unknown>).fields ?? []).flatMap((entry) =>
+        isPlainObject(entry) ? Object.keys(entry as object) : fieldNames(entry)
+      )
+    : [];
 
 /**
  * Validate an aggregation structure against its declared schema.

@@ -34,6 +34,7 @@ import {
   validateConvertFilterToKueryNode,
   getSearchDsl,
   validateAndConvertAggregations,
+  hasTopHits,
   removeAclFromTopHits,
 } from '../search';
 import { includedFields } from '../utils';
@@ -193,7 +194,7 @@ export const performFind = async <T = unknown, A = unknown>(
     index: pit ? undefined : commonHelper.getIndicesForTypes(allowedTypes),
     // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
     from: searchAfter ? undefined : perPage * (page - 1),
-    _source: includedFields(allowedTypes, fields),
+    _source: includedFields(allowedTypes, fields, internalOptions.includeAcl),
     preference,
     rest_total_hits_as_int: true,
     size: perPage,
@@ -304,10 +305,13 @@ export const performFind = async <T = unknown, A = unknown>(
     );
   }
 
+  // Only a `top_hits` returns documents, whose `fields` and `highlight` can carry ACL values.
+  const aggregations =
+    body.aggregations && aggsObject && hasTopHits(aggsObject)
+      ? removeAclFromTopHits(body.aggregations)
+      : body.aggregations;
   const result: SavedObjectsFindResponse<T, A> = {
-    ...(body.aggregations
-      ? { aggregations: removeAclFromTopHits(body.aggregations) as unknown as A }
-      : {}),
+    ...(aggregations ? { aggregations: aggregations as unknown as A } : {}),
     page,
     per_page: perPage,
     total: body.hits.total as number,

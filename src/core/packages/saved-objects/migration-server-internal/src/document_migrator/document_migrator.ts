@@ -28,15 +28,16 @@ import { downgradeRequired } from './utils';
 import { TransformType } from './types';
 
 /**
- * Puts the stored ACL back when a transform dropped it. Transforms, such as migrations and
- * encrypted saved object wrappers, often rebuild a document without knowing about the ACL, so a
- * rewrite would otherwise remove it. A model version can still set a new ACL.
+ * Puts the stored ACL back when a transform dropped it or set it to `null`. Transforms, such as
+ * migrations and encrypted saved object wrappers, often rebuild a document without knowing about
+ * the ACL, so a rewrite would otherwise remove it. A model version can still set a new ACL, but it
+ * cannot clear one.
  */
 const keepAcl = <R extends { document: SavedObjectUnsanitizedDoc }>(
   storedAcl: SavedObjectUnsanitizedDoc['acl'],
   result: R
 ): R =>
-  storedAcl !== undefined && result.document.acl === undefined
+  storedAcl != null && result.document.acl == null
     ? { ...result, document: { ...result.document, acl: storedAcl } }
     : result;
 

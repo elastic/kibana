@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { isPlainObject } from 'lodash';
 import { matchesAclField } from '../../utils';
 
@@ -32,6 +33,23 @@ const removeAclFromHit = (hit: Hit): Hit => ({
   ...(hit.fields && { fields: withoutAclKeys(hit.fields) }),
   ...(hit.highlight && { highlight: withoutAclKeys(hit.highlight) }),
 });
+
+/**
+ * Checks whether an aggregations request has a `top_hits` at any depth, so that `find` walks a
+ * response only when it can hold hits.
+ *
+ * @param aggregations The `aggs` of a search request.
+ * @returns `true` when any aggregation container, nested ones included, is a `top_hits`.
+ */
+export const hasTopHits = (
+  aggregations: Record<string, estypes.AggregationsAggregationContainer>
+): boolean =>
+  Object.values(aggregations).some(
+    (container) =>
+      container.top_hits !== undefined ||
+      (container.aggs !== undefined && hasTopHits(container.aggs)) ||
+      (container.aggregations !== undefined && hasTopHits(container.aggregations))
+  );
 
 /**
  * Removes the stored ACL from the hits of every `top_hits` result in an aggregations response.

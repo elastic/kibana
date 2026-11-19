@@ -154,9 +154,15 @@ describe('the stored ACL in repository APIs', () => {
       }
     });
 
-    it('keeps the ACL in the source filter when the caller asks for fields', async () => {
+    it('fetches the ACL with fields only when the caller asks for it', async () => {
       await repository.find({ type: 'index-pattern', fields: ['title'] });
       expect(client.search.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ _source: expect.not.arrayContaining(['acl']) })
+      );
+
+      client.search.mockResponseOnce(generateIndexPatternSearchResults() as estypes.SearchResponse);
+      await repository.find({ type: 'index-pattern', fields: ['title'] }, { includeAcl: true });
+      expect(client.search.mock.calls[1][0]).toEqual(
         expect.objectContaining({ _source: expect.arrayContaining(['acl']) })
       );
     });
