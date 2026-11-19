@@ -96,19 +96,16 @@ async function queryAllResults(
   if (!results.aggregations) {
     throw new Error('Elasticsearch query failed to return a valid aggregation');
   }
-  if (results.aggregations.instances.buckets.length === 0) {
-    return buckets;
+  const { buckets: pageBuckets, after_key: afterKey } = results.aggregations.instances;
+  const allBuckets = [...buckets, ...pageBuckets];
+
+  // The bucket_selector removes non-alerting instances from each page, so an empty page can still
+  // be followed by pages with alerting instances. Only a missing after_key marks the last page.
+  if (!afterKey) {
+    return allBuckets;
   }
 
-  return queryAllResults(
-    esClient,
-    slo,
-    params,
-    startedAt,
-    projectRouting,
-    [...buckets, ...results.aggregations.instances.buckets],
-    results.aggregations.instances.after_key
-  );
+  return queryAllResults(esClient, slo, params, startedAt, projectRouting, allBuckets, afterKey);
 }
 
 export async function evaluate(
