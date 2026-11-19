@@ -1,5 +1,5 @@
 {
-  "sha1": "25b20b00884a0861ffc105289681cd2ce7f136ba",
+  "sha1": "697efb630540a2004178e2424b41ba25954a1423",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -920,8 +920,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 138,
-        "column": 23
+        "line": 156,
+        "column": 15
       }
     },
     {
@@ -936,7 +936,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 225,
+        "line": 247,
         "column": 14
       }
     },
@@ -952,7 +952,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 268,
+        "line": 292,
         "column": 15
       }
     },
@@ -968,8 +968,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 319,
-        "column": 69
+        "line": 345,
+        "column": 21
       }
     },
     {
@@ -984,8 +984,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 412,
-        "column": 11
+        "line": 438,
+        "column": 23
       }
     },
     {
@@ -1000,8 +1000,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 449,
-        "column": 31
+        "line": 477,
+        "column": 16
       }
     },
     {
@@ -1016,8 +1016,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 489,
-        "column": 18
+        "line": 516,
+        "column": 24
       }
     },
     {
@@ -1032,8 +1032,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 553,
-        "column": 13
+        "line": 580,
+        "column": 23
       }
     },
     {
@@ -1048,8 +1048,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 618,
-        "column": 18
+        "line": 645,
+        "column": 29
       }
     },
     {
@@ -1064,8 +1064,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 677,
-        "column": 31
+        "line": 703,
+        "column": 40
       }
     },
     {
@@ -1080,8 +1080,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 716,
-        "column": 9
+        "line": 600,
+        "column": 27
       }
     },
     {
