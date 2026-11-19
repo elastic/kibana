@@ -18,18 +18,17 @@ export const useOperatorStripStyles = () => {
 
   return useMemo(
     () => ({
+      // Every tile is the same size, so the width says nothing about time. The bar and the
+      // percentage in a tile do. A tile is wide enough for what it says, and the row wraps.
       strip: css`
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(${euiTheme.base * 10}px, 1fr));
         gap: ${euiTheme.size.xs};
       `,
       stripStep: css`
         display: flex;
         flex-direction: column;
-        /* A tile is as wide as what it says, and shares the free room of its row by share. */
-        flex-basis: auto;
-        flex-shrink: 0;
-        max-width: 100%;
+        min-width: 0;
         gap: ${euiTheme.size.xs};
         padding: ${euiTheme.size.s};
         text-align: start;
@@ -59,10 +58,6 @@ export const useOperatorStripStyles = () => {
         font-variant-numeric: tabular-nums;
         line-height: 1.4;
         white-space: nowrap;
-      `,
-      stripBar: css`
-        height: ${euiTheme.size.s};
-        border-radius: ${euiTheme.border.radius.medium};
       `,
     }),
     [euiTheme, small]

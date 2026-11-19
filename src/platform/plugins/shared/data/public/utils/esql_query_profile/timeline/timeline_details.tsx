@@ -17,6 +17,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
+  EuiProgress,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -104,7 +105,6 @@ const OperatorStrip = ({
             key={key}
             type="button"
             css={styles.stripStep}
-            style={{ flexGrow: Math.max(operator.share * 100, 1) }}
             aria-expanded={selectedKey === key}
             aria-label={i18n.translate('data.inspector.queryProfile.operatorButtonAriaLabel', {
               defaultMessage: '{title}, {time}, {share}, {rowsIn} rows in, {rowsOut} rows out',
@@ -140,9 +140,12 @@ const OperatorStrip = ({
                 },
               })}
             </span>
-            <span
-              css={styles.stripBar}
-              style={{ background: categoryColor[operatorCategory(operator.title)] }}
+            <EuiProgress
+              value={operator.share * 100}
+              max={100}
+              size="s"
+              color={categoryColor[operatorCategory(operator.title)]}
+              aria-hidden="true"
             />
           </button>
         );
@@ -188,7 +191,7 @@ const DriverDetails = ({
         <p>
           <FormattedMessage
             id="data.inspector.queryProfile.driverOperatorTimeDescription"
-            defaultMessage="Operator time inside {driver}. These widths are not wall-clock time."
+            defaultMessage="Operator time inside {driver}. Each bar is the share of that time, not wall-clock time."
             values={{ driver: driver.label }}
           />
         </p>

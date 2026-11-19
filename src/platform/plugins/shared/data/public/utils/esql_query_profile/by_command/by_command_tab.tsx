@@ -37,8 +37,6 @@ export const hasCommandBreakdown = (heat: QueryHeat | undefined): boolean =>
 
 const HEAT_COLOR = { hot: 'danger', warm: 'warning', cool: 'primary' } as const;
 
-const oneLine = (text: string): string => text.replace(/\s+/g, ' ').trim();
-
 const useCommandStyles = () => {
   const { euiTheme } = useEuiTheme();
   const { fontSize: small } = useEuiFontSize('xs');
@@ -57,6 +55,8 @@ const useCommandStyles = () => {
       command: css`
         font-family: ${euiTheme.font.familyCode};
         font-size: ${small};
+        /* The command as it was written, wrapped but not changed: spaces inside a string count. */
+        white-space: pre-wrap;
         overflow-wrap: anywhere;
       `,
       share: css`
@@ -81,7 +81,6 @@ const useCommandStyles = () => {
 
 const CommandRow = ({ entry, isNested }: { entry: CommandHeat; isNested: boolean }) => {
   const styles = useCommandStyles();
-  const text = oneLine(entry.command.text);
   const note =
     entry.operators.length > 0
       ? entry.operators.join(', ')
@@ -95,7 +94,7 @@ const CommandRow = ({ entry, isNested }: { entry: CommandHeat; isNested: boolean
       css={[styles.row, isNested ? styles.nested : undefined]}
       data-test-subj="esqlQueryProfileCommand"
     >
-      <div css={styles.command}>{text}</div>
+      <div css={styles.command}>{entry.command.text}</div>
       <div css={styles.share}>{entry.share > 0 ? formatShare(entry.share) : '–'}</div>
       <div css={styles.bar}>
         <EuiProgress
