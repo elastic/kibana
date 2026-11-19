@@ -20,7 +20,7 @@ describe('NOTHING_TO_HUNT_FILTER', () => {
     );
   });
 
-  it('requires no indicator record, no technique, and no technique-mapped behavior', () => {
+  it('requires no indicator record, no technique, no technique-mapped behavior, and a full read by enrich', () => {
     expect(NOTHING_TO_HUNT_FILTER).toEqual({
       bool: {
         filter: expect.any(Array),
@@ -33,6 +33,7 @@ describe('NOTHING_TO_HUNT_FILTER', () => {
               query: { prefix: { 'extracted.behaviors.technique_id': 'T' } },
             },
           },
+          { term: { 'extracted.core.context_mode': 'degraded_context' } },
         ],
       },
     });

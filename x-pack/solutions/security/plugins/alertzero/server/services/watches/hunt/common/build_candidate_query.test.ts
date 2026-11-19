@@ -958,6 +958,51 @@ describe('buildCandidateQuery', () => {
         );
       });
 
+      it('says nothing at info when the gate held nothing back', async () => {
+        const scopedLogger = loggingSystemMock.createLogger();
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        esClient.search.mockResolvedValue(searchResponseOf([]));
+        mockCount(esClient, 0);
+
+        await buildCandidateQuery(esClient, scopedLogger, {
+          trigger: 'scheduled',
+          spaceId: 'hunt-a',
+        });
+
+        expect(scopedLogger.info).not.toHaveBeenCalled();
+        expect(scopedLogger.warn).not.toHaveBeenCalled();
+        expect(scopedLogger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('0 report(s) held back')
+        );
+      });
+
+      it('gets one short attempt, so a stalled count cannot hold the selection', async () => {
+        const { esClient } = await runScheduled();
+        const [, options] = esClient.count.mock.calls[0];
+        expect(options).toEqual({ requestTimeout: 5_000, maxRetries: 0 });
+      });
+
+      it('warns instead of logging a partial count when a shard failed', async () => {
+        const scopedLogger = loggingSystemMock.createLogger();
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        esClient.search.mockResolvedValue(searchResponseOf(['rpt-1']));
+        esClient.count.mockResolvedValue({
+          count: 2,
+          _shards: { total: 3, successful: 2, skipped: 0, failed: 1 },
+        });
+
+        const result = await buildCandidateQuery(esClient, scopedLogger, {
+          trigger: 'scheduled',
+          spaceId: 'hunt-a',
+        });
+
+        expect(result.ids).toEqual(['rpt-1']);
+        expect(scopedLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('1 of 3 shards failed on the count')
+        );
+        expect(scopedLogger.info).not.toHaveBeenCalled();
+      });
+
       it('is not issued for named ids', async () => {
         const { esClient, scopedLogger } = await runScheduled({
           trigger: 'manual',

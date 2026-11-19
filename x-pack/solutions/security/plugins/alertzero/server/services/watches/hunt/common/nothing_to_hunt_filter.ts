@@ -16,6 +16,12 @@ import { INDICATOR_ELIGIBLE_FILTER } from '@kbn/alertzero-common';
 export const MIN_HUNT_RELEVANCE = 0.5;
 
 /**
+ * `extracted.core.context_mode` when enrich retried on excerpts after a model context overflow.
+ * Mirrors the enrichment contract in security_solution, which this plugin cannot import.
+ */
+const DEGRADED_CONTEXT_MODE = 'degraded_context';
+
+/**
  * Reports a scheduled sweep has nothing to hunt for: scored below the baseline by enrich and
  * carrying no indicator record, no technique, and no behavior mapped to a technique.
  *
@@ -25,6 +31,9 @@ export const MIN_HUNT_RELEVANCE = 0.5;
  * `ttps.techniques` is read for completeness: today only seeded documents carry it, since enrich
  * writes `extracted.behaviors[].technique_id` instead. The behavior test is `prefix`, not
  * `exists`, because enrich stores an empty string for a behavior it could not map.
+ *
+ * A report enrich read only in part does not match either. Its score and its empty extraction
+ * describe the excerpts, while Behavior Hunt reads the stored body itself.
  */
 export const NOTHING_TO_HUNT_FILTER: estypes.QueryDslQueryContainer = {
   bool: {
@@ -38,6 +47,7 @@ export const NOTHING_TO_HUNT_FILTER: estypes.QueryDslQueryContainer = {
           query: { prefix: { 'extracted.behaviors.technique_id': 'T' } },
         },
       },
+      { term: { 'extracted.core.context_mode': DEGRADED_CONTEXT_MODE } },
     ],
   },
 };

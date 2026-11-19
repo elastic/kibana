@@ -32,6 +32,8 @@ interface ReportFixture {
   iocs?: string[];
   techniques?: string[];
   behaviorTechniqueIds?: string[];
+  /** How much of the article enrich read; `degraded_context` is the excerpts-only retry. */
+  contextMode?: 'full' | 'degraded_context';
   evidence?: Evidence[];
 }
 
@@ -71,6 +73,7 @@ describe('buildCandidateQuery against Elasticsearch', () => {
       iocs: [],
       techniques: [],
       behaviorTechniqueIds: [],
+      contextMode: 'full',
     },
     {
       id: BULLETIN_ONE_ID,
@@ -109,6 +112,14 @@ describe('buildCandidateQuery against Elasticsearch', () => {
       relevance: 0.2,
       behaviorTechniqueIds: ['T1133'],
     },
+    {
+      id: 'degraded-context',
+      title: 'Low relevance, but enrich read only excerpts',
+      relevance: 0.2,
+      iocs: [],
+      behaviorTechniqueIds: [],
+      contextMode: 'degraded_context',
+    },
     { id: 'kev-baseline', title: 'KEV-shaped, exactly 0.5', method: 'kev', relevance: 0.5 },
     { id: 'no-relevance', title: 'No relevance score at all' },
     {
@@ -140,6 +151,7 @@ describe('buildCandidateQuery against Elasticsearch', () => {
     iocs,
     techniques,
     behaviorTechniqueIds,
+    contextMode,
     evidence,
   }: ReportFixture) => ({
     space_id: spaceId,
@@ -154,6 +166,7 @@ describe('buildCandidateQuery against Elasticsearch', () => {
       ...(behaviorTechniqueIds && {
         behaviors: behaviorTechniqueIds.map((technique_id) => ({ technique_id })),
       }),
+      ...(contextMode && { core: { context_mode: contextMode } }),
     },
     ...(evidence && { evidence }),
   });
@@ -194,6 +207,7 @@ describe('buildCandidateQuery against Elasticsearch', () => {
           extracted: {
             properties: {
               relevance: { type: 'float' },
+              core: { properties: { context_mode: { type: 'keyword' } } },
               gate: { properties: { is_intelligence: { type: 'boolean' } } },
               iocs: { type: 'nested', properties: { value: { type: 'keyword' } } },
               ttps: { properties: { techniques: { type: 'keyword' } } },
@@ -236,12 +250,18 @@ describe('buildCandidateQuery against Elasticsearch', () => {
           'has-indicator',
           'has-technique',
           'has-mapped-behavior',
+          'degraded-context',
           'kev-baseline',
           'no-relevance',
           'hunted-and-pending',
         ].sort()
       );
-      expect(result.total).toBe(6);
+      expect(result.total).toBe(7);
+    });
+
+    it('does not hold back a report enrich read only in part', async () => {
+      const { result } = await sweep();
+      expect(result.ids).toContain('degraded-context');
     });
 
     it('holds back the real CISA bulletins', async () => {

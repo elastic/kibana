@@ -180,8 +180,15 @@ const buildScheduledClauses = (
 };
 
 /**
+ * The held-back count runs before the selection is returned, so it gets one short attempt. A
+ * stalled count must not hold the already-selected reports past the caller's own timeout.
+ */
+const HELD_BACK_COUNT_TIMEOUT_MS = 5_000;
+
+/**
  * Tells an operator how many reports the nothing-to-hunt gate kept out of this sweep. Best effort:
- * the selection is already made, so a failed count is a warning and never fails the sweep.
+ * the selection is already made, so a failed or partial count is a warning and never fails the
+ * sweep. A sweep that held nothing back says so at debug only.
  */
 const logHeldBackCount = async (
   esClient: ElasticsearchClient,
@@ -190,15 +197,30 @@ const logHeldBackCount = async (
   filter: estypes.QueryDslQueryContainer[]
 ): Promise<void> => {
   try {
-    const { count } = await esClient.count({
-      index: HUNT_REPORTS_INDEX,
-      ignore_unavailable: false,
-      query: { bool: { filter } },
-    });
-    logger.info(
-      `build_candidate_query: space=${spaceId} ${count} report(s) held back: nothing to hunt ` +
-        `(relevance below ${MIN_HUNT_RELEVANCE}, no indicators, no techniques)`
+    const { count, _shards: shards } = await esClient.count(
+      {
+        index: HUNT_REPORTS_INDEX,
+        ignore_unavailable: false,
+        query: { bool: { filter } },
+      },
+      { requestTimeout: HELD_BACK_COUNT_TIMEOUT_MS, maxRetries: 0 }
     );
+    const failedShards = shards?.failed ?? 0;
+    if (failedShards > 0) {
+      logger.warn(
+        `build_candidate_query: could not count reports held back as nothing to hunt. ` +
+          `${failedShards} of ${shards?.total} shards failed on the count`
+      );
+      return;
+    }
+    const message =
+      `build_candidate_query: space=${spaceId} ${count} report(s) held back: nothing to hunt ` +
+      `(relevance below ${MIN_HUNT_RELEVANCE}, no indicators, no techniques)`;
+    if (count > 0) {
+      logger.info(message);
+    } else {
+      logger.debug(message);
+    }
   } catch (err) {
     logger.warn(
       `build_candidate_query: could not count reports held back as nothing to hunt. ${
