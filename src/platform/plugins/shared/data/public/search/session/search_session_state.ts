@@ -393,9 +393,11 @@ export const sessionPureSelectors: SessionPureSelectors = {
     return () => ({
       state: sessionState,
       name: state.searchSessionSavedObject?.attributes.name,
-      startTime: state.searchSessionSavedObject?.attributes.created
-        ? new Date(state.searchSessionSavedObject?.attributes.created)
-        : state.startTime,
+      startTime:
+        state.startTime ??
+        (state.searchSessionSavedObject?.attributes.created
+          ? new Date(state.searchSessionSavedObject.attributes.created)
+          : undefined),
       completedTime: state.completedTime,
       canceledTime: state.canceledTime,
       isContinued: state.isContinued,
