@@ -367,6 +367,111 @@ describe('update', () => {
       });
     });
 
+    describe('alert sync when the write conflicts', () => {
+      const conflictResult = (id: string) => ({
+        id,
+        type: 'cases',
+        error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+      });
+
+      const mockWriteResult = (saved_objects: unknown[]) =>
+        clientArgs.services.caseService.patchCases.mockResolvedValue({
+          saved_objects,
+        } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.patchCases>>);
+
+      beforeEach(() => {
+        // An alert is attached to the case. Like the real service, return nothing for case ids that
+        // were not asked for, so the alerts are only found when the case is picked for syncing.
+        const alertComment = {
+          ...mockCaseComments[3],
+          score: 0,
+          references: [{ ...mockCaseComments[3].references[0], id: mockCases[0].id }],
+        };
+        clientArgs.services.caseService.getAllCaseComments.mockImplementation(async ({ id }) => {
+          const requestedIds = Array.isArray(id) ? id : [id];
+          const saved_objects = requestedIds.includes(mockCases[0].id) ? [alertComment] : [];
+          return { saved_objects, total: saved_objects.length, per_page: 10, page: 1 };
+        });
+        clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(1);
+      });
+
+      describe('status change on a case with synced alerts', () => {
+        const closeRequest = {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status: CaseStatuses.closed,
+            },
+          ],
+        };
+
+        it('syncs the alerts when the write succeeds', async () => {
+          mockWriteResult([{ ...mockCases[0], attributes: { status: CaseStatuses.closed } }]);
+
+          await bulkUpdate(closeRequest, clientArgs, casesClientMock);
+
+          expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+            expect.objectContaining({ status: CaseStatuses.closed }),
+          ]);
+        });
+
+        it('does not sync the alerts when the write conflicts', async () => {
+          mockWriteResult([conflictResult(mockCases[0].id)]);
+
+          await bulkUpdate(closeRequest, clientArgs, casesClientMock);
+
+          expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('enabling alert syncing', () => {
+        const caseWithSyncOff = {
+          ...mockCases[0],
+          attributes: {
+            ...mockCases[0].attributes,
+            settings: { ...mockCases[0].attributes.settings, syncAlerts: false },
+          },
+        };
+        const enableSyncRequest = {
+          cases: [
+            {
+              id: caseWithSyncOff.id,
+              version: caseWithSyncOff.version ?? '',
+              settings: { ...caseWithSyncOff.attributes.settings, syncAlerts: true },
+            },
+          ],
+        };
+
+        beforeEach(() => {
+          clientArgs.services.caseService.getCases.mockResolvedValue({
+            saved_objects: [caseWithSyncOff],
+          });
+        });
+
+        it('syncs the alerts when the write succeeds', async () => {
+          mockWriteResult([
+            {
+              ...caseWithSyncOff,
+              attributes: { settings: enableSyncRequest.cases[0].settings },
+            },
+          ]);
+
+          await bulkUpdate(enableSyncRequest, clientArgs, casesClientMock);
+
+          expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledTimes(1);
+        });
+
+        it('does not sync the alerts when the write conflicts', async () => {
+          mockWriteResult([conflictResult(caseWithSyncOff.id)]);
+
+          await bulkUpdate(enableSyncRequest, clientArgs, casesClientMock);
+
+          expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
+        });
+      });
+    });
+
     it('does not notify if the case does not exist', async () => {
       expect.assertions(2);
 
