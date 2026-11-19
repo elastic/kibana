@@ -29827,7 +29827,6 @@
     "xpack.evals.compareExperiments.flyoutTitle": "每个示例的分数",
     "xpack.evals.compareExperiments.flyoutTraceBaseline": "查看链路追踪（基线）",
     "xpack.evals.compareExperiments.flyoutTraceTarget": "查看跟踪（目标）",
-    "xpack.evals.compareExperiments.flyoutUnpairedHint": "此示例仅存在于一个实验中，因此不纳入统计比较",
     "xpack.evals.compareExperiments.loadingLabel": "正在加载比较数据…",
     "xpack.evals.compareExperiments.metricType.binary": "通过/未通过分数",
     "xpack.evals.compareExperiments.metricType.continuousBounded": "分数范围为 [0, 1]",
