@@ -75,7 +75,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Data management**:
 * Fix the component template wizard adding a data lifecycle when no lifecycle phase is configured, which made {{es}} reject index templates without a data stream that use the component template [#304426]({{kib-pull}}304426).
-* Fix creating and fetching {{data-sources}} with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist, which returned a `400` error while still saving it [#299790]({{kib-pull}}299790).
+* Fix `400` errors when you create or fetch {{data-sources}} with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist. The create request returned the error even though {{kib}} saved the data view [#299790]({{kib-pull}}299790).
 % !!DEFERRED!! Not in the latest BC (9.5.7-f2560f72, built from ec86614e); the backport merged after the BC was cut. Re-verify against the next BC.
 % * Fix the **Auto-follow patterns** page failing with "Error loading auto-follow patterns" when a pattern created through the {{es}} API has no `follow_index_pattern` [#303787]({{kib-pull}}303787).
 
