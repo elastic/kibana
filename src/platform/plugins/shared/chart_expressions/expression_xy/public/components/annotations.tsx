@@ -114,7 +114,8 @@ const createCustomTooltip =
             });
 
             return (
-              <Fragment key={row.time}>
+              // Rows of one bucket can share an id and a timestamp (several events at the same time).
+              <Fragment key={`${row.id}-${row.time}-${index}`}>
                 {index > 0 && (
                   <>
                     <EuiSpacer size="xs" />

@@ -137,6 +137,37 @@ describe('ES|QL annotation rendering', () => {
     expect(screen.getByText(/ — /)).toBeInTheDocument();
   });
 
+  it('renders every row of a bucket without duplicate React keys when events share a timestamp', () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const [annotation] = getAnnotationsGroupedByInterval(
+      [
+        { ...point, 'field:["events","message"]': 'First deploy' },
+        { ...point, 'field:["events","message"]': 'Second deploy' },
+      ],
+      [],
+      columns,
+      formatFactory,
+      'YYYY-MM-DD HH:mm',
+      false
+    );
+    const Tooltip = annotation.customTooltip;
+    if (!Tooltip) throw new Error('Expected an annotation tooltip');
+    render(
+      <I18nProvider>
+        <EuiThemeProvider>
+          <Tooltip datum={{ dataValue: 0 }} />
+        </EuiThemeProvider>
+      </I18nProvider>
+    );
+    expect(screen.getAllByText('Deployments')).toHaveLength(2);
+    expect(consoleError).not.toHaveBeenCalledWith(
+      expect.stringContaining('same key'),
+      expect.anything(),
+      expect.anything()
+    );
+    consoleError.mockRestore();
+  });
+
   it('shows the skipped count in a range tooltip', () => {
     const range: ManualRangeEventAnnotationRow & DatatableRow = {
       ...point,
