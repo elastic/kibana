@@ -374,10 +374,10 @@ describe('layout manager', () => {
         },
       ]);
 
-      expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(true);
+      expect(layoutManager.internalApi.applyingChildState$.value).toBe(true);
       await waitFor(() => {
         expect(applySerializedState).toHaveBeenCalledWith(updatedState);
-        expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(false);
+        expect(layoutManager.internalApi.applyingChildState$.value).toBe(false);
       });
 
       const layout = layoutManager.api.layout$.value;
@@ -415,10 +415,10 @@ describe('layout manager', () => {
         },
       ]);
 
-      expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(true);
+      expect(layoutManager.internalApi.applyingChildState$.value).toBe(true);
       await waitFor(() => {
         expect(applySerializedState).toHaveBeenCalledWith({ title: 'Updated Panel One' });
-        expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(false);
+        expect(layoutManager.internalApi.applyingChildState$.value).toBe(false);
       });
 
       expect(trackPanelMock.setScrollToPanelId).toHaveBeenCalledWith(PANEL_ONE_ID);

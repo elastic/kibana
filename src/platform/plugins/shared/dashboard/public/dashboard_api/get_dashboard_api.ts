@@ -245,7 +245,7 @@ export function getDashboardApi({
     },
     getState: getHistoryState,
     dataLoading$: combineLatest([
-      layoutManager.internalApi.childrenStateLoading$,
+      layoutManager.internalApi.applyingChildState$,
       layoutManager.internalApi.childApisPending$,
       dataLoadingManager.api.dataLoading$,
     ]).pipe(

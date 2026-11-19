@@ -90,7 +90,7 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
-  const childrenStateLoading$ = new BehaviorSubject<boolean>(false);
+  const applyingChildState$ = new BehaviorSubject<boolean>(false);
   const children$ = new BehaviorSubject<DashboardChildren>({});
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
@@ -133,7 +133,7 @@ export function initializeLayoutManager(
 
   const resetLayout = async (state: DashboardState) => {
     try {
-      childrenStateLoading$.next(true);
+      applyingChildState$.next(true);
 
       const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
         state.panels,
@@ -154,7 +154,7 @@ export function initializeLayoutManager(
       }
       await Promise.all(setStatePromises);
     } finally {
-      childrenStateLoading$.next(false);
+      applyingChildState$.next(false);
     }
   };
 
@@ -289,9 +289,9 @@ export function initializeLayoutManager(
     }
 
     if (applyStatePromises.length) {
-      childrenStateLoading$.next(true);
+      applyingChildState$.next(true);
       void Promise.allSettled(applyStatePromises).then(() => {
-        childrenStateLoading$.next(false);
+        applyingChildState$.next(false);
       });
     }
 
@@ -395,7 +395,7 @@ export function initializeLayoutManager(
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
     try {
-      childrenStateLoading$.next(true);
+      applyingChildState$.next(true);
       const existingGridData = layout$.value.panels[idToRemove]?.grid;
       const existingPinnedPanelData = layout$.value.pinnedPanels[idToRemove];
       if (!existingGridData && !existingPinnedPanelData) throw new PanelNotFoundError();
@@ -414,7 +414,7 @@ export function initializeLayoutManager(
         return newPanel.uuid;
       }
     } finally {
-      childrenStateLoading$.next(false);
+      applyingChildState$.next(false);
     }
   };
 
@@ -542,7 +542,7 @@ export function initializeLayoutManager(
         debounceTime(0), // batch state + layout updates
         map(() => undefined)
       ),
-      childrenStateLoading$,
+      applyingChildState$,
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
