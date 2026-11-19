@@ -245,16 +245,25 @@ const toPlainToken = (token: string): string => {
 
 const SLACK_CODE_SPAN = /```[\s\S]*?```|`[^`\n]+`/g;
 
-/** Bold, italic and strikethrough pairs, matched only at word edges so `5*3` and `snake_case` stay. */
-const SLACK_EMPHASIS = [
-  /(^|[\s(*_~])\*([^\s*](?:[^\n]*?[^\s*])?)\*(?=$|[\s).,!?:;*_~])/g,
-  /(^|[\s(*_~])_([^\s_](?:[^\n]*?[^\s_])?)_(?=$|[\s).,!?:;*_~])/g,
-  /(^|[\s(*_~])~([^\s~](?:[^\n]*?[^\s~])?)~(?=$|[\s).,!?:;*_~])/g,
-];
+/**
+ * Bold, italic and strikethrough pairs at word edges. The marker only appears inside a pair within a
+ * word (`snake_case`, `5*3`), so each scan stops at the next marker and stays linear.
+ */
+const toEmphasisPattern = (marker: string): RegExp => {
+  const m = `\\${marker}`;
+  return new RegExp(
+    `(^|[\\s(*_~\\uE001])${m}([^\\s${m}](?:(?:[^${m}\\n]|(?<=\\w)${m}(?=\\w))*?[^\\s${m}])?)${m}(?=$|[\\s).,!?:;*_~\\uE000])`,
+    'g'
+  );
+};
+
+const SLACK_EMPHASIS = ['*', '_', '~'].map(toEmphasisPattern);
 
 const stripEmphasis = (text: string): string => {
   const codeSpans: string[] = [];
-  const masked = text.replace(SLACK_CODE_SPAN, (span) => `\uE000${codeSpans.push(span) - 1}\uE001`);
+  const masked = text
+    .replace(/[\uE000\uE001]/g, '')
+    .replace(SLACK_CODE_SPAN, (span) => `\uE000${codeSpans.push(span) - 1}\uE001`);
   return SLACK_EMPHASIS.reduce(
     (result, pattern) => result.replace(pattern, '$1$2'),
     masked
