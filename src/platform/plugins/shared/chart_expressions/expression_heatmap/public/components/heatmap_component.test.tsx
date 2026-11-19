@@ -547,11 +547,11 @@ describe('HeatmapComponent', function () {
         { id: 'col-2-3', name: 'Bytes', meta: yMeta },
       ],
     });
-    const heatmap = (data: Datatable, ySortPredicate?: 'asc' | 'desc') =>
+    const heatmap = (datatable: Datatable, ySortPredicate?: 'asc' | 'desc') =>
       shallowWithIntl(
         <HeatmapComponent
           {...wrapperProps}
-          data={data}
+          data={datatable}
           args={{
             ...wrapperProps.args,
             gridConfig: { ...wrapperProps.args.gridConfig, ySortPredicate },
