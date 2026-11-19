@@ -90,6 +90,16 @@ module.exports = {
       ],
     },
 
+    '@kbn/ui-developer-toolbar': {
+      alternative: 'Use the developerToolbar plugin registerItem API instead.',
+      overrides: [
+        {
+          path: 'src/platform/plugins/shared/developer_toolbar/',
+          reason: 'Owning plugin that mounts the toolbar and exposes the registerItem API.',
+        },
+      ],
+    },
+
     '@kbn/ui-storybook-config': {
       alternative: 'Storybook-only config; do not import from Kibana runtime code.',
     },

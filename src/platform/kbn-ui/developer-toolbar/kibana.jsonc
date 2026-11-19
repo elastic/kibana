@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/ui-developer-toolbar",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

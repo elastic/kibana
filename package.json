@@ -2060,6 +2060,7 @@
     "@kbn/ts-type-check-cli": "workspace:*",
     "@kbn/ts-type-check-oblt-cli": "workspace:*",
     "@kbn/tsconfig-base": "workspace:*",
+    "@kbn/ui-developer-toolbar": "workspace:*",
     "@kbn/ui-storybook-config": "workspace:*",
     "@kbn/validate-next-docs-cli": "workspace:*",
     "@kbn/validate-oas": "workspace:*",
