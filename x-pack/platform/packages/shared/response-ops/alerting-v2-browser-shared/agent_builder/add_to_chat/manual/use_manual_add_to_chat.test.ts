@@ -9,8 +9,12 @@ import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { AttachmentConverter } from '../../types';
 import { useManualAddToChat, type ManualAddToChatServices } from './use_manual_add_to_chat';
+
+const applicationWithShow = (show: boolean): ApplicationStart =>
+  ({ capabilities: { agentBuilder: { show } } } as ApplicationStart);
 
 interface TestItem {
   id: string;
@@ -46,6 +50,7 @@ describe('useManualAddToChat', () => {
           ui: { activeConversation$: activeConversation$.asObservable() },
         },
       } as unknown as AgentBuilderPluginStart,
+      application: applicationWithShow(true),
     };
   });
 
@@ -63,10 +68,31 @@ describe('useManualAddToChat', () => {
 
   it('reports unavailable when agentBuilder is not available', () => {
     const { result } = renderHook(() =>
-      useManualAddToChat({ id: 'item-1' }, converter, { agentBuilder: undefined })
+      useManualAddToChat({ id: 'item-1' }, converter, {
+        agentBuilder: undefined,
+        application: applicationWithShow(true),
+      })
     );
 
     expect(result.current.isAddToChatAvailable).toBe(false);
+  });
+
+  it('reports unavailable when the user cannot show Agent Builder', () => {
+    const { result } = renderHook(() =>
+      useManualAddToChat({ id: 'item-1' }, converter, {
+        ...services,
+        application: applicationWithShow(false),
+      })
+    );
+
+    expect(result.current.isAddToChatAvailable).toBe(false);
+
+    act(() => {
+      result.current.addToChat();
+    });
+
+    expect(openChat).not.toHaveBeenCalled();
+    expect(addAttachment).not.toHaveBeenCalled();
   });
 
   it('opens a new chat on addToChat when no conversation is bound', () => {

@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ApplicationStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AddToChatButton } from './add_to_chat_button';
 import { useManualAddToChat, type ManualAddToChatServices } from './use_manual_add_to_chat';
@@ -31,7 +32,10 @@ const converter: AttachmentConverter<TestItem> = {
   getOrigin: (item) => item.id,
 };
 
-const services: ManualAddToChatServices = { agentBuilder: undefined };
+const services: ManualAddToChatServices = {
+  agentBuilder: undefined,
+  application: { capabilities: { agentBuilder: { show: true } } } as ApplicationStart,
+};
 
 describe('AddToChatButton', () => {
   const addToChat = jest.fn();

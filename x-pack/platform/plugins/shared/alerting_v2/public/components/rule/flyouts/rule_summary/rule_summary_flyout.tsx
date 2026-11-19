@@ -78,12 +78,16 @@ export const RuleSummaryFlyout = ({
   session,
 }: RuleSummaryFlyoutProps) => {
   const chrome = useService(CoreStart('chrome'));
+  const application = useService(CoreStart('application'));
   const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
     | AgentBuilderPluginStart
     | undefined;
   const { rulesLocators } = useAlertingLocators();
   useRuleAutoAttach(rule, { chrome, agentBuilder });
-  const { addToChat, isAddToChatAvailable } = useRuleManualAddToChat(rule, { agentBuilder });
+  const { addToChat, isAddToChatAvailable } = useRuleManualAddToChat(rule, {
+    agentBuilder,
+    application,
+  });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
   const lastExecution = useRuleLastExecution(ruleId);
   const takeActionPanels = useRuleMenuPanels({

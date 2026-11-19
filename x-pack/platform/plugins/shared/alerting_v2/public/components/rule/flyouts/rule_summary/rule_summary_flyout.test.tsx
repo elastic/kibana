@@ -72,10 +72,14 @@ jest.mock('../../../../services/user_capabilities', () => ({
 jest.mock('@kbn/core-di-browser', () => {
   const canRead = jest.fn(() => true);
   let agentBuilder: unknown = {};
+  let agentBuilderShow = false;
   return {
     useService: (token: unknown) => {
       if (token === 'http') {
         return { basePath: { prepend: (p: string) => `/base${p}` } };
+      }
+      if (token === 'application') {
+        return { capabilities: { agentBuilder: { show: agentBuilderShow } } };
       }
       if (token === 'UserCapabilities') {
         return { canRead, canWrite: () => true };
@@ -90,12 +94,18 @@ jest.mock('@kbn/core-di-browser', () => {
     setMockAgentBuilder: (next: unknown) => {
       agentBuilder = next;
     },
+    setMockAgentBuilderShow: (show: boolean) => {
+      agentBuilderShow = show;
+    },
   };
 });
 
-const { mockCanRead, setMockAgentBuilder } = jest.requireMock('@kbn/core-di-browser') as {
+const { mockCanRead, setMockAgentBuilder, setMockAgentBuilderShow } = jest.requireMock(
+  '@kbn/core-di-browser'
+) as {
   mockCanRead: jest.Mock;
   setMockAgentBuilder: (agentBuilder: unknown) => void;
+  setMockAgentBuilderShow: (show: boolean) => void;
 };
 
 jest.mock('../../rule_conditions', () => ({
@@ -162,6 +172,7 @@ const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
 describe('RuleSummaryFlyout', () => {
   beforeEach(() => {
     setMockAgentBuilder({});
+    setMockAgentBuilderShow(false);
     mockCanRead.mockImplementation(() => true);
     mockUseFetchRuleExecutions.mockReturnValue({
       data: { items: [], total: 0, page: 1, per_page: 1 },
@@ -580,9 +591,23 @@ describe('RuleSummaryFlyout', () => {
       expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule, expect.any(Object));
     });
 
+    it('hides the button when the user cannot show Agent Builder', () => {
+      setMockAgentBuilder({
+        openChat: jest.fn(),
+        addAttachment: jest.fn(),
+        events: { ui: { activeConversation$: new BehaviorSubject(null) } },
+      });
+
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleSummaryFlyoutAddToChatButton')).not.toBeInTheDocument();
+    });
+
     it('opens a new conversation with the rule when chat is unbound', () => {
       const openChat = jest.fn();
       const addAttachment = jest.fn();
+      setMockAgentBuilderShow(true);
       setMockAgentBuilder({
         openChat,
         addAttachment,
@@ -609,6 +634,7 @@ describe('RuleSummaryFlyout', () => {
     it('attaches the rule to the bound conversation', () => {
       const openChat = jest.fn();
       const addAttachment = jest.fn();
+      setMockAgentBuilderShow(true);
       setMockAgentBuilder({
         openChat,
         addAttachment,

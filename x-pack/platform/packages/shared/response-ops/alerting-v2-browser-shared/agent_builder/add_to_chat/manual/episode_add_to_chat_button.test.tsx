@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AlertEpisode, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { ApplicationStart } from '@kbn/core/public';
 import { EpisodeAddToChatButton } from './episode_add_to_chat_button';
 import { AddToChatButton } from './add_to_chat_button';
 import type { ManualAddToChatServices } from './use_manual_add_to_chat';
@@ -30,7 +31,10 @@ const mockRule = {
   grouping: { fields: ['host.name'] },
 } as RuleResponse;
 
-const services: ManualAddToChatServices = { agentBuilder: undefined };
+const services: ManualAddToChatServices = {
+  agentBuilder: undefined,
+  application: { capabilities: { agentBuilder: { show: true } } } as ApplicationStart,
+};
 
 describe('EpisodeAddToChatButton', () => {
   beforeEach(() => {
