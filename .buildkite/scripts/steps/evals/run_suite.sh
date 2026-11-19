@@ -116,8 +116,15 @@ TOKEN_USAGE_EXPORT_BUDGET_SECONDS="${TOKEN_USAGE_EXPORT_BUDGET_SECONDS:-120}"
 export_token_usage() {
   [[ -f .scout/servers/local.json ]] || return 0
   command -v buildkite-agent >/dev/null 2>&1 || return 0
-  local es_url out_dir out_file tmp_file scroll_id page hits pages=0 complete=0
+  local es_url out_dir out_file tmp_file scroll_id page hits pages=0 complete=0 request_timeout
   local deadline=$((SECONDS + TOKEN_USAGE_EXPORT_BUDGET_SECONDS))
+  # Each request is capped at the time left in the export budget, so a request started
+  # just before the deadline cannot outlive it by a full curl timeout.
+  request_timeout() {
+    local remaining=$(( deadline - SECONDS ))
+    (( remaining < 1 )) && return 1
+    echo "$(( remaining < TOKEN_USAGE_REQUEST_TIMEOUT_SECONDS ? remaining : TOKEN_USAGE_REQUEST_TIMEOUT_SECONDS ))"
+  }
   es_url="$(jq -r '.hosts.elasticsearch' .scout/servers/local.json | sed 's:/*$::')"
   out_dir="target/token_usage"
   mkdir -p "$out_dir"
@@ -126,9 +133,10 @@ export_token_usage() {
   rm -f "$out_file"
   : >"$tmp_file"
   # -f turns an HTTP error into a failed request instead of an error body with no hits.
-  page="$(es_curl -sSf --max-time "$TOKEN_USAGE_REQUEST_TIMEOUT_SECONDS" \
-    "$es_url/.kibana-inference-token-usage/_search?scroll=2m&size=2000&expand_wildcards=all" \
-    -H 'Content-Type: application/json' -d '{"sort":["_doc"]}')" || page=""
+  page="" && timeout="$(request_timeout)" &&
+    page="$(es_curl -sSf --max-time "$timeout" \
+      "$es_url/.kibana-inference-token-usage/_search?scroll=2m&size=2000&expand_wildcards=all" \
+      -H 'Content-Type: application/json' -d '{"sort":["_doc"]}')" || page=""
   while [[ -n "$page" ]] && (( pages++ < 500 && SECONDS < deadline )); do
     if ! printf '%s' "$page" | jq -e '.hits.hits | type == "array"' >/dev/null 2>&1; then
       break
@@ -141,9 +149,10 @@ export_token_usage() {
     printf '%s\n' "$hits" >>"$tmp_file"
     scroll_id="$(printf '%s' "$page" | jq -r '._scroll_id // empty')"
     [[ -n "$scroll_id" ]] || break
-    page="$(es_curl -sSf --max-time "$TOKEN_USAGE_REQUEST_TIMEOUT_SECONDS" \
-      "$es_url/_search/scroll" -H 'Content-Type: application/json' \
-      -d "{\"scroll\":\"2m\",\"scroll_id\":\"$scroll_id\"}")" || page=""
+    page="" && timeout="$(request_timeout)" &&
+      page="$(es_curl -sSf --max-time "$timeout" \
+        "$es_url/_search/scroll" -H 'Content-Type: application/json' \
+        -d "{\"scroll\":\"2m\",\"scroll_id\":\"$scroll_id\"}")" || page=""
   done
   if [[ "$complete" -ne 1 ]]; then
     echo "--- Token usage export incomplete (request failed, malformed page or time budget hit); not publishing the artifact"

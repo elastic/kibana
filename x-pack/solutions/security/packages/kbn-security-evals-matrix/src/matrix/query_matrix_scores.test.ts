@@ -1412,6 +1412,44 @@ describe('round 6 regression: admission and accumulation fixes', () => {
     ]);
   });
 
+  it('marks a dataset judgeless-only when every judged doc was rejected and only code checks survive', () => {
+    // Regression (Libra): a parity run judged entirely by a non-EIS judge dropped its
+    // LLM grades but its contract checks still produced ordinary numeric cells, which
+    // could satisfy the coverage gate on a different evaluator set than every other
+    // column. The dataset must carry excludedJudgelessOnly so buildCell renders
+    // `excluded:*` instead of ranking the column on the surviving code checks.
+    const codeDoc = {
+      ...doc('alert-analysis-a', undefined),
+      evaluator: { name: 'FinalAnswerPresent', score: 1, kind: 'code' },
+    } as unknown as EvaluationScoreDocument;
+    const judgedDoc = doc('alert-analysis-b', { id: 'openrouter/some-judge' });
+    const datasets = scoresByPrefixToDatasets([codeDoc, judgedDoc], ['alert-analysis'], {
+      requireEisJudge: true,
+    });
+
+    expect(datasets[0].excludedJudgelessOnly).toBe(true);
+    expect(datasets[0].judgedAdmitted).toBeFalsy();
+    // The code checks stay aggregated (the token axis and erroredOut plumbing read them).
+    expect(datasets[0].evaluators).toEqual([
+      expect.objectContaining({ evaluatorName: 'FinalAnswerPresent', mean: 1 }),
+    ]);
+
+    // Control: with an EIS-backed judge admitted alongside the code check, the dataset
+    // must NOT be marked judgeless-only.
+    const admittedDatasets = scoresByPrefixToDatasets(
+      [
+        codeDoc,
+        {
+          ...doc('alert-analysis-b', { id: 'eis-judge-1' }),
+        },
+      ],
+      ['alert-analysis'],
+      { requireEisJudge: true }
+    );
+    expect(admittedDatasets[0].excludedJudgelessOnly).toBeFalsy();
+    expect(admittedDatasets[0].judgedAdmitted).toBe(true);
+  });
+
   it('accumulates exclusion counts across suites for the same model', async () => {
     // Regression: excludedByModel.set overwrote the prior suite's counts, so a model
     // rejected in two suites reported only the last suite's rejections.

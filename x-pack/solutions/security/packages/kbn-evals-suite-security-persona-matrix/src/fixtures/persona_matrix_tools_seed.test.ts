@@ -579,25 +579,46 @@ describe('persona_matrix_tools_seed', () => {
       expect(log.warning).not.toHaveBeenCalled();
     });
 
-    it('deletes only the todo documents written since this run created write-todos', async () => {
+    it('deletes only todo documents this run added (ids not in the pre-seed snapshot)', async () => {
       const mod = await load('parity');
       const client = createClient();
+      const esIndex = jest.fn(async () => ({
+        // Snapshot taken at seed time: only this doc pre-exists the run.
+        hits: { hits: [{ _id: 'old-1', sort: ['old-1'] }] },
+      }));
       const deleteByQuery = jest.fn(async () => ({}));
       await mod.seedPersonaMatrixTools({
         kbnClient: asKbn(client),
         log,
+        esClient: { search: esIndex } as unknown as EsClient,
         profile: 'chrysalis-parity',
       });
+      // First cleanup page: the seeded id survived plus two run-added docs; second page: empty.
+      const cleanupSearch = jest
+        .fn()
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              { _id: 'old-1', sort: ['old-1'] },
+              { _id: 'new-1', sort: ['new-1'] },
+              { _id: 'new-2', sort: ['new-2'] },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({ hits: { hits: [] } });
       await mod.cleanupPersonaMatrixTools({
         kbnClient: asKbn(client),
         log,
-        esClient: { deleteByQuery } as unknown as EsClient,
+        esClient: {
+          search: cleanupSearch,
+          deleteByQuery,
+        } as unknown as EsClient,
       });
       expect(deleteByQuery).toHaveBeenCalledTimes(1);
       expect(deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: 'persona-matrix-todos',
-          query: { range: { '@timestamp': { gte: expect.any(String) } } },
+          query: { ids: { values: ['new-1', 'new-2'] } },
         })
       );
     });
@@ -609,6 +630,7 @@ describe('persona_matrix_tools_seed', () => {
       await mod.seedPersonaMatrixTools({
         kbnClient: asKbn(client),
         log,
+        esClient: { search: jest.fn() } as unknown as EsClient,
         profile: 'chrysalis-parity',
       });
       await mod.cleanupPersonaMatrixTools({

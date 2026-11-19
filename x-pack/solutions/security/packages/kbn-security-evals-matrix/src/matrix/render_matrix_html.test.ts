@@ -166,6 +166,51 @@ describe('renderMatrixHtml', () => {
     expect(html).not.toContain('Token cost per (model, category)');
   });
 
+  it('measures completeness against the configured token columns, not every matrix column', () => {
+    // config.tokenCost.columns scopes the axis to `alert` only; `threat` is a
+    // matrix column the axis never aggregates. A model with counts for `alert`
+    // alone must read complete, and the bucket headers must not include `threat`.
+    const config: MatrixConfig = {
+      ...mockConfig,
+      tokenCost: {
+        inputEvaluator: 'Input Tokens',
+        outputEvaluator: 'Output Tokens',
+        columns: ['alert'],
+      },
+    };
+    const matrixWithCost: Matrix = {
+      ...mockMatrix,
+      tokenCost: {
+        models: [
+          {
+            modelId: 'test-model',
+            modelLabel: 'Test Model',
+            openSource: false,
+            priced: true,
+            cells: [{ columnId: 'alert', totalMean: 1500, estimatedCostUsd: 0.25 }],
+          },
+        ],
+      },
+    };
+    const html = renderMatrixHtml(matrixWithCost, config);
+    expect(html).toContain('>2k<br>$0.25</td>');
+    expect(html).not.toContain('<span class="model-id">partial</span>');
+    // The bucket headers cover only the configured `alert` column.
+    expect(html).toContain('<th>Alert Analysis</th>');
+
+    // With both columns configured, the same single-cell model must read partial.
+    const fullAxisConfig: MatrixConfig = {
+      ...mockConfig,
+      tokenCost: {
+        inputEvaluator: 'Input Tokens',
+        outputEvaluator: 'Output Tokens',
+        columns: ['alert', 'threat'],
+      },
+    };
+    const partial = renderMatrixHtml(matrixWithCost, fullAxisConfig);
+    expect(partial).toContain('<span class="model-id">partial</span></td></tr>');
+  });
+
   it('HTML-escapes attacker-influenced reasons and evaluator names in status cells', () => {
     const payload = '"><img src=x onerror=alert(1)>';
     const hostile: Matrix = {

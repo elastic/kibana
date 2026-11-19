@@ -78,6 +78,15 @@ export function resolveVerdictScore(
 
   const [blockKey, verdictKey] = path;
   const metadata = doc.evaluator?.metadata as Record<string, unknown> | undefined;
+  if (evaluatorName === 'Relevance') {
+    // The Relevance evaluator's `label` is the code-derived verdict: an empty agent
+    // response is scored IRRELEVANT regardless of what the correctness judge's raw
+    // `relevance_summary` says. Reading the metadata verdict instead gives an
+    // empty-answer doc with judge metadata full credit. `evaluator.label` is the
+    // authoritative label on both the metadata and the stripped-metadata paths.
+    const labelScore = scoreVerdict(doc.evaluator?.label, ladder);
+    if (labelScore !== null && labelScore !== undefined) return labelScore;
+  }
   if (metadata === undefined) {
     // The scores routes strip `evaluator.metadata`, but the judged evaluators persist the same
     // verdict as `evaluator.label`: read it there before falling back to the continuous score.

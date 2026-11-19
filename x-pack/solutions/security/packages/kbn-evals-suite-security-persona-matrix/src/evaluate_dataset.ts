@@ -115,7 +115,11 @@ const buildJudgedOutput = <T extends { messageSource?: unknown; steps?: unknown 
 const isSubmissionEmpty = (judged: { messages?: unknown }): boolean => {
   const messages = Array.isArray(judged.messages) ? judged.messages : [];
   const latest = messages[messages.length - 1];
-  return !isRecord(latest) || typeof latest.message !== 'string' || latest.message.trim() === '';
+  if (!isRecord(latest) || typeof latest.message !== 'string') return true;
+  const message = latest.message.trim();
+  // The unanswered-prompt marker is a diagnostic recorded for a failed converse, not an
+  // answer; FinalAnswerPresent applies the same rule (~line 518).
+  return message === '' || message.startsWith(UNANSWERED_PROMPT_MARKER);
 };
 
 const logJudgePayloadTrim = (

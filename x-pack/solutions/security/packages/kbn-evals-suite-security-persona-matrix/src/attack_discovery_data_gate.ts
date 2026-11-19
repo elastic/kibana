@@ -40,23 +40,45 @@ export const assertAdDataGate = async ({
   index,
   start,
   end,
+  corpusIds,
 }: {
   esClient: EsClient;
   log: ToolingLog;
   index: string;
   start: string;
   end: string;
+  /**
+   * `_id`s of the restored corpus, captured right after the snapshot restore.
+   * The floor/max count only alerts positively identified as corpus docs; any
+   * other non-Chrysalis alert in the window is reported (and fails) as foreign
+   * contamination instead of silently making up a shortfall.
+   */
+  corpusIds: string[];
 }): Promise<void> => {
   const inWindow = { range: { '@timestamp': { gte: start, lt: end } } };
-  const [{ count: endpoint }, { count: chrysalis }] = await Promise.all([
+  const corpusIdsFilter = { ids: { values: corpusIds } };
+  const [{ count: corpus }, { count: chrysalis }, { count: foreign }] = await Promise.all([
     esClient.count({
       index,
-      query: { bool: { filter: [inWindow], must_not: [CHRYSALIS_SIGNAL_QUERY] } },
+      query: {
+        bool: { filter: [inWindow, corpusIdsFilter], must_not: [CHRYSALIS_SIGNAL_QUERY] },
+      },
     }),
     esClient.count({ index, query: { bool: { filter: [inWindow, CHRYSALIS_SIGNAL_QUERY] } } }),
+    esClient.count({
+      index,
+      query: {
+        bool: { filter: [inWindow], must_not: [CHRYSALIS_SIGNAL_QUERY, corpusIdsFilter] },
+      },
+    }),
   ]);
-  const summary = `endpoint=${endpoint} (min ${AD_MIN_ENDPOINT_ALERTS}, max ${AD_MAX_ENDPOINT_ALERTS}), chrysalis=${chrysalis} (max 0)`;
-  if (endpoint < AD_MIN_ENDPOINT_ALERTS || endpoint > AD_MAX_ENDPOINT_ALERTS || chrysalis > 0) {
+  const summary = `corpus=${corpus} (min ${AD_MIN_ENDPOINT_ALERTS}, max ${AD_MAX_ENDPOINT_ALERTS}), foreign=${foreign} (max 0), chrysalis=${chrysalis} (max 0)`;
+  if (
+    corpus < AD_MIN_ENDPOINT_ALERTS ||
+    corpus > AD_MAX_ENDPOINT_ALERTS ||
+    foreign > 0 ||
+    chrysalis > 0
+  ) {
     throw new Error(`Attack Discovery data gate failed in ${index} [${start}, ${end}): ${summary}`);
   }
   log.info(`[attack-discovery] data gate passed: ${summary}`);

@@ -358,7 +358,15 @@ const tokenCostBuckets = (
 
 const renderTokenCost = (matrix: Matrix, config: MatrixConfig): string => {
   if (!matrix.tokenCost || matrix.tokenCost.models.length === 0) return '';
-  const buckets = tokenCostBuckets(matrix.columns);
+  // Bucket ONLY the columns the token axis is configured over. Bucketing every
+  // matrix column would let non-token columns pad `expectedColumns`, so a model
+  // missing counts in a configured column still reads "complete" (and buckets
+  // built from matrix.columns would include columns the axis never aggregates).
+  const tokenColumnIds = new Set(config.tokenCost?.columns ?? []);
+  const tokenColumns = matrix.columns.filter((c) =>
+    tokenColumnIds.size === 0 ? true : tokenColumnIds.has(c.id)
+  );
+  const buckets = tokenCostBuckets(tokenColumns);
   const header = `<tr><th>Model</th>${buckets
     .map((b) => `<th>${esc(b.label)}</th>`)
     .join('')}<th>Total</th></tr>`;
@@ -404,7 +412,7 @@ const renderTokenCost = (matrix: Matrix, config: MatrixConfig): string => {
         m.modelId
       )}</span></td>${bucketCells
         .map((cells, i) => renderCell(m, cells, buckets[i].columnIds.length))
-        .join('')}${renderCell(m, m.cells, matrix.columns.length)}</tr>`;
+        .join('')}${renderCell(m, m.cells, tokenColumns.length)}</tr>`;
     })
     .join('');
   return `<details class="methodology tokencost" open><summary>Token cost per (model, category) — summed input + output means per example, native units; $ at EIS base-tier list rates with every input token billed as uncached (an estimate, not a spending ceiling — long-context tiers and cache writes can cost more). Hover for the per-column in/out split.</summary><table class="tokencost"><thead>${header}</thead><tbody>${rows}</tbody></table></details>`;

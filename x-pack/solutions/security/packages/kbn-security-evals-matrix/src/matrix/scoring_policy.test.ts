@@ -161,6 +161,37 @@ describe('scoring policy', () => {
       expect(applyScoringPolicy(d, { useVerdictLadder: true }, noneExcluded).score).toBe(0.5);
     });
 
+    it('Relevance follows the code-derived label, not the judge raw verdict, on empty answers', () => {
+      // The Relevance evaluator scores an empty agent response IRRELEVANT (label),
+      // whatever the correctness judge's raw relevance_summary says. The matrix must
+      // ladder that label, or an empty-answer doc carrying judge metadata reads full credit.
+      const d = doc({
+        name: 'Relevance',
+        score: 0,
+        label: 'IRRELEVANT',
+        metadata: {
+          correctnessAnalysis: { summary: { relevance_summary: 'RELEVANT' } },
+        },
+      });
+
+      expect(applyScoringPolicy(d, { useVerdictLadder: true }, noneExcluded).score).toBe(0);
+    });
+
+    it('Relevance still ladders the judge verdict when the label is not on the ladder', () => {
+      // `unavailable` (no correctness analysis) is not a ladder verdict; the judge's
+      // metadata verdict must still apply so such docs are not silently zeroed.
+      const d = doc({
+        name: 'Relevance',
+        score: null,
+        label: 'unavailable',
+        metadata: {
+          correctnessAnalysis: { summary: { relevance_summary: 'PARTIALLY_RELEVANT' } },
+        },
+      });
+
+      expect(applyScoringPolicy(d, { useVerdictLadder: true }, noneExcluded).score).toBe(0.5);
+    });
+
     it('passes through evaluators that have no verdict vocabulary', () => {
       const d = doc({ name: 'Trajectory', score: 5, metadata: {} });
       expect(resolveVerdictScore('Trajectory', d)).toBe(5);

@@ -237,11 +237,15 @@ const buildCell = (
     excludedSelfJudged = 0,
     excludedNonEis = 0,
     erroredOutEvaluators = [],
+    judgelessOnly = false,
   }: {
     selfJudged?: boolean;
     excludedSelfJudged?: number;
     excludedNonEis?: number;
     erroredOutEvaluators?: string[];
+    /** Every judged grade this column reads was rejected; only judge-less contract
+     * checks remain, which must not publish a ranked numeric cell. */
+    judgelessOnly?: boolean;
   } = {}
 ): MatrixCell => {
   // Checked before the `mean === undefined` branch: a cell-relevant evaluator that errored on
@@ -254,6 +258,19 @@ const buildCell = (
   );
   if (erroredOut.length > 0) {
     return { kind: 'insufficient-evaluators', evaluators: erroredOut };
+  }
+
+  // Checked before the scored branch: judge-less contract checks stay admitted under
+  // every judge policy, so a numeric mean computed only from them must not rank the
+  // model — mark the column excluded instead, same as the all-rejected case above.
+  if (judgelessOnly && mean !== undefined) {
+    if (excludedSelfJudged > 0) {
+      return { kind: 'excluded', reason: 'self-judged', docs: excludedSelfJudged };
+    }
+    if (excludedNonEis > 0) {
+      return { kind: 'excluded', reason: 'non-eis-judge', docs: excludedNonEis };
+    }
+    return { kind: 'missing' };
   }
 
   if (mean === undefined) {
@@ -709,6 +726,25 @@ const buildMatrixRow = (
       excludedNonEis: columnDatasetIds
         ? perDataset((dataset) => dataset.excludedNonEis ?? 0)
         : columnSuitesAll.reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0),
+      // True only when EVERY dataset this column reads holds rejected judged grades and
+      // no admitted judged grade — i.e. the column's numeric mean would rest purely on
+      // judge-less contract checks. Datasets without any judge-policy rejection (the
+      // ordinary case) never trip it.
+      judgelessOnly:
+        columnDatasetIds !== undefined &&
+        columnSuitesAll.some((suite) =>
+          suite.datasets.some(
+            (dataset) =>
+              columnDatasetIds.has(dataset.datasetId) && dataset.excludedJudgelessOnly === true
+          )
+        ) &&
+        columnSuitesAll
+          .flatMap((suite) => suite.datasets)
+          .filter((dataset) => columnDatasetIds.has(dataset.datasetId))
+          .every(
+            (dataset) =>
+              dataset.excludedJudgelessOnly === true || !dataset.evaluators.some(isQualityEvaluator)
+          ),
       erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column),
     };
     cells[column.id] = buildCell(

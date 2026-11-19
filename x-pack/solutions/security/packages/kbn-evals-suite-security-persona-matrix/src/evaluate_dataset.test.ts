@@ -741,6 +741,51 @@ describe('task output shape', () => {
     // submission as empty even though the stored transcript still carries the narration.
     expect(output.judgedAnswerEmpty).toBe(true);
   });
+
+  it('treats an unanswered-prompt marker response as an empty submission', async () => {
+    // A failed converse records `${UNANSWERED_PROMPT_MARKER} ...` as the message.
+    // isSubmissionEmpty must treat it as empty (same rule FinalAnswerPresent
+    // applies), or a failed run hands the diagnostic text to the judges as an answer.
+    const log = buildLog();
+    let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn().mockResolvedValue({
+          messages: [{ message: `${UNANSWERED_PROMPT_MARKER} converse failed: ECONNREFUSED` }],
+          messageSource: 'final_turn',
+          steps: [],
+          errors: [],
+          traceId: 'trace-1',
+        }),
+      } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {
+          inputTokens: { name: 'inputTokens' },
+          outputTokens: { name: 'outputTokens' },
+          toolCalls: { name: 'toolCalls' },
+          latency: { name: 'latency' },
+        },
+        criteria: () => ({ evaluate: jest.fn().mockResolvedValue({ score: 1 }) }),
+        correctnessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(async (params: { task: unknown }) => {
+          capturedTask = params.task as (example: unknown) => Promise<unknown>;
+        }),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log,
+    });
+
+    await evaluateDataset({
+      dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
+    });
+
+    const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
+    expect(output.judgedAnswerEmpty).toBe(true);
+  });
 });
 
 describe('task judges and the last-assistant-step fallback', () => {

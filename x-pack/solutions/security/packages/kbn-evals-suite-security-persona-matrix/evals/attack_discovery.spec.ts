@@ -11,6 +11,7 @@ import { evaluate } from '@kbn/evals-suite-attack-discovery/src/evaluate';
 import { resolveConcurrency } from '@kbn/evals-suite-attack-discovery/src/evaluate_dataset';
 import { runAttackDiscovery } from '@kbn/evals-suite-attack-discovery/src/task/run_attack_discovery';
 import type { AttackDiscoveryTaskOutput } from '@kbn/evals-suite-attack-discovery/src/types';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
   CHRYSALIS_AD_DATASET_NAME,
   createChrysalisAdExperimentEvaluators,
@@ -35,6 +36,33 @@ const AD_ALERTS_INDEX = '.alerts-security.alerts-default';
 // start:'now-24h', which selects nothing outside this window).
 const CORPUS_WINDOW = { start: '2026-03-01T00:00:00.000Z', end: '2026-04-01T00:00:00.000Z' };
 
+/** Every doc `_id` in the corpus window, paged via search_after. */
+async function listWindowIds(
+  esClient: EsClient,
+  index: string,
+  window: { start: string; end: string }
+): Promise<string[]> {
+  const ids: string[] = [];
+  let searchAfter: string[] | undefined;
+  for (;;) {
+    const response = await esClient.search<{ _id: string; sort: string[] }>({
+      index,
+      size: 1000,
+      sort: [{ _id: 'asc' }],
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+      query: { range: { '@timestamp': { gte: window.start, lt: window.end } } },
+    });
+    const hits = response.hits?.hits ?? [];
+    if (hits.length === 0) break;
+    for (const hit of hits) if (hit._id !== undefined) ids.push(hit._id);
+    const last = hits[hits.length - 1];
+    // Guard against a page that does not advance (bad sort payload): stop instead of looping.
+    if (searchAfter && last._id === searchAfter[0]) break;
+    searchAfter = last.sort as string[];
+  }
+  return ids;
+}
+
 evaluate.describe(
   'Attack Discovery (Chrysalis kill-chains)',
   { tag: tags.stateful.classic },
@@ -53,7 +81,18 @@ evaluate.describe(
         executorClient,
       }) => {
         await restoreAlertsSnapshot({ esClient, log, config: CHRYSALIS_95_SNAPSHOT });
-        await assertAdDataGate({ esClient, log, index: AD_ALERTS_INDEX, ...CORPUS_WINDOW });
+        // Snapshot the restored corpus's document ids while the index holds ONLY
+        // the restore's output: the data gate then counts positively-identified
+        // corpus alerts, and any later non-Chrysalis writer fails as contamination
+        // instead of covering a partial restore.
+        const corpusIds = await listWindowIds(esClient, AD_ALERTS_INDEX, CORPUS_WINDOW);
+        await assertAdDataGate({
+          esClient,
+          log,
+          index: AD_ALERTS_INDEX,
+          corpusIds,
+          ...CORPUS_WINDOW,
+        });
 
         const dataset = {
           name: CHRYSALIS_AD_DATASET_NAME,
