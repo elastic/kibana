@@ -48,6 +48,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
     type: RANGE_SLIDER_CONTROL,
     getPlacementHints,
     layoutConstraints: LAYOUT_CONSTRAINTS,
+    isAwaitingRequiredFilters: (state) => Boolean(state.required && state.value === undefined),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);

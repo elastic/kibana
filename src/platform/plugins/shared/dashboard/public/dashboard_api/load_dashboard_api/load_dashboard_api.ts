@@ -10,6 +10,7 @@
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { asyncForEach } from '@kbn/std';
+import { filter, firstValueFrom } from 'rxjs';
 
 import { getLastSavedState } from '../../../common/default_dashboard_state';
 import { dashboardClient } from '../../dashboard_client';
@@ -115,6 +116,11 @@ export async function loadDashboardApi({
     changedBy: [...(creationOptions?.changedBy ?? []), ...parseChangeSources(restoredChangedBy)],
     viewMode,
   });
+  // Wait until we know whether any pinned control is awaiting a required value, so the viewport never
+  // renders in the in-between state (which would flash the grid before the awaiting screen).
+  await firstValueFrom(
+    api.awaitingRequiredFilters$.pipe(filter((awaiting) => awaiting !== undefined))
+  );
   const userActivityService = getDashboardUserActivityService(api);
 
   const telemetrySubscription = startTrackingDashboardLoadTelemetry(api, {

@@ -119,6 +119,13 @@ export interface EmbeddablePublicDefinition<
   layoutConstraints?: LayoutConstraints;
 
   /**
+   * Whether an embeddable with this serialized state will hold back results until a value is supplied
+   * (e.g. a required control with no selection). Lets containers decide what to render before the
+   * embeddable has mounted and published its own `awaitingRequiredFilters$`.
+   */
+  isAwaitingRequiredFilters?: (serializedState: SerializedState) => boolean;
+
+  /**
    * Determine whether an incoming embeddable state duplicates an existing embeddable state of the same type.
    */
   isDuplicate?: (incomingState: SerializedState, existingState: SerializedState) => boolean;

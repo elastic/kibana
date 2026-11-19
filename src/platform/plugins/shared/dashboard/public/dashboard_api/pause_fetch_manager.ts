@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, filter, first } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, first } from 'rxjs';
 import type { initializeFiltersManager } from './filters_manager';
 
 export function initializePauseFetchManager(
@@ -19,13 +19,20 @@ export function initializePauseFetchManager(
     isFetchPaused$.next(paused);
   };
 
-  const initialFiltersSubscription = filtersManager.api.childFiltersLoading$
+  /**
+   * Unpause once child filters have loaded. Also unpause while awaiting required filters: the grid is not
+   * rendered then, so only pinned controls are mounted, and they must be able to fetch their options for the
+   * user to supply the required value (the dashboard's pause applies to its controls, too).
+   */
+  const initialFiltersSubscription = combineLatest([
+    filtersManager.api.childFiltersLoading$,
+    filtersManager.api.awaitingRequiredFilters$,
+  ])
     .pipe(
-      filter((loading) => !loading),
+      filter(([loading, awaitingRequired]) => !loading || awaitingRequired === true),
       first()
     )
     .subscribe(() => {
-      console.log('FILTERS PUBLISHED');
       setFetchPaused(false);
     });
 

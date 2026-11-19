@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { DashboardChangeSource } from '../../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
 import { embeddableService } from '../../services/kibana_services';
@@ -56,7 +56,10 @@ describe('loadDashboardApi', () => {
     // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     require('../get_dashboard_api').getDashboardApi = getDashboardApiMock;
     getDashboardApiMock.mockReturnValue({
-      api: { userActivity$ },
+      api: {
+        userActivity$,
+        awaitingRequiredFilters$: new BehaviorSubject<boolean | undefined>(false),
+      },
       cleanUp: jest.fn(),
       internalApi: {},
     });

@@ -66,7 +66,11 @@ export const DashboardViewport = () => {
   });
 
   const styles = useMemoCss(dashboardViewportStyles);
-  console.log({ awaitingRequired });
+
+  const renderContent = () => {
+    if (panelCount === 0 && sectionCount === 0) return <DashboardEmptyScreen />;
+    return awaitingRequired ? <AwaitingFiltersScreen /> : <DashboardGrid />;
+  };
   return (
     <div
       className={classNames('dshDashboardViewportWrapper', {
@@ -90,13 +94,7 @@ export const DashboardViewport = () => {
         data-view-mode={viewMode}
         data-test-subj={'dshDashboardViewport'}
       >
-        {panelCount === 0 && sectionCount === 0 ? (
-          <DashboardEmptyScreen />
-        ) : awaitingRequired ? (
-          <AwaitingFiltersScreen />
-        ) : (
-          <DashboardGrid />
-        )}
+        {renderContent()}
       </div>
       <SelectedPanelsToolbar />
     </div>
