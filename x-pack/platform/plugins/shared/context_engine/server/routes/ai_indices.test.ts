@@ -43,6 +43,7 @@ import {
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_DREAMING_PATH,
+  DREAMING_TEMPLATES_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_GROUPS_PATH,
@@ -2904,6 +2905,10 @@ describe('ai indices routes', () => {
     };
 
     it('registers internal routes', () => {
+      expect(getRoute('GET', DREAMING_TEMPLATES_PATH).config.access).toBe('internal');
+      expect(getRoute('GET', DREAMING_TEMPLATES_PATH).config.security).toEqual({
+        authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
+      });
       expect(getRoute('GET', AI_INDEX_DREAMING_PATH).config.access).toBe('internal');
       expect(getRoute('PUT', AI_INDEX_DREAMING_PATH).config.access).toBe('internal');
     });
@@ -2911,6 +2916,7 @@ describe('ai indices routes', () => {
     it('returns 404 while the global memory setting is off', async () => {
       memoryFlagEnabled = false;
 
+      await callRoute('GET', DREAMING_TEMPLATES_PATH, {});
       await callRoute('GET', AI_INDEX_DREAMING_PATH, {
         params: { aiIndexId: 'customer_support' },
       });
@@ -2920,10 +2926,30 @@ describe('ai indices routes', () => {
       });
 
       expect(response.notFound.mock.calls).toEqual(
-        Array(2).fill([{ body: { message: 'Context Engine memory is turned off.' } }])
+        Array(3).fill([{ body: { message: 'Context Engine memory is turned off.' } }])
       );
       expect(aiIndexService.get).not.toHaveBeenCalled();
       expect(aiIndexService.setDreaming).not.toHaveBeenCalled();
+    });
+
+    describe('GET /internal/context_engine/dreaming_templates', () => {
+      it('returns the built-in example dreaming configs', async () => {
+        await callRoute('GET', DREAMING_TEMPLATES_PATH, {});
+
+        expect(response.ok).toHaveBeenCalledWith({
+          body: {
+            templates: expect.arrayContaining([
+              expect.objectContaining({
+                id: 'customer_support',
+                name: 'Customer support',
+                dreaming: expect.objectContaining({
+                  facts: expect.any(Array),
+                }),
+              }),
+            ]),
+          },
+        });
+      });
     });
 
     it('leaves the config and memory_enabled out of the public AI index', async () => {
