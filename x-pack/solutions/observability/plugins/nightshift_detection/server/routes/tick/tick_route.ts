@@ -12,7 +12,7 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { DetectionEngineTickBody } from '../../../common/tick';
-import { TickService } from '../../lib/engine/tick_service';
+import { ScopedTickRunner } from '../../lib/engine/scoped_tick_runner';
 import { DetectionAccountService } from '../../lib/service_account/detection_account';
 import { BaseEngineRoute } from '../base_engine_route';
 import { DETECTION_ENGINE_API_PATH } from '../constants';
@@ -49,7 +49,7 @@ export class TickRoute extends BaseEngineRoute<DetectionEngineTickBody> {
     @inject(EngineRouteContext) ctx: EngineRouteContext,
     @inject(Request) request: KibanaRequest<unknown, unknown, DetectionEngineTickBody>,
     @inject(DetectionAccountService) private readonly account: DetectionAccountService,
-    @inject(TickService) private readonly tick: TickService
+    @inject(ScopedTickRunner) private readonly tick: ScopedTickRunner
   ) {
     super(ctx, request);
   }

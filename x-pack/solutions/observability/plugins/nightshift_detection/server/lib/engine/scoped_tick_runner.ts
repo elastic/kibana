@@ -25,12 +25,12 @@ const MINUTE_MS = 60_000;
 const MAX_LISTED_SOURCES = 10_000;
 
 /**
- * Runs one engine tick as the account behind a request. It forks a request scope, binds what the
- * run needs from that request, and resolves the runner in it, so the runner itself knows no
- * identity.
+ * Runs one engine tick as the account behind a request. It builds a scope for that tick: it forks
+ * the container, binds what the run needs from the request, and resolves the `EngineRunner` in the
+ * fork, so the runner itself knows no identity.
  */
 @injectable()
-export class TickService {
+export class ScopedTickRunner {
   constructor(
     @inject(CoreStart('injection')) private readonly injection: CoreDiServiceStart,
     @inject(CoreStart('elasticsearch'))

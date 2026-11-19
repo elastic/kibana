@@ -19,7 +19,7 @@ import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
 import { SpaceRunLock } from '../lib/engine/space_run_lock';
-import { TickService } from '../lib/engine/tick_service';
+import { ScopedTickRunner } from '../lib/engine/scoped_tick_runner';
 import { DetectionAccountService } from '../lib/service_account/detection_account';
 import { DetectionSetupService } from '../lib/service_account/setup_service';
 import { DetectionWorkflowInstaller } from '../lib/workflows/detection_workflow_installer';
@@ -97,7 +97,7 @@ describe('module', () => {
     container.get(DetectionAccountService);
     container.get(DetectionSetupService);
     container.get(DetectionWorkflowInstaller);
-    container.get(TickService);
+    container.get(ScopedTickRunner);
     container.get(SpaceRunLock);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
@@ -136,7 +136,7 @@ describe('module', () => {
     };
     container.bind(SpaceRunLock).toConstantValue(lock as unknown as SpaceRunLock);
 
-    const result = await container.get(TickService).run({
+    const result = await container.get(ScopedTickRunner).run({
       accountRequest: httpServerMock.createKibanaRequest(),
       spaceId: 'default',
       skipBacklog: false,
@@ -150,7 +150,7 @@ describe('module', () => {
     const { container, alerting } = createContainer();
     const requests = [httpServerMock.createKibanaRequest(), httpServerMock.createKibanaRequest()];
 
-    // A tick forks the container and binds its request, as the tick service does.
+    // A tick forks the container and binds its request, as the scoped tick runner does.
     for (const request of requests) {
       const tick = new Container({ parent: container, defaultScope: 'Singleton' });
       tick.bind(Request).toConstantValue(request);
