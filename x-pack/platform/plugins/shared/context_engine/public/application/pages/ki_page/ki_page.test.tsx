@@ -7,7 +7,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
-import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -112,7 +112,7 @@ const renderKiPage = (initialEntry: string, { canWrite = false }: { canWrite?: b
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
 
   const view = render(
-    <ChromeServiceProvider value={{ chrome: services.chrome }}>
+    <MockChromeContextProvider chrome={services.chrome}>
       <I18nProvider>
         <EuiProvider>
           <KibanaContextProvider
@@ -133,7 +133,7 @@ const renderKiPage = (initialEntry: string, { canWrite = false }: { canWrite?: b
           </KibanaContextProvider>
         </EuiProvider>
       </I18nProvider>
-    </ChromeServiceProvider>
+    </MockChromeContextProvider>
   );
 
   return { ...view, history };

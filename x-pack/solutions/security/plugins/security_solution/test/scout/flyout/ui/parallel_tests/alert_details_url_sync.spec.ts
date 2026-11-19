@@ -10,7 +10,8 @@ import { expect } from '@kbn/scout-security/ui';
 
 const FLYOUT_URL_PARAM = 'flyoutV2';
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/256433
+spaceTest.describe.skip(
   'Expandable flyout state sync',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {

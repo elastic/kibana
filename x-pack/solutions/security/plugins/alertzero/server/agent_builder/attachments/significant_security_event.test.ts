@@ -26,7 +26,6 @@ const validPayload = {
     { field: 'host.name' as const, value: 'srv-01' },
     { field: 'user.name' as const, value: 'jdoe' },
   ],
-  timeline: [{ at: '2026-01-01T00:00:00Z', what: 'RDP session established' }],
   hypothesis_tested: 'Adversary used stolen credentials to move laterally',
   evidence_for: ['RDP session from unusual host'],
   evidence_against: [],
@@ -62,12 +61,21 @@ describe('createSignificantSecurityEventAttachmentType', () => {
   });
 
   describe('format', () => {
-    it('returns a text representation quoting the title, severity, and timeline', async () => {
+    it('returns a text representation quoting the title and severity', async () => {
       const value = await formatToText(attachmentType, formatContext, validPayload);
 
       expect(value).toContain(validPayload.title);
       expect(value).toContain('high');
-      expect(value).toContain('RDP session established');
+    });
+
+    it('hides a legacy timeline from the agent', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        timeline: [{ at: '2026-01-01T00:00:00Z', what: 'RDP session established' }],
+      });
+
+      expect(value).not.toContain('Timeline:');
+      expect(value).not.toContain('RDP session established');
     });
 
     it('includes indicators, structured entities, evidence, and the evaluation record ref', async () => {
@@ -80,6 +88,83 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(value).toContain('Evidence against:\n  none recorded');
       expect(value).toContain('Evaluation record: eval-record-1');
       expect(value).toContain('taxonomy labels, not Discover IOCs');
+    });
+
+    it('omits the Evaluation record line when evaluation_record_ref is absent', async () => {
+      const { evaluation_record_ref: _omit, ...withoutEval } = validPayload;
+      const value = await formatToText(attachmentType, formatContext, withoutEval);
+
+      expect(value).not.toContain('Evaluation record:');
+    });
+
+    it('formats a hunt_result without resolved_iocs', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: true,
+          hit_sources: ['tier1'],
+          time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
+          tier1: {
+            status: 'environment_hits_found',
+            counts: { total_hits: 2, returned_hits: 2, affected_hosts: 1, affected_users: 0 },
+            per_index: [
+              { index: 'logs-endpoint.events.process-default', hit_count: 2, required: true },
+            ],
+            searched_ioc_count: 1,
+          },
+        },
+      });
+
+      expect(value).toContain('IOC Hunt: environment_hits_found');
+      expect(value).not.toContain('Resolved IOCs');
+    });
+
+    it('surfaces summary, basis and detections so the agent sees what the card leads with', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        summary: 'ip 203.0.113.10 seen 12x on 3 hosts',
+        basis: 'ioc_and_behavior',
+        detections: [
+          {
+            id: 'ioc:ip:203.0.113.10',
+            kind: 'ioc',
+            field: 'destination.ip',
+            basis: 'ioc_strong',
+            matched_on: [{ field: 'destination.ip', value: '203.0.113.10' }],
+            total: 12,
+            host_count: 3,
+            user_count: 1,
+          },
+          {
+            id: 'behavior:T1078.004',
+            kind: 'behavior',
+            technique_id: 'T1078.004',
+            technique_name: 'Cloud Accounts',
+            basis: 'ioc_and_behavior',
+            matched_on: [],
+            total: 4,
+            host_count: 2,
+            from_sample: true,
+          },
+        ],
+      });
+
+      expect(value).toContain('Summary: ip 203.0.113.10 seen 12x on 3 hosts');
+      expect(value).toContain('Basis: ioc_and_behavior');
+      expect(value).toContain(
+        '  - ioc 203.0.113.10 on destination.ip [ioc_strong]: 12 event(s), 3 host(s), 1 user(s)'
+      );
+      expect(value).toContain(
+        '  - behavior T1078.004 Cloud Accounts [ioc_and_behavior]: 4 event(s), 2 host(s), from sampled hits'
+      );
+    });
+
+    it('omits the hit-centric lines on an old payload without them', async () => {
+      const value = await formatToText(attachmentType, formatContext, validPayload);
+
+      expect(value).not.toContain('Summary:');
+      expect(value).not.toContain('Basis:');
+      expect(value).not.toContain('Detections');
     });
 
     it('includes the report_id so the agent can tie the event back to its threat report', async () => {
@@ -121,7 +206,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       );
     });
 
-    it('renders maps_to_proposal details when present', async () => {
+    it('does not render maps_to_proposal, which only packaging reads', async () => {
       const value = await formatToText(attachmentType, formatContext, {
         ...validPayload,
         maps_to_proposal: {
@@ -134,14 +219,10 @@ describe('createSignificantSecurityEventAttachmentType', () => {
         },
       });
 
-      expect(value).toContain('Maps to proposal:');
-      expect(value).toContain('Category: containment');
-      expect(value).toContain('Impact: Isolate affected hosts');
-      expect(value).toContain('Action workflow: workflow-1');
-      expect(value).toContain('Action input:');
-      expect(value).toContain('endpoint_ids: abc-123');
-      expect(value).toContain('force: true');
-      expect(value).toContain('- Rotate the compromised key');
+      expect(value).not.toContain('Maps to proposal');
+      expect(value).not.toContain('Isolate affected hosts');
+      expect(value).not.toContain('workflow-1');
+      expect(value).not.toContain('Rotate the compromised key');
     });
 
     it('surfaces the truncation note when the payload was truncated', async () => {
@@ -272,7 +353,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       const description = attachmentType.getAgentDescription?.();
 
       expect(description).toContain('Significant Security Event');
-      expect(description).toContain('timeline');
+      expect(description).not.toContain('timeline');
       expect(description).toContain('hypothesis_tested');
       expect(description).toContain('{ field, value }');
       expect(description).toContain('NOT Discover IOCs');
@@ -302,10 +383,6 @@ describe('createSignificantSecurityEventAttachmentType', () => {
         events: Array.from({ length: 50 }, () => ({
           event_id: 'e'.repeat(512),
           source_index: 'i'.repeat(256),
-        })),
-        timeline: Array.from({ length: 50 }, () => ({
-          at: '2026-01-01T00:00:00Z',
-          what: 'w'.repeat(2000),
         })),
         evidence_for: Array.from({ length: 50 }, () => 'f'.repeat(2000)),
         evidence_against: Array.from({ length: 50 }, () => 'a'.repeat(2000)),
@@ -342,8 +419,8 @@ describe('createSignificantSecurityEventAttachmentType', () => {
             })),
           },
         },
-        // `maps_to_proposal` at its schema maximums, including the 32KB `actionInput` cap,
-        // since the formatter now emits every one of these fields.
+        // `maps_to_proposal` at its schema maximums, including the 32KB `actionInput` cap. The
+        // formatter does not emit it, so it must not count against the content limit.
         maps_to_proposal: {
           category: 'c'.repeat(256),
           impact: 'i'.repeat(2000),
@@ -368,7 +445,6 @@ describe('createSignificantSecurityEventAttachmentType', () => {
 
       // Including the sections that come last, which a single cut would take first.
       for (const section of [
-        'Timeline:',
         'Hunt result:',
         'Confirmed by: IOC Hunt, Behavior Hunt',
         'Security knowledge indicators',
@@ -377,8 +453,6 @@ describe('createSignificantSecurityEventAttachmentType', () => {
         'Events:',
         'Evidence for:',
         'Evidence against:',
-        'Maps to proposal:',
-        'Manual remediation:',
         `Evaluation record: ${validPayload.evaluation_record_ref}`,
       ]) {
         expect(value).toContain(section);

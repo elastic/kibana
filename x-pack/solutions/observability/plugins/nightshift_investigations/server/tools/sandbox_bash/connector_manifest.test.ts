@@ -7,7 +7,7 @@
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../../sandbox_audit';
 import type { SandboxCallContext } from './tool_utils';
 import { writeConnectorManifest } from './connector_manifest';
 
@@ -44,10 +44,10 @@ const createRawConnector = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const createSessionMock = (): jest.Mocked<
-  Pick<SandboxSession, 'writeFiles' | 'mkdirs' | 'isReset'>
+  Pick<AuditedSandboxSession, 'writeFiles' | 'mkdirs' | 'isReset'>
 > => ({
   isReset: false,
-  writeFiles: jest.fn(async (files: Parameters<SandboxSession['writeFiles']>[0]) =>
+  writeFiles: jest.fn(async (files: Parameters<AuditedSandboxSession['writeFiles']>[0]) =>
     files.map(() => ({ bytes_written: 0, success: true }))
   ),
   mkdirs: jest.fn().mockResolvedValue([true]),
@@ -79,7 +79,7 @@ const renderManifest = async ({
   const logger = loggingSystemMock.createLogger();
 
   await writeConnectorManifest({
-    session: session as unknown as SandboxSession,
+    session: session as unknown as AuditedSandboxSession,
     callContext: createCallContext(allowedConnectorIds),
     getActionsClient: withActionsClient ? (getActionsClient as any) : undefined,
     logger,
@@ -134,7 +134,7 @@ describe('writeConnectorManifest', () => {
 
       await expect(
         writeConnectorManifest({
-          session: session as unknown as SandboxSession,
+          session: session as unknown as AuditedSandboxSession,
           callContext: createCallContext([]),
           getActionsClient: getActionsClient as any,
           logger: loggingSystemMock.createLogger(),

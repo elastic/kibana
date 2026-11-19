@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { DecideResult } from '@kbn/agent-builder-server';
 import type {
@@ -354,11 +354,13 @@ describe('DecisionService', () => {
 
 describe('createDecisionProviders', () => {
   const inference = { getClient: jest.fn() } as unknown as InferenceServerStart;
+  const elasticsearch = elasticsearchServiceMock.createStart();
   const createModelProvider = jest.fn();
 
   it('orders EIS, then the fast model', () => {
     const providers = createDecisionProviders({
       inference,
+      elasticsearch,
       createModelProvider,
       config: {
         decisionModelTimeoutMs: 1000,
@@ -373,6 +375,7 @@ describe('createDecisionProviders', () => {
   it('creates EIS and fast model provider instances', () => {
     const [decisionModel, fastModel] = createDecisionProviders({
       inference,
+      elasticsearch,
       createModelProvider,
       config: {
         decisionModelTimeoutMs: 1000,

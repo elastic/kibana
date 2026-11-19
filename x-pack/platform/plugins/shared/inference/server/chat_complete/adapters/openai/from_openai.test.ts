@@ -164,4 +164,21 @@ describe('tokenCountFromOpenAI', () => {
     expect(event.tokens.thinking).toBeUndefined();
     expect(event.tokens).toEqual({ prompt: 10, completion: 20, total: 30 });
   });
+
+  it('maps cache read and cache write tokens from the prompt token details', () => {
+    const event = tokenCountFromOpenAI({
+      prompt_tokens: 100,
+      completion_tokens: 20,
+      total_tokens: 120,
+      prompt_tokens_details: { cached_tokens: 40, cache_write_tokens: 25 },
+    });
+
+    expect(event.tokens).toEqual({
+      prompt: 100,
+      completion: 20,
+      total: 120,
+      cached: 40,
+      cacheWrite: 25,
+    });
+  });
 });

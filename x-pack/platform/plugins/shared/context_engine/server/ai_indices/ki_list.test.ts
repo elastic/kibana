@@ -42,7 +42,7 @@ const rowsResponse = (
     { name: 'type' },
     { name: 'title' },
     { name: 'updated_at' },
-    { name: 'lifecycle_status' },
+    { name: 'ki_status' },
   ],
   values: rows,
 });
@@ -58,7 +58,7 @@ const rowsResponseWithExpiresAt = (
     { name: 'title' },
     { name: 'updated_at' },
     { name: 'expires_at' },
-    { name: 'lifecycle_status' },
+    { name: 'ki_status' },
   ],
   values: rows,
 });
@@ -96,7 +96,7 @@ describe('ki_list', () => {
             '2026-01-02T00:00:00.000Z',
             'active',
           ],
-          [BACKING_INDEX, 'ki-2', 'policy', 'Refund policy', null, null],
+          [BACKING_INDEX, 'ki-2', 'policy', 'Refund policy', null, 'active'],
         ])
       )
       .mockResolvedValueOnce(totalsResponse(6))
@@ -125,14 +125,14 @@ describe('ki_list', () => {
           type: 'playbook',
           title: 'Refund playbook',
           updated_at: '2026-01-02T00:00:00.000Z',
-          lifecycle_status: 'active',
+          status: 'active',
         },
         {
           id: 'ki-2',
           index: BACKING_INDEX,
           type: 'policy',
           title: 'Refund policy',
-          lifecycle_status: 'active',
+          status: 'active',
         },
       ],
     });
@@ -147,10 +147,11 @@ describe('ki_list', () => {
         'INLINE STATS latest_doc = MAX(_id) BY _index, id',
         'WHERE _id == latest_doc',
         'EVAL lifecycle_status = COALESCE(governance.lifecycle.status, "active")',
+        'EVAL ki_status = CASE(lifecycle_status == "active" AND COALESCE(false, false), "expired", lifecycle_status)',
         'WHERE lifecycle_status != "deleted"',
         'EVAL expires_at = TO_STRING(NULL)',
         'SORT revision_time DESC, id ASC',
-        'KEEP _index, id, type, title, updated_at, expires_at, lifecycle_status',
+        'KEEP _index, id, type, title, updated_at, expires_at, ki_status',
         'LIMIT 25',
       ].join('\n| ')
     );
@@ -173,7 +174,7 @@ describe('ki_list', () => {
             'Expired memory',
             null,
             '2020-01-01T00:00:00.000Z',
-            'active',
+            'expired',
           ],
         ])
       )
@@ -190,7 +191,7 @@ describe('ki_list', () => {
           type: 'memory.session',
           title: 'Expired memory',
           expires_at: '2020-01-01T00:00:00.000Z',
-          lifecycle_status: 'active',
+          status: 'expired',
         },
       ],
     });
@@ -200,15 +201,13 @@ describe('ki_list', () => {
     expect(queryText(0)).not.toMatch(/expires_at\s+>/);
   });
 
-  it('returns no KIs when lifecycleStatuses is empty', async () => {
+  it('returns no KIs when statuses is empty', async () => {
     query
       .mockResolvedValueOnce(rowsResponse([]))
       .mockResolvedValueOnce(totalsResponse(0))
       .mockResolvedValueOnce(bucketsResponse([]));
 
-    await expect(
-      getKis(esClient, { dest: INDEX_DEST, size: 25, lifecycleStatuses: [] })
-    ).resolves.toEqual({
+    await expect(getKis(esClient, { dest: INDEX_DEST, size: 25, statuses: [] })).resolves.toEqual({
       total: 0,
       summary: { total: 0, counts_by_type: [] },
       kis: [],
@@ -217,7 +216,7 @@ describe('ki_list', () => {
     expect(queryText(0)).toContain('WHERE FALSE');
   });
 
-  it('lists only deleted KIs when lifecycleStatuses is deleted', async () => {
+  it('lists only deleted KIs when statuses is deleted', async () => {
     query
       .mockResolvedValueOnce(
         rowsResponse([
@@ -228,7 +227,7 @@ describe('ki_list', () => {
       .mockResolvedValueOnce(bucketsResponse([[1, 'memory.session']]));
 
     await expect(
-      getKis(esClient, { dest: INDEX_DEST, size: 25, lifecycleStatuses: ['deleted'] })
+      getKis(esClient, { dest: INDEX_DEST, size: 25, statuses: ['deleted'] })
     ).resolves.toEqual({
       total: 1,
       summary: { total: 1, counts_by_type: [{ type: 'memory.session', count: 1 }] },
@@ -238,15 +237,15 @@ describe('ki_list', () => {
           index: BACKING_INDEX,
           type: 'memory.session',
           title: 'Forgotten',
-          lifecycle_status: 'deleted',
+          status: 'deleted',
         },
       ],
     });
 
-    expect(queryText(0)).toContain('WHERE lifecycle_status IN ("deleted")');
+    expect(queryText(0)).toContain('WHERE ki_status IN ("deleted")');
   });
 
-  it('includes deleted KIs when lifecycleStatuses lists active and deleted', async () => {
+  it('includes deleted KIs when statuses lists active and deleted', async () => {
     query
       .mockResolvedValueOnce(
         rowsResponse([
@@ -260,7 +259,7 @@ describe('ki_list', () => {
       getKis(esClient, {
         dest: INDEX_DEST,
         size: 25,
-        lifecycleStatuses: ['active', 'deleted'],
+        statuses: ['active', 'deleted'],
       })
     ).resolves.toEqual({
       total: 1,
@@ -271,12 +270,12 @@ describe('ki_list', () => {
           index: BACKING_INDEX,
           type: 'memory.session',
           title: 'Forgotten',
-          lifecycle_status: 'deleted',
+          status: 'deleted',
         },
       ],
     });
 
-    expect(queryText(0)).toContain('WHERE lifecycle_status IN ("active", "deleted")');
+    expect(queryText(0)).toContain('WHERE ki_status IN ("active", "deleted")');
   });
 
   it('returns no KIs when deleted is requested but the index has no lifecycle field', async () => {
@@ -288,7 +287,7 @@ describe('ki_list', () => {
       .mockResolvedValueOnce(bucketsResponse([]));
 
     await expect(
-      getKis(esClient, { dest: INDEX_DEST, size: 25, lifecycleStatuses: ['deleted'] })
+      getKis(esClient, { dest: INDEX_DEST, size: 25, statuses: ['deleted'] })
     ).resolves.toEqual({
       total: 0,
       summary: { total: 0, counts_by_type: [] },
@@ -296,7 +295,7 @@ describe('ki_list', () => {
     });
 
     expect(queryText(0)).toContain('EVAL lifecycle_status = "active"');
-    expect(queryText(0)).toContain('WHERE lifecycle_status IN ("deleted")');
+    expect(queryText(0)).toContain('WHERE ki_status IN ("deleted")');
   });
 
   it('collapses revisions by id alone on a data stream', async () => {
@@ -406,8 +405,8 @@ describe('ki_list', () => {
             '2026-01-01T00:00:00.000Z',
             'active',
           ],
-          [BACKING_INDEX, 'ki-missing-type', null, 'Missing type', null, null],
-          [BACKING_INDEX, 'ki-missing-title', 'policy', null, null, null],
+          [BACKING_INDEX, 'ki-missing-type', null, 'Missing type', null, 'active'],
+          [BACKING_INDEX, 'ki-missing-title', 'policy', null, null, 'active'],
         ])
       )
       .mockResolvedValueOnce(totalsResponse(3))
@@ -434,19 +433,19 @@ describe('ki_list', () => {
           type: 'playbook',
           title: 'Complete KI',
           updated_at: '2026-01-01T00:00:00.000Z',
-          lifecycle_status: 'active',
+          status: 'active',
         },
         {
           id: 'ki-missing-type',
           index: BACKING_INDEX,
           title: 'Missing type',
-          lifecycle_status: 'active',
+          status: 'active',
         },
         {
           id: 'ki-missing-title',
           index: BACKING_INDEX,
           type: 'policy',
-          lifecycle_status: 'active',
+          status: 'active',
         },
       ],
     });
@@ -485,7 +484,7 @@ describe('ki_list', () => {
             index: BACKING_INDEX,
             type: 'dashboard',
             title: 'Sales',
-            lifecycle_status: 'active',
+            status: 'active',
           },
         ],
       })
@@ -496,11 +495,12 @@ describe('ki_list', () => {
         `FROM "${BACKING_INDEX}" METADATA _id, _index`,
         'EVAL id = _id',
         'EVAL lifecycle_status = "active"',
+        'EVAL ki_status = CASE(lifecycle_status == "active" AND COALESCE(false, false), "expired", lifecycle_status)',
         'WHERE lifecycle_status != "deleted"',
         'EVAL updated_at = TO_STRING(NULL)',
         'EVAL expires_at = TO_STRING(NULL)',
         'SORT id ASC',
-        'KEEP _index, id, type, title, updated_at, expires_at, lifecycle_status',
+        'KEEP _index, id, type, title, updated_at, expires_at, ki_status',
         'LIMIT 25',
       ].join('\n| ')
     );
@@ -526,6 +526,205 @@ describe('ki_list', () => {
     query.mockRejectedValueOnce(cause);
 
     await expect(getKis(esClient, { dest: INDEX_DEST, size: 25 })).rejects.toBe(cause);
+  });
+
+  describe('status filter', () => {
+    const emptyResponses = () =>
+      query
+        .mockResolvedValueOnce(rowsResponse([]))
+        .mockResolvedValueOnce(totalsResponse(0))
+        .mockResolvedValueOnce(bucketsResponse([]));
+
+    it('computes the status but filters the default list on the stored status', async () => {
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25 });
+
+      expect(queryText(0)).toContain('EVAL ki_status = ');
+      expect(queryText(0)).toContain('| WHERE lifecycle_status != "deleted"');
+      expect(queryText(0)).not.toContain('WHERE ki_status');
+    });
+
+    it('filters expired KIs on the computed status, only active KIs can expire', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, statuses: ['expired'] });
+
+      expect(queryText(0)).toContain(
+        [
+          'EVAL lifecycle_status = COALESCE(governance.lifecycle.status, "active")',
+          'EVAL ki_status = CASE(lifecycle_status == "active" AND COALESCE(expires_at <= NOW(), false), "expired", lifecycle_status)',
+          'WHERE ki_status IN ("expired")',
+        ].join('\n| ')
+      );
+      expect(queryText(1)).toContain('WHERE ki_status IN ("expired")');
+      expect(queryText(2)).toContain('WHERE ki_status IN ("expired")');
+    });
+
+    it('filters on active and expired together', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT));
+      emptyResponses();
+
+      await getKis(esClient, {
+        dest: INDEX_DEST,
+        size: 25,
+        statuses: ['active', 'expired'],
+      });
+
+      expect(queryText(0)).toContain('WHERE ki_status IN ("active", "expired")');
+    });
+
+    it('filters on all four statuses', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT));
+      emptyResponses();
+
+      await getKis(esClient, {
+        dest: INDEX_DEST,
+        size: 25,
+        statuses: ['active', 'deleted', 'verification_failed', 'expired'],
+      });
+
+      expect(queryText(0)).toContain(
+        'WHERE ki_status IN ("active", "deleted", "verification_failed", "expired")'
+      );
+    });
+
+    it('excludes expired KIs from active because the filter uses the computed status', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, statuses: ['active'] });
+
+      expect(queryText(0)).toContain('"expired", lifecycle_status)');
+      expect(queryText(0)).toContain('WHERE ki_status IN ("active")');
+      expect(queryText(0)).not.toContain('WHERE lifecycle_status IN');
+    });
+
+    it('never expires a KI when the index has no expires_at column', async () => {
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, statuses: ['expired'] });
+
+      expect(queryText(0)).toContain(
+        'EVAL ki_status = CASE(lifecycle_status == "active" AND COALESCE(false, false), "expired", lifecycle_status)'
+      );
+      expect(queryText(0)).not.toContain('NOW()');
+      expect(queryText(0).indexOf('EVAL ki_status')).toBeLessThan(
+        queryText(0).indexOf('EVAL expires_at = TO_STRING(NULL)')
+      );
+    });
+
+    it('returns only the computed status, not the stored lifecycle status', async () => {
+      query.mockReset();
+      query
+        .mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT))
+        .mockResolvedValueOnce(
+          rowsResponseWithExpiresAt([
+            [
+              BACKING_INDEX,
+              'ki-expired',
+              'faq',
+              'Old',
+              null,
+              '2020-01-01T00:00:00.000Z',
+              'expired',
+            ],
+          ])
+        )
+        .mockResolvedValueOnce(totalsResponse(1))
+        .mockResolvedValueOnce(bucketsResponse([[1, 'faq']]));
+
+      const { kis } = await getKis(esClient, {
+        dest: INDEX_DEST,
+        size: 25,
+        statuses: ['expired'],
+      });
+
+      expect(kis).toEqual([expect.objectContaining({ status: 'expired' })]);
+      expect(kis[0]).not.toHaveProperty('lifecycle_status');
+      expect(queryText(0)).toContain(
+        'KEEP _index, id, type, title, updated_at, expires_at, ki_status'
+      );
+    });
+  });
+
+  describe('sort', () => {
+    const emptyResponses = () =>
+      query
+        .mockResolvedValueOnce(rowsResponse([]))
+        .mockResolvedValueOnce(totalsResponse(0))
+        .mockResolvedValueOnce(bucketsResponse([]));
+
+    it('sorts by lowercased title with missing titles last, after the type filter', async () => {
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, type: 'faq', sort: 'title' });
+
+      expect(queryText(0)).toContain(
+        [
+          'WHERE type == ?type',
+          'EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))',
+          'SORT title_sort ASC NULLS LAST, id ASC',
+          'KEEP _index, id, type, title, updated_at, expires_at, ki_status',
+          'LIMIT 25',
+        ].join('\n| ')
+      );
+      expect(queryText(0)).not.toContain('revision_time DESC');
+      expect(queryText(1)).not.toContain('title_sort');
+      expect(queryText(2)).not.toContain('title_sort');
+    });
+
+    it('sorts by title when the index has no title column', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(['id', '@timestamp', 'type']));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, sort: 'title' });
+
+      expect(queryText(0)).toContain(
+        [
+          'EVAL title = TO_STRING(NULL)',
+          'EVAL updated_at = TO_STRING(NULL)',
+          'EVAL expires_at = TO_STRING(NULL)',
+          'EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))',
+          'SORT title_sort ASC NULLS LAST, id ASC',
+        ].join('\n| ')
+      );
+    });
+
+    it('sorts newest first when sort is updated', async () => {
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, sort: 'updated' });
+
+      expect(queryText(0)).toContain('| SORT revision_time DESC, id ASC\n| KEEP');
+      expect(queryText(0)).not.toContain('title_sort');
+    });
+
+    it('sorts by id when the index has no timestamp column', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse(['type', 'title']));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25 });
+
+      expect(queryText(0)).toContain('| SORT id ASC\n| KEEP');
+    });
+
+    it('ranks by best match first, then the updated sort, when a search query is set', async () => {
+      query.mockReset();
+      query.mockResolvedValueOnce(probeResponse([...ALL_FIELDS, 'description']));
+      emptyResponses();
+
+      await getKis(esClient, { dest: INDEX_DEST, size: 25, query: 'refund' });
+
+      expect(queryText(0)).toContain('| SORT _score DESC, revision_time DESC, id ASC\n| KEEP');
+    });
   });
 
   describe('probeColumns', () => {
@@ -572,7 +771,7 @@ describe('ki_list', () => {
       ),
       params: [{ searchQuery: 'refund' }],
     });
-    expect(queryText(0)).toContain('METADATA _id, _index, _score');
+    expect(queryText(0)).toContain('METADATA _id, _index, _score\n');
     expect(queryText(0)).toContain('SORT _score DESC, revision_time DESC, id ASC');
     expect(queryText(1)).toContain(
       'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
@@ -584,6 +783,21 @@ describe('ki_list', () => {
       query: expect.stringContaining('| STATS count = COUNT(*) BY type'),
       params: [{ searchQuery: 'refund' }],
     });
+  });
+
+  it('ranks by best match first, then title, when a search query is set', async () => {
+    query.mockReset();
+    query
+      .mockResolvedValueOnce(probeResponse([...ALL_FIELDS, 'description']))
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(totalsResponse(0))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    await getKis(esClient, { dest: INDEX_DEST, size: 10, query: 'refund', sort: 'title' });
+
+    expect(queryText(0)).toContain(
+      '| EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))\n| SORT _score DESC, title_sort ASC NULLS LAST, id ASC\n| KEEP'
+    );
   });
 
   it('binds type and search params together on rows and totals', async () => {

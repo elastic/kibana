@@ -35,7 +35,8 @@ interface DestinationsToolbarProps {
   onQueryChange: (query: string) => void;
   onSelectedTypesChange: (types: DestinationType[]) => void;
   onRefresh: () => void;
-  onAddDestination: () => void;
+  /** Omitted for users who cannot edit the unit, which hides the add button. */
+  onAddDestination?: () => void;
   isAddDisabled?: boolean;
 }
 
@@ -106,28 +107,32 @@ export const DestinationsToolbar = ({
           />
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} aria-hidden>
-        <EuiHorizontalRule
-          margin="none"
-          css={css`
-            block-size: ${euiTheme.size.xl};
-            inline-size: ${euiTheme.border.width.thin};
-          `}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          onClick={onAddDestination}
-          isDisabled={isAddDisabled}
-          data-test-subj="streamsAddDestinationButton"
-        >
-          <FormattedMessage
-            id="xpack.streams.destinations.addDestinationButtonLabel"
-            defaultMessage="Add destination"
-          />
-        </EuiButton>
-      </EuiFlexItem>
+      {onAddDestination && (
+        <>
+          <EuiFlexItem grow={false} aria-hidden>
+            <EuiHorizontalRule
+              margin="none"
+              css={css`
+                block-size: ${euiTheme.size.xl};
+                inline-size: ${euiTheme.border.width.thin};
+              `}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={onAddDestination}
+              isDisabled={isAddDisabled}
+              data-test-subj="streamsAddDestinationButton"
+            >
+              <FormattedMessage
+                id="xpack.streams.destinations.addDestinationButtonLabel"
+                defaultMessage="Add destination"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 };

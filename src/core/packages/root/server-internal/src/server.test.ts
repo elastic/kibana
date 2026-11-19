@@ -141,6 +141,7 @@ test('preboot services on "preboot"', async () => {
   expect(mockPluginsService.preboot).not.toHaveBeenCalled();
   expect(mockPrebootService.preboot).not.toHaveBeenCalled();
   expect(mockStatusService.preboot).not.toHaveBeenCalled();
+  expect(mockMetricsService.preboot).not.toHaveBeenCalled();
 
   await server.preboot();
 
@@ -157,6 +158,7 @@ test('preboot services on "preboot"', async () => {
   expect(mockPluginsService.preboot).toHaveBeenCalledTimes(1);
   expect(mockPrebootService.preboot).toHaveBeenCalledTimes(1);
   expect(mockStatusService.preboot).toHaveBeenCalledTimes(1);
+  expect(mockMetricsService.preboot).toHaveBeenCalledTimes(1);
 });
 
 test('sets up services on "setup"', async () => {
@@ -234,6 +236,8 @@ test('starts the event loop watchdog with the feature flags start contract', asy
   expect(mockEventLoopWatchdogService.start).toHaveBeenCalledWith({
     featureFlags: expect.objectContaining({ getBooleanValue$: expect.any(Function) }),
   });
+  // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+  await server.stop();
 });
 
 test('fails setup when node roles are missing', async () => {
@@ -314,6 +318,8 @@ test('runs services on "start"', async () => {
   expect(mockUserProfileService.start).toHaveBeenCalledTimes(1);
   expect(mockUserSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockInjectionService.start).toHaveBeenCalledTimes(1);
+  // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+  await server.stop();
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -387,6 +393,7 @@ test(`doesn't preboot core services if config validation fails`, async () => {
   expect(mockLoggingService.preboot).not.toHaveBeenCalled();
   expect(mockPluginsService.preboot).not.toHaveBeenCalled();
   expect(mockPrebootService.preboot).not.toHaveBeenCalled();
+  expect(mockMetricsService.preboot).not.toHaveBeenCalled();
 });
 
 describe('stripUnknownsWorkaround', () => {
@@ -508,20 +515,30 @@ describe('When preboot is disabled', () => {
     expect(mockUiSettingsService.preboot).toHaveBeenCalledTimes(1);
     expect(mockLoggingService.preboot).toHaveBeenCalledTimes(1);
 
-    expect(mockContextService.preboot).not.toHaveBeenCalled();
-    expect(mockHttpService.preboot).not.toHaveBeenCalled();
     expect(mockI18nService.preboot).not.toHaveBeenCalled();
     expect(mockElasticsearchService.preboot).not.toHaveBeenCalled();
     expect(mockRenderingService.preboot).not.toHaveBeenCalled();
     expect(mockPluginsService.preboot).not.toHaveBeenCalled();
     expect(mockPrebootService.preboot).not.toHaveBeenCalled();
-    expect(mockStatusService.preboot).not.toHaveBeenCalled();
+  });
+
+  test('preboots the HTTP server with the status and ELU history routes', async () => {
+    const server = new Server(rawConfigService, env, logger);
+
+    await server.preboot();
+
+    expect(mockContextService.preboot).toHaveBeenCalledTimes(1);
+    expect(mockHttpService.preboot).toHaveBeenCalledTimes(1);
+    const httpPreboot = await mockHttpService.preboot.mock.results[0].value;
+    expect(mockStatusService.preboot).toHaveBeenCalledWith({ http: httpPreboot });
+    expect(mockMetricsService.preboot).toHaveBeenCalledWith({ http: httpPreboot });
   });
 });
 
 describe('self client UIAM attestation getter', () => {
   const ATTESTATION = 'attestation-for-outbound';
   const ATTESTATION_HEADERS = { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: ATTESTATION };
+  let server: Server | undefined;
 
   beforeEach(() => {
     // An earlier test leaves the node service mocked as a migrator-only node, which aborts `start`.
@@ -534,8 +551,14 @@ describe('self client UIAM attestation getter', () => {
     rawConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
   });
 
+  afterEach(async () => {
+    // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+    await server?.stop();
+    server = undefined;
+  });
+
   const startServerAndGetAttestationGetter = async () => {
-    const server = new Server(rawConfigService, env, logger);
+    server = new Server(rawConfigService, env, logger);
     await server.preboot();
     await server.setup();
     await server.start();
@@ -732,5 +755,7 @@ describe('self client own client authentication check', () => {
     expect(isOwn('kibana-shared-secret')).toBe(true);
     expect(isOwn('upstream-secret')).toBe(false);
     expect(uiam.isOwnClientAuthentication).toHaveBeenCalledWith('upstream-secret');
+    // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+    await server.stop();
   });
 });

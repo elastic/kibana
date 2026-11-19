@@ -100,7 +100,7 @@ export interface ICommandMetadata {
   type?: 'source' | 'header' | 'processing'; // Optional property to classify the command type
   isTimeseries?: boolean; // Optional property to indicate if the command is a timeseries source command
   requiresTimeseriesSource?: boolean; // Optional property to indicate the command is only available when the source command is TS
-  hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear anywhere in the pipeline
+  hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear before the cursor, in the pipeline or in the query header
   subquerySource?: boolean; // Optional property to indicate if the command can start a subquery expression.
   hiddenWhenQueryContainsSubqueries?: boolean; // Optional property to hide the command when the query contains subqueries.
   docPreserving?: boolean; // Optional property to indicate each output row still maps to one input document, so a full-text WHERE before it can be reused by HIGHLIGHT.

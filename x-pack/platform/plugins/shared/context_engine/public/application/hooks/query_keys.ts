@@ -6,17 +6,19 @@
  */
 
 import type { KiLifecycleStatus } from '../../../common/step_types/ki';
+import type { KiStatus } from '../../../common/ki_lifecycle_status';
 
 export const contextEngineQueryKeys = {
   aiIndex: {
     list: () => ['context_engine', 'ai_index', 'list'] as const,
     detail: (aiIndexId: string) => ['context_engine', 'ai_index', aiIndexId] as const,
+    dreaming: (aiIndexId: string) => ['context_engine', 'ai_index', aiIndexId, 'dreaming'] as const,
     listKi: (
       aiIndexId: string,
       size: number,
       type: string | undefined,
       query: string | undefined,
-      lifecycleStatus?: readonly KiLifecycleStatus[]
+      status?: readonly KiStatus[]
     ) =>
       [
         'context_engine',
@@ -26,7 +28,7 @@ export const contextEngineQueryKeys = {
         size,
         type ?? '',
         query ?? '',
-        lifecycleStatus?.join(',') ?? '',
+        status?.join(',') ?? '',
       ] as const,
     viewKi: (
       aiIndexId: string,
@@ -43,6 +45,11 @@ export const contextEngineQueryKeys = {
         kiId,
         lifecycleStatus.join(','),
       ] as const,
+  },
+  dreamingTemplates: {
+    list: () => ['context_engine', 'dreaming_templates', 'list'] as const,
+    all: () => ['context_engine', 'dreaming_templates', 'all'] as const,
+    detail: (id: string) => ['context_engine', 'dreaming_templates', id] as const,
   },
   connectors: {
     list: () => ['context_engine', 'connectors', 'list'] as const,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { DecideParams, DecideResult, DecisionsStart } from '@kbn/agent-builder-server';
 import type {
   DecisionAnswer,
@@ -32,6 +32,7 @@ import {
 export const createDecisionProviders = ({
   config: { inferenceId, decisionModelTimeoutMs, fastModelTimeoutMs, unavailableTtlMs },
   inference,
+  elasticsearch,
   createModelProvider,
 }: {
   config: Pick<
@@ -39,10 +40,12 @@ export const createDecisionProviders = ({
     'inferenceId' | 'decisionModelTimeoutMs' | 'fastModelTimeoutMs' | 'unavailableTtlMs'
   >;
   inference: InferenceServerStart;
+  elasticsearch: ElasticsearchServiceStart;
   createModelProvider: ModelProviderFactoryFn;
 }): DecisionProvider[] => [
   new DecisionModelProvider({
     inference,
+    elasticsearch,
     inferenceId,
     timeoutMs: decisionModelTimeoutMs,
     unavailableTtlMs,

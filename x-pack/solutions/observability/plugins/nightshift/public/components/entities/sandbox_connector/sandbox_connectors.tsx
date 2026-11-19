@@ -171,7 +171,7 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
         announceOnMount
         size="s"
         title={i18n.translate('xpack.nightshift.sandboxConnectors.notEnabledTitle', {
-          defaultMessage: 'Elastic Nightshift is not enabled in this space yet.',
+          defaultMessage: 'Elastic nightshift is not enabled in this space yet.',
         })}
         data-test-subj="nightshiftSandboxConnectorsNotEnabled"
       >
@@ -180,7 +180,7 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
           data-test-subj="nightshiftSandboxConnectorsEnableLink"
         >
           {i18n.translate('xpack.nightshift.sandboxConnectors.notEnabledLink', {
-            defaultMessage: 'Enable it from the Nightshift onboarding to connect tools.',
+            defaultMessage: 'Enable it from the nightshift onboarding to connect tools.',
           })}
         </EuiLink>
       </KbnInfoCallout>

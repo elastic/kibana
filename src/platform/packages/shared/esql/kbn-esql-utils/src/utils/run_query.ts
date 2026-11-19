@@ -17,14 +17,17 @@ import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
-import { type ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getESQLQueryVariables } from './query_parsing_helpers';
+import { hasNamedParam } from './has_named_param';
+import { getGeoPrecisionParams, type GeoPrecisionParams } from './geo_precision_params';
 
-export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
+export const hasStartEndParams = (query: string) =>
+  hasNamedParam(query, '_tstart') || hasNamedParam(query, '_tend');
 
 export const getStartEndParams = (query: string, time?: TimeRange) => {
-  const startNamedParams = /\?_tstart/i.test(query);
-  const endNamedParams = /\?_tend/i.test(query);
+  const startNamedParams = hasNamedParam(query, '_tstart');
+  const endNamedParams = hasNamedParam(query, '_tend');
   if (time && (startNamedParams || endNamedParams)) {
     const timeParams = {
       start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
@@ -45,9 +48,15 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
 export const getNamedParams = (
   query: string,
   timeRange?: TimeRange,
-  variables?: ESQLControlVariable[]
+  variables?: ESQLControlVariable[],
+  geoPrecision?: GeoPrecisionParams
 ) => {
-  const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
+  const namedParams: ESQLSearchParams['params'] = [
+    ...getStartEndParams(query, timeRange),
+    ...(geoPrecision
+      ? getGeoPrecisionParams(query, geoPrecision.zoom, geoPrecision.resolution)
+      : []),
+  ];
   if (variables?.length) {
     const usedVariables = new Set(getESQLQueryVariables(query));
     variables
@@ -98,7 +107,8 @@ export async function getESQLQueryColumnsRaw({
   projectRouting?: ProjectRouting;
 }): Promise<ESQLColumn[]> {
   try {
-    const namedParams = getNamedParams(esqlQuery, timeRange, variables);
+    // Columns are resolved with `LIMIT 0`, so any valid precision works.
+    const namedParams = getNamedParams(esqlQuery, timeRange, variables, { zoom: 0 });
     const response = await lastValueFrom(
       search(
         {

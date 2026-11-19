@@ -35,6 +35,7 @@ const createServiceAccountsStartMock = (): jest.MockedObjectDeep<CoreServiceAcco
     bindWorkload: jest.fn(),
     unbindWorkload: jest.fn(),
     getWorkloadBinding: jest.fn().mockResolvedValue(null),
+    getWorkloadServiceAccountSummary: jest.fn().mockResolvedValue(null),
     withScopedRequestForWorkload: jest.fn(),
   });
 
@@ -47,7 +48,8 @@ const createDelegateHandleMock = (): jest.MockedObjectDeep<CoreSecurityDelegateH
         .mockImplementation(
           async (
             bindings: ReadonlyArray<ServiceAccountBoundWorkloadRef>
-          ): Promise<ResolvedServiceAccountWorkload[]> => bindings.map(() => ({}))
+          ): Promise<ResolvedServiceAccountWorkload[]> =>
+            bindings.map(() => ({ status: 'unknown' }))
         ),
     }),
   });

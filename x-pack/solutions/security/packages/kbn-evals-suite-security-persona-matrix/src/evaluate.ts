@@ -8,6 +8,7 @@
 import { evaluate as base } from '@kbn/evals';
 import type { EvaluationDataset } from '@kbn/evals';
 import { PersonaMatrixChatClient } from './chat_client';
+import { agentProfile, resolveAgentId } from './agent_profile';
 import { createEvaluatePersonaMatrixDataset } from './evaluate_dataset';
 import type { PersonaMatrixExample } from './datasets/persona_matrix_prompts';
 
@@ -24,12 +25,14 @@ export const evaluate = base.extend<
 >({
   chatClient: [
     async ({ fetch, log, connector }, use) => {
-      await use(new PersonaMatrixChatClient(fetch, log, connector.id));
+      await use(
+        new PersonaMatrixChatClient(fetch, log, connector.id, resolveAgentId(agentProfile))
+      );
     },
     { scope: 'worker' },
   ],
   evaluateDataset: [
-    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
+    ({ chatClient, evaluators, executorClient, traceEsClient, log, fetch }, use) => {
       use(
         createEvaluatePersonaMatrixDataset({
           chatClient,
@@ -37,6 +40,7 @@ export const evaluate = base.extend<
           executorClient,
           traceEsClient,
           log,
+          fetch,
         })
       );
     },

@@ -1,12 +1,12 @@
 {
-  "sha1": "8d2df870dc72b3684ce21bf0945826bd01b53533",
+  "sha1": "0c86f7a716420623cb8425c275d46c05ce769687",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "7879afe86878a8d-090d26c549810de",
-      "title": "Enable the Vega API feature flag",
+      "id": "7879afe86878a8d-aa40d033d190e40",
+      "title": "Enable the Vega as code feature flag",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
@@ -636,8 +636,8 @@
       }
     },
     {
-      "id": "71856c41ac39912-00ccb12b7f74919",
-      "title": "Disable the Vega API feature flag",
+      "id": "71856c41ac39912-19d3e3fbdec443e",
+      "title": "Reset the Vega as code feature flag",
       "expectedStatus": "passed",
       "tags": [],
       "location": {

@@ -51,7 +51,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     resultStore,
     skillsStore,
     attachmentStateManager,
-    todoStateManager,
     logger,
     promptManager,
     stateManager,
@@ -101,7 +100,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     spaceId,
     runAs: runAs?.serviceAccountId,
     deployment,
-    defaultConnectorId: manager.deps.defaultConnectorId,
+    defaultModel: manager.deps.defaultModel,
     logger,
     modelProvider,
     esClient: elasticsearch.client.asScoped(
@@ -124,7 +123,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     resultStore,
     skillsStore,
     attachmentStateManager,
-    todoStateManager,
     stateManager,
     promptManager,
     attachments: createAttachmentsService({

@@ -383,6 +383,29 @@ describe('var_group_policy_effects', () => {
         expect(result?.supports_cloud_connector).toBe(false);
       });
 
+      it('should set supports_identity_federation when it is undefined even if the root flag is already true', () => {
+        // A new policy: bool vars without a manifest default start as `undefined`, and
+        // CloudConnectorSetup has already set the root flag on mount. The var is required
+        // by the var_group, so leaving it undefined keeps the form invalid.
+        const packagePolicy = createMockPackagePolicy({
+          supports_cloud_connector: true,
+          cloud_connector_id: 'cc-1',
+          vars: {
+            role_arn: { value: 'some-arn' },
+            supports_identity_federation: { value: undefined, type: 'bool' },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
+
+        expect(result?.vars?.supports_identity_federation).toEqual({ value: true, type: 'bool' });
+        expect(result?.supports_cloud_connector).toBe(true);
+        // Root flag was already true, so the existing connector id must not be reset
+        expect(result).not.toHaveProperty('cloud_connector_id');
+      });
+
       it('should return null when supports_identity_federation is already in desired state', () => {
         const packagePolicy = createMockPackagePolicy({
           supports_cloud_connector: true,
