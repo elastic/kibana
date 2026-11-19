@@ -1246,8 +1246,7 @@ Every conversation details flyout — the in-chat one and the ones opened with
 width in every consuming app:
 
 - Default width 480px, minimum 400px, maximum 640px.
-- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the
-  next open, wherever the flyout is opened from.
+- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the next open, wherever the flyout is opened from.
 
 The width is not configurable per template or per caller: all surfaces share one setting.
 
@@ -1291,10 +1290,7 @@ agentBuilder.openConversationDetails({
 
 ### Opening flyouts from conversation details content
 
-Both conversation details flyouts are managed EUI flyouts in the
-`CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, a
-header or footer value, or an attachment renderer and have it stack on top with a Back button, open it as a main flyout
-in the same group by passing these options when you open it:
+Both conversation details flyouts are managed EUI flyouts in the `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, a header or footer value, or an attachment renderer and have it stack on top with a Back button, open it as a main flyout in the same group by passing these options when you open it:
 
 ```tsx
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
