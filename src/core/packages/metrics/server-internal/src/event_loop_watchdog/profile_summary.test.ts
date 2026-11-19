@@ -336,9 +336,15 @@ describe('summarizeProfile', () => {
     expect(summary.topKibanaFrame).toBeUndefined();
   });
 
-  it('summarises the real Kibana plugin-setup fixture and resolves Kibana frames under src/ and x-pack/', () => {
+  it('summarises a captured plugin-setup profile and resolves stable location tokens under src/ and x-pack/', () => {
     const fixturePath = path.join(__dirname, '__fixtures__', 'plugin_setup_window.json');
     const fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf8')) as SummarizableProfile;
+    for (const node of fixture.nodes) {
+      const url = node.callFrame.url ?? '';
+      if (url.startsWith('file:///kibana/src/') || url.startsWith('file:///kibana/x-pack/')) {
+        expect(url).toMatch(/^file:\/\/\/kibana\/(src|x-pack)\/f\/\d+\.ts$/);
+      }
+    }
     const summary = summarizeProfile(fixture, { root: ROOT });
 
     expect(summary.samples).toBe(200);
