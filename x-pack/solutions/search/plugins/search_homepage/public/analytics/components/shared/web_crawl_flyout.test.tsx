@@ -17,6 +17,7 @@ import { useAnalyticsClusterState } from '../../hooks/use_analytics_cluster_stat
 import { useAnalyticsLinks } from '../../hooks/use_analytics_links';
 import { useAnalyticsPreferences } from '../../hooks/use_analytics_preferences';
 import { useSampleData } from '../../hooks/use_sample_data';
+import { FIRST_WEB_CRAWL_MAX_PAGES } from '../../constants';
 import type { AnalyticsClusterStateResult } from '../../types';
 import { UnifiedHomePage } from '../home/unified_home';
 import {
@@ -101,6 +102,7 @@ describe('WebCrawlFlyoutProvider', () => {
   const setup = ({ hasWebCrawler = true }: { hasWebCrawler?: boolean } = {}) => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     setServices(history, hasWebCrawler);
+    mockUseAnalyticsClusterState.mockReturnValue(createClusterStateResult(NO_DATA_STATE));
     render(
       <EuiThemeProvider>
         <Router history={history}>
@@ -155,10 +157,22 @@ describe('WebCrawlFlyoutProvider', () => {
       telemetryPrefix: 'searchHomepageAnalytics',
       storageKeyPrefix: 'searchHomepage',
       optionsDisplay: 'collapsed',
+      defaultMaxDocuments: FIRST_WEB_CRAWL_MAX_PAGES,
       onManageWebCrawls: expect.any(Function),
     });
     expect(dialog).toHaveTextContent('can take several minutes');
     expect(dialog).toHaveTextContent('When the first page is indexed, this page changes');
+  });
+
+  it('states the page limit a crawl starts with, from the number it hands the form', () => {
+    const { opener } = setup();
+
+    fireEvent.click(opener);
+
+    expect(FIRST_WEB_CRAWL_MAX_PAGES).toBe(50);
+    expect(screen.getByTestId('analyticsWebCrawlFlyoutPageLimit')).toHaveTextContent(
+      `Crawls up to ${WebCrawlPanel.mock.calls[0][0].defaultMaxDocuments} pages to start. Change the limit under Advanced options.`
+    );
   });
 
   it('returns the focus to the opener when closed with the button', () => {
@@ -291,6 +305,9 @@ describe('crawling a website from the ingest gate', () => {
     const { showResult } = setup();
 
     fireEvent.click(screen.getByTestId('analyticsHomeFeaturedSource-webCrawl'));
+    expect(screen.getByTestId('analyticsWebCrawlFlyoutNextStep')).toHaveTextContent(
+      'When the first page is indexed, this page changes'
+    );
     const panel = screen.getByTestId('webCrawlPanelStub');
     const url = screen.getByTestId('webCrawlUrlStub');
     url.focus();
@@ -303,6 +320,9 @@ describe('crawling a website from the ingest gate', () => {
     // The same elements, so what the form shows of the running crawl is not reset.
     expect(screen.getByTestId('webCrawlPanelStub')).toBe(panel);
     expect(url).toHaveFocus();
+    expect(screen.getByTestId('analyticsWebCrawlFlyoutNextStep')).toHaveTextContent(
+      /^The progress of the crawl stays here and under Add data on the home page\.$/
+    );
 
     fireEvent.click(screen.getByTestId('analyticsWebCrawlFlyoutClose'));
 

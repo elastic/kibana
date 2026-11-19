@@ -61,6 +61,8 @@ interface WebCrawlFormProps {
   errorMessage?: string;
   /** `collapsed` leaves the URL in view and keeps every other field behind one disclosure. */
   optionsDisplay?: WebCrawlOptionsDisplay;
+  /** The page limit the form starts with. Defaults to the crawler's own. */
+  defaultMaxDocuments?: number;
 }
 
 /** Takes the URL and limits of a crawl. Several crawls can run at once, so it stays enabled while they do. */
@@ -69,6 +71,7 @@ export const WebCrawlForm = ({
   isStarting,
   errorMessage,
   optionsDisplay = 'inline',
+  defaultMaxDocuments = WEB_CRAWL_DEFAULT_MAX_DOCUMENTS,
 }: WebCrawlFormProps) => {
   const getTelemetryId = useTelemetryId();
   const optionsAccordionId = useGeneratedHtmlId({ prefix: 'webCrawlOptions' });
@@ -76,7 +79,7 @@ export const WebCrawlForm = ({
   const [url, setUrl] = useState('');
   const [isUrlInvalid, setIsUrlInvalid] = useState(false);
   const [maxDepth, setMaxDepth] = useState(WEB_CRAWL_DEFAULT_MAX_DEPTH);
-  const [maxDocuments, setMaxDocuments] = useState(WEB_CRAWL_DEFAULT_MAX_DOCUMENTS);
+  const [maxDocuments, setMaxDocuments] = useState(defaultMaxDocuments);
   const isMaxDepthInvalid = !isIntegerInRange(maxDepth, 0, WEB_CRAWL_MAX_DEPTH_LIMIT);
   const isMaxDocumentsInvalid = !isIntegerInRange(maxDocuments, 1, WEB_CRAWL_MAX_DOCUMENTS_LIMIT);
   const [includePathsText, setIncludePathsText] = useState('');

@@ -65,7 +65,7 @@ const STATUS_ICONS = {
 
 export const WebCrawlPanel = () => {
   const { share } = useWebCrawlerServices();
-  const { onManageWebCrawls, optionsDisplay } = useWebCrawlerConfig();
+  const { onManageWebCrawls, optionsDisplay, defaultMaxDocuments } = useWebCrawlerConfig();
   const getTelemetryId = useTelemetryId();
   const { crawl, startCrawl, isStarting, startErrorMessage } = useWebCrawl();
 
@@ -84,6 +84,7 @@ export const WebCrawlPanel = () => {
         isStarting={isStarting}
         errorMessage={startErrorMessage}
         optionsDisplay={optionsDisplay}
+        defaultMaxDocuments={defaultMaxDocuments}
       />
       {crawl && (
         <>

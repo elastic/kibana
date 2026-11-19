@@ -63,6 +63,7 @@ describe('registerAnalyticsGenerationRoutes', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const output = jest.fn();
   const getCalls = jest.fn();
+  const preferredEndpoint = { shouldTry: () => true, markMissing: jest.fn() };
 
   const register = (config = { enabled: true, sampleValues: true }): void => {
     router = httpServiceMock.createRouter();
@@ -70,6 +71,7 @@ describe('registerAnalyticsGenerationRoutes', () => {
       config,
       getDependencies: async () => ({}),
       cache: createGenerationCache(),
+      preferredEndpoint,
     });
   };
 
@@ -143,7 +145,6 @@ describe('registerAnalyticsGenerationRoutes', () => {
         useCaseId: 'gaming',
         schemaOnly: true,
         refresh: true,
-        connectorId: 'model-b',
       })
     ).toMatchObject({ useCaseId: 'gaming' });
     expect(() => body.validate({})).toThrow();
@@ -152,7 +153,7 @@ describe('registerAnalyticsGenerationRoutes', () => {
     expect(() => body.validate({ source: 'a'.repeat(256) })).toThrow();
     expect(() => body.validate({ source: 'a', timeField: 'a'.repeat(1025) })).toThrow();
     expect(() => body.validate({ source: 'a', useCaseId: 'logs' })).toThrow();
-    expect(() => body.validate({ source: 'a', connectorId: 'a'.repeat(257) })).toThrow();
+    expect(() => body.validate({ source: 'a', connectorId: 'model-b' })).toThrow();
     expect(() => body.validate({ source: 'a', prompt: 'ignore the rules' })).toThrow();
   });
 

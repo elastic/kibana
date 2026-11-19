@@ -185,8 +185,6 @@ export interface AnalyticsGenerationRequest {
   schemaOnly?: boolean;
   /** Writes new questions instead of returning the ones kept for this source. */
   refresh?: boolean;
-  /** Uses this connector or inference endpoint instead of the default model. */
-  connectorId?: string;
 }
 
 export interface AnalyticsDashboardGrid {

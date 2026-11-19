@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import type {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { QueryClient } from '@kbn/react-query';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
 import type {
   SearchGettingStartedPluginSetup,
   SearchGettingStartedPluginStart,
   SearchGettingStartedAppPluginStartDependencies,
-  SearchGettingStartedServicesContextDeps,
 } from './types';
-import { docLinks } from './common/doc_links';
+
+const SEARCH_HOMEPAGE_APP_ID = 'searchHomepage';
 
 export class SearchGettingStartedPlugin
   implements
@@ -33,12 +26,6 @@ export class SearchGettingStartedPlugin
       SearchGettingStartedAppPluginStartDependencies
     >
 {
-  private readonly kibanaVersion: string;
-
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.kibanaVersion = this.initializerContext.env.packageInfo.version;
-  }
-
   public setup(
     core: CoreSetup<
       SearchGettingStartedAppPluginStartDependencies,
@@ -46,28 +33,21 @@ export class SearchGettingStartedPlugin
     >,
     deps: {}
   ): SearchGettingStartedPluginSetup {
-    const queryClient = new QueryClient({});
-    const kibanaVersion = this.kibanaVersion;
     core.application.register({
       id: PLUGIN_ID,
       appRoute: PLUGIN_PATH,
       title: PLUGIN_NAME,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: 'logoElasticsearch',
-      async mount({ element, history }: AppMountParameters) {
-        const { renderApp } = await import('./application');
-        const [coreStart, depsStart] = await core.getStartServices();
-        docLinks.setDocLinks(coreStart.docLinks.links);
-        const services: SearchGettingStartedServicesContextDeps = {
-          ...depsStart,
-          history,
-          usageCollection: depsStart.usageCollection,
-        };
+      // The unified Elasticsearch home replaced this page; its URL is kept for old links.
+      async mount() {
+        const [coreStart] = await core.getStartServices();
+        await coreStart.application.navigateToApp(SEARCH_HOMEPAGE_APP_ID, { replace: true });
 
-        return renderApp(coreStart, services, element, queryClient, kibanaVersion);
+        return () => {};
       },
       order: 1,
-      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
+      visibleIn: [],
     });
 
     return {};

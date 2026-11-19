@@ -42,6 +42,11 @@ export interface WebCrawlPanelProps extends WebCrawlerHostProps {
    * path rules and targets behind an "Advanced options" disclosure. Defaults to `inline`.
    */
   optionsDisplay?: WebCrawlOptionsDisplay;
+  /**
+   * The page limit the form starts with, for hosts that want a smaller first crawl than the
+   * crawler's default. The user can still raise it up to the crawler's maximum.
+   */
+  defaultMaxDocuments?: number;
 }
 
 export interface WebCrawlsPageProps extends WebCrawlerHostProps {

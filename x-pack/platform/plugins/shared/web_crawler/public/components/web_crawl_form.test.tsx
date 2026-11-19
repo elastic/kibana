@@ -26,6 +26,7 @@ describe('WebCrawlForm', () => {
       isStarting?: boolean;
       errorMessage?: string;
       optionsDisplay?: 'inline' | 'collapsed';
+      defaultMaxDocuments?: number;
     } = {}
   ) =>
     renderWithWebCrawlerContext(<WebCrawlForm onSubmit={onSubmit} isStarting={false} {...props} />);
@@ -189,6 +190,28 @@ describe('WebCrawlForm', () => {
         sitemapUrls: [],
       });
       expect(getOptionsToggle()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it("starts from the host's page limit, which can be raised to the crawler's maximum", () => {
+      renderForm({ optionsDisplay: 'collapsed', defaultMaxDocuments: 50 });
+
+      expect(getMaxDocumentsInput()).toHaveValue(50);
+      fireEvent.change(getUrlInput(), { target: { value: 'https://example.com' } });
+      fireEvent.click(getSubmitButton());
+
+      expect(onSubmit).toHaveBeenLastCalledWith(
+        expect.objectContaining({ maxDepth: 2, maxDocuments: 50 })
+      );
+
+      fireEvent.change(getMaxDocumentsInput(), { target: { value: '1000' } });
+      fireEvent.click(getSubmitButton());
+
+      expect(onSubmit).toHaveBeenLastCalledWith(expect.objectContaining({ maxDocuments: 1000 }));
+
+      fireEvent.change(getMaxDocumentsInput(), { target: { value: '1001' } });
+      fireEvent.click(getSubmitButton());
+
+      expect(onSubmit).toHaveBeenCalledTimes(2);
     });
 
     it('opens and closes the options, and submits what was entered in them', () => {

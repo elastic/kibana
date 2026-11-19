@@ -206,11 +206,6 @@ export function createNavigationTree({
     ],
     footer: [
       {
-        id: 'search_getting_started',
-        icon: 'rocket',
-        link: 'searchGettingStarted',
-      },
-      {
         id: 'dev_tools',
         title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
           defaultMessage: 'Developer Tools',

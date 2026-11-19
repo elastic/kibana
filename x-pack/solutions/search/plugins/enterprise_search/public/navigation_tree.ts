@@ -213,11 +213,6 @@ export const getNavigationTreeDefinition = ({
           ],
           footer: [
             {
-              icon: 'rocket',
-              id: 'search_getting_started',
-              link: 'searchGettingStarted',
-            },
-            {
               getIsActive: ({ pathNameSerialized, prepend }) => {
                 return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
               },

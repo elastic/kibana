@@ -23,7 +23,8 @@ import { i18n } from '@kbn/i18n';
 import type { WebCrawlerPublicStart } from '@kbn/web-crawler-plugin/public';
 import { STORAGE_KEY_PREFIX, WEB_CRAWLS_ROUTE } from '../../../home_config';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ANALYTICS_TELEMETRY_PREFIX } from '../../constants';
+import { ANALYTICS_TELEMETRY_PREFIX, FIRST_WEB_CRAWL_MAX_PAGES } from '../../constants';
+import { useAnalyticsClusterState } from '../../hooks/use_analytics_cluster_state';
 import type { WebCrawlFlyoutApi } from './web_crawl_flyout_context';
 import { WebCrawlFlyoutContext } from './web_crawl_flyout_context';
 
@@ -39,6 +40,9 @@ const WebCrawlFlyout = ({
   onClose,
 }: WebCrawlFlyoutProps): React.JSX.Element => {
   const titleId = useGeneratedHtmlId({ prefix: 'analyticsWebCrawlFlyoutTitle' });
+  const { state } = useAnalyticsClusterState();
+  // Once the cluster holds data the page underneath has already changed, or never will.
+  const isPageChangeAhead = state === undefined || state.stage === 'noData';
 
   return (
     <EuiFlyout
@@ -64,6 +68,13 @@ const WebCrawlFlyout = ({
                 'A crawl runs in the background and can take several minutes. You can close this panel while it runs.',
             })}
           </p>
+          <p data-test-subj="analyticsWebCrawlFlyoutPageLimit">
+            {i18n.translate('xpack.searchHomepage.analytics.webCrawlFlyout.pageLimit', {
+              defaultMessage:
+                'Crawls up to {maxPages, plural, one {# page} other {# pages}} to start. Change the limit under Advanced options.',
+              values: { maxPages: FIRST_WEB_CRAWL_MAX_PAGES },
+            })}
+          </p>
         </EuiText>
         <EuiSpacer size="m" />
         <WebCrawlPanel
@@ -71,15 +82,21 @@ const WebCrawlFlyout = ({
           // The search home follows the last crawl stored under this prefix, so it picks this one up.
           storageKeyPrefix={STORAGE_KEY_PREFIX}
           optionsDisplay="collapsed"
+          defaultMaxDocuments={FIRST_WEB_CRAWL_MAX_PAGES}
           onManageWebCrawls={onManageWebCrawls}
         />
         <EuiSpacer size="m" />
         <EuiText size="s" color="subdued">
-          <p>
-            {i18n.translate('xpack.searchHomepage.analytics.webCrawlFlyout.nextStep', {
-              defaultMessage:
-                'When the first page is indexed, this page changes to show what you can do with your search data. The progress of the crawl stays here and under Add data on the home page.',
-            })}
+          <p data-test-subj="analyticsWebCrawlFlyoutNextStep">
+            {isPageChangeAhead
+              ? i18n.translate('xpack.searchHomepage.analytics.webCrawlFlyout.nextStep', {
+                  defaultMessage:
+                    'When the first page is indexed, this page changes to show what you can do with your search data. The progress of the crawl stays here and under Add data on the home page.',
+                })
+              : i18n.translate('xpack.searchHomepage.analytics.webCrawlFlyout.progress', {
+                  defaultMessage:
+                    'The progress of the crawl stays here and under Add data on the home page.',
+                })}
           </p>
         </EuiText>
       </EuiFlyoutBody>

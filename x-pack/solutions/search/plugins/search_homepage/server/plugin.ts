@@ -10,6 +10,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SearchHomepageConfig } from './config';
+import { createPreferredEndpointTracker } from './lib/analytics_generation_availability';
 import { createGenerationCache } from './lib/analytics_generation_cache';
 import { registerAnalyticsClusterStateRoute } from './routes/analytics_cluster_state';
 import { registerAnalyticsEventsOverTimeRoute } from './routes/analytics_events_over_time';
@@ -48,6 +49,7 @@ export class SearchHomepagePlugin
         return { agentBuilder, licensing };
       },
       cache: createGenerationCache(),
+      preferredEndpoint: createPreferredEndpointTracker(),
     });
     registerAnalyticsEventsOverTimeRoute(router, this.logger);
     registerAnalyticsSampleEventsRoutes(router, this.logger);

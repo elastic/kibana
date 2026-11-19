@@ -23,6 +23,7 @@ import { GenerationOutputError, generateSourceAnalytics } from '../lib/analytics
 import type {
   AnalyticsGenerationConfig,
   GenerationDependencies,
+  PreferredEndpointTracker,
 } from '../lib/analytics_generation_availability';
 import { resolveGenerationModel } from '../lib/analytics_generation_availability';
 import type { GenerationCache } from '../lib/analytics_generation_cache';
@@ -31,10 +32,9 @@ import { fetchSourceProfile, fetchSourceSchema } from '../lib/analytics_generati
 import { getStatusCode } from './analytics_cluster_state';
 
 const FAILURE_MESSAGE = 'Failed to generate analytics for the event source';
-// The longest index name and a generous bound for a field path and a connector id.
+// The longest index name and a generous bound for a field path.
 const MAX_SOURCE_NAME_LENGTH = 255;
 const MAX_FIELD_NAME_LENGTH = 1024;
-const MAX_CONNECTOR_ID_LENGTH = 256;
 /** A generation is given up on before the browser or a proxy would drop the request. */
 const GENERATION_DEADLINE_MS = 100_000;
 
@@ -63,7 +63,6 @@ const bodySchema = schema.object({
   ),
   schemaOnly: schema.maybe(schema.boolean()),
   refresh: schema.maybe(schema.boolean()),
-  connectorId: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_CONNECTOR_ID_LENGTH })),
 });
 
 export interface AnalyticsGenerationRouteDependencies {
@@ -71,12 +70,13 @@ export interface AnalyticsGenerationRouteDependencies {
   /** Resolved per request: the plugins start after the routes are registered. */
   getDependencies: () => Promise<GenerationDependencies>;
   cache: GenerationCache;
+  preferredEndpoint: PreferredEndpointTracker;
 }
 
 export const registerAnalyticsGenerationRoutes = (
   router: IRouter,
   logger: Logger,
-  { config, getDependencies, cache }: AnalyticsGenerationRouteDependencies
+  { config, getDependencies, cache, preferredEndpoint }: AnalyticsGenerationRouteDependencies
 ): void => {
   // Both routes ask for the privilege Agent Builder's own routes ask for, as they use its models.
   router.get(
@@ -92,6 +92,7 @@ export const registerAnalyticsGenerationRoutes = (
           request,
           config,
           dependencies: await getDependencies(),
+          preferredEndpoint,
           logger,
         });
         const body: AnalyticsGenerationAvailability = {
@@ -119,7 +120,7 @@ export const registerAnalyticsGenerationRoutes = (
       security: { authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] } },
     },
     async (context, request, response) => {
-      const { source, timeField, useCaseId, refresh, connectorId } = request.body;
+      const { source, timeField, useCaseId, refresh } = request.body;
       const schemaOnly = request.body.schemaOnly === true || !config.sampleValues;
       const abortController = new AbortController();
       const deadline = setTimeout(() => abortController.abort(), GENERATION_DEADLINE_MS);
@@ -130,7 +131,7 @@ export const registerAnalyticsGenerationRoutes = (
           request,
           config,
           dependencies: await getDependencies(),
-          connectorId,
+          preferredEndpoint,
           logger,
         });
         if (!resolved.available) {

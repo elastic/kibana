@@ -13,6 +13,8 @@ export const GUIDED_SETUP_PATH = '/get_started';
 /** Where the event-analytics pages lived before the homes were unified; kept as redirects. */
 export const LEGACY_ANALYTICS_HOME_PATH = '/analytics';
 export const LEGACY_ANALYTICS_ONBOARDING_PATH = '/analytics/get_started';
+/** How many pages a crawl started from the "Crawl a website" flyout indexes unless told otherwise. */
+export const FIRST_WEB_CRAWL_MAX_PAGES = 50;
 export const ANALYTICS_DEEP_LINK_ID = 'analytics';
 export const ANALYTICS_TELEMETRY_PREFIX = 'searchHomepageAnalytics';
 

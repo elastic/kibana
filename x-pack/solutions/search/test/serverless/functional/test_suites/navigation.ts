@@ -72,10 +72,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           pageTestSubject: 'dashboardLandingPage',
         },
         {
-          link: { deepLinkId: 'searchGettingStarted' },
-          pageTestSubject: 'search-getting-started',
-        },
-        {
           link: { deepLinkId: 'dev_tools:console' },
           pageTestSubject: 'console',
         },
@@ -160,7 +156,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'dashboards',
           'machine_learning',
           // footer:
-          'search_getting_started',
           'dev_tools',
           'workflows',
           'data_management',

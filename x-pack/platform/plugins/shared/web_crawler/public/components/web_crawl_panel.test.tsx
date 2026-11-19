@@ -45,13 +45,17 @@ describe('WebCrawlPanel', () => {
 
   const renderPanel = (
     onManageWebCrawls?: () => void,
-    optionsDisplay?: WebCrawlPanelProps['optionsDisplay']
+    optionsDisplay?: WebCrawlPanelProps['optionsDisplay'],
+    defaultMaxDocuments?: number
   ) =>
     renderWithWebCrawlerContext(
       <QueryClientProvider client={createTestQueryClient()}>
         <WebCrawlPanel />
       </QueryClientProvider>,
-      { services: { http, share }, config: { onManageWebCrawls, optionsDisplay } }
+      {
+        services: { http, share },
+        config: { onManageWebCrawls, optionsDisplay, defaultMaxDocuments },
+      }
     );
 
   const renderWithStoredCrawl = async (crawl: WebCrawl) => {
@@ -199,6 +203,23 @@ describe('WebCrawlPanel', () => {
         })
       );
       expect(await screen.findByTestId('webCrawlStatus')).toBeInTheDocument();
+    });
+
+    it("starts a crawl from the URL alone with the host's page limit", async () => {
+      http.post.mockResolvedValue(createWebCrawl());
+      http.get.mockResolvedValue(createWebCrawl());
+      renderPanel(undefined, 'collapsed', 50);
+
+      fireEvent.change(getUrlInput(), { target: { value: 'https://example.com' } });
+      fireEvent.click(getSubmitButton());
+
+      await waitFor(() =>
+        expectStartRequest({
+          url: 'https://example.com',
+          maxDepth: WEB_CRAWL_DEFAULT_MAX_DEPTH,
+          maxDocuments: 50,
+        })
+      );
     });
 
     it("shows the server's refusal next to the URL while the options stay closed", async () => {
