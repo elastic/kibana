@@ -32,7 +32,7 @@ export class DetectionSetupService {
   constructor(
     @inject(DetectionAccountService) private readonly account: DetectionAccountService,
     @inject(DetectionWorkflowInstaller)
-    private readonly workflows: Pick<DetectionWorkflowInstaller, 'install' | 'disable'>,
+    private readonly workflows: Pick<DetectionWorkflowInstaller, 'install' | 'enable'>,
     @inject(CoreStartToken('security')) private readonly security: CoreStart['security'],
     @inject(CoreStartToken('elasticsearch'))
     private readonly elasticsearch: CoreStart['elasticsearch'],
@@ -88,7 +88,8 @@ export class DetectionSetupService {
     // leave a space that was never set up reading as set up. Once the workflow install has
     // started, the workflow runs as the new account: putting a rebound space back on its previous
     // account would split the engine and its workflow across two accounts, so a rebound space keeps
-    // the new binding and a retry converges on it.
+    // the new binding and a retry converges on it. A first install leaves the workflow off, so a
+    // space that was never set up has nothing running to undo.
     let isInstallStarted = false;
 
     try {
@@ -106,13 +107,11 @@ export class DetectionSetupService {
           409
         );
       }
+
+      // Last, so a call that failed or lost a race above never switches the workflow on.
+      await this.workflows.enable({ request, spaceId });
     } catch (error) {
       if (!isInstallStarted || previousAccountId === undefined) {
-        if (isInstallStarted) {
-          // A space that was never set up must not keep a workflow that fails every minute.
-          await this.workflows.disable({ request, spaceId });
-        }
-
         await this.restorePreviousBinding({
           request,
           spaceId,

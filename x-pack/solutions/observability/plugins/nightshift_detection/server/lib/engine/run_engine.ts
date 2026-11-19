@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Logger as CoreLogger } from '@kbn/core-di';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { inject, injectable } from 'inversify';
+import { getErrorMessage } from '../errors/get_error_message';
 import { AvailabilityService } from '../availability/availability_service';
 import { DetectionSignalStore } from '../signals/signal_store';
 import { wrapReading } from '../signals/wrap_reading';
@@ -28,10 +29,6 @@ import { EnabledSources, RunContext } from './tokens';
  * stores nothing from it once the run has ended.
  */
 export const RUN_BUDGET_MS = 4 * 60_000;
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
 
 function assertRunOpen(runSignal: AbortSignal): void {
   if (runSignal.aborted) {

@@ -3,7 +3,8 @@
 version: "1"
 name: "Nightshift Detection Engine"
 description: "Runs one tick of the Nightshift detection engine for the space, every minute."
-enabled: true
+# Off until the space's setup has checked the binding and turns it on.
+enabled: false
 tags:
   - observability
   - nightshift

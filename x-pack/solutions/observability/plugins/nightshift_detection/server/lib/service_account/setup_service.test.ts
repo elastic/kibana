@@ -40,7 +40,7 @@ function createSetup({
   installWorkflow?: () => Promise<void>;
 } = {}) {
   let currentAccountId = boundAccountId;
-  const disableWorkflow = jest.fn(async () => {});
+  const enableWorkflow = jest.fn(async () => {});
   const bindWorkload = jest.fn(async (_request: unknown, binding: { serviceAccountId: string }) => {
     currentAccountId = binding.serviceAccountId;
     return {};
@@ -93,7 +93,7 @@ function createSetup({
   return {
     service: new DetectionSetupService(
       new DetectionAccountService(security, elasticsearch),
-      { install: installWorkflow, disable: disableWorkflow },
+      { install: installWorkflow, enable: enableWorkflow },
       security,
       elasticsearch,
       spaces,
@@ -102,7 +102,7 @@ function createSetup({
     ),
     bindWorkload,
     unbindWorkload,
-    disableWorkflow,
+    enableWorkflow,
     rebind: (serviceAccountId: string) => {
       currentAccountId = serviceAccountId;
     },
@@ -111,7 +111,7 @@ function createSetup({
 
 describe('DetectionSetupService.enable', () => {
   it('binds the space to the account, and binds it again with the same id without undoing it', async () => {
-    const { service, unbindWorkload } = createSetup();
+    const { service, unbindWorkload, enableWorkflow } = createSetup();
 
     const first = await service.enable({
       request,
@@ -127,6 +127,8 @@ describe('DetectionSetupService.enable', () => {
     expect(first).toEqual({ spaceId: 'default', serviceAccountId: 'account-1' });
     expect(second).toEqual(first);
     expect(unbindWorkload).not.toHaveBeenCalled();
+    // The workflow is installed off and switched on by the last step of each successful call.
+    expect(enableWorkflow).toHaveBeenCalledTimes(2);
   });
 
   it('refuses with 403 a user without manage_security, binding nothing', async () => {
@@ -207,8 +209,10 @@ describe('DetectionSetupService.enable', () => {
     await expect(
       setup.service.enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
     ).rejects.toMatchObject({ statusCode: 409 });
-    // The newer binding belongs to the concurrent call: the failed one leaves it alone.
+    // The newer binding belongs to the concurrent call: the failed one leaves it alone, and it
+    // must not switch on the workflow the winning call is still setting up.
     expect(setup.unbindWorkload).not.toHaveBeenCalled();
+    expect(setup.enableWorkflow).not.toHaveBeenCalled();
   });
 
   it('refuses with 400 when the role of the account does not exist, binding nothing', async () => {
@@ -224,7 +228,7 @@ describe('DetectionSetupService.enable', () => {
   });
 
   it('puts a space that was never set up back, workflow off, when the workflow install fails', async () => {
-    const { service, unbindWorkload, disableWorkflow } = createSetup({
+    const { service, unbindWorkload, enableWorkflow } = createSetup({
       installWorkflow: async () => {
         throw new EngineHttpError('install failed', 500);
       },
@@ -234,7 +238,7 @@ describe('DetectionSetupService.enable', () => {
       service.enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
     ).rejects.toMatchObject({ statusCode: 500 });
     expect(unbindWorkload).toHaveBeenCalledTimes(1);
-    expect(disableWorkflow).toHaveBeenCalledTimes(1);
+    expect(enableWorkflow).not.toHaveBeenCalled();
   });
 
   it('keeps the new account of a rebound space when the workflow install fails', async () => {

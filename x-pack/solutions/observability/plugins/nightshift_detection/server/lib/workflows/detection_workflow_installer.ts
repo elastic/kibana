@@ -6,13 +6,13 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import { Logger as CoreLogger, PluginSetup, PluginStart } from '@kbn/core-di';
+import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { NIGHTSHIFT_DETECTION_ENGINE_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { EngineHttpError } from '../errors/engine_http_error';
+import { getErrorMessage } from '../errors/get_error_message';
 import { getStatusCode } from '../errors/get_status_code';
 
 /** Owner id of the managed workflows the engine installs; the workflow definition names it too. */
@@ -25,8 +25,7 @@ export class DetectionWorkflowInstaller {
     @inject(PluginStart<WorkflowsExtensionsServerPluginStart>('workflowsExtensions'))
     private readonly workflowsExtensions: WorkflowsExtensionsServerPluginStart,
     @inject(PluginSetup<WorkflowsServerPluginSetup>('workflowsManagement'))
-    private readonly workflowsManagement: WorkflowsServerPluginSetup,
-    @inject(CoreLogger) private readonly logger: Logger
+    private readonly workflowsManagement: WorkflowsServerPluginSetup
   ) {}
 
   /** The id of the workflow document installed in a space. */
@@ -35,12 +34,14 @@ export class DetectionWorkflowInstaller {
   }
 
   /**
-   * Installs the engine's workflow in a space, bound to `serviceAccountId`:
+   * Installs the engine's workflow in a space, bound to `serviceAccountId`, and leaves it off:
    * 1. Install it with the caller's request, because binding a workflow to an account needs the
    *    caller's `manage_security`, which the workflows plugin enforces. Installing again with
-   *    another account rebinds the workflow.
+   *    another account rebinds the workflow and keeps its enabled state.
    * 2. Check it runs as the account, because installing is best-effort in the workflows plugin.
-   * 3. Turn it on.
+   *
+   * A first install stays off until `enable`, so a setup that fails or loses a race after this
+   * leaves no workflow running.
    *
    * @throws EngineHttpError when the install fails, or when the installed workflow does not run as
    * the account.
@@ -55,35 +56,23 @@ export class DetectionWorkflowInstaller {
     serviceAccountId: string;
   }): Promise<void> {
     await this.installWorkflow({ request, spaceId, serviceAccountId });
-    const enabled = await this.assertBoundTo({ request, spaceId, serviceAccountId });
-    await this.setEnabled({ request, spaceId, isEnabled: enabled });
+    await this.assertBoundTo({ request, spaceId, serviceAccountId });
   }
 
-  /**
-   * Turns the workflow off, for a setup that failed after installing it. It is best effort: a
-   * failure is logged, since the setup error that led here is the one to report.
-   */
-  public async disable({
+  /** Turns the installed workflow on. Safe to call when it is already on. */
+  public async enable({
     request,
     spaceId,
   }: {
     request: KibanaRequest;
     spaceId: string;
   }): Promise<void> {
-    try {
-      await this.workflowsManagement.management.updateWorkflow(
-        DetectionWorkflowInstaller.getDocumentId(spaceId),
-        { enabled: false },
-        spaceId,
-        request
-      );
-    } catch (error) {
-      this.logger.warn(
-        `Could not turn off the detection engine workflow of space ${spaceId}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
+    await this.workflowsManagement.management.updateWorkflow(
+      DetectionWorkflowInstaller.getDocumentId(spaceId),
+      { enabled: true },
+      spaceId,
+      request
+    );
   }
 
   private async installWorkflow({
@@ -108,15 +97,14 @@ export class DetectionWorkflowInstaller {
       const statusCode = getStatusCode(error) ?? 500;
       const retry = statusCode >= 500 ? ' Call _enable again to retry.' : '';
       throw new EngineHttpError(
-        `Installing workflow [${NIGHTSHIFT_DETECTION_ENGINE_WORKFLOW_ID}] failed: ${
-          error instanceof Error ? error.message : String(error)
-        }.${retry}`,
+        `Installing workflow [${NIGHTSHIFT_DETECTION_ENGINE_WORKFLOW_ID}] failed: ${getErrorMessage(
+          error
+        )}.${retry}`,
         statusCode
       );
     }
   }
 
-  /** Returns whether the installed workflow is already on. */
   private async assertBoundTo({
     request,
     spaceId,
@@ -125,7 +113,7 @@ export class DetectionWorkflowInstaller {
     request: KibanaRequest;
     spaceId: string;
     serviceAccountId: string;
-  }): Promise<boolean> {
+  }): Promise<void> {
     const document = await this.workflowsManagement.management.getWorkflow(
       DetectionWorkflowInstaller.getDocumentId(spaceId),
       spaceId,
@@ -136,27 +124,6 @@ export class DetectionWorkflowInstaller {
       throw new EngineHttpError(
         `Setting up space [${spaceId}] did not bind [${NIGHTSHIFT_DETECTION_ENGINE_WORKFLOW_ID}] to [${serviceAccountId}]. Call _enable again to retry.`,
         500
-      );
-    }
-
-    return document.enabled === true;
-  }
-
-  private async setEnabled({
-    request,
-    spaceId,
-    isEnabled,
-  }: {
-    request: KibanaRequest;
-    spaceId: string;
-    isEnabled: boolean;
-  }): Promise<void> {
-    if (!isEnabled) {
-      await this.workflowsManagement.management.updateWorkflow(
-        DetectionWorkflowInstaller.getDocumentId(spaceId),
-        { enabled: true },
-        spaceId,
-        request
       );
     }
   }
