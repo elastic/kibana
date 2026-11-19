@@ -33,6 +33,7 @@ import type {
   SyncEscalationResponse,
 } from '../../../common';
 import { retryOnTransientError } from '../../retry_on_transient_error';
+import { investigationQueryKeys } from '../../investigations/query_keys';
 import { escalationQueryKeys } from '../query_keys';
 
 /**
@@ -41,6 +42,12 @@ import { escalationQueryKeys } from '../query_keys';
  */
 const invalidateEscalations = (queryClient: ReturnType<typeof useQueryClient>) => {
   void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
+};
+
+/** Creating or linking an escalation can assign the caller to the investigation. */
+const invalidateEscalationsAndInvestigations = (queryClient: ReturnType<typeof useQueryClient>) => {
+  invalidateEscalations(queryClient);
+  void queryClient.invalidateQueries({ queryKey: investigationQueryKeys.all });
 };
 
 /** Lists escalations, optionally filtered by status/page/perPage and with debounced search. */
@@ -123,7 +130,7 @@ export const useCreateEscalation = () => {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: () => invalidateEscalations(queryClient),
+    onSuccess: () => invalidateEscalationsAndInvestigations(queryClient),
   });
 };
 
@@ -146,7 +153,7 @@ export const useAttachToEscalation = () => {
           body: JSON.stringify({ linked_investigations: [linkedInvestigationId] }),
         }
       ),
-    onSuccess: () => invalidateEscalations(queryClient),
+    onSuccess: () => invalidateEscalationsAndInvestigations(queryClient),
   });
 };
 

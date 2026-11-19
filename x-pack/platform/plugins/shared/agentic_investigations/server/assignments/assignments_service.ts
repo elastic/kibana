@@ -18,7 +18,7 @@ export interface AssignmentsServiceDeps {
 }
 
 /** Casts a raw metadata value to `string[]`, ignoring non-string elements. */
-const toStringArray = (value: unknown): string[] => {
+export const toStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   return value.filter((v): v is string => typeof v === 'string');
 };

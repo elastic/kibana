@@ -236,6 +236,9 @@ All routes are internal and versioned (`/internal/investigations/escalations`, v
 3. Resolves the escalation template's declared fields at runtime via `agentBuilder.conversationTemplates.get('escalation')`.
 4. Copies the intersection of the investigation's metadata and those declared fields, **excluding `status`** (so the escalation opens with `status: 'open'` from the template default) and **excluding `linked_investigations`** (set separately to `[linked_investigation_id]`). This filter is what prevents a `400` from `workflow_execution_ids`, which is declared on the investigation template but not on the escalation template.
 5. Creates the conversation with `templateId: 'escalation'` and no explicit `agentId` — the default agent is used, so collaborators can always see the escalation regardless of their access to the investigation's agent.
+6. Appends the escalation owner to the investigation's assignees through `AssignmentsService`, keeping the existing ones.
+
+Linking an investigation to an existing escalation assigns the caller only to newly linked investigations that have no assignees yet. Both assignments are best-effort (a failure is logged and the escalation write still succeeds), need `manage_investigations` (checked with `assertCanManage`), and are skipped for principals without a user profile uid.
 
 ### List behaviour
 
