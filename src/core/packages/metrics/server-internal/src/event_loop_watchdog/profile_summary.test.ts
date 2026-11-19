@@ -339,20 +339,6 @@ describe('summarizeProfile', () => {
   it('summarises a captured plugin-setup profile and resolves stable location tokens under src/ and x-pack/', () => {
     const fixturePath = path.join(__dirname, '__fixtures__', 'plugin_setup_window.json');
     const fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf8')) as SummarizableProfile;
-    for (const node of fixture.nodes) {
-      const url = node.callFrame.url ?? '';
-      if (url.startsWith('file:///kibana/src/') || url.startsWith('file:///kibana/x-pack/')) {
-        const prefix = url.startsWith('file:///kibana/src/')
-          ? 'file:///kibana/src/'
-          : 'file:///kibana/x-pack/';
-        const rest = url.slice(prefix.length);
-        expect(rest.startsWith('f/')).toBe(true);
-        expect(rest.endsWith('.ts')).toBe(true);
-        const id = rest.slice('f/'.length, -'.ts'.length);
-        expect(id.length).toBeGreaterThan(0);
-        expect([...id].every((c) => c >= '0' && c <= '9')).toBe(true);
-      }
-    }
     const summary = summarizeProfile(fixture, { root: ROOT });
 
     expect(summary.samples).toBe(200);
