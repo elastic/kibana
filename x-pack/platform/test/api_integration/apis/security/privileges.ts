@@ -634,6 +634,21 @@ export default function ({ getService }: FtrProviderContext) {
             });
           });
       });
+
+      it('grants the Context Engine manage memory API privilege only through its sub-feature', async () => {
+        const manageMemoryAction = 'api:contextEngine:manage_memory';
+
+        const { body } = await supertest
+          .get('/api/security/privileges?includeActions=true')
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200);
+        const { contextEngine } = (body as RawKibanaPrivileges).features;
+
+        expect(contextEngine.manage_memory).to.contain(manageMemoryAction);
+        expect(contextEngine.all).not.to.contain(manageMemoryAction);
+        expect(contextEngine.read).not.to.contain(manageMemoryAction);
+      });
     });
 
     // In this non-Basic case, results should be exactly the same as not supplying the respectLicenseLevel flag
