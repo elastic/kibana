@@ -156,6 +156,25 @@ describe('countSandboxEgressDenials', () => {
     expect(countSandboxEgressDenials(rounds)).toBe(5);
   });
 
+  it('follows a curl command across backslash-newline continuations', () => {
+    const rounds = [
+      {
+        steps: [
+          {
+            ...bash([
+              {
+                type: 'other',
+                data: { stderr: 'curl: (22) The requested URL returned error: 403', exit_code: 22 },
+              },
+            ]),
+            params: { command: 'curl -sSf \\\n  https://github.com/elastic/kibana/issues' },
+          },
+        ],
+      },
+    ] as unknown as ConversationRound[];
+    expect(countSandboxEgressDenials(rounds)).toBe(1);
+  });
+
   it("doesn't count another host's 403 as the firewall's", () => {
     const http403 = 'The requested URL returned error: 403';
     const command = (text: string, stderr: string) => ({
