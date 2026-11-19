@@ -15,6 +15,7 @@ jest.mock('@kbn/inference-prompt-utils', () => ({
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { AnalysisTarget } from '../../shared/analysis_target';
 import { identifyFeatures, MAX_IDENTIFIED_FEATURES_PER_ITERATION } from './identify_features';
+import { serializeInferenceDocuments } from './serialize_inference_documents';
 
 const target: AnalysisTarget = {
   id: 'logs.test',
@@ -138,7 +139,9 @@ describe('identifyFeatures', () => {
           function: 'finalize_features',
         },
         input: {
-          sample_documents: JSON.stringify([{ _id: 'doc-1', fields: { message: 'test message' } }]),
+          sample_documents: serializeInferenceDocuments([
+            { _id: 'doc-1', fields: { message: 'test message' } },
+          ]),
           previously_identified_features: JSON.stringify([
             {
               id: 'existing',

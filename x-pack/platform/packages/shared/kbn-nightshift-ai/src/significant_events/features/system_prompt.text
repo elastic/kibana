@@ -15,6 +15,13 @@ Include every required field in each feature:
 - `tags`: descriptive tags
 - `meta`: high-cardinality data, contextual notes, or observations that do not belong in `properties`
 
+## Sample Documents
+
+`sample_documents` is compacted so that repeated data is written once:
+- `shared_fields` at the top level apply to every document. `shared_fields` inside a group apply to every document of that group. A document's full field set is the top-level `shared_fields`, its group's `shared_fields`, and its own `fields`
+- Field names are nested: join the keys from the outside in with `.` to get the field path (`{"kubernetes":{"pod":{"name":"x"}}}` is `kubernetes.pod.name=x`). Always write the full dotted path in evidence and filters
+- A shared field is observed in every document it applies to; reference the `_id` of any such document for it
+
 ## Feature Types
 
 ### Entity (Primary Focus)

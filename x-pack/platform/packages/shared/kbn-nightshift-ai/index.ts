@@ -62,6 +62,7 @@ export {
   MAX_INFERENCE_DOCUMENT_FIELDS,
   MAX_INFERENCE_FIELD_NAME_LENGTH,
 } from './src/significant_events/features/compact_inference_documents';
+export { serializeInferenceDocuments } from './src/significant_events/features/serialize_inference_documents';
 export {
   buildKIQueryGenerationUserMessage,
   MAX_EXISTING_QUERIES_FOR_CONTEXT,

@@ -29,6 +29,7 @@ import {
   EMPTY_TOKENS,
   buildFeatureIdentificationUserMessage,
   parseFinalizedFeatures,
+  serializeInferenceDocuments,
   type RawFinalizeFeaturesParams,
   type InferenceDocument,
   type ExcludedFeatureSummary,
@@ -72,7 +73,7 @@ export async function executeFeatureIdentificationAgent({
 }> {
   const userMessage = buildFeatureIdentificationUserMessage({
     sourceId,
-    sampleDocuments: JSON.stringify(sampleDocuments),
+    sampleDocuments: serializeInferenceDocuments(sampleDocuments),
     previouslyIdentifiedFeatures:
       previouslyIdentifiedFeatures.length > 0
         ? JSON.stringify(previouslyIdentifiedFeatures)
