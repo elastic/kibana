@@ -25725,7 +25725,6 @@
     "xpack.contextEngine.aiIndexDetail.automations.emptyBodyManaged": "Aucune automatisation configurée.",
     "xpack.contextEngine.aiIndexDetail.automations.enabledBadge": "Activé",
     "xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel": "Automatisations verrouillées. Ajoutez une source ci-dessus pour débloquer les automatisations.",
-    "xpack.contextEngine.aiIndexDetail.automations.lockedBody": "Ajoutez une source ci-dessus pour débloquer les automatisations.",
     "xpack.contextEngine.aiIndexDetail.automations.maxAutomationsTooltip": "Vous avez atteint le nombre maximal d’automatisations.",
     "xpack.contextEngine.aiIndexDetail.automations.missingCreateWorkflowTooltip": "Vous avez besoin du privilège Workflows create pour créer un workflow.",
     "xpack.contextEngine.aiIndexDetail.automations.missingWorkflowPrivilege": "Vous avez besoin du privilège Workflows read pour afficher les détails de l'automatisation.",

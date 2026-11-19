@@ -13,6 +13,13 @@ import { AutomationsLockedDescription } from '../automations_locked_description'
 import { AutomationsPanel } from '../automations_panel';
 import { LockedSectionPanel } from '../locked_section_panel';
 
+const automationsLockedAriaLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel',
+  {
+    defaultMessage: 'Automations locked. Add a source in the Sources tab to unlock automations.',
+  }
+);
+
 interface AutomationsSectionProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
@@ -37,26 +44,14 @@ export const AutomationsSection = ({
     />
   ) : (
     <LockedSectionPanel
-      data-test-subj="contextAiIndexSettingsAutomationsLocked"
-      ariaLabel={i18n.translate(
-        'xpack.contextEngine.aiIndexDetail.settings.automations.lockedAriaLabel',
-        {
-          defaultMessage:
-            'Automations locked. Add a source in the Sources tab to unlock automations.',
-        }
-      )}
+      data-test-subj="contextAutomationsLocked"
+      ariaLabel={automationsLockedAriaLabel}
       title={
         <FormattedMessage
-          id="xpack.contextEngine.aiIndexDetail.settings.automations.title"
+          id="xpack.contextEngine.aiIndexDetail.automations.title"
           defaultMessage="Automations"
         />
       }
-      description={
-        <AutomationsLockedDescription
-          aiIndexId={aiIndexId}
-          bodyMessageId="xpack.contextEngine.aiIndexDetail.settings.automations.lockedBody"
-          addSourceLinkMessageId="xpack.contextEngine.aiIndexDetail.settings.automations.lockedAddSourceLink"
-        />
-      }
+      description={<AutomationsLockedDescription aiIndexId={aiIndexId} />}
     />
   );

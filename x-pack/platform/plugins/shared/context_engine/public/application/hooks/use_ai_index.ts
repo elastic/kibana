@@ -15,7 +15,7 @@ interface UseAiIndexResult {
   aiIndex: GetAiIndexResponse | undefined;
   isLoading: boolean;
   error: Error | undefined;
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 /**
@@ -33,5 +33,9 @@ export const useAiIndex = (id: string): UseAiIndexResult => {
     queryFn: ({ signal }) => getAiIndex(http, { aiIndexId: id, signal }),
   });
 
-  return { aiIndex: data, isLoading, error: error ?? undefined, refetch };
+  const refetchAiIndex = async (): Promise<void> => {
+    await refetch();
+  };
+
+  return { aiIndex: data, isLoading, error: error ?? undefined, refetch: refetchAiIndex };
 };

@@ -13,15 +13,9 @@ import { getAiIndexSourcesPath } from '../../paths';
 
 interface AutomationsLockedDescriptionProps {
   aiIndexId: string;
-  bodyMessageId?: string;
-  addSourceLinkMessageId?: string;
 }
 
-export const AutomationsLockedDescription = ({
-  aiIndexId,
-  bodyMessageId = 'xpack.contextEngine.aiIndexDetail.automations.lockedBody',
-  addSourceLinkMessageId = 'xpack.contextEngine.aiIndexDetail.automations.lockedAddSourceLink',
-}: AutomationsLockedDescriptionProps) => {
+export const AutomationsLockedDescription = ({ aiIndexId }: AutomationsLockedDescriptionProps) => {
   const { navigateToContextEngine } = useNavigation();
 
   const addSourceLink = (
@@ -29,13 +23,16 @@ export const AutomationsLockedDescription = ({
       onClick={() => navigateToContextEngine(getAiIndexSourcesPath(aiIndexId))}
       data-test-subj="contextAutomationsLockedAddSourceLink"
     >
-      <FormattedMessage id={addSourceLinkMessageId} defaultMessage="Add a source" />
+      <FormattedMessage
+        id="xpack.contextEngine.aiIndexDetail.automations.lockedAddSourceLink"
+        defaultMessage="Add a source"
+      />
     </EuiLink>
   );
 
   return (
     <FormattedMessage
-      id={bodyMessageId}
+      id="xpack.contextEngine.aiIndexDetail.automations.lockedBody"
       defaultMessage="Add a source and Context creates automations for it. {addSourceLink}"
       values={{ addSourceLink }}
     />

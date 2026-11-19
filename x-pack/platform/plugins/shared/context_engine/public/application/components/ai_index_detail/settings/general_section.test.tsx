@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { GeneralSection } from './general_section';
@@ -63,6 +63,23 @@ describe('GeneralSection', () => {
     expect(screen.getByTestId('contextAiIndexSettingsGeneral')).toBeInTheDocument();
     expect(screen.getByText('General')).toBeInTheDocument();
     expect(screen.getByTestId('contextDescriptionTextArea')).toHaveValue('My custom description');
+  });
+
+  it('does not show save or discard for trailing whitespace only', () => {
+    renderWithProviders(
+      <GeneralSection
+        isLoading={false}
+        aiIndex={{ ...aiIndex, description: 'My custom description' }}
+        onSaved={jest.fn()}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'My custom description  ' },
+    });
+
+    expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextDescriptionCancelButton')).not.toBeInTheDocument();
   });
 
   it('does not show save or discard until the description changes', () => {
@@ -147,7 +164,36 @@ describe('GeneralSection', () => {
       );
     });
 
-    expect(onSaved).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(onSaved).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
+  });
+
+  it('shows the refetched description after onSaved resolves', async () => {
+    const testServices = coreMock.createStart();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    const SaveWithRefetchHarness = () => {
+      const [description, setDescription] = useState('My custom description');
+      const onSaved = async () => {
+        setDescription('Refetched description');
+      };
+      return (
+        <GeneralSection isLoading={false} aiIndex={{ ...aiIndex, description }} onSaved={onSaved} />
+      );
+    };
+
+    renderWithProviders(<SaveWithRefetchHarness />, testServices);
+
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'Updated description' },
+    });
+    fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextDescriptionTextArea')).toHaveValue('Refetched description');
+    });
     expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
   });
 
@@ -188,6 +234,6 @@ describe('GeneralSection', () => {
 
     expect(screen.getByTestId('contextAiIndexSettingsGeneral')).toBeInTheDocument();
     expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
-    expect(document.querySelector('.euiSkeletonText')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSettingsGeneralLoading')).toBeInTheDocument();
   });
 });

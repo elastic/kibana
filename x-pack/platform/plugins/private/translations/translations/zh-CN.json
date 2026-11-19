@@ -25805,7 +25805,6 @@
     "xpack.contextEngine.aiIndexDetail.automations.emptyBodyManaged": "未配置自动化。",
     "xpack.contextEngine.aiIndexDetail.automations.enabledBadge": "已启用",
     "xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel": "自动化已锁定。在上方添加数据源以解锁自动化功能。",
-    "xpack.contextEngine.aiIndexDetail.automations.lockedBody": "在上方添加数据源以解锁自动化功能",
     "xpack.contextEngine.aiIndexDetail.automations.maxAutomationsTooltip": "您已达到自动化数量上限。",
     "xpack.contextEngine.aiIndexDetail.automations.missingCreateWorkflowTooltip": "您需要具备工作流创建权限，才能创建工作流。",
     "xpack.contextEngine.aiIndexDetail.automations.missingWorkflowPrivilege": "您需要具备工作流读取权限，才能查看自动化详细信息。",

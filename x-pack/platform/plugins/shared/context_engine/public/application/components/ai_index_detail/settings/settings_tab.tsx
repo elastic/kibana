@@ -18,7 +18,7 @@ interface SettingsTabProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
   aiIndexId: string;
-  onSaved: () => void;
+  onSaved: () => void | Promise<void>;
   isAutomationsUnlocked: boolean;
   indexManagementHref: string | undefined;
 }

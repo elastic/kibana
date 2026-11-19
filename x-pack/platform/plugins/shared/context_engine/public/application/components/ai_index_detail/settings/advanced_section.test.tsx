@@ -9,7 +9,7 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import type { AiIndexHttpItem } from '../../../../../common/http_api/ai_indices';
+import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_PATHS } from '../../../paths';
 import { AdvancedSection } from './advanced_section';
 
@@ -18,7 +18,6 @@ const navigateToContextEngine = jest.fn();
 jest.mock('../../../hooks/use_navigation', () => ({
   useNavigation: () => ({
     navigateToContextEngine,
-    createContextEngineUrl: (path: string) => path,
   }),
 }));
 
@@ -41,7 +40,7 @@ jest.mock('../../ai_index_list', () => ({
   ),
 }));
 
-const aiIndex: AiIndexHttpItem = {
+const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },

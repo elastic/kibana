@@ -30,7 +30,7 @@ import { SettingsRow } from './settings_row';
 interface GeneralSectionProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
-  onSaved: () => void;
+  onSaved: () => void | Promise<void>;
 }
 
 export const GeneralSection = ({ isLoading, aiIndex, onSaved }: GeneralSectionProps) => {
@@ -39,19 +39,20 @@ export const GeneralSection = ({ isLoading, aiIndex, onSaved }: GeneralSectionPr
   const isManaged = aiIndex?.managed === true;
   const saved = aiIndex?.description ?? '';
   const description = edited ?? saved;
+  const trimmedDescription = description.trim();
   const validation = validateTextInput({
-    value: description,
+    value: trimmedDescription,
     maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
   });
-  const isDirty = edited !== undefined && edited.trim() !== saved.trim();
+  const isDirty = edited !== undefined && trimmedDescription !== saved.trim();
 
   const save = async () => {
     if (!aiIndex || !validation.valid) {
       return;
     }
-    if (await saveDescription(aiIndex, description)) {
+    if (await saveDescription(aiIndex, trimmedDescription)) {
+      await onSaved();
       setEdited(undefined);
-      onSaved();
     }
   };
 
@@ -80,7 +81,7 @@ export const GeneralSection = ({ isLoading, aiIndex, onSaved }: GeneralSectionPr
         }
       >
         {isLoading ? (
-          <EuiSkeletonText lines={2} />
+          <EuiSkeletonText data-test-subj="contextAiIndexSettingsGeneralLoading" lines={2} />
         ) : (
           <EuiFormRow
             fullWidth

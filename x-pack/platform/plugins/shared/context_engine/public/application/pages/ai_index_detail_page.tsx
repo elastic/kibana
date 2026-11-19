@@ -16,15 +16,13 @@ import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import {
   AiIndexCreatedCallout,
-  AutomationsLockedDescription,
-  AutomationsPanel,
   ConnectAgentPanel,
   LockedSectionPanel,
   SignalsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
-import { SettingsTab } from '../components/ai_index_detail/settings';
+import { AutomationsSection, SettingsTab } from '../components/ai_index_detail/settings';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
@@ -73,13 +71,6 @@ const knowledgeIndicatorsTabLabel = i18n.translate(
 const settingsTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.settings', {
   defaultMessage: 'Settings',
 });
-
-const automationsLockedAriaLabel = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel',
-  {
-    defaultMessage: 'Automations locked. Add a source in the Sources tab to unlock automations.',
-  }
-);
 
 const discoverLinkLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.discoverLink', {
   defaultMessage: 'Open in Discover',
@@ -294,26 +285,13 @@ export const AiIndexDetailPage = () => {
           <EuiSpacer size="m" />
         </>
       )}
-      {showAutomationsPanel ? (
-        <AutomationsPanel
-          isLoading={isLoading}
-          aiIndex={aiIndex}
-          onSaved={refetch}
-          isManaged={!!aiIndex?.managed}
-        />
-      ) : (
-        <LockedSectionPanel
-          data-test-subj="contextAutomationsLocked"
-          ariaLabel={automationsLockedAriaLabel}
-          title={
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.automations.title"
-              defaultMessage="Automations"
-            />
-          }
-          description={<AutomationsLockedDescription aiIndexId={resolvedAiIndexId} />}
-        />
-      )}
+      <AutomationsSection
+        isLoading={isLoading}
+        aiIndex={aiIndex}
+        aiIndexId={resolvedAiIndexId}
+        onSaved={refetch}
+        isUnlocked={showAutomationsPanel}
+      />
       <EuiSpacer size="m" />
       {showSignalsSection &&
         (showSignalsPanel ? (

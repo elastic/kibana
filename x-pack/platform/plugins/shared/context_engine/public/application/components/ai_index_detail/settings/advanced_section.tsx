@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } fr
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import type { AiIndexHttpItem } from '../../../../../common/http_api/ai_indices';
+import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { CONTEXT_ENGINE_PATHS } from '../../../paths';
 import { AiIndexDeleteConfirmModal } from '../../ai_index_list';
@@ -17,7 +17,7 @@ import { SettingsPanel } from './settings_panel';
 import { SettingsRow } from './settings_row';
 
 interface AdvancedSectionProps {
-  aiIndex: AiIndexHttpItem;
+  aiIndex: GetAiIndexResponse;
   indexManagementHref: string | undefined;
 }
 
