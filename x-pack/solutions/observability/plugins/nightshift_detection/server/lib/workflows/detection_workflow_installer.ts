@@ -8,7 +8,7 @@
 import { inject, injectable } from 'inversify';
 import type { KibanaRequest } from '@kbn/core/server';
 import { PluginSetup, PluginStart } from '@kbn/core-di';
-import { NIGHTSHIFT_DETECTION_ENGINE_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { EngineHttpError } from '../errors/engine_http_error';
@@ -18,7 +18,7 @@ import { getStatusCode } from '../errors/get_status_code';
 /** Owner id of the managed workflows the engine installs; the workflow definition names it too. */
 export const DETECTION_ENGINE_WORKFLOW_OWNER = 'nightshiftDetection';
 
-/** Installs the engine's bound workflow in a space, checks it is bound, and turns it on. */
+/** Installs the continuous detection workflow in a space, checks it is bound, and turns it on. */
 @injectable()
 export class DetectionWorkflowInstaller {
   constructor(
@@ -30,11 +30,11 @@ export class DetectionWorkflowInstaller {
 
   /** The id of the workflow document installed in a space. */
   private static getDocumentId(spaceId: string): string {
-    return `${NIGHTSHIFT_DETECTION_ENGINE_WORKFLOW_ID}-${spaceId}`;
+    return `${NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID}-${spaceId}`;
   }
 
   /**
-   * Installs the engine's workflow in a space, bound to `serviceAccountId`, and leaves it off:
+   * Installs the continuous detection workflow in a space, bound to `serviceAccountId`, and leaves it off:
    * 1. Install it with the caller's request, because binding a workflow to an account needs the
    *    caller's `manage_security`, which the workflows plugin enforces. Installing again with
    *    another account rebinds the workflow and keeps its enabled state.
@@ -89,7 +89,7 @@ export class DetectionWorkflowInstaller {
     try {
       await client.managedWorkflows.install(
         DETECTION_ENGINE_WORKFLOW_OWNER,
-        NIGHTSHIFT_DETECTION_ENGINE_WORKFLOW_ID,
+        NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID,
         { spaceId, workflowIdSuffix: spaceId, values: { serviceAccountId } }
       );
     } catch (error) {
@@ -97,7 +97,7 @@ export class DetectionWorkflowInstaller {
       const statusCode = getStatusCode(error) ?? 500;
       const retry = statusCode >= 500 ? ' Call _enable again to retry.' : '';
       throw new EngineHttpError(
-        `Installing workflow [${NIGHTSHIFT_DETECTION_ENGINE_WORKFLOW_ID}] failed: ${getErrorMessage(
+        `Installing workflow [${NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID}] failed: ${getErrorMessage(
           error
         )}.${retry}`,
         statusCode
@@ -122,7 +122,7 @@ export class DetectionWorkflowInstaller {
 
     if (document?.definition?.settings?.run_as !== serviceAccountId) {
       throw new EngineHttpError(
-        `Setting up space [${spaceId}] did not bind [${NIGHTSHIFT_DETECTION_ENGINE_WORKFLOW_ID}] to [${serviceAccountId}]. Call _enable again to retry.`,
+        `Setting up space [${spaceId}] did not bind [${NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID}] to [${serviceAccountId}]. Call _enable again to retry.`,
         500
       );
     }

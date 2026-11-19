@@ -14,7 +14,7 @@ import {
   DetectionWorkflowInstaller,
 } from '../lib/workflows/detection_workflow_installer';
 
-/** Binds the engine's bound workflow installer and the service that runs a tick from a request. */
+/** Binds the continuous detection workflow installer and the service that runs a tick from a request. */
 export function bindTick({ bind }: ContainerModuleLoadOptions): void {
   bind(DetectionWorkflowInstaller).toSelf().inSingletonScope();
   bind(TickService).toSelf().inSingletonScope();

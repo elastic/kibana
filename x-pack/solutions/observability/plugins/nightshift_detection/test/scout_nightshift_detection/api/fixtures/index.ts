@@ -100,7 +100,7 @@ const createAdminRequester =
 /**
  * Sets the default space up to run the detection engine: the role on stateful (Serverless gets
  * `_nightshift_detection` from elasticsearch-controller), the deployment's detection account, and
- * the space's binding and engine workflow. Once for the whole suite: the account belongs to the
+ * the space's binding and continuous detection workflow. Once for the whole suite: the account belongs to the
  * deployment, and two workers creating it at once conflict.
  */
 export const setUpDetectionEngine = async ({

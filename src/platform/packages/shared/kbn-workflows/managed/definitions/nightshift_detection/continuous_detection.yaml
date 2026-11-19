@@ -1,8 +1,8 @@
 # Installed per space, bound to the detection engine service account, by the space's setup. The
 # schedule starts it every minute and it calls the engine's tick route as that account.
 version: "1"
-name: "Nightshift Detection Engine"
-description: "Runs one tick of the Nightshift detection engine for the space, every minute."
+name: "Nightshift Continuous Detection"
+description: "Runs the Nightshift detection strategies for the space every minute."
 # Off until the space's setup has checked the binding and turns it on.
 enabled: false
 tags:
@@ -17,7 +17,7 @@ settings:
   # A tick that outlives its minute must not pile up: the next trigger is dropped, and the
   # engine's own lease would turn a second tick away anyway.
   concurrency:
-    key: "nightshift-detection-engine"
+    key: "nightshift-continuous-detection"
     strategy: drop
     max: 1
 triggers:

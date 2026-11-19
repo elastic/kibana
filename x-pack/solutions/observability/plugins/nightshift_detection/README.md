@@ -40,7 +40,7 @@ privilege runs the setup, and the server only binds the space to the account it 
 binds the space to an existing account. Calling it again with the same id changes nothing; another
 space can reuse the account.
 
-Setting a space up also installs and enables its engine workflow, `system-nightshift-detection-engine-<space>`,
+Setting a space up also installs and enables its continuous detection workflow, `system-nightshift-continuous-detection-<space>`,
 bound to the same account. It runs every minute and calls `POST /internal/nightshift/detection/_tick`
 as the account. A user with `manage_nightshift` can call `_tick` too, and runs as the account;
 `{ "skip_backlog": true }` starts every due strategy at its latest settled step instead of replaying
