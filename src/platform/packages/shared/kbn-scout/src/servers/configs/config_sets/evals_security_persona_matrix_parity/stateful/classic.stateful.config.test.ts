@@ -27,11 +27,11 @@ describe('loads without GCS_CREDENTIALS', () => {
     process.env = originalEnv;
   });
   it('adds no GCS secure file', () => {
-    let servers: typeof import('./classic.stateful.config').servers | undefined;
+    let configServers: typeof import('./classic.stateful.config').servers | undefined;
     jest.isolateModules(() => {
-      ({ servers } = jest.requireActual('./classic.stateful.config'));
+      ({ servers: configServers } = jest.requireActual('./classic.stateful.config'));
     });
-    expect(servers?.esTestCluster.secureFiles ?? []).not.toContainEqual(
+    expect(configServers?.esTestCluster.secureFiles ?? []).not.toContainEqual(
       expect.stringContaining(GCS_SETTING_PREFIX)
     );
   });
