@@ -17,10 +17,11 @@
 2. `Fixes https://github.com/elastic/kibana/issues/N` (full URL; `Part of` for partial work)
 3. Problem, then solution, then Before and After
 4. `## How to test` (reproduction link or steps, then verification steps)
-5. Optional `## Release note`
-6. `## Review notes`, content collapsed
-7. `## Checklist`, content collapsed
-8. `## Identify risks`, content collapsed
+5. `## Impact` and `## Action`, only for breaking changes and deprecations (see "Breaking changes and deprecations")
+6. Optional `## Release note`
+7. `## Review notes`, content collapsed
+8. `## Checklist`, content collapsed
+9. `## Identify risks`, content collapsed
 
 Skeleton:
 
