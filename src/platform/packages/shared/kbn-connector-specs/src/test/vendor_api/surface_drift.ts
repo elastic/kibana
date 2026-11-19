@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorDrift, DriftReportEntry, FailedDrift, SpecChange } from './detect_drift';
+import type { ConnectorDrift, DriftReportEntry, FailedDrift } from './detect_drift';
+import { connectorOf, DRIFT_ISSUE_LABEL, markerOf } from './drift_issue_marker';
+import { changeList, findingsOf, renderDriftIssue } from './drift_issue';
 import type { VendorApiLog } from './update_vendor_api';
-
-/** The label of every drift issue; the connector is named by a marker in the body. */
-export const DRIFT_ISSUE_LABEL = 'connector-validation';
-
-const MAX_CHANGES_PER_KIND = 30;
-// GitHub rejects issue bodies longer than 65536 characters.
-const MAX_BODY_LENGTH = 60000;
+import { errorMessage } from './values';
 
 export interface DriftIssue {
   readonly number: number;
   readonly state: 'open' | 'closed';
+  readonly title: string;
   readonly body: string;
   readonly url: string;
 }
@@ -35,7 +32,7 @@ export interface IssueTracker {
   }) => Promise<DriftIssue>;
   readonly update: (
     number: number,
-    changes: { body?: string; state?: 'open' | 'closed' }
+    changes: { title?: string; body?: string; state?: 'open' | 'closed' }
   ) => Promise<void>;
   readonly comment: (number: number, body: string) => Promise<void>;
 }
@@ -81,106 +78,7 @@ export interface SurfaceDriftOptions {
   readonly log: VendorApiLog;
 }
 
-const markerOf = (connector: string): string => `<!-- ${DRIFT_ISSUE_LABEL}:${connector} -->`;
-
-const MARKER_PATTERN = new RegExp(`<!-- ${DRIFT_ISSUE_LABEL}:(\\S+) -->`);
-
-const connectorOf = ({ body }: DriftIssue): string | undefined => body.match(MARKER_PATTERN)?.[1];
-
 const isFailed = (entry: DriftReportEntry): entry is FailedDrift => 'error' in entry;
-
-const VERDICTS: Record<ConnectorDrift['verdict'], string> = {
-  healthy: 'healthy: the actions pass against the committed snapshots and the latest specs',
-  'vendor-drift':
-    'vendor drift: the actions pass against the committed snapshots, but fail against the latest vendor specs',
-  'kibana-regression':
-    'Kibana-side regression: the actions fail against the committed snapshots already',
-  unknown: 'unknown: a latest vendor spec did not load',
-};
-
-const changeLine = ({ operation, text, id }: SpecChange): string =>
-  `- ${operation ? `\`${operation}\`: ` : ''}${text} (\`${id}\`)`;
-
-const changeList = (changes: readonly SpecChange[]): string[] => [
-  ...changes.slice(0, MAX_CHANGES_PER_KIND).map(changeLine),
-  ...(changes.length > MAX_CHANGES_PER_KIND
-    ? [`- …and ${changes.length - MAX_CHANGES_PER_KIND} more`]
-    : []),
-];
-
-const problemSection = (title: string, problems: readonly string[] = []): string[] =>
-  problems.length > 0 ? [`### ${title}`, '', ...problems.map((p) => `- ${p}`), ''] : [];
-
-const sourceSection = (drift: ConnectorDrift): string[] =>
-  Object.entries(drift.sources).flatMap(([name, { status, error, changes }]) => {
-    if (status === 'unchanged') {
-      return [];
-    }
-    if (status === 'unreachable') {
-      return [`#### \`${name}\`: unreachable`, '', `\`${error ?? 'unknown error'}\``, ''];
-    }
-    if (changes === undefined) {
-      return [`#### \`${name}\`: changed, not classified (no \`oasdiff\` was available)`, ''];
-    }
-    const notable = changes.filter(({ kind }) => kind !== 'non-breaking');
-    const other = changes.filter(({ kind }) => kind === 'non-breaking');
-    return [
-      `#### \`${name}\`: changed`,
-      '',
-      ...changeList(notable),
-      ...(other.length > 0
-        ? [
-            '',
-            `<details><summary>${other.length} non-breaking change(s)</summary>`,
-            '',
-            ...changeList(other),
-            '',
-            '</details>',
-          ]
-        : []),
-      '',
-    ];
-  });
-
-/** The title and body of a connector's drift issue; the same drift always renders the same. */
-export const renderDriftIssue = (
-  drift: ConnectorDrift,
-  owners: readonly string[]
-): { title: string; body: string } => {
-  const id = drift.connector.replace(/^\./, '');
-  const changes = sourceSection(drift);
-  const body = [
-    markerOf(drift.connector),
-    `The weekly vendor API drift check found that the \`${drift.connector}\` connector needs attention.`,
-    '',
-    `**Two-mock result:** ${VERDICTS[drift.verdict]}.`,
-    '',
-    ...(changes.length > 0 ? ['### Vendor spec changes', '', ...changes] : []),
-    ...problemSection('Problems against the latest vendor specs', drift.latestProblems),
-    ...problemSection('Problems against the committed snapshots', drift.snapshotProblems),
-    ...problemSection(
-      'Overlay actions that no longer apply to the latest specs',
-      drift.overlayFindings
-    ),
-    '### What to do',
-    '',
-    `- Fix it with the \`update-connector\` skill (\`src/platform/packages/shared/kbn-connector-specs/.claude/skills\`), for example \`/update-connector ${id} <this issue>\` in Claude Code. It reproduces the drift, fixes the connector, refreshes its artifacts and opens a draft PR.`,
-    `- Or by hand. Reproduce: \`node scripts/connector_vendor_api --drift --connector ${id}\``,
-    `- Once the connector handles the change, refresh its artifacts: \`node scripts/connector_vendor_api --connector ${id} --refresh\``,
-    '- This issue is updated by later runs, and closed once the check finds nothing here that needs attention.',
-    ...(owners.length > 0 ? ['', `cc ${owners.map((owner) => `@${owner}`).join(' ')}`] : []),
-  ].join('\n');
-  return {
-    title: `[Connector validation] Vendor API drift in ${drift.connector}`,
-    body:
-      body.length > MAX_BODY_LENGTH
-        ? `${body.slice(
-            0,
-            MAX_BODY_LENGTH
-          )}\n\n…truncated; run the command above for the full report.`
-        : body,
-  };
-};
 
 /** The body of the bot PR refreshing the artifacts of connectors with non-breaking drift. */
 export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string =>
@@ -203,9 +101,6 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string =>
       ];
     }),
   ].join('\n');
-
-const message = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 /**
  * Turns a drift report into GitHub issues: one per connector that needs one, found again by the
@@ -271,7 +166,7 @@ export const surfaceDrift = async ({
         continue;
       }
 
-      const { title, body } = renderDriftIssue(entry, ownersOf(connector));
+      const { title, body } = renderDriftIssue(entry, { owners: ownersOf(connector), buildUrl });
       if (!existing) {
         let created: DriftIssue | undefined;
         await write(`create an issue for ${connector}: ${title}`, async () => {
@@ -280,16 +175,16 @@ export const surfaceDrift = async ({
         actions.push({ connector, action: 'created', ...(created ? { issue: created } : {}) });
       } else if (existing.state === 'closed') {
         await write(`reopen #${existing.number} for ${connector}`, async () => {
-          await tracker.update(existing.number, { body, state: 'open' });
+          await tracker.update(existing.number, { title, body, state: 'open' });
           await tracker.comment(
             existing.number,
             `The drift check found \`${connector}\` drifting again${build}; reopening.`
           );
         });
         actions.push({ connector, action: 'reopened', issue: existing });
-      } else if (existing.body.trim() !== body.trim()) {
+      } else if (findingsOf(existing.body) !== findingsOf(body) || existing.title !== title) {
         await write(`update #${existing.number} for ${connector}`, async () => {
-          await tracker.update(existing.number, { body });
+          await tracker.update(existing.number, { title, body });
           await tracker.comment(
             existing.number,
             `The drift check found new findings for \`${connector}\`${build}; the description is updated.`
@@ -297,17 +192,23 @@ export const surfaceDrift = async ({
         });
         actions.push({ connector, action: 'updated', issue: existing });
       } else {
+        // Only when it was last checked changed: editing the body notifies no one.
+        if (existing.body.trim() !== body.trim()) {
+          await write(`refresh when #${existing.number} was last checked`, () =>
+            tracker.update(existing.number, { body })
+          );
+        }
         actions.push({ connector, action: 'unchanged', issue: existing });
       }
     } catch (error) {
-      log.warning(`${connector}: ${message(error)}`);
-      actions.push({ connector, action: 'failed', error: message(error) });
+      log.warning(`${connector}: ${errorMessage(error)}`);
+      actions.push({ connector, action: 'failed', error: errorMessage(error) });
     }
   }
 
   // A removed connector is in no report, so nothing above would ever close its issue.
   for (const issue of issues) {
-    const connector = connectorOf(issue);
+    const connector = connectorOf(issue.body);
     if (issue.state !== 'open' || connector === undefined || knownConnectors.has(connector)) {
       continue;
     }
@@ -321,8 +222,8 @@ export const surfaceDrift = async ({
       });
       actions.push({ connector, action: 'closed', issue });
     } catch (error) {
-      log.warning(`${connector}: ${message(error)}`);
-      actions.push({ connector, action: 'failed', error: message(error) });
+      log.warning(`${connector}: ${errorMessage(error)}`);
+      actions.push({ connector, action: 'failed', error: errorMessage(error) });
     }
   }
 

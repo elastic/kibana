@@ -163,6 +163,7 @@ export class EsqlSource implements DataSourceBase {
   private readonly columns: readonly Column[];
   private filterableSource?: FilterableSource;
   private readonly columnsByName: ReadonlyMap<string, Column>;
+  private readonly emptyColumnNames: readonly string[];
 
   private constructor({
     id,
@@ -184,6 +185,7 @@ export class EsqlSource implements DataSourceBase {
     this.resultColumns = resultColumns;
     this.columns = resultColumns.map(columnFromDatatableColumn);
     this.columnsByName = new Map(this.columns.map((c) => [c.name, c]));
+    this.emptyColumnNames = resultColumns.filter(({ isNull }) => isNull).map(({ name }) => name);
     this.fields = this.columns.map(columnToFieldBase);
   }
 
@@ -341,6 +343,11 @@ export class EsqlSource implements DataSourceBase {
 
   public getColumn(name: string): Column | undefined {
     return this.columnsByName.get(name);
+  }
+
+  /** Names of the result columns without values. They stay in {@link getColumns} but are missing from the rows. */
+  public getEmptyColumnNames(): readonly string[] {
+    return this.emptyColumnNames;
   }
 
   public isTimeBased(): boolean {

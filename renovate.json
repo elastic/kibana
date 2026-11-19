@@ -461,8 +461,7 @@
       "matchDepNames": ["redux-toolkit-v1"],
       "reviewers": [
         "team:kibana-dashboards",
-        "team:security-investigations",
-        "team:security-threat-hunting"
+        "team:security-investigations"
       ],
       "matchBaseBranches": ["main"],
       "enabled": true,
@@ -1692,11 +1691,11 @@
       "matchDepNames": ["adm-zip"],
       "reviewers": [
         "team:siem-conduit",
-        "team:security-threat-hunting",
+        "team:security-investigations",
         "team:security-data-engineering"
       ],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:security-siem-conduit", "Team:Threat Hunting"],
+      "addLabels": ["Team:security-siem-conduit", "Team:Security Investigations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1755,9 +1754,9 @@
     {
       "groupName": "css-box-model",
       "matchDepNames": ["css-box-model"],
-      "reviewers": ["team:security-investigations", "team:security-threat-hunting"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security Investigations", "Team:Threat Hunting"],
+      "addLabels": ["Team:Security Investigations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1784,11 +1783,10 @@
       "matchDepNames": ["typescript-fsa-reducers"],
       "reviewers": [
         "team:security-investigations",
-        "team:security-entity-analytics",
-        "team:security-threat-hunting"
+        "team:security-entity-analytics"
       ],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security Investigations", "Team:Entity Analytics", "Team:Threat Hunting"],
+      "addLabels": ["Team:Security Investigations", "Team:Entity Analytics"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2126,14 +2124,6 @@
       "enabled": true
     },
     {
-      "groupName": "hdr-histogram-js",
-      "matchDepNames": ["hdr-histogram-js"],
-      "reviewers": ["team:obs-signals-metrics-team"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "@appland/sql-parser",
       "matchDepNames": ["@appland/sql-parser"],
       "reviewers": ["team:security-defend-workflows"],
@@ -2190,9 +2180,9 @@
     {
       "groupName": "langsmith",
       "matchDepNames": ["langsmith"],
-      "reviewers": ["team:security-threat-hunting"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Threat Hunting"],
+      "addLabels": ["Team:Security Investigations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2516,9 +2506,9 @@
     {
       "groupName": "xml Format Util",
       "matchDepNames": ["xml-formatter"],
-      "reviewers": ["team:security-threat-hunting"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:Threat Hunting", "release_note:skip", "backport:skip"],
+      "labels": ["Team:Security Investigations", "release_note:skip", "backport:skip"],
       "minimumReleaseAge": "60 days",
       "enabled": true
     },

@@ -16,8 +16,8 @@ import AddToTimelineButton, {
   ADD_TO_TIMELINE_KEYBOARD_SHORTCUT,
   AddSuccessMessage,
 } from './add_to_timeline';
-import type { DataProvider } from '../../../../common/types';
-import { IS_OPERATOR } from '../../../../common/types';
+import type { DataProvider } from '@kbn/securitysolution-timeline-common';
+import { IS_OPERATOR } from '@kbn/securitysolution-timeline-common';
 import { TestProviders } from '../../../mock';
 import {
   PRESS,
