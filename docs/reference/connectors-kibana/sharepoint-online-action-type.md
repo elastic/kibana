@@ -11,13 +11,24 @@ applies_to:
 
 The SharePoint Online connector enables federated search across SharePoint sites, pages, and content using the Microsoft Graph API.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-sharepoint-online-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [sharepoint-online-connector-configuration]
 
-SharePoint Online connectors support three Microsoft Entra ID authentication types:
+SharePoint Online connectors support the following authentication types:
+
+#### Quick Connect OAuth 2.0 (recommended for delegated access)
+
+```{applies_to}
+serverless: preview
+stack: preview 9.6
+```
+
+Elastic's managed OAuth flow for SharePoint Online. No app registration is required. Select this option and authorize access through Elastic. Provides delegated access (the connector acts as the authenticated user) with read-only access to sites and files. An administrator might need to approve the Elastic app and grant it access to specific sites. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 #### OAuth client credentials (app-only auth)
 
@@ -131,6 +142,10 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [sharepoint-online-api-credentials]
 
+### Quick Connect OAuth 2.0
+
+No setup required. Select **Quick Connect OAuth 2.0** when you create the connector in {{kib}} and follow the authorization prompt to grant Elastic access to your SharePoint Online sites. Your Microsoft 365 administrator might need to grant consent for the Elastic app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+
 ### OAuth client credentials (app-only auth)
 
 To use app-only authentication, register an application in Microsoft Entra (formerly Azure Active Directory):
@@ -157,7 +172,7 @@ To use app-only authentication, register an application in Microsoft Entra (form
     - **Client ID**: Found in the **Overview** section (also called Application ID).
     - **Client Secret**: The value you copied in step 15.
 
-### OAuth Client Certificate (Microsoft Entra) — recommended for production [sharepoint-online-cert-credentials]
+### OAuth Client Certificate (Microsoft Entra) — recommended for production app-only access [sharepoint-online-cert-credentials]
 
 To use certificate-based app-only authentication, register an application in Microsoft Entra:
 

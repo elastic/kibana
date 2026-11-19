@@ -129,6 +129,7 @@ export const postprocessAnnotations = (
   esaggsResponses: Array<{
     response: Datatable;
     fieldsColIdMap: Record<string, string>;
+    fieldDisplayNames?: Record<string, string>;
   }>,
   queryAnnotationConfigs: QueryPointEventAnnotationOutput[],
   manualAnnotationDatatableRows: Array<{
@@ -146,17 +147,19 @@ export const postprocessAnnotations = (
   }> // todo: simplify types
 ) => {
   const datatableColumns: DatatableColumn[] = esaggsResponses
-    .flatMap(({ response, fieldsColIdMap }) => {
+    .flatMap(({ response, fieldsColIdMap, fieldDisplayNames }) => {
       const swappedFieldsColIdMap = Object.fromEntries(
         Object.entries(fieldsColIdMap).map(([k, v]) => [v, k])
       );
       return response.columns
         .filter((col) => swappedFieldsColIdMap[col.id])
         .map((col) => {
+          const fieldName = swappedFieldsColIdMap[col.id];
           return {
             ...col,
-            name: swappedFieldsColIdMap[col.id], // we need to overwrite the name because esaggs column name is per bucket and not per row (eg. "First 10 fields...")
-            id: `field:${swappedFieldsColIdMap[col.id]}`,
+            // esaggs labels buckets ("First 10 …"); id stays the field, name is the data-view label
+            name: fieldDisplayNames?.[fieldName] ?? fieldName,
+            id: `field:${fieldName}`,
           };
         });
     })

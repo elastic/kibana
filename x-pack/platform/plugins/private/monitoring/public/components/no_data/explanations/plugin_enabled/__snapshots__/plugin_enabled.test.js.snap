@@ -11,7 +11,7 @@ Array [
     class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText emotion-euiText-s"
     >
       <p>
         To run monitoring please perform the following steps
@@ -22,7 +22,7 @@ Array [
     class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       We checked the cluster settings and found that 

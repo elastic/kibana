@@ -1,0 +1,87 @@
+# METRICS-INFO
+
+The `METRICS_INFO` processing command retrieves information about the metrics available in time series data streams, along with their applicable dimensions and other metadata. Use `METRICS_INFO` to discover which metrics exist, what types and units they have, and which dimensions apply to them without inspecting index mappings or relying on the field capabilities API.
+
+`METRICS_INFO` produces one row per distinct metric signature: each unique combination of metric name and properties across backing indices. When the same metric is defined with different properties, such as different units, in different data streams, separate rows are returned for each variant.
+
+The output contains `keyword` columns for `metric_name`, `data_stream`, `unit`, `metric_type`, `field_type`, and `dimension_fields`.
+
+## Syntax
+
+`METRICS_INFO`
+
+### Parameters
+
+`METRICS_INFO` takes no parameters.
+
+## Examples
+
+List every metric available in the targeted time series data stream, sorted alphabetically by name:
+
+```esql
+TS k8s
+| METRICS_INFO
+| SORT metric_name
+```
+
+Discover metrics with actual data for the `prod` cluster:
+
+```esql
+TS k8s
+| WHERE cluster == "prod"
+| METRICS_INFO
+| SORT metric_name
+```
+
+Select only metric names and metric types:
+
+```esql
+TS k8s
+| WHERE cluster == "prod"
+| METRICS_INFO
+| KEEP metric_name, metric_type
+| SORT metric_name
+```
+
+Filter metadata rows to counter metrics:
+
+```esql
+TS k8s
+| METRICS_INFO
+| WHERE metric_type == "counter"
+| SORT metric_name
+```
+
+Find metrics whose names match a network interface prefix:
+
+```esql
+TS k8s
+| METRICS_INFO
+| WHERE metric_name LIKE "network.eth0*"
+| SORT metric_name
+```
+
+Count distinct metrics whose names match a pattern:
+
+```esql
+TS k8s
+| METRICS_INFO
+| WHERE metric_name LIKE "network.total*"
+| STATS matching_metrics = COUNT_DISTINCT(metric_name)
+```
+
+
+Count metrics by metric type:
+
+```esql
+TS k8s
+| METRICS_INFO
+| STATS metric_count = COUNT(*) BY metric_type
+| SORT metric_type
+```
+
+## Limitations
+
+- `METRICS_INFO` can only be used after a `TS` source command. Using it after `FROM` or other source commands produces an error.
+- `METRICS_INFO` must appear before pipeline-breaking commands such as `STATS`, `SORT`, or `LIMIT`.
+- The output replaces the original table. Downstream commands operate on the metadata rows, not the raw time series documents.

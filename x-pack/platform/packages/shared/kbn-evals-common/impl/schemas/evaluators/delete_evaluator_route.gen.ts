@@ -23,7 +23,7 @@ export const DeleteEvaluatorRequestQuery = lazySchema(() =>
     /**
      * Limits the delete to one version.
      */
-    version: z.string().max(64).optional(),
+    version: z.string().max(64).optional().describe('Limits the delete to one version.'),
   })
 );
 export type DeleteEvaluatorRequestQuery = z.infer<typeof DeleteEvaluatorRequestQuery>;
@@ -43,7 +43,7 @@ export const DeleteEvaluatorResponse = lazySchema(() =>
     /**
      * How many stored versions were removed.
      */
-    deleted: z.number().int().min(0),
+    deleted: z.number().int().min(0).describe('How many stored versions were removed.'),
   })
 );
 export type DeleteEvaluatorResponse = z.infer<typeof DeleteEvaluatorResponse>;

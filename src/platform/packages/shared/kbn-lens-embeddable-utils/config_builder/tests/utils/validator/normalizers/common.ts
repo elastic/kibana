@@ -42,6 +42,8 @@ import {
   LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
   LENS_SAMPLING_DEFAULT_VALUE,
+  LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
+  LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
 } from '../../../../schema/constants';
 import type { LensAttributes } from '../../../../types';
 import { getValues, type NormalizerConfig } from './normalize';
@@ -51,23 +53,6 @@ import { generateAdHocDataViewId, getAdHocDataViewSpec } from '../../../../trans
 import { toApiFieldSettings } from '../../../../transforms/columns/field_settings';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-
-const COMMON_STATE_IGNORE_PATHS = [
-  'savedObjectId', // panel-level SO reference, not part of LensAttributes
-  'state.visualization.title', // removed by-value nested title
-  // TODO: check missing properties striped out in transforms
-  'state.datasourceStates.formBased.layers.*.indexPatternId',
-  'state.datasourceStates.formBased.currentIndexPatternId',
-  // Will be unskipped after the fix for https://github.com/elastic/kibana/issues/283574
-  'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg.params.sortField',
-  // TODO: check missing/different properties on colorMapping
-  'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
-  'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
-  'state.visualization.layers.*.colorMapping.assignments.*.touched',
-  'state.visualization.layers.*.colorMapping.specialAssignments.*.touched',
-  'state.visualization.layers.*.colorMapping.colorMode.steps.*.touched',
-  'state.visualization.colorMapping.colorMode.steps.*.touched',
-];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
 
@@ -475,7 +460,12 @@ const normalizeReferences = <T extends LensAttributes>(
           (filterRefNames.has(reference.name) || reference.name.startsWith('filter-index-pattern-'))
         );
       })
-      // ignore current index pattern reference
+      // `indexpattern-datasource-current-indexpattern` is not read by name. The 7.10 migration
+      // and by-value builders emit it. `extractReferences` and the transform do not.
+      // `getUsedDataViews` and the XY first-`index-pattern` fallback use the id. On every
+      // integration panel this reference is first and the next one has the same id, so dropping
+      // it changes neither.`toAPIFormat` does not apply that annotation fallback.
+      // The editor always writes `xy-visualization-layer-*`, so it is not reproducible from the UI.
       .filter((reference) => {
         return !(
           reference.type === 'index-pattern' &&
@@ -615,15 +605,16 @@ const isDateHistogramColumn = (
 ): col is DateHistogramIndexPatternColumn => col.operationType === 'date_histogram';
 
 /**
- * Default missing `ignoreTimeRange`/`dropPartials`/`includeEmptyRows` to `false` on `date_histogram`
- * columns on the ORIGINAL side. The transform emits `Boolean(...)` in both directions
- * (`transforms/columns/date_histogram.ts`), so a missing flag round-trips as an explicit `false`.
+ * Apply runtime defaults for missing `ignoreTimeRange`/`dropPartials`/`includeEmptyRows` on
+ * `date_histogram` columns in the original SO. The transform uses the same values when the SO
+ * omits a field, so both sides converge to the same value after round-trip. A missing
+ * `includeEmptyRows` is `false` because the runtime reads it as falsy (`min_doc_count: 1`).
  */
 const normalizeDateHistogramColumnParams = (col: DateHistogramIndexPatternColumn): void => {
   const { params } = col;
-  params.ignoreTimeRange = Boolean(params.ignoreTimeRange);
-  params.dropPartials = Boolean(params.dropPartials);
-  params.includeEmptyRows = Boolean(params.includeEmptyRows);
+  params.ignoreTimeRange = params.ignoreTimeRange ?? LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT;
+  params.dropPartials = params.dropPartials ?? LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT;
+  params.includeEmptyRows = params.includeEmptyRows ?? false;
 };
 
 const isRangeColumn = (col: GenericIndexPatternColumn): col is RangeIndexPatternColumn =>
@@ -801,16 +792,16 @@ const isLastValueColumn = (col: GenericIndexPatternColumn): col is LastValueInde
   col.operationType === 'last_value';
 
 /**
- * Default a missing/`null` `params.showArrayValues` to `true` on `last_value` columns on the ORIGINAL
- * side to match the 8.2.0 saved-object migration `commonSetLastValueShowArrayValues`
- * (`server/migrations/common_migrations.ts`) that coerces any non-boolean `showArrayValues` to `true` at load.
+ * Default a missing/`null` `params.showArrayValues` to `false` on `last_value` columns on the ORIGINAL
+ * side to match the `?? false` fallback in `fromLastValueLensStateToAPI`
+ * (`config_builder/transforms/columns/last_value.ts`).
  */
 const normalizeLastValueShowArrayValues = (col: GenericIndexPatternColumn): void => {
   if (!isLastValueColumn(col)) {
     return;
   }
   if (col.params.showArrayValues == null) {
-    col.params.showArrayValues = true;
+    col.params.showArrayValues = false;
   }
 };
 
@@ -1203,7 +1194,6 @@ export const getCommonNormalizer = <T extends LensAttributes>(
   getArgs: (attributes: T) => CommonNormalizerArgs
 ): NormalizerConfig<T> => ({
   order: -1,
-  ignore: COMMON_STATE_IGNORE_PATHS,
   original: (attributes: T) => {
     const { layerRemapping, columnRemapping, inferColumnDataType } = getArgs(attributes);
 
@@ -1218,6 +1208,23 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     // if the transform ever re-emits it, transformed still carries it and the strict compare fails.
     if ('type' in attributes && attributes.type === 'lens') {
       delete attributes.type;
+    }
+
+    // 'savedObjectId' is the twin of 'type': a legacy by-reference pointer that old library saves baked
+    // into the stored attributes and unlink copied into by-value panels. It is not part of LensAttributes,
+    // is never read at runtime (the link lives on the panel-level ref_id), and is dropped by toAPIFormat.
+    if ('savedObjectId' in attributes) {
+      delete attributes.savedObjectId;
+    }
+
+    // 'state.visualization.title' is a legacy default the XY/heatmap `initialize()` wrote for freshly
+    // created charts ('Empty XY chart' / 'Empty Heatmap chart'). It is untyped (absent from the
+    // visualization state types) and never read at render: the displayed title comes from the panel-level
+    // title when set, otherwise the document `attributes.title` (`defaultTitle$`) — never from
+    // `state.visualization.title`. It is dropped by toAPIFormat.
+    const { visualization } = attributes.state;
+    if (isRecord(visualization) && 'title' in visualization) {
+      delete visualization.title;
     }
 
     // Canonicalize filters and collect (in a single pass) the reference names they consumed, so the
@@ -1371,6 +1378,15 @@ export const getCommonNormalizer = <T extends LensAttributes>(
             // apply defaults
             layer.sampling = layer.sampling ?? LENS_SAMPLING_DEFAULT_VALUE;
 
+            // `indexPatternId` is a runtime-only `FormBasedLayer` field, omitted from
+            // `FormBasedPersistedState`, that leaked into by-value panels.
+            // - `extractReferences` moves it onto the `indexpattern-datasource-layer-*` reference.
+            // - `resolveDataViewId` prefers the same reference and falls back to this inline id
+            //   only when the reference is absent.
+            if ('indexPatternId' in layer) {
+              delete layer.indexPatternId;
+            }
+
             // remove empty incompleteColumns
             if (Object.keys(layer.incompleteColumns ?? {}).length === 0) {
               delete layer.incompleteColumns;
@@ -1479,6 +1495,13 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               }
             }
           }
+
+          // `currentIndexPatternId` is a runtime-only `FormBasedPrivateState` field that leaked into
+          // by-value panels. `loadInitialState` recomputes it. The transform never emits it.
+          if ('currentIndexPatternId' in ds) {
+            delete ds.currentIndexPatternId;
+          }
+
           return ds;
         }
       ),
@@ -1548,14 +1571,20 @@ function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParam
  *
  * This need to address:
  * - named palettes: `palette id`, `continuity`, and `rangeType` are compared strictly (see
- *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped.
+ *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped, and
+ *   a missing `steps` defaults to the chart's `defaultBandCount`.
  * - custom palettes: mirror the transform's continuity-driven open/closed encoding (open above
  *   nulls `rangeMax` and the last multi-stop; open below nulls `rangeMin`), set the last
- *   multi-stop to the effective `rangeMax` when closed, and default missing `rangeType` /
- *   `params.name` the transform always derives.
+ *   multi-stop to the effective `rangeMax` when closed, drop the unread `steps`, and
+ *   default missing `rangeType` / `params.name` the transform always derives.
+ *
+ * For every palette the unread `maxSteps` (editor-only) and `progression` (deprecated) are
+ * dropped, and `reverse` is reset to `false` because the stored stops already carry the color
+ * order.
  */
 export function getPaletteNormalizer<T extends LensAttributes>(
   palettePath: string,
+  defaultBandCount: number,
   isSingleValuePalette?: (attributes: T) => boolean
 ): NormalizerConfig<T> {
   return {
@@ -1570,6 +1599,14 @@ export function getPaletteNormalizer<T extends LensAttributes>(
 
       palettes.forEach((palette) => {
         if (!palette.params) return;
+
+        // `maxSteps` is now editor-only state
+        delete palette.params.maxSteps;
+        // `progression` is deprecated and has no reader
+        delete palette.params.progression;
+        // Render never applies `reverse` (the stops carry the color order), and the transform
+        // always writes `false`
+        palette.params.reverse = false;
 
         const rangeMin = getRangeValue(palette.params.rangeMin);
         const rangeMax = getRangeValue(palette.params.rangeMax);
@@ -1586,6 +1623,9 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           palette.name = canonicalName;
           palette.params.name = canonicalName;
           palette.params.rangeType = useNumericRange ? 'number' : 'percent';
+          // A named palette renders from its id and `steps` alone, and the API's
+          // `distributed_palette` carries `steps` when set. An omitted value takes the chart default.
+          palette.params.steps ??= defaultBandCount;
           clearUnusedNamedPaletteParams(palette);
           return;
         }
@@ -1613,6 +1653,10 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           }
         }
 
+        // A custom palette renders from its stops, so a stored `steps` is editor residue with no
+        // reader. The transform omits it.
+        delete palette.params.steps;
+
         if (!palette.params.rangeType) {
           palette.params.rangeType = 'percent';
         }
@@ -1625,12 +1669,6 @@ export function getPaletteNormalizer<T extends LensAttributes>(
 
       return attributes;
     },
-    ignore: [
-      'maxSteps', // often omitted in original
-      'progression', // deprecated but defaults to 'fixed'
-      'reverse', // typically unused or omitted
-      'steps', // count of steps in original is not right
-    ].map((param) => `${palettePath}.params.${param}`),
   };
 }
 
@@ -1641,6 +1679,8 @@ export function getPaletteNormalizer<T extends LensAttributes>(
  * - `match` with `matchEntireWord: true` becomes a `raw` rule.
  * - `match` with `matchEntireWord: false`, `regex`, and `range` rules are
  *   runtime-dead (`getKey` returns `null`) and are stripped.
+ *
+ * Also deletes the deprecated `touched` flag, which no reader uses and the transform no longer emits.
  */
 export function getColorMappingNormalizer<T extends LensAttributes>(
   colorMappingPath: string
@@ -1651,6 +1691,8 @@ export function getColorMappingNormalizer<T extends LensAttributes>(
 
       configs.forEach((config) => {
         for (const assignment of config.assignments) {
+          // Custom color assignments are now detected at runtime from the color itself (see `hasCustomColors`).
+          delete assignment.touched;
           assignment.rules = assignment.rules.flatMap((rule): ColorMapping.ColorRule[] => {
             if (rule.type === 'raw') return [rule];
             if (rule.type === 'match' && rule.matchEntireWord === true) {
@@ -1659,6 +1701,16 @@ export function getColorMappingNormalizer<T extends LensAttributes>(
             }
             return [];
           });
+        }
+        for (const specialAssignment of config.specialAssignments ?? []) {
+          // Custom color assignments are now detected at runtime from the color itself (see `hasCustomColors`).
+          delete specialAssignment.touched;
+        }
+        if (config.colorMode?.type === 'gradient') {
+          for (const step of config.colorMode.steps) {
+            // Custom color assignments are now detected at runtime from the color itself (see `hasCustomColors`).
+            delete step.touched;
+          }
         }
       });
 

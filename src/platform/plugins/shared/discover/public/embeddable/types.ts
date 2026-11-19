@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
@@ -28,15 +29,16 @@ import type {
   PublishingSubject,
   SerializedTimeRange,
   SerializedTitles,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type {
   DiscoverSessionTab,
   SavedSearch,
   SerializableSavedSearch,
 } from '@kbn/saved-search-plugin/common/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { EsqlSource } from '@kbn/data-source';
 import type { BehaviorSubject } from 'rxjs';
-import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import type { PublishesWritableDataSources } from '@kbn/presentation-publishing/interfaces/publishes_data_sources';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   NonPersistedDisplayOptions,
@@ -67,7 +69,8 @@ export type SearchEmbeddablePublicState = Pick<
   | 'jsonModeSettings'
 > & {
   rows: DataTableRecord[];
-  columnsMeta: DataTableColumnsMeta | undefined;
+  /** The ES|QL source of the fetched rows, with the result columns. */
+  resultDataSource: EsqlSource | undefined;
   totalHitCount: number | undefined;
   inspectorAdapters: Record<string, unknown>;
 };
@@ -80,9 +83,9 @@ export type SearchEmbeddableStateManager = {
 
 export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddablePublicState,
-  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
+  'rows' | 'resultDataSource' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
 > &
-  Pick<SerializableSavedSearch, 'serializedSearchSource'>;
+  Pick<SerializableSavedSearch, 'serializedSearchSource' | 'tabTypeState'>;
 
 export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
   SerializedTitles &
@@ -103,7 +106,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiS
   Required<PublishesWritableTitle> &
   Required<PublishesDescription> &
   PublishesWritableSavedSearch &
-  PublishesWritableDataViews &
+  PublishesWritableDataSources<DataView> &
   PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
   PublishesEsql &
@@ -115,7 +118,8 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiS
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
   Partial<CanOverrideHoverActions> &
   HasDrilldowns &
-  HasSupportedTriggers;
+  HasSupportedTriggers &
+  SupportsJsonExport;
 
 export interface PublishesSavedSearch {
   savedSearch$: PublishingSubject<SavedSearch>;

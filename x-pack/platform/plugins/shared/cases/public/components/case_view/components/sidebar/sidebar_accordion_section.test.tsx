@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { SidebarAccordionSection } from './sidebar_accordion_section';
 
 describe('SidebarAccordionSection', () => {
@@ -109,8 +108,7 @@ describe('SidebarAccordionSection', () => {
     expect(screen.getByTestId('sidebar-accordion-section')).toBeInTheDocument();
   });
 
-  it('calls onToggle with the section id when toggled', async () => {
-    const user = userEvent.setup();
+  it('calls onToggle with the section id when toggled', () => {
     const onToggle = jest.fn();
 
     render(
@@ -125,7 +123,7 @@ describe('SidebarAccordionSection', () => {
       </SidebarAccordionSection>
     );
 
-    await user.click(screen.getByTestId('case-view-sidebar-connectors-toggle'));
+    fireEvent.click(screen.getByTestId('case-view-sidebar-connectors-toggle'));
 
     expect(onToggle).toHaveBeenCalledWith('connectors', false);
   });

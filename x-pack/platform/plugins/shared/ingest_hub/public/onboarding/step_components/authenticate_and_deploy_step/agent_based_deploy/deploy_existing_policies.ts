@@ -33,7 +33,8 @@ export interface DeployToExistingResult {
  * Bundled originals (multiple services, same package) share one package policy document whose
  * id fans out to all instanceIds in the group via collectDeployResults.
  *
- * namespace is intentionally omitted so each target policy's own namespace applies.
+ * A group's namespace, when set, overrides each target policy's namespace. Otherwise it is omitted
+ * so the target policy's own namespace applies.
  */
 export async function deployToExistingAgentPolicies(
   groups: DeployGroup[],

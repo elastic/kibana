@@ -32,6 +32,7 @@
     "@kbn/fs",
     "@kbn/react-query",
     "@kbn/management-settings-ids",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/lock-manager"
   ]
 }

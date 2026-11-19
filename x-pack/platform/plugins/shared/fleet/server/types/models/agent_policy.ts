@@ -9,8 +9,12 @@ import { schema } from '@kbn/config-schema';
 
 import type { GlobalDataTag } from '../../../common/types';
 
-import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
-import { isValidNamespace } from '../../../common/services';
+import {
+  agentPolicyStatuses,
+  dataTypes,
+  FLEET_SCHEMA_NAME_MAX_LENGTH,
+} from '../../../common/constants';
+import { getDeniedAgentPolicyOverrideKey, isValidNamespace } from '../../../common/services';
 import { getSettingsAPISchema } from '../../services/form_settings';
 
 import { ProxyHeadersSchema } from '../rest_spec/fleet_proxies';
@@ -55,6 +59,44 @@ function validateCPU(s: string) {
   }
 }
 
+/**
+ * `overrides` as accepted from REST API requests: rejects the denied keys, including dotted paths
+ * below them. Not used for `xpack.fleet.agentPolicies` in kibana.yml, where rejecting them would
+ * stop Kibana from starting after an upgrade.
+ *
+ * Not part of `AgentPolicyBaseSchema` on purpose: that object feeds the frozen SO model-version
+ * schemas (create and forward compatibility) and the response schemas. Policies saved before this
+ * check may still hold denied keys, and rejecting them there would break copying them, the space
+ * awareness migration and reading them. Stored denied keys are stripped when the full agent policy
+ * is built instead.
+ */
+export const AgentPolicyOverridesRequestSchema = schema.maybe(
+  schema.oneOf([
+    schema.literal(null),
+    schema.recordOf(
+      schema.querySortField.warn({ label: 'fleet.agent_policies.overrides.key' }),
+      schema.any(),
+      {
+        validate: (val) => {
+          if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
+            return 'inputs overrides is not allowed';
+          }
+          for (const key of Object.keys(val)) {
+            const denied = getDeniedAgentPolicyOverrideKey(key);
+            if (denied) {
+              return `${denied} overrides is not allowed`;
+            }
+          }
+        },
+        meta: {
+          description:
+            'Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.',
+        },
+      }
+    ),
+  ])
+);
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   space_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
@@ -95,7 +137,17 @@ export const AgentPolicyBaseSchema = {
   ),
   data_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   monitoring_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  download_source_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  download_source_id: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.string({
+        meta: {
+          description: 'Use `download_source_ids` instead',
+          deprecated: true,
+        },
+      }),
+    ])
+  ),
   fleet_server_host_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   agent_features: schema.maybe(
     schema.arrayOf(
@@ -107,6 +159,9 @@ export const AgentPolicyBaseSchema = {
     )
   ),
   is_protected: schema.maybe(schema.boolean()),
+  // Keep this permissive: it also feeds the frozen SO model-version schemas and the response
+  // schemas, and policies saved before the OpenTelemetry keys were denied may still hold them.
+  // Requests are validated with `AgentPolicyOverridesRequestSchema` instead.
   overrides: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -376,8 +431,27 @@ export const AgentPolicySchemaV7 = AgentPolicySchemaV6.extends(
   { meta: { id: 'agent_policy_v7' } }
 );
 
+const downloadSourceIdsSchema = schema.maybe(
+  schema.arrayOf(
+    schema.string({
+      maxLength: 500,
+      meta: {
+        description:
+          "A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.",
+      },
+    }),
+    { maxSize: 3 }
+  )
+);
+
+export const AgentPolicySchemaV8 = AgentPolicySchemaV7.extends(
+  { download_source_ids: downloadSourceIdsSchema },
+  { meta: { id: 'agent_policy_v8' } }
+);
+
 export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
   {
+    download_source_ids: downloadSourceIdsSchema,
     supports_agentless: schema.maybe(
       schema.oneOf([
         schema.literal(null),
@@ -392,12 +466,92 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
       ])
     ),
     force: schema.maybe(schema.boolean()),
+    // REST-only, for the same reason as the bounds below (see AgentPolicyOverridesRequestSchema).
+    overrides: AgentPolicyOverridesRequestSchema,
+    // REST-only reporting bounds: AgentPolicyBaseSchema stays unchanged so that they do not
+    // flow into the frozen SO model-version schemas (V3–V7).
+    id: schema.maybe(schema.savedObjectId.warn({ minLength: 0, label: 'fleet.agent_policies.id' })),
+    space_ids: schema.maybe(
+      schema.arrayOf(
+        schema.spaceId.warn({ minLength: 0, label: 'fleet.agent_policies.space_ids' }),
+        {
+          maxSize: 100,
+        }
+      )
+    ),
+    name: schema.displayName.warn({
+      minLength: 1,
+      maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+      label: 'fleet.agent_policies.name',
+      validate: validateNonEmptyString,
+    }),
+    description: schema.maybe(
+      schema.description.warn({ label: 'fleet.agent_policies.description' })
+    ),
+    data_output_id: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.savedObjectId.warn({ minLength: 0, label: 'fleet.agent_policies.data_output_id' }),
+      ])
+    ),
+    monitoring_output_id: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.agent_policies.monitoring_output_id',
+        }),
+      ])
+    ),
+    download_source_id: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.agent_policies.download_source_id',
+          meta: {
+            description: 'Use `download_source_ids` instead',
+            deprecated: true,
+          },
+        }),
+      ])
+    ),
+    fleet_server_host_id: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.agent_policies.fleet_server_host_id',
+        }),
+      ])
+    ),
+    global_data_tags: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          name: schema.displayName.warn({
+            minLength: 0,
+            maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+            label: 'fleet.agent_policies.global_data_tags.name',
+          }),
+          value: schema.oneOf([schema.string(), schema.number()]),
+        }),
+        {
+          validate: validateGlobalDataTagInput,
+          meta: {
+            description:
+              'User defined data tags that are added to all of the inputs. The values can be strings or numbers.',
+          },
+          maxSize: 100,
+        }
+      )
+    ),
   },
   { meta: { id: 'new_agent_policy' } }
 );
 
 export const AgentPolicySchema = AgentPolicySchemaV6.extends(
   {
+    download_source_ids: downloadSourceIdsSchema,
     id: schema.string(),
     is_managed: schema.maybe(schema.boolean()),
     status: schema.oneOf([
@@ -650,6 +804,7 @@ export const FullAgentPolicyResponseSchema = schema.object(
         }),
         download: schema.object({
           sourceURI: schema.string(),
+          sources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 3 })),
           ssl: schema.maybe(BaseSSLSchema),
           auth: schema.maybe(
             schema.object({
@@ -666,6 +821,11 @@ export const FullAgentPolicyResponseSchema = schema.object(
           secrets: schema.maybe(BaseSecretsSchema),
           timeout: schema.maybe(schema.string()),
           target_directory: schema.maybe(schema.string()),
+          reserve_diskspace: schema.maybe(
+            schema.object({
+              enabled: schema.boolean(),
+            })
+          ),
           proxy_url: schema.maybe(schema.string()),
           proxy_headers: schema.maybe(ProxyHeadersSchema),
         }),

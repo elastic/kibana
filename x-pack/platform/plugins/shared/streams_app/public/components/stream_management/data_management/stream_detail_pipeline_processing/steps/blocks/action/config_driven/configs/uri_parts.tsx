@@ -45,7 +45,7 @@ const fieldOptions: FieldOptions = {
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.uriPartsFieldHelpText',
     { defaultMessage: 'Field containing the URI string to parse.' }
   ),
-  includeCondition: false,
+  includeCondition: true,
   includeIgnoreFailures: true,
   includeIgnoreMissing: true,
 };

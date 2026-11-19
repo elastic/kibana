@@ -9,7 +9,7 @@ import type { Crypto } from '@elastic/node-crypto';
 import nodeCrypto from '@elastic/node-crypto';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { mockAuthenticatedUser } from '@kbn/security-plugin/common/model/authenticated_user.mock';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';

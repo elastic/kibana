@@ -9,7 +9,12 @@
 
 import type YAML from 'yaml';
 import type { LineCounter } from 'yaml';
-import type { WorkflowDetailDto, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type {
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowStepExecutionDto,
+  WorkflowYaml,
+} from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { LoadingStates } from './utils/loading_states';
@@ -31,12 +36,24 @@ export interface WorkflowDetailState {
    * The save button should be disabled when this is false to prevent saving stale data.
    */
   isYamlSynced: boolean;
+  /** Whether a save is being checked for what it breaks, before `loading.isSavingYaml` takes over. */
+  isCheckingSave: boolean;
   /** The persisted workflow detail data */
   workflow?: WorkflowDetailDto;
   /** The computed data derived from the workflow yaml string, it is updated by the workflowComputationMiddleware */
   computed?: ComputedData;
   /** The currently selected execution (when viewing executions tab) */
   execution?: WorkflowExecutionDto;
+  executionRequest?: { id: string; requestId: string; loadMore: boolean };
+  /** Set while loading `id` keeps failing; `failureCount` is the length of the current streak. */
+  executionError?: { id: string; message: string; isNotFound: boolean; failureCount: number };
+  /** `total` from the paginated execution-steps list; used for the truncation callout. */
+  stepExecutionsTotal: number;
+  /**
+   * Step executions loaded so far, one entry per fetched page of
+   * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE. `execution.stepExecutions` is the flattened view.
+   */
+  stepExecutionPages: WorkflowStepExecutionDto[][];
   /** The computed data derived from the selected execution, it is updated by the loadExecutionThunk */
   computedExecution?: ComputedData;
   /** The active tab (workflow or executions) */
@@ -60,6 +77,7 @@ export interface WorkflowDetailState {
   replay?: {
     executionId?: string;
     stepExecutionId?: string;
+    isTestRun?: boolean;
   };
   /** The connectors data */
   connectors?: ConnectorsResponse;
@@ -88,6 +106,8 @@ export interface WorkflowDetailState {
 export type ActiveTab = 'workflow' | 'executions';
 
 export interface ComputedData {
+  /** YAML source used to derive the rest of this snapshot. */
+  yamlString: string | undefined;
   yamlDocument?: YAML.Document; // This will be handled specially for serialization
   yamlLineCounter?: LineCounter;
   workflowLookup?: WorkflowLookup;

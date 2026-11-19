@@ -55,7 +55,7 @@ jest.mock('../../hooks', () => ({
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { monaco } from '@kbn/monaco';
 import { monaco as monacoRuntime } from '@kbn/monaco';
-import { createParser } from '@kbn/monaco/src/languages/console/parser';
+import { createParser } from '@kbn/monaco/src/languages/definitions/console/parser';
 import { sendRequest } from '../../hooks';
 import { serviceContextMock } from '../../contexts/services_context.mock';
 import { _test as kbTest } from '../../../lib/kb';
@@ -1756,6 +1756,7 @@ describe('Editor actions provider', () => {
 
   describe('provideCompletionItems', () => {
     const mockModel = {
+      getLineMaxColumn: () => 1,
       getWordAtPosition: () => {
         return {
           word: 'GET',
@@ -2640,6 +2641,33 @@ describe('Editor actions provider', () => {
         expect(suggestions[0].label).toBe('false');
       });
 
+      it('computes body suggestions against the text after the cursor at request time', async () => {
+        let resolveParsedRequests: (requests: typeof unterminatedRequest) => void = () => {};
+        mockGetParsedRequests.mockReturnValue(
+          new Promise<typeof unterminatedRequest>((resolve) => {
+            resolveParsedRequests = resolve;
+          })
+        );
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [{ name: 'aggs', template: {} }];
+        });
+        const lines = ['GET _search', '{', '  ""'];
+        const model = setup(lines, 3, 4);
+
+        const pending = provideCompletionItems(model, { lineNumber: 3, column: 4 });
+        // keystrokes typed while the parser worker is answering
+        lines[2] = '  "ag"';
+        resolveParsedRequests(unterminatedRequest);
+
+        const { suggestions } = await pending;
+
+        expect(suggestions).toHaveLength(1);
+        // the template is still expanded and only the auto-closed quote is replaced
+        expect(suggestions[0].insertText).toContain('aggs": {');
+        expect((suggestions[0].range as monaco.IRange).endColumn).toBe(5);
+      });
+
       it('still returns method completion items on an empty line outside triple quotes', async () => {
         mockGetParsedRequests.mockResolvedValue([{ startOffset: 0, endOffset: 14 }]);
         const model = setup(['GET _search', '{}', '']);
@@ -3179,6 +3207,39 @@ describe('Editor actions provider', () => {
 
       expect(sendRequest).toHaveBeenCalledWith(expect.objectContaining({ host: undefined }));
       expect(setSelectedHostSpy).toHaveBeenCalledWith(null);
+    });
+
+    it('keeps a request paired with its own line number when an earlier entry cannot be stringified', async () => {
+      (sendRequest as jest.Mock).mockResolvedValue([]);
+
+      const context = serviceContextMock.create();
+      jest.spyOn(context.services.esHostService, 'waitForInitialization').mockResolvedValue();
+      jest.spyOn(context.services.esHostService, 'getAllHosts').mockReturnValue([]);
+
+      // Line 1 holds a method without a url, so `getRequestFromEditor()` returns null for
+      // its parsed entry. Before requests carried their own line numbers, dropping that
+      // entry shifted the valid request on line 2 onto line 1 (index-based pairing).
+      editor.getModel.mockReturnValue(createModel(['GET', 'GET _search']));
+      editor.getSelection.mockReturnValue({
+        startLineNumber: 1,
+        endLineNumber: 2,
+      } as monaco.Selection);
+
+      const provider = new MonacoEditorActionsProvider(editor, jest.fn(), '.className', {
+        getRequests: jest.fn().mockResolvedValue([
+          { startOffset: 0, endOffset: 3, method: 'GET', url: '' },
+          { startOffset: 4, endOffset: 15, method: 'GET', url: '_search' },
+        ]),
+        getErrors: jest.fn().mockResolvedValue([]),
+      } as any);
+
+      await provider.sendRequests(jest.fn(), context);
+
+      expect(sendRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requests: [expect.objectContaining({ method: 'GET', url: '_search', lineNumber: 2 })],
+        })
+      );
     });
   });
 });

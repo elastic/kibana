@@ -8,7 +8,7 @@
 import { firstValueFrom } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { UserProfileAPIClient } from './user_profile_api_client';
 
@@ -81,6 +81,38 @@ describe('UserProfileAPIClient', () => {
     await apiClient.update({ avatar: { imageUrl: 'avatar.png' } });
     expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_data', {
       body: '{"avatar":{"imageUrl":"avatar.png"}}',
+    });
+  });
+
+  it('does not post the stored locale on a partial update', async () => {
+    coreStart.http.get.mockResolvedValue({
+      data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
+    });
+    await apiClient.getCurrent({ dataPath: 'userSettings' });
+
+    await apiClient.partialUpdate({ userSettings: { darkMode: 'dark' } });
+
+    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_data', {
+      body: JSON.stringify({ userSettings: { darkMode: 'dark' } }),
+    });
+    expect(await firstValueFrom(apiClient.userProfile$)).toEqual({
+      userSettings: { locale: 'de-DE', darkMode: 'dark' },
+    });
+  });
+
+  it('reverts the in-memory profile when a partial update fails', async () => {
+    coreStart.http.get.mockResolvedValue({
+      data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
+    });
+    await apiClient.getCurrent({ dataPath: 'userSettings' });
+    coreStart.http.post.mockRejectedValueOnce(new Error('nope'));
+
+    await expect(apiClient.partialUpdate({ userSettings: { darkMode: 'dark' } })).rejects.toThrow(
+      'nope'
+    );
+
+    expect(await firstValueFrom(apiClient.userProfile$)).toEqual({
+      userSettings: { locale: 'de-DE', darkMode: 'light' },
     });
   });
 

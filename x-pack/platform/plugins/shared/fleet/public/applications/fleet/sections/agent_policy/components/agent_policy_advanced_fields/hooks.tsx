@@ -24,6 +24,7 @@ import {
 } from '../../../../../../../common/constants';
 import {
   getAllowedOutputTypesForAgentPolicy,
+  getAllowedOutputTypesForMonitoring,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
 } from '../../../../../../../common/services';
@@ -85,6 +86,8 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     () => getAllowedOutputTypesForAgentPolicy(agentPolicy as AgentPolicy),
     [agentPolicy]
   );
+
+  const allowedMonitoringOutputTypes = useMemo(() => getAllowedOutputTypesForMonitoring(), []);
 
   const dataOutputOptions = useMemo(() => {
     if (outputsRequest.isLoading || !outputsRequest.data) {
@@ -148,14 +151,15 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
       return [];
     }
 
-    const defaultOutputName = outputsRequest.data.items.find(
+    const defaultMonitoringOutputName = outputsRequest.data.items.find(
       (item) => item.is_default_monitoring
     )?.name;
     return [
-      getDefaultOutput(defaultOutputName),
+      getDefaultOutput(defaultMonitoringOutputName),
       ...outputsRequest.data.items
         .filter(
           (item) =>
+            allowedMonitoringOutputTypes.includes(item.type) &&
             !(isAgentless && item.id === SERVERLESS_PRIVATE_OUTPUT_ID) &&
             (!item.is_internal ||
               isAgentless ||
@@ -169,7 +173,13 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
           };
         }),
     ];
-  }, [outputsRequest, isPolicyPerOutputAllowed, isAgentless, isServerless]);
+  }, [
+    outputsRequest,
+    isPolicyPerOutputAllowed,
+    allowedMonitoringOutputTypes,
+    isAgentless,
+    isServerless,
+  ]);
 
   const dataOutputValueOfSelected = agentPolicy.data_output_id || DEFAULT_SELECT_VALUE;
 

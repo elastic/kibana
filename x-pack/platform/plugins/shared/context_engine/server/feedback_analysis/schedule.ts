@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
@@ -15,6 +14,7 @@ import {
 } from '../../common/constants';
 import type { AiIndexFeedbackAnalysis } from '../../common/http_api/ai_indices';
 import { parseIntervalMinutes } from '../../common/validation';
+import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
 /**
  * The one workflows management call this plugin makes, declared structurally rather than imported:
@@ -32,6 +32,8 @@ export interface WorkflowEnablementApi {
 
 export interface ReconcileScheduleParams {
   aiIndexId: string;
+  /** Space the AI index lives in; the managed workflow instance is installed into this space. */
+  spaceId: string;
   /** Desired state; `undefined` means disabled. */
   feedbackAnalysis?: AiIndexFeedbackAnalysis;
   /**
@@ -46,16 +48,8 @@ export interface FeedbackAnalysisScheduleService {
   reconcile(params: ReconcileScheduleParams): Promise<void>;
 
   /** Tears the schedule down when the AI index it analyzes is deleted. */
-  remove(params: { aiIndexId: string }): Promise<void>;
+  remove(params: { aiIndexId: string; spaceId: string }): Promise<void>;
 }
-
-/**
- * A managed workflow instance is keyed by `(workflowId, spaceId)` while an AI index is global and
- * writable from any space, so the schedule is pinned here rather than taken from the request. A
- * request-scoped space would let an enable in one space and a disable in another address different
- * instances, leaving a run nobody can stop.
- */
-const SCHEDULE_SPACE_ID = DEFAULT_SPACE_ID;
 
 export const createFeedbackAnalysisScheduleService = ({
   logger,
@@ -69,32 +63,34 @@ export const createFeedbackAnalysisScheduleService = ({
 }): FeedbackAnalysisScheduleService => {
   const log = logger.get('feedback_analysis_schedule');
 
-  /**
-   * Managed workflow document ids are `<definition id>-<suffix>`, and an AI index id is already
-   * globally unique, so it alone identifies an instance.
-   */
-  const workflowDocumentIdFor = (aiIndexId: string) =>
-    `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-${aiIndexId}`;
+  const workflowDocumentIdFor = (aiIndexId: string, spaceId: string) =>
+    `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(
+      aiIndexId,
+      spaceId
+    )}`;
 
   const intervalMinutesFor = (feedbackAnalysis: AiIndexFeedbackAnalysis): number => {
     const interval = feedbackAnalysis.schedule?.interval ?? DEFAULT_FEEDBACK_ANALYSIS_INTERVAL;
     return parseIntervalMinutes(interval) ?? MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES;
   };
 
-  const uninstall = async (aiIndexId: string) => {
+  const uninstall = async (aiIndexId: string, spaceId: string) => {
     const client = await getManagedWorkflowsClient();
     await client.uninstall(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-      spaceId: SCHEDULE_SPACE_ID,
-      workflowIdSuffix: aiIndexId,
+      spaceId,
+      workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
     });
   };
 
   return {
-    async reconcile({ aiIndexId, feedbackAnalysis, request }) {
+    async reconcile({ aiIndexId, spaceId, feedbackAnalysis, request }) {
       if (!feedbackAnalysis?.enabled) {
         // Uninstalling drops the trigger task with the document, so disabling needs no request.
-        await uninstall(aiIndexId);
-        log.debug(() => `Removed feedback analysis schedule for AI index '${aiIndexId}'`);
+        await uninstall(aiIndexId, spaceId);
+        log.debug(
+          () =>
+            `Removed feedback analysis schedule for AI index '${aiIndexId}' in space '${spaceId}'`
+        );
         return;
       }
 
@@ -107,8 +103,8 @@ export const createFeedbackAnalysisScheduleService = ({
       const intervalMinutes = intervalMinutesFor(feedbackAnalysis);
       const client = await getManagedWorkflowsClient();
       await client.install(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-        spaceId: SCHEDULE_SPACE_ID,
-        workflowIdSuffix: aiIndexId,
+        spaceId,
+        workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
         values: {
           aiIndexId,
           intervalMinutes,
@@ -122,20 +118,23 @@ export const createFeedbackAnalysisScheduleService = ({
       // reconciles: the schedule then follows whoever last saved it rather than expiring with the
       // account that first turned it on.
       await workflowsManagement.updateWorkflow(
-        workflowDocumentIdFor(aiIndexId),
+        workflowDocumentIdFor(aiIndexId, spaceId),
         { enabled: true },
-        SCHEDULE_SPACE_ID,
+        spaceId,
         request
       );
 
       log.info(
-        `Scheduled feedback analysis for AI index '${aiIndexId}' every ${intervalMinutes}m, running as the user who enabled it`
+        `Scheduled feedback analysis for AI index '${aiIndexId}' in space '${spaceId}' every ${intervalMinutes}m, running as the user who enabled it`
       );
     },
 
-    async remove({ aiIndexId }) {
-      await uninstall(aiIndexId);
-      log.debug(() => `Removed feedback analysis schedule for deleted AI index '${aiIndexId}'`);
+    async remove({ aiIndexId, spaceId }) {
+      await uninstall(aiIndexId, spaceId);
+      log.debug(
+        () =>
+          `Removed feedback analysis schedule for deleted AI index '${aiIndexId}' in space '${spaceId}'`
+      );
     },
   };
 };

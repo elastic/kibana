@@ -65,17 +65,26 @@ const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
   /**
-   * Workflow Template Library — fetches the curated catalog and exposes it at
+   * Workflow Template library — fetches the curated catalog and exposes it at
    * `/internal/workflows/library/*`. Server-only infrastructure settings; the
    * tech-preview enable/disable toggle is the `workflowsManagement:library:enabled`
    * global uiSetting (so browser components can read it without depending on
    * this plugin).
    */
   library: librarySchema,
+  /**
+   * Workflow pages: the `page` trigger and the hosted form. Off by default while the feature
+   * is in development. Enable with `workflowsManagement.pages.enabled: true` in `kibana.yml`.
+   */
+  pages: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,
+  // The editor builds the YAML schema in the browser, so it needs the pages switch.
+  exposeToBrowser: { pages: true },
 };

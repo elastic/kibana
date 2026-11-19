@@ -86,6 +86,7 @@ describe('useHasChromeAppHeaderContent', () => {
     chrome.appHeader.set({
       experimentalDashboardAiAction: {
         onClick: jest.fn(),
+        tooltip: 'Enhance this dashboard',
       },
     });
 

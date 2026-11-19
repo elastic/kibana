@@ -27,9 +27,10 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/developer-toolbar-plugin'
   - '@kbn/shared-ux-utility'
+  - '@kbn/react-fiber'
 tags:
   - plugin
-  - prod
+  - dev
   - group-platform
   - private
   - jest-unit-tests
@@ -38,6 +39,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

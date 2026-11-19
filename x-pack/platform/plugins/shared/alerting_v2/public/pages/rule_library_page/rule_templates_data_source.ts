@@ -27,6 +27,7 @@ export interface FindRuleTemplatesUiParams {
   perPage?: number;
   search?: string;
   tags?: string[];
+  excludedTags?: string[];
   sortField?: FindRuleTemplatesSortField;
   sortOrder?: 'asc' | 'desc';
 }
@@ -36,6 +37,7 @@ export const toFindRuleTemplatesRequest = ({
   perPage,
   search,
   tags,
+  excludedTags,
   sortField,
   sortOrder,
   ...rest
@@ -46,6 +48,7 @@ export const toFindRuleTemplatesRequest = ({
     per_page: perPage,
     search,
     tags,
+    excluded_tags: excludedTags,
     sort_field: sortField,
     sort_order: sortOrder,
   };
@@ -99,6 +102,7 @@ export const useRuleTemplatesDataSource = (): DataSourceConfig => {
             perPage: page.size,
             search: searchQuery || undefined,
             tags: tagFilter?.include,
+            excludedTags: tagFilter?.exclude,
             sortField: toApiSortField(sort?.field),
             sortOrder: sort?.direction,
           })

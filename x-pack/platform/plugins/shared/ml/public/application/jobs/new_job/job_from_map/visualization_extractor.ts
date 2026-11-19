@@ -6,7 +6,7 @@
  */
 
 import { asyncForEach } from '@kbn/std';
-import type { PublishesDataViews } from '@kbn/presentation-publishing';
+import type { PublishesDataSources } from '@kbn/presentation-publishing';
 import { type MapApi } from '@kbn/maps-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -27,10 +27,10 @@ export class VisualizationExtractor {
   constructor() {}
 
   public async getResultLayersFromEmbeddable(
-    embeddable: MapApi & Partial<PublishesDataViews>
+    embeddable: MapApi & Partial<PublishesDataSources<DataView>>
   ): Promise<LayerResult[]> {
     const layers: LayerResult[] = [];
-    const dataViews: DataView[] = embeddable.dataViews$?.value ?? [];
+    const dataViews: DataView[] = embeddable.dataSources$?.value ?? [];
 
     // Keep track of geoFields for layers as they can be repeated
     const layerGeoFields: Record<string, boolean> = {};

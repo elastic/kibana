@@ -18,6 +18,13 @@ export const stripProcessingUpdatedAt = (
     : { steps: processing.steps };
 };
 
+// The lifecycle flyouts below only close once a Streams `PUT /_ingest` write resolves. That write
+// takes the cluster-wide `streams/apply_changes` lock and fans out to several Elasticsearch calls,
+// so on Cloud it runs past Scout's 10s default expect timeout (sibling Streams writes were measured
+// at 6.8s and 10.2s there, see `enable_wired_streams_flow.spec.ts`). Well under the 90s Cloud test
+// timeout.
+const STREAMS_WRITE_CLOSE_TIMEOUT = 30_000;
+
 export const RETENTION_TEST_IDS = {
   // Entry points (lifecycle summary header actions)
   editLifecycleMethodButton: 'dataLifecycleSummaryEditLifecycleMethod',
@@ -82,8 +89,7 @@ export const RETENTION_TEST_IDS = {
   ilmPolicyRow: (policyName: string) =>
     `retentionSelectableRow-${policyName.replace(/[^a-zA-Z0-9]+/g, '_')}`,
 
-  // Readiness signal: `-loading` while a stats (re)fetch is inflight, `-loaded` once it settles.
-  summaryStatsLoading: 'dataLifecycleSummary-stats-loading',
+  // Readiness signal: `-loaded` only once stats are settled and no (post-save held) preview is shown.
   summaryStatsLoaded: 'dataLifecycleSummary-stats-loaded',
 
   // Display elements
@@ -209,10 +215,10 @@ export async function openLifecycleMethodFlyout(page: ScoutPage): Promise<Locato
 
 /**
  * Waits for the summary's stats (re)fetch to settle so a following popover click isn't dismissed by
- * the re-render. Waits for `-loading` first to avoid matching the stale `-loaded` state on screen.
+ * the re-render. The flyout's preview is held until the refreshed stats land, so the signal already
+ * reads `-loading` when the flyout closes and there is no transient state to catch.
  */
 export async function waitForLifecycleSummaryStatsSettled(page: ScoutPage): Promise<void> {
-  await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoading)).toBeVisible();
   await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoaded)).toBeVisible();
 }
 
@@ -230,7 +236,9 @@ export async function saveRetentionChanges(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout).waitFor({ state: 'hidden' });
+  await page
+    .getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout)
+    .waitFor({ state: 'hidden', timeout: STREAMS_WRITE_CLOSE_TIMEOUT });
 
   if (waitForIlmStats) {
     await waitForLifecycleSummaryStatsSettled(page);
@@ -420,7 +428,7 @@ export async function setCustomRetention(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await flyout.waitFor({ state: 'hidden' });
+  await flyout.waitFor({ state: 'hidden', timeout: STREAMS_WRITE_CLOSE_TIMEOUT });
 }
 
 /**
@@ -442,7 +450,7 @@ export async function removeDeletePhase(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await flyout.waitFor({ state: 'hidden' });
+  await flyout.waitFor({ state: 'hidden', timeout: STREAMS_WRITE_CLOSE_TIMEOUT });
 }
 
 /**
@@ -496,7 +504,9 @@ export async function applyFailedLifecycleFlyout(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await expect(page.getByTestId(RETENTION_TEST_IDS.failedLifecycleFlyout)).toBeHidden();
+  await expect(page.getByTestId(RETENTION_TEST_IDS.failedLifecycleFlyout)).toBeHidden({
+    timeout: STREAMS_WRITE_CLOSE_TIMEOUT,
+  });
 }
 
 /**
@@ -567,7 +577,7 @@ export async function setFailureStoreRetention(
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
-  await expect(flyout).toBeHidden();
+  await expect(flyout).toBeHidden({ timeout: STREAMS_WRITE_CLOSE_TIMEOUT });
 }
 
 /**

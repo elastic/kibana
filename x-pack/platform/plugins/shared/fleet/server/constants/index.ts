@@ -19,6 +19,7 @@ export {
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+  AGENTLESS_UNENROLLED_REASON,
   UNPRIVILEGED_AGENT_KUERY,
   PRIVILEGED_AGENT_KUERY,
   MAX_TIME_COMPLETE_INSTALL,
@@ -86,8 +87,10 @@ export {
   MAX_REINSTALL_RETRIES,
   // Download sources
   DEFAULT_DOWNLOAD_SOURCE_URI,
+  DEFAULT_DOWNLOAD_SOURCE_NAME,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   DEFAULT_DOWNLOAD_SOURCE_ID,
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
   // Fleet server host
   DEFAULT_FLEET_SERVER_HOST_ID,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -114,8 +117,6 @@ export {
   OUTPUT_HEALTH_DATA_STREAM,
   FLEET_SETUP_LOCK_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-  // data streams
-  DATA_STREAM_INDEX_PATTERN_REGEX,
   type PrivilegeMapObject,
 } from '../../common/constants';
 
@@ -146,4 +147,5 @@ export {
 export { FILE_STORAGE_DATA_AGENT_INDEX } from './fleet_es_assets';
 export { FILE_STORAGE_METADATA_AGENT_INDEX } from './fleet_es_assets';
 export * from '../../common/constants/mappings';
+export * from '../../common/constants/schema_field_limits';
 export * from './max_concurrency_constants';

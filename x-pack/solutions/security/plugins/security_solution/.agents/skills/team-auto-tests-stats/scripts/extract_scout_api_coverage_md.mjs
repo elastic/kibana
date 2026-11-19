@@ -78,7 +78,6 @@ function extractDescribeTitles(content) {
  * @returns {{ pos: number; kw: string; kwLen: number } | null}
  */
 function findNextTestKeyword(content, start, usePlaywrightTestAlias) {
-  const len = content.length;
   /** @type {{ pos: number; kw: string; kwLen: number } | null} */
   let best = null;
   /** @type {string[]} */

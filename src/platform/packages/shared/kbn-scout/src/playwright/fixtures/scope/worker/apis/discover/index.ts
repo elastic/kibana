@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverSessionApiInput } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 import { DISCOVER_SESSION_API_PATH, DISCOVER_SESSION_API_VERSION } from './constants';
@@ -24,7 +24,14 @@ export interface DiscoverApiService {
    * @param body - Discover session create request body
    * @param spaceId - Optional space id to create the session in
    */
-  create: (body: DiscoverSessionApiInput, spaceId?: string) => Promise<string>;
+  create: (body: DiscoverSessionApiDataInput, spaceId?: string) => Promise<string>;
+  /**
+   * Fully replace an existing Discover session via the upsert API.
+   * @param id - Id of the Discover session to replace
+   * @param body - Discover session request body
+   * @param spaceId - Optional space id the session lives in
+   */
+  update: (id: string, body: DiscoverSessionApiDataInput, spaceId?: string) => Promise<void>;
 }
 
 /**
@@ -63,6 +70,25 @@ export const getDiscoverApiHelper = (
           throw new Error('Discover session create response: expected a non-empty string id');
         }
         return id;
+      });
+    },
+
+    update: async (id, body, spaceId) => {
+      await measurePerformanceAsync(log, 'discoverApi.update', async () => {
+        const response = await kbnClient.request<unknown>({
+          method: 'PUT',
+          path: withSpace(`${DISCOVER_SESSION_API_PATH}/${id}`, spaceId),
+          body,
+          headers: { 'elastic-api-version': DISCOVER_SESSION_API_VERSION },
+        });
+
+        if (response.status !== 200) {
+          throw new Error(
+            `Expected Discover session update status 200, got ${response.status}: ${JSON.stringify(
+              response.data
+            )}`
+          );
+        }
       });
     },
   };

@@ -68,7 +68,7 @@ spaceTest.describe.skip('Flights dashboard (sample data)', { tag: tags.deploymen
     await spaceTest.step('return to dashboard and validate panels', async () => {
       await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
 
-      await expect.poll(async () => await pageObjects.dashboard.getControlCount()).toBe(3);
+      await expect.poll(async () => await pageObjects.controls.getCount()).toBe(3);
 
       // check panels rendered
       await expect.poll(async () => await pageObjects.dashboard.getPanelCount()).toBe(16);

@@ -1,0 +1,120 @@
+{
+  "10.3.0": [
+    {
+      "name": "Slack Connector without inbound identity",
+      "actionTypeId": ".slack",
+      "isMissingSecrets": false,
+      "config": {
+        "webhookUrl": "https://hooks.slack.com/services/xxx"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared"
+    },
+    {
+      "name": "Datadog Connector with apiKey",
+      "actionTypeId": ".datadog",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://api.datadoghq.com"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared",
+      "apiKey": "eyJhcGlLZXkiOiJjaXBoZXJ0ZXh0In0="
+    },
+    {
+      "name": "Datadog Connector with UIAM key",
+      "actionTypeId": ".datadog",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://api.datadoghq.com"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared",
+      "apiKey": null,
+      "uiamApiKey": "eyJ1aWFtIjoiY2lwaGVydGV4dCJ9",
+      "uiamApiKeyExternal": false
+    },
+    {
+      "name": "Webhook Connector with empty identity fields",
+      "actionTypeId": ".webhook",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://example.com/webhook",
+        "method": "post"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared",
+      "apiKey": "",
+      "uiamApiKey": null
+    }
+  ],
+  "10.4.0": [
+    {
+      "name": "Slack Connector without inbound identity",
+      "actionTypeId": ".slack",
+      "isMissingSecrets": false,
+      "config": {
+        "webhookUrl": "https://hooks.slack.com/services/xxx"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared",
+      "hasInboundEventIdentity": false
+    },
+    {
+      "name": "Datadog Connector with apiKey",
+      "actionTypeId": ".datadog",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://api.datadoghq.com"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared",
+      "apiKey": "eyJhcGlLZXkiOiJjaXBoZXJ0ZXh0In0=",
+      "hasInboundEventIdentity": true
+    },
+    {
+      "name": "Datadog Connector with UIAM key",
+      "actionTypeId": ".datadog",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://api.datadoghq.com"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared",
+      "apiKey": null,
+      "uiamApiKey": "eyJ1aWFtIjoiY2lwaGVydGV4dCJ9",
+      "uiamApiKeyExternal": false,
+      "hasInboundEventIdentity": true
+    },
+    {
+      "name": "Webhook Connector with empty identity fields",
+      "actionTypeId": ".webhook",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://example.com/webhook",
+        "method": "post"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared",
+      "apiKey": "",
+      "uiamApiKey": null,
+      "hasInboundEventIdentity": false
+    }
+  ]
+}

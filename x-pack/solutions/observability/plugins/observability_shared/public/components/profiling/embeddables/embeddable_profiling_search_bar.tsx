@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import { EMBEDDABLE_PROFILING_SEARCH_BAR } from '.';
 import { getProfilingComponent } from '../helpers/component_registry';
 
@@ -20,6 +21,7 @@ export interface EmbeddableProfilingSearchBarProps {
   onRefresh: () => void;
   rangeFrom: string;
   rangeTo: string;
+  schema?: ProfilingSchema;
 }
 
 export function EmbeddableProfilingSearchBar(props: EmbeddableProfilingSearchBarProps) {

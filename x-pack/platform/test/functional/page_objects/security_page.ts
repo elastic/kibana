@@ -14,6 +14,7 @@ import type {
 } from '@kbn/security-plugin/common';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { Key } from 'selenium-webdriver';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrService } from '../ftr_provider_context';
 
 interface LoginOptions {
@@ -322,10 +323,22 @@ export class SecurityPageObject extends FtrService {
 
     const { body: user } = await this.supertest
       .get('/internal/security/me')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .set('kbn-xsrf', 'xxx')
       .set('Cookie', `sid=${sidCookie.value}`)
       .expect(200);
     return user as AuthenticatedUser;
+  }
+
+  /** Ends the session server-side; deleting the browser's `sid` cookie only drops the client copy. */
+  private async invalidateBrowserSession() {
+    // `browser.getCookie` throws `NoSuchCookieError` when absent, so read the whole jar instead.
+    const sidCookie = (await this.browser.getCookies()).find(({ name }) => name === 'sid');
+    if (!sidCookie?.value) {
+      return;
+    }
+    // `/api/security/logout` rejects AJAX-flagged requests, so send no `kbn-*` headers.
+    await this.supertest.get('/api/security/logout').set('Cookie', `sid=${sidCookie.value}`);
   }
 
   async forceLogout(
@@ -337,15 +350,41 @@ export class SecurityPageObject extends FtrService {
       return;
     }
 
-    // When cookie-login is active, skip the /logout server round-trip entirely.
-    // Clearing browser state is sufficient for test isolation — the next navigateToApp
-    // will redirect to /login and loginIfPrompted will inject a fresh cookie.
-    if (this.config.get('security.cookieLogin') && this.browserAuth) {
+    // When cookie-login is active, skip the /logout browser round-trip and end the session with
+    // a direct API call instead: clearing browser state alone leaves the session valid
+    // server-side, so any response that re-sets the `sid` cookie silently restores it.
+    const { browserAuth } = this;
+    if (this.config.get('security.cookieLogin') && browserAuth) {
       this.log.debug(
         '[security] cookieLogin: clearing browser state instead of navigating to /logout'
       );
-      await this.browserAuth.cleanBrowserState();
-      return;
+      // Unload the app first. Requests that outlive the page (e.g. keepalive) can still
+      // re-set the session cookie after it is deleted, so clear until it stays cleared.
+      const hostPort = this.deployment.getHostPort();
+      await this.browser.get(hostPort + '/bootstrap-anonymous.js');
+      const alert = await this.browser.getAlert();
+      if (alert) await alert.accept();
+      await this.invalidateBrowserSession();
+      await browserAuth.cleanBrowserState();
+      let clearedChecks = 0;
+      await this.retry.waitFor('session cookie to stay cleared', async () => {
+        if ((await this.browser.getCookies()).length > 0) {
+          clearedChecks = 0;
+          await browserAuth.cleanBrowserState();
+          return false;
+        }
+        clearedChecks++;
+        return clearedChecks >= 2;
+      });
+      // Land on a plain login page, which callers rely on. Returning to the previous app URL
+      // would add a `next` target that sends the next form login past the space selector.
+      await this.browser.get(hostPort + '/login');
+      if (await this.testSubjects.waitForExists('loginForm', { timeout: 10_000 })) {
+        return;
+      }
+      this.log.debug(
+        `[security] cookieLogin: no login form at ${await this.browser.getCurrentUrl()}, falling back to /logout`
+      );
     }
 
     const performForceLogout = async () => {
@@ -389,9 +428,7 @@ export class SecurityPageObject extends FtrService {
       }
     };
 
-    await this.retry.tryWithRetries('force logout with retries', performForceLogout, {
-      retryCount: 2,
-    });
+    await this.retry.try(performForceLogout, { description: 'force logout with retries' });
   }
 
   async clickRolesSection() {
@@ -500,11 +537,14 @@ export class SecurityPageObject extends FtrService {
 
   async getElasticsearchRoles() {
     const roles = [];
-    await this.testSubjects.exists('rolesTable');
+    await this.testSubjects.existOrFail('rolesTable');
     await this.testSubjects.click('tablePaginationPopoverButton');
     await this.testSubjects.click('tablePagination-100-rows');
-    await this.testSubjects.exists('rolesTableLoading');
-    await this.testSubjects.exists('rolesTable');
+    // the roles grid is paginated server-side, so the click above starts a fresh request
+    await this.retry.waitFor('roles table to reload at 100 rows per page', async () => {
+      const rowsPerPage = await this.testSubjects.getVisibleText('tablePaginationPopoverButton');
+      return rowsPerPage.includes('100') && (await this.testSubjects.exists('rolesTable'));
+    });
 
     for (const role of await this.testSubjects.findAll('roleRow')) {
       const [rolename, reserved, deprecated] = await Promise.all([

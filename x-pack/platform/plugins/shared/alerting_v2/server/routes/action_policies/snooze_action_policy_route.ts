@@ -8,13 +8,12 @@
 import {
   actionPolicyResponseSchema,
   errorResponseSchema,
-  ID_MAX_LENGTH,
   snoozeActionPolicyBodySchema,
   type SnoozeActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -27,16 +26,7 @@ import {
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
 } from './action_policy_route_descriptions';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-
-const snoozeActionPolicyParamsSchema = z.object({
-  id: z
-    .string()
-    .min(1)
-    .max(ID_MAX_LENGTH)
-    .describe(
-      'The ID of the action policy to snooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.'
-    ),
-});
+import { actionPolicyIdParamsSchema } from './route_schemas';
 
 @injectable()
 export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
@@ -49,13 +39,14 @@ export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Snooze an action policy',
     description: 'Snooze an action policy until a specified time.',
     oasOperationObject: snoozeActionPolicyOasExamples,
   } as const;
   static schemas = {
     request: {
-      params: snoozeActionPolicyParamsSchema,
+      params: actionPolicyIdParamsSchema,
       body: snoozeActionPolicyBodySchema,
     },
     response: {
@@ -84,7 +75,7 @@ export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
-      z.infer<typeof snoozeActionPolicyParamsSchema>,
+      z.infer<typeof actionPolicyIdParamsSchema>,
       unknown,
       SnoozeActionPolicyBody
     >,

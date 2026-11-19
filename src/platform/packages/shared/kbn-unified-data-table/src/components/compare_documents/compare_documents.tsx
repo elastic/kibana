@@ -18,9 +18,9 @@ import type {
 } from '@elastic/eui';
 import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { DataSource } from '@kbn/data-source';
 import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
 import { ComparisonControls } from './comparison_controls';
 import { renderComparisonToolbar } from './comparison_toolbar';
@@ -38,8 +38,7 @@ export interface CompareDocumentsProps {
   ariaDescribedBy: string;
   ariaLabelledBy: string;
   dataView: DataView;
-  columnsMeta?: DataTableColumnsMeta;
-  isPlainRecord: boolean;
+  dataSource?: DataSource;
   selectedFieldNames: string[];
   selectedDocIds: string[];
   schemaDetectors: EuiDataGridSchemaDetector[];
@@ -68,8 +67,7 @@ const CompareDocuments = ({
   ariaDescribedBy,
   ariaLabelledBy,
   dataView,
-  columnsMeta,
-  isPlainRecord,
+  dataSource,
   selectedFieldNames,
   selectedDocIds: originalSelectedDocIds,
   schemaDetectors,
@@ -120,7 +118,7 @@ const CompareDocuments = ({
   const fieldColumnId = useGeneratedHtmlId({ prefix: 'fields' });
   const { comparisonFields, totalFields } = useComparisonFields({
     dataView,
-    columnsMeta,
+    dataSource,
     selectedFieldNames,
     selectedDocIds,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
@@ -129,7 +127,7 @@ const CompareDocuments = ({
   });
   const comparisonColumns = useComparisonColumns({
     wrapper,
-    isPlainRecord,
+    dataSource,
     fieldColumnId,
     selectedDocIds,
     docMap,
@@ -148,7 +146,7 @@ const CompareDocuments = ({
   const additionalControls = useMemo(
     () => (
       <ComparisonControls
-        isPlainRecord={isPlainRecord}
+        dataSource={dataSource}
         selectedDocIds={selectedDocIds}
         showDiff={showDiff}
         diffMode={diffMode}
@@ -167,7 +165,7 @@ const CompareDocuments = ({
     [
       diffMode,
       forceShowAllFields,
-      isPlainRecord,
+      dataSource,
       selectedDocIds,
       setDiffMode,
       setIsCompareActive,
@@ -200,7 +198,7 @@ const CompareDocuments = ({
   );
   const renderCellValue = useComparisonCellValue({
     dataView,
-    columnsMeta,
+    dataSource,
     comparisonFields,
     fieldColumnId,
     selectedDocIds,

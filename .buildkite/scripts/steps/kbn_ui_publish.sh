@@ -15,7 +15,7 @@ set -euo pipefail
 #   DRY_RUN=1         — build everything but skip the publish step.
 #   BASE_REF=<ref>    — override the git base used for change detection.
 #   FORCE_ALL=1       — publish every kbn-ui package regardless of diff.
-#   SKIP_BOOTSTRAP=1  — skip `yarn kbn bootstrap` (local re-runs).
+#   SKIP_BOOTSTRAP=1  — skip `pnpm kbn bootstrap` (local re-runs).
 
 report_step() {
   echo "--- $1"
@@ -143,7 +143,7 @@ for tarball in "${built_tarballs[@]}"; do
   # A 409 (already published with this version) is the expected no-op
   # for a content-hash-versioned artifact that hasn't changed. Convert
   # that into a success; anything else is still fatal.
-  npm publish "$new_tarball" --tag latest --userconfig "$NPMRC" || {
+  npm publish "$new_tarball" --tag main --userconfig "$NPMRC" || {
     publish_rc=$?
     if npm view "$(node -p "require('$pkg_manifest').name")@$(node -p "require('$pkg_manifest').version")" \
          --userconfig "$NPMRC" >/dev/null 2>&1; then

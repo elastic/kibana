@@ -123,6 +123,28 @@ describe('useCaseViewActivity', () => {
     });
   });
 
+  it('persists the sources filter when the activity filters change', () => {
+    const { result } = renderHook(() => useCaseViewActivity({ caseData }), { wrapper });
+
+    act(() => {
+      result.current.handleUserActivityParamsChanged({
+        type: 'all',
+        sortOrder: 'asc',
+        page: 1,
+        perPage: 10,
+        sources: ['agent'],
+      });
+    });
+
+    expect(result.current.userActivityQueryParams).toEqual({
+      type: 'all',
+      sortOrder: 'asc',
+      page: 1,
+      perPage: 10,
+      sources: ['agent'],
+    });
+  });
+
   it('returns a memoized object reference across re-renders when nothing changes', () => {
     const { result, rerender } = renderHook(() => useCaseViewActivity({ caseData }), { wrapper });
 

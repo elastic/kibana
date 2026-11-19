@@ -25,8 +25,8 @@ export const getFeedbackContextStepDefinition = ({
   createServerStepDefinition({
     ...feedbackContextStepCommonDefinition,
     handler: async (context) => {
-      const request = context.contextManager.getFakeRequest();
-      await assertContextEngineEnabled(isContextEngineEnabled, request);
+      const spaceId = context.contextManager.getContext().workflow.spaceId;
+      await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
       await assertFeedbackLoopEnabled(isFeedbackLoopEnabled);
 
       const { ai_index_id: aiIndexId } = context.input;
@@ -39,10 +39,10 @@ export const getFeedbackContextStepDefinition = ({
           output_schema: outputSchema,
           has_signals: hasSignals,
           run,
-        } = await buildFeedbackContext(aiIndexId, {
+        } = await buildFeedbackContext(aiIndexId, spaceId, {
           esClient,
           aiIndexService: getAiIndexService(),
-          improvementsService: getImprovementsService(esClient),
+          improvementsService: getImprovementsService(esClient, spaceId),
         });
 
         logger.debug(

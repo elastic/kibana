@@ -111,14 +111,20 @@ export function RumHome() {
   );
 }
 
-function DashboardToolbar() {
+export function DashboardToolbar({
+  showWebApplicationSelect = true,
+}: {
+  showWebApplicationSelect?: boolean;
+}) {
   return (
     <>
       <EuiSpacer size="m" />
       <EuiFlexGroup wrap>
-        <EuiFlexItem>
-          <WebApplicationSelect />
-        </EuiFlexItem>
+        {showWebApplicationSelect && (
+          <EuiFlexItem>
+            <WebApplicationSelect />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <UserPercentile />
         </EuiFlexItem>

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -19,11 +18,12 @@ import type {
   SmlIndexerDeleteAttachmentParams,
   SmlPermissionsInput,
   SmlDocument,
-  SmlDocumentAttributes,
+  SmlWriter,
   SmlTypeDefinition,
 } from './types';
 
-import { smlIndexName } from './sml_storage';
+import { INGESTION_METHOD_FIELD, smlIndexName } from './sml_storage';
+import { smlEntryId, smlEntryIdFromOriginUri, smlOriginUri } from './sml_origin';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
 
@@ -95,6 +95,7 @@ export interface SmlIndexer {
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
     spaces?: string[];
+    strict?: boolean;
   }) => Promise<void>;
 }
 
@@ -247,15 +248,24 @@ class SmlIndexerImpl implements SmlIndexer {
       return;
     }
 
-    await this.deleteEntry({ originUri, esClient });
+    if (smlEntry.type !== attachmentType) {
+      this.logger.warn(
+        `SML indexer: skipping origin '${originId}': the '${attachmentType}' type returned an entry with type '${smlEntry.type}', which must match. The existing entry is unchanged.`
+      );
+      return;
+    }
+
+    const entryId = smlEntryId(attachmentType, originId);
+    const creation = await this.readCreation({ entryId, esClient });
 
     const indexOp = this.buildIndexOp({
-      entryId: uuidv4(),
+      entryId,
       entry: smlEntry,
       originId,
       spaces,
       ingestionMethod: 'crawled',
       resolvedPermissions,
+      ...creation,
     });
 
     if (!indexOp) {
@@ -278,6 +288,7 @@ class SmlIndexerImpl implements SmlIndexer {
       esClient,
       ...(spaces && spaces.length > 0 ? { spaces } : {}),
       ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
+      ...(params.strict !== undefined ? { strict: params.strict } : {}),
     });
   }
 
@@ -311,6 +322,31 @@ class SmlIndexerImpl implements SmlIndexer {
     return { kibana: { privileges: { name: [] } } };
   }
 
+  /** Reads the existing entry's creation time and creator. */
+  private async readCreation({
+    entryId,
+    esClient,
+  }: {
+    entryId: string;
+    esClient: ElasticsearchClient;
+  }): Promise<{ createdAt?: string; createdBy?: SmlWriter }> {
+    const response = await esClient.get<Pick<SmlDocument, '@timestamp' | 'governance'>>(
+      {
+        index: smlIndexName,
+        id: entryId,
+        _source_includes: ['@timestamp', 'governance.provenance.created_by'],
+      },
+      { ignore: [404] }
+    );
+    if (!response.found || !response._source) {
+      return {};
+    }
+    return {
+      createdAt: response._source['@timestamp'],
+      createdBy: response._source.governance?.provenance?.created_by,
+    };
+  }
+
   private buildIndexOp({
     entryId,
     entry,
@@ -319,6 +355,7 @@ class SmlIndexerImpl implements SmlIndexer {
     ingestionMethod,
     resolvedPermissions,
     createdAt,
+    createdBy,
   }: {
     entryId: string;
     entry: SmlEntry;
@@ -327,6 +364,7 @@ class SmlIndexerImpl implements SmlIndexer {
     ingestionMethod: SmlIngestionMethod;
     resolvedPermissions: SmlPermissionsInput;
     createdAt?: string;
+    createdBy?: SmlWriter;
   }) {
     const actions = [...new Set(resolvedPermissions.kibana?.privileges?.name ?? [])].sort();
 
@@ -347,27 +385,24 @@ class SmlIndexerImpl implements SmlIndexer {
       .map((space) => ({ space, name: actions, count: actions.length }));
 
     const now = new Date().toISOString();
-
-    // SML-owned keys are spread last so a producer cannot forge `origin.uri` or `ingestion_method`,
-    // which gate deletion and manual-entry protection.
-    const attributes: SmlDocumentAttributes = {
-      ...entry.attributes,
-      id: entryId,
-      origin: { uri: `${entry.type}://${originId}` },
-      created_at: createdAt || now,
-      updated_at: now,
-      ingestion_method: ingestionMethod,
+    const writer: SmlWriter = {
+      uri: entry.user_id !== undefined ? `user://${entry.user_id}` : 'crawler://sml',
+      metadata: { ingestion_method: ingestionMethod },
     };
-    if (entry.user_id !== undefined) {
-      attributes.user_id = entry.user_id;
-    }
 
     const document: SmlDocument = {
+      '@timestamp': createdAt || now,
+      id: entryId,
       type: entry.type,
       title: entry.title,
       content: entry.content,
+      updated_at: now,
+      references: [
+        { uri: smlOriginUri(entry.type, originId), relation: 'derived_from' },
+        ...(entry.references ?? []),
+      ],
+      governance: { provenance: { created_by: createdBy ?? writer, updated_by: writer } },
       permissions: { kibana: { privileges } },
-      attributes,
     };
     if (entry.description !== undefined) {
       document.description = entry.description;
@@ -375,8 +410,8 @@ class SmlIndexerImpl implements SmlIndexer {
     if (entry.tags !== undefined) {
       document.tags = entry.tags;
     }
-    if (entry.references !== undefined) {
-      document.references = entry.references;
+    if (entry.attributes !== undefined) {
+      document.attributes = entry.attributes;
     }
     return {
       index: {
@@ -444,8 +479,8 @@ class SmlIndexerImpl implements SmlIndexer {
         query: {
           bool: {
             filter: [
-              { term: { 'attributes.origin.uri': originUri } },
-              { term: { 'attributes.ingestion_method': 'manual' } },
+              { term: { id: smlEntryIdFromOriginUri(originUri) } },
+              { term: { [INGESTION_METHOD_FIELD]: 'manual' } },
             ],
           },
         },
@@ -481,17 +516,19 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient,
     ingestionMethod,
     spaces,
+    strict = false,
   }: {
     originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
     spaces?: string[];
+    strict?: boolean;
   }): Promise<void> {
     const filter: Array<Record<string, unknown>> = [
-      { term: { 'attributes.origin.uri': originUri } },
+      { term: { id: smlEntryIdFromOriginUri(originUri) } },
     ];
     if (ingestionMethod) {
-      filter.push({ term: { 'attributes.ingestion_method': ingestionMethod } });
+      filter.push({ term: { [INGESTION_METHOD_FIELD]: ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
       // Space scoping is a direct term match on the nested `.space` field
@@ -515,8 +552,29 @@ class SmlIndexerImpl implements SmlIndexer {
         ignore_unavailable: true,
         allow_no_indices: true,
         query: { bool: { filter } },
-        refresh: false,
+        refresh: strict,
+        ...(strict ? { conflicts: 'proceed' as const } : {}),
       });
+      if (strict && (result.timed_out || result.failures?.length)) {
+        throw new Error(`SML deletion was incomplete for origin '${originUri}'`);
+      }
+      if (strict && result.version_conflicts) {
+        // Another delete can remove a document after delete-by-query takes its snapshot.
+        await esClient.indices.refresh({
+          index: smlIndexName,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        });
+        const remaining = await esClient.count({
+          index: smlIndexName,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          query: { bool: { filter } },
+        });
+        if (remaining.count > 0 || remaining._shards.failed > 0) {
+          throw new Error(`SML deletion was incomplete for origin '${originUri}'`);
+        }
+      }
       if (result.deleted && result.deleted > 0) {
         this.logger.info(
           `SML indexer: deleted ${result.deleted} existing ${label} for origin '${originUri}'`
@@ -529,6 +587,7 @@ class SmlIndexerImpl implements SmlIndexer {
         );
         return;
       }
+      if (strict) throw error;
       this.logger.warn(
         `SML indexer: failed to delete ${label} for origin '${originUri}': ${
           (error as Error).message

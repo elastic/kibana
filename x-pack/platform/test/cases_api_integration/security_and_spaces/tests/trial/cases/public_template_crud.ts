@@ -9,7 +9,11 @@ import expect from '@kbn/expect';
 import { stringify as yamlStringify } from 'yaml';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { deleteAllCaseItems, getSpaceUrlPrefix } from '../../../../common/lib/api';
+import {
+  deleteAllCaseItems,
+  getSpaceUrlPrefix,
+  storeTemplateDefinition,
+} from '../../../../common/lib/api';
 import type { User } from '../../../../common/lib/authentication/types';
 import {
   obsOnly,
@@ -203,6 +207,141 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns 404 for an unknown template', async () => {
         await requestAs('delete', `${TEMPLATES_URL}/does-not-exist-000000000000`).expect(404);
+      });
+    });
+
+    describe('extractObservables owner rule', () => {
+      const ownersThatCannotAutoExtract = ['cases', 'observability'];
+      const errorMessage = 'Setting extractObservables to true is not allowed';
+
+      const buildDefinitionWithSettings = (extractObservables: boolean) =>
+        yamlStringify({
+          name: 'Case default title',
+          settings: { extractObservables },
+          fields: [{ name: 'priority', type: 'keyword', control: 'INPUT_TEXT', label: 'Priority' }],
+        });
+
+      const findTemplatesByName = async (name: string) => {
+        const { body } = await requestAs('get', TEMPLATES_URL).expect(200);
+        return body.templates.filter((template: { name: string }) => template.name === name);
+      };
+
+      for (const owner of ownersThatCannotAutoExtract) {
+        describe(`owner ${owner}`, () => {
+          const writeBody = (name: string, extractObservables: boolean) =>
+            buildWriteBody(name, {
+              owner,
+              definition: buildDefinitionWithSettings(extractObservables),
+            });
+
+          it('rejects POST with extractObservables true with a 400 and creates no template', async () => {
+            const { body } = await requestAs('post', TEMPLATES_URL)
+              .send(writeBody('Rejected Template', true))
+              .expect(400);
+
+            expect(body.message).to.contain(errorMessage);
+            expect(await findTemplatesByName('Rejected Template')).to.have.length(0);
+          });
+
+          it('rejects the POST dry_run preflight with a 400', async () => {
+            const { body } = await requestAs('post', `${TEMPLATES_URL}?dry_run=true`)
+              .send(writeBody('Dry Run Rejected', true))
+              .expect(400);
+
+            expect(body.message).to.contain(errorMessage);
+          });
+
+          it('rejects PUT with a change to true with a 400 and creates no new version', async () => {
+            const { body: created } = await requestAs('post', TEMPLATES_URL)
+              .send(writeBody('Versioned Rejected', false))
+              .expect(200);
+
+            const { body } = await requestAs('put', `${TEMPLATES_URL}/${created.templateId}`)
+              .send(writeBody('Versioned Rejected', true))
+              .expect(400);
+            expect(body.message).to.contain(errorMessage);
+
+            const { body: dryRunBody } = await requestAs(
+              'put',
+              `${TEMPLATES_URL}/${created.templateId}?dry_run=true`
+            )
+              .send(writeBody('Versioned Rejected', true))
+              .expect(400);
+            expect(dryRunBody.message).to.contain(errorMessage);
+
+            const { body: after } = await requestAs(
+              'get',
+              `${TEMPLATES_URL}/${created.templateId}`
+            ).expect(200);
+            expect(after.templateVersion).to.eql(1);
+          });
+
+          it('accepts extractObservables false', async () => {
+            const { body: created } = await requestAs('post', TEMPLATES_URL)
+              .send(writeBody('Accepted False', false))
+              .expect(200);
+
+            await requestAs('put', `${TEMPLATES_URL}/${created.templateId}`)
+              .send(writeBody('Accepted False', false))
+              .expect(200);
+          });
+
+          it('accepts a PUT that keeps a stored true', async () => {
+            const { body: created } = await requestAs('post', TEMPLATES_URL)
+              .send(writeBody('Old Data', false))
+              .expect(200);
+            await storeTemplateDefinition({
+              es,
+              templateId: created.templateId,
+              definition: buildDefinitionWithSettings(true),
+            });
+
+            await requestAs('put', `${TEMPLATES_URL}/${created.templateId}?dry_run=true`)
+              .send(writeBody('Old Data', true))
+              .expect(200);
+            const { body: updated } = await requestAs(
+              'put',
+              `${TEMPLATES_URL}/${created.templateId}`
+            )
+              .send(writeBody('Old Data', true))
+              .expect(200);
+
+            expect(updated.templateVersion).to.eql(2);
+            expect(updated.definition.settings.extractObservables).to.eql(true);
+          });
+        });
+      }
+
+      describe('owner securitySolution', () => {
+        it('accepts extractObservables true on POST and on a change from false to true on PUT', async () => {
+          const owner = 'securitySolution';
+          const { body: created } = await requestAs('post', TEMPLATES_URL)
+            .send(
+              buildWriteBody('Security True', {
+                owner,
+                definition: buildDefinitionWithSettings(true),
+              })
+            )
+            .expect(200);
+          expect(created.definition.settings.extractObservables).to.eql(true);
+
+          const { body: other } = await requestAs('post', TEMPLATES_URL)
+            .send(
+              buildWriteBody('Security False', {
+                owner,
+                definition: buildDefinitionWithSettings(false),
+              })
+            )
+            .expect(200);
+          await requestAs('put', `${TEMPLATES_URL}/${other.templateId}`)
+            .send(
+              buildWriteBody('Security False', {
+                owner,
+                definition: buildDefinitionWithSettings(true),
+              })
+            )
+            .expect(200);
+        });
       });
     });
 

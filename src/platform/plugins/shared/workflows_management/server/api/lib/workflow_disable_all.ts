@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 
 import { bulkIndexWithOccRetry, toOccHit } from './bulk_occ_index';
@@ -16,7 +18,7 @@ import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow
 import { unscheduleWorkflowTasks } from '../../task_defs/unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../../tasks/workflow_task_scheduler';
 
-const mutateWorkflowToDisabled = (source: WorkflowProperties): WorkflowProperties => {
+export const mutateWorkflowToDisabled = (source: WorkflowProperties): WorkflowProperties => {
   const updatedYaml = updateWorkflowYamlFields(source.yaml, { enabled: false }, false);
   return {
     ...source,
@@ -33,16 +35,27 @@ const mutateWorkflowToDisabled = (source: WorkflowProperties): WorkflowPropertie
  */
 export const disableAllWorkflows = async (params: {
   storage: WorkflowStorage;
+  accessControlFilter?: estypes.QueryDslQueryContainer;
+  assertCanEdit?: (workflow: WorkflowProperties, id: string) => void;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
   spaceId?: string;
+  canModifyBoundWorkflows?: boolean;
 }): Promise<{
   total: number;
   disabled: number;
   failures: Array<{ id: string; error: string }>;
   disabledWorkflows: Array<{ id: string; document: WorkflowProperties }>;
 }> => {
-  const { storage, taskScheduler, logger, spaceId } = params;
+  const {
+    storage,
+    taskScheduler,
+    logger,
+    spaceId,
+    accessControlFilter,
+    assertCanEdit,
+    canModifyBoundWorkflows = true,
+  } = params;
   const bumpVersion = Boolean(spaceId);
   const client = storage.getClient();
   const pageSize = 1000;
@@ -52,7 +65,11 @@ export const disableAllWorkflows = async (params: {
 
   const query = {
     bool: {
-      must: [{ term: { enabled: true } }, ...(spaceId ? [{ term: { spaceId } }] : [])],
+      must: [
+        { term: { enabled: true } },
+        ...(spaceId ? [{ term: { spaceId } }] : []),
+        ...(accessControlFilter ? [accessControlFilter] : []),
+      ],
       must_not: [{ exists: { field: 'deleted_at' } }],
     },
   };
@@ -84,7 +101,16 @@ export const disableAllWorkflows = async (params: {
         } = await bulkIndexWithOccRetry({
           client,
           hits: occHits,
-          mutate: (hit) => mutateWorkflowToDisabled(hit._source),
+          mutate: (hit) => {
+            assertCanEdit?.(hit._source, hit._id);
+            // This runs again on the refreshed document after an OCC conflict.
+            if (hit._source.definition?.settings?.run_as && !canModifyBoundWorkflows) {
+              throw Boom.forbidden(
+                'Modifying a service-account workflow requires manage_security.'
+              );
+            }
+            return mutateWorkflowToDisabled(hit._source);
+          },
           logger,
           bumpVersion,
         });

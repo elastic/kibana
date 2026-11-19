@@ -15,6 +15,7 @@ import {
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
   type WorkflowExecutionFailedParams,
+  type WorkflowExecutionRunAs,
   WorkflowExecutionTelemetryEventTypes,
 } from './types';
 
@@ -57,10 +58,17 @@ const baseWorkflowExecutionSchema: RootSchema<{
   managedBy?: string;
   originManagedWorkflowId?: string;
   managedVersion?: number;
+  runAs: WorkflowExecutionRunAs;
+  runAsInherited?: boolean;
   ruleId?: string;
   compositionDepth?: number;
   parentWorkflowId?: string;
   parentWorkflowInvocation?: 'sync' | 'async';
+  executionChain?: Array<{
+    executionId: string;
+    invocation: 'sync' | 'async';
+    workflowId: string;
+  }>;
   eventChainDepth?: number;
   inputTokensUsed?: number;
   outputTokensUsed?: number;
@@ -148,6 +156,22 @@ const baseWorkflowExecutionSchema: RootSchema<{
       optional: true,
     },
   },
+  runAs: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Whose credentials the execution runs with: service_account when it is bound to a service account, user when it runs as the user or API key that triggered or scheduled it.',
+      optional: false,
+    },
+  },
+  runAsInherited: {
+    type: 'boolean',
+    _meta: {
+      description:
+        "Whether the service account came from the parent workflow rather than this workflow's own settings.run_as. Only present when runAs is service_account.",
+      optional: true,
+    },
+  },
   ruleId: {
     type: 'keyword',
     _meta: {
@@ -177,6 +201,34 @@ const baseWorkflowExecutionSchema: RootSchema<{
     _meta: {
       description:
         'Whether the parent started this sub-workflow with workflow.execute (sync) or workflow.executeAsync (async). Only present for sub-workflow executions.',
+      optional: true,
+    },
+  },
+  executionChain: {
+    type: 'array',
+    items: {
+      properties: {
+        executionId: {
+          type: 'keyword',
+          _meta: { description: 'The execution ID of this ancestor run.', optional: false },
+        },
+        invocation: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'How this ancestor started the next run down: workflow.execute (sync) or workflow.executeAsync (async).',
+            optional: false,
+          },
+        },
+        workflowId: {
+          type: 'keyword',
+          _meta: { description: 'The workflow ID of this ancestor run.', optional: false },
+        },
+      },
+    },
+    _meta: {
+      description:
+        'Every ancestor of a sub-workflow execution, root first and direct parent last. The last hop matches parentWorkflowId and parentWorkflowInvocation. Omitted for a top-level execution, and for a sub-workflow execution whose chain started before the chain was recorded. Its length is the composition depth.',
       optional: true,
     },
   },
@@ -241,6 +293,7 @@ const {
   compositionDepth: _compositionDepth,
   parentWorkflowId: _parentWorkflowId,
   parentWorkflowInvocation: _parentWorkflowInvocation,
+  executionChain: _executionChain,
   ...eventDrivenExecutionSuppressedBaseSchema
 } = baseWorkflowExecutionSchema;
 

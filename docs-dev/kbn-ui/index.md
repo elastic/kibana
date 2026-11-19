@@ -54,6 +54,7 @@ savedObjectsClient: SavedObjectsClientContract
 - `@emotion/react`, `@emotion/css`
 - `react`, `react-dom`
 - `@kbn/i18n`
+- other `@kbn/ui-*` packages under `src/platform/kbn-ui/`
 
 Additional dependencies _may_ exist, will require review, and should be kept to an absolute minimum.
 
@@ -96,19 +97,19 @@ All `@kbn/ui-*` packages share a single Storybook and docset.
 Run the stories in the shared `kbn-ui` Storybook:
 
 ```bash
-yarn storybook kbn_ui
+pnpm storybook kbn_ui
 ```
 
 Run a package's tests:
 
 ```bash
-yarn test:jest src/platform/kbn-ui/<component>
+pnpm test:jest src/platform/kbn-ui/<component>
 ```
 
 Preview these docs from the repository root:
 
 ```bash
-yarn storybook_docs kbn_ui --dev --docs-path docs-dev
+pnpm storybook_docs kbn_ui --dev --docs-path docs-dev
 ```
 
 Or serve the docset directly:

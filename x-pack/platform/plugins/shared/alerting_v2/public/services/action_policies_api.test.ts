@@ -31,6 +31,31 @@ describe('ActionPoliciesApi', () => {
     });
   });
 
+  describe('listActionPolicies', () => {
+    it('sends the filter and search query params to the list path', async () => {
+      await api.listActionPolicies({ page: 2, filter: 'enabled: true', search: 'cpu' });
+
+      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/action_policies', {
+        query: {
+          page: 2,
+          per_page: undefined,
+          filter: 'enabled: true',
+          search: 'cpu',
+          sort_field: undefined,
+          sort_order: undefined,
+        },
+      });
+    });
+
+    it('omits empty filter and search values', async () => {
+      await api.listActionPolicies({ filter: '', search: '' });
+
+      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/action_policies', {
+        query: expect.objectContaining({ filter: undefined, search: undefined }),
+      });
+    });
+  });
+
   describe('createActionPolicy', () => {
     it('sends a POST request', async () => {
       const payload = { name: 'Test', description: '', destinations: [] } as any;
@@ -92,10 +117,10 @@ describe('ActionPoliciesApi', () => {
     it('forwards the trimmed matcher as a query parameter', async () => {
       http.get.mockResolvedValue([]);
 
-      await api.fetchRuleEventFields('  rule.id : "abc"  ');
+      await api.fetchRuleEventFields('  alert_id: "abc"  ');
 
       expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/suggestions/rule_event_fields', {
-        query: { matcher: 'rule.id : "abc"' },
+        query: { matcher: 'alert_id: "abc"' },
       });
     });
 
@@ -116,29 +141,6 @@ describe('ActionPoliciesApi', () => {
       const result = await api.fetchRuleEventFields();
 
       expect(result).toEqual(['data.host.name', 'data.count']);
-    });
-  });
-
-  describe('fetchTags', () => {
-    it('GET /action_policies/tags with wrapped response', async () => {
-      http.get.mockResolvedValue({ tags: ['production', 'staging'] });
-
-      const result = await api.fetchTags();
-
-      expect(http.get).toHaveBeenCalledWith(`${'/internal/alerting/v2/action_policies'}/tags`, {
-        query: { search: undefined },
-      });
-      expect(result).toEqual({ tags: ['production', 'staging'] });
-    });
-
-    it('forwards search param in the query', async () => {
-      http.get.mockResolvedValue({ tags: ['production'] });
-
-      await api.fetchTags({ search: 'prod' });
-
-      expect(http.get).toHaveBeenCalledWith(`${'/internal/alerting/v2/action_policies'}/tags`, {
-        query: { search: 'prod' },
-      });
     });
   });
 });

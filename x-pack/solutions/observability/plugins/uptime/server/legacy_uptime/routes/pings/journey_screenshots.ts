@@ -13,6 +13,7 @@ import type { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_
 import { getJourneyScreenshot } from '../../lib/requests/get_journey_screenshot';
 import type { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
+import { MAX_ID_LENGTH, boundedString } from '../schema_limits';
 
 export interface ClientContract {
   screenshotRef: RefResult;
@@ -33,7 +34,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory<ClientContract>
   path: API_URLS.JOURNEY_SCREENSHOT,
   validate: {
     params: schema.object({
-      checkGroup: schema.string(),
+      checkGroup: boundedString(MAX_ID_LENGTH),
       stepIndex: schema.number(),
     }),
   },

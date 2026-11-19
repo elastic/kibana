@@ -174,6 +174,7 @@ describe('Utils', () => {
       const attrValue = {
         type: AST_NODE_TYPES.Literal,
         value: 'hello world',
+        raw: '"hello world"',
       } as TSESTree.StringLiteral;
 
       expect(getValueFromJSXAttribute(attrValue)).toBe('hello world');
@@ -219,6 +220,7 @@ describe('Utils', () => {
       const attrValue = {
         type: AST_NODE_TYPES.Literal,
         value: "it's working",
+        raw: `"it's working"`,
       } as TSESTree.StringLiteral;
 
       expect(getValueFromJSXAttribute(attrValue)).toBe("it\\'s working");
@@ -228,6 +230,7 @@ describe('Utils', () => {
       const attrValue = {
         type: AST_NODE_TYPES.Literal,
         value: 'x',
+        raw: '"x"',
       } as TSESTree.StringLiteral;
 
       expect(getValueFromJSXAttribute(attrValue)).toBe('');

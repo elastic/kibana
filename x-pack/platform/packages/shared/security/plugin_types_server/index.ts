@@ -29,6 +29,7 @@ export type {
   ConvertUiamAPIKeysResponse,
   UiamAPIKeysType,
   ClientAuthentication,
+  SystemIdentity,
 } from './src/authentication';
 export type {
   PrivilegeDeprecationsService,

@@ -11,11 +11,22 @@ import {
   TimelineEventType,
   type ChatEvent,
   type ConversationUpdatedEvent,
+  type ExecutionAbortedEvent,
+  type ExecutionFailedEvent,
   type ExecutionStartedEvent,
   type ExecutionTerminatedEvent,
+  type MessageChunkEvent,
   type RoundCompleteEvent,
+  type RoundInterruptedEvent,
 } from '@kbn/agent-builder-common';
-import { filterEventsNativeApiEvents, filterLegacyApiEvents } from './converse_helpers';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
+import {
+  filterEventsNativeApiEvents,
+  filterLegacyApiEvents,
+  getConverseHelpers,
+} from './converse_helpers';
 
 const roundCompleteEvent: RoundCompleteEvent = {
   type: ChatEventType.roundComplete,
@@ -42,6 +53,36 @@ const executionTerminatedEvent: ExecutionTerminatedEvent = {
   data: {
     outcome: { type: 'responded', response: { message: 'ok' } },
   } as any,
+};
+
+const executionFailedEvent: ExecutionFailedEvent = {
+  id: 'round-1::execution_failed',
+  type: TimelineEventType.executionFailed,
+  created_at: '2024-01-01T00:00:00.000Z',
+  actor: { type: 'agent', id: 'agent-1' } as any,
+  execution_id: 'round-1::execution',
+  trigger_event_id: 'round-1::user_message',
+  data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } } as any,
+};
+
+const executionAbortedEvent: ExecutionAbortedEvent = {
+  id: 'round-1::execution_aborted',
+  type: TimelineEventType.executionAborted,
+  created_at: '2024-01-01T00:00:00.000Z',
+  actor: { type: 'agent', id: 'agent-1' } as any,
+  execution_id: 'round-1::execution',
+  trigger_event_id: 'round-1::user_message',
+  data: { time_to_last_token: 1 },
+};
+
+const messageChunkEvent: MessageChunkEvent = {
+  type: ChatEventType.messageChunk,
+  data: { text_chunk: 'hi', message_id: 'm1' },
+};
+
+const roundInterruptedEvent: RoundInterruptedEvent = {
+  type: ChatEventType.roundInterrupted,
+  data: { round_id: 'round-1' } as any,
 };
 
 const conversationUpdatedEvent: ConversationUpdatedEvent = {
@@ -79,5 +120,70 @@ describe('converse_helpers filter operators', () => {
       TimelineEventType.executionTerminated,
       ChatEventType.conversationUpdated,
     ]);
+  });
+
+  it('filterLegacyApiEvents drops execution_failed and execution_aborted too', async () => {
+    const emitted = await firstValueFrom(
+      of<ChatEvent[]>(
+        ...[executionStartedEvent, messageChunkEvent, executionFailedEvent, executionAbortedEvent]
+      ).pipe(filterLegacyApiEvents(), toArray())
+    );
+
+    expect(emitted.map((event) => event.type)).toEqual([ChatEventType.messageChunk]);
+  });
+
+  it('filterLegacyApiEvents does not strip round_interrupted (the runner does)', async () => {
+    const emitted = await firstValueFrom(
+      of<ChatEvent[]>(...[roundInterruptedEvent]).pipe(filterLegacyApiEvents(), toArray())
+    );
+
+    expect(emitted.map((event) => event.type)).toEqual([ChatEventType.roundInterrupted]);
+  });
+
+  it('filterEventsNativeApiEvents keeps execution_failed and execution_aborted', async () => {
+    const emitted = await firstValueFrom(
+      of<ChatEvent[]>(...[roundCompleteEvent, executionFailedEvent, executionAbortedEvent]).pipe(
+        filterEventsNativeApiEvents(),
+        toArray()
+      )
+    );
+
+    expect(emitted.map((event) => event.type)).toEqual([
+      TimelineEventType.executionFailed,
+      TimelineEventType.executionAborted,
+    ]);
+  });
+});
+
+describe('converse_helpers executeAgent', () => {
+  const executeAgentMock = jest.fn();
+  const executionService = { executeAgent: executeAgentMock } as unknown as AgentExecutionService;
+  const payload = { input: 'hello' } as ChatRequestBodyPayload;
+  const { executeAgent } = getConverseHelpers({ getInternalServices: jest.fn() });
+
+  beforeEach(() => {
+    executeAgentMock.mockReset();
+  });
+
+  it('requests an immediate claim for requests from the Kibana UI', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: { 'x-elastic-internal-origin': 'Kibana' },
+    });
+
+    await executeAgent({ payload, request, executionService });
+
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ requestImmediateClaim: true })
+    );
+  });
+
+  it('does not request an immediate claim for other requests', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    await executeAgent({ payload, request, executionService });
+
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ requestImmediateClaim: false })
+    );
   });
 });

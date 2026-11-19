@@ -13,9 +13,11 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { useDeleteAiIndex } from '../../hooks/use_delete_ai_index';
 import { useKibana } from '../../hooks/use_kibana';
@@ -117,6 +119,10 @@ export const AiIndexDeleteConfirmModal = ({
         data-test-subj="contextAiIndexDeleteKiCheckbox"
         checked={deleteKnowledgeIndicators}
         onChange={(event) => setDeleteKnowledgeIndicators(event.target.checked)}
+        {...getEbtProps({
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageDeleteModal,
+          action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.DELETE_KI_CHECKBOX,
+        })}
         label={
           <FormattedMessage
             id="xpack.contextEngine.landing.deleteModal.kiCheckbox"
@@ -134,6 +140,10 @@ export const AiIndexDeleteConfirmModal = ({
         checked={deleteAutomations}
         disabled={automationsCount === 0 || !canDeleteWorkflows}
         onChange={(event) => setDeleteAutomations(event.target.checked)}
+        {...getEbtProps({
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageDeleteModal,
+          action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.DELETE_AUTOMATIONS_CHECKBOX,
+        })}
         label={
           <FormattedMessage
             id="xpack.contextEngine.landing.deleteModal.automationsCheckbox"

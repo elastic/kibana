@@ -1,20 +1,25 @@
 # Continuous KI (Knowledge Indicator) onboarding workflow.
 #
-# Runs on a schedule and orchestrates onboarding across managed streams:
-#   1. Fetches eligible streams from the _eligible API endpoint. Stream
-#      selection (onboard-all vs. an explicit include list) and interval come
-#      from the continuous KI extraction Advanced Settings.
-#   2. Starts the managed onboarding workflow for ALL candidate streams via
+# Runs on a schedule and orchestrates onboarding across the enabled sources of
+# one space:
+#   1. Fetches eligible sources from the _eligible API endpoint. The enabled
+#      flag and interval come from the space's continuous onboarding Advanced
+#      Settings.
+#   2. Starts the managed onboarding workflow for ALL candidate sources via
 #      workflow.executeAsync (features AND queries generation), confirming each
 #      reaches in_progress before moving to the next.
-#   3. Polls each stream sequentially until it reaches a terminal state
+#   3. Polls each source sequentially until it reaches a terminal state
 #      (completed/failed), then captures the result.
 #
 # Values below (timeouts, intervals, defaults) must stay in sync with the
-# constants in streams/common/constants.ts — see continuous_onboarding_workflow.test.ts.
+# constants in significant_events/common/constants.ts, see
+# continuous_onboarding_workflow.test.ts.
 #
-# This is a managed workflow installed by the streams (and later significant_events) plugin. It is created
-# disabled and enabled/disabled via the continuous KI extraction setting.
+# This is a per-space managed workflow installed by the significant_events
+# plugin. It is installed when continuous onboarding is first enabled in a space
+# and only disabled when it is turned off, so its execution history is kept.
+# Every request is prefixed with the space the
+# workflow runs in.
 
 version: '1'
 name: 'Continuous KI Onboarding'
@@ -61,7 +66,7 @@ steps:
     with:
       method: GET
       path: |-
-        /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams | default: consts.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours | default: consts.lookbackHours }}
+        /s/{{ workflow.spaceId }}/internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams | default: consts.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours | default: consts.lookbackHours }}
         {%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}
       headers:
         x-elastic-internal-origin: 'kibana'
@@ -74,7 +79,7 @@ steps:
   # Step 2: Only proceed if there are candidates to schedule.
   - name: has_candidates
     type: if
-    condition: 'steps.get_eligible.output.candidates[0].streamName:*'
+    condition: 'steps.get_eligible.output.candidates[0].sourceId:*'
     steps:
       # Phase 1: Schedule all candidate streams, confirming each reaches in_progress.
       - name: schedule_all
@@ -91,7 +96,9 @@ steps:
             with:
               workflow-id: 'system-streams-ki-onboarding'
               inputs:
-                streamName: '${{ foreach.item.streamName }}'
+                sourceId: '${{ foreach.item.sourceId }}'
+                sourceSlug: '${{ foreach.item.sourceSlug }}'
+                sourceRevision: '${{ foreach.item.sourceRevision }}'
                 skipFeatures: false
                 skipQueries: false
                 rootTriggeredBy: '${{ execution.triggeredBy }}'
@@ -110,7 +117,7 @@ steps:
                 type: kibana.request
                 with:
                   method: GET
-                  path: '/internal/streams/{{ foreach.item.streamName }}/onboarding/_status'
+                  path: '/s/{{ workflow.spaceId }}/internal/streams/{{ foreach.item.sourceId }}/onboarding/_status'
                   headers:
                     x-elastic-internal-origin: 'kibana'
               - name: if_not_started_delay
@@ -137,7 +144,7 @@ steps:
                 type: kibana.request
                 with:
                   method: GET
-                  path: '/internal/streams/{{ foreach.item.streamName }}/onboarding/_status'
+                  path: '/s/{{ workflow.spaceId }}/internal/streams/{{ foreach.item.sourceId }}/onboarding/_status'
                   headers:
                     x-elastic-internal-origin: 'kibana'
                 on-failure:
@@ -158,7 +165,7 @@ steps:
           - name: onboarding_result
             type: data.set
             with:
-              streamName: '{{ foreach.item.streamName }}'
+              sourceId: '{{ foreach.item.sourceId }}'
               status: '${{ steps.check_status.output.status }}'
               features:
                 skipped: '${{ steps.check_status.output.features.skipped }}'

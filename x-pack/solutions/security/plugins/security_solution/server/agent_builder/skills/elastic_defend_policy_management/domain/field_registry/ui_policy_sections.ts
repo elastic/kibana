@@ -19,6 +19,7 @@ export const UI_POLICY_SECTIONS = {
     behavior_protection: true,
     attack_surface_reduction: true,
     device_control: true,
+    ai_data_collection: true,
   },
   mac: {
     malware: true,
@@ -29,13 +30,16 @@ export const UI_POLICY_SECTIONS = {
     behavior_protection: true,
     memory_protection: true,
     device_control: true,
+    ai_data_collection: true,
   },
   linux: {
     malware: true,
+    ransomware: true,
     events: true,
     popup: true,
     advanced: true,
     behavior_protection: true,
     memory_protection: true,
+    ai_data_collection: true,
   },
 } as const satisfies { [OS in keyof UIPolicyConfig]: { [S in keyof UIPolicyConfig[OS]]: true } };

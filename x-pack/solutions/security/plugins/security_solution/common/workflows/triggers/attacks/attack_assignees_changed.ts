@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import {
   MAX_ALERTS_PER_TRIGGER,
@@ -33,23 +33,25 @@ triggers:
       condition: 'event.assigneesAdded: *'
 \`\`\``;
 
-const attackAssigneesChangedEventSchema = z.object({
-  attackIds: z
-    .array(z.string().min(1).max(MAX_ID_LENGTH))
-    .max(MAX_ALERTS_PER_TRIGGER)
-    .meta({ description: ATTACK_ASSIGNEES_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION }),
-  assigneesAdded: z
-    .array(z.string().min(1).max(MAX_ASSIGNEE_UID_LENGTH))
-    .max(MAX_ASSIGNEES_PER_OPERATION)
-    .meta({ description: TRIGGER_SCHEMA_ASSIGNEES_ADDED_DESCRIPTION }),
-  assigneesRemoved: z
-    .array(z.string().min(1).max(MAX_ASSIGNEE_UID_LENGTH))
-    .max(MAX_ASSIGNEES_PER_OPERATION)
-    .meta({ description: TRIGGER_SCHEMA_ASSIGNEES_REMOVED_DESCRIPTION }),
-  truncated: z
-    .boolean()
-    .meta({ description: ATTACK_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
-});
+const attackAssigneesChangedEventSchema = lazySchema(() =>
+  z.object({
+    attackIds: z
+      .array(z.string().min(1).max(MAX_ID_LENGTH))
+      .max(MAX_ALERTS_PER_TRIGGER)
+      .meta({ description: ATTACK_ASSIGNEES_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION }),
+    assigneesAdded: z
+      .array(z.string().min(1).max(MAX_ASSIGNEE_UID_LENGTH))
+      .max(MAX_ASSIGNEES_PER_OPERATION)
+      .meta({ description: TRIGGER_SCHEMA_ASSIGNEES_ADDED_DESCRIPTION }),
+    assigneesRemoved: z
+      .array(z.string().min(1).max(MAX_ASSIGNEE_UID_LENGTH))
+      .max(MAX_ASSIGNEES_PER_OPERATION)
+      .meta({ description: TRIGGER_SCHEMA_ASSIGNEES_REMOVED_DESCRIPTION }),
+    truncated: z
+      .boolean()
+      .meta({ description: ATTACK_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
+  })
+);
 
 export const attackAssigneesChangedTriggerDef: CommonTriggerDefinition = {
   id: AttackAssigneesChangedTriggerId,

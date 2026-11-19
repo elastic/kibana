@@ -23,10 +23,11 @@ import {
   scheduleUninstallAllTask,
   scheduleEnsureUpToDateTask,
   scheduleEnsureSecurityLabsUpToDateTask,
-  getTaskStatus,
+  getInstallAllTaskStatus,
   waitUntilTaskCompleted,
 } from '../../tasks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../install_lock';
 
 const scheduleInstallAllTaskMock = scheduleInstallAllTask as jest.MockedFn<
   typeof scheduleInstallAllTask
@@ -44,7 +45,9 @@ const scheduleEnsureSecurityLabsUpToDateTaskMock =
 const waitUntilTaskCompletedMock = waitUntilTaskCompleted as jest.MockedFn<
   typeof waitUntilTaskCompleted
 >;
-const getTaskStatusMock = getTaskStatus as jest.MockedFn<typeof getTaskStatus>;
+const getInstallAllTaskStatusMock = getInstallAllTaskStatus as jest.MockedFn<
+  typeof getInstallAllTaskStatus
+>;
 
 const DEFAULT_INFERENCE_ID = defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
 describe('DocumentationManager', () => {
@@ -56,10 +59,13 @@ describe('DocumentationManager', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let packageInstaller: {
     installSecurityLabs: jest.Mock;
+    uninstallSecurityLabs: jest.Mock;
     getSecurityLabsStatus: jest.Mock;
+    getRepositoryVersion: jest.Mock;
   };
 
   let docManager: DocumentationManager;
+  let withLock: jest.Mock;
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -79,7 +85,9 @@ describe('DocumentationManager', () => {
     });
     packageInstaller = {
       installSecurityLabs: jest.fn().mockResolvedValue(undefined),
+      uninstallSecurityLabs: jest.fn().mockResolvedValue(undefined),
       getSecurityLabsStatus: jest.fn().mockResolvedValue({ status: 'uninstalled' }),
+      getRepositoryVersion: jest.fn().mockResolvedValue('2026-10-12T20:25:34.000Z'),
     };
 
     docInstallClient = {
@@ -92,6 +100,7 @@ describe('DocumentationManager', () => {
         ]),
     } as unknown as jest.Mocked<ProductDocInstallClient>;
 
+    withLock = jest.fn((_lockId: string, callback: () => Promise<unknown>) => callback());
     docManager = new DocumentationManager({
       logger,
       taskManager,
@@ -99,6 +108,7 @@ describe('DocumentationManager', () => {
       auditService,
       docInstallClient,
       esClient,
+      lockManager: { withLock },
       packageInstaller: packageInstaller as unknown as ConstructorParameters<
         typeof DocumentationManager
       >[0]['packageInstaller'],
@@ -111,7 +121,7 @@ describe('DocumentationManager', () => {
     scheduleEnsureUpToDateTaskMock.mockReset();
     scheduleEnsureSecurityLabsUpToDateTaskMock.mockReset();
     waitUntilTaskCompletedMock.mockReset();
-    getTaskStatusMock.mockReset();
+    getInstallAllTaskStatusMock.mockReset();
   });
 
   describe('#install', () => {
@@ -120,7 +130,7 @@ describe('DocumentationManager', () => {
         licensingMock.createLicense({ license: { type: 'enterprise' } })
       );
 
-      getTaskStatusMock.mockResolvedValue('not_scheduled');
+      getInstallAllTaskStatusMock.mockResolvedValue('none');
 
       docInstallClient.getInstallationStatus.mockResolvedValue({
         kibana: { status: 'uninstalled' },
@@ -135,6 +145,8 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: DEFAULT_INFERENCE_ID,
+        force: false,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
@@ -206,7 +218,7 @@ describe('DocumentationManager', () => {
 
   describe('#update', () => {
     beforeEach(() => {
-      getTaskStatusMock.mockResolvedValue('not_scheduled');
+      getInstallAllTaskStatusMock.mockResolvedValue('none');
 
       docInstallClient.getInstallationStatus.mockResolvedValue({
         kibana: { status: 'uninstalled' },
@@ -221,6 +233,7 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: DEFAULT_INFERENCE_ID,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
@@ -256,7 +269,7 @@ describe('DocumentationManager', () => {
 
   describe('#ensureDefaultProductDocumentation', () => {
     beforeEach(() => {
-      getTaskStatusMock.mockResolvedValue('not_scheduled');
+      getInstallAllTaskStatusMock.mockResolvedValue('none');
       licensing.getLicense.mockResolvedValue(
         licensingMock.createLicense({ license: { type: 'enterprise' } })
       );
@@ -277,6 +290,8 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.JINAv5,
+        force: false,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
@@ -309,6 +324,8 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.JINAv5,
+        force: false,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
     });
@@ -352,6 +369,67 @@ describe('DocumentationManager', () => {
         inferenceId: defaultInferenceEndpoints.JINAv5,
         version: undefined,
       });
+    });
+
+    it('installs under the shared install lock', async () => {
+      packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'uninstalled' });
+      let installedUnderLock = false;
+      withLock.mockImplementation(async (_lockId: string, callback: () => Promise<unknown>) => {
+        await callback();
+        installedUnderLock = packageInstaller.installSecurityLabs.mock.calls.length === 1;
+      });
+
+      await docManager.ensureDefaultSecurityLabs();
+
+      expect(withLock).toHaveBeenCalledWith(
+        PRODUCT_DOC_INSTALL_LOCK_ID,
+        expect.any(Function),
+        expect.anything()
+      );
+      expect(installedUnderLock).toBe(true);
+    });
+
+    it('skips the install when Security Labs was installed while waiting for the lock', async () => {
+      packageInstaller.getSecurityLabsStatus
+        .mockResolvedValueOnce({ status: 'uninstalled' }) // before the lock
+        .mockResolvedValueOnce({ status: 'installed' }); // under the lock, after another node
+
+      await docManager.ensureDefaultSecurityLabs();
+
+      expect(withLock).toHaveBeenCalledTimes(1);
+      expect(packageInstaller.installSecurityLabs).not.toHaveBeenCalled();
+    });
+
+    it('installs once when two startup calls make the same pre-lock decision', async () => {
+      let installed = false;
+      packageInstaller.getSecurityLabsStatus.mockImplementation(async () => ({
+        status: installed ? 'installed' : 'uninstalled',
+      }));
+      packageInstaller.installSecurityLabs.mockImplementation(async () => {
+        installed = true;
+      });
+      // both calls read the status before either enters the lock; the lock then serializes them
+      let release: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      let queue: Promise<unknown> = Promise.resolve();
+      withLock.mockImplementation((_lockId: string, callback: () => Promise<unknown>) => {
+        const run = queue.then(async () => {
+          await gate;
+          await callback();
+        });
+        queue = run.catch(() => undefined);
+        return run;
+      });
+
+      const first = docManager.ensureDefaultSecurityLabs();
+      const second = docManager.ensureDefaultSecurityLabs();
+      await new Promise((resolve) => setImmediate(resolve));
+      release();
+      await Promise.all([first, second]);
+
+      expect(packageInstaller.installSecurityLabs).toHaveBeenCalledTimes(1);
     });
 
     it('schedules no install when Security Labs is already installed', async () => {
@@ -404,7 +482,7 @@ describe('DocumentationManager', () => {
 
   describe('#updateAll', () => {
     beforeEach(() => {
-      getTaskStatusMock.mockResolvedValue('not_scheduled');
+      getInstallAllTaskStatusMock.mockResolvedValue('none');
 
       docInstallClient.getInstallationStatus.mockResolvedValue({
         kibana: { status: 'uninstalled' },
@@ -419,12 +497,14 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
 
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.ELSER,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
@@ -433,7 +513,7 @@ describe('DocumentationManager', () => {
 
   describe('#uninstall', () => {
     beforeEach(() => {
-      getTaskStatusMock.mockResolvedValue('not_scheduled');
+      getInstallAllTaskStatusMock.mockResolvedValue('none');
 
       docInstallClient.getInstallationStatus.mockResolvedValue({
         kibana: { status: 'uninstalled' },

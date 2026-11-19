@@ -15,7 +15,8 @@ import { isTriggerType } from '@kbn/workflows';
 const CUSTOM_TRIGGER_CONDITION_COMMENT =
   'Filter the subscription by using KQL, use event.* to target event properties';
 
-const CONNECTOR_ID_COMMENT = 'Id of the connector instance this trigger is bound to';
+const CONNECTOR_ID_COMMENT =
+  'Id of the connector instance this trigger is bound to, or "*" for every instance of this type';
 
 interface GenerateTriggerSnippetOptions {
   full?: boolean;
@@ -82,6 +83,19 @@ export function generateTriggerSnippet(
 
     case 'manual':
       parameters = {};
+      break;
+
+    case 'page':
+      parameters = {
+        title: monacoSuggestionFormat ? '${1:Report an incident}' : 'Report an incident',
+        description: monacoSuggestionFormat
+          ? '${2:Tell us what happened}'
+          : 'Tell us what happened',
+        inputs: {
+          properties: { summary: { type: 'string', description: 'What happened' } },
+          required: ['summary'],
+        },
+      };
       break;
 
     default:

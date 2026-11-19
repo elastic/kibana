@@ -63,7 +63,7 @@ export const JsonEditorWrapper = () => {
     <EuiFlexGroup direction="column" gutterSize="m" responsive={false} css={fullHeightContainer}>
       <EuiFlexItem grow css={editorContainer}>
         {/* Monaco overlay widgets break if an ancestor panel applies shadow transforms. */}
-        <EuiPanel css={fullHeightPanel} paddingSize="none" hasShadow={false}>
+        <EuiPanel css={fullHeightPanel} paddingSize="none" hasShadow={false} hasBorder={false}>
           <IngestPipelineJsonEditor
             processors={processors}
             onProcessorsChange={(updatedProcessors: IngestPipelineProcessor[], json: string) => {

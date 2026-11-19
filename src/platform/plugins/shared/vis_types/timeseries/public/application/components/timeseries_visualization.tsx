@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
+
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import type { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { visContainerStyle } from '@kbn/visualizations-common';
+import { visContainerStyle } from '@kbn/visualizations-components';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { TimeseriesLoading } from './timeseries_loading';
@@ -56,6 +58,7 @@ function TimeseriesVisualization({
 }: TimeseriesVisualizationProps) {
   const [indexPattern, setIndexPattern] = useState<FetchedIndexPattern['indexPattern']>(null);
   const [palettesService, setPalettesService] = useState<PaletteRegistry | null>(null);
+  const interactive = handlers.isInteractive();
 
   useEffect(() => {
     getCharts()
@@ -194,19 +197,22 @@ function TimeseriesVisualization({
         >
           <VisComponent
             getConfig={getConfig}
-            model={model}
+            model={interactive ? model : omit(model, 'drilldown_url')}
             visData={visData}
             uiState={uiState}
-            onBrush={onBrush}
             initialRender={initialRender}
-            onFilterClick={handleFilterClick}
-            onUiState={handleUiState}
             syncColors={syncColors}
             syncTooltips={syncTooltips}
             syncCursor={syncCursor}
             palettesService={palettesService}
             indexPattern={indexPattern}
+            isInteractive={interactive}
             fieldFormatMap={indexPattern?.fieldFormatMap}
+            {...(interactive && {
+              onUiState: handleUiState,
+              onBrush,
+              onFilterClick: handleFilterClick,
+            })}
           />
         </Suspense>
       </EuiFlexItem>

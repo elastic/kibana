@@ -13,7 +13,7 @@ import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
 import { renderWithTheme } from '../../../utils/test_helpers';
 
 // Mock the usePerformanceContext hook
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
   }),

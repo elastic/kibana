@@ -7,8 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -29,25 +28,19 @@ import {
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
+import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
 import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
+import { DocumentPagination, useShowDocumentPagination } from './components/document_pagination';
 
 const SHARE_ALERT_LABEL = i18n.translate(
   'xpack.securitySolution.flyoutV2.document.header.shareAlertLabel',
   {
-    defaultMessage: 'Share alert',
+    defaultMessage: 'Copy link to alert',
   }
 );
-
-// Positioned relative to the flyout itself (the nearest positioned ancestor), matching where EUI
-// places its own close button (`right: euiTheme.size.s` / `top: euiTheme.size.s`). The larger
-// inline-end offset makes room for the close button so the two sit side by side.
-const shareButtonStyles = css`
-  position: absolute;
-  inset-inline-end: 36px;
-  inset-block-start: 8px;
-`;
 
 export interface HeaderProps {
   /**
@@ -72,6 +65,8 @@ export interface HeaderProps {
  * Document header for the flyout_v2 document flyout.
  * Renders severity, timestamp, title (as a rule-details link for alerts),
  * and alert-only summary blocks (status, risk score assignees, and notes).
+ * The share button is only shown inside the Security Solution app: its link opens the alerts page,
+ * which would navigate users away from where they are (e.g. Discover, that has its own share button).
  */
 export const Header: FC<HeaderProps> = memo(
   ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onShowNotes }) => {
@@ -81,6 +76,7 @@ export const Header: FC<HeaderProps> = memo(
       [hit]
     );
     const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
+    const isInSecurityApp = useIsInSecurityApp();
 
     const alertDetailsLink = useGetFlyoutLink({
       eventId: hit.raw._id ?? '',
@@ -88,24 +84,37 @@ export const Header: FC<HeaderProps> = memo(
       timestamp: String(hit.flattened?.['@timestamp'] ?? ''),
     });
 
+    const showPagination = useShowDocumentPagination();
+
     return (
       <>
-        <div css={shareButtonStyles}>
+        <FlyoutHeaderActions>
           <ShareUrlIconButton
-            url={isAlert ? alertDetailsLink : null}
+            url={isAlert && isInSecurityApp ? alertDetailsLink : null}
             tooltip={SHARE_ALERT_LABEL}
             ariaLabel={SHARE_ALERT_LABEL}
             dataTestSubj={DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID}
           />
-        </div>
-        <DocumentSeverity hit={hit}>
-          <EuiSpacer size="s" />
-        </DocumentSeverity>
-        <EuiText size="s">
-          <Timestamp hit={hit} />
-        </EuiText>
-        <EuiSpacer size="xs" />
-
+        </FlyoutHeaderActions>
+        <EuiFlexGroup
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <DocumentSeverity hit={hit} />
+          </EuiFlexItem>
+          {showPagination && (
+            <EuiFlexItem grow={false}>
+              <DocumentPagination />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <Timestamp hit={hit}>
+          <EuiSpacer size="xs" />
+        </Timestamp>
         <Title hit={hit} hideLink={!canReadRules || isRulePreview} />
         {isAlert && (
           <>

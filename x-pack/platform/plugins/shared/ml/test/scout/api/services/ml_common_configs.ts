@@ -139,6 +139,32 @@ export const getADFqFilterStatsJobConfig2 = (jobId: string) =>
   } satisfies estypes.MlJob);
 
 /**
+ * Returns a BM classification DFA job config sourcing from the ft_bank_marketing index.
+ * Source: FTR x-pack/platform/test/api_integration/apis/ml/notifications (BM_CLASSIFICATION_CONFIG)
+ */
+export const getDFABmClassificationJobConfig = (
+  dfaId: string
+): { id: string; [key: string]: unknown } => ({
+  id: dfaId,
+  description: 'Classification job based on the bank marketing dataset',
+  source: {
+    index: ['ft_bank_marketing'],
+    query: { match_all: {} },
+  },
+  analysis: {
+    classification: {
+      dependent_variable: 'y',
+      training_percent: 80,
+    },
+  },
+  analyzed_fields: { includes: [], excludes: [] },
+  model_memory_limit: '80mb',
+  allow_lazy_start: false,
+  max_num_threads: 1,
+  dest: { index: `user-${dfaId}` },
+});
+
+/**
  * Returns a datafeed config targeting the ft_farequote index for the given AD job.
  * Source: FTR x-pack/platform/test/api_integration/services/ml/common_config.ts (FQ_DATAFEED_CONFIG)
  */

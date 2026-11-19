@@ -182,6 +182,7 @@ describe('workflow executions actions column', () => {
       workflowId: 'wf-1',
       executionId: 'exec-1',
       context: { inputs: { foo: 'bar' } },
+      isTestRun: false,
     });
     expect(mockNavigateToApp).not.toHaveBeenCalled();
   });

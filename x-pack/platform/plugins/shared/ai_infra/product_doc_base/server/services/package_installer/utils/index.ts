@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-export { downloadToDisk } from './download';
+export { downloadToDisk, checkArtifactAvailable, ArtifactNotFoundError } from './download';
+export {
+  resolveArtifactsFolderPath,
+  isInArtifactsFolder,
+  removeArtifactFile,
+  logArtifactsFolderUsage,
+  purgeArtifactsFolder,
+} from './artifacts_folder';
 export { openZipArchive, type ZipArchive } from './zip_archive';
 export { loadManifestFile, loadMappingFile } from './archive_accessors';
 export {

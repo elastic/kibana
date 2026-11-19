@@ -14,25 +14,31 @@ import type {
 import type { UserActionFindRequestTypes } from '../../../../common/types/api';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrowZod } from '../../../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
 } from '../../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 
 import type { FindOptions, ServiceContext } from '../types';
 import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
-import { buildFilter, combineFilters, NodeBuilderOperators } from '../../../client/utils';
+import {
+  buildFilter,
+  combineFilters,
+  NodeBuilderOperators,
+  stringToKueryNode,
+} from '../../../client/utils';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
   UserActionTransformedAttributes,
 } from '../../../common/types/user_actions';
 import { bulkDecodeSOAttributes } from '../../utils';
-import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
-import type { UserActionType } from '../../../../common/types/domain';
+import { UserActionTransformedAttributesSchema } from '../../../common/types/user_actions';
+import type { UserActionAttributes, UserActionType } from '../../../../common/types/domain';
 import {
   UserActionActions,
   UserActionTypes,
@@ -50,6 +56,7 @@ export class UserActionFinder {
     perPage,
     filter,
     authors,
+    sources,
   }: FindOptions): Promise<SavedObjectsFindResponse<UserActionTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to find user actions for case id: ${caseId}`);
@@ -58,6 +65,7 @@ export class UserActionFinder {
         filter,
         UserActionFinder.buildFilter(types),
         UserActionFinder.buildAuthorFilter(authors),
+        UserActionFinder.buildSourceFilter(sources),
       ]);
 
       const userActions =
@@ -75,7 +83,7 @@ export class UserActionFinder {
 
       const decodeRes = bulkDecodeSOAttributes(
         res.saved_objects,
-        UserActionTransformedAttributesRt
+        UserActionTransformedAttributesSchema
       );
 
       return {
@@ -103,10 +111,10 @@ export class UserActionFinder {
    * logged whenever the cap is actually hit so truncation isn't silent.
    *
    * `decode` (defaults to `true`) controls whether each attribute is validated
-   * with `decodeOrThrow` as it's collected. Callers that only need a subset of
+   * with `decodeOrThrowZod` as it's collected. Callers that only need a subset of
    * the results (e.g. after filtering + pagination) can pass `decode: false` and
    * call `decodeUserActions` themselves on just that subset, avoiding paying the
-   * io-ts decode cost for records that end up discarded.
+   * decode cost for records that end up discarded.
    */
   public async findAll({
     caseId,
@@ -114,6 +122,7 @@ export class UserActionFinder {
     types,
     filter,
     authors,
+    sources,
     limit,
     decode,
   }: Omit<FindOptions, 'page' | 'perPage' | 'search'> & {
@@ -127,6 +136,7 @@ export class UserActionFinder {
         filter,
         UserActionFinder.buildFilter(types),
         UserActionFinder.buildAuthorFilter(authors),
+        UserActionFinder.buildSourceFilter(sources),
       ]);
 
       return await this.collectFromPIT(
@@ -157,7 +167,9 @@ export class UserActionFinder {
   ): UserActionSavedObjectTransformed[] {
     return userActions.map((so) => ({
       ...so,
-      attributes: decodeOrThrow(UserActionTransformedAttributesRt)(so.attributes),
+      attributes: decodeOrThrowZod(UserActionTransformedAttributesSchema)(
+        so.attributes
+      ) as UserActionAttributes,
     }));
   }
 
@@ -182,11 +194,12 @@ export class UserActionFinder {
   }
 
   private static buildActionFilter(): KueryNode | undefined {
-    const filterForUserActionsExcludingComments = fromKueryExpression(
-      `not (${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user} or ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${COMMENT_ATTACHMENT_TYPE})`
+    // Comment edits and deletions stay in History, so All = Comments + History.
+    const filterForUserActionsExcludingCommentCreations = fromKueryExpression(
+      `not ((${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user} or ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${COMMENT_ATTACHMENT_TYPE}) and ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action: ${UserActionActions.create})`
     );
 
-    return filterForUserActionsExcludingComments;
+    return filterForUserActionsExcludingCommentCreations;
   }
 
   private static buildCommentTypeFilter(): KueryNode | undefined {
@@ -268,6 +281,29 @@ export class UserActionFinder {
     });
   }
 
+  private static buildSourceFilter(sources?: FindOptions['sources']): KueryNode | undefined {
+    if (!sources?.length) {
+      return undefined;
+    }
+
+    const typedSources = sources.filter((source) => source !== NO_ACTION_SOURCE_FILTERING_KEYWORD);
+    const includeMissing = sources.includes(NO_ACTION_SOURCE_FILTERING_KEYWORD);
+
+    const typedFilter = typedSources.length
+      ? buildFilter({
+          filters: typedSources,
+          field: 'source.type',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        })
+      : undefined;
+    const missingFilter = includeMissing
+      ? stringToKueryNode(`not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.source.type: *`)
+      : undefined;
+
+    return combineFilters([typedFilter, missingFilter], NodeBuilderOperators.or);
+  }
+
   private static buildGenericTypeFilter(type: UserActionType): KueryNode | undefined {
     return buildFilter({
       filters: [type],
@@ -336,7 +372,9 @@ export class UserActionFinder {
           return {
             ...res,
             attributes: decode
-              ? decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes)
+              ? (decodeOrThrowZod(UserActionTransformedAttributesSchema)(
+                  res.attributes
+                ) as UserActionAttributes)
               : (res.attributes as UserActionTransformedAttributes),
           };
         })

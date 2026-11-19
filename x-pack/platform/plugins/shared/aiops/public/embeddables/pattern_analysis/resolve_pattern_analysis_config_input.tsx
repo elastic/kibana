@@ -78,7 +78,10 @@ export async function resolveEmbeddablePatternAnalysisUserInput(
         ),
         {
           ownFocus: true,
-          size: 's',
+          size: 500,
+          minWidth: 400,
+          maxWidth: 800,
+          isResizable: true,
           type: 'push',
           paddingSize: 'm',
           hideCloseButton: true,

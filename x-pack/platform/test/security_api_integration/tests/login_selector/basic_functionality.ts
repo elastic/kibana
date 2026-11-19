@@ -188,7 +188,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe('SAML', () => {
       function createSAMLResponse(options = {}) {
         return getSAMLResponse({
-          destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
+          destination: url.format({
+            protocol: 'http',
+            hostname: kibanaServerConfig.hostname,
+            port: kibanaServerConfig.port,
+            pathname: '/api/security/saml/callback',
+          }),
           sessionIndex: String(randomness.naturalNumber()),
           ...options,
         });

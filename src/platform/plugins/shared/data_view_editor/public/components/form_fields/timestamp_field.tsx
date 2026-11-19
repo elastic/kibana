@@ -7,12 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFormRow, EuiComboBox, EuiFormHelpText } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiComboBox,
+  EuiFormHelpText,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTextColor,
+} from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
 import type { FieldConfig, FieldHook, ValidationConfig } from '../../shared_imports';
@@ -25,6 +35,7 @@ interface Props {
   options$: Observable<TimestampOption[]>;
   isLoadingOptions$: Observable<boolean>;
   matchedIndices$: Observable<MatchedIndicesSet>;
+  optionsError$: Observable<Error | undefined>;
   disabled?: boolean;
 }
 
@@ -72,14 +83,49 @@ const timestampFieldHelp = i18n.translate('indexPatternEditor.editor.form.timeFi
   defaultMessage: 'Select a timestamp field for use with the global time filter.',
 });
 
+const getTimestampOptionsErrorText = (error: Error) =>
+  i18n.translate('indexPatternEditor.editor.form.timeFieldsError', {
+    defaultMessage: "Couldn't retrieve the list of timestamp fields: {message}",
+    values: { message: error.message },
+  });
+
+const getHelpText = ({
+  options,
+  isLoadingOptions,
+  hasMatchedIndices,
+  optionsError,
+}: {
+  options: TimestampOption[];
+  isLoadingOptions: boolean;
+  hasMatchedIndices: boolean;
+  optionsError?: Error;
+}): ReactNode => {
+  if (!isLoadingOptions && optionsError) {
+    return (
+      <EuiTextColor color="danger" data-test-subj="timestampFieldError">
+        {getTimestampOptionsErrorText(optionsError)}
+      </EuiTextColor>
+    );
+  }
+  if (!isLoadingOptions && hasMatchedIndices && !options.length) {
+    return noTimestampOptionText;
+  }
+  if (options.length) {
+    return timestampFieldHelp;
+  }
+  return <>&nbsp;</>;
+};
+
 export const TimestampField = ({
   options$,
   isLoadingOptions$,
   matchedIndices$,
+  optionsError$,
   disabled,
 }: Props) => {
   const options = useObservable<TimestampOption[]>(options$, []);
   const isLoadingOptions = useObservable<boolean>(isLoadingOptions$, false);
+  const optionsError = useObservable<Error | undefined>(optionsError$);
   const hasMatchedIndices = !!useObservable(matchedIndices$, matchedIndiciesDefault)
     .exactMatchedIndices.length;
 
@@ -89,10 +135,9 @@ export const TimestampField = ({
   }));
 
   const timestampConfig = useMemo(() => getTimestampConfig(options), [options]);
-  const selectTimestampHelp = options.length ? timestampFieldHelp : '';
-
-  const timestampNoFieldsHelp =
-    options.length === 0 && !isLoadingOptions && hasMatchedIndices ? noTimestampOptionText : '';
+  const helpText = getHelpText({ options, isLoadingOptions, hasMatchedIndices, optionsError });
+  // the options only reflect the date fields of the matching indices once they are loaded without an error
+  const areOptionsLoaded = !isLoadingOptions && !optionsError && hasMatchedIndices;
 
   return (
     <UseField<EuiComboBoxOptionOption<string>> config={timestampConfig} path="timestampField">
@@ -106,9 +151,9 @@ export const TimestampField = ({
             field={field}
             optionsAsComboBoxOptions={optionsAsComboBoxOptions}
             isLoadingOptions={isLoadingOptions}
+            areOptionsLoaded={areOptionsLoaded}
             disabled={disabled}
-            timestampNoFieldsHelp={timestampNoFieldsHelp}
-            selectTimestampHelp={selectTimestampHelp}
+            helpText={helpText}
           />
         );
       }}
@@ -120,28 +165,36 @@ interface TimestampFieldRendererProps {
   field: FieldHook<EuiComboBoxOptionOption<string>>;
   optionsAsComboBoxOptions: Array<EuiComboBoxOptionOption<string>>;
   isLoadingOptions: boolean;
+  areOptionsLoaded: boolean;
   disabled?: boolean;
-  timestampNoFieldsHelp: string;
-  selectTimestampHelp: string;
+  helpText: ReactNode;
 }
 
 const TimestampFieldRenderer = ({
   field,
   optionsAsComboBoxOptions,
   isLoadingOptions,
+  areOptionsLoaded,
   disabled,
-  timestampNoFieldsHelp,
-  selectTimestampHelp,
+  helpText,
 }: TimestampFieldRendererProps) => {
   const { label, value, setValue, reset } = field;
   const wasValueInTheListRef = useRef(false);
 
   const isDisabled = !optionsAsComboBoxOptions.length || isLoadingOptions || disabled;
   const valueInList = optionsAsComboBoxOptions.some((option) => option.value === value.value);
+  const isSavedValueMissingInList =
+    Boolean(value.value) && !valueInList && !wasValueInTheListRef.current;
 
   useEffect(() => {
     if (valueInList) {
       wasValueInTheListRef.current = true;
+      return;
+    }
+
+    // Keep the saved timestamp field which is missing in the list, so the user is told about it
+    // instead of silently replacing it with @timestamp
+    if (isSavedValueMissingInList) {
       return;
     }
 
@@ -160,7 +213,16 @@ const TimestampFieldRenderer = ({
       wasValueInTheListRef.current = false;
       reset();
     }
-  }, [optionsAsComboBoxOptions, value, isDisabled, isLoadingOptions, setValue, reset, valueInList]);
+  }, [
+    optionsAsComboBoxOptions,
+    value,
+    isDisabled,
+    isLoadingOptions,
+    setValue,
+    reset,
+    valueInList,
+    isSavedValueMissingInList,
+  ]);
 
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const isComboBoxInvalid = !isDisabled && isInvalid;
@@ -202,11 +264,25 @@ const TimestampFieldRenderer = ({
             data-is-loading={isLoadingOptions ? '1' : '0'}
             fullWidth
           />
-          <EuiFormHelpText>
-            {timestampNoFieldsHelp || selectTimestampHelp || <>&nbsp;</>}
-          </EuiFormHelpText>
+          <EuiFormHelpText>{helpText}</EuiFormHelpText>
         </>
       </EuiFormRow>
+      {areOptionsLoaded && isSavedValueMissingInList && (
+        <>
+          <EuiSpacer size="s" />
+          <KbnWarningCallout
+            size="s"
+            data-test-subj="timestampFieldNotFoundCallout"
+            title={
+              <FormattedMessage
+                id="indexPatternEditor.editor.form.timestampFieldNotFoundWarning"
+                defaultMessage="This data view uses {fieldName} as its timestamp field, but no matching data stream, index, or index alias has that field."
+                values={{ fieldName: <EuiCode>{value.value}</EuiCode> }}
+              />
+            }
+          />
+        </>
+      )}
     </>
   );
 };

@@ -36,12 +36,7 @@ export class CasesPage {
   public readonly alertRuleLink: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    // Titles resolve to the legacy `HeaderPage` subject or the redesign app header
-    // (`appHeaderTitle`) so the page object works whether the `casesRedesign` flags are on or off.
-    // Only one of the two is present at a time on a given page.
-    this.listTitle = this.page.locator(
-      '[data-test-subj="cases-all-title"],[data-test-subj="appHeaderTitle"]'
-    );
+    this.listTitle = this.page.testSubj.locator('appHeaderTitle');
     this.createCaseButton = this.page.testSubj.locator('createNewCaseBtn');
     this.createCaseForm = this.page.testSubj.locator('case-creation-form-steps');
     // Classic chrome renders the legacy `chrome.setBadge()` read-only badge in the
@@ -53,9 +48,7 @@ export class CasesPage {
       // eslint-disable-next-line playwright/no-nth-methods -- the two badges are equivalent; either one proves the read-only state
       .first();
     this.noPrivilegesPrompt = this.page.getByRole('heading', { name: 'Privileges required' });
-    this.caseViewTitle = this.page.locator(
-      '[data-test-subj="case-view-title"],[data-test-subj="appHeaderTitle"]'
-    );
+    this.caseViewTitle = this.page.testSubj.locator('appHeaderTitle');
     this.addCommentInput = this.page.testSubj.locator('add-comment');
     this.commentTextArea = this.page.testSubj.locator('add-comment').locator('textarea');
     this.submitCommentButton = this.page.testSubj.locator('submit-comment');

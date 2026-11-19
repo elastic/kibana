@@ -524,7 +524,7 @@ When adding new toolkit actions:
 
 - **Root and data source events**: Emitted when data source resolution is applied, via `trackContextualProfileResolvedEvent({ contextLevel, profileId })`.
 - **Document events**: Emitted lazily when the proxied record's `context` property is read.
-- **Active profiles context**: Updated on data source resolution via `updateProfilesContextWith([rootId, dataSourceId])`, which sets the EBT context for all subsequent events in that session.
+- **Active profiles context**: Updated on data source resolution via `updateProfilesContextWith`, which sets `discoverProfiles` for all subsequent events in that session. The list contains the root profile id and the data source profile id. When a provider defines `telemetryLabels`, inherited labels are included too, and the active profile id is appended when it is not already one of them.
 
 The `ScopedDiscoverEBTManager` is injected at scoped manager creation time.
 
@@ -534,7 +534,7 @@ The `ScopedDiscoverEBTManager` is injected at scoped manager creation time.
 - **Mocks** are in `__mocks__/`. Use these when testing components that depend on the framework.
 - **When modifying framework internals**, run the existing test suite to catch regressions:
   ```
-  yarn test:jest src/platform/plugins/shared/discover/public/context_awareness/
+  pnpm test:jest src/platform/plugins/shared/discover/public/context_awareness/
   ```
 - **When adding extension points**, add consumption tests in the relevant Discover component tests, not in the framework tests. The framework tests verify the generic merging and resolution mechanics — extension point behavior is tested at the call site.
 

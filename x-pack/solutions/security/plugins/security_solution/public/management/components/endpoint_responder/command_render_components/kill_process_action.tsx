@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { endpointActionResponseCodes } from '../lib/endpoint_action_response_codes';
-import type {
-  ActionDetails,
-  KillProcessActionOutputContent,
-  ResponseActionParametersWithProcessData,
-} from '../../../../../common/endpoint/types';
+import { memo, useMemo } from 'react';
 import type { KillProcessRequestBody } from '../../../../../common/api/endpoint';
 import { parsedKillOrSuspendParameter } from '../lib/utils';
 import { useSendKillProcessRequest } from '../../../hooks/response_actions/use_send_kill_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
-import { KillSuspendProcessActionResult } from '../../kill_process_action_result';
 
 export const KillProcessActionResult = memo<
   ActionRequestComponentProps<{ pid?: string[]; entityId?: string[]; processName?: string[] }>
@@ -40,7 +33,7 @@ export const KillProcessActionResult = memo<
       : undefined;
   }, [command.args, command.commandDefinition?.meta]);
 
-  const { result, actionDetails } = useConsoleActionSubmitter<KillProcessRequestBody>({
+  return useConsoleActionSubmitter<KillProcessRequestBody>({
     ResultComponent,
     setStore,
     store,
@@ -49,30 +42,6 @@ export const KillProcessActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'killProcess',
-  });
-
-  if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
-    return (
-      <ResultComponent
-        title={
-          endpointActionResponseCodes[
-            actionDetails?.outputs?.[actionDetails.agents[0]]?.content.code ?? ''
-          ]
-        }
-      >
-        <KillSuspendProcessActionResult
-          action={
-            actionDetails as ActionDetails<
-              KillProcessActionOutputContent,
-              ResponseActionParametersWithProcessData
-            >
-          }
-          data-test-subj="killProcessResponseOutput"
-        />
-      </ResultComponent>
-    );
-  }
-
-  return result;
+  }).result;
 });
 KillProcessActionResult.displayName = 'KillProcessActionResult';

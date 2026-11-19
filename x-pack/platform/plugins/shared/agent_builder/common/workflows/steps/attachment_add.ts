@@ -36,6 +36,10 @@ const InputSchema = z.object({
   hidden: z.boolean().optional().meta({
     description: 'Whether the attachment should be hidden from the user.',
   }),
+  render_inline: z.boolean().optional().meta({
+    description:
+      'When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it. Defaults to false.',
+  }),
 });
 
 const OutputSchema = z.object({
@@ -68,7 +72,7 @@ export const addAttachmentStepCommonDefinition: CommonStepDefinition<
       'xpack.agentBuilder.workflowSteps.addAttachment.documentation.details',
       {
         defaultMessage:
-          'Adds a new attachment to the specified conversation. Either `data` (by-value) or `origin` (by-reference) must be provided. Returns the created attachment id, type, and version.',
+          'Adds a new attachment to the specified conversation. Either `data` (by-value) or `origin` (by-reference) must be provided. Set `render_inline` to show the attachment to the user as soon as they open the conversation. Returns the created attachment id, type, and version.',
       }
     ),
     examples: [

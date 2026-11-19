@@ -11,6 +11,8 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import type { IDslPagination } from '@kbn/search-types';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { createDiscoverServicesMock, discoverServiceMock } from '../../../__mocks__/services';
 import { FetchStatus } from '../../types';
 import type { DataDocuments$ } from './discover_data_state_container';
@@ -20,16 +22,20 @@ import {
   initializeDataStateInDiscoverStateMock,
 } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
+import { fetchEsql } from '../data_fetching/fetch_esql';
 import {
   DEFAULT_TAB_STATE,
   createTabItem,
   internalStateActions,
   selectAllTabs,
   selectDataSourceProfileId,
+  getTabDataView,
   selectTabRuntimeState,
 } from './redux';
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
+import * as resolveEsqlSourceModule from '../data_fetching/resolve_esql_source';
+import { ScopedDiscoverEBTManager } from '../../../ebt_manager/scoped_discover_ebt_manager';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -44,11 +50,24 @@ jest.mock('@kbn/ebt-tools', () => ({
 }));
 
 const mockFetchDocuments = jest.mocked(fetchDocuments);
+const mockFetchEsql = jest.mocked(fetchEsql);
 
 describe('test getDataStateContainer', () => {
+  let trackQueryPerformanceEvent: jest.SpiedFunction<
+    ScopedDiscoverEBTManager['trackQueryPerformanceEvent']
+  >;
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockFetchDocuments.mockResolvedValue({ records: [] });
+    trackQueryPerformanceEvent = jest.spyOn(
+      ScopedDiscoverEBTManager.prototype,
+      'trackQueryPerformanceEvent'
+    );
+  });
+
+  afterEach(() => {
+    trackQueryPerformanceEvent.mockRestore();
   });
 
   test('return is valid', async () => {
@@ -59,6 +78,184 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+  });
+
+  describe('replay cache', () => {
+    const cachedTimeRange = {
+      from: '2021-08-31T20:00:00.000Z',
+      to: '2021-08-31T21:00:00.000Z',
+      mode: 'absolute' as const,
+    };
+    const cachedReplay = {
+      hit: true as const,
+      sessionId: 'cached-session',
+      timeRange: cachedTimeRange,
+      lastFetched: '2021-08-31T21:00:00.000Z',
+    };
+
+    const setup = async () => {
+      const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+      await toolkit.initializeTabs();
+      const tabId = toolkit.getCurrentTab().id;
+      const { replayCache, search, query } = toolkit.services.data;
+      jest.mocked(search.session.start).mockReturnValue('new-session');
+      jest.mocked(replayCache.get).mockReturnValue(cachedReplay);
+
+      return { toolkit, tabId, query };
+    };
+
+    test('initial fetch replays the cached session and time range', async () => {
+      const { toolkit, tabId } = await setup();
+
+      await toolkit.initializeSingleTab({ tabId });
+
+      expect(toolkit.getCurrentTab().dataRequestParams).toMatchObject({
+        searchSessionId: 'cached-session',
+        timeRangeAbsolute: cachedTimeRange,
+        replayCacheLastFetched: cachedReplay.lastFetched,
+      });
+    });
+
+    test('refresh after a replay starts a new session with the current time range', async () => {
+      const { toolkit, tabId, query } = await setup();
+      const { dataStateContainer } = await toolkit.initializeSingleTab({ tabId });
+
+      dataStateContainer.fetch();
+
+      await waitFor(() =>
+        expect(toolkit.getCurrentTab().dataRequestParams).toMatchObject({
+          searchSessionId: 'new-session',
+          timeRangeAbsolute: query.timefilter.timefilter.getAbsoluteTime(),
+          replayCacheLastFetched: undefined,
+        })
+      );
+    });
+
+    test('marks replayed loads on the performance events and still reports a later refresh', async () => {
+      const { toolkit, tabId } = await setup();
+      const reportedEvents: Array<{ eventName: string; isReplayedLoad?: boolean }> = [];
+      trackQueryPerformanceEvent.mockImplementation(({ eventName }) => ({
+        reportEvent: ({ isReplayedLoad }) => {
+          reportedEvents.push({ eventName, isReplayedLoad });
+        },
+      }));
+      const { dataStateContainer } = await toolkit.initializeSingleTab({ tabId });
+      await waitFor(() =>
+        expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE)
+      );
+
+      dataStateContainer.fetch();
+      await waitFor(() =>
+        expect(reportedEvents).toContainEqual({
+          eventName: 'discoverFetchAll',
+          isReplayedLoad: false,
+        })
+      );
+
+      expect(reportedEvents).toEqual([
+        { eventName: 'discoverFetchAllRequestsOnly', isReplayedLoad: true },
+        { eventName: 'discoverFetchAll', isReplayedLoad: true },
+        { eventName: 'discoverFetchAllRequestsOnly', isReplayedLoad: false },
+        { eventName: 'discoverFetchAll', isReplayedLoad: false },
+      ]);
+    });
+  });
+
+  test('completes the load after Cancel', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({ tabId, appState: { query: { esql: 'FROM logs' } } })
+    );
+
+    const response = Promise.withResolvers<Awaited<ReturnType<typeof fetchEsql>>>();
+    mockFetchEsql.mockReturnValueOnce(response.promise);
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+    await waitFor(() => expect(mockFetchEsql).toHaveBeenCalled());
+
+    dataStateContainer.cancel();
+    response.reject(new Error('The query was canceled'));
+    await waitFor(() =>
+      expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE)
+    );
+  });
+
+  test('fetch clears skipInitialFetch so later query switches do not return to the empty state', async () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const tabId = stateContainer.getCurrentTab().id;
+
+    stateContainer.internalState.dispatch(
+      internalStateActions.setSkipInitialFetch({ tabId, skipInitialFetch: true })
+    );
+    expect(stateContainer.getCurrentTab().skipInitialFetch).toBe(true);
+
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+    await dataState.fetch();
+
+    expect(stateContainer.getCurrentTab().skipInitialFetch).toBe(false);
+  });
+
+  test('fetch does not run or clear skipInitialFetch for an empty ES|QL query', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: '' } },
+      })
+    );
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setSkipInitialFetch)({
+        skipInitialFetch: true,
+      })
+    );
+
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+    await dataStateContainer.fetch();
+
+    expect(toolkit.getCurrentTab().skipInitialFetch).toBe(true);
+    expect(mockFetchEsql).not.toHaveBeenCalled();
+    expect(mockFetchDocuments).not.toHaveBeenCalled();
+  });
+
+  test('timefilter-triggered refetch does not search an empty ES|QL query', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: '' } },
+      })
+    );
+
+    jest.spyOn(toolkit.searchSessionManager, 'getNextSearchSessionId');
+
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+    expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.UNINITIALIZED);
+
+    const unsubscribe = dataStateContainer.subscribe();
+    dataStateContainer.refetch$.next(undefined);
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(toolkit.searchSessionManager.getNextSearchSessionId).not.toHaveBeenCalled();
+    expect(mockFetchEsql).not.toHaveBeenCalled();
+    expect(mockFetchDocuments).not.toHaveBeenCalled();
+    expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.UNINITIALIZED);
+
+    unsubscribe();
   });
 
   test('refetch$ triggers a search', async () => {
@@ -96,10 +293,12 @@ describe('test getDataStateContainer', () => {
     expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith(
       {
         dataSource: stateContainer.getCurrentTab().appState.dataSource,
-        dataView: selectTabRuntimeState(
-          stateContainer.runtimeStateManager,
-          stateContainer.getCurrentTab().id
-        ).currentDataView$.getValue(),
+        dataView: getTabDataView(
+          selectTabRuntimeState(
+            stateContainer.runtimeStateManager,
+            stateContainer.getCurrentTab().id
+          )
+        ),
         query: stateContainer.getCurrentTab().appState.query,
       },
       expect.any(Function)
@@ -115,6 +314,39 @@ describe('test getDataStateContainer', () => {
     unsubscribe();
   });
 
+  test('fetches with the EsqlSource set on the tab without resolving it again', async () => {
+    const services = createDiscoverServicesMock();
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true, services });
+    const { esqlSource } = await createResolvedMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setDataSource)({
+        dataSource: esqlSource,
+      })
+    );
+    const { currentDataSource$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
+
+    const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource');
+    services.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+      return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+    });
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer, services);
+    const unsubscribe = dataState.subscribe();
+
+    dataState.refetch$.next(undefined);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe('complete');
+    });
+
+    expect(currentDataSource$.getValue()).toBe(esqlSource);
+    expect(resolveSpy).not.toHaveBeenCalled();
+
+    unsubscribe();
+    resolveSpy.mockRestore();
+  });
+
   test('does not reset warning callout dismiss on fetch more', async () => {
     const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
 
@@ -127,6 +359,13 @@ describe('test getDataStateContainer', () => {
     dataStateContainer.data$.documents$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: records.slice(0, 2),
+      pagination: {
+        hasNextPage: () => true,
+        nextPage: jest.fn().mockResolvedValue({
+          rawResponse: { hits: { hits: esHitsMockWithSort.slice(2) } },
+          pagination: { hasNextPage: () => false, nextPage: jest.fn() } as IDslPagination<true>,
+        }),
+      },
     });
     toolkit.internalState.dispatch(
       toolkit.injectCurrentTab(internalStateActions.setIsWarningCalloutDismissed)({
@@ -134,7 +373,6 @@ describe('test getDataStateContainer', () => {
       })
     );
 
-    mockFetchDocuments.mockResolvedValue({ records: records.slice(2) });
     dataStateContainer.refetch$.next('fetch_more');
 
     await waitFor(() => {
@@ -297,14 +535,31 @@ describe('test getDataStateContainer', () => {
     const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const initialRecords = [records[0], records[1]];
     const moreRecords = [records[2], records[3]];
+    const moreHits = [esHitsMockWithSort[2], esHitsMockWithSort[3]];
 
     mockFetchDocuments.mockResolvedValue({ records: moreRecords });
+
+    const mockPagination: IDslPagination = {
+      hasNextPage: () => true,
+      nextPage: jest.fn().mockResolvedValue({
+        rawResponse: {
+          hits: {
+            hits: moreHits,
+          },
+        },
+        pagination: {
+          hasNextPage: () => false,
+          nextPage: jest.fn(),
+        } as IDslPagination<true>,
+      }),
+    };
 
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
     dataState.data$.documents$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: initialRecords,
+      pagination: mockPagination,
     }) as DataDocuments$;
 
     const unsubscribe = dataState.subscribe();
@@ -337,6 +592,82 @@ describe('test getDataStateContainer', () => {
     });
 
     dataState.refetch$.next('fetch_more');
+  });
+
+  describe('inspector reset behavior', () => {
+    test('inspectorAdapters.requests.reset is called on regular refetch', async () => {
+      mockFetchDocuments.mockResolvedValue({ records: [] });
+
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+        return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+      });
+
+      const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+      const resetSpy = jest.spyOn(dataState.inspectorAdapters.requests, 'reset');
+
+      const unsubscribe = dataState.subscribe();
+      resetSpy.mockClear();
+
+      dataState.refetch$.next(undefined);
+
+      await waitFor(() => {
+        expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+      });
+
+      expect(resetSpy).toHaveBeenCalled();
+      unsubscribe();
+    });
+
+    test('inspectorAdapters.requests.reset is called on reset refetch', async () => {
+      mockFetchDocuments.mockResolvedValue({ records: [] });
+
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+        return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+      });
+
+      const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+      const resetSpy = jest.spyOn(dataState.inspectorAdapters.requests, 'reset');
+
+      const unsubscribe = dataState.subscribe();
+      resetSpy.mockClear();
+
+      dataState.refetch$.next('reset');
+
+      await waitFor(() => {
+        expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+      });
+
+      expect(resetSpy).toHaveBeenCalled();
+      unsubscribe();
+    });
+
+    test('inspectorAdapters.requests.reset is NOT called on fetch_more', async () => {
+      const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+      const initialRecords = [records[0], records[1]];
+
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+      dataState.data$.documents$ = new BehaviorSubject({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: initialRecords,
+      }) as DataDocuments$;
+
+      const resetSpy = jest.spyOn(dataState.inspectorAdapters.requests, 'reset');
+
+      const unsubscribe = dataState.subscribe();
+      resetSpy.mockClear();
+
+      // Trigger fetch_more - the inspector reset happens in tap() before the fetch starts
+      dataState.refetch$.next('fetch_more');
+
+      // Wait a tick for the tap() operator to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(resetSpy).not.toHaveBeenCalled();
+      unsubscribe();
+    });
   });
 
   describe('profile app state defaults', () => {

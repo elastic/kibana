@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Type } from '@kbn/config-schema';
-import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
@@ -15,8 +15,8 @@ import {
   MAX_SIGNAL_GROUPS,
   MAX_SIGNALS_PAGE_SIZE,
   SIGNALS_INTERNAL_API_VERSION,
-  signalGroupsPath,
-  signalsPath,
+  SIGNAL_GROUPS_PATH,
+  SIGNALS_PATH,
 } from '../../common/constants';
 import type {
   ListSignalGroupsResponse,
@@ -25,6 +25,7 @@ import type {
 } from '../../common/http_api/signals';
 import { apiPrivileges } from '../../common/features';
 import { getSignalGroups, getSignalsByTag } from '../signals/read';
+import { resolveSpaceId } from '../utils/resolve_space_id';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
@@ -59,15 +60,6 @@ const listSignalsQuerySchema = schema.object({
 });
 
 /**
- * Resolves the active space id for the request, falling back to the default space when the spaces
- * plugin is absent. Signals are read from the current space's index.
- */
-const DEFAULT_SPACE_ID = 'default';
-
-const resolveSpaceId = (spaces: SpacesPluginStart | undefined, request: KibanaRequest): string =>
-  spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-
-/**
  * Registers the read-only Signals routes. Reads run as the CURRENT USER (the signals indices are
  * per-space user indices), so both handlers use `asCurrentUser` and read the current space's index.
  */
@@ -84,7 +76,7 @@ export const registerSignalRoutes = ({
   // Preaggregated grouped-by-tag list.
   router.versioned
     .get({
-      path: signalGroupsPath,
+      path: SIGNAL_GROUPS_PATH,
       security: READ_SECURITY,
       access: 'internal',
       summary: 'List signal groups',
@@ -110,7 +102,7 @@ export const registerSignalRoutes = ({
   // Per-group signals (paginated).
   router.versioned
     .get({
-      path: signalsPath,
+      path: SIGNALS_PATH,
       security: READ_SECURITY,
       access: 'internal',
       summary: 'List signals for a tag',

@@ -13,7 +13,7 @@ import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 
 // After this many consecutive "no data" responses with filters applied,
 // drop the extra filters and fall back to the basic time-window query.
-// This prevents users from getting stuck if a field like host.os.type
+// This prevents users from getting stuck if a field like os.type
 // is missing from indexed documents due to mapping or collector differences.
 const FALLBACK_POLL_THRESHOLD = 30;
 
@@ -60,7 +60,7 @@ export function useTimeWindowDataDetection({
   );
 
   // Default: after FALLBACK_POLL_THRESHOLD empty polls, drop extra filters so a
-  // missing/late host.os.type can't strand the user. Opt out via
+  // missing/late os.type can't strand the user. Opt out via
   // keepExtraParamsOnFallback when the caller needs the filter pinned (e.g. V2
   // per-OS pages where unscoped data would mean cross-OS false completion).
   const hasExtraParams =

@@ -23,6 +23,7 @@ import {
 } from '../hitl_notifications/send_wait_for_approval_notifications';
 
 jest.mock('../wait_for_input_step/hitl_external_resume_helpers', () => ({
+  ...jest.requireActual('../wait_for_input_step/hitl_external_resume_helpers'),
   invalidateHitlExternalResumeTokenIfPresent: jest.fn(),
   mintHitlExternalResumeToken: jest.fn().mockReturnValue({
     token: 'resume-token',
@@ -93,6 +94,8 @@ describe('WaitForApprovalStepImpl', () => {
       failStep: jest.fn(),
       stampHitlAudit: jest.fn(),
       setInput: jest.fn(),
+      getCurrentStepState: jest.fn().mockReturnValue({ dynamicTimeout: '24h' }),
+      setCurrentStepState: jest.fn(),
       updateWorkflowExecution: jest.fn(),
       stepExecutionId: 'test-step-exec-id',
       abortController: new AbortController(),
@@ -153,6 +156,43 @@ describe('WaitForApprovalStepImpl', () => {
     expect(mockSendWaitForApprovalNotifications).not.toHaveBeenCalled();
   });
 
+  it('persists the rendered timeout on wait-entry', async () => {
+    node.configuration = {
+      ...node.configuration,
+      timeout: "{{ inputs.expiresIn | default: '72h' }}",
+    } as WaitForApprovalStep;
+    (
+      mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+    ).mockImplementation((value: unknown) => (value === node.configuration.timeout ? '1h' : value));
+
+    await underTest.run();
+
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(
+      expect.objectContaining({ dynamicTimeout: '1h' })
+    );
+  });
+
+  it('fails wait-entry before notifications when the rendered timeout is invalid', async () => {
+    mockHasExternalHitlChannels.mockReturnValue(true);
+    node.configuration = {
+      ...node.configuration,
+      timeout: '{{ inputs.expiresIn }}',
+      with: {
+        ...node.configuration.with,
+        channels: { slack: { 'connector-id': 'slack-1' } },
+      },
+    } as WaitForApprovalStep;
+    (
+      mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+    ).mockImplementation((value: unknown) =>
+      value === node.configuration.timeout ? 'soon' : value
+    );
+
+    await expect(underTest.run()).rejects.toThrow('Invalid duration format: soon');
+    expect(mockSendWaitForApprovalNotifications).not.toHaveBeenCalled();
+    expect(mockMintHitlExternalResumeToken).not.toHaveBeenCalled();
+  });
+
   it('mints a resume token and sends notifications when channels are configured', async () => {
     mockHasExternalHitlChannels.mockReturnValue(true);
     node.configuration = {
@@ -167,13 +207,21 @@ describe('WaitForApprovalStepImpl', () => {
 
     await underTest.run();
 
-    expect(mockMintHitlExternalResumeToken).toHaveBeenCalled();
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
+    expect(mockMintHitlExternalResumeToken).toHaveBeenCalledWith(
+      expect.objectContaining({ timeout: '24h' })
+    );
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenLastCalledWith(
       expect.objectContaining({
+        message: 'Approve this change?',
         _hitlTokenHash: 'resume-token-hash',
         _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
       })
     );
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+      dynamicTimeout: '24h',
+      _hitlTokenHash: 'resume-token-hash',
+      _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+    });
     expect(mockBuildWaitForApprovalResumeLinks).toHaveBeenCalledWith(
       expect.objectContaining({ stepId: 'test-step-exec-id', token: 'resume-token' })
     );
@@ -194,15 +242,22 @@ describe('WaitForApprovalStepImpl', () => {
 
     await underTest.run();
 
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(
-      1,
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+      })
+    );
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(
       expect.objectContaining({
         _hitlTokenHash: 'resume-token-hash',
         _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
       })
     );
     expect(mockSendWaitForApprovalNotifications).toHaveBeenCalled();
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(2);
+    expect(
+      mockStepExecutionRuntime.setCurrentStepState.mock.invocationCallOrder.at(-1)
+    ).toBeLessThan(mockSendWaitForApprovalNotifications.mock.invocationCallOrder[0]);
   });
 
   it('persists the external resume token metadata when notification delivery fails', async () => {
@@ -220,7 +275,13 @@ describe('WaitForApprovalStepImpl', () => {
 
     await expect(underTest.run()).rejects.toThrow('Slack connector failed');
 
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+      })
+    );
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenLastCalledWith(
       expect.objectContaining({
         _hitlTokenHash: 'resume-token-hash',
         _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
@@ -297,6 +358,38 @@ describe('WaitForApprovalStepImpl', () => {
       response: { approved: false },
       respondedBy: 'external_resume:step-exec-1',
     });
+  });
+
+  it('uses the persisted timeout on resume, not the YAML template', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(new Date('2025-06-01T12:01:00.000Z'));
+      node.configuration = {
+        ...node.configuration,
+        timeout: "{{ inputs.expiresIn | default: '72h' }}",
+      } as WaitForApprovalStep;
+
+      mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
+      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+        startedAt: '2025-06-01T12:00:00.000Z',
+        state: { dynamicTimeout: '30s' },
+      };
+      mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
+        context: {},
+      } as unknown as ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>);
+
+      await underTest.run();
+
+      const timeoutError = (mockStepExecutionRuntime.failStep as jest.Mock).mock
+        .calls[0][0] as ExecutionError;
+      expect(timeoutError.toSerializableObject()).toEqual({
+        type: 'TimeoutError',
+        message: 'Approval wait exceeded the configured timeout of 30s.',
+      });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('fails with TimeoutError when approval wait expires', async () => {

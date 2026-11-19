@@ -11,7 +11,7 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObject,
 } from '@kbn/core-saved-objects-server';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 import { getDescriptorNamespace } from './get_descriptor_namespace';
 import type { EncryptedSavedObjectsService } from '../crypto';

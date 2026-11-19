@@ -247,6 +247,16 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('getReadableWorkflowIds', () => {
+    it('should call GET /internal/workflows/readable_workflow_ids with version 1', async () => {
+      await api.getReadableWorkflowIds();
+
+      expect(http.get).toHaveBeenCalledWith('/internal/workflows/readable_workflow_ids', {
+        version: '1',
+      });
+    });
+  });
+
   describe('searchTriggerEvents', () => {
     it('should call POST /internal/workflows/trigger_events/_search with body', async () => {
       const params = {
@@ -260,6 +270,17 @@ describe('WorkflowApi', () => {
 
       expect(http.post).toHaveBeenCalledWith('/internal/workflows/trigger_events/_search', {
         body: JSON.stringify(params),
+        version: INTERNAL_VERSION,
+      });
+    });
+  });
+
+  describe('getLinkedRules', () => {
+    it('should call POST /internal/workflows/_linked_rules with ids', async () => {
+      await api.getLinkedRules(['w1', 'w2']);
+
+      expect(http.post).toHaveBeenCalledWith('/internal/workflows/_linked_rules', {
+        body: JSON.stringify({ ids: ['w1', 'w2'] }),
         version: INTERNAL_VERSION,
       });
     });
@@ -376,6 +397,18 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('getExecutionSteps', () => {
+    it('should call GET /api/workflows/executions/{executionId}/steps', async () => {
+      const params = { page: 1, size: 100 };
+      await api.getExecutionSteps('exec-1', params);
+
+      expect(http.get).toHaveBeenCalledWith('/api/workflows/executions/exec-1/steps', {
+        query: params,
+        version: VERSION,
+      });
+    });
+  });
+
   describe('cancelExecution', () => {
     it('should call POST /api/workflows/executions/{executionId}/cancel', async () => {
       await api.cancelExecution('exec-1');
@@ -459,7 +492,7 @@ describe('WorkflowApi', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // Workflow Template Library
+  // Workflow Template library
   // ---------------------------------------------------------------------------
 
   describe('getCatalog', () => {

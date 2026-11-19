@@ -112,7 +112,7 @@ export const Page: FC<{
     }
 
     if (jobsExist === false) {
-      return <AnalyticsEmptyPrompt showDocsLink iconSize="s" />;
+      return <AnalyticsEmptyPrompt showDocsLink centered />;
     }
     return (
       <>

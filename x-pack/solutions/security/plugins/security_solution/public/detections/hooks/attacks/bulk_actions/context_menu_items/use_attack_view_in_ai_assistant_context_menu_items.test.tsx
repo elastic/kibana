@@ -239,7 +239,7 @@ describe('useAttackViewInAiAssistantContextMenuItems', () => {
     expect(closePopover).toHaveBeenCalledTimes(1);
     expect(reportAddToChatClick).toHaveBeenCalledWith({
       pathway: 'attacks_page_group_take_action',
-      attachments: ['alert'],
+      attachments: ['attack_discovery'],
     });
     expect(openAgentBuilderFlyout).toHaveBeenCalledTimes(1);
     expect(reportAddToChatClick.mock.invocationCallOrder[0]).toBeLessThan(

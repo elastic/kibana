@@ -122,14 +122,12 @@ spaceTest.describe('Lens ad hoc data view', { tag: '@local-stateful-classic' }, 
         await page.testSubj.locator('fieldListLoading').waitFor({ state: 'hidden' });
 
         await page.testSubj.locator('lnsIndexPatternFieldSearch').fill('runtime');
-        const availableRuntimeField = page.testSubj
+        await page.testSubj
           .locator('lnsIndexPatternAvailableFields')
-          .getByTestId('lnsFieldListPanelField-runtimefield');
-        await availableRuntimeField.waitFor({ state: 'visible' });
+          .getByTestId('lnsFieldListPanelField-runtimefield')
+          .waitFor({ state: 'visible' });
 
-        const workspace = page.testSubj.locator('lnsWorkspace');
-        await availableRuntimeField.dragTo(workspace);
-        await lens.waitForVisualization();
+        await lens.dragFieldToWorkspace('runtimefield', 'lnsVisualizationContainer');
 
         const runtimeHeader = page.testSubj
           .locator('lnsVisualizationContainer')

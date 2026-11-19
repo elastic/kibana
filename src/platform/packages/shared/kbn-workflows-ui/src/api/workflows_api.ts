@@ -43,12 +43,15 @@ import type {
   GetCatalogResponse,
   GetExecutionLogsParams,
   GetExecutionParams,
+  GetExecutionStepsParams,
   GetLibraryHealthResponse,
+  GetLinkedRulesResponse,
   GetSchemaParams,
   GetWorkflowExecutionsParams,
   GetWorkflowStepExecutionsParams,
   InstallTemplateResponse,
   MgetWorkflowsParams,
+  ReadableWorkflowIdsResponse,
   RestoreWorkflowVersionParams,
   RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
@@ -274,6 +277,16 @@ export class WorkflowApi {
     });
   }
 
+  async getExecutionSteps(
+    executionId: string,
+    params?: GetExecutionStepsParams
+  ): Promise<WorkflowStepExecutionListDto> {
+    return this.http.get(`${BASE}/executions/${encodeURIComponent(executionId)}/steps`, {
+      query: params as HttpFetchQuery,
+      version: API_VERSION,
+    });
+  }
+
   async cancelExecution(executionId: string): Promise<void> {
     return this.http.post(`${BASE}/executions/${encodeURIComponent(executionId)}/cancel`, {
       version: API_VERSION,
@@ -337,6 +350,12 @@ export class WorkflowApi {
     });
   }
 
+  async getReadableWorkflowIds(): Promise<ReadableWorkflowIdsResponse> {
+    return this.http.get(`${INTERNAL_BASE}/readable_workflow_ids`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
   async searchTriggerEvents(
     params: SearchTriggerEventLogParams
   ): Promise<SearchTriggerEventLogResult> {
@@ -346,8 +365,15 @@ export class WorkflowApi {
     });
   }
 
+  async getLinkedRules(ids: string[]): Promise<GetLinkedRulesResponse> {
+    return this.http.post(`${INTERNAL_BASE}/_linked_rules`, {
+      body: JSON.stringify({ ids }),
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
   // ---------------------------------------------------------------------------
-  // Workflow Template Library
+  // Workflow Template library
   // ---------------------------------------------------------------------------
 
   async getCatalog(params: GetCatalogParams = {}): Promise<GetCatalogResponse> {

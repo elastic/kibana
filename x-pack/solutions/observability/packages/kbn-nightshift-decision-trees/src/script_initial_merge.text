@@ -1,0 +1,4 @@
+Task: merge the new initial investigation steps into the accessed decision tree file(s) (existing tree = Plan A, this investigation = Plan B).
+Use the investigation tool calls, tool results, and first answer in the transcript above as evidence.
+Collapse overlapping steps onto existing nodes and reuse their IDs; preserve unrelated branches and add only genuinely new investigation structure.
+When done, call {{submit_tool}} with the edited decision-tree files.

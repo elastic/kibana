@@ -87,7 +87,7 @@ export class RepoSourceClassifier {
       return true;
     }
 
-    if (path.getFilename() === 'webpack.config' && path.getPkgInfo()?.pkgId !== '@kbn/optimizer') {
+    if (path.getFilename() === 'webpack.config') {
       return true;
     }
 

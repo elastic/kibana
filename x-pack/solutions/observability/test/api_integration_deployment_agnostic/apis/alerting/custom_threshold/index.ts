@@ -17,6 +17,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./documents_count_fired'));
     loadTestFile(require.resolve('./group_by_fired'));
     loadTestFile(require.resolve('./group_by_no_data'));
+    loadTestFile(require.resolve('./cross_rule_no_data_isolation'));
     loadTestFile(require.resolve('./p99_pct_fired'));
     loadTestFile(require.resolve('./rate_bytes_fired'));
     loadTestFile(require.resolve('./consumers_and_privileges'));

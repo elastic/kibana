@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { useNavigateToCanvasSearch } from '../../stream_management/data_management/stream_detail_canvas/use_navigate_to_canvas_search';
 import { useSourcesTable } from './sources_context';
-import type { SourceStatus, SourceViewModel } from './types';
+import type { SourceViewModel } from './types';
 import { SOURCE_TYPE_CONFIG_BY_TYPE } from './source_type_config';
 import { CreateSourceModal } from './create_source_modal';
 import { SourceDetailsFlyout } from './source_details_flyout';
 import { DeleteSourcesConfirmation } from './delete_sources_confirmation';
-import { getSourceSortableValue, SOURCE_STATUS_LABELS } from './source_grid_cell';
+import { getSourceDisplaySignals } from './source_models';
+import { getSourceSortableValue } from './source_grid_cell';
 import { SourcesGrid } from './sources_grid';
 import { SourcesToolbar } from './sources_toolbar';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { UnitReadOnlyCallout } from '../unit_read_only_callout';
 
 export const SourcesTab = () => {
   const sourcesController = useSourcesTable();
@@ -30,16 +34,14 @@ export const SourcesTab = () => {
     isLoadingUnit,
     isUnitUnavailable,
     selectedTypes,
-    selectedStatuses,
     sortingColumns,
     pagination,
     visibleColumnIds,
-    deleteSource,
+    deleteSources,
     refreshUnit,
     setQuery,
     setSelectedSources,
     setSelectedTypes,
-    setSelectedStatuses,
     setSortingColumns,
     setPagination,
     setVisibleColumnIds,
@@ -47,11 +49,20 @@ export const SourcesTab = () => {
     closeCreateModal,
     openSourceFlyout,
     closeSourceFlyout,
+    isUnitSaving,
   } = sourcesController;
 
-  const [sourcesPendingDeletion, setSourcesPendingDeletion] = React.useState<SourceViewModel[]>([]);
+  const {
+    v2: { manage: canManage },
+  } = useStreamsPrivileges();
+  const [sourcesPendingDeletion, setSourcesPendingDeletion] = useState<SourceViewModel[]>([]);
+  const navigateToCanvasSearch = useNavigateToCanvasSearch();
+  const showOnCanvas = useCallback(
+    (source: SourceViewModel) => navigateToCanvasSearch(source.name ?? source.id),
+    [navigateToCanvasSearch]
+  );
 
-  const typeFilterOptions = React.useMemo(
+  const typeFilterOptions = useMemo(
     () =>
       Array.from(new Set(sources.map(({ type }) => type))).map((type) => ({
         key: type,
@@ -60,31 +71,26 @@ export const SourcesTab = () => {
     [sources]
   );
 
-  const statusFilterOptions = React.useMemo(
-    () =>
-      (Object.keys(SOURCE_STATUS_LABELS) as SourceStatus[]).map((status) => ({
-        key: status,
-        label: SOURCE_STATUS_LABELS[status],
-      })),
-    []
-  );
-
-  const filteredSources = React.useMemo(() => {
+  const filteredSources = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return sources.filter(
       (source) =>
         (!normalizedQuery ||
-          [source.name ?? source.id, source.id, SOURCE_TYPE_CONFIG_BY_TYPE[source.type].label]
+          [
+            source.name ?? source.id,
+            source.id,
+            SOURCE_TYPE_CONFIG_BY_TYPE[source.type].label,
+            ...getSourceDisplaySignals(source, source.supportedTelemetry),
+          ]
             .join(' ')
             .toLowerCase()
             .includes(normalizedQuery)) &&
-        (selectedTypes.length === 0 || selectedTypes.includes(source.type)) &&
-        (selectedStatuses.length === 0 || selectedStatuses.includes(source.status))
+        (selectedTypes.length === 0 || selectedTypes.includes(source.type))
     );
-  }, [query, selectedStatuses, selectedTypes, sources]);
+  }, [query, selectedTypes, sources]);
 
-  const sortedSources = React.useMemo(() => {
+  const sortedSources = useMemo(() => {
     const [sort] = sortingColumns;
     if (!sort) {
       return filteredSources;
@@ -112,18 +118,22 @@ export const SourcesTab = () => {
       >
         <EuiFlexItem grow={false}>
           <EuiSpacer size="m" />
+          {!canManage && (
+            <>
+              <UnitReadOnlyCallout />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <SourcesToolbar
             query={query}
             typeOptions={typeFilterOptions}
-            statusOptions={statusFilterOptions}
             selectedTypes={selectedTypes}
-            selectedStatuses={selectedStatuses}
             isRefreshing={isRefreshingUnit}
             onQueryChange={setQuery}
             onSelectedTypesChange={setSelectedTypes}
-            onSelectedStatusesChange={setSelectedStatuses}
             onRefresh={refreshUnit}
-            onAddSource={openCreateModal}
+            onAddSource={canManage ? openCreateModal : undefined}
+            isAddDisabled={isUnitSaving}
           />
           <EuiSpacer size="s" />
         </EuiFlexItem>
@@ -137,9 +147,7 @@ export const SourcesTab = () => {
             status={isLoadingUnit ? 'loading' : isUnitUnavailable ? 'unavailable' : 'ready'}
             sources={sortedSources}
             selectedSources={selectedSources}
-            hasActiveFilters={
-              query.trim().length > 0 || selectedTypes.length > 0 || selectedStatuses.length > 0
-            }
+            hasActiveFilters={query.trim().length > 0 || selectedTypes.length > 0}
             visibleColumns={visibleColumnIds}
             pagination={pagination}
             sortingColumns={sortingColumns}
@@ -148,11 +156,12 @@ export const SourcesTab = () => {
             onSortingChange={setSortingColumns}
             onSelectionChange={setSelectedSources}
             onOpenSource={openSourceFlyout}
-            onRequestDelete={setSourcesPendingDeletion}
+            onShowOnCanvas={showOnCanvas}
+            onRequestDelete={canManage ? setSourcesPendingDeletion : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isCreateModalOpen && (
+      {canManage && isCreateModalOpen && (
         <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
       )}
       {selectedSource && (
@@ -160,6 +169,7 @@ export const SourcesTab = () => {
           sources={sourcesController}
           source={selectedSource}
           onClose={closeSourceFlyout}
+          readOnly={!canManage}
         />
       )}
       {sourcesPendingDeletion.length > 0 && (
@@ -167,7 +177,7 @@ export const SourcesTab = () => {
           count={sourcesPendingDeletion.length}
           onCancel={() => setSourcesPendingDeletion([])}
           onConfirm={() => {
-            sourcesPendingDeletion.forEach(({ id }) => deleteSource(id));
+            deleteSources(sourcesPendingDeletion.map(({ id }) => id));
             setSelectedSources([]);
             setSourcesPendingDeletion([]);
           }}

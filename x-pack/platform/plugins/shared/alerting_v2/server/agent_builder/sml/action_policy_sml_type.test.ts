@@ -25,12 +25,11 @@ const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
   enabled: true,
   destinations: [{ type: 'workflow', id: 'wf-critical-route' }],
   matcher: { expression: 'alert.severity = "critical"' },
-  groupingMode: 'per_episode',
-  tags: ['oncall', 'critical'],
+  grouping: { mode: 'per_alert' },
   apiKeyOwner: 'elastic',
   apiKeyCreatedByUser: true,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
+  updatedBy: { profile_uid: 'elastic' },
   createdAt: '2026-04-01T00:00:00.000Z',
   updatedAt: '2026-04-10T00:00:00.000Z',
 } as ActionPolicySavedObjectAttributes;
@@ -199,10 +198,9 @@ describe('createActionPolicySmlType', () => {
         content: [
           'Critical alerts → Slack',
           'Route every critical-priority alert to #oncall',
-          '(alert.severity = "critical")',
-          'per_episode',
+          'expression: "alert.severity = "critical""',
+          'per_alert',
           'workflow:wf-critical-route',
-          'oncall, critical',
         ].join('\n'),
       });
     });
@@ -278,12 +276,23 @@ describe('createActionPolicySmlType', () => {
         title: 'Critical alerts → Slack',
         content: '',
         permissions: { kibana: { privileges: [] } },
-        attributes: {
-          id: 'sml-1',
-          origin: { uri: `${ACTION_POLICY_KI_TYPE}://${originId}` },
-          created_at: '2026-04-10T00:00:00.000Z',
-          updated_at: '2026-04-10T00:00:00.000Z',
-          ingestion_method: 'crawled' as const,
+        id: 'sml-1',
+        '@timestamp': '2026-04-10T00:00:00.000Z',
+        updated_at: '2026-04-10T00:00:00.000Z',
+        references: [
+          { uri: `${ACTION_POLICY_KI_TYPE}://${originId}`, relation: 'derived_from' as const },
+        ],
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+            updated_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+          },
         },
       };
     };
@@ -308,6 +317,20 @@ describe('createActionPolicySmlType', () => {
       expect(result?.data).toEqual(expect.objectContaining({ name: baseActionPolicyAttrs.name }));
     });
 
+    it('sets the attachment origin to the raw policy id instead of the SML origin URI', async () => {
+      getActionPolicy.mockResolvedValueOnce({
+        ...baseActionPolicyAttrs,
+        id: 'policy-1',
+      });
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result?.origin).toBe('policy-1');
+    });
+
     it('returns undefined when getActionPolicy throws', async () => {
       // The entry surfaces in search results but the policy itself
       // was deleted between index time and read time — surface this
@@ -327,12 +350,12 @@ describe('createActionPolicySmlType', () => {
     });
 
     it('uses an empty string when the origin uri carries no id', async () => {
-      // Defensive contract: the origin id is parsed out of `attributes.origin.uri`. A malformed
-      // uri must thread an empty string down to `getActionPolicy` rather than crash the call.
       getActionPolicy.mockResolvedValueOnce({ ...baseActionPolicyAttrs, id: '' });
 
       const document = buildSmlDocument();
-      document.attributes.origin.uri = `${ACTION_POLICY_KI_TYPE}://`;
+      document.references = [
+        { uri: `${ACTION_POLICY_KI_TYPE}://`, relation: 'derived_from' as const },
+      ];
 
       await buildDefinition().toAttachment(document, buildToAttachmentContext());
 
@@ -349,6 +372,32 @@ describe('createActionPolicySmlType', () => {
 
       expect(result).toBeUndefined();
       expect(getActionPolicy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('searchByTitle', () => {
+    const search = (title: string) =>
+      buildDefinition().searchByTitle!({ title, size: 5 }, buildToAttachmentContext());
+
+    let findActionPolicies: jest.Mock;
+
+    beforeEach(() => {
+      findActionPolicies = jest.fn().mockResolvedValue({
+        items: [{ id: 'policy-1', name: 'Critical alerts' }],
+      });
+      actionPolicyClient = { findActionPolicies } as unknown as ActionPolicyClient;
+    });
+
+    it('searches action policies by the title and maps the results', async () => {
+      expect(await search('crit')).toEqual([{ originId: 'policy-1', title: 'Critical alerts' }]);
+      expect(findActionPolicies).toHaveBeenCalledWith({ search: 'crit', perPage: 5 });
+    });
+
+    it('returns nothing when Alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      expect(await search('crit')).toEqual([]);
+      expect(findActionPolicies).not.toHaveBeenCalled();
     });
   });
 });

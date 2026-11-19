@@ -56,6 +56,7 @@ describe('transformCreateBody', () => {
       },
       scope: {
         alerting: {
+          enabled: true,
           filters: [],
           kql: "_id: '1234'",
         },

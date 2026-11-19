@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Scope } from 'eslint';
+import type { Scope } from '@oxlint/plugins';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 
 export function checkNodeForExistingDataTestSubjProp(
   node: TSESTree.JSXOpeningElement,
-  getScope: () => Scope.Scope
+  getScope: () => Scope
 ): boolean {
   const hasJsxDataTestSubjProp = node.attributes.find(
     (attr) => attr.type === AST_NODE_TYPES.JSXAttribute && attr.name.name === 'data-test-subj'
@@ -38,13 +38,16 @@ export function checkNodeForExistingDataTestSubjProp(
   const { name } = spreadedVariable.argument; // The name of the spreaded variable
 
   const variable = getScope().variables.find((v) => v.name === name); // the variable definition of the spreaded variable
+  const definition = variable?.defs[0]?.node;
 
-  return variable && variable.defs.length > 0
-    ? variable.defs[0].node.init?.properties?.find((property: TSESTree.Property) => {
-        if ('value' in property.key) {
-          return property.key.value === 'data-test-subj';
-        }
-        return false;
-      })
-    : false;
+  if (definition?.type !== 'VariableDeclarator' || definition.init?.type !== 'ObjectExpression') {
+    return false;
+  }
+
+  return definition.init.properties.some(
+    (property) =>
+      property.type === 'Property' &&
+      'value' in property.key &&
+      property.key.value === 'data-test-subj'
+  );
 }

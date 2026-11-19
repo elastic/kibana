@@ -30,7 +30,7 @@ export const InputValidationCallout: React.FC<InputValidationCalloutProps> = Rea
         <EuiCallOut
           announceOnMount
           color="danger"
-          iconType="help"
+          iconType="question"
           size="s"
           title={TITLE}
           data-test-subj="workflow-input-validation-callout"

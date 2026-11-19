@@ -76,7 +76,7 @@ export const GroupedItem = memo(
             </EuiFlexItem>
           )}
 
-          {item.itemType !== DOCUMENT_TYPE_ENTITY && item.actor && item.target && (
+          {item.itemType !== DOCUMENT_TYPE_ENTITY && (item.actor || item.target) && (
             <EuiFlexItem>
               <ActorsRow actor={item.actor} target={item.target} />
             </EuiFlexItem>

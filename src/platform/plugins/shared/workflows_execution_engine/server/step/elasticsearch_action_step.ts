@@ -46,7 +46,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
 
   public getInput() {
     const stepWith = this.node.configuration.with || {};
-    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
+    return this.stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
@@ -198,7 +198,13 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
     params: any
   ): Promise<any> {
     const maxResponseBytes = this.getMaxResponseBytes();
-    const transportOptions = maxResponseBytes > 0 ? { maxResponseSize: maxResponseBytes } : {};
+    const stepTimeoutMs = this.stepExecutionRuntime.getStepTimeoutMs();
+    // Without a step timeout, Kibana's `elasticsearch.requestTimeout` applies.
+    const transportOptions = {
+      signal: this.stepExecutionRuntime.abortController.signal,
+      ...(stepTimeoutMs !== undefined ? { requestTimeout: stepTimeoutMs } : {}),
+      ...(maxResponseBytes > 0 ? { maxResponseSize: maxResponseBytes } : {}),
+    };
 
     // Support both raw API format and connector-driven syntax
     if (params.request) {

@@ -8,10 +8,11 @@
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { extractEuidFromMlDataTool } from './extract_euid_from_ml_data';
-import type { EntityType } from '../../../../../common/entity_analytics/types';
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: { getEuidFromObject: jest.fn() },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const mockGetEuidFromObject = euid.getEuidFromObject as jest.Mock;
@@ -27,12 +28,13 @@ describe('extractEuidFromMlDataTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Default: delegate to the real implementation
-    mockGetEuidFromObject.mockImplementation((entityType: string, doc: unknown) =>
-      jest
-        .requireActual<typeof import('@kbn/entity-store/common/euid_helpers')>(
-          '@kbn/entity-store/common/euid_helpers'
-        )
-        .euid.getEuidFromObject(entityType as EntityType, doc)
+    mockGetEuidFromObject.mockImplementation(
+      (definition: Parameters<typeof euid.getEuidFromObject>[0], doc: unknown) =>
+        jest
+          .requireActual<typeof import('@kbn/entity-store/common/euid_helpers')>(
+            '@kbn/entity-store/common/euid_helpers'
+          )
+          .euid.getEuidFromObject(definition, doc)
     );
   });
 

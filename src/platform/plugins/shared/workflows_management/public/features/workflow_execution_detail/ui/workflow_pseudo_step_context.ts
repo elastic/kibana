@@ -41,6 +41,8 @@ export function buildTriggerContextFromExecution(
     const event = executionContext.event as Record<string, unknown>;
     if (event.alerts != null || event.type === 'alert') {
       triggerType = 'alert';
+    } else if (event.type === 'manual') {
+      triggerType = 'manual';
     } else if (
       isEventDrivenWorkflowTriggerSource({
         triggeredBy,
@@ -53,9 +55,12 @@ export function buildTriggerContextFromExecution(
     }
   }
 
-  const inputData = (executionContext as { event?: JsonValue; inputs?: JsonValue }).event
-    ? executionContext.event
-    : executionContext.inputs;
+  // Manual runs store the payload on context.inputs. Older rows may still have
+  // event.type === 'manual'; keep classifying those as manual and show inputs.
+  const inputData =
+    triggerType === 'manual'
+      ? (executionContext as { inputs?: JsonValue }).inputs
+      : (executionContext as { event?: JsonValue }).event;
 
   return {
     triggerType,
@@ -113,6 +118,20 @@ export function buildTriggerStepExecutionFromContext(
   } as WorkflowStepExecutionDto;
 }
 
+/**
+ * Top-level keys that `buildOverviewStepExecutionFromContext` adds for display only. They are not
+ * in the workflow execution context, so they are not valid template paths.
+ */
+const OVERVIEW_DISPLAY_ONLY_FIELDS: ReadonlySet<string> = new Set([
+  'trace',
+  'executionError',
+  'skipReason',
+]);
+
+/** Whether a flattened Overview field path is a template path that exists in the workflow context. */
+export const isOverviewContextField = (fieldPath: string): boolean =>
+  !OVERVIEW_DISPLAY_ONLY_FIELDS.has(fieldPath.split('.')[0]);
+
 export function buildOverviewStepExecutionFromContext(
   workflowExecution: WorkflowExecutionDto
 ): WorkflowStepExecutionDto {
@@ -120,6 +139,18 @@ export function buildOverviewStepExecutionFromContext(
   if (workflowExecution.context) {
     const { inputs, event, ...context } = workflowExecution.context;
     contextData = context as Record<string, unknown>;
+  }
+
+  if (workflowExecution.effectiveIdentity) {
+    const executionContext =
+      contextData.execution && typeof contextData.execution === 'object'
+        ? contextData.execution
+        : {};
+    contextData.execution = {
+      ...executionContext,
+      effectiveIdentity: workflowExecution.effectiveIdentity,
+      executedBy: workflowExecution.executedBy,
+    };
   }
 
   if (isValidWorkflowDocumentVersion(workflowExecution.version)) {
@@ -182,6 +213,7 @@ export function buildOverviewStepExecutionFromContext(
     status: workflowExecution.status,
     stepExecutionIndex: 0,
     startedAt: workflowExecution.startedAt,
+    finishedAt: workflowExecution.finishedAt,
     input: contextData as JsonValue,
     scopeStack: [],
     workflowRunId: workflowExecution.id,

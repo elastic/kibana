@@ -13,6 +13,7 @@ export interface RerunWorkflowExecutionParams {
   workflowId: string;
   executionId?: string;
   context?: Record<string, unknown>;
+  isTestRun?: boolean;
 }
 
 export const buildReplayInputsFromExecutionContext = (

@@ -140,6 +140,26 @@ export const normalizeStepAi = (params: {
   return hasAny ? result : undefined;
 };
 
+/** True for first-class AI steps (`ai.*`, built-in `inference`). Connector steps with usage are not. */
+export const isAiStepType = (stepType: string | undefined): boolean =>
+  Boolean(stepType && (stepType.startsWith('ai.') || stepType === 'inference'));
+
+/**
+ * Whether the step detail panel should show the "AI" section. A configured `connector-id`
+ * alone is not an AI signal (Slack, email, ... steps have one too): require an AI step type
+ * or actual tokens/model.
+ */
+export const shouldShowAiSection = (
+  stepType: string | undefined,
+  ai: StepAiMetadata | undefined
+): boolean =>
+  ai !== undefined &&
+  (isAiStepType(stepType) ||
+    ai.totalTokens !== undefined ||
+    ai.inputTokens !== undefined ||
+    ai.outputTokens !== undefined ||
+    ai.model !== undefined);
+
 export const stepAiToTokenUsage = (ai: StepAiMetadata): WorkflowTokenUsage | undefined => {
   if (
     ai.totalTokens === undefined &&

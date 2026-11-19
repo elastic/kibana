@@ -33,7 +33,7 @@ describe('deriveIterationStatus', () => {
   it('returns SKIPPED when there are no executed descendant steps', () => {
     const status = deriveIterationStatus(
       {
-        stepId: '0',
+        stepId: 'iteration-0',
         stepType: 'foreach-iteration',
         status: null,
         stepExecutionId: null,
@@ -47,7 +47,7 @@ describe('deriveIterationStatus', () => {
   it('derives COMPLETED from executed children even when the synthetic node was SKIPPED', () => {
     const status = deriveIterationStatus(
       {
-        stepId: '0',
+        stepId: 'iteration-0',
         stepType: 'foreach-iteration',
         status: ExecutionStatus.SKIPPED,
         stepExecutionId: null,
@@ -69,7 +69,7 @@ describe('deriveIterationStatus', () => {
   it('picks the worst descendant status', () => {
     const status = deriveIterationStatus(
       {
-        stepId: '1',
+        stepId: 'iteration-1',
         stepType: 'foreach-iteration',
         status: null,
         stepExecutionId: null,
@@ -124,7 +124,7 @@ describe('buildIterationStatusOverrides', () => {
     const overrides = buildIterationStatusOverrides(
       [
         {
-          stepId: '0',
+          stepId: 'iteration-0',
           stepType: 'foreach-iteration',
           status: ExecutionStatus.SKIPPED,
           stepExecutionId: null,
@@ -139,7 +139,7 @@ describe('buildIterationStatusOverrides', () => {
           ],
         },
         {
-          stepId: '1',
+          stepId: 'iteration-1',
           stepType: 'foreach-iteration',
           status: ExecutionStatus.SKIPPED,
           stepExecutionId: null,
@@ -162,6 +162,31 @@ describe('buildIterationStatusOverrides', () => {
 
     expect(overrides.get(0)).toBe(ExecutionStatus.COMPLETED);
     expect(overrides.get(1)).toBe(ExecutionStatus.COMPLETED);
+  });
+
+  it('parses while iteration ids that are still a bare index', () => {
+    const overrides = buildIterationStatusOverrides(
+      [
+        {
+          stepId: '0',
+          stepType: 'while-iteration',
+          status: ExecutionStatus.SKIPPED,
+          stepExecutionId: null,
+          children: [
+            {
+              stepId: 'log',
+              stepType: 'console',
+              status: ExecutionStatus.COMPLETED,
+              stepExecutionId: 's0',
+              children: [],
+            },
+          ],
+        },
+      ],
+      mapWith([{ id: 's0', status: ExecutionStatus.COMPLETED }])
+    );
+
+    expect(overrides.get(0)).toBe(ExecutionStatus.COMPLETED);
   });
 });
 

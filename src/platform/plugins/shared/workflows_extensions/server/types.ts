@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   ManagedWorkflowsSystemApiProvider,
   PluginScopedManagedWorkflowsApi,
@@ -128,11 +125,7 @@ export type ServerStepDefinitionOrLoader<
 /**
  * Dependencies for the server plugin start phase.
  */
-export interface WorkflowsExtensionsServerPluginStartDeps {
-  actions: ActionsPluginStartContract;
-  inference: InferenceServerStart;
-  spaces?: SpacesPluginStart;
-}
+export type WorkflowsExtensionsServerPluginStartDeps = Record<string, never>;
 
 export type WorkflowsExtensionsRequestHandlerContext = CustomRequestHandlerContext<{
   workflows: WorkflowsApiRequestHandlerContext;

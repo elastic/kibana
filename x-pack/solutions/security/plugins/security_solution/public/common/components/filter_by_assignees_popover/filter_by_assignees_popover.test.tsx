@@ -107,6 +107,22 @@ describe('<FilterByAssigneesPopover />', () => {
     expect(assigneesList).toHaveTextContent('user3@test.com');
   });
 
+  it('should render the selected assignee as checked', () => {
+    const { getByTestId, getByText } = renderFilterByAssigneesPopover();
+
+    fireEvent.click(getByTestId(FILTER_BY_ASSIGNEES_BUTTON));
+    fireEvent.click(getByText('User 1'));
+
+    expect(getByTestId('userProfileSelectableOption-user1')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+    expect(getByTestId('userProfileSelectableOption-user2')).toHaveAttribute(
+      'aria-checked',
+      'false'
+    );
+  });
+
   it('should call onUsersChange on closing the popover', () => {
     const onUsersChangeMock = jest.fn();
     const { getByTestId, getByText } = renderFilterByAssigneesPopover([], onUsersChangeMock);

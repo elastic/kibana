@@ -31,7 +31,7 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * - entityAnalyticsEntityStoreV2    (entity-analytics v2 code path)
  *
  * `xpack.alerting_v2.enabled` additionally gates the alerting_v2 plugin's
- * rule-management skill (defaults to true, set explicitly here for clarity).
+ * rule-authoring skill (defaults to true, set explicitly here for clarity).
  *
  * NOT enabled here: `SIEM_READINESS_AGENT_BUILDER_ENABLED` is a hardcoded internal
  * constant in security_solution/server/agent_builder/siem_readiness_feature_flag.ts,

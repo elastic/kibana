@@ -96,7 +96,7 @@ describe(
         loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
 
         // Check that Add Elastic Rules button is enabled
-        cy.get(ADD_ELASTIC_RULES_BTN).should('be.enabled');
+        cy.get(ADD_ELASTIC_RULES_BTN).should('have.attr', 'href');
 
         // Navigate to Add Elastic Rules page via URL
         // and assert that page can be accessed

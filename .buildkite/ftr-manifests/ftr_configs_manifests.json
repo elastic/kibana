@@ -10,7 +10,6 @@
         ".buildkite/ftr-manifests/ftr_observability_serverless_configs.yml",
         ".buildkite/ftr-manifests/ftr_security_serverless_configs.yml",
         ".buildkite/ftr-manifests/ftr_search_serverless_configs.yml",
-        ".buildkite/ftr-manifests/ftr_workplaceai_serverless_configs.yml",
         ".buildkite/ftr-manifests/ftr_vectordb_serverless_configs.yml"
     ]
 }

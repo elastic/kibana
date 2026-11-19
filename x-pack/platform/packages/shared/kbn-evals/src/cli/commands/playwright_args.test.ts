@@ -7,7 +7,8 @@
 
 import { buildPlaywrightArgs } from './playwright_args';
 
-const CONFIG = 'x-pack/platform/packages/shared/kbn-evals-suite-significant-events/config.ts';
+const CONFIG =
+  'x-pack/solutions/observability/packages/kbn-evals-suite-significant-events/config.ts';
 const SPEC_FILES = ['evals/discovery/discovery.spec.ts', 'evals/ki_query_generation/ki.spec.ts'];
 
 const indexOfArg = (args: string[], arg: string) => args.indexOf(arg);

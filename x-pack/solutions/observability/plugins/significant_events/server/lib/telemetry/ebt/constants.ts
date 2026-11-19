@@ -1,0 +1,54 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE =
+  'significant-events-significant-events-queries-generated';
+const SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE = 'significant-events-features-identified';
+const SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE =
+  'significant-events-agent-builder-knowledge-indicator-created';
+const SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE =
+  'significant-events-agent-tool-ki-identification-started';
+const SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE =
+  'significant-events-agent-tool-event-create';
+const SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE =
+  'significant-events-event-status-changed';
+const SIGNIFICANT_EVENT_ENTITY_TYPE = 'significant_event';
+const SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE =
+  'significant-events-significant-events-discovery-triggered';
+const SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE =
+  'significant-events-significant-events-discovery-started';
+const SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE =
+  'significant-events-significant-events-discovery-completed';
+const SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE =
+  'significant-events-onboarding-scheduled';
+const SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE = 'significant-events-detection-scan';
+const SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE =
+  'significant-events-agent-tool-event-write';
+const SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE =
+  'significant-events-agent-tool-event-search';
+const SIGNIFICANT_EVENTS_AGENT_TOOL_FAILED_EVENT_TYPE = 'significant-events-agent-tool-failed';
+const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE =
+  'significant-events-significant-events-queries-generation-failed';
+
+export {
+  SIGNIFICANT_EVENTS_AGENT_TOOL_FAILED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
+  SIGNIFICANT_EVENT_ENTITY_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
+};

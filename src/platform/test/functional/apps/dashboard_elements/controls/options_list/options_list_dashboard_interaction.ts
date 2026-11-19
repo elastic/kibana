@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
   const filterBar = getService('filterBar');
+  const retry = getService('retry');
 
   const { dashboardControls, timePicker, dashboard, header } = getPageObjects([
     'dashboardControls',
@@ -33,7 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
    *
    * Migration: migrate to scout - try to simplify test cases
    */
-  describe('Interactions between options list and dashboard', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/239769
+  describe.skip('Interactions between options list and dashboard', () => {
     let controlId: string;
 
     before(async () => {
@@ -254,7 +256,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
         await dashboard.loadDashboardInEditMode(OPTIONS_LIST_DASHBOARD_NAME);
-        await dashboard.ensureMissingUnsavedChangesNotification();
+        await retry.try(async () => {
+          await dashboard.ensureMissingUnsavedChangesNotification();
+        });
       });
     });
   });

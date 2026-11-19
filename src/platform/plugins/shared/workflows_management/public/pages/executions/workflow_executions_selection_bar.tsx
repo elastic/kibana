@@ -66,7 +66,7 @@ export const WorkflowExecutionsSelectionBar = ({
     >
       <EuiFlexItem data-test-subj="workflow-executions-table-selected-count" grow={false}>
         <EuiText size="xs" color="subdued">
-          {i18n.translate('workflowsManagement.executionsPage.utilityBar.selectedExecutions', {
+          {i18n.translate('workflows.executionsPage.utilityBar.selectedExecutions', {
             defaultMessage: '{count} selected',
             values: { count: selectedExecutionsCount },
           })}
@@ -75,7 +75,7 @@ export const WorkflowExecutionsSelectionBar = ({
       <EuiFlexItem grow={false}>
         <EuiPopover
           aria-label={i18n.translate(
-            'workflowsManagement.executionsPage.utilityBar.bulkActionsPopoverAriaLabel',
+            'workflows.executionsPage.utilityBar.bulkActionsPopoverAriaLabel',
             {
               defaultMessage: 'Bulk actions',
             }
@@ -92,14 +92,11 @@ export const WorkflowExecutionsSelectionBar = ({
               iconType="chevronSingleDown"
               flush="left"
               data-test-subj="workflow-executions-table-bulk-actions-button"
-              aria-label={i18n.translate(
-                'workflowsManagement.executionsPage.utilityBar.bulkActions',
-                {
-                  defaultMessage: 'Bulk actions',
-                }
-              )}
+              aria-label={i18n.translate('workflows.executionsPage.utilityBar.bulkActions', {
+                defaultMessage: 'Bulk actions',
+              })}
             >
-              {i18n.translate('workflowsManagement.executionsPage.utilityBar.bulkActions', {
+              {i18n.translate('workflows.executionsPage.utilityBar.bulkActions', {
                 defaultMessage: 'Bulk actions',
               })}
             </EuiButtonEmpty>
@@ -120,14 +117,11 @@ export const WorkflowExecutionsSelectionBar = ({
           iconType="cross"
           flush="left"
           data-test-subj="workflow-executions-clear-selection-button"
-          aria-label={i18n.translate(
-            'workflowsManagement.executionsPage.utilityBar.clearSelection',
-            {
-              defaultMessage: 'Clear selection',
-            }
-          )}
+          aria-label={i18n.translate('workflows.executionsPage.utilityBar.clearSelection', {
+            defaultMessage: 'Clear selection',
+          })}
         >
-          {i18n.translate('workflowsManagement.executionsPage.utilityBar.clearSelection', {
+          {i18n.translate('workflows.executionsPage.utilityBar.clearSelection', {
             defaultMessage: 'Clear selection',
           })}
         </EuiButtonEmpty>

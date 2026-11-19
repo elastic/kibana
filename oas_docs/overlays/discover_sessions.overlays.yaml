@@ -1,0 +1,123 @@
+overlay: 1.0.0
+info:
+  title: Overlays for the Discover sessions API
+  version: 0.0.1
+actions:
+  # ──────────────────────────────────────────────
+  # Tag description
+  # ──────────────────────────────────────────────
+  - target: '$.tags[?(@.name=="Discover sessions")]'
+    description: Add tag description with getting started content, externalDocs, and displayName
+    update:
+      description: |
+        A [Discover session](https://www.elastic.co/docs/explore-analyze/discover) is a saved exploration of your data in Discover. Each session contains one or more tabs, and each tab stores its own data source, query, filters, columns, sorting, and chart settings. Use this API to create and manage Discover sessions programmatically.
+
+        ## When to use this API
+
+        - Use this API to define a complete, self-contained Discover session in a single payload, including tabs based on ES|QL queries or data views.
+        - Use the [Dashboards API](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards/operation/create-dashboard) to embed Discover sessions in dashboards as `discover_session` panels, either inline or linked by ID.
+
+        ## Get started
+
+        Before you begin:
+
+        - **Authentication**: Refer to [Authentication](https://www.elastic.co/docs/api/doc/kibana#authentication) in the Kibana API documentation.
+        - **CSRF protection**: Write operations (`POST`, `PUT`, `DELETE`) require the `kbn-xsrf: true` header.
+        - **Spaces**: If you use non-default [Kibana spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces), prepend `s/{space_id}/` to the path.
+
+        ### Try it now
+
+        Create your first Discover session right now using the following example, with an ES|QL tab that lists large requests. You can run it as-is after installing the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data):
+
+        ```bash
+        curl -X POST "${KIBANA_URL}/api/discover_sessions" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "title": "My first API Discover session",
+            "tabs": [
+              {
+                "id": "large-requests",
+                "label": "Large requests",
+                "data_source": {
+                  "type": "esql",
+                  "query": "FROM kibana_sample_data_logs | WHERE bytes > 10000 | LIMIT 100"
+                },
+                "column_order": ["host", "url", "bytes"]
+              }
+            ]
+          }'
+        ```
+
+        Most examples in this reference use the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`). Metrics tab examples need a time series data stream, such as `metrics-*`. To use your own data, replace the index pattern and field references.
+
+        ### Discover session structure
+
+        A Discover session is structured as follows:
+
+        - **`title`** (required): the display name of the Discover session.
+        - **`description`**: a short description of the Discover session.
+        - **`tags`**: IDs of tags to associate with the Discover session.
+        - **`tabs`** (required): ordered list of tabs. Each tab requires a unique `id`, which other saved objects and links can reference, and a `label` displayed in Discover. Tab IDs can contain only lowercase letters, numbers, hyphens, and underscores.
+
+        ### Data sources
+
+        The `data_source.type` field in each tab determines how the tab queries data:
+
+        | Type | Description |
+        |------|-------------|
+        | `esql` | An ES&#124;QL query. Set the query in `data_source.query`. |
+        | `data_view_reference` | An existing data view, referenced by ID in `data_source.ref_id`. |
+        | `data_view_spec` | A data view defined inline, with an `index_pattern` and an optional `time_field`. |
+
+        Tabs based on data views also support `query`, `filters`, and `view_mode` (`documents`, `patterns`, or `aggregated`).
+
+        Each tab also has a `type`. `default` tabs support data views and ES|QL. `metrics` tabs support only ES|QL and also store metrics grid settings, such as `dimensions` and aggregations. If omitted, `type` defaults to `default`.
+
+        - **ES|QL tab**:
+
+          ```json
+          {
+            "id": "errors",
+            "label": "Errors",
+            "data_source": {
+              "type": "esql",
+              "query": "FROM kibana_sample_data_logs | WHERE response.keyword == \"503\""
+            }
+          }
+          ```
+
+        - **Data view tab**:
+
+          ```json
+          {
+            "id": "all-logs",
+            "label": "All logs",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "kibana_sample_data_logs",
+              "time_field": "timestamp"
+            },
+            "column_order": ["host", "url", "bytes"],
+            "sort": [
+              {
+                "name": "timestamp",
+                "direction": "desc"
+              }
+            ]
+          }
+          ```
+
+        ### Warnings
+
+        Getting a single Discover session (`GET /api/discover_sessions/{id}`) returns the session in a `data` object. When saved content cannot be fully represented in the API response, it is omitted and listed in a `warnings` array. The saved session is not modified.
+
+      externalDocs:
+        description: Discover documentation
+        url: https://www.elastic.co/docs/explore-analyze/discover
+      x-displayName: Discover sessions
+  # Heatmap drawing stays behind observability.metricsHeatmapsEnabled, so the public spec only documents lnsXY.
+  - target: "$..histogram_visualization.enum[?(@ == 'lnsHeatmap')]"
+    description: Hide the experimental heatmap visualization
+    remove: true

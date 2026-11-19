@@ -514,6 +514,38 @@ describe('ApmConfiguration', () => {
       expect(shouldInstrumentClient(frontendConfig)).toBe(false);
     });
 
+    it('does not throw when elastic.apm.active is false and contextPropagationOnly is omitted', () => {
+      const configWithActiveFalse = new ApmConfiguration(
+        mockedRootDir,
+        {
+          ...kibanaConfig,
+          elastic: {
+            apm: {
+              active: false,
+            },
+          },
+        },
+        false
+      );
+
+      const serverConfig = configWithActiveFalse.getConfig('serviceName');
+      expect(serverConfig).toEqual(
+        expect.objectContaining({
+          active: false,
+          contextPropagationOnly: false,
+        })
+      );
+
+      const frontendConfig = configWithActiveFalse.getConfig('kibana-frontend');
+      expect(frontendConfig).toEqual(
+        expect.objectContaining({
+          active: true,
+          contextPropagationOnly: false,
+        })
+      );
+      expect(shouldInstrumentClient(frontendConfig)).toBe(true);
+    });
+
     it('disables kibana-frontend when overridden in elastic.apm.servicesOverrides', () => {
       const configWithYamlOverride = new ApmConfiguration(
         mockedRootDir,

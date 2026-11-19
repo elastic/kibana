@@ -297,7 +297,7 @@ describe('visualizationSmlType', () => {
       });
 
       await visualizationSmlType.toAttachment!(
-        { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
+        { references: [{ uri: 'lens://viz-1', relation: 'derived_from' }] } as never,
         createContext() as never
       );
 
@@ -332,7 +332,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
+        { references: [{ uri: 'lens://viz-1', relation: 'derived_from' }] } as never,
         createContext() as never
       );
 
@@ -366,7 +366,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
+        { references: [{ uri: 'lens://viz-1', relation: 'derived_from' }] } as never,
         createContext() as never
       );
 
@@ -384,7 +384,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
+        { references: [{ uri: 'lens://viz-1', relation: 'derived_from' }] } as never,
         createContext() as never
       );
 
@@ -396,7 +396,7 @@ describe('visualizationSmlType', () => {
 
       await expect(
         visualizationSmlType.toAttachment!(
-          { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
+          { references: [{ uri: 'lens://viz-1', relation: 'derived_from' }] } as never,
           createContext() as never
         )
       ).rejects.toThrow('Connection failed');
@@ -429,7 +429,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { attributes: { origin: { uri: 'lens://viz-1' } } } as never,
+        { references: [{ uri: 'lens://viz-1', relation: 'derived_from' }] } as never,
         createContext() as never
       );
 
@@ -441,6 +441,36 @@ describe('visualizationSmlType', () => {
         layers: [{ id: 'layer1' }],
       });
       expect(data.chart_type).toBe('pie');
+    });
+  });
+
+  describe('searchByTitle', () => {
+    const search = (title: string) =>
+      visualizationSmlType.searchByTitle!({ title, size: 5 }, createContext() as never);
+
+    beforeEach(() => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          { id: 'vis-1', attributes: { title: 'CPU over time' } },
+          { id: 'vis-2', attributes: {} },
+        ],
+      });
+    });
+
+    it('searches the title by prefix and maps the results', async () => {
+      expect(await search('cpu')).toEqual([
+        { originId: 'vis-1', title: 'CPU over time' },
+        { originId: 'vis-2', title: 'vis-2' },
+      ]);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'lens',
+        fields: ['title'],
+        perPage: 5,
+        sort: [{ field: 'updated_at', order: 'desc' }],
+        search: 'cpu*',
+        searchFields: ['title'],
+        defaultSearchOperator: 'AND',
+      });
     });
   });
 });

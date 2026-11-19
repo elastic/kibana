@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/config-schema'
   - '@kbn/zod'
+  - '@kbn/esql-browser'
 tags:
   - plugin
   - prod
@@ -64,6 +65,4 @@ fileGroups:
     - server/**/*
     - public/react_embeddable_system/embeddable_renderer_context.tsx
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -58,7 +58,11 @@ export const buildExecutionModels = (frameworks: readonly TestFramework[]): Exec
     const reporterFilter = `reporter.type IN (${inList(outcomeFrameworks)})`;
     models.push({
       frameworks: outcomeFrameworks,
-      runFilter: `(event.action == "test-outcome" AND ${reporterFilter})`,
+      // An outcome with no attempt never ran (https://github.com/elastic/kibana/pull/295058).
+      // `test.attempts` is mapped as `long` in indices created before the `test` component
+      // template reached the cluster and as `short` since; ES|QL rejects a field with mixed types
+      // unless a conversion function picks one, so cast rather than read the field directly.
+      runFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND TO_LONG(test.attempts) > 0)`,
       executionFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND test.outcome IN ("expected", "unexpected", "flaky"))`,
       failureFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND test.outcome IN ("unexpected", "flaky"))`,
       failedExpression: 'CASE(test.outcome IN ("unexpected", "flaky"), 1, 0)',

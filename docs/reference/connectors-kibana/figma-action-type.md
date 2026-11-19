@@ -13,6 +13,8 @@ applies_to:
 
 The Figma connector communicates with the [Figma REST API](https://developers.figma.com/docs/rest-api/) to browse design files, inspect document structure, render nodes as images, and explore team projects. It can be used with Agent Builder and Workflows.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-figma-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

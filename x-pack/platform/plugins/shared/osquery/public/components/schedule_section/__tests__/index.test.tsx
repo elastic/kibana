@@ -265,5 +265,33 @@ describe('ScheduleSection', () => {
       fireEvent.click(screen.getByTestId('osquery-schedule-type-interval'));
       expect(onChange).not.toHaveBeenCalled();
     });
+
+    // The selector presents the locked mode, so the field set under it has to
+    // present the same mode. Showing the interval input beneath a checked
+    // "Date & time" card described two different schedules at once
+    // (elastic/kibana#272441).
+    it('renders the locked mode field set when the value mode disagrees', () => {
+      renderFlagOn(
+        <ScheduleSection value={intervalState()} onChange={jest.fn()} lockedScheduleType="rrule" />
+      );
+
+      expect(screen.getByLabelText('Date & time')).toBeChecked();
+      expect(screen.getByTestId('osquery-schedule-start-date')).toBeInTheDocument();
+      expect(screen.queryByTestId('osquery-schedule-interval')).not.toBeInTheDocument();
+    });
+
+    it('renders the locked interval field set when the value is in recurrence mode', () => {
+      renderFlagOn(
+        <ScheduleSection
+          value={recurrenceState()}
+          onChange={jest.fn()}
+          lockedScheduleType="interval"
+        />
+      );
+
+      expect(screen.getByLabelText('Interval')).toBeChecked();
+      expect(screen.getByTestId('osquery-schedule-interval')).toBeInTheDocument();
+      expect(screen.queryByTestId('osquery-schedule-start-date')).not.toBeInTheDocument();
+    });
   });
 });

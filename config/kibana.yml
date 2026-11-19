@@ -159,7 +159,7 @@
 #ops.interval: 5000
 
 # Specifies the available locales in the user profile settings.
-#i18n.locales: ["en", "fr-FR", "ja-JP", "zh-CN", "de-DE"]
+#i18n.locales: ["en", "fr-FR", "ja-JP", "zh-CN", "de-DE", "pt-BR"]
 
 # Specifies the default locale to be used for all localizable strings, dates and number formats.
 # User profile settings allow users to customize their display language. This setting determines the default locale when no user settings are specified.

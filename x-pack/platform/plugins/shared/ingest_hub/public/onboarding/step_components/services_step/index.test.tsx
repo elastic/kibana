@@ -18,9 +18,9 @@ jest.mock('./use_services_step', () => ({
   useServicesStep: jest.fn(),
 }));
 
-jest.mock('./data_format_select', () => ({
-  DataFormatSelect: ({ disabled }: { disabled: boolean }) => (
-    <div data-test-subj="mock-data-format-select" data-disabled={String(disabled)} />
+jest.mock('./data_schema_section', () => ({
+  DataSchemaSection: ({ disabled }: { disabled: boolean }) => (
+    <div data-test-subj="mock-data-schema-section" data-disabled={String(disabled)} />
   ),
 }));
 
@@ -41,21 +41,19 @@ function makeServicesStepReturn(): ReturnType<typeof useServicesStep> {
     searchQuery: '',
     setSearchQuery: jest.fn(),
     filteredServices: [],
-    categories: [],
-    activeCategory: 'analytics',
-    setSelectedCategory: jest.fn(),
-    servicesInCategory: [],
-    duplicateNamesInCategory: new Set(),
+    duplicateNames: new Set(),
     selectedSet: new Set(),
-    categoryStats: new Map(),
     isReady: true,
     handleToggle: jest.fn(),
-    allInCategorySelected: false,
-    handleSelectAllInCategory: jest.fn(),
-    handleDeselectAllInCategory: jest.fn(),
+    allVisibleSelected: false,
+    handleSelectAllVisible: jest.fn(),
+    handleDeselectAllVisible: jest.fn(),
     handleNext: jest.fn(),
     dataFormat: 'ecs',
     setDataFormat: jest.fn(),
+    agentBasedOnlySelected: [],
+    ecfOnlySelected: [],
+    isUnavailableForMethod: () => false,
   };
 }
 
@@ -69,31 +67,61 @@ function renderStep(initialEntries = ['/']) {
   );
 }
 
+describe('ServicesStep — agentBasedOnlyCallout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseOnboardingFlow.mockReturnValue({
+      detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+    });
+  });
+
+  it('does not render the callout when agentBasedOnlySelected is empty', () => {
+    mockUseServicesStep.mockReturnValue(makeServicesStepReturn());
+    renderStep(['/']);
+    expect(screen.queryByTestId('servicesStep-agentBasedOnlyCallout')).toBeNull();
+  });
+
+  it('renders the callout with service names when agentBasedOnlySelected is non-empty', () => {
+    mockUseServicesStep.mockReturnValue({
+      ...makeServicesStepReturn(),
+      agentBasedOnlySelected: [
+        { id: 'aws_securityhub', name: 'Security Hub' },
+        { id: 'amazon_security_lake', name: 'Amazon Security Lake' },
+      ] as any,
+    });
+    renderStep(['/']);
+    const callout = screen.getByTestId('servicesStep-agentBasedOnlyCallout');
+    expect(callout).toBeTruthy();
+    expect(callout.textContent).toContain('Security Hub');
+    expect(callout.textContent).toContain('Amazon Security Lake');
+  });
+});
+
 describe('ServicesStep — isFormatDisabled', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseServicesStep.mockReturnValue(makeServicesStepReturn());
   });
 
-  it('DataFormatSelect is enabled when no deploymentId param and no deploy state', () => {
+  it('DataSchemaSection is enabled when no deploymentId param and no deploy state', () => {
     mockUseOnboardingFlow.mockReturnValue({
       detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
     });
     renderStep(['/']);
-    const el = screen.getByTestId('mock-data-format-select');
+    const el = screen.getByTestId('mock-data-schema-section');
     expect(el.getAttribute('data-disabled')).toBe('false');
   });
 
-  it('DataFormatSelect is disabled when ?deploymentId= is in URL', () => {
+  it('DataSchemaSection is disabled when ?deploymentId= is in URL', () => {
     mockUseOnboardingFlow.mockReturnValue({
       detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
     });
     renderStep(['/?deploymentId=dep-123']);
-    const el = screen.getByTestId('mock-data-format-select');
+    const el = screen.getByTestId('mock-data-schema-section');
     expect(el.getAttribute('data-disabled')).toBe('true');
   });
 
-  it('DataFormatSelect is disabled when serviceStatuses has entries (deploy started, SO may have failed)', () => {
+  it('DataSchemaSection is disabled when serviceStatuses has entries (deploy started, SO may have failed)', () => {
     mockUseOnboardingFlow.mockReturnValue({
       detectAndReviewStep: {
         serviceStatuses: { ec2: 'instantiating' },
@@ -101,11 +129,11 @@ describe('ServicesStep — isFormatDisabled', () => {
       },
     });
     renderStep(['/']);
-    const el = screen.getByTestId('mock-data-format-select');
+    const el = screen.getByTestId('mock-data-schema-section');
     expect(el.getAttribute('data-disabled')).toBe('true');
   });
 
-  it('DataFormatSelect is disabled when policyIdsByInstance has entries', () => {
+  it('DataSchemaSection is disabled when policyIdsByInstance has entries', () => {
     mockUseOnboardingFlow.mockReturnValue({
       detectAndReviewStep: {
         serviceStatuses: {},
@@ -113,7 +141,7 @@ describe('ServicesStep — isFormatDisabled', () => {
       },
     });
     renderStep(['/']);
-    const el = screen.getByTestId('mock-data-format-select');
+    const el = screen.getByTestId('mock-data-schema-section');
     expect(el.getAttribute('data-disabled')).toBe('true');
   });
 });

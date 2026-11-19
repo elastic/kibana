@@ -12,8 +12,9 @@ import type { MetricVisualizationState, TermsIndexPatternColumn } from '@kbn/len
 
 import { validator } from '../utils/validator';
 import { DEFAULT_LAYER_ID } from '../../constants';
-import type { MetricConfig } from '../../schema/charts/metric';
+import { metricConfigSchema, type MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
+import { getPalettes } from '@kbn/palettes';
 import { LensConfigBuilder } from '../../config_builder';
 import {
   simpleMetricAttributes,
@@ -163,6 +164,43 @@ describe('Metric', () => {
         trendlineLayer?.columns.find(({ columnId }) => columnId === trendlineTimeAccessor)
           ?.fieldName
       ).toBe('custom_time_bucket');
+    });
+
+    it('derives the trendline from the FORK branch producing the metric column', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const query =
+        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | FORK (STATS `Total Flights` = COUNT(*)) (STATS `Flight Count` = COUNT(*) BY `Time Bucket` = BUCKET(timestamp, 75, ?_tstart, ?_tend))';
+      const lensState = builder.fromAPIFormat({
+        type: 'metric',
+        title: 'FORK metric with trendline',
+        data_source: { type: 'esql', query },
+        ignore_global_filters: false,
+        sampling: 1,
+        metrics: [
+          {
+            type: 'primary',
+            column: 'Total Flights',
+            background_chart: { type: 'trend' },
+          },
+        ],
+      } satisfies MetricConfig);
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+      const trendlineLayerId = visualization.trendlineLayerId;
+      const trendlineTimeAccessor = visualization.trendlineTimeAccessor;
+
+      if (!trendlineLayerId || !trendlineTimeAccessor) {
+        throw new Error('Expected trendline accessors in metric visualization state');
+      }
+
+      const trendlineLayer = lensState.state.datasourceStates.textBased?.layers[trendlineLayerId];
+      expect(trendlineLayer?.query?.esql).toBe(
+        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | STATS `Total Flights` = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      );
+      expect(trendlineLayer?.query?.esql).not.toContain('FORK');
+      expect(
+        trendlineLayer?.columns.find(({ columnId }) => columnId === trendlineTimeAccessor)
+          ?.fieldName
+      ).toBe('BUCKET(timestamp, 75, ?_tstart, ?_tend)');
     });
   });
 
@@ -349,8 +387,8 @@ describe('Metric', () => {
       expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
     });
 
-    it.each(['before', 'after'] as const)(
-      'should place a visible name %s the value',
+    it.each(['before', 'after', 'tooltip'] as const)(
+      'should round-trip a visible name with %s placement',
       (placement) => {
         const { visualization, apiOutput } = convert(
           getConfigWithSecondaryLabel({ visible: true, placement })
@@ -365,6 +403,24 @@ describe('Metric', () => {
       const { visualization } = convert(getConfigWithSecondaryLabel({ visible: true }));
 
       expect(visualization.secondaryNameVisibility).toBe('before');
+    });
+
+    it('should keep the default placement of a visible name after schema parse', () => {
+      const { apiOutput } = convert(getConfigWithSecondaryLabel({ visible: true }));
+      const parsed = metricConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+      expect(parsed.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+    });
+
+    it('should not add a placement after schema parse when the name is hidden', () => {
+      const { apiOutput } = convert(
+        getConfigWithSecondaryLabel({ visible: false, placement: 'after' })
+      );
+      const parsed = metricConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+      expect(parsed.styling?.secondary?.label).toEqual({ visible: false });
     });
   });
 
@@ -411,6 +467,53 @@ describe('Metric', () => {
       const secondary = api.metrics.find((metric) => metric.type === 'secondary');
 
       expect(secondary?.label).toBe('Custom Name');
+    });
+  });
+
+  describe('hidden bar', () => {
+    const getBackgroundChart = (config: MetricConfig) => {
+      const [primaryMetric] = config.metrics;
+      return 'background_chart' in primaryMetric ? primaryMetric.background_chart : undefined;
+    };
+
+    it('(SO -> API) keeps the bar and its max when showBar is set', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = true;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toMatchObject({ type: 'bar' });
+    });
+
+    it('(SO -> API) drops the bar when the max is set but showBar is false', () => {
+      // The editor's supporting visualization None/Trend keeps the max and sets showBar to false
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = false;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toBeUndefined();
+    });
+
+    it('(SO -> API) drops the bar when showBar is missing, like the runtime', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      delete (attributes.state.visualization as MetricVisualizationState).showBar;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toBeUndefined();
+    });
+
+    it('(SO -> API -> SO) does not show a bar for a hidden one', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = false;
+
+      const builder = new LensConfigBuilder();
+      const so = builder.fromAPIFormat(builder.toAPIFormat(attributes));
+      const viz = so.state.visualization as MetricVisualizationState;
+
+      expect(viz.showBar).toBe(false);
+      expect(viz.maxAccessor).toBeUndefined();
     });
   });
 
@@ -464,6 +567,51 @@ describe('Metric', () => {
 
       expect(viz.palette?.params?.rangeType).toBe('percent');
       expect(apiOutput.metrics[0].color).toEqual(config.metrics[0].color);
+    });
+
+    it('(SO -> API) turns a single-value custom percent palette into the static color at 50%', () => {
+      const attributes = structuredClone(defaultColorByValueAttributes);
+      const viz = attributes.state.visualization as MetricVisualizationState;
+      viz.palette = {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          name: 'custom',
+          reverse: false,
+          rangeType: 'percent',
+          rangeMin: 0,
+          continuity: 'above',
+          stops: [
+            { color: '#f6726a', stop: 50 },
+            { color: '#24c292', stop: 100 },
+          ],
+          colorStops: [
+            { color: '#f6726a', stop: 0 },
+            { color: '#24c292', stop: 50 },
+          ],
+        },
+      };
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual({ type: 'static', color: '#24c292' });
+    });
+
+    it('(SO -> API) turns a single-value named percent palette into the static color at 50%', () => {
+      const attributes = structuredClone(defaultColorByValueAttributes);
+      const viz = attributes.state.visualization as MetricVisualizationState;
+      viz.palette = {
+        type: 'palette',
+        name: 'status',
+        params: { name: 'status', rangeType: 'percent', steps: 3, continuity: 'all' },
+      };
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual({
+        type: 'static',
+        color: getPalettes(false).get('status').colors(3)[1],
+      });
     });
 
     it('(SO -> API -> SO) keeps the numeric range of a single-value named palette ', () => {

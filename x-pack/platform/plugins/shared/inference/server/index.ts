@@ -13,13 +13,14 @@ import type {
 import type { InferenceConfig } from './config';
 import { configSchema } from './config';
 import type {
+  InferenceServerClient,
   InferenceServerSetup,
   InferenceServerStart,
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
 
-export type { InferenceServerSetup, InferenceServerStart };
+export type { InferenceServerClient, InferenceServerSetup, InferenceServerStart };
 export type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 export {

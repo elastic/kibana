@@ -393,6 +393,7 @@ const MapFromJSONTemplate = () => {
       <EuiFlexItem grow={false}>
         <EuiForm isInvalid={error !== undefined} error={error}>
           <EuiFilePicker
+            aria-label="Upload a JSON file"
             display="large"
             fullWidth
             initialPromptText="Upload a JSON file"

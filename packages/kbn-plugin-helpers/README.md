@@ -10,8 +10,8 @@ is already the case if you use the new `node scripts/generate_plugin` script.
 ```json
 {
   "scripts" : {
-    "build": "yarn plugin-helpers build",
-    "dev": "yarn plugin-helpers dev",
+    "build": "pnpm plugin-helpers build",
+    "dev": "pnpm plugin-helpers dev",
     "plugin-helpers": "node ../../scripts/plugin_helpers",
     "kbn": "node ../../scripts/kbn"
   }
@@ -21,7 +21,7 @@ is already the case if you use the new `node scripts/generate_plugin` script.
 This will make it easier to execute the `plugin-helpers` script from within your plugin repository.
 
 ```sh
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ yarn kbn bootstrap
 This simple CLI has a build task that plugin devs can run from to easily package Kibana plugins.
 
 Previously you could also use that tool to start and test your plugin. Currently you can run 
-your plugin along with Kibana running `yarn start` in the Kibana repository root folder. Finally to test 
+your plugin along with Kibana running `pnpm start` in the Kibana repository root folder. Finally to test 
 your plugin you should now configure and use your own tools.
 
 ```sh

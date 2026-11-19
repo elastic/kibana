@@ -42,6 +42,8 @@ export interface GraphEdge {
   actorEntityName?: string | string[] | null;
   actorHostIps?: string[] | string;
   actorsDocData?: Array<string | null> | string;
+  actorRiskScore?: RiskScoreRange;
+  actorAssetCriticality?: AssetCriticalityCount[];
   // Target attributes (shared)
   targetNodeId: string | null;
   targetIdsCount: number;
@@ -50,6 +52,22 @@ export interface GraphEdge {
   targetEntityName?: string | string[] | null;
   targetHostIps?: string[] | string;
   targetsDocData?: Array<string | null> | string;
+  targetRiskScore?: RiskScoreRange;
+  targetAssetCriticality?: AssetCriticalityCount[];
+}
+
+/** Risk score spread across the entities a node represents; min === max for a single entity. */
+export interface RiskScoreRange {
+  min: number;
+  max: number;
+}
+
+/** One asset criticality level and how many of a node's entities carry it. */
+export interface AssetCriticalityCount {
+  /** Raw entity-store level, e.g. "extreme_impact". The consumer resolves the display label. */
+  level: string;
+  /** Number of the node's entities at this level. */
+  count: number;
 }
 
 /**
@@ -69,12 +87,12 @@ export interface EventEdge extends GraphEdge {
   sourceIps?: string[] | string;
   sourceCountryCodes?: string[] | string;
   /**
-   * Unique identifier for the label node based on document IDs.
-   * This ensures that label nodes are deduplicated by documents, not by actor-target pairs.
+   * Unique identifier for the event node based on document IDs.
+   * This ensures that event nodes are deduplicated by documents, not by actor-target pairs.
    * When a single document expands via MV_EXPAND into multiple rows with different entity types,
-   * they should share the same label node because they originate from the same document(s).
+   * they should share the same event node because they originate from the same document(s).
    */
-  labelNodeId: string;
+  eventNodeId: string;
   pinned?: string | null;
 }
 
@@ -106,7 +124,7 @@ export interface EventEsqlRow {
    * Per-target → source-document mapping, one entry per (target, doc) pair, encoded as
    * "<targetEntityId>\n<_id>". Lets regroupEvents attribute each target to the document(s)
    * that referenced it after the STATS pre-aggregation drops targetEntityId from the group key,
-   * so label nodes stay split by document just as they would be if grouping by targetEntityId.
+   * so event nodes stay split by document just as they would be if grouping by targetEntityId.
    */
   targetDocMap: string | string[];
 }
@@ -162,6 +180,13 @@ export interface EntityRecord {
   type: string;
   sub_type: string;
   docData: string;
+  /**
+   * Risk score / asset criticality, KEEP-ed as columns by the entities ES|QL query (which
+   * also serializes them into `docData`). Kept separately because the node-level riskScore
+   * range and assetCriticality distribution are computed here in TypeScript.
+   */
+  riskScore?: number | null;
+  assetCriticality?: string | null;
 }
 
 /**

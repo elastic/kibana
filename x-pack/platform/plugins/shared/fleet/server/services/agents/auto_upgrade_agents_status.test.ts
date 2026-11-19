@@ -43,12 +43,12 @@ describe('getAutoUpgradeAgentsStatus', () => {
 
     expect(agentClient.listAgents).toHaveBeenCalledWith(
       expect.objectContaining({
-        kuery: `(status:online or status:offline or status:enrolling or status:updating or status:degraded or status:error or status:orphaned) AND fleet-agents.policy_id:\"test-policy-id\"`,
+        kuery: `(status:online or status:offline or status:enrolling or status:updating or status:degraded or status:error or status:orphaned) AND (fleet-agents.policy_base_id:\"test-policy-id\" or (fleet-agents.policy_id:\"test-policy-id\" and not fleet-agents.policy_base_id:*))`,
       })
     );
     expect(agentClient.listAgents).toHaveBeenCalledWith(
       expect.objectContaining({
-        kuery: `(status:online or status:offline or status:enrolling or status:updating or status:degraded or status:error or status:orphaned) AND fleet-agents.policy_id:\"test-policy-id\" AND fleet-agents.upgrade_details.state:\"UPG_FAILED\"`,
+        kuery: `(status:online or status:offline or status:enrolling or status:updating or status:degraded or status:error or status:orphaned) AND (fleet-agents.policy_base_id:\"test-policy-id\" or (fleet-agents.policy_id:\"test-policy-id\" and not fleet-agents.policy_base_id:*)) AND fleet-agents.upgrade_details.state:\"UPG_FAILED\"`,
       })
     );
   });

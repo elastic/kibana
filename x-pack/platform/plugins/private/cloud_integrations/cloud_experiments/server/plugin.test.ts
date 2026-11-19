@@ -132,7 +132,12 @@ describe('Cloud Experiments server plugin', () => {
         cloud: cloudMock.createSetup(),
         usageCollection: usageCollectionPluginMock.createSetupContract(),
       });
-      expect(plugin.start(coreMock.createStart())).toBeUndefined();
+      const coreStart = coreMock.createStart();
+      expect(plugin.start(coreStart)).toBeUndefined();
+      expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+        'cloudExperiments.rolloutEvaluationProbe',
+        false
+      );
     });
 
     test('triggers a userMetadataUpdate for `hasData`', async () => {
@@ -185,6 +190,19 @@ describe('Cloud Experiments server plugin', () => {
       const metadataServiceStopSpy = jest.spyOn(plugin['metadataService'], 'stop');
       plugin.stop();
       expect(metadataServiceStopSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('stops rollout evaluation probe subscriptions', () => {
+      const unsubscribe = jest.fn();
+      const coreStart = coreMock.createStart();
+      coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue({
+        subscribe: jest.fn().mockReturnValue({ unsubscribe }),
+      });
+
+      plugin.start(coreStart);
+      plugin.stop();
+
+      expect(unsubscribe).toHaveBeenCalledTimes(1);
     });
   });
 });

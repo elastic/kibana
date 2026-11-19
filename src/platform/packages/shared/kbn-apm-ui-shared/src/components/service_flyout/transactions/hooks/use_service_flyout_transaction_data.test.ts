@@ -296,6 +296,8 @@ describe('useServiceFlyoutTransactionData', () => {
       expect(mainCallsAfter).toBe(mainCallsBefore);
       expect(result.current.items).toHaveLength(1);
       expect(result.current.items[0].name).toBe('POST /api/checkout');
+      expect(result.current.presenceItems).toHaveLength(2);
+      expect(result.current.isServerSearch).toBe(false);
     });
 
     it('re-fetches server-side when searchQuery changes and maxCountExceeded is true', async () => {
@@ -316,6 +318,118 @@ describe('useServiceFlyoutTransactionData', () => {
       rerender({ searchQuery: 'checkout' });
 
       await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+    });
+
+    it('treats an unsearched maxCountExceeded result as unable to prove absence while search is active', async () => {
+      let resolveServerSearch: (value: object) => void;
+      const serverSearchPromise = new Promise<object>((resolve) => {
+        resolveServerSearch = resolve;
+      });
+      let mainCall = 0;
+
+      const http = {
+        get: jest.fn().mockImplementation((url: string) => {
+          if (url.includes('detailed_statistics')) {
+            return Promise.resolve(EMPTY_DETAILED_RESPONSE);
+          }
+          mainCall += 1;
+          if (mainCall === 1) {
+            // Truncated top groups without the searched transaction — a follow-up
+            // server search will run once maxCountExceeded flips.
+            return Promise.resolve({
+              transactionGroups: [TRANSACTION_GROUPS[1]],
+              maxCountExceeded: true,
+              hasActiveAlerts: false,
+            });
+          }
+          return serverSearchPromise;
+        }),
+      } as unknown as HttpStart;
+
+      const { result } = renderHook(
+        ({ searchQuery }: { searchQuery: string }) =>
+          useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, searchQuery }),
+        { initialProps: { searchQuery: 'orders' } }
+      );
+
+      await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
+      // Intermediate unsearched response must not look conclusive while search is active.
+      expect(result.current.isServerSearch).toBe(true);
+      expect(result.current.presenceItems.map((item) => item.name)).toEqual(['POST /api/checkout']);
+
+      resolveServerSearch!({
+        transactionGroups: [TRANSACTION_GROUPS[0]],
+        maxCountExceeded: true,
+        hasActiveAlerts: false,
+      });
+
+      await waitFor(() =>
+        expect(result.current.items.map((item) => item.name)).toEqual(['GET /api/orders'])
+      );
+      expect(result.current.isServerSearch).toBe(true);
+    });
+
+    it('keeps isServerSearch true for the retained result while clearing search reloads', async () => {
+      let resolveUnsearchedMain: (value: object) => void;
+      const unsearchedMainPromise = new Promise<object>((resolve) => {
+        resolveUnsearchedMain = resolve;
+      });
+      let mainCall = 0;
+
+      const http = {
+        get: jest.fn().mockImplementation((url: string) => {
+          if (url.includes('detailed_statistics')) {
+            return Promise.resolve(EMPTY_DETAILED_RESPONSE);
+          }
+          mainCall += 1;
+          if (mainCall === 1) {
+            return Promise.resolve({
+              transactionGroups: TRANSACTION_GROUPS,
+              maxCountExceeded: true,
+              hasActiveAlerts: false,
+            });
+          }
+          if (mainCall === 2) {
+            return Promise.resolve({
+              transactionGroups: [TRANSACTION_GROUPS[0]],
+              maxCountExceeded: true,
+              hasActiveAlerts: false,
+            });
+          }
+          return unsearchedMainPromise;
+        }),
+      } as unknown as HttpStart;
+
+      const { result, rerender } = renderHook(
+        ({ searchQuery }: { searchQuery: string }) =>
+          useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, searchQuery }),
+        { initialProps: { searchQuery: '' } }
+      );
+
+      await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
+      expect(result.current.isServerSearch).toBe(false);
+
+      rerender({ searchQuery: 'orders' });
+      await waitFor(() => expect(result.current.isServerSearch).toBe(true));
+      expect(result.current.items).toHaveLength(1);
+
+      // Clear search — retained narrowed rows must stay marked as server-search until the
+      // unsearched request settles (otherwise the host can falsely freeze on them).
+      rerender({ searchQuery: '' });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(true));
+      expect(result.current.isServerSearch).toBe(true);
+      expect(result.current.items).toHaveLength(1);
+
+      resolveUnsearchedMain!({
+        transactionGroups: TRANSACTION_GROUPS,
+        maxCountExceeded: true,
+        hasActiveAlerts: false,
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.isServerSearch).toBe(false);
+      expect(result.current.items).toHaveLength(2);
     });
 
     it('resets maxCountExceeded when serviceName changes', async () => {
@@ -729,6 +843,26 @@ describe('useServiceFlyoutTransactionData', () => {
       );
 
       await waitFor(() => expect(result.current.error).toBe(fetchError));
+    });
+
+    it('exposes a main statistics failure separately from a successful settle', async () => {
+      const fetchError = new Error('main stats failed');
+      const http = {
+        get: jest.fn().mockImplementation((url: string) => {
+          if (url.includes('main_statistics')) {
+            return Promise.reject(fetchError);
+          }
+          return Promise.resolve(EMPTY_DETAILED_RESPONSE);
+        }),
+      } as unknown as HttpStart;
+
+      const { result } = renderHook(() =>
+        useServiceFlyoutTransactionData({ http, ...BASE_PARAMS })
+      );
+
+      await waitFor(() => expect(result.current.mainError).toBe(fetchError));
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeUndefined();
     });
 
     it('fires a danger toast when the data source fetch fails', async () => {

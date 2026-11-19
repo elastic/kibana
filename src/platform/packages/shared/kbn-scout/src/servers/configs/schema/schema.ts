@@ -108,6 +108,7 @@ export const schema = Joi.object()
         resources: Joi.array().items(Joi.string()).default([]),
         uiam: Joi.boolean().default(false),
         uiamOAuth: Joi.boolean().default(false),
+        uiamEphemeralTokenExpiration: Joi.string(),
         cps: Joi.boolean().default(false),
       })
       .default(),

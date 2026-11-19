@@ -89,6 +89,75 @@ describe('SearchBarComponent', () => {
     (useKibana as jest.Mock).mockReturnValue(useKibanaMock);
   });
 
+  it('passes dashboard data views to the filter bar with the page data view', () => {
+    const panelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const store = createMockStore();
+
+    render(
+      <TestProviders store={store}>
+        <SearchBarComponent {...props} additionalSources={[panelDataView]} />
+      </TestProviders>
+    );
+
+    expect(useKibanaMock.services.unifiedSearch.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: [dataView, panelDataView],
+      }),
+      expect.anything()
+    );
+  });
+
+  it('deduplicates dashboard data views that repeat the page data view or each other', () => {
+    const pageDataView = createStubDataView({
+      spec: { id: 'page-data-view', title: 'security-solution-*' },
+    });
+    const duplicatePageDataView = createStubDataView({
+      spec: { id: 'page-data-view', title: 'security-solution-*' },
+    });
+    const panelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const repeatedPanelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const store = createMockStore();
+
+    render(
+      <TestProviders store={store}>
+        <SearchBarComponent
+          {...props}
+          dataView={pageDataView}
+          additionalSources={[duplicatePageDataView, panelDataView, repeatedPanelDataView]}
+        />
+      </TestProviders>
+    );
+
+    expect(useKibanaMock.services.unifiedSearch.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: [pageDataView, panelDataView],
+      }),
+      expect.anything()
+    );
+  });
+
+  it('forwards the query input append to the search bar', () => {
+    const renderQueryInputAppend = jest.fn(() => null);
+    const store = createMockStore();
+
+    render(
+      <TestProviders store={store}>
+        <SearchBarComponent {...props} renderQueryInputAppend={renderQueryInputAppend} />
+      </TestProviders>
+    );
+
+    expect(useKibanaMock.services.unifiedSearch.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({ renderQueryInputAppend }),
+      expect.anything()
+    );
+  });
+
   it('calls useUpdateUrlParam for filter and query', () => {
     const query = { query: 'testQuery', language: 'kuery' };
     const filters = [

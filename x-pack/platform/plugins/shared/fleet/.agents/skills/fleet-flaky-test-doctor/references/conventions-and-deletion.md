@@ -56,7 +56,7 @@ Spins up its own real ES + Kibana. No Docker, no FTR config. Slower than jest un
 
 **Location:** `x-pack/platform/plugins/shared/fleet/{public,common,server}/**/*.test.{ts,tsx}` (excluding `server/integration_tests/`)
 
-**Run:** `yarn jest <path>` or `yarn jest --testNamePattern="<name>"`
+**Run:** `pnpm exec jest <path>` or `pnpm exec jest --testNamePattern="<name>"`
 
 **Conventions:**
 - All external dependencies (ES client, SO client, HTTP requests) must be mocked.
@@ -159,7 +159,7 @@ done
 
 # Jest unit
 for i in {1..10}; do
-  yarn jest <path> && echo "PASS $i" || { echo "FAIL $i"; break; }
+  pnpm exec jest <path> && echo "PASS $i" || { echo "FAIL $i"; break; }
 done
 ```
 

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { RasterTileSource } from 'maplibre-gl';
 import { AbstractSource } from '../source';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
-// @ts-ignore
 import { WmsClient } from './wms_client';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import type { IRasterSource, RasterTileSourceData } from '../raster_source';

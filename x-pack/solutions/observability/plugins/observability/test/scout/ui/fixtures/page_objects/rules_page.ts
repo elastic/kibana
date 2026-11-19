@@ -39,7 +39,7 @@ export class RulesPage {
     return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB);
   }
 
-  // Rules Settings Flyout methods
+  // Rules Settings Page methods
   /**
    * Gets the settings link button locator
    */
@@ -48,54 +48,52 @@ export class RulesPage {
   }
 
   /**
-   * Gets the rules settings flyout locator
+   * Gets the rules settings page locator
    */
-  public get settingsFlyout() {
-    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULES_SETTINGS_FLYOUT);
+  public get settingsPage() {
+    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULES_SETTINGS_PAGE);
   }
 
   /**
-   * Gets the flyout cancel button locator
+   * Gets the settings page cancel button locator
    */
-  public get settingsFlyoutCancelButton() {
+  public get settingsPageCancelButton() {
     return this.page.testSubj.locator(
-      RULES_SETTINGS_TEST_SUBJECTS.RULES_SETTINGS_FLYOUT_CANCEL_BUTTON
+      RULES_SETTINGS_TEST_SUBJECTS.RULES_SETTINGS_PAGE_CANCEL_BUTTON
     );
   }
 
   /**
-   * Gets the flyout save button locator
+   * Gets the settings page save button locator
    */
-  public get settingsFlyoutSaveButton() {
-    return this.page.testSubj.locator(
-      RULES_SETTINGS_TEST_SUBJECTS.RULES_SETTINGS_FLYOUT_SAVE_BUTTON
-    );
+  public get settingsPageSaveButton() {
+    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULES_SETTINGS_PAGE_SAVE_BUTTON);
   }
 
   /**
-   * Clicks the settings link to open the flyout
+   * Clicks the settings link to open the settings sub-page
    */
-  async openSettingsFlyout() {
+  async openSettingsPage() {
     await expect(this.settingsLink).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.settingsLink.click();
-    await expect(this.settingsFlyout).toBeVisible();
+    await expect(this.settingsPage).toBeVisible();
   }
 
   /**
-   * Verifies the settings flyout is visible with expected elements
+   * Verifies the settings page is visible with expected elements
    */
-  async expectSettingsFlyoutVisible() {
-    await expect(this.settingsFlyout).toBeVisible();
-    await expect(this.settingsFlyoutCancelButton).toBeVisible();
-    await expect(this.settingsFlyoutSaveButton).toBeVisible();
+  async expectSettingsPageVisible() {
+    await expect(this.settingsPage).toBeVisible();
+    await expect(this.settingsPageCancelButton).toBeVisible();
+    await expect(this.settingsPageSaveButton).toBeVisible();
   }
 
   /**
-   * Closes the settings flyout by clicking the cancel button
+   * Leaves the settings page by clicking the cancel button
    */
-  async closeSettingsFlyout() {
-    await this.settingsFlyoutCancelButton.click();
-    await expect(this.settingsFlyout).toBeHidden();
+  async cancelSettingsPage() {
+    await this.settingsPageCancelButton.click();
+    await expect(this.settingsPage).toBeHidden();
   }
 
   // Rule Type Modal methods
@@ -299,14 +297,14 @@ export class RulesPage {
   }
 
   /**
-   * Gets the flyout cancel button locator
+   * Gets the settings page cancel button locator
    */
   public get editRuleFlyoutCancelButton() {
     return this.page.getByRole('button', { name: 'Cancel' });
   }
 
   /**
-   * Gets the flyout save button locator
+   * Gets the settings page save button locator
    */
   public get editRuleFlyoutSaveButton() {
     return this.page.getByRole('button', { name: 'Save changes' });

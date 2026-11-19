@@ -24,7 +24,13 @@ export class EngineDescriptorClient {
   constructor(
     private readonly soClient: SavedObjectsClientContract,
     private readonly namespace: string,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    /**
+     * Set to true when backed by an internal repository (createInternalRepository).
+     * Internal repos have no implicit space context so namespace must be passed explicitly on
+     * writes. Scoped clients derive namespace from the space extension and reject explicit overrides.
+     */
+    private readonly internalRepository: boolean = false
   ) {}
 
   async getAll(): Promise<EngineDescriptor[]> {
@@ -57,7 +63,7 @@ export class EngineDescriptorClient {
       );
     }
 
-    const id = this.getSavedObjectId(entityType);
+    const id = this.getLocalSavedObjectId(entityType);
     this.logger.debug(`Creating engine descriptor with id ${id}`);
 
     const logExtractionState = EngineLogExtractionState.parse({});
@@ -84,7 +90,7 @@ export class EngineDescriptorClient {
   ): Promise<Partial<EngineDescriptor>> {
     await this.findOrThrow(entityType);
 
-    const id = this.getSavedObjectId(entityType);
+    const id = this.getLocalSavedObjectId(entityType);
     const { attributes } = await this.soClient.update<EngineDescriptor>(
       EngineDescriptorTypeName,
       id,
@@ -92,6 +98,7 @@ export class EngineDescriptorClient {
       {
         refresh: 'wait_for',
         mergeAttributes,
+        ...(this.internalRepository ? { namespace: this.namespace } : {}),
       }
     );
 
@@ -101,13 +108,17 @@ export class EngineDescriptorClient {
   async delete(entityType: EntityType) {
     await this.findOrThrow(entityType);
 
-    const id = this.getSavedObjectId(entityType);
+    const id = this.getLocalSavedObjectId(entityType);
     this.logger.debug(`Deleting engine descriptor with id ${id}`);
     await this.soClient.delete(EngineDescriptorTypeName, id);
   }
 
-  private getSavedObjectId(entityType: EntityType): string {
-    return `${EngineDescriptorTypeName}-${entityType}-${this.namespace}`;
+  static getSavedObjectId(entityType: EntityType, namespace: string): string {
+    return `${EngineDescriptorTypeName}-${entityType}-${namespace}`;
+  }
+
+  private getLocalSavedObjectId(entityType: EntityType): string {
+    return EngineDescriptorClient.getSavedObjectId(entityType, this.namespace);
   }
 
   private find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {

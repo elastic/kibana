@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { fetch as undiciFetch, Agent } from 'undici';
 
 import {
@@ -75,7 +76,7 @@ const jsonResponse = (status: number, body: unknown) =>
 
 function mockFeatureFlag(enabled = true) {
   jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({
-    getBooleanValue: jest.fn().mockResolvedValue(enabled),
+    getBooleanValue$: jest.fn().mockReturnValue(of(enabled)),
   } as any);
 }
 

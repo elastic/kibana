@@ -29,7 +29,7 @@ jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useTrackPageview: jest.fn(),
 }));
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: () => ({ onPageReady: jest.fn() }),
 }));
 

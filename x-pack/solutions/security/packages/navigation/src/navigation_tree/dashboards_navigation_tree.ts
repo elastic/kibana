@@ -31,10 +31,6 @@ export const createDashboardsNavigationTree = (): NodeDefinition => ({
       link: securityLink(SecurityPageName.cloudSecurityPostureVulnerabilityDashboard),
     },
     {
-      id: SecurityPageName.entityAnalytics,
-      link: securityLink(SecurityPageName.entityAnalytics),
-    },
-    {
       id: SecurityPageName.dataQuality,
       link: securityLink(SecurityPageName.dataQuality),
     },

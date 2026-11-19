@@ -11,6 +11,7 @@ import type { RefObject } from 'react';
 
 import moment from 'moment';
 
+import { TZDate } from 'react-day-picker';
 import type {
   TimePrecision,
   TimeRange,
@@ -348,13 +349,30 @@ export function getOptionInputText(
   return `${startFragment.text} ${DATE_RANGE_INPUT_DELIMITER} ${endFragment.text}`;
 }
 
-/** Returns a new Date set to the start of the given day (00:00:00.000). */
-export function getStartDate(date: Date): Date {
+/** Returns a new Date set to the start of the given day in the requested time zone. */
+export function getStartDate(date: Date, timeZone?: string): Date {
+  if (timeZone) {
+    return new TZDate(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0, timeZone);
+  }
+
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 }
 
-/** Returns a new Date set to the end of the given day (23:59:59.999). */
-export function getEndDate(date: Date): Date {
+/** Returns a new Date set to the end of the given day in the requested time zone. */
+export function getEndDate(date: Date, timeZone?: string): Date {
+  if (timeZone) {
+    return new TZDate(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      23,
+      59,
+      59,
+      999,
+      timeZone
+    );
+  }
+
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
 }
 
@@ -369,6 +387,17 @@ export function formatDateRange(start: Date, end: Date, precision: TimePrecision
     start,
     precision
   )} ${DATE_RANGE_INPUT_DELIMITER} ${formatAbsoluteDate(end, precision)}`;
+}
+
+/**
+ * Formats a date range as re-parseable input text at full millisecond precision.
+ *
+ * Input text is the source of truth for the applied range, so it must never be
+ * truncated to the display `timePrecision`: e.g. a calendar day selection must
+ * round-trip as `23:59:59.999`, not `23:59:59` or `23:59`.
+ */
+export function formatInputDateRange(start: Date, end: Date): string {
+  return formatDateRange(start, end, 'ms');
 }
 
 /**

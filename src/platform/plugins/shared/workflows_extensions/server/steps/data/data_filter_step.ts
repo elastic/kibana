@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { evaluateKql } from '@kbn/eval-kql';
-import { isKqlSyntaxError } from './kql_utils';
+import { decodeKqlTemplateValues, evaluateKql } from '@kbn/eval-kql';
+import { yieldToEventLoop } from '@kbn/workflows/server';
+import { parseKqlCondition, renderKqlCondition } from './kql_utils';
 import { dataFilterStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -17,7 +18,8 @@ export const dataFilterStepDefinition = createServerStepDefinition({
   handler: async (context) => {
     try {
       const items = context.config.items;
-      const { condition, limit } = context.input;
+      const { limit } = context.input;
+      const condition = renderKqlCondition(context.contextManager, context.rawInput.condition);
 
       if (!Array.isArray(items)) {
         context.logger.error(`Input items has invalid type: ${typeof items}`);
@@ -34,17 +36,19 @@ export const dataFilterStepDefinition = createServerStepDefinition({
       }
 
       context.logger.debug(
-        `Filtering ${items.length} item(s) with condition: ${condition}${
+        `Filtering ${items.length} item(s) with condition: ${decodeKqlTemplateValues(condition)}${
           limit ? ` (limit: ${limit})` : ''
         }`
       );
 
+      const kqlAst = parseKqlCondition(condition);
       const filteredItems: unknown[] = [];
       let matchedCount = 0;
 
       for (let index = 0; index < items.length; index++) {
         const item = items[index];
 
+        await yieldToEventLoop();
         if (context.abortSignal?.aborted) {
           context.logger.warn('Filter operation aborted by signal');
           return { error: new Error('Operation was aborted') };
@@ -63,7 +67,7 @@ export const dataFilterStepDefinition = createServerStepDefinition({
           );
         } else {
           try {
-            const matches = evaluateKql(condition, { item, index });
+            const matches = evaluateKql(kqlAst, { item, index });
 
             if (matches) {
               filteredItems.push(item);
@@ -75,12 +79,6 @@ export const dataFilterStepDefinition = createServerStepDefinition({
               }
             }
           } catch (error) {
-            if (isKqlSyntaxError(error)) {
-              context.logger.error('Invalid KQL condition', error);
-              return {
-                error: new Error(`Invalid KQL condition: ${(error as Error).message}`),
-              };
-            }
             context.logger.warn(`Failed to evaluate condition for item at index ${index}`, error);
           }
         }

@@ -11,32 +11,25 @@ import type {
   RequestHandler,
   KibanaResponseFactory,
 } from '@kbn/core/server';
-import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
-import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
+import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 
 import type { CategorizationFieldValidationSchema } from '@kbn/aiops-log-pattern-analysis/schema';
 import { wrapError } from '../error_wrapper';
-import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
+import type { AiopsUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
 export const routeHandlerFactory: (
   license: AiopsLicense,
-  usageCounter?: UsageCounter
+  aiopsUsage: AiopsUsage
 ) => RequestHandler<unknown, unknown, CategorizationFieldValidationSchema> =
-  (license, usageCounter) =>
+  (license, aiopsUsage) =>
   async (
     context: RequestHandlerContext,
     request: KibanaRequest<unknown, unknown, CategorizationFieldValidationSchema>,
     response: KibanaResponseFactory
   ) => {
-    const { headers } = request;
-    trackAIOpsRouteUsage(
-      `POST ${AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_VALIDATION}`,
-      headers[AIOPS_ANALYSIS_RUN_ORIGIN],
-      usageCounter
-    );
+    aiopsUsage.trackCategorization(request.headers[AIOPS_ANALYSIS_RUN_ORIGIN]);
 
     if (!license.isActivePlatinumLicense) {
       return response.forbidden();

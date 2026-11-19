@@ -96,7 +96,7 @@ const bySkill = (skillId: string): BenchmarkExample[] =>
 
 // ─── PLATFORM ───────────────────────────────────────────────────────────────
 
-export const DASHBOARD_MANAGEMENT_EXAMPLES = bySkill('dashboard-management');
+export const DASHBOARDS_EXAMPLES = bySkill('dashboards');
 export const GRAPH_CREATION_EXAMPLES = bySkill('graph-creation');
 export const SKILL_AUTHORING_EXAMPLES = bySkill('skill-authoring');
 export const VISUALIZATION_CREATION_EXAMPLES = bySkill('visualization-creation');
@@ -106,7 +106,6 @@ export const VISUALIZATION_CREATION_EXAMPLES = bySkill('visualization-creation')
 export const KI_IDENTIFICATION_MANAGEMENT_EXAMPLES = bySkill('ki-identification-management');
 export const KNOWLEDGE_INDICATORS_MANAGEMENT_EXAMPLES = bySkill('knowledge-indicators-management');
 export const SIG_EVENTS_MANAGEMENT_EXAMPLES = bySkill('significant-events-management');
-export const SIG_EVENTS_MEMORY_EXAMPLES = bySkill('significant-events-memory');
 export const STREAMS_MANAGEMENT_EXAMPLES = bySkill('streams-management');
 
 // ─── SECURITY ───────────────────────────────────────────────────────────────

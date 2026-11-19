@@ -11,8 +11,11 @@ import {
   type RuleTemplateResponse,
 } from '@kbn/alerting-v2-schemas';
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
+import type { SavedObjectsFindOptions } from '@kbn/core/server';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
+import { escapeTermsInclude } from '../escape_terms_include';
 
 const ATTRIBUTES_PREFIX = `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes`;
 
@@ -23,19 +26,39 @@ export const RULE_TEMPLATE_SEARCH_FIELDS = ['rule.metadata.name', 'rule.metadata
 export const buildEngineV2Filter = (): KueryNode =>
   nodeBuilder.is(`${ATTRIBUTES_PREFIX}.engine`, 'v2');
 
-export const buildFindRuleTemplatesFilter = (tags?: string[]): KueryNode => {
-  const engineFilter = buildEngineV2Filter();
+export const buildRuleTemplateTagsAggregation = (
+  search?: string
+): NonNullable<SavedObjectsFindOptions['aggs']> => ({
+  tags: {
+    terms: {
+      field: RULE_TEMPLATE_TAGS_FIELD,
+      size: TAGS_RESPONSE_LIMIT,
+      order: { _count: 'desc' },
+      ...(search ? { include: `${escapeTermsInclude(search)}.*` } : {}),
+    },
+  },
+});
 
-  if (!tags?.length) {
-    return engineFilter;
+export const buildFindRuleTemplatesFilter = (
+  tags?: string[],
+  excludedTags?: string[]
+): KueryNode => {
+  const engineFilter = buildEngineV2Filter();
+  const filters: KueryNode[] = [engineFilter];
+
+  if (tags?.length) {
+    filters.push(nodeBuilder.or(tags.map((tag) => nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, tag))));
   }
 
-  const tagFilters = tags.map((tag) => nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, tag));
+  if (excludedTags?.length) {
+    filters.push(
+      ...excludedTags.map((tag) =>
+        nodeTypes.function.buildNode('not', nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, tag))
+      )
+    );
+  }
 
-  return nodeBuilder.and([
-    engineFilter,
-    tagFilters.length === 1 ? tagFilters[0] : nodeBuilder.or(tagFilters),
-  ]);
+  return nodeBuilder.and(filters);
 };
 
 export const mapSortField = (sortField?: FindRuleTemplatesSortField): string => {

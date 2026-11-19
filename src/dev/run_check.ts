@@ -35,10 +35,11 @@ import {
   JEST_CONFIG_NAMES,
   type MoonJestResult,
   type JestFailedTest,
-} from '@kbn/test';
+} from '@kbn/jest';
 import { executeTypeCheckValidation } from './type_check_validation_loader';
 
 import { executeEslintValidation } from './eslint/run_eslint_contract';
+import { executeOxlintValidation } from './oxlint/run_oxlint_contract';
 
 // ── Output helpers ──────────────────────────────────────────────────────────
 
@@ -119,6 +120,14 @@ const createSilentLog = () => {
   const log = new ToolingLog();
   log.setWriters([writer]);
   return { log, captured };
+};
+
+const writeCaptured = (captured: string[]) => {
+  if (captured.length === 0) return;
+  writeln('');
+  for (const msg of captured) {
+    for (const l of msg.split('\n')) writeln(`    ${l}`);
+  }
 };
 
 // ── Header ──────────────────────────────────────────────────────────────────
@@ -215,6 +224,19 @@ const runMoonRegeneration = async (fix: boolean): Promise<{ passed: boolean; out
   };
 };
 
+const runServerImportGraphCheck = async (): Promise<{ passed: boolean; output: string }> => {
+  const execa = (await import('execa')).default;
+  const result = await execa(process.execPath, ['scripts/check_server_import_graph'], {
+    cwd: REPO_ROOT,
+    reject: false,
+  });
+
+  return {
+    passed: result.exitCode === 0,
+    output: [result.stdout, result.stderr].filter(Boolean).join('\n'),
+  };
+};
+
 const runJestTestsDirectly = async (
   testFiles: string[]
 ): Promise<{ testCount: number; passed: boolean; output: string }> => {
@@ -288,7 +310,7 @@ run(
         baseContext.runContext.kind === 'full' ||
         baseContext.contract.testMode === 'all');
 
-    // Steps run in a fixed order: tsproj → moon → lint → jest → tsc.
+    // Steps run in a fixed order: tsproj → moon → graph → lint → jest → tsc.
     // @kbn/ts-projects is cached for the process; tsproj autofixes tsconfigs in a
     // subprocess, so lint/tsc must not load TS_PROJECTS until those fixes are on disk.
     // Do not reorder or add top-level imports that pull in @kbn/ts-projects earlier.
@@ -380,6 +402,72 @@ run(
       }
     }
 
+    // ── server import graph ────────────────────────────────────────────
+    // Whole-graph check (browser-only node modules reachable from server entry points). It is
+    // not scoped to changed files on purpose: the import that introduces a violation usually
+    // lives in a `common/` or package module that no changed server file points at directly.
+
+    {
+      const graphProgress = startProgress('graph');
+      try {
+        const result = await runServerImportGraphCheck();
+        if (result.passed) {
+          graphProgress.writeResult(
+            line('graph', '✓', 'no new browser imports on server', graphProgress.elapsed())
+          );
+        } else {
+          graphProgress.writeResult(line('graph', '✗', 'failed', graphProgress.elapsed()));
+          writeln('');
+          const excerpt = result.output.split('\n').slice(-30);
+          for (const l of excerpt) writeln(`    ${l}`);
+          writeln('    $ node scripts/check_server_import_graph');
+          writeln('');
+          errors.push(new Error('check_server_import_graph failed'));
+        }
+      } catch (error) {
+        graphProgress.writeResult(line('graph', '✗', 'failed', graphProgress.elapsed()));
+        errors.push(error instanceof Error ? error : new Error(String(error)));
+      }
+    }
+
+    // ── oxlint ─────────────────────────────────────────────────────────
+
+    {
+      const { log, captured } = createSilentLog();
+      const progress = startProgress('oxlint');
+      try {
+        const result = await executeOxlintValidation({ baseContext, log, fix });
+        if (!result) {
+          progress.writeResult(line('oxlint', '—', 'no files changed'));
+        } else if (result.failedFiles.length > 0) {
+          progress.writeResult(line('oxlint', '✗', 'failed', progress.elapsed()));
+          writeCaptured(captured);
+          writeln(`    $ node scripts/lint ${result.failedFiles.join(' ')}`);
+          writeln('');
+          errors.push(new Error('oxlint failed'));
+        } else {
+          const suffix =
+            result.warningCount > 0 ? ` (${pluralize(result.warningCount, 'warning')})` : '';
+          progress.writeResult(
+            line(
+              'oxlint',
+              result.warningCount > 0 ? '⚠' : '✓',
+              `${pluralize(result.fileCount, 'file')}${suffix}`,
+              progress.elapsed()
+            )
+          );
+          if (result.warningCount > 0) writeCaptured(captured);
+        }
+      } catch (error) {
+        progress.writeResult(line('oxlint', '✗', 'failed', progress.elapsed()));
+        const failure = error instanceof Error ? error : new Error(String(error));
+        writeln('');
+        for (const l of failure.message.split('\n')) writeln(`    ${l}`);
+        writeln('');
+        errors.push(failure);
+      }
+    }
+
     // ── lint ───────────────────────────────────────────────────────────
 
     {
@@ -391,10 +479,7 @@ run(
           progress.writeResult(line('lint', '—', 'no files changed'));
         } else if (result.failedFiles.length > 0) {
           progress.writeResult(line('lint', '✗', 'failed', progress.elapsed()));
-          if (captured.length > 0) {
-            writeln('');
-            for (const msg of captured) writeln(`    ${msg}`);
-          }
+          writeCaptured(captured);
           writeln(`    $ node scripts/eslint ${result.failedFiles.join(' ')}`);
           writeln('');
           errors.push(new Error('eslint failed'));
@@ -415,6 +500,7 @@ run(
               progress.elapsed()
             )
           );
+          if (result.warningCount > 0) writeCaptured(captured);
           if (verbose && result.fixedFiles.length > 0) {
             for (const file of result.fixedFiles) {
               writeln(`         fixed: ${file}`);

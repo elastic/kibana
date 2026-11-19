@@ -357,6 +357,30 @@ describe('writeRelationshipMetadatas', () => {
       expect(logger.error).toHaveBeenCalledWith('Failed to append 1 of 1 relationship metadata.');
     });
 
+    it('prefixes the failure message when a logPrefix is supplied', async () => {
+      // Without the prefix these lines are unattributable in production, where
+      // several integrations write metadata within the same maintainer run.
+      const logger = loggerMock.create();
+      const { entityMetadataClient } = makeEntityMetadataClient(1, []);
+      const records: EntityRelationshipRecord[] = [
+        {
+          entityId: 'user:alice@corp',
+          entityType: 'user',
+          relationships: { accesses_frequently: ['host:laptopA'] },
+        },
+      ];
+      await writeRelationshipMetadatas(
+        entityMetadataClient,
+        logger,
+        records,
+        baseContext,
+        '[accesses][elastic_defend]'
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        '[accesses][elastic_defend] Failed to append 1 of 1 relationship metadata.'
+      );
+    });
+
     it('logs at info level (not error) when bulkAppend returns no failures', async () => {
       const logger = loggerMock.create();
       const { entityMetadataClient } = makeEntityMetadataClient();

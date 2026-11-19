@@ -131,6 +131,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -269,6 +272,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -407,6 +413,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -545,6 +554,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -692,6 +704,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -839,6 +854,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -958,6 +976,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/350.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1077,6 +1098,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/350.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1146,7 +1170,10 @@
       },
       "host": {
         "target": {
-          "id": ["host-instance-1", "host-instance-2"]
+          "id": [
+            "host-instance-1",
+            "host-instance-2"
+          ]
         }
       },
       "log": {
@@ -1177,6 +1204,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/350.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1341,6 +1371,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1472,6 +1505,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/360.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1584,6 +1620,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/370.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1644,6 +1683,9 @@
         },
         "name": "AWS SDK",
         "original": "aws-sdk-go/1.44.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1709,6 +1751,9 @@
         },
         "name": "google-cloud-sdk",
         "original": "google-cloud-sdk gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1775,6 +1820,9 @@
         },
         "name": "google-cloud-sdk",
         "original": "google-cloud-sdk gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -1841,6 +1889,9 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1902,6 +1953,9 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1974,6 +2028,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -2046,6 +2103,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -2117,6 +2177,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -2250,6 +2313,9 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }

@@ -99,11 +99,13 @@ describe('datatable cell renderer', () => {
     columnConfig,
     formatters = defaultFormatters,
     isDarkMode = false,
+    isInteractive = true,
     fitRowToContent,
   }: {
     columnConfig: ColumnConfig;
     formatters?: Record<string, FieldFormat>;
     isDarkMode?: boolean;
+    isInteractive?: boolean;
     fitRowToContent?: boolean;
   }) =>
     createGridCell(
@@ -113,6 +115,7 @@ describe('datatable cell renderer', () => {
       isDarkMode,
       cellColorFnMock,
       paletteServiceMock,
+      isInteractive,
       fitRowToContent
     );
 
@@ -183,6 +186,24 @@ describe('datatable cell renderer', () => {
       renderCell({ cellRenderer });
       expect(screen.getByText('formatted 123')).toHaveClass('lnsTableCell--multiline');
     });
+
+    it('passes isInteractive to the formatter so it can suppress live content (e.g. links) when false', () => {
+      const convertToReact = jest.fn((x: unknown, options?: { isInteractive?: boolean }) =>
+        options?.isInteractive === false ? `inert ${x}` : `link ${x}`
+      );
+      const formatter = {
+        convertToText: (x: unknown) => `formatted ${x}`,
+        convertToReact,
+      } as unknown as FieldFormat;
+      const cellRenderer = makeCellRenderer({
+        columnConfig: { columns: [], sortingColumnId: '', sortingDirection: 'none' },
+        formatters: { a: formatter },
+        isInteractive: false,
+      });
+      renderCell({ cellRenderer });
+      expect(convertToReact).toHaveBeenCalledWith(123, { isInteractive: false });
+      expect(screen.getByText('inert 123')).toBeInTheDocument();
+    });
   });
 
   describe('one-click filter', () => {
@@ -197,6 +218,29 @@ describe('datatable cell renderer', () => {
       });
       renderCell({ cellRenderer, context: { handleFilterClick: () => {} } });
       expect(screen.getByRole('button')).toHaveTextContent('formatted 123');
+    });
+
+    it('renders a clickable dash for missing values', async () => {
+      const handleFilterClick = jest.fn();
+      const cellRenderer = makeCellRenderer({
+        columnConfig: {
+          columns: [{ columnId: 'a', type: 'lens_datatable_column', oneClickFilter: true }],
+          sortingColumnId: '',
+          sortingDirection: 'none',
+        },
+        formatters: { a: defaultFieldFormat },
+      });
+
+      renderCell({
+        cellRenderer,
+        context: { handleFilterClick, table: makeTable([{ a: null }]) },
+      });
+
+      expect(screen.getByRole('button')).toHaveTextContent('-');
+      expect(screen.queryByText('(null)')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button'));
+      expect(handleFilterClick).toHaveBeenCalledWith('a', null, 0, 0);
     });
 
     it('passes the correct colIndex to handleFilterClick for a non-first column', async () => {
@@ -382,7 +426,7 @@ describe('datatable cell renderer', () => {
           context: { table: makeTable([{ a: null }]) },
         });
 
-        expect(screen.getByText('(null)')).toBeInTheDocument();
+        expect(screen.getByText('-')).toBeInTheDocument();
         expect(setCellProps).not.toHaveBeenCalled();
         expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
         expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--colored');
@@ -473,7 +517,7 @@ describe('datatable cell renderer', () => {
             },
             convertToReact: (x: unknown) => {
               if (typeof x === 'number' && Number.isNaN(x)) {
-                return <span>(null)</span>;
+                return <span>{'-'}</span>;
               }
               return `formatted ${x}`;
             },
@@ -486,7 +530,7 @@ describe('datatable cell renderer', () => {
         context: { table: makeTable([{ a: Number.NaN }]) },
       });
 
-      expect(screen.getByText('(null)')).toBeInTheDocument();
+      expect(screen.getByText('-')).toBeInTheDocument();
       expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
     });
 
@@ -679,18 +723,18 @@ describe('datatable cell renderer', () => {
       sortingDirection: 'none',
     };
 
-    it('should adjust link color for dark background in light mode', () => {
+    it('should use a high-contrast link color for dark background in light mode', () => {
       const backgroundColor = '#000000';
-      const expectedColor = '#4b78c9';
+      const expectedColor = '#FFFFFF';
       const isDarkMode = false;
       renderThemedCellRenderer(columnConfig, isDarkMode, backgroundColor);
 
       expect(screen.getByRole('button')).toHaveStyle(`color: ${expectedColor}`);
     });
 
-    it('should adjust link color for light background in dark mode', () => {
+    it('should use a high-contrast link color for light background in dark mode', () => {
       const backgroundColor = '#FFFFFF';
-      const expectedColor = '#1750BA';
+      const expectedColor = '#07101F';
       const isDarkMode = true;
       renderThemedCellRenderer(columnConfig, isDarkMode, backgroundColor);
 
@@ -719,7 +763,7 @@ describe('datatable cell renderer', () => {
       expect(screen.getByRole('button').style.color).toBe('');
     });
 
-    it('should not adjust link color when colorMode is text', () => {
+    it('should use the mapped color as the link color when colorMode is text', () => {
       const backgroundColor = '#FF0000'; // A distinct background color
       const isDarkMode = false;
       const columnConfigNonCellColorMode: DatatableArgs = {
@@ -732,7 +776,7 @@ describe('datatable cell renderer', () => {
         ],
       };
       renderThemedCellRenderer(columnConfigNonCellColorMode, isDarkMode, backgroundColor);
-      expect(screen.getByRole('button').style.color).toBe('');
+      expect(screen.getByRole('button')).toHaveStyle(`color: ${backgroundColor}`);
     });
   });
 

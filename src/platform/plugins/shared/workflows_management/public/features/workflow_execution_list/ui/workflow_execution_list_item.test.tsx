@@ -51,6 +51,7 @@ const renderColumns = (
     euiTheme: {
       colors: { textSubdued: '#666' },
     } as Parameters<typeof getExecutionHistoryColumns>[0]['euiTheme'],
+    showExecutionName: true,
     showExecutor: true,
     executedByUserProfiles: new Map([['u_tal', executedByProfile]]),
     showUnresolvedExecutors: true,
@@ -80,16 +81,37 @@ const renderColumns = (
 
 describe('execution history columns', () => {
   it('uses fixed widths that leave room for Status/Started/Duration headers', () => {
-    expect(EXECUTION_HISTORY_COLUMN_WIDTHS.status).toBe('120px');
+    expect(EXECUTION_HISTORY_COLUMN_WIDTHS.status).toBe('160px');
     expect(EXECUTION_HISTORY_COLUMN_WIDTHS.started).toBe('120px');
     expect(EXECUTION_HISTORY_COLUMN_WIDTHS.duration).toBe('72px');
   });
 
-  it('orders columns Status → Started → Duration → Executed by', () => {
+  it('orders columns Execution name → Status → Started → Duration → Executed by', () => {
     const columns = getExecutionHistoryColumns({
       euiTheme: {
         colors: { textSubdued: '#666' },
       } as Parameters<typeof getExecutionHistoryColumns>[0]['euiTheme'],
+      showExecutionName: true,
+      showExecutor: true,
+      executedByUserProfiles: new Map(),
+      showUnresolvedExecutors: true,
+      timeZoneSetting: 'UTC',
+    });
+    expect(columns.map((c) => ('field' in c ? c.field : undefined))).toEqual([
+      'runName',
+      'status',
+      'startedAt',
+      'duration',
+      'executedBy',
+    ]);
+  });
+
+  it('omits Execution name when the workflow is not using execution names', () => {
+    const columns = getExecutionHistoryColumns({
+      euiTheme: {
+        colors: { textSubdued: '#666' },
+      } as Parameters<typeof getExecutionHistoryColumns>[0]['euiTheme'],
+      showExecutionName: false,
       showExecutor: true,
       executedByUserProfiles: new Map(),
       showUnresolvedExecutors: true,
@@ -111,6 +133,13 @@ describe('execution history columns', () => {
     expect(screen.getByText('Failed')).toBeInTheDocument();
     expect(screen.queryByText('Completed')).not.toBeInTheDocument();
     expect(screen.queryByText('Error')).not.toBeInTheDocument();
+  });
+
+  it('shows the execution name', () => {
+    renderColumns({ ...baseExecution, runName: 'Deploy staging' });
+    expect(screen.getByTestId('workflowExecutionListRunNameCell')).toHaveTextContent(
+      'Deploy staging'
+    );
   });
 
   it('renders a flask for test runs and none for production', () => {
@@ -169,5 +198,21 @@ describe('execution history columns', () => {
   it('renders resolved executor display names when showExecutor is true', () => {
     renderColumns(baseExecution, { showExecutor: true });
     expect(screen.getByText('Tal Borenstein')).toBeInTheDocument();
+  });
+
+  it('renders Action is required instead of the Waiting pill for wait-for-input runs', () => {
+    renderColumns({ ...baseExecution, status: ExecutionStatus.WAITING_FOR_INPUT });
+
+    expect(screen.getByTestId('workflowExecutionActionRequiredBadge')).toHaveTextContent(
+      'Action is required'
+    );
+    expect(screen.queryByTestId('workflowExecutionListStatusPill')).not.toBeInTheDocument();
+  });
+
+  it('keeps the Waiting pill for timer waits', () => {
+    renderColumns({ ...baseExecution, status: ExecutionStatus.WAITING });
+
+    expect(screen.getByTestId('workflowExecutionListStatusPill')).toHaveTextContent('Waiting');
+    expect(screen.queryByTestId('workflowExecutionActionRequiredBadge')).not.toBeInTheDocument();
   });
 });

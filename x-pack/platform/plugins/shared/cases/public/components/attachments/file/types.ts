@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as rt from 'io-ts';
-import type { SingleFileAttachmentMetadataRt } from '../../../../common/types/domain';
+import type { z } from '@kbn/zod/v4';
+import type { SingleFileAttachmentMetadataSchema } from '../../../../common/types/domain';
 
-export type DownloadableFile = rt.TypeOf<typeof SingleFileAttachmentMetadataRt> & { id: string };
+export type DownloadableFile = z.infer<typeof SingleFileAttachmentMetadataSchema> & { id: string };

@@ -2,7 +2,7 @@
 
 ## Setup
 - Use the Node version pinned in `.nvmrc` (matches `engines.node` in `package.json`).
-- Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
+- Run `node scripts/kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
 
 ## Overview
 - Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages. Aside from tooling and testing, most code lives in these modules.
@@ -45,7 +45,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Without `--project` it checks **all** projects (very slow). Always scope to a single project:
   `node scripts/type_check --project src/core/packages/http/server-internal/tsconfig.json`
 - Only one `--project` per run. To check multiple packages, run separate commands.
-- `.buildkite/` is **not** a valid target for `scripts/type_check`. Buildkite scripts live in a separate workspace; typecheck them with `npm run typecheck` (or `yarn typecheck`) from inside `.buildkite/`.
+- `.buildkite/` is **not** a valid target for `scripts/type_check`. Buildkite scripts live in a separate workspace; typecheck them with `npm run typecheck` from inside `.buildkite/`.
 
 ### TypeScript & Types
 - Use TypeScript for all new code; avoid `any` and `unknown`.
@@ -87,6 +87,7 @@ Follow existing patterns in the target area first; below are common defaults.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
+- For semantic string fields, prefer the built-in helpers from `@kbn/config-schema` / `@kbn/zod` (`savedObjectId`, `savedObjectType`, `savedObjectVersion`, `spaceId`, `displayName`, `description`, `searchFilter`, `aggregation`, `querySortField`, `urlString`, `pemCertificate`, `version`) over ad-hoc limits; override with `{ maxLength }` only to keep an existing stricter contract. When no semantic helper fits the field, use `boundedString({ maxLength })`. On existing routes with unknown real-world lengths, use `.warn({ label })` (static label only) to report instead of reject. If a field truly can't be bounded, use `unboundedString({ reason })` instead of a CodeQL suppression. See `docs/extend/key-concepts/security/bounded-string-schemas.md`.
 
 ## Internationalization (i18n)
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md

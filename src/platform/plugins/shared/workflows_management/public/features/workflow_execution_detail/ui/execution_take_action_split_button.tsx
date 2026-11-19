@@ -15,13 +15,15 @@ import {
   EuiSplitButton,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { isDangerousStatus } from '@kbn/workflows';
+import { isDangerousStatus, isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { useRunWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
-import { buildReplayInputsFromExecutionContext } from '../../../pages/executions/build_replay_inputs_from_execution_context';
+import { useTelemetry } from '../../../hooks/use_telemetry';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 interface ExecutionTakeActionSplitButtonProps {
   execution: WorkflowExecutionDto;
@@ -32,8 +34,12 @@ interface ExecutionTakeActionSplitButtonProps {
 export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSplitButtonProps>(
   ({ execution, failedStepId, onOpenFailedStepInEditor }) => {
     const { notifications, application } = useKibana().services;
-    const { canExecuteWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
-    const { mutateAsync: runWorkflow, isLoading: isRerunning } = useRunWorkflow();
+    const { canExecuteWorkflow, canUpdateWorkflow, canCancelWorkflowExecution } =
+      useWorkflowsCapabilities();
+    const { id: routeWorkflowId } = useParams<{ id?: string }>();
+    const { updateUrlState } = useWorkflowUrlState();
+    const api = useWorkflowsApi();
+    const telemetry = useTelemetry();
     const { href: executionHref } = useNavigateToExecution({
       workflowId: execution.workflowId ?? '',
       executionId: execution.id,
@@ -41,33 +47,94 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const isFailed = isDangerousStatus(execution.status);
+    const isTerminal = isTerminalStatus(execution.status);
+    const isCancelDisabled =
+      isTerminal || Boolean(execution.finishedAt) || !canCancelWorkflowExecution;
 
-    const handleRerun = useCallback(async () => {
+    const handleRerun = useCallback(() => {
       if (!canExecuteWorkflow || !execution.workflowId) return;
-      try {
-        await runWorkflow({
-          id: execution.workflowId,
-          inputs: buildReplayInputsFromExecutionContext(execution.context),
+
+      const replayIsTestRun = execution.isTestRun === true;
+
+      // Stay on this execution so the flyout does not close behind the modal.
+      if (routeWorkflowId === execution.workflowId) {
+        updateUrlState({
+          replayExecutionId: execution.id,
+          ...(replayIsTestRun ? { replayIsTestRun: true } : {}),
         });
+        return;
+      }
+
+      const params = new URLSearchParams({
+        tab: 'executions',
+        executionId: execution.id,
+        replayExecutionId: execution.id,
+      });
+      if (replayIsTestRun) {
+        params.set('replayIsTestRun', 'true');
+      }
+
+      application.navigateToApp('workflows', {
+        path: `/${execution.workflowId}?${params.toString()}`,
+      });
+    }, [
+      application,
+      canExecuteWorkflow,
+      execution.id,
+      execution.isTestRun,
+      execution.workflowId,
+      routeWorkflowId,
+      updateUrlState,
+    ]);
+
+    const handleCancel = useCallback(async () => {
+      setIsMenuOpen(false);
+      if (isCancelDisabled) {
+        return;
+      }
+
+      const timeToCancellation = execution.startedAt
+        ? Date.now() - new Date(execution.startedAt).getTime()
+        : undefined;
+
+      try {
+        await api.cancelExecution(execution.id);
         notifications.toasts.addSuccess(
-          i18n.translate('workflows.executionFlyout.takeAction.reRunSuccess', {
-            defaultMessage: 'Re-ran execution',
+          i18n.translate('workflows.executionFlyout.takeAction.cancelSuccess', {
+            defaultMessage: 'Execution cancelled',
           }),
           { toastLifeTimeMs: 3000 }
         );
+        telemetry.reportWorkflowRunCancelled({
+          workflowExecutionId: execution.id,
+          workflowId: execution.workflowId,
+          timeToCancellation,
+          origin: 'workflow_detail',
+          error: undefined,
+        });
       } catch (err) {
-        notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
-          title: i18n.translate('workflows.executionFlyout.takeAction.reRunError', {
-            defaultMessage: 'Failed to re-run execution',
+        const errorObj = err instanceof Error ? err : new Error(String(err));
+        notifications.toasts.addError(errorObj, {
+          title: i18n.translate('workflows.executionFlyout.takeAction.cancelError', {
+            defaultMessage: 'Error cancelling execution',
           }),
+        });
+        telemetry.reportWorkflowRunCancelled({
+          workflowExecutionId: execution.id,
+          workflowId: execution.workflowId,
+          timeToCancellation,
+          origin: 'workflow_detail',
+          error: errorObj,
         });
       }
     }, [
-      canExecuteWorkflow,
-      execution.context,
+      api,
+      execution.id,
+      execution.startedAt,
       execution.workflowId,
+      isCancelDisabled,
       notifications.toasts,
-      runWorkflow,
+      telemetry,
     ]);
 
     const handleEditWorkflow = useCallback(() => {
@@ -97,23 +164,21 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
 
     const menuItems = useMemo(() => {
       const items: React.ReactElement[] = [];
-      if (canExecuteWorkflow) {
-        items.push(
-          <EuiContextMenuItem
-            key="rerun"
-            icon="refresh"
-            onClick={() => {
-              setIsMenuOpen(false);
-              void handleRerun();
-            }}
-            data-test-subj="workflowExecutionFlyoutReRunMenuItem"
-          >
-            {i18n.translate('workflows.executionFlyout.takeAction.reRunWithSameInput', {
-              defaultMessage: 'Re-run with same input',
-            })}
-          </EuiContextMenuItem>
-        );
-      }
+      items.push(
+        <EuiContextMenuItem
+          key="cancel"
+          icon="cross"
+          disabled={isCancelDisabled}
+          onClick={() => {
+            void handleCancel();
+          }}
+          data-test-subj="workflowExecutionFlyoutCancelExecution"
+        >
+          {i18n.translate('workflows.executionFlyout.takeAction.cancelExecution', {
+            defaultMessage: 'Cancel execution',
+          })}
+        </EuiContextMenuItem>
+      );
       if (isFailed && failedStepId && onOpenFailedStepInEditor && canUpdateWorkflow) {
         items.push(
           <EuiContextMenuItem
@@ -157,13 +222,13 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
       // Delete execution omitted — no single-execution delete API.
       return items;
     }, [
-      canExecuteWorkflow,
       canUpdateWorkflow,
       failedStepId,
+      handleCancel,
       handleCopyLink,
       handleEditWorkflow,
       handleOpenFailedStep,
-      handleRerun,
+      isCancelDisabled,
       isFailed,
       onOpenFailedStepInEditor,
     ]);
@@ -183,11 +248,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
         anchorPosition="upRight"
         button={
           <EuiSplitButton size="s" fill data-test-subj="workflowExecutionFlyoutTakeAction">
-            <EuiSplitButton.ActionPrimary
-              onClick={() => void handleRerun()}
-              isLoading={isRerunning}
-              isDisabled={!canExecuteWorkflow}
-            >
+            <EuiSplitButton.ActionPrimary onClick={handleRerun} isDisabled={!canExecuteWorkflow}>
               {i18n.translate('workflows.executionFlyout.takeAction.reRun', {
                 defaultMessage: 'Re-run',
               })}

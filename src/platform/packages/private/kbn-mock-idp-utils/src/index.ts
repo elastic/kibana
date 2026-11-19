@@ -38,7 +38,9 @@ export {
   MOCK_IDP_UIAM_SERVICE_URL,
   MOCK_IDP_UIAM_OAUTH_BASE_URL,
   MOCK_IDP_UIAM_SIGNING_SECRET,
+  MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET,
   MOCK_IDP_UIAM_SHARED_SECRET,
+  MOCK_IDP_GATEWAY_SHARED_SECRET,
   MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
   MOCK_IDP_UIAM_ORGANIZATION_ID,
   MOCK_IDP_UIAM_CLOUD_ID,
@@ -64,3 +66,5 @@ export {
   updateTestOAuthConnection,
   deleteTestOAuthConnection,
 } from './cosmos_db_seeder';
+
+export { exchangeUiamServiceAccountToken } from './exchange_uiam_service_account_token';

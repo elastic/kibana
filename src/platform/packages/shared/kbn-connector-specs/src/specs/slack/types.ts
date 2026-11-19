@@ -52,6 +52,9 @@ export interface SlackConversationsListChannel {
   is_private?: boolean;
   is_archived?: boolean;
   is_member?: boolean;
+  is_im?: boolean;
+  is_mpim?: boolean;
+  user?: string;
 }
 
 export interface SlackConversationsListResponse extends SlackErrorFields {
@@ -64,6 +67,27 @@ export type SlackConversationsListParams = Record<string, string | number | bool
 
 const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mpim'] as const;
 
+// Conservative upper bounds on user-supplied strings to keep schema validation
+// cheap and prevent unbounded input. Slack IDs/timestamps are short; cursors
+// are opaque tokens kept generous; email follows RFC 5321. Channel names are
+// capped at 80 characters by Slack; the generic name bound leaves room for a
+// leading "#" and usernames. Message text is truncated by Slack at 40,000
+// characters, but chat.update rejects text over 4,000 characters (msg_too_long).
+// conversations.invite accepts up to 1000 user IDs.
+const SLACK_MAX_ID_LENGTH = 64;
+const SLACK_MAX_TIMESTAMP_LENGTH = 32;
+// Unix timestamps in seconds, optionally with a fraction, as Slack's `ts` values ("1234567890.123456").
+const SLACK_UNIX_TIMESTAMP_PATTERN = /^\d+(\.\d+)?$/;
+const SLACK_MAX_CURSOR_LENGTH = 1024;
+const SLACK_MAX_EMAIL_LENGTH = 320;
+const SLACK_MAX_CHANNEL_NAME_LENGTH = 80;
+const SLACK_MAX_NAME_LENGTH = 255;
+const SLACK_MAX_SEARCH_QUERY_LENGTH = 2000;
+const SLACK_MAX_MESSAGE_TEXT_LENGTH = 40000;
+const SLACK_MAX_UPDATE_MESSAGE_TEXT_LENGTH = 4000;
+const SLACK_MAX_INVITE_USERS = 1000;
+const SLACK_MAX_INVITE_USERS_LENGTH = SLACK_MAX_INVITE_USERS * (SLACK_MAX_ID_LENGTH + 1);
+
 const SLACK_MAX_CONVERSATIONS_LIST_LIMIT = 1000;
 const SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT = SLACK_MAX_CONVERSATIONS_LIST_LIMIT;
 const SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES = 10;
@@ -72,6 +96,7 @@ const SLACK_MAX_RESOLVE_CHANNEL_MAX_PAGES = 100;
 const slackConversationTypesWithPublicDefault = () =>
   z
     .array(z.enum(SLACK_CONVERSATION_TYPES))
+    .max(SLACK_CONVERSATION_TYPES.length)
     .optional()
     .transform(
       (val): Array<(typeof SLACK_CONVERSATION_TYPES)[number]> =>
@@ -83,6 +108,7 @@ export const SlackResolveChannelIdInputSchema = lazySchema(() =>
     name: z
       .string()
       .min(1)
+      .max(SLACK_MAX_NAME_LENGTH)
       .describe(
         'Channel name to resolve (e.g. "general" or "#general"). Returns the first matching conversation ID (C.../G...). To list or browse channels (e.g. what is available), use listChannels instead of probing many names here.'
       ),
@@ -98,6 +124,7 @@ export const SlackResolveChannelIdInputSchema = lazySchema(() =>
     excludeArchived: z.boolean().default(true).describe('Exclude archived channels (default true)'),
     cursor: z
       .string()
+      .max(SLACK_MAX_CURSOR_LENGTH)
       .optional()
       .describe('Optional cursor to resume a previous scan (advanced). Usually omit.'),
     limit: z
@@ -130,6 +157,7 @@ export const SlackListChannelsInputSchema = lazySchema(() =>
     excludeArchived: z.boolean().default(true).describe('Exclude archived channels (default true)'),
     cursor: z
       .string()
+      .max(SLACK_MAX_CURSOR_LENGTH)
       .optional()
       .describe(
         'Pagination cursor from a previous listChannels response (nextCursor). Omit for the first page.'
@@ -162,29 +190,34 @@ export const SlackSearchMessagesInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
+      .max(SLACK_MAX_SEARCH_QUERY_LENGTH)
       .describe(
         'Plain text search query to find messages. Do NOT embed Slack search operators like from: or in: here — use the dedicated fromUser, inChannel, after, and before parameters instead. Keep queries focused on a few keywords rather than long phrases for better results.'
       ),
     inChannel: z
       .string()
+      .max(SLACK_MAX_NAME_LENGTH)
       .optional()
       .describe(
         'Optional Slack search constraint. Adds `in:CHANNEL_NAME` to the query (e.g. in:general).'
       ),
     fromUser: z
       .string()
+      .max(SLACK_MAX_NAME_LENGTH)
       .optional()
       .describe(
         "Optional Slack search constraint. Adds `from:USER_ID` (e.g. from:U012ABCDEF) or `from:username` to the query. Accepts a Slack username or user ID, NOT a full name. If you only know a person's full name, search for it as keywords in the query parameter first, then use the sender.username field from results for subsequent filtered searches."
       ),
     after: z
       .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
       .optional()
       .describe(
         'Optional Slack search constraint. Adds `after:YYYY-MM-DD` to the query (e.g. after:2026-02-10).'
       ),
     before: z
       .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
       .optional()
       .describe(
         'Optional Slack search constraint. Adds `before:YYYY-MM-DD` to the query (e.g. before:2026-02-10).'
@@ -205,6 +238,7 @@ export const SlackSearchMessagesInputSchema = lazySchema(() =>
       ),
     cursor: z
       .string()
+      .max(SLACK_MAX_CURSOR_LENGTH)
       .optional()
       .describe(
         'Pagination cursor to fetch the next page of results (use response_metadata.next_cursor from a previous call).'
@@ -240,6 +274,7 @@ export const SlackCreateConversationInputSchema = lazySchema(() =>
     name: z
       .string()
       .min(1)
+      .max(SLACK_MAX_CHANNEL_NAME_LENGTH)
       .describe(
         'Name of the channel to create. Channel names can only contain lowercase letters, numbers, hyphens, and underscores, and must be 80 characters or fewer.'
       ),
@@ -256,24 +291,18 @@ export const SlackInviteToConversationInputSchema = lazySchema(() =>
     channel: z
       .string()
       .min(1)
+      .max(SLACK_MAX_ID_LENGTH)
       .describe('The ID of the channel to invite users to (e.g. C... or G...).'),
     users: z
       .string()
       .min(1)
+      .max(SLACK_MAX_INVITE_USERS_LENGTH)
       .describe(
-        'Comma-separated list of user IDs to invite to the channel (e.g. U01PWE77HD2,U02ABC1234).'
+        `Comma-separated list of user IDs to invite to the channel (e.g. U01PWE77HD2,U02ABC1234). Slack accepts up to ${SLACK_MAX_INVITE_USERS} users.`
       ),
   })
 );
 export type SlackInviteToConversationInput = z.infer<typeof SlackInviteToConversationInputSchema>;
-
-// Conservative upper bounds on user-supplied strings to keep schema validation
-// cheap and prevent unbounded input. Slack IDs/timestamps are short; cursors
-// are opaque tokens kept generous; email follows RFC 5321.
-const SLACK_MAX_ID_LENGTH = 64;
-const SLACK_MAX_TIMESTAMP_LENGTH = 32;
-const SLACK_MAX_CURSOR_LENGTH = 1024;
-const SLACK_MAX_EMAIL_LENGTH = 320;
 
 const SLACK_MAX_HISTORY_LIMIT = 1000;
 const SLACK_DEFAULT_HISTORY_LIMIT = 100;
@@ -290,6 +319,7 @@ export const SlackGetConversationHistoryInputSchema = lazySchema(() =>
     oldest: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .regex(SLACK_UNIX_TIMESTAMP_PATTERN)
       .optional()
       .describe(
         'Only messages after this Unix timestamp (inclusive). String form, e.g. "1234567890.123456".'
@@ -297,6 +327,7 @@ export const SlackGetConversationHistoryInputSchema = lazySchema(() =>
     latest: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .regex(SLACK_UNIX_TIMESTAMP_PATTERN)
       .optional()
       .describe('Only messages before this Unix timestamp. String form, e.g. "1234567890.123456".'),
     inclusive: z
@@ -449,6 +480,7 @@ export type SlackListUsersInput = z.infer<typeof SlackListUsersInputSchema>;
 const slackConversationTypesAllDefault = () =>
   z
     .array(z.enum(SLACK_CONVERSATION_TYPES))
+    .max(SLACK_CONVERSATION_TYPES.length)
     .optional()
     .transform(
       (val): Array<(typeof SLACK_CONVERSATION_TYPES)[number]> =>
@@ -559,11 +591,13 @@ export const SlackListFilesInputSchema = lazySchema(() =>
     tsFrom: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .regex(SLACK_UNIX_TIMESTAMP_PATTERN)
       .optional()
       .describe('Only include files created after this Unix timestamp (string form, seconds).'),
     tsTo: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .regex(SLACK_UNIX_TIMESTAMP_PATTERN)
       .optional()
       .describe('Only include files created before this Unix timestamp (string form, seconds).'),
     types: z
@@ -630,17 +664,39 @@ export interface SlackFilesInfoResponse extends SlackErrorFields {
   response_metadata?: { next_cursor?: string };
 }
 
+const SLACK_MAX_MESSAGE_BLOCKS = 50;
+
+const slackMessageBlocksSchema = () =>
+  z
+    .array(
+      z.looseObject({
+        type: z
+          .string()
+          .min(1)
+          .max(50)
+          .describe('Block type, for example section, divider, or actions'),
+      })
+    )
+    .max(SLACK_MAX_MESSAGE_BLOCKS)
+    .optional()
+    .describe(
+      'Slack Block Kit blocks (https://docs.slack.dev/reference/block-kit/blocks) that lay out the message. When set, text is the notification and fallback text only.'
+    );
+
 export const SlackSendMessageInputSchema = lazySchema(() =>
   z.object({
     channel: z
       .string()
       .min(1)
+      .max(SLACK_MAX_NAME_LENGTH)
       .describe(
-        'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use listChannels to browse available channels, or resolveChannelId when you know the channel name and need its ID.'
+        'Conversation ID (C.../G.../D...) or, on the Elastic Slack app, a connected channel name (e.g. "#general"). Use listChannels or resolveChannelId to look up an ID.'
       ),
-    text: z.string().min(1).describe('The message text to send'),
+    text: z.string().min(1).max(SLACK_MAX_MESSAGE_TEXT_LENGTH).describe('The message text to send'),
+    blocks: slackMessageBlocksSchema(),
     threadTs: z
       .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
       .optional()
       .describe('Timestamp of another message to reply to (creates a threaded reply)'),
     unfurlLinks: z
@@ -651,3 +707,261 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
   })
 );
 export type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
+
+// =============================================================================
+// Net-new action input schemas (V2 write-parity additions)
+// =============================================================================
+
+// https://api.slack.com/methods/conversations.replies
+export const SlackGetConversationRepliesInputSchema = lazySchema(() =>
+  z.object({
+    channel: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_ID_LENGTH)
+      .describe(
+        'Conversation ID that contains the thread (e.g. C... for channels, G... for private channels, D... for DMs).'
+      ),
+    ts: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .describe(
+        'Timestamp of the parent message that started the thread (e.g. "1234567890.123456"). This is the threadTs from a sendMessage response.'
+      ),
+    oldest: z
+      .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .optional()
+      .describe('Only replies after this Unix timestamp (inclusive). String form.'),
+    latest: z
+      .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .optional()
+      .describe('Only replies before this Unix timestamp. String form.'),
+    inclusive: z
+      .boolean()
+      .optional()
+      .describe('Include messages with the oldest or latest timestamps.'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(SLACK_MAX_HISTORY_LIMIT)
+      .default(SLACK_DEFAULT_HISTORY_LIMIT)
+      .describe(
+        `Number of replies to return per page (1-${SLACK_MAX_HISTORY_LIMIT}). Defaults to ${SLACK_DEFAULT_HISTORY_LIMIT}.`
+      ),
+    cursor: z
+      .string()
+      .max(SLACK_MAX_CURSOR_LENGTH)
+      .optional()
+      .describe(
+        'Pagination cursor from a previous getConversationReplies response. Omit for the first page.'
+      ),
+    raw: z
+      .boolean()
+      .optional()
+      .describe('Return the full raw Slack API response instead of a compact result.'),
+  })
+);
+export type SlackGetConversationRepliesInput = z.infer<
+  typeof SlackGetConversationRepliesInputSchema
+>;
+
+export interface SlackConversationsRepliesResponse extends SlackErrorFields {
+  ok: boolean;
+  messages?: SlackConversationsHistoryMessage[];
+  has_more?: boolean;
+  response_metadata?: { next_cursor?: string };
+}
+
+// https://api.slack.com/methods/chat.update
+export const SlackUpdateMessageInputSchema = lazySchema(() =>
+  z.object({
+    channel: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_NAME_LENGTH)
+      .describe(
+        'Conversation ID (C.../G.../D...) holding the message. Slack does not accept channel names when editing; only the Elastic Slack app also accepts a connected channel name (e.g. "#general").'
+      ),
+    messageTs: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .describe(
+        'Timestamp of the message to edit, as returned in ts by sendMessage. Must be a message this app posted.'
+      ),
+    text: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_UPDATE_MESSAGE_TEXT_LENGTH)
+      .describe(
+        'The new message text, at most 4,000 characters. It replaces the current text of the message, and without blocks Slack removes any blocks the message had.'
+      ),
+    blocks: slackMessageBlocksSchema(),
+  })
+);
+export type SlackUpdateMessageInput = z.infer<typeof SlackUpdateMessageInputSchema>;
+
+// https://api.slack.com/methods/reactions.add
+export const SlackAddReactionInputSchema = lazySchema(() =>
+  z.object({
+    channel: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_ID_LENGTH)
+      .describe('Conversation ID that contains the message to react to.'),
+    timestamp: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .describe(
+        'Timestamp of the message to react to (e.g. "1234567890.123456"). Use the timestamp from a previous sendMessage response.'
+      ),
+    name: z
+      .string()
+      .min(1)
+      .max(100)
+      .describe(
+        'Emoji name to add as a reaction, without surrounding colons (e.g. "thumbsup", "white_check_mark", "eyes").'
+      ),
+  })
+);
+export type SlackAddReactionInput = z.infer<typeof SlackAddReactionInputSchema>;
+
+const SLACK_MAX_FILE_CONTENT_LENGTH = 2_000_000;
+const SLACK_MAX_FILENAME_LENGTH = 255;
+const SLACK_MAX_UPLOAD_TITLE_LENGTH = 500;
+const SLACK_MAX_UPLOAD_COMMENT_LENGTH = 2000;
+
+const BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/;
+
+/** Strips an optional `data:...;base64,` prefix and whitespace so the payload can be decoded strictly. */
+export const normalizeBase64 = (content: string): string =>
+  content.replace(/^data:[^,]*;base64,/i, '').replace(/\s+/g, '');
+
+const isValidBase64 = (content: string): boolean => {
+  const normalized = normalizeBase64(content);
+  return normalized.length % 4 === 0 && BASE64_PATTERN.test(normalized);
+};
+
+// https://api.slack.com/methods/files.getUploadURLExternal (v2 upload flow)
+export const SlackUploadFileInputSchema = lazySchema(() =>
+  z
+    .object({
+      filename: z
+        .string()
+        .min(1)
+        .max(SLACK_MAX_FILENAME_LENGTH)
+        .describe('Name of the file to upload (e.g. "incident-report.txt", "screenshot.png").'),
+      content: z
+        .string()
+        .min(1)
+        .max(SLACK_MAX_FILE_CONTENT_LENGTH)
+        .describe(
+          'File content to upload. For text files (logs, reports, code), pass the raw text. For binary files, pass base64-encoded content and set encoding to "base64". Max ~2 MB (1.5 MB binary).'
+        ),
+      encoding: z
+        .enum(['utf8', 'base64'])
+        .default('utf8')
+        .describe(
+          'Encoding of the content field. Use "utf8" (default) for plain text; use "base64" for binary files.'
+        ),
+      channel: z
+        .string()
+        .max(SLACK_MAX_ID_LENGTH)
+        .optional()
+        .describe(
+          'Conversation ID to share the uploaded file into (e.g. C...). Omit to upload without sharing.'
+        ),
+      title: z
+        .string()
+        .max(SLACK_MAX_UPLOAD_TITLE_LENGTH)
+        .optional()
+        .describe('Display title for the file in Slack.'),
+      initialComment: z
+        .string()
+        .max(SLACK_MAX_UPLOAD_COMMENT_LENGTH)
+        .optional()
+        .describe('Message text to accompany the file when it is shared into a channel.'),
+      threadTs: z
+        .string()
+        .max(SLACK_MAX_TIMESTAMP_LENGTH)
+        .optional()
+        .describe('Thread timestamp to share the file into a thread.'),
+    })
+    .refine((v) => v.encoding !== 'base64' || isValidBase64(v.content), {
+      message: 'content is not valid base64.',
+      path: ['content'],
+    })
+);
+export type SlackUploadFileInput = z.infer<typeof SlackUploadFileInputSchema>;
+
+export interface SlackFilesGetUploadURLResponse extends SlackErrorFields {
+  ok: boolean;
+  upload_url?: string;
+  file_id?: string;
+}
+
+export interface SlackFilesCompleteUploadResponse extends SlackErrorFields {
+  ok: boolean;
+  files?: Array<{ id?: string; title?: string }>;
+}
+
+// https://api.slack.com/methods/chat.postMessage (interactive buttons for HITL)
+export const SlackAskQuestionInputSchema = lazySchema(() =>
+  z.object({
+    channel: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_ID_LENGTH)
+      .describe(
+        'Conversation ID or user ID (U...) to post the question to. Use lookupUserByEmail to get a user ID for direct-message delivery.'
+      ),
+    question: z
+      .string()
+      .min(1)
+      .max(2000)
+      .describe('The question or prompt text to display to the human respondent.'),
+    buttons: z
+      .array(
+        z.object({
+          text: z.string().min(1).max(75).describe('Button label displayed in Slack.'),
+          value: z
+            .string()
+            .min(1)
+            .max(200)
+            .describe('Value submitted when this button is clicked (machine-readable identifier).'),
+          style: z
+            .enum(['primary', 'danger'])
+            .optional()
+            .describe(
+              'Visual style: "primary" (green) for the preferred action, "danger" (red) for destructive actions. Omit for neutral.'
+            ),
+        })
+      )
+      .min(1)
+      .max(10)
+      .describe('Response options shown as buttons. Provide 1-10 buttons.'),
+    threadTs: z
+      .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .optional()
+      .describe('Timestamp of another message to post the question as a threaded reply.'),
+  })
+);
+export type SlackAskQuestionInput = z.infer<typeof SlackAskQuestionInputSchema>;
+
+export interface SlackChatPostMessageResponse extends SlackErrorFields {
+  ok: boolean;
+  channel?: string;
+  ts?: string;
+  message?: {
+    text?: string;
+    user?: string;
+    type?: string;
+    thread_ts?: string;
+  };
+}

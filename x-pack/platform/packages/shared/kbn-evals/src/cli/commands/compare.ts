@@ -9,13 +9,14 @@ import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
-import { computePairedTTestResults, pairScores } from '@kbn/evals-common';
+import { compareScores, pairScores } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
 import { getSpaceIdsFromEnv } from '../../utils/space_ids';
+import { buildExecutionCompareUrl } from '../../utils/evals_ui_url';
 import { readSpaceIdsFlag } from '../run_helpers';
-import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
+import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
@@ -23,7 +24,7 @@ const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 export const compareCmd: Command<void> = {
   name: 'compare',
   description: `
-  Compare two evaluation experiments using paired t-tests.
+  Compare two evaluation experiments with a paired statistical test per dataset and evaluator.
 
   Usage modes:
     1. Direct comparison of two experiment IDs (target first, baseline second):
@@ -102,7 +103,7 @@ export const compareCmd: Command<void> = {
       throw createFlagError(
         [
           error instanceof Error ? error.message : String(error),
-          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
+          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true and xpack.evals.mode=full.',
           'Set EVAL_KBN_API_KEY when authenticating to a non-local target.',
         ].join('\n')
       );
@@ -278,27 +279,24 @@ export const compareCmd: Command<void> = {
       `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
     );
 
-    const results = computePairedTTestResults(pairs);
+    const results = compareScores(pairs);
     if (results.length === 0) {
-      log.warning('No t-test results returned.');
+      log.warning('No comparison results returned.');
       return;
     }
 
     if (format === 'markdown') {
-      let comparePageUrl: string | undefined;
       const effectiveKibanaUrl = kibanaUrl ?? evaluationsKbnUrl;
-      if (effectiveKibanaUrl) {
-        try {
-          const urlObj = new URL(effectiveKibanaUrl);
-          urlObj.username = '';
-          urlObj.password = '';
-          const baseUrl = urlObj.toString().replace(/\/+$/, '');
-          comparePageUrl = `${baseUrl}/app/evals/compare?type=execution&baseline=${encodeURIComponent(
-            baselineExperimentId
-          )}&target=${encodeURIComponent(targetExperimentId)}`;
-        } catch {
-          log.warning(`Invalid Kibana URL for compare page link: ${effectiveKibanaUrl}`);
-        }
+      const comparePageUrl = effectiveKibanaUrl
+        ? buildExecutionCompareUrl({
+            kibanaUrl: effectiveKibanaUrl,
+            spaceId: spaceIds?.[0],
+            baselineExecutionId: baselineExperimentId,
+            targetExecutionId: targetExperimentId,
+          })
+        : undefined;
+      if (effectiveKibanaUrl && !comparePageUrl) {
+        log.warning('Invalid Kibana URL for compare page link.');
       }
 
       const markdown = formatMarkdownCompareReport({
@@ -321,7 +319,7 @@ export const compareCmd: Command<void> = {
         process.stdout.write(markdown + '\n');
       }
     } else {
-      const report = formatPairedTTestReport({
+      const report = formatCompareReport({
         targetExperimentId,
         baselineExperimentId,
         results,

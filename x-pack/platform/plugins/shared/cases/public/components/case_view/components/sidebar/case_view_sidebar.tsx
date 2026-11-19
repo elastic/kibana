@@ -187,7 +187,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
         data-test-subj="case-view-sidebar-applied-template"
       >
         <FormattedMessage
-          id="xpack.cases.casesRedesign.details.fieldsSectionTemplateSubtitle"
+          id="xpack.cases.details.fieldsSectionTemplateSubtitle"
           defaultMessage="Template: {name}"
           values={{
             name: <strong css={templateNameStyles}>{templateData.name}</strong>,

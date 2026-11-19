@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Action } from 'typescript-fsa';
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { takeLatest } from 'redux-saga/effects';
-import type { GraphState, GraphStoreDependencies } from './store';
+import type { GraphState, GraphStoreDependencies, StartGraphListening } from './store';
 import type { AdvancedSettings } from '../types';
 import { reset } from './global';
 import { setDatasource, requestDatasource } from './datasource';
+import type { MatchedAction } from './helpers';
+import { matchesAction } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/advancedSettings');
 
@@ -40,21 +40,24 @@ export const advancedSettingsReducer = reducerWithInitialState(initialSettings)
 export const settingsSelector = (state: GraphState) => state.advancedSettings;
 
 /**
- * Saga making sure the advanced settings are always synced up to the workspace instance.
+ * Listener making sure the advanced settings are always synced up to the workspace instance.
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncSettingsSaga = ({ getWorkspace, notifyReact }: GraphStoreDependencies) => {
-  function* syncSettings(action: Action<AdvancedSettingsState>): IterableIterator<void> {
-    const workspace = getWorkspace();
-    if (!workspace) {
-      return;
-    }
-    workspace.options.exploreControls = action.payload;
-    notifyReact();
-  }
-
-  return function* () {
-    yield takeLatest(updateSettings.match, syncSettings);
-  };
+export const registerAdvancedSettingsListeners = (
+  startListening: StartGraphListening,
+  { getWorkspace, notifyReact }: GraphStoreDependencies
+) => {
+  startListening({
+    matcher: matchesAction(updateSettings),
+    effect: (action: MatchedAction<AdvancedSettingsState>, listenerApi) => {
+      listenerApi.cancelActiveListeners();
+      const workspace = getWorkspace();
+      if (!workspace) {
+        return;
+      }
+      workspace.options.exploreControls = action.payload;
+      notifyReact();
+    },
+  });
 };

@@ -53,30 +53,9 @@ const PackTypeSelectableComponent = ({
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <EuiCheckableCard
-              id={`${idPrefix}-policy`}
-              name={idPrefix}
-              css={FULL_HEIGHT_CSS}
-              label={
-                <strong>
-                  {i18n.translate('xpack.osquery.pack.form.policyLabel', {
-                    defaultMessage: 'Policy',
-                  })}
-                </strong>
-              }
-              checked={packType === 'policy'}
-              onChange={handleSelectPolicy}
-              disabled={isDisabled}
-              data-test-subj="osqueryPackTypePolicy"
-            >
-              {i18n.translate('xpack.osquery.pack.form.policyDescription', {
-                defaultMessage: 'Schedule pack for specific policy.',
-              })}
-            </EuiCheckableCard>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCheckableCard
               id={`${idPrefix}-global`}
               name={idPrefix}
+              checkableType="radio"
               css={FULL_HEIGHT_CSS}
               label={
                 <strong>
@@ -91,7 +70,30 @@ const PackTypeSelectableComponent = ({
               data-test-subj="osqueryPackTypeGlobal"
             >
               {i18n.translate('xpack.osquery.pack.form.globalDescription', {
-                defaultMessage: 'Use pack across all policies',
+                defaultMessage: 'Use pack across all policies.',
+              })}
+            </EuiCheckableCard>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCheckableCard
+              id={`${idPrefix}-policy`}
+              name={idPrefix}
+              checkableType="radio"
+              css={FULL_HEIGHT_CSS}
+              label={
+                <strong>
+                  {i18n.translate('xpack.osquery.pack.form.policyLabel', {
+                    defaultMessage: 'Policy',
+                  })}
+                </strong>
+              }
+              checked={packType === 'policy'}
+              onChange={handleSelectPolicy}
+              disabled={isDisabled}
+              data-test-subj="osqueryPackTypePolicy"
+            >
+              {i18n.translate('xpack.osquery.pack.form.policyDescription', {
+                defaultMessage: 'Use pack for specific policies.',
               })}
             </EuiCheckableCard>
           </EuiFlexItem>

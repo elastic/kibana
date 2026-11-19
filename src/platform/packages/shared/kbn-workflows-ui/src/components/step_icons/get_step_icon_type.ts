@@ -103,9 +103,6 @@ export const getStepIconType = (type: string): IconType => {
       // Avoid tokenNumber: filled token glyphs read too small next to logo/outline icons.
       iconType = 'list';
       break;
-    case 'merge':
-      iconType = HardcodedIcons.merge;
-      break;
     case 'parallel':
     case 'enter-parallel':
     case 'exit-parallel':
@@ -134,6 +131,7 @@ export const getStepIconType = (type: string): IconType => {
       break;
     case 'slack':
     case 'slack_api':
+    case 'slack2':
       iconType = 'logoSlack';
       break;
     case 'inference':

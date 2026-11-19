@@ -7,16 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { randomUUID } from 'crypto';
+import type { Logger } from '@kbn/logging';
+import {
+  collectIgnoredKibanaFetcherOccurrences,
+  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  transformWorkflowYamlJsontoEsWorkflow,
+} from '@kbn/workflows';
 import type { EsWorkflow, EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 
 import { generateWorkflowId } from '../../../common/lib/import';
 import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml';
+import { getCalledWorkflowIds } from '../../../common/lib/workflow_dependents/find_call_sites';
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
 import { INITIAL_WORKFLOW_VERSION } from '../../lib/workflow_version';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
+
+/** Persist-time warning for ignored kibana YAML `fetcher` settings. */
+export const logIgnoredKibanaFetcherOnPersist = (params: {
+  logger?: Logger;
+  steps: WorkflowYaml['steps'] | undefined;
+  workflowName: string;
+  workflowId?: string;
+}): void => {
+  const { logger, steps, workflowName, workflowId } = params;
+  if (!logger) {
+    return;
+  }
+  const ignoredFetcherSteps = collectIgnoredKibanaFetcherOccurrences(steps)
+    .map((occurrence) => occurrence.stepName)
+    .filter((name): name is string => typeof name === 'string' && name.length > 0);
+  if (ignoredFetcherSteps.length === 0) {
+    return;
+  }
+  logger.warn(
+    `Workflow "${workflowName}" contains a deprecated kibana step "fetcher" setting. ${IGNORED_KIBANA_FETCHER_SETTING_MESSAGE}`,
+    {
+      event: { action: 'workflow-persist' },
+      tags: ['kibana', 'deprecated'],
+      labels: {
+        ...(workflowId ? { workflow_id: workflowId } : {}),
+        step_names: ignoredFetcherSteps.join(','),
+      },
+    }
+  );
+};
 
 /** Derives a list of trigger type ids from a workflow definition. */
 export const getTriggerTypesFromDefinition = (
@@ -64,7 +101,7 @@ const extractLooseMetadataFields = (
  * Validates YAML and builds a WorkflowProperties document ready for indexing.
  * Shared by user-created and managed workflow creation paths.
  */
-export const prepareWorkflowDocumentFromYaml = (params: {
+export const prepareWorkflowDocumentFromYaml = async (params: {
   id?: string;
   yaml: string;
   zodSchema: z.ZodType;
@@ -73,7 +110,10 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   spaceId: string;
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
   nameFallback?: string;
-}): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
+  logger?: Logger;
+  /** Preserved across a full-document rewrite. Assigned when omitted. */
+  workflowUid?: string;
+}): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> => {
   const {
     id: providedId,
     yaml,
@@ -83,6 +123,8 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     spaceId,
     triggerDefinitions,
     nameFallback,
+    logger,
+    workflowUid,
   } = params;
 
   const looseMetadata = extractLooseMetadataFields(yaml);
@@ -99,7 +141,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     valid: false,
   };
 
-  const validation = validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
+  const validation = await validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
   if (validation.valid && validation.parsedWorkflow) {
     workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
   } else if (validation.parsedWorkflow) {
@@ -110,12 +152,21 @@ export const prepareWorkflowDocumentFromYaml = (params: {
 
   const id = providedId || generateWorkflowId(workflowToCreate.name);
 
+  logIgnoredKibanaFetcherOnPersist({
+    logger,
+    steps: validation.parsedWorkflow?.steps,
+    workflowName: workflowToCreate.name,
+    workflowId: id,
+  });
+
   const workflowData: WorkflowProperties = {
     name: workflowToCreate.name,
     description: workflowToCreate.description,
     enabled: workflowToCreate.enabled,
     tags: workflowToCreate.tags || [],
     triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
+    calledWorkflowIds: getCalledWorkflowIds(workflowToCreate.definition),
+    calledWorkflowIdsIndexed: true,
     yaml,
     definition: workflowToCreate.definition ?? null,
     createdBy: authenticatedUser,
@@ -128,6 +179,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     lifecycle: null,
     valid: workflowToCreate.valid,
     deleted_at: null,
+    workflowUid: workflowUid ?? randomUUID(),
     version: INITIAL_WORKFLOW_VERSION,
     created_at: now.toISOString(),
     updated_at: now.toISOString(),
@@ -140,17 +192,28 @@ export const prepareWorkflowDocumentFromYaml = (params: {
  * Validates YAML update and returns the storage patch + validation errors.
  * Pure function — caller resolves zodSchema and triggerDefinitions before calling.
  */
-export const applyYamlUpdate = (params: {
+export const applyYamlUpdate = async (params: {
   workflowYaml: string;
   zodSchema: z.ZodType;
   triggerDefinitions: Array<{ id: string; eventSchema: z.ZodType }>;
-}): {
+  logger?: Logger;
+  workflowId?: string;
+}): Promise<{
   updatedDataPatch: Partial<WorkflowProperties>;
   validationErrors: string[];
   shouldUpdateScheduler: boolean;
-} => {
-  const { workflowYaml, zodSchema, triggerDefinitions } = params;
-  const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
+}> => {
+  const { workflowYaml, zodSchema, triggerDefinitions, logger, workflowId } = params;
+  const validation = await validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
+  logIgnoredKibanaFetcherOnPersist({
+    logger,
+    steps: validation.parsedWorkflow?.steps,
+    workflowName:
+      validation.parsedWorkflow?.name ??
+      extractLooseMetadataFields(workflowYaml).name ??
+      'Untitled workflow',
+    workflowId,
+  });
 
   if (!validation.valid || !validation.parsedWorkflow) {
     const looseMetadata = extractLooseMetadataFields(workflowYaml);
@@ -188,6 +251,27 @@ export const applyYamlUpdate = (params: {
     validationErrors: [],
     shouldUpdateScheduler: true,
   };
+};
+
+/**
+ * Gives a valid YAML update the workflow's current enabled state when the YAML doesn't set
+ * `enabled` itself, so saving YAML never turns a workflow on or off by omission.
+ */
+export const keepEnabledUnlessDeclared = (
+  workflowYaml: string,
+  { updatedDataPatch, validationErrors }: Awaited<ReturnType<typeof applyYamlUpdate>>,
+  enabled: boolean
+): Partial<WorkflowProperties> => {
+  const { definition } = updatedDataPatch;
+  if (
+    validationErrors.length > 0 ||
+    !updatedDataPatch.valid ||
+    !definition ||
+    workflowYamlDeclaresTopLevelEnabled(workflowYaml)
+  ) {
+    return updatedDataPatch;
+  }
+  return { ...updatedDataPatch, enabled, definition: { ...definition, enabled } };
 };
 
 /**
@@ -239,12 +323,13 @@ export const applyFieldUpdates = (
     );
   }
 
-  // Keep definition.enabled in sync with the top-level enabled column so that
-  // any consumer of the parsed definition (e.g. export) always sees the current
-  // value.  The YAML-update path performs this same sync in workflow_crud_service;
-  // mirror it here for the field-only path.
-  if (patch.enabled !== undefined && existingSource?.definition) {
-    patch.definition = { ...existingSource.definition, enabled: patch.enabled };
+  // Keep parsed fields current: delegation checks read tags from the definition.
+  if (existingSource?.definition && (patch.enabled !== undefined || patch.tags !== undefined)) {
+    patch.definition = {
+      ...existingSource.definition,
+      ...(patch.enabled !== undefined ? { enabled: patch.enabled } : {}),
+      ...(patch.tags !== undefined ? { tags: patch.tags } : {}),
+    };
   }
 
   return { patch, validationErrors };

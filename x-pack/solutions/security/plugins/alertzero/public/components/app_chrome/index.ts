@@ -6,4 +6,5 @@
  */
 
 export { AppChromeLayout } from './app_chrome_layout';
-export { AskAlertZeroFab } from './alertzero_chrome';
+export { useAppHeadingDocLink } from './app_heading_doc_link';
+export { useAppHeadingTitle } from './app_heading_title';

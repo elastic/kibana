@@ -11,7 +11,7 @@ import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 /**
- * Exposed by the preboot test plugin in `test/plugins/test_endpoints`, which reads the verification
+ * Exposed by the preboot `interactive_setup_test_endpoints` plugin, which reads the verification
  * code interactive setup generated. Tests cannot read that file directly: its location depends on
  * the *running Kibana's* data path, which on CI is the built install directory rather than the repo
  * root the test process runs from.
@@ -23,7 +23,9 @@ const VERIFICATION_CODE_ROUTE = '/test_endpoints/verification_code';
  * `/internal/interactive_setup/{enroll,configure}` has to carry it, and it changes on every boot.
  */
 export async function getVerificationCode(apiClient: ApiClientFixture): Promise<string> {
-  const response = await apiClient.get(VERIFICATION_CODE_ROUTE);
+  const response = await apiClient.get(VERIFICATION_CODE_ROUTE, {
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+  });
   expect(response).toHaveStatusCode(200);
 
   return response.body.verificationCode;

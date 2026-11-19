@@ -86,9 +86,13 @@ components:
           type: number
           description: The migrated rule risk_score value, integer between 0 and 100.
         query:
+          ## null values helps in unsetting value in elasticsearch
+          nullable: true
           type: string
           description: The translated elastic query.
         query_language:
+          ## null values helps in unsetting value in elasticsearch
+          nullable: true
           type: string
           description: The translated elastic query language.
           enum:

@@ -13,6 +13,7 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
 import type { AppDeepLinkLocations } from '@kbn/core/public';
+import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 
 /** Tab interface with optional deep link and create action support. */
 export type DashboardListingTab = TableListTab & {
@@ -20,7 +21,12 @@ export type DashboardListingTab = TableListTab & {
     title: string;
     visibleIn?: AppDeepLinkLocations[];
   };
-  createAction?: () => void | Promise<void>;
+  createAction?: {
+    order: AppMenuPopoverItem['order'];
+    label: AppMenuPopoverItem['label'];
+    iconType: AppMenuPopoverItem['iconType'];
+    create: (path: string) => void | Promise<void>;
+  };
 };
 
 export type DashboardListingProps = PropsWithChildren<{
@@ -30,7 +36,6 @@ export type DashboardListingProps = PropsWithChildren<{
   goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
   getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
   urlStateEnabled?: boolean;
-  showCreateDashboardButton?: boolean;
   getTabs?: () => DashboardListingTab[];
 }>;
 

@@ -8,8 +8,8 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowsBaseTelemetry } from './telemetry';
-import type { YamlValidationResult } from '../../features/validate_workflow_yaml/model/types';
 import {
   workflowEventNames,
   WorkflowExecutionEventTypes,

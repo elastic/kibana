@@ -171,9 +171,13 @@ export const Watch = lazySchema(() =>
      */
     tags: z.array(z.string()).describe('Always includes watch, plus a tier tag when known'),
     /**
-     * Accent color for coverage strip and cards (hex or CSS var)
+     * EUI token key resolved with resolveWatchAccent (`euiColorVisN` or `textAssistance`)
      */
-    color: z.string().describe('Accent color for coverage strip and cards (hex or CSS var)'),
+    color: z
+      .string()
+      .describe(
+        'EUI token key resolved with resolveWatchAccent (`euiColorVisN` or `textAssistance`)'
+      ),
     enabled: z.boolean(),
     draft: z.boolean(),
     /**

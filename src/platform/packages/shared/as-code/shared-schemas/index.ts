@@ -14,11 +14,14 @@ export {
   asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
   asCodeQuerySchema,
+  asCodeRelatedItemSchema,
   asCodeSearchRequestSchema,
+  getAsCodeSearchRequestSchema,
   getAsCodeTagsSchema,
   getMeta,
   type AsCodeMeta,
   type AsCodeQuery,
+  type AsCodeRelatedItem,
 } from './src/schemas';
 
 export {

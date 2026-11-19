@@ -18,6 +18,7 @@ export const TableRowActions: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   onReassignClick: () => void;
   onUnenrollClick: () => void;
+  onForceUnenrollClick: () => void;
   onGetUninstallCommandClick: () => void;
   onUpgradeClick: () => void;
   onAddRemoveTagsClick: (button: HTMLElement) => void;
@@ -27,12 +28,14 @@ export const TableRowActions: React.FunctionComponent<{
   onViewAgentJsonClick: () => void;
   onViewAgentPolicyClick: () => void;
   onRollbackClick: () => void;
+  onRestartClick: () => void;
   onRemoveCollectorClick?: () => void;
 }> = ({
   agent,
   agentPolicy,
   onReassignClick,
   onUnenrollClick,
+  onForceUnenrollClick,
   onGetUninstallCommandClick,
   onUpgradeClick,
   onAddRemoveTagsClick,
@@ -42,6 +45,7 @@ export const TableRowActions: React.FunctionComponent<{
   onViewAgentJsonClick,
   onViewAgentPolicyClick,
   onRollbackClick,
+  onRestartClick,
   onRemoveCollectorClick,
 }) => {
   const { getHref } = useLink();
@@ -62,8 +66,10 @@ export const TableRowActions: React.FunctionComponent<{
       onRequestDiagnosticsClick,
       onChangeAgentPrivilegeLevelClick,
       onUnenrollClick,
+      onForceUnenrollClick,
       onUninstallClick: onGetUninstallCommandClick,
       onRollbackClick,
+      onRestartClick,
       onRemoveCollectorClick,
     }),
     [
@@ -78,8 +84,10 @@ export const TableRowActions: React.FunctionComponent<{
       onRequestDiagnosticsClick,
       onChangeAgentPrivilegeLevelClick,
       onUnenrollClick,
+      onForceUnenrollClick,
       onGetUninstallCommandClick,
       onRollbackClick,
+      onRestartClick,
       onRemoveCollectorClick,
     ]
   );

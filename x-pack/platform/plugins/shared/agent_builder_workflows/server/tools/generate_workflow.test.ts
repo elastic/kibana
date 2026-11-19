@@ -44,9 +44,15 @@ describe('generateWorkflowTool', () => {
       update: jest.Mock;
       sendUiEvent: jest.Mock;
       stack: unknown[];
+      callSource: string;
     }> = {}
   ) =>
     ({
+      callContext: {
+        toolId: 'platform.core.generate_workflow',
+        toolCallId: 'call-1',
+        callSource: overrides.callSource ?? 'agent',
+      },
       modelProvider: { getDefaultModel: jest.fn().mockResolvedValue({ id: 'model' }) },
       logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
       request: { __mock: 'request' },
@@ -123,7 +129,35 @@ describe('generateWorkflowTool', () => {
     expect(result.data.proposal_id).toEqual(expect.any(String));
     expect(result.data.created).toBe(true);
     expect(result.data.comment).toBe('created the workflow');
+    expect(result.data.presentation).toEqual(expect.stringContaining('render_attachment'));
+    // In chat the YAML lives in the attachment, not in the tool result.
+    expect(result.data.yaml).toBeUndefined();
   });
+
+  it.each(['mcp', 'user', 'unknown'])(
+    'returns the YAML instead of attachment ids for %s callers',
+    async (callSource) => {
+      generateWorkflowMock.mockResolvedValueOnce({
+        workflow: generatedWorkflow,
+        yaml: 'name: foo\n',
+        response: 'created the workflow',
+      } as any);
+
+      const context = buildContext({ callSource });
+      const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
+      const out = await tool.handler({ query: 'a workflow' } as any, context);
+
+      const result = (out as unknown as { results: Array<{ data: Record<string, unknown> }> })
+        .results[0];
+      expect(result.data.yaml).toBe('name: foo\n');
+      expect(result.data.created).toBe(true);
+      // Callers outside the chat harness cannot resolve these, so they are omitted.
+      expect(result.data.attachment_id).toBeUndefined();
+      expect(result.data.diff_attachment_id).toBeUndefined();
+      expect(result.data.proposal_id).toBeUndefined();
+      expect(result.data.presentation).toBeUndefined();
+    }
+  );
 
   it('persists a provided workflowId on creation: both diff and workflow attachments carry it', async () => {
     generateWorkflowMock.mockResolvedValueOnce({

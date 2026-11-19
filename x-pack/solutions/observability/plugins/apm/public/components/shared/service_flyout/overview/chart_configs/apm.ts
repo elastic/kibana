@@ -17,6 +17,7 @@ import {
   METRIC_SYSTEM_TOTAL_MEMORY,
   PROCESSOR_EVENT,
   TRANSACTION_DURATION,
+  TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../../common/es_fields/apm';
 import { ChartType } from '../../../charts/helper/get_timeseries_color';
@@ -44,10 +45,13 @@ function createApmBaseQuery({
   processorEvent: FlyoutLensChartProcessorEvent;
   scope: ServiceScope & { transactionType?: string };
 }): ComposerQuery {
-  const { transactionType } = scope;
+  const { transactionType, transactionName } = scope;
   const query = esql.from(indices).where`${esql.col(PROCESSOR_EVENT)} == ${processorEvent}`;
   if (transactionType) {
     query.where`${esql.col(TRANSACTION_TYPE)} == ${transactionType}`;
+  }
+  if (transactionName) {
+    query.where`${esql.col(TRANSACTION_NAME)} == ${transactionName}`;
   }
   applyServiceFilters(query, scope);
   return query;

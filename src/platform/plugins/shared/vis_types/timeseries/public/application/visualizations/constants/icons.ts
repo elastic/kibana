@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
+import type { VisIconType } from '@kbn/chart-icons';
+import { resolveVisIcon } from '@kbn/chart-icons';
 import { bombIcon } from '../../components/svg/bomb_icon';
 import { fireIcon } from '../../components/svg/fire_icon';
 
@@ -42,4 +45,12 @@ export const ICON_TYPES_MAP = {
   [ICON_NAMES.MAP_PIN]: 'pinFilled',
   [ICON_NAMES.STAR]: 'starFilled',
   [ICON_NAMES.TAG]: 'tag',
+} satisfies Record<string, VisIconType | typeof bombIcon | typeof fireIcon>;
+
+/**
+ * Returns the icon to render for a persisted TSVB icon name.
+ */
+export const getIconType = (iconName: string | undefined): IconType | undefined => {
+  const icon = iconName ? ICON_TYPES_MAP[iconName] : undefined;
+  return typeof icon === 'string' ? resolveVisIcon(icon) : icon;
 };

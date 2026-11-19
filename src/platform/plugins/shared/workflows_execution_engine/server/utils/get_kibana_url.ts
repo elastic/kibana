@@ -12,21 +12,7 @@ import type { CoreStart } from '@kbn/core/server';
 
 const LOCALHOST_FALLBACK = 'http://localhost:5601';
 
-export function getKibanaUrl(
-  coreStart?: CoreStart,
-  cloudSetup?: CloudSetup,
-  use_server_info: boolean = false,
-  use_localhost: boolean = false
-): string {
-  // Force flags take precedence (use_server_info wins over use_localhost)
-  if (use_server_info) {
-    return getServerInfoUrl(coreStart) ?? LOCALHOST_FALLBACK;
-  }
-
-  if (use_localhost) {
-    return LOCALHOST_FALLBACK;
-  }
-
+export function getKibanaUrl(coreStart?: CoreStart, cloudSetup?: CloudSetup): string {
   // Default resolution order: publicBaseUrl → cloud URL → server info → localhost
   return (
     coreStart?.http?.basePath?.publicBaseUrl ??
@@ -45,15 +31,14 @@ function getServerInfoUrl(coreStart?: CoreStart): string | undefined {
   return `${protocol}://${hostname}:${port}${http.basePath.prepend('/').slice(0, -1)}`;
 }
 
-export function buildWorkflowExecutionUrl(
-  kibanaUrl: string,
+/** App path for an execution, relative to publicBaseUrl, including the space prefix. */
+export function buildWorkflowExecutionAppPath(
   spaceId: string,
   workflowId: string,
   executionId: string,
   stepExecutionId?: string
 ): string {
   const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-  const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
   const params = new URLSearchParams({
     executionId,
     tab: 'executions',
@@ -63,5 +48,20 @@ export function buildWorkflowExecutionUrl(
     params.set('stepExecutionId', stepExecutionId);
   }
 
-  return `${baseUrl}?${params.toString()}`;
+  return `${spacePrefix}/app/workflows/${workflowId}?${params.toString()}`;
+}
+
+export function buildWorkflowExecutionUrl(
+  kibanaUrl: string,
+  spaceId: string,
+  workflowId: string,
+  executionId: string,
+  stepExecutionId?: string
+): string {
+  return `${kibanaUrl}${buildWorkflowExecutionAppPath(
+    spaceId,
+    workflowId,
+    executionId,
+    stepExecutionId
+  )}`;
 }

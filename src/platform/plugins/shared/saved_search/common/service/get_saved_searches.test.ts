@@ -109,6 +109,7 @@ describe('getSavedSearch', () => {
         "rowsPerPage": undefined,
         "sampleSize": 100,
         "searchSource": Object {
+          "build": [MockFunction],
           "create": [MockFunction],
           "createChild": [MockFunction],
           "createCopy": [MockFunction],
@@ -143,6 +144,7 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
+        "tabTypeState": undefined,
         "tabs": Array [
           Object {
             "attributes": Object {
@@ -264,6 +266,7 @@ describe('getSavedSearch', () => {
         "rowsPerPage": undefined,
         "sampleSize": undefined,
         "searchSource": Object {
+          "build": [MockFunction],
           "create": [MockFunction],
           "createChild": [MockFunction],
           "createCopy": [MockFunction],
@@ -298,6 +301,7 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
+        "tabTypeState": undefined,
         "tabs": Array [
           Object {
             "attributes": Object {

@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+  ENDPOINT_KNOWLEDGE_SEARCH_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { installSecurityManagedWorkflowsAndMarkReady } from './security_managed_workflows';
+import {
+  installSecurityManagedWorkflowsAndMarkReady,
+  installThreatIntelManagedWorkflowsForSpaces,
+} from './security_managed_workflows';
 import * as threatIntelInstall from './threat_intel_workflow/install';
 import * as alertAnalysisInstall from './alert_analysis_workflow/install';
 import * as enumerate from './lib/enumerate_space_ids';
@@ -22,7 +28,9 @@ jest.mock('./lib/enumerate_space_ids');
 describe('installSecurityManagedWorkflowsAndMarkReady', () => {
   const createManagedClient = () => ({
     install: jest.fn().mockResolvedValue(undefined),
+    installMany: jest.fn().mockResolvedValue({ failed: [] }),
     uninstall: jest.fn().mockResolvedValue(undefined),
+    disable: jest.fn().mockResolvedValue(true),
     ready: jest.fn().mockResolvedValue(undefined),
     execute: jest.fn().mockResolvedValue('mock-execution-id'),
     getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
@@ -57,6 +65,40 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     );
   });
 
+  it.each([true, false])(
+    'synchronizes endpoint workflows before ready with enabled %s',
+    async (enabled) => {
+      const managed = createManagedClient();
+      const order: string[] = [];
+      const action = enabled ? 'install' : 'uninstall';
+      managed[action].mockImplementation(async (workflowId) => {
+        if (workflowId === ENDPOINT_KNOWLEDGE_SEARCH_WORKFLOW_ID) {
+          order.push('knowledge');
+        }
+      });
+      managed.ready.mockImplementation(async () => {
+        order.push('ready');
+      });
+      const workflowsExtensions = workflowsExtensionsMock.createStart();
+      workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
+
+      await installSecurityManagedWorkflowsAndMarkReady({
+        workflowsExtensions,
+        logger: loggerMock.create(),
+        threatIntelSupplyEnabled: false,
+        experimentalFeatures: { automaticTroubleshootingUniversalSkill: enabled },
+        bootstrapReady: Promise.resolve(),
+        core: coreMock.createStart(),
+      });
+
+      expect(managed[action]).toHaveBeenCalledWith(ENDPOINT_KNOWLEDGE_SEARCH_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+      expect(order).toEqual(['knowledge', 'ready']);
+      expect(managed.ready).toHaveBeenCalledTimes(1);
+    }
+  );
+
   it('calls ready exactly once after alert analysis and threat intel install when the flag is on', async () => {
     const managed = createManagedClient();
     const order: string[] = [];
@@ -81,6 +123,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      experimentalFeatures: { automaticTroubleshootingUniversalSkill: false },
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -100,6 +143,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      experimentalFeatures: { automaticTroubleshootingUniversalSkill: false },
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -124,6 +168,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      experimentalFeatures: { automaticTroubleshootingUniversalSkill: false },
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -143,6 +188,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      experimentalFeatures: { automaticTroubleshootingUniversalSkill: false },
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -163,6 +209,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      experimentalFeatures: { automaticTroubleshootingUniversalSkill: false },
       bootstrapReady,
       core: coreMock.createStart(),
     });
@@ -172,6 +219,40 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     resolveBootstrap();
     await pending;
     expect(threatIntelInstall.installThreatIntelManagedWorkflows).toHaveBeenCalled();
+  });
+
+  it('installThreatIntelManagedWorkflowsForSpaces installs TI for enumerated spaces', async () => {
+    const managed = createManagedClient();
+    const workflowsExtensions = workflowsExtensionsMock.createStart();
+    workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
+    (enumerate.enumerateSpaceIds as jest.Mock).mockResolvedValue(['default', 'another']);
+
+    await installThreatIntelManagedWorkflowsForSpaces({
+      workflowsExtensions,
+      logger: loggerMock.create(),
+      core: coreMock.createStart(),
+    });
+
+    expect(threatIntelInstall.installThreatIntelManagedWorkflows).toHaveBeenCalledWith({
+      managedWorkflowsClient: managed,
+      spaceIds: ['default', 'another'],
+      logger: expect.anything(),
+    });
+  });
+
+  it('installThreatIntelManagedWorkflowsForSpaces rethrows after logging so recovery can retry', async () => {
+    const workflowsExtensions = workflowsExtensionsMock.createStart();
+    workflowsExtensions.initManagedWorkflowsClient.mockRejectedValue(new Error('no client'));
+    const logger = loggerMock.create();
+
+    await expect(
+      installThreatIntelManagedWorkflowsForSpaces({
+        workflowsExtensions,
+        logger,
+        core: coreMock.createStart(),
+      })
+    ).rejects.toThrow('no client');
+    expect(logger.warn).toHaveBeenCalled();
   });
 
   it('installs alert analysis in the global space via the shared client', async () => {
@@ -190,6 +271,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      experimentalFeatures: { automaticTroubleshootingUniversalSkill: false },
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });

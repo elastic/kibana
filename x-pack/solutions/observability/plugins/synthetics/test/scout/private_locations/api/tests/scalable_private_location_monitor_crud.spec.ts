@@ -19,13 +19,11 @@ import { tryForTime } from '../../../common/fixtures/retry';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 
 /**
- * A scalable (condition-sharded) private location -- `isAgentSharding: true`
- * -- routes every write through `PackagePolicyService`'s batched Fleet
- * agent-policy revision bump (`agent_policy_revision_batcher.ts`), unlike a
- * classic private location, which goes through Fleet's own immediate bump.
- * No existing Scout or FTR suite set `isAgentSharding: true` on a private
- * location, so that whole path -- create, update, and delete -- ran with zero
- * real-HTTP, real-auth coverage.
+ * A condition-sharded private location (Enterprise/trial license) routes every
+ * write through `PackagePolicyService`'s batched Fleet agent-policy revision
+ * bump (`agent_policy_revision_batcher.ts`), unlike an unsharded location,
+ * which goes through Fleet's own immediate bump. This suite covers that path
+ * -- create, update, and delete -- with real HTTP and real auth.
  *
  * That gap is not hypothetical: `bumpAgentPolicyRevision` briefly resolved its
  * cross-space agent-policy lookup with `getUnsafeInternalClient()`, which
@@ -55,8 +53,7 @@ apiTest.describe(
       await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
       await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
       privateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-        'default',
-        { isAgentSharding: true }
+        'default'
       );
     });
 

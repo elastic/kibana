@@ -12,21 +12,16 @@ import {
 
 const validResponse = {
   id: 'np-1',
-  version: 'WzEsMV0=',
   name: 'My Policy',
   description: 'A test policy',
   enabled: true,
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: { expression: 'host.name: "server-1"' },
-  group_by: ['host.name'],
-  tags: ['production'],
-  grouping_mode: 'per_episode' as const,
-  throttle: { strategy: 'on_status_change' as const, interval: null },
-  snoozed_until: null,
-  auth: { owner: 'user-1', created_by_user: true },
-  created_by: 'user-1',
+  grouping: { mode: 'per_field' as const, fields: ['host.name'] },
+  throttle: { strategy: 'on_status_change' as const },
+  created_by: { profile_uid: 'user-1' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'user-1',
+  updated_by: { profile_uid: 'user-1' },
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
@@ -39,21 +34,11 @@ describe('actionPolicyResponseSchema', () => {
   it('accepts nullable fields as null', () => {
     const result = actionPolicyResponseSchema.parse({
       ...validResponse,
-      version: undefined,
-      matcher: null,
-      group_by: null,
-      tags: null,
-      grouping_mode: null,
-      throttle: null,
-      snoozed_until: null,
       created_by: null,
       updated_by: null,
     });
-    expect(result.matcher).toBeNull();
-    expect(result.group_by).toBeNull();
-    expect(result.tags).toBeNull();
-    expect(result.grouping_mode).toBeNull();
-    expect(result.throttle).toBeNull();
+    expect(result.created_by).toBeNull();
+    expect(result.updated_by).toBeNull();
   });
 
   it('rejects missing required fields', () => {

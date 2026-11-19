@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux-v7';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
@@ -49,6 +49,11 @@ jest.mock('../hooks/use_monitor_list', () => ({
   useMonitorList: () => mockUseMonitorList(),
 }));
 
+jest.mock('../../common/app_header', () => ({
+  MonitorsListingPage: ({ children }: { children: React.ReactNode }) => children,
+  SyntheticsHeaderToolbar: () => null,
+}));
+
 jest.mock('../../../hooks', () => ({
   useEnablement: jest.fn(() => ({
     isEnabled: true,
@@ -89,6 +94,10 @@ jest.mock('../common/monitor_filters/filter_group', () => ({
   FilterGroup: () => null,
 }));
 
+jest.mock('../common/monitor_filters/selected_filter_pills', () => ({
+  SelectedFilterPills: () => null,
+}));
+
 jest.mock('../common/search_field', () => ({
   SearchField: () => null,
 }));
@@ -98,23 +107,24 @@ jest.mock('./overview/quick_filters', () => ({
 }));
 
 jest.mock('./overview/overview_grid', () => ({
-  OverviewGrid: () => null,
+  OverviewGrid: () => <div data-test-subj="overviewGrid" />,
 }));
 
 jest.mock('./overview/overview_status', () => ({
   OverviewStatus: () => null,
 }));
 
-jest.mock('./overview/overview_errors/overview_errors', () => ({
-  OverviewErrors: () => null,
-}));
-
-jest.mock('./overview/overview_alerts', () => ({
-  OverviewAlerts: () => null,
+jest.mock('./overview/overview_activity_chart', () => ({
+  OverviewActivityChart: () => null,
+  useOverviewActivityStats: () => [],
 }));
 
 jest.mock('../common/no_monitors_found', () => ({
-  NoMonitorsFound: () => null,
+  NoMonitorsFound: () => <div data-test-subj="noMonitorsFound" />,
+}));
+
+jest.mock('../../common/components/browser_complete_agent_overview_callout', () => ({
+  BrowserCompleteAgentOverviewCallout: () => null,
 }));
 
 import { OverviewPage } from './overview_page';
@@ -242,6 +252,30 @@ describe('OverviewPage wiring', () => {
     const history = renderPage('/overview', { monitorTypes: ['http'] });
 
     expect(history.location.pathname).toBe('/overview');
+  });
+
+  it('keeps the overview mounted when autodiscovered monitors are hidden and nothing else matches', () => {
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      settled: true,
+      allConfigs: [],
+    });
+
+    const history = renderPage('/overview', { includeHeartbeatMonitors: false });
+
+    expect(history.location.pathname).toBe('/overview');
+    expect(screen.getByTestId('overviewGrid')).toBeInTheDocument();
+    expect(screen.queryByTestId('noMonitorsFound')).not.toBeInTheDocument();
   });
 
   it('does not redirect when only ping-only overview monitors exist (no saved objects)', () => {

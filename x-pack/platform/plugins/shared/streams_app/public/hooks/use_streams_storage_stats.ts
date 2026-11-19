@@ -12,12 +12,15 @@ import { useStreamsAppFetch } from './use_streams_app_fetch';
 interface UseStreamsStorageStatsResult {
   storageByStream: Record<string, number>;
   storageLoaded: boolean;
+  storageError: boolean;
 }
 
 /**
  * Fetches total storage size (bytes) for all streams in a single bulk request.
  */
-export const useStreamsStorageStats = (): UseStreamsStorageStatsResult => {
+export const useStreamsStorageStats = ({
+  enabled = true,
+}: { enabled?: boolean } = {}): UseStreamsStorageStatsResult => {
   const {
     dependencies: {
       start: {
@@ -28,8 +31,10 @@ export const useStreamsStorageStats = (): UseStreamsStorageStatsResult => {
 
   const storeStatsFetch = useStreamsAppFetch(
     ({ signal }) =>
-      streamsRepositoryClient.fetch('GET /internal/streams/storage_stats', { signal }),
-    [streamsRepositoryClient]
+      enabled
+        ? streamsRepositoryClient.fetch('GET /internal/streams/storage_stats', { signal })
+        : undefined,
+    [enabled, streamsRepositoryClient]
   );
 
   const storageByStream = useMemo(() => {
@@ -43,6 +48,7 @@ export const useStreamsStorageStats = (): UseStreamsStorageStatsResult => {
 
   return {
     storageByStream,
-    storageLoaded: !storeStatsFetch.loading,
+    storageLoaded: enabled && !storeStatsFetch.loading,
+    storageError: Boolean(storeStatsFetch.error),
   };
 };

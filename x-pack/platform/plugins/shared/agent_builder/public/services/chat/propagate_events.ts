@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { OperatorFunction } from 'rxjs';
+import type { MonoTypeOperatorFunction } from 'rxjs';
 import { tap } from 'rxjs';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import type { EventsService } from '../events';
 
 /**
- * Forwards each event in the converse() stream to the public events service, tagged with
- * the conversation id so per-conversation subscribers (`getChatEvents$`) can filter to
- * just their conversation.
+ * Forwards each event of a stream to the public events service, tagged with the conversation id
+ * so per-conversation subscribers (`getChatEvents$`) can filter to just their conversation.
  */
 export function propagateEvents({
   eventsService,
@@ -21,7 +20,7 @@ export function propagateEvents({
 }: {
   eventsService: EventsService;
   conversationId: string;
-}): OperatorFunction<ChatEvent, ChatEvent> {
+}): MonoTypeOperatorFunction<ChatEvent> {
   return tap((event) => {
     eventsService.propagateChatEvent(conversationId, event);
   });

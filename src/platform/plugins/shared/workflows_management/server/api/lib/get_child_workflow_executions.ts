@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
+import { isExecuteSyncStepType } from '@kbn/workflows';
 import type {
   ChildWorkflowExecutionItem,
   EsWorkflowExecution,
@@ -44,13 +44,13 @@ const CHILD_SOURCE_INCLUDES = [
   'stepExecutionIds',
 ] as GetWorkflowExecutionsByIdsOptions['sourceIncludes'];
 
+// The child execution id is written to step state as soon as the child run starts,
+// so a still-running or waiting child is linkable too. That matters for HITL: the
+// parent step sits in `waiting_for_child` exactly when the user needs the link.
 const extractChildRefs = (steps: EsWorkflowStepExecution[]): ChildRef[] =>
   steps
     .filter(
-      (step) =>
-        isExecuteSyncStepType(step.stepType) &&
-        isTerminalStatus(step.status) &&
-        typeof step.state?.executionId === 'string'
+      (step) => isExecuteSyncStepType(step.stepType) && typeof step.state?.executionId === 'string'
     )
     .map((step) => ({
       stepExecutionId: step.id,

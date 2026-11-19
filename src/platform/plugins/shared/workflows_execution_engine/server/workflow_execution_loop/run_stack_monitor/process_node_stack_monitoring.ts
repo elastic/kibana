@@ -50,11 +50,11 @@ export async function processNodeStackMonitoring(
     }
   }
 
+  // Cancel is read from memory. The persistence flush loads the cancel fields from
+  // Elasticsearch; this pass must not, or every step waits on that read.
   await cancelWorkflowIfRequested(
-    params.workflowExecutionRepository,
     params.workflowExecutionState,
     monitoredStepExecutionRuntime,
-    params.workflowLogger,
     params.workflowExecutionCursor,
     monitoredStepExecutionRuntime.abortController
   );

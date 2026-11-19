@@ -67,9 +67,11 @@ export const isReadOnlySql = (
   return allowedPrefixes.test(head);
 };
 
+// `extraWritePattern` adds vendor-specific write tokens on top of WRITE_PATTERN; it must not be global or sticky.
 export const assertReadOnly = (
   sql: string,
-  allowedPrefixes: RegExp = SELECT_OR_WITH_PREFIX
+  allowedPrefixes: RegExp = SELECT_OR_WITH_PREFIX,
+  extraWritePattern?: RegExp
 ): void => {
   if (MYSQL_EXECUTABLE_COMMENT.test(sql)) {
     throw new Error('MySQL executable comments (/*! ... */) are not permitted');
@@ -83,7 +85,7 @@ export const assertReadOnly = (
       'Only read-only SQL statements are permitted (SELECT, WITH). Use listTables or describeTable for schema discovery, or executeSql for writes.'
     );
   }
-  if (WRITE_PATTERN.test(head)) {
+  if (WRITE_PATTERN.test(head) || extraWritePattern?.test(head)) {
     throw new Error('Write operations are not permitted');
   }
 };
