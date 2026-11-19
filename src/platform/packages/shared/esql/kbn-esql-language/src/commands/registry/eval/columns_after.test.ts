@@ -171,6 +171,33 @@ describe('EVAL > columnsAfter', () => {
     ]);
   });
 
+  it('keeps only the rightmost assignment of a repeated name', () => {
+    const command = synth.cmd`EVAL baz = 1, qux = bar, baz = "a"`;
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.DEFAULT
+    );
+
+    expect(result).toEqual([
+      ...baseColumns,
+      {
+        name: 'qux',
+        type: 'keyword',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+      {
+        name: 'baz',
+        type: 'keyword',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+    ]);
+  });
+
   it('propagates the concrete type of a CASE expression with a null result', () => {
     const command = synth.cmd`EVAL result = CASE(true, 1, NULL)`;
     const result = columnsAfter(

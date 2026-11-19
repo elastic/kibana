@@ -102,6 +102,10 @@ const readsNamedSubqueryWithMetadata = (
   rootCommands: ESQLCommand[],
   namedSubqueries: NamedSubquery[]
 ): boolean => {
+  if (namedSubqueries.length === 0) {
+    return false;
+  }
+
   const usedNamedSubqueries = [...getUsedNamedSubqueries(rootCommands, namedSubqueries)];
 
   if (usedNamedSubqueries.length === 0) {

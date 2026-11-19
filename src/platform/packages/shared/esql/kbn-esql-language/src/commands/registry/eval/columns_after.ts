@@ -51,9 +51,12 @@ export const columnsAfter = (
   }
 
   // EVAL appends new and overwritten columns after the remaining input columns.
-  const newColumnNames = new Set(newColumns.map(({ name }) => name));
-  return uniqBy(
-    [...previousColumns.filter(({ name }) => !newColumnNames.has(name)), ...newColumns],
-    'name'
-  );
+  // When a name is assigned more than once, only the rightmost assignment creates a column.
+  const assignedColumns = uniqBy([...newColumns].reverse(), 'name').reverse();
+  const assignedNames = new Set(assignedColumns.map(({ name }) => name));
+
+  return [
+    ...uniqBy(previousColumns, 'name').filter(({ name }) => !assignedNames.has(name)),
+    ...assignedColumns,
+  ];
 };
