@@ -198,7 +198,7 @@ import { SecurityGroupingView } from './security_grouping_view';
 import {
   DEFAULT_GROUP_BY,
   getGroupByFields,
-  isDefaultGroupBy,
+  isCategoryTypeGroupBy,
   resolveGroupByFields,
   type GroupByFieldDef,
   type GroupByFieldId,
@@ -299,7 +299,7 @@ const isViewMode = (value: unknown): value is ViewMode =>
   value === 'grid' || value === 'list' || value === 'geomap';
 
 /**
- * Phase 1 inventory landing: list view, grouped by Category → Type.
+ * Phase 1 inventory landing: list view, grouped by Category.
  * Applied once per full page load so a stale localStorage choice (hex
  * map, other groupings) does not stick, while changing the view and
  * walking the left nav still persists until the next reload.
@@ -514,8 +514,11 @@ const parseStoredGroupBy = (raw: string | null): GroupByFieldId[] => {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string')) {
-      // Cap at the maximum to guard against corrupted/oversized payloads.
-      return (parsed as GroupByFieldId[]).slice(0, MAX_STORED_GROUPINGS);
+      const ids = (parsed as GroupByFieldId[]).slice(0, MAX_STORED_GROUPINGS);
+      // The old default was Category → Type. Treat that stored selection as
+      // the new Category-only default so a reload doesn't keep the extra level.
+      if (isCategoryTypeGroupBy(ids)) return [...DEFAULT_GROUP_BY];
+      return ids;
     }
   } catch {
     // fall through
@@ -527,7 +530,9 @@ const useEntitiesGroupBy = (): [GroupByFieldId[], (next: GroupByFieldId[]) => vo
   const [groupBy, setGroupByState] = useState<GroupByFieldId[]>(() => {
     if (typeof window === 'undefined') return [...DEFAULT_GROUP_BY];
     try {
-      return parseStoredGroupBy(window.localStorage.getItem(GROUP_BY_STORAGE_KEY));
+      const next = parseStoredGroupBy(window.localStorage.getItem(GROUP_BY_STORAGE_KEY));
+      window.localStorage.setItem(GROUP_BY_STORAGE_KEY, JSON.stringify(next));
+      return next;
     } catch {
       return [...DEFAULT_GROUP_BY];
     }
@@ -1121,6 +1126,7 @@ const AllEntitiesViewInner = ({
     isElasticOn && (dataVariation === 'empty' || isDemoEmptyCategoryPage);
   const tableStyleVariation = useVariation('tableStyle') as TableStyleVariation;
   const awsReinventOn = useVariation('awsReinvent') === 'on';
+  const showSummaryCards = useVariation('summaryCards') === 'on';
   const dashboardStyleVariation = useVariation('dashboardStyle') as
     | 'embedded'
     | 'list'
@@ -1466,19 +1472,15 @@ const AllEntitiesViewInner = ({
   }, [isTourActive, tourStep, viewMode, tourStepViewModeRequirements]);
 
   // ElasticOn "Group by" (1–3 fields). Non-ElasticOn modes never surface the
-  // control, so this stays at the built-in Category → Type default there.
+  // control, so this stays at the Category default there.
   const [groupBy, setGroupBy] = useEntitiesGroupBy();
-
-  // Previously the Kubernetes page auto-swapped to Cluster → Type grouping
-  // in ElasticOn; now all categories use the uniform Category → Type default.
 
   // "Group by" fields offered on this page (core + category-scoped attributes)
   // and the resolved defs for the active selection. `customGroupBy` is only set
-  // when ElasticOn and the selection differs from the built-in Category → Type
-  // default — that's the signal the grid/list use to switch to the generic,
-  // health-coloured layout. A selection whose fields don't resolve on the
-  // current page (e.g. a Hosts-only attribute after navigating away) collapses
-  // back to the default layout rather than rendering an empty grouping.
+  // when ElasticOn and the selection is not Category → Type — that's the signal
+  // the grid/list use to switch to the generic layout. Category alone is the
+  // default and uses that generic one-level path. A selection whose fields
+  // don't resolve on the current page collapses back to the rich layout.
   const groupByFields = useMemo(
     () => getGroupByFields(effectiveCategoryScope, isElasticOn, phaseVariation as string),
     [effectiveCategoryScope, isElasticOn, phaseVariation]
@@ -1509,8 +1511,8 @@ const AllEntitiesViewInner = ({
     if (!isElasticOn) return undefined;
     // Explicitly cleared → flat, ungrouped view (not the built-in default).
     if (groupBy.length === 0) return [];
-    // The built-in default reproduces the rich Category → Type layout.
-    if (isDefaultGroupBy(groupBy)) return undefined;
+    // Category → Type keeps the rich per-type metric catalogs.
+    if (isCategoryTypeGroupBy(groupBy)) return undefined;
     // A non-empty selection whose fields don't resolve on this page (e.g. a
     // Hosts-only attribute after walking to Kubernetes) — the intent was to
     // group, so fall back to the built-in layout rather than flattening.
@@ -1533,7 +1535,7 @@ const AllEntitiesViewInner = ({
   // map stays on the three types, since the page is already the AWS section.
   const awsTypesDirect =
     isElasticOn && awsReinventOn && cloudProviderScope === 'aws' && !cloudServiceScope;
-  const showAwsTypeGroups = awsTypesDirect && isDefaultGroupBy(groupBy);
+  const showAwsTypeGroups = awsTypesDirect && isCategoryTypeGroupBy(groupBy);
   const viewGroupByFields = useMemo(() => {
     if (!awsReinventOn) return groupByFields;
     return groupByFields.map((field) => {
@@ -1856,7 +1858,7 @@ const AllEntitiesViewInner = ({
     () => (isLatest ? new URLSearchParams(location.search).get('loadView') : null),
     [isLatest, location.search]
   );
-  // Phase 1 landing: list view, every category, grouped by Category → Type.
+  // Phase 1 landing: list view, every category, grouped by Category.
   // The storage write above covers the first mount; this also catches a
   // phase switch to Phase 1 after the persisted hooks have already hydrated.
   useEffect(() => {
@@ -2164,10 +2166,8 @@ const AllEntitiesViewInner = ({
     // Flat / ungrouped: everything sits in a single "All entities" block.
     if (groupBy.length === 0) return filteredEntities.length > 0 ? 1 : 0;
 
-    // On a category-scoped page with the built-in default grouping, count
-    // distinct sub-types (the visible panels) rather than distinct categories
-    // (which would always be 1).
-    if (categoryScope && isDefaultGroupBy(groupBy)) {
+    // Category → Type on a scoped page shows sub-types, not the one category.
+    if (categoryScope && isCategoryTypeGroupBy(groupBy)) {
       return new Set(filteredEntities.map((entity) => entity.subType ?? entity.type)).size;
     }
 
@@ -3473,6 +3473,20 @@ const AllEntitiesViewInner = ({
                 <AddObservabilityDataEmptyPrompt categoryScope={categoryScope} />
               ) : isElasticOn ? (
                 <>
+                  {showSummaryCards ? (
+                    <>
+                      <InventorySummaryCards
+                        entities={filteredEntitiesAfterCategoryType}
+                        thingsLabel={labThingsLabel(isElasticOn)}
+                        scopeKey={inventorySummaryScopeKey}
+                        alertsFilter={alertsFilter}
+                        onAlertsFilterChange={handleAlertsFilterChange}
+                        charts={charts}
+                        density={listDensity}
+                      />
+                      <EuiSpacer size="s" />
+                    </>
+                  ) : null}
                   {/*
                   ElasticOn Inventory toolbar (3 rows):
                     1. Unified KQL search bar — the same "multidimensional
@@ -3765,20 +3779,6 @@ const AllEntitiesViewInner = ({
                     ) : null}
                   </EuiFlexGroup>
                   <EuiSpacer size="s" />
-                  {!showOverviewTab && !showAddDataEmptyPrompt ? (
-                    <>
-                      <InventorySummaryCards
-                        entities={filteredEntitiesAfterCategoryType}
-                        thingsLabel={labThingsLabel(isElasticOn)}
-                        scopeKey={inventorySummaryScopeKey}
-                        alertsFilter={alertsFilter}
-                        onAlertsFilterChange={handleAlertsFilterChange}
-                        charts={charts}
-                        density={listDensity}
-                      />
-                      <EuiSpacer size="s" />
-                    </>
-                  ) : null}
                   <EuiFlexGroup
                     alignItems="center"
                     gutterSize="s"

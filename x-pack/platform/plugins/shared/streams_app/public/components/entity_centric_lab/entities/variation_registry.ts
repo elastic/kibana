@@ -243,6 +243,27 @@ export const AWS_REINVENT_DIMENSION: VariationDimension = {
   ],
 };
 
+/** Inventory summary cards above search and filters. */
+export type SummaryCardsVariation = 'off' | 'on';
+
+export const SUMMARY_CARDS_DIMENSION: VariationDimension = {
+  id: 'summaryCards',
+  label: 'Summary cards',
+  defaultOption: 'off',
+  options: [
+    {
+      id: 'off',
+      label: 'Off',
+      description: 'Hide the inventory summary cards',
+    },
+    {
+      id: 'on',
+      label: 'On',
+      description: 'Show summary cards at the top of Inventory',
+    },
+  ],
+};
+
 /** Inventory and alert counts on the Observability left-nav links. */
 export const NAV_BADGES_DIMENSION: VariationDimension = {
   id: 'navBadges',
@@ -289,6 +310,7 @@ export const VARIATION_DIMENSIONS: readonly VariationDimension[] = [
   FLYOUT_PRESENTATION_DIMENSION,
   TABLE_STYLE_DIMENSION,
   NAV_BADGES_DIMENSION,
+  SUMMARY_CARDS_DIMENSION,
   AWS_REINVENT_DIMENSION,
   DASHBOARD_STYLE_DIMENSION,
   DASHBOARD_THUMBNAILS_DIMENSION,

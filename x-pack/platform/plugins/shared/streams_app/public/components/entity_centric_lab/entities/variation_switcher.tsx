@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.22';
+export const PROTOTYPE_VERSION = '1.23';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,12 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-19',
+    summary: 'Summary cards are a variation, and inventory groups by category only.',
+    details:
+      'Summary cards is off by default. Turn it on to show the cards at the top of Inventory, above search and filters. Group by defaults to Entity category. Adding Entity type brings back the second level, including on the AWS page. A stored Category → Type selection from the previous default is treated as Category only. Bump to v1.23.',
+  },
   {
     date: '2026-11-19',
     summary:

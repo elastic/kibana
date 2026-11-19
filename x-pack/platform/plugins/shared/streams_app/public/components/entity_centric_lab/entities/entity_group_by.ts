@@ -8,9 +8,10 @@
 /**
  * Generic "Group by" support for the ElasticOn Inventory (list + hex grid).
  *
- * By default the views group entities by Category → Type (the built-in
- * layout). This module lets the user pick up to three arbitrary fields to
- * group by instead (Infra "Select up to three groupings" style). It's intentionally
+ * By default the views group entities by Category. Category → Type remains
+ * the rich built-in layout when the user adds Type. This module lets the user
+ * pick up to three arbitrary fields to group by instead (Infra "Select up to
+ * three groupings" style). It's intentionally
  * React-free — just the field catalog + a grouping helper — so both views and
  * the saved-views module can share it without pulling in UI.
  */
@@ -52,12 +53,18 @@ export interface GroupByFieldDef {
 }
 
 /**
- * Default grouping — reproduces the built-in Category → Type layout. When the
- * active grouping equals this, both views use their original (unchanged)
- * rendering path with the per-type metric catalogs; any other selection uses
- * the generic, health-coloured path.
+ * Default grouping — Category only. Category → Type is still the rich layout
+ * ({@link isCategoryTypeGroupBy}); any other selection uses the generic path.
  */
-export const DEFAULT_GROUP_BY: readonly GroupByFieldId[] = ['category', 'type'];
+export const DEFAULT_GROUP_BY: readonly GroupByFieldId[] = ['category'];
+
+/** Previous default. Stored selections that still match this are migrated. */
+const LEGACY_DEFAULT_GROUP_BY: readonly GroupByFieldId[] = ['category', 'type'];
+
+/** Rich per-type layout: Category, then Type. */
+export const isCategoryTypeGroupBy = (groupBy: readonly GroupByFieldId[]): boolean =>
+  groupBy.length === LEGACY_DEFAULT_GROUP_BY.length &&
+  groupBy.every((id, index) => id === LEGACY_DEFAULT_GROUP_BY[index]);
 
 const UNKNOWN = i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.unknown', {
   defaultMessage: 'Unknown',
