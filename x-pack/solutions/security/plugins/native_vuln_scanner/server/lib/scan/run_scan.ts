@@ -6,8 +6,10 @@
  */
 
 import type { ElasticsearchClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { KevEntries, LoadKevResult } from '../enrichment/kev';
+import { loadKev } from '../enrichment/kev';
 import type { FeedOs, LoadFeedResult } from '../feeds/fetch';
-import { loadFeed } from '../feeds/fetch';
+import { feedUrl, loadFeed } from '../feeds/fetch';
 import type { AgentInventoryRows, NormalizedHost } from '../inventory';
 import { findInventoryScheduleIds, normalizeInventories, readAgentInventories } from '../inventory';
 import type { Finding, MatchStats } from '../matcher';
@@ -19,6 +21,8 @@ export interface ScanDeps {
   packRepository: ISavedObjectsRepository;
   logger: Logger;
   loadFeed?: (os: FeedOs, options: { signal: AbortSignal }) => Promise<LoadFeedResult>;
+  /** Loads the CISA KEV catalog; failure only skips enrichment. */
+  loadKev?: (signal: AbortSignal) => Promise<LoadKevResult>;
   /** From kibana.yml: whether this run's feeds and findings include vendor-unfixed CVEs. */
   includeUnfixed?: boolean;
   now?: () => Date;
@@ -36,6 +40,16 @@ export interface ScanSummary {
   matchStats: MatchStats;
   aborted: boolean;
   packMissing: boolean;
+  /**
+   * How findings were checked against CISA KEV and how many were stamped this run: `ok` is a
+   * current catalog, `stale` an expired copy served because the refresh failed, `unavailable` no
+   * catalog (existing stamps are kept), `not_attempted` no download was tried.
+   */
+  kev: { status: 'ok' | 'stale' | 'unavailable' | 'not_attempted'; listed: number };
+  /** Distinct CVE ids among this run's matched findings (a multi-host CVE counts once). */
+  distinctCves: number;
+  /** Feed provenance the run actually used, keyed like `releases`. */
+  feedInfo: Record<string, { sourceUrl?: string; snapshotTime?: string; ageSeconds?: number }>;
 }
 
 export class ScanFailedError extends Error {
@@ -118,6 +132,38 @@ export const readInventory = async (
   return { hosts, skippedHosts, skippedRows, packMissing: false };
 };
 
+interface KevCatalog {
+  status: 'ok' | 'stale' | 'unavailable';
+  entries?: KevEntries;
+}
+
+/** The KEV catalog for this run; a failed load warns once and leaves the run unenriched. */
+const loadKevEntries = async (
+  load: (signal: AbortSignal) => Promise<LoadKevResult>,
+  signal: AbortSignal,
+  logger: Logger
+): Promise<KevCatalog> => {
+  const catalog = await load(signal).catch(
+    (error): LoadKevResult => ({
+      status: 'unavailable',
+      reason: error instanceof Error ? error.message : String(error),
+    })
+  );
+  if (catalog.status === 'ok') return { status: 'ok', entries: catalog.entries };
+  if (catalog.status === 'stale') {
+    logger.warn(
+      `CISA KEV catalog refresh failed (${catalog.reason}); this run uses the last downloaded ` +
+        'copy. The next scan retries.'
+    );
+    return { status: 'stale', entries: catalog.entries };
+  }
+  logger.warn(
+    `CISA KEV catalog unavailable (${catalog.reason}); findings of this run keep the known ` +
+      'exploited marks they already have. The next scan retries.'
+  );
+  return { status: 'unavailable' };
+};
+
 /**
  * Reads the latest inventory, then matches and writes one OS release at a time (a parsed feed
  * takes a few hundred MB of heap). A failed release does not stop the others; the run throws at
@@ -129,6 +175,7 @@ export const runScan = async (
     packRepository,
     logger,
     loadFeed: load = loadFeed,
+    loadKev: loadKevCatalog = (abort) => loadKev(abort, { logger }),
     includeUnfixed,
     now = () => new Date(),
   }: ScanDeps,
@@ -145,6 +192,9 @@ export const runScan = async (
     matchStats: {},
     aborted: false,
     packMissing: false,
+    kev: { status: 'not_attempted', listed: 0 },
+    distinctCves: 0,
+    feedInfo: {},
   };
 
   const inventory = await readInventory({ es, packRepository, logger }, signal);
@@ -157,7 +207,17 @@ export const runScan = async (
 
   const byRelease = groupByRelease(hosts);
 
+  // Enrichment is optional: a failed load leaves findings unenriched but never fails the scan.
+  // With no hosts there is nothing to stamp, so the catalog is not downloaded.
+  let kev: KevCatalog | undefined;
+  if (byRelease.size > 0) {
+    kev = await loadKevEntries(loadKevCatalog, signal, logger);
+    summary.kev.status = kev.status;
+  }
+
   const failures: Record<string, string> = {};
+  const cves = new Set<string>();
+  const scanStart = now();
   for (const [key, releaseHosts] of byRelease) {
     if (signal.aborted) {
       summary.aborted = true;
@@ -166,6 +226,20 @@ export const runScan = async (
     const os = releaseHosts[0].inventory.os;
     try {
       const result = await load(os, { signal });
+      summary.feedInfo[key] = {
+        sourceUrl: feedUrl(os, { includeUnfixed }),
+        ...(result.status === 'ok' && result.feed.snapshotTime
+          ? {
+              snapshotTime: result.feed.snapshotTime,
+              ageSeconds: Math.max(
+                0,
+                Math.floor(
+                  (scanStart.getTime() - new Date(result.feed.snapshotTime).getTime()) / 1000
+                )
+              ),
+            }
+          : {}),
+      };
       if (result.status === 'unavailable') {
         summary.releases[key] = 'unavailable';
         logger.warn(
@@ -188,12 +262,18 @@ export const runScan = async (
         now: now().toISOString(),
         runId,
         unfixedScanned: includeUnfixed ?? false,
+        kev: kev?.entries,
+        // Only an outage keeps the stamps already stored; an ok or stale catalog is the truth.
+        keepKev: kev?.status === 'unavailable',
         signal,
       });
+      for (const { cve } of findings) cves.add(cve.id);
+      summary.distinctCves = cves.size;
       summary.releases[key] = 'matched';
       summary.findings += written.written;
       summary.fixed += written.fixed;
       summary.fixSkipped += written.fixSkipped;
+      summary.kev.listed += written.kevListed;
     } catch (error) {
       if (signal.aborted) {
         summary.aborted = true;

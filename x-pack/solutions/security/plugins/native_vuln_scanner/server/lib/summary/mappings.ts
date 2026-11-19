@@ -21,6 +21,8 @@ export const summaryMappings: MappingTypeMapping = {
     hosts_scanned: { type: 'integer' },
     findings_open: { type: 'integer' },
     findings_fixed: { type: 'integer' },
+    kev: { properties: { status: keyword, listed: { type: 'integer' } } },
+    distinct_cves: { type: 'integer' },
     feeds: {
       properties: {
         release: keyword,
@@ -28,6 +30,9 @@ export const summaryMappings: MappingTypeMapping = {
         etag: keyword,
         // Not indexed for search; keeps a long vendor error from hitting ignore_above silently.
         error: { type: 'keyword', index: false, doc_values: false, ignore_above: 2048 },
+        source_url: keyword,
+        snapshot_time: date,
+        age_seconds: { type: 'integer' },
       },
     },
     failures: { type: 'keyword', index: false, doc_values: false, ignore_above: 2048 },

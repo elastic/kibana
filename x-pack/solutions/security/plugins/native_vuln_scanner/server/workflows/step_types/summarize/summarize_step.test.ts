@@ -39,6 +39,7 @@ const matched = (overrides: Partial<MatchOutput> = {}): MatchOutput => ({
   pack_missing: false,
   releases: { 'ubuntu:noble': 'matched', 'rhel:9': 'matched' },
   failures: {},
+  feed_provenance: {},
   ...overrides,
 });
 
@@ -78,6 +79,19 @@ describe('native_vuln.summarize handler', () => {
       failures: [],
     });
     expect(result).toEqual({ output: { run_id: RUN_ID, status: 'success', index: SUMMARY_INDEX } });
+  });
+
+  it('records the KEV outcome when the match step reports it', async () => {
+    const { doc } = await run({
+      fetch: fetched,
+      match: matched({ kev: { status: 'ok', listed: 2 } }),
+    });
+    expect(doc?.kev).toEqual({ status: 'ok', listed: 2 });
+  });
+
+  it('leaves kev out of the summary when the match step did not report it', async () => {
+    const { doc } = await run({ fetch: fetched, match: matched() });
+    expect(doc).not.toHaveProperty('kev');
   });
 
   it('accepts a Date for the execution start', async () => {

@@ -7,6 +7,7 @@
 
 import { createHash } from 'crypto';
 import { EcsVersion } from '@elastic/ecs';
+import type { KevEntry } from '../enrichment/kev';
 import type { AdvisorySource, CvssScore } from '../feeds/types';
 import type { Finding } from '../matcher';
 import type { FindingState } from './constants';
@@ -65,6 +66,13 @@ export interface FindingDoc {
     classification?: 'CVSS';
     scanner: { vendor: string };
     data_source: { ID: string; Name: string; URL?: string };
+    /** Only present when the CVE is in the CISA Known Exploited Vulnerabilities catalog. */
+    kev?: {
+      known_exploited: true;
+      date_added: string;
+      due_date: string;
+      ransomware_use: KevEntry['knownRansomwareCampaignUse'];
+    };
   };
   native_vuln_scanner: {
     finding_id: string;
@@ -135,7 +143,14 @@ const toCvssVendorScore = ({ version, score, vector }: CvssScore): CvssVendorSco
     : { V3Score: score, V3Vector: vector };
 
 const references = ({ cve, advisories }: Finding): string[] => {
-  const urls = [cve.url ?? `https://www.cve.org/CVERecord?id=${cve.id}`];
+  const urls: string[] = [];
+  const isCve = (id: string): boolean => id.toUpperCase().startsWith('CVE');
+  // CVE-source references first, then the other OVAL references (USN/RHSA/errata links).
+  for (const { refs } of advisories) {
+    for (const ref of refs ?? []) if (isCve(ref.id)) urls.push(ref.url);
+    for (const ref of refs ?? []) if (!isCve(ref.id)) urls.push(ref.url);
+  }
+  urls.push(cve.url ?? `https://www.cve.org/CVERecord?id=${cve.id}`);
   for (const { url } of advisories) if (url) urls.push(url);
   return [...new Set(urls)];
 };
@@ -143,6 +158,8 @@ const references = ({ cve, advisories }: Finding): string[] => {
 export interface FindingDocContext {
   now: string;
   runId: string;
+  /** The KEV catalog entry for `finding.cve.id`, when the CVE is listed. */
+  kev?: KevEntry;
 }
 
 /**
@@ -152,7 +169,7 @@ export interface FindingDocContext {
 export const toFindingDoc = (
   finding: Finding,
   host: HostMeta,
-  { now, runId }: FindingDocContext
+  { now, runId, kev }: FindingDocContext
 ): FindingDoc => {
   if (host.id !== finding.hostId) {
     throw new Error(`Host metadata ${host.id} does not belong to finding host ${finding.hostId}`);
@@ -210,6 +227,16 @@ export const toFindingDoc = (
         Name: DATA_SOURCE_NAME[source],
         ...(primary?.url ? { URL: primary.url } : {}),
       },
+      ...(kev
+        ? {
+            kev: {
+              known_exploited: true as const,
+              date_added: kev.dateAdded,
+              due_date: kev.dueDate,
+              ransomware_use: kev.knownRansomwareCampaignUse,
+            },
+          }
+        : {}),
     },
     native_vuln_scanner: {
       finding_id: id,

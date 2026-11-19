@@ -123,6 +123,7 @@ describe('findings writer', () => {
       written: 2,
       fixed: 0,
       fixSkipped: 0,
+      kevListed: 0,
       failures: {},
     });
     let docs = await byCve(FINDINGS_INDEX);
@@ -222,9 +223,66 @@ describe('findings writer', () => {
       unfixedScanned: false,
     });
 
-    expect(result).toEqual({ written: 1, fixed: 0, fixSkipped: 0, failures: {} });
+    expect(result).toEqual({
+      written: 1,
+      fixed: 0,
+      fixSkipped: 0,
+      kevListed: 0,
+      failures: {},
+    });
     const doc = (await byCve(FINDINGS_INDEX)).get('CVE-2026-20');
     expect(doc?.event.created).toBe(at(8));
     expect(doc?.native_vuln_scanner).toMatchObject({ state: 'active', first_seen: at(7) });
+  });
+
+  it('stores a kev block and keeps it only when the run had no KEV catalog', async () => {
+    const other: HostMeta = { ...HOST, id: 'h4' };
+    const listed = { ...finding('CVE-2026-30'), hostId: other.id };
+    const kev = new Map([
+      [
+        'CVE-2026-30',
+        {
+          dateAdded: '2026-11-18',
+          dueDate: '2026-12-02',
+          knownRansomwareCampaignUse: 'Known' as const,
+        },
+      ],
+    ]);
+    const write = (
+      minute: number,
+      options: { kev?: typeof kev; keepKev?: boolean }
+    ): ReturnType<typeof writeFindings> =>
+      writeFindings(kibana, {
+        hosts: [other],
+        findings: [listed],
+        now: at(minute),
+        runId: `run-${minute}`,
+        unfixedScanned: false,
+        ...options,
+      });
+    const stored = async () => (await byCve(FINDINGS_INDEX)).get('CVE-2026-30');
+    const expectedKev = {
+      known_exploited: true,
+      date_added: '2026-11-18',
+      due_date: '2026-12-02',
+      ransomware_use: 'Known',
+    };
+
+    // (a) the strict mapping accepts a valid kev block.
+    expect(await write(10, { kev })).toMatchObject({ written: 1, kevListed: 1, failures: {} });
+    expect((await stored())?.vulnerability.kev).toEqual(expectedKev);
+
+    // (b) an outage run (no catalog, keepKev) keeps the stored block.
+    expect(await write(11, { keepKev: true })).toMatchObject({ written: 1, kevListed: 0 });
+    expect((await stored())?.vulnerability.kev).toEqual(expectedKev);
+    expect((await stored())?.native_vuln_scanner.state).toBe('active');
+
+    // (c) a run whose catalog no longer lists the CVE removes it.
+    expect(await write(12, { kev: new Map(), keepKev: false })).toMatchObject({ written: 1 });
+    expect((await stored())?.vulnerability).not.toHaveProperty('kev');
+
+    // Once removed, an outage run has nothing to keep.
+    await write(13, { keepKev: true });
+    expect((await stored())?.vulnerability).not.toHaveProperty('kev');
   });
 });

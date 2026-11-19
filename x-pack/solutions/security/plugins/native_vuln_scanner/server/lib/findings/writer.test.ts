@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Finding } from '../matcher';
 import { FINDINGS_INDEX } from './constants';
-import type { HostMeta } from './finding_doc';
+import type { FindingDoc, HostMeta } from './finding_doc';
 import { FindingsWriteError, writeFindings } from './writer';
 
 const host = (id: string): HostMeta => ({ id, os: { family: 'ubuntu', version: 'noble' } });
@@ -49,7 +49,13 @@ describe('writeFindings', () => {
       findings: [finding('h1', 'CVE-1'), finding('h1', 'CVE-1'), finding('h1', 'CVE-2')],
     });
 
-    expect(result).toEqual({ written: 2, fixed: 2, fixSkipped: 0, failures: {} });
+    expect(result).toEqual({
+      written: 2,
+      fixed: 2,
+      fixSkipped: 0,
+      kevListed: 0,
+      failures: {},
+    });
     const operations = es.bulk.mock.calls[0][0].operations ?? [];
     expect(operations).toHaveLength(4);
     expect(operations[0]).toMatchObject({ update: { _index: FINDINGS_INDEX } });
@@ -69,6 +75,56 @@ describe('writeFindings', () => {
         },
       },
     });
+  });
+
+  it('stamps findings of KEV-listed CVEs and counts them', async () => {
+    const kev = new Map([
+      [
+        'CVE-1',
+        {
+          dateAdded: '2026-11-18',
+          dueDate: '2026-12-02',
+          knownRansomwareCampaignUse: 'Known' as const,
+        },
+      ],
+    ]);
+    const result = await writeFindings(es, {
+      ...PARAMS,
+      hosts: [host('h1')],
+      findings: [finding('h1', 'CVE-1'), finding('h1', 'CVE-2')],
+      kev,
+    });
+
+    expect(result.kevListed).toBe(1);
+    const operations = es.bulk.mock.calls[0][0].operations ?? [];
+    // Operations alternate action / payload; the payloads are at the odd indexes.
+    const upserts = operations
+      .filter((_op, index) => index % 2 === 1)
+      .map((op) => (op as { upsert: FindingDoc }).upsert);
+    const byCve = new Map(upserts.map((upsert) => [upsert.vulnerability.id, upsert]));
+    expect(byCve.get('CVE-1')?.vulnerability.kev).toEqual({
+      known_exploited: true,
+      date_added: '2026-11-18',
+      due_date: '2026-12-02',
+      ransomware_use: 'Known',
+    });
+    expect(byCve.get('CVE-2')?.vulnerability).not.toHaveProperty('kev');
+  });
+
+  it.each([
+    ['defaults to false', undefined, false],
+    ['passes true through', true, true],
+    ['passes false through', false, false],
+  ])('sends keepKev to the upsert script and %s', async (_name, keepKev, expected) => {
+    await writeFindings(es, {
+      ...PARAMS,
+      hosts: [host('h1')],
+      findings: [finding('h1', 'CVE-1')],
+      keepKev,
+    });
+    const operations = es.bulk.mock.calls[0][0].operations ?? [];
+    const { script } = operations[1] as { script: { params: { keepKev: boolean } } };
+    expect(script.params.keepKev).toBe(expected);
   });
 
   it('fixes the findings of a scanned host that has no findings left', async () => {

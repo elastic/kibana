@@ -38,6 +38,24 @@ export const matchOutputSchema = lazySchema(() =>
     pack_missing: z.boolean(),
     releases: z.record(z.string(), z.enum(['matched', 'unavailable', 'failed'])),
     failures: z.record(z.string(), z.string()),
+    /** Feed provenance per release: where the feed came from and how old its snapshot was. */
+    feed_provenance: z.record(
+      z.string(),
+      z.object({
+        source_url: z.string().optional(),
+        snapshot_time: z.string().optional(),
+        age_seconds: z.number().optional(),
+      })
+    ),
+    /** Distinct CVE ids among this run's matched findings. */
+    distinct_cves: z.number().optional(),
+    /** CISA KEV enrichment outcome; `listed` is the findings stamped as known exploited. */
+    kev: z
+      .object({
+        status: z.enum(['ok', 'stale', 'unavailable', 'not_attempted']),
+        listed: z.number(),
+      })
+      .optional(),
   })
 );
 

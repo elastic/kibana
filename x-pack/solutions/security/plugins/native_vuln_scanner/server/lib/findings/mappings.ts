@@ -60,6 +60,14 @@ export const findingsMappings: MappingTypeMapping = {
         published_date: date,
         scanner: { properties: keywords('vendor') },
         data_source: { properties: keywords('ID', 'Name', 'URL') },
+        kev: {
+          properties: {
+            known_exploited: { type: 'boolean' },
+            date_added: date,
+            due_date: date,
+            ransomware_use: keyword,
+          },
+        },
       },
     },
     native_vuln_scanner: {

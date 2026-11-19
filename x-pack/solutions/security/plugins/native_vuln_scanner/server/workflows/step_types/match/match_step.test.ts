@@ -41,6 +41,9 @@ const summary = (overrides: Partial<ScanSummary> = {}): ScanSummary => ({
   matchStats: {},
   aborted: false,
   packMissing: false,
+  kev: { status: 'ok', listed: 0 },
+  distinctCves: 0,
+  feedInfo: {},
   ...overrides,
 });
 
@@ -75,6 +78,9 @@ describe('native_vuln.match handler', () => {
         pack_missing: false,
         releases: { 'ubuntu:noble': 'matched' },
         failures: {},
+        kev: { status: 'ok', listed: 0 },
+        feed_provenance: {},
+        distinct_cves: 0,
       },
     });
   });

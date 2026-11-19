@@ -23,6 +23,12 @@ export interface SummaryFeed {
   etag?: string;
   /** Why the release failed. */
   error?: string;
+  /** The URL the feed was fetched from. */
+  source_url?: string;
+  /** ISO date the vendor published the snapshot, when the feed carried one. */
+  snapshot_time?: string;
+  /** Whole seconds from the run's start to `snapshot_time`; only with a `snapshot_time`. */
+  age_seconds?: number;
 }
 
 export interface SummaryDoc {
@@ -38,6 +44,10 @@ export interface SummaryDoc {
   feeds: SummaryFeed[];
   /** Per-release failure messages, mirrored from `feeds` for easy display. */
   failures: string[];
+  /** Whether findings were checked against the CISA KEV catalog, and how many are listed. */
+  kev?: { status: 'ok' | 'stale' | 'unavailable' | 'not_attempted'; listed: number };
+  /** Distinct CVE ids among this run's matched findings (unfixed included). */
+  distinct_cves?: number;
 }
 
 export type PackState = 'missing' | 'ok' | 'differs';

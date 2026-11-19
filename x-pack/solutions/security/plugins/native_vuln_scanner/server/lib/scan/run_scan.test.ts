@@ -10,6 +10,7 @@ import { join } from 'path';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { parseRhelOval } from '../feeds/rhel_oval';
+import type { KevEntries, LoadKevResult } from '../enrichment/kev';
 import type { FeedOs, LoadFeedResult } from '../feeds/fetch';
 import type { AgentInventoryRows } from '../inventory';
 import { findInventoryScheduleIds, readAgentInventories } from '../inventory';
@@ -70,17 +71,26 @@ const rhel9Feed = async (): Promise<LoadFeedResult> => ({
   feed: await parseRhelOval([rhelFixture], { major: '9' }),
 });
 
+const KEV: KevEntries = new Map([
+  [
+    'CVE-2026-23868',
+    { dateAdded: '2026-11-18', dueDate: '2026-12-02', knownRansomwareCampaignUse: 'Unknown' },
+  ],
+]);
+
 const setup = (
   agents: AgentInventoryRows[],
-  load: (os: FeedOs) => Promise<LoadFeedResult> = rhel9Feed
+  load: (os: FeedOs) => Promise<LoadFeedResult> = rhel9Feed,
+  loadKev: () => Promise<LoadKevResult> = async () => ({ status: 'ok', entries: KEV })
 ) => {
   findIdsMock.mockResolvedValue({ rpm_packages: ['uuid-rpm'], os_version: ['uuid-os'] });
   readMock.mockImplementation(() => rows(agents));
   ensureMock.mockResolvedValue(undefined);
-  writeMock.mockImplementation(async (_es, { findings }) => ({
+  writeMock.mockImplementation(async (_es, { findings, kev }) => ({
     written: findings.length,
     fixed: 1,
     fixSkipped: 0,
+    kevListed: findings.filter(({ cve }) => kev?.has(cve.id)).length,
     failures: {},
   }));
   const loadFeed = jest.fn(load);
@@ -89,6 +99,7 @@ const setup = (
     packRepository: savedObjectsRepositoryMock.create(),
     logger: loggingSystemMock.createLogger(),
     loadFeed,
+    loadKev: jest.fn(loadKev),
     now: () => new Date('2026-11-13T00:00:00.000Z'),
   };
   return { deps, loadFeed };
@@ -113,6 +124,8 @@ describe('runScan', () => {
     expect(ensureMock).not.toHaveBeenCalled();
     expect(loadFeed).not.toHaveBeenCalled();
     expect(writeMock).not.toHaveBeenCalled();
+    expect(deps.loadKev).not.toHaveBeenCalled();
+    expect(summary.kev).toEqual({ status: 'not_attempted', listed: 0 });
   });
 
   it('reads the inventory, matches each release against its feed and writes the findings', async () => {
@@ -146,6 +159,86 @@ describe('runScan', () => {
       })
     );
     expect(summary.findings).toBeGreaterThan(0);
+    expect(summary.distinctCves).toBe(new Set(params.findings.map(({ cve }) => cve.id)).size);
+    const info = summary.feedInfo['rhel:9'];
+    expect(info?.sourceUrl).toBe(
+      'https://security.access.redhat.com/data/oval/v2/RHEL9/rhel-9.oval.xml.bz2'
+    );
+    expect(info?.snapshotTime).toBe('2026-11-12T19:21:30Z');
+    // now() is 2026-11-13T00:00:00Z; the snapshot is from 2026-11-12T19:21:30Z.
+    expect(info?.ageSeconds).toBe(16710);
+  });
+
+  it('hands the KEV catalog to the writer and counts the findings it lists', async () => {
+    const { deps } = setup([rhelAgent('a1', '9'), rhelAgent('a2', '9')]);
+    const { signal } = new AbortController();
+
+    const summary = await runScan(deps, { signal, runId: 'r1' });
+
+    expect(deps.loadKev).toHaveBeenCalledWith(signal);
+    expect(writeMock.mock.calls[0][1].kev).toBe(KEV);
+    expect(writeMock.mock.calls[0][1].keepKev).toBe(false);
+    const listed = writeMock.mock.calls[0][1].findings.filter(
+      ({ cve }) => cve.id === 'CVE-2026-23868'
+    ).length;
+    expect(listed).toBeGreaterThan(0);
+    expect(summary.kev).toEqual({ status: 'ok', listed });
+  });
+
+  it('still scans and writes findings when the KEV catalog is unavailable', async () => {
+    const { deps } = setup([rhelAgent('a1', '9')], rhel9Feed, async () => ({
+      status: 'unavailable',
+      reason: 'getaddrinfo ENOTFOUND www.cisa.gov',
+    }));
+
+    const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+
+    expect(summary.findings).toBeGreaterThan(0);
+    expect(writeMock.mock.calls[0][1].kev).toBeUndefined();
+    // No catalog at all: the writer keeps the stamps findings already have.
+    expect(writeMock.mock.calls[0][1].keepKev).toBe(true);
+    expect(summary.kev).toEqual({ status: 'unavailable', listed: 0 });
+    expect(deps.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('CISA KEV catalog unavailable (getaddrinfo ENOTFOUND www.cisa.gov)')
+    );
+  });
+
+  it('uses the stale catalog as the truth and does not keep old stamps', async () => {
+    const { deps } = setup([rhelAgent('a1', '9')], rhel9Feed, async () => ({
+      status: 'stale',
+      entries: KEV,
+      reason: 'HTTP 503',
+    }));
+
+    const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+
+    expect(writeMock.mock.calls[0][1].kev).toBe(KEV);
+    expect(writeMock.mock.calls[0][1].keepKev).toBe(false);
+    expect(summary.kev.status).toBe('stale');
+    expect(summary.kev.listed).toBeGreaterThan(0);
+    expect(deps.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('CISA KEV catalog refresh failed (HTTP 503)')
+    );
+  });
+
+  it('reports not_attempted and downloads nothing when there are no hosts', async () => {
+    const { deps } = setup([]);
+
+    const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+
+    expect(deps.loadKev).not.toHaveBeenCalled();
+    expect(summary.kev).toEqual({ status: 'not_attempted', listed: 0 });
+  });
+
+  it('treats a throwing KEV loader as unavailable', async () => {
+    const { deps } = setup([rhelAgent('a1', '9')], rhel9Feed, async () => {
+      throw new Error('boom');
+    });
+
+    const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+
+    expect(summary.findings).toBeGreaterThan(0);
+    expect(summary.kev.status).toBe('unavailable');
   });
 
   it('warns when the pack exists but no agent has reported inventory', async () => {

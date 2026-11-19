@@ -28,7 +28,7 @@ export interface HostInventory {
 
 export type MatchedAdvisory = Pick<
   AdvisoryRecord['advisory'],
-  'id' | 'source' | 'definition_id' | 'title' | 'url' | 'severity'
+  'id' | 'source' | 'definition_id' | 'title' | 'url' | 'severity' | 'refs'
 >;
 
 export interface Finding {

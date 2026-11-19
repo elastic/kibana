@@ -129,6 +129,7 @@ interface PendingDefinition {
   /** RHSA ref_id on patched defs, the CVE ref_id on unpatched defs. */
   advisoryId: string;
   url?: string;
+  refs?: Array<{ id: string; url: string }>;
   severity?: string;
   issued?: string;
   updated?: string;
@@ -229,6 +230,17 @@ export const parseRhelOval = async (
     const advisoryRef = unfixed
       ? references.find((r) => r.attrs.source === 'CVE')
       : references.find((r) => r.attrs.source === 'RHSA');
+    const refs: Array<{ id: string; url: string }> = [];
+    let refsOverflowed = false;
+    for (const { attrs } of references) {
+      if (!attrs.ref_url) continue;
+      if (refs.length === 10) {
+        refsOverflowed = true;
+        break;
+      }
+      refs.push({ id: attrs.ref_id ?? '', url: attrs.ref_url.slice(0, 1024) });
+    }
+    if (refsOverflowed) countInto(skipped, 'reference_overflow');
     const advisory = child(metadata, 'advisory');
     const cves = parseCves(advisory);
     if (!advisoryRef || cves.length === 0) {
@@ -270,6 +282,7 @@ export const parseRhelOval = async (
       title: child(metadata, 'title')?.text ?? '',
       advisoryId: advisoryRef.attrs.ref_id,
       url: advisoryRef.attrs.ref_url,
+      refs: refs.length > 0 ? refs : undefined,
       severity: (advisory && child(advisory, 'severity')?.text) || undefined,
       issued: dateToIso(advisory && child(advisory, 'issued')?.attrs.date),
       updated: dateToIso(advisory && child(advisory, 'updated')?.attrs.date),
@@ -340,6 +353,7 @@ export const parseRhelOval = async (
           severity: def.severity,
           published: def.issued,
           modified: def.updated,
+          refs: def.refs,
         },
         os,
         kind: 'package',

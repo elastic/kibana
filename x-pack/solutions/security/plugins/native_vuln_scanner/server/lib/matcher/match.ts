@@ -219,6 +219,7 @@ const collect = (hostId: string, hits: readonly Hit[]): Finding[] => {
         title: record.advisory.title,
         url: record.advisory.url,
         severity: record.advisory.severity,
+        refs: record.advisory.refs,
       };
       // Unfixed never wins against a fixed hit: `order < 0` only via a real fixed version.
       const order =

@@ -120,6 +120,24 @@ describe('toFindingDoc', () => {
     expect(doc.vulnerability.description).toContain('is earlier than 0:2.34-83.el9_3.7');
   });
 
+  it('adds a kev block only for a CVE in the KEV catalog', () => {
+    const listed = toFindingDoc(finding(), HOST, {
+      ...CTX,
+      kev: {
+        dateAdded: '2026-11-18',
+        dueDate: '2026-12-02',
+        knownRansomwareCampaignUse: 'Known',
+      },
+    });
+    expect(listed.vulnerability.kev).toEqual({
+      known_exploited: true,
+      date_added: '2026-11-18',
+      due_date: '2026-12-02',
+      ransomware_use: 'Known',
+    });
+    expect(toFindingDoc(finding(), HOST, CTX).vulnerability).not.toHaveProperty('kev');
+  });
+
   it('puts a CVE link first so the UI can pair it with the id', () => {
     const { reference } = toFindingDoc(finding(), HOST, CTX).vulnerability;
     expect(reference[0]).toBe('https://access.redhat.com/security/cve/CVE-2026-23868');
@@ -155,6 +173,35 @@ describe('toFindingDoc', () => {
       data_source: { ID: 'CVE-2024-1', Name: 'Red Hat OVAL' },
     });
     expect(doc.vulnerability.cvss).toBeUndefined();
+  });
+
+  it('lists CVE-source references first, then other OVAL refs, the CVE link and advisory urls, deduped', () => {
+    const [advisory] = finding().advisories;
+    const doc = toFindingDoc(
+      {
+        ...finding(),
+        advisories: [
+          {
+            ...advisory,
+            refs: [
+              { id: 'RHSA-2026:1234', url: 'https://access.redhat.com/errata/RHSA-2026:1234' },
+              {
+                id: 'CVE-2026-23868',
+                url: 'https://access.redhat.com/security/cve/CVE-2026-23868',
+              },
+              { id: 'CVE-2026-9999', url: 'https://access.redhat.com/security/cve/CVE-2026-9999' },
+            ],
+          },
+        ],
+      },
+      HOST,
+      CTX
+    );
+    expect(doc.vulnerability.reference).toEqual([
+      'https://access.redhat.com/security/cve/CVE-2026-23868',
+      'https://access.redhat.com/security/cve/CVE-2026-9999',
+      'https://access.redhat.com/errata/RHSA-2026:1234',
+    ]);
   });
 
   it('rejects host metadata of another host', () => {

@@ -49,6 +49,7 @@ interface PendingDefinition {
   title: string;
   severity?: string;
   published?: string;
+  refs?: Array<{ id: string; url: string }>;
   cve: AdvisoryCve;
   leaves: Array<{ leaf: UbuntuLeaf; conditions: UbuntuCondition[][] }>;
 }
@@ -188,6 +189,17 @@ export const parseUbuntuOval = async (
     if (grouped.length === 0) return;
 
     const { attrs } = cveNode;
+    const refs: Array<{ id: string; url: string }> = [];
+    let refsOverflowed = false;
+    for (const { attrs: refAttrs } of children(metadata, 'reference')) {
+      if (!refAttrs.ref_url) continue;
+      if (refs.length === 10) {
+        refsOverflowed = true;
+        break;
+      }
+      refs.push({ id: refAttrs.ref_id ?? '', url: refAttrs.ref_url.slice(0, 1024) });
+    }
+    if (refsOverflowed) countInto(skipped, 'reference_overflow');
     const advisory = child(metadata, 'advisory');
     const severity = advisory && child(advisory, 'severity')?.text;
     const publicDate = advisory && child(advisory, 'public_date')?.text;
@@ -196,6 +208,7 @@ export const parseUbuntuOval = async (
       title: child(metadata, 'title')?.text ?? '',
       severity: severity || undefined,
       published: publicDate || ovalPublicToIso(attrs.public),
+      refs: refs.length > 0 ? refs : undefined,
       cve: {
         id: cveNode.text,
         url: attrs.href,
@@ -303,6 +316,7 @@ export const parseUbuntuOval = async (
             url: def.cve.url,
             severity: def.severity,
             published: def.published,
+            refs: def.refs,
           },
           os,
           kind: 'package',
@@ -330,6 +344,7 @@ export const parseUbuntuOval = async (
             url: def.cve.url,
             severity: def.severity,
             published: def.published,
+            refs: def.refs,
           },
           os,
           kind: 'running_kernel',
@@ -390,6 +405,7 @@ export const parseUbuntuOval = async (
           url: def.cve.url,
           severity: def.severity,
           published: def.published,
+          refs: def.refs,
         },
         os,
         kind: leaf.type === 'package' ? 'package' : 'running_kernel',

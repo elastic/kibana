@@ -42,6 +42,10 @@ describe('parseRhelOval', () => {
         severity: 'Important',
         published: '2026-05-19T00:00:00Z',
         modified: '2026-05-19T00:00:00Z',
+        refs: [
+          { id: 'RHSA-2026:19367', url: 'https://access.redhat.com/errata/RHSA-2026:19367' },
+          { id: 'CVE-2026-23868', url: 'https://access.redhat.com/security/cve/CVE-2026-23868' },
+        ],
       },
       os: { family: 'rhel', version: '9' },
       kind: 'package',
@@ -300,6 +304,45 @@ describe('classifyRhelCriterion', () => {
         evr: '0:4.18.0-1.el8',
       },
     });
+  });
+});
+
+describe('parseRhelOval reference handling', () => {
+  // The nodejs RHSA definition with two extra references appended: 11 in total, over the cap of 10.
+  const overflowing = readFileSync(join(__dirname, '__fixtures__', 'rhel_9_trimmed.oval.xml'))
+    .toString()
+    .replace(
+      /<reference ref_id="CVE-2023-24807"[\s\S]*?\/>/,
+      `<reference ref_id="CVE-2023-24807" ref_url="https://access.redhat.com/security/cve/CVE-2023-24807" source="CVE"/>
+   <reference ref_id="CVE-2029-0001" ref_url="https://access.redhat.com/security/cve/CVE-2029-0001" source="CVE"/>
+   <reference ref_id="CVE-2029-0002" ref_url="https://access.redhat.com/security/cve/CVE-2029-0002" source="CVE"/>`
+    );
+
+  it('keeps at most 10 references per definition and counts the overflow', async () => {
+    const result = await parseRhelOval([Buffer.from(overflowing)], { major: '9' });
+    expect(result.skipped.reference_overflow).toBe(1);
+    const nodejs = result.records.find((r) => r.advisory.id === 'RHSA-2023:2654');
+    expect(nodejs?.advisory.refs).toHaveLength(10);
+    expect(nodejs?.advisory.refs?.slice(0, 2)).toEqual([
+      { id: 'RHSA-2023:2654', url: 'https://access.redhat.com/errata/RHSA-2023:2654' },
+      { id: 'CVE-2021-35065', url: 'https://access.redhat.com/security/cve/CVE-2021-35065' },
+    ]);
+  });
+
+  it('caps each reference url at 1024 characters', async () => {
+    const long = 'https://access.redhat.com/security/cve/CVE-2021-35065' + 'x'.repeat(2000);
+    const padded = readFileSync(join(__dirname, '__fixtures__', 'rhel_9_trimmed.oval.xml'))
+      .toString()
+      .replace('https://access.redhat.com/security/cve/CVE-2021-35065', long);
+    const result = await parseRhelOval([Buffer.from(padded)], { major: '9' });
+    const giflib = result.records.find((r) => r.advisory.id === 'RHSA-2026:19367');
+    expect(giflib?.advisory.refs).toEqual([
+      { id: 'RHSA-2026:19367', url: 'https://access.redhat.com/errata/RHSA-2026:19367' },
+      { id: 'CVE-2026-23868', url: 'https://access.redhat.com/security/cve/CVE-2026-23868' },
+    ]);
+    const nodejs = result.records.find((r) => r.advisory.id === 'RHSA-2023:2654');
+    expect(nodejs?.advisory.refs?.[1]?.url).toHaveLength(1024);
+    expect(nodejs?.advisory.refs?.[1]?.url.startsWith(long.slice(0, 1024))).toBe(true);
   });
 });
 

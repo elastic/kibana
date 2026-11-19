@@ -27,6 +27,18 @@ const toOutput = (summary: ScanSummary): MatchOutput => ({
   pack_missing: summary.packMissing,
   releases: summary.releases,
   failures: {},
+  feed_provenance: Object.fromEntries(
+    Object.entries(summary.feedInfo).map(([release, info]) => [
+      release,
+      {
+        ...(info.sourceUrl ? { source_url: info.sourceUrl } : {}),
+        ...(info.snapshotTime ? { snapshot_time: info.snapshotTime } : {}),
+        ...(info.ageSeconds !== undefined ? { age_seconds: info.ageSeconds } : {}),
+      },
+    ])
+  ),
+  distinct_cves: summary.distinctCves,
+  kev: summary.kev,
 });
 
 /**

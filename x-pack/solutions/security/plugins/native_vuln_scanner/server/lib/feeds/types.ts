@@ -67,6 +67,8 @@ export interface AdvisoryRecord {
     severity?: string;
     published?: string;
     modified?: string;
+    /** Every `<reference>` of the definition (advisory, CVEs, vendor notices), capped at 10. */
+    refs?: Array<{ id: string; url: string }>;
   };
   os: { family: 'ubuntu' | 'rhel'; version: string };
   kind: 'package' | 'running_kernel';

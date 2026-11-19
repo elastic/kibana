@@ -37,12 +37,18 @@ const statusOf = ({
 const feedsOf = ({ fetch, match, match_error: matchError }: SummarizeInput): SummaryFeed[] => {
   const etags = new Map((fetch?.feeds ?? []).map(({ release, etag }) => [release, etag]));
   if (match) {
-    return Object.entries(match.releases).map(([release, status]) => ({
-      release,
-      status,
-      etag: etags.get(release),
-      error: match.failures[release],
-    }));
+    return Object.entries(match.releases).map(([release, status]) => {
+      const provenance = match.feed_provenance?.[release];
+      return {
+        release,
+        status,
+        etag: etags.get(release),
+        error: match.failures[release],
+        ...(provenance?.source_url ? { source_url: provenance.source_url } : {}),
+        ...(provenance?.snapshot_time ? { snapshot_time: provenance.snapshot_time } : {}),
+        ...(provenance?.age_seconds !== undefined ? { age_seconds: provenance.age_seconds } : {}),
+      };
+    });
   }
   // The match step did not report, so only the fetch outcome is known.
   return (fetch?.feeds ?? []).map(({ release, status, etag, error }) => ({
@@ -91,6 +97,8 @@ export const buildSummarizeStepDefinition = ({
         findings_fixed: match?.fixed ?? 0,
         feeds,
         failures,
+        ...(match?.kev ? { kev: match.kev } : {}),
+        ...(match?.distinct_cves !== undefined ? { distinct_cves: match.distinct_cves } : {}),
       };
       // Start-up creates the index too, but a write before it exists would auto-create it unmapped.
       await ensureSummaryIndex(es);

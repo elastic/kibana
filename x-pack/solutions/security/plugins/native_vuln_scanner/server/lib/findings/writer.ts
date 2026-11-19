@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { BulkOperationContainer, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { KevEntries } from '../enrichment/kev';
 import type { Finding } from '../matcher';
 import { FINDINGS_INDEX } from './constants';
 import type { FindingDoc, HostMeta } from './finding_doc';
@@ -25,6 +26,9 @@ const HOST_BATCH = 1000;
  * Unfixed docs (no vendor fix yet) stay `unfixed`: they never alert and are not `new`. When a
  * fix later ships, the incoming fixed doc reopens them (and resets `event.created`), so rules
  * created in between can fire.
+ *
+ * `vulnerability.kev` comes from the fresh document, except when the run had no KEV catalog
+ * (`keepKev`): then the stored block is copied forward so an outage does not erase it.
  */
 export const UPSERT_SCRIPT = `
 def prev = ctx._source.native_vuln_scanner;
@@ -40,11 +44,15 @@ if (prev == null) {
   state = 'active';
 }
 def created = state == 'reopened' || ctx._source.event == null ? params.doc.event.created : ctx._source.event.created;
+def prevKev = ctx._source.vulnerability == null ? null : ctx._source.vulnerability.kev;
 ctx._source.clear();
 ctx._source.putAll(params.doc);
 ctx._source.native_vuln_scanner.first_seen = firstSeen;
 ctx._source.native_vuln_scanner.state = state;
 ctx._source.event.created = created;
+if (params.keepKev == true && params.doc.vulnerability.kev == null && prevKev != null) {
+  ctx._source.vulnerability.kev = prevKev;
+}
 `;
 
 export const FIX_SCRIPT = `
@@ -64,6 +72,13 @@ export interface WriteFindingsParams {
    * excluded from the fix pass: a run without unfixed rows must not mass-close them.
    */
   unfixedScanned: boolean;
+  /** CISA KEV catalog; findings of listed CVEs get a `vulnerability.kev` block. */
+  kev?: KevEntries;
+  /**
+   * True when this run had no KEV catalog at all: a finding without a `kev` block keeps the one
+   * it already has. False when the catalog (even a stale copy) is the truth for this run.
+   */
+  keepKev?: boolean;
   signal?: AbortSignal;
 }
 
@@ -75,6 +90,8 @@ export interface WriteFindingsResult {
    * per-document failures). They stay open and the next run reconciles them.
    */
   fixSkipped: number;
+  /** Findings built with a `vulnerability.kev` block this run. */
+  kevListed: number;
   /** Bulk item failures as `<status>:<error type>` -> count. */
   failures: Record<string, number>;
 }
@@ -86,10 +103,16 @@ export class FindingsWriteError extends Error {
   }
 }
 
-const bulkOperations = (docs: readonly FindingDoc[]): Array<BulkOperationContainer | object> =>
+const bulkOperations = (
+  docs: readonly FindingDoc[],
+  keepKev: boolean
+): Array<BulkOperationContainer | object> =>
   docs.flatMap((doc) => [
     { update: { _index: FINDINGS_INDEX, _id: doc.event.id, retry_on_conflict: 3 } },
-    { script: { source: UPSERT_SCRIPT, lang: 'painless', params: { doc } }, upsert: doc },
+    {
+      script: { source: UPSERT_SCRIPT, lang: 'painless', params: { doc, keepKev } },
+      upsert: doc,
+    },
   ]);
 
 const countFailures = (response: BulkResponse, failures: Record<string, number>): number => {
@@ -112,30 +135,31 @@ const countFailures = (response: BulkResponse, failures: Record<string, number>)
  */
 export const writeFindings = async (
   es: ElasticsearchClient,
-  { hosts, findings, now, runId, unfixedScanned, signal }: WriteFindingsParams
+  { hosts, findings, now, runId, unfixedScanned, kev, keepKev = false, signal }: WriteFindingsParams
 ): Promise<WriteFindingsResult> => {
   const metaById = new Map(hosts.map((host) => [host.id, host]));
   const docs = new Map<string, FindingDoc>();
   for (const finding of findings) {
     const host = metaById.get(finding.hostId);
     if (!host) throw new Error(`Finding for host ${finding.hostId} has no host metadata`);
-    const doc = toFindingDoc(finding, host, { now, runId });
+    const doc = toFindingDoc(finding, host, { now, runId, kev: kev?.get(finding.cve.id) });
     docs.set(doc.event.id, doc);
   }
 
   const failures: Record<string, number> = {};
   const all = [...docs.values()];
+  const kevListed = all.filter((doc) => doc.vulnerability.kev).length;
   let written = 0;
   for (let i = 0; i < all.length; i += BULK_BATCH) {
     const batch = all.slice(i, i + BULK_BATCH);
     const response = await es.bulk(
-      { operations: bulkOperations(batch), refresh: false },
+      { operations: bulkOperations(batch, keepKev), refresh: false },
       { signal }
     );
     written += batch.length - countFailures(response, failures);
   }
   if (Object.keys(failures).length > 0) throw new FindingsWriteError(failures);
-  if (hosts.length === 0) return { written, fixed: 0, fixSkipped: 0, failures };
+  if (hosts.length === 0) return { written, fixed: 0, fixSkipped: 0, kevListed, failures };
 
   await es.indices.refresh({ index: FINDINGS_INDEX }, { signal });
   const hostIds = [...metaById.keys()];
@@ -168,5 +192,5 @@ export const writeFindings = async (
     fixed += updated;
     fixSkipped += conflicts + fixFailures.length;
   }
-  return { written, fixed, fixSkipped, failures };
+  return { written, fixed, fixSkipped, kevListed, failures };
 };
