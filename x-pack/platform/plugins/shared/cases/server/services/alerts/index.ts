@@ -451,7 +451,18 @@ export class AlertService {
     }
   }
 
-  public async ensureAlertsAuthorized({ alerts }: { alerts: AlertInfo[] }): Promise<void> {
+  /**
+   * Authorizes alert attachments through alerting RBAC and rejects alerts that are not visible in
+   * the case's space, which the case's alerts table would never show even though they count
+   * towards its total.
+   */
+  public async ensureAlertsAuthorized({
+    alerts,
+    spaceId,
+  }: {
+    alerts: AlertInfo[];
+    spaceId: string;
+  }): Promise<void> {
     try {
       const nonEmptyAlerts = this.getNonEmptyAlerts(alerts);
 
@@ -464,12 +475,80 @@ export class AlertService {
       await this.alertsClient.ensureAllAlertsAuthorizedRead({
         alerts: nonEmptyAlerts,
       });
+
+      await this.rejectAlertsOutsideSpace(nonEmptyAlerts, spaceId);
     } catch (error) {
       throw createCaseError({
         message: `Failed to authorize alerts: ${error}`,
         error,
         logger: this.logger,
       });
+    }
+  }
+
+  /**
+   * Rejects alerts whose `kibana.space_ids` lists neither the case's space nor `*` (all spaces).
+   *
+   * Searches each attached index rather than `mget`-ing it: attach paths may store the alerts
+   * alias, and single-document operations against an alias fail once it spans more than one
+   * index. Alerts that cannot be found or read are left alone, matching rule_registry's
+   * authorization check, and so are alerts without space ids, whose visibility the document
+   * does not decide.
+   */
+  private async rejectAlertsOutsideSpace(alerts: AlertInfo[], spaceId: string): Promise<void> {
+    const idsByIndex = new Map<string, Set<string>>();
+
+    for (const { id, index } of alerts) {
+      const ids = idsByIndex.get(index) ?? new Set<string>();
+      ids.add(id);
+      idsByIndex.set(index, ids);
+    }
+
+    const outsideSpaceIdsByIndex = await pMap(
+      Array.from(idsByIndex.entries()),
+      async ([index, idSet]): Promise<string[]> => {
+        const ids = Array.from(idSet);
+        let hits;
+
+        try {
+          ({ hits } = await this.scopedClusterClient.search<AlertSpaceFields>({
+            index,
+            size: ids.length,
+            query: { ids: { values: ids } },
+            _source: [SPACE_IDS],
+            track_total_hits: false,
+            ignore_unavailable: true,
+            allow_no_indices: true,
+          }));
+        } catch (error) {
+          if (!AlertService.isUnauthorizedRead(error) && !AlertService.isRejectedIndexName(error)) {
+            throw error;
+          }
+
+          this.logger.debug(
+            `Skipping the space check of the alerts referenced through ${index}: ${ids.join(', ')}`
+          );
+
+          return [];
+        }
+
+        return hits.hits.flatMap(({ _id: id, _source: source }) => {
+          const spaceIds = source?.[SPACE_IDS];
+          const isOutsideSpace =
+            Array.isArray(spaceIds) && !spaceIds.includes(spaceId) && !spaceIds.includes('*');
+
+          return id != null && isOutsideSpace ? [id] : [];
+        });
+      },
+      { concurrency: MAX_CONCURRENT_SEARCHES }
+    );
+
+    const outsideSpaceIds = outsideSpaceIdsByIndex.flat();
+
+    if (outsideSpaceIds.length > 0) {
+      throw Boom.badRequest(
+        `Referenced alert(s) do not belong to space ${spaceId}: ${outsideSpaceIds.join(', ')}`
+      );
     }
   }
 
@@ -503,7 +582,7 @@ export class AlertService {
 
   /**
    * Authorizes attack attachments, rejecting references that are missing, not attack discoveries,
-   * or in another space, all of which `ensureAlertsAuthorized` silently accepts.
+   * or in another space. Unlike `ensureAlertsAuthorized`, a missing reference is an error.
    */
   public async ensureAttacksAuthorized({
     attacks,
@@ -947,6 +1026,11 @@ export interface Alert {
   _id: string;
   _index: string;
   _source: Record<string, unknown>;
+}
+
+/** The only `_source` field `ensureAlertsAuthorized` reads back from the referenced alert. */
+interface AlertSpaceFields {
+  [SPACE_IDS]?: string[];
 }
 
 /** The only `_source` fields `ensureAttacksAuthorized` reads back from the referenced document. */

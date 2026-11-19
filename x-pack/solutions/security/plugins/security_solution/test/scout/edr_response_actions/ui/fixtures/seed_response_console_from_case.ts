@@ -201,6 +201,7 @@ export const seedResponseConsoleFromCase = async ({
       endpointAgentId: agentId,
       count: 1,
       index: alertIndex,
+      spaceId,
     });
     const indexedAlert = alerts.alerts[0];
     const alertId = indexedAlert?._id;

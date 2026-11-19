@@ -731,6 +731,7 @@ export default ({ getService }: FtrProviderContext): void => {
         afterEach(async () => {
           await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
+          await deleteAllRules(supertest, log, 'space1');
           await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
         });
 
@@ -800,7 +801,8 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: caseAuth,
           });
 
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alertSpaceId = caseAuth?.space ?? undefined;
+          const signals = await createSecuritySolutionAlerts(supertest, log, 1, alertSpaceId);
 
           const alerts: Array<{ id: string; index: string }> = [];
           const indices: string[] = [];
@@ -825,7 +827,7 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedHttpCode: attachmentExpectedHttpCode,
           });
 
-          const updatedAlerts = await getSecuritySolutionAlerts(supertest, ids);
+          const updatedAlerts = await getSecuritySolutionAlerts(supertest, ids, alertSpaceId);
 
           updatedAlerts.hits.hits.forEach((alert) => {
             expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql(expectedAlertStatus);
@@ -970,7 +972,7 @@ export default ({ getService }: FtrProviderContext): void => {
             { user: superUser, space: 'space1' }
           );
 
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 1, 'space1');
           const alert = signals.hits.hits[0];
 
           await bulkCreateAttachmentsAndRefreshIndex({
@@ -992,7 +994,7 @@ export default ({ getService }: FtrProviderContext): void => {
             { user: superUser, space: 'space1' }
           );
 
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 1, 'space1');
           const alert = signals.hits.hits[0];
 
           await bulkCreateAttachmentsAndRefreshIndex({
@@ -1014,7 +1016,7 @@ export default ({ getService }: FtrProviderContext): void => {
             { user: superUser, space: 'space1' }
           );
 
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 1, 'space1');
           const alert = signals.hits.hits[0];
 
           await bulkCreateAttachmentsAndRefreshIndex({
@@ -1023,6 +1025,33 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedHttpCode: 200,
             auth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
           });
+        });
+
+        it('400s when attaching an alert from a different space than the case', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false, extractObservables: false },
+            },
+            200,
+            superUserSpace1Auth
+          );
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alert = signals.hits.hits[0];
+
+          await bulkCreateAttachmentsAndRefreshIndex({
+            caseId: postedCase.id,
+            alerts: [{ id: alert._id!, index: alert._index }],
+            expectedHttpCode: 400,
+            auth: superUserSpace1Auth,
+          });
+
+          const unchangedAlert = await getSecuritySolutionAlerts(supertest, [alert._id!]);
+          expect(unchangedAlert.hits.hits[0]._source?.[ALERT_CASE_IDS] ?? []).not.contain(
+            postedCase.id
+          );
         });
       });
 
@@ -1041,11 +1070,16 @@ export default ({ getService }: FtrProviderContext): void => {
         const bulkCreateAlertsAndVerifyCaseIdsInAlertSchema = async (totalCases: number) => {
           const cases = await Promise.all(
             [...Array(totalCases).keys()].map((index) =>
-              createCase(supertest, {
-                ...postCaseReq,
-                owner: 'observabilityFixture',
-                settings: { syncAlerts: false, extractObservables: false },
-              })
+              createCase(
+                supertest,
+                {
+                  ...postCaseReq,
+                  owner: 'observabilityFixture',
+                  settings: { syncAlerts: false, extractObservables: false },
+                },
+                200,
+                superUserSpace1Auth
+              )
             )
           );
 
@@ -1053,6 +1087,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await bulkCreateAttachments({
               supertest,
               caseId: theCase.id,
+              auth: superUserSpace1Auth,
               params: [buildUnifiedAlertReq('observabilityFixture', { alertId, index: apmIndex })],
             });
           }
@@ -1086,6 +1121,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
+            auth: superUserSpace1Auth,
             params: [buildUnifiedAlertReq('observabilityFixture', { alertId, index: apmIndex })],
           });
 
@@ -1102,14 +1138,20 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should not add more than 10 cases to an alert', async () => {
           await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(10);
 
-          const postedCase = await createCase(supertest, {
-            ...postCaseReq,
-            settings: { syncAlerts: false, extractObservables: false },
-          });
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false, extractObservables: false },
+            },
+            200,
+            superUserSpace1Auth
+          );
 
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
+            auth: superUserSpace1Auth,
             params: [buildUnifiedAlertReq('securitySolutionFixture', { alertId, index: apmIndex })],
             expectedHttpCode: 400,
           });

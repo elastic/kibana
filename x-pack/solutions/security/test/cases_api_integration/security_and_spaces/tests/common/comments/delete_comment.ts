@@ -131,7 +131,8 @@ export default ({ getService }: FtrProviderContext): void => {
           await es.indices.refresh({ index: _alerts.map((alert) => alert._index) });
           const updatedAlerts = await getSecuritySolutionAlerts(
             supertest,
-            alerts.map((alert) => alert._id)
+            alerts.map((alert) => alert._id),
+            'space1'
           );
 
           return updatedAlerts.hits.hits.map((alert) => ({ ...alert._source }));
@@ -140,13 +141,14 @@ export default ({ getService }: FtrProviderContext): void => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
           await createAlertsIndex(supertest, log);
-          const signals = await createSecuritySolutionAlerts(supertest, log, 2);
+          // The helpers below create the cases in space1, which only accepts space1 alerts.
+          const signals = await createSecuritySolutionAlerts(supertest, log, 2, 'space1');
           alerts = [signals.hits.hits[0] as Alerts[number], signals.hits.hits[1] as Alerts[number]];
         });
 
         afterEach(async () => {
           await deleteAllAlerts(supertest, log, es);
-          await deleteAllRules(supertest, log);
+          await deleteAllRules(supertest, log, 'space1');
           await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
         });
 

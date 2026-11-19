@@ -35,6 +35,8 @@ export interface IndexEndpointRuleAlertsOptions {
    * alerts alias, which is created here when it is missing.
    */
   index?: string;
+  /** Space written to `kibana.space_ids`. Defaults to `default`. */
+  spaceId?: string;
 }
 
 export interface IndexedEndpointRuleAlerts {
@@ -66,6 +68,7 @@ export const indexEndpointRuleAlerts = async ({
   count = 1,
   log = createToolingLogger(),
   index,
+  spaceId,
 }: IndexEndpointRuleAlertsOptions): Promise<IndexedEndpointRuleAlerts> => {
   log.verbose(`Indexing ${count} endpoint rule alerts`);
 
@@ -90,6 +93,7 @@ export const indexEndpointRuleAlerts = async ({
       agent: { id: endpointAgentId, version },
       host: { hostname: endpointHostname },
       ...(endpointIsolated ? { Endpoint: { state: { isolation: endpointIsolated } } } : {}),
+      ...(spaceId ? { 'kibana.space_ids': [spaceId] } : {}),
     });
     const indexedAlert = await esClient.index({
       index: alertIndex,
