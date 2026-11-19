@@ -10,6 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { ProjectNavigationLinkItem } from '@kbn/core-chrome-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import { Sha256 } from '@kbn/crypto-browser';
 import type { RecentlyAccessed, RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
 import {
   getRecentlyViewedWorkflowPath,
@@ -52,22 +53,30 @@ describe('getRecentlyViewedWorkflowsNavItems$', () => {
 });
 
 describe('startRecentlyViewedWorkflows', () => {
-  const startAs = (getCurrentUser: () => Promise<ReturnType<typeof mockAuthenticatedUser>>) => {
-    const core = coreMock.createStart({ basePath: '/s/my-space' });
+  type CurrentUser = ReturnType<typeof mockAuthenticatedUser>;
+
+  const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  const startAs = (getCurrentUser: () => Promise<CurrentUser>, basePath = '/s/my-space') => {
+    const core = coreMock.createStart({ basePath });
     core.security.authc.getCurrentUser.mockImplementation(getCurrentUser);
     return startRecentlyViewedWorkflows(core);
   };
-  const startAsUser = (user: Parameters<typeof mockAuthenticatedUser>[0]) =>
-    startAs(() => Promise.resolve(mockAuthenticatedUser(user)));
+  const startAsUser = async (
+    user: Parameters<typeof mockAuthenticatedUser>[0],
+    basePath?: string
+  ): Promise<RecentlyAccessed> => {
+    const history = startAs(() => Promise.resolve(mockAuthenticatedUser(user)), basePath);
+    await flushPromises();
+    return history;
+  };
+  const viewWorkflow = (history: RecentlyAccessed, id: string, label: string) =>
+    history.add(getRecentlyViewedWorkflowPath(id), label, id);
 
   afterEach(() => localStorage.clear());
 
   it('keeps a separate history for each user of the browser', async () => {
-    (await startAsUser({ profile_uid: 'alice' })).add(
-      getRecentlyViewedWorkflowPath('wf-1'),
-      'Private',
-      'wf-1'
-    );
+    viewWorkflow(await startAsUser({ profile_uid: 'alice' }), 'wf-1', 'Private');
 
     expect((await startAsUser({ profile_uid: 'bob' })).get()).toEqual([]);
     expect((await startAsUser({ profile_uid: 'alice' })).get()).toEqual([
@@ -76,20 +85,43 @@ describe('startRecentlyViewedWorkflows', () => {
   });
 
   it('uses the username when the user has no profile', async () => {
-    (await startAsUser({ profile_uid: undefined, username: 'alice' })).add(
-      getRecentlyViewedWorkflowPath('wf-1'),
-      'Private',
-      'wf-1'
+    viewWorkflow(
+      await startAsUser({ profile_uid: undefined, username: 'alice' }),
+      'wf-1',
+      'Private'
     );
 
     expect((await startAsUser({ profile_uid: undefined, username: 'bob' })).get()).toEqual([]);
   });
 
-  it('shares one history in the space when there is no authenticated user', async () => {
-    const noUser = () => Promise.reject(new Error('No authenticated user'));
-    (await startAs(noUser)).add(getRecentlyViewedWorkflowPath('wf-1'), 'Shared', 'wf-1');
+  it('does not let a user ID collide with the space part of another key', async () => {
+    const otherSpaceSuffix = new Sha256().update('/s/other', 'utf8').digest('base64');
+    viewWorkflow(await startAsUser({ profile_uid: 'alice' }, '/s/other'), 'wf-1', 'Private');
 
-    expect((await startAs(noUser)).get()).toEqual([viewed('wf-1', 'Shared')]);
-    expect((await startAsUser({ profile_uid: 'alice' })).get()).toEqual([]);
+    expect((await startAsUser({ profile_uid: `alice-${otherSpaceSuffix}` }, '')).get()).toEqual([]);
+  });
+
+  it('keeps no history when the current user cannot be found', async () => {
+    const history = startAs(() => Promise.reject(new Error('Service unavailable')));
+    await flushPromises();
+    viewWorkflow(history, 'wf-1', 'Private');
+    await flushPromises();
+
+    expect(history.get()).toEqual([]);
+    expect(Object.keys(localStorage)).toEqual([]);
+  });
+
+  it('records views made before the current user is known', async () => {
+    let resolveUser: (user: CurrentUser) => void = () => {};
+    const history = startAs(() => new Promise((resolve) => (resolveUser = resolve)));
+    const emitted: RecentlyAccessedHistoryItem[][] = [];
+    history.get$().subscribe((items) => emitted.push(items));
+
+    viewWorkflow(history, 'wf-1', 'First');
+    resolveUser(mockAuthenticatedUser({ profile_uid: 'alice' }));
+    await flushPromises();
+
+    expect(history.get()).toEqual([viewed('wf-1', 'First')]);
+    expect(emitted.at(-1)).toEqual([viewed('wf-1', 'First')]);
   });
 });

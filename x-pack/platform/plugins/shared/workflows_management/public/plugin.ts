@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  combineLatest,
-  defer,
-  filter,
-  type Observable,
-  Subject,
-  type Subscription,
-  switchMap,
-} from 'rxjs';
+import { combineLatest, filter, type Observable, Subject, type Subscription } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type {
   AppDeepLinkLocations,
@@ -79,7 +71,7 @@ export class WorkflowsPlugin
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
-  private recentlyViewedWorkflows?: Promise<RecentlyAccessed>;
+  private recentlyViewedWorkflows?: RecentlyAccessed;
   private readonly pagesEnabled: boolean;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementPublicConfig>) {
@@ -169,10 +161,9 @@ export class WorkflowsPlugin
         {
           id: 'recent',
           title: i18n.translate('workflows.nav.recentTitle', { defaultMessage: 'Recent' }),
-          items$: defer(() => this.getRecentlyViewedWorkflows(core)).pipe(
-            switchMap((recentlyViewed) =>
-              getRecentlyViewedWorkflowsNavItems$(core.http, recentlyViewed)
-            )
+          items$: getRecentlyViewedWorkflowsNavItems$(
+            core.http,
+            this.getRecentlyViewedWorkflows(core)
           ),
         },
       ],
@@ -326,7 +317,7 @@ export class WorkflowsPlugin
   }
 
   /** The side navigation and the app must share one history to see each other's updates. */
-  private getRecentlyViewedWorkflows(core: CoreStart): Promise<RecentlyAccessed> {
+  private getRecentlyViewedWorkflows(core: CoreStart): RecentlyAccessed {
     this.recentlyViewedWorkflows ??= startRecentlyViewedWorkflows(core);
     return this.recentlyViewedWorkflows;
   }
@@ -347,7 +338,7 @@ export class WorkflowsPlugin
         availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),
         agentBuilder,
-        recentlyViewed: await this.getRecentlyViewedWorkflows(coreStart),
+        recentlyViewed: this.getRecentlyViewedWorkflows(coreStart),
       },
     };
 
