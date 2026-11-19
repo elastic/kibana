@@ -2,19 +2,20 @@
   "name": "@kbn/ui-developer-toolbar",
   "version": "0.1.0",
   "private": true,
-  "description": "Elastic developer toolbar (shell, built-in monitors and measure tool) for standalone distribution",
+  "description": "Elastic developer toolbar (shell, built-in monitors, measure and inspect tools) for standalone distribution",
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
     "index.js",
     "index.js.map",
     "index.js.LICENSE.txt",
+    "THIRD_PARTY_LICENSES.txt",
     "index.d.ts",
     "metadata.json",
     "package.json"
   ],
   "peerDependencies": {
-    "@elastic/eui": ">=112.0.0",
+    "@elastic/eui": ">=113.2.0",
     "@emotion/css": ">=11.13.0",
     "@emotion/react": ">=11.14.0",
     "react": "^18.2.0",

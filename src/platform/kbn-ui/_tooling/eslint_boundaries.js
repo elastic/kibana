@@ -97,6 +97,11 @@ module.exports = {
           path: 'src/platform/plugins/shared/developer_toolbar/',
           reason: 'Owning plugin that mounts the toolbar and exposes the registerItem API.',
         },
+        {
+          path: 'src/platform/plugins/private/inspect_component/',
+          reason:
+            'Kibana adapter for the inspect tool: registers InspectButton with a Kibana host (HTTP resolver for codeowners and relative path, GitHub links).',
+        },
       ],
     },
 

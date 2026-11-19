@@ -10,7 +10,15 @@
 // Build-time type validation — causes build failure if types diverge.
 import './type_validation';
 
-export { DeveloperToolbar, DeveloperToolbarItem, MeasureButton, useToolbarState } from '../../src';
+export {
+  DeveloperToolbar,
+  DeveloperToolbarItem,
+  MeasureButton,
+  InspectButton,
+  createGithubSourceLinks,
+  createPrefixFileResolver,
+  useToolbarState,
+} from '../../src';
 export type {
   DeveloperToolbarProps,
   DeveloperToolbarItemProps,
@@ -18,4 +26,12 @@ export type {
   DeveloperToolbarRegisteredItem,
   EnvironmentInfo,
   MeasureButtonProps,
+  InspectButtonProps,
+  InspectMode,
+  InspectFileData,
+  InspectHostConfig,
+  InspectSourceLink,
+  InspectSourceLocation,
+  CreateGithubSourceLinksOptions,
+  CreatePrefixFileResolverOptions,
 } from '../../src';

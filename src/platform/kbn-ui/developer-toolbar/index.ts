@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DeveloperToolbar, DeveloperToolbarItem, MeasureButton, useToolbarState } from './src';
+export {
+  DeveloperToolbar,
+  DeveloperToolbarItem,
+  MeasureButton,
+  InspectButton,
+  createGithubSourceLinks,
+  createPrefixFileResolver,
+  useToolbarState,
+} from './src';
 
 export type {
   DeveloperToolbarProps,
@@ -16,4 +24,12 @@ export type {
   DeveloperToolbarRegisteredItem,
   EnvironmentInfo,
   MeasureButtonProps,
+  InspectButtonProps,
+  InspectMode,
+  InspectFileData,
+  InspectHostConfig,
+  InspectSourceLink,
+  InspectSourceLocation,
+  CreateGithubSourceLinksOptions,
+  CreatePrefixFileResolverOptions,
 } from './src';

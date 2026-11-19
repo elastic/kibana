@@ -18,4 +18,21 @@ export {
 export { useToolbarState, type DeveloperToolbarState } from './toolbar/hooks';
 export type { DeveloperToolbarItem as DeveloperToolbarRegisteredItem } from './toolbar/state/developer_toolbar_state';
 export { MeasureButton, type MeasureButtonProps } from './measure/components/measure_button';
+export { InspectButton } from './inspect/components/inspect/inspect_button';
+export {
+  createGithubSourceLinks,
+  type CreateGithubSourceLinksOptions,
+} from './inspect/host/create_github_source_links';
+export {
+  createPrefixFileResolver,
+  type CreatePrefixFileResolverOptions,
+} from './inspect/host/create_prefix_file_resolver';
+export type {
+  InspectButtonProps,
+  InspectMode,
+  InspectFileData,
+  InspectHostConfig,
+  InspectSourceLink,
+  InspectSourceLocation,
+} from './inspect/types';
 export type { EnvironmentInfo } from './toolbar/types';

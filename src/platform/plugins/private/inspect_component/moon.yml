@@ -17,17 +17,12 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/plugins/private/inspect_component
 dependsOn:
-  - '@kbn/react-kibana-mount'
   - '@kbn/core'
-  - '@kbn/i18n'
-  - '@kbn/i18n-react'
   - '@kbn/config-schema'
   - '@kbn/repo-info'
   - '@kbn/core-http-router-server-mocks'
-  - '@kbn/test-jest-helpers'
   - '@kbn/developer-toolbar-plugin'
-  - '@kbn/shared-ux-utility'
-  - '@kbn/react-fiber'
+  - '@kbn/ui-developer-toolbar'
 tags:
   - plugin
   - dev

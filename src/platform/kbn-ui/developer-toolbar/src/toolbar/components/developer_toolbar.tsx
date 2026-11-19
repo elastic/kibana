@@ -36,6 +36,7 @@ import { FrameJankIndicator } from '../toolbar_items/frame_jank/frame_jank_indic
 import { EnvironmentIndicator } from '../toolbar_items/environment/environment_indicator';
 import { useMinimized } from '../hooks/use_minimized';
 import { SettingsModal } from './settings_modal';
+import { HostColorModeContext } from './host_color_mode';
 import { useToolbarState } from '../hooks/use_toolbar_state';
 import type { EnvironmentInfo } from '../types';
 
@@ -252,10 +253,14 @@ const getToolbarContainerStyles = (euiTheme: EuiThemeComputed, portal: boolean) 
 
 /** Developer toolbar shell with the built-in monitors; render once per page. */
 export const DeveloperToolbar: React.FC<DeveloperToolbarProps> = (props) => {
+  const { colorMode } = useEuiTheme();
+
   return (
-    <EuiThemeProvider colorMode={'dark'}>
-      <DeveloperToolbarInternal {...props} />
-    </EuiThemeProvider>
+    <HostColorModeContext.Provider value={colorMode === 'DARK' ? 'dark' : 'light'}>
+      <EuiThemeProvider colorMode={'dark'}>
+        <DeveloperToolbarInternal {...props} />
+      </EuiThemeProvider>
+    </HostColorModeContext.Provider>
   );
 };
 

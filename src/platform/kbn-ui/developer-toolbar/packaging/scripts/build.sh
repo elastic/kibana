@@ -4,7 +4,8 @@
 #
 # Steps:
 #   1. Validate types (packaging types match source types).
-#   2. Bundle via webpack (source + aliases -> single JS file).
+#   2. Bundle via webpack (source + aliases -> single JS file) and copy the
+#      license of the bundled third-party dependency (dom-to-image-more).
 #   3. Generate TypeScript declarations from the standalone types.
 #   4. Copy package.json into the output directory.
 #   5. Stamp a content-hash version onto target/package.json.
@@ -28,6 +29,14 @@ echo "    Types OK"
 
 echo "==> Step 2: Webpack bundle"
 "$KBN_BIN/webpack" --config "$PACKAGING_DIR/webpack.config.js"
+DOM_TO_IMAGE_PKG_JSON="$(node -p "require.resolve('dom-to-image-more/package.json', { paths: ['$KIBANA_ROOT'] })")"
+DOM_TO_IMAGE_DIR="$(dirname "$DOM_TO_IMAGE_PKG_JSON")"
+DOM_TO_IMAGE_VERSION="$(node -p "require('$DOM_TO_IMAGE_PKG_JSON').version")"
+{
+  echo "dom-to-image-more@$DOM_TO_IMAGE_VERSION"
+  echo ""
+  cat "$DOM_TO_IMAGE_DIR/LICENSE"
+} > "$TARGET_DIR/THIRD_PARTY_LICENSES.txt"
 echo "    Bundle OK"
 
 echo "==> Step 3: TypeScript declarations"
