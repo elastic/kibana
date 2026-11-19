@@ -105,12 +105,17 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, apiServices, kbnClient }) => {
-      // Restore the default-rule settings this suite's last test disables, so the
-      // disabled state does not leak into sibling specs on the shared server.
-      expect(await putDynamicSettings(apiClient, DYNAMIC_SETTINGS_DEFAULTS)).toHaveStatusCode(200);
+      // Restore the default-rule settings this suite disables so they don't leak into sibling
+      // specs. Only the settings this suite changes are sent, to avoid the task-settings 409.
+      const settingsRes = await putDynamicSettings(apiClient, {
+        defaultStatusRuleEnabled: DYNAMIC_SETTINGS_DEFAULTS.defaultStatusRuleEnabled,
+        defaultTLSRuleEnabled: DYNAMIC_SETTINGS_DEFAULTS.defaultTLSRuleEnabled,
+        defaultConnectors: DYNAMIC_SETTINGS_DEFAULTS.defaultConnectors,
+      });
       await kbnClient.savedObjects.clean({ types: ['synthetics-monitor-multi-space'] });
       await apiServices.alerting.cleanup.deleteAllConnectors();
-      const settingsRes = await putDynamicSettings(apiClient, DYNAMIC_SETTINGS_DEFAULTS);
+      await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
+      // Assert last so a failed reset does not skip the cleanup above.
       expect(settingsRes).toHaveStatusCode(200);
     });
 
