@@ -45,8 +45,9 @@ import { getOpsgenieConnectorType } from './opsgenie';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
 import { getMcpConnectorType } from './mcp';
-import { getSshHostConnectorType } from './ssh_host';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
+import type { ConfigSchema } from '../config';
+import { getSshHostConnectorType } from './ssh_host';
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 
@@ -54,6 +55,7 @@ export function registerConnectorTypes({
   actions,
   publicBaseUrl,
   experimentalFeatures,
+  config,
   isElasticCloudTrial,
   getUiSettingsClient,
   getInternalEsClient,
@@ -61,6 +63,7 @@ export function registerConnectorTypes({
   actions: ActionsPluginSetupContract;
   publicBaseUrl?: string;
   experimentalFeatures: ExperimentalFeatures;
+  config: ConfigSchema;
   isElasticCloudTrial?: () => Promise<boolean>;
   getUiSettingsClient?: InferenceConnectorDependencies['getUiSettingsClient'];
   getInternalEsClient?: InferenceConnectorDependencies['getInternalEsClient'];
@@ -110,5 +113,9 @@ export function registerConnectorTypes({
     );
   }
   actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());
-  actions.registerSubActionConnectorType(getSshHostConnectorType());
+  actions.registerSubActionConnectorType(
+    getSshHostConnectorType({
+      allowLegacyAlgorithms: config.sshHost.allowLegacyAlgorithms,
+    })
+  );
 }

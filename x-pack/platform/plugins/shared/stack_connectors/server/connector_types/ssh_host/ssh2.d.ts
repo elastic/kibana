@@ -20,6 +20,13 @@ declare module 'ssh2' {
     keepaliveInterval?: number;
     keepaliveCountMax?: number;
     hostVerifier?: (key: Buffer, verify: (valid: boolean) => void) => boolean | void;
+    algorithms?: {
+      kex?: string[];
+      cipher?: string[];
+      serverHostKey?: string[];
+      hmac?: string[];
+      compress?: string[];
+    };
   }
 
   export interface ExecStream extends EventEmitter {

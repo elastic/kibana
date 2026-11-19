@@ -6,6 +6,7 @@
  */
 
 import { allowedExperimentalValues } from '../../common/experimental_features';
+import { configSchema } from '../config';
 import { registerConnectorTypes } from '.';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
@@ -33,6 +34,7 @@ describe('registers connectors', () => {
     registerConnectorTypes({
       actions: mockedActions,
       experimentalFeatures: allowedExperimentalValues,
+      config: configSchema.validate({}),
     });
     ACTION_TYPE_IDS.forEach((id) =>
       expect(mockedActions.registerType).toHaveBeenCalledWith(

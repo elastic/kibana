@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   TextField,
@@ -18,7 +19,7 @@ import {
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { AUTH_TYPE } from '@kbn/connector-schemas/ssh_host';
+import { AUTH_TYPE, parsePinnedHostKey } from '@kbn/connector-schemas/ssh_host';
 import type { AuthType } from '@kbn/connector-schemas/ssh_host';
 
 const { emptyField } = fieldValidators;
@@ -26,10 +27,13 @@ const { emptyField } = fieldValidators;
 const SshHostConnectorFieldsComponent: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
-  const [{ config }] = useFormData<{ config: { authType: AuthType } }>({
-    watch: 'config.authType',
+  const [{ config }] = useFormData<{
+    config: { authType?: AuthType; skipHostKeyVerification?: boolean };
+  }>({
+    watch: ['config.authType', 'config.skipHostKeyVerification'],
   });
   const authType = config?.authType ?? AUTH_TYPE.PrivateKey;
+  const skipHostKeyVerification = config?.skipHostKeyVerification ?? false;
 
   const authOptions = [
     {
@@ -171,6 +175,79 @@ const SshHostConnectorFieldsComponent: React.FunctionComponent<ActionConnectorFi
       />
       <EuiSpacer size="m" />
       <UseField
+        path="config.hostKey"
+        component={TextAreaField}
+        config={{
+          label: i18n.translate('xpack.stackConnectors.components.sshHost.hostKeyLabel', {
+            defaultMessage: 'Host key',
+          }),
+          helpText: i18n.translate('xpack.stackConnectors.components.sshHost.hostKeyHelp', {
+            defaultMessage:
+              'The server public key, as an OpenSSH line (ssh-ed25519 AAAA...) or the base64 key.',
+          }),
+          validations: [
+            {
+              validator: ({ value }) => {
+                if (skipHostKeyVerification) {
+                  return;
+                }
+                const text = typeof value === 'string' ? value : '';
+                if (!text.trim()) {
+                  return {
+                    message: i18n.translate(
+                      'xpack.stackConnectors.components.sshHost.hostKeyRequired',
+                      {
+                        defaultMessage: 'Host key is required.',
+                      }
+                    ),
+                  };
+                }
+                if (!parsePinnedHostKey(text)) {
+                  return {
+                    message: i18n.translate(
+                      'xpack.stackConnectors.components.sshHost.hostKeyInvalid',
+                      {
+                        defaultMessage:
+                          'Enter an OpenSSH public key line or the base64 key from that line.',
+                      }
+                    ),
+                  };
+                }
+              },
+            },
+          ],
+        }}
+        componentProps={{
+          euiFieldProps: {
+            readOnly,
+            rows: 4,
+            fullWidth: true,
+            'data-test-subj': 'sshHostKeyInput',
+          },
+        }}
+      />
+      <EuiSpacer size="m" />
+      {skipHostKeyVerification ? (
+        <KbnWarningCallout
+          size="s"
+          title={i18n.translate('xpack.stackConnectors.components.sshHost.hostKeyModeSkipped', {
+            defaultMessage:
+              'Host key verification is skipped. This connector trusts any server key.',
+          })}
+          data-test-subj="sshHostKeyModeCallout"
+        />
+      ) : (
+        <KbnInfoCallout
+          size="s"
+          title={i18n.translate('xpack.stackConnectors.components.sshHost.hostKeyModePinned', {
+            defaultMessage:
+              'Host key verification is pinned. The connection is refused when the server key does not match.',
+          })}
+          data-test-subj="sshHostKeyModeCallout"
+        />
+      )}
+      <EuiSpacer size="m" />
+      <UseField
         path="config.skipHostKeyVerification"
         component={ToggleField}
         config={{
@@ -188,6 +265,23 @@ const SshHostConnectorFieldsComponent: React.FunctionComponent<ActionConnectorFi
                 'Insecure. Disables SSH host key checks. Use only for lab hosts that change keys often.',
             }
           ),
+          validations: [
+            {
+              validator: () => {
+                if (authType === AUTH_TYPE.Password && skipHostKeyVerification) {
+                  return {
+                    message: i18n.translate(
+                      'xpack.stackConnectors.components.sshHost.passwordRequiresPinnedHostKey',
+                      {
+                        defaultMessage:
+                          'Password authentication requires a pinned host key. Turn verification on.',
+                      }
+                    ),
+                  };
+                }
+              },
+            },
+          ],
         }}
         componentProps={{
           euiFieldProps: {

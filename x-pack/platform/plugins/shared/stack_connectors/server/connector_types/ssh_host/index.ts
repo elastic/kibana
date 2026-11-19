@@ -19,10 +19,14 @@ import {
 import type { Config, Secrets } from '@kbn/connector-schemas/ssh_host';
 import { SshHostConnector } from './ssh_host_connector';
 
-export const getSshHostConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
+export const getSshHostConnectorType = ({
+  allowLegacyAlgorithms = false,
+}: {
+  allowLegacyAlgorithms?: boolean;
+} = {}): SubActionConnectorType<Config, Secrets> => ({
   id: CONNECTOR_ID,
   name: CONNECTOR_NAME,
-  getService: (params) => new SshHostConnector(params),
+  getService: (params) => new SshHostConnector(params, { allowLegacyAlgorithms }),
   schema: {
     config: ConfigSchema,
     secrets: SecretsSchema,

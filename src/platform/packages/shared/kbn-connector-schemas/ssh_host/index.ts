@@ -10,6 +10,8 @@
 export { CONNECTOR_ID, CONNECTOR_NAME, AUTH_TYPE, SUB_ACTION } from './constants';
 export type { AuthType } from './constants';
 
+export { HOST_KEY_MAX_LENGTH, parsePinnedHostKey } from './host_key';
+
 export {
   ConfigSchema,
   SecretsSchema,

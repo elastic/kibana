@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
-import { closeSync, existsSync, mkdtempSync, openSync, readFileSync, writeSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import { createHash, timingSafeEqual } from 'crypto';
 import { Client, utils } from 'ssh2';
 import type { ConnectConfig, SFTPWrapper } from 'ssh2';
 import { AUTH_TYPE } from '@kbn/connector-schemas/ssh_host';
@@ -45,7 +42,45 @@ export interface SshTarget {
   password?: string;
   privateKey?: string;
   skipHostKeyVerification: boolean;
+  /** Canonical base64 host-key blob. Present when verification is pinned. */
+  hostKey?: string;
+  allowLegacyAlgorithms: boolean;
+  logger?: { info: (message: string) => void };
 }
+
+/**
+ * ssh2 1.17 defaults with SHA-1 host keys, MACs, and key exchange removed.
+ * Cipher order stays with ssh2 so it can follow the runtime's AES support.
+ */
+export const MODERN_SSH_ALGORITHMS: NonNullable<ConnectConfig['algorithms']> = {
+  kex: [
+    'curve25519-sha256',
+    'curve25519-sha256@libssh.org',
+    'ecdh-sha2-nistp256',
+    'ecdh-sha2-nistp384',
+    'ecdh-sha2-nistp521',
+    'diffie-hellman-group-exchange-sha256',
+    'diffie-hellman-group14-sha256',
+    'diffie-hellman-group15-sha512',
+    'diffie-hellman-group16-sha512',
+    'diffie-hellman-group17-sha512',
+    'diffie-hellman-group18-sha512',
+  ],
+  serverHostKey: [
+    'ssh-ed25519',
+    'ecdsa-sha2-nistp256',
+    'ecdsa-sha2-nistp384',
+    'ecdsa-sha2-nistp521',
+    'rsa-sha2-512',
+    'rsa-sha2-256',
+  ],
+  hmac: [
+    'hmac-sha2-256-etm@openssh.com',
+    'hmac-sha2-512-etm@openssh.com',
+    'hmac-sha2-256',
+    'hmac-sha2-512',
+  ],
+};
 
 export interface RemoteExecResult {
   stdout: string;
@@ -68,20 +103,6 @@ interface PooledSession {
 const sessions = new Map<string, PooledSession>();
 const opening = new Map<string, Promise<PooledSession>>();
 
-let privateSshDir: string | undefined;
-
-const getPrivateSshDir = (): string => {
-  if (!privateSshDir || !existsSync(privateSshDir)) {
-    privateSshDir = mkdtempSync(join(tmpdir(), 'kbn_ssh_'));
-  }
-  return privateSshDir;
-};
-
-const knownHostsPath = (connectorId: string): string => {
-  const id = createHash('sha256').update(connectorId).digest('hex').slice(0, 16);
-  return join(getPrivateSshDir(), `kbn_ssh_kh_${id}`);
-};
-
 const sessionKey = (target: SshTarget): string =>
   createHash('sha256')
     .update(
@@ -92,42 +113,24 @@ const sessionKey = (target: SshTarget): string =>
         String(target.port),
         target.authType,
         target.skipHostKeyVerification ? '1' : '0',
+        target.hostKey ?? '',
+        target.allowLegacyAlgorithms ? '1' : '0',
         target.password ?? '',
         target.privateKey ?? '',
       ].join('\0')
     )
     .digest('hex');
 
-const readKnownKey = (file: string, hostname: string, port: number): string | undefined => {
-  if (!existsSync(file)) {
-    return undefined;
+/** Compares the key the server presents with the pinned blob. Runs before user authentication. */
+const pinnedHostKeyMatches = (target: SshTarget, key: Buffer): boolean => {
+  if (!target.hostKey) {
+    return false;
   }
-  const prefix = `${encodeURIComponent(hostname)} ${port} `;
-  const line = readFileSync(file, 'utf8')
-    .split('\n')
-    .find((entry) => entry.startsWith(prefix));
-  return line ? line.slice(prefix.length) : undefined;
-};
-
-const appendKnownHost = (file: string, hostname: string, port: number, key: string): void => {
-  const fd = openSync(file, 'a', 0o600);
-  try {
-    writeSync(fd, `${encodeURIComponent(hostname)} ${port} ${key}\n`);
-  } finally {
-    closeSync(fd);
+  const pinned = Buffer.from(target.hostKey, 'base64');
+  if (pinned.length !== key.length) {
+    return false;
   }
-};
-
-/** accept-new: store the first key for this host, reject a different one. */
-const acceptNewHostKey = (target: SshTarget, key: Buffer): boolean => {
-  const file = knownHostsPath(target.connectorId);
-  const encoded = key.toString('base64');
-  const known = readKnownKey(file, target.hostname, target.port);
-  if (known === undefined) {
-    appendKnownHost(file, target.hostname, target.port, encoded);
-    return true;
-  }
-  return known === encoded;
+  return timingSafeEqual(pinned, key);
 };
 
 const normalizePrivateKey = (key: string): string => `${key.replace(/\r/g, '').trimEnd()}\n`;
@@ -142,13 +145,16 @@ const connectConfig = (target: SshTarget): ConnectConfig => {
     keepaliveCountMax: KEEPALIVE_COUNT_MAX,
   };
 
+  if (!target.allowLegacyAlgorithms) {
+    config.algorithms = MODERN_SSH_ALGORITHMS;
+  }
+
   if (!target.skipHostKeyVerification) {
-    config.hostVerifier = (key) => acceptNewHostKey(target, key);
+    config.hostVerifier = (key) => pinnedHostKeyMatches(target, key);
   }
 
   if (target.authType === AUTH_TYPE.Password) {
     config.password = target.password;
-    config.tryKeyboard = true;
     return config;
   }
 
@@ -182,21 +188,11 @@ const openClient = (target: SshTarget, key: string): Promise<PooledSession> =>
       fail(error);
     };
 
-    if (target.authType === AUTH_TYPE.Password) {
-      const password = target.password ?? '';
-      client.on(
-        'keyboard-interactive',
-        (
-          _name: string,
-          _instructions: string,
-          _lang: string,
-          prompts: unknown[],
-          finish: (responses: string[]) => void
-        ) => {
-          finish(prompts.map(() => password));
-        }
-      );
-    }
+    target.logger?.info(
+      `SSH connector [${target.connectorId}] host key verification ${
+        target.skipHostKeyVerification ? 'skipped' : 'pinned'
+      }`
+    );
 
     client.once('error', onError);
     client.once('ready', () => {

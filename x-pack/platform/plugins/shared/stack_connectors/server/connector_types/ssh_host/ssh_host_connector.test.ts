@@ -113,6 +113,11 @@ jest.mock('ssh2', () => {
       keepaliveInterval?: number;
       keepaliveCountMax?: number;
       hostVerifier?: (key: Buffer, verify: (valid: boolean) => void) => boolean | void;
+      algorithms?: {
+        kex?: string[];
+        serverHostKey?: string[];
+        hmac?: string[];
+      };
     };
     ended: boolean;
     emit(event: string, ...args: unknown[]): boolean;
@@ -213,6 +218,11 @@ const MockClient = Client as unknown as {
       keepaliveInterval?: number;
       keepaliveCountMax?: number;
       hostVerifier?: (key: Buffer, verify: (valid: boolean) => void) => boolean | void;
+      algorithms?: {
+        kex?: string[];
+        serverHostKey?: string[];
+        hmac?: string[];
+      };
     };
     ended: boolean;
   }>;
@@ -230,6 +240,7 @@ const MockClient = Client as unknown as {
 
 describe('SshHostConnector', () => {
   const privateKey = '-----BEGIN OPENSSH PRIVATE KEY-----\ntest\n-----END OPENSSH PRIVATE KEY-----';
+  const pinnedHostKey = Buffer.from('host-key-a').toString('base64');
 
   const createConnector = (
     overrides: {
@@ -240,25 +251,33 @@ describe('SshHostConnector', () => {
       password?: string | null;
       sshPrivateKey?: string | null;
       skipHostKeyVerification?: boolean;
+      hostKey?: string | null;
+      allowLegacyAlgorithms?: boolean;
       configurationUtilities?: ReturnType<typeof actionsConfigMock.create>;
+      logger?: ReturnType<typeof loggingSystemMock.createLogger>;
     } = {}
   ) =>
-    new SshHostConnector({
-      configurationUtilities: overrides.configurationUtilities ?? actionsConfigMock.create(),
-      config: {
-        host: overrides.host ?? 'example.com',
-        authType: overrides.authType ?? AUTH_TYPE.PrivateKey,
-        skipHostKeyVerification: overrides.skipHostKeyVerification ?? false,
+    new SshHostConnector(
+      {
+        configurationUtilities: overrides.configurationUtilities ?? actionsConfigMock.create(),
+        config: {
+          host: overrides.host ?? 'example.com',
+          authType: overrides.authType ?? AUTH_TYPE.PrivateKey,
+          skipHostKeyVerification: overrides.skipHostKeyVerification ?? false,
+          hostKey: overrides.hostKey === undefined ? pinnedHostKey : overrides.hostKey ?? undefined,
+        },
+        connector: { id: overrides.id ?? '1', type: CONNECTOR_ID },
+        secrets: {
+          username: overrides.username ?? 'alice',
+          sshPrivateKey:
+            overrides.sshPrivateKey === undefined ? privateKey : overrides.sshPrivateKey,
+          password: overrides.password === undefined ? null : overrides.password,
+        },
+        logger: overrides.logger ?? loggingSystemMock.createLogger(),
+        services: actionsMock.createServices(),
       },
-      connector: { id: overrides.id ?? '1', type: CONNECTOR_ID },
-      secrets: {
-        username: overrides.username ?? 'alice',
-        sshPrivateKey: overrides.sshPrivateKey === undefined ? privateKey : overrides.sshPrivateKey,
-        password: overrides.password === undefined ? null : overrides.password,
-      },
-      logger: loggingSystemMock.createLogger(),
-      services: actionsMock.createServices(),
-    });
+      { allowLegacyAlgorithms: overrides.allowLegacyAlgorithms ?? false }
+    );
 
   const connectConfig = () => MockClient.instances.at(-1)?.config;
 
@@ -298,6 +317,9 @@ describe('SshHostConnector', () => {
         })
       );
       expect(connectConfig()?.hostVerifier).toEqual(expect.any(Function));
+      expect(connectConfig()?.algorithms?.serverHostKey).not.toContain('ssh-rsa');
+      expect(connectConfig()?.algorithms?.hmac).not.toContain('hmac-sha1');
+      expect(connectConfig()?.algorithms?.kex).not.toContain('diffie-hellman-group14-sha1');
       expect(MockClient.lastStream?.command).toContain('base64 -d');
       expect(
         Buffer.from(MockClient.lastStream?.stdin.toString('utf8') ?? '', 'base64').toString()
@@ -310,16 +332,82 @@ describe('SshHostConnector', () => {
       expect(connectConfig()?.hostVerifier).toBeUndefined();
     });
 
-    it('rejects a changed host key as a client failure', async () => {
-      const connector = createConnector();
-      await connector.exec({ script: 'true' });
-      resetSshHostSessionsForTests();
+    it('accepts an OpenSSH public key line that matches the server key', async () => {
+      await createConnector({ hostKey: `ssh-ed25519 ${pinnedHostKey} server.example` }).exec({
+        script: 'true',
+      });
+
+      expect(connectConfig()?.hostVerifier?.(Buffer.from('host-key-a'), () => undefined)).toBe(
+        true
+      );
+    });
+
+    it('rejects a server key that does not match the pin before authentication', async () => {
       MockClient.hostKey = Buffer.from('host-key-b');
 
-      const result = await connector.exec({ script: 'true' });
+      const result = await createConnector().exec({ script: 'true' });
 
       expect(result.code).toBe(255);
       expect(result.stderr).toMatch(/Host key verification failed/i);
+      expect(connectConfig()?.hostVerifier?.(Buffer.from('host-key-b'), () => undefined)).toBe(
+        false
+      );
+    });
+
+    it('rejects a missing host key before connecting', async () => {
+      await expect(createConnector({ hostKey: null }).exec({ script: 'true' })).rejects.toThrow(
+        'A host key is required unless host key verification is skipped'
+      );
+      expect(MockClient.instances).toHaveLength(0);
+    });
+
+    it('rejects an unparseable host key before connecting', async () => {
+      await expect(
+        createConnector({ hostKey: 'not-a-key' }).exec({ script: 'true' })
+      ).rejects.toThrow('Host key must be an OpenSSH public key line or a base64 key');
+      expect(MockClient.instances).toHaveLength(0);
+    });
+
+    it('rejects password authentication when host key verification is skipped', async () => {
+      await expect(
+        createConnector({
+          skipHostKeyVerification: true,
+          authType: AUTH_TYPE.Password,
+          password: 'secret',
+          sshPrivateKey: null,
+        }).exec({ script: 'true' })
+      ).rejects.toThrow('Password authentication requires a pinned host key');
+      expect(MockClient.instances).toHaveLength(0);
+    });
+
+    it('logs the verification mode without the host key', async () => {
+      const logger = loggingSystemMock.createLogger();
+      const connector = createConnector({ id: 'conn-log', logger });
+
+      await connector.exec({ script: 'true' });
+      await connector.exec({ script: 'true' });
+
+      expect(logger.info).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(
+        'SSH connector [conn-log] host key verification pinned'
+      );
+      expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining(pinnedHostKey));
+    });
+
+    it('uses ssh2 defaults when legacy algorithms are enabled', async () => {
+      await createConnector({ allowLegacyAlgorithms: true }).exec({ script: 'true' });
+
+      expect(connectConfig()?.algorithms).toBeUndefined();
+    });
+
+    it('opens a new session when the pinned host key changes', async () => {
+      await createConnector({ id: 'conn-a' }).exec({ script: 'true' });
+      await createConnector({
+        id: 'conn-a',
+        hostKey: Buffer.from('host-key-b').toString('base64'),
+      }).exec({ script: 'true' });
+
+      expect(MockClient.instances).toHaveLength(2);
     });
 
     it('rejects a username with whitespace before connecting', async () => {
@@ -361,9 +449,8 @@ describe('SshHostConnector', () => {
         sshPrivateKey: null,
       }).exec({ script: 'true' });
 
-      expect(connectConfig()).toEqual(
-        expect.objectContaining({ password: 'secret', tryKeyboard: true })
-      );
+      expect(connectConfig()).toEqual(expect.objectContaining({ password: 'secret' }));
+      expect(connectConfig()?.tryKeyboard).toBeUndefined();
       expect(connectConfig()?.privateKey).toBeUndefined();
     });
 

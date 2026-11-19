@@ -15,6 +15,8 @@ export const ConfigSchema = lazySchema(() =>
       host: z.string().min(1).max(253),
       authType: z.enum(['privateKey', 'password']).default('privateKey'),
       skipHostKeyVerification: z.boolean().default(false),
+      // The server public key. Required at connect time unless verification is skipped.
+      hostKey: z.string().max(4096).optional(),
     })
     .strict()
 );

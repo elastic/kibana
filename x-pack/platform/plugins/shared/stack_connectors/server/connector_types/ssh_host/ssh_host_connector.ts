@@ -7,7 +7,7 @@
 
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
-import { AUTH_TYPE, SUB_ACTION } from '@kbn/connector-schemas/ssh_host';
+import { AUTH_TYPE, parsePinnedHostKey, SUB_ACTION } from '@kbn/connector-schemas/ssh_host';
 import type {
   Config,
   Secrets,
@@ -73,8 +73,14 @@ const rethrowLocalFailure = (error: unknown): void => {
 };
 
 export class SshHostConnector extends SubActionConnector<Config, Secrets> {
-  constructor(params: ServiceParams<Config, Secrets>) {
+  private readonly allowLegacyAlgorithms: boolean;
+
+  constructor(
+    params: ServiceParams<Config, Secrets>,
+    options: { allowLegacyAlgorithms?: boolean } = {}
+  ) {
     super(params);
+    this.allowLegacyAlgorithms = options.allowLegacyAlgorithms ?? false;
 
     this.registerSubAction({ name: SUB_ACTION.Exec, method: 'exec', schema: ExecParamsSchema });
     this.registerSubAction({
@@ -144,6 +150,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
   private prepare(): SshTarget {
     this.assertHostAllowed();
     this.assertCredentials();
+    const hostKey = this.resolveHostKey();
     const { hostname, port } = parseHost(this.config.host);
     const { username, password, sshPrivateKey } = this.secrets;
     return {
@@ -155,7 +162,27 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
       password: password ?? undefined,
       privateKey: sshPrivateKey ?? undefined,
       skipHostKeyVerification: this.config.skipHostKeyVerification,
+      hostKey,
+      allowLegacyAlgorithms: this.allowLegacyAlgorithms,
+      logger: this.logger,
     };
+  }
+
+  private resolveHostKey(): string | undefined {
+    const hostKey = parsePinnedHostKey(this.config.hostKey);
+    if (this.config.skipHostKeyVerification) {
+      if (this.config.authType === AUTH_TYPE.Password) {
+        throw new Error('Password authentication requires a pinned host key');
+      }
+      return hostKey;
+    }
+    if (hostKey) {
+      return hostKey;
+    }
+    if (this.config.hostKey?.trim()) {
+      throw new Error('Host key must be an OpenSSH public key line or a base64 key');
+    }
+    throw new Error('A host key is required unless host key verification is skipped');
   }
 
   private assertCredentials(): void {

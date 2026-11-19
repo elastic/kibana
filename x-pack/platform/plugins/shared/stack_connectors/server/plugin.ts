@@ -89,6 +89,7 @@ export class StackConnectorsPlugin
       actions,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       experimentalFeatures: this.experimentalFeatures,
+      config: this.config,
       isElasticCloudTrial: this.isElasticCloudTrial,
       getUiSettingsClient: async (savedObjectsClient) => {
         const [coreStart] = await core.getStartServices();
