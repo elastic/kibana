@@ -902,8 +902,10 @@ node scripts/synthtrace agent_config --live
 
 These scenarios generate browser and mobile Real User Monitoring data for Digital Experience. EDOT Browser data is OTel-native, as stored by the Elasticsearch exporter, with no APM enrichment:
 
-- `logs-generic.otel-default`: `browser.navigation`, `browser.navigation_timing`, `browser.resource_timing`, `browser.web_vital` (LCP, INP, CLS, FCP, TTFB), `browser.user_action.click` and `exception` events
-- `traces-generic.otel-default`: fetch/XHR `CLIENT` spans
+- `logs-browser.otel-default`: `browser.navigation`, `browser.navigation_timing`, `browser.resource_timing`, `browser.web_vital` (LCP, INP, CLS, FCP, TTFB), `browser.user_action.click` and `exception` events
+- `traces-browser.otel-default`: fetch/XHR `CLIENT` spans
+
+EDOT Browser data has a dataset of its own, as proposed in elastic/observability-dev#6361, so that its index can be sorted by session. `digital_experience_browser` and `digital_experience_mixed` install the `synthtrace-logs-browser.otel` and `synthtrace-traces-browser.otel` index templates, built from the cluster's `logs-otel@template` and `traces-otel@template`, which sort them by `service.name`, `session.id` and `@timestamp` (latest first). In code and Scout tests, call `otelEsClient.installBrowserIndexTemplates()` for the same sort; without it, the data streams take the OTel templates' host and time sort. A data stream created before the templates keeps its sort until it rolls over. EDOT React Native data stays in `logs-generic.otel-default` and `traces-generic.otel-default`.
 
 Non-zero timings and web vital values always have a fractional part, so dynamic mapping types them as `float`. Like EDOT Browser, timings of phases that didn't happen are written as `0`.
 
