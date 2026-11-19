@@ -584,6 +584,8 @@ describe('RuleSummaryFlyout', () => {
     };
 
     it('hides the button when Agent Builder cannot open chat', () => {
+      setMockAgentBuilderShow(true);
+
       renderFlyout();
 
       expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeInTheDocument();

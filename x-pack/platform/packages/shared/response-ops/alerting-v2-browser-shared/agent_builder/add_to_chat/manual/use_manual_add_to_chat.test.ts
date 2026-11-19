@@ -14,7 +14,7 @@ import type { AttachmentConverter } from '../../types';
 import { useManualAddToChat, type ManualAddToChatServices } from './use_manual_add_to_chat';
 
 const applicationWithShow = (show: boolean): ApplicationStart =>
-  ({ capabilities: { agentBuilder: { show } } } as ApplicationStart);
+  ({ capabilities: { agentBuilder: { show } } } as unknown as ApplicationStart);
 
 interface TestItem {
   id: string;
@@ -93,6 +93,24 @@ describe('useManualAddToChat', () => {
 
     expect(openChat).not.toHaveBeenCalled();
     expect(addAttachment).not.toHaveBeenCalled();
+  });
+
+  it('does not attach to a bound conversation when the user cannot show Agent Builder', () => {
+    activeConversation$.next({ id: 'conv-1', conversation: undefined });
+
+    const { result } = renderHook(() =>
+      useManualAddToChat({ id: 'item-1' }, converter, {
+        ...services,
+        application: applicationWithShow(false),
+      })
+    );
+
+    act(() => {
+      result.current.addToChat();
+    });
+
+    expect(addAttachment).not.toHaveBeenCalled();
+    expect(openChat).not.toHaveBeenCalled();
   });
 
   it('opens a new chat on addToChat when no conversation is bound', () => {

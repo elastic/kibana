@@ -33,7 +33,7 @@ const mockRule = {
 
 const services: ManualAddToChatServices = {
   agentBuilder: undefined,
-  application: { capabilities: { agentBuilder: { show: true } } } as ApplicationStart,
+  application: { capabilities: { agentBuilder: { show: true } } } as unknown as ApplicationStart,
 };
 
 describe('EpisodeAddToChatButton', () => {
