@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { resolveChatCompletionReasoning } from './resolve_chat_completion_reasoning';
+import {
+  resolveChatCompletionReasoning,
+  resolveOpenAIReasoningEffort,
+} from './resolve_chat_completion_reasoning';
 
 describe('resolveChatCompletionReasoning', () => {
   it('returns the caller-provided reasoning unchanged', () => {
@@ -25,6 +28,9 @@ describe('resolveChatCompletionReasoning', () => {
       'openai/gpt-5',
       'openai-gpt-5.2',
       '.openai-gpt-5.4-chat_completion',
+      'gpt-5.6-terra',
+      'gpt-6-luna',
+      '.openai-gpt-6-sol-chat_completion',
     ];
     for (const model of models) {
       expect(
@@ -45,6 +51,7 @@ describe('resolveChatCompletionReasoning', () => {
       'gpt-4.1',
       'o3-mini',
       'gpt-52',
+      'gpt-60',
     ];
     for (const model of models) {
       expect(
@@ -81,5 +88,31 @@ describe('resolveChatCompletionReasoning', () => {
         model: 'google-gemini-2.5-pro',
       })
     ).toEqual({ effort: 'none' });
+  });
+});
+
+describe('resolveOpenAIReasoningEffort', () => {
+  it('returns none when native tools are present and the model requires it', () => {
+    const models = ['gpt-5.6-terra', 'gpt-5.6-luna-2026-09-01', 'openai/gpt-5.6-sol', 'gpt-6-luna'];
+    for (const model of models) {
+      expect(resolveOpenAIReasoningEffort({ hasNativeTools: true, model })).toBe('none');
+    }
+  });
+
+  it('returns undefined for models that default to or reject none', () => {
+    const models = ['gpt-5', 'gpt-5-mini', 'gpt-5.4', 'gpt-5.5', 'gpt-5.60', 'gpt-4.1', 'o3-mini'];
+    for (const model of models) {
+      expect(resolveOpenAIReasoningEffort({ hasNativeTools: true, model })).toBeUndefined();
+    }
+  });
+
+  it('returns undefined when tools are absent', () => {
+    expect(
+      resolveOpenAIReasoningEffort({ hasNativeTools: false, model: 'gpt-5.6-terra' })
+    ).toBeUndefined();
+  });
+
+  it('returns undefined when the model is unknown', () => {
+    expect(resolveOpenAIReasoningEffort({ hasNativeTools: true })).toBeUndefined();
   });
 });
