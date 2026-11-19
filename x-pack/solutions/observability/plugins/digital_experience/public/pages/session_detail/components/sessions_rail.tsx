@@ -46,7 +46,7 @@ import {
   type SessionSignalId,
 } from '../../../utils/describe_session';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
-import type { RailPlacement } from './session_split_view';
+import { isFlyoutPlacement, type RailPlacement } from './session_split_view';
 import { pickSessionsListQuery } from '../../../utils/sessions_list_query';
 import { MAX_LISTED_SESSIONS } from '../../sessions/components/sessions_table';
 import { useSessionsList } from '../../sessions/hooks/sessions_list_request';
@@ -74,7 +74,7 @@ const DOCK_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.rail.do
 });
 
 const hideIconOf = (placement: RailPlacement): string => {
-  if (placement === 'flyout') {
+  if (isFlyoutPlacement(placement)) {
     return 'cross';
   }
   return placement === 'right' ? 'transitionRightOut' : 'transitionLeftOut';
@@ -342,12 +342,12 @@ export function SessionsRail({
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <EuiToolTip
-              content={placement === 'flyout' ? DOCK_LABEL : OPEN_AS_FLYOUT_LABEL}
+              content={isFlyoutPlacement(placement) ? DOCK_LABEL : OPEN_AS_FLYOUT_LABEL}
               disableScreenReaderOutput
             >
               <EuiButtonIcon
-                iconType={placement === 'flyout' ? 'pin' : 'external'}
-                aria-label={placement === 'flyout' ? DOCK_LABEL : OPEN_AS_FLYOUT_LABEL}
+                iconType={isFlyoutPlacement(placement) ? 'pin' : 'menuRight'}
+                aria-label={isFlyoutPlacement(placement) ? DOCK_LABEL : OPEN_AS_FLYOUT_LABEL}
                 onClick={onToggleFlyout}
                 data-test-subj="digitalExperienceSessionsRailFlyoutToggle"
                 {...getEbtProps({

@@ -37,8 +37,16 @@ const containerCss = css({
   height: 'var(--kbn-application--content-height, calc(100vh - var(--euiFixedHeadersOffset, 0px)))',
 });
 
-/** Where the sessions list shows: beside the session, in a flyout over it, or not at all. */
-export type RailPlacement = 'left' | 'right' | 'flyout' | 'hidden';
+/**
+ * Where the sessions list shows: beside the session, in a flyout that pushes the session aside or
+ * lies over it, or not at all.
+ */
+export type RailPlacement = 'left' | 'right' | 'flyoutPush' | 'flyoutOverlay' | 'hidden';
+
+export const isFlyoutPlacement = (
+  placement: RailPlacement
+): placement is 'flyoutPush' | 'flyoutOverlay' =>
+  placement === 'flyoutPush' || placement === 'flyoutOverlay';
 
 const FLYOUT_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.rail.flyoutLabel', {
   defaultMessage: 'Sessions',
@@ -80,13 +88,12 @@ export function SessionSplitView({
     return <>{children}</>;
   }
 
-  if (placement === 'flyout') {
+  if (isFlyoutPlacement(placement)) {
     return (
       <>
         {children}
-        {/* Pushes the session aside, so the list and the session can be used together. */}
         <EuiFlyout
-          type="push"
+          type={placement === 'flyoutPush' ? 'push' : 'overlay'}
           ownFocus={false}
           paddingSize="none"
           hideCloseButton
