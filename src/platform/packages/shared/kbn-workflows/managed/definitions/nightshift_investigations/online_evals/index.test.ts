@@ -22,7 +22,7 @@ describe('nightshift online evals workflow', () => {
     expect(NIGHTSHIFT_ONLINE_EVALS_WORKFLOW.billable).toBe(false);
   });
 
-  const [scoreReferenceFree, scoreAlertOutcome] = workflow.steps;
+  const [scoreReferenceFree, scoreAlertOutcome, scoreRecoveryDueDiligence] = workflow.steps;
   const runsFor = (step: (typeof workflow.steps)[number], roundKind: string) =>
     createWorkflowLiquidEngine().evalValueSync((step.if ?? '').slice(3, -2), {
       inputs: { round_kind: roundKind },
@@ -31,11 +31,11 @@ describe('nightshift online evals workflow', () => {
   it.each([
     ['initial', 'score_reference_free'],
     ['follow_up', undefined],
-    ['alert_recovery', 'score_alert_outcome'],
-  ])('scores a %s round with only %s', (roundKind, expected) => {
+    ['alert_recovery', ['score_alert_outcome', 'score_recovery_due_diligence']],
+  ])('scores a %s round with %s', (roundKind, expected) => {
     expect(
       workflow.steps.filter((step) => runsFor(step, roundKind)).map(({ name }) => name)
-    ).toEqual(expected ? [expected] : []);
+    ).toEqual(Array.isArray(expected) ? expected : expected ? [expected] : []);
   });
 
   it('grades the first-round report with the reference-free judges', () => {
@@ -68,6 +68,25 @@ describe('nightshift online evals workflow', () => {
             { name: 'nightshift_alert_outcome_rca_accuracy' },
             { name: 'nightshift_alert_outcome_benign_classification' },
             { name: 'nightshift_alert_outcome_rca_reporting_gap' },
+          ],
+          entry_point: '${{ inputs.entry_point }}',
+        }),
+      })
+    );
+  });
+
+  it("grades the recovery round's own analysis with the due-diligence judges", () => {
+    expect(scoreRecoveryDueDiligence).toEqual(
+      expect.objectContaining({
+        type: 'nightshift.onlineEvals.score',
+        with: expect.objectContaining({
+          round_kind: '{{ inputs.round_kind }}',
+          graded_report: 'current',
+          evaluator_set: 'recovery_due_diligence',
+          evaluators: [
+            { name: 'nightshift_recovery_causal_checklist' },
+            { name: 'nightshift_recovery_root_cause_evidence' },
+            { name: 'nightshift_recovery_evidence_families' },
           ],
           entry_point: '${{ inputs.entry_point }}',
         }),

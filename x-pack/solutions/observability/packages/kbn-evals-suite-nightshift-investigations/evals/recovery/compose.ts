@@ -52,21 +52,29 @@ export const recoveryInputSchema = lazySchema(() =>
 export const composeRecoveryQuestion = ({ input }: InvestigationExample): string =>
   buildAlertRecoveredFollowUpMessage(recoveryInputSchema.parse(input).alert);
 
-type PriorStep = z.infer<typeof priorStepSchema>;
+// Derived from a schema, not written as an object type: the start route's `context` must be JSON,
+// and an interface would not be assignable to it.
+const earlierRoundContextSchema = lazySchema(() =>
+  z.object({
+    earlier_round: z.object({
+      request: z.string(),
+      steps: z
+        .array(
+          z.object({
+            step: z.number(),
+            tool: z.string(),
+            arguments: priorStepSchema.shape.params,
+            result: z.string(),
+            note: z.string().optional(),
+          })
+        )
+        .optional(),
+      your_answer: z.string(),
+    }),
+  })
+);
 
-interface EarlierRoundContext {
-  earlier_round: {
-    request: string;
-    steps?: Array<{
-      step: number;
-      tool: string;
-      arguments: PriorStep['params'];
-      result: string;
-      note?: string;
-    }>;
-    your_answer: string;
-  };
-}
+type EarlierRoundContext = z.infer<typeof earlierRoundContextSchema>;
 
 /**
  * The investigation's earlier round, which the start route's open `context` carries because the

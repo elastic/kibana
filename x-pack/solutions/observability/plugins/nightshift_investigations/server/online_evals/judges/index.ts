@@ -28,6 +28,7 @@ import {
   type MemoryWriteJudgeReferenceData,
 } from './memory_write';
 import { rcaRewardJudge } from './rca_reward';
+import { recoveryDueDiligenceJudges } from './recovery_due_diligence';
 
 export {
   MEMORY_READ_JUDGE_VERSION,
@@ -56,6 +57,9 @@ export const alertOutcomeJudges: readonly RegisteredEvaluatorDefinition[] = [
   alertOutcomeRcaReportingGapJudge,
 ];
 
+/** Reference-free judges of the alert-recovery round's own analysis. */
+export { recoveryDueDiligenceJudges };
+
 /** Judges of how an investigation used the Wiki pages it read. */
 export const wikiJudges: readonly RegisteredEvaluatorDefinition[] = [
   wikiPagesReadJudge,
@@ -72,6 +76,7 @@ export const memoryJudges: readonly RegisteredEvaluatorDefinition[] = [
 export const onlineEvalJudges: readonly RegisteredEvaluatorDefinition[] = [
   ...referenceFreeJudges,
   ...alertOutcomeJudges,
+  ...recoveryDueDiligenceJudges,
   ...wikiJudges,
   ...memoryJudges,
 ];

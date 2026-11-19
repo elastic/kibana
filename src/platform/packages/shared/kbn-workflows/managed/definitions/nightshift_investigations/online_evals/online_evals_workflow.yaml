@@ -112,3 +112,25 @@ steps:
       investigation_execution_id: '${{ inputs.investigation_execution_id }}'
       entry_point: '${{ inputs.entry_point }}'
       alert_rule_type: '${{ inputs.alert_rule_type }}'
+
+  # An alert recovery's own analysis is graded reference-free too: how thoroughly the round used
+  # the alert's whole lifetime to explain what drove it and why it closed. Its tags record which
+  # kinds of checks ran, so the scores can be monitored by check type.
+  - name: score_recovery_due_diligence
+    type: nightshift.onlineEvals.score
+    if: "${{ inputs.round_kind == 'alert_recovery' }}"
+    with:
+      investigation_id: '{{ inputs.investigation_id }}'
+      round_id: '{{ inputs.round_id }}'
+      round_kind: '{{ inputs.round_kind }}'
+      graded_report: current
+      evaluator_set: recovery_due_diligence
+      evaluators:
+        - name: nightshift_recovery_causal_checklist
+        - name: nightshift_recovery_root_cause_evidence
+        - name: nightshift_recovery_evidence_families
+      investigation_started_at: '{{ inputs.investigation_started_at }}'
+      investigation_ended_at: '${{ inputs.investigation_ended_at }}'
+      investigation_execution_id: '${{ inputs.investigation_execution_id }}'
+      entry_point: '${{ inputs.entry_point }}'
+      alert_rule_type: '${{ inputs.alert_rule_type }}'

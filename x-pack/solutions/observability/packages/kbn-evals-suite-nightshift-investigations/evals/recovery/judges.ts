@@ -8,6 +8,10 @@
 import { createPrompt } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { Evaluator } from '@kbn/evals';
+import {
+  EVIDENCE_FAMILIES,
+  familiesReached as reachedFamilies,
+} from '@kbn/nightshift-investigations-plugin/server/online_evals/judges/recovery_due_diligence/evidence_families';
 import type {
   InvestigationExample,
   InvestigationTaskOutput,
@@ -241,30 +245,14 @@ export const createRootCauseEvidenceEvaluator = (deps: JudgeDeps): RecoveryEvalu
   },
 });
 
-/** Families of evidence a run can read, each recognised from the tool-call arguments. */
-export const EVIDENCE_FAMILIES: ReadonlyArray<{ id: string; pattern: RegExp }> = [
-  { id: 'alert_documents', pattern: /\.alerts-|kibana\.alert\./ },
-  { id: 'rule_event_log', pattern: /\.kibana-event-log|event-log|rule_execution|event\.provider/ },
-  {
-    id: 'apm_metrics',
-    pattern: /metrics-apm|transaction\.(duration|name)|event\.success_count|\.1m/,
-  },
-  { id: 'apm_traces_errors', pattern: /traces-apm|logs-apm\.error|error\.exception|trace\.id/ },
-  { id: 'service_logs', pattern: /logging-[a-z0-9-]*:|logs-\*|:logs-/ },
-  { id: 'remote_clusters', pattern: /[/"\s=][a-z0-9-]+:(logs|metrics|traces)-/ },
-  { id: 'chat_or_incident_records', pattern: /nightshift_slack|slack_read|incident/i },
-  { id: 'source_code', pattern: /github\.com|git (clone|grep|ls-tree|log)|\/workspace\/repos/ },
-  { id: 'prior_memory', pattern: /\/workspace\/(memories|wiki)/ },
-];
-
-const stepText = ({ tool_id: toolId, params }: TrajectoryStep): string =>
-  `${toolId} ${JSON.stringify(params)}`;
+const stepText = ({ tool_id: toolId, params }: TrajectoryStep) => ({
+  tool_id: toolId,
+  arguments: params,
+});
 
 /** The evidence families a trajectory reached, from the calls' arguments alone. */
-export const familiesReached = (trajectory: TrajectoryStep[] | undefined): string[] => {
-  const text = (trajectory ?? []).map(stepText).join('\n');
-  return EVIDENCE_FAMILIES.filter(({ pattern }) => pattern.test(text)).map(({ id }) => id);
-};
+export const familiesReached = (trajectory: TrajectoryStep[] | undefined): string[] =>
+  reachedFamilies((trajectory ?? []).map(stepText));
 
 export const evidenceFamiliesEvaluator: RecoveryEvaluator = {
   name: EVIDENCE_FAMILIES_EVALUATOR,
