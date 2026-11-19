@@ -41,7 +41,6 @@ import { getPackageSavedObjects } from './get';
 const UPLOAD_PACKAGE_NAME_MIN_LENGTH = 2;
 const UPLOAD_PACKAGE_NAME_MAX_LENGTH = 150;
 const UPLOAD_PACKAGE_NAME_PATTERN = /^[a-z][a-z0-9_]*$/;
-const UPLOAD_DOCS_URL = 'https://www.elastic.co/docs/extend/integrations/upload-new-integration';
 
 interface UploadDataStream {
   dataset: string;
@@ -569,8 +568,8 @@ function unownedLiveDataStreamError({
   return new PackageInvalidArchiveError(
     i18n.translate('xpack.fleet.packageUpload.unownedDataStream', {
       defaultMessage:
-        'Data stream "{dataStreamName}" matches dataset "{dataset}" but is not owned by package "{packageName}": {reason}. Uploaded packages cannot take over existing data streams. To learn about the supported options, refer to {docsUrl}.',
-      values: { dataStreamName, dataset, packageName, reason, docsUrl: UPLOAD_DOCS_URL },
+        'Data stream "{dataStreamName}" matches dataset "{dataset}" but is not owned by package "{packageName}": {reason}. Uploaded packages cannot take over existing data streams. Use a different dataset name, or remove the existing data stream before uploading.',
+      values: { dataStreamName, dataset, packageName, reason },
     })
   );
 }
