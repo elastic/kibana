@@ -14,10 +14,9 @@ import type { FlyoutTemplateProps } from '../types';
 /**
  * Supplied by an opener that owns the flyout's lifecycle.
  *
- * Under it, `FlyoutTemplate` takes every root prop from `props` and ignores its own, so the
- * `id` and `session` the opener's bookkeeping matches on cannot be contradicted from inside
- * the subtree. `onClose` stays the element's own, sourced from `useFlyoutClose`, so the
- * declarative contract can keep requiring it.
+ * The flyout's frame takes every root prop from `props`, and a `FlyoutTemplate` inside it
+ * ignores its own except `onClose` and the tab props, so the `id` and `session` the opener's
+ * bookkeeping matches on cannot be contradicted from inside the subtree.
  */
 export interface FlyoutTemplateManaged {
   /** Resolved root props; `children` and `onClose` still come from the `FlyoutTemplate` element. */
@@ -28,8 +27,8 @@ export interface FlyoutTemplateManaged {
 
 const FlyoutTemplateManagedContext = createContext<FlyoutTemplateManaged | null>(null);
 
-/** @internal Wraps managed flyout content. Not for use by flyout authors. */
-export const FlyoutTemplateManagedProvider = ({
+/** @internal Supplies the managing opener's contract. `FlyoutTemplateManagedProvider` renders it. */
+export const FlyoutTemplateManagedContextProvider = ({
   value,
   children,
 }: {
@@ -40,10 +39,6 @@ export const FlyoutTemplateManagedProvider = ({
     {children}
   </FlyoutTemplateManagedContext.Provider>
 );
-
-/** @internal Returns the managing opener's contract, or `null` when the template owns itself. */
-export const useFlyoutTemplateManaged = (): FlyoutTemplateManaged | null =>
-  useContext(FlyoutTemplateManagedContext);
 
 /**
  * Dismisses the flyout from anywhere inside managed content, without threading a ref down.

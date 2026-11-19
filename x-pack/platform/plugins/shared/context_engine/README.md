@@ -189,7 +189,8 @@ privileges. Callers also need, on every backing index (`ai-index-*`):
 - `read` to query, or Elasticsearch returns 403;
 - `view_index_metadata` to describe (`_mapping` and `_field_caps`), or
   Elasticsearch returns 403. The counts aggregation also needs `read`; without
-  it the two counts sections are omitted and the rest of the block is returned.
+  it the two counts sections are omitted and the rest of the block is returned;
+- `read` and `write` to create, update, or delete a knowledge indicator.
 
 Two things decide what a caller can see: the space filter Kibana adds, and the
 caller's own Elasticsearch permissions on the backing indices. Nothing checks
@@ -364,17 +365,14 @@ POST /api/context_engine/memory/_forget
 ```
 
 ```json
-{ "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"], "mode": "tombstone" }
+{ "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"] }
 ```
 
-`ids` takes 1 to 100 ids and duplicates are collapsed. `mode` is `tombstone` (the
-default) or `hard_delete`. A tombstone keeps the memory's revisions until retention
-removes them. A hard delete removes every revision, tombstones included.
+`ids` takes 1 to 100 ids and duplicates are collapsed. Forgetting writes a tombstone and
+keeps the memory's revisions until retention removes them.
 
-The response lists one outcome per unique id, in request order:
-
-- `tombstone`: `forgotten`, `already_forgotten`, or `not_found`.
-- `hard_delete`: `deleted` or `not_found`.
+The response lists one outcome per unique id, in request order: `forgotten`,
+`already_forgotten`, or `not_found`.
 
 The space comes from the request URL. A memory of another user or in another space is
 reported as `not_found`, so the route never reveals that it exists. The route is gated by
@@ -383,7 +381,7 @@ still works after memory is turned off.
 
 ### Privileges and audit
 
-The route needs `contextEngine:write` for both modes. Without `user_id` it forgets the
+The route needs `contextEngine:write`. Without `user_id` it forgets the
 caller's own memories, and a caller without a user profile gets a 403.
 
 Naming another user in `user_id` also needs `contextEngine:manage_memory`, which is not
@@ -391,10 +389,9 @@ part of All, so an administrator grants it explicitly. Without it the request ge
 and every id is audited as a failure. A mismatch between `user_id` and a memory's owner
 reads as `not_found`.
 
-Each unique id writes one audit event, `session_memory_forget` or
-`session_memory_hard_delete`. The event records the authenticated actor in `user.*`, the
-memory's owner in `user.target.id`, and the memory in `kibana.saved_object`. `not_found`
-and Elasticsearch errors are recorded as failures.
+Each unique id writes one `session_memory_forget` audit event. The event records the
+authenticated actor in `user.*`, the memory's owner in `user.target.id`, and the memory in
+`kibana.saved_object`. `not_found` and Elasticsearch errors are recorded as failures.
 
 ## Signals
 

@@ -46,24 +46,6 @@ const getForgetOutcome = (latest: StoredSessionMemory | undefined): ForgetOutcom
   return latest.deleted_at === undefined ? 'forgotten' : 'already_forgotten';
 };
 
-// Collapses to the latest revision of each memory before anything looks at tombstones. Filtering
-// out tombstones in the query instead would surface an older revision of a forgotten memory.
-const findLatestRevisions = async (
-  esClient: ElasticsearchClient,
-  scope: SessionMemoryScope,
-  ids: readonly string[]
-): Promise<StoredSessionMemory[]> => {
-  const response = await esClient.search<StoredSessionMemory>({
-    index: SESSION_MEMORY_DATA_STREAM,
-    ...ignoreMissingStream,
-    query: { bool: { filter: [{ terms: { id: [...ids] } }, ...scopeFilter(scope)] } },
-    collapse: { field: 'id' },
-    sort: [{ '@timestamp': 'desc' }],
-    size: ids.length,
-  });
-  return response.hits.hits.flatMap(({ _source }) => _source ?? []);
-};
-
 /**
  * Creates the service that reads and writes the session memory data stream.
  * `esClient` must send the product origin that system data streams require, as core's clients do.
@@ -119,7 +101,17 @@ export const createSessionMemoryService = (
       return {};
     }
 
-    const latestRevisions = await findLatestRevisions(esClient, scope, uniqueIds);
+    // Collapse to the latest revision of each memory before looking at tombstones. Filtering out
+    // tombstones in the query instead would surface an older revision of a forgotten memory.
+    const response = await esClient.search<StoredSessionMemory>({
+      index: SESSION_MEMORY_DATA_STREAM,
+      ...ignoreMissingStream,
+      query: { bool: { filter: [{ terms: { id: uniqueIds } }, ...scopeFilter(scope)] } },
+      collapse: { field: 'id' },
+      sort: [{ '@timestamp': 'desc' }],
+      size: uniqueIds.length,
+    });
+    const latestRevisions = response.hits.hits.flatMap(({ _source }) => _source ?? []);
     const latestById = new Map(latestRevisions.map((latest) => [latest.id, latest]));
 
     const timestamp = new Date().toISOString();
@@ -138,33 +130,5 @@ export const createSessionMemoryService = (
     }
 
     return Object.fromEntries(uniqueIds.map((id) => [id, getForgetOutcome(latestById.get(id))]));
-  },
-
-  hardDelete: async (scope, ids) => {
-    const uniqueIds = [...new Set(ids)];
-    if (uniqueIds.length === 0) {
-      return {};
-    }
-
-    const foundIds = new Set(
-      (await findLatestRevisions(esClient, scope, uniqueIds)).map(({ id }) => id)
-    );
-    if (foundIds.size > 0) {
-      const { failures = [] } = await esClient.deleteByQuery({
-        index: SESSION_MEMORY_DATA_STREAM,
-        ...ignoreMissingStream,
-        query: { bool: { filter: [{ terms: { id: [...foundIds] } }, ...scopeFilter(scope)] } },
-        conflicts: 'proceed',
-      });
-      if (failures.length > 0) {
-        throw new Error(
-          `Failed to delete from session memory: ${failures[0].cause?.reason ?? 'unknown error'}`
-        );
-      }
-    }
-
-    return Object.fromEntries(
-      uniqueIds.map((id) => [id, foundIds.has(id) ? 'deleted' : 'not_found'])
-    );
   },
 });

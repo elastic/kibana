@@ -44,7 +44,11 @@ import { euiRules } from './eui.mts';
 import { formatjsOverrides } from './formatjs.mts';
 import { mochaOverrides } from './mocha.mts';
 import { nOverrides } from './n.mts';
-import { playwrightOverrides, playwrightSettings } from './playwright.mts';
+import {
+  playwrightOverrides,
+  playwrightReactHooksOverrides,
+  playwrightSettings,
+} from './playwright.mts';
 import { testingLibraryOverrides } from './testing_library.mts';
 import { unusedVarsOverrides } from './unused_vars.mts';
 import { importPluginOverrides } from './import_plugin.mts';
@@ -59,6 +63,7 @@ const movedFromEslintOverrides: OxlintOverride[] = [
   ...jestOverrides,
   ...importExtraneousDependenciesOverrides,
   ...teamOverrides,
+  ...playwrightReactHooksOverrides,
   ...restrictedImportsOverrides,
   ...formatjsOverrides,
   ...mochaOverrides,

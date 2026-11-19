@@ -25,6 +25,11 @@ export const GAUGE_SHAPES = {
   CIRCLE: 'circle',
 } as const;
 
+/**
+ * Shape used when a gauge state does not specify one.
+ */
+export const LENS_GAUGE_DEFAULT_SHAPE = GAUGE_SHAPES.HORIZONTAL_BULLET;
+
 export const GAUGE_TICKS_POSITIONS = {
   HIDDEN: 'hidden',
   AUTO: 'auto',

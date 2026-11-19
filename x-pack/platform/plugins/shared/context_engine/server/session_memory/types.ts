@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ForgetOutcome, HardDeleteOutcome } from '../../common/http_api/session_memory';
+import type { ForgetOutcome } from '../../common/http_api/session_memory';
 
 /** One revision of a memory. */
 export interface StoredSessionMemory {
@@ -53,9 +53,4 @@ export interface SessionMemoryService {
   get(scope: SessionMemoryScope, id: string): Promise<SessionMemory | undefined>;
   /** Tombstones each memory, keeping its revisions until retention removes them. */
   forget(scope: SessionMemoryScope, ids: readonly string[]): Promise<Record<string, ForgetOutcome>>;
-  /** Deletes every revision of each memory, tombstones included, and reports what happened to every id. */
-  hardDelete(
-    scope: SessionMemoryScope,
-    ids: readonly string[]
-  ): Promise<Record<string, HardDeleteOutcome>>;
 }

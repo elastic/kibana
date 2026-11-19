@@ -18,12 +18,16 @@ import {
 } from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
-import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
+import type {
+  InternalBuiltinToolDefinition,
+  ModelSource,
+  SubAgentExecutor,
+} from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
 import { filterReachableSubagents } from '../utils/filter_reachable_subagents';
-import { selectSubagentConnectorId } from '../utils/select_subagent_connector_id';
+import { selectSubagentModelSource } from '../utils/select_subagent_model_source';
 import { triggerModeSchema } from '../utils/trigger_mode_schema';
 
 const baseSchema = lazySchema(() =>
@@ -60,6 +64,7 @@ The sub-agent sees the full history of your prior exchanges with it.
 export const createSendMessageTool = ({
   agentId: ownerAgentId,
   executionId: parentExecutionId,
+  parentModel,
   subAgentExecutor,
   abortSignal,
   backgroundExecutionService,
@@ -70,6 +75,8 @@ export const createSendMessageTool = ({
 }: {
   agentId: string;
   executionId: string;
+  /** Model source the parent run was asked to run on, inherited by its sub-agents. */
+  parentModel?: ModelSource;
   subAgentExecutor: SubAgentExecutor;
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
@@ -138,8 +145,9 @@ export const createSendMessageTool = ({
       }
 
       try {
-        const connectorId = await selectSubagentConnectorId({
+        const modelSource = await selectSubagentModelSource({
           modelProvider,
+          parentModel,
           effortLevel: effort as EffortLevel,
           inferenceFeatureId: inferenceFeatureIdBySubagent?.get(entry.agent_id),
         });
@@ -149,7 +157,7 @@ export const createSendMessageTool = ({
           parentExecutionId,
           conversationId: entry.conversation_id,
           prompt,
-          connectorId,
+          modelSource,
           ...(run_in_background
             ? {
                 background: {

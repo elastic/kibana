@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-export type ForgetMode = 'tombstone' | 'hard_delete';
-
 export type ForgetOutcome = 'forgotten' | 'already_forgotten' | 'not_found';
 
-export type HardDeleteOutcome = 'deleted' | 'not_found';
-
-export type ForgetSessionMemoriesResponse =
-  | { mode: 'tombstone'; results: Array<{ id: string; outcome: ForgetOutcome }> }
-  | { mode: 'hard_delete'; results: Array<{ id: string; outcome: HardDeleteOutcome }> };
+export interface ForgetSessionMemoriesResponse {
+  results: Array<{ id: string; outcome: ForgetOutcome }>;
+}
 
 export interface RememberSessionMemoryResponse {
   id: string;

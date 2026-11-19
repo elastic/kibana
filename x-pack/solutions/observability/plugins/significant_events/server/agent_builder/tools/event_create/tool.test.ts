@@ -107,7 +107,8 @@ describe('event_create tool', () => {
       })
     );
     expect(telemetry.trackAgentToolEventCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
+      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
+      expect.anything()
     );
   });
 

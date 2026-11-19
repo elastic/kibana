@@ -100,7 +100,6 @@ describe('session memory routes', () => {
       remember: jest.fn(async (_scope, { id }) => ({ id: id ?? 'unused' })),
       get: jest.fn(),
       forget: jest.fn(),
-      hardDelete: jest.fn(),
     };
 
     const router = {
@@ -145,7 +144,7 @@ describe('session memory routes', () => {
   it('returns 404 and touches nothing when the context engine is disabled', async () => {
     featureFlagEnabled = false;
 
-    await callRoute({ user_id: 'jdoe', ids: ['m1'], mode: 'tombstone' });
+    await callRoute({ user_id: 'jdoe', ids: ['m1'] });
 
     expect(response.notFound).toHaveBeenCalledTimes(1);
     expect(service.forget).not.toHaveBeenCalled();
@@ -156,7 +155,7 @@ describe('session memory routes', () => {
     it('forgets the memories of the caller when user_id is missing', async () => {
       service.forget.mockResolvedValue({ a: 'forgotten' });
 
-      await callRoute({ ids: ['a'], mode: 'tombstone' });
+      await callRoute({ ids: ['a'] });
 
       expect(service.forget).toHaveBeenCalledWith({ space: 'marketing', userId: 'jdoe' }, ['a']);
       expect(response.ok).toHaveBeenCalledTimes(1);
@@ -165,14 +164,14 @@ describe('session memory routes', () => {
     it('returns 403 when user_id is missing and the caller has no profile', async () => {
       profileUid = null;
 
-      await callRoute({ ids: ['a'], mode: 'tombstone' });
+      await callRoute({ ids: ['a'] });
 
       expect(response.forbidden).toHaveBeenCalledTimes(1);
       expect(service.forget).not.toHaveBeenCalled();
     });
 
     it('returns 403 and audits the attempt when user_id names another user without manage memory', async () => {
-      await callRoute({ user_id: 'other', ids: ['a', 'b'], mode: 'tombstone' });
+      await callRoute({ user_id: 'other', ids: ['a', 'b'] });
 
       expect(response.forbidden).toHaveBeenCalledWith({
         body: { message: expect.stringContaining(apiPrivileges.manageMemory) },
@@ -195,28 +194,26 @@ describe('session memory routes', () => {
       authzResult = { [apiPrivileges.manageMemory]: true };
       service.forget.mockResolvedValue({ a: 'forgotten' });
 
-      await callRoute({ user_id: 'other', ids: ['a'], mode: 'tombstone' });
+      await callRoute({ user_id: 'other', ids: ['a'] });
 
       expect(service.forget).toHaveBeenCalledWith({ space: 'marketing', userId: 'other' }, ['a']);
       expect(response.ok).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('tombstone mode', () => {
+  describe('forgetting', () => {
     it('forgets in the request space for the body user and answers in request order, without duplicates', async () => {
       service.forget.mockResolvedValue({ b: 'forgotten', 2: 'already_forgotten', a: 'not_found' });
 
-      await callRoute({ user_id: 'jdoe', ids: ['b', '2', 'a', 'b'], mode: 'tombstone' });
+      await callRoute({ user_id: 'jdoe', ids: ['b', '2', 'a', 'b'] });
 
       expect(service.forget).toHaveBeenCalledWith({ space: 'marketing', userId: 'jdoe' }, [
         'b',
         '2',
         'a',
       ]);
-      expect(service.hardDelete).not.toHaveBeenCalled();
       expect(response.ok).toHaveBeenCalledWith({
         body: {
-          mode: 'tombstone',
           results: [
             { id: 'b', outcome: 'forgotten' },
             { id: '2', outcome: 'already_forgotten' },
@@ -233,7 +230,7 @@ describe('session memory routes', () => {
         c: 'not_found',
       });
 
-      await callRoute({ user_id: 'jdoe', ids: ['a', 'b', 'c', 'a'], mode: 'tombstone' });
+      await callRoute({ user_id: 'jdoe', ids: ['a', 'b', 'c', 'a'] });
 
       expect(auditedEvents()).toEqual([
         expect.objectContaining({
@@ -257,59 +254,11 @@ describe('session memory routes', () => {
     });
   });
 
-  describe('hard_delete mode', () => {
-    it('hard deletes and reports per-id outcomes', async () => {
-      service.hardDelete.mockResolvedValue({ a: 'deleted', b: 'not_found' });
-
-      await callRoute({ user_id: 'jdoe', ids: ['a', 'b'], mode: 'hard_delete' });
-
-      expect(service.hardDelete).toHaveBeenCalledWith({ space: 'marketing', userId: 'jdoe' }, [
-        'a',
-        'b',
-      ]);
-      expect(service.forget).not.toHaveBeenCalled();
-      expect(response.ok).toHaveBeenCalledWith({
-        body: {
-          mode: 'hard_delete',
-          results: [
-            { id: 'a', outcome: 'deleted' },
-            { id: 'b', outcome: 'not_found' },
-          ],
-        },
-      });
-    });
-
-    it('audits each memory as a permanent deletion', async () => {
-      service.hardDelete.mockResolvedValue({ a: 'deleted', b: 'not_found' });
-
-      await callRoute({ user_id: 'jdoe', ids: ['a', 'b'], mode: 'hard_delete' });
-
-      expect(auditedEvents()).toEqual([
-        expect.objectContaining({
-          message: 'User has permanently deleted session memory [id=a] of user [id=jdoe]',
-          event: expect.objectContaining({
-            action: 'session_memory_hard_delete',
-            type: ['deletion'],
-            outcome: 'success',
-          }),
-        }),
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: 'session_memory_hard_delete',
-            outcome: 'failure',
-          }),
-        }),
-      ]);
-    });
-  });
-
   it('audits a failure for every memory and rethrows when the service throws', async () => {
     const error = new Error('shard unavailable');
     service.forget.mockRejectedValue(error);
 
-    await expect(
-      callRoute({ user_id: 'jdoe', ids: ['a', 'b', 'a'], mode: 'tombstone' })
-    ).rejects.toBe(error);
+    await expect(callRoute({ user_id: 'jdoe', ids: ['a', 'b', 'a'] })).rejects.toBe(error);
 
     expect(response.ok).not.toHaveBeenCalled();
     expect(auditedEvents()).toEqual([
@@ -328,14 +277,13 @@ describe('session memory routes', () => {
 
   describe('request validation', () => {
     it('accepts a request without user_id', () => {
-      expect(validateBody({ ids: ['a'] })).toEqual({ ids: ['a'], mode: 'tombstone' });
+      expect(validateBody({ ids: ['a'] })).toEqual({ ids: ['a'] });
     });
 
-    it('defaults the mode to tombstone', () => {
+    it('accepts a request with user_id', () => {
       expect(validateBody({ user_id: 'jdoe', ids: ['a'] })).toEqual({
         user_id: 'jdoe',
         ids: ['a'],
-        mode: 'tombstone',
       });
     });
 
@@ -355,7 +303,6 @@ describe('session memory routes', () => {
       ],
       ['an empty id', { user_id: 'jdoe', ids: [''] }],
       ['an over-long id', { user_id: 'jdoe', ids: ['i'.repeat(MAX_SESSION_MEMORY_ID_LENGTH + 1)] }],
-      ['an unknown mode', { user_id: 'jdoe', ids: ['a'], mode: 'archive' }],
     ])('rejects %s', (_name, body) => {
       expect(() => validateBody(body)).toThrow();
     });
@@ -367,7 +314,6 @@ describe('session memory routes', () => {
           ids: Array.from({ length: MAX_SESSION_MEMORY_FORGET_IDS }, () =>
             'i'.repeat(MAX_SESSION_MEMORY_ID_LENGTH)
           ),
-          mode: 'hard_delete',
         })
       ).not.toThrow();
     });

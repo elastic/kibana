@@ -18,7 +18,18 @@ beforeEach(() => {
   logger = loggingSystemMock.createLogger();
 });
 
-const run = (handler: () => Promise<{ ok: boolean }>) => {
+const createResources = (flagEnabled: boolean) => {
+  const getBooleanValue = jest.fn().mockResolvedValue(flagEnabled);
+  return {
+    getBooleanValue,
+    resources: {
+      logger,
+      context: { core: Promise.resolve({ featureFlags: { getBooleanValue } }) },
+    },
+  };
+};
+
+const run = (handler: () => Promise<{ ok: boolean }>, flagEnabled = true) => {
   const route = createDigitalExperienceServerRoute({
     endpoint: ENDPOINT,
     options: { access: 'internal' },
@@ -26,10 +37,54 @@ const run = (handler: () => Promise<{ ok: boolean }>) => {
     handler,
   });
   const wrapped = route[ENDPOINT].handler as unknown as (resources: unknown) => Promise<unknown>;
-  return wrapped({ logger });
+  return wrapped(createResources(flagEnabled).resources);
 };
 
 describe('createDigitalExperienceServerRoute', () => {
+  it('answers 404 without calling the handler when the feature flag is off', async () => {
+    const handler = jest.fn().mockResolvedValue({ ok: true });
+
+    await expect(run(handler, false)).rejects.toMatchObject({
+      isBoom: true,
+      output: { statusCode: 404 },
+    });
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('leaves a failure to evaluate the feature flag to the route framework, not as a data failure', async () => {
+    const handler = jest.fn().mockResolvedValue({ ok: true });
+    const { getBooleanValue, resources } = createResources(true);
+    const flagError = new Error('flag provider down');
+    getBooleanValue.mockRejectedValue(flagError);
+    const route = createDigitalExperienceServerRoute({
+      endpoint: ENDPOINT,
+      options: { access: 'internal' },
+      security: { authz: { enabled: false, reason: 'test' } },
+      handler,
+    });
+    const wrapped = route[ENDPOINT].handler as unknown as (resources: unknown) => Promise<unknown>;
+
+    await expect(wrapped(resources)).rejects.toBe(flagError);
+    expect(handler).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('evaluates the feature flag with a false fallback and calls the handler when it is on', async () => {
+    const handler = jest.fn().mockResolvedValue({ ok: true });
+    const { getBooleanValue, resources } = createResources(true);
+    const route = createDigitalExperienceServerRoute({
+      endpoint: ENDPOINT,
+      options: { access: 'internal' },
+      security: { authz: { enabled: false, reason: 'test' } },
+      handler,
+    });
+    const wrapped = route[ENDPOINT].handler as unknown as (resources: unknown) => Promise<unknown>;
+
+    await expect(wrapped(resources)).resolves.toEqual({ ok: true });
+    expect(getBooleanValue).toHaveBeenCalledWith('digitalExperience.enabled', false);
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
   it('returns what the handler returns', async () => {
     await expect(run(async () => ({ ok: true }))).resolves.toEqual({ ok: true });
     expect(logger.error).not.toHaveBeenCalled();
