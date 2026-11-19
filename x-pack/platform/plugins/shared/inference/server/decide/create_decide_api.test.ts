@@ -156,13 +156,22 @@ describe('createDecideApi', () => {
 
     transportRequest.mockResolvedValue(decisionResponse);
 
-    const [first, ...rest]: DecisionQuestion[] = [shouldRespond, topic];
-    const { answers } = await decide({ input, inferenceId: 'my-decision' }, first, ...rest);
+    const questions: DecisionQuestion[] = [shouldRespond, topic];
+    const { answers } = await decide({ input, inferenceId: 'my-decision' }, questions);
 
-    const [{ type }]: [DecisionAnswer, ...DecisionAnswer[]] = answers;
+    const types = answers.map(({ type }: DecisionAnswer) => type);
 
-    expect(type).toBe('predicate');
-    expect(answers).toHaveLength(2);
+    expect(types).toEqual(['predicate', 'choice']);
+  });
+
+  it('rejects an empty list of questions', async () => {
+    const { decide, transportRequest } = setup();
+
+    const error = await decide({ input, inferenceId: 'my-decision' }, []).catch((thrown) => thrown);
+
+    expect(isInferenceRequestError(error)).toBe(true);
+    expect(error.message).toContain('at least one question');
+    expect(transportRequest).not.toHaveBeenCalled();
   });
 
   it('rejects a call without questions', async () => {

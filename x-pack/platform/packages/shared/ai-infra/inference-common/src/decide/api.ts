@@ -88,7 +88,15 @@ export interface DecideOptions {
  * status 404 when the `decision` endpoint doesn't exist.
  * @experimental The Elasticsearch `decision` inference task it calls is experimental.
  */
-export type DecideAPI = <const Q extends NonEmptyTuple<DecisionQuestion>>(
-  options: DecideOptions,
-  ...questions: Q
-) => Promise<{ answers: DecisionAnswersFor<Q> }>;
+export interface DecideAPI {
+  <const Q extends NonEmptyTuple<DecisionQuestion>>(
+    options: DecideOptions,
+    ...questions: Q
+  ): Promise<{
+    answers: DecisionAnswersFor<Q>;
+  }>;
+
+  (options: DecideOptions, questions: readonly DecisionQuestion[]): Promise<{
+    answers: DecisionAnswer[];
+  }>;
+}

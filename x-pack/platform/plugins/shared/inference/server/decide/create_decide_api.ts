@@ -38,6 +38,11 @@ interface CreateDecideApiOptions {
   anonymization?: InferenceAnonymizationOptions;
 }
 
+type QuestionArgs = DecisionQuestion[] | [readonly DecisionQuestion[]];
+
+const isQuestionList = (args: QuestionArgs): args is [readonly DecisionQuestion[]] =>
+  Array.isArray(args[0]);
+
 const toKeyedQuestions = (
   questions: readonly DecisionQuestion[]
 ): Record<string, DecisionQuestion> =>
@@ -112,8 +117,10 @@ export function createDecideApi({
 }: CreateDecideApiOptions) {
   return async (
     options: DecideOptions,
-    ...questions: DecisionQuestion[]
+    ...args: QuestionArgs
   ): Promise<{ answers: DecisionAnswer[] }> => {
+    const questions = isQuestionList(args) ? [...args[0]] : args;
+
     if (questions.length === 0) {
       throw createInferenceRequestError('decide() needs at least one question', 400);
     }
