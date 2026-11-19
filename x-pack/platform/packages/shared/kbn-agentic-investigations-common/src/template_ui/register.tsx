@@ -188,9 +188,8 @@ export const registerAgenticInvestigationTemplateUI = ({
             renderStatus,
             renderSeverity,
             renderLiveState,
-            // Full screen rather than the sidebar: the chat is the investigation's own record, so it
-            // gets the whole page instead of a panel beside the flyout that opened it. The
-            // conversation list is collapsed so the investigation's chat gets the width.
+            // The chat is the investigation's own record, so it opens full screen, with the
+            // conversation list collapsed to give it the width.
             onOpenChat: ({ conversationId, agentId }) =>
               openFullscreenConversation({
                 conversationId,

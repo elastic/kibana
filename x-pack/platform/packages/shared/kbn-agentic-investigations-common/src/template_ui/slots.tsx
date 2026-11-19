@@ -16,8 +16,8 @@ import {
 import type { RenderLinkedInvestigations, RenderOverview } from './types';
 
 /**
- * The flyout tabs' contents, kept in one module so `register` can pull them in a single lazy chunk
- * instead of shipping them in each consuming plugin's page load bundle.
+ * The flyout tabs' contents, kept in one module so `register` can pull them in a single lazy chunk,
+ * out of each consuming plugin's page load bundle.
  *
  * Every slot derives its investigation from the conversation Agent Builder passes in. The
  * derivation is synchronous, so no slot loads, fails, or renders a skeleton.
