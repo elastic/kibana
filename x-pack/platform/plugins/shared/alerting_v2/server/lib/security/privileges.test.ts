@@ -75,6 +75,19 @@ describe('registerFeaturePrivileges', () => {
     }
   });
 
+  it('grants write access to import configs on alerts `all` and read access on alerts `read`', () => {
+    const alertsFeature = getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id);
+
+    expect(alertsFeature.privileges?.all.savedObject).toEqual({
+      all: ['alerting_import_config'],
+      read: [],
+    });
+    expect(alertsFeature.privileges?.read.savedObject).toEqual({
+      all: [],
+      read: ['alerting_import_config'],
+    });
+  });
+
   it('forwards the `alerts` privilege to the `all` and `read` privileges of the alerts feature', () => {
     const alertsFeature = getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id);
 
