@@ -26,23 +26,17 @@ export const RowExpansionButton = <Item extends any>({
   );
 
   return (
-    <EuiToolTip
-      content={isExpanded ? collapseAriaLabel : expandAriaLabel}
-      disableScreenReaderOutput
-    >
+    <EuiToolTip content={expandAriaLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         data-test-subj="infraRowExpansionButtonButton"
         onClick={handleClick}
-        aria-label={isExpanded ? collapseAriaLabel : expandAriaLabel}
+        aria-label={expandAriaLabel}
+        aria-expanded={isExpanded}
         iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
       />
     </EuiToolTip>
   );
 };
-
-const collapseAriaLabel = i18n.translate('xpack.infra.table.collapseRowLabel', {
-  defaultMessage: 'Collapse',
-});
 
 const expandAriaLabel = i18n.translate('xpack.infra.table.expandRowLabel', {
   defaultMessage: 'Expand',

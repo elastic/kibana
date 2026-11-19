@@ -154,10 +154,33 @@ describe('WorkflowRepository.areWorkflowsEnabled', () => {
     expect(esClient.search).toHaveBeenCalledTimes(1);
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        _source: ['enabled', 'spaceId', 'owner_id', 'access_control'],
+        _source: ['enabled', 'spaceId', 'owner_id', 'access_control', 'workflowUid'],
         allow_partial_search_results: false,
       })
     );
+  });
+
+  it('returns workflowUid from the stored document and leaves it unset when the document has none', async () => {
+    esClient.search.mockResolvedValue({
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: {
+        hits: [
+          {
+            _id: 'wf-with-uid',
+            _source: { enabled: true, spaceId: 'default', workflowUid: 'uid-current' },
+          },
+          { _id: 'wf-without-uid', _source: { enabled: true, spaceId: 'default' } },
+        ],
+      },
+    });
+
+    const result = await repository.getWorkflowExecutionStates([
+      { workflowId: 'wf-with-uid', spaceId: 'default' },
+      { workflowId: 'wf-without-uid', spaceId: 'default' },
+    ]);
+
+    expect(result.get('default:wf-with-uid')?.workflowUid).toBe('uid-current');
+    expect(result.get('default:wf-without-uid')).not.toHaveProperty('workflowUid');
   });
 
   it('returns an empty map without hitting ES when refs is empty', async () => {
@@ -186,7 +209,7 @@ describe('WorkflowRepository.areWorkflowsEnabled', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: WORKFLOW_INDEX_NAME,
-        _source: ['enabled', 'spaceId', 'owner_id', 'access_control'],
+        _source: ['enabled', 'spaceId', 'owner_id', 'access_control', 'workflowUid'],
         size: 2,
         query: expect.objectContaining({
           bool: expect.objectContaining({
@@ -421,6 +444,7 @@ describe('WorkflowRepository.getWorkflow', () => {
                 billable: true,
                 originManagedWorkflowId: 'system-parent',
                 managedVersion: 4,
+                workflowUid: 'uid-current',
                 created_at: '2024-01-02T03:04:05.000Z',
                 updated_at: '2024-06-07T08:09:10.000Z',
               },
@@ -442,6 +466,7 @@ describe('WorkflowRepository.getWorkflow', () => {
       billable: true,
       originManagedWorkflowId: 'system-parent',
       managedVersion: 4,
+      workflowUid: 'uid-current',
     });
   });
 
