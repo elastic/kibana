@@ -45,6 +45,7 @@ import CONTEXT_ENGINE_TRACE_DREAMING_YAML from './definitions/context_engine/dre
 import CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_traces_batch.yaml';
 import CONTEXT_ENGINE_RELATIONSHIPS_YAML from './definitions/context_engine/relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
+import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../common/utils';
 import { visitNestedSteps } from '../definition/definition_utils';
 import type { VisitNestedStepEntry, WorkflowStep } from '../definition/definition_utils';
 import { getElasticsearchConnectors } from '../spec/elasticsearch';
@@ -229,11 +230,8 @@ const elasticsearchConnectorsByType = new Map(
   getElasticsearchConnectors().map((connector) => [connector.type, connector])
 );
 
-// Copies of kbn-workflows-yaml/common/regex.ts (that package depends on @kbn/workflows, so it
-// cannot be imported here).
-const DYNAMIC_VALUE_REGEX = /^\$\{\{\s*\S[\s\S]*\}\}$/;
-const VARIABLE_VALUE_REGEX = /^\{\{\s*\S[\s\S]*\}\}$/;
-const LIQUID_TAG_VALUE_REGEX = /\{\%[^%]*\%\}/;
+const OBJECT_FORM_HINT =
+  'Hint: the editor schema rejects some shorthand that Elasticsearch accepts. If this is one, use the object form, for example `term: { field: { value: false } }`, `prefix: { field: { value: "a" } }` or `_source: { includes: [...] }`.';
 
 function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
   const { id } = definition;
@@ -498,19 +496,18 @@ describe('managedWorkflowDefinitions', () => {
           if (current === undefined) {
             return true;
           }
-          const isTemplateValue =
-            typeof current === 'string' &&
-            (DYNAMIC_VALUE_REGEX.test(current) ||
-              VARIABLE_VALUE_REGEX.test(current) ||
-              LIQUID_TAG_VALUE_REGEX.test(current));
-          return !isTemplateValue;
+          return !(
+            isDynamicValue(current) ||
+            isVariableValue(current) ||
+            isLiquidTagValue(current)
+          );
         });
 
         if (survivingIssues.length > 0) {
           failures.push({
             path,
             issuePaths: survivingIssues.map((issue) => issue.path.map(String).join('.')),
-            error: z.prettifyError(new z.ZodError(survivingIssues)),
+            error: `${z.prettifyError(new z.ZodError(survivingIssues))}\n${OBJECT_FORM_HINT}`,
           });
         }
       };
