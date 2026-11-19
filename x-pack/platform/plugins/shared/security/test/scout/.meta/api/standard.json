@@ -1,5 +1,5 @@
 {
-  "sha1": "a64d56b79b20ff2c83b15f5364a35355dc254159",
+  "sha1": "d0fb11bbfd149f3678d8efe0f18fe5f77ebd9e2c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -7,28 +7,26 @@
     {
       "id": "d2014f4df575e52-44c5e30280778f9",
       "title": "Built-in roles Kibana access validation should have expected Kibana access for all built-in roles",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/builtin_roles_kibana_access.spec.ts",
-        "line": 121,
+        "line": 122,
         "column": 1
       }
     },
     {
       "id": "d2014f4df575e52-7f69d1210618001",
       "title": "Built-in roles Kibana access validation should have consistent Kibana application naming",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/builtin_roles_kibana_access.spec.ts",
-        "line": 104,
+        "line": 105,
         "column": 24
       }
     },
@@ -72,6 +70,20 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/session_cookie.spec.ts",
         "line": 58,
         "column": 79
+      }
+    },
+    {
+      "id": "34768dcfde18be8-8bca71c8308d16e",
+      "title": "Session IDs creates a URL-safe document ID and keeps the session usable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/session_id.spec.ts",
+        "line": 38,
+        "column": 17
       }
     },
     {

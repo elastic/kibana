@@ -18,7 +18,8 @@ Two clients, two identities:
 - `DetectionEngineDataClient`: the space's detection service account, request-scoped. Generators read
   customer data with it.
 - `DetectionEngineSystemClient`: `asInternalUser` (kibana_system). Every read and write on
-  `.nightshift-detection_engine-*` goes through it.
+  `.nightshift-detection_engine-*` goes through it, and so does the per-space run lock that
+  `SpaceRunLock` takes in `.kibana_locks` (`@kbn/lock-manager`).
 
 ## Running it locally
 

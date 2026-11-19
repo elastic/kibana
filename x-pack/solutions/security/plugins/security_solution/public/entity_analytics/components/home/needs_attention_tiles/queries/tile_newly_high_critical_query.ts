@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
-import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/esql';
+import { buildLookback, type TimeRange } from '../../queries/time_range';
+import { getRiskScoreIndex } from '../../entities_grid/queries/esql';
 import { buildRiskLevelHistoryBranch } from './risk_history';
 import { buildPreviousNewlyHighCriticalQuery } from './risk_previous_period';
 import type { TilePeriod } from './tile_period';

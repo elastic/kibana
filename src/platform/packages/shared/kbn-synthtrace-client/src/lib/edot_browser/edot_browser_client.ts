@@ -10,11 +10,11 @@
 import type { OtelScope } from '../otel_logs';
 import { generateLongId, generateShortId } from '../utils/generate_id';
 import {
-  LOGS_INDEX,
+  BROWSER_LOGS_INDEX,
+  BROWSER_TRACES_INDEX,
   REPLAY_INDEX,
   SEVERITY_ERROR,
   SEVERITY_INFO,
-  TRACES_INDEX,
 } from '../edot_shared/constants';
 import { EdotLog } from '../edot_shared/edot_log';
 import { EdotSpan } from '../edot_shared/edot_span';
@@ -154,7 +154,7 @@ export class EdotBrowserClient {
     attributes: Record<string, unknown>,
     severityNumber: number = SEVERITY_INFO
   ): EdotLog {
-    return new EdotLog({ _index: LOGS_INDEX })
+    return new EdotLog({ _index: BROWSER_LOGS_INDEX })
       .eventName(eventName)
       .severity(severityNumber)
       .scope(scope)
@@ -445,7 +445,7 @@ export class EdotBrowserClient {
       errorType ?? (statusCode !== undefined ? String(statusCode) : undefined);
 
     return new EdotSpan<EdotBrowserSpanDocument>({
-      _index: TRACES_INDEX,
+      _index: BROWSER_TRACES_INDEX,
       trace_id: traceId,
       span_id: spanId,
       name: method,

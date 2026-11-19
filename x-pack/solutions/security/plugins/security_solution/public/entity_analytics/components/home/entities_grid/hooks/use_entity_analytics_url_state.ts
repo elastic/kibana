@@ -13,20 +13,18 @@ import { getEntityAnalyticsEntityTypes } from '../../../../../../common/entity_a
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../../../common/utils';
 import { ValidCriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
+import { TIME_RANGE_OPTIONS, type TimeRange } from '../../queries/time_range';
 import {
   GROUP_SIZE_FIELD,
   RISK_SCORE_NORM_FIELD,
   ROWS_MODES,
   SORT_DIRECTIONS,
-  TIME_RANGE_OPTIONS,
   isOneOf,
 } from '../common';
-import type { EntityFilters, RowsMode, SortDir, TimeRange } from '../common';
+import type { EntityFilters, RowsMode, SortDir } from '../common';
 import { findSortPageFetcher } from '../grid_columns';
 import { ENTITY_GROUPING_OPTIONS, MAX_GROUPING_LEVELS } from '../../entities_table/constants';
 import { isSignalCardId, type SignalCardId } from '../../needs_attention_tiles/data';
-
-export { TIME_RANGE_OPTIONS };
 
 // ── param keys ────────────────────────────────────────────────────────────────
 
