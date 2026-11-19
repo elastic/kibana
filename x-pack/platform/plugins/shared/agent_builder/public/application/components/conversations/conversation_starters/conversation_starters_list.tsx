@@ -35,8 +35,11 @@ const componentStyles = (euiThemeContext: UseEuiTheme) => {
       min-inline-size: 0;
       max-inline-size: 100%;
     `,
+    // An inline box, unlike a block one, doesn't inherit the underline EUI adds to the title on hover.
     content: css`
-      display: flex;
+      display: inline-flex;
+      inline-size: 100%;
+      vertical-align: top;
       align-items: center;
       gap: ${euiTheme.size.xs};
       padding: ${euiTheme.size.s} ${euiTheme.size.m};

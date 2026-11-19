@@ -96,6 +96,68 @@ apiTest.describe(
       expect(response.body.labels).toStrictEqual(['alpha', 'beta', 'gamma']);
     });
 
+    apiTest(
+      'updates conversation_starters with a label and an optional prompt',
+      async ({ asAdmin }) => {
+        const id = await createAgent(asAdmin);
+        const conversationStarters = [
+          { label: 'Top errors', prompt: 'Show me the top 10 errors from the last 24 hours' },
+          { label: 'Plain label' },
+        ];
+
+        const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+          body: { conversation_starters: conversationStarters },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.conversation_starters).toStrictEqual(conversationStarters);
+      }
+    );
+
+    apiTest('removes all conversation_starters with an empty list', async ({ asAdmin }) => {
+      const id = await createAgent(asAdmin, { conversation_starters: [{ label: 'Remove me' }] });
+
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+        body: { conversation_starters: [] },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.conversation_starters).toStrictEqual([]);
+    });
+
+    apiTest('keeps conversation_starters when other fields are updated', async ({ asAdmin }) => {
+      const conversationStarters = [{ label: 'Keep me', prompt: 'Keep this prompt too' }];
+      const id = await createAgent(asAdmin, { conversation_starters: conversationStarters });
+
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+        body: { name: 'Renamed Agent' },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.conversation_starters).toStrictEqual(conversationStarters);
+    });
+
+    [
+      { description: 'a label longer than 30 characters', starters: [{ label: 'a'.repeat(31) }] },
+      { description: 'a blank label', starters: [{ label: '   ' }] },
+      { description: 'a blank prompt', starters: [{ label: 'Top errors', prompt: '   ' }] },
+      { description: 'a plain string instead of an object', starters: ['Top errors'] },
+      {
+        description: 'more than 3 conversation starters',
+        starters: ['a', 'b', 'c', 'd'].map((label) => ({ label })),
+      },
+    ].forEach(({ description, starters }) => {
+      apiTest(`rejects conversation_starters with ${description}`, async ({ asAdmin }) => {
+        const id = await createAgent(asAdmin);
+
+        const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+          body: { conversation_starters: starters },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(400);
+      });
+    });
+
     apiTest('updates avatar_symbol and avatar_color', async ({ asAdmin }) => {
       const id = await createAgent(asAdmin);
 
