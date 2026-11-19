@@ -9,9 +9,9 @@ import type { ChatCompletionReasoning } from '@kbn/inference-common';
 
 // OpenAI Chat Completions rejects function tools on these reasoning models unless
 // reasoning effort is explicitly `none`. Keep the default scoped to them: models with
-// mandatory reasoning (e.g. Gemini Pro, gpt-oss) reject `effort: none` with a 400.
+// mandatory reasoning (e.g. Gemini Pro, gpt-oss, gpt-6-astra) reject `effort: none` with a 400.
 // Remove once Elasticsearch exposes parameter capabilities for inference endpoints.
-const MODELS_REJECTING_TOOLS_WITHOUT_NONE_REASONING = ['gpt-5', 'gpt-6'];
+const MODELS_REJECTING_TOOLS_WITHOUT_NONE_REASONING = ['gpt-5', 'gpt-6-luna', 'gpt-6-sol'];
 
 // Narrower than the list above: sent straight to OpenAI, where older gpt-5 models and other
 // gpt-6 models (e.g. gpt-6-astra, gpt-6.1-sol) reject `none`.
@@ -31,7 +31,7 @@ const modelMatchesAny = (model: string, candidates: readonly string[]): boolean 
  * Resolve the reasoning payload for a unified chat completion request.
  *
  * OpenAI Chat Completions rejects function tools when reasoning effort defaults
- * to anything other than `none` on newer reasoning models (gpt-5 and gpt-6 families). When
+ * to anything other than `none` on newer reasoning models (gpt-5, gpt-6-luna, gpt-6-sol). When
  * native tools are present, the caller did not set reasoning, and the model is
  * known to require it, default to `{ effort: 'none' }`. Explicit caller values
  * always win. For every other model the field is omitted, since models with

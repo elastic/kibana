@@ -52,6 +52,9 @@ describe('resolveChatCompletionReasoning', () => {
       'o3-mini',
       'gpt-52',
       'gpt-60',
+      'gpt-6-astra',
+      'gpt-6-astra-pro',
+      'gpt-6.1-sol',
     ];
     for (const model of models) {
       expect(
