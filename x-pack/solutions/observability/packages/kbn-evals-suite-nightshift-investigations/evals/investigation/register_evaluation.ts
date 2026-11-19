@@ -161,6 +161,8 @@ export const registerInvestigationEvaluation = ({
           connectorId: connector.id,
         });
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
+        // The rules are space-wide. Safe because the suite runs one Playwright worker (Scout's
+        // default) and each CI shard has its own Kibana, so no two datasets share the space at once.
         await replaceSandboxAllowlist(fetch, getDatasetSandboxAllowlist(dataset));
         const knowledgeMetadata = await restoreKnowledge({ esClient, log });
         const runExperiment = ({
