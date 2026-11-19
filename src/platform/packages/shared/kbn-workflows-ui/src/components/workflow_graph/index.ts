@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// The canvas loads lazily through one shared chunk; see `lazy_workflow_graph_canvas.tsx`.
 export {
   WorkflowGraphCanvasWithoutProvider,
-  type WorkflowGraphCanvasProps,
-} from './workflow_graph_canvas';
+  preloadWorkflowGraphCanvas,
+} from './lazy_workflow_graph_canvas';
+export type { WorkflowGraphCanvasProps } from './workflow_graph_canvas';
 export type {
   NodeConfigWarningReason,
   RenderStepIcon,

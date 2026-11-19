@@ -121,6 +121,7 @@ const mockMenu: { props: { onActionSelected: (action: ActionOption) => void } | 
   props: undefined,
 };
 jest.mock('../../actions_menu_popover', () => ({
+  useWarmActionsMenu: jest.fn(),
   ActionsMenuPopover: (props: { onActionSelected: (action: ActionOption) => void }) => {
     mockMenu.props = props;
     return null;

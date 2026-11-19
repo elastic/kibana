@@ -42,6 +42,7 @@ import { CatalogTemplateIcons } from './catalog_template_icons';
 import { TemplateInstallSection, type TemplateInstallStep } from './install_form';
 import { WorkflowYamlPreview } from './template_yaml_preview';
 import {
+  preloadWorkflowGraphCanvas,
   ReactFlowProvider,
   type RenderStepIcon,
   TypeIcon,
@@ -125,6 +126,14 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   // install form. `TemplateInstallSection` stays mounted across both so the
   // form values survive stepping back and forth.
   const [activeStep, setActiveStep] = useState<TemplateInstallStep>('details');
+
+  // The preview is the canvas, a lazy chunk: start fetching it now, in parallel with the
+  // template request, so the graph does not wait for a second download.
+  useEffect(() => {
+    preloadWorkflowGraphCanvas().catch(() => {
+      // Harmless: the canvas requests its chunk again when it renders.
+    });
+  }, []);
 
   // Values and the step belong to a single template; reset them when the source
   // changes (catalog slug or the identity of a pre-loaded/custom template).

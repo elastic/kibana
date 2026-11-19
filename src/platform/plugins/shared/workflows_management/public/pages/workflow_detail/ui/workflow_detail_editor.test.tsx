@@ -163,6 +163,7 @@ jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
+  preloadWorkflowGraphCanvas: jest.fn(() => Promise.resolve()),
 }));
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Do not import this module as a value from anywhere but `lazy_workflow_graph_canvas.tsx` (tests aside):
+// it is the single lazy boundary of the canvas chunk. See that file for why.
 import { EuiCallOut, euiCanAnimate, EuiText, transparentize, useEuiTheme } from '@elastic/eui';
 import {
   Background,

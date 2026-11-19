@@ -77,7 +77,7 @@ import {
   setHasYamlSchemaValidationErrors,
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
-import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
+import { ActionsMenuPopover, useWarmActionsMenu } from '../../../features/actions_menu_popover';
 import type {
   ActionOptionData,
   EditorCommand,
@@ -246,6 +246,8 @@ export const WorkflowYAMLEditor = ({
   const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
   const isSaving = useSelector(selectIsSaveInProgress);
   const dispatch = useDispatch();
+  // The actions menu is a lazy chunk shared with the visual editor: fetch it while idle.
+  useWarmActionsMenu();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
   const readOnlyReason = useWorkflowEditorReadOnlyReason();

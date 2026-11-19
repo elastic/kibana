@@ -15,7 +15,8 @@
  * EuiIcon loading placeholder (gray rounded square). Seeding the same cache the
  * aliased package uses makes those glyphs render immediately.
  *
- * Icons are loaded via dynamic `import()` so Jest (which cannot parse the
+ * All the glyphs live in `eui_icon_set.ts` and load through ONE dynamic `import()`, so they
+ * ship as a single lazy chunk (one request, not one per glyph) and Jest (which cannot parse the
  * optimize/es ESM graph) can import this module without transforming those paths.
  */
 let seeded = false;
@@ -28,111 +29,10 @@ export const ensureWorkflowGraphEuiIcons = (): void => {
   if (seeded || isJest) return;
   seeded = true;
 
-  void (async () => {
-    const [
-      { appendIconComponentCache },
-      { icon: apps },
-      { icon: at },
-      { icon: boxesVertical },
-      { icon: branch },
-      { icon: checkCircleFill },
-      { icon: chevronSingleDown },
-      { icon: chevronSingleLeft },
-      { icon: chevronSingleRight },
-      { icon: code },
-      { icon: copy },
-      { icon: cross },
-      { icon: ellipsis },
-      { icon: info },
-      { icon: minus },
-      { icon: pencil },
-      { icon: play },
-      { icon: plus },
-      { icon: plusCircle },
-      { icon: question },
-      { icon: refresh },
-      { icon: share },
-      { icon: tokenArray },
-      { icon: tokenBoolean },
-      { icon: tokenDate },
-      { icon: tokenNull },
-      { icon: tokenNumber },
-      { icon: tokenObject },
-      { icon: tokenString },
-      { icon: trash },
-      { icon: warning },
-      { icon: workflow },
-    ] = await Promise.all([
-      import('@elastic/eui/optimize/es/components/icon/icon'),
-      import('@elastic/eui/optimize/es/components/icon/assets/apps'),
-      import('@elastic/eui/optimize/es/components/icon/assets/at'),
-      import('@elastic/eui/optimize/es/components/icon/assets/boxes_vertical'),
-      import('@elastic/eui/optimize/es/components/icon/assets/branch'),
-      import('@elastic/eui/optimize/es/components/icon/assets/check_circle_fill'),
-      import('@elastic/eui/optimize/es/components/icon/assets/chevron_single_down'),
-      import('@elastic/eui/optimize/es/components/icon/assets/chevron_single_left'),
-      import('@elastic/eui/optimize/es/components/icon/assets/chevron_single_right'),
-      import('@elastic/eui/optimize/es/components/icon/assets/code'),
-      import('@elastic/eui/optimize/es/components/icon/assets/copy'),
-      import('@elastic/eui/optimize/es/components/icon/assets/cross'),
-      import('@elastic/eui/optimize/es/components/icon/assets/ellipsis'),
-      import('@elastic/eui/optimize/es/components/icon/assets/info'),
-      import('@elastic/eui/optimize/es/components/icon/assets/minus'),
-      import('@elastic/eui/optimize/es/components/icon/assets/pencil'),
-      import('@elastic/eui/optimize/es/components/icon/assets/play'),
-      import('@elastic/eui/optimize/es/components/icon/assets/plus'),
-      import('@elastic/eui/optimize/es/components/icon/assets/plus_circle'),
-      import('@elastic/eui/optimize/es/components/icon/assets/question'),
-      import('@elastic/eui/optimize/es/components/icon/assets/refresh'),
-      import('@elastic/eui/optimize/es/components/icon/assets/share'),
-      import('@elastic/eui/optimize/es/components/icon/assets/token_array'),
-      import('@elastic/eui/optimize/es/components/icon/assets/token_boolean'),
-      import('@elastic/eui/optimize/es/components/icon/assets/token_date'),
-      import('@elastic/eui/optimize/es/components/icon/assets/token_null'),
-      import('@elastic/eui/optimize/es/components/icon/assets/token_number'),
-      import('@elastic/eui/optimize/es/components/icon/assets/token_object'),
-      import('@elastic/eui/optimize/es/components/icon/assets/token_string'),
-      import('@elastic/eui/optimize/es/components/icon/assets/trash'),
-      import('@elastic/eui/optimize/es/components/icon/assets/warning'),
-      import('@elastic/eui/optimize/es/components/icon/assets/workflow'),
-    ]);
-
-    appendIconComponentCache({
-      apps,
-      at,
-      boxesVertical,
-      branch,
-      checkCircleFill,
-      chevronSingleDown,
-      chevronSingleLeft,
-      chevronSingleRight,
-      code,
-      copy,
-      cross,
-      ellipsis,
-      info,
-      minus,
-      pencil,
-      play,
-      plus,
-      plusCircle,
-      question,
-      refresh,
-      share,
-      // FieldIcon glyphs used by the data-reference catalog / field editor.
-      tokenArray,
-      tokenBoolean,
-      tokenDate,
-      tokenNull,
-      tokenNumber,
-      tokenObject,
-      tokenString,
-      trash,
-      warning,
-      workflow,
+  import('./eui_icon_set')
+    .then(({ seedEuiIcons }) => seedEuiIcons())
+    .catch(() => {
+      // Let the next call retry, e.g. after a chunk failed to load.
+      seeded = false;
     });
-  })().catch(() => {
-    // Let the next call retry, e.g. after a chunk failed to load.
-    seeded = false;
-  });
 };

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ActionsMenuPopover } from './ui/actions_menu_popover';
-export { ActionsMenu } from './ui/actions_menu';
+// The menu loads lazily through one shared chunk; see `ui/lazy_actions_menu_popover.tsx`.
+export { ActionsMenuPopover, useWarmActionsMenu } from './ui/lazy_actions_menu_popover';
 export type {
   ActionOptionData,
   ActionsMenuInsertionContext,

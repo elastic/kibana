@@ -28,6 +28,7 @@ import type { monaco } from '@kbn/monaco';
 import { isMac } from '@kbn/shared-ux-utility';
 import { WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID } from '@kbn/workflows';
 import {
+  preloadWorkflowGraphCanvas,
   ReactFlowProvider,
   useWorkflowsCapabilities,
   WorkflowDetailBottomBar,
@@ -79,9 +80,12 @@ const WorkflowYAMLEditor = React.lazy(() =>
 );
 
 const WorkflowVisualEditor = React.lazy(() =>
-  import('../../../features/workflow_visual_editor').then((module) => ({
-    default: module.WorkflowVisualEditor,
-  }))
+  Promise.all([
+    import('../../../features/workflow_visual_editor'),
+    // The editor renders the canvas, a lazy chunk of its own: fetch it alongside the editor chunk
+    // instead of after it. A failed preload is harmless, the canvas requests its chunk again.
+    preloadWorkflowGraphCanvas().catch(() => undefined),
+  ]).then(([module]) => ({ default: module.WorkflowVisualEditor }))
 );
 
 interface WorkflowDetailEditorProps {

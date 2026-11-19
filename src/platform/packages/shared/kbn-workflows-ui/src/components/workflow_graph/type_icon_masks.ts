@@ -9,29 +9,25 @@
 
 import { getDataUrlFromReactComponent } from '../step_icons/icon_to_data_url';
 
-interface IconModule {
-  readonly icon: Parameters<typeof getDataUrlFromReactComponent>[0];
-}
-
 const isJest =
   typeof process !== 'undefined' &&
   (process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === 'test');
 
 /**
- * Same glyphs the data picker's `FieldIcon` draws, keyed by `FieldIcon` type. Loaded with
- * dynamic `import()` so Jest never has to parse the optimize/es graph (see
- * `ensure_eui_icons.ts`).
+ * Same glyphs the data picker's `FieldIcon` draws, keyed by `FieldIcon` type, read from the shared
+ * icon set. That module loads with a dynamic `import()` so Jest never has to parse the optimize/es
+ * graph (see `ensure_eui_icons.ts`) and the glyphs share one lazy chunk with the other icons.
  */
-const ICON_LOADERS: Readonly<Record<string, () => Promise<IconModule>>> = {
-  string: () => import('@elastic/eui/optimize/es/components/icon/assets/token_string'),
-  number: () => import('@elastic/eui/optimize/es/components/icon/assets/token_number'),
-  boolean: () => import('@elastic/eui/optimize/es/components/icon/assets/token_boolean'),
-  array: () => import('@elastic/eui/optimize/es/components/icon/assets/token_array'),
-  object: () => import('@elastic/eui/optimize/es/components/icon/assets/token_object'),
-  null: () => import('@elastic/eui/optimize/es/components/icon/assets/token_null'),
-  date: () => import('@elastic/eui/optimize/es/components/icon/assets/token_date'),
-  unknown: () => import('@elastic/eui/optimize/es/components/icon/assets/question'),
-};
+const TYPE_ICON_KEYS = {
+  string: 'tokenString',
+  number: 'tokenNumber',
+  boolean: 'tokenBoolean',
+  array: 'tokenArray',
+  object: 'tokenObject',
+  null: 'tokenNull',
+  date: 'tokenDate',
+  unknown: 'question',
+} as const;
 
 let cached: Promise<Readonly<Record<string, string>>> | undefined;
 
@@ -42,11 +38,14 @@ let cached: Promise<Readonly<Record<string, string>>> | undefined;
  */
 export const loadTypeIconMasks = (): Promise<Readonly<Record<string, string>>> => {
   if (isJest) return Promise.resolve({});
-  cached ??= Promise.all(
-    Object.entries(ICON_LOADERS).map(async ([type, load]) => {
-      const { icon } = await load();
-      return [type, getDataUrlFromReactComponent(icon, '')] as const;
-    })
-  ).then((entries) => Object.fromEntries(entries.filter(([, url]) => url !== '')));
+  cached ??= import('./eui_icon_set').then(({ euiIconComponents }) =>
+    Object.fromEntries(
+      Object.entries(TYPE_ICON_KEYS)
+        .map(
+          ([type, key]) => [type, getDataUrlFromReactComponent(euiIconComponents[key], '')] as const
+        )
+        .filter(([, url]) => url !== '')
+    )
+  );
   return cached;
 };

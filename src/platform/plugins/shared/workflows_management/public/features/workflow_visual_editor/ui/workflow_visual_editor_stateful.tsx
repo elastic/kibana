@@ -81,6 +81,7 @@ import {
   type ActionOptionData,
   type ActionsMenuInsertionContext,
   ActionsMenuPopover,
+  useWarmActionsMenu,
 } from '../../actions_menu_popover';
 import { collectStepsByName } from '../lib/collect_steps';
 import { getStepScope } from '../lib/get_step_scope';
@@ -295,6 +296,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const { canExecuteWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
   const { selectedStepId, setSelectedStep, setEditorView } = useWorkflowUrlState();
   const dispatch = useDispatch();
+  // The insert menu is a lazy chunk shared with the YAML editor: fetch it while idle.
+  useWarmActionsMenu();
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const isEditorReadOnly = useWorkflowEditorReadOnly();
 
