@@ -22,6 +22,7 @@ import {
   ConnectAgentPanel,
   DreamingPanel,
   LockedSectionPanel,
+  ManageAutomationsLink,
   OverviewPlaceholderPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
@@ -377,6 +378,7 @@ export const AiIndexDetailPage = () => {
           aiIndex={aiIndex}
           onSaved={refetch}
           isManaged={!!aiIndex?.managed}
+          headerAction={<ManageAutomationsLink aiIndexId={resolvedAiIndexId} />}
         />
       ) : (
         <LockedSectionPanel

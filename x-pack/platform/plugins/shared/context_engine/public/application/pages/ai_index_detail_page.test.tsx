@@ -30,6 +30,7 @@ import {
   CONTEXT_ENGINE_PATHS,
   getAiIndexDetailPath,
   getAiIndexKnowledgeDocumentsPath,
+  getAiIndexSettingsPath,
 } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
@@ -523,6 +524,24 @@ describe('AiIndexDetailPage', () => {
 
     expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+  });
+
+  it('links automations to Settings instead of offering to add them on the Overview', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextAutomationsManageInSettingsLink'));
+
+    expect(services.application.navigateToApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({ path: getAiIndexSettingsPath(aiIndex.id) })
+    );
   });
 
   it('keeps automations visible when sources are removed but automations remain', async () => {

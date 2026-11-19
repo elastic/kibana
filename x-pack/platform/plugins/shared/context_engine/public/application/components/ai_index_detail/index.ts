@@ -11,6 +11,7 @@ export { AutomationsPanel } from './automations_panel';
 export { ConnectAgentPanel } from './connect_agent_panel';
 export { DreamingPanel } from './dreaming_panel';
 export { LockedSectionPanel } from './locked_section_panel';
+export { ManageAutomationsLink } from './manage_automations_link';
 export { OverviewPlaceholderPanel } from './overview_placeholder_panel';
 export { SignalsPanel } from './signals_panel';
 export { SourcesPanel } from './sources_panel';
