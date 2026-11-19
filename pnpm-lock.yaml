@@ -5002,6 +5002,9 @@ importers:
       symbol-observable:
         specifier: 4.0.0
         version: 4.0.0
+      tabbable:
+        specifier: 5.3.3
+        version: 5.3.3
       tar:
         specifier: 7.5.22
         version: 7.5.22

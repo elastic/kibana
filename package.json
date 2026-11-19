@@ -1691,6 +1691,7 @@
     "styled-components": "5.3.11",
     "suricata-sid-db": "1.0.2",
     "symbol-observable": "4.0.0",
+    "tabbable": "5.3.3",
     "tar": "7.5.22",
     "ts-easing": "0.2.0",
     "tslib": "2.8.1",
