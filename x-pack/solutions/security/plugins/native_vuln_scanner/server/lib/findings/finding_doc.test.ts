@@ -126,6 +126,25 @@ describe('toFindingDoc', () => {
     expect(reference).toContain('https://access.redhat.com/errata/RHSA-2026:1234');
   });
 
+  it('omits fixed_version and marks unfixed findings', () => {
+    const doc = toFindingDoc(
+      finding({
+        fixedVersion: undefined,
+        unfixed: true,
+        vendorReason: 'Will not fix',
+        why: 'tar 1.34 is installed with no fixed version yet (CVE-2005-2541)',
+      }),
+      HOST,
+      CTX
+    );
+    expect(doc.package).not.toHaveProperty('fixed_version');
+    expect(doc.native_vuln_scanner).toMatchObject({
+      state: 'unfixed',
+      unfixed: true,
+      vendor_reason: 'Will not fix',
+    });
+  });
+
   it('falls back to cve.org without a feed URL and to the CVE id without a title', () => {
     const f = finding({ advisories: [] });
     const doc = toFindingDoc({ ...f, cve: { id: 'CVE-2024-1' } }, HOST, CTX);

@@ -15,6 +15,11 @@ export const configSchema = schema.object({
    * managed workflow.
    */
   enabled: schema.boolean({ defaultValue: false }),
+  /**
+   * Also report CVEs the vendor has not fixed yet (RHEL unpatched feed, Ubuntu "might be
+   * affected"). Off: only CVEs with a fixed version.
+   */
+  includeUnfixed: schema.boolean({ defaultValue: false }),
 });
 
 export type NativeVulnScannerConfig = TypeOf<typeof configSchema>;

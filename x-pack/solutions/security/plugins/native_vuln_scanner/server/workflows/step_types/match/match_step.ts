@@ -35,7 +35,7 @@ const toOutput = (summary: ScanSummary): MatchOutput => ({
  * already reported as failed or unavailable is not retried.
  */
 const buildFeedLoader =
-  (feeds: NonNullable<MatchInput['feeds']>) =>
+  (feeds: NonNullable<MatchInput['feeds']>, includeUnfixed: boolean) =>
   async (os: FeedOs, { signal }: { signal: AbortSignal }): Promise<LoadFeedResult> => {
     const release = releaseKey(os);
     const reported = feeds.find((feed) => feed.release === release);
@@ -45,13 +45,19 @@ const buildFeedLoader =
     if (reported?.status === 'unavailable' && reported.url) {
       return { status: 'unavailable', url: reported.url };
     }
-    const cached = getCachedFeed(release);
-    if (!cached) return loadFeed(os, { signal });
-    const feed = await parseFeedBody(os, cached.body, { signal });
+    const cached = getCachedFeed(release, includeUnfixed);
+    if (!cached) return loadFeed(os, { signal, includeUnfixed });
+    const feed = await parseFeedBody(os, cached.body, { signal, includeUnfixed });
     return { status: 'ok', feed, etag: cached.etag, lastModified: cached.lastModified };
   };
 
-export const buildMatchStepDefinition = ({ logger, getScanDeps, getLicense, now }: StepDeps) =>
+export const buildMatchStepDefinition = ({
+  logger,
+  getScanDeps,
+  getLicense,
+  includeUnfixed,
+  now,
+}: StepDeps) =>
   createServerStepDefinition({
     ...matchStepCommonDefinition,
     handler: async ({ input, abortSignal: signal, contextManager }) => {
@@ -61,7 +67,14 @@ export const buildMatchStepDefinition = ({ logger, getScanDeps, getLicense, now 
       const runId = contextManager.getContext().execution.id;
       try {
         const summary = await runScan(
-          { es, packRepository, logger, loadFeed: buildFeedLoader(feeds), now },
+          {
+            es,
+            packRepository,
+            logger,
+            loadFeed: buildFeedLoader(feeds, includeUnfixed),
+            includeUnfixed,
+            now,
+          },
           { signal, runId }
         );
         const output = toOutput(summary);

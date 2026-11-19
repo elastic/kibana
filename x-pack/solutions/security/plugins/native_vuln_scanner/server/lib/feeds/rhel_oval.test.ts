@@ -78,7 +78,7 @@ describe('parseRhelOval', () => {
   it('gates module stream packages on the enabled module', () => {
     const nodejs = byAdvisory('RHSA-2023:2654');
     expect(nodejs).toHaveLength(8);
-    expect(nodejs.find((r) => r.package.name === 'npm')?.fixed_version.raw).toBe(
+    expect(nodejs.find((r) => r.package.name === 'npm')?.fixed_version?.raw).toBe(
       '1:9.5.0-1.18.14.2.2.module+el9.2.0.z+18497+a402347c'
     );
     for (const r of nodejs) {
@@ -93,7 +93,7 @@ describe('parseRhelOval', () => {
       expect.arrayContaining(['kernel', 'kernel-core', 'bpftool', 'perf', 'python3-perf'])
     );
     for (const r of kernel) {
-      expect(r.fixed_version.raw).toBe('0:5.14.0-162.23.1.el9_1');
+      expect(r.fixed_version?.raw).toBe('0:5.14.0-162.23.1.el9_1');
       expect(r.conditions).toEqual([
         [
           {
@@ -300,5 +300,42 @@ describe('classifyRhelCriterion', () => {
         evr: '0:4.18.0-1.el8',
       },
     });
+  });
+});
+
+describe('parseRhelOval with includeUnfixed', () => {
+  const unpatched = readFileSync(
+    join(__dirname, '__fixtures__', 'rhel_9_unpatched_trimmed.oval.xml')
+  );
+
+  it('ignores vulnerability definitions when includeUnfixed is off', async () => {
+    const result = await parseRhelOval([unpatched], { major: '9' });
+    expect(result.records).toEqual([]);
+    expect(result.definitions).toBe(0);
+  });
+
+  it('emits presence records for unpatched definitions', async () => {
+    const result = await parseRhelOval([unpatched], { major: '9', includeUnfixed: true });
+
+    expect(result.definitions).toBe(0);
+    expect(result.skipped).toEqual({ unfixed_definitions: 2 });
+    expect(result.records.map((r) => [r.advisory.id, r.package.name, r.vendor_reason])).toEqual([
+      ['CVE-2005-2541', 'tar', 'Will not fix'],
+      ['CVE-2016-1247', 'nginx-core', 'Affected'],
+      ['CVE-2016-1247', 'nginx-all-modules', 'Affected'],
+    ]);
+    for (const record of result.records) {
+      expect(record.fixed_version).toBeUndefined();
+      expect(record.unfixed).toBe(true);
+      expect(record.conditions).toEqual([]);
+    }
+    const tar = result.records[0];
+    expect(tar.advisory).toMatchObject({
+      source: 'redhat',
+      definition_id: 'oval:com.redhat.cve:def:20052541',
+      url: 'https://access.redhat.com/security/cve/CVE-2005-2541',
+      severity: 'Moderate',
+    });
+    expect(tar.cves.map((c) => c.id)).toEqual(['CVE-2005-2541']);
   });
 });

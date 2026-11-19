@@ -69,6 +69,16 @@ describe('feedUrl', () => {
     );
   });
 
+  it('switches RHEL to the including-unpatched feed when unfixed rows are wanted', () => {
+    expect(feedUrl({ family: 'rhel', version: '9' }, { includeUnfixed: true })).toBe(
+      'https://security.access.redhat.com/data/oval/v2/RHEL9/rhel-9-including-unpatched.oval.xml.bz2'
+    );
+    // Ubuntu has one combined feed; the flag changes nothing there.
+    expect(feedUrl({ family: 'ubuntu', version: 'noble' }, { includeUnfixed: true })).toBe(
+      'https://security-metadata.canonical.com/oval/com.ubuntu.noble.cve.oval.xml.bz2'
+    );
+  });
+
   it.each([
     ['ubuntu', '../noble'],
     ['ubuntu', 'noble?x=1'],
@@ -232,5 +242,21 @@ describe('parseFeedBody', () => {
   it('parses a downloaded body', async () => {
     const feed = await parseFeedBody({ family: 'rhel', version: '9' }, rhelBz2);
     expect(feed.definitions).toBe(5);
+  });
+
+  it('uses the larger decompressed cap for the RHEL unpatched feed', async () => {
+    const { MAX_DECOMPRESSED_FEED_BYTES, MAX_DECOMPRESSED_UNPATCHED_FEED_BYTES } =
+      jest.requireActual('./fetch');
+    expect(MAX_DECOMPRESSED_UNPATCHED_FEED_BYTES).toBeGreaterThan(MAX_DECOMPRESSED_FEED_BYTES);
+    // The effective cap is observable through the guard's refusal message.
+    await expect(
+      parseFeedBody({ family: 'rhel', version: '9' }, rhelBz2, {
+        maxDecompressedBytes: 8,
+        includeUnfixed: true,
+      })
+    ).rejects.toThrow('decompresses past 8 bytes');
+    await expect(
+      parseFeedBody({ family: 'rhel', version: '9' }, rhelBz2, { maxDecompressedBytes: 8 })
+    ).rejects.toThrow('decompresses past 8 bytes');
   });
 });

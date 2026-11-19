@@ -39,7 +39,7 @@ describe('parseUbuntuOval', () => {
 
   it('emits one record per fixed binary group of a source package', () => {
     const samba = byCve('CVE-2018-14628');
-    expect(samba.map((r) => [r.package.name, r.fixed_version.raw])).toEqual([
+    expect(samba.map((r) => [r.package.name, r.fixed_version?.raw])).toEqual([
       ['samba', '2:4.19.4+dfsg-3ubuntu1'],
       ['samba', '2:2.8.0+samba4.19.4+dfsg-3ubuntu1'],
     ]);
@@ -100,5 +100,56 @@ describe('parseUbuntuOval', () => {
   it('does not depend on chunk boundaries', async () => {
     const small = await parseUbuntuOval(chunked(fixture, 97), { release: 'noble' });
     expect(small.records).toEqual(result.records);
+  });
+});
+
+describe('parseUbuntuOval with includeUnfixed', () => {
+  let result: FeedParseResult;
+
+  beforeAll(async () => {
+    result = await parseUbuntuOval(chunked(fixture, 4096), {
+      release: 'noble',
+      includeUnfixed: true,
+    });
+  });
+
+  const byCve = (id: string) => result.records.filter((r) => r.advisory.id === id);
+
+  it('emits unfixed package records for might-be-affected criteria', () => {
+    const gtkwave = byCve('CVE-2023-35958');
+    expect(gtkwave).toHaveLength(1);
+    expect(gtkwave[0]).toMatchObject({
+      kind: 'package',
+      unfixed: true,
+      vendor_reason: 'might be affected',
+      package: { name: 'gtkwave', binaries: ['gtkwave'] },
+      conditions: [],
+    });
+    expect(gtkwave[0].fixed_version).toBeUndefined();
+
+    const motif = byCve('CVE-2026-94287').find((r) => r.package.name === 'motif');
+    expect(motif).toMatchObject({ unfixed: true, vendor_reason: 'might be affected' });
+    expect(motif?.fixed_version).toBeUndefined();
+  });
+
+  it('still skips other pockets and reports the remaining skips', () => {
+    expect(result.records.every((r) => r.package.name !== 'libspring-java')).toBe(true);
+    // The kernel-only branch was claimed for synthesis, so it is not also reported skipped.
+    expect(result.skipped).toEqual({ might_be_affected: 1, other_pocket: 1 });
+  });
+
+  it('turns kernel-only definitions into unfixed running-kernel records', () => {
+    const kernel = byCve('CVE-2021-47488').filter((r) => r.unfixed);
+    expect(kernel).toHaveLength(1);
+    expect(kernel[0]).toMatchObject({
+      kind: 'running_kernel',
+      unfixed: true,
+      vendor_reason: 'might be affected',
+      package: { name: 'linux-raspi-realtime' },
+      conditions: [
+        [{ type: 'kernel_release_matches', pattern: '6\\.8\\.0\\-\\d+(\\-raspi\\-realtime)' }],
+      ],
+    });
+    expect(kernel[0].fixed_version).toBeUndefined();
   });
 });

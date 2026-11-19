@@ -10,6 +10,8 @@ export interface CachedFeed {
   etag?: string;
   lastModified?: string;
   body: Uint8Array;
+  /** Which variant was fetched; a flag mismatch means the bytes are for the other feed. */
+  includeUnfixed: boolean;
 }
 
 /** More releases than this are unlikely (Ubuntu and RHEL majors in use); the cap bounds heap if that changes. */
@@ -18,7 +20,10 @@ export const MAX_CACHED_FEEDS = 8;
 // Per process: the workflow engine may run the match step on another node, which then downloads the feed itself.
 const cache = new Map<string, CachedFeed>();
 
-export const getCachedFeed = (release: string): CachedFeed | undefined => cache.get(release);
+export const getCachedFeed = (release: string, includeUnfixed: boolean): CachedFeed | undefined => {
+  const cached = cache.get(release);
+  return cached?.includeUnfixed === includeUnfixed ? cached : undefined;
+};
 
 export const setCachedFeed = (release: string, feed: CachedFeed): void => {
   cache.delete(release);

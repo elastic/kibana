@@ -34,15 +34,28 @@ import type {
  * and the running kernel. The rpminfo_state is only read for the optional arch constraint.
  */
 
-interface RhelLeaf {
+/** "PKG is earlier than EVR" (patched feed): the package is fixed at EVR. */
+interface RhelFixedLeaf {
   name: string;
   evr: string;
+  unfixed?: undefined;
   testRef?: string;
 }
+
+/** "PKG is installed" (unpatched feed): affected, no fixed version. */
+interface RhelPresenceLeaf {
+  name: string;
+  evr: undefined;
+  unfixed: true;
+  testRef?: string;
+}
+
+type RhelLeaf = RhelFixedLeaf | RhelPresenceLeaf;
 
 const EARLIER_THAN = /^(\S+) is earlier than (\S+)$/;
 const SIGNED = / is signed with Red Hat \S+ key$/;
 const RHEL_INSTALLED = /^Red Hat Enterprise Linux (\d+) is installed$/;
+const INSTALLED = /^(\S+) is installed$/;
 const MODULE_ENABLED = /^Module (\S+) is enabled$/;
 const KERNEL_EARLIER_RUNNING = /^(kernel(?:-rt)?) earlier than (\S+) is currently running$/;
 const KERNEL_EQUALS_RUNNING = /^kernel version (\S+) is currently running$/;
@@ -53,6 +66,8 @@ const KPATCH_NOT_INSTALLED = /^kpatch-patch not installed for \S+$/;
 export interface ParseRhelOvalOptions {
   /** Major release the feed covers, e.g. `9`. */
   major: string;
+  /** Parse `oval:com.redhat.cve:` vulnerability definitions (unpatched feed). */
+  includeUnfixed?: boolean;
 }
 
 export const classifyRhelCriterion = (
@@ -68,6 +83,10 @@ export const classifyRhelCriterion = (
   if (installed) {
     return installed[1] === major ? { kind: 'true' } : { kind: 'false', reason: 'other_release' };
   }
+  // Unpatched feed presence test; must come after RHEL_INSTALLED, which it also matches.
+  const presence = comment.match(INSTALLED);
+  if (presence)
+    return { kind: 'leaf', leaf: { name: presence[1], evr: undefined, unfixed: true, testRef } };
   // OVAL v2 guard branch: true only on hosts that are not RHEL at all.
   if (comment === 'Red Hat Enterprise Linux must be installed') return { kind: 'false' };
   if (comment === 'Red Hat CoreOS 4 is installed') return { kind: 'false' };
@@ -107,12 +126,15 @@ export const classifyRhelCriterion = (
 interface PendingDefinition {
   id: string;
   title: string;
-  rhsa: string;
+  /** RHSA ref_id on patched defs, the CVE ref_id on unpatched defs. */
+  advisoryId: string;
   url?: string;
   severity?: string;
   issued?: string;
   updated?: string;
   cves: AdvisoryCve[];
+  /** Present on unpatched-feed definitions: component -> vendor resolution state. */
+  resolution?: Map<string, string>;
   leaves: Array<{ leaf: RhelLeaf; conditions: AdvisoryCondition[][] }>;
 }
 
@@ -176,7 +198,7 @@ const mergeByArch = (
 
 export const parseRhelOval = async (
   input: OvalInput,
-  { major }: ParseRhelOvalOptions
+  { major, includeUnfixed }: ParseRhelOvalOptions
 ): Promise<FeedParseResult> => {
   const skipped: Record<string, number> = {};
   const pending: PendingDefinition[] = [];
@@ -190,8 +212,13 @@ export const parseRhelOval = async (
   const unsupportedArchStates = new Set<string>();
 
   const onDefinition = (node: XmlNode): void => {
-    if (node.attrs.class !== 'patch') return;
-    definitions++;
+    const { class: defClass, id } = node.attrs;
+    // The unpatched feed's `oval:com.redhat.cve:` defs carry class="vulnerability"; so do
+    // `oval:com.redhat.unaffected:` defs, which stay excluded.
+    const unfixed = defClass === 'vulnerability' && id.startsWith('oval:com.redhat.cve:');
+    if (defClass !== 'patch' && !(unfixed && includeUnfixed)) return;
+    if (defClass === 'patch') definitions++;
+    else countInto(skipped, 'unfixed_definitions');
     const metadata = child(node, 'metadata');
     const criteria = child(node, 'criteria');
     if (!metadata || !criteria) {
@@ -199,12 +226,24 @@ export const parseRhelOval = async (
       return;
     }
     const references = children(metadata, 'reference');
-    const rhsa = references.find((r) => r.attrs.source === 'RHSA');
+    const advisoryRef = unfixed
+      ? references.find((r) => r.attrs.source === 'CVE')
+      : references.find((r) => r.attrs.source === 'RHSA');
     const advisory = child(metadata, 'advisory');
     const cves = parseCves(advisory);
-    if (!rhsa || cves.length === 0) {
+    if (!advisoryRef || cves.length === 0) {
       countInto(skipped, 'no_cve');
       return;
+    }
+    const resolution = new Map<string, string>();
+    if (advisory) {
+      for (const affected of children(advisory, 'affected')) {
+        for (const res of children(affected, 'resolution')) {
+          for (const component of children(res, 'component')) {
+            resolution.set(component.text, res.attrs.state);
+          }
+        }
+      }
     }
     let conjunctions: Array<Conjunction<RhelLeaf, AdvisoryCondition>>;
     try {
@@ -229,12 +268,13 @@ export const parseRhelOval = async (
     pending.push({
       id: node.attrs.id,
       title: child(metadata, 'title')?.text ?? '',
-      rhsa: rhsa.attrs.ref_id,
-      url: rhsa.attrs.ref_url,
+      advisoryId: advisoryRef.attrs.ref_id,
+      url: advisoryRef.attrs.ref_url,
       severity: (advisory && child(advisory, 'severity')?.text) || undefined,
       issued: dateToIso(advisory && child(advisory, 'issued')?.attrs.date),
       updated: dateToIso(advisory && child(advisory, 'updated')?.attrs.date),
       cves,
+      resolution: unfixed ? resolution : undefined,
       leaves,
     });
   };
@@ -279,15 +319,20 @@ export const parseRhelOval = async (
       return stateRef ? stateArch.get(stateRef) : undefined;
     })) {
       let key: string | undefined;
-      try {
-        key = rpmKey(leaf.evr);
-      } catch (e) {
-        if (!(e instanceof UnencodableVersionError)) throw e;
-        countInto(skipped, 'unencodable_version_kept');
+      if (leaf.evr !== undefined) {
+        try {
+          key = rpmKey(leaf.evr);
+        } catch (e) {
+          if (!(e instanceof UnencodableVersionError)) throw e;
+          countInto(skipped, 'unencodable_version_kept');
+        }
+      } else if (def.resolution?.get(leaf.name) === undefined) {
+        // Informational: the vendor named no resolution state for this component.
+        countInto(skipped, 'unfixed_without_reason');
       }
       records.push({
         advisory: {
-          id: def.rhsa,
+          id: def.advisoryId,
           source: 'redhat',
           definition_id: def.id,
           title: def.title,
@@ -299,7 +344,9 @@ export const parseRhelOval = async (
         os,
         kind: 'package',
         package: arch ? { name: leaf.name, arch } : { name: leaf.name },
-        fixed_version: { raw: leaf.evr, scheme: 'rpm', key },
+        ...(leaf.unfixed
+          ? { unfixed: true as const, vendor_reason: def.resolution?.get(leaf.name) }
+          : { fixed_version: { raw: leaf.evr, scheme: 'rpm' as const, key } }),
         cves: def.cves,
         conditions,
         feed: { snapshot_time: snapshotTime },

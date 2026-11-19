@@ -20,7 +20,12 @@ const ABORTED = 'The feed download was aborted';
  * Downloads each needed vendor feed (conditionally, by ETag) and keeps the bytes on the server.
  * The output is per-release metadata only: advisory data would blow the step output size limit.
  */
-export const buildFetchFeedStepDefinition = ({ logger, getScanDeps, getLicense }: StepDeps) =>
+export const buildFetchFeedStepDefinition = ({
+  logger,
+  getScanDeps,
+  getLicense,
+  includeUnfixed,
+}: StepDeps) =>
   createServerStepDefinition({
     ...fetchFeedStepCommonDefinition,
     handler: async ({ abortSignal: signal }) => {
@@ -35,9 +40,13 @@ export const buildFetchFeedStepDefinition = ({ logger, getScanDeps, getLicense }
       const output = () => ({ feeds, hosts: inventory.hosts.length, pack_missing: false });
       for (const [release, hosts] of groupByRelease(inventory.hosts)) {
         if (signal.aborted) return { output: output(), error: new Error(ABORTED) };
-        const known = getCachedFeed(release);
+        const known = getCachedFeed(release, includeUnfixed);
         try {
-          const result = await downloadFeed(hosts[0].inventory.os, { signal, etag: known?.etag });
+          const result = await downloadFeed(hosts[0].inventory.os, {
+            signal,
+            etag: known?.etag,
+            includeUnfixed,
+          });
           if (result.status === 'unavailable') {
             logger.warn(
               `No advisory feed for ${release} (${result.url}); ${hosts.length} hosts will not be scanned.`
@@ -55,7 +64,7 @@ export const buildFetchFeedStepDefinition = ({ logger, getScanDeps, getLicense }
             });
           } else {
             const { body, etag, lastModified } = result;
-            setCachedFeed(release, { body, etag, lastModified });
+            setCachedFeed(release, { body, etag, lastModified, includeUnfixed });
             feeds.push({
               release,
               status: 'downloaded',

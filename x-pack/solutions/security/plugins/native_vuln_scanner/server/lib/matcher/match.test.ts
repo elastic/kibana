@@ -157,6 +157,92 @@ describe('matchHost: Ubuntu', () => {
   });
 });
 
+describe('matchHost: unfixed records', () => {
+  const presence = record({
+    os: RHEL9,
+    advisory: { id: 'CVE-2026-0001', source: 'redhat', definition_id: 'u1', title: 'unfixed' },
+    package: { name: 'nginx-core' },
+    unfixed: true,
+    vendor_reason: 'Affected',
+    fixed_version: undefined,
+  });
+
+  it('matches any installed version and reports the vendor reason', () => {
+    const findings = run(
+      host({ os: RHEL9, packages: [{ name: 'nginx-core', version: '1.20.1' }] }),
+      [presence]
+    );
+    expect(findings).toEqual([
+      expect.objectContaining({
+        unfixed: true,
+        vendorReason: 'Affected',
+        why: 'nginx-core 1.20.1 is installed with no fixed version yet (CVE-2026-0001)',
+      }),
+    ]);
+  });
+
+  it('does not report a patched install when a fixed row covers the same CVE and package', () => {
+    const fixed = record({
+      os: RHEL9,
+      advisory: { id: 'RHSA-1', source: 'redhat', definition_id: 'f1', title: 'fixed' },
+      package: { name: 'nginx-core' },
+      fixed_version: { raw: '1.20.2', scheme: 'rpm' },
+      cves: [{ id: 'CVE-2026-0001' }],
+    });
+    // Installed version >= the fix: the fixed row itself does not match, and it must
+    // also suppress the unfixed presence row.
+    expect(
+      run(host({ os: RHEL9, packages: [{ name: 'nginx-core', version: '1.20.3' }] }), [
+        fixed,
+        presence,
+      ])
+    ).toEqual([]);
+  });
+
+  it('lets a fixed finding win when both hit the same CVE, package and version', () => {
+    const fixed = record({
+      os: RHEL9,
+      advisory: { id: 'RHSA-1', source: 'redhat', definition_id: 'f1', title: 'fixed' },
+      package: { name: 'nginx-core' },
+      fixed_version: { raw: '1.20.2', scheme: 'rpm' },
+      cves: [{ id: 'CVE-2026-0001' }],
+    });
+    const findings = run(
+      host({ os: RHEL9, packages: [{ name: 'nginx-core', version: '1.20.1' }] }),
+      [fixed, presence]
+    );
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({ fixedVersion: '1.20.2' });
+    expect(findings[0].unfixed).toBeUndefined();
+  });
+
+  it('matches an unfixed kernel flavour on the running kernel alone', () => {
+    const unfixedKernel = record({
+      os: UBUNTU,
+      advisory: { id: 'CVE-2021-47488', source: 'ubuntu', definition_id: 'k2', title: 'linux' },
+      kind: 'running_kernel',
+      package: { name: 'linux-raspi-realtime' },
+      unfixed: true,
+      vendor_reason: 'might be affected',
+      fixed_version: undefined,
+      conditions: [
+        [{ type: 'kernel_release_matches', pattern: '6\\.8\\.0\\-\\d+(\\-raspi\\-realtime)' }],
+      ],
+    });
+    const findings = run(host({ os: UBUNTU, kernelRelease: '6.8.0-1020-raspi-realtime' }), [
+      unfixedKernel,
+    ]);
+    expect(findings).toEqual([
+      expect.objectContaining({
+        kind: 'running_kernel',
+        package: { name: 'linux-raspi-realtime', version: '6.8.0-1020-raspi-realtime' },
+        unfixed: true,
+        why: 'running kernel 6.8.0-1020-raspi-realtime matches the linux-raspi-realtime flavour with no fixed version yet (CVE-2021-47488)',
+      }),
+    ]);
+  });
+});
+
 describe('matchHost: RHEL', () => {
   const rhsa = (overrides: Partial<AdvisoryRecord> = {}) =>
     record({

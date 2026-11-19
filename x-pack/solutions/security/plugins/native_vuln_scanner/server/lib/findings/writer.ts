@@ -21,11 +21,24 @@ const HOST_BATCH = 1000;
  * on a reopen, where it restarts. Detection rules filter on `event.created >= <rule creation>`, so
  * the reset lets a finding first seen before the rule existed match again when it reopens. How
  * often that alerts depends on the license; see the README.
+ *
+ * Unfixed docs (no vendor fix yet) stay `unfixed`: they never alert and are not `new`. When a
+ * fix later ships, the incoming fixed doc reopens them (and resets `event.created`), so rules
+ * created in between can fire.
  */
 export const UPSERT_SCRIPT = `
 def prev = ctx._source.native_vuln_scanner;
 def firstSeen = prev == null ? params.doc.native_vuln_scanner.first_seen : prev.first_seen;
-def state = prev != null && prev.state == 'fixed' ? 'reopened' : 'active';
+def state;
+if (prev == null) {
+  state = params.doc.native_vuln_scanner.state;
+} else if (params.doc.native_vuln_scanner.unfixed == true) {
+  state = 'unfixed';
+} else if (prev.state == 'fixed' || prev.state == 'unfixed') {
+  state = 'reopened';
+} else {
+  state = 'active';
+}
 def created = state == 'reopened' || ctx._source.event == null ? params.doc.event.created : ctx._source.event.created;
 ctx._source.clear();
 ctx._source.putAll(params.doc);
@@ -46,6 +59,11 @@ export interface WriteFindingsParams {
   findings: readonly Finding[];
   now: string;
   runId: string;
+  /**
+   * Whether this run's feed included unfixed rows, per release. When false, unfixed docs are
+   * excluded from the fix pass: a run without unfixed rows must not mass-close them.
+   */
+  unfixedScanned: boolean;
   signal?: AbortSignal;
 }
 
@@ -94,7 +112,7 @@ const countFailures = (response: BulkResponse, failures: Record<string, number>)
  */
 export const writeFindings = async (
   es: ElasticsearchClient,
-  { hosts, findings, now, runId, signal }: WriteFindingsParams
+  { hosts, findings, now, runId, unfixedScanned, signal }: WriteFindingsParams
 ): Promise<WriteFindingsResult> => {
   const metaById = new Map(hosts.map((host) => [host.id, host]));
   const docs = new Map<string, FindingDoc>();
@@ -139,6 +157,7 @@ export const writeFindings = async (
             must_not: [
               { term: { 'native_vuln_scanner.state': 'fixed' } },
               { term: { 'native_vuln_scanner.run_id': runId } },
+              ...(unfixedScanned ? [] : [{ term: { 'native_vuln_scanner.unfixed': true } }]),
             ],
           },
         },

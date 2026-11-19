@@ -19,6 +19,8 @@ export interface ScanDeps {
   packRepository: ISavedObjectsRepository;
   logger: Logger;
   loadFeed?: (os: FeedOs, options: { signal: AbortSignal }) => Promise<LoadFeedResult>;
+  /** From kibana.yml: whether this run's feeds and findings include vendor-unfixed CVEs. */
+  includeUnfixed?: boolean;
   now?: () => Date;
 }
 
@@ -122,7 +124,14 @@ export const readInventory = async (
  * the end. Hosts of unmatched releases are left out of the write so their findings stay open.
  */
 export const runScan = async (
-  { es, packRepository, logger, loadFeed: load = loadFeed, now = () => new Date() }: ScanDeps,
+  {
+    es,
+    packRepository,
+    logger,
+    loadFeed: load = loadFeed,
+    includeUnfixed,
+    now = () => new Date(),
+  }: ScanDeps,
   { signal, runId }: { signal: AbortSignal; runId: string }
 ): Promise<ScanSummary> => {
   const summary: ScanSummary = {
@@ -178,6 +187,7 @@ export const runScan = async (
         findings,
         now: now().toISOString(),
         runId,
+        unfixedScanned: includeUnfixed ?? false,
         signal,
       });
       summary.releases[key] = 'matched';

@@ -18,19 +18,32 @@ export const MAX_FEED_BYTES = 64 * 1024 * 1024;
 /** Decompressed output cap; the download cap alone does not bound it. */
 export const MAX_DECOMPRESSED_FEED_BYTES = 512 * 1024 * 1024;
 
+/** The unpatched RHEL feed decompresses to about 658 MB; it gets a larger cap. */
+export const MAX_DECOMPRESSED_UNPATCHED_FEED_BYTES = 768 * 1024 * 1024;
+
 const UBUNTU_CODENAME = /^[a-z]+$/;
 const RHEL_MAJOR = /^[1-9]\d*$/;
+
+export interface FeedUrlOptions {
+  /** RHEL: use the feed that also carries unpatched (unfixed CVE) definitions. */
+  includeUnfixed?: boolean;
+}
 
 /**
  * Vendor OVAL feed for one OS release. The release comes from host-reported data, so it is
  * validated before it becomes part of a URL.
  */
-export const feedUrl = ({ family, version }: FeedOs): string => {
+export const feedUrl = (
+  { family, version }: FeedOs,
+  { includeUnfixed }: FeedUrlOptions = {}
+): string => {
   if (family === 'ubuntu' && UBUNTU_CODENAME.test(version)) {
     return `https://security-metadata.canonical.com/oval/com.ubuntu.${version}.cve.oval.xml.bz2`;
   }
   if (family === 'rhel' && RHEL_MAJOR.test(version)) {
-    return `https://security.access.redhat.com/data/oval/v2/RHEL${version}/rhel-${version}.oval.xml.bz2`;
+    return includeUnfixed
+      ? `https://security.access.redhat.com/data/oval/v2/RHEL${version}/rhel-${version}-including-unpatched.oval.xml.bz2`
+      : `https://security.access.redhat.com/data/oval/v2/RHEL${version}/rhel-${version}.oval.xml.bz2`;
   }
   throw new Error(`No advisory feed for ${family} ${version}`);
 };
@@ -58,13 +71,17 @@ export interface DownloadFeedOptions {
   fetchImpl?: typeof fetch;
   /** Sent as `If-None-Match`, so an unchanged feed costs no body. */
   etag?: string;
+  /** RHEL: fetch the feed that also carries unpatched (unfixed CVE) definitions. */
+  includeUnfixed?: boolean;
 }
 
 export interface LoadFeedOptions {
   signal?: AbortSignal;
   fetchImpl?: typeof fetch;
-  /** Overrides {@link MAX_DECOMPRESSED_FEED_BYTES}; for tests. */
+  /** Overrides the decompressed-bytes cap; for tests. */
   maxDecompressedBytes?: number;
+  /** RHEL: parse the feed that also carries unpatched (unfixed CVE) definitions. */
+  includeUnfixed?: boolean;
 }
 
 const tooLarge = (url: string, bytes: number): Error =>
@@ -115,9 +132,9 @@ const guardBlocks = function* (
 /** Downloads the compressed advisory feed for one OS release without parsing it. */
 export const downloadFeed = async (
   os: FeedOs,
-  { signal, fetchImpl = fetch, etag: knownEtag }: DownloadFeedOptions = {}
+  { signal, fetchImpl = fetch, etag: knownEtag, includeUnfixed }: DownloadFeedOptions = {}
 ): Promise<DownloadFeedResult> => {
-  const url = feedUrl(os);
+  const url = feedUrl(os, { includeUnfixed });
   const response = await fetchImpl(url, {
     signal,
     headers: knownEtag ? { 'if-none-match': knownEtag } : undefined,
@@ -148,31 +165,40 @@ export const downloadFeed = async (
 export const parseFeedBody = async (
   os: FeedOs,
   body: Uint8Array,
-  { signal, maxDecompressedBytes }: Pick<LoadFeedOptions, 'signal' | 'maxDecompressedBytes'> = {}
+  {
+    signal,
+    maxDecompressedBytes,
+    includeUnfixed,
+  }: Pick<LoadFeedOptions, 'signal' | 'maxDecompressedBytes' | 'includeUnfixed'> = {}
 ): Promise<FeedParseResult> => {
   const blocks = guardBlocks(
     bunzip2Blocks(body),
-    feedUrl(os),
+    feedUrl(os, { includeUnfixed }),
     signal,
-    maxDecompressedBytes ?? MAX_DECOMPRESSED_FEED_BYTES
+    maxDecompressedBytes ??
+      (os.family === 'rhel' && includeUnfixed
+        ? MAX_DECOMPRESSED_UNPATCHED_FEED_BYTES
+        : MAX_DECOMPRESSED_FEED_BYTES)
   );
   return os.family === 'ubuntu'
-    ? parseUbuntuOval(blocks, { release: os.version })
-    : parseRhelOval(blocks, { major: os.version });
+    ? parseUbuntuOval(blocks, { release: os.version, includeUnfixed })
+    : parseRhelOval(blocks, { major: os.version, includeUnfixed });
 };
 
 /** Downloads, decompresses and parses the advisory feed for one OS release. */
 export const loadFeed = async (
   os: FeedOs,
-  { signal, fetchImpl, maxDecompressedBytes }: LoadFeedOptions = {}
+  { signal, fetchImpl, maxDecompressedBytes, includeUnfixed }: LoadFeedOptions = {}
 ): Promise<LoadFeedResult> => {
-  const downloaded = await downloadFeed(os, { signal, fetchImpl });
+  const downloaded = await downloadFeed(os, { signal, fetchImpl, includeUnfixed });
   if (downloaded.status === 'unavailable') return downloaded;
   // No etag is sent here, so a 304 can only come from a misbehaving server.
   if (downloaded.status === 'not_modified') {
-    throw new Error(`Advisory feed ${feedUrl(os)} answered 304 to an unconditional request`);
+    throw new Error(
+      `Advisory feed ${feedUrl(os, { includeUnfixed })} answered 304 to an unconditional request`
+    );
   }
   const { body, etag, lastModified } = downloaded;
-  const feed = await parseFeedBody(os, body, { signal, maxDecompressedBytes });
+  const feed = await parseFeedBody(os, body, { signal, maxDecompressedBytes, includeUnfixed });
   return { status: 'ok', feed, etag, lastModified };
 };

@@ -34,11 +34,14 @@ import type { AdvisoryCve, AdvisoryRecord, FeedParseResult } from './types';
  */
 
 type UbuntuLeaf =
-  | { type: 'package'; source: string; testRef: string }
-  | { type: 'kernel'; flavour: string; testRef: string };
+  | { type: 'package'; source: string; testRef: string; unfixed?: true }
+  | { type: 'kernel'; flavour: string; testRef: string }
+  | { type: 'kernel_presence'; flavour: string; testRef: string };
 
 interface UbuntuCondition {
   testRef: string;
+  /** Parsed from "Is kernel 'X' running?" so kernel-only branches keep the flavour name. */
+  flavour?: string;
 }
 
 interface PendingDefinition {
@@ -51,18 +54,20 @@ interface PendingDefinition {
 }
 
 const FIXED_PACKAGE = /^(\S+) source package in ([^,]+), is affected and has been fixed\b/;
-const MIGHT_BE_AFFECTED = /^\S+ source package in [^,]+, might be affected\b/;
+const MIGHT_BE_AFFECTED = /^(\S+) source package in ([^,]+), might be affected\b/;
 const KERNEL_RUNNING = /^Is kernel '([^']+)' running\?$/;
 const KERNEL_FIXED = /^'([^']+)' kernel in \S+ was vulnerable but has been fixed\b/;
 
 export interface ParseUbuntuOvalOptions {
   /** Release codename, e.g. `noble`. Criteria for other pockets (`esm-apps/noble`) are skipped. */
   release: string;
+  /** Parse "might be affected" and kernel-flavour-only criteria into unfixed records. */
+  includeUnfixed?: boolean;
 }
 
 export const parseUbuntuOval = async (
   input: OvalInput,
-  { release }: ParseUbuntuOvalOptions
+  { release, includeUnfixed }: ParseUbuntuOvalOptions
 ): Promise<FeedParseResult> => {
   const skipped: Record<string, number> = {};
   const pending: PendingDefinition[] = [];
@@ -88,13 +93,23 @@ export const parseUbuntuOval = async (
       if (!testRef) return { kind: 'false', reason: 'missing_test_ref' };
       return { kind: 'leaf', leaf: { type: 'package', source: fixed[1], testRef } };
     }
-    if (MIGHT_BE_AFFECTED.test(comment)) return { kind: 'false', reason: 'might_be_affected' };
+    if (MIGHT_BE_AFFECTED.test(comment)) {
+      const might = comment.match(MIGHT_BE_AFFECTED);
+      if (!includeUnfixed || !might || !testRef || might[2] !== release) {
+        return { kind: 'false', reason: 'might_be_affected' };
+      }
+      return { kind: 'leaf', leaf: { type: 'package', source: might[1], testRef, unfixed: true } };
+    }
     const kernelFixed = comment.match(KERNEL_FIXED);
     if (kernelFixed && testRef) {
       return { kind: 'leaf', leaf: { type: 'kernel', flavour: kernelFixed[1], testRef } };
     }
-    if (KERNEL_RUNNING.test(comment) && testRef)
-      return { kind: 'condition', condition: { testRef } };
+    if (KERNEL_RUNNING.test(comment) && testRef) {
+      return {
+        kind: 'condition',
+        condition: { testRef, flavour: comment.match(KERNEL_RUNNING)?.[1] },
+      };
+    }
     return { kind: 'false', reason: 'unrecognised_criterion' };
   };
 
@@ -122,11 +137,54 @@ export const parseUbuntuOval = async (
       countInto(skipped, `criteria_${e.reason}`);
       return;
     }
+    // Kernel-only branches ("Is kernel 'X' running?" alone) carry no leaf: groupByLeaf reports
+    // them as `unfixed_kernel` skips. When includeUnfixed is on, the first flavour-ful
+    // condition of each such branch becomes a presence record below, so claim those branches
+    // here to keep the skip ledger from counting rows that do become records.
+    const isKernelOnly = (conjunction: Conjunction<UbuntuLeaf, UbuntuCondition>): boolean =>
+      conjunction.every((atom) => atom.kind === 'condition');
+    const claimableKernelRefs = new Set<string>();
+    if (includeUnfixed) {
+      for (const conjunction of conjunctions) {
+        if (!isKernelOnly(conjunction)) continue;
+        for (const atom of conjunction) {
+          if (atom.kind !== 'condition') continue;
+          const { flavour, testRef } = atom.condition;
+          if (flavour && !claimableKernelRefs.has(testRef)) claimableKernelRefs.add(testRef);
+        }
+      }
+    }
     const grouped = groupByLeaf(
-      conjunctions,
+      conjunctions.filter(
+        (c) =>
+          !isKernelOnly(c) ||
+          !c.some(
+            (atom) => atom.kind === 'condition' && claimableKernelRefs.has(atom.condition.testRef)
+          )
+      ),
       (leaf) => leaf.testRef,
       (reason) => countInto(skipped, reason === 'no_leaf' ? 'unfixed_kernel' : reason)
     );
+    if (includeUnfixed) {
+      const synthesized = new Map<string, { leaf: UbuntuLeaf; conditions: UbuntuCondition[][] }>();
+      for (const conjunction of conjunctions) {
+        if (!isKernelOnly(conjunction)) continue;
+        for (const atom of conjunction) {
+          if (atom.kind !== 'condition') continue;
+          const { flavour, testRef } = atom.condition;
+          if (!flavour || synthesized.has(testRef)) continue;
+          synthesized.set(testRef, {
+            leaf: {
+              type: 'kernel_presence',
+              flavour,
+              testRef,
+            },
+            conditions: [],
+          });
+        }
+      }
+      grouped.push(...synthesized.values());
+    }
     if (grouped.length === 0) return;
 
     const { attrs } = cveNode;
@@ -229,6 +287,61 @@ export const parseUbuntuOval = async (
     for (const { leaf, conditions } of def.leaves) {
       const test = tests.get(leaf.testRef);
       const fixed = lessThanState(test?.stateRef);
+      if (leaf.type === 'package' && leaf.unfixed) {
+        // "might be affected" tests carry no fixed-version state; any installed binary matches.
+        const variable = variableFor(leaf.testRef);
+        if (!variable || variable.values.length === 0) {
+          countInto(skipped, 'unresolved_binaries');
+          continue;
+        }
+        records.push({
+          advisory: {
+            id: def.cve.id,
+            source: 'ubuntu',
+            definition_id: def.id,
+            title: def.title,
+            url: def.cve.url,
+            severity: def.severity,
+            published: def.published,
+          },
+          os,
+          kind: 'package',
+          package: { name: leaf.source, binaries: variable.values },
+          unfixed: true,
+          vendor_reason: 'might be affected',
+          cves: [def.cve],
+          conditions: [],
+          feed: { snapshot_time: snapshotTime },
+        });
+        continue;
+      }
+      if (leaf.type === 'kernel_presence') {
+        const pattern = kernelPattern(leaf.testRef);
+        if (!pattern) {
+          countInto(skipped, 'unresolved_kernel_condition');
+          continue;
+        }
+        records.push({
+          advisory: {
+            id: def.cve.id,
+            source: 'ubuntu',
+            definition_id: def.id,
+            title: def.title,
+            url: def.cve.url,
+            severity: def.severity,
+            published: def.published,
+          },
+          os,
+          kind: 'running_kernel',
+          package: { name: leaf.flavour },
+          unfixed: true,
+          vendor_reason: 'might be affected',
+          cves: [def.cve],
+          conditions: [[{ type: 'kernel_release_matches', pattern }]],
+          feed: { snapshot_time: snapshotTime },
+        });
+        continue;
+      }
       if (!test || !fixed) {
         countInto(skipped, 'unresolved_fixed_version');
         continue;

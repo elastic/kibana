@@ -106,6 +106,28 @@ column on the findings page.
 `native_vuln_scanner.first_seen` never changes, so "First found" in the flyout stays at the
 original sighting.
 
+### Unfixed findings
+
+```yaml
+xpack.nativeVulnScanner.includeUnfixed: true
+```
+
+With `includeUnfixed` (off by default) the scanner also reports CVEs that affect an installed
+package but have no fixed version yet: Red Hat's unpatched feed (`oval:com.redhat.cve`
+definitions) and Ubuntu's "might be affected" and kernel-flavour-only criteria. Such findings
+carry no `package.fixed_version`, are marked `native_vuln_scanner.unfixed: true` and carry the
+vendor's own wording in `native_vuln_scanner.vendor_reason` (Red Hat resolution states verbatim,
+e.g. "Will not fix" or "Affected"; Ubuntu says "might be affected").
+
+An unfixed finding is `unfixed` from its first sighting: it is never `new` or `reopened` while no
+fix exists, and it never alerts — detection rules created from findings exclude
+`native_vuln_scanner.unfixed: true` (rules created before this exclusion keep the old query until
+recreated). When the vendor later ships a fix, the next scan that matches it reopens the finding
+and resets `event.created`, so rules alert from then on.
+
+The fix pass only closes unfixed findings when the run's feed included unfixed rows
+(`includeUnfixed: true`); a run without them leaves unfixed findings open.
+
 ## Agent runtime requirement
 
 Elastic Agents 9.7+ route agent inputs through the OTel collector runtime by default, and that

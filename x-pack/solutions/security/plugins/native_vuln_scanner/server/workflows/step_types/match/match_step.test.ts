@@ -152,7 +152,12 @@ describe('native_vuln.match handler', () => {
     it('parses the feed bytes the fetch step left on this node', async () => {
       const parsed = { records: [] } as never;
       parseMock.mockResolvedValue(parsed);
-      setCachedFeed('ubuntu:noble', { etag: '"e"', lastModified: 'lm', body: new Uint8Array(2) });
+      setCachedFeed('ubuntu:noble', {
+        etag: '"e"',
+        lastModified: 'lm',
+        body: new Uint8Array(2),
+        includeUnfixed: false,
+      });
 
       const result = await load({ feeds: [{ release: 'ubuntu:noble', status: 'downloaded' }] });
 
@@ -165,7 +170,10 @@ describe('native_vuln.match handler', () => {
 
       await load({ feeds: [{ release: 'ubuntu:noble', status: 'downloaded' }] });
 
-      expect(loadFeedMock).toHaveBeenCalledWith(noble, { signal: expect.any(AbortSignal) });
+      expect(loadFeedMock).toHaveBeenCalledWith(noble, {
+        signal: expect.any(AbortSignal),
+        includeUnfixed: false,
+      });
     });
   });
 

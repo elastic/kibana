@@ -31,7 +31,7 @@ const okBulk = (count: number): BulkResponse => ({
   items: Array.from({ length: count }, () => ({ update: { _index: FINDINGS_INDEX, status: 200 } })),
 });
 
-const PARAMS = { now: '2026-11-13T10:00:00.000Z', runId: 'run-1' };
+const PARAMS = { now: '2026-11-13T10:00:00.000Z', runId: 'run-1', unfixedScanned: false };
 
 describe('writeFindings', () => {
   let es: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -64,6 +64,7 @@ describe('writeFindings', () => {
           must_not: [
             { term: { 'native_vuln_scanner.state': 'fixed' } },
             { term: { 'native_vuln_scanner.run_id': 'run-1' } },
+            { term: { 'native_vuln_scanner.unfixed': true } },
           ],
         },
       },
@@ -131,5 +132,64 @@ describe('writeFindings', () => {
     expect(es.bulk).toHaveBeenCalledTimes(2);
     expect(es.updateByQuery).toHaveBeenCalledTimes(2);
     expect(result).toMatchObject({ written: 501, fixed: 4 });
+  });
+
+  describe('unfixed findings', () => {
+    const unfixed = (hostId: string, cveId: string): Finding => ({
+      hostId,
+      cve: { id: cveId },
+      kind: 'package',
+      package: { name: 'tar', version: '1.34' },
+      unfixed: true,
+      vendorReason: 'Will not fix',
+      scheme: 'rpm',
+      advisories: [],
+      why: 'tar 1.34 is installed with no fixed version yet (CVE-2005-2541)',
+    });
+
+    it('excludes unfixed docs from the fix pass when the run scanned no unfixed rows', async () => {
+      await writeFindings(es, {
+        ...PARAMS,
+        unfixedScanned: false,
+        hosts: [host('h1')],
+        findings: [unfixed('h1', 'CVE-9')],
+      });
+
+      const [fixRequest] = es.updateByQuery.mock.calls[0];
+      expect(fixRequest?.query?.bool?.must_not).toContainEqual({
+        term: { 'native_vuln_scanner.unfixed': true },
+      });
+    });
+
+    it('may fix unfixed docs when the run scanned unfixed rows', async () => {
+      await writeFindings(es, {
+        ...PARAMS,
+        unfixedScanned: true,
+        hosts: [host('h1')],
+        findings: [unfixed('h1', 'CVE-9')],
+      });
+
+      const [fixRequest] = es.updateByQuery.mock.calls[0];
+      expect(fixRequest?.query?.bool?.must_not).not.toContainEqual({
+        term: { 'native_vuln_scanner.unfixed': true },
+      });
+    });
+
+    it('upserts an unfixed doc with the unfixed state and script handling', async () => {
+      await writeFindings(es, {
+        ...PARAMS,
+        hosts: [host('h1')],
+        findings: [unfixed('h1', 'CVE-9')],
+      });
+
+      const [operation, upsert] = es.bulk.mock.calls[0][0].operations ?? [];
+      expect(operation).toMatchObject({ update: { _index: FINDINGS_INDEX } });
+      expect(upsert).toMatchObject({
+        upsert: {
+          vulnerability: { id: 'CVE-9' },
+          native_vuln_scanner: { state: 'unfixed', unfixed: true },
+        },
+      });
+    });
   });
 });

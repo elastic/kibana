@@ -37,7 +37,11 @@ export interface Finding {
   kind: AdvisoryRecord['kind'];
   package: InstalledPackage;
   /** Lowest fixed version across every advisory that matched this CVE and package. */
-  fixedVersion: string;
+  fixedVersion?: string;
+  /** The vendor has not fixed this yet; set instead of `fixedVersion`. */
+  unfixed?: true;
+  /** The vendor's own wording, e.g. "Fix deferred" or "might be affected". */
+  vendorReason?: string;
   scheme: VersionScheme;
   advisories: MatchedAdvisory[];
   /** Human-readable reason for the lowest-fix match. */

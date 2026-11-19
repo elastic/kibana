@@ -73,12 +73,16 @@ describe('native_vuln.fetch_feed handler', () => {
       ],
     });
     expect(downloadMock).toHaveBeenCalledTimes(2);
-    expect(getCachedFeed('ubuntu:noble')?.etag).toBe('"ubuntu"');
+    expect(getCachedFeed('ubuntu:noble', false)?.etag).toBe('"ubuntu"');
     expect(JSON.stringify(result.output)).not.toContain('records');
   });
 
   it('sends the cached etag and reuses the cached bytes on a 304', async () => {
-    setCachedFeed('ubuntu:noble', { etag: '"old"', body: new Uint8Array(7) });
+    setCachedFeed('ubuntu:noble', {
+      etag: '"old"',
+      body: new Uint8Array(7),
+      includeUnfixed: false,
+    });
     inventoryMock.mockResolvedValue(snapshot([ubuntuHost]));
     downloadMock.mockResolvedValue({ status: 'not_modified', etag: '"old"' });
 
@@ -87,6 +91,7 @@ describe('native_vuln.fetch_feed handler', () => {
     expect(downloadMock).toHaveBeenCalledWith(ubuntuHost.inventory.os, {
       signal: expect.any(AbortSignal),
       etag: '"old"',
+      includeUnfixed: false,
     });
     expect(result.output).toEqual(
       expect.objectContaining({
@@ -118,7 +123,7 @@ describe('native_vuln.fetch_feed handler', () => {
       })
     );
     expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('ubuntu:noble'));
-    expect(getCachedFeed('ubuntu:noble')).toBeUndefined();
+    expect(getCachedFeed('ubuntu:noble', false)).toBeUndefined();
   });
 
   it('fails a 304 that has no cached feed behind it', async () => {

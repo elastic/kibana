@@ -14,5 +14,7 @@ export interface StepDeps {
   getScanDeps: () => Promise<{ es: ElasticsearchClient; packRepository: ISavedObjectsRepository }>;
   /** Resolved lazily: the licence only exists after the licensing plugin starts. */
   getLicense: () => Promise<ILicense>;
+  /** From kibana.yml: include vendor-unfixed CVEs in feeds and findings. */
+  includeUnfixed: boolean;
   now?: () => Date;
 }

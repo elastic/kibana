@@ -15,6 +15,8 @@ interface OsIndex {
   kernels: AdvisoryRecord[];
   /** Package names each RHEL definition lists, so srpm expansion never overrides an explicit row. */
   namesByDefinition: Map<string, Set<string>>;
+  /** `${cve.id}\u0000${name}` of every fixed row: a fix supersedes an unfixed presence row. */
+  fixedCveNames: Set<string>;
 }
 
 export interface AdvisoryIndex {
@@ -41,14 +43,25 @@ export const buildAdvisoryIndex = (records: readonly AdvisoryRecord[]): Advisory
     const key = osKey(record.os);
     let os = byOs.get(key);
     if (!os) {
-      os = { byPackage: new Map(), kernels: [], namesByDefinition: new Map() };
+      os = {
+        byPackage: new Map(),
+        kernels: [],
+        namesByDefinition: new Map(),
+        fixedCveNames: new Set(),
+      };
       byOs.set(key, os);
     }
     if (record.kind === 'running_kernel') {
       os.kernels.push(record);
+      if (!record.unfixed)
+        os.fixedCveNames.add(`${record.cves[0]?.id ?? ''}\u0000${record.package.name}`);
       continue;
     }
     const names = record.package.binaries ?? [record.package.name];
+    if (!record.unfixed) {
+      for (const cve of record.cves)
+        for (const name of names) os.fixedCveNames.add(`${cve.id}\u0000${name}`);
+    }
     for (const name of names) pushTo(os.byPackage, name, record);
     const listed = os.namesByDefinition.get(record.advisory.definition_id) ?? new Set<string>();
     for (const name of names) listed.add(name);
@@ -181,7 +194,9 @@ export const sourceRpmName = (source: string): string =>
   source.replace(/-[^-]+-[^-]+\.src\.rpm$/, '');
 
 const compareFor = (record: AdvisoryRecord): ((a: string, b: string) => Ordering) =>
-  record.fixed_version.scheme === 'dpkg' ? compareDpkg : compareRpm;
+  (record.fixed_version?.scheme ?? (record.os.family === 'ubuntu' ? 'dpkg' : 'rpm')) === 'dpkg'
+    ? compareDpkg
+    : compareRpm;
 
 interface Hit {
   record: AdvisoryRecord;
@@ -193,7 +208,7 @@ interface Hit {
 const collect = (hostId: string, hits: readonly Hit[]): Finding[] => {
   const findings = new Map<string, Finding>();
   for (const { record, pkg, why } of hits) {
-    const compare = compareFor(record);
+    const compare = record.fixed_version ? compareFor(record) : undefined;
     for (const cve of record.cves) {
       const key = JSON.stringify([cve.id, pkg.name, pkg.arch ?? '', pkg.version]);
       const existing = findings.get(key);
@@ -205,15 +220,21 @@ const collect = (hostId: string, hits: readonly Hit[]): Finding[] => {
         url: record.advisory.url,
         severity: record.advisory.severity,
       };
-      const order = existing ? compare(record.fixed_version.raw, existing.fixedVersion) : -1;
+      // Unfixed never wins against a fixed hit: `order < 0` only via a real fixed version.
+      const order =
+        existing === undefined || !compare || !record.fixed_version
+          ? -1
+          : compare(record.fixed_version.raw, existing.fixedVersion ?? '');
       if (order < 0) {
         findings.set(key, {
           hostId,
           cve,
           kind: record.kind,
           package: pkg,
-          fixedVersion: record.fixed_version.raw,
-          scheme: record.fixed_version.scheme,
+          ...(record.unfixed
+            ? { unfixed: true as const, vendorReason: record.vendor_reason }
+            : { fixedVersion: record.fixed_version?.raw }),
+          scheme: record.fixed_version?.scheme ?? (record.os.family === 'ubuntu' ? 'dpkg' : 'rpm'),
           advisories: [advisory],
           why,
           feedSnapshotTime: record.feed.snapshot_time,
@@ -241,10 +262,21 @@ const matchKernels = (os: OsIndex, host: HostInventory, hits: Hit[], stats?: Mat
     return;
   }
   for (const record of os.kernels) {
+    if (record.unfixed) {
+      const alternative = satisfiedAlternative(record, host, stats);
+      if (!Array.isArray(alternative)) continue;
+      hits.push({
+        record,
+        pkg: { name: record.package.name, version: kernelRelease },
+        why: `running kernel ${kernelRelease} matches the ${record.package.name} flavour with no fixed version yet (${record.advisory.id})`,
+      });
+      continue;
+    }
     const capture = record.package.release_version;
-    if (!capture) continue;
+    if (!capture || !record.fixed_version) continue;
+    const fixedRaw = record.fixed_version.raw;
     const running = ubuntuKernelVersion(capture, kernelRelease, stats);
-    if (running === undefined || compareFor(record)(running, record.fixed_version.raw) >= 0) {
+    if (running === undefined || compareFor(record)(running, fixedRaw) >= 0) {
       continue;
     }
     const alternative = satisfiedAlternative(record, host, stats);
@@ -252,9 +284,9 @@ const matchKernels = (os: OsIndex, host: HostInventory, hits: Hit[], stats?: Mat
     hits.push({
       record,
       pkg: { name: record.package.name, version: running },
-      why: `running kernel ${kernelRelease} (${running}) is earlier than ${
-        record.fixed_version.raw
-      } (${record.advisory.id}${conditionSuffix(alternative, host)})`,
+      why: `running kernel ${kernelRelease} (${running}) is earlier than ${fixedRaw} (${
+        record.advisory.id
+      }${conditionSuffix(alternative, host)})`,
     });
   }
 };
@@ -283,8 +315,25 @@ export const matchHost = (
   for (const pkg of host.packages) {
     for (const record of os.byPackage.get(pkg.name) ?? []) {
       if (!archMatches(record.package.arch, pkg.arch, stats)) continue;
+      if (record.unfixed) {
+        // A fixed row for the same CVE+package supersedes the presence row entirely, so a
+        // patched install never becomes an unfixed finding.
+        if (record.cves.some((cve) => os.fixedCveNames.has(`${cve.id}\u0000${pkg.name}`))) continue;
+        const alternative = satisfiedAlternative(record, host, stats);
+        if (!Array.isArray(alternative)) continue;
+        hits.push({
+          record,
+          pkg,
+          why: `${pkg.name} ${pkg.version} is installed with no fixed version yet (${
+            record.advisory.id
+          }${conditionSuffix(alternative, host)})`,
+        });
+        continue;
+      }
+      const fixedRaw = record.fixed_version?.raw;
+      if (fixedRaw === undefined) continue;
       const compare = compareFor(record);
-      if (compare(pkg.version, record.fixed_version.raw) >= 0) continue;
+      if (compare(pkg.version, fixedRaw) >= 0) continue;
       const alternative = satisfiedAlternative(record, host, stats);
       if (!Array.isArray(alternative)) continue;
 
@@ -293,7 +342,7 @@ export const matchHost = (
       hits.push({
         record,
         pkg,
-        why: `${pkg.name} ${pkg.version} is earlier than ${record.fixed_version.raw} (${record.advisory.id}${via}${suffix})`,
+        why: `${pkg.name} ${pkg.version} is earlier than ${fixedRaw} (${record.advisory.id}${via}${suffix})`,
       });
 
       // RHEL errata can list only some binaries of a source rpm; extend the hit to the
@@ -304,11 +353,11 @@ export const matchHost = (
       for (const sibling of siblingsBySource.get(source) ?? []) {
         if (sibling === pkg || listed?.has(sibling.name)) continue;
         if (!archMatches(record.package.arch, sibling.arch, stats)) continue;
-        if (compare(sibling.version, record.fixed_version.raw) >= 0) continue;
+        if (compare(sibling.version, fixedRaw) >= 0) continue;
         hits.push({
           record,
           pkg: sibling,
-          why: `${sibling.name} ${sibling.version} is earlier than ${record.fixed_version.raw} (${record.advisory.id}; built from source rpm ${source} like ${pkg.name}${suffix})`,
+          why: `${sibling.name} ${sibling.version} is earlier than ${fixedRaw} (${record.advisory.id}; built from source rpm ${source} like ${pkg.name}${suffix})`,
         });
       }
     }

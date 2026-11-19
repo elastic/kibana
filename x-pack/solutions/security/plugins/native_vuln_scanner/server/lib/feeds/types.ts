@@ -51,9 +51,11 @@ export interface ReleaseVersionCapture {
 }
 
 /**
- * One "affected if installed < fixed" row. A host is affected when the installed version of
- * `package.name` (or of any `package.binaries` entry) sorts before `fixed_version`, and either
- * `conditions` is empty or every condition of at least one alternative holds (OR of ANDs).
+ * One advisory row. A host is affected when the installed version of `package.name` (or of any
+ * `package.binaries` entry) sorts before `fixed_version`, and either `conditions` is empty or
+ * every condition of at least one alternative holds (OR of ANDs). When `unfixed` is set there is
+ * no fixed version yet: any installed version is affected (for `running_kernel` kind: when the
+ * running kernel matches the flavour pattern).
  */
 export interface AdvisoryRecord {
   advisory: {
@@ -74,7 +76,12 @@ export interface AdvisoryRecord {
     arch?: ArchConstraint;
     release_version?: ReleaseVersionCapture;
   };
-  fixed_version: { raw: string; scheme: VersionScheme; key?: string };
+  /** Absent when `unfixed`: the vendor has shipped no fixed version yet. */
+  fixed_version?: { raw: string; scheme: VersionScheme; key?: string };
+  /** The vendor has not fixed this yet; the record matches any installed version. */
+  unfixed?: true;
+  /** The vendor's own wording, e.g. "Fix deferred" or "might be affected". */
+  vendor_reason?: string;
   cves: AdvisoryCve[];
   conditions: AdvisoryCondition[][];
   feed: { snapshot_time?: string };

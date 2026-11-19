@@ -32,6 +32,7 @@ export const buildDeps = (overrides: Partial<StepDeps> = {}) => {
     getLicense: jest.fn(async () =>
       licenseMock.createLicense({ license: { type: 'enterprise', mode: 'enterprise' } })
     ),
+    includeUnfixed: false,
     now: () => new Date('2026-11-13T01:00:00.000Z'),
     ...overrides,
   };

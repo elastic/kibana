@@ -46,7 +46,8 @@ export interface FindingDoc {
   package: {
     name: string;
     version: string;
-    fixed_version: string;
+    /** Absent on unfixed findings: the vendor has shipped no fix yet. */
+    fixed_version?: string;
     architecture?: string;
     type: 'deb' | 'rpm';
   };
@@ -79,6 +80,9 @@ export interface FindingDoc {
     feed_snapshot_time?: string;
     source_package?: string;
     advisories: Finding['advisories'];
+    /** Set while the vendor has not fixed the CVE; such findings never alert. */
+    unfixed?: boolean;
+    vendor_reason?: string;
   };
 }
 
@@ -178,7 +182,7 @@ export const toFindingDoc = (
     package: {
       name: pkg.name,
       version: pkg.version,
-      fixed_version: finding.fixedVersion,
+      ...(finding.fixedVersion ? { fixed_version: finding.fixedVersion } : {}),
       ...(pkg.arch ? { architecture: pkg.arch } : {}),
       type: finding.scheme === 'dpkg' ? 'deb' : 'rpm',
     },
@@ -212,13 +216,15 @@ export const toFindingDoc = (
       kind: finding.kind,
       scheme: finding.scheme,
       confidence: 'confirmed',
-      state: 'new',
+      state: finding.unfixed ? 'unfixed' : 'new',
       run_id: runId,
       why: finding.why,
       first_seen: now,
       last_seen: now,
       ...(finding.feedSnapshotTime ? { feed_snapshot_time: finding.feedSnapshotTime } : {}),
       ...(pkg.source ? { source_package: pkg.source } : {}),
+      ...(finding.unfixed ? { unfixed: true } : {}),
+      ...(finding.vendorReason ? { vendor_reason: finding.vendorReason } : {}),
       advisories,
     },
   };

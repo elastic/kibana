@@ -27,4 +27,4 @@ export const FINDINGS_DATASET = 'native_vuln_scanner.vulnerability';
 
 export const FINDINGS_VENDOR = 'Elastic native scanner';
 
-export type FindingState = 'new' | 'active' | 'fixed' | 'reopened';
+export type FindingState = 'new' | 'active' | 'fixed' | 'reopened' | 'unfixed';

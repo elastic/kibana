@@ -111,7 +111,13 @@ describe('findings writer', () => {
 
   it('tracks a finding through new, active, fixed and reopened', async () => {
     const write = (minute: number, findings: Finding[]) =>
-      writeFindings(kibana, { hosts: [HOST], findings, now: at(minute), runId: `run-${minute}` });
+      writeFindings(kibana, {
+        hosts: [HOST],
+        findings,
+        now: at(minute),
+        runId: `run-${minute}`,
+        unfixedScanned: false,
+      });
 
     expect(await write(0, [finding('CVE-2026-1'), finding('CVE-2026-2')])).toEqual({
       written: 2,
@@ -175,6 +181,7 @@ describe('findings writer', () => {
       findings: [{ ...finding('CVE-2026-9'), hostId: 'h2' }],
       now: at(3),
       runId: 'run-3',
+      unfixedScanned: false,
     });
 
     const result = await writeFindings(kibana, {
@@ -182,6 +189,7 @@ describe('findings writer', () => {
       findings: [],
       now: at(4),
       runId: 'run-4',
+      unfixedScanned: false,
     });
 
     expect(result.fixed).toBe(2);
@@ -211,6 +219,7 @@ describe('findings writer', () => {
       findings: [{ ...stored, hostId: other.id }],
       now: at(8),
       runId: 'run-8',
+      unfixedScanned: false,
     });
 
     expect(result).toEqual({ written: 1, fixed: 0, fixSkipped: 0, failures: {} });

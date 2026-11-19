@@ -65,7 +65,8 @@ export const findingsMappings: MappingTypeMapping = {
     native_vuln_scanner: {
       properties: {
         ...keywords('finding_id', 'kind', 'scheme', 'confidence', 'state', 'run_id'),
-        ...keywords('source_package'),
+        ...keywords('source_package', 'vendor_reason'),
+        unfixed: { type: 'boolean' },
         why: { type: 'text' },
         first_seen: date,
         last_seen: date,
