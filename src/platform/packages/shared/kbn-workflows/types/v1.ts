@@ -644,6 +644,8 @@ export interface ConnectorTypeInfo {
   enabledInLicense: boolean;
   minimumLicenseRequired: string;
   subActions: ConnectorSubAction[];
+  /** The type only receives inbound events: it has no actions to run in a workflow step. */
+  isInboundOnly?: boolean;
 }
 
 export type CompletionFn = () => Promise<

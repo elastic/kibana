@@ -359,6 +359,31 @@ describe('getAvailableConnectors', () => {
     ]);
   });
 
+  it('flags a type whose spec only receives inbound events', async () => {
+    const actionsClientWithRequest = {
+      listTypes: jest
+        .fn()
+        .mockResolvedValue([
+          mockActionType({ id: '.inbound_only', name: 'Inbound only' }),
+          mockActionType({ id: '.dual', name: 'Dual' }),
+        ]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue({ getAll: jest.fn().mockResolvedValue([]) }),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [
+        mockSpecSummary({ id: '.inbound_only', hasInboundEvents: true, isInboundOnly: true }),
+        mockSpecSummary({ id: '.dual', hasInboundEvents: true, isInboundOnly: false }),
+      ],
+      spaceId: 'default',
+      request,
+    });
+
+    expect(result.connectorTypes['.inbound_only'].isInboundOnly).toBe(true);
+    expect(result.connectorTypes['.dual'].isInboundOnly).toBeUndefined();
+  });
+
   it('keeps the built-in sub-actions of a type that has no spec', async () => {
     const actionsClientWithRequest = {
       listTypes: jest

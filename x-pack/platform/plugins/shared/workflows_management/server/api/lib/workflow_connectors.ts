@@ -44,6 +44,7 @@ const toConnectorTypeInfo = (
     enabledInLicense: actionType.enabledInLicense,
     minimumLicenseRequired: actionType.minimumLicenseRequired,
     ...(subActions && { subActions }),
+    ...(specSummary?.isInboundOnly && { isInboundOnly: true }),
   };
 };
 

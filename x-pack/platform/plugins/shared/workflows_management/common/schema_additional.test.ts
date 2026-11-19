@@ -313,10 +313,25 @@ describe('schema - additional coverage', () => {
         '.inboundWebhook': createMockConnectorTypeInfo({
           actionTypeId: '.inboundWebhook',
           displayName: 'Inbound Webhook',
+          isInboundOnly: true,
         }),
       };
 
       expect(convertDynamicConnectorsToContracts(types)).toEqual([]);
+    });
+
+    it('should keep a connector type that is not flagged as inbound-only', () => {
+      const types = {
+        '.catalog_only': createMockConnectorTypeInfo({
+          actionTypeId: '.catalog_only',
+          displayName: 'Catalog only',
+          subActions: [{ name: 'list_items', displayName: 'List Items' }],
+        }),
+      };
+
+      expect(convertDynamicConnectorsToContracts(types).map((contract) => contract.type)).toEqual([
+        'catalog_only.list_items',
+      ]);
     });
 
     it('should skip disabled connectors', () => {

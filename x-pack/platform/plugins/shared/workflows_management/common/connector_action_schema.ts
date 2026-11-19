@@ -15,7 +15,7 @@ import {
   XSOARRunActionParamsSchema,
   XSOARRunActionResponseSchema,
 } from '@kbn/connector-schemas/xsoar';
-import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
+import { connectorsSpecs } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
 import {
@@ -142,12 +142,6 @@ export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSc
       ])
     ),
   ])
-);
-
-export const inboundOnlyConnectorTypeIds = new Set(
-  Object.values(connectorsSpecs)
-    .filter(isInboundOnlyConnectorSpec)
-    .map((spec) => spec.metadata.id)
 );
 
 export const ConnectorInputSchemas = new Map<string, z.ZodSchema>([

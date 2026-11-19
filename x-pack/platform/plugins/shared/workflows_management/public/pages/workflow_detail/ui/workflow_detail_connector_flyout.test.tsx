@@ -10,6 +10,7 @@ import React from 'react';
 import { monaco } from '@kbn/monaco';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
+import { createMockConnectorTypeInfo } from '../../../../common/mocks/connector_type_info';
 import {
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
@@ -21,6 +22,7 @@ import { TestWrapper } from '../../../shared/test_utils';
 const mockUseKibana = jest.fn();
 const mockUseAsyncThunk = jest.fn();
 const mockUseFetchConnector = jest.fn();
+const mockUseAvailableConnectors = jest.fn();
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => mockUseKibana(),
@@ -31,6 +33,7 @@ jest.mock('../../../hooks/use_async_thunk', () => ({
 }));
 
 jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
+  useAvailableConnectors: () => mockUseAvailableConnectors(),
   useFetchConnector: (connectorId?: string) => mockUseFetchConnector(connectorId),
 }));
 
@@ -100,6 +103,8 @@ describe('WorkflowDetailConnectorFlyout', () => {
       data: undefined,
       isLoading: false,
     });
+
+    mockUseAvailableConnectors.mockReturnValue({ connectorTypes: {}, totalConnectors: 0 });
 
     mockGetAddConnectorFlyout.mockReturnValue(<div data-test-subj="add-connector-flyout" />);
     mockGetEditConnectorFlyout.mockReturnValue(<div data-test-subj="edit-connector-flyout" />);
@@ -284,6 +289,15 @@ describe('WorkflowDetailConnectorFlyout', () => {
     });
 
     it('keeps the flyout open after creating an inbound webhook so the ingest token remains visible', () => {
+      mockUseAvailableConnectors.mockReturnValue({
+        connectorTypes: {
+          '.inboundWebhook': createMockConnectorTypeInfo({
+            actionTypeId: '.inboundWebhook',
+            isInboundOnly: true,
+          }),
+        },
+        totalConnectors: 0,
+      });
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
       mockGetAddConnectorFlyout.mockImplementation((config: any) => {
         onConnectorCreatedCallback = config.onConnectorCreated;
