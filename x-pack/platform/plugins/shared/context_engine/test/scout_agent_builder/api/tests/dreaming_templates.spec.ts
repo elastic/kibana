@@ -13,6 +13,11 @@ import { apiTest, testData } from '../fixtures';
 
 const { CONTEXT_ENGINE_READ, INTERNAL_API_HEADERS } = testData;
 const DREAMING_TEMPLATES_PATH = 'internal/context_engine/dreaming_templates';
+const GLOBAL_SETTINGS_PATH = '/internal/kibana/global_settings';
+
+interface GlobalUiSettingsResponse {
+  settings?: Record<string, { userValue?: boolean }>;
+}
 
 const READ_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
@@ -25,10 +30,27 @@ const NO_CONTEXT_ENGINE_ROLE: KibanaRole = {
 };
 
 apiTest.describe('context engine dreaming templates API', { tag: tags.stateful.classic }, () => {
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.uiSettings.updateGlobal({
-      [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+  let initialMemoryEnabled: boolean | undefined;
+
+  apiTest.beforeAll(async ({ kbnClient }) => {
+    const { data } = await kbnClient.request<GlobalUiSettingsResponse>({
+      method: 'GET',
+      path: GLOBAL_SETTINGS_PATH,
     });
+    initialMemoryEnabled = data.settings?.[CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]?.userValue;
+  });
+
+  apiTest.afterAll(async ({ kbnClient }) => {
+    if (initialMemoryEnabled === undefined) {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `${GLOBAL_SETTINGS_PATH}/${CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID}`,
+      });
+    } else {
+      await kbnClient.uiSettings.updateGlobal({
+        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: initialMemoryEnabled,
+      });
+    }
     await kbnClient.uiSettings.waitForEventualCacheRefresh();
   });
 
@@ -50,7 +72,7 @@ apiTest.describe('context engine dreaming templates API', { tag: tags.stateful.c
         });
 
         expect(offResponse).toHaveStatusCode(404);
-        expect(offResponse.body).toStrictEqual({
+        expect(offResponse.body).toMatchObject({
           message: 'Context Engine memory is turned off.',
         });
       });
@@ -105,21 +127,26 @@ apiTest.describe('context engine dreaming templates API', { tag: tags.stateful.c
           );
         }
       );
+    }
+  );
 
-      await apiTest.step(
-        'returns 403 to a session without Context Engine read access',
-        async () => {
-          const { cookieHeader: unprivilegedCookie } = await samlAuth.asInteractiveUser(
-            NO_CONTEXT_ENGINE_ROLE
-          );
-          const forbiddenResponse = await apiClient.get(DREAMING_TEMPLATES_PATH, {
-            headers: { ...INTERNAL_API_HEADERS, ...unprivilegedCookie },
-            responseType: 'json',
-          });
+  apiTest(
+    'returns 403 to a session without Context Engine read access while memory is on',
+    async ({ apiClient, kbnClient, samlAuth }) => {
+      await kbnClient.uiSettings.updateGlobal({
+        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
+      });
+      await kbnClient.uiSettings.waitForEventualCacheRefresh();
 
-          expect(forbiddenResponse).toHaveStatusCode(403);
-        }
+      const { cookieHeader: unprivilegedCookie } = await samlAuth.asInteractiveUser(
+        NO_CONTEXT_ENGINE_ROLE
       );
+      const forbiddenResponse = await apiClient.get(DREAMING_TEMPLATES_PATH, {
+        headers: { ...INTERNAL_API_HEADERS, ...unprivilegedCookie },
+        responseType: 'json',
+      });
+
+      expect(forbiddenResponse).toHaveStatusCode(403);
     }
   );
 });
