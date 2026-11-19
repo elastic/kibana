@@ -330,6 +330,22 @@ describe('usePanelSelectionGestures', () => {
 
       expect(getSelection()).toEqual(['panel2']);
     });
+
+    it('leaves a Ctrl+Shift drag to the panel content, e.g. a map box zoom', () => {
+      const onPanelContentMouseDown = jest.fn();
+      panelContent.addEventListener('mousedown', onPanelContentMouseDown);
+      const { result } = renderGestures();
+      const init = { button: 0, ctrlKey: true, shiftKey: true };
+
+      const notPrevented = fireEvent.mouseDown(panelContent, { ...init, clientX: 50, clientY: 50 });
+      fireEvent.mouseMove(document, { ...init, clientX: 250, clientY: 60 });
+      expect(result.current.marqueeRect).toBeUndefined();
+      fireEvent.mouseUp(document, { ...init, clientX: 250, clientY: 60 });
+
+      expect(notPrevented).toBe(true);
+      expect(onPanelContentMouseDown).toHaveBeenCalledTimes(1);
+      expect(getSelection()).toEqual([]);
+    });
   });
 
   describe('select hint', () => {
