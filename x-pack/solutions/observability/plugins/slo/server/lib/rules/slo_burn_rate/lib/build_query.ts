@@ -6,6 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { Builder, esql, synth } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { SLODefinition } from '../../../../domain/models';
 import { Duration, toDurationUnit } from '../../../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../../../domain/services/get_delay_in_seconds_from_slo';
@@ -99,70 +101,87 @@ export function buildEvaluationQuery(
 ): EvaluationQuery {
   const isTimeslices = slo.budgetingMethod === 'timeslices';
   const dateRanges = getWindowDateRanges(startedAt, params, getDelayInSecondsFromSLO(slo));
-  const queryParams: estypes.EsqlNamedValue[] = [{ target: slo.objective.target }];
-  const stats: string[] = [];
-  const burnRates: string[] = [];
-  const breachConditions: string[] = [];
+
+  const queryParams: estypes.EsqlNamedValue[] = [];
+  const param = (name: string, value: string | number) => {
+    queryParams.push({ [name]: value });
+    return synth.par(name);
+  };
+  const filteredAgg = (agg: ESQLAstExpression, condition: ESQLAstExpression) =>
+    Builder.expression.func.binary('where', [agg, condition]);
+
+  const target = param('target', slo.objective.target);
+  const stats: ESQLAstExpression[] = [];
+  const burnRates: ESQLAstExpression[] = [];
+  const breachConditions: ESQLAstExpression[] = [];
 
   dateRanges.forEach((ranges, index) => {
     const windowTypes: WindowType[] = ['short', 'long'];
     windowTypes.forEach((type) => {
       const id = `w${index}_${type}`;
       const dateRange = ranges[type];
-      queryParams.push({ [`${id}_from`]: dateRange.from.toISOString() });
-      queryParams.push({ [`${id}_to`]: dateRange.to.toISOString() });
-      const inRange = `@timestamp >= ?${id}_from AND @timestamp < ?${id}_to`;
+      const inRange = esql.exp`@timestamp >= ${param(
+        `${id}_from`,
+        dateRange.from.toISOString()
+      )} AND @timestamp < ${param(`${id}_to`, dateRange.to.toISOString())}`;
+      const good = esql.col(`${id}_good`);
+      const total = esql.col(`${id}_total`);
+      const burnRate = esql.col(`${id}_burn_rate`);
 
       if (isTimeslices) {
-        stats.push(`${id}_good = SUM(slo.isGoodSlice) WHERE ${inRange}`);
-        stats.push(`${id}_total = COUNT(slo.isGoodSlice) WHERE ${inRange}`);
+        stats.push(filteredAgg(esql.exp`${good} = SUM(slo.isGoodSlice)`, inRange));
+        stats.push(filteredAgg(esql.exp`${total} = COUNT(slo.isGoodSlice)`, inRange));
         const totalSlices = getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!);
-        if (totalSlices > 0) {
-          queryParams.push({ [`${id}_slices`]: totalSlices });
-          burnRates.push(
-            `${id}_burn_rate = CASE(${id}_total > 0, (TO_DOUBLE(${id}_total - ${id}_good) / ?${id}_slices) / (1 - ?target), 0.0)`
-          );
-        } else {
-          burnRates.push(`${id}_burn_rate = 0.0`);
-        }
-      } else {
-        stats.push(`${id}_good = SUM(slo.numerator) WHERE ${inRange}`);
-        stats.push(`${id}_total = SUM(slo.denominator) WHERE ${inRange}`);
         burnRates.push(
-          `${id}_burn_rate = CASE(${id}_total > 0, (1 - TO_DOUBLE(${id}_good) / ${id}_total) / (1 - ?target), 0.0)`
+          totalSlices > 0
+            ? esql.exp`${burnRate} = CASE(${total} > 0, (TO_DOUBLE(${total} - ${good}) / ${param(
+                `${id}_slices`,
+                totalSlices
+              )}) / (1 - ${target}), 0.0)`
+            : esql.exp`${burnRate} = 0.0`
+        );
+      } else {
+        stats.push(filteredAgg(esql.exp`${good} = SUM(slo.numerator)`, inRange));
+        stats.push(filteredAgg(esql.exp`${total} = SUM(slo.denominator)`, inRange));
+        burnRates.push(
+          esql.exp`${burnRate} = CASE(${total} > 0, (1 - TO_DOUBLE(${good}) / ${total}) / (1 - ${target}), 0.0)`
         );
       }
     });
 
-    queryParams.push({ [`w${index}_threshold`]: params.windows[index].burnRateThreshold });
+    const threshold = param(`w${index}_threshold`, params.windows[index].burnRateThreshold);
     breachConditions.push(
-      `w${index}_short_burn_rate >= ?w${index}_threshold AND w${index}_long_burn_rate >= ?w${index}_threshold, ${index}`
+      esql.exp`${esql.col(`w${index}_short_burn_rate`)} >= ${threshold} AND ${esql.col(
+        `w${index}_long_burn_rate`
+      )} >= ${threshold}`,
+      esql.int(index)
     );
   });
 
   const { instanceId, windowIndex, shortWindowBurnRate, longWindowBurnRate } = EVALUATION_COLUMNS;
   const selectByWindow = (type: WindowType) =>
-    `CASE(${dateRanges
-      .map((_, index) => `${windowIndex} == ${index}, w${index}_${type}_burn_rate`)
-      .join(', ')})`;
+    dateRanges.flatMap((_, index) => [
+      esql.exp`${esql.col(windowIndex)} == ${esql.int(index)}`,
+      esql.col(`w${index}_${type}_burn_rate`),
+    ]);
 
-  const query = [
-    `FROM ${SLI_DESTINATION_INDEX_PATTERN}`,
-    `STATS ${stats.join(', ')} BY ${instanceId} = slo.instanceId`,
-    `EVAL ${burnRates.join(', ')}`,
-    `EVAL ${windowIndex} = CASE(${breachConditions.join(', ')})`,
-    `WHERE ${windowIndex} IS NOT NULL`,
-    `EVAL ${shortWindowBurnRate} = ${selectByWindow(
-      'short'
-    )}, ${longWindowBurnRate} = ${selectByWindow('long')}`,
-    `EVAL evaluation_value = LEAST(${shortWindowBurnRate}, ${longWindowBurnRate})`,
-    `SORT ${windowIndex} ASC, evaluation_value DESC, ${instanceId} ASC`,
-    `KEEP ${instanceId}, ${windowIndex}, ${shortWindowBurnRate}, ${longWindowBurnRate}`,
-    `LIMIT ${limit}`,
-  ].join('\n| ');
+  const query = esql.from(SLI_DESTINATION_INDEX_PATTERN).pipe`STATS ${stats} BY ${esql.col(
+    instanceId
+  )} = slo.instanceId`.pipe`EVAL ${burnRates}`.pipe`EVAL ${esql.col(
+    windowIndex
+  )} = CASE(${breachConditions})`.where`${esql.col(windowIndex)} IS NOT NULL`.pipe`EVAL ${esql.col(
+    shortWindowBurnRate
+  )} = CASE(${selectByWindow('short')}), ${esql.col(longWindowBurnRate)} = CASE(${selectByWindow(
+    'long'
+  )})`.pipe`EVAL evaluation_value = LEAST(${esql.col(shortWindowBurnRate)}, ${esql.col(
+    longWindowBurnRate
+  )})`
+    .sort([windowIndex, 'ASC'], ['evaluation_value', 'DESC'], [instanceId, 'ASC'])
+    .keep(instanceId, windowIndex, shortWindowBurnRate, longWindowBurnRate)
+    .limit(limit);
 
   return {
-    query,
+    query: query.print('pipe-multiline'),
     params: queryParams,
     filter: buildEvaluationFilter(startedAt, slo, params),
   };
