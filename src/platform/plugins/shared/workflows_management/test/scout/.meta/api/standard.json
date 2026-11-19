@@ -1,5 +1,5 @@
 {
-  "sha1": "b232f04d4fd37ff8cbf15815928b3aacade2272d",
+  "sha1": "9a531fe9fd75ab77127fe6f55c36ffbe292d65b3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -208,8 +208,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_admission_race.spec.ts",
-        "line": 183,
-        "column": 30
+        "line": 173,
+        "column": 51
       }
     },
     {
@@ -228,8 +228,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_admission_race.spec.ts",
-        "line": 204,
-        "column": 16
+        "line": 188,
+        "column": 12
       }
     },
     {
@@ -248,8 +248,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_admission_race.spec.ts",
-        "line": 221,
-        "column": 6
+        "line": 208,
+        "column": 32
       }
     },
     {
@@ -268,8 +268,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_admission_race.spec.ts",
-        "line": 285,
-        "column": 7
+        "line": 270,
+        "column": 32
       }
     },
     {
