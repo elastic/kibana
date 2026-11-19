@@ -28,10 +28,6 @@ export function sanitizeOutput<T extends Output = Output>(output: T): T {
   if ('ssl' in output && output.ssl) {
     sanitized.ssl = omit(output.ssl, ['key']);
   }
-  // OTLP exporter headers can carry credentials
-  if ('otlp_exporter' in output && output.otlp_exporter) {
-    sanitized.otlp_exporter = omit(output.otlp_exporter, ['headers']);
-  }
 
   return sanitized as T;
 }
