@@ -84,14 +84,20 @@ export async function getServiceGroupingAttributes(
  * Reads both namespaces of the given services from transaction events, as metric rollups do not
  * carry them. One value per field per service. A service with neither namespace is still listed.
  *
- * The names stand in for the map's environment, search bar and filters, which already chose them.
- * Applying those filters again would miss services the map's sample of traces adds. The map's own
- * time range is kept rather than the call graph's day: every drawn service was seen in it, and a
- * namespace does not change with the window. A service with no transaction events in the range,
- * for example under tail-based sampling, is not found.
+ * The names stand in for the map's search bar and filters, which already chose them. Those can
+ * target fields transaction events do not carry, so applying them again would drop services.
+ *
+ * The environment is applied, so a service gets the namespace it has in the selected environment.
+ * With every environment selected, a service deployed
+ * in several of them gets the namespace of the one where it has the most transactions.
+ *
+ * The map's own time range is kept rather than the call graph's day: every drawn service was seen
+ * in it, and a namespace does not change with the window. A service with no transaction events in
+ * the range, for example under tail-based sampling, is not found.
  */
 async function getNamespaceAttributes({
   apmEventClient,
+  environment,
   start,
   end,
   services,
@@ -109,7 +115,11 @@ async function getNamespaceAttributes({
     size: 0,
     query: {
       bool: {
-        filter: [...rangeQuery(start, end), { terms: { [SERVICE_NAME]: [...services] } }],
+        filter: [
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          { terms: { [SERVICE_NAME]: [...services] } },
+        ],
       },
     },
     aggs: {

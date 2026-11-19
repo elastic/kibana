@@ -163,7 +163,7 @@ describe('getServiceGroupingAttributes', () => {
     expect(Object.getPrototypeOf(attributes)).toBeNull();
   });
 
-  it('reads only the drawn services over the map range, without the map filters', async () => {
+  it('reads only the drawn services in the selected environment, without the kuery or filters', async () => {
     const search: SearchMock = jest
       .fn()
       .mockResolvedValue(namespacesPage([bucket('checkout', 'shop', 'team-checkout')]));
@@ -191,7 +191,11 @@ describe('getServiceGroupingAttributes', () => {
     expect(call.params.apm.events).toEqual([ProcessorEvent.transaction]);
     expect(call.params.query).toEqual({
       bool: {
-        filter: [...rangeQuery(START, END), { terms: { 'service.name': ['cart', 'checkout'] } }],
+        filter: [
+          ...rangeQuery(START, END),
+          ...environmentQuery('production'),
+          { terms: { 'service.name': ['cart', 'checkout'] } },
+        ],
       },
     });
     expect(call.params.aggs).toEqual({
