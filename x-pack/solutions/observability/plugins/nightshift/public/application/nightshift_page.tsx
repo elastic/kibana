@@ -80,7 +80,7 @@ const getCenteredLoadingFallback = (testSubject: string) => (
 );
 
 const getPageSectionLoadingFallback = (testSubject: string) => (
-  <EuiPageTemplate.Section component="div" restrictWidth={false}>
+  <EuiPageTemplate.Section component="div" color="transparent" restrictWidth={false}>
     <EuiLoadingSpinner size="xl" data-test-subj={testSubject} />
   </EuiPageTemplate.Section>
 );
