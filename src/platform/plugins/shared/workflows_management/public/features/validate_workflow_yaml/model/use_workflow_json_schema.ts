@@ -10,7 +10,11 @@
 // TODO: Remove the eslint-disable comments to use the proper types.
 
 import { useMemo } from 'react';
-import { getOrResolveObject, getWorkflowJsonSchema } from '@kbn/workflows';
+import {
+  getOrResolveObject,
+  getWorkflowJsonSchema,
+  guardStepUnionAlternativesByType,
+} from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
@@ -64,6 +68,9 @@ export const useWorkflowJsonSchema = ({
             triggerSchemas.getTriggerSchemaOptions()
           ); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
       const jsonSchema = getWorkflowJsonSchema(zodSchema);
+      if (jsonSchema) {
+        guardStepUnionAlternativesByType(jsonSchema);
+      }
       if (jsonSchema && !serviceAccountsEnabled) {
         const workflowSchema = getOrResolveObject<z.core.JSONSchema.JSONSchema>(
           jsonSchema,
