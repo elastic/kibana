@@ -136,6 +136,10 @@ describe('getApplicationCves', () => {
       cveIdContains: ['CVE-2026', '2021-23'],
       severities: ['CRITICAL', 'MEDIUM'],
       analystVerdict: ['Default', 'False Positive'],
+      remediationLevels: ['Official Fix', 'Workaround'],
+      exploitedInTheWild: ['Yes'],
+      exploitCodeMaturity: ['Proof of Concept', 'High'],
+      reportConfidence: ['Confirmed'],
       publishedDateGte: '2021-01-01T00:00:00Z',
       publishedDateLte: '2026-12-31T00:00:00Z',
       publishedDateGt: '2020-01-01T00:00:00Z',
@@ -160,6 +164,10 @@ describe('getApplicationCves', () => {
           ['cveId__contains', 'CVE-2026,2021-23'],
           ['severities', 'CRITICAL,MEDIUM'],
           ['analystVerdict', 'Default,False Positive'],
+          ['remediationLevels', 'Official Fix,Workaround'],
+          ['exploitedInTheWild', 'Yes'],
+          ['exploitCodeMaturity', 'Proof of Concept,High'],
+          ['reportConfidence', 'Confirmed'],
           ['publishedDate__gte', '2021-01-01T00:00:00Z'],
           ['publishedDate__lte', '2026-12-31T00:00:00Z'],
           ['siteIds', '21,22'],
@@ -184,6 +192,19 @@ describe('getApplicationCves', () => {
     ).data.find((item) => item.cveId === 'CVE-2026-106445');
     expect(nullSeverity?.severity).toBeNull();
   });
+
+  it.each([
+    ['remediationLevels', 'OFFICIAL_FIX'],
+    ['exploitedInTheWild', 'YES'],
+    ['exploitCodeMaturity', 'PROOF_OF_CONCEPT'],
+    ['reportConfidence', 'CONFIRMED'],
+  ])(
+    'rejects %s value %s, which SentinelOne does not accept, before any request',
+    (field, value) => {
+      expect(() => action().input.parse({ applicationIds: ['1'], [field]: [value] })).toThrow();
+      expect(request).not.toHaveBeenCalled();
+    }
+  );
 
   it('chains pages by name + vendor + versions (vendor sent HTML-escaped as given) and passes counts and empty answers through', async () => {
     const target = {

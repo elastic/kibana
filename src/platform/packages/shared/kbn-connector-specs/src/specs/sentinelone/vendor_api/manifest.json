@@ -201,7 +201,26 @@
         "source": "s1"
       }
     ],
-    "getApplicationCves": [],
+    "getApplicationCves": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/application-management/risks/cves",
+        "source": "s1"
+      }
+    ],
     "getGroups": [
       {
         "method": "get",
@@ -287,7 +306,7 @@
             "sizeParam": "limit"
           },
           "response": {
-            "itemsPath": "errors",
+            "itemsPath": "data.sites",
             "nextPath": "pagination.nextCursor"
           },
           "style": "cursor"
@@ -401,6 +420,11 @@
         },
         "path": "/web/api/v2.1/agents",
         "source": "s1"
+      },
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/agents/actions/disconnect",
+        "source": "s1"
       }
     ],
     "listExclusions": [
@@ -469,6 +493,11 @@
         },
         "path": "/web/api/v2.1/agents",
         "source": "s1"
+      },
+      {
+        "method": "put",
+        "path": "/web/api/v2.1/groups/{group_id}/move-agents",
+        "source": "s1"
       }
     ],
     "releaseHost": [
@@ -488,6 +517,11 @@
           "style": "cursor"
         },
         "path": "/web/api/v2.1/agents",
+        "source": "s1"
+      },
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/agents/actions/connect",
         "source": "s1"
       }
     ],
@@ -517,12 +551,40 @@
         "method": "delete",
         "path": "/sdl/v2/api/queries/{id}",
         "source": "s1"
+      },
+      {
+        "method": "get",
+        "path": "/sdl/v2/api/queries/{id}",
+        "source": "s1"
       }
     ],
     "runScriptAndWait": [
       {
         "method": "post",
         "path": "/web/api/v2.1/remote-scripts/execute",
+        "source": "s1"
+      },
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/remote-scripts/fetch-files",
+        "source": "s1"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/remote-scripts/status",
         "source": "s1"
       }
     ],
@@ -627,6 +689,11 @@
         },
         "path": "/web/api/v2.1/cloud-detection/rules",
         "source": "s1"
+      },
+      {
+        "method": "put",
+        "path": "/web/api/v2.1/cloud-detection/rules/{rule_id}",
+        "source": "s1"
       }
     ],
     "updateThreatStatus": [
@@ -656,6 +723,13 @@
     }
   },
   "unmatched": {
+    "downloadRemoteScriptResults": [
+      {
+        "method": "get",
+        "path": "/script-results/output.zip",
+        "reason": "The results archive is fetched from the pre-signed storage link that fetch-files returns, which is a storage link and not a route of the management API."
+      }
+    ],
     "downloadThreatFile": [
       {
         "method": "get",

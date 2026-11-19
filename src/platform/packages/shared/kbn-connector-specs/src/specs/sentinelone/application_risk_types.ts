@@ -11,7 +11,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 /** SentinelOne ids: letters, digits, '-' and '_', never ',' (lists are sent comma-separated). */
 const ID_PATTERN = /^[A-Za-z0-9_-]+$/;
-/** Enum-like Application Risk filter values such as CRITICAL or OFFICIAL_FIX. */
+/** Severity filter values such as CRITICAL (the other Application Risk filters take the values SentinelOne lists, such as Official Fix). */
 const UPPER_VALUE_PATTERN = /^[A-Z][A-Z_]*$/;
 /** Any value that does not break the comma-separated list encoding. */
 const NO_COMMA_PATTERN = /^[^,]+$/;
@@ -76,22 +76,28 @@ export const GetApplicationCvesInputSchema = lazySchema(() =>
         .optional()
         .describe('CVE id contains, for example CVE-2021-23383 or 2021-23'),
       severities: upperValues(10, 'Severities, for example CRITICAL, HIGH, MEDIUM, LOW'),
-      remediationLevels: upperValues(
-        10,
-        'Remediation levels, for example OFFICIAL_FIX, TEMPORARY_FIX (needs Ranger Insights)'
-      ),
-      exploitedInTheWild: upperValues(
-        10,
-        'Exploited in the wild values, for example YES, EXPLOITED_UNKNOWN (needs Ranger Insights)'
-      ),
-      exploitCodeMaturity: upperValues(
-        10,
-        'Exploit code maturity values, for example FUNCTIONAL, HIGH (needs Ranger Insights)'
-      ),
-      reportConfidence: upperValues(
-        10,
-        'Report confidence values, for example REASONABLE, CONFIRMED (needs Ranger Insights)'
-      ),
+      remediationLevels: z
+        .array(
+          z.enum(['Official Fix', 'Temporary Fix', 'Workaround', 'Unavailable', 'Not Defined'])
+        )
+        .max(5)
+        .optional()
+        .describe('Remediation levels (needs Ranger Insights)'),
+      exploitedInTheWild: z
+        .array(z.enum(['Yes', 'Unknown', 'Not Defined']))
+        .max(3)
+        .optional()
+        .describe('Exploited in the wild (needs Ranger Insights)'),
+      exploitCodeMaturity: z
+        .array(z.enum(['Functional', 'High', 'Proof of Concept', 'Unproven', 'Not Defined']))
+        .max(5)
+        .optional()
+        .describe('Exploit code maturity (needs Ranger Insights)'),
+      reportConfidence: z
+        .array(z.enum(['Confirmed', 'Reasonable', 'Unknown', 'Not Defined']))
+        .max(4)
+        .optional()
+        .describe('Report confidence (needs Ranger Insights)'),
       analystVerdict: z
         .array(z.enum(['Default', 'False Positive', 'Added CVE']))
         .max(3)

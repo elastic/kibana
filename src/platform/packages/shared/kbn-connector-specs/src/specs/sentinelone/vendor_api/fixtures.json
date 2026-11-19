@@ -23,7 +23,19 @@
         },
         "body": {
           "id": "q1",
-          "stepsCompleted": 1,
+          "stepsCompleted": 0,
+          "stepsTotal": 2
+        }
+      },
+      {
+        "source": "s1",
+        "method": "GET",
+        "path": "/sdl/v2/api/queries/{id}",
+        "status": 200,
+        "body": {
+          "id": "q1",
+          "stepsCompleted": 2,
+          "stepsTotal": 2,
           "data": {
             "columns": [
               {
@@ -57,6 +69,26 @@
         "method": "POST",
         "path": "/web/api/v2.1/remote-scripts/fetch-files"
       }
+    ],
+    "responses": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/remote-scripts/fetch-files",
+        "status": 200,
+        "body": {
+          "data": {
+            "data": {
+              "downloadLinks": [
+                {
+                  "downloadUrl": "https://storage.example.com/script-results/output.zip",
+                  "fileName": "output.zip"
+                }
+              ]
+            }
+          }
+        }
+      }
     ]
   },
   "getActivities": {
@@ -77,5 +109,441 @@
         "connected"
       ]
     }
+  },
+  "isolateHost": {
+    "input": {
+      "agentIds": [
+        "1000000000000000001"
+      ]
+    },
+    "responses": [
+      {
+        "source": "s1",
+        "method": "GET",
+        "path": "/web/api/v2.1/agents",
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "id": "1000000000000000001",
+              "networkStatus": "connected",
+              "groupId": "1000000000000000099",
+              "computerName": "demo-host"
+            }
+          ],
+          "pagination": {
+            "totalItems": 1
+          }
+        }
+      },
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/agents/actions/disconnect",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "releaseHost": {
+    "input": {
+      "agentIds": [
+        "1000000000000000001"
+      ]
+    },
+    "responses": [
+      {
+        "source": "s1",
+        "method": "GET",
+        "path": "/web/api/v2.1/agents",
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "id": "1000000000000000001",
+              "networkStatus": "disconnected",
+              "groupId": "1000000000000000099",
+              "computerName": "demo-host"
+            }
+          ],
+          "pagination": {
+            "totalItems": 1
+          }
+        }
+      },
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/agents/actions/connect",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "moveAgent": {
+    "input": {
+      "agentIds": [
+        "1000000000000000001"
+      ],
+      "groupId": "2000000000000000002"
+    },
+    "responses": [
+      {
+        "source": "s1",
+        "method": "GET",
+        "path": "/web/api/v2.1/agents",
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "id": "1000000000000000001",
+              "networkStatus": "connected",
+              "groupId": "1000000000000000099",
+              "computerName": "demo-host"
+            }
+          ],
+          "pagination": {
+            "totalItems": 1
+          }
+        }
+      }
+    ]
+  },
+  "initiateScan": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/agents/actions/initiate-scan",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "abortScan": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/agents/actions/abort-scan",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "shutdownAgent": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/agents/actions/shutdown",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "broadcastMessage": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/agents/actions/broadcast",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "fetchAgentFiles": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/agents/{agent_id}/actions/fetch-files",
+        "status": 200,
+        "body": {
+          "data": {
+            "success": true
+          }
+        }
+      }
+    ]
+  },
+  "mitigateThreat": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/threats/mitigate/{action}",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "rollbackThreat": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/threats/mitigate/{action}",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "updateStarRule": {
+    "input": {
+      "ruleId": "2250000000000000001"
+    },
+    "responses": [
+      {
+        "source": "s1",
+        "method": "GET",
+        "path": "/web/api/v2.1/cloud-detection/rules",
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "id": "2250000000000000001",
+              "name": "Existing rule",
+              "description": "Existing rule",
+              "severity": "Medium",
+              "status": "Draft",
+              "queryType": "events",
+              "s1ql": "EndpointName = \"example\"",
+              "expirationMode": "Permanent",
+              "scope": "site",
+              "scopeId": [
+                "2250000000000000002"
+              ],
+              "siteId": "2250000000000000002",
+              "treatAsThreat": "UNDEFINED",
+              "networkQuarantine": false,
+              "queryLang": "1.0"
+            }
+          ],
+          "pagination": {
+            "totalItems": 1
+          }
+        }
+      }
+    ]
+  },
+  "enableStarRules": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "PUT",
+        "path": "/web/api/v2.1/cloud-detection/rules/enable",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "disableStarRules": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "PUT",
+        "path": "/web/api/v2.1/cloud-detection/rules/disable",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "deleteStarRule": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "DELETE",
+        "path": "/web/api/v2.1/cloud-detection/rules",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "removeHashFromBlocklist": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "DELETE",
+        "path": "/web/api/v2.1/restrictions",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "deleteExclusion": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "DELETE",
+        "path": "/web/api/v2.1/exclusions",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "deleteIOC": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "DELETE",
+        "path": "/web/api/v2.1/threat-intelligence/iocs",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "deleteFirewallRule": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "DELETE",
+        "path": "/web/api/v2.1/firewall-control",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1
+          }
+        }
+      }
+    ]
+  },
+  "runScriptAndWait": {
+    "responses": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/remote-scripts/execute",
+        "status": 200,
+        "body": {
+          "data": {
+            "affected": 1,
+            "parentTaskId": "1000000000000000001",
+            "pending": false
+          }
+        }
+      },
+      {
+        "source": "s1",
+        "method": "GET",
+        "path": "/web/api/v2.1/remote-scripts/status",
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "id": "1000000000000000002",
+              "parentTaskId": "1000000000000000001",
+              "status": "completed"
+            }
+          ],
+          "pagination": {
+            "totalItems": 1
+          }
+        }
+      },
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/remote-scripts/fetch-files",
+        "status": 200,
+        "body": {
+          "data": {
+            "data": {
+              "downloadLinks": [
+                {
+                  "downloadUrl": "https://storage.example.com/script-results/output.zip",
+                  "fileName": "output.zip",
+                  "taskId": "1000000000000000002"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "getApplicationCves": {
+    "input": [
+      {
+        "applicationIds": [
+          "1000000000000000004"
+        ],
+        "severities": [
+          "CRITICAL"
+        ],
+        "cveIdContains": [
+          "CVE-2021-1"
+        ],
+        "sortBy": "cveId",
+        "sortOrder": "asc",
+        "limit": 5,
+        "skipCount": true
+      },
+      {
+        "applicationName": "openssl",
+        "applicationVendor": "OpenSSL Software Foundation",
+        "applicationVersions": [
+          "3.0.2"
+        ],
+        "publishedDateGte": "2025-01-01T00:00:00Z"
+      }
+    ]
   }
 }

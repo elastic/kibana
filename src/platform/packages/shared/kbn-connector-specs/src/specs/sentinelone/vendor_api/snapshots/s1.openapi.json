@@ -339,6 +339,37 @@
         },
         "type": "object"
       },
+      "_NoDataSchema_409": {
+        "properties": {
+          "errors": {
+            "items": {
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "detail": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "detail",
+                "title"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "_RemoteScriptsExecuteSchema_200": {
         "properties": {
           "data": {
@@ -9054,6 +9085,1447 @@
         },
         "type": "object"
       },
+      "groups_AddAgentsDataSchema_204": {
+        "properties": {
+          "data": {
+            "properties": {
+              "agentsMoved": {
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "errors": {
+            "items": {
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "groups_PutAddAgentsSchema": {
+        "properties": {
+          "filter": {
+            "properties": {
+              "accountIds": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 500,
+                "minItems": 1,
+                "type": "array"
+              },
+              "activeProtection": {
+                "items": {
+                  "enum": [
+                    "edr",
+                    "idr"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "activeThreats": {
+                "type": "integer"
+              },
+              "activeThreats__gt": {
+                "type": "integer"
+              },
+              "adComputerMember__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "adComputerName__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "adComputerQuery__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "adQuery": {
+                "type": "string"
+              },
+              "adQuery__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "adUserMember__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "adUserName__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "adUserQuery__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "agentIds": {
+                "default": null,
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "nullable": true,
+                "type": "array"
+              },
+              "agentNamespace__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "agentOperatingMode__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "agentOperatingModes": {
+                "items": {
+                  "enum": [
+                    "optimized",
+                    "standard"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "agentOperatingModesNin": {
+                "items": {
+                  "enum": [
+                    "optimized",
+                    "standard"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "agentPodName__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "agentVersion__between": {
+                "type": "string"
+              },
+              "agentVersion__gt": {
+                "type": "string"
+              },
+              "agentVersion__gte": {
+                "type": "string"
+              },
+              "agentVersion__lt": {
+                "type": "string"
+              },
+              "agentVersion__lte": {
+                "type": "string"
+              },
+              "agentVersions": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "agentVersionsNin": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "appsVulnerabilityStatuses": {
+                "items": {
+                  "enum": [
+                    "patch_required",
+                    "up_to_date",
+                    "not_applicable"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "appsVulnerabilityStatusesNin": {
+                "items": {
+                  "enum": [
+                    "patch_required",
+                    "up_to_date",
+                    "not_applicable"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "awsRole__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "awsSecurityGroups__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "awsSubnetIds__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "azureResourceGroup__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "cloudAccount__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "cloudImage__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "cloudInstanceId__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "cloudInstanceSize__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "cloudLocation__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "cloudNetwork__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "cloudProvider": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "cloudProviderNin": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "cloudTags__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "clusterName__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "computerName": {
+                "type": "string"
+              },
+              "computerNameOrUuid__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "computerName__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "computerName__like": {
+                "type": "string"
+              },
+              "consoleMigrationStatuses": {
+                "items": {
+                  "enum": [
+                    "N/A",
+                    "Pending",
+                    "Migrated",
+                    "Failed"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "consoleMigrationStatusesNin": {
+                "items": {
+                  "enum": [
+                    "N/A",
+                    "Pending",
+                    "Migrated",
+                    "Failed"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "containerizedWorkloadCounts": {
+                "properties": {
+                  "containersCount": {
+                    "type": "integer"
+                  },
+                  "podsCount": {
+                    "type": "integer"
+                  },
+                  "tasksCount": {
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              },
+              "coreCount__between": {
+                "type": "string"
+              },
+              "coreCount__gt": {
+                "type": "integer"
+              },
+              "coreCount__gte": {
+                "type": "integer"
+              },
+              "coreCount__lt": {
+                "type": "integer"
+              },
+              "coreCount__lte": {
+                "type": "integer"
+              },
+              "cpuCount__between": {
+                "type": "string"
+              },
+              "cpuCount__gt": {
+                "type": "integer"
+              },
+              "cpuCount__gte": {
+                "type": "integer"
+              },
+              "cpuCount__lt": {
+                "type": "integer"
+              },
+              "cpuCount__lte": {
+                "type": "integer"
+              },
+              "cpuId__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "createdAt__between": {
+                "type": "string"
+              },
+              "createdAt__gt": {
+                "type": "string"
+              },
+              "createdAt__gte": {
+                "type": "string"
+              },
+              "createdAt__lt": {
+                "type": "string"
+              },
+              "createdAt__lte": {
+                "type": "string"
+              },
+              "csvFilterId": {
+                "type": "string"
+              },
+              "decommissionedAt__between": {
+                "type": "string"
+              },
+              "decommissionedAt__gt": {
+                "type": "string"
+              },
+              "decommissionedAt__gte": {
+                "type": "string"
+              },
+              "decommissionedAt__lt": {
+                "type": "string"
+              },
+              "decommissionedAt__lte": {
+                "type": "string"
+              },
+              "domains": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "domainsNin": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "ecsClusterName__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "ecsServiceArn__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "ecsServiceName__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "ecsTaskArn__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "ecsTaskAvailabilityZone__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "ecsTaskDefinitionArn__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "ecsTaskDefinitionFamily__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "ecsTaskDefinitionRevision__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "ecsType__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "ecsVersion__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "encryptedApplications": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "entraId__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "externalId__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "externalIp__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "filterId": {
+                "type": "string"
+              },
+              "filteredGroupIds": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "filteredSiteIds": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "firewallEnabled": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "gatewayIp": {
+                "type": "string"
+              },
+              "gcpServiceAccount__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "groupIds": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 500,
+                "minItems": 1,
+                "type": "array"
+              },
+              "hasContainerizedWorkload": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "hasLocalConfiguration": {
+                "type": "boolean"
+              },
+              "hasTags": {
+                "type": "boolean"
+              },
+              "ids": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "idsNin": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "infected": {
+                "type": "boolean"
+              },
+              "installerTypes": {
+                "items": {
+                  "enum": [
+                    ".msi",
+                    ".exe",
+                    ".deb",
+                    ".rpm",
+                    ".bsx",
+                    ".pkg",
+                    ".img",
+                    "unknown",
+                    ".tar",
+                    ".zip",
+                    ".gz",
+                    ".xz"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "installerTypesNin": {
+                "items": {
+                  "enum": [
+                    ".msi",
+                    ".exe",
+                    ".deb",
+                    ".rpm",
+                    ".bsx",
+                    ".pkg",
+                    ".img",
+                    "unknown",
+                    ".tar",
+                    ".zip",
+                    ".gz",
+                    ".xz"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "isActive": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "isAdConnector": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "isDecommissioned": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "isEventSearchProxyEnabled": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "isHyperAutomate": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "isMgmtProxyEnabled": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "isPendingUninstall": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "isUninstalled": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "isUpToDate": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "k8sNodeLabels__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "k8sNodeName__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "k8sType__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "k8sVersion__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "lastActiveDate__between": {
+                "type": "string"
+              },
+              "lastActiveDate__gt": {
+                "type": "string"
+              },
+              "lastActiveDate__gte": {
+                "type": "string"
+              },
+              "lastActiveDate__lt": {
+                "type": "string"
+              },
+              "lastActiveDate__lte": {
+                "type": "string"
+              },
+              "lastLoggedInUserName__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "lastSuccessfulScanDate__between": {
+                "type": "string"
+              },
+              "lastSuccessfulScanDate__gt": {
+                "type": "string"
+              },
+              "lastSuccessfulScanDate__gte": {
+                "type": "string"
+              },
+              "lastSuccessfulScanDate__lt": {
+                "type": "string"
+              },
+              "lastSuccessfulScanDate__lte": {
+                "type": "string"
+              },
+              "liveUpdateId__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "locationEnabled": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "locationIds": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "locationIdsNin": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "machineTypes": {
+                "items": {
+                  "enum": [
+                    "unknown",
+                    "desktop",
+                    "laptop",
+                    "server",
+                    "kubernetes node",
+                    "storage",
+                    "kubernetes pod",
+                    "ecs task",
+                    "kubernetes helper"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "machineTypesNin": {
+                "items": {
+                  "enum": [
+                    "unknown",
+                    "desktop",
+                    "laptop",
+                    "server",
+                    "kubernetes node",
+                    "storage",
+                    "kubernetes pod",
+                    "ecs task",
+                    "kubernetes helper"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "migrationStatus": {
+                "enum": [
+                  "N/A",
+                  "Pending",
+                  "Migrated",
+                  "Failed"
+                ],
+                "type": "string"
+              },
+              "missingPermissions": {
+                "items": {
+                  "enum": [
+                    "user_action_needed_fda",
+                    "user_action_needed_rs_fda",
+                    "user_action_needed_fda_helper",
+                    "user_action_needed_fda_sentineld",
+                    "user_action_needed_bluetooth_per",
+                    "user_action_needed_network",
+                    "user_action_needed_notifications"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "missingPermissionsNin": {
+                "items": {
+                  "enum": [
+                    "user_action_needed_fda",
+                    "user_action_needed_rs_fda",
+                    "user_action_needed_fda_helper",
+                    "user_action_needed_fda_sentineld",
+                    "user_action_needed_bluetooth_per",
+                    "user_action_needed_network",
+                    "user_action_needed_notifications"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "mitigationMode": {
+                "enum": [
+                  "detect",
+                  "protect"
+                ],
+                "type": "string"
+              },
+              "mitigationModeSuspicious": {
+                "enum": [
+                  "detect",
+                  "protect"
+                ],
+                "type": "string"
+              },
+              "networkInterfaceGatewayMacAddress__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "networkInterfaceInet__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "networkInterfacePhysical__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "networkQuarantineEnabled": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "networkStatuses": {
+                "items": {
+                  "enum": [
+                    "connected",
+                    "disconnected",
+                    "connecting",
+                    "disconnecting"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "networkStatusesNin": {
+                "items": {
+                  "enum": [
+                    "connected",
+                    "disconnected",
+                    "connecting",
+                    "disconnecting"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "operationalStates": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "operationalStatesNin": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "osArch": {
+                "enum": [
+                  "32 bit",
+                  "64 bit",
+                  "ARM64"
+                ],
+                "type": "string"
+              },
+              "osArches": {
+                "items": {
+                  "enum": [
+                    "32 bit",
+                    "64 bit",
+                    "ARM64"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "osArchesNin": {
+                "items": {
+                  "enum": [
+                    "32 bit",
+                    "64 bit",
+                    "ARM64"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "osTypes": {
+                "items": {
+                  "enum": [
+                    "windows",
+                    "linux",
+                    "windows_legacy",
+                    "macos"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "osTypesNin": {
+                "items": {
+                  "enum": [
+                    "windows",
+                    "linux",
+                    "windows_legacy",
+                    "macos"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "osVersion__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "pacFileUsage": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "proxyMethod": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "proxyMethodNin": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "query": {
+                "type": "string"
+              },
+              "rangerStatus": {
+                "enum": [
+                  "NotApplicable",
+                  "Enabled",
+                  "Disabled"
+                ],
+                "type": "string"
+              },
+              "rangerStatuses": {
+                "items": {
+                  "enum": [
+                    "NotApplicable",
+                    "Enabled",
+                    "Disabled"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "rangerStatusesNin": {
+                "items": {
+                  "enum": [
+                    "NotApplicable",
+                    "Enabled",
+                    "Disabled"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "rangerVersions": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "rangerVersionsNin": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "registeredAt__between": {
+                "type": "string"
+              },
+              "registeredAt__gt": {
+                "type": "string"
+              },
+              "registeredAt__gte": {
+                "type": "string"
+              },
+              "registeredAt__lt": {
+                "type": "string"
+              },
+              "registeredAt__lte": {
+                "type": "string"
+              },
+              "remoteOpsForensicsSupported": {
+                "type": "boolean"
+              },
+              "remoteProfilingStates": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "remoteProfilingStatesNin": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "rsoLevel": {
+                "enum": [
+                  "none",
+                  "pro",
+                  "ars"
+                ],
+                "type": "string"
+              },
+              "rsoLevels": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "scanStatus": {
+                "enum": [
+                  "none",
+                  "started",
+                  "aborted",
+                  "finished"
+                ],
+                "type": "string"
+              },
+              "scanStatuses": {
+                "items": {
+                  "enum": [
+                    "none",
+                    "started",
+                    "aborted",
+                    "finished"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "scanStatusesNin": {
+                "items": {
+                  "enum": [
+                    "none",
+                    "started",
+                    "aborted",
+                    "finished"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "serialNumber__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 255,
+                "type": "array"
+              },
+              "siteIds": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 500,
+                "minItems": 1,
+                "type": "array"
+              },
+              "storageTypes": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "storageTypesNin": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "tagsData": {
+                "type": "string"
+              },
+              "threatContentHash": {
+                "type": "string"
+              },
+              "threatCreatedAt__between": {
+                "type": "string"
+              },
+              "threatCreatedAt__gt": {
+                "type": "string"
+              },
+              "threatCreatedAt__gte": {
+                "type": "string"
+              },
+              "threatCreatedAt__lt": {
+                "type": "string"
+              },
+              "threatCreatedAt__lte": {
+                "type": "string"
+              },
+              "threatHidden": {
+                "type": "boolean"
+              },
+              "threatMitigationStatus": {
+                "enum": [
+                  "mitigated",
+                  "blocked",
+                  "active",
+                  "suspicious",
+                  "pending",
+                  "suspicious_resolved"
+                ],
+                "type": "string"
+              },
+              "threatRebootRequired": {
+                "items": {
+                  "type": "boolean"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "threatResolved": {
+                "type": "boolean"
+              },
+              "totalMemory__between": {
+                "type": "string"
+              },
+              "totalMemory__gt": {
+                "type": "integer"
+              },
+              "totalMemory__gte": {
+                "type": "integer"
+              },
+              "totalMemory__lt": {
+                "type": "integer"
+              },
+              "totalMemory__lte": {
+                "type": "integer"
+              },
+              "updatedAt__between": {
+                "type": "string"
+              },
+              "updatedAt__gt": {
+                "type": "string"
+              },
+              "updatedAt__gte": {
+                "type": "string"
+              },
+              "updatedAt__lt": {
+                "type": "string"
+              },
+              "updatedAt__lte": {
+                "type": "string"
+              },
+              "userActionsNeeded": {
+                "items": {
+                  "enum": [
+                    "none",
+                    "user_action_needed",
+                    "reboot_needed",
+                    "upgrade_needed",
+                    "incompatible_os",
+                    "unprotected",
+                    "rebootless_without_dynamic_detection",
+                    "extended_exclusions_partially_accepted",
+                    "reboot_required",
+                    "pending_deprecation",
+                    "ne_not_running",
+                    "ne_cf_not_active",
+                    "pending_performance_insights",
+                    "prompt_security_certificate_missing",
+                    "prompt_security_certificate_expired",
+                    "reboot_category",
+                    "missing_permissions_category",
+                    "agent_suppressed_category",
+                    "incompatible_os_category",
+                    "unprotected_category",
+                    "partial_functionality",
+                    "performance_insights"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "userActionsNeededNin": {
+                "items": {
+                  "enum": [
+                    "none",
+                    "user_action_needed",
+                    "reboot_needed",
+                    "upgrade_needed",
+                    "incompatible_os",
+                    "unprotected",
+                    "rebootless_without_dynamic_detection",
+                    "extended_exclusions_partially_accepted",
+                    "reboot_required",
+                    "pending_deprecation",
+                    "ne_not_running",
+                    "ne_cf_not_active",
+                    "pending_performance_insights",
+                    "prompt_security_certificate_missing",
+                    "prompt_security_certificate_expired",
+                    "reboot_category",
+                    "missing_permissions_category",
+                    "agent_suppressed_category",
+                    "incompatible_os_category",
+                    "unprotected_category",
+                    "partial_functionality",
+                    "performance_insights"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "uuid": {
+                "type": "string"
+              },
+              "uuid__contains": {
+                "items": {
+                  "minLength": 2,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "uuids": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 5000,
+                "type": "array"
+              },
+              "windowsOsRevision__gte": {
+                "type": "integer"
+              },
+              "windowsOsRevision__lte": {
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "filter"
+        ],
+        "type": "object"
+      },
       "groups_SummarizedGroupSchema_many_200": {
         "properties": {
           "data": {
@@ -16840,6 +18312,154 @@
         ],
         "type": "object"
       },
+      "v2_1.application_management.application_management_schemas_RiskyCVEsSchema_many_200": {
+        "properties": {
+          "data": {
+            "items": {
+              "properties": {
+                "cveId": {
+                  "type": "string"
+                },
+                "cvssVersion": {
+                  "type": "string"
+                },
+                "description": {
+                  "readOnly": true
+                },
+                "exploitCodeMaturity": {
+                  "enum": [
+                    "Unproven",
+                    "High",
+                    "Not Defined",
+                    "Proof of Concept",
+                    "Functional"
+                  ],
+                  "nullable": true,
+                  "type": "string"
+                },
+                "exploitedInTheWild": {
+                  "enum": [
+                    "Not Defined",
+                    "Unknown",
+                    "Yes"
+                  ],
+                  "nullable": true,
+                  "type": "string"
+                },
+                "fpFnMarks": {
+                  "items": {
+                    "properties": {
+                      "markedBy": {
+                        "type": "string"
+                      },
+                      "markedDate": {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      "markedOnScope": {
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "reason": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "readOnly": true
+                      }
+                    },
+                    "required": [
+                      "markedOnScope"
+                    ],
+                    "type": "object"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                },
+                "mitreUrl": {
+                  "readOnly": true
+                },
+                "nvdBaseScore": {
+                  "type": "string"
+                },
+                "nvdUrl": {
+                  "readOnly": true
+                },
+                "publishedDate": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "remediationLevel": {
+                  "enum": [
+                    "Temporary Fix",
+                    "Not Defined",
+                    "Official Fix",
+                    "Workaround",
+                    "Unavailable"
+                  ],
+                  "nullable": true,
+                  "type": "string"
+                },
+                "reportConfidence": {
+                  "enum": [
+                    "Not Defined",
+                    "Reasonable",
+                    "Unknown",
+                    "Confirmed"
+                  ],
+                  "nullable": true,
+                  "type": "string"
+                },
+                "riskScore": {
+                  "type": "string"
+                },
+                "severity": {
+                  "readOnly": true
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "errors": {
+            "items": {
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "pagination": {
+            "properties": {
+              "nextCursor": {
+                "default": null,
+                "nullable": true,
+                "type": "string"
+              },
+              "totalItems": {
+                "format": "int32",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "totalItems"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "pagination"
+        ],
+        "type": "object"
+      },
       "v2_1.error.schemas_BadRequestError": {
         "properties": {
           "code": {
@@ -19938,6 +21558,152 @@
         ],
         "responses": {
           "204": {
+            "headers": {
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Refill-Rate": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Type": {
+                "schema": {
+                  "enum": [
+                    "local",
+                    "global"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2_1.error.schemas_BadRequestError"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2_1.error.schemas_UnauthorizedError"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2_1.error.schemas_ForbiddenError"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2_1.error.schemas_NotFoundError"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2_1.error.schemas_TooManyRequestsError"
+                }
+              }
+            },
+            "headers": {
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Refill-Rate": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Type": {
+                "schema": {
+                  "enum": [
+                    "local",
+                    "global"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2_1.error.schemas_InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "_sdl_v2_api_queries_{id}_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lastStepSeen",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Dataset-Query-Forward-Tag",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2_1.long_running_query.schemas_QueryResult"
+                }
+              }
+            },
             "headers": {
               "X-RateLimit-Limit": {
                 "schema": {
@@ -24369,6 +26135,114 @@
         }
       }
     },
+    "/web/api/v2.1/agents/actions/connect": {
+      "post": {
+        "operationId": "_web_api_agents_actions_connect_post",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/agents.schemas_AgentsActionSchema"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_AffectedResultsSchema_200"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_400"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_401"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_403"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/web/api/v2.1/agents/actions/disconnect": {
+      "post": {
+        "operationId": "_web_api_agents_actions_disconnect_post",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/agents.schemas_AgentsDangerousActionSchema"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_AffectedResultsSchema_200"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_400"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_401"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_403"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/web/api/v2.1/agents/actions/initiate-scan": {
       "post": {
         "operationId": "_web_api_agents_actions_initiate-scan_post",
@@ -24644,6 +26518,389 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/_NoDataSchema_404"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/web/api/v2.1/application-management/risks/cves": {
+      "get": {
+        "operationId": "_web_api_application-management_risks_cves_get",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "siteIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "minimum": 100000000000000000,
+                "type": "string"
+              },
+              "maxItems": 1,
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "required": false,
+            "schema": {
+              "default": null,
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "applicationIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "minimum": 100000000000000000,
+                "type": "string"
+              },
+              "maxItems": 5000,
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "accountIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "minimum": 100000000000000000,
+                "type": "string"
+              },
+              "maxItems": 1,
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "applicationVendor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "publishedDate__between",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "default": null,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": null,
+              "format": "int32",
+              "maximum": 1000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "applicationName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "remediationLevels",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "Temporary Fix",
+                  "Not Defined",
+                  "Official Fix",
+                  "Workaround",
+                  "Unavailable"
+                ],
+                "type": "string"
+              },
+              "maxItems": 5000,
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "publishedDate__gte",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "required": false,
+            "schema": {
+              "default": null,
+              "enum": [
+                "cveId",
+                "severity",
+                "nvdBaseScore",
+                "publishedDate",
+                "riskScore",
+                "exploitedInTheWild",
+                "exploitCodeMaturity",
+                "remediationLevel",
+                "reportConfidence"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "exploitedInTheWild",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "Not Defined",
+                  "Unknown",
+                  "Yes"
+                ],
+                "type": "string"
+              },
+              "maxItems": 5000,
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "severities",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 5000,
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "publishedDate__lt",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "publishedDate__gt",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skipCount",
+            "required": false,
+            "schema": {
+              "default": null,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "publishedDate__lte",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "reportConfidence",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "Not Defined",
+                  "Reasonable",
+                  "Unknown",
+                  "Confirmed"
+                ],
+                "type": "string"
+              },
+              "maxItems": 5000,
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "countOnly",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "applicationVersions",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 5000,
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "cveId__contains",
+            "required": false,
+            "schema": {
+              "items": {
+                "minLength": 9,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "groupIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "minimum": 100000000000000000,
+                "type": "string"
+              },
+              "maxItems": 1,
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "analystVerdict",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "Added CVE",
+                  "False Positive",
+                  "Default"
+                ],
+                "type": "string"
+              },
+              "maxItems": 5000,
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "exploitCodeMaturity",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "Unproven",
+                  "High",
+                  "Not Defined",
+                  "Proof of Concept",
+                  "Functional"
+                ],
+                "type": "string"
+              },
+              "maxItems": 5000,
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2_1.application_management.application_management_schemas_RiskyCVEsSchema_many_200"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_400"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_401"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_403"
                 }
               }
             }
@@ -26427,6 +28684,69 @@
         }
       }
     },
+    "/web/api/v2.1/cloud-detection/rules/{rule_id}": {
+      "put": {
+        "operationId": "_web_api_cloud-detection_rules_{rule_id}_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/v2_1.rules.schemas_PostRuleSchema"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2_1.rules.schemas_RuleResponseSchema_200"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_400"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_401"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_404"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/web/api/v2.1/exclusions": {
       "delete": {
         "operationId": "_web_api_exclusions_delete",
@@ -28011,6 +30331,78 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/_NoDataSchema_401"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/web/api/v2.1/groups/{group_id}/move-agents": {
+      "put": {
+        "operationId": "_web_api_groups_{group_id}_move-agents_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/groups_PutAddAgentsSchema"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "204": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/groups_AddAgentsDataSchema_204"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_400"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_401"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_403"
+                }
+              }
+            }
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/_NoDataSchema_409"
                 }
               }
             }
