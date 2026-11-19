@@ -29,7 +29,7 @@ AWS Region
 :   The AWS region whose managed nodes you want to query, for example `us-east-1` or `eu-west-1`. Requests are sent to `ssm.<region>.amazonaws.com`.
 
 Authentication
-:   AWS Access Key ID and Secret Access Key. Both are required for every action. The IAM identity behind them needs the Systems Manager permissions of the actions you want to use — see [Get API credentials](#aws-ssm-api-credentials).
+:   AWS Access Key ID and Secret Access Key. Both are required for every action. The IAM identity behind them needs the Systems Manager permissions of the actions you want to use. See [Get API credentials](#aws-ssm-api-credentials).
 
 ## Available actions [aws-ssm-connector-actions]
 
@@ -68,6 +68,6 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
    - `ssm:StartAutomationExecution` on both the runbooks it can run (for example `arn:aws:ssm:<region>::document/AWS-RestartEC2Instance` for a runbook owned by AWS, or `arn:aws:ssm:<region>:<account-id>:document/MyRunbook` for one in your account) and `arn:aws:ssm:<region>:<account-id>:automation-execution/*`, and `ssm:StopAutomationExecution` on resource `*`. A runbook runs as the role passed in its `AutomationAssumeRole` parameter, which also needs `iam:PassRole` for that role, or else with these credentials, which then need every permission the runbook uses.
    - `ssm:PutParameter` and `ssm:GetParameter` on the parameters it can write (for example `arn:aws:ssm:<region>:<account-id>:parameter/myapp/flags/*`). Before overwriting a parameter, the connector reads its type to refuse overwriting a `SecureString`.
    - Leave out the permissions of the second, third, and fourth items to keep the connector read-only. Those actions then fail with `AccessDeniedException`.
-3. Under **Security credentials**, create an **Access key** for that user and copy the **Access Key ID** and **Secret Access Key**. Store the secret access key securely — AWS only shows it once.
+3. Under **Security credentials**, create an **Access key** for that user and copy the **Access Key ID** and **Secret Access Key**. Store the secret access key securely because AWS only shows it once.
 4. Note the AWS region where your managed nodes are registered (for example `us-east-1`).
 5. When configuring the connector, enter the Access Key ID, Secret Access Key, and Region.
