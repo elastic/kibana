@@ -1117,11 +1117,17 @@ steps:
 
     describe('when testing with workflowId parameter', () => {
       it.each([
-        { workflowYaml: undefined, permission: 'execute', isEphemeral: false },
-        { workflowYaml: mockWorkflowYaml, permission: 'edit', isEphemeral: true },
+        { workflowYaml: undefined, debug: undefined, permission: 'execute', isEphemeral: false },
+        { workflowYaml: mockWorkflowYaml, debug: undefined, permission: 'edit', isEphemeral: true },
+        {
+          workflowYaml: undefined,
+          debug: { enabled: true },
+          permission: 'edit',
+          isEphemeral: false,
+        },
       ])(
-        'requires $permission for isEphemeral=$isEphemeral',
-        async ({ workflowYaml, permission, isEphemeral }) => {
+        'requires $permission for isEphemeral=$isEphemeral and debug=$debug',
+        async ({ workflowYaml, debug, permission, isEphemeral }) => {
           const privateWorkflow: WorkflowDetailDto = {
             ...mockWorkflowDetailDto,
             access_control: { access_mode: 'private', entries: [] },
@@ -1134,6 +1140,7 @@ steps:
             inputs,
             spaceId,
             request: mockRequest,
+            debug,
           });
 
           const access = await mockWorkflowsService.getAccessControl();
@@ -1145,11 +1152,40 @@ steps:
           );
           expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
             expect.objectContaining({ yaml: mockWorkflowYaml, isTestRun: true, isEphemeral }),
-            expect.any(Object),
+            debug ? expect.objectContaining({ debug }) : expect.not.objectContaining({ debug }),
             mockRequest
           );
         }
       );
+
+      it('requires manage_security to debug a service-account workflow', async () => {
+        mockWorkflowsService.getWorkflow.mockResolvedValue(mockWorkflowDetailDto);
+        mockWorkflowsService.validateWorkflow.mockResolvedValue({
+          valid: true,
+          diagnostics: [],
+          parsedWorkflow: { ...parsedMockWorkflow, settings: { run_as: 'account-a' } } as any,
+        });
+        const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        scopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+          has_all_requested: false,
+        } as Awaited<ReturnType<typeof scopedClusterClient.asCurrentUser.security.hasPrivileges>>);
+        const elasticsearch = elasticsearchServiceMock.createStart();
+        elasticsearch.client.asScoped.mockReturnValue(scopedClusterClient);
+        mockWorkflowsService.getCoreStart = jest
+          .fn()
+          .mockResolvedValue({ ...coreMock.createStart(), elasticsearch });
+
+        await expect(
+          api.testWorkflow({
+            workflowId: mockWorkflowDetailDto.id,
+            inputs,
+            spaceId,
+            request: mockRequest,
+            debug: { enabled: true },
+          })
+        ).rejects.toThrow('Modifying a service-account workflow requires manage_security.');
+        expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
+      });
 
       it('should fetch workflow YAML by ID and execute it', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue({
@@ -3353,6 +3389,53 @@ steps:
 
       expect(mockWorkflowsService.getWaitingStepExecutionId).not.toHaveBeenCalled();
       expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    describe('debug runs', () => {
+      beforeEach(async () => {
+        mockWorkflowsService.getWorkflowExecution.mockResolvedValue({
+          id: 'run-1',
+          workflowId: 'workflow-123',
+          isTestRun: true,
+          context: { debug: { enabled: true } },
+        } as any);
+        mockWorkflowsService.getStepExecution = jest
+          .fn()
+          .mockResolvedValue({ state: { breakpointPaused: true } });
+        const access = await mockWorkflowsService.getAccessControl();
+        jest.mocked(access.assertAccess).mockImplementation(async (_workflow, operation) => {
+          if (operation === 'edit') throw new WorkflowAccessDeniedError();
+        });
+      });
+
+      it('requires edit access to override step input at a breakpoint', async () => {
+        await expect(
+          api.resumeWorkflowExecution('run-1', 'default', { message: 'changed' }, mockRequest, {
+            stepExecutionId: 'step-exec-1',
+          })
+        ).rejects.toThrow(WorkflowAccessDeniedError);
+
+        expect(mockWorkflowsService.markStepAsResponded).not.toHaveBeenCalled();
+        expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).not.toHaveBeenCalled();
+      });
+
+      it('allows continuing from a breakpoint with execute access', async () => {
+        await api.resumeWorkflowExecution('run-1', 'default', {}, mockRequest, {
+          stepExecutionId: 'step-exec-1',
+        });
+
+        expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).toHaveBeenCalled();
+      });
+
+      it('allows answering a wait step with execute access', async () => {
+        mockWorkflowsService.getStepExecution.mockResolvedValue({ state: {} } as any);
+
+        await api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
+          stepExecutionId: 'step-exec-1',
+        });
+
+        expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).toHaveBeenCalled();
+      });
     });
 
     it('throws a conflict and never resumes when no waiting step can be resolved', async () => {

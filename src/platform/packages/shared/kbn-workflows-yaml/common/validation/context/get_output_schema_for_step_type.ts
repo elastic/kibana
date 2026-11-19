@@ -18,6 +18,7 @@ import { withPropertyReferenceOptions } from './property_reference_options';
 import type { WorkflowContextRegistry } from './registry';
 import { structuralStepOutputSchemas } from './structural_step_output_schemas';
 import { isDynamicValue } from '../../regex';
+import { inferZodType } from '../../zod/infer_zod_type';
 
 const waitForInputFallbackSchema: z.ZodSchema = z.record(z.string(), z.unknown());
 
@@ -188,7 +189,43 @@ const getCalledWorkflowOutputSchema = (
   });
 };
 
+function applyMockOutputSchema(baseSchema: z.ZodSchema, node: GraphNodeUnion): z.ZodSchema {
+  if (!('configuration' in node) || !node.configuration || typeof node.configuration !== 'object') {
+    return baseSchema;
+  }
+  const mock = (node.configuration as { mock?: { output?: unknown } }).mock;
+  if (!mock || !('output' in mock) || mock.output === undefined) {
+    return baseSchema;
+  }
+  const inferredMock = inferZodType(mock.output);
+  // Mocks only apply to debug runs and may hold unrendered templates, so they must not narrow an open schema.
+  if (baseSchema instanceof z.ZodUnknown || baseSchema instanceof z.ZodAny) {
+    return z.union([inferredMock, baseSchema]);
+  }
+  if (baseSchema instanceof z.ZodObject && inferredMock instanceof z.ZodObject) {
+    const mergedShape: Record<string, z.ZodType> = { ...baseSchema.shape };
+    for (const [key, mockFieldSchema] of Object.entries(inferredMock.shape)) {
+      const existingField = mergedShape[key];
+      if (!existingField) {
+        mergedShape[key] = mockFieldSchema as z.ZodType;
+      } else if (existingField instanceof z.ZodUnknown || existingField instanceof z.ZodAny) {
+        mergedShape[key] = z.union([mockFieldSchema as z.ZodType, existingField]);
+      }
+    }
+    return z.object(mergedShape);
+  }
+  return baseSchema;
+}
+
 export const getOutputSchemaForStepType = (
+  registry: WorkflowContextRegistry,
+  node: GraphNodeUnion
+): z.ZodSchema => {
+  const baseSchema = resolveBaseOutputSchemaForStepType(registry, node);
+  return applyMockOutputSchema(baseSchema, node);
+};
+
+const resolveBaseOutputSchemaForStepType = (
   registry: WorkflowContextRegistry,
   node: GraphNodeUnion
 ): z.ZodSchema => {

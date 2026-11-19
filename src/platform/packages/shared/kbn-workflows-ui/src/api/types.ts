@@ -81,6 +81,10 @@ export interface TestWorkflowParams {
   workflowId?: string;
   workflowYaml?: string;
   inputs: Record<string, unknown>;
+  debug?: {
+    enabled: boolean;
+    breakpoints?: string[];
+  };
 }
 
 export interface SearchExecutionsParams {

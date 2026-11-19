@@ -167,6 +167,25 @@ export class WorkflowsApiService {
     return response.data;
   }
 
+  /** POST /api/workflows/test — run a workflow in test or debug mode. */
+  async test(params: {
+    workflowId?: string;
+    workflowYaml?: string;
+    inputs: Record<string, unknown>;
+    debug?: {
+      enabled: boolean;
+      breakpoints?: string[];
+    };
+  }): Promise<{ workflowExecutionId: string }> {
+    const response = await this.kbnClient.request<{ workflowExecutionId: string }>({
+      method: 'POST',
+      path: `/s/${this.spaceId}/api/workflows/test`,
+      body: params,
+      headers: { 'elastic-api-version': '2023-10-31' },
+    });
+    return response.data;
+  }
+
   async getExecution(
     workflowExecutionId: string,
     options: GetWorkflowExecutionOptions = {}

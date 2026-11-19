@@ -51,6 +51,7 @@ interface ExecutionResultCardProps {
   failedPosition: FailedStepPosition | null;
   /** Set when the run is paused on waitForInput. Result links to that step. */
   waitingStepExecutionId?: string;
+  isBreakpointPause?: boolean;
   onFocusFailedStep: (stepExecutionId: string) => void;
 }
 
@@ -59,6 +60,7 @@ export const ExecutionResultCard = ({
   workflowExecution,
   failedPosition,
   waitingStepExecutionId,
+  isBreakpointPause = false,
   onFocusFailedStep,
 }: ExecutionResultCardProps) => {
   const { euiTheme } = useEuiTheme();
@@ -164,9 +166,13 @@ export const ExecutionResultCard = ({
                     textDecoration: 'underline',
                   }}
                 >
-                  {i18n.translate('workflows.executionFlyout.result.provideActionLinkText', {
-                    defaultMessage: 'Provide action',
-                  })}
+                  {isBreakpointPause
+                    ? i18n.translate('workflows.executionFlyout.result.pausedAtBreakpointText', {
+                        defaultMessage: 'Paused at breakpoint',
+                      })
+                    : i18n.translate('workflows.executionFlyout.result.provideActionLinkText', {
+                        defaultMessage: 'Provide action',
+                      })}
                 </EuiLink>
               ) : (
                 <EuiText

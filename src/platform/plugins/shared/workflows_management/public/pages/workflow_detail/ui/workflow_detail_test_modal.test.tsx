@@ -54,6 +54,7 @@ jest.mock('../../../hooks/use_async_thunk', () => ({
 }));
 
 jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
+  selectBreakpoints: jest.fn(() => []),
   selectIsTestModalOpen: jest.fn(),
   selectReplayExecutionId: jest.fn(),
   selectReplayIsTestRun: jest.fn(),

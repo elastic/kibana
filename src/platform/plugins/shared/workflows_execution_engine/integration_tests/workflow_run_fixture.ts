@@ -109,10 +109,17 @@ export class WorkflowRunFixture {
     workflowYaml,
     inputs,
     event,
+    isTestRun = false,
+    debug,
   }: {
     workflowYaml: string;
     inputs?: Record<string, unknown>;
     event?: Record<string, unknown>;
+    isTestRun?: boolean;
+    debug?: {
+      enabled: boolean;
+      breakpoints?: string[];
+    };
   }) {
     // clean up before running workflow
     this.cleanup();
@@ -121,11 +128,12 @@ export class WorkflowRunFixture {
       id: 'fake_workflow_execution_id',
       spaceId: this.spaceId,
       workflowId: 'fake_foreach_id',
-      isTestRun: false,
+      isTestRun,
       workflowDefinition,
       context: {
         inputs,
         event,
+        ...(debug ? { debug } : {}),
       },
       status: ExecutionStatus.PENDING,
       createdAt: new Date().toISOString(),

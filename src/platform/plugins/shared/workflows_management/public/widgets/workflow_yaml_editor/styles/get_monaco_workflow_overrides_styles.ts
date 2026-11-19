@@ -60,6 +60,21 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       max-width: 800px;
     }
 
+    /* Compact tooltip for the debugger breakpoint gutter glyph */
+    .monaco-hover:not([class*='contrib']):has([data-code='step-breakpoint-tooltip']),
+    .monaco-hover:not([class*='contrib']):has([data-code='step-breakpoint-tooltip'])
+      .monaco-hover-content,
+    .monaco-hover:not([class*='contrib']):has([data-code='step-breakpoint-tooltip'])
+      .hover-contents {
+      width: auto;
+      min-width: 0;
+    }
+
+    .monaco-hover:not([class*='contrib']):has([data-code='step-breakpoint-tooltip'])
+      .monaco-hover-content {
+      padding: 4px 8px;
+    }
+
     /* Ensure Monaco's internal glyph hover widgets work properly */
     .monaco-editor [class*='modesGlyphHoverWidget'],
     .monaco-editor [class*='glyph'][class*='hover'] {

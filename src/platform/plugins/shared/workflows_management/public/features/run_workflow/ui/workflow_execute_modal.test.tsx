@@ -570,6 +570,49 @@ describe('WorkflowExecuteModal', () => {
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
+    it('opens on the Manual tab with Debug and Run enabled when a no-input test workflow has breakpoints or step mocks', () => {
+      const mockOnDebugSubmit = jest.fn();
+      const { getByRole, getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={true}
+          hasBreakpoints={true}
+          definition={{
+            ...baseWorkflowDefinition,
+            triggers: [{ type: 'manual' }],
+          }}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+          onDebugSubmit={mockOnDebugSubmit}
+        />
+      );
+
+      expect(mockOnSubmit).not.toHaveBeenCalled();
+      expect(getByRole('radio', { name: 'Manual' })).toBeChecked();
+      expect(getByTestId('debugWorkflowButton')).toBeEnabled();
+      expect(getByTestId('executeWorkflowButton')).toBeEnabled();
+    });
+
+    it('does not auto-run a production replay when breakpoints are set and Debug is available', () => {
+      const mockOnDebugSubmit = jest.fn();
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          hasBreakpoints={true}
+          definition={{
+            ...baseWorkflowDefinition,
+            triggers: [{ type: 'manual' }],
+          }}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+          onDebugSubmit={mockOnDebugSubmit}
+        />
+      );
+
+      expect(mockOnSubmit).not.toHaveBeenCalled();
+      expect(mockOnClose).not.toHaveBeenCalled();
+      expect(getByTestId('debugWorkflowButton')).toBeInTheDocument();
+    });
+
     it('does not auto-run when workflow has alert triggers', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal

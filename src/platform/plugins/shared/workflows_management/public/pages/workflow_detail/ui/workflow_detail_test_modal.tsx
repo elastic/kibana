@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useRunWorkflow, useTestWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import {
+  selectBreakpoints,
   selectEditorYaml,
   selectIsTestModalOpen,
   selectReplayExecutionId,
@@ -24,7 +25,10 @@ import {
   clearReplay,
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
-import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
+import {
+  type TestWorkflowParams,
+  testWorkflowThunk,
+} from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
 import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { useAsyncThunk } from '../../../hooks/use_async_thunk';
@@ -37,6 +41,8 @@ export const WorkflowDetailTestModal = () => {
   const { canExecuteWorkflow: hasExecutePrivilege } = useWorkflowsCapabilities();
   const workflow = useSelector(selectWorkflow);
   const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
+  // Debug runs of a saved workflow require edit access.
+  const canDebugWorkflow = workflow?.permissions?.edit !== false;
 
   const { setSelectedExecution, selectEditorRun } = useWorkflowUrlState();
 
@@ -46,6 +52,7 @@ export const WorkflowDetailTestModal = () => {
   const definition = useSelector(selectWorkflowDefinition);
   const workflowId = useSelector(selectWorkflowId);
   const yamlString = useSelector(selectEditorYaml);
+  const breakpoints = useSelector(selectBreakpoints);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
   const { mutateAsync: runWorkflow } = useRunWorkflow();
@@ -56,7 +63,11 @@ export const WorkflowDetailTestModal = () => {
   const isProductionReplay = isReplay && !replayIsTestRun;
 
   const handleRunWorkflow = useCallback(
-    async (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
+    async (
+      inputs: Record<string, unknown>,
+      triggerTab?: WorkflowTriggerTab,
+      debug?: TestWorkflowParams['debug']
+    ) => {
       if (isReplay) {
         if (!workflowId) {
           const missingIdError = new Error(
@@ -74,9 +85,10 @@ export const WorkflowDetailTestModal = () => {
         }
 
         try {
-          const result = replayIsTestRun
-            ? await testSavedWorkflow({ workflowId, inputs })
-            : await runWorkflow({ id: workflowId, inputs });
+          const result =
+            replayIsTestRun || debug
+              ? await testSavedWorkflow({ workflowId, inputs, debug })
+              : await runWorkflow({ id: workflowId, inputs });
           if (result?.workflowExecutionId) {
             setSelectedExecution(result.workflowExecutionId);
           }
@@ -92,7 +104,7 @@ export const WorkflowDetailTestModal = () => {
         return;
       }
 
-      const executionId = await testWorkflow({ inputs, triggerTab });
+      const executionId = await testWorkflow({ inputs, triggerTab, debug });
 
       if (executionId) {
         selectEditorRun(executionId.workflowExecutionId);
@@ -109,6 +121,12 @@ export const WorkflowDetailTestModal = () => {
       testWorkflow,
       workflowId,
     ]
+  );
+
+  const handleDebugWorkflow = useCallback(
+    (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) =>
+      handleRunWorkflow(inputs, triggerTab, { enabled: true, breakpoints }),
+    [handleRunWorkflow, breakpoints]
   );
 
   const closeModal = useCallback(() => {
@@ -166,6 +184,8 @@ export const WorkflowDetailTestModal = () => {
       yamlString={yamlString}
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
+      onDebugSubmit={canDebugWorkflow ? handleDebugWorkflow : undefined}
+      hasBreakpoints={breakpoints.length > 0}
       initialExecutionId={replayExecutionId ?? undefined}
     />
   );

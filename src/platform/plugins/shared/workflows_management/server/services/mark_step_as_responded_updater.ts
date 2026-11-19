@@ -92,7 +92,7 @@ export const createMarkStepAsRespondedUpdater = (
       return 'noop';
     }
     // Container steps (foreach, if) stay `running` while a nested wait is paused and must not win the claim.
-    if (!isHitlWaitStepType(current.stepType)) {
+    if (!isHitlWaitStepType(current.stepType) && current.state?.breakpointPaused !== true) {
       return 'noop';
     }
     if (current.finishedAt != null) {

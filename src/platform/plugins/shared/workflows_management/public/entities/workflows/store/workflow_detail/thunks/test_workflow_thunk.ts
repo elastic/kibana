@@ -20,6 +20,10 @@ import { selectWorkflow, selectWorkflowDefinition, selectYamlString } from '../s
 export interface TestWorkflowParams {
   inputs: Record<string, unknown>;
   triggerTab?: WorkflowTriggerTab;
+  debug?: {
+    enabled: boolean;
+    breakpoints?: string[];
+  };
 }
 
 export interface TestWorkflowResponse {
@@ -32,7 +36,7 @@ export const testWorkflowThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/testWorkflowThunk',
-  async ({ inputs, triggerTab }, { getState, rejectWithValue, extra: { services } }) => {
+  async ({ inputs, triggerTab, debug }, { getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
     const api = new WorkflowApi(http);
     const workflowsManagement = services.workflowsManagement;
@@ -55,6 +59,7 @@ export const testWorkflowThunk = createAsyncThunk<
         workflowYaml: workflow?.permissions?.edit === false ? undefined : yamlString,
         workflowId: workflow?.id,
         inputs,
+        ...(debug ? { debug } : {}),
       });
 
       // Report telemetry for successful test run

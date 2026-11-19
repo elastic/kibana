@@ -25,6 +25,7 @@ import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
 import { getTriggerConditionKqlSuggestions } from './trigger_condition/get_trigger_condition_kql_suggestions';
 import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
 import { getVariableSuggestions } from './variable/get_variable_suggestions';
+import { getStepMockOutputSuggestions } from './workflow/get_step_mock_output_suggestions';
 import { getWorkflowInputsSuggestions } from './workflow/get_workflow_inputs_suggestions';
 import { getWorkflowOutputsSuggestions } from './workflow/get_workflow_outputs_suggestions';
 import { getWorkflowSuggestions } from './workflow/get_workflow_suggestions';
@@ -216,6 +217,11 @@ export async function getSuggestions(
   const workflowOutputSuggestions = await getWorkflowOutputsSuggestions(autocompleteContext);
   if (workflowOutputSuggestions.length > 0) {
     return workflowOutputSuggestions;
+  }
+
+  const mockOutputSuggestions = getStepMockOutputSuggestions(autocompleteContext);
+  if (mockOutputSuggestions.length > 0) {
+    return mockOutputSuggestions;
   }
 
   // JSON Schema autocompletion for inputs.properties

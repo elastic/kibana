@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux-v7';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
+import { canSetBreakpointOnStep } from './decorations/use_breakpoint_decorations';
 import { RunStepButton } from './run_step_button';
 import {
   CopyDevToolsOption,
@@ -27,8 +28,11 @@ import {
   CopyWorkflowStepOption,
 } from './step_action_options';
 import {
+  selectBreakpoints,
   selectEditorFocusedStepInfo,
+  selectEditorWorkflowLookup,
   selectIsExecutionsTab,
+  toggleBreakpoint,
 } from '../../../entities/workflows/store';
 
 export interface StepActionsProps {
@@ -36,9 +40,23 @@ export interface StepActionsProps {
 }
 
 export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
+  const dispatch = useDispatch();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
+  const breakpoints = useSelector(selectBreakpoints);
+  const workflowLookup = useSelector(selectEditorWorkflowLookup);
+  const canSetBreakpoint = canSetBreakpointOnStep(focusedStepInfo, workflowLookup?.steps);
+  const hasBreakpoint = Boolean(
+    canSetBreakpoint && focusedStepInfo?.stepId && breakpoints.includes(focusedStepInfo.stepId)
+  );
+  const breakpointLabel = hasBreakpoint
+    ? i18n.translate('workflows.stepActions.removeBreakpointLabel', {
+        defaultMessage: 'Remove breakpoint',
+      })
+    : i18n.translate('workflows.stepActions.setBreakpointLabel', {
+        defaultMessage: 'Set breakpoint',
+      });
 
   const togglePopover = useCallback(() => {
     setIsPopoverOpen((prev) => !prev);
@@ -108,6 +126,21 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
               })
             }
           />
+        </EuiFlexItem>
+      )}
+      {focusedStepInfo && !isExecutionsTab && canSetBreakpoint && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={breakpointLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="dot"
+              color={hasBreakpoint ? 'warning' : 'text'}
+              iconSize="s"
+              aria-pressed={hasBreakpoint}
+              aria-label={breakpointLabel}
+              data-test-subj="workflowToggleBreakpoint"
+              onClick={() => dispatch(toggleBreakpoint(focusedStepInfo.stepId as string))}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {!!items.length && (

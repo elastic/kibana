@@ -60,6 +60,7 @@ const initialState: WorkflowDetailState = {
   focusedStepId: undefined,
   focusedTriggerId: undefined,
   highlightedStepId: undefined,
+  breakpoints: [],
   isTestModalOpen: false,
   testStepModalOpenStepId: undefined,
   replay: undefined,
@@ -87,6 +88,7 @@ const workflowDetailSlice = createSlice({
         state.cursorPosition = undefined;
         state.focusedStepId = undefined;
         state.focusedTriggerId = undefined;
+        state.breakpoints = [];
       }
       state.workflow = action.payload;
     },
@@ -116,6 +118,15 @@ const workflowDetailSlice = createSlice({
     },
     setHighlightedStepId: (state, action: { payload: { stepId: string | undefined } }) => {
       state.highlightedStepId = action.payload.stepId;
+    },
+    toggleBreakpoint: (state, action: { payload: string }) => {
+      const stepId = action.payload;
+      const idx = state.breakpoints.indexOf(stepId);
+      if (idx >= 0) {
+        state.breakpoints.splice(idx, 1);
+      } else {
+        state.breakpoints.push(stepId);
+      }
     },
     setIsTestModalOpen: (state, action: { payload: boolean }) => {
       state.isTestModalOpen = action.payload;
@@ -319,6 +330,7 @@ export const {
   setIsCheckingSave,
   setCursorPosition,
   setHighlightedStepId,
+  toggleBreakpoint,
   setIsTestModalOpen,
   setReplayExecutionId,
   setReplayStepExecutionId,

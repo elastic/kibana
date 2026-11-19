@@ -329,4 +329,35 @@ describe('useWaitingStepResume', () => {
       ExecutionStatus.WAITING_FOR_INPUT
     );
   });
+
+  it('returns isBreakpointPause: true immediately when waitingStep has state.breakpointPaused', () => {
+    mockUseStepExecution.mockReturnValue({ data: undefined, isLoading: true } as ReturnType<
+      typeof useStepExecution
+    >);
+
+    const execution = createMockWorkflowExecutionDto({
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        createMockStepExecutionDto({
+          id: 'step-bp',
+          stepId: 'step_two',
+          stepType: 'console',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          startedAt: '2024-01-01T00:00:01Z',
+          state: { breakpointPaused: true, breakpointHit: true },
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() => useWaitingStepResume('exec-1', execution));
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        waitingStepExecutionId: 'step-bp',
+        waitingStepStartedAt: '2024-01-01T00:00:01Z',
+        isBreakpointPause: true,
+        hasResumeError: false,
+      })
+    );
+  });
 });
