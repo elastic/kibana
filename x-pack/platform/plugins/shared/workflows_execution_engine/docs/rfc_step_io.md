@@ -16,7 +16,7 @@ The previous design tried to bound that heap with a background eviction loop, pi
 
 Each execution owns a byte-bounded LRU of step outputs. Elasticsearch remains the durable copy. A node does not read the LRU directly. Before the node reads, the engine loads the step IO that node needs, freezes it into a snapshot, and serves that snapshot until the node is done.
 
-The default cache budget is 10 MB (`eviction.maxCacheSize`). An output is stored in the LRU only when it is at most 20% of that budget. A larger output is still returned for the current read and held on the snapshot until the node finishes. It is not kept for a later node. `eviction.minPayloadSize` is ignored. It remains in config so existing deployments that set it do not fail to start.
+The default cache budget is 10 MB (`eviction.maxCacheSize`). An output is stored in the LRU only when it is at most 20% of that budget. A larger output is still returned for the current read and held on the snapshot until the node finishes. It is not kept for a later node. `eviction.minPayloadSize` is ignored. A deployment that still sets it gets a deprecation warning and the value is removed. Output retention is `eviction.maxCacheSize`.
 
 ## Contract
 

@@ -60,8 +60,8 @@ const configSchema = schema.object({
      */
     maxCacheSize: schema.byteSize({ defaultValue: '10mb' }),
     /**
-     * No-op — retained for backwards-compatibility with existing Kibana configs that set it.
-     * Previously controlled the minimum payload size for eviction; the LRU cache ignores this.
+     * Deprecated. The LRU cache ignores this. A configured value logs a warning and is removed.
+     * Retention is controlled by maxCacheSize.
      */
     minPayloadSize: schema.byteSize({ defaultValue: '10kb' }),
   }),
@@ -101,6 +101,24 @@ export const config: PluginConfigDescriptor<WorkflowsExecutionEngineConfig> = {
             defaultMessage:
               'Remove workflowsExecutionEngine.http from the Kibana config file, CLI flag, or environment variable. If allowedHosts listed specific hosts, set those hosts on xpack.actions.allowedHosts.',
           }),
+        ],
+      },
+    }),
+    unused('eviction.minPayloadSize', {
+      level: 'warning',
+      message: i18n.translate('workflowsExecutionEngine.deprecations.minPayloadSizeUnusedMessage', {
+        defaultMessage:
+          'workflowsExecutionEngine.eviction.minPayloadSize is not used. Output retention is controlled by workflowsExecutionEngine.eviction.maxCacheSize.',
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate(
+            'workflowsExecutionEngine.deprecations.minPayloadSizeUnused.manualStepOneMessage',
+            {
+              defaultMessage:
+                'Remove workflowsExecutionEngine.eviction.minPayloadSize from the Kibana config file, CLI flag, or environment variable. Set workflowsExecutionEngine.eviction.maxCacheSize to control how much step output stays in memory.',
+            }
+          ),
         ],
       },
     }),
