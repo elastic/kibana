@@ -68,6 +68,11 @@ exports[`LayerControl is rendered 1`] = `
           >
             <EuiButtonIcon
               aria-label="Collapse layers panel"
+              buttonRef={
+                Object {
+                  "current": null,
+                }
+              }
               className="mapLayerControl__closeLayerTOCButton"
               color="text"
               data-test-subj="mapToggleLegendButton"
@@ -109,6 +114,11 @@ exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
   position="left"
 >
   <ExpandButton
+    buttonRef={
+      Object {
+        "current": null,
+      }
+    }
     hasErrorsOrWarnings={false}
     isLoading={false}
     onClick={[Function]}
@@ -122,6 +132,11 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with error icon
   position="left"
 >
   <ExpandButton
+    buttonRef={
+      Object {
+        "current": null,
+      }
+    }
     hasErrorsOrWarnings={true}
     isLoading={false}
     onClick={[Function]}
@@ -135,6 +150,11 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with loading ic
   position="left"
 >
   <ExpandButton
+    buttonRef={
+      Object {
+        "current": null,
+      }
+    }
     hasErrorsOrWarnings={false}
     isLoading={true}
     onClick={[Function]}
@@ -210,6 +230,11 @@ exports[`LayerControl isReadOnly 1`] = `
           >
             <EuiButtonIcon
               aria-label="Collapse layers panel"
+              buttonRef={
+                Object {
+                  "current": null,
+                }
+              }
               className="mapLayerControl__closeLayerTOCButton"
               color="text"
               data-test-subj="mapToggleLegendButton"
@@ -297,6 +322,11 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
           >
             <EuiButtonIcon
               aria-label="Collapse layers panel"
+              buttonRef={
+                Object {
+                  "current": null,
+                }
+              }
               className="mapLayerControl__closeLayerTOCButton"
               color="text"
               data-test-subj="mapToggleLegendButton"

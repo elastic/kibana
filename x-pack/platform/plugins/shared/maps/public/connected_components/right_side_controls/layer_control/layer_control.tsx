@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -53,6 +53,30 @@ export function LayerControl({
 }: Props) {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
+
+  // Expanding/collapsing swaps one button for another, which drops focus to <body> and
+  // leaves screen readers silent. Move focus to the counterpart button after a user toggle
+  // so the new state is announced.
+  const expandButtonRef = useRef<HTMLButtonElement | null>(null);
+  const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const shouldRestoreFocusRef = useRef(false);
+
+  useEffect(() => {
+    if (!shouldRestoreFocusRef.current) return;
+    shouldRestoreFocusRef.current = false;
+    (isLayerTOCOpen ? collapseButtonRef : expandButtonRef).current?.focus();
+  }, [isLayerTOCOpen]);
+
+  const onOpenLayerTOC = useCallback(() => {
+    shouldRestoreFocusRef.current = true;
+    openLayerTOC();
+  }, [openLayerTOC]);
+
+  const onCloseLayerTOC = useCallback(() => {
+    shouldRestoreFocusRef.current = true;
+    closeLayerTOC();
+  }, [closeLayerTOC]);
+
   if (!isLayerTOCOpen) {
     if (isScreenshotMode()) {
       return null;
@@ -71,7 +95,8 @@ export function LayerControl({
         <ExpandButton
           hasErrorsOrWarnings={hasErrorsOrWarnings}
           isLoading={isLoading}
-          onClick={openLayerTOC}
+          onClick={onOpenLayerTOC}
+          buttonRef={expandButtonRef}
         />
       </EuiToolTip>
     );
@@ -167,7 +192,8 @@ export function LayerControl({
                 <EuiButtonIcon
                   className="mapLayerControl__closeLayerTOCButton"
                   css={{ backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important` }}
-                  onClick={closeLayerTOC}
+                  onClick={onCloseLayerTOC}
+                  buttonRef={collapseButtonRef}
                   iconType="menuRight"
                   color="text"
                   aria-label={i18n.translate(
