@@ -358,20 +358,21 @@ function buildBulkOps(
           compositeSlo,
           memberSummaries
         );
-        bulkOps.push({
-          index: {
-            _index: COMPOSITE_SUMMARY_INDEX_NAME,
-            _id: buildCompositeSloSummaryDocId(spaceId, compositeSlo.id),
-          },
-        });
+        const summaryDoc = buildCompositeSummaryDoc(
+          compositeSlo,
+          compositeSummary,
+          members,
+          spaceId,
+          unresolvedMemberIds
+        );
         bulkOps.push(
-          buildCompositeSummaryDoc(
-            compositeSlo,
-            compositeSummary,
-            members,
-            spaceId,
-            unresolvedMemberIds
-          )
+          {
+            index: {
+              _index: COMPOSITE_SUMMARY_INDEX_NAME,
+              _id: buildCompositeSloSummaryDocId(spaceId, compositeSlo.id),
+            },
+          },
+          summaryDoc
         );
       } catch (err) {
         stats.computeErrors++;
