@@ -15,7 +15,6 @@ import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types'
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -65,6 +64,7 @@ jest.mock('../hooks/use_data_connectors', () => ({
     connectors: [],
     connectorNameById: new Map(),
     connectorActionTypeById: new Map(),
+    connectorTypeNameById: new Map(),
     isLoading: false,
   }),
 }));
@@ -244,6 +244,15 @@ const openSourcesTab = async () => {
   return screen.findByTestId('contextSourcesPanel');
 };
 
+const addEsqlSourceViaPanel = async (query: string) => {
+  fireEvent.click(await screen.findByTestId('contextAddElasticsearchDataCard'));
+  await screen.findByTestId('contextAddElasticsearchDataPanel');
+  fireEvent.click(screen.getByTestId('contextToggleEsqlModeButton'));
+  const editor = await screen.findByTestId('mockEsqlEditor');
+  fireEvent.change(editor, { target: { value: query } });
+  fireEvent.click(screen.getByTestId('contextAddSourcesConfirmButton'));
+};
+
 const confirmAutomationDelete = async () => {
   const modal = await screen.findByTestId('contextAutomationDeleteConfirmModal');
   fireEvent.click(within(modal).getByRole('button', { name: 'Remove' }));
@@ -345,12 +354,8 @@ describe('AiIndexDetailPage', () => {
     expect(await screen.findByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
-    await screen.findByTestId('contextEditSourcesInlineEditor');
-
-    const editor = await screen.findByTestId('mockEsqlEditor');
-    fireEvent.change(editor, { target: { value: 'FROM My view' } });
-    fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
-    fireEvent.click(screen.getByTestId('contextEditSourcesDoneButton'));
+    await screen.findByTestId('contextSourcesPanel');
+    await addEsqlSourceViaPanel('FROM My view');
 
     await waitFor(() => {
       expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
@@ -453,7 +458,7 @@ describe('AiIndexDetailPage', () => {
     );
   });
 
-  it('redirects a Settings deep link to the overview when memory is globally disabled', async () => {
+  it('opens the Settings tab from a deep link when memory is globally disabled', async () => {
     mockUseMemoryEnabled.mockReturnValue(false);
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
@@ -461,14 +466,15 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services, undefined, `${getAiIndexDetailPath(aiIndex.id)}/settings`);
     await waitForAiIndexDetailLoaded();
 
-    expect(await screen.findByTestId('contextAiIndexDetailTab-overview')).toHaveAttribute(
+    expect(await screen.findByTestId('contextAiIndexSettingsTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-settings')).toHaveAttribute(
       'aria-selected',
       'true'
     );
     expect(screen.queryByTestId('contextAiIndexDreamingPanel')).not.toBeInTheDocument();
   });
 
-  it('hides the Settings tab when memory is globally disabled', async () => {
+  it('shows the Settings tab when memory is globally disabled', async () => {
     mockUseMemoryEnabled.mockReturnValue(false);
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
@@ -477,7 +483,20 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.getByTestId('contextAiIndexDetailTab-overview')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextAiIndexDetailTab-settings')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-settings')).toBeInTheDocument();
+  });
+
+  it('shows the Advanced settings section with backing index and delete panels', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+    await waitForAiIndexDetailLoaded();
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-settings'));
+
+    expect(await screen.findByTestId('contextAiIndexSettingsTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSettingsBackingIndex')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSettingsDelete')).toBeInTheDocument();
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
@@ -520,14 +539,15 @@ describe('AiIndexDetailPage', () => {
     );
   });
 
-  it('shows the inline sources editor when there are no sources', async () => {
+  it('shows add source cards when there are no sources', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
 
     renderWithProviders(services);
 
     fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
-    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextSourcesPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-overview'));
     expect(screen.getByTestId('contextAutomationsLocked')).toHaveAttribute(
       'aria-label',
@@ -546,7 +566,7 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
-    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-overview'));
     expect(screen.getByTestId('contextAutomationsLocked')).toBeInTheDocument();
     expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
@@ -612,7 +632,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
   });
 
-  it('edits the description and refetches the AI index', async () => {
+  it('edits the description on the Settings tab and refetches the AI index', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
     services.http.put.mockResolvedValue({ status: 'updated' });
@@ -622,10 +642,14 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-settings'));
+    await screen.findByTestId('contextAiIndexSettingsTab');
 
-    const textArea = await screen.findByTestId('contextDescriptionTextArea');
+    const textArea = screen.getByTestId('contextDescriptionTextArea');
+    expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
+
     fireEvent.change(textArea, { target: { value: 'A brand new description' } });
+    expect(screen.getByTestId('contextDescriptionSaveButton')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
 
     await waitFor(() => {
@@ -643,14 +667,14 @@ describe('AiIndexDetailPage', () => {
       );
     });
 
-    // The editor closes and the detail data is refetched after a successful save.
     await waitFor(() => {
-      expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
     });
+    expect(screen.getByTestId('contextDescriptionTextArea')).toBeInTheDocument();
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
 
-  it('shows the inline sources editor with the current sources selected', async () => {
+  it('shows saved sources with add cards when sources already exist', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
 
@@ -659,25 +683,30 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     await openSourcesTab();
 
-    expect(screen.getByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
     expect(screen.getByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddElasticsearchDataPanel')).not.toBeInTheDocument();
   });
 
   it('saves edited sources and refetches the AI index', async () => {
     const services = createServices();
-    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+    const indexWithoutSources = { ...aiIndex, sources: [] };
+    const indexWithSources = {
+      ...aiIndex,
+      sources: [{ type: 'esql', value: 'FROM My view' }],
+    };
+    services.http.get
+      .mockResolvedValueOnce(indexWithoutSources)
+      .mockResolvedValueOnce(indexWithSources);
     services.http.put.mockResolvedValue({ status: 'updated' });
 
     renderWithProviders(services);
 
     fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
-    await screen.findByTestId('contextEditSourcesInlineEditor');
+    await screen.findByTestId('contextSourcesPanel');
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    const editor = await screen.findByTestId('mockEsqlEditor');
-    fireEvent.change(editor, { target: { value: 'FROM My view' } });
-    fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
-    fireEvent.click(screen.getByTestId('contextEditSourcesDoneButton'));
+    await addEsqlSourceViaPanel('FROM My view');
 
     await waitFor(() => {
       expect(services.http.put).toHaveBeenCalledWith(
@@ -694,9 +723,9 @@ describe('AiIndexDetailPage', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
       expect(screen.getByTestId('contextSelectedSource-esql-0')).toHaveTextContent('FROM My view');
     });
+    expect(screen.queryByTestId('contextAddElasticsearchDataPanel')).not.toBeInTheDocument();
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
 
@@ -719,11 +748,8 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextAddDescriptionButton')).not.toBeInTheDocument();
 
     await waitForAiIndexDetailLoaded();
-
-    expect(screen.getByTestId('contextAddDescriptionButton')).toBeEnabled();
 
     expect(screen.getByTestId('contextAddAutomationButton')).toBeEnabled();
   });
@@ -829,11 +855,11 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.getByTestId('contextAiIndexDetailManagedBadge')).toHaveTextContent('Managed');
-    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
-    expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
+    await screen.findByTestId('contextSourcesPanel');
+    expect(screen.queryByTestId('contextAddElasticsearchDataCard')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddConnectorsCard')).not.toBeInTheDocument();
   });
 
   it('shows all overview sections for managed AI indexes without setup locks', async () => {
@@ -864,10 +890,9 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
     expect(screen.getByTestId('contextAddAutomationButton')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
-    expect(screen.getByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
   });
 
   it('renders connector sources using the connector id when no name is resolved', async () => {
@@ -882,10 +907,9 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     await openSourcesTab();
 
-    expect(screen.getByTestId('contextSelectedSource-connector-0')).toHaveTextContent(
-      'connector-abc'
-    );
-    expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Connector');
+    const connectorCard = screen.getByTestId('contextSelectedSource-connector-0');
+    expect(connectorCard).toHaveTextContent('connector-abc');
+    expect(connectorCard).toHaveTextContent('Connector');
   });
 
   it('removes an automation and refetches', async () => {
@@ -973,17 +997,11 @@ describe('AiIndexDetailPage', () => {
     );
     expect(screen.getByTestId('contextListKiPanel')).toBeInTheDocument();
     expect(history.location.pathname).toBe(getAiIndexKnowledgeDocumentsPath(aiIndex.id));
-    await openAppMenuOverflow();
-    await waitFor(() => {
-      expect(screen.getByTestId('contextListKiPanelDestLink')).toBeInTheDocument();
-    });
-    expect(screen.getByTestId('contextListKiDiscoverLink')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiPanelDestLink')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextListKiPanelSummary')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('contextListKiDiscoverLink')).toHaveAttribute(
-      'href',
-      '/app/discover'
-    );
+    const discoverLink = await screen.findByTestId('contextListKiDiscoverLink');
+    expect(discoverLink).toHaveAttribute('href', '/app/discover');
   });
 
   it('hides the Knowledge Indicators tab when there are no KIs', async () => {

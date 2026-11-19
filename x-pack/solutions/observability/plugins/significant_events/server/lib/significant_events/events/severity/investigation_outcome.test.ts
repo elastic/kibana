@@ -113,30 +113,28 @@ describe('resolveInvestigationOutcomes', () => {
     );
 
     expect([...outcomes]).toEqual([
-      ['event-1', { severity: 'high' }],
-      ['event-2', { severity: 'high' }],
+      ['event-1', { severity: 'high', episodeId: 'episode-1' }],
+      ['event-2', { severity: 'high', episodeId: 'episode-2' }],
     ]);
   });
 
-  it('a re-opened event follows the newest investigation across its episodes', () => {
-    const first = {
+  it('an investigation governs an event only through the episodes it is mapped to, however new it is', () => {
+    const earlierEpisode = {
       ...withSeverity('low'),
-      id: 'first',
-      created_at: '2026-11-01T10:00:00.000Z',
+      id: 'earlier',
+      created_at: '2026-11-09T10:00:00.000Z',
     };
-    const second = {
+    const currentEpisode = {
       ...investigation({ subjects: [{ type: 'alert', id: 'episode-2' }] }),
-      id: 'second',
-      created_at: '2026-11-08T10:00:00.000Z',
+      id: 'current',
+      created_at: '2026-11-01T10:00:00.000Z',
       metadata: { status: 'open', severity: 'critical', verdict: 'v' },
     } as InvestigationSummary;
 
-    const { outcomes } = resolve([first, second], {
-      'episode-1': ['event-1'],
-      'episode-2': ['event-1'],
-    });
+    // Only the event's current episode is mapped, as the loader does.
+    const { outcomes } = resolve([earlierEpisode, currentEpisode], { 'episode-2': ['event-1'] });
 
-    expect(outcomes.get('event-1')?.severity).toBe('critical');
+    expect(outcomes.get('event-1')).toEqual({ severity: 'critical', episodeId: 'episode-2' });
   });
 
   it('ignores an episode that maps to no event, and skips one that maps to several', () => {
@@ -167,33 +165,34 @@ describe('resolveInvestigationOutcomes', () => {
 
 describe('loadInvestigationOutcomes', () => {
   const setup = ({
-    episodeIdsByEvent = new Map([['event-1', ['episode-1']]]),
+    currentEpisodeIds = new Map([['event-1', 'episode-1']]),
     conversationIds = ['inv-1'],
     results = [investigation()],
     list,
     eventIdsByEpisode,
   }: {
     eventIdsByEpisode?: Map<string, string[]>;
-    episodeIdsByEvent?: Map<string, string[]>;
+    currentEpisodeIds?: Map<string, string>;
     conversationIds?: string[];
     results?: InvestigationSummary[];
     list?: jest.Mock;
   } = {}) => {
-    const findEpisodeIdsByEventIds = jest.fn(async () => episodeIdsByEvent);
+    const findCurrentEpisodeIdsByEventIds = jest.fn(async () => currentEpisodeIds);
     const findEventIdsByEpisodeIds = jest.fn(
       async (_episodeIds: string[]) =>
         eventIdsByEpisode ??
         new Map(
-          [...episodeIdsByEvent].flatMap(([eventId, episodeIds]) =>
-            episodeIds.map((episodeId): [string, string[]] => [episodeId, [eventId]])
-          )
+          [...currentEpisodeIds].map(([eventId, episodeId]): [string, string[]] => [
+            episodeId,
+            [eventId],
+          ])
         )
     );
     const findConversationIdsBySubjects = jest.fn(async () => conversationIds);
     const listInvestigations =
       list ?? jest.fn(async () => ({ results, pagination: { total: results.length } }));
     return {
-      findEpisodeIdsByEventIds,
+      findCurrentEpisodeIdsByEventIds,
       findEventIdsByEpisodeIds,
       findConversationIdsBySubjects,
       listInvestigations,
@@ -206,7 +205,7 @@ describe('loadInvestigationOutcomes', () => {
             getSubjectsClient: () => ({ findConversationIdsBySubjects } as never),
             getInvestigationsClient: () => ({ list: listInvestigations } as never),
           },
-          eventClient: { findEpisodeIdsByEventIds, findEventIdsByEpisodeIds },
+          eventClient: { findCurrentEpisodeIdsByEventIds, findEventIdsByEpisodeIds },
         }),
     };
   };
@@ -219,12 +218,40 @@ describe('loadInvestigationOutcomes', () => {
     const outcome = await load();
 
     expect(outcome.status === 'available' && Object.fromEntries(outcome.outcomes)).toEqual({
-      'event-1': { severity: 'high' },
+      'event-1': { severity: 'high', episodeId: 'episode-1' },
     });
     expect(findConversationIdsBySubjects).toHaveBeenCalledWith([
       { type: 'alert', id: 'episode-1' },
     ]);
     expect(listInvestigations).toHaveBeenCalledWith({ id: ['inv-1'], per_page: 1 });
+  });
+
+  it('gives a reopened event no outcome from an earlier episode, and reads only its current episode', async () => {
+    // The event reopened as episode-2; the recorded investigation belongs to its earlier episode-1.
+    const { load, findConversationIdsBySubjects } = setup({
+      currentEpisodeIds: new Map([['event-1', 'episode-2']]),
+      results: [investigation({ subjects: [{ type: 'alert', id: 'episode-1' }] })],
+    });
+
+    const outcome = await load();
+
+    expect(outcome).toEqual({ status: 'available', outcomes: new Map() });
+    expect(findConversationIdsBySubjects).toHaveBeenCalledWith([
+      { type: 'alert', id: 'episode-2' },
+    ]);
+  });
+
+  it("gives a reopened event the outcome of its current episode's investigation", async () => {
+    const { load } = setup({
+      currentEpisodeIds: new Map([['event-1', 'episode-2']]),
+      results: [investigation({ subjects: [{ type: 'alert', id: 'episode-2' }] })],
+    });
+
+    const outcome = await load();
+
+    expect(outcome.status === 'available' && Object.fromEntries(outcome.outcomes)).toEqual({
+      'event-1': { severity: 'high', episodeId: 'episode-2' },
+    });
   });
 
   it('returns only the requested events, though an investigation can govern others', async () => {
@@ -261,12 +288,12 @@ describe('loadInvestigationOutcomes', () => {
   });
 
   it('reads the episode-to-events map in chunks, so a large page stays under the per-read cap', async () => {
-    const episodeIds = Array.from({ length: 120 }, (_, index) => `episode-${index}`);
+    const eventIds = Array.from({ length: 120 }, (_, index) => `event-${index}`);
     const { load, findEventIdsByEpisodeIds } = setup({
-      episodeIdsByEvent: new Map([['event-1', episodeIds]]),
+      currentEpisodeIds: new Map(eventIds.map((id) => [id, `episode-of-${id}`])),
     });
 
-    await load(['event-1']);
+    await load(eventIds);
 
     expect(findEventIdsByEpisodeIds.mock.calls.map(([ids]) => ids.length)).toEqual([50, 50, 20]);
   });
@@ -274,9 +301,9 @@ describe('loadInvestigationOutcomes', () => {
   it('reads nothing for no events, or for events with no episode', async () => {
     const none = setup();
     expect(await none.load([])).toEqual({ status: 'available', outcomes: new Map() });
-    expect(none.findEpisodeIdsByEventIds).not.toHaveBeenCalled();
+    expect(none.findCurrentEpisodeIdsByEventIds).not.toHaveBeenCalled();
 
-    const noEpisodes = setup({ episodeIdsByEvent: new Map() });
+    const noEpisodes = setup({ currentEpisodeIds: new Map() });
     expect(await noEpisodes.load()).toEqual({ status: 'available', outcomes: new Map() });
     expect(noEpisodes.listInvestigations).not.toHaveBeenCalled();
   });
@@ -284,7 +311,7 @@ describe('loadInvestigationOutcomes', () => {
   it('batches the key lookups by 50 episodes and the reads by 100 ids', async () => {
     const eventIds = Array.from({ length: 60 }, (_, index) => `event-${index}`);
     const { load, findConversationIdsBySubjects, listInvestigations } = setup({
-      episodeIdsByEvent: new Map(eventIds.map((id) => [id, [`episode-of-${id}`]])),
+      currentEpisodeIds: new Map(eventIds.map((id) => [id, `episode-of-${id}`])),
       conversationIds: Array.from({ length: 150 }, (_, index) => `inv-${index}`),
       results: [],
     });
@@ -304,7 +331,10 @@ describe('loadInvestigationOutcomes', () => {
       logger,
       eventIds: ['event-1'],
       agenticInvestigations: undefined,
-      eventClient: { findEpisodeIdsByEventIds: jest.fn(), findEventIdsByEpisodeIds: jest.fn() },
+      eventClient: {
+        findCurrentEpisodeIdsByEventIds: jest.fn(),
+        findEventIdsByEpisodeIds: jest.fn(),
+      },
     });
 
     expect(outcome).toEqual({ status: 'unavailable', reason: 'not_installed' });
