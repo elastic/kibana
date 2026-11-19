@@ -291,14 +291,14 @@ describe('Index Pattern Fetcher - server', () => {
       );
     });
 
-    test('applies excluding index patterns to every including index pattern', async () => {
+    test('sends the index patterns in the given order, including the excluding ones', async () => {
       await indexPatterns.getMatchedIndices({
-        indexPatterns: ['-filebeat-*', 'filebeat-*', 'logs-*', '-logs-excluded-*'],
+        indexPatterns: ['-filebeat-*', 'filebeat-*', 'logs-*', '-logs-excluded-*', 'metrics-*'],
       });
 
       expect(esClient.fieldCaps).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: ['filebeat-*', 'logs-*', '-filebeat-*', '-logs-excluded-*'],
+          index: ['-filebeat-*', 'filebeat-*', 'logs-*', '-logs-excluded-*', 'metrics-*'],
         }),
         expect.anything()
       );

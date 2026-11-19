@@ -187,8 +187,9 @@ export class IndexPatternsFetcher {
    * raw field capabilities of the requested fields. Unlike {@link getIndexPatternMatches}, it does not tell
    * which index pattern matched, which saves one request per including index pattern.
    *
-   * Excluding index patterns (starting with `-`) apply to every including index pattern, whatever their
-   * position in the list, to resolve the same indices as {@link getIndexPatternMatches}.
+   * The index patterns are sent in the given order, so Elasticsearch applies an excluding index pattern
+   * (starting with `-`) only to the index patterns listed before it, as it does when searching them.
+   * {@link getIndexPatternMatches} instead applies every excluding index pattern to every including one.
    *
    * @param options.indexPatterns - Index patterns to resolve (may include wildcards and excluded entries).
    * @param options.fields - Fields to return capabilities for. Defaults to `_id` to keep the response small.
@@ -203,19 +204,15 @@ export class IndexPatternsFetcher {
     runtimeMappings?: estypes.MappingRuntimeFields;
   }): Promise<GetMatchedIndicesResult> {
     const { indexPatterns, fields = ['_id'], includeUnmapped, runtimeMappings } = options;
-    const includingIndexPatterns = indexPatterns.filter(
-      (indexPattern) => !this.isExcludingIndexPattern(indexPattern)
-    );
 
     // A request without including index patterns would resolve to every index
-    if (includingIndexPatterns.length === 0) {
+    if (indexPatterns.every((indexPattern) => this.isExcludingIndexPattern(indexPattern))) {
       return { matchedIndices: [], fields: {} };
     }
 
-    const excludingIndexPatterns = indexPatterns.filter(this.isExcludingIndexPattern);
     const { body } = await callFieldCapsApi({
       callCluster: this.elasticsearchClient,
-      indices: [...includingIndexPatterns, ...excludingIndexPatterns],
+      indices: indexPatterns,
       fields,
       fieldCapsOptions: { allow_no_indices: true, include_unmapped: includeUnmapped },
       expandWildcards: 'open',
