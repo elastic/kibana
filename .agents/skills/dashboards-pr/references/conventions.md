@@ -93,15 +93,15 @@ Fixes https://github.com/elastic/kibana/issues/N
 
 Read `.github/PULL_REQUEST_TEMPLATE.md` on every run, so the description tracks the current template. Copy every item under `### Checklist` verbatim (including links), as a `- [ ]` / `- [x]` list. For `### Identify risks`, replace the template's checkboxes with prose: severity, what could go wrong, and the mitigation. Leave out the template's HTML comments and instructional sentences ("Check the PR satisfies following conditions.").
 
-## Breaking changes
+## Breaking changes and deprecations
 
-For breaking HTTP API or contract changes, add visible `## Impact` and `## Action` sections after `## How to test`, and suggest the `release_note:breaking` label. Mention that the breaking-change committee must approve.
+For breaking HTTP API or contract changes, and for deprecations, add visible `## Impact` and `## Action` sections after `## How to test`, and suggest the `release_note:breaking` or `release_note:deprecation` label. For breaking changes, ask whether the breaking-change committee has already approved; it must before the PR is merged. Never mention or link the committee's internal issue in the PR. Instead, remind the user in chat to add the PR link to that issue.
 
 ## Labels
 
 Suggest, in chat (never inside the body):
 
-- one `release_note:*`: `release_note:fix` for a fix users can see, even a small one; `release_note:enhancement` / `release_note:feature` for new behavior; `release_note:skip` for internal-only changes;
+- one `release_note:*`: `release_note:fix` for a fix users can see; `release_note:feature` for something new; `release_note:enhancement` for improving something existing; `release_note:breaking` or `release_note:deprecation` for changes that need `## Impact` and `## Action`; `release_note:plugin_api_changes` for plugin API changes; `release_note:skip` only if users won't notice the change;
 - one `backport:*` (`backport:skip`, `backport:version` with the version labels, e.g. `v9.7.0`);
 - `Team:*` and `Feature:*`, taken from the issue's labels when present, otherwise from the owners of the touched files (`kibana.jsonc` `owner`, `.github/CODEOWNERS`).
 
