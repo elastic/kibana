@@ -39,6 +39,9 @@ import {
 import {
   ClosureTypeSchema,
   ConfigurationBasicWithoutOwnerSchema,
+  KpiAcknowledgeTriggerSchema,
+  KpiAggregateBySchema,
+  KpiDateBasisSchema,
   KpiMetricAggregationTypeSchema,
   KpiMetricDateFieldSchema,
   KpiMetricDirectionSchema,
@@ -220,6 +223,14 @@ export const PredefinedKpiMetricRequestSchema = lazySchema(() =>
       min: 1,
       max: MAX_METRIC_PREDEFINED_ID_LENGTH,
     }),
+    acknowledgeTrigger: KpiAcknowledgeTriggerSchema.optional(),
+    aggregateBy: KpiAggregateBySchema.optional(),
+    dateBasis: KpiDateBasisSchema.optional(),
+    caseQuery: limitedStringSchema({
+      fieldName: 'metric case query',
+      min: 0,
+      max: MAX_METRIC_QUERY_LENGTH,
+    }).optional(),
   })
 );
 

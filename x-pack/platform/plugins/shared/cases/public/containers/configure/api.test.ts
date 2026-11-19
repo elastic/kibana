@@ -80,6 +80,16 @@ describe('Case Configuration API', () => {
             display: 'value' as const,
           },
           {
+            id: 'metric-3',
+            kind: 'predefined' as const,
+            predefinedId: 'alert_time_to_acknowledge_avg',
+            display: 'value' as const,
+            acknowledgeTrigger: 'assigned' as const,
+            aggregateBy: 'case' as const,
+            dateBasis: 'case_closed_at' as const,
+            caseQuery: 'case.category: "IR"',
+          },
+          {
             id: 'metric-2',
             kind: 'custom' as const,
             label: 'Critical cases',

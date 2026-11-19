@@ -117,6 +117,14 @@ export const KpiMetricDirectionSchema = lazySchema(() =>
   z.enum(['lower_is_better', 'higher_is_better'])
 );
 
+export const KpiAcknowledgeTriggerSchema = lazySchema(() =>
+  z.enum(['assigned', 'in_progress', 'assigned_or_in_progress'])
+);
+
+export const KpiAggregateBySchema = lazySchema(() => z.enum(['alert', 'case']));
+
+export const KpiDateBasisSchema = lazySchema(() => z.enum(['attached_at', 'case_closed_at']));
+
 export const KpiMetricGroupBySchema = lazySchema(() =>
   z.object({
     field: z.string(),
@@ -140,6 +148,26 @@ export const PredefinedKpiMetricSchema = lazySchema(() =>
   KpiMetricBaseSchema.extend({
     kind: z.literal('predefined'),
     predefinedId: z.string(),
+    /**
+     * Only for the alert time to acknowledge metrics. The events that acknowledge an alert.
+     * No value means assigned_or_in_progress. The engine reads it in Step 28.
+     */
+    acknowledgeTrigger: KpiAcknowledgeTriggerSchema.optional(),
+    /**
+     * Only for the alert time to acknowledge metrics. Alert gives one value for each alert.
+     * Case gives one value for each case. No value means alert. The engine reads it in Step 30.
+     */
+    aggregateBy: KpiAggregateBySchema.optional(),
+    /**
+     * Only for the alert time to acknowledge metrics. The date that the date range applies to.
+     * No value means attached_at. The engine reads it in Step 32.
+     */
+    dateBasis: KpiDateBasisSchema.optional(),
+    /**
+     * Only for the alert time to acknowledge metrics. KQL on the .cases fields that selects the cases.
+     * The engine reads it in Step 34.
+     */
+    caseQuery: z.string().optional(),
   })
 );
 
@@ -269,6 +297,9 @@ export type KpiMetricThreshold = z.infer<typeof KpiMetricThresholdSchema>;
 export type KpiMetricThresholdUnit = z.infer<typeof KpiMetricThresholdUnitSchema>;
 export type KpiMetricDirection = z.infer<typeof KpiMetricDirectionSchema>;
 export type KpiMetricDateField = z.infer<typeof KpiMetricDateFieldSchema>;
+export type KpiAcknowledgeTrigger = z.infer<typeof KpiAcknowledgeTriggerSchema>;
+export type KpiAggregateBy = z.infer<typeof KpiAggregateBySchema>;
+export type KpiDateBasis = z.infer<typeof KpiDateBasisSchema>;
 export type KpiMetricGroupBy = z.infer<typeof KpiMetricGroupBySchema>;
 export type PredefinedKpiMetricConfiguration = z.infer<typeof PredefinedKpiMetricSchema>;
 export type CustomKpiMetricConfiguration = z.infer<typeof CustomKpiMetricSchema>;

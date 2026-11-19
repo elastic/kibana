@@ -767,6 +767,35 @@ describe('configure', () => {
       expect(result.data).toStrictEqual(metrics);
     });
 
+    it('keeps the options of an alert metric', () => {
+      const metric = {
+        kind: 'predefined' as const,
+        predefinedId: 'alert_time_to_acknowledge_avg',
+        display: 'value' as const,
+        acknowledgeTrigger: 'assigned_or_in_progress' as const,
+        aggregateBy: 'case' as const,
+        dateBasis: 'case_closed_at' as const,
+        caseQuery: 'case.category: "IR"',
+      };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ casesList: [metric] });
+    });
+
+    it('does not accept an option value that is not known', () => {
+      const metric = { ...predefinedMetric, acknowledgeTrigger: 'never' };
+      expect(KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] }).success).toBe(
+        false
+      );
+    });
+
+    it('does not accept a case query above the length limit', () => {
+      const metric = { ...predefinedMetric, caseQuery: 'a'.repeat(MAX_METRIC_QUERY_LENGTH + 1) };
+      expect(KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] }).success).toBe(
+        false
+      );
+    });
+
     it('accepts an aggregation, a threshold, and a direction', () => {
       const metric = {
         ...customMetric,

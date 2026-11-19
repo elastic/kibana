@@ -206,6 +206,29 @@ describe('configure', () => {
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(request);
     });
+
+    it('keeps the options of an alert metric', () => {
+      const request = {
+        ...defaultRequest,
+        metrics: {
+          casesList: [
+            {
+              id: 'metric-1',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_median',
+              display: 'value',
+              acknowledgeTrigger: 'in_progress',
+              aggregateBy: 'case',
+              dateBasis: 'case_closed_at',
+              caseQuery: 'case.category: "IR"',
+            },
+          ],
+        },
+      };
+      const result = ConfigurationAttributesSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
   });
 
   describe('ConfigurationSchema', () => {
