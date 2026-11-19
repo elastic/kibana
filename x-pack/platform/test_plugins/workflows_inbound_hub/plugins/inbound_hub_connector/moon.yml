@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/workflows-inbound-hub-test-plugin
   channel: ''
   owner: '@elastic/workflows-eng'
-  sourceRoot: x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector
+  sourceRoot: x-pack/platform/test_plugins/workflows_inbound_hub/plugins/inbound_hub_connector
 dependsOn:
   - '@kbn/actions-plugin'
   - '@kbn/connector-specs'
