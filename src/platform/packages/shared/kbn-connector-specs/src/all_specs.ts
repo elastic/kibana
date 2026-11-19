@@ -13,6 +13,7 @@ export * from './specs/atlassian/jira-cloud/jira';
 export * from './specs/atlassian/confluence_cloud/confluence';
 export * from './specs/aws/aws';
 export * from './specs/aws_lambda/aws_lambda';
+export * from './specs/aws_ssm/aws_ssm';
 export * from './specs/bigquery/bigquery';
 export * from './specs/brave_search/brave_search';
 export * from './specs/censys/censys';
