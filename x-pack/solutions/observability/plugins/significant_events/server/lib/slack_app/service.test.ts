@@ -12,6 +12,7 @@ import type { SignificantEventsServer } from '../../types';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { createAgentNotFoundError, createAgentUnavailableError } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID, SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
@@ -390,6 +391,27 @@ describe('SlackAppService', () => {
       expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
         expect.objectContaining({ apiKeyId: 'new-key', claimId: 'claim-2' }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+    });
+
+    it('records the full name of the connecting user instead of an opaque username', async () => {
+      const { server, soClient, grantAsInternalUser } = createHarness();
+      jest.mocked(server.security.authc.getCurrentUser).mockReturnValue(
+        mockAuthenticatedUser({
+          username: '12345',
+          full_name: 'Test User',
+          email: 't@example.com',
+        })
+      );
+      grantAsInternalUser.mockResolvedValue({ id: 'new-key', name: 'k', api_key: 'secret' });
+      startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'claim-2' });
+
+      await new SlackAppService(server).connect(request);
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({ createdBy: 'Test User' }),
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
     });
