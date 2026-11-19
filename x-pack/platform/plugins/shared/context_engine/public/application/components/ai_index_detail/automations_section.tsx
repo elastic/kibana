@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
-import { AutomationsLockedDescription } from '../automations_locked_description';
-import { AutomationsPanel } from '../automations_panel';
-import { LockedSectionPanel } from '../locked_section_panel';
+import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { AutomationsLockedDescription } from './automations_locked_description';
+import { AutomationsPanel } from './automations_panel';
+import { LockedSectionPanel } from './locked_section_panel';
 
 const automationsLockedAriaLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel',

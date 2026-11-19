@@ -17,13 +17,14 @@ import { KI_NOT_DELETED_STATUSES } from '../../../common/ki_lifecycle_status';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import {
   AiIndexCreatedCallout,
+  AutomationsSection,
   ConnectAgentPanel,
   LockedSectionPanel,
   SignalsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
-import { AutomationsSection, SettingsTab } from '../components/ai_index_detail/settings';
+import { SettingsTab } from '../components/ai_index_detail/settings';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';

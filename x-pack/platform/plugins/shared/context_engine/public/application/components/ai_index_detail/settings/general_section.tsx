@@ -106,49 +106,49 @@ export const GeneralSection = ({ isLoading, aiIndex, onSaved }: GeneralSectionPr
             />
           </EuiFormRow>
         )}
+        {isDirty && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={() => setEdited(undefined)}
+                  isDisabled={isSaving}
+                  data-test-subj="contextDescriptionCancelButton"
+                  {...getEbtProps({
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
+                    action: CONTEXT_ENGINE_UI_EBT.action.description.CANCEL,
+                  })}
+                >
+                  <FormattedMessage
+                    id="xpack.contextEngine.aiIndexDetail.settings.general.discard"
+                    defaultMessage="Discard"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  size="s"
+                  onClick={save}
+                  isLoading={isSaving}
+                  isDisabled={!validation.valid}
+                  data-test-subj="contextDescriptionSaveButton"
+                  {...getEbtProps({
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
+                    action: CONTEXT_ENGINE_UI_EBT.action.description.SAVE,
+                  })}
+                >
+                  <FormattedMessage
+                    id="xpack.contextEngine.aiIndexDetail.settings.general.save"
+                    defaultMessage="Save changes"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
       </SettingsRow>
-      {isDirty && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={() => setEdited(undefined)}
-                isDisabled={isSaving}
-                data-test-subj="contextDescriptionCancelButton"
-                {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
-                  action: CONTEXT_ENGINE_UI_EBT.action.description.CANCEL,
-                })}
-              >
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.settings.general.discard"
-                  defaultMessage="Discard"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                size="s"
-                onClick={save}
-                isLoading={isSaving}
-                isDisabled={!validation.valid}
-                data-test-subj="contextDescriptionSaveButton"
-                {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
-                  action: CONTEXT_ENGINE_UI_EBT.action.description.SAVE,
-                })}
-              >
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.settings.general.save"
-                  defaultMessage="Save changes"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
     </SettingsPanel>
   );
 };

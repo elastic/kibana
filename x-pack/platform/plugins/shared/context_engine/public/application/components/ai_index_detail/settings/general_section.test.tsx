@@ -112,6 +112,23 @@ describe('GeneralSection', () => {
     expect(screen.getByTestId('contextDescriptionCancelButton')).toHaveTextContent('Discard');
   });
 
+  it('does not render a divider between the description field and dirty actions', () => {
+    renderWithProviders(
+      <GeneralSection
+        isLoading={false}
+        aiIndex={{ ...aiIndex, description: 'My custom description' }}
+        onSaved={jest.fn()}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'Updated description' },
+    });
+
+    expect(screen.getByTestId('contextDescriptionSaveButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSettingsGeneral').querySelector('hr')).toBeNull();
+  });
+
   it('restores the saved description when Discard is clicked', () => {
     renderWithProviders(
       <GeneralSection

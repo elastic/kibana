@@ -9,8 +9,8 @@ import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { useMemoryEnabled } from '../../../hooks/use_memory_enabled';
+import { AutomationsSection } from '../automations_section';
 import { AdvancedSection } from './advanced_section';
-import { AutomationsSection } from './automations_section';
 import { DreamingPanel } from './dreaming_panel';
 import { GeneralSection } from './general_section';
 

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { AutomationsSection } from './automations_section';
 export { SettingsTab } from './settings_tab';

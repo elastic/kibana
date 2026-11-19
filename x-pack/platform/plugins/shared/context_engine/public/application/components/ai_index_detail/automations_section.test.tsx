@@ -9,14 +9,14 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
+import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { AutomationsSection } from './automations_section';
 
-jest.mock('../automations_panel', () => ({
+jest.mock('./automations_panel', () => ({
   AutomationsPanel: () => <div data-test-subj="contextAutomationsPanelStub" />,
 }));
 
-jest.mock('../automations_locked_description', () => ({
+jest.mock('./automations_locked_description', () => ({
   AutomationsLockedDescription: () => (
     <div data-test-subj="contextAutomationsLockedDescriptionStub" />
   ),
