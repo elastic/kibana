@@ -13,7 +13,6 @@ import {
   EuiPageSection,
   EuiPanel,
   EuiProgress,
-  useResizeObserver,
   EuiSpacer,
   EuiTitle,
   copyToClipboard,
@@ -30,7 +29,6 @@ import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../ebt_constants';
 import { useApiClient } from '../../hooks/use_api_client';
-import { useHideSideNav } from '../../application/side_nav_context';
 import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useDiscoverHref } from '../../hooks/use_discover_href';
 import { usePersistedChoice } from '../../hooks/use_persisted_choice';
@@ -38,11 +36,11 @@ import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_p
 import { useFormatters } from '../../hooks/use_formatters';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { ANONYMOUS_USER, SESSIONS_LABEL } from '../../labels';
-import { sessionSignals, shortSessionId, type SessionSignalId } from '../../utils/describe_session';
+import { sessionSignals, shortSessionId, type SessionSignal } from '../../utils/describe_session';
 import { formatSessionDuration } from '../../utils/format_session_duration';
 import { pickSessionsListQuery } from '../../utils/sessions_list_query';
 import { JourneyFilters } from './components/journey_filters';
-import { SessionSplitView } from './components/session_split_view';
+import { SessionsFlyout } from './components/sessions_flyout';
 import { SessionsRail } from './components/sessions_rail';
 import { PageJourney } from './components/page_journey';
 import { SessionSummary } from './components/session_summary';
@@ -78,50 +76,11 @@ const SESSIONS_LIST_LABEL = i18n.translate(
 );
 
 /**
- * Where the sessions list shows beside a session, kept across visits. A value stored before the
- * list could move, `open`, falls back to the left, where it was.
+ * Whether the sessions list shows in a flyout beside a session, kept across visits. Anything else
+ * stored, e.g. from before the list was a flyout, shows it.
  */
-const RAIL_STORAGE_KEY = 'digitalExperience.sessionDetail.rail';
-
-const RAIL_PLACEMENT_OPTIONS = [
-  {
-    placement: 'left',
-    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.showLeft', {
-      defaultMessage: 'Show on the left',
-    }),
-    iconType: 'transitionLeftIn',
-  },
-  {
-    placement: 'right',
-    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.showRight', {
-      defaultMessage: 'Show on the right',
-    }),
-    iconType: 'transitionRightIn',
-  },
-  {
-    placement: 'flyout',
-    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.showFlyout', {
-      defaultMessage: 'Show as a flyout',
-    }),
-    iconType: 'menuRight',
-  },
-  {
-    placement: 'hidden',
-    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.hide', {
-      defaultMessage: 'Hide',
-    }),
-    iconType: 'eyeSlash',
-  },
-] as const;
-
-const RAIL_PLACEMENTS = RAIL_PLACEMENT_OPTIONS.map(({ placement }) => placement);
-
-const railMenuIcon: Record<(typeof RAIL_PLACEMENTS)[number], string> = {
-  left: 'transitionLeftIn',
-  right: 'transitionRightIn',
-  flyout: 'menuRight',
-  hidden: 'transitionLeftIn',
-};
+const FLYOUT_STORAGE_KEY = 'digitalExperience.sessionDetail.rail';
+const FLYOUT_CHOICES = ['flyout', 'hidden'] as const;
 
 const OPEN_IN_DISCOVER_LABEL = i18n.translate(
   'xpack.digitalExperience.sessionDetail.openInDiscoverLabel',
@@ -129,24 +88,26 @@ const OPEN_IN_DISCOVER_LABEL = i18n.translate(
 );
 
 /** The signals of a session as the header writes them, which has room to spell them out. */
-const BADGE_LABELS: Record<SessionSignalId, (count: number) => string> = {
-  jsErrors: (count) =>
-    i18n.translate('xpack.digitalExperience.sessionDetail.badges.jsErrors', {
-      defaultMessage: '{count, plural, one {# JS error} other {# JS errors}}',
-      values: { count },
-    }),
-  failedRequests: (count) =>
-    i18n.translate('xpack.digitalExperience.sessionDetail.badges.failedRequests', {
-      defaultMessage: '{count, plural, one {# failed request} other {# failed requests}}',
-      values: { count },
-    }),
-  bounced: () =>
-    i18n.translate('xpack.digitalExperience.sessionDetail.badges.bounced', {
-      defaultMessage: 'Bounced',
-    }),
+const badgeLabel = (signal: SessionSignal): string => {
+  switch (signal.id) {
+    case 'jsErrors':
+      return i18n.translate('xpack.digitalExperience.sessionDetail.badges.jsErrors', {
+        defaultMessage: '{count, plural, one {# JS error} other {# JS errors}}',
+        values: { count: signal.count },
+      });
+    case 'failedRequests':
+      return i18n.translate('xpack.digitalExperience.sessionDetail.badges.failedRequests', {
+        defaultMessage: '{count, plural, one {# failed request} other {# failed requests}}',
+        values: { count: signal.count },
+      });
+    case 'bounced':
+      return i18n.translate('xpack.digitalExperience.sessionDetail.badges.bounced', {
+        defaultMessage: 'Bounced',
+      });
+  }
 };
 
-const BADGE_TOOLTIPS: Partial<Record<SessionSignalId, string>> = {
+const BADGE_TOOLTIPS: Partial<Record<SessionSignal['id'], string>> = {
   bounced: i18n.translate('xpack.digitalExperience.sessionDetail.badges.bouncedTooltip', {
     defaultMessage: 'The user left after viewing one page.',
   }),
@@ -154,11 +115,11 @@ const BADGE_TOOLTIPS: Partial<Record<SessionSignalId, string>> = {
 
 /** What kind of session it is, at a glance: its errors, failed requests, bounce and environment. */
 const sessionBadges = (session: Session): AppHeaderBadge[] => [
-  ...sessionSignals(session).map(({ id, count, color }) => ({
-    label: BADGE_LABELS[id](count),
-    tooltip: BADGE_TOOLTIPS[id],
-    color,
-    'data-test-subj': `digitalExperienceSessionBadge-${id}`,
+  ...sessionSignals(session).map((signal) => ({
+    label: badgeLabel(signal),
+    tooltip: BADGE_TOOLTIPS[signal.id],
+    color: signal.color,
+    'data-test-subj': `digitalExperienceSessionBadge-${signal.id}`,
   })),
   ...(session.environment
     ? [
@@ -352,21 +313,15 @@ export function SessionDetailPage({
   const { query } = useDigitalExperienceParams('/{serviceName}/sessions/{sessionId}');
   const { overviewHref, sessionsHref } = useApplicationLinks(serviceName, query.source);
   const backHref = sessionsHref(pickSessionsListQuery(query));
-  const [railPlacement, setRailPlacement] = usePersistedChoice(
-    RAIL_STORAGE_KEY,
-    RAIL_PLACEMENTS,
-    'left'
+  const [flyoutChoice, setFlyoutChoice] = usePersistedChoice(
+    FLYOUT_STORAGE_KEY,
+    FLYOUT_CHOICES,
+    'flyout'
   );
-  const railOpen = railPlacement !== 'hidden';
-  const railIsDocked = railPlacement === 'left' || railPlacement === 'right';
-  // Docked, the list takes the width of the side navigation; as a flyout, it leaves it be.
-  useHideSideNav(railIsDocked);
+  const flyoutOpen = flyoutChoice === 'flyout';
 
-  // Another session opens at its top, whether the page or the panel beside the list scrolls.
+  // Another session opens at its top.
   const pageRef = useRef<HTMLDivElement>(null);
-  // Measured, so that the sessions list's header can line up with it.
-  const [headerElement, setHeaderElement] = useState<HTMLDivElement | null>(null);
-  const { height: headerHeight } = useResizeObserver(headerElement, 'height');
   const shownSessionId = useRef(sessionId);
   useEffect(() => {
     if (shownSessionId.current !== sessionId) {
@@ -508,74 +463,45 @@ export function SessionDetailPage({
       ];
 
   return (
-    <SessionSplitView
-      placement={railPlacement}
-      onHideRail={() => setRailPlacement('hidden')}
-      rail={
-        <SessionsRail
-          serviceName={serviceName}
-          sessionId={sessionId}
-          source={query.source}
-          placement={railPlacement === 'hidden' ? 'left' : railPlacement}
-          onHide={() => setRailPlacement('hidden')}
-          onToggleFlyout={() => setRailPlacement(railPlacement === 'flyout' ? 'left' : 'flyout')}
-          headerHeight={railIsDocked ? headerHeight || undefined : undefined}
-        />
-      }
-    >
+    <>
       <div data-test-subj="digitalExperienceSessionPage" ref={pageRef}>
         {/* The header's back is the way to the list, so there is no in-page back button, and Chrome
       Next shows a single back control. */}
-        <div ref={setHeaderElement}>
-          <AppHeader
-            title={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
-              defaultMessage: 'Session',
-            })}
-            back={{ href: backHref, label: SESSIONS_LABEL }}
-            badges={session ? sessionBadges(session) : undefined}
-            metadata={metadata}
-            menu={{
-              items: [
-                {
-                  id: 'sessionsList',
-                  order: 1,
-                  label: SESSIONS_LIST_LABEL,
-                  iconType: railMenuIcon[railPlacement],
-                  isSelected: railOpen,
-                  testId: 'digitalExperienceSessionsListToggle',
-                  popoverTestId: 'digitalExperienceSessionsListPlacement',
-                  // Where the list shows, or that it doesn't.
-                  items: RAIL_PLACEMENT_OPTIONS.map(({ placement, label, iconType }, index) => ({
-                    id: `sessionsList-${placement}`,
-                    order: index + 1,
-                    label,
-                    iconType,
-                    isSelected: railPlacement === placement,
-                    run: () => setRailPlacement(placement),
-                    testId: `digitalExperienceSessionsListPlacement-${placement}`,
-                    ebt: {
-                      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_SESSIONS_LIST,
-                      detail: placement,
+        <AppHeader
+          title={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
+            defaultMessage: 'Session',
+          })}
+          back={{ href: backHref, label: SESSIONS_LABEL }}
+          badges={session ? sessionBadges(session) : undefined}
+          metadata={metadata}
+          menu={{
+            items: [
+              {
+                id: 'sessionsList',
+                order: 1,
+                label: SESSIONS_LIST_LABEL,
+                iconType: 'menuRight',
+                isSelected: flyoutOpen,
+                run: () => setFlyoutChoice(flyoutOpen ? 'hidden' : 'flyout'),
+                testId: 'digitalExperienceSessionsListToggle',
+                ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_SESSIONS_LIST },
+              },
+              ...(discoverHref
+                ? [
+                    {
+                      id: 'openInDiscover',
+                      order: 2,
+                      label: OPEN_IN_DISCOVER_LABEL,
+                      iconType: 'discoverApp',
+                      href: discoverHref,
+                      testId: 'digitalExperienceSessionOpenInDiscover',
+                      ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER },
                     },
-                  })),
-                },
-                ...(discoverHref
-                  ? [
-                      {
-                        id: 'openInDiscover',
-                        order: 2,
-                        label: OPEN_IN_DISCOVER_LABEL,
-                        iconType: 'discoverApp',
-                        href: discoverHref,
-                        testId: 'digitalExperienceSessionOpenInDiscover',
-                        ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER },
-                      },
-                    ]
-                  : []),
-              ],
-            }}
-          />
-        </div>
+                  ]
+                : []),
+            ],
+          }}
+        />
         {/* The app shell is unpadded, so the header spans the page; the content pads itself. */}
         <div css={{ position: 'relative' }}>
           {loading && detail && (
@@ -591,6 +517,16 @@ export function SessionDetailPage({
           {renderContent()}
         </EuiPageSection>
       </div>
-    </SessionSplitView>
+      {flyoutOpen && (
+        <SessionsFlyout onClose={() => setFlyoutChoice('hidden')}>
+          <SessionsRail
+            serviceName={serviceName}
+            sessionId={sessionId}
+            source={query.source}
+            onHide={() => setFlyoutChoice('hidden')}
+          />
+        </SessionsFlyout>
+      )}
+    </>
   );
 }

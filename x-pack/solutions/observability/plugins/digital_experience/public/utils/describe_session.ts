@@ -56,14 +56,9 @@ export const journeyOf = ({
 };
 
 /** What stands out about a session: something broke, or the user left at once. */
-export type SessionSignalId = 'jsErrors' | 'failedRequests' | 'bounced';
-
-export interface SessionSignal {
-  id: SessionSignalId;
-  /** How many there are; `bounced` has nothing to count. */
-  count: number;
-  color: 'danger' | 'warning' | 'hollow';
-}
+export type SessionSignal =
+  | { id: 'jsErrors' | 'failedRequests'; count: number; color: 'danger' | 'warning' }
+  | { id: 'bounced'; color: 'hollow' };
 
 /**
  * The signals of a session, in the order every surface shows them: what broke first, then whether
@@ -80,5 +75,5 @@ export const sessionSignals = ({
   ...(failedRequestCount > 0
     ? [{ id: 'failedRequests' as const, count: failedRequestCount, color: 'warning' as const }]
     : []),
-  ...(bounced ? [{ id: 'bounced' as const, count: 0, color: 'hollow' as const }] : []),
+  ...(bounced ? [{ id: 'bounced' as const, color: 'hollow' as const }] : []),
 ];

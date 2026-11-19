@@ -191,19 +191,14 @@ const httpError = (status: number, message: string) =>
   Object.assign(new Error(message), { response: { status } });
 
 const mockAddSuccess = jest.fn();
-const mockChrome = {
-  getChromeStyle: jest.fn(() => 'classic'),
-  sideNav: { getIsCollapsed: jest.fn(() => false), setIsCollapsed: jest.fn() },
-};
 const mockGetRedirectUrl = jest.fn(() => '/app/discover#/?esql');
 
-/** Opens the header's Sessions list menu, which may sit in the menu's overflow. */
-const openSessionsListMenu = async () => {
+/** Presses the header's Sessions list button, which may sit in the menu's overflow. */
+const toggleSessionsList = async () => {
   if (!screen.queryByTestId('digitalExperienceSessionsListToggle')) {
     await openAppMenuOverflow();
   }
   fireEvent.click(screen.getByTestId('digitalExperienceSessionsListToggle'));
-  await screen.findByTestId('digitalExperienceSessionsListPlacement-left');
 };
 
 /** The page as its route renders it, with the session from the URL. */
@@ -217,7 +212,6 @@ function SessionRoute() {
 const renderPage = () => {
   jest.mocked(useKibanaServices).mockReturnValue({
     notifications: { toasts: { addSuccess: mockAddSuccess } },
-    chrome: mockChrome,
     share: {
       url: {
         locators: {
@@ -730,127 +724,36 @@ describe('SessionDetailPage', () => {
     expect(mockList).toHaveBeenCalledTimes(2);
   });
 
+  it('shows the sessions list in a flyout', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    const flyout = await screen.findByTestId('digitalExperienceSessionsFlyout');
+    expect(within(flyout).getByTestId('digitalExperienceSessionsRail')).toBeInTheDocument();
+  });
+
   it('hides the sessions list, and shows it again from the header', async () => {
     mockDetail.mockResolvedValue(detail());
     renderPage();
 
     fireEvent.click(await screen.findByTestId('digitalExperienceSessionsRailHide'));
-    expect(screen.queryByTestId('digitalExperienceSessionsRail')).not.toBeInTheDocument();
-    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"hidden"');
-
-    await openSessionsListMenu();
-    fireEvent.click(screen.getByTestId('digitalExperienceSessionsListPlacement-left'));
-    expect(await screen.findByTestId('digitalExperienceSessionsRail')).toBeInTheDocument();
-  });
-
-  it('shows the sessions list on the right when asked, and remembers it', async () => {
-    mockDetail.mockResolvedValue(detail());
-    renderPage();
-
-    await screen.findByTestId('digitalExperienceSessionsRail');
-    expect(screen.getByTestId('digitalExperienceSessionSplitView')).toHaveAttribute(
-      'data-rail-side',
-      'left'
-    );
-
-    await openSessionsListMenu();
-    fireEvent.click(screen.getByTestId('digitalExperienceSessionsListPlacement-right'));
-
-    expect(screen.getByTestId('digitalExperienceSessionSplitView')).toHaveAttribute(
-      'data-rail-side',
-      'right'
-    );
-    // After the session, in the layout.
-    expect(
-      screen
-        .getByTestId('digitalExperienceSessionPage')
-        .compareDocumentPosition(await screen.findByTestId('digitalExperienceSessionsRail'))
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"right"');
-  });
-
-  it('turns the list into a flyout, and back beside the session', async () => {
-    mockChrome.getChromeStyle.mockReturnValue('project');
-    mockDetail.mockResolvedValue(detail());
-    renderPage();
-
-    await screen.findByTestId('digitalExperienceSessionsRail');
-    expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(true);
-
-    fireEvent.click(screen.getByTestId('digitalExperienceSessionsRailFlyoutToggle'));
-
-    const flyout = await screen.findByTestId('digitalExperienceSessionsFlyout');
-    expect(within(flyout).getByTestId('digitalExperienceSessionsRail')).toBeInTheDocument();
-    expect(screen.queryByTestId('digitalExperienceSessionSplitView')).not.toBeInTheDocument();
-    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"flyout"');
-    // A flyout leaves the side navigation as the user had it.
-    expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(false);
-
-    fireEvent.click(screen.getByTestId('digitalExperienceSessionsRailFlyoutToggle'));
-
-    expect(await screen.findByTestId('digitalExperienceSessionSplitView')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceSessionsFlyout')).not.toBeInTheDocument();
-    mockChrome.getChromeStyle.mockReturnValue('classic');
-  });
-
-  it('keeps the list and the session as they are when the list moves, or becomes a flyout', async () => {
-    mockDetail.mockResolvedValue(detail());
-    renderPage();
-    const search = (await screen.findByTestId(
-      'digitalExperienceSessionsRailSearch'
-    )) as HTMLInputElement;
-
-    await openSessionsListMenu();
-    fireEvent.click(screen.getByTestId('digitalExperienceSessionsListPlacement-right'));
-    fireEvent.click(screen.getByTestId('digitalExperienceSessionsRailFlyoutToggle'));
-    await screen.findByTestId('digitalExperienceSessionsFlyout');
-
-    // The same input, not a new one, and neither request has run again.
-    expect(screen.getByTestId('digitalExperienceSessionsRailSearch')).toBe(search);
+    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"hidden"');
+    // The session stays, without loading again.
+    expect(screen.getByTestId('digitalExperienceSessionSummary')).toBeInTheDocument();
     expect(mockDetail).toHaveBeenCalledTimes(1);
-    expect(mockList).toHaveBeenCalledTimes(1);
+
+    await toggleSessionsList();
+    expect(await screen.findByTestId('digitalExperienceSessionsFlyout')).toBeInTheDocument();
+    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"flyout"');
   });
 
-  it('shows the list on the left for a choice stored before it could move', async () => {
-    window.localStorage.setItem('digitalExperience.sessionDetail.rail', '"open"');
+  it('shows the list for a choice stored before it was a flyout', async () => {
+    window.localStorage.setItem('digitalExperience.sessionDetail.rail', '"left"');
     mockDetail.mockResolvedValue(detail());
     renderPage();
 
-    await screen.findByTestId('digitalExperienceSessionsRail');
-    expect(screen.getByTestId('digitalExperienceSessionSplitView')).toHaveAttribute(
-      'data-rail-side',
-      'left'
-    );
-  });
-
-  it('collapses the project side navigation while the list shows, and restores it', async () => {
-    mockChrome.getChromeStyle.mockReturnValue('project');
-    mockDetail.mockResolvedValue(detail());
-    renderPage();
-
-    await screen.findByTestId('digitalExperienceSessionsRail');
-    expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(true);
-
-    fireEvent.click(screen.getByTestId('digitalExperienceSessionsRailHide'));
-    expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(false);
-    mockChrome.getChromeStyle.mockReturnValue('classic');
-  });
-
-  it('restores the project side navigation when the page is reloaded with the list open', async () => {
-    mockChrome.getChromeStyle.mockReturnValue('project');
-    mockDetail.mockResolvedValue(detail());
-    renderPage();
-
-    await screen.findByTestId('digitalExperienceSessionsRail');
-    expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(true);
-
-    // The chrome keeps a collapsed navigation as the user's choice, so it has to be restored
-    // before the page goes away, not only when the list is hidden.
-    act(() => {
-      window.dispatchEvent(new Event('pagehide'));
-    });
-    expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(false);
-    mockChrome.getChromeStyle.mockReturnValue('classic');
+    expect(await screen.findByTestId('digitalExperienceSessionsFlyout')).toBeInTheDocument();
   });
 
   it('moves to another session without loading the list again, keeping the previous one until it loads', async () => {

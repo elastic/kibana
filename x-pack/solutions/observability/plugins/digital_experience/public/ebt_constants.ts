@@ -146,7 +146,6 @@ export const SESSIONS_EBT_ELEMENTS = {
   TRACE_LINK: 'sessionTraceLink',
   RAIL_SESSION: 'sessionsRailSession',
   RAIL_HIDE: 'sessionsRailHide',
-  RAIL_FLYOUT: 'sessionsRailFlyout',
   RAIL_EDIT_FILTERS: 'sessionsRailEditFilters',
   RAIL_PAGE: 'sessionsRailPage',
 } as const;
