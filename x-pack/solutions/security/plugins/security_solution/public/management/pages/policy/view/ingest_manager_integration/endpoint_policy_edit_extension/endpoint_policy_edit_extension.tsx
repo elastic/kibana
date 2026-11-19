@@ -11,10 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { cloneDeep } from 'lodash';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import type { PolicySettingsFormProps } from '../../policy_settings_form/policy_settings_form';
+import type { PerOsPolicySettingsFormProps } from '../../policy_settings_form/per_os/per_os_policy_settings_form';
 import type { NewPolicyData } from '../../../../../../../common/endpoint/types';
 import { EndpointPolicyArtifactCards } from './components/endpoint_policy_artifact_cards';
-import { PolicySettingsForm } from '../../policy_settings_form';
+import { PerOsPolicySettingsForm } from '../../policy_settings_form';
 
 /**
  * Exports Endpoint-specific package policy instructions
@@ -26,18 +26,19 @@ export const EndpointPolicyEditExtension = memo<PackagePolicyEditExtensionCompon
     const endpointPolicySettings = policyUpdates.inputs[0].config.policy.value;
     const { canAccessFleet } = useUserPrivileges().endpointPrivileges;
 
-    const endpointPolicySettingsOnChangeHandler: PolicySettingsFormProps['onChange'] = useCallback(
-      ({ isValid, updatedPolicy }) => {
-        const newPolicyInputs = cloneDeep(policyUpdates.inputs);
-        newPolicyInputs[0].config.policy.value = updatedPolicy;
+    const endpointPolicySettingsOnChangeHandler: PerOsPolicySettingsFormProps['onChange'] =
+      useCallback(
+        ({ isValid, updatedPolicy }) => {
+          const newPolicyInputs = cloneDeep(policyUpdates.inputs);
+          newPolicyInputs[0].config.policy.value = updatedPolicy;
 
-        onChange({
-          isValid,
-          updatedPolicy: { inputs: newPolicyInputs },
-        });
-      },
-      [onChange, policyUpdates.inputs]
-    );
+          onChange({
+            isValid,
+            updatedPolicy: { inputs: newPolicyInputs },
+          });
+        },
+        [onChange, policyUpdates.inputs]
+      );
 
     return (
       <>
@@ -57,7 +58,7 @@ export const EndpointPolicyEditExtension = memo<PackagePolicyEditExtensionCompon
 
             <EuiSpacer size="s" />
 
-            <PolicySettingsForm
+            <PerOsPolicySettingsForm
               policy={endpointPolicySettings}
               onChange={endpointPolicySettingsOnChangeHandler}
               mode={canAccessFleet ? 'edit' : 'view'}

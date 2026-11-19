@@ -39,19 +39,11 @@ describe('Policy Advanced Settings section chrome', () => {
     renderResult: ReturnType<ReturnType<typeof createAppRootMockRenderer>['render']>
   ) => renderResult.getByTestId(testSubj.showHideButton);
 
-  it('renders the legacy inline button without the full-width styling hook when the prop is omitted', () => {
-    const renderResult = renderSection();
-    const toggle = getToggle(renderResult);
-
-    expect(toggle.querySelector('[data-euiicon-type="chevronSingleDown"]')).not.toBeInTheDocument();
-    expect(toggle.querySelector('[data-euiicon-type="chevronSingleUp"]')).not.toBeInTheDocument();
-  });
-
   // The jsdom `EuiIcon` mock echoes any `iconType` string onto `data-euiicon-type` without
   // checking it is a real icon, which is how `arrowUp`/`arrowDown` shipped rendering nothing.
   // Asserting the exact name at least pins the one that was verified in a browser.
-  it('renders a full-width toggle with a chevron when fullWidthToggle is true', async () => {
-    const renderResult = renderSection({ fullWidthToggle: true });
+  it('renders a full-width toggle with a chevron', async () => {
+    const renderResult = renderSection();
     const toggle = getToggle(renderResult);
 
     expect(toggle.querySelector('[data-euiicon-type]')).toHaveAttribute(

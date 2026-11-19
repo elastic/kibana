@@ -17,8 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useFetchAgentByAgentPolicySummary } from '../../../../hooks/policy/use_fetch_endpoint_policy_agent_summary';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
-import type { PolicySettingsFormProps } from '../policy_settings_form/policy_settings_form';
-import { PolicySettingsForm } from '../policy_settings_form';
+import type { PerOsPolicySettingsFormProps } from '../policy_settings_form/per_os/per_os_policy_settings_form';
+import { PerOsPolicySettingsForm } from '../policy_settings_form';
 import type {
   MaybeImmutable,
   PolicyConfig,
@@ -77,7 +77,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(
       ];
     }, [routingOnCancelNavigateTo]);
 
-    const handleSettingsOnChange: PolicySettingsFormProps['onChange'] = useCallback(
+    const handleSettingsOnChange: PerOsPolicySettingsFormProps['onChange'] = useCallback(
       (updates) => {
         setPolicySettings(updates.updatedPolicy);
         setPolicyModified(!isEqual(updates.updatedPolicy, policy.inputs[0].config.policy.value));
@@ -176,7 +176,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(
           />
         )}
 
-        <PolicySettingsForm
+        <PerOsPolicySettingsForm
           policy={policySettings}
           onChange={handleSettingsOnChange}
           mode={isEditMode ? 'edit' : 'view'}
