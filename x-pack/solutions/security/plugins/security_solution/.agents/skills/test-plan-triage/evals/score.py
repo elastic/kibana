@@ -188,12 +188,15 @@ def check_template(expected: dict, result: dict, message: str) -> list[str]:
         if template[field] is not None and template[field] != refs(result.get(field)):
             failures.append(f"answer says {field} {template[field] or 'none'} but RESULT says {refs(result.get(field)) or 'none'}")
     wanted_level = expected.get("answer", {}).get("suggested_level_text")
-    if wanted_level:
+    wanted_mention = expected.get("answer", {}).get("suggested_level_mentions")
+    if wanted_level or wanted_mention:
         lines = message.splitlines()
         level_at = _field(lines, "Suggested level for a test plan")
         level = lines[level_at].split("**Suggested level for a test plan:**", 1)[1].strip().lower() if level_at is not None else ""
-        if not level.startswith(wanted_level.lower()):
+        if wanted_level and not level.startswith(wanted_level.lower()):
             failures.append(f"suggested level does not start with {wanted_level!r}")
+        if wanted_mention and wanted_mention.lower() not in level:
+            failures.append(f"suggested level does not mention {wanted_mention!r}")
     if expected.get("answer", {}).get("question") and not template["question"]:
         failures.append("answer has no **Question:** line")
     return failures

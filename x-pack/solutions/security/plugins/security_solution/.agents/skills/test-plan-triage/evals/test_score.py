@@ -164,6 +164,13 @@ class CheckTest(unittest.TestCase):
         failures = score.check(expected, "with", write_run(self.work, YES_ANSWER))
         self.assertEqual(failures, ["suggested level does not start with 'one functionality'"])
 
+    def test_suggested_level_mentions(self):
+        expected = {**EXPECTED_YES, "answer": {"suggested_level_mentions": "elastic/kibana#100"}}
+        self.assertEqual(score.check(expected, "with", write_run(self.work, YES_ANSWER)), [])
+        expected = {**EXPECTED_YES, "answer": {"suggested_level_mentions": "umbrella"}}
+        failures = score.check(expected, "with", write_run(self.work, YES_ANSWER))
+        self.assertEqual(failures, ["suggested level does not mention 'umbrella'"])
+
     def test_untouched(self):
         expected = {**EXPECTED_YES, "untouched": ["elastic/kibana#999"]}
         failures = score.check(expected, "with", write_run(self.work, YES_ANSWER, requests="api repos/elastic/kibana/issues/999\n"))
