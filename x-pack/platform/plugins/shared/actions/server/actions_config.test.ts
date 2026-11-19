@@ -59,7 +59,7 @@ const defaultActionsConfig: ActionsConfig = {
     ...defaultInboundEventsLimitConfigs,
   },
   connectorSigningKeys: { enabled: false },
-  connectorCatalog: { enabled: false },
+  catalog: { enabled: false },
 };
 
 describe('ensureUriAllowed', () => {
@@ -1251,17 +1251,17 @@ describe('getEnabledEmailServices()', () => {
   });
 });
 
-describe('isConnectorCatalogEnabled()', () => {
+describe('isCatalogEnabled()', () => {
   test('returns false by default', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
-    expect(acu.isConnectorCatalogEnabled()).toBe(false);
+    expect(acu.isCatalogEnabled()).toBe(false);
   });
 
-  test('returns true when connectorCatalog.enabled is true', () => {
+  test('returns true when catalog.enabled is true', () => {
     const acu = getActionsConfigurationUtilities({
       ...defaultActionsConfig,
-      connectorCatalog: { enabled: true },
+      catalog: { enabled: true },
     });
-    expect(acu.isConnectorCatalogEnabled()).toBe(true);
+    expect(acu.isCatalogEnabled()).toBe(true);
   });
 });

@@ -39,7 +39,7 @@ describe('config validation', () => {
             },
           },
         },
-        "connectorCatalog": Object {
+        "catalog": Object {
           "enabled": false,
         },
         "connectorSigningKeys": Object {
@@ -117,7 +117,7 @@ describe('config validation', () => {
             },
           },
         },
-        "connectorCatalog": Object {
+        "catalog": Object {
           "enabled": false,
         },
         "connectorSigningKeys": Object {
@@ -304,7 +304,7 @@ describe('config validation', () => {
             },
           },
         },
-        "connectorCatalog": Object {
+        "catalog": Object {
           "enabled": false,
         },
         "connectorSigningKeys": Object {
@@ -518,7 +518,7 @@ describe('config validation', () => {
             },
           },
         },
-        "connectorCatalog": Object {
+        "catalog": Object {
           "enabled": false,
         },
         "connectorSigningKeys": Object {

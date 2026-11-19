@@ -395,7 +395,7 @@ export const configSchema = schema.object({
   connectorSigningKeys: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
-  connectorCatalog: schema.object({
+  catalog: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
 });

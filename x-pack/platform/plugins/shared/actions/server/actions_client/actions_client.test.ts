@@ -569,7 +569,7 @@ describe('create()', () => {
         ...defaultInboundEventsLimitConfigs,
       },
       connectorSigningKeys: { enabled: false },
-      connectorCatalog: { enabled: false },
+      catalog: { enabled: false },
     });
 
     const localActionTypeRegistryParams = {
