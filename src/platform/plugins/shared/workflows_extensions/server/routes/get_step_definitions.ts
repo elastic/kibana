@@ -18,14 +18,15 @@ const ROUTE_PATH = '/internal/workflows_extensions/step_definitions';
 
 /**
  * Converts a zod schema to a stable JSON Schema representation for hashing.
- * Falls back to a deterministic marker so an unconvertible schema still
- * contributes to (and changes) the hash when it changes.
+ * Unrepresentable parts (e.g. transforms) are emitted as `{}` instead of throwing,
+ * matching the workflow schema generation, so such steps still get a real hash
+ * rather than the constant fallback.
  */
 function schemaToJson(schema?: z.ZodType): unknown {
   if (!schema) {
     return undefined;
   }
-  return z.toJSONSchema(schema);
+  return z.toJSONSchema(schema, { unrepresentable: 'any' });
 }
 
 /**
