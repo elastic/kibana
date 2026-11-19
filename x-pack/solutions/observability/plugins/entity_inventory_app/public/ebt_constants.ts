@@ -13,6 +13,10 @@ export const ENTITY_INVENTORY_EBT_ACTIONS = {
   RETRY_LOAD: 'retryLoad',
   /** User restores the table's default columns and sort. */
   RESET_TABLE: 'resetTable',
+  /** Developer opens or closes the performance overlay flyout (feature-flagged). */
+  TOGGLE_PERFORMANCE_OVERLAY: 'togglePerformanceOverlay',
+  /** Developer clears the recorded API calls of the performance overlay. */
+  CLEAR_PERFORMANCE_HISTORY: 'clearPerformanceHistory',
 };
 
 /** EBT click `element` values: where in the entity inventory the click happened. */
@@ -20,6 +24,7 @@ export const ENTITY_INVENTORY_EBT_ELEMENTS = {
   NO_DATA: 'entityInventoryNoData',
   FILTER_BAR: 'filterBar',
   ENTITY_TABLE: 'entityTable',
+  PERFORMANCE_OVERLAY: 'performanceOverlay',
 };
 
 export const ENTITY_INVENTORY_EBT_DETAILS = {
