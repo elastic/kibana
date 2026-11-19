@@ -142,6 +142,7 @@ import {
   buildTypeFromStoredSpec,
   createConnectorCatalogStorage,
   startConnectorCatalog,
+  CONNECTOR_TYPE_CATALOG_INDEX,
   type ConnectorCatalogHandle,
 } from './lib/connector_catalog';
 
@@ -1216,7 +1217,12 @@ export class ActionsPlugin
 
   /** Starts the first catalog load, driven by the catalog flag. */
   private startConnectorCatalog(core: CoreStart): ConnectorCatalogHandle {
-    const { setupContract, actionTypeRegistry, logger } = this;
+    const { setupContract, actionTypeRegistry } = this;
+    // 1 context for the whole catalog start, so `plugins.actions.connectorCatalog` filters it.
+    const logger = this.logger.get('connectorCatalog');
+    logger.debug(
+      `Connector catalog start requested. Reading flag "${ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG}" and index "${CONNECTOR_TYPE_CATALOG_INDEX}".`
+    );
     const handle = startConnectorCatalog({
       isEnabled$: core.featureFlags.getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false),
       storage: createConnectorCatalogStorage({
@@ -1254,10 +1260,17 @@ export class ActionsPlugin
     const pendingTypes = enabledActionTypes.filter(
       (connectorType) => !this.actionTypeRegistry?.has(connectorType)
     );
+    const catalogLogger = this.logger.get('connectorCatalog');
     if (pendingTypes.length === 0) {
+      catalogLogger.debug('All enabled connector types are registered at start.');
       return;
     }
 
+    catalogLogger.debug(
+      `Enabled connector types [${pendingTypes.join(
+        ', '
+      )}] are not registered at start. Checking again when the catalog is ready.`
+    );
     // Catalog types register after start(), so check again once the first load has ended.
     void catalogReady.then(() => {
       const unavailableTypes = pendingTypes.filter(
@@ -1267,7 +1280,9 @@ export class ActionsPlugin
         this.logger.warn(
           `Enabled connector types [${unavailableTypes.join(', ')}] are not registered.`
         );
+        return;
       }
+      catalogLogger.debug('All enabled connector types are registered after the catalog load.');
     });
   };
 

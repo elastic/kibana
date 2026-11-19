@@ -13,6 +13,7 @@ import {
   of,
   switchMap,
   take,
+  tap,
   takeUntil,
   timeout,
 } from 'rxjs';
@@ -53,17 +54,26 @@ export const startConnectorCatalog = ({
   logger,
   timeoutMs = CATALOG_FIRST_LOAD_TIMEOUT_MS,
 }: StartConnectorCatalogDeps): ConnectorCatalogHandle => {
+  const startedAt = Date.now();
+  const elapsedMs = () => Date.now() - startedAt;
   const stop$ = new Subject<void>();
   let loading = false;
+
+  logger.debug(`Starting the first connector catalog load. Deadline: ${timeoutMs} ms.`);
 
   // Unsubscribing aborts the signal, so a timeout or stop cancels the load. A late result is dropped.
   const load$ = new Observable<void>((subscriber) => {
     const controller = new AbortController();
     const { signal } = controller;
     loading = true;
+    let running = true;
+    const loadStartedAt = Date.now();
     loadCatalogConnectorTypes({ storage, actionTypeRegistry, buildType, logger, signal })
       .then((count) => {
         if (!signal.aborted) {
+          logger.debug(
+            `The first connector catalog load finished in ${Date.now() - loadStartedAt} ms.`
+          );
           logger.info(`Registered ${count} connector type(s) from the connector catalog.`);
         }
       })
@@ -73,10 +83,16 @@ export const startConnectorCatalog = ({
         }
       })
       .finally(() => {
+        running = false;
         subscriber.next();
         subscriber.complete();
       });
-    return () => controller.abort();
+    return () => {
+      if (running) {
+        logger.debug('The first connector catalog load was cut short. Aborting the running read.');
+      }
+      controller.abort();
+    };
   });
 
   // 1 deadline for the whole first load, from this call. The flag provider can be slow or down,
@@ -84,6 +100,13 @@ export const startConnectorCatalog = ({
   const ready = firstValueFrom(
     isEnabled$.pipe(
       take(1),
+      tap((enabled) =>
+        logger.debug(
+          `The connector catalog flag has its first value after ${elapsedMs()} ms: ${enabled}.${
+            enabled ? '' : ' Skipping the load. Later changes need a restart.'
+          }`
+        )
+      ),
       switchMap((enabled) => (enabled ? load$ : of(undefined))),
       timeout({
         first: timeoutMs,
@@ -103,11 +126,14 @@ export const startConnectorCatalog = ({
       takeUntil(stop$)
     ),
     { defaultValue: undefined }
-  );
+  ).then(() => {
+    logger.debug(`The connector catalog is ready after ${elapsedMs()} ms.`);
+  });
 
   return {
     ready,
     stop: () => {
+      logger.debug('Stopping the connector catalog.');
       stop$.next();
       stop$.complete();
     },

@@ -73,9 +73,11 @@ export const createConnectorCatalogStorage = ({
   ): Promise<{ created: boolean }> => {
     try {
       await client.index({ id, document, op_type: 'create', refresh: false });
+      logger.debug(`Stored connector catalog document "${id}".`);
       return { created: true };
     } catch (error) {
       if (isResponseErrorWithStatus(error, 409)) {
+        logger.debug(`Connector catalog document "${id}" already exists. Left unchanged.`);
         return { created: false };
       }
       throw error;
@@ -91,9 +93,21 @@ export const createConnectorCatalogStorage = ({
           { signal }
         );
         const raw = response._source?.raw;
-        return typeof raw === 'string' ? { raw } : undefined;
+        if (typeof raw !== 'string') {
+          logger.debug(
+            `The connector catalog manifest document exists in "${CONNECTOR_TYPE_CATALOG_INDEX}" but has no manifest text.`
+          );
+          return undefined;
+        }
+        logger.debug(
+          `Read the connector catalog manifest from "${CONNECTOR_TYPE_CATALOG_INDEX}" (${raw.length} characters).`
+        );
+        return { raw };
       } catch (error) {
         if (isResponseErrorWithStatus(error, 404)) {
+          logger.debug(
+            `The connector catalog manifest was not found in "${CONNECTOR_TYPE_CATALOG_INDEX}" (404).`
+          );
           return undefined;
         }
         throw error;
@@ -104,6 +118,7 @@ export const createConnectorCatalogStorage = ({
       if (refs.length === 0) {
         return [];
       }
+      logger.debug(`Reading ${refs.length} connector catalog definition(s) with mget.`);
       try {
         const response = await esClient.mget<DefinitionSource>(
           { index: CONNECTOR_TYPE_CATALOG_INDEX, ids: refs.map(getCatalogDefinitionDocId) },
@@ -113,6 +128,9 @@ export const createConnectorCatalogStorage = ({
           if ('error' in doc) {
             // `_mget` answers 200 with an error on each document when the index is missing.
             if (doc.error.type === INDEX_NOT_FOUND_ERROR_TYPE) {
+              logger.debug(
+                `The connector catalog index "${CONNECTOR_TYPE_CATALOG_INDEX}" does not exist.`
+              );
               return [];
             }
             throw new Error(
@@ -120,6 +138,7 @@ export const createConnectorCatalogStorage = ({
             );
           }
           if (!doc.found || !doc._source) {
+            logger.debug(`Connector catalog definition "${doc._id}" was not found.`);
             return [];
           }
           const { connectorId, version, yaml, contentHash, catalogVersion } = doc._source;
@@ -148,6 +167,7 @@ export const createConnectorCatalogStorage = ({
         document: { type: 'manifest', raw },
         refresh: false,
       });
+      logger.debug(`Replaced the connector catalog manifest (${raw.length} characters).`);
     },
   };
 };
