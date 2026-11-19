@@ -82,6 +82,30 @@ describe('useDefaultAIConnectorId', () => {
     });
   });
 
+  it('should return the configured inference endpoint instead of the Elastic-managed connector', () => {
+    const { getDefaultConnector: actualGetDefaultConnector } = jest.requireActual(
+      '@kbn/elastic-assistant/impl/assistant/helpers'
+    );
+    mockGetDefaultConnector.mockImplementation(actualGetDefaultConnector);
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: mockHttp,
+        settings: { client: { get: jest.fn().mockReturnValue('custom-inference-endpoint') } },
+      },
+    });
+    mockUseLoadConnectors.mockReturnValue({
+      data: [
+        { id: 'Anthropic-Claude-Sonnet-3-7', name: 'Anthropic Claude Sonnet 3.7' },
+        { id: 'custom-inference-endpoint', name: 'custom-inference-endpoint' },
+      ],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useDefaultAIConnectorId());
+
+    expect(result.current.defaultConnectorId).toBe('custom-inference-endpoint');
+  });
+
   it('should return isLoading true when connectors are loading', () => {
     mockUseLoadConnectors.mockReturnValue({
       data: mockConnectors,
