@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isComputedFeature, type Feature } from '@kbn/significant-events-schema';
 import type { QueryClient, QueryFunctionContext } from '@kbn/react-query';
@@ -17,7 +17,7 @@ import { FEATURES_QUERY_KEY } from '../query_keys';
 
 const ERROR_REFETCH_INTERVAL_MS = 60_000;
 // Report one outage until every failing polling observer recovers or unmounts.
-const failedPollingObservers = new WeakMap<QueryClient, Set<symbol>>();
+const failedPollingObservers = new WeakMap<QueryClient, Set<string>>();
 
 export const useStreamFeatures = (
   sourceId: string,
@@ -33,7 +33,7 @@ export const useStreamFeatures = (
   } = useKibana().services;
   const showFetchErrorToast = useFetchErrorToast();
   const queryClient = useQueryClient();
-  const [pollingObserverId] = useState(() => Symbol());
+  const pollingObserverId = useId();
   const isPollingEnabled = enabled && !!refetchInterval;
 
   useEffect(
@@ -66,7 +66,7 @@ export const useStreamFeatures = (
         return;
       }
 
-      const failures = failedPollingObservers.get(queryClient) ?? new Set<symbol>();
+      const failures = failedPollingObservers.get(queryClient) ?? new Set<string>();
       const shouldShowErrorToast = failures.size === 0;
       failures.add(pollingObserverId);
       failedPollingObservers.set(queryClient, failures);
