@@ -1,0 +1,57 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { PublicStepRegistry } from '../step_registry';
+
+export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
+  stepRegistry.register(() => import('./data/data_map_step').then((m) => m.dataMapStepDefinition));
+  stepRegistry.register(() =>
+    import('./data/data_dedupe_step').then((m) => m.dataDedupeStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_filter_step').then((m) => m.dataFilterStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_find_step').then((m) => m.dataFindStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_regex_extract_step').then((m) => m.dataRegexExtractStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_regex_replace_step').then((m) => m.dataRegexReplaceStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_aggregate_step').then((m) => m.dataAggregateStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_stringify_json_step').then((m) => m.dataStringifyJsonStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_parse_json_step').then((m) => m.dataParseJsonStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_concat_step').then((m) => m.dataConcatStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./remote_host/remote_host_run_command_step').then(
+      (m) => m.remoteHostRunCommandStepDefinition
+    )
+  );
+  stepRegistry.register(() =>
+    import('./remote_host/remote_host_upload_file_step').then(
+      (m) => m.remoteHostUploadFileStepDefinition
+    )
+  );
+  stepRegistry.register(() =>
+    import('./remote_host/remote_host_download_file_step').then(
+      (m) => m.remoteHostDownloadFileStepDefinition
+    )
+  );
+  stepRegistry.register(() =>
+    import('./workflow/get_last_run_step').then((m) => m.getLastRunStepDefinition)
+  );
+};
