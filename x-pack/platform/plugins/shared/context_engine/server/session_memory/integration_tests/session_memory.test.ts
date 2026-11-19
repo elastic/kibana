@@ -25,7 +25,7 @@ describe('session memory', () => {
     esClient.indices.refresh({ index: SESSION_MEMORY_DATA_STREAM, ignore_unavailable: true });
 
   // Writing `content` runs semantic_text inference, which the test cluster's basic license does not
-  // allow. Memories are seeded without content, which is enough for forget and hardDelete.
+  // allow. Memories are seeded without content, which is enough for forget.
   const seed = async (...documents: StoredSessionMemory[]) => {
     const response = await esClient.bulk({
       operations: documents.flatMap((document) => [
@@ -74,9 +74,6 @@ describe('session memory', () => {
 
   it('finds nothing before Elasticsearch creates the stream', async () => {
     await expect(service.forget(jdoe, ['missing'])).resolves.toEqual({ missing: 'not_found' });
-    await expect(service.hardDelete(jdoe, ['missing'])).resolves.toEqual({
-      deletedDocuments: 0,
-    });
   });
 
   it('hides a memory from other users and other spaces', async () => {
@@ -87,8 +84,8 @@ describe('session memory', () => {
     await expect(service.forget(otherUser, ['isolated'])).resolves.toEqual({
       isolated: 'not_found',
     });
-    await expect(service.hardDelete(otherSpace, ['isolated'])).resolves.toEqual({
-      deletedDocuments: 0,
+    await expect(service.forget(otherSpace, ['isolated'])).resolves.toEqual({
+      isolated: 'not_found',
     });
 
     await expect(service.forget(jdoe, ['isolated'])).resolves.toEqual({
@@ -119,18 +116,4 @@ describe('session memory', () => {
     await expect(service.forget(jdoe, ['live'])).resolves.toEqual({ live: 'already_forgotten' });
   });
 
-  it('hard deletes every revision of a memory, tombstones included', async () => {
-    await seed(
-      revision('deleted', '2026-11-08T09:00:00.000Z'),
-      revision('deleted', '2026-11-08T10:00:00.000Z'),
-      revision('deleted', '2026-11-08T09:00:00.000Z', { space: 'default', userId: 'asmith' })
-    );
-    await service.forget(jdoe, ['deleted']);
-    await refresh();
-
-    await expect(service.hardDelete(jdoe, ['deleted'])).resolves.toEqual({ deletedDocuments: 3 });
-    await refresh();
-
-    expect(await countRevisions('deleted')).toBe(1);
-  });
 });

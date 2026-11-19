@@ -209,29 +209,4 @@ describe('createSessionMemoryService', () => {
       expect(esClient.search).not.toHaveBeenCalled();
     });
   });
-
-  describe('hardDelete', () => {
-    it('throws when Elasticsearch fails to delete some documents', async () => {
-      esClient.deleteByQuery.mockResolvedValue({
-        deleted: 1,
-        failures: [
-          {
-            id: 'doc-1',
-            index: '.ds-memory',
-            status: 500,
-            cause: { type: 'exception', reason: 'shard unavailable' },
-          },
-        ],
-      });
-
-      await expect(service.hardDelete(scope, ['memory-1'])).rejects.toThrow(
-        'Failed to delete from session memory: shard unavailable'
-      );
-    });
-
-    it('does nothing for an empty list', async () => {
-      await expect(service.hardDelete(scope, [])).resolves.toEqual({ deletedDocuments: 0 });
-      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
-    });
-  });
 });

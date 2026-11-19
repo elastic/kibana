@@ -135,23 +135,4 @@ export const createSessionMemoryService = (
 
     return Object.fromEntries(uniqueIds.map((id) => [id, getForgetOutcome(latestById.get(id))]));
   },
-
-  hardDelete: async (scope, ids) => {
-    if (ids.length === 0) {
-      return { deletedDocuments: 0 };
-    }
-
-    const { deleted = 0, failures = [] } = await esClient.deleteByQuery({
-      index: SESSION_MEMORY_DATA_STREAM,
-      ...ignoreMissingStream,
-      query: { bool: { filter: [{ terms: { id: [...ids] } }, ...scopeFilter(scope)] } },
-      conflicts: 'proceed',
-    });
-    if (failures.length > 0) {
-      throw new Error(
-        `Failed to delete from session memory: ${failures[0].cause?.reason ?? 'unknown error'}`
-      );
-    }
-    return { deletedDocuments: deleted };
-  },
 });

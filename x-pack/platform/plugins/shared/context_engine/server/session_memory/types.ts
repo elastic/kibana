@@ -53,9 +53,4 @@ export interface SessionMemoryService {
   get(scope: SessionMemoryScope, id: string): Promise<SessionMemory | undefined>;
   /** Tombstones each memory, keeping its revisions until retention removes them. */
   forget(scope: SessionMemoryScope, ids: readonly string[]): Promise<Record<string, ForgetOutcome>>;
-  /** Deletes every revision of each memory, tombstones included, and counts the deleted documents. */
-  hardDelete(
-    scope: SessionMemoryScope,
-    ids: readonly string[]
-  ): Promise<{ deletedDocuments: number }>;
 }
