@@ -210,13 +210,14 @@ export const discoverHuntDatasets = async ({
       );
       continue;
     }
-    entry.search_patterns = entry.data_streams.map((stream) => `${stream}*`);
+    const readable = entry.data_streams.filter(searchable);
+    entry.search_patterns = readable.map((stream) => `${stream}*`);
     // Residual case no wildcard can isolate: a sibling whose dataset name extends one of
     // this entry's full stream names (`windows-default` beside stream `logs-windows-default`).
     // Concrete stream names are not an option, since Tier 1's hit bar globs required
     // patterns against dated backing indices and Tier 2's allowlist probe needs a
     // wildcard, so the pattern stays and the overlap is made visible instead.
-    for (const stream of entry.data_streams) {
+    for (const stream of readable) {
       const parsed = parseDataStreamName(stream);
       const leaking = parsed
         ? siblings.filter((other) =>
@@ -238,10 +239,6 @@ export const discoverHuntDatasets = async ({
     .map((entry) => ({
       ...entry,
       data_streams: entry.data_streams.filter(searchable),
-      search_patterns: entry.search_patterns.filter(
-        (pattern) =>
-          !entry.data_streams.some((stream) => !searchable(stream) && pattern === `${stream}*`)
-      ),
     }))
     .sort((a, b) => a.index_pattern.localeCompare(b.index_pattern));
 };
