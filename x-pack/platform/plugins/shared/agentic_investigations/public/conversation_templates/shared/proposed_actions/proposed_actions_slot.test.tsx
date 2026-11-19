@@ -180,7 +180,10 @@ describe('ProposedActionsSlot', () => {
     mockConversationProposalsPage([mockProposal]);
     renderSlot();
     fireEvent.click(screen.getByText('Isolate cfo-mbp-14 — host isolation'));
-    expect(screen.getByRole('button', { name: 'Approve' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Approve' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
     expect(approveMutateAsync).not.toHaveBeenCalled();
     expect(dismissMutateAsync).not.toHaveBeenCalled();
   });

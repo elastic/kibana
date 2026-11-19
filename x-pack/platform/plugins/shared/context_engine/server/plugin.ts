@@ -48,6 +48,7 @@ import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
+import { createSessionEventsService } from './session_events/service';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
@@ -420,6 +421,8 @@ export class ContextEnginePlugin
     });
     const signalsService = this.signalsService;
 
+    const sessionEventsService = createSessionEventsService(this.esClient);
+
     const improvementsLogger = this.logger.get('improvements');
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
       new ImprovementsService({ esClient, logger: improvementsLogger, space: spaceId });
@@ -493,6 +496,7 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
+      getSessionEventsService: () => sessionEventsService,
     };
   }
 
