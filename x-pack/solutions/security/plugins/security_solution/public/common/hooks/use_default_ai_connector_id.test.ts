@@ -96,7 +96,11 @@ describe('useDefaultAIConnectorId', () => {
     mockUseLoadConnectors.mockReturnValue({
       data: [
         { id: 'Anthropic-Claude-Sonnet-3-7', name: 'Anthropic Claude Sonnet 3.7' },
-        { id: 'custom-inference-endpoint', name: 'custom-inference-endpoint' },
+        {
+          id: 'custom-inference-endpoint',
+          name: 'custom-inference-endpoint',
+          isInferenceEndpoint: true,
+        },
       ],
       isLoading: false,
     });
