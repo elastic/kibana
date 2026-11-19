@@ -79,5 +79,18 @@ describe('getBuildFlavorCspConfig', () => {
       expect(header).toContain(`font-src 'self' fonts.example.test data:`);
       expect(header).toContain(`media-src media.example.test 'self' kibana.estccdn.com`);
     });
+
+    it('keeps a configured csp.default_src and still enforces the three directives', () => {
+      const configured = cspConfig.schema.validate({ default_src: ['assets.example.test'] });
+      const { header } = new CspConfig(
+        configured,
+        getBuildFlavorCspConfig('traditional', configured)
+      );
+
+      expect(header).toContain(`default-src 'self' assets.example.test`);
+      expect(header).toContain(`font-src 'self' data:`);
+      expect(header).toContain(`img-src 'self' data: blob: https: http:`);
+      expect(header).toContain(`media-src 'self' kibana.estccdn.com`);
+    });
   });
 });

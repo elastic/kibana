@@ -203,6 +203,7 @@ groups:
           stack: ga
           ech: unavailable
           self: ga
+        note: "From 9.6.1, Kibana enforces `img-src`, `font-src` and `media-src` directives by default, so images, fonts and media no longer fall back to `csp.default_src`."
 
       - setting: csp.font_src
         description: |
