@@ -117,6 +117,7 @@ describe('OtelSynthtraceEsClient', () => {
             name,
             index_template: {
               index_patterns: [`${name.split('-')[0]}-*.otel-*`],
+              priority: 120,
               composed_of: ['otel@mappings', `${name.split('-')[0]}-otel@mappings`],
               ignore_missing_component_templates: ['logs-otel@custom'],
               data_stream: { hidden: false, allow_custom_routing: false },
@@ -136,7 +137,7 @@ describe('OtelSynthtraceEsClient', () => {
       expect(putIndexTemplate).toHaveBeenCalledWith({
         name: 'synthtrace-logs-browser.otel',
         index_patterns: ['logs-browser.otel-*'],
-        priority: 150,
+        priority: 121,
         composed_of: ['otel@mappings', 'logs-otel@mappings'],
         ignore_missing_component_templates: ['logs-otel@custom'],
         data_stream: { hidden: false, allow_custom_routing: false },
@@ -175,5 +176,28 @@ describe('OtelSynthtraceEsClient', () => {
       expect(putIndexTemplate).not.toHaveBeenCalled();
       expect(logger.warning).toHaveBeenCalledTimes(2);
     });
+  });
+
+  it('deletes the browser index templates on clean, so later browser data keeps the default sort', async () => {
+    const deleteDataStream = jest.fn().mockResolvedValue({});
+    const deleteIndexTemplate = jest.fn().mockResolvedValue({});
+    const client = new OtelSynthtraceEsClientImpl({
+      client: { indices: { deleteDataStream, deleteIndexTemplate } } as unknown as Client,
+      logger: { info: jest.fn() } as unknown as Logger,
+    });
+
+    await client.clean();
+
+    expect(deleteDataStream).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'logs-*.otel-*,traces-*.otel-*' })
+    );
+    expect(deleteIndexTemplate).toHaveBeenCalledWith(
+      { name: 'synthtrace-logs-browser.otel' },
+      { ignore: [404] }
+    );
+    expect(deleteIndexTemplate).toHaveBeenCalledWith(
+      { name: 'synthtrace-traces-browser.otel' },
+      { ignore: [404] }
+    );
   });
 });

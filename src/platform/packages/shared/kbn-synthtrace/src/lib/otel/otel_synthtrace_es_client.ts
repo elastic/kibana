@@ -89,6 +89,10 @@ const BROWSER_SORT_FIELD_MAPPINGS: Record<string, estypes.MappingProperty> = {
   'attributes.session.id': { type: 'keyword', ignore_above: 1024 },
 };
 
+const BROWSER_TEMPLATE_TYPES = ['logs', 'traces'] as const;
+const browserTemplateName = (type: (typeof BROWSER_TEMPLATE_TYPES)[number]): string =>
+  `synthtrace-${type}-browser.otel`;
+
 /**
  * Indexes OTel-native documents as-is: no OTel to APM translation, no metric aggregation.
  * Documents are routed by `_index` or their `data_stream` fields.
@@ -114,18 +118,24 @@ export class OtelSynthtraceEsClientImpl
    */
   async installBrowserIndexTemplates(): Promise<void> {
     await Promise.all(
-      (['logs', 'traces'] as const).map(async (type) => {
-        const name = `synthtrace-${type}-browser.otel`;
+      BROWSER_TEMPLATE_TYPES.map(async (type) => {
+        const name = browserTemplateName(type);
         try {
           const {
             index_templates: [stock],
           } = await this.client.indices.getIndexTemplate({ name: `${type}-otel@template` });
-          const { template, composed_of, ignore_missing_component_templates, data_stream } =
-            stock.index_template;
+          const {
+            template,
+            composed_of,
+            ignore_missing_component_templates,
+            data_stream,
+            priority,
+          } = stock.index_template;
           await this.client.indices.putIndexTemplate({
             name,
             index_patterns: [`${type}-browser.otel-*`],
-            priority: 150,
+            // Overlapping templates of the same priority are rejected.
+            priority: (priority ?? 0) + 1,
             composed_of,
             ignore_missing_component_templates:
               typeof ignore_missing_component_templates === 'string'
@@ -145,6 +155,18 @@ export class OtelSynthtraceEsClientImpl
         } catch (error) {
           this.logger.warning(`Failed to create index template "${name}": ${error}`);
         }
+      })
+    );
+  }
+
+  override async clean(): Promise<void> {
+    await super.clean();
+    // Otherwise every later browser data stream would keep the session sort.
+    await Promise.all(
+      BROWSER_TEMPLATE_TYPES.map(async (type) => {
+        const name = browserTemplateName(type);
+        await this.client.indices.deleteIndexTemplate({ name }, { ignore: [404] });
+        this.logger.info(`Deleted index template "${name}"`);
       })
     );
   }
