@@ -1,0 +1,196 @@
+version: "1"
+name: Start machine learning jobs
+description: >
+  AlertZero action: makes a machine learning rule's anomaly detection jobs run.
+  Installs a missing job from the Elastic module that ships it, then starts the
+  datafeed of every job. Executed by the investigation proposal gate once an
+  analyst approves, so it runs with the approver's machine learning privileges.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog can be
+  # discovered by tag rather than a hardcoded list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata, read back by the proposals service when a
+  # proposal referencing this workflow is created or rendered. Metadata has to
+  # live under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Start machine learning jobs
+    description: Installs missing anomaly detection jobs from their Elastic module and starts their datafeeds.
+    category: configure
+    impact: medium
+    reversible: true
+    approvalPolicy: always-gate
+  no_items: []
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            The jobs to run. Every action workflow takes a single `actionInput`
+            object so the generic gate workflow never needs to know an action's
+            parameter names.
+          properties:
+            job_ids:
+              type: array
+              minItems: 1
+              maxItems: 20
+              items:
+                type: string
+                minLength: 1
+                maxLength: 256
+              description: Anomaly detection job ids the rule reads.
+          required:
+            - job_ids
+          additionalProperties: false
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: installed_modules
+    type: string
+  - name: started
+    type: string
+steps:
+  - name: jobs_exist
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/ml/jobs/jobs_exist"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        x-elastic-internal-origin: kibana
+        Content-Type: application/json
+      body:
+        jobIds: "${{ inputs.actionInput.job_ids }}"
+
+  # Rendered as `,id,id` because Liquid cannot build an array otherwise.
+  - name: resolve_missing
+    type: data.set
+    with:
+      ids: >-
+        {%- for job in inputs.actionInput.job_ids -%}
+        {%- if steps.jobs_exist.output[job].exists != true -%},{{ job }}{%- endif -%}
+        {%- endfor -%}
+
+  - name: list_modules
+    type: kibana.request
+    if: "${{ steps.resolve_missing.output.ids != blank }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/ml/modules/get_module/"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        x-elastic-internal-origin: kibana
+
+  # One `module|index pattern` line per module that ships a missing job, and the
+  # jobs no module ships. Security modules install with no job id prefix.
+  - name: resolve_modules
+    type: data.set
+    if: "${{ steps.resolve_missing.output.ids != blank }}"
+    with:
+      modules: >-
+        {%- assign missing = steps.resolve_missing.output.ids | append: ',' -%}
+        {%- for module in steps.list_modules.output -%}
+        {%- assign ships = false -%}
+        {%- for job in module.jobs -%}
+        {%- assign key = ',' | append: job.id | append: ',' -%}
+        {%- if missing contains key -%}{%- assign ships = true -%}{%- endif -%}
+        {%- endfor -%}
+        {%- if ships -%};{{ module.id }}|{{ module.defaultIndexPattern }}{%- endif -%}
+        {%- endfor -%}
+      unknown: >-
+        {%- assign shipped = ',' -%}
+        {%- for module in steps.list_modules.output -%}
+        {%- for job in module.jobs -%}{%- assign shipped = shipped | append: job.id | append: ',' -%}{%- endfor -%}
+        {%- endfor -%}
+        {%- assign ids = steps.resolve_missing.output.ids | remove_first: ',' | split: ',' -%}
+        {%- for id in ids -%}
+        {%- assign key = ',' | append: id | append: ',' -%}
+        {%- unless shipped contains key -%}{{ id }} {% endunless -%}
+        {%- endfor -%}
+
+  - name: fail_unknown_jobs
+    type: workflow.fail
+    if: "${{ steps.resolve_modules.output.unknown != blank }}"
+    with:
+      message: >-
+        No Elastic machine learning module ships these jobs, so they can't be
+        installed: {{ steps.resolve_modules.output.unknown | strip }}. Create them by hand,
+        or disable the rule. Approving again won't work, so decline it.
+
+  # Same settings as the Security app's job setup. The datafeeds start below,
+  # so only the rule's jobs run, not every job the module installs.
+  - name: setup_modules
+    type: foreach
+    if: "${{ steps.resolve_modules.output.modules != blank }}"
+    foreach: "${{ steps.resolve_modules.output.modules | remove_first: ';' | split: ';' }}"
+    steps:
+      - name: setup_module
+        type: kibana.request
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/ml/modules/setup/{{ foreach.item | split: '|' | first }}"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "1"
+            x-elastic-internal-origin: kibana
+            Content-Type: application/json
+          body:
+            prefix: ""
+            indexPatternName: "{{ foreach.item | split: '|' | last }}"
+            startDatafeed: false
+            useDedicatedIndex: true
+            applyToAllSpaces: true
+
+  - name: resolve_datafeeds
+    type: data.set
+    with:
+      ids: "{% for job in inputs.actionInput.job_ids %},datafeed-{{ job }}{% endfor %}"
+
+  - name: start_datafeeds
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/ml/jobs/force_start_datafeeds"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        x-elastic-internal-origin: kibana
+        Content-Type: application/json
+      body:
+        datafeedIds: "${{ steps.resolve_datafeeds.output.ids | remove_first: ',' | split: ',' }}"
+
+  # The route answers 200 with a per-datafeed error, and the gate counts any
+  # error-free run as success, so a datafeed that did not start fails the action.
+  - name: resolve_started
+    type: data.set
+    with:
+      failed: >-
+        {%- for job in inputs.actionInput.job_ids -%}
+        {%- assign datafeed = 'datafeed-' | append: job -%}
+        {%- if steps.start_datafeeds.output[datafeed].started != true -%}{{ job }}: {{ steps.start_datafeeds.output[datafeed].error | default: 'not started' }}; {% endif -%}
+        {%- endfor -%}
+
+  - name: fail_not_started
+    type: workflow.fail
+    if: "${{ steps.resolve_started.output.failed != blank }}"
+    with:
+      message: >-
+        Some datafeeds did not start: {{ steps.resolve_started.output.failed }}
+        Check that a machine learning node has free memory and that the job's
+        source indices exist.
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      installed_modules: "{{ steps.resolve_modules.output.modules | remove_first: ';' }}"
+      started: "{{ inputs.actionInput.job_ids | join: ', ' }}"

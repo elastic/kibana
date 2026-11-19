@@ -159,6 +159,24 @@ triggers:
                   type: string
                   enum: [suppress, doNotSuppress]
               additionalProperties: false
+            max_signals:
+              type: integer
+              minimum: 1
+              description: New maximum number of alerts the rule writes per run.
+            data_view_id:
+              type: string
+              minLength: 1
+              maxLength: 512
+              description: Id of the data view the rule searches instead of its current one.
+            new_terms_fields:
+              type: array
+              minItems: 1
+              maxItems: 3
+              items:
+                type: string
+                minLength: 1
+                maxLength: 1024
+              description: New terms fields of a new terms rule, replacing the whole list.
           required:
             - id
           additionalProperties: false
@@ -227,7 +245,8 @@ steps:
       patch: >-
         ${{ inputs.actionInput | pick: 'id', 'query', 'risk_score', 'severity',
           'threshold', 'interval', 'from', 'index', 'timestamp_override',
-          'threat_index', 'alert_suppression' }}
+          'threat_index', 'alert_suppression', 'max_signals', 'data_view_id',
+          'new_terms_fields' }}
 
   # `workflow.execute` declares its output as unknown, so the parent falls back
   # to a heuristic read of the last step unless the child emits explicitly.
@@ -247,3 +266,6 @@ steps:
       timestamp_override: "{{ steps.patch_rule.output.timestamp_override }}"
       threat_index: "${{ steps.patch_rule.output.threat_index }}"
       alert_suppression: "${{ steps.patch_rule.output.alert_suppression }}"
+      max_signals: "${{ steps.patch_rule.output.max_signals }}"
+      data_view_id: "{{ steps.patch_rule.output.data_view_id }}"
+      new_terms_fields: "${{ steps.patch_rule.output.new_terms_fields }}"

@@ -36,6 +36,7 @@ import {
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
 import { createDetectionCoverageSkill } from './detection_coverage';
+import { createRuleDoctorSkill } from './rule_doctor';
 import { createEndpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
 import { createElasticDefendPolicyManagementSkill } from './elastic_defend_policy_management';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
@@ -94,6 +95,8 @@ export const registerSkills = async ({
   }
 
   await agentBuilder.skills.register(createDetectionCoverageSkill());
+
+  await agentBuilder.skills.register(createRuleDoctorSkill());
 
   await agentBuilder.skills.register(
     findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })

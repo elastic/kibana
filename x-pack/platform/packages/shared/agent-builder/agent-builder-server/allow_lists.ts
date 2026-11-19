@@ -292,6 +292,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'threat-hunting',
   'find-security-rules',
   'detection-coverage',
+  'rule-doctor',
   'pci-compliance',
   'endpoint-forensic-analysis',
   'elastic-defend-policy-management',
