@@ -25,3 +25,12 @@ export {
   transformRuleToRuleResponseInternal as transformRuleToRuleResponseInternalV1,
   transformRuleActions as transformRuleActionsInternalV1,
 } from './transform_rule_to_rule_response_internal/v1';
+
+export {
+  transformRuleScheduleRequest,
+  transformRuleScheduleResponse,
+} from './transform_rule_schedule/latest';
+export {
+  transformRuleScheduleRequest as transformRuleScheduleRequestV1,
+  transformRuleScheduleResponse as transformRuleScheduleResponseV1,
+} from './transform_rule_schedule/v1';

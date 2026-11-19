@@ -38,3 +38,17 @@ export {
   getRRuleResponseSchemaV1,
 } from './r_rule';
 export type { RRule, RRuleRequest, RRuleResponse, RRuleRequestV1, RRuleResponseV1 } from './r_rule';
+
+export {
+  rruleStringSchema,
+  rruleStringSchemaV1,
+  parseRruleString,
+  parseRruleStringV1,
+  transformRruleStringToRrule,
+  transformRruleStringToRruleV1,
+  transformRruleToRruleString,
+  transformRruleToRruleStringV1,
+  RRULE_STRING_MAX_LENGTH,
+  RRULE_STRING_DESCRIPTION,
+} from './rrule_string';
+export type { ParseRruleStringResult } from './rrule_string';

@@ -2584,6 +2584,15 @@
       "enabled": true
     },
     {
+      "groupName": "rrule-temporal",
+      "matchDepNames": ["rrule-temporal"],
+      "reviewers": ["team:response-ops"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:ResponseOps"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "react-day-picker",
       "matchDepNames": ["react-day-picker"],
       "reviewers": ["team:eui-team"],

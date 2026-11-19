@@ -6,6 +6,7 @@
  */
 
 import { omit, pick } from 'lodash';
+import { Frequency } from '@kbn/rrule';
 import { createRuleRoute } from './create_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -297,6 +298,56 @@ describe('createRuleRoute', () => {
           last_execution_date: createResult.execution_status.last_execution_date.toISOString(),
         },
       },
+    });
+  });
+
+  it('creates a rule with an rrule schedule', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+
+    createRuleRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
+    });
+
+    const [, handler] = router.post.mock.calls[0];
+    const mockRruleString =
+      'DTSTART;TZID=Europe/Rome:20261117T090000\nRRULE:FREQ=WEEKLY;BYHOUR=9;BYMINUTE=0;BYDAY=MO,WE';
+    const mockRrule = {
+      freq: Frequency.WEEKLY,
+      interval: 1,
+      tzid: 'Europe/Rome',
+      dtstart: '2026-11-17T08:00:00.000Z',
+      byweekday: ['MO', 'WE'],
+      byhour: [9],
+      byminute: [0],
+    };
+
+    rulesClient.create.mockResolvedValueOnce({
+      ...mockedAlert,
+      schedule: { rrule: mockRrule },
+    } as unknown as SanitizedRule<{ bar: boolean }>);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { body: { ...ruleToCreate, schedule: { rrule: mockRruleString } } },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(rulesClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ schedule: { rrule: mockRrule } }),
+      })
+    );
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({ schedule: { rrule: mockRruleString } }),
     });
   });
 

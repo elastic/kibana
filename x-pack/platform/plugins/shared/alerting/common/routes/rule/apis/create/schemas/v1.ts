@@ -14,7 +14,7 @@ import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../.
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { artifactsSchemaV1 } from '../../../request';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
-import { flappingSchemaV2 } from '../../../common';
+import { flappingSchemaV2, ruleScheduleRequestSchemaV1 } from '../../../common';
 
 export const actionFrequencySchema = schema.object(
   {
@@ -174,20 +174,7 @@ const baseCreateBodyFields = {
       })
     )
   ),
-  schedule: schema.object(
-    {
-      interval: schema.string({
-        validate: validateDurationV1,
-        meta: { description: 'The interval is specified in seconds, minutes, hours, or days.' },
-      }),
-    },
-    {
-      meta: {
-        description:
-          'The check interval, which specifies how frequently the rule conditions are checked.',
-      },
-    }
-  ),
+  schedule: ruleScheduleRequestSchemaV1,
   actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
   alert_delay: schema.maybe(alertDelaySchemaV1),

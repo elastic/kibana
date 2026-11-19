@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { rRuleRequestSchemaV1 } from '@kbn/response-ops-schedule-schema';
-import { validateDurationV1 } from '../../../validation';
+import { ruleScheduleRequestSchemaV1 } from '../../../common';
 import { notifyWhenSchemaV1 } from '../../../response';
 import { ruleSnoozeScheduleSchemaV1 } from '../../../request';
 import {
@@ -64,7 +64,7 @@ export const bulkEditOperationsSchema = schema.arrayOf(
     schema.object({
       operation: schema.literal('set'),
       field: schema.literal('schedule'),
-      value: schema.object({ interval: schema.string({ validate: validateDurationV1 }) }),
+      value: ruleScheduleRequestSchemaV1,
     }),
     schema.object({
       operation: schema.literal('set'),

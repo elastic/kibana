@@ -10,6 +10,8 @@ requestBody:
           $ref: "./es_query/create_es_query_kql_rule_request.yaml"
         createIndexThresholdRuleRequest:
           $ref: "./index_threshold/create_index_threshold_rule_request.yaml"
+        createIndexThresholdRruleRuleRequest:
+          $ref: "./index_threshold/create_index_threshold_rrule_rule_request.yaml"
         createTrackingContainmentRuleRequest:
           $ref: "./geo_containment/create_tracking_containment_rule_request.yaml"
 responses:
@@ -25,5 +27,7 @@ responses:
             $ref: "./es_query/create_es_query_kql_rule_response.yaml"
           createIndexThresholdRuleResponse:
             $ref: "./index_threshold/create_index_threshold_rule_response.yaml"
+          createIndexThresholdRruleRuleResponse:
+            $ref: "./index_threshold/create_index_threshold_rrule_rule_response.yaml"
           createTrackingContainmentRuleResponse:
             $ref: "./geo_containment/create_tracking_containment_rule_response.yaml"
