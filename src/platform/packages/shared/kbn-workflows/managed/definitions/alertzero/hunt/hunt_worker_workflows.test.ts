@@ -54,6 +54,8 @@ interface YamlStep {
     result_behaviors?: string;
     result_coverage_gaps?: string;
     report_intent_targets?: string;
+    type?: string;
+    render_inline?: boolean;
     'workflow-id'?: string;
     'run-as-mode'?: string;
     inputs?: Record<string, unknown>;
@@ -128,6 +130,15 @@ describe('Hunt Watch worker chain', () => {
     expect(names.indexOf('append_workflow_execution')).toBeLessThan(
       names.indexOf('attach_threat_report')
     );
+  });
+
+  // `render_inline` is the only thing that shows this card in the thread; the agent does not render it.
+  it('attaches the threat report as an inline card', () => {
+    const attach = stepIn(findOrCreateInvestigation.steps, 'attach_threat_report');
+
+    expect(attach?.type).toBe('ai.attachment.add');
+    expect(attach?.with?.type).toBe('security.threat');
+    expect(attach?.with?.render_inline).toBe(true);
   });
 
   it.each([
