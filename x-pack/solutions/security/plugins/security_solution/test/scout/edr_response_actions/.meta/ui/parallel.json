@@ -1,5 +1,5 @@
 {
-  "sha1": "6067086a55ddfa31a1fdef950f303723b8f15b9b",
+  "sha1": "13e52d07418382802dc1598c8b5c637c6afc8371",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -40,7 +40,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
-        "line": 57,
+        "line": 61,
         "column": 29
       }
     },
@@ -54,8 +54,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
-        "line": 74,
-        "column": 26
+        "line": 79,
+        "column": 29
       }
     },
     {
@@ -68,8 +68,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
-        "line": 98,
-        "column": 25
+        "line": 101,
+        "column": 41
       }
     },
     {
@@ -178,12 +178,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/response_console_from_alerts.spec.ts",
-        "line": 37,
-        "column": 33
+        "line": 46,
+        "column": 7
       }
     },
     {
@@ -192,12 +193,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/response_console_from_alerts.spec.ts",
-        "line": 51,
-        "column": 53
+        "line": 61,
+        "column": 17
       }
     },
     {

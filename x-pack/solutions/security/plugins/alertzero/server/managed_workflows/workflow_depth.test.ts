@@ -19,7 +19,7 @@ import { workerRegistry } from './worker_registry';
 
 /**
  * Mirrors the default `maxWorkflowDepth` of the workflows execution engine
- * (`src/platform/plugins/shared/workflows_execution_engine/server/config.ts`). The root of an
+ * (`x-pack/platform/plugins/shared/workflows_execution_engine/server/config.ts`). The root of an
  * execution is level 0, and a `workflow.execute` or `workflow.executeAsync` call from a workflow
  * at this level fails, so this is the deepest level a chain can reach.
  */

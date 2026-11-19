@@ -45,6 +45,11 @@ export class DiscoverPageObject extends FtrService {
   public async navigateToApp(opts: { queryMode: 'classic' | 'esql' }) {
     await this.setQueryMode(opts.queryMode);
     await this.common.navigateToApp(this.APP_ID);
+    // A login prompted by this navigation clears localStorage, dropping the seeded mode.
+    if ((await this.getQueryMode()) !== opts.queryMode) {
+      await this.setQueryMode(opts.queryMode);
+      await this.common.navigateToApp(this.APP_ID);
+    }
   }
 
   /** Ensures that navigation to discover has completed */
