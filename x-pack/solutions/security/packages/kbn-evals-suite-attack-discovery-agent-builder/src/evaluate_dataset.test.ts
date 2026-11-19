@@ -2232,3 +2232,27 @@ describe('slow-path handoff (#293046): task-level backfill', () => {
     }
   });
 });
+
+describe('trace-based evaluator wiring', () => {
+  // Every other test passes `traceBasedEvaluators: {}` and ignores the evaluator
+  // array, so dropping `traceEvaluators.estimatedCost` from the list leaves them
+  // green while the suite silently loses its `Estimated Cost (USD)` column.
+  it('hands the estimatedCost trace evaluator to runExperiment', async () => {
+    const estimatedCost = { name: 'Estimated Cost (USD)', kind: 'CODE', evaluate: jest.fn() };
+    const runExperiment = jest.fn().mockResolvedValue(undefined);
+
+    const run = createEvaluateAttackDiscoveryAgentBuilderDataset({
+      chatClient: {} as never,
+      fetch: jest.fn() as never,
+      evaluators: { traceBasedEvaluators: { estimatedCost } } as never,
+      executorClient: { runExperiment } as never,
+      traceEsClient: {} as never,
+    });
+
+    await run({ dataset: { name: 'wiring', description: '', examples: [] } });
+
+    expect(runExperiment).toHaveBeenCalledTimes(1);
+    const [, evaluatorList] = runExperiment.mock.calls[0];
+    expect(evaluatorList).toContain(estimatedCost);
+  });
+});

@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import { table } from 'table';
 import { isImproved } from '@kbn/evals-common';
 import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import { formatMetricValue } from './format_metric';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
@@ -21,7 +22,7 @@ function formatPValue(value: number | null): string {
 }
 
 function formatNumber(value: number): string {
-  return Number.isFinite(value) ? value.toFixed(2) : '-';
+  return Number.isFinite(value) ? formatMetricValue(value) : '-';
 }
 
 function formatDifference(value: number, direction: Direction): string {
@@ -29,7 +30,7 @@ function formatDifference(value: number, direction: Direction): string {
     return chalk.gray('-');
   }
 
-  const formatted = value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
+  const formatted = value > 0 ? `+${formatMetricValue(value)}` : formatMetricValue(value);
 
   if (value === 0 || direction === 'neutral') {
     return formatted;

@@ -43,6 +43,24 @@ describe('formatMarkdownCompareReport', () => {
     expect(output).toContain('Yes');
   });
 
+  it('keeps sub-cent precision for means and diff so a cost regression stays visible', () => {
+    const output = formatMarkdownCompareReport({
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
+      results: [
+        makeResult({
+          evaluatorName: 'Estimated Cost (USD)',
+          direction: 'minimize',
+          meanTarget: 0.004,
+          meanBaseline: 0.002,
+        }),
+      ],
+    });
+
+    const row = output.split('\n').find((line) => line.includes('| Estimated Cost (USD) |'));
+    expect(row).toContain('| 0.0040 | 0.0020 | +0.0020');
+  });
+
   it('renders the test column and explains how tests are chosen', () => {
     const output = formatMarkdownCompareReport({
       targetExperimentId: 'exp-a',

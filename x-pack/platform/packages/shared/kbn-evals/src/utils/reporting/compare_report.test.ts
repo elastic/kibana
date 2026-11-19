@@ -195,6 +195,25 @@ describe('formatCompareReport', () => {
     expect(tableOutput).toContain('t-test');
   });
 
+  it('keeps sub-cent precision for means and diff so a cost regression stays visible', () => {
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: [
+        makeResult({
+          evaluatorName: 'Estimated Cost (USD)',
+          direction: 'minimize',
+          meanTarget: 0.004,
+          meanBaseline: 0.002,
+        }),
+      ],
+    });
+
+    expect(tableOutput).toContain('0.0040');
+    expect(tableOutput).toContain('0.0020');
+    expect(tableOutput).toContain('+0.0020');
+  });
+
   it('appends discordant pairs to the diff of binary rows', () => {
     const results = [
       makeResult({
