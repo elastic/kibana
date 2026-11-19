@@ -96,7 +96,13 @@ export function NightshiftApp({
 
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
-  const debouncedSearchQuery = useDebouncedValue(searchQuery, INVESTIGATIONS_SEARCH_DEBOUNCE_MS);
+  // The input keeps the raw term so spaces can be typed, but the API rejects a whitespace-only
+  // query, so only the trimmed term filters.
+  const trimmedSearchQuery = searchQuery?.trim() || undefined;
+  const debouncedSearchQuery = useDebouncedValue(
+    trimmedSearchQuery,
+    INVESTIGATIONS_SEARCH_DEBOUNCE_MS
+  );
   const rawSeverity = useMemo(() => getNightshiftSeverityFromSearch(search), [search]);
   const activeSeverity: Severity | undefined = useMemo(
     () => (isSeverity(rawSeverity) ? rawSeverity : undefined),
@@ -108,7 +114,9 @@ export function NightshiftApp({
   const {
     sections,
     severityCounts,
+    unfilteredSeverityCounts,
     areSeverityCountsLoading,
+    areUnfilteredSeverityCountsLoading,
     areSeverityCountsStale,
     hasSeverityCountsError,
     activeInvestigationCount,
@@ -151,6 +159,13 @@ export function NightshiftApp({
           .filter(isSeverity)
       ),
     [sections]
+  );
+
+  // Mute chrome from the no-search baseline, not the filtered list — a search that zeros Medium
+  // must keep Medium filled while Critical (never present) stays hollow.
+  const presentSeverities = useMemo(
+    () => new Set(SEVERITY_OPTIONS.filter((severity) => unfilteredSeverityCounts[severity] > 0)),
+    [unfilteredSeverityCounts]
   );
 
   const needsYouCount =
@@ -336,7 +351,7 @@ export function NightshiftApp({
   // Searching is typing, not clicking. Reported once the debounced term's results have landed,
   // so an empty result set is distinguishable from a hit. The term itself is never reported.
   useEffect(() => {
-    const query = debouncedSearchQuery?.trim();
+    const query = debouncedSearchQuery;
     if (!query) {
       reportedSearchQuery.current = undefined;
       return;
@@ -466,11 +481,17 @@ export function NightshiftApp({
       >
         <InvestigationSeverityTiles
           severityCounts={severityCounts}
+          presentSeverities={presentSeverities}
           scrollableSeverities={scrollableSeverities}
           // The counts are their own query. Until they land (or are replaced after a filter
           // change) a number would be a default 0 or the previous filter's, contradicting the
           // rows below, so all four tiles show a skeleton and reveal together.
-          isLoading={isInitialLoading || areSeverityCountsLoading || areSeverityCountsStale}
+          isLoading={
+            isInitialLoading ||
+            areSeverityCountsLoading ||
+            areSeverityCountsStale ||
+            areUnfilteredSeverityCountsLoading
+          }
           onSeverityClick={handleSeverityClick}
         />
 
@@ -483,7 +504,7 @@ export function NightshiftApp({
           onInvestigationClick={handleInvestigationClick}
           onStartInvestigation={onStartInvestigation}
           onCreateAutomation={onCreateAutomation}
-          hasActiveSearch={Boolean(searchQuery)}
+          hasActiveSearch={Boolean(trimmedSearchQuery)}
         />
       </div>
     </EuiFlexGroup>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react';
-import type { QueryOperator } from '@kbn/timelines-plugin/common';
+import type { QueryOperator } from '@kbn/securitysolution-timeline-common';
 import { DataProviderTypeEnum } from '../../../../../../common/api/timeline';
 import { useInsightQuery } from './use_insight_query';
 import { TestProviders } from '../../../../mock';

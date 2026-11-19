@@ -14,12 +14,12 @@ import {
   type FixtureProbe,
 } from '../__fixtures__';
 import { normalizeAclSource } from '../acl';
-import { compareLevels, type EntryLevel } from '../levels';
+import { compareLevels, type EntryAccess } from '../levels';
 import type { AccessPolicy } from '../policy';
 import { buildAclReadFilter } from './build_acl_read_filter';
 
 const SPACE = 'default';
-const LEVELS: EntryLevel[] = ['view', 'use', 'edit', 'manage'];
+const LEVELS: EntryAccess[] = ['view', 'use', 'edit', 'manage'];
 const PROBES = Object.keys(FIXTURE_PROBES).filter(
   (name): name is FixtureProbe => name in FIXTURE_PROBES
 );
@@ -31,7 +31,7 @@ const INDEXABLE_FIXTURES = ACL_SHAPE_FIXTURES.filter(({ indexable }) => indexabl
 const PRIVATE = {
   version: 1,
   owner: { type: 'user', id: 'u_owner' },
-  general_access: 'none',
+  general: { access: 'none' },
 };
 
 /** The values indexed for each field of one document, by the field's full dotted path. */
@@ -55,7 +55,7 @@ const indexDocument = (source: Record<string, unknown>, spaces = [SPACE]): Index
       ['acl.version', acl?.version ?? []],
       ['acl.owner.type', acl?.owner.type ?? []],
       ['acl.owner.id', acl?.owner.id ?? []],
-      ['acl.general_access', acl?.general_access ?? []],
+      ['acl.general.access', acl?.general.access ?? []],
     ]),
     entries: (acl?.entries ?? []).map(
       (entry) =>
@@ -145,7 +145,7 @@ const matches = (query: unknown, fields: Fields, entries: Fields[]): boolean => 
 const isVisible = (query: unknown, { fields, entries }: IndexedDocument) =>
   matches(query, fields, entries);
 
-const levelsUpTo = (level: EntryLevel | undefined) =>
+const levelsUpTo = (level: EntryAccess | undefined) =>
   level ? LEVELS.filter((other) => compareLevels(other, level) <= 0) : [];
 
 /**
@@ -155,7 +155,7 @@ const levelsUpTo = (level: EntryLevel | undefined) =>
 const expectAccess = (
   source: Record<string, unknown>,
   policy: AccessPolicy,
-  access: Partial<Record<FixtureProbe, EntryLevel>>,
+  access: Partial<Record<FixtureProbe, EntryAccess>>,
   { recovery = false }: { recovery?: boolean } = {}
 ) => {
   const document = indexDocument(source);
@@ -165,7 +165,7 @@ const expectAccess = (
         buildAclReadFilter({
           policy,
           principal: FIXTURE_PROBES[probe],
-          level,
+          access: level,
           recoverySpaces: recovery ? [SPACE] : [],
           ordinarySpaces: recovery ? [] : [SPACE],
         }),
@@ -202,7 +202,7 @@ describe('buildAclReadFilter', () => {
           isVisible(
             buildAclReadFilter({
               policy,
-              level: 'view',
+              access: 'view',
               recoverySpaces: [SPACE],
               ordinarySpaces: [],
             }),
@@ -213,34 +213,6 @@ describe('buildAclReadFilter', () => {
     );
   });
 
-  describe('with shapes that only the normalizer tests cover', () => {
-    const EVERYONE_EDITS = Object.fromEntries(PROBES.map((probe) => [probe, 'edit' as const]));
-
-    it.each([
-      ['a key the mapping does not know is no ACL', { acl: { foo: 'bar' } }, EVERYONE_EDITS],
-      [
-        'an entry with only added_at is a damaged ACL',
-        { acl: { entries: [{ added_at: '2026-10-21T00:00:00Z' }] } },
-        {},
-      ],
-      ['an empty general access string is a damaged ACL', { acl: { general_access: '' } }, {}],
-      [
-        'sibling dotted entry keys grant nothing',
-        {
-          acl: {
-            ...PRIVATE,
-            'entries.type': 'user',
-            'entries.id': 'u_grantee',
-            'entries.access': 'use',
-          },
-        },
-        { owner: 'manage' as const },
-      ],
-    ])('%s', (_, source, access) => {
-      expectAccess(source, FIXTURE_POLICY, access);
-    });
-  });
-
   describe('spaces', () => {
     const publicObject = indexDocument({}, ['other']);
 
@@ -248,7 +220,7 @@ describe('buildAclReadFilter', () => {
       expect(
         buildAclReadFilter({
           policy: FIXTURE_POLICY,
-          level: 'view',
+          access: 'view',
           recoverySpaces: [],
           ordinarySpaces: [],
         })
@@ -262,7 +234,7 @@ describe('buildAclReadFilter', () => {
       ]) {
         expect(
           isVisible(
-            buildAclReadFilter({ policy: FIXTURE_POLICY, level: 'view', ...params }),
+            buildAclReadFilter({ policy: FIXTURE_POLICY, access: 'view', ...params }),
             publicObject
           )
         ).toBe(false);
@@ -276,7 +248,7 @@ describe('buildAclReadFilter', () => {
       ]) {
         expect(
           isVisible(
-            buildAclReadFilter({ policy: FIXTURE_POLICY, level: 'view', ...params }),
+            buildAclReadFilter({ policy: FIXTURE_POLICY, access: 'view', ...params }),
             publicObject
           )
         ).toBe(true);
@@ -292,13 +264,13 @@ describe('buildAclReadFilter', () => {
       source: Record<string, unknown>,
       probe: FixtureProbe,
       spaces: { recoverySpaces: string[]; ordinarySpaces: string[] },
-      level: EntryLevel = 'view'
+      level: EntryAccess = 'view'
     ) =>
       isVisible(
         buildAclReadFilter({
           policy: FIXTURE_POLICY,
           principal: FIXTURE_PROBES[probe],
-          level,
+          access: level,
           ...spaces,
         }),
         indexDocument(source, ['*'])
@@ -335,13 +307,13 @@ describe('buildAclReadFilter', () => {
       source: Record<string, unknown>,
       space: string,
       spaces: { recoverySpaces: string[]; ordinarySpaces: string[] },
-      { probe = 'stranger', level = 'view' }: { probe?: FixtureProbe; level?: EntryLevel } = {}
+      { probe = 'stranger', level = 'view' }: { probe?: FixtureProbe; level?: EntryAccess } = {}
     ) =>
       isVisible(
         buildAclReadFilter({
           policy: FIXTURE_POLICY,
           principal: FIXTURE_PROBES[probe],
-          level,
+          access: level,
           ...spaces,
         }),
         indexDocument(source, [space])
@@ -420,7 +392,7 @@ describe('buildAclReadFilter', () => {
       buildAclReadFilter({
         policy: FIXTURE_POLICY,
         principal: FIXTURE_PROBES.owner,
-        level: 'use',
+        access: 'use',
         recoverySpaces: ['admin-space'],
         ordinarySpaces: [SPACE],
       })

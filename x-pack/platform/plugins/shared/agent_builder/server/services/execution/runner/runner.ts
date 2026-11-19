@@ -35,6 +35,7 @@ import type {
   ExperimentalFeatures,
   HooksServiceStart,
   ModelProvider,
+  ModelSource,
   RunAgentReturn,
   RunContext,
   RunApprovals,
@@ -73,6 +74,7 @@ import type { AttachmentServiceStart } from '../../attachments';
 import type { RendererServiceStart } from '../../renderers';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import type { ModelProviderFactoryFn } from './model_provider';
+import { connectorModelSource } from './model_provider';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import {
   createConversationStateManager,
@@ -125,7 +127,8 @@ export interface CreateScopedRunnerDeps {
   owner?: UserIdAndName;
   /** Service account the execution runs as; see {@link RunAgentParams.runAs}. */
   runAs?: ExecutionRunAs;
-  defaultConnectorId?: string;
+  /** Where this run's default model comes from; undefined leaves the provider on its own default. */
+  defaultModel?: ModelSource;
   /**
    * Optional CPS project routing expression scoping this run's search tools to a set of projects
    * Defaults to space-level routing (all linked projects in the current space) when omitted.
@@ -181,7 +184,7 @@ export interface CreateScopedRunnerDeps {
 export type CreateRunnerDeps = Omit<
   CreateScopedRunnerDeps,
   | 'request'
-  | 'defaultConnectorId'
+  | 'defaultModel'
   | 'projectRouting'
   | 'resultStore'
   | 'skillsStore'
@@ -290,7 +293,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     owner,
     runAs,
     agentId,
-    defaultConnectorId,
+    defaultModel,
     projectRouting,
     telemetryMetadata,
     maxContentLength,
@@ -310,7 +313,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     runAs?: ExecutionRunAs;
     /** Agent id for this run; used to lazily resolve Deductive-only config. */
     agentId?: string;
-    defaultConnectorId?: string;
+    defaultModel?: ModelSource;
     projectRouting?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
     maxContentLength?: number;
@@ -339,7 +342,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
     const modelProvider = modelProviderFactory({
       request,
-      defaultConnectorId,
+      defaultModel,
       telemetryMetadata,
       maxContentLength,
       reasoningLevel,
@@ -406,7 +409,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       request,
       owner,
       runAs,
-      defaultConnectorId,
+      defaultModel,
       projectRouting,
       abortSignal,
       resultStore,
@@ -434,7 +437,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const runner = await createScopedRunnerWithDeps({
         request,
         promptState,
-        defaultConnectorId,
+        defaultModel: connectorModelSource(defaultConnectorId),
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
@@ -448,7 +451,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const runner = await createScopedRunnerWithDeps({
         request,
         promptState,
-        defaultConnectorId,
+        defaultModel: connectorModelSource(defaultConnectorId),
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
@@ -461,7 +464,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         owner,
         runAs,
-        defaultConnectorId,
+        defaultModel,
         projectRouting,
         telemetryMetadata,
         maxContentLength,
@@ -482,7 +485,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         owner,
         runAs,
         agentId,
-        defaultConnectorId,
+        defaultModel,
         projectRouting,
         telemetryMetadata,
         maxContentLength,
