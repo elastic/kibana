@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
+import { TriggerModeSelector } from './trigger_mode_selector';
+import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
 
 const mentionButtonLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.inputActions.mentionButtonLabel',
@@ -27,6 +29,10 @@ interface InputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   isSubmitting: boolean;
+  showTriggerModeSelector: boolean;
+  triggerMode: ChatTriggerMode;
+  isAutoTriggerModeAvailable: boolean;
+  onTriggerModeChange: (mode: ChatTriggerMode) => void;
   onMentionClick?: () => void;
   isMentionDisabled?: boolean;
 }
@@ -35,43 +41,63 @@ export const InputActions: React.FC<InputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
   isSubmitting,
+  showTriggerModeSelector,
+  triggerMode,
+  isAutoTriggerModeAvailable,
+  onTriggerModeChange,
   onMentionClick,
   isMentionDisabled = false,
 }) => {
+  const showConnectorSelector = triggerMode !== ChatTriggerMode.Never;
+  const showStartActions = showConnectorSelector || Boolean(onMentionClick);
+
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
         alignItems="center"
-        justifyContent="spaceBetween"
+        justifyContent={showStartActions ? 'spaceBetween' : 'flexEnd'}
       >
-        <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
-          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-            {onMentionClick && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={mentionButtonLabel} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="at"
-                    color="text"
-                    size="s"
-                    aria-label={mentionButtonLabel}
-                    data-test-subj="agentBuilderConversationInputMentionButton"
-                    // Keeps the focus in the editor, so the menu opens under the caret
-                    onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
-                    isDisabled={isMentionDisabled}
-                    onClick={onMentionClick}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
-              <ConnectorSelector />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {showStartActions && (
+          <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              {onMentionClick && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={mentionButtonLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="at"
+                      color="text"
+                      size="s"
+                      aria-label={mentionButtonLabel}
+                      data-test-subj="agentBuilderConversationInputMentionButton"
+                      // Keeps the focus in the editor, so the menu opens under the caret
+                      onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
+                      isDisabled={isMentionDisabled}
+                      onClick={onMentionClick}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              {showConnectorSelector && (
+                <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
+                  <ConnectorSelector />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            {showTriggerModeSelector && (
+              <EuiFlexItem grow={false}>
+                <TriggerModeSelector
+                  triggerMode={triggerMode}
+                  isAutoAvailable={isAutoTriggerModeAvailable}
+                  onTriggerModeChange={onTriggerModeChange}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <ConversationActionButton
                 onSubmit={onSubmit}
