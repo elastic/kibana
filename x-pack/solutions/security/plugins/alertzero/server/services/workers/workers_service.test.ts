@@ -318,6 +318,18 @@ describe('WorkersService', () => {
           )
       ).resolves.toEqual({ outcome: 'unavailable' });
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      // persistWorker writes through install before the unavailable return, so the stored
+      // settings and revision themselves must be untouched by the refused save.
+      const document = harness.documents.get(`${RULE_TUNING}-space-a`);
+      expect(document?.values).toMatchObject({
+        extras: RULE_TUNING_DEFAULT_EXTRAS,
+        serviceAccountId: 'sa-1',
+      });
+      const stateAfter = await harness.managedWorkflows.getInstalledWorkflowState(
+        reportedWorkflowId(RULE_TUNING, 'space-a'),
+        'space-a'
+      );
+      expect(stateAfter?.documentVersion).toBe(revision);
     });
 
     it('uses the best-effort ensure, not the required one, when listing workers', async () => {
@@ -1472,13 +1484,17 @@ describe('WorkersService', () => {
 
     const makeHuntService = (
       harness: ReturnType<typeof createPersistentHarness>,
-      threatIntelSupply: ThreatIntelSupplyService
+      threatIntelSupply: ThreatIntelSupplyService,
+      agentFns: {
+        ensureAgentForSpace?: (spaceId: string) => Promise<void>;
+        requireAgentForSpace?: (spaceId: string) => Promise<void>;
+      } = {}
     ) =>
       new WorkersService(
         harness.management,
         Promise.resolve(harness.managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
-        {},
+        agentFns,
         async (_request, registration, options) => {
           await harness.install(registration.id, options);
         },
@@ -1664,6 +1680,33 @@ describe('WorkersService', () => {
 
       expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalled();
       expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+    });
+
+    it('tears down TI supply when the shared agent ensure fails after the supply was set up', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply, {
+        requireAgentForSpace: async () => {
+          throw new Error('agent store unavailable');
+        },
+      });
+
+      await expect(
+        service.update(
+          HUNT,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).resolves.toEqual({ outcome: 'unavailable' });
+
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+      expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 
     it('does not ensure TI supply when enable is rejected for a missing service account', async () => {

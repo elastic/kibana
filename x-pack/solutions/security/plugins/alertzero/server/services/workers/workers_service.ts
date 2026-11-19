@@ -449,6 +449,10 @@ export class WorkersService {
               err instanceof Error ? err.message : String(err)
             }`
           );
+          // A Hunt enable that got this far already ensured the shared threat-intel supply;
+          // without it the enabled-by-request ingest/enrich/attribution workflows would keep
+          // running while Hunt itself stays off behind a 503.
+          await rollbackHuntSupplyIfNeeded();
           return { outcome: 'unavailable' };
         }
       }
