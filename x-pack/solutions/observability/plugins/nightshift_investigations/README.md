@@ -195,7 +195,7 @@ Starting an investigation also needs Agent Builder `all` (the start route's own 
 The findings recorder's final pass proposes up to three actions. By default each is a to-do: the analyst carries it out and marks it applied. A proposal can instead run a workflow the space's users wrote, once someone approves it. The recorder is shown every workflow in the space that:
 
 1. carries the `action` tag;
-2. declares `consts.actionMetadata` with at least `name` and `approvalPolicy` (use `always-gate`);
+2. declares `consts.actionMetadata` with at least `name` and `approvalPolicy: always-gate`. Workflows with any other policy are left out, so every run the recorder proposes waits for a person to approve it;
 3. takes one `actionInput` object on its manual trigger, whose properties are the workflow's parameters (describe each, the recorder fills them from the findings);
 4. ends in a `workflow.output` step.
 

@@ -20,7 +20,11 @@ const setup = ({
     total: 2,
   });
   const listActions = jest.fn().mockResolvedValue({
-    actions: Array.from({ length: 25 }, (_, i) => ({ workflowId: `wf-${i}`, name: `wf-${i}` })),
+    actions: Array.from({ length: 25 }, (_, i) => ({
+      workflowId: `wf-${i}`,
+      name: `wf-${i}`,
+      approvalPolicy: 'always-gate',
+    })),
     total: 25,
   });
   const assertCanRead = jest.fn(async () => {
@@ -99,6 +103,21 @@ describe('createRecorderProposals', () => {
 
     expect(listActions).toHaveBeenCalledWith('space-a', request, { managedFilter: 'unmanaged' });
     expect(actions).toHaveLength(MAX_RECORDER_ACTIONS);
+  });
+
+  it('leaves out action workflows that could run without a person approving them', async () => {
+    const { adapter, listActions } = setup();
+    listActions.mockResolvedValue({
+      actions: [
+        { workflowId: 'gated', name: 'gated', approvalPolicy: 'always-gate' },
+        { workflowId: 'autonomous', name: 'autonomous', approvalPolicy: 'autonomy-dependent' },
+      ],
+      total: 2,
+    });
+
+    const actions = await adapter.listActions({ request });
+
+    expect(actions.map(({ workflowId }) => workflowId)).toEqual(['gated']);
   });
 
   it('proposes an action workflow through the gate, with its input and no to-do category', async () => {

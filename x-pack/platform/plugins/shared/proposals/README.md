@@ -462,13 +462,13 @@ Rule 3 is the non-obvious one and the easiest to get wrong: the gate passes exac
 
 See `definitions/alertzero/actions/action_create_detection_rule.yaml` for a worked example.
 
-A user can author one too, in the Workflows app: the same four rules apply, and the workflow lives in their space instead of the global one. Declare `approvalPolicy: always-gate` so it never runs without a person approving it. Keep user-authored actions to low-harm ones (opening a case or an issue, paging someone) for now: the workflow and its input are validated when the proposal is created, not again when it is approved, and nothing deduplicates the same action proposed from two conversations.
+A user can author one too, in the Workflows app: the same four rules apply, and the workflow lives in their space instead of the global one. Declare `approvalPolicy: always-gate` so it never runs without a person approving it; Nightshift's findings recorder only lists user-authored actions that do. Keep user-authored actions to low-harm ones (opening a case or an issue, paging someone) for now: the workflow and its input are validated when the proposal is created, not again when it is approved, and nothing deduplicates the same action proposed from two conversations.
 
 ### The action catalog
 
 `ProposalsPluginStart.listActions(spaceId, request, { categories?, managedFilter? })` lists the action workflows a space can propose — every workflow tagged `action` with a valid `consts.actionMetadata` — as `ActionCatalogEntry` (`@kbn/proposals-common`): the workflow id, its metadata, and the JSON Schema of its manual trigger inputs, so an agent can fill `actionInput` without reading the YAML. It reads as the request's user, so it lists only what they can read. Definitions with invalid metadata are skipped with a warning.
 
-`managedFilter` picks which workflows: `managed` (the default) for the actions solutions install, `unmanaged` for the ones the space's users wrote, `all` for both. AlertZero lists the managed ones; Nightshift's findings recorder lists only the unmanaged ones, so it never proposes another solution's actions.
+`managedFilter` picks which workflows: `managed` (the default) for the actions solutions install, `unmanaged` for the ones the space's users wrote, `all` for both. AlertZero lists the managed ones; Nightshift's findings recorder lists only the unmanaged ones that declare `approvalPolicy: always-gate`, so it never proposes another solution's actions, nor one that could run unapproved.
 
 ### API
 

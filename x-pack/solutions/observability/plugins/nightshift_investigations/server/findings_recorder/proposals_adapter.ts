@@ -78,12 +78,15 @@ export const createRecorderProposals = ({
     },
 
     // Only the space's own workflows: managed actions belong to the solution that installed them
-    // (AlertZero's host isolation, say) and are not Nightshift's to propose.
+    // (AlertZero's host isolation, say) and are not Nightshift's to propose. And only `always-gate`
+    // ones: the input is written by the model, so a person must approve every run of it.
     listActions: async ({ request }) => {
       const { actions } = await proposals.listActions(getSpaceId(request), request, {
         managedFilter: 'unmanaged',
       });
-      return actions.slice(0, MAX_RECORDER_ACTIONS);
+      return actions
+        .filter(({ approvalPolicy }) => approvalPolicy === 'always-gate')
+        .slice(0, MAX_RECORDER_ACTIONS);
     },
 
     propose: async (args) => {
