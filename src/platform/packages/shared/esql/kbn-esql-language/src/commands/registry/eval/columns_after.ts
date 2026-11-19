@@ -50,5 +50,10 @@ export const columnsAfter = (
     }
   }
 
-  return uniqBy([...newColumns, ...previousColumns], 'name');
+  // EVAL appends new and overwritten columns after the remaining input columns.
+  const newColumnNames = new Set(newColumns.map(({ name }) => name));
+  return uniqBy(
+    [...previousColumns.filter(({ name }) => !newColumnNames.has(name)), ...newColumns],
+    'name'
+  );
 };

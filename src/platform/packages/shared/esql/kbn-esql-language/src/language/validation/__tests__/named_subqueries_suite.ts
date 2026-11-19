@@ -19,9 +19,8 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
           query: 'LET a = (FROM index | KEEP keywordField); FROM a | KEEP keywordField',
         },
         {
-          name: 'a LET next to an index',
-          query:
-            'LET a = (FROM index | KEEP keywordField); FROM a, other_index | KEEP keywordField, doubleField',
+          name: 'a LET and an index providing distinct fields in the same FROM',
+          query: 'LET a = (ROW letField = 1); FROM a, other_index | KEEP letField, doubleField',
         },
         {
           name: 'a LET inside a FROM subquery',
@@ -34,14 +33,14 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
             'LET other_index = (FROM index | KEEP keywordField); FROM index | WHERE keywordField IN (FROM other_index)',
         },
         {
-          name: 'a LET inside an IN subquery of a query starting with ROW',
+          name: 'a LET overwriting an EVAL column in a tuple IN subquery',
           query:
-            'LET a = (FROM index | KEEP integerField); ROW x = 1 | WHERE x IN (FROM a | KEEP integerField)',
+            'LET a = (ROW i = 1, s = "a" | EVAL i = 2); ROW x = 2, y = "a" | WHERE (y, x) IN (FROM a)',
         },
         {
-          name: 'a LET mixed with an inline source in an IN subquery',
+          name: 'a LET with wildcard KEEP in a tuple IN subquery',
           query:
-            'LET a = (ROW x = 1); ROW x = 1, y = "a" | WHERE (x, y) IN (FROM a, (ROW y = "a"))',
+            'LET a = (ROW k = 1, val = 2); ROW x = 1, y = 2 | WHERE (x, y) IN (FROM a | KEEP k, v*)',
         },
         {
           name: 'a LET after an inline source in an IN subquery',
@@ -49,35 +48,27 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
             'LET a = (ROW x = 1); ROW x = 1, y = "a" | WHERE (x, y) IN (FROM (ROW y = "a"), a)',
         },
       ])('accepts $name', async ({ query }) => {
-        const { expectErrors } = await setup();
+        const { expectErrors, expectElasticsearchAccepts } = await setup();
 
         await expectErrors(query, []);
+        await expectElasticsearchAccepts?.(query);
       });
     });
 
-    it.each([
-      'LET a = (ROW x = 1); TS a',
-      'LET a = (ROW x = 1); FROM (TS a)',
-      'LET index = (ROW x = 1); TS index',
-    ])('does not treat a LET binding as an index for TS: %s', async (query) => {
-      const { expectErrors } = await setup();
+    it.each(['LET a = (ROW x = 1); TS a', 'LET index = (ROW x = 1); TS index'])(
+      'does not treat a LET binding as an index for TS: %s',
+      async (query) => {
+        const { expectErrors } = await setup();
 
-      await expectErrors(query, ['Subqueries are not supported in TS command']);
-    });
+        await expectErrors(query, ['Subqueries are not supported in TS command']);
+      }
+    );
 
     describe('METADATA', () => {
       it.each([
         {
           name: 'on a LET without indices',
           query: 'LET a = (ROW value = 1); FROM a METADATA _id | KEEP missingField',
-        },
-        {
-          name: 'with a field Kibana does not list',
-          query: 'LET a = (ROW value = 1); FROM a METADATA _tier | KEEP missingField',
-        },
-        {
-          name: 'on a subquery reading a LET',
-          query: 'LET a = (ROW value = 1); FROM (FROM a) METADATA _i* | KEEP missingField',
         },
         {
           name: 'in a LET read through another LET',

@@ -29,13 +29,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'baz',
         type: 'integer',
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -50,6 +50,7 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'baz',
         type: 'integer',
@@ -62,7 +63,6 @@ describe('EVAL > columnsAfter', () => {
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -86,13 +86,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'foo + 1',
         type: 'integer',
         location: { min: 18, max: 24 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -116,6 +116,7 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'baz',
         type: 'integer',
@@ -128,7 +129,6 @@ describe('EVAL > columnsAfter', () => {
         location: { min: 33, max: 41 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -182,13 +182,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'result',
         type: 'integer',
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -203,13 +203,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'newField',
         type: 'keyword',
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -224,13 +224,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'newField',
         type: 'keyword',
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 
@@ -245,13 +245,13 @@ describe('EVAL > columnsAfter', () => {
     );
 
     expect(result).toEqual([
+      ...baseColumns,
       {
         name: 'newField',
         type: 'null',
         location: { min: 0, max: 0 },
         userDefined: true,
       },
-      ...baseColumns,
     ]);
   });
 });
