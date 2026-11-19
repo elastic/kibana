@@ -1,3 +1,4 @@
+tsrs
 @openfeature/ofrep-web-provider
 cbor2
 @eslint-community/eslint-plugin-eslint-comments
@@ -71,7 +72,6 @@ mongodb-connection-string-url
 magic-string
 graphql
 @cfworker/json-schema
-oxlint-tsgolint
 bump-cli
 @oxlint/plugins
 @types/mssql
