@@ -36,7 +36,7 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
     const { pathname, search } = toUrl();
 
     expect(`${pathname}${search}`).toMatchInlineSnapshot(
-      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12"`
+      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+%28agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12%29"`
     );
   });
 
@@ -57,7 +57,12 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
         kqlQuery: 'host.name : "a"',
         filters: [{ meta: {}, query: { match_phrase: { 'agent.name': 'beats' } } }],
       },
-      'transaction.name : "bazName" and host.name : "a"',
+      'transaction.name : "bazName" and (host.name : "a")',
+    ],
+    [
+      'a KQL filter with an `or` clause',
+      'host.name : "a" or host.name : "b"',
+      'transaction.name : "bazName" and (host.name : "a" or host.name : "b")',
     ],
     [
       'a kqlWithFilters filter with an empty kqlQuery',
@@ -75,7 +80,7 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
     );
 
     expect(url.searchParams.get('kuery')).toBe(
-      `transaction.name : "bazName" and ${DEFAULT_PARAMS.filter} and label.project_id : "project-123"`
+      `transaction.name : "bazName" and (${DEFAULT_PARAMS.filter}) and label.project_id : "project-123"`
     );
   });
 
@@ -96,7 +101,7 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
 
     expect(url.pathname).toBe('/app/apm/services/cart-service/overview');
     expect(url.searchParams.get('kuery')).toBe(
-      `transaction.name : "bazName" and ${DEFAULT_PARAMS.filter} and label.project_id : "project-123"`
+      `transaction.name : "bazName" and (${DEFAULT_PARAMS.filter}) and label.project_id : "project-123"`
     );
   });
 
