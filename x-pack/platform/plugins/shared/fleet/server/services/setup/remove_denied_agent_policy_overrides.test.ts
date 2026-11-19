@@ -18,28 +18,40 @@ import { removeDeniedAgentPolicyOverrides } from './remove_denied_agent_policy_o
 
 jest.mock('../app_context');
 jest.mock('../agent_policy', () => ({
-  agentPolicyService: { update: jest.fn() },
+  agentPolicyService: { get: jest.fn(), update: jest.fn(), bumpRevision: jest.fn() },
   getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('fleet-agent-policies'),
 }));
 
 const mockedAppContextService = jest.mocked(appContextService);
+const mockedGet = jest.mocked(agentPolicyService.get);
 const mockedUpdate = jest.mocked(agentPolicyService.update);
+const mockedBumpRevision = jest.mocked(agentPolicyService.bumpRevision);
 
 const mockStoredPolicies = (
   soClient: ReturnType<typeof savedObjectsClientMock.create>,
-  policies: Array<{ id: string; namespaces?: string[]; overrides?: Record<string, any> | null }>
+  policies: Array<{
+    id: string;
+    namespaces?: string[];
+    overrides?: Record<string, any> | null;
+    status?: string;
+  }>
 ) => {
+  // By default the current overrides are the ones seen by the scan
+  mockedGet.mockImplementation(
+    async (_soClient, id) =>
+      ({ id, overrides: policies.find((policy) => policy.id === id)?.overrides } as any)
+  );
   soClient.createPointInTimeFinder.mockReturnValue({
     close: jest.fn(),
     async *find() {
       yield {
-        saved_objects: policies.map(({ id, namespaces, overrides }) => ({
+        saved_objects: policies.map(({ id, namespaces, overrides, status }) => ({
           id,
           namespaces,
           type: 'fleet-agent-policies',
           references: [],
           // As with `fields: ['overrides']`: no `attributes` at all when the policy has no overrides.
-          attributes: overrides === undefined ? undefined : { overrides },
+          attributes: overrides === undefined ? undefined : { overrides, status },
         })),
         total: policies.length,
         per_page: 1000,
@@ -62,7 +74,9 @@ describe('removeDeniedAgentPolicyOverrides', () => {
       (spaceId?: string) => ({ spaceId } as any)
     );
     mockedAppContextService.getLogger.mockReturnValue(logger);
+    mockedGet.mockReset();
     mockedUpdate.mockReset();
+    mockedBumpRevision.mockReset();
   });
 
   it('searches the overrides of agent policies in all spaces', async () => {
@@ -73,7 +87,7 @@ describe('removeDeniedAgentPolicyOverrides', () => {
     expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'fleet-agent-policies',
-        fields: ['overrides'],
+        fields: ['overrides', 'status'],
         namespaces: ['*'],
       })
     );
@@ -151,7 +165,66 @@ describe('removeDeniedAgentPolicyOverrides', () => {
     expect(logged).not.toContain('secret-token');
   });
 
-  it('keeps going and logs an error when a policy update fails', async () => {
+  it('skips inactive policies', async () => {
+    mockStoredPolicies(soClient, [
+      {
+        id: 'inactive',
+        namespaces: ['default'],
+        overrides: { receivers: {} },
+        status: 'inactive',
+      },
+      { id: 'active', namespaces: ['default'], overrides: { receivers: {} }, status: 'active' },
+    ]);
+
+    await removeDeniedAgentPolicyOverrides(esClient);
+
+    expect(mockedUpdate).toHaveBeenCalledTimes(1);
+    expect(mockedUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      esClient,
+      'active',
+      expect.anything(),
+      expect.anything()
+    );
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('sanitizes the current overrides, so edits made since the scan are kept', async () => {
+    mockStoredPolicies(soClient, [
+      { id: 'policy-1', namespaces: ['default'], overrides: { receivers: {} } },
+    ]);
+    mockedGet.mockResolvedValue({
+      id: 'policy-1',
+      overrides: { 'agent.logging.level': 'debug', receivers: {} },
+    } as any);
+
+    await removeDeniedAgentPolicyOverrides(esClient);
+
+    expect(mockedUpdate).toHaveBeenCalledWith(
+      { spaceId: 'default' },
+      esClient,
+      'policy-1',
+      { overrides: { 'agent.logging.level': 'debug' } },
+      { force: true, skipValidation: true }
+    );
+  });
+
+  it('does not update a policy that no longer has denied overrides', async () => {
+    mockStoredPolicies(soClient, [
+      { id: 'policy-1', namespaces: ['default'], overrides: { receivers: {} } },
+    ]);
+    mockedGet.mockResolvedValue({
+      id: 'policy-1',
+      overrides: { 'agent.logging.level': 'debug' },
+    } as any);
+
+    await removeDeniedAgentPolicyOverrides(esClient);
+
+    expect(mockedUpdate).not.toHaveBeenCalled();
+    expect(mockedBumpRevision).not.toHaveBeenCalled();
+  });
+
+  it('keeps going, logs an error and schedules a redeploy when a policy update fails', async () => {
     mockStoredPolicies(soClient, [
       { id: 'policy-1', namespaces: ['default'], overrides: { receivers: {} } },
       { id: 'policy-2', namespaces: ['default'], overrides: { exporters: {} } },
@@ -162,5 +235,21 @@ describe('removeDeniedAgentPolicyOverrides', () => {
 
     expect(mockedUpdate).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('boom'));
+    expect(mockedBumpRevision).toHaveBeenCalledTimes(1);
+    expect(mockedBumpRevision).toHaveBeenCalledWith({ spaceId: 'default' }, esClient, 'policy-1', {
+      asyncDeploy: true,
+    });
+  });
+
+  it('only logs when scheduling the redeploy fails too', async () => {
+    mockStoredPolicies(soClient, [
+      { id: 'policy-1', namespaces: ['default'], overrides: { receivers: {} } },
+    ]);
+    mockedUpdate.mockRejectedValue(new Error('deploy failed'));
+    mockedBumpRevision.mockRejectedValue(new Error('no task manager'));
+
+    await expect(removeDeniedAgentPolicyOverrides(esClient)).resolves.toBeUndefined();
+
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('no task manager'));
   });
 });
