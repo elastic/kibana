@@ -45,6 +45,11 @@ describe('useFormatters', () => {
     expect(timeZone).toBe('America/New_York');
   });
 
+  it('names the zones Elasticsearch rejects by the zones they link to', () => {
+    expect(renderFormatters({ 'dateFormat:tz': 'EST' }).timeZone).toBe('America/Panama');
+    expect(renderFormatters({ 'dateFormat:tz': 'ROC' }).timeZone).toBe('Asia/Taipei');
+  });
+
   it("uses the browser's time zone, by its IANA name, when Kibana follows the browser", () => {
     const { formatDate, timeZone } = renderFormatters({ 'dateFormat:tz': 'Browser' });
 

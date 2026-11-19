@@ -249,7 +249,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
         if (!lineWidth.isDynamic() && lineWidth.isComplete()) {
           maxLineWidth = (lineWidth as StaticSizeProperty).getOptions().size;
         } else if (lineWidth.isDynamic() && lineWidth.isComplete()) {
-          maxLineWidth = (lineWidth as DynamicSizeProperty).getOptions().maxSize;
+          maxLineWidth = (lineWidth as DynamicSizeProperty).getOptions().max_size;
         }
       }
       const buffer = Math.ceil(3.5 * maxLineWidth);
