@@ -496,8 +496,12 @@ const buildNothingSearchedNarrative = (result: HuntCoordinatorCoreResult): strin
   const reason = isScopeResolutionFailure(result)
     ? 'Hunt Watch could not work out which indices to search.'
     : `${describeNothingSearchedIocs(result)}, and ${describeNothingSearchedBehaviors(result)}.`;
+  const retry =
+    result.completeness === 'incomplete_retryable'
+      ? ' The report stays eligible for a later sweep.'
+      : '';
   return [
-    `### Hunt Watch searched nothing for this report\n${reason} This is not a statement that the environment is clean.`,
+    `### Hunt Watch searched nothing for this report\n${reason} This is not a statement that the environment is clean.${retry}`,
     `_Hunt run ${code(result.run_id)}._`,
   ].join('\n\n');
 };

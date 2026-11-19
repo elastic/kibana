@@ -775,6 +775,34 @@ describe('buildHuntNarrative when no search ran', () => {
     expect(narrative).not.toContain(ctx.reportTitle);
   });
 
+  it('says the report stays eligible when the run is retryable', () => {
+    const narrative = buildHuntNarrative(
+      nothingSearched({
+        tier2_skipped_reason: 'no_inference',
+        completeness: 'incomplete_retryable',
+        retryable_reasons: ['generation_failed'],
+        incomplete: [
+          { reason: 'generation_failed', detail: 'requested but could not run' },
+          nothingSearchedGap,
+        ],
+      }),
+      ctx
+    );
+
+    expect(narrative).toBe(
+      expectedText(`${noIocs}, and no model was available for Behavior Hunt.`).replace(
+        NOT_CLEAN,
+        `${NOT_CLEAN} The report stays eligible for a later sweep.`
+      )
+    );
+  });
+
+  it('does not mention a later sweep when the run is final', () => {
+    expect(
+      buildHuntNarrative(nothingSearched({ tier2_skipped_reason: 'configured_never' }), ctx)
+    ).not.toContain('later sweep');
+  });
+
   it('stays under 400 characters with a UUID run id and a three-digit count', () => {
     const unexecuted = behavior({ execution: { executed: false, row_count: 0, hit: false } });
     const narrative = buildHuntNarrative(
