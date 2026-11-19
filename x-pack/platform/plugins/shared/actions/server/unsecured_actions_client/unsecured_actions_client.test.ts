@@ -57,11 +57,11 @@ const inMemoryConnectors = [
   }),
 ];
 let unsecuredActionsClient: UnsecuredActionsClient;
-let whenCatalogReady: jest.Mock<Promise<void>, []>;
+let waitForCatalog: jest.Mock<Promise<void>, []>;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  whenCatalogReady = jest.fn().mockResolvedValue(undefined);
+  waitForCatalog = jest.fn().mockResolvedValue(undefined);
   connectorTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
   unsecuredActionsClient = new UnsecuredActionsClient({
     actionExecutor,
@@ -72,7 +72,7 @@ beforeEach(() => {
     kibanaIndices: ['.kibana'],
     logger,
     connectorTypeRegistry,
-    whenCatalogReady,
+    waitForCatalog,
   });
 });
 
@@ -335,7 +335,7 @@ describe('bulkEnqueueExecution()', () => {
 describe('catalog readiness', () => {
   const createPendingReady = () => {
     let resolveReady: () => void = () => {};
-    whenCatalogReady.mockReturnValue(
+    waitForCatalog.mockReturnValue(
       new Promise<void>((resolve) => {
         resolveReady = resolve;
       })

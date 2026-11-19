@@ -804,7 +804,7 @@ export class ActionsPlugin
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
         connectorTypeRegistry: actionTypeRegistry!,
-        whenCatalogReady: () => this.catalogRequestWait,
+        waitForCatalog: () => this.catalogRequestWait,
       });
     };
 
@@ -1153,12 +1153,12 @@ export class ActionsPlugin
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
-    const whenCatalogReady = () => this.catalogRequestWait;
+    const waitForCatalog = () => this.catalogRequestWait;
 
     return async function actionsRouteHandlerContext(context, request) {
       const [coreStart, pluginsStart] = await core.getStartServices();
       // Requests that arrive before the first catalog load ends wait for it, up to a cap.
-      await whenCatalogReady();
+      await waitForCatalog();
       const { taskManager, encryptedSavedObjects, eventLog } = pluginsStart;
       const { savedObjects } = coreStart;
 
