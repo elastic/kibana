@@ -703,10 +703,34 @@ describe('groupTimelineEvents placing steers', () => {
     expect(standaloneSteers([trigger, started, steer('s1'), readStep('s1'), aborted])).toEqual([]);
   });
 
-  it('shows a steer the stopped run never read as not read', () => {
+  it('keeps a steer the stopped run never read standalone, with no status', () => {
     const [item] = standaloneSteers([trigger, started, steer('s1'), aborted]);
 
-    expect(item.steerState).toBe('not_read');
+    expect(item.steerState).toBeUndefined();
+  });
+
+  it('gives a steer an earlier run never read no status while a later run is live', () => {
+    const nextTrigger = createUserMessageEvent({
+      id: 'ask-2',
+      created_at: '2026-01-01T00:00:05.000Z',
+    });
+    const nextStarted = createExecutionStartedEvent({
+      id: 'started-2',
+      execution_id: 'exec-2',
+      trigger_event_id: 'ask-2',
+      created_at: '2026-01-01T00:00:06.000Z',
+    });
+    const items = standaloneSteers([
+      trigger,
+      started,
+      steer('s1'),
+      aborted,
+      nextTrigger,
+      nextStarted,
+    ]);
+    const item = items.find(({ event }) => event.id === 's1');
+
+    expect(item?.steerState).toBeUndefined();
   });
 });
 

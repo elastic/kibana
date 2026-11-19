@@ -32,9 +32,6 @@ const steerLabels: Record<SteerState, string> = {
   waiting: i18n.translate('xpack.agentBuilder.conversation.steer.waiting', {
     defaultMessage: 'Waiting for the agent',
   }),
-  not_read: i18n.translate('xpack.agentBuilder.conversation.steer.notRead', {
-    defaultMessage: 'Not read by that run',
-  }),
   before_pause: i18n.translate('xpack.agentBuilder.conversation.steer.beforePause', {
     defaultMessage: 'Will be read after you answer the prompt',
   }),

@@ -69,9 +69,10 @@ export const groupTimelineEvents = (
   const displayEvents = events.filter(isTimelineDisplayEvent);
   const awaitingPromptEventId = findAwaitingPromptEventId(displayEvents);
   const steers = steerPlacement(displayEvents);
+  // A steer its run ended without reading carries no status: nothing is going to happen to it.
   const steerStateOf = (event: UserMessageEvent): SteerState | undefined =>
     steers.unread(event)
-      ? 'not_read'
+      ? undefined
       : awaitingPromptEventId
       ? 'before_pause'
       : steers.hasLiveExecution
