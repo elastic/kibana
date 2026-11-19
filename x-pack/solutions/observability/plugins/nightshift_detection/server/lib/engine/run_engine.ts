@@ -22,7 +22,13 @@ import { SpaceRunLock } from './space_run_lock';
 import type { StrategyRunResult, TickResult } from './tick_result';
 import { EnabledSources, RunContext } from './tokens';
 
-/** Time one tick has for all its generators together. A generator past it is aborted. */
+/**
+ * Time one tick has, from taking the space's run lock, so the whole tick ends inside the
+ * workflow's five-minute timeout: reading the generator state and the sources count against it.
+ * A generator still running when it is spent is aborted and reported with an error, and its
+ * generator state does not move. JavaScript cannot kill a generator that ignores its signal: it
+ * runs on, but nothing it returns is used.
+ */
 export const RUN_BUDGET_MS = 4 * 60_000;
 
 function getErrorMessage(error: unknown): string {
