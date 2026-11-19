@@ -181,6 +181,7 @@ export function createNavigationTree({
             children: [
               { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
               { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
+              { link: 'management:content_connectors', breadcrumbStatus: 'hidden' },
               { link: 'searchHomepage:webCrawls', breadcrumbStatus: 'hidden' },
             ],
             title: i18n.translate('xpack.serverlessSearch.nav.ingest.pipelines.title', {

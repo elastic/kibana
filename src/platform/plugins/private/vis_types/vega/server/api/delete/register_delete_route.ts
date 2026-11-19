@@ -14,12 +14,8 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import {
-  VEGA_API_PATH,
-  commonRouteConfig,
-  PUBLIC_API_VERSION,
-  VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION,
-} from '../constants';
+import { VEGA_API_PATH, VEGA_API_VERSION } from '../../../common/constants';
+import { commonRouteConfig, VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION } from '../constants';
 import { isVegaApiEnabled } from '../is_vega_api_enabled';
 import { deleteItem } from './delete';
 
@@ -41,7 +37,7 @@ export const registerDeleteRoute = (
 
   deleteRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: VEGA_API_VERSION,
       options: {
         oasOperationObject: async () =>
           (await import('../oas_examples')).deleteVegaOASOperationObject,

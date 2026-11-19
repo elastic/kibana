@@ -13,30 +13,51 @@ import {
   formatDuration,
   formatEventsRate,
 } from '../../../../../services/unit_stats_client/format_stats';
+import { hasDestinationFailures } from '../../../../streams_layout/destinations/destination_failures';
 import { useDestinationStats } from '../../../../unit_stats/state_management/use_stats_manager';
+import { DestinationFailureIcon } from './destination_failure_icon';
 import { StatsProblemIcon } from './stats_problem_icon';
 
 interface DestinationNodeStatsProps {
   destinationId: string;
+  /** False when no source feeds the destination in the saved unit. Nothing is requested then. */
+  hasSavedSource: boolean;
   indexCount?: number;
 }
 
 /**
  * The footer of a destination node: the rate and the latency, for example `8.1k/s | 175ms`. A value
  * that is missing shows a dash, and a rate of exactly 0 shows `0/s`. A destination with neither a
- * rate nor a latency shows `Data not flowing in` instead. It is its own component, so a stats
+ * rate nor a latency shows `Data not flowing in` instead, and so does one that no source feeds in
+ * the saved unit, which is not requested at all. It is its own component, so a stats
  * update re-renders only this row, and never the node or the graph. It always reserves its row, so
  * the card does not change size when the first result arrives. Until then, and when the stats could
  * not be loaded, it shows no numbers, so a load or a failure never looks like a measured value.
+ *
+ * A destination that rejects what it is sent, such as refused credentials, has a short failure
+ * badge in the row, whose popover shows the failures, and it does not say `Data not flowing in`. The
+ * badge stays in the row, because a taller card would overlap its neighbors on the Map. Stats that loaded
+ * only in part, with an error beside real values, keep their numbers and add a partial icon. An
+ * old (`stale`) entry shows only the stale icon, and an `error` entry only the error icon.
  */
-export function DestinationNodeStats({ destinationId, indexCount }: DestinationNodeStatsProps) {
+export function DestinationNodeStats({
+  destinationId,
+  hasSavedSource,
+  indexCount,
+}: DestinationNodeStatsProps) {
   const { euiTheme } = useEuiTheme();
-  const entry = useDestinationStats(destinationId);
+  // No id registers nothing and reads nothing, so a destination with no saved source is not requested.
+  const entry = useDestinationStats(hasSavedSource ? destinationId : undefined);
   const hasValues =
     entry?.status === 'ready' || entry?.status === 'noData' || entry?.status === 'stale';
   const eventsRate = entry?.stats?.eventsRate ?? null;
   const latencyAverage = entry?.stats?.latencyAverage ?? null;
-  const isNotFlowing = hasValues && eventsRate === null && latencyAverage === null;
+  const failed = entry?.stats?.failed;
+  const hasFailures = hasValues && failed !== undefined && hasDestinationFailures(failed);
+  // A destination that rejects what it is sent is not idle, so it does not say that no data flows.
+  const isNotFlowing =
+    !hasSavedSource ||
+    (hasValues && !hasFailures && eventsRate === null && latencyAverage === null);
 
   return (
     <div
@@ -77,6 +98,13 @@ export function DestinationNodeStats({ destinationId, indexCount }: DestinationN
           </EuiText>
         </>
       )}
+      {hasFailures && failed && (
+        <DestinationFailureIcon
+          destinationId={destinationId}
+          failed={failed}
+          dataTestSubj="streamsCanvasDestinationFailures"
+        />
+      )}
       {entry?.status === 'stale' && (
         <StatsProblemIcon problem="stale" dataTestSubj="streamsCanvasDestinationStale" />
       )}
@@ -87,6 +115,13 @@ export function DestinationNodeStats({ destinationId, indexCount }: DestinationN
           dataTestSubj="streamsCanvasDestinationError"
         />
       )}
+      {entry?.status === 'ready' && entry.error && (
+        <StatsProblemIcon
+          problem="partial"
+          reason={entry.error.reason}
+          dataTestSubj="streamsCanvasDestinationPartial"
+        />
+      )}
       {typeof indexCount === 'number' && indexCount > 0 && (
         <EuiText
           size="xs"
@@ -95,6 +130,7 @@ export function DestinationNodeStats({ destinationId, indexCount }: DestinationN
           // Pushed to the right edge, so the rate and latency sit on the left and the row uses the width.
           css={css`
             margin-left: auto;
+            white-space: nowrap;
           `}
         >
           {i18n.translate('xpack.streams.canvas.destinationNode.indexCount', {

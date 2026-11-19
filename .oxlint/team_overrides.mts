@@ -18,6 +18,20 @@ import { RESTRICTED_GLOBALS } from './javascript.mts';
  */
 export const teamOverrides: OxlintOverride[] = [
   /**
+   * Temporarily disable some react rules for specific plugins, remove in separate PRs
+   */
+  {
+    files: ['src/platform/plugins/shared/kibana_react/**/*.{js,mjs,ts,tsx}'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+    },
+  },
+  {
+    files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
+    rules: { 'react-hooks/exhaustive-deps': 'off' },
+  },
+  /**
    * Files that run BEFORE node version check
    */
   {
@@ -200,6 +214,7 @@ export const teamOverrides: OxlintOverride[] = [
     ],
     rules: {
       'no-console': ['warn', { allow: ['error'] }],
+      'react-hooks/rules-of-hooks': 'error',
     },
   },
   {
@@ -208,6 +223,23 @@ export const teamOverrides: OxlintOverride[] = [
       '@typescript-eslint/explicit-function-return-type': [
         'error',
         { allowTypedFunctionExpressions: false },
+      ],
+    },
+  },
+  {
+    files: [
+      'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
+      'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+      'x-pack/platform/plugins/shared/{streams,streams_app}/**/*.{ts,tsx}',
+      'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'react-hooks/exhaustive-deps': [
+        'error',
+        {
+          additionalHooks:
+            '^(useUrl|useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
+        },
       ],
     },
   },
@@ -258,6 +290,7 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/platform/packages/shared/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/solutions/security/packages/**/*.{test,mock,test_helper}.{ts,tsx}',
+      'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
       'x-pack/solutions/security/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/solutions/security/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -283,6 +316,7 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
       'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
     ],
+    excludeFiles: ['x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**'],
     rules: {
       '@typescript-eslint/no-this-alias': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
@@ -306,7 +340,10 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
     ],
+    excludeFiles: ['x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**'],
     rules: {
+      complexity: 'warn',
+      'no-undef': 'off',
       '@kbn/compat/eslint-require-atomic-updates': 'error',
       'accessor-pairs': 'error',
       'array-callback-return': 'error',
@@ -411,6 +448,9 @@ export const teamOverrides: OxlintOverride[] = [
   {
     files: ['x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}'],
     rules: {
+      complexity: 'error',
+      'no-undef': 'off',
+      'sort-keys': 'error',
       '@kbn/compat/eslint-consistent-return': 'error',
       '@kbn/compat/import-order': [
         'error',
@@ -567,6 +607,7 @@ export const teamOverrides: OxlintOverride[] = [
     ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
+      'react-hooks/exhaustive-deps': 'error',
     },
   },
   {
@@ -598,6 +639,7 @@ export const teamOverrides: OxlintOverride[] = [
   {
     files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
     rules: {
+      'react-hooks/exhaustive-deps': 'off',
       '@kbn/compat/typescript-member-ordering': ['warn', { default: { order: 'alphabetically' } }],
       '@kbn/compat/import-order': [
         'error',
@@ -655,6 +697,10 @@ export const teamOverrides: OxlintOverride[] = [
         { devDependencies: true, peerDependencies: true, packageDir: REPO_ROOT },
       ],
     },
+  },
+  {
+    files: ['x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.js'],
+    globals: { canvas: 'writable' },
   },
   {
     files: [
@@ -883,12 +929,14 @@ export const teamOverrides: OxlintOverride[] = [
   {
     files: [
       'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
       'src/platform/plugins/shared/workflows_extensions/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
     ],
     rules: {
+      complexity: 'warn',
+      'no-undef': 'off',
       '@kbn/compat/eslint-require-atomic-updates': 'error',
       '@kbn/compat/import-order': [
         // This rule sorts import declarations
@@ -967,7 +1015,7 @@ export const teamOverrides: OxlintOverride[] = [
   {
     files: [
       'src/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}',
-      'src/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
       'src/platform/plugins/shared/workflows_extensions/**/*.{test,mock,test_helper}.{ts,tsx}',
       'src/platform/packages/shared/kbn-workflows/**/*.{test,mock,test_helper}.{ts,tsx}',
       'src/platform/packages/shared/kbn-workflows-ui/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1014,6 +1062,43 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/formatters/variable_parser.js',
     ],
     rules: { 'prefer-const': 'off' },
+  },
+  /**
+   * Moved from inline `eslint-env`, `global` and `eslint <rule>: [...]` comments, which oxlint
+   * doesn't read.
+   */
+  {
+    files: [
+      'src/platform/packages/shared/kbn-jest/src/setup/after_env.integration.js',
+      'src/platform/packages/shared/kbn-jest/src/setup/enzyme.js',
+      'src/platform/packages/shared/kbn-jest/src/setup/mocks.eui.js',
+      'src/platform/packages/shared/kbn-jest/src/setup/mocks.kbn_i18n_react.js',
+      'src/platform/packages/shared/kbn-jest/src/setup/mocks.moment_timezone.js',
+      'src/platform/packages/shared/kbn-jest/src/setup/mocks.vega.js',
+      'src/platform/packages/shared/kbn-jest/src/setup/react_testing_library.js',
+      'x-pack/platform/plugins/private/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
+      'x-pack/platform/plugins/shared/agent_builder/jest.setup.js',
+    ],
+    env: { jest: true },
+  },
+  {
+    files: ['packages/kbn-rspack-optimizer/src/hmr/hmr_client.js'],
+    globals: { __KBN_HMR_PORT__: 'readonly', __webpack_hash__: 'readonly' },
+  },
+  {
+    files: [
+      'x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/components/description_step/index.tsx',
+      'x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/components/add_exception_flyout/reducer.ts',
+    ],
+    rules: { complexity: ['error', 25] },
+  },
+  {
+    files: [
+      'x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/utils/helpers.tsx',
+    ],
+    // ESLint used 21. Oxlint also counts default parameters and each `?.`, which ESLint 8 doesn't,
+    // and that puts `getPrepopulatedBehaviorException` at 41.
+    rules: { complexity: ['error', 41] },
   },
   {
     // Oxlint's code path analysis throws on shorthand ambient modules (`declare module '*.css';`),
@@ -1078,5 +1163,19 @@ export const nestedConfigOverrides: OxlintOverride[] = [
       'x-pack/solutions/security/test/security_solution_cypress/cypress/**/*',
     ],
     rules: { '@kbn/compat/import-no-extraneous-dependencies': 'off' },
+  },
+  {
+    // `env: { 'cypress/globals': true }` in the security Cypress folders
+    files: [
+      'x-pack/solutions/security/plugins/security_solution/public/management/cypress/**/*',
+      'x-pack/solutions/security/test/security_solution_cypress/cypress/**/*',
+    ],
+    globals: {
+      cy: 'readonly',
+      Cypress: 'readonly',
+      expect: 'readonly',
+      assert: 'readonly',
+      chai: 'readonly',
+    },
   },
 ];

@@ -20,7 +20,6 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { AggregatedFeature } from '@kbn/significant-events-schema';
-import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeveloperMode } from '../../../../../hooks/use_developer_mode';
 import { DeveloperModeBadge } from '../../../../../components/ui/developer_mode_badge';
@@ -31,6 +30,7 @@ import {
 } from '../../../../../common/ebt_constants';
 import { getConfidenceColor } from '../../../../../common/get_confidence_color';
 import { DurabilityBadge } from '../durability_badge';
+import { getFeatureTypeLabel } from '../../utils/get_feature_type_label';
 
 interface Props {
   /** Top-level fields belong to the viewed instance, which need not be the representative. */
@@ -62,7 +62,7 @@ export function KnowledgeIndicatorFeatureDetailsContent({
       },
       {
         title: DETAILS_TYPE_LABEL,
-        description: <EuiBadge color="hollow">{upperFirst(feature.type)}</EuiBadge>,
+        description: <EuiBadge color="hollow">{getFeatureTypeLabel(feature.type)}</EuiBadge>,
       },
       {
         title: DETAILS_SUBTYPE_LABEL,

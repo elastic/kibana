@@ -120,6 +120,25 @@ describe('branchCountsWithout', () => {
       failedBuilds: 2,
     });
   });
+
+  it('takes a breakage in a pipeline judged on its own off that pipeline’s counts only', () => {
+    const fipsCounts = [
+      ...counts,
+      { branch: 'main', pipeline: 'kibana-fips', builds: 40, failedBuilds: 8 },
+    ];
+    const breakages = findBreakages({
+      ...setupBuilds(`${'.'.repeat(30)}xxxxxx`),
+      pipeline: 'kibana-fips',
+      setup: 'kibana-fips a.config.ts stateful-classic local',
+    });
+
+    expect(breakages).toEqual([expect.objectContaining({ pipeline: 'kibana-fips' })]);
+    expect(branchCountsWithout(fipsCounts, breakages)).toEqual([
+      { branch: 'main', builds: 53, failedBuilds: 12 },
+      { branch: '9.5', builds: 20, failedBuilds: 2 },
+      { branch: 'main', pipeline: 'kibana-fips', builds: 34, failedBuilds: 2 },
+    ]);
+  });
 });
 
 describe('describeBreakage', () => {

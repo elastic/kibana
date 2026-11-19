@@ -95,4 +95,8 @@ export {
   type NetworkConnection,
   type NetworkConnectionType,
 } from './src/lib/edot_react_native';
-export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';
+export {
+  syntheticsMonitor,
+  type BrowserJourneyStep,
+  type SyntheticsMonitorDocument,
+} from './src/lib/synthetics';

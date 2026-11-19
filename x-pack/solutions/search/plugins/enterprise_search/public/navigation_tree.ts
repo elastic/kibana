@@ -188,6 +188,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:ingest_pipelines' },
                     { link: 'management:pipelines' },
+                    { link: 'management:content_connectors' },
                     { link: SEARCH_HOMEPAGE_WEB_CRAWLS_ID },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingest.pipelines.title', {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type NodeType = 'if' | 'merge' | 'parallel' | 'action' | 'foreach' | 'atomic' | 'trigger';
+export type NodeType = 'if' | 'parallel' | 'action' | 'foreach' | 'atomic' | 'trigger';
 
 export const mainScopeNodes = [
   'enter-if',
