@@ -145,34 +145,37 @@ const GroupHeader = ({
   description: string;
   drivers: TimelineDriver[];
 }) => {
-  const styles = useTimelineStyles();
   const spread = useMemo(() => driverSpread(drivers), [drivers]);
 
   return (
-    <EuiText size="xs" color="subdued">
-      <p css={styles.groupLabel} data-test-subj="esqlQueryProfileGroupHeader">
-        {groupLabel(description)}
-        {spread ? ` · ${spreadLabel(spread)}` : ''}
-        {spread?.isSkewed ? (
-          <EuiIconTip
-            type="warning"
-            color="warning"
-            size="s"
-            aria-label={i18n.translate('data.inspector.queryProfile.skewedGroupAriaLabel', {
-              defaultMessage: 'Uneven durations',
-            })}
-            content={i18n.translate('data.inspector.queryProfile.skewedGroupTooltip', {
-              defaultMessage:
-                'The slowest driver took {max}, much longer than the typical {median}. One node may hold more data or be slower than the others.',
-              values: {
-                max: formatDurationMillis(spread.maxMillis),
-                median: formatDurationMillis(spread.medianMillis),
-              },
-            })}
-          />
-        ) : null}
-      </p>
-    </EuiText>
+    <>
+      <EuiSpacer size="s" />
+      <EuiText size="xs" color="subdued">
+        <p data-test-subj="esqlQueryProfileGroupHeader">
+          {groupLabel(description)}
+          {spread ? ` · ${spreadLabel(spread)}` : ''}
+          {spread?.isSkewed ? (
+            <EuiIconTip
+              type="warning"
+              color="warning"
+              size="s"
+              aria-label={i18n.translate('data.inspector.queryProfile.skewedGroupAriaLabel', {
+                defaultMessage: 'Uneven durations',
+              })}
+              content={i18n.translate('data.inspector.queryProfile.skewedGroupTooltip', {
+                defaultMessage:
+                  'The slowest driver took {max}, much longer than the typical {median}. One node may hold more data or be slower than the others.',
+                values: {
+                  max: formatDurationMillis(spread.maxMillis),
+                  median: formatDurationMillis(spread.medianMillis),
+                },
+              })}
+            />
+          ) : null}
+        </p>
+      </EuiText>
+      <EuiSpacer size="xs" />
+    </>
   );
 };
 
@@ -222,7 +225,7 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
             testSubject="esqlQueryProfilePlanningLane"
           />
         ) : null}
-        {groups.map(([description, drivers]) => (
+        {groups.map(([description, drivers], groupIndex) => (
           <div key={description || 'other'}>
             <GroupHeader description={description} drivers={drivers} />
             {drivers.map((driver) => (
@@ -235,7 +238,7 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
                 waits={driver.sleeps.map((sleep) =>
                   laneBox(sleep.startMillis, sleep.stopMillis, domain)
                 )}
-                colorCss={styles.groupColor(driver.description)}
+                colorCss={styles.groupColor(groupIndex)}
                 isSelected={selectedLaneId === driver.id}
                 onClick={() => toggle(driver.id)}
               />

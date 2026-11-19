@@ -16,8 +16,20 @@ export const useTimelineStyles = () => {
   const { fontSize: small } = useEuiFontSize('xs');
   const labelColumn = `minmax(${euiTheme.base * 8}px, ${euiTheme.base * 12}px) 1fr`;
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    // Groups of drivers are told apart by their place, so no kind of driver needs a color of its own.
+    const { euiColorVis3, euiColorVis5, euiColorVis7, euiColorVis9, euiColorVis1 } =
+      euiTheme.colors.vis;
+    const groupColors = [
+      euiTheme.colors.primary,
+      euiColorVis3,
+      euiColorVis5,
+      euiColorVis7,
+      euiColorVis9,
+      euiColorVis1,
+    ];
+
+    return {
       lanes: css`
         max-height: ${euiTheme.base * 22}px;
         overflow-y: auto;
@@ -68,9 +80,6 @@ export const useTimelineStyles = () => {
         font-variant-numeric: tabular-nums;
         line-height: 1.4;
         white-space: nowrap;
-      `,
-      groupLabel: css`
-        margin: ${euiTheme.size.s} 0 ${euiTheme.size.xs};
       `,
       lane: css`
         display: grid;
@@ -159,61 +168,10 @@ export const useTimelineStyles = () => {
       planningColor: css`
         background: ${euiTheme.colors.warning};
       `,
-      groupColor: (description: string) =>
+      groupColor: (groupIndex: number) =>
         css`
-          background: ${description === 'node_reduce'
-            ? euiTheme.colors.vis.euiColorVis3
-            : description === 'final'
-            ? euiTheme.colors.vis.euiColorVis5
-            : euiTheme.colors.primary};
+          background: ${groupColors[groupIndex % groupColors.length]};
         `,
-      strip: css`
-        display: flex;
-        flex-wrap: wrap;
-        gap: ${euiTheme.size.xs};
-      `,
-      stripStep: css`
-        display: flex;
-        flex-direction: column;
-        /* A tile is as wide as what it says, and shares the free room of its row by share. */
-        flex-basis: auto;
-        flex-shrink: 0;
-        max-width: 100%;
-        gap: ${euiTheme.size.xs};
-        padding: ${euiTheme.size.s};
-        text-align: start;
-        color: inherit;
-        background: transparent;
-        border: none;
-        border-radius: ${euiTheme.border.radius.medium};
-        cursor: pointer;
-
-        &:hover,
-        &[aria-expanded='true'] {
-          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-        }
-      `,
-      stripTitle: css`
-        overflow-wrap: anywhere;
-        font-weight: ${euiTheme.font.weight.bold};
-        font-size: ${euiTheme.font.scale.s * euiTheme.base}px;
-        line-height: 1.4;
-      `,
-      stripShare: css`
-        display: flex;
-        align-items: center;
-        gap: ${euiTheme.size.xs};
-        color: ${euiTheme.colors.textSubdued};
-        font-size: ${small};
-        font-variant-numeric: tabular-nums;
-        line-height: 1.4;
-        white-space: nowrap;
-      `,
-      stripBar: css`
-        height: ${euiTheme.size.s};
-        border-radius: ${euiTheme.border.radius.medium};
-      `,
-    }),
-    [euiTheme, small, labelColumn]
-  );
+    };
+  }, [euiTheme, small, labelColumn]);
 };

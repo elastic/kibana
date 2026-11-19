@@ -28,7 +28,7 @@ import { operatorCategory, useOperatorCategoryColors } from '../shared/operator_
 import { formatCount, formatDurationMillis } from '../shared/profile_format';
 import { heatLevel } from '../shared/profile_heat';
 import { operatorShareLabel, operatorTimeLabel, planningPhaseLabel } from './timeline_labels';
-import { useTimelineStyles } from './timeline_styles';
+import { useOperatorStripStyles } from './operator_strip_styles';
 
 /** An operator also has to be at least this share of the whole query to be flagged. */
 const MIN_QUERY_SHARE = 0.05;
@@ -90,7 +90,7 @@ const OperatorStrip = ({
   selectedKey?: string;
   onSelect: (key: string | undefined) => void;
 }) => {
-  const styles = useTimelineStyles();
+  const styles = useOperatorStripStyles();
   const categoryColor = useOperatorCategoryColors();
 
   return (
