@@ -42,15 +42,19 @@ describe('useLocatorUrl', () => {
     await waitFor(() => expect(result.current).toBe('/app/test'));
   });
 
-  it('logs and resets the URL when getUrl() rejects while mounted', async () => {
-    const locator = createLocator(() => Promise.reject(new Error('fail')));
+  it('logs and clears a previously resolved URL when a later getUrl() rejects', async () => {
+    const resolving = createLocator(() => Promise.resolve('/app/test'));
+    const rejecting = createLocator(() => Promise.reject(new Error('fail')));
 
-    const { result } = renderHook(() => useLocatorUrl(locator, {}));
+    const { result, rerender } = renderHook(({ locator }) => useLocatorUrl(locator, {}), {
+      initialProps: { locator: resolving },
+    });
+    await waitFor(() => expect(result.current).toBe('/app/test'));
 
-    await waitFor(() =>
-      expect(consoleError).toHaveBeenCalledWith('useLocatorUrl', expect.any(Error))
-    );
-    expect(result.current).toBe('');
+    rerender({ locator: rejecting });
+
+    await waitFor(() => expect(result.current).toBe(''));
+    expect(consoleError).toHaveBeenCalledWith('useLocatorUrl', expect.any(Error));
   });
 
   it('does not log an error when getUrl() rejects after unmount', async () => {
