@@ -94,7 +94,7 @@ export const unenrollAgent = async (
     body: {},
   });
 
-/** Polls until Fleet reports the agent as `unenrolled` and inactive, which requires its ack. */
+/** Polls until Fleet reports the agent's ack: unenrolled, inactive and unenrolled_at set. */
 export const waitForAgentUnenrolled = async (
   apiClient: ApiClientFixture,
   headers: RequestHeaders,
@@ -108,8 +108,8 @@ export const waitForAgentUnenrolled = async (
           return `status ${statusCode}: ${JSON.stringify(body)}`;
         }
 
-        const { status, active } = body.item;
-        return { status, active };
+        const { status, active, unenrolled_at: unenrolledAt } = body.item;
+        return { status, active, unenrolledAtSet: Boolean(unenrolledAt) };
       },
       {
         message: `agent ${agentId} acknowledges the unenroll`,
@@ -117,7 +117,7 @@ export const waitForAgentUnenrolled = async (
         intervals: [5_000],
       }
     )
-    .toStrictEqual({ status: 'unenrolled', active: false });
+    .toStrictEqual({ status: 'unenrolled', active: false, unenrolledAtSet: true });
 };
 
 /** Decrypted uninstall token of `agentPolicyId`. Throws when Fleet does not return it. */
