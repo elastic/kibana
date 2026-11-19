@@ -33901,7 +33901,6 @@
     "xpack.fleet.packagePolicyValidation.requiredErrorMessage": "{fieldName} é obrigatório",
     "xpack.fleet.packageUpload.datasetOwned": "O pacote carregado declara um conjunto de dados \"{dataset}\" que já pertence ao pacote instalado \"{packageName}\".",
     "xpack.fleet.packageUpload.dataStreamLookupFailed": "Não foi possível verificar se o conjunto de dados do pacote carregado \"{dataset}\" não corresponde a um fluxo de dados do Elasticsearch existente.",
-    "xpack.fleet.packageUpload.existingDataStream": "Já existe um fluxo de dados ativo correspondente \"{dataStreamName}\" para o conjunto de dados \"{dataset}\", e ele precisa ser migrado ou removido antes de carregar um novo pacote.",
     "xpack.fleet.packageUpload.forbiddenArchiveAsset": "O pacote carregado contém um recurso não permitido: {path}",
     "xpack.fleet.packageUpload.invalidDataset": "O pacote carregado declara um conjunto de dados inválido \"{dataset}\".",
     "xpack.fleet.packageUpload.invalidDataStreamType": "O pacote carregado declara um tipo de fluxo de dados inválido \"{type}\": {reason}",
