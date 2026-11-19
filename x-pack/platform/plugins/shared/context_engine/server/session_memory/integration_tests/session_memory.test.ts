@@ -10,7 +10,11 @@ import { createEsClientForTesting, createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SESSION_MEMORY_DATA_STREAM } from '../data_streams';
 import { createSessionMemoryService } from '../service';
-import type { SessionMemoryService, StoredSessionMemory } from '../types';
+import type { SessionMemoryService, StoredMemoryRevision, StoredTombstone } from '../types';
+
+// Writing `content` runs semantic_text inference, which the test cluster's basic license does not
+// allow. Revisions are seeded without it, which is enough for forget, since forget never reads it.
+type SeededRevision = Omit<StoredMemoryRevision, 'content'>;
 
 describe('session memory', () => {
   jest.setTimeout(180_000);
@@ -24,9 +28,7 @@ describe('session memory', () => {
   const refresh = () =>
     esClient.indices.refresh({ index: SESSION_MEMORY_DATA_STREAM, ignore_unavailable: true });
 
-  // Writing `content` runs semantic_text inference, which the test cluster's basic license does not
-  // allow. Memories are seeded without content, which is enough for forget.
-  const seed = async (...documents: StoredSessionMemory[]) => {
+  const seed = async (...documents: Array<SeededRevision | StoredTombstone>) => {
     const response = await esClient.bulk({
       operations: documents.flatMap((document) => [
         { create: { _index: SESSION_MEMORY_DATA_STREAM } },
@@ -38,7 +40,7 @@ describe('session memory', () => {
   };
 
   // Seeded revisions predate every timestamp the service writes.
-  const revision = (id: string, timestamp: string, scope = jdoe): StoredSessionMemory => ({
+  const revision = (id: string, timestamp: string, scope = jdoe): SeededRevision => ({
     '@timestamp': timestamp,
     id,
     space: scope.space,

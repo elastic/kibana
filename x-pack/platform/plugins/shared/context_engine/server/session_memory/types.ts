@@ -5,20 +5,30 @@
  * 2.0.
  */
 
-/** One revision of a memory. */
-export interface StoredSessionMemory {
+interface StoredRevisionBase {
   '@timestamp': string;
   id: string;
   space: string;
   session_id: string;
   user_id: string;
   ai_index_id: readonly string[];
-  /** Absent on tombstones. */
-  content?: string;
-  attributes?: Readonly<Record<string, string>>;
-  /** Present only on tombstones. */
-  deleted_at?: string;
 }
+
+/** A revision written by remember. */
+export interface StoredMemoryRevision extends StoredRevisionBase {
+  content: string;
+  attributes?: Readonly<Record<string, string>>;
+  deleted_at?: never;
+}
+
+/** A revision written by forget. A memory is forgotten when its latest revision is a tombstone. */
+export interface StoredTombstone extends StoredRevisionBase {
+  deleted_at: string;
+  content?: never;
+}
+
+/** One revision of a memory. */
+export type StoredSessionMemory = StoredMemoryRevision | StoredTombstone;
 
 export interface SessionMemoryScope {
   space: string;

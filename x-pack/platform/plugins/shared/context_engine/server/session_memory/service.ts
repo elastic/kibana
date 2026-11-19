@@ -14,7 +14,9 @@ import type {
   ForgetResult,
   SessionMemoryScope,
   SessionMemoryService,
+  StoredMemoryRevision,
   StoredSessionMemory,
+  StoredTombstone,
 } from './types';
 
 // Every read and delete goes through this filter, so a memory in another space or of another user
@@ -31,7 +33,10 @@ const toErrorMessage = ({ type, reason, caused_by: cause }: ErrorCause): string 
   return cause?.reason ? `${message}: ${cause.reason}` : message;
 };
 
-const toTombstone = (latest: StoredSessionMemory, timestamp: string): StoredSessionMemory => ({
+const isTombstone = (revision: StoredSessionMemory): revision is StoredTombstone =>
+  revision.deleted_at !== undefined;
+
+const toTombstone = (latest: StoredMemoryRevision, timestamp: string): StoredTombstone => ({
   '@timestamp': timestamp,
   id: latest.id,
   space: latest.space,
@@ -52,7 +57,7 @@ const toForgetResult = (
   if (!latest) {
     return { id, outcome: 'not_found' };
   }
-  return { id, outcome: latest.deleted_at === undefined ? 'forgotten' : 'already_forgotten' };
+  return { id, outcome: isTombstone(latest) ? 'already_forgotten' : 'forgotten' };
 };
 
 /**
@@ -64,7 +69,7 @@ export const createSessionMemoryService = (
 ): SessionMemoryService => ({
   remember: async ({ space, userId }, input) => {
     const { id = randomUUID(), sessionId, content, aiIndexIds = [], attributes = {} } = input;
-    await esClient.index<StoredSessionMemory>({
+    await esClient.index<StoredMemoryRevision>({
       index: SESSION_MEMORY_DATA_STREAM,
       op_type: 'create',
       document: {
@@ -90,7 +95,7 @@ export const createSessionMemoryService = (
       size: 1,
     });
     const latest = response.hits.hits[0]?._source;
-    if (latest?.content === undefined) {
+    if (!latest || isTombstone(latest)) {
       return undefined;
     }
     return {
@@ -128,12 +133,12 @@ export const createSessionMemoryService = (
 
     const timestamp = new Date().toISOString();
     const tombstones = latestRevisions
-      .filter((latest) => latest.deleted_at === undefined)
+      .filter((latest): latest is StoredMemoryRevision => !isTombstone(latest))
       .map((latest) => toTombstone(latest, timestamp));
     // The bulk API reports a rejected tombstone in its item instead of throwing, and keeps the order.
     const errorsById = new Map<string, string>();
     if (tombstones.length > 0) {
-      const { items } = await esClient.bulk<StoredSessionMemory>({
+      const { items } = await esClient.bulk<StoredTombstone>({
         operations: tombstones.flatMap((tombstone) => [
           { create: { _index: SESSION_MEMORY_DATA_STREAM } },
           tombstone,
