@@ -58,7 +58,7 @@ import { BandMarkers } from './band_markers';
 import { CellDetails } from './cell_details';
 import { LatencyHeatmap } from './latency_heatmap';
 import { LatencyMapLegend } from './legend';
-import { MapHeader } from './map_header';
+import { MapHeader, percentileDuration } from './map_header';
 import type { SlowestPercentile } from './map_header';
 import { SelectionSummary } from './selection_summary';
 import { OVERLAY_CONTROL_ATTRIBUTE, SelectionOverlay } from './selection_overlay';
@@ -490,8 +490,7 @@ export function LatencyMap({
   const selectSlowest = (percentile: SlowestPercentile) => {
     if (!geometry || !stats) return;
     setChosenSlowest(percentile);
-    const duration = percentile === 99 ? stats.p99 : percentile === 95 ? stats.p95 : stats.p90;
-    const row = Math.floor(durationToRow(duration, stats));
+    const row = Math.floor(durationToRow(percentileDuration(stats, percentile), stats));
     commitRange(
       {
         x0: 0,
@@ -887,10 +886,9 @@ export function LatencyMap({
       return undefined;
     }
     const matches = ([99, 95, 90] as SlowestPercentile[]).filter((percentile) => {
-      const duration = percentile === 99 ? stats.p99 : percentile === 95 ? stats.p95 : stats.p90;
       const row = Math.min(
         geometry.rows - 1,
-        Math.max(0, Math.floor(durationToRow(duration, stats)))
+        Math.max(0, Math.floor(durationToRow(percentileDuration(stats, percentile), stats)))
       );
       return committedRange.y0 === row;
     });

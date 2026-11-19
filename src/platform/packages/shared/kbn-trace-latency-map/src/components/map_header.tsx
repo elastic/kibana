@@ -32,7 +32,7 @@ import { ErrorsMenu } from './errors_menu';
 export type SlowestPercentile = 90 | 95 | 99;
 export const SLOWEST_PERCENTILES: SlowestPercentile[] = [90, 95, 99];
 
-const percentileDuration = (stats: DurationStats, percentile: SlowestPercentile) =>
+export const percentileDuration = (stats: DurationStats, percentile: SlowestPercentile) =>
   percentile === 99 ? stats.p99 : percentile === 95 ? stats.p95 : stats.p90;
 
 /** Says what a sampled map draws exactly and what it estimates. */
