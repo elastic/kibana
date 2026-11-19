@@ -10,6 +10,18 @@ if [[ -z "$EVAL_SUITE_ID" ]]; then
   exit 1
 fi
 
+# Without explicit model groups (empty or `all`) OpenRouter expands to every tool-calling model it
+# serves, and that payload overflows the environment variable that carries it (exit 126,
+# "Argument list too long").
+if [[ -z "$(printf '%s' "${EVAL_MODEL_GROUPS:-}" | tr -d '[:space:],')" ]]; then
+  echo "EVAL_MODEL_GROUPS is required, e.g. EVAL_MODEL_GROUPS=eis/openai-gpt-5.4"
+  exit 1
+fi
+if [[ ",$(printf '%s' "$EVAL_MODEL_GROUPS" | tr -d '[:space:]')," == *,all,* ]]; then
+  echo "EVAL_MODEL_GROUPS=all is not supported for on-demand runs; list the models explicitly, e.g. EVAL_MODEL_GROUPS=eis/openai-gpt-5.4"
+  exit 1
+fi
+
 if ! command -v buildkite-agent >/dev/null 2>&1; then
   echo "buildkite-agent is required to upload on-demand suite steps"
   exit 1
