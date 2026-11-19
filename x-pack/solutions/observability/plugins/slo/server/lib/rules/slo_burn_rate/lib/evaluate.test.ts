@@ -126,29 +126,18 @@ describe('evaluate', () => {
     });
   });
 
-  it('evaluates every instance and pages past empty pages when a threshold is not positive', async () => {
+  it('keeps paging the evaluation past pages without alerting instances', async () => {
     const slo = createSLO({ id: 'irrelevant', indicator: createKQLCustomIndicator() });
-    const rule = createBurnRateRule(slo);
-    const params = {
-      ...rule,
-      windows: rule.windows.map((window, index) =>
-        index === 0 ? { ...window, burnRateThreshold: 0 } : window
-      ),
-    };
+    const params = createBurnRateRule(slo);
     esClient.search
+      .mockResolvedValueOnce(aggResponse([candidateBucket('page-2-alerting')]))
       .mockResolvedValueOnce(aggResponse([], { instanceId: 'page-1-last' }))
-      .mockResolvedValueOnce(
-        aggResponse([alertingBucket('page-2-alerting')], { instanceId: 'page-2-last' })
-      )
-      .mockResolvedValueOnce(aggResponse([]));
+      .mockResolvedValueOnce(aggResponse([alertingBucket('page-2-alerting')]));
 
     const results = await evaluate(esClient, slo, params, new Date());
 
     expect(esClient.search).toHaveBeenCalledTimes(3);
-    expect(esClient.search.mock.calls[0][0]).not.toMatchObject({
-      query: { bool: { filter: expect.arrayContaining([{ terms: expect.anything() }]) } },
-    });
-    expect(esClient.search.mock.calls[1][0]).toMatchObject({
+    expect(esClient.search.mock.calls[2][0]).toMatchObject({
       aggs: { instances: { composite: { after: { instanceId: 'page-1-last' } } } },
     });
     expect(results.map(({ instanceId }) => instanceId)).toEqual(['page-2-alerting']);

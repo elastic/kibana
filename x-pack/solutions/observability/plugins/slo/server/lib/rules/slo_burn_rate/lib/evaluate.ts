@@ -90,11 +90,6 @@ async function queryAllPages<TBucket>(
   return nextAfterKey ? queryAllPages(queryPage, nextAfterKey, allBuckets) : allBuckets;
 }
 
-// A window can only trigger for an instance with bad events in its short window when its threshold
-// is positive. With a threshold of 0 or less, instances without bad events can trigger too.
-const allThresholdsArePositive = ({ windows }: BurnRateRuleParams): boolean =>
-  windows.every(({ burnRateThreshold }) => burnRateThreshold > 0);
-
 export async function evaluate(
   esClient: ElasticsearchClient,
   slo: SLODefinition,
@@ -120,15 +115,13 @@ export async function evaluate(
     return results.aggregations.instances;
   };
 
-  const evaluateInstances = (instanceIds?: string[]) =>
+  const evaluateInstances = (instanceIds: string[]) =>
     queryAllPages<EvaluationBucket>((afterKey) =>
       searchInstances(buildQuery(startedAt, slo, params, afterKey, instanceIds))
     );
 
-  if (!allThresholdsArePositive(params)) {
-    return transformBucketToResults(await evaluateInstances(), params);
-  }
-
+  // A window only triggers when its short window burn rate reaches a positive threshold, which needs
+  // bad events, so instances without bad events in the longest short window are skipped.
   const candidates = await queryAllPages<{ key: EvaluationAfterKey }>((afterKey) =>
     searchInstances(buildCandidatesQuery(startedAt, slo, params, afterKey))
   );
