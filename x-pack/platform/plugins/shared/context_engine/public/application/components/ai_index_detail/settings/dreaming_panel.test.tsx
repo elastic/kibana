@@ -175,10 +175,10 @@ describe('DreamingPanel', () => {
     renderPanel(aiIndexWith({ ...factsOnly, schedule: { interval: '1h' } }));
 
     expect(screen.getByTestId('contextAiIndexDreamingInterval')).toHaveValue('1h');
-    fireEvent.click(screen.getByTestId('contextAiIndexDreamingEnabled'));
     fireEvent.change(screen.getByTestId('contextAiIndexDreamingInterval'), {
       target: { value: '6h' },
     });
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingEnabled'));
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
 
     await waitFor(() =>
@@ -187,6 +187,15 @@ describe('DreamingPanel', () => {
         config: expect.objectContaining({ enabled: false, schedule: { interval: '6h' } }),
       })
     );
+  });
+
+  it('hides the interval while the schedule is off', () => {
+    renderPanel(aiIndexWith({ ...factsOnly, enabled: false }));
+
+    expect(screen.queryByTestId('contextAiIndexDreamingInterval')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingEnabled'));
+
+    expect(screen.getByTestId('contextAiIndexDreamingInterval')).toBeInTheDocument();
   });
 
   it('does not save an interval shorter than the floor', () => {

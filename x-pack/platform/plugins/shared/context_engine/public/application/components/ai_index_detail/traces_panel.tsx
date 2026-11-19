@@ -46,7 +46,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextTracesPanel">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem css={{ minWidth: 0 }}>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h2>
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.traces.title"

@@ -13,17 +13,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTitle,
   EuiToolTip,
-  useEuiTheme,
-  type IconType,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import {
@@ -34,7 +31,6 @@ import {
   type DreamingRelationshipType,
   type DreamingTypesConfig,
 } from '../../../../common/dreaming';
-import { Eyebrow } from '../dreaming_template/eyebrow';
 import { EntityTypeModal, FactTypeModal, RelationshipTypeModal } from './type_modals';
 
 /** The fact, entity and relationship types being edited, before they are saved. */
@@ -85,17 +81,6 @@ export const draftBuildsAnything = (draft: DreamingConfigDraft): boolean => {
   return facts.length > 0 || entities !== null;
 };
 
-const useTypeNameStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  return css`
-    font-family: ${euiTheme.font.familyCode};
-    font-weight: ${euiTheme.font.weight.bold};
-    font-size: ${euiTheme.size.l};
-    color: ${euiTheme.colors.textHeading};
-    overflow-wrap: anywhere;
-  `;
-};
-
 const editLabel = (type: string) =>
   i18n.translate('xpack.contextEngine.dreamingConfig.editAriaLabel', {
     defaultMessage: 'Edit {type}',
@@ -124,61 +109,59 @@ const TypeCard = ({
   onEdit,
   onDelete,
   'data-test-subj': dataTestSubj,
-}: TypeCardProps) => {
-  const typeNameStyles = useTypeNameStyles();
-  return (
-    <EuiPanel hasBorder paddingSize="l" css={{ height: '100%' }} data-test-subj={dataTestSubj}>
-      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem>
-          <div css={typeNameStyles}>{type}</div>
+}: TypeCardProps) => (
+  <EuiPanel hasBorder paddingSize="m" data-test-subj={dataTestSubj}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <h4>{type}</h4>
+        </EuiTitle>
+      </EuiFlexItem>
+      {onEdit && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={editLabel(type)} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="pencil"
+              color="text"
+              onClick={onEdit}
+              aria-label={editLabel(type)}
+              data-test-subj={`${dataTestSubj}-edit`}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
-        {onEdit && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={editLabel(type)} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="pencil"
-                color="text"
-                onClick={onEdit}
-                aria-label={editLabel(type)}
-                data-test-subj={`${dataTestSubj}-edit`}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-        {onDelete && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={deleteLabel(type)} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="trash"
-                color="danger"
-                onClick={onDelete}
-                aria-label={deleteLabel(type)}
-                data-test-subj={`${dataTestSubj}-delete`}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      {description && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiText size="s" color="subdued">
-            <p>{description}</p>
-          </EuiText>
-        </>
       )}
-      {footer && (
-        <>
-          <EuiSpacer size="m" />
-          {footer}
-        </>
+      {onDelete && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={deleteLabel(type)} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              onClick={onDelete}
+              aria-label={deleteLabel(type)}
+              data-test-subj={`${dataTestSubj}-delete`}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
       )}
-    </EuiPanel>
-  );
-};
+    </EuiFlexGroup>
+    {description && (
+      <>
+        <EuiSpacer size="xs" />
+        <EuiText size="xs" color="subdued">
+          <p>{description}</p>
+        </EuiText>
+      </>
+    )}
+    {footer && (
+      <>
+        <EuiSpacer size="m" />
+        {footer}
+      </>
+    )}
+  </EuiPanel>
+);
 
 interface SectionProps {
-  icon: IconType;
   title: string;
   count: number;
   description: string;
@@ -190,7 +173,6 @@ interface SectionProps {
 }
 
 const Section = ({
-  icon,
   title,
   count,
   description,
@@ -203,10 +185,9 @@ const Section = ({
   <section data-test-subj={dataTestSubj}>
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type={icon} color="subdued" aria-hidden />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <Eyebrow>{title}</Eyebrow>
+        <EuiTitle size="xxs">
+          <h3>{title}</h3>
+        </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge>
@@ -225,8 +206,8 @@ const Section = ({
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
-    <EuiSpacer size="s" />
-    <EuiText size="s" color="subdued">
+    <EuiSpacer size="m" />
+    <EuiText size="xs" color="subdued">
       <p>{description}</p>
     </EuiText>
     <EuiSpacer size="m" />
@@ -235,7 +216,7 @@ const Section = ({
         <p>{emptyMessage}</p>
       </EuiText>
     ) : (
-      <EuiFlexGrid columns={3} gutterSize="m">
+      <EuiFlexGrid columns={2} gutterSize="m">
         {children}
       </EuiFlexGrid>
     )}
@@ -288,7 +269,6 @@ export const DreamingConfigEditor = ({
   return (
     <div data-test-subj="contextDreamingConfigEditor">
       <Section
-        icon="document"
         title={i18n.translate('xpack.contextEngine.dreamingConfig.factsTitle', {
           defaultMessage: 'Fact types',
         })}
@@ -320,7 +300,7 @@ export const DreamingConfigEditor = ({
           </EuiFlexItem>
         ))}
       </Section>
-      <EuiHorizontalRule margin="xl" />
+      <EuiSpacer size="l" />
       <EuiSwitch
         label={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesSwitch', {
           defaultMessage: 'Also learn entities',
@@ -331,7 +311,7 @@ export const DreamingConfigEditor = ({
         data-test-subj="contextDreamingConfigEntitiesSwitch"
       />
       <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
+      <EuiText size="xs" color="subdued">
         <p>
           {i18n.translate('xpack.contextEngine.dreamingConfig.entitiesSwitchDescription', {
             defaultMessage:
@@ -343,7 +323,6 @@ export const DreamingConfigEditor = ({
         <>
           <EuiSpacer size="l" />
           <Section
-            icon="cube"
             title={i18n.translate('xpack.contextEngine.dreamingConfig.entitiesTitle', {
               defaultMessage: 'Entity types',
             })}
@@ -391,7 +370,6 @@ export const DreamingConfigEditor = ({
         <>
           <EuiHorizontalRule margin="xl" />
           <Section
-            icon="link"
             title={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsTitle', {
               defaultMessage: 'Relationship types',
             })}

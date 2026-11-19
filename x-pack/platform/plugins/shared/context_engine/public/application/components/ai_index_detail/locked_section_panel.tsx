@@ -36,7 +36,7 @@ export const LockedSectionPanel = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xs">
-          <h3>{title}</h3>
+          <h2>{title}</h2>
         </EuiTitle>
         <AiIndexDetailPanelDescription>{description}</AiIndexDetailPanelDescription>
       </EuiFlexItem>
