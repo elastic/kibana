@@ -56,7 +56,7 @@ describe('AsyncDomainEventBus', () => {
 
     it('invokes the subscribed handler when a matching event is published', async () => {
       const handler = jest.fn();
-      bus.subscribe<FooEvent>('foo', handler);
+      bus.subscribe('foo', handler);
 
       const event = fooEvent('world');
       bus.publish(event);
@@ -77,7 +77,7 @@ describe('AsyncDomainEventBus', () => {
 
     it('dispatches handlers asynchronously so publish() returns before handlers run', async () => {
       let handlerRan = false;
-      bus.subscribe<FooEvent>('foo', () => {
+      bus.subscribe('foo', () => {
         handlerRan = true;
       });
 
@@ -93,8 +93,8 @@ describe('AsyncDomainEventBus', () => {
     it('does not invoke handlers subscribed to a different event type', async () => {
       const fooHandler = jest.fn();
       const barHandler = jest.fn();
-      bus.subscribe<FooEvent>('foo', fooHandler);
-      bus.subscribe<BarEvent>('bar', barHandler);
+      bus.subscribe('foo', fooHandler);
+      bus.subscribe('bar', barHandler);
 
       bus.publish(fooEvent());
 
@@ -106,7 +106,7 @@ describe('AsyncDomainEventBus', () => {
 
     it('invokes every handler subscribed to the same event type', async () => {
       const handlers = [jest.fn(), jest.fn(), jest.fn()];
-      handlers.forEach((handler) => bus.subscribe<FooEvent>('foo', handler));
+      handlers.forEach((handler) => bus.subscribe('foo', handler));
 
       const event = fooEvent();
       bus.publish(event);
@@ -123,7 +123,7 @@ describe('AsyncDomainEventBus', () => {
       const handler = jest.fn(async (_event: FooEvent) => {
         await new Promise((resolve) => setImmediate(resolve));
       });
-      bus.subscribe<FooEvent>('foo', handler);
+      bus.subscribe('foo', handler);
 
       bus.publish(fooEvent());
 
@@ -136,8 +136,8 @@ describe('AsyncDomainEventBus', () => {
     it('routes each event only to handlers of its own type even with multiple types in flight', async () => {
       const fooHandler = jest.fn();
       const barHandler = jest.fn();
-      bus.subscribe<FooEvent>('foo', fooHandler);
-      bus.subscribe<BarEvent>('bar', barHandler);
+      bus.subscribe('foo', fooHandler);
+      bus.subscribe('bar', barHandler);
 
       const foo = fooEvent('one');
       const bar = barEvent(7);
@@ -156,6 +156,7 @@ describe('AsyncDomainEventBus', () => {
       'refuses to publish events typed "%s", logs a single warn, and does not dispatch to handlers',
       async (reservedType) => {
         const handler = jest.fn();
+        // @ts-expect-error: we're testing the reserved type
         bus.subscribe(reservedType, handler);
         // @ts-expect-error: we're testing the reserved type
         bus.publish({ type: reservedType });
@@ -180,8 +181,8 @@ describe('AsyncDomainEventBus', () => {
         throw new Error('boom');
       });
       const succeeding = jest.fn();
-      bus.subscribe<FooEvent>('foo', failing);
-      bus.subscribe<FooEvent>('foo', succeeding);
+      bus.subscribe('foo', failing);
+      bus.subscribe('foo', succeeding);
 
       bus.publish(fooEvent());
 
@@ -198,8 +199,8 @@ describe('AsyncDomainEventBus', () => {
     it('continues invoking siblings when a handler returns a rejected promise', async () => {
       const failing = jest.fn().mockRejectedValue(new Error('boom async'));
       const succeeding = jest.fn();
-      bus.subscribe<FooEvent>('foo', failing);
-      bus.subscribe<FooEvent>('foo', succeeding);
+      bus.subscribe('foo', failing);
+      bus.subscribe('foo', succeeding);
 
       bus.publish(fooEvent());
 
@@ -213,7 +214,7 @@ describe('AsyncDomainEventBus', () => {
   describe('unsubscribe', () => {
     it('stops invoking the handler after unsubscribe()', async () => {
       const handler = jest.fn();
-      const subscription = bus.subscribe<FooEvent>('foo', handler);
+      const subscription = bus.subscribe('foo', handler);
 
       bus.publish(fooEvent());
       await flushAsync();
@@ -229,8 +230,8 @@ describe('AsyncDomainEventBus', () => {
     it('does not affect sibling handlers when one is unsubscribed', async () => {
       const handlerA = jest.fn();
       const handlerB = jest.fn();
-      const subscriptionA = bus.subscribe<FooEvent>('foo', handlerA);
-      bus.subscribe<FooEvent>('foo', handlerB);
+      const subscriptionA = bus.subscribe('foo', handlerA);
+      bus.subscribe('foo', handlerB);
 
       subscriptionA.unsubscribe();
       bus.publish(fooEvent());
@@ -243,7 +244,7 @@ describe('AsyncDomainEventBus', () => {
 
     it('is idempotent: calling unsubscribe() more than once is a no-op', async () => {
       const handler = jest.fn();
-      const subscription = bus.subscribe<FooEvent>('foo', handler);
+      const subscription = bus.subscribe('foo', handler);
 
       subscription.unsubscribe();
       subscription.unsubscribe();
@@ -257,8 +258,8 @@ describe('AsyncDomainEventBus', () => {
 
     it('treats the same handler subscribed twice as two independent subscriptions', async () => {
       const handler = jest.fn();
-      const subscription1 = bus.subscribe<FooEvent>('foo', handler);
-      bus.subscribe<FooEvent>('foo', handler);
+      const subscription1 = bus.subscribe('foo', handler);
+      bus.subscribe('foo', handler);
 
       bus.publish(fooEvent());
       await flushAsync();
@@ -275,7 +276,7 @@ describe('AsyncDomainEventBus', () => {
   describe('publish validation', () => {
     it('ignores null events without dispatching to any handler', async () => {
       const handler = jest.fn();
-      bus.subscribe<FooEvent>('foo', handler);
+      bus.subscribe('foo', handler);
 
       bus.publish(null as unknown as FooEvent);
 
@@ -286,7 +287,7 @@ describe('AsyncDomainEventBus', () => {
 
     it('ignores undefined events', async () => {
       const handler = jest.fn();
-      bus.subscribe<FooEvent>('foo', handler);
+      bus.subscribe('foo', handler);
 
       bus.publish(undefined as unknown as FooEvent);
 
@@ -297,7 +298,7 @@ describe('AsyncDomainEventBus', () => {
 
     it('ignores events whose `type` is not a string', async () => {
       const handler = jest.fn();
-      bus.subscribe<FooEvent>('foo', handler);
+      bus.subscribe('foo', handler);
 
       bus.publish({ type: 123 } as unknown as FooEvent);
 
@@ -320,7 +321,7 @@ describe('AsyncDomainEventBus', () => {
 
     it('threads the publisher-provided context through to each subscribed handler unchanged', async () => {
       const handler = jest.fn();
-      ctxBus.subscribe<FooEvent>('foo', handler);
+      ctxBus.subscribe('foo', handler);
 
       const event = fooEvent('with-context');
       const context: TestContext = { tag: 'ctx-1' };
@@ -336,7 +337,7 @@ describe('AsyncDomainEventBus', () => {
 
     it('isolates context between successive publish calls (no cross-talk)', async () => {
       const handler = jest.fn();
-      ctxBus.subscribe<FooEvent>('foo', handler);
+      ctxBus.subscribe('foo', handler);
 
       const ctxA: TestContext = { tag: 'A' };
       const ctxB: TestContext = { tag: 'B' };
@@ -352,6 +353,7 @@ describe('AsyncDomainEventBus', () => {
 
     it('still skips reserved event types and never invokes handlers when context is supplied', async () => {
       const handler = jest.fn();
+      // @ts-expect-error: we're testing the reserved type
       ctxBus.subscribe('error', handler);
       // @ts-expect-error: we're testing the reserved type
       ctxBus.publish({ type: 'error' }, { tag: 'ignored' });
@@ -368,8 +370,8 @@ describe('AsyncDomainEventBus', () => {
       });
 
       const succeeding = jest.fn();
-      ctxBus.subscribe<FooEvent>('foo', failing);
-      ctxBus.subscribe<FooEvent>('foo', succeeding);
+      ctxBus.subscribe('foo', failing);
+      ctxBus.subscribe('foo', succeeding);
 
       const context: TestContext = { tag: 'shared' };
       ctxBus.publish(fooEvent(), context);

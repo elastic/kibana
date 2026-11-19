@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -21,6 +21,7 @@ import { statusSignal } from './status_signal';
 import { useSettleDeclinedProposals } from './use_settle_declined_proposals';
 import { getCloseErrorCode } from './close_error_codes';
 import { CloseInvestigationModal } from '../close_confirmation/close_investigation_modal';
+import { useSkipCloseConfirmation } from '../close_confirmation/use_skip_close_confirmation';
 import * as i18n from '../close_confirmation/translations';
 
 export interface ConnectedCloseInvestigationModalProps {
@@ -37,6 +38,9 @@ export interface ConnectedCloseInvestigationModalProps {
  * Unlike `ConnectedStatusToggle`, this component is stateless — the parent supplies `investigation`
  * and `onClose`. It fetches the close preview, calls the status mutation on confirm, invalidates
  * queries and toasts on completion.
+ *
+ * The modal only appears when the close needs a dismiss reason: an investigation whose pending
+ * proposals all waived it closes straight away (see `useSkipCloseConfirmation`).
  *
  * The preview is always fresh (staleTime: 0, refetchInterval: 10 000) and the modal shows a
  * spinner while the first fetch is in-flight. After a successful close the dismissed proposals read
@@ -78,6 +82,9 @@ export const ConnectedCloseInvestigationModal: React.FC<
 
   const settleDeclinedProposals = useSettleDeclinedProposals(dropDecidedProposal);
 
+  // Set by `confirmWithoutReason` so the catch below knows no modal is on screen to report into.
+  const wasSkipped = useRef(false);
+
   const handleConfirm = useCallback(
     async ({ dismissReason, rationale }: { dismissReason?: DismissReason; rationale?: string }) => {
       try {
@@ -100,6 +107,15 @@ export const ConnectedCloseInvestigationModal: React.FC<
         onClose();
         await settled;
       } catch (err) {
+        if (wasSkipped.current) {
+          // A close that asked nothing has no modal to show the callouts in, so the failure is
+          // reported as a toast and the attempt ends rather than stalling out of sight.
+          invalidateAll();
+          statusSignal.bump();
+          services.notifications?.toasts.addDanger(i18n.STATUS_CHANGE_ERROR);
+          onClose();
+          return;
+        }
         const code = getCloseErrorCode(err);
         if (code === 'close_targets_changed') {
           // Keep the modal open, show the changed-callout and refresh the list.
@@ -132,6 +148,18 @@ export const ConnectedCloseInvestigationModal: React.FC<
       settleDeclinedProposals,
     ]
   );
+
+  const confirmWithoutReason = useCallback(() => {
+    wasSkipped.current = true;
+    void handleConfirm({});
+  }, [handleConfirm]);
+  const { isSkipped } = useSkipCloseConfirmation({
+    preview: previewData,
+    loadError: isError && !previewData,
+    confirm: confirmWithoutReason,
+  });
+
+  if (isSkipped) return null;
 
   return (
     <CloseInvestigationModal

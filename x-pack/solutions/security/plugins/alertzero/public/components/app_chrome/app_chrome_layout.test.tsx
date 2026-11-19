@@ -17,10 +17,18 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { AppChromeLayout } from './app_chrome_layout';
+import { useAppHeadingDocLink } from './app_heading_doc_link';
 import { useAppHeadingTitle } from './app_heading_title';
 
+const OVERVIEW_DOC_LINK = 'https://www.elastic.co/docs/alertzero';
+const SET_UP_DOC_LINK = 'https://www.elastic.co/docs/alertzero/set-up';
+
 const coreStartStub = {
-  docLinks: { links: { siem: { guide: 'https://www.elastic.co/guide' } } },
+  docLinks: {
+    links: {
+      securitySolution: { alertZero: { overview: OVERVIEW_DOC_LINK, setUp: SET_UP_DOC_LINK } },
+    },
+  },
 } as unknown as CoreStart;
 
 const makeChromeWithFeedback = (openFeedback?: () => void) => {
@@ -76,11 +84,11 @@ describe('AppChromeLayout header menu', () => {
     expect(openFeedback).toHaveBeenCalledTimes(1);
   });
 
-  it('links Documentation to the Security solution guide', async () => {
+  it('links Documentation to the AlertZero overview when no page picks a link', async () => {
     await renderLayout(makeChromeWithFeedback(jest.fn()));
 
     const link = (await screen.findByText('Documentation')).closest('a');
-    expect(link?.getAttribute('href')).toBe('https://www.elastic.co/guide');
+    expect(link?.getAttribute('href')).toBe(OVERVIEW_DOC_LINK);
   });
 
   it('shows no Feedback entry when no feedback handler is registered', async () => {
@@ -159,5 +167,48 @@ describe('AppChromeLayout heading title', () => {
 
     rerender(layoutAt(history, null));
     expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('AlertZero');
+  });
+});
+
+describe('AppChromeLayout documentation link', () => {
+  const PageWithDocLink: React.FC = () => {
+    useAppHeadingDocLink('setUp');
+    return null;
+  };
+
+  const layoutWith = (children: React.ReactNode) => (
+    <KibanaContextProvider services={coreStartStub}>
+      <MockChromeContextProvider chrome={makeChromeWithFeedback(jest.fn())}>
+        <EuiProvider>
+          <Router history={createMemoryHistory({ initialEntries: ['/'] })}>
+            <AppChromeLayout>{children}</AppChromeLayout>
+          </Router>
+        </EuiProvider>
+      </MockChromeContextProvider>
+    </KibanaContextProvider>
+  );
+
+  const openOverflow = async () => {
+    const overflow = await waitFor(() => {
+      const el = (document.querySelector('[data-euiicon-type="ellipsis"]') as HTMLElement)?.closest(
+        'button'
+      );
+      expect(el).toBeTruthy();
+      return el as HTMLElement;
+    });
+    fireEvent.click(overflow);
+  };
+
+  it('links Documentation to the page a page picks, and falls back when it unmounts', async () => {
+    const { rerender } = render(layoutWith(<PageWithDocLink />));
+    await openOverflow();
+    expect((await screen.findByText('Documentation')).closest('a')?.getAttribute('href')).toBe(
+      SET_UP_DOC_LINK
+    );
+
+    rerender(layoutWith(null));
+    expect((await screen.findByText('Documentation')).closest('a')?.getAttribute('href')).toBe(
+      OVERVIEW_DOC_LINK
+    );
   });
 });

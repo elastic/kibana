@@ -16,6 +16,7 @@ export const euiRules: DummyRuleMap = {
   '@elastic/eui/href-or-on-click': 'warn',
   '@elastic/eui/no-css-color': 'warn',
   '@elastic/eui/no-deprecated-icon-aliases': 'warn',
+  '@elastic/eui/no-removed-icons': 'error',
   '@elastic/eui/no-nested-copy-tooltip': 'warn',
   '@elastic/eui/no-nested-interactive-element': 'warn',
   '@elastic/eui/no-static-z-index': 'warn',

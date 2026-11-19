@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
+import type { ServiceAnomaliesResponse, ServiceMapServiceStats } from '@kbn/apm-types';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
 import {
   SERVICE_NAME,
@@ -93,11 +93,20 @@ export function getAllNodes(services: ServicesResponse[], connections: Connectio
 export function getAllServices(
   allNodes: Map<string, ConnectionNode>,
   destinationServices: ExitSpanDestination[],
-  anomalies: ServiceAnomaliesResponse
+  anomalies: ServiceAnomaliesResponse,
+  services: ServicesResponse[]
 ) {
   const anomaliesByServiceName = new Map<string, ServiceAnomalyStats>(
     anomalies.serviceAnomalies.map((item) => [item.serviceName, item])
   );
+  // We don't need to read the grouping FF here as `stats` is only set when service map grouping is enabled and the service has transactions
+  const statsByServiceName = new Map<string, ServiceMapServiceStats>(
+    services.flatMap((service) => (service.stats ? [[service[SERVICE_NAME], service.stats]] : []))
+  );
+  const getStats = (id: string) => {
+    const stats = statsByServiceName.get(id);
+    return stats ? { stats } : {};
+  };
 
   const serviceNodes = new Map<string, ServiceConnectionNode>();
 
@@ -110,6 +119,7 @@ export function getAllServices(
         ...to,
         id: toId,
         serviceAnomalyStats: anomaliesByServiceName.get(to.id),
+        ...getStats(toId),
       });
     }
   }
@@ -119,6 +129,7 @@ export function getAllServices(
       serviceNodes.set(node.id, {
         ...node,
         serviceAnomalyStats: anomaliesByServiceName.get(node.id),
+        ...getStats(node.id),
       });
     }
   }

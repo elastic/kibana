@@ -23,6 +23,7 @@ import type {
   EsWorkflowStepExecution,
   ExecutionStatus,
   ExecutionType,
+  TriggerSchemaOptions,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowAggsDto,
@@ -35,12 +36,16 @@ import type {
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
+import type { ManagedFilter } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
+  ManagedWorkflowInstallManyResult,
   ManagedWorkflowInstanceState,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallManyItem,
   ManagedWorkflowServiceInstallOptions,
   ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
@@ -81,12 +86,21 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
+import type { WorkflowLookupItem } from '../../common/lib/workflow_dependents/types';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
+import { resolveWorkflowPage } from '../lib/resolve_workflow_page';
+import type { ResolveWorkflowPageResult } from '../lib/resolve_workflow_page';
 import {
   type ManagedInstallReadinessResult,
   waitForManagedWorkflowInstallReadiness,
 } from '../lib/wait_for_managed_workflow_install_readiness';
+import type { WorkflowPageRef } from '../pages/page_secret';
+import type { WorkflowPagesClient } from '../pages/workflow_pages_client';
+import type {
+  WorkflowPagesService,
+  WorkflowPagesServiceStart,
+} from '../pages/workflow_pages_service';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import type { HitlStepClaim } from '../services/mark_step_as_responded_updater';
 import { WorkflowAccessControlService } from '../services/workflow_access_control';
@@ -99,6 +113,8 @@ import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusCounts,
+  WorkflowExecutionStatusCountsParams,
   WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
@@ -137,6 +153,8 @@ export interface SearchWorkflowExecutionsParams {
   request?: KibanaRequest;
   accessControlFilter?: estypes.QueryDslQueryContainer;
   workflowId?: string;
+  /** History identity of the current workflow document. Operational reads leave this unset and filter on `workflowId`. */
+  workflowUid?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
@@ -172,6 +190,7 @@ export class WorkflowsService {
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
+  private pages?: WorkflowPagesServiceStart;
   private accessControlService?: WorkflowAccessControlService;
   private managedWorkflowsService!: ManagedWorkflowsService;
   private readonly changeHistoryService: WorkflowChangeHistoryService;
@@ -188,7 +207,9 @@ export class WorkflowsService {
     public readonly core: CoreSetup<WorkflowsServerPluginStartDeps>,
     public readonly plugins: WorkflowsServerPluginSetupDeps,
     private readonly logger: Logger,
-    public readonly kibanaVersion: string
+    public readonly kibanaVersion: string,
+    /** Set up by the plugin. Without it, workflows have no pages. */
+    private readonly pagesService?: WorkflowPagesService
   ) {
     this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
     this.initPromise = this.initialize(core);
@@ -267,6 +288,13 @@ export class WorkflowsService {
       getCoreStart: () => this.coreStart,
       licensing: pluginsStart.licensing,
       logger: this.logger,
+      getWorkflowsForOutputs: async (ids, spaceId, request) => {
+        const access = await this.getAccessControl();
+        return this.crudService.getWorkflowsSourceByIds(ids, spaceId, ['name', 'definition'], {
+          accessControlFilter: await access.readFilter(request),
+        });
+      },
+      pagesEnabled: this.pagesService !== undefined,
     });
 
     const { workflowExecutionsDataClient, stepExecutionsDataClient } =
@@ -290,6 +318,20 @@ export class WorkflowsService {
 
     await this.initializeChangeHistoryService(coreStart);
 
+    this.pages = this.pagesService?.start({
+      core: coreStart,
+      encryptedSavedObjects: pluginsStart.encryptedSavedObjects,
+      authz: pluginsStart.security?.authz,
+      getSpaceId: (request) => this.plugins.spaces.spacesService.getSpaceId(request),
+      assertWorkflowAccess: async ({ workflowId, spaceId }, operation, request) => {
+        const workflow = await this.getWorkflow(workflowId, spaceId);
+        if (!workflow) throw new WorkflowNotFoundError(workflowId);
+        await (await this.getAccessControl()).assertAccess(workflow, operation, request);
+      },
+      audit: new WorkflowManagementAuditLog({ service: this }),
+      logger: this.logger.get('pages'),
+    });
+
     this.crudService = new WorkflowCrudService({
       authz: this.pluginsStart.security?.authz,
       getSpaceId: (request) => this.plugins.spaces.spacesService.getSpaceId(request),
@@ -305,6 +347,7 @@ export class WorkflowsService {
       changeHistoryService: this.changeHistoryService,
       workflowExecutionsDataClient: this.workflowExecutionsDataClient,
       stepExecutionsDataClient,
+      pagesSystemClient: this.pages?.getSystemClient(),
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -336,6 +379,31 @@ export class WorkflowsService {
     return this.pluginsStart;
   }
 
+  /** Page operations for one request. Checks the caller's privileges and the workflow ACL. */
+  public async getPagesClient(request: KibanaRequest): Promise<WorkflowPagesClient> {
+    await this.ensureInitialized();
+    if (!this.pages) throw new Error('Workflow pages are not set up');
+    return this.pages.getClient({ request });
+  }
+
+  /** Returns the workflow behind a page URL, or why the page must not run. */
+  public async resolveWorkflowPage(
+    ref: WorkflowPageRef,
+    secret: string
+  ): Promise<ResolveWorkflowPageResult> {
+    await this.ensureInitialized();
+    if (!this.pages) throw new Error('Workflow pages are not set up');
+    return resolveWorkflowPage(
+      {
+        getWorkflowSource: (id, spaceId) =>
+          this.crudService.getWorkflowDocumentSource(id, spaceId, { includeGlobal: false }),
+        pagesSystemClient: this.pages.getSystemClient(),
+        serviceAccountBindings: this.workflowsExecutionEngine.serviceAccountBindings,
+      },
+      { ref, secret }
+    );
+  }
+
   public async getAccessControl(): Promise<WorkflowAccessControlService> {
     await this.ensureInitialized();
     return (this.accessControlService ??= new WorkflowAccessControlService(
@@ -352,6 +420,16 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto | null> {
     await this.ensureInitialized();
     return this.crudService.getWorkflow(id, spaceId, options);
+  }
+
+  public async getDefinitionToStore(
+    yaml: string,
+    workflow: { id: string; enabled: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<EsWorkflow['definition'] | null> {
+    await this.ensureInitialized();
+    return this.crudService.getDefinitionToStore(yaml, workflow, spaceId, request);
   }
 
   public async getHistoryForWorkflow(
@@ -391,7 +469,12 @@ export class WorkflowsService {
     ids: string[],
     spaceId: string,
     source?: string[],
-    options?: { includeDeleted?: boolean; accessControlFilter?: estypes.QueryDslQueryContainer }
+    options?: {
+      includeDeleted?: boolean;
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      managedFilter?: ManagedFilter;
+      allowPartialResults?: boolean;
+    }
   ): Promise<WorkflowPartialDetailDto[]> {
     await this.ensureInitialized();
     return this.crudService.getWorkflowsSourceByIds(ids, spaceId, source, options);
@@ -509,6 +592,24 @@ export class WorkflowsService {
     return this.searchService.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
   }
 
+  public async indexCalledWorkflowIds(ids: string[]): Promise<void> {
+    await this.ensureInitialized();
+    await this.crudService.indexCalledWorkflowIds(ids);
+  }
+
+  public async findWorkflowsCalling(
+    workflowIds: string[],
+    spaceId: string,
+    options: {
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      includeUnindexed?: boolean;
+      managedFilter?: ManagedFilter;
+    }
+  ): Promise<WorkflowLookupItem[]> {
+    await this.ensureInitialized();
+    return this.searchService.findWorkflowsCalling(workflowIds, spaceId, options);
+  }
+
   public async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
@@ -588,6 +689,14 @@ export class WorkflowsService {
   ): Promise<WorkflowExecutionListDto> {
     await this.ensureInitialized();
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
+  }
+
+  public async getWorkflowExecutionStatusCounts(
+    params: WorkflowExecutionStatusCountsParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusCounts> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getWorkflowExecutionStatusCounts(params, spaceId);
   }
 
   public async searchExecutionsView(
@@ -729,6 +838,10 @@ export class WorkflowsService {
     return this.validationService.getAvailableConnectors(spaceId, request);
   }
 
+  public getTriggerSchemaOptions(): TriggerSchemaOptions {
+    return { includePageTrigger: this.pagesService !== undefined };
+  }
+
   public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
     await this.ensureInitialized();
     return this.validationService.getRegisteredCustomTriggerDefinitions();
@@ -777,6 +890,26 @@ export class WorkflowsService {
       registeredPluginId,
       request
     );
+  }
+
+  /**
+   * Install or update static managed workflows with `_bulk`, after one ES readiness check for the
+   * whole batch. Best-effort like {@link installManagedWorkflow}: a gated batch resolves with no
+   * failures and marks the plugin install pass incomplete.
+   */
+  public async bulkInstallManagedWorkflows(
+    items: readonly ManagedWorkflowServiceInstallManyItem[],
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowInstallManyResult> {
+    await this.ensureInitialized();
+    const readiness = await this.ensureManagedInstallReady(
+      `install of ${items.length} workflow(s) for plugin '${registeredPluginId}'`
+    );
+    if (!readiness.ready) {
+      this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
+      return { failed: [] };
+    }
+    return this.managedWorkflowsService.bulkInstallManagedWorkflows(items, registeredPluginId);
   }
 
   public async uninstallManagedWorkflow(

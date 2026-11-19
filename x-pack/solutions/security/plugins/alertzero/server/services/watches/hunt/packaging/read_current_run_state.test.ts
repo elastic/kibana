@@ -34,6 +34,7 @@ const sseAttachment = ({
   ],
   confidence = 0.9,
   timeRange = { from: '2026-09-25T00:00:00.000Z', to: '2026-09-25T01:00:00.000Z' },
+  manualRemediation,
 }: {
   actionableIndices?: string[];
   events?: Array<{
@@ -70,6 +71,7 @@ const sseAttachment = ({
   corroboratedTechniqueId?: string;
   confidence?: number;
   timeRange?: { from: string; to: string };
+  manualRemediation?: string[];
 }): VersionedAttachment => ({
   id: attachmentId,
   type: 'security.significant_security_event',
@@ -108,7 +110,9 @@ const sseAttachment = ({
             source_index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
           },
         ],
-        timeline: [],
+        ...(manualRemediation
+          ? { maps_to_proposal: { manual_remediation: manualRemediation } }
+          : {}),
         hypothesis_tested: hypothesis,
         evidence_for: evidenceFor,
         evidence_against: [],
@@ -694,6 +698,24 @@ describe('readCurrentRunState', () => {
 
     expect(state?.titles).toEqual(['Same finding']);
     expect(state?.evidenceLines).toEqual(['Same line']);
+  });
+
+  it('still extracts manual remediation from maps_to_proposal when the SSE has no timeline', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          attachmentId: 'sse-1',
+          manualRemediation: ['Rotate the key', 'Reset MFA'],
+        }),
+        sseAttachment({ attachmentId: 'sse-2', manualRemediation: ['Reset MFA'] }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.manualRemediation).toEqual(['Rotate the key', 'Reset MFA']);
   });
 
   it('takes the max Tier 1 total hits across current-run SSEs', async () => {

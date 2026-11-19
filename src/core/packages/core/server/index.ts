@@ -328,6 +328,7 @@ export type {
   SharedGlobalConfig,
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
+  PluginInitialization,
 } from '@kbn/core-plugins-server';
 export type {
   PluginsServiceSetup,

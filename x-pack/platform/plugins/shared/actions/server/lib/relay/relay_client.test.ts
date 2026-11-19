@@ -378,6 +378,37 @@ describe('RelayClient', () => {
     );
   });
 
+  describe('listAvailableChannels', () => {
+    it('GETs the available filter and maps channels, keeping truncated', async () => {
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: {
+          channels: [{ scope_id: 'C1', display_name: 'alerts', extra: 'dropped' }],
+          truncated: true,
+        },
+      } as never);
+
+      await expect(createClient().listAvailableChannels('team/A')).resolves.toEqual({
+        channels: [{ scope_id: 'C1', display_name: 'alerts' }],
+        truncated: true,
+      });
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team%2FA/channels?status=available',
+          method: 'get',
+        })
+      );
+    });
+
+    it('rejects a response without a channels array', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: {} } as never);
+
+      await expect(createClient().listAvailableChannels('team-A')).rejects.toBeInstanceOf(
+        RelayRequestError
+      );
+    });
+  });
+
   describe('listBindings', () => {
     it('GETs a single page and maps SUB entries with their display snapshot, exposing next_cursor', async () => {
       requestMock.mockResolvedValue({
@@ -813,7 +844,7 @@ describe('RelayClient', () => {
         { execution_id: 'execution-1' },
         signal
       )
-    ).resolves.toEqual({ status: 204 });
+    ).resolves.toEqual(expect.objectContaining({ status: 204 }));
 
     expect(requestMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -823,6 +854,24 @@ describe('RelayClient', () => {
         sslOverrides: relaySSLSettings,
       })
     );
+  });
+
+  it('returns the callback response headers, joining repeated values', async () => {
+    requestMock.mockResolvedValue({
+      status: 429,
+      data: undefined,
+      headers: { 'retry-after': '17', 'x-relay': ['a', 'b'] },
+    } as never);
+
+    const { status, headers } = await createClient().postCallback(
+      'https://relay.test/relay-provided/callback?token=abc',
+      { execution_id: 'execution-1' },
+      new AbortController().signal
+    );
+
+    expect(status).toBe(429);
+    expect(headers.get('Retry-After')).toBe('17');
+    expect(headers.get('x-relay')).toBe('a, b');
   });
 
   it('rejects callback URLs outside the configured Relay origin', async () => {

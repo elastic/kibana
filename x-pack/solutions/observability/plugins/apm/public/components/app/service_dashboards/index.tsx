@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -92,6 +92,24 @@ export function ServiceDashboards() {
 
     setServiceDashboards(filteredServiceDashboards);
   }, [allAvailableDashboards, data]);
+
+  // Tracks which dashboard the currently published API belongs to, so a late cleanup from a
+  // canceled load for a previous dashboard cannot clear the reference to the current one.
+  const publishedForRef = useRef<string | undefined>();
+
+  const onApiAvailable = useCallback(
+    (api: DashboardApi) => {
+      publishedForRef.current = dashboardId;
+      setDashboard(api);
+    },
+    [dashboardId]
+  );
+
+  const onApiCleanup = useCallback(() => {
+    if (publishedForRef.current === dashboardId) {
+      setDashboard(undefined);
+    }
+  }, [dashboardId]);
 
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = () => ({
@@ -208,7 +226,8 @@ export function ServiceDashboards() {
                 locator={locator}
                 savedObjectId={dashboardId}
                 getCreationOptions={getCreationOptions}
-                onApiAvailable={setDashboard}
+                onApiAvailable={onApiAvailable}
+                onApiCleanup={onApiCleanup}
               />
             )}
           </EuiFlexItem>

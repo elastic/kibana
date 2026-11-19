@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import type { ActionType } from '@kbn/actions-types';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-import { ConnectSourcesGrid, type ConnectSourcesGroup } from './connect_sources_grid';
+import { ConnectSourcesGrid, isAdditionalType, isTelemetryType } from './connect_sources_grid';
 import {
   actionType,
   httpError,
@@ -23,7 +23,7 @@ jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 const setup = ({
   types,
   connectors,
-  group = 'additional',
+  filter = isAdditionalType,
   trailing,
   canSave = true,
   canUpdateAgent = true,
@@ -31,7 +31,7 @@ const setup = ({
 }: {
   types: ActionType[];
   connectors?: SandboxConnector[];
-  group?: ConnectSourcesGroup;
+  filter?: (actionTypeId: string) => boolean;
   trailing?: React.ReactNode;
   canSave?: boolean;
   canUpdateAgent?: boolean;
@@ -44,7 +44,7 @@ const setup = ({
     canUpdateAgent,
   });
   if (typesError) services.fetchConnectorTypes.mockRejectedValueOnce(typesError);
-  renderWithProviders(<ConnectSourcesGrid group={group} trailing={trailing} />);
+  renderWithProviders(<ConnectSourcesGrid filter={filter} trailing={trailing} />);
   return services;
 };
 
@@ -64,7 +64,7 @@ describe('ConnectSourcesGrid', () => {
   ];
 
   it('shows External Elasticsearch and New Relic as the telemetry sources', async () => {
-    setup({ types: allTypes(), group: 'telemetry' });
+    setup({ types: allTypes(), filter: isTelemetryType });
 
     await screen.findByTestId('nightshiftConnectSourcesGrid');
     expect(cardIds()).toEqual(['.new_relic-card', '.elasticsearch-card']);
@@ -72,33 +72,37 @@ describe('ConnectSourcesGrid', () => {
     expect(screen.getByTestId('.elasticsearch-card')).toHaveTextContent('External Elasticsearch');
   });
 
-  it('shows HTTP and the other sandbox-capable types as additional sources', async () => {
-    setup({ types: allTypes(), group: 'additional' });
+  it('shows the other sandbox-capable types as additional sources, without the HTTP card', async () => {
+    setup({ types: allTypes(), filter: isAdditionalType });
 
     await screen.findByTestId('nightshiftConnectSourcesGrid');
-    expect(cardIds()).toEqual(['.github-card', '.http-card']);
+    expect(cardIds()).toEqual(['.github-card']);
     expect(screen.getByTestId('.github-card')).toHaveTextContent('Repos');
   });
 
-  it('lists every connector of the type in the HTTP card, preconfigured ones included', async () => {
+  it('lists every connector of the type in its card, preconfigured ones included', async () => {
     setup({
-      types: [actionType('.http')],
+      types: [actionType('.github')],
       connectors: [
-        sandboxConnector('telemetry', { name: 'Elasticsearch telemetry', is_preconfigured: true }),
-        sandboxConnector('other'),
+        sandboxConnector('telemetry', {
+          name: 'Elasticsearch telemetry',
+          connector_type_id: '.github',
+          is_preconfigured: true,
+        }),
+        sandboxConnector('other', { connector_type_id: '.github' }),
       ],
-      group: 'additional',
+      filter: isAdditionalType,
     });
 
-    fireEvent.click(await screen.findByTestId('.http-connect'));
+    fireEvent.click(await screen.findByTestId('.github-connect'));
 
-    await screen.findByTestId('.http-connectPopover');
+    await screen.findByTestId('.github-connectPopover');
     expect(screen.getByTestId('nightshiftConnectorListItem-telemetry')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftConnectorListItem-other')).toBeInTheDocument();
   });
 
   it('ends the grid with the trailing card, even without a type to show', async () => {
-    setup({ types: [], group: 'telemetry', trailing: <div data-test-subj="trailingCard" /> });
+    setup({ types: [], filter: isTelemetryType, trailing: <div data-test-subj="trailingCard" /> });
 
     expect(await screen.findByTestId('trailingCard')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftConnectSourcesGrid')).toBeInTheDocument();
@@ -161,7 +165,7 @@ describe('ConnectSourcesGrid', () => {
   });
 
   it('renders nothing when the group has no type and nothing trails', async () => {
-    setup({ types: [actionType('.github')], group: 'telemetry' });
+    setup({ types: [actionType('.github')], filter: isTelemetryType });
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.queryByTestId('nightshiftConnectSourcesGrid')).not.toBeInTheDocument();
