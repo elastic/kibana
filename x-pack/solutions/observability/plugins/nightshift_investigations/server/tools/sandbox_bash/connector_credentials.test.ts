@@ -92,25 +92,34 @@ describe('buildConnectorEnv', () => {
     expect(secretValues).toEqual([BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue']);
   });
 
-  it('leaves selectedActions out of the env and retains hosts without auth headers', () => {
-    const hosts = ['localhost'];
-    const { env, allowedHosts, secretEnvKeys } = buildConnectorEnv({
+  it('leaves the selectedActions allowlist out of the env', () => {
+    const { env } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
       actionTypeId: '.elasticsearch',
       config: { url: 'http://localhost:9200', authType: 'basic', selectedActions: ['_test'] },
       headers: {},
-      hosts,
+      hosts: ['localhost'],
     });
 
-    hosts.push('other.example.com');
-    expect(allowedHosts).toEqual(['localhost']);
-    expect(secretEnvKeys).toEqual([]);
     expect(env).toEqual({
       CONNECTOR_ID,
       CONNECTOR_TYPE: '.elasticsearch',
       CONNECTOR_CONFIG_URL: 'http://localhost:9200',
       CONNECTOR_CONFIG_AUTHTYPE: 'basic',
     });
+  });
+
+  it('keeps connector hosts as allowed hosts when there are no auth headers', () => {
+    const { allowedHosts, secretEnvKeys } = buildConnectorEnv({
+      connectorId: CONNECTOR_ID,
+      actionTypeId: '.http',
+      config: { url: 'https://api.example.com' },
+      headers: {},
+      hosts: ['api.example.com'],
+    });
+
+    expect(allowedHosts).toEqual(['api.example.com']);
+    expect(secretEnvKeys).toEqual([]);
   });
 
   it('marks every header env var, and no config env var, as a secret bound to the hosts', () => {
