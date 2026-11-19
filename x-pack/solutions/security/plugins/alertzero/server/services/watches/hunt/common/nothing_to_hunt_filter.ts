@@ -22,8 +22,14 @@ export const MIN_HUNT_RELEVANCE = 0.5;
 const DEGRADED_CONTEXT_MODE = 'degraded_context';
 
 /**
- * Reports a scheduled sweep has nothing to hunt for: scored below the baseline by enrich and
- * carrying no indicator record, no technique, and no behavior mapped to a technique.
+ * Reports a scheduled sweep holds back as unlikely to give the hunt anything to search: scored
+ * below the baseline by enrich and carrying no indicator record, no technique, and no behavior
+ * mapped to a technique.
+ *
+ * This is a heuristic. The hunt does not read `extracted.behaviors`. Behavior Hunt extracts its
+ * own techniques from the stored body, so enrich's verdict predicts what it will find and does not
+ * decide it. On the 21 reports this matched in local test data when it was added, 17 earlier hunts
+ * had searched nothing and 4 had run one T1190 query that found no hits.
  *
  * A report with no `extracted.relevance` does not match (a range on a missing field matches
  * nothing), so it stays selectable.

@@ -274,8 +274,8 @@ export const buildCandidateQuery = async (
     // from being retried forever. The hunt narrative says so.
     filterClauses.push(scheduledClauses.notHunted);
 
-    // A report enrich scored as having nothing to hunt is not selected, unless an earlier run
-    // left it pending a retry in this space. Named ids skip this so an analyst can still replay it.
+    // A report enrich scored as unlikely to have anything to hunt is not selected, unless an earlier
+    // run left it pending a retry in this space. Named ids skip this so an analyst can still replay it.
     filterClauses.push({ bool: { must_not: [scheduledClauses.nothingToHunt] } });
 
     // Publish-date lookback. `should` with `minimum_should_match: 1` lets a report with
