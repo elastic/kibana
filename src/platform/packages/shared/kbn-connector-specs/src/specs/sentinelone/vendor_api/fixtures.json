@@ -1,0 +1,81 @@
+{
+  "runQuery": {
+    "queries": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/sdl/v2/api/queries"
+      },
+      {
+        "source": "s1",
+        "method": "DELETE",
+        "path": "/sdl/v2/api/queries/{id}"
+      }
+    ],
+    "responses": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/sdl/v2/api/queries",
+        "status": 200,
+        "headers": {
+          "x-dataset-query-forward-tag": "tag-1"
+        },
+        "body": {
+          "id": "q1",
+          "stepsCompleted": 1,
+          "data": {
+            "columns": [
+              {
+                "name": "timestamp"
+              }
+            ],
+            "values": [
+              [
+                1
+              ]
+            ],
+            "matchCount": 1
+          }
+        }
+      }
+    ]
+  },
+  "getRemoteScriptResults": {
+    "queries": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/remote-scripts/fetch-files"
+      }
+    ]
+  },
+  "downloadRemoteScriptResults": {
+    "queries": [
+      {
+        "source": "s1",
+        "method": "POST",
+        "path": "/web/api/v2.1/remote-scripts/fetch-files"
+      }
+    ]
+  },
+  "getActivities": {
+    "input": {
+      "activityTypes": [
+        80
+      ]
+    }
+  },
+  "createIOC": {
+    "input": {
+      "validUntil": "2027-01-01T00:00:00Z"
+    }
+  },
+  "getAgents": {
+    "input": {
+      "networkStatuses": [
+        "connected"
+      ]
+    }
+  }
+}

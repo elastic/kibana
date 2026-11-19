@@ -1,0 +1,667 @@
+{
+  "operations": {
+    "abortScan": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/agents/actions/abort-scan",
+        "source": "s1"
+      }
+    ],
+    "addHashToBlocklist": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/restrictions",
+        "source": "s1"
+      }
+    ],
+    "addThreatNote": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/web/api/v2.1/threats/notes",
+        "source": "s1"
+      }
+    ],
+    "broadcastMessage": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/agents/actions/broadcast",
+        "source": "s1"
+      }
+    ],
+    "createExclusion": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/exclusions",
+        "source": "s1"
+      }
+    ],
+    "createFirewallRule": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/firewall-control",
+        "source": "s1"
+      }
+    ],
+    "createIOC": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/threat-intelligence/iocs",
+        "source": "s1"
+      }
+    ],
+    "createStarRule": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/cloud-detection/rules",
+        "source": "s1"
+      }
+    ],
+    "deleteExclusion": [
+      {
+        "method": "delete",
+        "path": "/web/api/v2.1/exclusions",
+        "source": "s1"
+      }
+    ],
+    "deleteFirewallRule": [
+      {
+        "method": "delete",
+        "path": "/web/api/v2.1/firewall-control",
+        "source": "s1"
+      }
+    ],
+    "deleteIOC": [
+      {
+        "method": "delete",
+        "path": "/web/api/v2.1/threat-intelligence/iocs",
+        "source": "s1"
+      }
+    ],
+    "deleteStarRule": [
+      {
+        "method": "delete",
+        "path": "/web/api/v2.1/cloud-detection/rules",
+        "source": "s1"
+      }
+    ],
+    "disableStarRules": [
+      {
+        "method": "put",
+        "path": "/web/api/v2.1/cloud-detection/rules/disable",
+        "source": "s1"
+      }
+    ],
+    "downloadAgentFile": [
+      {
+        "method": "get",
+        "path": "/web/api/v2.1/agents/{agent_id}/uploads/{activity_id}",
+        "source": "s1"
+      }
+    ],
+    "downloadRemoteScriptResults": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/remote-scripts/fetch-files",
+        "source": "s1"
+      }
+    ],
+    "downloadThreatFile": [
+      {
+        "method": "get",
+        "path": "/web/api/v2.1/threats/{threat_id}/download-from-cloud",
+        "source": "s1"
+      }
+    ],
+    "enableStarRules": [
+      {
+        "method": "put",
+        "path": "/web/api/v2.1/cloud-detection/rules/enable",
+        "source": "s1"
+      }
+    ],
+    "executeScript": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/remote-scripts/execute",
+        "source": "s1"
+      }
+    ],
+    "fetchAgentFiles": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/agents/{agent_id}/actions/fetch-files",
+        "source": "s1"
+      }
+    ],
+    "fetchThreatFile": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/threats/fetch-file",
+        "source": "s1"
+      }
+    ],
+    "getAccounts": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/accounts",
+        "source": "s1"
+      }
+    ],
+    "getActivities": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/activities",
+        "source": "s1"
+      }
+    ],
+    "getAgents": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/agents",
+        "source": "s1"
+      }
+    ],
+    "getApplicationCves": [],
+    "getGroups": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/groups",
+        "source": "s1"
+      }
+    ],
+    "getInstalledApplications": [
+      {
+        "method": "get",
+        "path": "/web/api/v2.1/agents/applications",
+        "source": "s1"
+      }
+    ],
+    "getRemoteScriptResults": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/remote-scripts/fetch-files",
+        "source": "s1"
+      }
+    ],
+    "getRemoteScriptStatus": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/remote-scripts/status",
+        "source": "s1"
+      }
+    ],
+    "getRemoteScripts": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/remote-scripts",
+        "source": "s1"
+      }
+    ],
+    "getSites": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "errors",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/sites",
+        "source": "s1"
+      }
+    ],
+    "getThreatDetails": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/threats",
+        "source": "s1"
+      }
+    ],
+    "getThreatNotes": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/threats/{threat_id}/notes",
+        "source": "s1"
+      }
+    ],
+    "getThreatTimeline": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/threats/{threat_id}/timeline",
+        "source": "s1"
+      }
+    ],
+    "getThreats": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/threats",
+        "source": "s1"
+      }
+    ],
+    "initiateScan": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/agents/actions/initiate-scan",
+        "source": "s1"
+      }
+    ],
+    "isolateHost": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/agents",
+        "source": "s1"
+      }
+    ],
+    "listExclusions": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/exclusions",
+        "source": "s1"
+      }
+    ],
+    "listFirewallRules": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/firewall-control",
+        "source": "s1"
+      }
+    ],
+    "mitigateThreat": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/web/api/v2.1/threats/mitigate/{action}",
+        "source": "s1"
+      }
+    ],
+    "moveAgent": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/agents",
+        "source": "s1"
+      }
+    ],
+    "releaseHost": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/agents",
+        "source": "s1"
+      }
+    ],
+    "removeHashFromBlocklist": [
+      {
+        "method": "delete",
+        "path": "/web/api/v2.1/restrictions",
+        "source": "s1"
+      }
+    ],
+    "rollbackThreat": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/web/api/v2.1/threats/mitigate/{action}",
+        "source": "s1"
+      }
+    ],
+    "runQuery": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/sdl/v2/api/queries",
+        "source": "s1"
+      },
+      {
+        "method": "delete",
+        "path": "/sdl/v2/api/queries/{id}",
+        "source": "s1"
+      }
+    ],
+    "runScriptAndWait": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/remote-scripts/execute",
+        "source": "s1"
+      }
+    ],
+    "searchAlerts": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/cloud-detection/alerts",
+        "source": "s1"
+      }
+    ],
+    "searchBlocklist": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/restrictions",
+        "source": "s1"
+      }
+    ],
+    "searchIOCs": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/threat-intelligence/iocs",
+        "source": "s1"
+      }
+    ],
+    "shutdownAgent": [
+      {
+        "method": "post",
+        "path": "/web/api/v2.1/agents/actions/shutdown",
+        "source": "s1"
+      }
+    ],
+    "updateAlertStatus": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/web/api/v2.1/cloud-detection/alerts/incident",
+        "source": "s1"
+      }
+    ],
+    "updateAlertVerdict": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/web/api/v2.1/cloud-detection/alerts/analyst-verdict",
+        "source": "s1"
+      }
+    ],
+    "updateStarRule": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "end": "null",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "pagination.nextCursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/web/api/v2.1/cloud-detection/rules",
+        "source": "s1"
+      }
+    ],
+    "updateThreatStatus": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/web/api/v2.1/threats/incident",
+        "source": "s1"
+      }
+    ],
+    "updateThreatVerdict": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/web/api/v2.1/threats/analyst-verdict",
+        "source": "s1"
+      }
+    ]
+  },
+  "sources": {
+    "s1": {
+      "apiVersion": "2.1",
+      "fetchedAt": "2026-11-19T10:06:32.000Z",
+      "format": "swagger",
+      "note": "Exported from a SentinelOne management console (Swagger 2.0, 'S1 MGMT API 2.1'), which is login-gated and has no public URL, so the source URL is a placeholder and the drift check cannot refetch it. The export was normalised before trimming: keywords set to null and 52 regular expressions that JavaScript cannot parse were removed. Redistribution of a trimmed snapshot was confirmed by the Kibana reviewers.",
+      "url": "https://your-console.sentinelone.net/api-doc"
+    }
+  },
+  "unmatched": {
+    "downloadThreatFile": [
+      {
+        "method": "get",
+        "path": "/string",
+        "reason": "The file is fetched from the pre-signed download URL that the previous SentinelOne call returns, which is a storage link and not a route of the management API."
+      }
+    ]
+  }
+}
