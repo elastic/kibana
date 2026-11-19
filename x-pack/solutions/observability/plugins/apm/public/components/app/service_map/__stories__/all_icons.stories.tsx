@@ -159,6 +159,7 @@ export const AllIcons: StoryObj = {
       { subtype: 'mongodb', label: 'mongodb' },
       { subtype: 'redis', label: 'redis' },
       { subtype: 'cassandra', label: 'cassandra' },
+      { subtype: 'mssql', label: 'mssql (generic database)' },
     ];
 
     const messaging = [
@@ -172,6 +173,8 @@ export const AllIcons: StoryObj = {
       { subtype: 'http', label: 'http', spanType: 'external' },
       { subtype: 'grpc', label: 'grpc', spanType: 'external' },
       { subtype: 'graphql', label: 'graphql', spanType: 'external' },
+      { subtype: 'websocket', label: 'websocket', spanType: 'external' },
+      { subtype: 'handlebars', label: 'handlebars', spanType: 'template' },
     ];
 
     return (
@@ -334,7 +337,7 @@ export const AllIcons: StoryObj = {
         </Section>
 
         <Section>
-          <SectionTitle>External</SectionTitle>
+          <SectionTitle>External and other</SectionTitle>
           <IconRow>
             {externals.map((ext) => (
               <div key={ext.subtype} style={{ textAlign: 'center' }}>
