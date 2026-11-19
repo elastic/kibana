@@ -12,12 +12,10 @@ import { getQueryRuleParams, getMlRuleParams, getThreatRuleParams } from '../../
 import { checkForFrozenIndices, hasTimestampFields } from '../utils/utils';
 import { runExecutionValidation } from './run_execution_validation';
 
-const mockGetMatchedIndices = jest.fn();
+const mockResolveIndexPatterns = jest.fn();
 
-jest.mock('@kbn/data-views-plugin/server', () => ({
-  IndexPatternsFetcher: jest.fn().mockImplementation(() => ({
-    getMatchedIndices: (options: { indexPatterns: string[] }) => mockGetMatchedIndices(options),
-  })),
+jest.mock('./resolve_index_patterns', () => ({
+  resolveIndexPatterns: (options: { indexPatterns: string[] }) => mockResolveIndexPatterns(options),
 }));
 
 jest.mock('../utils/utils', () => ({
@@ -41,7 +39,7 @@ describe('runExecutionValidation', () => {
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
 
   const mockMatchedIndices = (fields: FieldCapsFields, indices: string[] = ['auditbeat-1']) => {
-    mockGetMatchedIndices.mockResolvedValue({ matchedIndices: indices, fields });
+    mockResolveIndexPatterns.mockResolvedValue({ matchedIndices: indices, fields });
   };
 
   const run = ({
@@ -69,7 +67,7 @@ describe('runExecutionValidation', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetMatchedIndices.mockReset();
+    mockResolveIndexPatterns.mockReset();
     scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
     jest.mocked(hasTimestampFields).mockReturnValue({
@@ -134,7 +132,7 @@ describe('runExecutionValidation', () => {
     it('is empty for machine learning rules', async () => {
       const result = await run({ params: getMlRuleParams() });
       expect(result.dateNanosTimestampFields).toEqual([]);
-      expect(mockGetMatchedIndices).not.toHaveBeenCalled();
+      expect(mockResolveIndexPatterns).not.toHaveBeenCalled();
     });
   });
 
@@ -145,11 +143,11 @@ describe('runExecutionValidation', () => {
 
     expect(result.skipExecution).toBe(false);
     expect(result.warnings).toEqual([]);
-    expect(mockGetMatchedIndices).toHaveBeenCalledTimes(1);
-    expect(mockGetMatchedIndices).toHaveBeenCalledWith({
+    expect(mockResolveIndexPatterns).toHaveBeenCalledTimes(1);
+    expect(mockResolveIndexPatterns).toHaveBeenCalledWith({
+      esClient: scopedClusterClient.asCurrentUser,
       indexPatterns: ['auditbeat-*'],
       fields: ['@timestamp', 'event.ingested'],
-      includeUnmapped: true,
       runtimeMappings: undefined,
     });
     expect(scopedClusterClient.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
@@ -204,7 +202,7 @@ describe('runExecutionValidation', () => {
     expect(result.skipExecution).toBe(true);
     expect(result.warnings).toEqual([NO_MATCHING_INDICES_WARNING]);
     expect(ruleExecutionLogger.logMetric).toHaveBeenCalledWith('matched_indices_count', 0);
-    expect(mockGetMatchedIndices).toHaveBeenCalledTimes(1);
+    expect(mockResolveIndexPatterns).toHaveBeenCalledTimes(1);
     expect(hasTimestampFields).not.toHaveBeenCalled();
     expect(checkForFrozenIndices).not.toHaveBeenCalled();
   });
@@ -251,13 +249,13 @@ describe('runExecutionValidation', () => {
 
     await run({ inputIndex });
 
-    expect(mockGetMatchedIndices).toHaveBeenCalledWith(
+    expect(mockResolveIndexPatterns).toHaveBeenCalledWith(
       expect.objectContaining({ indexPatterns: inputIndex })
     );
   });
 
   it('warns and sends no other request when the request fails', async () => {
-    mockGetMatchedIndices.mockRejectedValue(new Error('boom'));
+    mockResolveIndexPatterns.mockRejectedValue(new Error('boom'));
 
     const result = await run();
 
@@ -268,7 +266,7 @@ describe('runExecutionValidation', () => {
       dateNanosTimestampFields: [],
       mixedTimestampFields: [],
     });
-    expect(mockGetMatchedIndices).toHaveBeenCalledTimes(1);
+    expect(mockResolveIndexPatterns).toHaveBeenCalledTimes(1);
     expect(scopedClusterClient.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
     expect(hasTimestampFields).not.toHaveBeenCalled();
     expect(checkForFrozenIndices).not.toHaveBeenCalled();
@@ -284,16 +282,15 @@ describe('runExecutionValidation', () => {
       const result = await run({ params });
 
       expect(result.skipExecution).toBe(false);
-      expect(mockGetMatchedIndices.mock.calls.map(([{ indexPatterns }]) => indexPatterns)).toEqual([
-        ['auditbeat-*'],
-        ['threat-*'],
-      ]);
+      expect(
+        mockResolveIndexPatterns.mock.calls.map(([{ indexPatterns }]) => indexPatterns)
+      ).toEqual([['auditbeat-*'], ['threat-*']]);
       expect(scopedClusterClient.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
       expect(hasTimestampFields).toHaveBeenCalledTimes(2);
     });
 
     it('skips execution when no threat index matches', async () => {
-      mockGetMatchedIndices
+      mockResolveIndexPatterns
         .mockResolvedValueOnce({ matchedIndices: ['auditbeat-1'], fields: date })
         .mockResolvedValueOnce({ matchedIndices: [], fields: {} });
 
@@ -306,7 +303,7 @@ describe('runExecutionValidation', () => {
     });
 
     it('does not check the threat timestamp fields when no rule index matches', async () => {
-      mockGetMatchedIndices
+      mockResolveIndexPatterns
         .mockResolvedValueOnce({ matchedIndices: [], fields: {} })
         .mockResolvedValueOnce({ matchedIndices: ['threat-1'], fields: {} });
 
@@ -319,7 +316,7 @@ describe('runExecutionValidation', () => {
 
     it('adds the warning for threat indices without the timestamp field', async () => {
       jest.mocked(hasTimestampFields).mockImplementation(actualHasTimestampFields);
-      mockGetMatchedIndices
+      mockResolveIndexPatterns
         .mockResolvedValueOnce({ matchedIndices: ['auditbeat-1'], fields: date })
         .mockResolvedValueOnce({ matchedIndices: ['threat-1'], fields: {} });
 
@@ -332,7 +329,7 @@ describe('runExecutionValidation', () => {
     });
 
     it('warns and still checks the rule indices when the threat indices request fails', async () => {
-      mockGetMatchedIndices
+      mockResolveIndexPatterns
         .mockResolvedValueOnce({ matchedIndices: ['auditbeat-1'], fields: date })
         .mockRejectedValueOnce(new Error('boom'));
 
@@ -342,7 +339,7 @@ describe('runExecutionValidation', () => {
       expect(result.warnings).toEqual([
         'Encountered an error validating threat index patterns: Error: boom',
       ]);
-      expect(mockGetMatchedIndices).toHaveBeenCalledTimes(2);
+      expect(mockResolveIndexPatterns).toHaveBeenCalledTimes(2);
       expect(hasTimestampFields).toHaveBeenCalledTimes(1);
     });
   });

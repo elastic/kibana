@@ -7,7 +7,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RuleParams } from '../../rule_schema';
 import type { TimestampFieldCapsResponse } from '../utils/utils';
@@ -19,6 +18,7 @@ import {
   PARTIAL_INDEX_PREFIX,
 } from '../utils/utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import { resolveIndexPatterns } from './resolve_index_patterns';
 
 export interface RunExecutionValidationParams {
   params: RuleParams;
@@ -99,7 +99,6 @@ export const runExecutionValidation = async (
   const timestampFields = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
     : [primaryTimestamp];
-  const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
 
   const resolveIndices = async ({
     patterns,
@@ -111,10 +110,10 @@ export const runExecutionValidation = async (
     spanName: string;
   }): Promise<IndexResolution> => {
     const { matchedIndices, fields } = await withSecuritySpan(spanName, () =>
-      indexPatterns.getMatchedIndices({
+      resolveIndexPatterns({
+        esClient: scopedClusterClient.asCurrentUser,
         indexPatterns: patterns,
         fields: timestampFields,
-        includeUnmapped: true,
         runtimeMappings: patternsRuntimeMappings,
       })
     );

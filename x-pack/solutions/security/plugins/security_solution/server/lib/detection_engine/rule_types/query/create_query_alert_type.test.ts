@@ -18,19 +18,16 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { fromKueryExpression } from '@kbn/es-query';
 import { getFilter } from '../utils/get_filter';
+import { resolveIndexPatterns } from '../validation/resolve_index_patterns';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 
-jest.mock('@kbn/data-views-plugin/server', () => ({
-  ...jest.requireActual('@kbn/data-views-plugin/server'),
-  IndexPatternsFetcher: jest.fn().mockImplementation(() => ({
-    getMatchedIndices: jest.fn().mockResolvedValue({
-      matchedIndices: ['some-index'],
-      fields: { '@timestamp': { date: { type: 'date' } } },
-    }),
-  })),
+jest.mock('../validation/resolve_index_patterns', () => ({
+  resolveIndexPatterns: jest.fn().mockResolvedValue({
+    matchedIndices: ['some-index'],
+    fields: { '@timestamp': { date: { type: 'date' } } },
+  }),
 }));
 
 jest.mock('../utils/utils', () => ({
@@ -142,9 +139,7 @@ describe('Custom Query Alerts', () => {
   });
 
   it('short-circuits and writes a warning if no indices are found', async () => {
-    (IndexPatternsFetcher as jest.Mock).mockImplementationOnce(() => ({
-      getMatchedIndices: jest.fn().mockResolvedValue({ matchedIndices: [], fields: {} }),
-    }));
+    (resolveIndexPatterns as jest.Mock).mockResolvedValueOnce({ matchedIndices: [], fields: {} });
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         id: QUERY_RULE_TYPE_ID,

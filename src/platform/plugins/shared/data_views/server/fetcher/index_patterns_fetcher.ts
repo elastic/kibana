@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
-import { castArray, keyBy } from 'lodash';
+import { keyBy } from 'lodash';
 import { catchError, defer, from, map, of } from 'rxjs';
 import { rateLimitingForkJoin } from '../../common/data_views/utils';
 import type { QueryDslQueryContainer } from '../../common/types';
@@ -20,7 +20,6 @@ import {
   mergeCapabilitiesWithFields,
 } from './lib';
 import { DataViewType } from '../../common/types';
-import { callFieldCapsApi } from './lib/es_api';
 
 export interface FieldDescriptor {
   aggregatable: boolean;
@@ -53,11 +52,6 @@ export interface GetIndexPatternMatchesResult {
   matchedIndexPatterns: string[];
   matchedIndices?: string[];
   matchesByIndexPattern?: Record<string, string[]>;
-}
-
-export interface GetMatchedIndicesResult {
-  matchedIndices: string[];
-  fields: estypes.FieldCapsResponse['fields'];
 }
 
 export class IndexPatternsFetcher {
@@ -180,46 +174,6 @@ export class IndexPatternsFetcher {
    */
   isExcludingIndexPattern(indexPattern: string): boolean {
     return indexPattern.trim().startsWith('-');
-  }
-
-  /**
-   * Resolves all index patterns with a single field caps request and returns the matched indices with the
-   * raw field capabilities of the requested fields. Unlike {@link getIndexPatternMatches}, it does not tell
-   * which index pattern matched, which saves one request per including index pattern.
-   *
-   * The index patterns are sent in the given order, so Elasticsearch applies an excluding index pattern
-   * (starting with `-`) only to the index patterns listed before it, as it does when searching them.
-   * {@link getIndexPatternMatches} instead applies every excluding index pattern to every including one.
-   *
-   * @param options.indexPatterns - Index patterns to resolve (may include wildcards and excluded entries).
-   * @param options.fields - Fields to return capabilities for. Defaults to `_id` to keep the response small.
-   * @param options.includeUnmapped - Whether the capabilities list the indices where a field is unmapped.
-   * @param options.runtimeMappings - Runtime fields to take into account.
-   * @returns Resolves to {@link GetMatchedIndicesResult}, with no matched indices when nothing matches.
-   */
-  async getMatchedIndices(options: {
-    indexPatterns: string[];
-    fields?: string[];
-    includeUnmapped?: boolean;
-    runtimeMappings?: estypes.MappingRuntimeFields;
-  }): Promise<GetMatchedIndicesResult> {
-    const { indexPatterns, fields = ['_id'], includeUnmapped, runtimeMappings } = options;
-
-    // A request without including index patterns would resolve to every index
-    if (indexPatterns.every((indexPattern) => this.isExcludingIndexPattern(indexPattern))) {
-      return { matchedIndices: [], fields: {} };
-    }
-
-    const { body } = await callFieldCapsApi({
-      callCluster: this.elasticsearchClient,
-      indices: indexPatterns,
-      fields,
-      fieldCapsOptions: { allow_no_indices: true, include_unmapped: includeUnmapped },
-      expandWildcards: 'open',
-      runtimeMappings,
-    });
-
-    return { matchedIndices: castArray(body.indices), fields: body.fields };
   }
 
   /**
