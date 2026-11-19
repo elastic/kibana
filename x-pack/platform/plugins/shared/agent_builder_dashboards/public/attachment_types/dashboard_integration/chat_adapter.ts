@@ -30,10 +30,13 @@ import type { IdGenerator } from '..';
  * and not with how the chat publishes and stages them.
  */
 
+/** A dashboard attachment of the conversation at its latest version. */
+export type ConversationDashboardAttachment = DashboardAttachment & { version: number };
+
 export interface ConversationChange {
   conversationId: string | undefined;
   /** The conversation's dashboard attachments, each at its latest version. */
-  attachments: DashboardAttachment[];
+  attachments: ConversationDashboardAttachment[];
 }
 
 export interface ChatAdapter {
@@ -54,13 +57,15 @@ export interface ChatAdapter {
 
 const toDashboardAttachments = (
   conversation: ActiveConversation['conversation']
-): DashboardAttachment[] =>
+): ConversationDashboardAttachment[] =>
   (conversation?.attachments ?? [])
     .filter(isDashboardAttachment)
-    .flatMap((attachment): DashboardAttachment[] => {
+    .flatMap((attachment): ConversationDashboardAttachment[] => {
       const { id, type, origin } = attachment;
-      const latestVersionData = getLatestVersion(attachment)?.data;
-      return latestVersionData ? [{ id, type, origin, data: latestVersionData }] : [];
+      const latestVersion = getLatestVersion(attachment);
+      return latestVersion?.data
+        ? [{ id, type, origin, data: latestVersion.data, version: latestVersion.version }]
+        : [];
     });
 
 const isDashboardUpdatedUiEvent = (

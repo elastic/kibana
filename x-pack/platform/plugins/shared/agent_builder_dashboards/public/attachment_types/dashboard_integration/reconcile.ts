@@ -48,14 +48,14 @@ export const isAttachmentShownInDashboard = async ({
  * The attachment the open dashboard stands for: the one whose origin is the dashboard, which for an
  * unsaved dashboard is one without an origin.
  */
-export const findDashboardAttachment = ({
+export const findDashboardAttachment = <TAttachment extends DashboardAttachment>({
   attachments,
   dashboardId,
 }: {
-  attachments: DashboardAttachment[];
+  attachments: TAttachment[];
   /** The saved id of the dashboard, `undefined` for an unsaved one. */
   dashboardId: string | undefined;
-}): DashboardAttachment | undefined => attachments.find(({ origin }) => origin === dashboardId);
+}): TAttachment | undefined => attachments.find(({ origin }) => origin === dashboardId);
 
 /**
  * The id the chat input stages the open dashboard under: its attachment, or a new attachment when

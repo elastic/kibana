@@ -55,6 +55,12 @@ import type { IdGenerator } from '..';
 export const MANUAL_CHANGES_DEBOUNCE_MS =
   UNSAVED_CHANGES_DEBOUNCE + CHILDREN_UNSAVED_CHANGES_DEBOUNCE + 50;
 
+/** The conversation attachment version the open dashboard shows. */
+export interface ShownAttachmentVersion {
+  attachmentId: string;
+  version: number;
+}
+
 export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
@@ -64,6 +70,8 @@ export interface DashboardAppIntegrationParams {
   toasts: NotificationsStart['toasts'];
   draftAttachmentId: IdGenerator;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  /** Called with the attachment version the open dashboard shows, `undefined` when it shows none. */
+  setShownAttachmentVersion: (shown: ShownAttachmentVersion | undefined) => void;
   /**
    * Lookup for the framework-provided `updateOrigin` callback bound to a specific
    * attachment id. Returns `undefined` when the attachment has not been rendered yet
@@ -92,10 +100,12 @@ export const registerDashboardAppIntegration = ({
   toasts,
   draftAttachmentId,
   checkSavedDashboardExist,
+  setShownAttachmentVersion,
   getUpdateOrigin,
 }: DashboardAppIntegrationParams): (() => void) => {
   const chat = createChatAdapter({ agentBuilder, draftAttachmentId, getUpdateOrigin });
-  let attachments: DashboardAttachment[] | undefined;
+  // agent updates carry no version until the conversation that has them is published
+  let attachments: Array<DashboardAttachment & { version?: number }> | undefined;
   let conversationId: string | undefined;
   // Attachments staged from this dashboard without an origin, because agent changes to a dashboard
   // the user can't edit open in a new dashboard, which the origin then follows on save. One per
@@ -116,19 +126,24 @@ export const registerDashboardAppIntegration = ({
       isNewConversation: !conversationId,
       draftAttachmentId: draftAttachmentId.current,
     });
+    const { attributes: dashboardState } = api.getSerializedState();
+    const isShown = dashboardAttachment
+      ? await isAttachmentShownInDashboard({
+          areEqual,
+          dashboardState,
+          data: dashboardAttachment.data,
+        })
+      : false;
+    setShownAttachmentVersion(
+      isShown && dashboardAttachment?.version !== undefined
+        ? { attachmentId: dashboardAttachment.id, version: dashboardAttachment.version }
+        : undefined
+    );
     if (!attachmentId) {
       return;
     }
-    const { attributes: dashboardState } = api.getSerializedState();
     // the conversation already has what the dashboard shows, e.g. the agent's applied changes
-    if (
-      dashboardAttachment &&
-      (await isAttachmentShownInDashboard({
-        areEqual,
-        dashboardState,
-        data: dashboardAttachment.data,
-      }))
-    ) {
+    if (isShown) {
       chat.unstage(attachmentId);
       return;
     }
@@ -262,6 +277,7 @@ export const registerDashboardAppIntegration = ({
   return () => {
     integrationSubscription.unsubscribe();
     originSyncSubscription.unsubscribe();
+    setShownAttachmentVersion(undefined);
     otherDashboardUpdateNotifier.removeAll();
   };
 };

@@ -137,6 +137,7 @@ describe('registerDashboardAppIntegration', () => {
   let getUpdateOrigin: jest.Mock;
   let checkSavedDashboardExist: jest.Mock;
   let areEqual: jest.Mock;
+  let setShownAttachmentVersion: jest.Mock;
   let draftAttachmentId: IdGenerator;
   let emitConversationChange: (change: {
     id?: string;
@@ -169,6 +170,7 @@ describe('registerDashboardAppIntegration', () => {
     );
     checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
     areEqual = jest.fn().mockResolvedValue(false);
+    setShownAttachmentVersion = jest.fn();
     let currentDraftAttachmentId = 'draft-attachment-id-1';
     draftAttachmentId = {
       get current() {
@@ -226,6 +228,7 @@ describe('registerDashboardAppIntegration', () => {
       toasts,
       draftAttachmentId,
       checkSavedDashboardExist,
+      setShownAttachmentVersion,
       getUpdateOrigin,
     });
   };
@@ -643,6 +646,10 @@ describe('registerDashboardAppIntegration', () => {
     await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(removeAttachment).toHaveBeenCalledWith('dashboard-attachment-id');
+    expect(setShownAttachmentVersion).toHaveBeenLastCalledWith({
+      attachmentId: 'dashboard-attachment-id',
+      version: 1,
+    });
   });
 
   it('keeps the staged dashboard in the chat input when the user leaves the dashboard', () => {
