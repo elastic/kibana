@@ -10,7 +10,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toStoredQuery } from '@kbn/as-code-shared-transforms';
@@ -112,11 +111,7 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
       }
     />
   ) : (
-    <div
-      css={css`
-        overflow: scroll;
-      `}
-    >
+    <>
       {Object.values(searchBarVisibilityProps).some((visible) => visible) && (
         <unifiedSearchService.ui.SearchBar
           appName={DASHBOARD_APP_ID}
@@ -130,6 +125,6 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
         />
       )}
       <PreviewRenderer initialState={initialState.current} onApiAvailable={setDashboardApi} />
-    </div>
+    </>
   );
 };

@@ -12,7 +12,7 @@ import {
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { rememberClassicTabOrigin } from '../../hooks/use_streams_home_link';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
@@ -22,7 +22,6 @@ import type { StreamsAppServices } from '../../services/types';
 import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
 import { DateRangeRedirect } from '../date_range_redirect';
 import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
-import { CLASSIC_TAB_QUERY_KEY } from '../streams_layout/use_show_classic_tab';
 
 const queryClient = new QueryClient();
 
@@ -40,15 +39,8 @@ export function AppRoot({
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
-  // Leaving Streams resets the stream check and the Classic tab origin. On unmount, not mount:
-  // a mount effect runs after the routes have already started the check.
-  useEffect(
-    () => () => {
-      queryClient.removeQueries({ queryKey: CLASSIC_TAB_QUERY_KEY });
-      rememberClassicTabOrigin();
-    },
-    []
-  );
+  // Leaving Streams resets the Classic tab origin.
+  useEffect(() => () => rememberClassicTabOrigin(), []);
 
   const context = {
     appParams: appMountParameters,

@@ -57,20 +57,20 @@ export function DynamicColorForm({
       type,
     };
     if (type === COLOR_MAP_TYPE.ORDINAL) {
-      newColorOptions.useCustomColorRamp = useCustomColorMap;
+      newColorOptions.use_custom_color_ramp = useCustomColorMap;
       if (customColorMap) {
-        newColorOptions.customColorRamp = customColorMap as OrdinalColorStop[];
+        newColorOptions.custom_color_ramp = customColorMap as OrdinalColorStop[];
       }
       if (color) {
         newColorOptions.color = color;
       }
     } else {
-      newColorOptions.useCustomColorPalette = useCustomColorMap;
+      newColorOptions.use_custom_color_palette = useCustomColorMap;
       if (customColorMap) {
-        newColorOptions.customColorPalette = customColorMap as CategoryColorStop[];
+        newColorOptions.custom_color_palette = customColorMap as CategoryColorStop[];
       }
       if (color) {
-        newColorOptions.colorCategory = color;
+        newColorOptions.color_category = color;
       }
     }
 
@@ -104,7 +104,7 @@ export function DynamicColorForm({
   const onOtherCategoryColorChange = (color: string) => {
     onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
-      otherCategoryColor: color,
+      other_category_color: color,
     });
   };
 
@@ -143,14 +143,14 @@ export function DynamicColorForm({
           onColorMapTypeChange={onColorMapTypeChange}
           colorMapType={COLOR_MAP_TYPE.ORDINAL}
           colorPaletteId={styleOptions.color}
-          customColorMap={styleOptions.customColorRamp}
-          useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
+          customColorMap={styleOptions.custom_color_ramp}
+          useCustomColorMap={_.get(styleOptions, 'use_custom_color_ramp', false)}
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
           swatches={swatches}
           invert={invert}
         />
-        {!!styleOptions.useCustomColorRamp ? null : (
+        {!!styleOptions.use_custom_color_ramp ? null : (
           <EuiFormRow display="columnCompressed">
             <EuiSwitch
               label={i18n.translate('xpack.maps.style.revereseColorsLabel', {
@@ -170,9 +170,9 @@ export function DynamicColorForm({
           onColorMapTypeChange={onColorMapTypeChange}
           onChange={onColorMapSelect}
           colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
-          colorPaletteId={styleOptions.colorCategory}
-          customColorMap={styleOptions.customColorPalette}
-          useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
+          colorPaletteId={styleOptions.color_category}
+          customColorMap={styleOptions.custom_color_palette}
+          useCustomColorMap={_.get(styleOptions, 'use_custom_color_palette', false)}
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
           swatches={swatches}
@@ -180,7 +180,7 @@ export function DynamicColorForm({
         />
         <OtherCategoryColorPicker
           onChange={onOtherCategoryColorChange}
-          color={styleOptions.otherCategoryColor}
+          color={styleOptions.other_category_color}
         />
       </>
     );

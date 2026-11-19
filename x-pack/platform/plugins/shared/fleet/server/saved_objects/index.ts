@@ -70,9 +70,13 @@ import {
   ProvisioningCallbackSchemaV1,
   CloudOnboardingDeploymentSchemaV7,
   CloudOnboardingDeploymentSchemaV8,
+  CloudOnboardingDeploymentSchemaV9,
 } from '../types';
 
-import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
+import {
+  downloadSourceSchemaV2,
+  downloadSourceSchemaV3,
+} from '../../common/types/models/download_source_schema';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
@@ -1920,6 +1924,13 @@ export const getSavedObjectTypes = (
             create: downloadSourceSchemaV2,
           },
         },
+        '3': {
+          changes: [],
+          schemas: {
+            forwardCompatibility: downloadSourceSchemaV3,
+            create: downloadSourceSchemaV3,
+          },
+        },
       },
     },
     [FLEET_SERVER_HOST_SAVED_OBJECT_TYPE]: {
@@ -2300,6 +2311,18 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV8,
+          },
+        },
+        9: {
+          // policySettings values may also be string arrays (additional_datastreams_permissions).
+          // No mappings_addition — policySettings is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV9.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV9,
           },
         },
       },

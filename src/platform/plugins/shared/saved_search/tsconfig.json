@@ -28,13 +28,13 @@
     "@kbn/search-types",
     "@kbn/unified-data-table",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/core-http-browser-internal",
     "@kbn/core-http-browser",
     "@kbn/discover-utils",
-    "@kbn/core-saved-objects-base-server-internal",
     "@kbn/logging-mocks",
     "@kbn/discover-session-constants",
     "@kbn/esql-language",
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }

@@ -136,23 +136,50 @@ export interface IDslSearchParams extends BaseSearchParams {
  */
 export type IDslSearchOptions = IBaseSearchOptions;
 
-export type IDslPaginatedSearchParams = IDslSearchParams & Required<Pick<IDslSearchParams, 'sort'>>;
+type IDslPaginatedBaseSearchParams = IDslSearchParams & Required<Pick<IDslSearchParams, 'sort'>>;
+
+/**
+ * Parameters for a paginated DSL search whose response counts the total hits, which is how
+ * `hasNextPage` knows whether more pages exist
+ */
+export type IDslPaginatedSearchParams = IDslPaginatedBaseSearchParams & {
+  trackTotalHits?: true;
+};
+
+/**
+ * Parameters for a paginated DSL search that opts out of counting total hits, so the request can
+ * run in parallel with whatever request provides the total. `hasNextPage` then needs that total.
+ */
+export type IDslUntrackedPaginatedSearchParams = IDslPaginatedBaseSearchParams & {
+  trackTotalHits: false;
+};
 
 export type IDslPaginatedSearchOptions = IBaseSearchOptions;
 
 /**
- * Pagination helpers for DSL search results
+ * Pagination helpers for DSL search results.
+ * `TTotalHitsRequired` is true when the search did not count total hits.
  */
-export interface IDslPagination {
+export interface IDslPagination<TTotalHitsRequired extends boolean = false> {
   /**
-   * Whether more results are available
+   * Whether more results are available. When the search did not count total hits, the caller
+   * supplies the total.
    */
-  hasNextPage: boolean;
+  hasNextPage: (
+    ...args: TTotalHitsRequired extends true ? [totalHits: number] : [totalHits?: number]
+  ) => boolean;
 
   /**
    * Fetch the next page of results using search_after
    */
-  nextPage: () => Promise<IDslPaginatedSearchResult | null>;
+  nextPage: (options?: {
+    abortSignal?: AbortSignal;
+    executionContext?: KibanaExecutionContext;
+    /** Override the inspector title for this pagination request */
+    inspectorTitle?: string;
+    /** Override the inspector description for this pagination request */
+    inspectorDescription?: string;
+  }) => Promise<IDslPaginatedSearchResult<TTotalHitsRequired> | null>;
 }
 
 /**
@@ -168,7 +195,7 @@ export interface IDslSearchResult {
 /**
  * Result from a paginated DSL search
  */
-export interface IDslPaginatedSearchResult {
+export interface IDslPaginatedSearchResult<TTotalHitsRequired extends boolean = false> {
   /**
    * Raw Elasticsearch search response
    */
@@ -176,7 +203,7 @@ export interface IDslPaginatedSearchResult {
   /**
    * Pagination helpers for navigating through result pages
    */
-  pagination: IDslPagination;
+  pagination: IDslPagination<TTotalHitsRequired>;
 }
 
 // ============================================================================
@@ -460,10 +487,16 @@ export interface ISearchMethods {
   /**
    * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
-  dslPaginated: (
-    params: IDslPaginatedSearchParams,
-    options?: IDslPaginatedSearchOptions
-  ) => Promise<IDslPaginatedSearchResult>;
+  dslPaginated: {
+    (
+      params: IDslPaginatedSearchParams,
+      options?: IDslPaginatedSearchOptions
+    ): Promise<IDslPaginatedSearchResult>;
+    /** Opts out of counting total hits, so `hasNextPage` needs the total from the caller */
+    (params: IDslUntrackedPaginatedSearchParams, options?: IDslPaginatedSearchOptions): Promise<
+      IDslPaginatedSearchResult<true>
+    >;
+  };
 
   /**
    * Execute an EQL (Event Query Language) search
