@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { fetchEsqlData, type EsqlDataResult } from './fetch_esql_data';
 import { fetchEsqlDatasets } from './fetch_esql_datasets';
@@ -14,7 +14,7 @@ import { fetchEsqlDatasets } from './fetch_esql_datasets';
 jest.mock('./fetch_esql_data');
 
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
-const search = jest.fn() as unknown as ISearchGeneric;
+const search = { esql: jest.fn() } as unknown as Pick<ISearchMethods, 'esql'>;
 const http = {} as HttpStart;
 const columns = [{ name: 'n', type: 'long' }];
 

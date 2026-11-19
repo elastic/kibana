@@ -54,7 +54,7 @@ export const mountManagementSection = (
         previewDependencies={{
           dataViews: data.dataViews,
           http: coreStart.http,
-          search: data.search.search,
+          search: data.search,
         }}
         telemetryClient={telemetryClient}
         toasts={coreStart.notifications.toasts}

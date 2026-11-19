@@ -506,11 +506,22 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
  *
  * **Backward compat only** — unnecessary for new integrations, which have no saved queries
  * predating the `??` syntax (https://github.com/elastic/elasticsearch/pull/122459).
+ *
+ * TODO: remove this function (and its callers) in the next major release, when saved queries
+ * that predate the `??` syntax are no longer supported.
  */
 export const fixESQLQueryWithVariables = (
   queryString: string,
   esqlVariables?: ESQLControlVariable[]
 ) => {
+  // Only FIELDS and FUNCTIONS variables are ever rewritten, so skip parsing the query otherwise
+  const hasIdentifierTypeVariables = esqlVariables?.some(
+    ({ type }) => type === ESQLVariableType.FIELDS || type === ESQLVariableType.FUNCTIONS
+  );
+  if (!hasIdentifierTypeVariables) {
+    return queryString;
+  }
+
   const currentVariables = getESQLQueryVariables(queryString);
   if (!currentVariables.length) {
     return queryString;

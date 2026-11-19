@@ -83,12 +83,10 @@ export { castESQLValue } from './utils/cast_esql_value';
 export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
-  getESQLResults,
   formatESQLColumns,
   getStartEndParams,
   hasStartEndParams,
   getNamedParams,
-  getEsqlSearchParams,
 } from './utils/run_query';
 export {
   hasGeotilePrecisionParam,

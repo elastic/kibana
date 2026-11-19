@@ -141,7 +141,7 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
       );
       const createESQLControlAction = new CreateESQLControlAction(
         core,
-        data.search.search,
+        data.search,
         data.query.timefilter.timefilter
       );
       return createESQLControlAction;

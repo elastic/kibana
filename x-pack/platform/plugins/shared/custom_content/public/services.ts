@@ -6,13 +6,13 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 interface Services {
   core: CoreStart;
-  search: ISearchGeneric;
+  search: Pick<ISearchMethods, 'esql'>;
   dataViews: DataViewsPublicPluginStart;
   agentBuilder: AgentBuilderPluginStart | undefined;
 }
@@ -21,7 +21,7 @@ let services: Services | undefined;
 
 export const setServices = (
   core: CoreStart,
-  search: ISearchGeneric,
+  search: Pick<ISearchMethods, 'esql'>,
   dataViews: DataViewsPublicPluginStart,
   agentBuilder: AgentBuilderPluginStart | undefined
 ) => {

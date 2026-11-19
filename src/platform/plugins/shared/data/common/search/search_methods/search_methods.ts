@@ -9,6 +9,7 @@
 
 import { lastValueFrom, takeWhile } from 'rxjs';
 import { castArray } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import {
   buildEsQuery,
   getTimeZoneFromSettings,
@@ -50,7 +51,11 @@ import type {
   SQL_SEARCH_STRATEGY,
 } from '..';
 import { getTime } from '../../query';
-import { mapEsqlResponseToDatatable, formatAndRethrowEsqlError } from './datatable_mapper';
+import {
+  mapEsqlResponseToDatatable,
+  formatAndRethrowEsqlError,
+  getInspectorErrorJson,
+} from './datatable_mapper';
 import {
   getDslRequestInspectorStats,
   getDslResponseInspectorStats,
@@ -71,6 +76,13 @@ export interface SearchMethodsServiceDependencies {
    * Resolves the locale sent with ES|QL requests when the caller does not provide one
    */
   getLocale?: () => string;
+  /**
+   * Resolves the project routing a request is actually sent with, given the caller's override.
+   * Used to log the effective routing to Inspector. Omit where cross-project search doesn't apply.
+   */
+  getProjectRouting?: (
+    override: IEsqlSearchParams['projectRouting']
+  ) => IEsqlSearchParams['projectRouting'];
 }
 
 /**
@@ -99,24 +111,61 @@ export class SearchMethodsService implements ISearchMethods {
       'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY
     );
 
-    const requestResponder = this.startInspectorRequest(options);
+    // A request that was aborted while its context was being resolved (e.g. superseded by a newer one,
+    // which already reset the adapter) must not log a stale entry.
+    // A caller-provided id lets a new request replace the previous one with that id in the adapter.
+    const requestId = options?.inspector?.id ?? uuidv4();
+    const requestResponder = options?.abortSignal?.aborted
+      ? undefined
+      : options?.inspector?.adapter.start(options.inspector.title, {
+          description: options.inspector.description,
+          id: requestId,
+        });
 
+    // A request that failed because it was aborted on purpose (e.g. superseded, or ended along with
+    // a sibling) is not worth showing in Inspector, so its entry is removed rather than left PENDING.
+    const dropEntryIfAborted = (): boolean => {
+      if (!options?.abortSignal?.aborted) return false;
+      if (requestResponder) options?.inspector?.adapter.resetRequest(requestId);
+      return true;
+    };
+
+    // The search interceptor falls back to the default routing when the caller gives none, so
+    // log the routing the request is sent with rather than only the caller's override.
+    const projectRouting =
+      this.deps.getProjectRouting?.(params.projectRouting) ?? params.projectRouting;
     requestResponder?.json({
       ...((request.params ?? {}) as Record<string, unknown>),
       ...(params.approximation !== undefined && { approximation: params.approximation }),
+      ...(projectRouting !== undefined && { project_routing: projectRouting }),
     });
 
     try {
       const response = await this.executeSearch(request, searchOptions);
 
-      requestResponder?.stats(getEsqlInspectorStats(response.rawResponse));
+      // `rawResponse.values` is always an array from here on. Elasticsearch can answer 200 with an
+      // `{ error }` body that has no `values`, but the search interceptor rejects any body with an
+      // `error` key (as an error carrying `attributes`) before it resolves, so such a body lands in
+      // the catch below and never reaches the stats or the normalization.
+
+      // An all-empty `values` (e.g. every column dropped) is reported as no rows
+      const rawResponse: IEsqlSearchResult['rawResponse'] = response.rawResponse.values?.every(
+        (row: unknown) => Array.isArray(row) && row.length === 0
+      )
+        ? { ...response.rawResponse, values: [] }
+        : response.rawResponse;
+
+      // A response that resolves after an abort is a partial result the user asked for (cancel),
+      // and callers read its warnings and cluster details from this entry, so it is always logged.
+      // Stats use the normalized rows so Inspector agrees with what the caller receives
+      requestResponder?.stats(getEsqlInspectorStats(rawResponse));
       requestResponder?.ok({
         json: { rawResponse: response.rawResponse },
         requestParams: response.requestParams,
       });
 
       const datatable = options?.includeDataTable
-        ? mapEsqlResponseToDatatable(response.rawResponse as any, {
+        ? mapEsqlResponseToDatatable(rawResponse, {
             query: params.query,
             timeRange: params.kibanaQueryContext?.timeRange,
             esqlVariables: params.kibanaQueryContext?.esqlVariables,
@@ -125,14 +174,16 @@ export class SearchMethodsService implements ISearchMethods {
         : undefined;
 
       return {
-        rawResponse: response.rawResponse,
+        rawResponse,
         warning: response.warning,
         datatable,
       };
     } catch (error) {
-      requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
-      });
+      if (!dropEntryIfAborted()) {
+        requestResponder?.error({
+          json: getInspectorErrorJson(error),
+        });
+      }
       return formatAndRethrowEsqlError(error);
     }
   }
@@ -224,7 +275,7 @@ export class SearchMethodsService implements ISearchMethods {
       };
     } catch (error) {
       requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
+        json: getInspectorErrorJson(error),
       });
       throw error;
     }
@@ -259,7 +310,7 @@ export class SearchMethodsService implements ISearchMethods {
       };
     } catch (error) {
       requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
+        json: getInspectorErrorJson(error),
       });
       throw error;
     }
@@ -520,6 +571,7 @@ export class SearchMethodsService implements ISearchMethods {
     // this is for backward compatibility, if the query is of fields or functions type
     // and the query is not set with ?? in the query, we should set it
     // https://github.com/elastic/elasticsearch/pull/122459
+    // TODO: remove with fixESQLQueryWithVariables in the next major release
     const esqlQuery = fixESQLQueryWithVariables(params.query, esqlVariables);
 
     const timeFilter = timeRange && getTime(undefined, timeRange, { fieldName: timeField });

@@ -6,17 +6,15 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { getESQLResults } from '@kbn/esql-utils';
 import { createReactQueryWrapper } from '../../../../../../../common/mock/create_react_query_wrapper';
 import { usePrivilegedAccessDetectionAnomaliesQuery } from './pad_query_hooks';
 
 jest.mock('@kbn/esql-utils', () => ({
-  getESQLResults: jest.fn(),
   prettifyQuery: jest.fn((query) => query),
 }));
 
 jest.mock('../../../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { data: { search: { search: jest.fn() } } } }),
+  useKibana: () => ({ services: { data: { search: { esql: mockEsql } } } }),
 }));
 
 jest.mock('../../../../../../../common/hooks/esql/use_esql_global_filter', () => ({
@@ -32,7 +30,7 @@ jest.mock('./pad_esql_source_query_hooks', () => ({
   usePadAnomalyDataEsqlSource: () => 'FROM anomaly-data',
 }));
 
-const mockGetESQLResults = getESQLResults as jest.Mock;
+const mockEsql = jest.fn();
 
 const pumContext = (id: string) => ({
   child: { type: 'security_solution', name: 'entity_analytics:privileged_user_monitoring', id },
@@ -41,8 +39,8 @@ const pumContext = (id: string) => ({
 describe('usePrivilegedAccessDetectionAnomaliesQuery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetESQLResults.mockResolvedValue({
-      response: {
+    mockEsql.mockResolvedValue({
+      rawResponse: {
         columns: [{ name: 'user.name', type: 'keyword' }],
         values: [['alice']],
       },
@@ -60,19 +58,15 @@ describe('usePrivilegedAccessDetectionAnomaliesQuery', () => {
       { wrapper: createReactQueryWrapper() }
     );
 
-    await waitFor(() => expect(mockGetESQLResults).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(mockEsql).toHaveBeenCalledTimes(2));
 
-    expect(mockGetESQLResults).toHaveBeenCalledWith(
-      expect.objectContaining({
-        esqlQuery: 'FROM top-users',
-        executionContext: pumContext('pad_chart_top_users'),
-      })
+    expect(mockEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM top-users' }),
+      expect.objectContaining({ executionContext: pumContext('pad_chart_top_users') })
     );
-    expect(mockGetESQLResults).toHaveBeenCalledWith(
-      expect.objectContaining({
-        esqlQuery: 'FROM anomaly-data',
-        executionContext: pumContext('pad_chart_anomalies'),
-      })
+    expect(mockEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM anomaly-data' }),
+      expect.objectContaining({ executionContext: pumContext('pad_chart_anomalies') })
     );
   });
 });
