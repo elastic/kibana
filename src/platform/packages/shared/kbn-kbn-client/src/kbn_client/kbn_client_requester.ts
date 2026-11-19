@@ -123,6 +123,7 @@ interface Options {
 // streaming a large multipart upload), and the previous axios-based requester
 // had no equivalent socket-connect cutoff. Restore that headroom.
 const FETCH_CONNECT_TIMEOUT_MS = 60_000;
+const FETCH_HEADERS_TIMEOUT_MS = 15 * 60_000;
 
 export class KbnClientRequester {
   // `url` retains any `user:pass@` from the original config - `resolveUrl()` is
@@ -149,16 +150,20 @@ export class KbnClientRequester {
     }
     this.urlForFetch = parsed.toString();
 
-    this.dispatcher =
-      parsed.protocol === 'https:'
-        ? new Agent({
-            connect: {
+    // Experiment: undici's default headers timeout is 5 minutes, which cuts off long
+    // non-streaming calls such as Agent Builder `converse` before the server replies.
+    this.dispatcher = new Agent({
+      headersTimeout: FETCH_HEADERS_TIMEOUT_MS,
+      bodyTimeout: FETCH_HEADERS_TIMEOUT_MS,
+      connect:
+        parsed.protocol === 'https:'
+          ? {
               ca: options.certificateAuthorities,
               rejectUnauthorized: false,
               timeout: FETCH_CONNECT_TIMEOUT_MS,
-            },
-          })
-        : null;
+            }
+          : { timeout: FETCH_CONNECT_TIMEOUT_MS },
+    });
   }
 
   public resolveUrl(relativeUrl = '/') {

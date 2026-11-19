@@ -55,12 +55,12 @@ describe('createInferenceEndpointExecutor', () => {
       {
         method: 'POST',
         path: `/_inference/chat_completion/${inferenceId}/_stream`,
-        querystring: { timeout: '3m' },
+        querystring: { timeout: '15m' },
         body,
       },
       {
         asStream: true,
-        requestTimeout: 180_000,
+        requestTimeout: 900_000,
         headers: { 'X-Elastic-Product-Use-Case': 'inference', 'accept-encoding': 'identity' },
       }
     );
@@ -173,14 +173,14 @@ describe('createInferenceEndpointExecutor', () => {
     );
   });
 
-  it('sets the inference timeout to 3m when no timeout is provided', async () => {
+  it('sets the inference timeout to 15m when no timeout is provided', async () => {
     const stream = new PassThrough();
     mockTransportRequest.mockResolvedValue(stream);
 
     await executor.invoke({ body: {} });
 
     expect(mockTransportRequest).toHaveBeenCalledWith(
-      expect.objectContaining({ querystring: { timeout: '3m' } }),
+      expect.objectContaining({ querystring: { timeout: '15m' } }),
       expect.anything()
     );
   });
@@ -255,7 +255,7 @@ describe('createInferenceEndpointExecutor', () => {
 
     expect(mockTransportRequest).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ requestTimeout: 180_000 })
+      expect.objectContaining({ requestTimeout: 900_000 })
     );
   });
 

@@ -9,7 +9,7 @@ import type { ElasticModelDictionary } from './types';
 import { elasticModelIds } from './inference_endpoints';
 
 /** Caps hung inference streams so Kibana terminates them with a typed error. */
-export const MAX_STREAM_DURATION_MS = 5 * 60 * 1000;
+export const MAX_STREAM_DURATION_MS = 15 * 60 * 1000;
 
 export const elasticModelDictionary: ElasticModelDictionary = {
   [elasticModelIds.RainbowSprinkles]: {

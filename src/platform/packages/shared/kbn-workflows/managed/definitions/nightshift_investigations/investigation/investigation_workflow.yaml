@@ -182,7 +182,7 @@ steps:
     aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
-    timeout: 1800s
+    timeout: 3300s
     with:
       # The agent records its findings on the investigation with its tools, so the step has no
       # output schema.
