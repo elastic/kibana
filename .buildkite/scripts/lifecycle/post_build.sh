@@ -34,7 +34,7 @@ if [[ "${GITHUB_PR_NUMBER:-}" ]]; then
   fi
 fi
 
-if [[ "${REPORT_FAILED_TESTS_TO_GITHUB:-}" == "true" ]]; then
+if [[ "${REPORT_FAILED_TESTS_TO_GITHUB:-}" == "true" ]] && [[ "$(buildkite-agent meta-data keys)" == *_github_test_reporting* ]]; then
   echo "--- Bootstrap Kibana"
   export KBN_BOOTSTRAP_NO_PREBUILT=true
   .buildkite/scripts/bootstrap.sh

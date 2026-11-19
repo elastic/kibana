@@ -52,7 +52,9 @@ naming the test, as nothing else would post its breaks. The count is kept in the
 
 Test jobs run with `--no-github-update`. When `REPORT_FAILED_TESTS_TO_GITHUB` is enabled, Post-Build
 downloads their reports and files GitHub issues. Retries of a step are reported together, and
-Post-Build fails without reporting when more than 50 tests failed.
+Post-Build fails without reporting when more than 50 tests failed. Post-Build passes
+`--report-job-metadata` so each report's issue and annotation links point to its originating
+job, even when a later retry passes.
 
 ## `node scripts/report_flaky_test_issues`
 

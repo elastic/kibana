@@ -9,22 +9,7 @@
 
 import { TestFailures } from '#pipeline-utils';
 
-(async () => {
-  try {
-    await TestFailures.reportFailedTestIssues();
-  } catch (ex) {
-    console.error(
-      'Report failed test issues error',
-      ex.message,
-      ex?.stack || 'no stacktrace information'
-    );
-    if (ex.response) {
-      const requestUrl = ex.response?.url || ex.response?.config?.url || '';
-      console.error(
-        `HTTP Error ${ex.response.status}/${ex.response.statusText} (${requestUrl})`,
-        ex.response.data
-      );
-    }
-    process.exit(1);
-  }
-})();
+TestFailures.reportFailedTestIssues().catch((error) => {
+  console.error('Report failed test issues error', error);
+  process.exit(1);
+});

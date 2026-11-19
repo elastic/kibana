@@ -72,15 +72,20 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
       if [[ -n "${BUILDKITE_STEP_KEY:-}" ]]; then
         SCOUT_FAILURE_COUNT=$(buildkite-agent meta-data get "${BUILDKITE_STEP_KEY}_scout_failure_count" --default "0" 2>/dev/null || echo 0)
       fi
-      if [[ "${REPORT_FAILED_TESTS_TO_GITHUB:-}" == "true" ]]; then
-        buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_github_test_reporting" "$(jq -cn \
-          --argjson scout "$([[ "$SCOUT_FAILURE_COUNT" -ge 2 ]] && echo true || echo false)" \
-          --arg label "${BUILDKITE_LABEL:-}" \
-          '{scout: $scout, label: $label}')"
-      fi
       echo "--- Run Failed Test Reporter (Scout, failure_count=$SCOUT_FAILURE_COUNT)"
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" --no-github-update \
         '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
+
+      # Post-Build files the GitHub issues from what this job reports here.
+      if [[ "${REPORT_FAILED_TESTS_TO_GITHUB:-}" == "true" ]]; then
+        HAS_JUNIT=$([[ -n "$(find target/junit -name '*.xml' -print -quit 2>/dev/null)" ]] && echo true || echo false)
+        HAS_SCOUT=$([[ "$SCOUT_FAILURE_COUNT" -ge 2 ]] && compgen -G '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson' > /dev/null && echo true || echo false)
+        if [[ "$HAS_JUNIT" == "true" || "$HAS_SCOUT" == "true" ]]; then
+          buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_github_test_reporting" \
+            "{\"junit\":$HAS_JUNIT,\"scout\":$HAS_SCOUT,\"failures\":$(find target/test_failures -name '*.json' 2>/dev/null | wc -l)}" \
+            || echo "Failed to record GitHub reporting metadata"
+        fi
+      fi
     fi
   fi
 
