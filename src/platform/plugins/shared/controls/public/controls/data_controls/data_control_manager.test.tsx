@@ -375,16 +375,42 @@ describe('initializeDataControlManager', () => {
     });
 
     it('is the query of the user, never a generated one, when the values come from a query', async () => {
-      (getDataViewIdFromESQLQuery as jest.Mock).mockResolvedValueOnce('esqlDatasetId');
-      const manager = await initializeManager({
+      // A saved control has the query and no data view or field: they are derived from the query
+      (getDataViewIdFromESQLQuery as jest.Mock).mockResolvedValue('esqlDatasetId');
+      mockGetESQLSingleColumnValues.mockResolvedValue({
+        values: [],
+        column: { name: 'myFieldName', type: 'keyword' },
+        indexPattern: 'logs-*',
+      });
+      const {
+        data_view_id: _dataViewId,
+        field_name: _fieldName,
+        ...serializedState
+      } = {
+        ...dataControlState,
         values_source: ControlValuesSource.ESQL,
-        esql_query: 'FROM logs-* | STATS BY host',
-      });
+        esql_query: 'FROM logs-* | STATS BY myFieldName',
+      };
 
-      expect(await planOf(manager)).toEqual({
-        fetchMode: 'esql',
-        query: 'FROM logs-* | STATS BY host',
-      });
+      try {
+        const manager = await initializeDataControlManager({
+          controlId: 'myControlId',
+          controlType: 'myControlType',
+          state: serializedState,
+          editorStateManager: initializeStateManager({}, {}),
+          parentApi: {},
+          typeDisplayName: 'My Control Type',
+        });
+
+        expect(await planOf(manager)).toEqual({
+          fetchMode: 'esql',
+          query: 'FROM logs-* | STATS BY myFieldName',
+        });
+        expect(manager.api.dataSources$.value?.[0].id).toBe('esqlDatasetId');
+        expect(manager.api.blockingError$.value).toBeUndefined();
+      } finally {
+        (getDataViewIdFromESQLQuery as jest.Mock).mockResolvedValue('myDataViewId');
+      }
     });
 
     it('is not known while the data source cannot be loaded', async () => {

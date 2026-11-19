@@ -108,7 +108,7 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     subscription.unsubscribe();
   }, 10000);
 
-  it('does not fetch until the fetch plan is known', async () => {
+  it('waits for the fetch plan, and fetches with its query when it is published', async () => {
     const api = buildApi({
       filters$: new BehaviorSubject<unknown>([]),
       parentQuery$: new BehaviorSubject<unknown>(undefined),
@@ -130,6 +130,15 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
 
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(emitted).toEqual([{ suggestions: [], totalCardinality: 0, isPartial: false }]);
+
+    api.valuesSourceFetchPlan$.next({ fetchMode: 'esql', query: 'FROM logs-*\n| STATS BY host' });
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).toMatchObject({
+      kind: 'esql',
+      esql: 'FROM logs-*\n| STATS BY host',
+    });
     subscription.unsubscribe();
   }, 10000);
 

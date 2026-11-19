@@ -60,20 +60,22 @@ describe('minMax$ with an ES|QL fetch plan', () => {
     dataViewsService.get = jest.fn();
   });
 
-  it('takes the bounds from the values of the query of the plan, with no data view', async () => {
+  it('takes the bounds from the values of the query of the plan, unchanged, with no data view', async () => {
     mockGetESQLSingleColumnValues.mockResolvedValue({
       values: [40, 5, 90],
       column,
       indexPattern: 'logs-*',
     });
 
-    expect(await run({ fetchMode: 'esql', query: 'FROM logs-*\n| STATS BY bytes' })).toEqual({
+    expect(
+      await run({ fetchMode: 'esql', query: 'FROM logs-* | STATS BY bytes | LIMIT 5' })
+    ).toEqual({
       min: 5,
       max: 90,
     });
     expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: 'FROM logs-*\n| STATS BY bytes',
+        query: 'FROM logs-* | STATS BY bytes | LIMIT 5',
         signal: expect.any(AbortSignal),
       })
     );

@@ -10,7 +10,11 @@
 import type { Filter } from '@kbn/es-query';
 import type { FilterableSource } from '@kbn/data-source';
 import { dataViewsService } from '../../../services/kibana_services';
-import { hasNoEsqlResults } from './has_no_results';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import type { FetchContext } from '@kbn/presentation-publishing';
+import type { ValuesSourceFetchPlan } from '../types';
+import type { DataControlStateManager } from '../data_control_manager';
+import { hasNoEsqlResults, hasNoResults$ } from './has_no_results';
 
 const mockGetESQLSingleColumnValues = jest.fn();
 jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
@@ -102,5 +106,38 @@ describe('hasNoEsqlResults', () => {
     mockGetESQLSingleColumnValues.mockResolvedValue({ errors: [error] });
 
     await expect(hasNoEsqlResults(request())).rejects.toBe(error);
+  });
+
+  describe('hasNoResults$', () => {
+    const run = (plan: ValuesSourceFetchPlan) =>
+      firstValueFrom(
+        hasNoResults$({
+          api: {
+            appliedFilters$: new BehaviorSubject<Filter[] | undefined>([rangeFilter]),
+            useGlobalFilters$: new BehaviorSubject<boolean | undefined>(true),
+            ignoreValidations$: new BehaviorSubject<boolean | undefined>(false),
+            valuesSourceFetchPlan$: new BehaviorSubject<ValuesSourceFetchPlan | undefined>(plan),
+            dataSources$: new BehaviorSubject<FilterableSource[] | undefined>([esqlSource]),
+          } as unknown as DataControlStateManager['api'],
+          controlFetch$: of({} as FetchContext),
+          setIsLoading: jest.fn(),
+        }).hasNoResults$
+      );
+
+    it('flags an empty range with the ES|QL query of an ES|QL plan, and not as DSL on a data view', async () => {
+      mockGetESQLSingleColumnValues.mockResolvedValue({
+        values: [],
+        column,
+        indexPattern: 'logs-*',
+      });
+
+      expect(
+        await run({ fetchMode: 'esql', query: 'FROM logs-* | STATS BY bytes | LIMIT 5' })
+      ).toBe(true);
+      expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'FROM logs-* | STATS BY bytes | LIMIT 5\n| LIMIT 1' })
+      );
+      expect(dataViewsService.get).not.toHaveBeenCalled();
+    });
   });
 });
