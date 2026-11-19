@@ -26,3 +26,19 @@ export const WORKFLOW_MIGRATION_STOPPED_DESCRIPTION = (totalWorkflows: number) =
       'Migration of {totalWorkflows} workflows was stopped, you can resume it any time.',
     values: { totalWorkflows },
   });
+
+export const WORKFLOW_MIGRATION_COMPLETE_DESCRIPTION = (createdAt: string, finishedAt: string) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.workflows.panel.result.description', {
+    defaultMessage: 'Stories uploaded on {createdAt} and translation finished {finishedAt}.',
+    values: { createdAt, finishedAt },
+  });
+
+export const WORKFLOW_MIGRATION_COMPLETE_BADGE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.panel.result.badge',
+  { defaultMessage: 'Translation complete' }
+);
+
+export const WORKFLOW_MIGRATION_VIEW_TRANSLATED_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.panel.result.viewButton',
+  { defaultMessage: 'Go to translated workflows' }
+);

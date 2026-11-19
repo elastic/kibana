@@ -32,7 +32,12 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   }, [migrationStats.last_execution?.error, migrationStats.items.total, migrationStats.status]);
 
   return (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+    <EuiPanel
+      hasShadow={false}
+      hasBorder
+      paddingSize="m"
+      data-test-subj="workflowMigrationReadyPanel"
+    >
       <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
