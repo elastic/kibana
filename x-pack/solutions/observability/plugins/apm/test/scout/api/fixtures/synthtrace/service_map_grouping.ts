@@ -10,10 +10,12 @@ import { apm, httpExitSpan, timerange } from '@kbn/synthtrace-client';
 import {
   SERVICE_MAP_GROUPING_ENVIRONMENT,
   SERVICE_MAP_GROUPING_GATEWAY,
+  SERVICE_MAP_GROUPING_GATEWAY_KUBERNETES_NAMESPACE,
   SERVICE_MAP_GROUPING_ISOLATED,
   SERVICE_MAP_GROUPING_PLATFORM,
   SERVICE_MAP_GROUPING_PLATFORM_NAMESPACE,
   SERVICE_MAP_GROUPING_SERVICES,
+  SERVICE_MAP_GROUPING_TEAM_KUBERNETES_NAMESPACES,
   SERVICE_MAP_GROUPING_TEAM_NAMESPACES,
   SERVICE_MAP_GROUPING_TEAMS,
 } from '../constants';
@@ -64,6 +66,17 @@ const NAMESPACES: ReadonlyMap<string, string> = new Map([
   ]),
 ]);
 
+/** Each service's `kubernetes.namespace`. Services not listed set none. */
+const KUBERNETES_NAMESPACES: ReadonlyMap<string, string> = new Map([
+  ...SERVICE_MAP_GROUPING_TEAMS.flatMap((members, team) =>
+    members.map((service): [string, string] => [
+      service,
+      SERVICE_MAP_GROUPING_TEAM_KUBERNETES_NAMESPACES[team],
+    ])
+  ),
+  [SERVICE_MAP_GROUPING_GATEWAY, SERVICE_MAP_GROUPING_GATEWAY_KUBERNETES_NAMESPACE],
+]);
+
 /**
  * Every minute, each service runs one transaction with an HTTP exit span to each service it
  * calls, and each callee runs a transaction under that span: the exit spans give the service
@@ -82,9 +95,13 @@ export function serviceMapGrouping({
         .service({ name, environment: SERVICE_MAP_GROUPING_ENVIRONMENT, agentName: 'java' })
         .instance(`${name}-1`);
       const namespace = NAMESPACES.get(name);
+      const kubernetesNamespace = KUBERNETES_NAMESPACES.get(name);
       return [
         name,
-        namespace ? created.defaults({ 'service.namespace': namespace }) : created,
+        created.defaults({
+          ...(namespace ? { 'service.namespace': namespace } : {}),
+          ...(kubernetesNamespace ? { 'kubernetes.namespace': kubernetesNamespace } : {}),
+        }),
       ] as const;
     })
   );

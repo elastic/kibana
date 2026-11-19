@@ -17,14 +17,18 @@ import {
   toSourceQuery,
   SERVICE_MAP_GROUPING_END_DATE,
   SERVICE_MAP_GROUPING_ENVIRONMENT,
+  SERVICE_MAP_GROUPING_GATEWAY,
+  SERVICE_MAP_GROUPING_GATEWAY_KUBERNETES_NAMESPACE,
   SERVICE_MAP_GROUPING_NOT_CONNECTED,
   SERVICE_MAP_GROUPING_PLATFORM,
   SERVICE_MAP_GROUPING_PLATFORM_NAMESPACE,
   SERVICE_MAP_GROUPING_SERVICES,
   SERVICE_MAP_GROUPING_SHARED,
   SERVICE_MAP_GROUPING_START_DATE,
+  SERVICE_MAP_GROUPING_TEAM_KUBERNETES_NAMESPACES,
   SERVICE_MAP_GROUPING_TEAM_NAMESPACES,
   SERVICE_MAP_GROUPING_TEAMS,
+  SERVICE_MAP_GROUPING_WITHOUT_KUBERNETES_NAMESPACE,
   SERVICE_MAP_GROUPING_WITHOUT_NAMESPACE,
 } from '../../fixtures';
 
@@ -160,6 +164,33 @@ apiTest.describe(
             SERVICE_MAP_GROUPING_PLATFORM
           ),
           noAttribute: sorted(SERVICE_MAP_GROUPING_WITHOUT_NAMESPACE),
+        });
+      }
+    );
+
+    apiTest(
+      'groups every service by its kubernetes.namespace, and those with none in a single group',
+      async ({ apiClient }) => {
+        const response = await getServiceMap(apiClient, { headers, query: GROUPING_QUERY });
+
+        expect(response).toHaveStatusCode(200);
+        const membersByGroupId = getMembersByGroupId(
+          getServiceGrouping(response.body),
+          'kubernetes.namespace'
+        );
+
+        // each Kubernetes namespace holds two teams
+        const teamsByNamespace: Record<string, string[]> = {};
+        SERVICE_MAP_GROUPING_TEAMS.forEach((members, team) => {
+          const id = `kubernetes.namespace:${SERVICE_MAP_GROUPING_TEAM_KUBERNETES_NAMESPACES[team]}`;
+          teamsByNamespace[id] = sorted([...(teamsByNamespace[id] ?? []), ...members]);
+        });
+        expect(membersByGroupId).toStrictEqual({
+          ...teamsByNamespace,
+          [`kubernetes.namespace:${SERVICE_MAP_GROUPING_GATEWAY_KUBERNETES_NAMESPACE}`]: [
+            SERVICE_MAP_GROUPING_GATEWAY,
+          ],
+          noAttribute: sorted(SERVICE_MAP_GROUPING_WITHOUT_KUBERNETES_NAMESPACE),
         });
       }
     );
