@@ -197,5 +197,6 @@ Enter the following in the Kibana connector form:
 |---|---|
 | **Cloud environment** | Commercial, GCC High, or DoD depending on your tenant |
 | **Token URL** | `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token` |
+| **OAuth scope** | `https://graph.microsoft.com/.default` for Commercial, `https://graph.microsoft.us/.default` for GCC High, or `https://dod-graph.microsoft.us/.default` for DoD. Must match the selected cloud environment. |
 | **Client ID** | The Application (client) ID from your app registration |
 | **Client Secret** | The client secret value, or upload a certificate instead |
