@@ -172,7 +172,7 @@ export async function evaluate(
   }
 
   const context: EvaluationContext = { esClient, slo, params, startedAt, projectRouting };
-  // Only instances with bad events in a short window can reach a positive burn rate threshold.
+  // Instances without bad events in the short windows are not candidates, yet can reach a threshold that is not positive.
   const canPrefilterCandidates = params.windows.every(
     ({ burnRateThreshold }) => burnRateThreshold > 0
   );

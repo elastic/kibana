@@ -210,8 +210,8 @@ function buildSloRevisionFilter(slo: SLODefinition, dateRange: { from: Date; to:
 }
 
 /**
- * Builds the query listing the instances with a bad slice or bad occurrences in any short window.
- * Bad occurrences are compared per instance since no indexed field marks them, unlike bad slices.
+ * Builds the query listing the instances whose short window burn rate reaches the threshold of at least one window,
+ * which every instance breaching a window does. It only reads the short windows, much shorter than the long ones.
  */
 export function buildCandidatesQuery(
   startedAt: Date,
@@ -220,16 +220,18 @@ export function buildCandidatesQuery(
   afterKey?: EvaluationAfterKey
 ) {
   const delayInSeconds = getDelayInSecondsFromSLO(slo);
-  const shortDateRanges = params.windows.map((winDef) =>
-    getLookbackDateRange(
+  const shortWindows = params.windows.map((winDef, index) => ({
+    windowId: generateWindowId(index),
+    threshold: winDef.burnRateThreshold,
+    dateRange: getLookbackDateRange(
       startedAt,
       new Duration(winDef.shortWindow.value, toDurationUnit(winDef.shortWindow.unit)),
       delayInSeconds
-    )
-  );
+    ),
+  }));
   const dateRange = {
-    from: new Date(Math.min(...shortDateRanges.map(({ from }) => from.getTime()))),
-    to: shortDateRanges[0].to,
+    from: new Date(Math.min(...shortWindows.map(({ dateRange: { from } }) => from.getTime()))),
+    to: shortWindows[0].dateRange.to,
   };
   const isTimesliceBudgetingMethod = slo.budgetingMethod === 'timeslices';
 
@@ -239,6 +241,7 @@ export function buildCandidatesQuery(
       bool: {
         filter: [
           ...buildSloRevisionFilter(slo, dateRange),
+          // The timeslices burn rate only depends on the bad slices.
           ...(isTimesliceBudgetingMethod ? [{ term: { 'slo.isGoodSlice': 0 } }] : []),
         ],
       },
@@ -250,19 +253,28 @@ export function buildCandidatesQuery(
           size: CANDIDATES_PAGE_SIZE,
           sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
         },
-        ...(isTimesliceBudgetingMethod
-          ? {}
-          : {
-              aggs: {
-                ...OCCURRENCE_AGGS,
-                hasBadOccurrences: {
-                  bucket_selector: {
-                    buckets_path: { good: 'good', total: 'total' },
-                    script: { source: 'params.total > params.good' },
-                  },
-                },
-              },
+        aggs: {
+          ...shortWindows.reduce(
+            (acc, { windowId, threshold, dateRange: shortDateRange }) => ({
+              ...acc,
+              ...buildWindowAgg(windowId, SHORT_WINDOW, threshold, slo, shortDateRange),
             }),
+            {}
+          ),
+          evaluation: {
+            bucket_selector: {
+              buckets_path: Object.fromEntries(
+                shortWindows.map(({ windowId }) => [
+                  windowId,
+                  generateAboveThresholdKey(windowId, SHORT_WINDOW),
+                ])
+              ),
+              script: {
+                source: shortWindows.map(({ windowId }) => `params.${windowId} == 1`).join(' || '),
+              },
+            },
+          },
+        },
       },
     },
   };

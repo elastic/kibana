@@ -76,7 +76,7 @@ describe('evaluate', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
-  it('only evaluates the instances with bad events in the short windows', async () => {
+  it('only evaluates the instances breaching a short window', async () => {
     esClient.search
       .mockResolvedValueOnce(candidatesResponse(['host-a', 'host-b']))
       .mockResolvedValueOnce(evaluationResponse(['host-b']));
@@ -97,7 +97,7 @@ describe('evaluate', () => {
     ]);
   });
 
-  it('does not evaluate when no instance has bad events in the short windows', async () => {
+  it('does not evaluate when no instance is breaching a short window', async () => {
     esClient.search.mockResolvedValueOnce(candidatesResponse([]));
 
     const results = await evaluate(esClient, slo, params, new Date());

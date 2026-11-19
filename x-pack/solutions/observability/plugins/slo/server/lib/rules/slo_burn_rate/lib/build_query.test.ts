@@ -56,7 +56,7 @@ describe('buildQuery()', () => {
 });
 
 describe('buildCandidatesQuery()', () => {
-  it('should look up the instances with bad occurrences in the short windows', () => {
+  it('should look up the instances breaching a short window for occurrences', () => {
     const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
     const rule = createBurnRateRule(slo);
     expect(buildCandidatesQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
@@ -72,7 +72,7 @@ describe('buildCandidatesQuery()', () => {
     );
   });
 
-  it('should look up the instances with a bad slice in the short windows', () => {
+  it('should look up the instances breaching a short window from their bad slices for timeslices', () => {
     const slo = createSLOWithTimeslicesBudgetingMethod({
       id: 'test-slo',
       indicator: createKQLCustomIndicator(),
