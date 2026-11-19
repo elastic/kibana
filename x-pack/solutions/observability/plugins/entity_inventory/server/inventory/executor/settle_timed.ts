@@ -11,7 +11,10 @@ export interface TimedOutcome<T> {
   wallMs: number;
 }
 
-/** Runs `run` and settles it, never rejecting, timing it from the call to the settling. */
+/**
+ * Runs `run` and settles it, never rejecting, timing it from the call until this continuation
+ * resumes, so `wallMs` includes any event-loop delay from other work, not network time alone.
+ */
 export const settleTimed = async <T>(run: () => Promise<T>): Promise<TimedOutcome<T>> => {
   const startedAt = performance.now();
   try {

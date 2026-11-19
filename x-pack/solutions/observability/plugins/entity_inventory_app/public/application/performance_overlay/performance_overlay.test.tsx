@@ -114,7 +114,7 @@ describe('PerformanceOverlay', () => {
     const summary = await screen.findByTestId('entityInventoryPerformanceSummary');
     expect(summary).toHaveTextContent('Browser end to end (ms)61.3');
     expect(summary).toHaveTextContent('Server total (ms)52.0');
-    expect(summary).toHaveTextContent('Network and serialisation (ms)9.2');
+    expect(summary).toHaveTextContent('Network and serialization (ms)9.2');
     expect(summary).toHaveTextContent('Slowest query, ES took (ms)38.0');
     expect(summary).toHaveTextContent('Sum of ES took over queries (ms)38.0');
 

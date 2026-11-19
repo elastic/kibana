@@ -88,7 +88,7 @@ export const SUMMARY = {
     defaultMessage: 'Server took (ms)',
   }),
   gapMs: i18n.translate('xpack.entityInventoryApp.performanceOverlay.summary.gapMs', {
-    defaultMessage: 'Network and serialisation (ms)',
+    defaultMessage: 'Network and serialization (ms)',
   }),
   definitionMs: i18n.translate('xpack.entityInventoryApp.performanceOverlay.summary.definitionMs', {
     defaultMessage: 'Definition lookup (ms)',

@@ -148,7 +148,7 @@ export interface ListTimings {
   planningMs: number;
   /** The concurrent probes alone; part of `planningMs`. */
   probesMs: number;
-  /** The concurrent plan queries, from the first sent to the last settled. */
+  /** The concurrent plan queries, from the first sent to the last settled, including converting each response to rows. */
   queriesMs: number;
   /** Interpreting, merging, ordering, limiting and filling the rows. */
   processingMs: number;
