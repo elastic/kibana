@@ -161,13 +161,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
           expect(createResponse).toHaveStatusCode(201);
         });
 
-        await apiTest.step('hides the dreaming routes while memory is off', async () => {
-          const templatesOffResponse = await apiClient.get(testData.DREAMING_TEMPLATES_PATH, {
-            headers: internalHeaders,
-            responseType: 'json',
-          });
-          expect(templatesOffResponse).toHaveStatusCode(404);
-
+        await apiTest.step('hides the dreaming route while memory is off', async () => {
           const getResponse = await apiClient.get(dreamingPath, {
             headers: internalHeaders,
             responseType: 'json',
@@ -186,19 +180,6 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
           [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
         });
         await kbnClient.uiSettings.waitForEventualCacheRefresh();
-
-        await apiTest.step('lists the example dreaming configs while memory is on', async () => {
-          const templatesResponse = await apiClient.get(testData.DREAMING_TEMPLATES_PATH, {
-            headers: internalHeaders,
-            responseType: 'json',
-          });
-          expect(templatesResponse).toHaveStatusCode(200);
-          expect(templatesResponse.body.templates).toStrictEqual(
-            expect.arrayContaining([
-              expect.objectContaining({ id: 'customer_support', name: 'Customer support' }),
-            ])
-          );
-        });
 
         await apiTest.step('stores the config while memory is on', async () => {
           const putResponse = await apiClient.put(dreamingPath, {

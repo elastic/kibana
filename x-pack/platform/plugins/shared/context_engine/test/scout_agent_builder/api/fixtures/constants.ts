@@ -39,8 +39,6 @@ export const AI_INDEX_INTERNAL_PATH = 'internal/context_engine/ai_index';
 export const aiIndexDreamingPath = (aiIndexId: string) =>
   `${AI_INDEX_INTERNAL_PATH}/${aiIndexId}/dreaming`;
 
-export const DREAMING_TEMPLATES_PATH = 'internal/context_engine/dreaming_templates';
-
 /** Kibana grant for the Context Engine `read` privilege in every space. */
 export const CONTEXT_ENGINE_READ: KibanaRole['kibana'][number] = {
   base: [],
