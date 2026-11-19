@@ -64,11 +64,24 @@ const EIS_VENDOR_PREFIXES = [
 
 const EIS_VENDOR_ID = new RegExp(`^(${EIS_VENDOR_PREFIXES.join('|')})-`, 'i');
 
-/** Whether a judge id names an EIS-backed connector (`eis-` prefix or vendor-canonical id). */
-export function isEisBacked(judgeId: string | undefined | null): boolean {
+/**
+ * Whether a judge is EIS-backed. Score docs stamp the judge with the provider of its
+ * connector (`Elastic` for EIS), which is authoritative when present: a self-hosted
+ * endpoint registered under a vendor-looking id (`qwen-local`) carries `OpenAI`/`Other`
+ * and must not pass on its id alone. Docs written before providers were recorded fall
+ * back to the id heuristics (`eis-` prefix or vendor-canonical id).
+ */
+export function isEisBacked(
+  judgeId: string | undefined | null,
+  judgeProvider?: string | null
+): boolean {
   const id = String(judgeId ?? '').trim();
   if (!id) {
     return false;
+  }
+  const provider = String(judgeProvider ?? '').trim();
+  if (provider) {
+    return provider.toLowerCase() === 'elastic';
   }
   if (/^eis[-_]/i.test(id)) {
     return true;

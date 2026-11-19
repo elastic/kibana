@@ -112,6 +112,16 @@ const buildJudgedOutput = <T extends { messageSource?: unknown; steps?: unknown 
   };
 };
 
+const isSubmissionEmpty = (judged: { messages?: unknown }): boolean => {
+  const messages = Array.isArray(judged.messages) ? judged.messages : [];
+  const latest = messages[messages.length - 1];
+  if (!isRecord(latest) || typeof latest.message !== 'string') return true;
+  const message = latest.message.trim();
+  // The unanswered-prompt marker is a diagnostic recorded for a failed converse, not an
+  // answer; FinalAnswerPresent applies the same rule (~line 518).
+  return message === '' || message.startsWith(UNANSWERED_PROMPT_MARKER);
+};
+
 const logJudgePayloadTrim = (
   log: ToolingLog,
   label: string,
@@ -505,7 +515,11 @@ export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => (
     const hasMessage =
       taskOutput.messageSource !== 'last_assistant_step' &&
       (taskOutput.messages ?? []).some(
-        (msg) => typeof msg?.message === 'string' && msg.message.trim().length > 0
+        (msg) =>
+          typeof msg?.message === 'string' &&
+          msg.message.trim().length > 0 &&
+          // The unanswered-prompt marker is a diagnostic shown to the judges, not an answer.
+          !msg.message.trimStart().startsWith(UNANSWERED_PROMPT_MARKER)
       );
     if (hasMessage) {
       return { score: 1, explanation: 'Final user-facing message present.' };
@@ -1056,6 +1070,9 @@ export function createEvaluatePersonaMatrixDataset({
             ...(judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget
               ? { judgePayloadTrim }
               : {}),
+            // Whether the submission the judges graded was empty. The stored transcript can keep
+            // narration the judges never saw, so Relevance reads this instead of the messages.
+            judgedAnswerEmpty: isSubmissionEmpty(judgedOutput),
             // Added after the judge payload is built so no judge ever reads it.
             rawResponse: response.rawResponse,
           } as TaskOutput;

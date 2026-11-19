@@ -65,6 +65,20 @@ export interface AggregatedDatasetScores {
   excludedNonEis?: number;
   /** True when an admitted score in THIS dataset was self-judged (prefix columns only). */
   selfJudged?: boolean;
+  /**
+   * True when at least one judge-graded (model-graded, not `kind: 'code'`) score was
+   * admitted into THIS dataset. Contract checks stay admitted under every judge policy,
+   * so without this flag a dataset whose every judged doc was rejected could still
+   * produce numeric cells ranked purely on judge-less checks.
+   */
+  judgedAdmitted?: boolean;
+  /**
+   * True when judged grades exist for this dataset but every one was rejected by the
+   * judge policy, leaving only judge-less (`kind: 'code'`) checks. The dataset keeps
+   * its evaluators (telemetry axes still read them), but buildCell renders the column
+   * `excluded:*` rather than ranking it on a different set of evaluators.
+   */
+  excludedJudgelessOnly?: boolean;
 }
 
 export interface AggregatedSuiteScores {
@@ -141,6 +155,11 @@ export const scoresByPrefixToDatasets = (
   // prefixes, and `cellExtras.selfJudged` must reflect only the datasets a column
   // actually reads (a suite-wide flag would mislabel an independently judged column).
   const selfJudgedByPrefix = new Map<string, boolean>();
+  // Per-prefix flag: at least one judge-graded (non-`kind: 'code'`) doc was admitted.
+  // Judge-less contract checks stay admitted under every judge policy; this flag lets
+  // buildCell distinguish "column scored only on contract checks because every judged
+  // doc was rejected" from an ordinary admissible score mix.
+  const judgedAdmittedByPrefix = new Map<string, boolean>();
   const excluded: ExcludedScoreCounts = {
     nonQuality: 0,
     nonEis: 0,
@@ -182,11 +201,14 @@ export const scoresByPrefixToDatasets = (
       // non-EIS judge when requireEisJudge is on: without this, a doc whose evaluator
       // omitted its judge model silently contributes to a matrix that claims every
       // score is EIS-graded.
+      // Code evaluators invoke no model, so there is no judge to vet: they stay admitted.
+      const isCodeEvaluator = (doc.evaluator as { kind?: string } | undefined)?.kind === 'code';
       const rejectedEisJudge = Boolean(
         evaluatorName &&
           !rejectedNonQuality &&
           options.requireEisJudge &&
-          (!judgeId || !isEisBacked(judgeId))
+          !isCodeEvaluator &&
+          (!judgeId || !isEisBacked(judgeId, doc.evaluator?.model?.provider))
       );
       const rejectedSelfJudged = Boolean(
         evaluatorName &&
@@ -263,6 +285,12 @@ export const scoresByPrefixToDatasets = (
           }
 
           if (admitted) {
+            // Judge-graded docs (any evaluator with a judge model; `kind: 'code'`
+            // evaluators invoke no model) mark this prefix as having surviving LLM
+            // grades, defeating the judge-less-checks-only exclusion below.
+            if (!isCodeEvaluator && judgeId) {
+              judgedAdmittedByPrefix.set(prefix, true);
+            }
             let errTrack = erroredByPrefix.get(prefix);
             // A trace evaluator that found no spans reports 'unavailable', not 'error'.
             if (doc.evaluator?.label === 'error' || doc.evaluator?.label === 'unavailable') {
@@ -334,6 +362,17 @@ export const scoresByPrefixToDatasets = (
       .filter(([, tally]) => tally.errored > 0 && tally.scored === 0)
       .map(([name]) => name);
     const prefixExclusions = excludedByPrefix.get(prefix);
+    // Judge-less contract checks stay admitted under every judge policy, so they alone
+    // must not publish an ordinary numeric cell when every judged doc was rejected:
+    // with judged grades present-but-rejected and none admitted, the dataset keeps
+    // its evaluators (the token axis and erroredOut plumbing still read them) but is
+    // marked so buildCell renders `excluded:*` instead of ranking on a different set
+    // of evaluators than every other column.
+    const judgedRejected = Boolean(
+      prefixExclusions &&
+        (prefixExclusions.selfJudged > 0 || prefixExclusions.nonEis > 0) &&
+        !judgedAdmittedByPrefix.get(prefix)
+    );
     return {
       datasetId: `prefix:${prefix}`,
       datasetName: prefix,
@@ -347,6 +386,8 @@ export const scoresByPrefixToDatasets = (
       ],
       ...(erroredOut.length > 0 ? { erroredOutEvaluators: erroredOut } : {}),
       ...(selfJudgedByPrefix.get(prefix) === true ? { selfJudged: true } : {}),
+      ...(judgedAdmittedByPrefix.get(prefix) === true ? { judgedAdmitted: true } : {}),
+      ...(judgedRejected ? { excludedJudgelessOnly: true } : {}),
       // Exposed per dataset so buildCell can mark THIS column excluded even when
       // sibling prefixes in the suite kept admissible scores.
       ...(prefixExclusions && prefixExclusions.selfJudged > 0
@@ -814,7 +855,7 @@ export const queryMatrixScores = async (
               if (forbidSelfJudged && describeJudge(judgeId, modelId).selfJudged) {
                 return false;
               }
-              return !(requireEis && !isEisBacked(judgeId));
+              return !(requireEis && !isEisBacked(judgeId, doc.evaluator?.model?.provider));
             });
             for (const doc of admittedDocs) {
               const judgeId = doc.evaluator?.model?.id;

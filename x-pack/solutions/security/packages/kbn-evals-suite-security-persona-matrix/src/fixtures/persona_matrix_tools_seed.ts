@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   PARITY_WORKFLOWS,
   PARITY_CASE_TAG,
   CREATE_CASE_WORKFLOW_ID,
+  WRITE_TODOS_WORKFLOW_ID,
+  TODOS_INDEX,
   type ParityWorkflow,
 } from './parity_workflows';
 import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
@@ -206,7 +209,86 @@ const createdWorkflowIds = new Set<string>();
  */
 let parityCaseWindowStart: string | undefined;
 
+/**
+ * Todo documents already in `persona-matrix-todos` when this process created the
+ * `write-todos` workflow. Cleanup deletes only docs NOT in this snapshot, so a
+ * reused Scout stack neither keeps this run's plans nor loses another run's
+ * (a time window would: a concurrent run's writes after the window start would
+ * be deleted).
+ */
+let preexistingTodoIds: Set<string> | undefined;
+
 const CASES_PAGE_SIZE = 100;
+
+/**
+ * Ids of every doc currently in the todos index, paged via search_after.
+ */
+async function listTodoIds(esClient: EsClient): Promise<Set<string>> {
+  const ids = new Set<string>();
+  let searchAfter: string[] | undefined;
+  let lastSeenId: string | undefined;
+  for (;;) {
+    const response = await esClient.search<{ _id: string; sort: string[] }>({
+      index: TODOS_INDEX,
+      ignore_unavailable: true,
+      size: 1000,
+      // ES 8 disables fielddata on `_id` by default, so sorting on `_id` throws;
+      // `_shard_doc` is always available for search_after paging.
+      sort: ['_shard_doc'],
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+    });
+    const hits = response.hits?.hits ?? [];
+    for (const hit of hits) if (hit._id !== undefined) ids.add(hit._id);
+    if (hits.length === 0) break;
+    const last = hits[hits.length - 1];
+    // Guard against a page that does not advance (bad sort payload): stop instead of looping.
+    if (last._id === lastSeenId) break;
+    lastSeenId = last._id;
+    searchAfter = last.sort as string[];
+  }
+  return ids;
+}
+
+/**
+ * Deletes only todo documents this run added: every id NOT in the pre-seed
+ * snapshot. Concurrent runs' writes (ids present before this run started, or
+ * written by another process into a reused stack) survive.
+ */
+async function deleteTodosCreatedThisRun(esClient: EsClient): Promise<void> {
+  const preexisting = preexistingTodoIds;
+  if (!preexisting) return;
+  let searchAfter: string[] | undefined;
+  let lastSeenId: string | undefined;
+  for (;;) {
+    const response = await esClient.search<{ _id: string; sort: string[] }>({
+      index: TODOS_INDEX,
+      ignore_unavailable: true,
+      size: 1000,
+      // ES 8 disables fielddata on `_id` by default, so sorting on `_id` throws;
+      // `_shard_doc` is always available for search_after paging.
+      sort: ['_shard_doc'],
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+    });
+    const hits = response.hits?.hits ?? [];
+    if (hits.length === 0) break;
+    const doomed = hits
+      .map((h) => h._id)
+      .filter((id): id is string => id !== undefined && !preexisting.has(id));
+    if (doomed.length > 0) {
+      await esClient.deleteByQuery({
+        index: TODOS_INDEX,
+        ignore_unavailable: true,
+        refresh: true,
+        query: { ids: { values: doomed } },
+      });
+    }
+    const last = hits[hits.length - 1];
+    // Guard against a page that does not advance (bad sort payload): stop instead of looping.
+    if (last._id === lastSeenId) break;
+    lastSeenId = last._id;
+    searchAfter = last.sort as string[];
+  }
+}
 
 /**
  * True only when the connector at STUB_CONNECTOR_ID is known to be an `.http`
@@ -362,8 +444,9 @@ const isAlreadyExists = (error: unknown): boolean => {
 async function createWorkflowIfMissing({
   kbnClient,
   log,
+  esClient,
   workflow,
-}: SeedToolsOptions & { workflow: ParityWorkflow }): Promise<void> {
+}: SeedToolsOptions & { esClient?: EsClient; workflow: ParityWorkflow }): Promise<void> {
   try {
     await kbnClient.request({
       method: 'POST',
@@ -373,6 +456,12 @@ async function createWorkflowIfMissing({
     });
     createdWorkflowIds.add(workflow.id);
     if (workflow.id === CREATE_CASE_WORKFLOW_ID) parityCaseWindowStart = new Date().toISOString();
+    if (workflow.id === WRITE_TODOS_WORKFLOW_ID && esClient) {
+      // Snapshot the ids already in the todos index BEFORE this run can add any,
+      // so cleanup can delete only this run's docs (the workflow indexes with
+      // `id: execution.id`, so ids are stable and cheap to diff).
+      preexistingTodoIds = await listTodoIds(esClient);
+    }
     log.info(`[persona-matrix] created workflow '${workflow.id}'`);
   } catch (error) {
     if (isAlreadyExists(error)) {
@@ -526,8 +615,9 @@ async function attachToolsToDefaultAgent({
 export async function seedPersonaMatrixTools({
   kbnClient,
   log,
+  esClient,
   profile = 'default',
-}: SeedToolsOptions & { profile?: AgentProfile }): Promise<void> {
+}: SeedToolsOptions & { esClient?: EsClient; profile?: AgentProfile }): Promise<void> {
   await createStubConnectorIfMissing({ kbnClient, log });
 
   await createToolIfMissing({
@@ -580,7 +670,7 @@ export async function seedPersonaMatrixTools({
   }
 
   for (const workflow of PARITY_WORKFLOWS) {
-    await createWorkflowIfMissing({ kbnClient, log, workflow });
+    await createWorkflowIfMissing({ kbnClient, log, esClient, workflow });
   }
   for (const body of PARITY_TOOLS) {
     await createToolIfMissing({ kbnClient, log, body });
@@ -603,7 +693,8 @@ export async function seedPersonaMatrixTools({
 export async function cleanupPersonaMatrixTools({
   kbnClient,
   log,
-}: SeedToolsOptions): Promise<void> {
+  esClient,
+}: SeedToolsOptions & { esClient?: EsClient }): Promise<void> {
   for (const id of createdToolIds) {
     await kbnClient
       .request({
@@ -658,6 +749,14 @@ export async function cleanupPersonaMatrixTools({
           );
         }
       });
+  }
+
+  if (esClient && createdWorkflowIds.has(WRITE_TODOS_WORKFLOW_ID) && preexistingTodoIds) {
+    try {
+      await deleteTodosCreatedThisRun(esClient);
+    } catch (error) {
+      log.warning(`[persona-matrix] parity todos cleanup failed: ${error}`);
+    }
   }
 
   // create.case runs the seeded create-case workflow, which tags every case it

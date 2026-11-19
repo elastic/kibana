@@ -73,6 +73,18 @@ describe('isEisBacked', () => {
     expect(isEisBacked(id)).toBe(false);
   });
 
+  it('trusts the recorded provider over a vendor-looking id', () => {
+    expect(isEisBacked('qwen-local', 'Other')).toBe(false);
+    expect(isEisBacked('openai-gpt-oss', 'OpenAI')).toBe(false);
+    expect(isEisBacked('qwen-local', 'Elastic')).toBe(true);
+    expect(isEisBacked('zai-glm-5-2', 'elastic')).toBe(true);
+  });
+
+  it('falls back to id heuristics when the doc carries no provider', () => {
+    expect(isEisBacked('qwen-3-8-2-4t-a95b', undefined)).toBe(true);
+    expect(isEisBacked('qwen-3-8-2-4t-a95b', '')).toBe(true);
+  });
+
   it('rejects empty and whitespace ids', () => {
     expect(isEisBacked('')).toBe(false);
     expect(isEisBacked('   ')).toBe(false);

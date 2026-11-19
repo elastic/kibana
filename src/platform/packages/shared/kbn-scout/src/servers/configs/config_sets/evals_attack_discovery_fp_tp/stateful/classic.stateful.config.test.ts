@@ -9,6 +9,35 @@
 
 import { servers } from './classic.stateful.config';
 
+// Top-level imports evaluate the config chain once, with whatever GCS_CREDENTIALS the
+// runner env happens to carry, writing a real SA key to a temp file during tests.
+// Guard: when the env var is unset at load time no secure file may be produced.
+const GCS_SETTING_PREFIX = 'gcs.client.default.credentials_file=';
+
+describe('loads without GCS_CREDENTIALS', () => {
+  const originalEnv = process.env;
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env.GCS_CREDENTIALS;
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+  it('adds no GCS secure file', () => {
+    let configServers: typeof import('./classic.stateful.config').servers | undefined;
+    jest.isolateModules(() => {
+      ({ servers: configServers } = jest.requireActual('./classic.stateful.config'));
+    });
+    // The export itself must load: a missing `servers` export would otherwise
+    // pass this test vacuously (undefined config can't hold a secure file) even
+    // though Scout would refuse to start with that config.
+    expect(configServers).toBeDefined();
+    expect(configServers?.esTestCluster.secureFiles ?? []).not.toContainEqual(
+      expect.stringContaining(GCS_SETTING_PREFIX)
+    );
+  });
+});
+
 describe('evals_attack_discovery_fp_tp config set', () => {
   it('enables service accounts so alertzero installs its managed workflows (#295215)', () => {
     expect(servers.kbnTestServer.serverArgs).toContain(

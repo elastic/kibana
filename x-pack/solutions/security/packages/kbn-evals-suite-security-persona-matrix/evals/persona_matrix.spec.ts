@@ -65,7 +65,12 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
         `[persona-matrix] entity store not running; no selected example needs entity tools: ${error}`
       );
     }
-    await seedPersonaMatrixTools({ kbnClient, log, profile: agentProfile });
+    await seedPersonaMatrixTools({
+      kbnClient,
+      log,
+      esClient: esClient as unknown as EsClient,
+      profile: agentProfile,
+    });
     log.info(
       `[persona-matrix] seeded persona-matrix tools (seed profile: ${seedProfile}, agent: ${resolveAgentId(
         agentProfile
@@ -75,7 +80,11 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
 
   evaluate.afterAll(async ({ esClient, kbnClient, log }) => {
     await cleanupChrysalisAlerts({ esClient: esClient as unknown as EsClient, log });
-    await cleanupPersonaMatrixTools({ kbnClient, log });
+    await cleanupPersonaMatrixTools({
+      kbnClient,
+      log,
+      esClient: esClient as unknown as EsClient,
+    });
   });
 
   evaluate('all 21 examples', async ({ evaluateDataset, kbnClient, log }) => {

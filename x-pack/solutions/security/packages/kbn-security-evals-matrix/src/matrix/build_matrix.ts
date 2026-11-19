@@ -237,11 +237,15 @@ const buildCell = (
     excludedSelfJudged = 0,
     excludedNonEis = 0,
     erroredOutEvaluators = [],
+    judgelessOnly = false,
   }: {
     selfJudged?: boolean;
     excludedSelfJudged?: number;
     excludedNonEis?: number;
     erroredOutEvaluators?: string[];
+    /** Every judged grade this column reads was rejected; only judge-less contract
+     * checks remain, which must not publish a ranked numeric cell. */
+    judgelessOnly?: boolean;
   } = {}
 ): MatrixCell => {
   // Checked before the `mean === undefined` branch: a cell-relevant evaluator that errored on
@@ -254,6 +258,19 @@ const buildCell = (
   );
   if (erroredOut.length > 0) {
     return { kind: 'insufficient-evaluators', evaluators: erroredOut };
+  }
+
+  // Checked before the scored branch: judge-less contract checks stay admitted under
+  // every judge policy, so a numeric mean computed only from them must not rank the
+  // model — mark the column excluded instead, same as the all-rejected case above.
+  if (judgelessOnly && mean !== undefined) {
+    if (excludedSelfJudged > 0) {
+      return { kind: 'excluded', reason: 'self-judged', docs: excludedSelfJudged };
+    }
+    if (excludedNonEis > 0) {
+      return { kind: 'excluded', reason: 'non-eis-judge', docs: excludedNonEis };
+    }
+    return { kind: 'missing' };
   }
 
   if (mean === undefined) {
@@ -694,6 +711,38 @@ const buildMatrixRow = (
                 .reduce((sum, dataset) => sum + (pick(dataset) || 0), 0)),
         0
       );
+    // Libra round: a column whose effective selection reads no judged (model-graded)
+    // evaluator — e.g. an allowlist of code-only contract checks such as
+    // `FinalAnswerPresent` — must not inherit judge-policy rejections recorded
+    // against other evaluators of the same datasets: its numeric mean rests on
+    // code-only checks that stay admitted under every judge policy, so rendering
+    // it `excluded:*` hides a valid, fully measured cell. Only apply the
+    // exclusion signals when some in-scope dataset carries a judged evaluator
+    // this column actually scores. (A suite rejected wholesale pushes
+    // `datasets: []`, leaving no evaluator record to inspect: the suite's fate
+    // IS the column's fate there, so the counts stay.)
+    const columnAllows = column.evaluators ? new Set(column.evaluators) : undefined;
+    const readsJudgedGrades = columnSuitesAll.some((suite) =>
+      suite.datasets.some(
+        (dataset) =>
+          (!columnDatasetIds || columnDatasetIds.has(dataset.datasetId)) &&
+          dataset.evaluators.some(
+            (e) =>
+              isQualityEvaluator(e) &&
+              !CONTRACT_EVALUATORS.has(e.evaluatorName) &&
+              (columnAllows
+                ? columnAllows.has(e.evaluatorName)
+                : !isExcludedEvaluator(e.evaluatorName, excludeEvaluators))
+          )
+      )
+    );
+    const canScopeToSelection = columnSuitesAll.every((suite) => suite.datasets.length > 0);
+    const scopedExcludedSelfJudged = columnDatasetIds
+      ? perDataset((dataset) => dataset.excludedSelfJudged ?? 0)
+      : columnSuitesAll.reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0);
+    const scopedExcludedNonEis = columnDatasetIds
+      ? perDataset((dataset) => dataset.excludedNonEis ?? 0)
+      : columnSuitesAll.reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0);
     const cellExtras = {
       // Per-column, not suite-wide: only the datasets this column actually reads decide
       // whether the published cell is self-judged (a suite mixing self-judged `alert`
@@ -709,13 +758,40 @@ const buildMatrixRow = (
       excludedNonEis: columnDatasetIds
         ? perDataset((dataset) => dataset.excludedNonEis ?? 0)
         : columnSuitesAll.reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0),
+      // True only when EVERY dataset this column reads holds rejected judged grades and
+      // no admitted judged grade — i.e. the column's numeric mean would rest purely on
+      // judge-less contract checks. Datasets without any judge-policy rejection (the
+      // ordinary case) never trip it.
+      judgelessOnly:
+        columnDatasetIds !== undefined &&
+        columnSuitesAll.some((suite) =>
+          suite.datasets.some(
+            (dataset) =>
+              columnDatasetIds.has(dataset.datasetId) && dataset.excludedJudgelessOnly === true
+          )
+        ) &&
+        columnSuitesAll
+          .flatMap((suite) => suite.datasets)
+          .filter((dataset) => columnDatasetIds.has(dataset.datasetId))
+          .every(
+            (dataset) =>
+              dataset.excludedJudgelessOnly === true || !dataset.evaluators.some(isQualityEvaluator)
+          ),
       erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column),
     };
+    // Only an explicit column allowlist that reads no judged grades suppresses the
+    // judge-policy exclusions: without an allowlist the column would have scored
+    // every judged evaluator, so a fully-rejected run genuinely excludes it.
+    const suppressJudgeExclusions =
+      columnAllows !== undefined && canScopeToSelection && !readsJudgedGrades;
+    const appliedCellExtras = suppressJudgeExclusions
+      ? { ...cellExtras, excludedSelfJudged: 0, excludedNonEis: 0, judgelessOnly: false }
+      : cellExtras;
     cells[column.id] = buildCell(
       computeColumnMean(modelScores, column, excludeEvaluators),
       column,
       config,
-      cellExtras
+      appliedCellExtras
     );
     if (overallExcludeEvaluators !== excludeEvaluators) {
       overallCells[column.id] = buildCell(
@@ -728,7 +804,7 @@ const buildMatrixRow = (
         ),
         column,
         config,
-        cellExtras
+        appliedCellExtras
       );
     }
   }

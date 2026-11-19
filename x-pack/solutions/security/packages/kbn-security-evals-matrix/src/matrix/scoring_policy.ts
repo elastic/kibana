@@ -32,7 +32,9 @@ export interface PolicyScoreDoc {
     score?: number | null;
     label?: string | null;
     direction?: string | null;
-    model?: { id?: string | null } | null;
+    /** `code` evaluators invoke no model, so no judge policy applies to them. */
+    kind?: string | null;
+    model?: { id?: string | null; provider?: string | null } | null;
     metadata?: unknown;
   } | null;
 }
@@ -62,7 +64,7 @@ export const emptyExclusionCounts = (): PolicyExclusionCounts => ({
 
 /**
  * Ladder score for a judged evaluator, or the stored continuous score when the evaluator
- * has no verdict vocabulary or the doc carries no `evaluator.metadata` (often stripped by the scores route).
+ * has no verdict vocabulary or the doc carries no `evaluator.metadata` (stripped by the scores routes; the verdict is then read from `evaluator.label`).
  */
 export function resolveVerdictScore(
   evaluatorName: string,
@@ -76,8 +78,20 @@ export function resolveVerdictScore(
 
   const [blockKey, verdictKey] = path;
   const metadata = doc.evaluator?.metadata as Record<string, unknown> | undefined;
+  if (evaluatorName === 'Relevance') {
+    // The Relevance evaluator's `label` is the code-derived verdict: an empty agent
+    // response is scored IRRELEVANT regardless of what the correctness judge's raw
+    // `relevance_summary` says. Reading the metadata verdict instead gives an
+    // empty-answer doc with judge metadata full credit. `evaluator.label` is the
+    // authoritative label on both the metadata and the stripped-metadata paths.
+    const labelScore = scoreVerdict(doc.evaluator?.label, ladder);
+    if (labelScore !== null && labelScore !== undefined) return labelScore;
+  }
   if (metadata === undefined) {
-    return doc.evaluator?.score;
+    // The scores routes strip `evaluator.metadata`, but the judged evaluators persist the same
+    // verdict as `evaluator.label`: read it there before falling back to the continuous score.
+    const labelScore = scoreVerdict(doc.evaluator?.label, ladder);
+    return labelScore ?? doc.evaluator?.score;
   }
   const block = metadata[blockKey] as Record<string, unknown> | undefined;
   // Correctness evaluators nest their verdict under `summary`; Groundedness does not.
@@ -107,7 +121,11 @@ export function applyScoringPolicy(
   // A doc whose evaluator omitted its judge model is indistinguishable from a non-EIS
   // judge under requireEisJudge: admit it here and the trace path publishes a score the
   // aggregation path (query_matrix_scores) already withheld from the matrix.
-  if (policy.requireEisJudge && (!judgeId || !isEisBacked(judgeId))) {
+  if (
+    policy.requireEisJudge &&
+    doc.evaluator?.kind !== 'code' &&
+    (!judgeId || !isEisBacked(judgeId, doc.evaluator?.model?.provider))
+  ) {
     return { score: null, rejected: 'non-eis' };
   }
   if (

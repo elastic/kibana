@@ -107,27 +107,59 @@ record_suite_failure() {
 }
 
 # The token-usage data stream lives on the step's throwaway ES, so copy it into a build artifact
-# before Scout is stopped. Best effort: it must never change the step's exit status.
+# before Scout is stopped. Best effort: it must never change the step's exit status, and it must
+# never hold up teardown, so every request and the whole export carry a time budget. The artifact
+# is only published after the scroll finished cleanly; a partial copy would read as a complete one.
+TOKEN_USAGE_REQUEST_TIMEOUT_SECONDS="${TOKEN_USAGE_REQUEST_TIMEOUT_SECONDS:-30}"
+TOKEN_USAGE_EXPORT_BUDGET_SECONDS="${TOKEN_USAGE_EXPORT_BUDGET_SECONDS:-120}"
+
 export_token_usage() {
   [[ -f .scout/servers/local.json ]] || return 0
   command -v buildkite-agent >/dev/null 2>&1 || return 0
-  local es_url out_dir out_file scroll_id page hits pages=0
+  local es_url out_dir out_file tmp_file scroll_id page hits pages=0 complete=0 request_timeout
+  local deadline=$((SECONDS + TOKEN_USAGE_EXPORT_BUDGET_SECONDS))
+  # Each request is capped at the time left in the export budget, so a request started
+  # just before the deadline cannot outlive it by a full curl timeout.
+  request_timeout() {
+    local remaining=$(( deadline - SECONDS ))
+    (( remaining < 1 )) && return 1
+    echo "$(( remaining < TOKEN_USAGE_REQUEST_TIMEOUT_SECONDS ? remaining : TOKEN_USAGE_REQUEST_TIMEOUT_SECONDS ))"
+  }
   es_url="$(jq -r '.hosts.elasticsearch' .scout/servers/local.json | sed 's:/*$::')"
   out_dir="target/token_usage"
   mkdir -p "$out_dir"
   out_file="$out_dir/token_usage_${EVAL_PROJECT:-all}.ndjson"
-  : >"$out_file"
-  page="$(es_curl -sS "$es_url/.kibana-inference-token-usage/_search?scroll=2m&size=2000&expand_wildcards=all" \
-    -H 'Content-Type: application/json' -d '{"sort":["_doc"]}')" || return 0
-  while (( pages++ < 500 )); do
+  tmp_file="${out_file}.partial"
+  rm -f "$out_file"
+  : >"$tmp_file"
+  # -f turns an HTTP error into a failed request instead of an error body with no hits.
+  page="" && timeout="$(request_timeout)" &&
+    page="$(es_curl -sSf --max-time "$timeout" \
+      "$es_url/.kibana-inference-token-usage/_search?scroll=2m&size=2000&expand_wildcards=all" \
+      -H 'Content-Type: application/json' -d '{"sort":["_doc"]}')" || page=""
+  while [[ -n "$page" ]] && (( pages++ < 500 && SECONDS < deadline )); do
+    if ! printf '%s' "$page" | jq -e '.hits.hits | type == "array"' >/dev/null 2>&1; then
+      break
+    fi
     hits="$(printf '%s' "$page" | jq -c '.hits.hits[]?._source' 2>/dev/null)" || break
-    [[ -n "$hits" ]] || break
-    printf '%s\n' "$hits" >>"$out_file"
+    if [[ -z "$hits" ]]; then
+      complete=1
+      break
+    fi
+    printf '%s\n' "$hits" >>"$tmp_file"
     scroll_id="$(printf '%s' "$page" | jq -r '._scroll_id // empty')"
     [[ -n "$scroll_id" ]] || break
-    page="$(es_curl -sS "$es_url/_search/scroll" -H 'Content-Type: application/json' \
-      -d "{\"scroll\":\"2m\",\"scroll_id\":\"$scroll_id\"}")" || break
+    page="" && timeout="$(request_timeout)" &&
+      page="$(es_curl -sSf --max-time "$timeout" \
+        "$es_url/_search/scroll" -H 'Content-Type: application/json' \
+        -d "{\"scroll\":\"2m\",\"scroll_id\":\"$scroll_id\"}")" || page=""
   done
+  if [[ "$complete" -ne 1 ]]; then
+    echo "--- Token usage export incomplete (request failed, malformed page or time budget hit); not publishing the artifact"
+    rm -f "$tmp_file"
+    return 0
+  fi
+  mv "$tmp_file" "$out_file"
   echo "--- Token usage docs: $(wc -l <"$out_file") (by model)"
   jq -r '.model.model_id // "unknown"' "$out_file" | sort | uniq -c || true
   buildkite-agent artifact upload "$out_file" || true

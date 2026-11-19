@@ -33,6 +33,7 @@ import {
   isRankablePathContract,
   type PersonaMatrixDatasetExample,
 } from './evaluate_dataset';
+import { UNANSWERED_PROMPT_MARKER } from './chat_client';
 import type { PersonaMatrixChatClient } from './chat_client';
 import type { AgentProfile } from './agent_profile';
 import {
@@ -331,6 +332,14 @@ describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
     const result = await evaluate({
       messages: [{ message: 'Let me check that rule.' }],
       messageSource: 'last_assistant_step',
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 for the unanswered-prompt diagnostic (thrown converse / paused agent)', async () => {
+    const result = await evaluate({
+      messages: [{ message: `${UNANSWERED_PROMPT_MARKER} converse failed: ECONNREFUSED` }],
+      messageSource: 'response',
     });
     expect(result.score).toBe(0);
   });
@@ -728,6 +737,54 @@ describe('task output shape', () => {
     const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
 
     expect(output.messageSource).toBe('last_assistant_step');
+    // The judges were handed no answer (the narration is stripped), so Relevance must see the
+    // submission as empty even though the stored transcript still carries the narration.
+    expect(output.judgedAnswerEmpty).toBe(true);
+  });
+
+  it('treats an unanswered-prompt marker response as an empty submission', async () => {
+    // A failed converse records `${UNANSWERED_PROMPT_MARKER} ...` as the message.
+    // isSubmissionEmpty must treat it as empty (same rule FinalAnswerPresent
+    // applies), or a failed run hands the diagnostic text to the judges as an answer.
+    const log = buildLog();
+    let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn().mockResolvedValue({
+          messages: [{ message: `${UNANSWERED_PROMPT_MARKER} converse failed: ECONNREFUSED` }],
+          messageSource: 'final_turn',
+          steps: [],
+          errors: [],
+          traceId: 'trace-1',
+        }),
+      } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {
+          inputTokens: { name: 'inputTokens' },
+          outputTokens: { name: 'outputTokens' },
+          toolCalls: { name: 'toolCalls' },
+          latency: { name: 'latency' },
+        },
+        criteria: () => ({ evaluate: jest.fn().mockResolvedValue({ score: 1 }) }),
+        correctnessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(async (params: { task: unknown }) => {
+          capturedTask = params.task as (example: unknown) => Promise<unknown>;
+        }),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log,
+    });
+
+    await evaluateDataset({
+      dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
+    });
+
+    const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
+    expect(output.judgedAnswerEmpty).toBe(true);
   });
 });
 
