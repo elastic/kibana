@@ -81,6 +81,7 @@ export interface RecorderProposals {
     proposalId: string;
     proposal: RecorderProposalInput;
   }) => Promise<void>;
+  retire: (args: { request: KibanaRequest; proposalId: string }) => Promise<void>;
 }
 
 export interface FindingsPassDeps {
@@ -274,7 +275,7 @@ const buildProposalsContext = (
     sections.push(
       `Open (${
         open.length
-      } of ${MAX_OPEN_PROPOSALS} open slots used — leave unchanged ones out; set supersedes to an ID such as P1 to refine or replace in place):\n${lines.join(
+      } of ${MAX_OPEN_PROPOSALS} open slots used — leave unchanged ones out; set supersedes to an ID such as P1 to refine or replace in place; list obsolete IDs in retire_proposals):\n${lines.join(
         '\n'
       )}`
     );
@@ -302,14 +303,16 @@ const writeRecorderProposals = async ({
   conversationId,
   existingAtPrompt,
   openByHandle,
-  wanted,
+  wanted = [],
+  retire = [],
 }: {
   proposals: RecorderProposals;
   request: KibanaRequest;
   conversationId: string;
   existingAtPrompt: readonly ExistingRecorderProposal[];
   openByHandle: ReadonlyMap<string, ExistingRecorderProposal>;
-  wanted: NonNullable<FindingsRecord['proposals']>;
+  wanted?: FindingsRecord['proposals'];
+  retire?: FindingsRecord['retire_proposals'];
 }): Promise<void> => {
   // Re-read right before writing: a human or another round may have acted while the model ran.
   const latest = await proposals.list({ request, conversationId });
@@ -336,6 +339,26 @@ const writeRecorderProposals = async ({
     }
   }
 
+  const resolveRef = (rawRef: string): ExistingRecorderProposal | undefined => {
+    const ref = rawRef.trim();
+    return (
+      openByHandle.get(ref.toLowerCase()) ??
+      latestById.get(ref) ??
+      promptById.get(ref) ??
+      openByTitle.get(titleKey(ref))
+    );
+  };
+
+  // Protect any open proposal that `wanted` is revising in this pass so an overlapping
+  // `retire_proposals` entry cannot retire the revision target before `revise()` runs.
+  const reservedForRevise = new Set<string>();
+  for (const item of wanted) {
+    const target =
+      (item.supersedes ? resolveRef(item.supersedes) : undefined) ??
+      openByTitle.get(titleKey(item.title));
+    if (target) reservedForRevise.add(target.id);
+  }
+
   let openCount = latest.filter(({ status }) => status === 'pending').length;
   const touchedIds = new Set<string>();
   const emittedTitles = new Set<string>();
@@ -349,6 +372,22 @@ const writeRecorderProposals = async ({
     }
   };
 
+  // Retire obsolete open proposals first so freed slots are available to net-new proposals below.
+  for (const rawRef of retire) {
+    const matched = resolveRef(rawRef);
+    if (!matched) continue;
+    const current = latestById.get(matched.id) ?? matched;
+    if (current.status !== 'pending' || closedIds.has(current.id)) continue;
+    if (touchedIds.has(current.id) || reservedForRevise.has(current.id)) continue;
+    touchedIds.add(current.id);
+    const key = titleKey(current.title);
+    if (openByTitle.get(key)?.id === current.id) {
+      openByTitle.delete(key);
+    }
+    openCount = Math.max(0, openCount - 1);
+    await runWrite(() => proposals.retire({ request, proposalId: current.id }));
+  }
+
   for (const item of wanted) {
     const payload: RecorderProposalInput = {
       title: item.title,
@@ -359,11 +398,7 @@ const writeRecorderProposals = async ({
 
     if (item.supersedes) {
       const ref = item.supersedes.trim();
-      const matched =
-        openByHandle.get(ref.toLowerCase()) ??
-        latestById.get(ref) ??
-        promptById.get(ref) ??
-        openByTitle.get(titleKey(ref));
+      const matched = resolveRef(ref);
       if (matched) {
         const current = latestById.get(matched.id) ?? matched;
         if (current.status !== 'pending' || closedIds.has(current.id)) continue;
@@ -846,8 +881,8 @@ const runTrackedFindingsPass = async (
       ]);
     }
     const proposals = deps.getProposals?.();
-    if (final && proposals && record.proposals?.length) {
-      const wanted = record.proposals;
+    if (final && proposals && (record.proposals?.length || record.retire_proposals?.length)) {
+      const { proposals: wanted, retire_proposals: retire } = record;
       writes.push([
         'proposals',
         () =>
@@ -858,6 +893,7 @@ const runTrackedFindingsPass = async (
             existingAtPrompt: existingProposals,
             openByHandle,
             wanted,
+            retire,
           }),
       ]);
     }

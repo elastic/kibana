@@ -41,9 +41,14 @@ const originFilter = ({ origin }: ChartsWindow): ESQLAstExpression =>
 
 /** Open is exactly `pending`: every other status is a settled proposal. */
 const PENDING: ProposalStatus = 'pending';
+const SUPERSEDED: ProposalStatus = 'superseded';
 
-/** A superseded proposal is represented by its replacement; counting both double-counts a retry. */
-const NOT_SUPERSEDED: ESQLAstExpression = exp`supersededBy IS NULL`;
+/**
+ * Excludes rows replaced by a successor (`supersededBy`, including retries and
+ * reopened to-dos) and gateless rows retired with none (`status == 'superseded'`,
+ * which carry neither `decidedAt` nor `expiresAt`).
+ */
+const NOT_SUPERSEDED: ESQLAstExpression = exp`supersededBy IS NULL AND status != ${SUPERSEDED}`;
 
 /**
  * When a proposal stopped being open. A decision sets `decidedAt`; a deadline

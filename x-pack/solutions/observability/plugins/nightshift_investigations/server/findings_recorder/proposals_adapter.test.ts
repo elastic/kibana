@@ -43,6 +43,7 @@ const setup = ({ canRead = true, canManage = true } = {}) => {
     actionInput: undefined,
   });
   const revise = jest.fn().mockResolvedValue({ proposalId: 'p-rev-3', revision: 3 });
+  const retire = jest.fn().mockResolvedValue({ id: 'p-live', status: 'superseded' });
   const createProposal = jest.fn().mockResolvedValue({ workflowExecutionId: 'e1' });
   const assertCanRead = jest.fn(async () => {
     if (!canRead) throw new Error('Forbidden');
@@ -52,7 +53,7 @@ const setup = ({ canRead = true, canManage = true } = {}) => {
   });
   const adapter = createRecorderProposals({
     proposals: {
-      getProposalsService: () => ({ list, getLatestRevision, revise }),
+      getProposalsService: () => ({ list, getLatestRevision, revise, retire }),
       getProposalPrivileges: () => ({ assertCanRead, assertCanManage }),
       createProposal,
     } as never,
@@ -63,6 +64,7 @@ const setup = ({ canRead = true, canManage = true } = {}) => {
     list,
     getLatestRevision,
     revise,
+    retire,
     createProposal,
     assertCanRead,
     assertCanManage,
@@ -186,5 +188,21 @@ describe('createRecorderProposals', () => {
         proposal: { title: 'Updated', comment: 'Updated comment.' },
       })
     ).resolves.toBeUndefined();
+  });
+
+  it('retires the live head of a proposal chain and ignores concurrent decisions', async () => {
+    const { adapter, assertCanManage, getLatestRevision, retire } = setup();
+
+    await adapter.retire({ request, proposalId: 'p-root' });
+
+    expect(assertCanManage).toHaveBeenCalledWith(request);
+    expect(getLatestRevision).toHaveBeenCalledWith('p-root', 'space-a');
+    expect(retire).toHaveBeenCalledWith('p-live', 'space-a');
+
+    retire.mockRejectedValueOnce(new ProposalConflictError('already decided'));
+    await expect(adapter.retire({ request, proposalId: 'p-root' })).resolves.toBeUndefined();
+
+    retire.mockRejectedValueOnce(new ProposalNotFoundError('gone'));
+    await expect(adapter.retire({ request, proposalId: 'p-root' })).resolves.toBeUndefined();
   });
 });
