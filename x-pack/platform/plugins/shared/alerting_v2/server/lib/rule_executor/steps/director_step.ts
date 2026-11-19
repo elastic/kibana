@@ -19,7 +19,8 @@ import {
   type AlertEpisodeStatus,
 } from '../../../resources/datastreams/alert_events';
 
-const TRANSITION_COUNTER: Partial<Record<AlertEpisodeStatus, RuleExecutionCounter>> = {
+const TRANSITION_COUNTER: Record<AlertEpisodeStatus, RuleExecutionCounter> = {
+  [alertEpisodeStatus.pending]: RULE_EXECUTION_COUNTERS.episodesTransitionedToPending,
   [alertEpisodeStatus.active]: RULE_EXECUTION_COUNTERS.episodesTransitionedToActive,
   [alertEpisodeStatus.recovering]: RULE_EXECUTION_COUNTERS.episodesTransitionedToRecovering,
   [alertEpisodeStatus.inactive]: RULE_EXECUTION_COUNTERS.episodesTransitionedToInactive,

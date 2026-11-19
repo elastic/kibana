@@ -23,6 +23,7 @@ export const RULE_EXECUTION_COUNTERS = {
   recoveredEventsGenerated: 'recoveredEventsGenerated',
   noDataEventsGenerated: 'noDataEventsGenerated',
   newEpisodesGenerated: 'newEpisodesGenerated',
+  episodesTransitionedToPending: 'episodesTransitionedToPending',
   episodesTransitionedToActive: 'episodesTransitionedToActive',
   episodesTransitionedToRecovering: 'episodesTransitionedToRecovering',
   episodesTransitionedToInactive: 'episodesTransitionedToInactive',

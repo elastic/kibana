@@ -30,6 +30,7 @@ const ZEROED_COUNTERS = {
   'metrics.recoveredEventsGenerated': 0,
   'metrics.noDataEventsGenerated': 0,
   'metrics.newEpisodesGenerated': 0,
+  'metrics.episodesTransitionedToPending': 0,
   'metrics.episodesTransitionedToActive': 0,
   'metrics.episodesTransitionedToRecovering': 0,
   'metrics.episodesTransitionedToInactive': 0,
@@ -132,6 +133,7 @@ apiTest.describe(
         expect(run['metrics.recoveredEventsGenerated']).toBe(0);
         expect(run['metrics.noDataEventsGenerated']).toBe(0);
 
+        expect(run['metrics.episodesTransitionedToPending']).toBe(0);
         expect(run['metrics.episodesTransitionedToActive']).toBe(1);
         expect(run['metrics.episodesTransitionedToRecovering']).toBe(0);
         expect(run['metrics.episodesTransitionedToInactive']).toBe(0);

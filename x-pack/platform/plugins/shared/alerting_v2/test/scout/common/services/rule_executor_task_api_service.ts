@@ -59,6 +59,7 @@ export interface ReportedRun {
   'metrics.recoveredEventsGenerated'?: number;
   'metrics.noDataEventsGenerated'?: number;
   'metrics.newEpisodesGenerated'?: number;
+  'metrics.episodesTransitionedToPending'?: number;
   'metrics.episodesTransitionedToActive'?: number;
   'metrics.episodesTransitionedToRecovering'?: number;
   'metrics.episodesTransitionedToInactive'?: number;

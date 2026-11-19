@@ -109,6 +109,7 @@ describe('DirectorStep', () => {
           { groupHash: 'g2', episodeId: 'e2', previousStatus: null, status: 'active' },
           { groupHash: 'g3', episodeId: 'e3', previousStatus: 'active', status: 'recovering' },
           { groupHash: 'g4', episodeId: 'e4', previousStatus: 'recovering', status: 'inactive' },
+          { groupHash: 'g5', episodeId: 'e5', previousStatus: 'inactive', status: 'pending' },
         ],
       },
       previousAlertStateByGroupHash: new Map(),
@@ -127,13 +128,11 @@ describe('DirectorStep', () => {
       [RULE_EXECUTION_COUNTERS.episodesTransitionedToActive]: 2,
       [RULE_EXECUTION_COUNTERS.episodesTransitionedToRecovering]: 1,
       [RULE_EXECUTION_COUNTERS.episodesTransitionedToInactive]: 1,
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToPending]: 1,
     });
   });
 
   it('counts each (episode, status) transition once across batches of the same run', async () => {
-    // An ungrouped rule can surface the same episode in several batches; with
-    // this run's writes not yet refreshed, the director recomputes the same
-    // transition each batch. The step must report it once.
     const transition = {
       groupHash: 'g1',
       episodeId: 'e1',
@@ -165,7 +164,7 @@ describe('DirectorStep', () => {
     expect(second.meta?.counters).toEqual({});
   });
 
-  it('does not emit a counter for transitions to pending', async () => {
+  it('emits a counter for transitions to pending', async () => {
     const director = createMockDirectorService();
     director.run.mockResolvedValue({
       alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
@@ -187,7 +186,9 @@ describe('DirectorStep', () => {
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     // @ts-expect-error: meta is present on the result
-    expect(result.meta?.counters).toEqual({});
+    expect(result.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToPending]: 1,
+    });
   });
 
   it('skips episode tracking for signal rules', async () => {

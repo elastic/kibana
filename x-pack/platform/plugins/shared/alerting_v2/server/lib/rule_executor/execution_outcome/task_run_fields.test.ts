@@ -43,6 +43,7 @@ const zeroedMetricFields = {
   'metrics.recoveredEventsGenerated': 0,
   'metrics.noDataEventsGenerated': 0,
   'metrics.newEpisodesGenerated': 0,
+  'metrics.episodesTransitionedToPending': 0,
   'metrics.episodesTransitionedToActive': 0,
   'metrics.episodesTransitionedToRecovering': 0,
   'metrics.episodesTransitionedToInactive': 0,
