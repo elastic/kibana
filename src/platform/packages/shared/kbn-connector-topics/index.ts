@@ -8,6 +8,10 @@
  */
 
 export { connectorEventBusSchema } from './src/events/connector_event_bus_schema';
+export type {
+  ConnectorEventBusData,
+  ConnectorEventTopicDefinition,
+} from './src/events/connector_event_topic';
 export { datadogAlert } from './src/events/datadog';
 export {
   githubCheckRun,
