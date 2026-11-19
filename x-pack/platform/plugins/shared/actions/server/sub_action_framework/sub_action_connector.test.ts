@@ -7,6 +7,7 @@
 
 import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import axios, { AxiosHeaders } from 'axios';
+import { Readable } from 'stream';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -318,6 +319,64 @@ describe('SubActionConnector', () => {
       expect(logger.debug).toHaveBeenLastCalledWith(
         'Request to external service failed. Connector Id: test-id. Connector type: .test. Method: get. URL: https://example.com'
       );
+    });
+
+    it('reads the body of a streaming error response', async () => {
+      // e.g. a GenAI `stream` sub-action that fails with a non-2xx response:
+      // axios rejects with the raw response stream in error.response.data
+      const error = createAxiosError();
+      error.config = {
+        ...error.config,
+        responseType: 'stream',
+      } as AxiosError['config'];
+      error.response = {
+        config: error.config,
+        status: 429,
+        data: Readable.from([JSON.stringify({ errorMessage: 'rate limited', errorCode: 429 })]),
+      } as AxiosResponse;
+      requestMock.mockImplementation(() => {
+        throw error;
+      });
+
+      await expect(async () =>
+        service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
+      ).rejects.toThrow('Message: rate limited. Code: 429');
+
+      expect(error.response?.data).toEqual({ errorMessage: 'rate limited', errorCode: 429 });
+    });
+
+    it('attaches an error listener before destroying a truncated streaming error response', async () => {
+      // https://github.com/elastic/kibana/issues/299804
+      // The reader consumes the stream with `for await`, which attaches an
+      // 'error' listener to the source stream *before* it is destroyed in
+      // read(); the old pipe()-based reader did not, so destroy() emitted an
+      // unhandled 'error' event that crashed the process.
+      let listenerCountAtDestroy = -1;
+      const error = createAxiosError();
+      error.config = {
+        ...error.config,
+        responseType: 'stream',
+      } as AxiosError['config'];
+      error.response = {
+        config: error.config,
+        status: 403,
+        data: new Readable({
+          read() {
+            this.push('<html>');
+            listenerCountAtDestroy = this.listenerCount('error');
+            this.destroy(new Error('aborted'));
+          },
+        }),
+      } as AxiosResponse;
+      requestMock.mockImplementation(() => {
+        throw error;
+      });
+
+      await expect(async () =>
+        service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
+      ).rejects.toThrow('Status code: 403');
+
+      expect(listenerCountAtDestroy).toBeGreaterThan(0);
     });
 
     it('converts auth axios property to a basic auth header if provided', async () => {

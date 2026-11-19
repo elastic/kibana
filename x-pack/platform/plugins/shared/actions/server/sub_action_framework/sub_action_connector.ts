@@ -19,9 +19,7 @@ import type {
 import axios from 'axios';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { finished } from 'stream/promises';
-import type { IncomingMessage } from 'http';
-import { PassThrough } from 'stream';
+import type { Readable } from 'stream';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { inspect } from 'util';
 import type { z } from '@kbn/zod/v4';
@@ -199,15 +197,11 @@ export abstract class SubActionConnector<Config, Secrets> {
     // The error response body may also be a stream, e.g. for the GenAI connector
     if (error.response?.config?.responseType === 'stream' && error.response?.data) {
       try {
-        const incomingMessage = error.response.data as IncomingMessage;
-
-        const pt = incomingMessage.pipe(new PassThrough());
-
-        pt.on('data', (chunk) => {
+        // for await propagates a source stream error into this catch; pipe()
+        // would emit an unhandled 'error' event instead
+        for await (const chunk of error.response.data as Readable) {
           responseBody += chunk.toString();
-        });
-
-        await finished(pt);
+        }
 
         error.response.data = JSON.parse(responseBody);
 
