@@ -52,7 +52,7 @@ const renderContent = (
   const { executionId } = item;
   if (isFailedTurn(item) || isAbortedTurn(item)) {
     return (
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="m">
         {item.steps.length > 0 && (
           <EuiFlexItem grow={false}>
             <EventSteps

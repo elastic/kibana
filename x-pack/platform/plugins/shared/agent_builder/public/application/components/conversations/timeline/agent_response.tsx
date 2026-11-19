@@ -51,7 +51,7 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
   const conversationId = useConversationId();
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="m">
       {steps.length > 0 && (
         <EuiFlexItem grow={false}>
           <EventSteps
