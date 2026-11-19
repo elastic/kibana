@@ -61,7 +61,7 @@ triggers:
         # `emit_package_failed` can still report it.
         huntStatus:
           type: string
-          description: Hunt child's result status, one of `success`, `partial`, `retired_incomplete` or `failed`. `partial` and `failed` leave the report eligible for a later sweep; `retired_incomplete` means the report is retired after a gap no rerun can close (hit or not), so the run is settled but not a clean full-search verdict.
+          description: Hunt child's result status, one of `success`, `partial`, `retired_incomplete` or `failed`. `partial` and `failed` leave the report eligible for a later sweep; `retired_incomplete` means the report is retired after a gap no rerun can close, so the absence of a hit is settled but not a clean verdict.
         hasConfirmedHit:
           type: boolean
           description: Whether the hunt cleared the confirmed-hit bar.

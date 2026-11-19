@@ -59,7 +59,7 @@ export const packageReportInputSchema = lazySchema(() =>
     huntStatus: z
       .enum(['success', 'partial', 'retired_incomplete', 'failed'])
       .describe(
-        "Hunt child's result status: `success` when the run covered what it was asked to, `partial` when a tier could not finish and a later sweep will hunt the report again, `retired_incomplete` when the hunt stamped the report after a gap no rerun can close (settled, but not a clean verdict, whether or not there was a hit), `failed` when the coordinator call failed or was skipped."
+        "Hunt child's result status: `success` when the run covered what it was asked to, `partial` when a tier could not finish and a later sweep will hunt the report again, `retired_incomplete` when the hunt stamped the report after a gap no rerun can close (the absence of a hit is a settled result, but not a clean verdict), `failed` when the coordinator call failed or was skipped."
       ),
     hasConfirmedHit: z
       .boolean()
@@ -303,8 +303,8 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
         'fillable respond and investigate catalog actions, and returns mint payloads (including expectedProposalCount, the settlement barrier the ' +
         'packaging child threads into each gate) for the packaging child to dispatch as gate executions. ' +
         'A completed hunt that confirmed no hit leaves no current-run SSE attachment, so it packages as a ' +
-        'dismissal off huntStatus and hasConfirmedHit. A hunt that ended retired_incomplete (a gap no rerun can close) with no hit packages the same way, ' +
-        'and one with a confirmed hit packages its findings as usual; either way what was not searched is named in the coverage KI and the Investigation summary. ' +
+        'dismissal off huntStatus and hasConfirmedHit. A hunt that ended retired_incomplete (a gap no rerun can close) packages the same way, ' +
+        'with the unsearched techniques named in the coverage KI and the Investigation summary. ' +
         'A hunt that did not complete and will be retried returns run_incomplete instead, because its ' +
         'report may still be hunted again into this same Investigation. ' +
         'Does not close the Investigation; dismiss is a boolean the child applies.',
