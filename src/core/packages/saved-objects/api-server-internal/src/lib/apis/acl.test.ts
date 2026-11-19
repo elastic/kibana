@@ -162,6 +162,36 @@ describe('the stored ACL in repository APIs', () => {
     });
   });
 
+  describe('find aggregations', () => {
+    it('removes ACL values from the hits of a top_hits aggregation', async () => {
+      const results = generateIndexPatternSearchResults();
+      const hit = {
+        _id: 'index-pattern:1',
+        _index: '.kibana-test',
+        fields: { 'index-pattern.title': ['logs'], 'acl.owner.id': [OWNER_ID] },
+        highlight: { 'acl.owner.id': [`<em>${OWNER_ID}</em>`] },
+      };
+      client.search.mockResponseOnce({
+        ...results,
+        aggregations: { top: { hits: { total: { value: 1 }, max_score: 1, hits: [hit] } } },
+      } as estypes.SearchResponse);
+
+      const { aggregations } = await repository.find<unknown, Record<string, any>>({
+        type: 'index-pattern',
+        aggs: { top: { top_hits: { docvalue_fields: ['*'], highlight: { fields: { '*': {} } } } } },
+      });
+
+      expect(aggregations!.top.hits.hits).toEqual([
+        {
+          _id: 'index-pattern:1',
+          _index: '.kibana-test',
+          fields: { 'index-pattern.title': ['logs'] },
+          highlight: {},
+        },
+      ]);
+    });
+  });
+
   describe('bulkGet', () => {
     it('leaves the ACL out', async () => {
       const response = getMockMgetResponse(registry, [{ type, id }]);
@@ -272,6 +302,68 @@ describe('the stored ACL in repository APIs', () => {
   });
 
   describe('bulkCreate', () => {
+    const mockBulkResponse = (operation: 'create' | 'index') =>
+      client.bulk.mockResponseOnce({
+        errors: false,
+        took: 1,
+        items: [
+          {
+            [operation]: {
+              _id: `${type}:${id}`,
+              _index: '.kibana-test',
+              status: 200,
+              ...mockVersionProps,
+            },
+          },
+        ],
+      } as estypes.BulkResponse);
+    const getBulkDocument = () =>
+      (client.bulk.mock.calls[0][0].operations as Array<Record<string, unknown>>)[1];
+    // The shape an import would send: an object with a root `acl`.
+    const objectWithAcl = {
+      type,
+      id,
+      attributes: { title: 'New' },
+      acl: RAW_ACL_SOURCE.acl,
+    } as Parameters<SavedObjectsRepository['bulkCreate']>[0][number];
+
+    it.each([
+      ['without overwrite', false],
+      ['with overwrite', true],
+    ])('ignores an ACL that the caller passes, %s', async (_, overwrite) => {
+      mockPreflightCheckForCreate.mockResolvedValueOnce([{ type, id }]);
+      mockBulkResponse(overwrite ? 'index' : 'create');
+
+      await repository.bulkCreate([objectWithAcl], { overwrite });
+
+      expect(getBulkDocument()).not.toHaveProperty('acl');
+    });
+
+    it('keeps the stored ACL, not one that the caller passes, when it overwrites an object', async () => {
+      mockPreflightCheckForCreate.mockResolvedValueOnce([
+        {
+          type,
+          id,
+          existingDocument: {
+            _id: `${type}:${id}`,
+            _source: {
+              type,
+              namespaces: ['default'],
+              acl: { version: 1, owner: { type: 'user', id: 'u_stored' } },
+            } as unknown as SavedObjectsRawDocSource,
+          },
+        },
+      ]);
+      mockBulkResponse('index');
+
+      await repository.bulkCreate([objectWithAcl], { overwrite: true });
+
+      expect(getBulkDocument().acl).toEqual({
+        version: 1,
+        owner: { type: 'user', id: 'u_stored' },
+      });
+    });
+
     it('keeps the stored ACL when it overwrites an object', async () => {
       mockPreflightCheckForCreate.mockResolvedValueOnce([
         {

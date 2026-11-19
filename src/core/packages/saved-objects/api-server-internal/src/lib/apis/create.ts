@@ -14,10 +14,8 @@ import {
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import {
-  decodeRequestVersion,
-  readAclFromRawSource,
-} from '@kbn/core-saved-objects-base-server-internal';
+import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { normalizeAclSource } from '@kbn/ols';
 import type {
   SavedObjectAccessControl,
   SavedObjectsCreateOptions,
@@ -160,7 +158,7 @@ export const performCreate = async <T>(
   // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
   const originId = Object.keys(options).includes('originId') ? options.originId : existingOriginId;
   // An overwrite keeps the stored ACL. Callers cannot set an ACL through create.
-  const existingAcl = readAclFromRawSource(preflightResult?.existingDocument?._source);
+  const existingAcl = normalizeAclSource(preflightResult?.existingDocument?._source);
   const migrated = migrationHelper.migrateInputDocument({
     id,
     type,

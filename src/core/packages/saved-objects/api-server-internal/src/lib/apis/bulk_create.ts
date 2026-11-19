@@ -16,8 +16,7 @@ import {
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { readAclFromRawSource } from '@kbn/core-saved-objects-base-server-internal';
-import type { StoredAcl } from '@kbn/ols';
+import { normalizeAclSource, type StoredAcl } from '@kbn/ols';
 import {
   type SavedObjectsCreateOptions,
   type SavedObjectsBulkCreateObject,
@@ -276,7 +275,7 @@ export const performBulkCreate = async <T>(
           existingOriginId = existingDocument?._source?.originId;
           accessControl = existingDocument?._source?.accessControl;
           // An overwrite keeps the stored ACL. Callers cannot set an ACL through bulk create.
-          existingAcl = readAclFromRawSource(existingDocument?._source);
+          existingAcl = normalizeAclSource(existingDocument?._source);
         } else {
           if (registry.isSingleNamespace(object.type)) {
             savedObjectNamespace = initialNamespaces

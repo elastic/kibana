@@ -22,8 +22,8 @@ import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-object
 import {
   decodeRequestVersion,
   encodeHitVersion,
-  readAclFromRawSource,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { normalizeAclSource } from '@kbn/ols';
 import { projectAcl } from './acl';
 
 export interface GetBulkOperationErrorRawResponse {
@@ -139,7 +139,7 @@ export function getSavedObjectFromSource<T>(
     ];
   }
 
-  const acl = readAclFromRawSource(doc._source);
+  const acl = normalizeAclSource(doc._source);
   return projectAcl(
     {
       id,

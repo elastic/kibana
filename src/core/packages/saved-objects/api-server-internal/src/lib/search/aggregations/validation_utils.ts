@@ -31,13 +31,12 @@ export const isRootLevelAttribute = (
   }
 
   const [type, firstPath, ...otherPaths] = splits;
+  const rootPath = [firstPath, ...otherPaths].join('.');
   // Callers cannot aggregate on the stored ACL.
-  if (allowedTypes.includes(firstPath) || matchesAclField([firstPath, ...otherPaths].join('.'))) {
+  if (allowedTypes.includes(firstPath) || matchesAclField(rootPath)) {
     return false;
   }
-  return (
-    allowedTypes.includes(type) && fieldDefined(indexMapping, [firstPath, ...otherPaths].join('.'))
-  );
+  return allowedTypes.includes(type) && fieldDefined(indexMapping, rootPath);
 };
 
 /**

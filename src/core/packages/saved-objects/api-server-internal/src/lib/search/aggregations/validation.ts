@@ -136,29 +136,20 @@ const validateAggregationType = (
 const ACL_SOURCE_EXCLUDES = [ACL_FIELD, `${ACL_FIELD}.*`];
 
 /**
- * Keeps the stored ACL out of the documents that a `top_hits` aggregation returns. Its field options
- * are not validated like other aggregation fields, so they are checked for the ACL here, and its
- * source filter always excludes the ACL.
+ * Keeps the stored ACL out of the documents that a `top_hits` aggregation returns. Its source filter
+ * always excludes the ACL. `docvalue_fields` and `highlight` accept any field, as before, because
+ * `find` removes the ACL values they return (see `removeAclFromTopHits`). A sort on the ACL is
+ * refused, because the order of the hits would still show the ACL values.
  */
 const hideAclFromTopHits = (
   topHits: Record<string, any>,
   { currentPath }: ValidationContext
 ): Record<string, any> => {
-  const fieldNames: unknown[] = [
-    ...castArray(topHits.docvalue_fields ?? []),
-    ...castArray(topHits.stored_fields ?? []),
-    ...castArray(topHits.sort ?? []).flatMap((sort) =>
-      isPlainObject(sort) ? Object.keys(sort) : [sort]
-    ),
-    ...castArray(topHits.highlight?.fields ?? []).flatMap((fields) =>
-      isPlainObject(fields) ? Object.keys(fields) : []
-    ),
-  ];
-  const aclField = fieldNames.find(
-    (name): name is string => typeof name === 'string' && matchesAclField(name)
-  );
-  if (aclField !== undefined) {
-    throw new Error(`[${currentPath.join('.')}] Invalid attribute path: ${aclField}`);
+  const aclSortField = castArray(topHits.sort ?? [])
+    .flatMap((sort) => (isPlainObject(sort) ? Object.keys(sort) : [sort]))
+    .find((name): name is string => typeof name === 'string' && matchesAclField(name));
+  if (aclSortField !== undefined) {
+    throw new Error(`[${currentPath.join('.')}] Invalid attribute path: ${aclSortField}`);
   }
 
   const { _source: source } = topHits;

@@ -86,6 +86,7 @@ export const executeUpdate = async <T>(
     migration: migrationHelper,
     validation: validationHelper,
     user: userHelper,
+    serializer: serializerHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const typeDefinition = registry.getType(type)!;
@@ -248,7 +249,7 @@ export const executeUpdate = async <T>(
     }
     // client.create doesn't return the index document.
     // Use rawUpsert as the _source
-    const upsertedSavedObject = serializer.rawToSavedObject<T>(
+    const upsertedSavedObject = serializerHelper.rawToSavedObject<T>(
       {
         ...rawUpsert,
         ...createDocResponseBody,
@@ -259,7 +260,7 @@ export const executeUpdate = async <T>(
     let namespaces: string[] = [];
     if (!registry.isNamespaceAgnostic(type)) {
       namespaces = upsertedSavedObject.namespaces ?? [
-        SavedObjectsUtils.namespaceIdToString(upsertedSavedObject.namespace),
+        SavedObjectsUtils.namespaceIdToString(rawUpsert._source.namespace),
       ];
     }
 
@@ -359,7 +360,7 @@ export const executeUpdate = async <T>(
     // client.index doesn't return the indexed document.
     // Rather than making another round trip to elasticsearch to fetch the doc, we use the SO we sent
     // rawToSavedObject adds references as [] if undefined
-    const updatedSavedObject = serializer.rawToSavedObject<T>(
+    const updatedSavedObject = serializerHelper.rawToSavedObject<T>(
       {
         ...docToSend,
         ...indexDocResponseBody,
@@ -371,7 +372,7 @@ export const executeUpdate = async <T>(
     let namespaces: string[] = [];
     if (!registry.isNamespaceAgnostic(type)) {
       namespaces = updatedSavedObject.namespaces ?? [
-        SavedObjectsUtils.namespaceIdToString(updatedSavedObject.namespace),
+        SavedObjectsUtils.namespaceIdToString(docToSend._source.namespace),
       ];
     }
 

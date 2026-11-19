@@ -33,23 +33,32 @@ function getTypes(registry: ISavedObjectTypeRegistry, type?: string | string[]) 
 }
 
 /**
- * Every root field except the stored ACL, as `simple_query_string` field patterns. A search in all
- * fields uses it instead of `*`, which would also find objects by their owner or grantees.
+ * The `simple_query_string` field patterns that a search in all fields uses instead of `*`, which
+ * would also find objects by their owner or grantees: the requested types' attributes, and every
+ * core root field except the stored ACL. A document holds only its own type's attributes, and
+ * `find` returns only the requested types, so the other types' fields could never match.
  */
-function getAllFieldsExceptAcl(mappings: IndexMapping): string[] {
-  return Object.entries(mappings.properties ?? {}).flatMap(([name, field]) => {
-    if (matchesAclField(name)) {
+function getAllFieldsExceptAcl(
+  registry: ISavedObjectTypeRegistry,
+  mappings: IndexMapping,
+  types: string[]
+): string[] {
+  const typeFields = types.flatMap((type) => [type, `${type}.*`]);
+  const rootFields = Object.entries(mappings.properties ?? {}).flatMap(([name, field]) => {
+    if (registry.getType(name) || matchesAclField(name)) {
       return [];
     }
     const hasSubfields = 'properties' in field || 'fields' in field;
     return hasSubfields ? [name, `${name}.*`] : [name];
   });
+  return [...typeFields, ...rootFields];
 }
 
 /**
  *  Get the field params based on the types, searchFields, and rootSearchFields
  */
 function getSimpleQueryStringTypeFields(
+  registry: ISavedObjectTypeRegistry,
   mappings: IndexMapping,
   types: string[],
   searchFields: string[] = [],
@@ -58,7 +67,7 @@ function getSimpleQueryStringTypeFields(
   if (!searchFields.length && !rootSearchFields.length) {
     return {
       lenient: true,
-      fields: getAllFieldsExceptAcl(mappings),
+      fields: getAllFieldsExceptAcl(registry, mappings, types),
     };
   }
 
@@ -270,6 +279,7 @@ export function getQueryParams({
 
     const simpleQueryStringClause = useSimpleQueryStringClause
       ? getSimpleQueryStringClause({
+          registry,
           mappings,
           search,
           searchFields: simpleQuerySearchFields,
@@ -484,6 +494,7 @@ const getNestedQueryStringClause = ({
 };
 
 const getSimpleQueryStringClause = ({
+  registry,
   mappings,
   search,
   types,
@@ -491,6 +502,7 @@ const getSimpleQueryStringClause = ({
   rootSearchFields,
   defaultSearchOperator,
 }: {
+  registry: ISavedObjectTypeRegistry;
   mappings: IndexMapping;
   search: string;
   types: string[];
@@ -502,7 +514,13 @@ const getSimpleQueryStringClause = ({
     {
       simple_query_string: {
         query: search,
-        ...getSimpleQueryStringTypeFields(mappings, types, searchFields, rootSearchFields),
+        ...getSimpleQueryStringTypeFields(
+          registry,
+          mappings,
+          types,
+          searchFields,
+          rootSearchFields
+        ),
         ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
       },
     },

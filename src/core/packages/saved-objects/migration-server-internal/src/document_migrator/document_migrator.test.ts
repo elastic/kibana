@@ -1871,6 +1871,32 @@ describe('DocumentMigrator and the stored ACL', () => {
     expect(actual.acl).toEqual(newAcl);
   });
 
+  it('keeps the stored ACL when it downgrades a document', () => {
+    const migrator = createMigrator({
+      name: 'dog',
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: { forwardCompatibility: (attributes: any) => ({ a: attributes.a }) },
+        },
+      },
+    });
+    const actual = migrator.migrate(
+      {
+        id: 'smelly',
+        type: 'dog',
+        attributes: { a: 1, b: 2 },
+        references: [],
+        typeMigrationVersion: '10.2.0',
+        acl: storedAcl,
+      },
+      { allowDowngrade: true }
+    );
+    expect(actual.typeMigrationVersion).toEqual('10.1.0');
+    expect(actual.attributes).toEqual({ a: 1 });
+    expect(actual.acl).toEqual(storedAcl);
+  });
+
   it('adds no ACL to a document without one', () => {
     const migrator = createMigrator({ name: 'dog' });
     const actual = migrator.migrate({ id: 'smelly', type: 'dog', attributes: {}, references: [] });

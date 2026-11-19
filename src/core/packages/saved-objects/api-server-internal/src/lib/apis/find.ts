@@ -34,6 +34,7 @@ import {
   validateConvertFilterToKueryNode,
   getSearchDsl,
   validateAndConvertAggregations,
+  removeAclFromTopHits,
 } from '../search';
 import { includedFields } from '../utils';
 
@@ -304,7 +305,9 @@ export const performFind = async <T = unknown, A = unknown>(
   }
 
   const result: SavedObjectsFindResponse<T, A> = {
-    ...(body.aggregations ? { aggregations: body.aggregations as unknown as A } : {}),
+    ...(body.aggregations
+      ? { aggregations: removeAclFromTopHits(body.aggregations) as unknown as A }
+      : {}),
     page,
     per_page: perPage,
     total: body.hits.total as number,

@@ -51,8 +51,8 @@ export function includedFields(
         return acc;
       }, [])
       .concat(ROOT_FIELDS)
-      // The stored ACL is not a root field that callers can aggregate on or ask for, so it is only
-      // added here, to keep it on source-filtered reads.
+      // `ROOT_FIELDS` lists the root fields that callers can use, for example in aggregations, so it
+      // leaves out the stored ACL. The ACL is added here to keep it on source-filtered reads.
       .concat(ACL_FIELD)
   );
 }

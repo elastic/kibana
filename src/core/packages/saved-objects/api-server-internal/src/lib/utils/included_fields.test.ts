@@ -36,7 +36,7 @@ describe('getRootFields', () => {
 describe('includedFields', () => {
   const rootFields = getRootFields();
 
-  it('adds the stored ACL, which is not a root field', () => {
+  it('adds the stored ACL, which `getRootFields` leaves out', () => {
     expect(rootFields).not.toContain('acl');
     expect(includedFields('config', 'foo')).toContain('acl');
   });

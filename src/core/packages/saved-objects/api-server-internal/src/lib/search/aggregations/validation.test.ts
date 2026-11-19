@@ -578,14 +578,27 @@ describe('validateAndConvertAggregations and the stored ACL', () => {
   });
 
   it.each([
-    ['docvalue_fields', { docvalue_fields: ['acl.owner.id'] }],
-    ['stored_fields', { stored_fields: '*' }],
-    ['sort', { sort: [{ 'acl.general.access': 'asc' }] }],
-    ['highlight', { highlight: { fields: { 'acl.*': {} } } }],
-  ])('throws for the ACL in top_hits %s', (_, topHits) => {
-    expect(() => validate({ top: { top_hits: topHits } })).toThrow(
+    ['an object sort', { sort: [{ 'acl.general.access': 'asc' }] }],
+    ['a sort with options', { sort: [{ 'acl.owner.id': { order: 'asc', missing: '_last' } }] }],
+    ['a string sort', { sort: ['acl.owner.id'] }],
+    ['a wildcard sort', { sort: ['*'] }],
+  ])('throws for the ACL in %s of top_hits', (_, topHits) => {
+    expect(() => validate({ top: { top_hits: topHits } } as AggsMap)).toThrow(
       '[top.top_hits] Invalid attribute path'
     );
+  });
+
+  // `find` removes the ACL values these options return, so they accept any field, as before.
+  it.each([
+    ['docvalue_fields', { docvalue_fields: ['*'] }],
+    ['docvalue_fields with an ACL field', { docvalue_fields: ['acl.owner.id'] }],
+    ['stored_fields', { stored_fields: '*' }],
+    ['highlight', { highlight: { fields: { '*': {} } } }],
+    ['highlight with an ACL field', { highlight: { fields: { 'acl.*': {} } } }],
+  ])('accepts %s in top_hits', (_, topHits) => {
+    expect(validate({ top: { top_hits: topHits } })).toEqual({
+      top: { top_hits: { ...topHits, _source: { excludes: ['acl', 'acl.*'] } } },
+    });
   });
 
   it('excludes the ACL from the documents that top_hits returns', () => {

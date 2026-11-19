@@ -90,7 +90,11 @@ describe('ACL storage in Saved Objects', () => {
   const indexFixture = (
     id: string,
     source: Record<string, unknown>,
-    { type = TYPE, typeMigrationVersion }: { type?: string; typeMigrationVersion?: string } = {}
+    {
+      type = TYPE,
+      typeMigrationVersion,
+      refresh = 'wait_for',
+    }: { type?: string; typeMigrationVersion?: string; refresh?: 'wait_for' | false } = {}
   ) =>
     esClient.index({
       index: MAIN_SAVED_OBJECT_INDEX,
@@ -103,7 +107,7 @@ describe('ACL storage in Saved Objects', () => {
         ...(typeMigrationVersion && { typeMigrationVersion }),
         ...source,
       },
-      refresh: 'wait_for',
+      refresh,
     });
 
   const getRawSource = async (type: string, id: string) =>
@@ -204,6 +208,7 @@ describe('ACL storage in Saved Objects', () => {
   it('leaves the ACL out of results by default', async () => {
     const { id } = getFixture('dotted root keys are indexed');
     expect(await repository.get(TYPE, id)).not.toHaveProperty('acl');
+    expect((await repository.resolve(TYPE, id)).saved_object).not.toHaveProperty('acl');
 
     const { saved_objects: objects } = await repository.find({ type: TYPE, perPage: 1000 });
     expect(objects.length).toBe(indexableFixtures.length);
@@ -225,6 +230,29 @@ describe('ACL storage in Saved Objects', () => {
 
     const { id } = getFixture('dotted root keys are indexed');
     expect(objects.find((object) => object.id === id)?.acl?.owner.id).toEqual([OWNER_ID]);
+  });
+
+  it('update keeps the access decision of every fixture and drops dotted keys', async () => {
+    // Gets are real-time, so neither the writes nor the reads need a refresh.
+    const idOf = (fixture: (typeof indexableFixtures)[number]) => `update-every-${fixture.id}`;
+    await Promise.all(
+      indexableFixtures.map((fixture) =>
+        indexFixture(idOf(fixture), fixture.source, { refresh: false })
+      )
+    );
+    for (const fixture of indexableFixtures) {
+      const id = idOf(fixture);
+      const before = decide(fixture.policy, await getAcl(TYPE, id));
+
+      await repository.update(TYPE, id, { title: 'updated' }, { refresh: false });
+
+      const source = await getRawSource(TYPE, id);
+      expect({
+        fixture: fixture.name,
+        dottedKeys: Object.keys(source).filter((key) => key.startsWith('acl.')),
+        after: decide(fixture.policy, await getAcl(TYPE, id)),
+      }).toEqual({ fixture: fixture.name, dottedKeys: [], after: before });
+    }
   });
 
   describe('rewrites keep the access decision and drop dotted keys', () => {
@@ -295,20 +323,36 @@ describe('ACL storage in Saved Objects', () => {
       expect(ownerSearch.total).toBe(0);
     });
 
-    it('leaves the ACL out of the documents that top_hits returns', async () => {
-      const { aggregations } = await repository.find<
-        unknown,
-        { top: { hits: { hits: Array<{ _source: Record<string, unknown> }> } } }
-      >({
+    it('leaves the ACL out of the hits that top_hits returns', async () => {
+      type Hit = Record<'_source' | 'fields' | 'highlight', Record<string, unknown> | undefined>;
+      const { aggregations } = await repository.find<unknown, { top: { hits: { hits: Hit[] } } }>({
         type: TYPE,
         perPage: 0,
-        aggs: { top: { top_hits: { size: 100, _source: ['acl', `${TYPE}.title`] } } },
+        aggs: {
+          top: {
+            top_hits: {
+              size: 100,
+              _source: ['acl', `${TYPE}.title`],
+              // Elasticsearch returns ACL values for these, and `find` removes them.
+              docvalue_fields: ['type', 'acl.*'],
+              highlight: {
+                fields: { '*': {} },
+                highlight_query: { match: { 'acl.owner.id': OWNER_ID } },
+              },
+            },
+          },
+        },
       });
-      const sources = aggregations!.top.hits.hits.map(({ _source: source }) => source);
-      expect(sources.length).toBeGreaterThan(0);
+      const hits = aggregations!.top.hits.hits;
+      expect(hits.length).toBeGreaterThan(0);
+      expect(hits.every((hit) => hit.fields?.type !== undefined)).toBe(true);
       expect(
-        sources
-          .flatMap((source) => Object.keys(source))
+        hits
+          .flatMap((hit) => [
+            ...Object.keys(hit._source ?? {}),
+            ...Object.keys(hit.fields ?? {}),
+            ...Object.keys(hit.highlight ?? {}),
+          ])
           .filter((key) => key === 'acl' || key.startsWith('acl.'))
       ).toEqual([]);
     });

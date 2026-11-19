@@ -40,6 +40,10 @@ describe('matchesAclField', () => {
     'acl.*',
     '*.access',
     '*owner*',
+    '**',
+    'acl.*.id',
+    'acl.entries.*',
+    'a*l.o*r.*d',
   ])('matches %s', (pattern) => {
     expect(matchesAclField(pattern)).toBe(true);
   });
@@ -52,7 +56,16 @@ describe('matchesAclField', () => {
     'b*',
     '*.title',
     'dashboard.acl',
+    'title*',
+    '*x',
+    '*.attributes.*',
+    'acl*x',
   ])('does not match %s', (pattern) => {
     expect(matchesAclField(pattern)).toBe(false);
+  });
+
+  it('answers quickly for a pattern with many wildcards', () => {
+    expect(matchesAclField(`${'*'.repeat(1000)}x`)).toBe(false);
+    expect(matchesAclField(`${'*'.repeat(1000)}id`)).toBe(true);
   });
 });

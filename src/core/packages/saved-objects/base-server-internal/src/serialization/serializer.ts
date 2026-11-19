@@ -15,10 +15,9 @@ import type {
   SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { toAclSource } from '@kbn/ols';
+import { normalizeAclSource, toAclSource } from '@kbn/ols';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
 import { decodeVersion, encodeVersion } from '../version';
-import { readAclFromRawSource } from './acl';
 import type {
   ISavedObjectTypeRegistryInternal,
   SavedObjectTypeRegistry,
@@ -107,8 +106,9 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
     } = _source;
 
     // Every type keeps its ACL through migrations and rewrites. Repository APIs leave it out of
-    // their results unless the caller asks for it.
-    const acl = readAclFromRawSource(_source);
+    // their results unless the caller asks for it. Pass the whole source: Elasticsearch also indexes
+    // dotted root keys such as `"acl.owner.id"`, so they are part of the stored ACL.
+    const acl = normalizeAclSource(_source);
 
     const version =
       _seq_no != null || _primary_term != null

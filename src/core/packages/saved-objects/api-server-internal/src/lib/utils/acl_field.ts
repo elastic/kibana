@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { escapeRegExp } from 'lodash';
 import { ACL_FIELD, ACL_MAPPING } from '@kbn/ols';
 
 interface MappingNode {
@@ -28,6 +27,37 @@ export const ACL_FIELD_PATHS: readonly string[] = collectPaths(
 );
 
 /**
+ * Checks whether `value` matches `pattern`, where `*` matches any run of characters, dots included,
+ * and every other character matches itself. It walks both strings once, backing up only to the last
+ * `*`, so its time grows with their lengths for any pattern, unlike a regular expression built from
+ * the pattern.
+ */
+const matchesPattern = (pattern: string, value: string): boolean => {
+  let p = 0;
+  let v = 0;
+  let star = -1;
+  let resume = 0;
+  while (v < value.length) {
+    if (p < pattern.length && pattern[p] !== '*' && pattern[p] === value[v]) {
+      p++;
+      v++;
+    } else if (p < pattern.length && pattern[p] === '*') {
+      star = p++;
+      resume = v;
+    } else if (star !== -1) {
+      p = star + 1;
+      v = ++resume;
+    } else {
+      return false;
+    }
+  }
+  while (pattern[p] === '*') {
+    p++;
+  }
+  return p === pattern.length;
+};
+
+/**
  * Checks whether a root field name or pattern reaches the stored ACL: `acl` or any field under it.
  *
  * Callers can never search, sort, aggregate, or read the stored ACL through query options, because
@@ -41,6 +71,5 @@ export const matchesAclField = (pattern: string): boolean => {
   if (!pattern.includes('*')) {
     return pattern === ACL_FIELD || pattern.startsWith(`${ACL_FIELD}.`);
   }
-  const matcher = new RegExp(`^${pattern.split('*').map(escapeRegExp).join('.*')}$`);
-  return ACL_FIELD_PATHS.some((path) => matcher.test(path));
+  return ACL_FIELD_PATHS.some((path) => matchesPattern(pattern, path));
 };
