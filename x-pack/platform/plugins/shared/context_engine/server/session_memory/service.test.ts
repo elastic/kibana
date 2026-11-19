@@ -7,6 +7,7 @@
 
 import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { MAX_SESSION_MEMORY_FORGET_IDS } from '../../common/constants';
 import { SESSION_MEMORY_DATA_STREAM } from './data_streams';
 import { createSessionMemoryService } from './service';
 import type { StoredSessionMemory } from './types';
@@ -201,6 +202,33 @@ describe('createSessionMemoryService', () => {
 
       await expect(service.forget(scope, ['memory-1'])).rejects.toThrow(
         'Failed to write to session memory: failed to parse'
+      );
+    });
+
+    it('throws before reading when given more ids than one call takes', async () => {
+      const ids = Array.from(
+        { length: MAX_SESSION_MEMORY_FORGET_IDS + 1 },
+        (_, index) => `memory-${index}`
+      );
+
+      await expect(service.forget(scope, ids)).rejects.toThrow(
+        `Cannot forget more than ${MAX_SESSION_MEMORY_FORGET_IDS} memories at once`
+      );
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('counts a repeated id once against the limit and reads one revision per id', async () => {
+      esClient.search.mockResolvedValue(searchResponse([]));
+      const ids = Array.from(
+        { length: MAX_SESSION_MEMORY_FORGET_IDS },
+        (_, index) => `memory-${index}`
+      );
+
+      const result = await service.forget(scope, [...ids, 'memory-0']);
+
+      expect(Object.keys(result)).toHaveLength(MAX_SESSION_MEMORY_FORGET_IDS);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ size: MAX_SESSION_MEMORY_FORGET_IDS })
       );
     });
 

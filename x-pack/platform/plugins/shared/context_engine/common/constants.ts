@@ -27,6 +27,9 @@ export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
  */
 export const AI_INDEX_KI_GROUPS_PATH = `${AI_INDEX_KI_LIST_PATH}/_groups`;
 
+/** The most unique memory ids one forget call takes, which keeps its search under the result window. */
+export const MAX_SESSION_MEMORY_FORGET_IDS = 100;
+
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
 export const MAX_KI_PAGE_SIZE = 100;

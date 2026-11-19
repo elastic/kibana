@@ -8,6 +8,7 @@
 import { randomUUID } from 'crypto';
 import type { BulkResponse, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { MAX_SESSION_MEMORY_FORGET_IDS } from '../../common/constants';
 import { SESSION_MEMORY_DATA_STREAM } from './data_streams';
 import type {
   ForgetOutcome,
@@ -103,6 +104,9 @@ export const createSessionMemoryService = (
     const uniqueIds = [...new Set(ids)];
     if (uniqueIds.length === 0) {
       return {};
+    }
+    if (uniqueIds.length > MAX_SESSION_MEMORY_FORGET_IDS) {
+      throw new Error(`Cannot forget more than ${MAX_SESSION_MEMORY_FORGET_IDS} memories at once`);
     }
 
     // Collapse to the latest revision of each memory before looking at tombstones. Filtering out

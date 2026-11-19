@@ -51,6 +51,9 @@ export interface SessionMemoryService {
   remember(scope: SessionMemoryScope, input: RememberInput): Promise<{ id: string }>;
   /** Returns the latest revision, or undefined when the memory is missing, forgotten, or out of scope. */
   get(scope: SessionMemoryScope, id: string): Promise<SessionMemory | undefined>;
-  /** Tombstones each memory, keeping its revisions until retention removes them. */
+  /**
+   * Tombstones each memory, keeping its revisions until retention removes them. Throws for more
+   * than `MAX_SESSION_MEMORY_FORGET_IDS` unique ids.
+   */
   forget(scope: SessionMemoryScope, ids: readonly string[]): Promise<Record<string, ForgetOutcome>>;
 }
