@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EntryLevel, GeneralAccessLevel } from '../levels';
+import type { EntryAccess, GeneralAccess } from '../levels';
 
 /**
  * Operations every policy must define. A type can add its own operations on top of them.
@@ -15,8 +15,8 @@ import type { EntryLevel, GeneralAccessLevel } from '../levels';
 export const REQUIRED_OPERATIONS = ['view', 'edit', 'delete'] as const;
 
 /**
- * Operations the platform owns, which a policy cannot define: `manage_access` follows the `manage`
- * level, and `transfer` belongs to the owner and to recovery administrators only.
+ * Operations the platform owns, which a policy cannot define: `manage_access` follows `manage`
+ * access, and `transfer` belongs to the owner and to recovery administrators only.
  */
 export const RESERVED_OPERATIONS = ['manage_access', 'transfer'] as const;
 
@@ -40,8 +40,8 @@ export const isReservedOperation = (operation: string): operation is ReservedOpe
  * What one operation of a type requires.
  */
 export interface AccessOperation {
-  /** The lowest level that permits the operation. */
-  level: EntryLevel;
+  /** The lowest access that permits the operation. */
+  access: EntryAccess;
   /**
    * Feature privileges that cap the operation. Security resolves them to privilege actions. The
    * caller must hold all of them: the lists are an AND, so listing a privilege only ever narrows
@@ -59,15 +59,15 @@ export interface AccessOperation {
  * Per-type access policy, declared once when the type is registered.
  */
 export interface AccessPolicy {
-  /** The levels that general access can take for objects of this type. */
-  generalAccessLevels: readonly GeneralAccessLevel[];
+  /** The values that general access can take for objects of this type. */
+  generalAccess: readonly GeneralAccess[];
   /**
    * The general access that new objects get, and that applies to objects without an ACL. It is
-   * one of the {@link AccessPolicy.generalAccessLevels}.
+   * one of the {@link AccessPolicy.generalAccess}.
    */
-  defaultGeneralAccessLevel: GeneralAccessLevel;
-  /** The levels that entries can grant. */
-  entryLevels: readonly EntryLevel[];
+  defaultGeneralAccess: GeneralAccess;
+  /** The access that entries can grant. */
+  entryAccess: readonly EntryAccess[];
   /**
    * What each operation requires, keyed by operation name. It includes every
    * {@link REQUIRED_OPERATIONS} entry.

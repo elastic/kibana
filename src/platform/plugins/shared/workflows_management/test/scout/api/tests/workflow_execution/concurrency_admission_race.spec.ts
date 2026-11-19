@@ -22,23 +22,10 @@ const SIMULTANEOUS_DROP_RUNS = 5;
 const SIMULTANEOUS_CANCEL_RUNS = 3;
 const CANCEL_MAX_TWO = 2;
 const SIMULTANEOUS_CANCEL_MAX_TWO_RUNS = 3;
-const ADMISSION_SETTLE_TIMEOUT_MS = 25_000;
+// A cancel-in-progress loser that already parked at `waiting_for_input` only reaches `cancelled`
+// on the next execution wake, up to `WORKFLOW_WAKE_POLL_INTERVAL_MS` (30s) later.
+const ADMISSION_SETTLE_TIMEOUT_MS = 45_000;
 const CANCEL_TERMINATION_TIMEOUT_MS = 30_000;
-
-/**
- * Statuses that mean admission has finished for these repros. `pending` and `running`
- * are transient: the winner of a queue run moves on to `waiting_for_input`, and
- * cancel-in-progress losers are cancelled before they run.
- */
-const SETTLED_ADMISSION_STATUSES = new Set<string>([
-  ExecutionStatus.WAITING_FOR_INPUT,
-  ExecutionStatus.QUEUED,
-  ExecutionStatus.SKIPPED,
-  ExecutionStatus.CANCELLED,
-  ExecutionStatus.COMPLETED,
-  ExecutionStatus.FAILED,
-  ExecutionStatus.TIMED_OUT,
-]);
 
 type AdmissionExecution = WorkflowExecutionDto & { createdAt?: string };
 
@@ -60,6 +47,18 @@ const countByStatus = (executions: WorkflowExecutionDto[]): Record<string, numbe
     counts[status] = (counts[status] ?? 0) + 1;
   }
   return counts;
+};
+
+const matchesStatusCounts = (
+  executions: WorkflowExecutionDto[],
+  expected: Record<string, number>
+): boolean => {
+  const counts = countByStatus(executions);
+  const expectedStatuses = Object.keys(expected);
+  return (
+    expectedStatuses.length === Object.keys(counts).length &&
+    expectedStatuses.every((status) => counts[status] === expected[status])
+  );
 };
 
 const holdSlotWorkflowYaml = (isolationKey: string) => `
@@ -140,17 +139,15 @@ const startTogether = async (
 const waitForAdmissionToSettle = async (
   workflowsApi: WorkflowsApiService,
   workflowId: string,
-  expectedCount: number
+  expectedCounts: Record<string, number>
 ): Promise<WorkflowExecutionDto[]> => {
   const page = await waitForConditionOrThrow({
     action: () => workflowsApi.getExecutions(workflowId, { size: 100 }),
-    condition: (next) =>
-      next.results.length === expectedCount &&
-      next.results.every((execution) => SETTLED_ADMISSION_STATUSES.has(execution.status ?? '')),
+    condition: (next) => matchesStatusCounts(next.results, expectedCounts),
     interval: 500,
     timeout: ADMISSION_SETTLE_TIMEOUT_MS,
     errorMessage: (next) =>
-      `Admission did not settle for ${expectedCount} runs. Last counts: ${JSON.stringify(
+      `Admission did not settle at ${JSON.stringify(expectedCounts)}. Last counts: ${JSON.stringify(
         countByStatus(next.results)
       )}`,
   });
@@ -185,17 +182,18 @@ spaceTest.describe(
 
         await startTogether(apiServices.workflowsApi, workflow.id, SIMULTANEOUS_QUEUE_RUNS);
 
-        const executions = await waitForAdmissionToSettle(
-          apiServices.workflowsApi,
-          workflow.id,
-          SIMULTANEOUS_QUEUE_RUNS
-        );
-
-        expect(countByStatus(executions)).toStrictEqual({
+        const expectedCounts = {
           [ExecutionStatus.WAITING_FOR_INPUT]: 1,
           [ExecutionStatus.QUEUED]: QUEUE_SIZE,
           [ExecutionStatus.SKIPPED]: SIMULTANEOUS_QUEUE_RUNS - 1 - QUEUE_SIZE,
-        });
+        };
+        const executions = await waitForAdmissionToSettle(
+          apiServices.workflowsApi,
+          workflow.id,
+          expectedCounts
+        );
+
+        expect(countByStatus(executions)).toStrictEqual(expectedCounts);
       }
     );
 
@@ -207,16 +205,17 @@ spaceTest.describe(
 
         await startTogether(apiServices.workflowsApi, workflow.id, SIMULTANEOUS_DROP_RUNS);
 
+        const expectedCounts = {
+          [ExecutionStatus.WAITING_FOR_INPUT]: 1,
+          [ExecutionStatus.SKIPPED]: SIMULTANEOUS_DROP_RUNS - 1,
+        };
         const executions = await waitForAdmissionToSettle(
           apiServices.workflowsApi,
           workflow.id,
-          SIMULTANEOUS_DROP_RUNS
+          expectedCounts
         );
 
-        expect(countByStatus(executions)).toStrictEqual({
-          [ExecutionStatus.WAITING_FOR_INPUT]: 1,
-          [ExecutionStatus.SKIPPED]: SIMULTANEOUS_DROP_RUNS - 1,
-        });
+        expect(countByStatus(executions)).toStrictEqual(expectedCounts);
       }
     );
 
@@ -234,11 +233,10 @@ spaceTest.describe(
           SIMULTANEOUS_CANCEL_RUNS
         );
 
-        await waitForAdmissionToSettle(
-          apiServices.workflowsApi,
-          workflow.id,
-          SIMULTANEOUS_CANCEL_RUNS
-        );
+        await waitForAdmissionToSettle(apiServices.workflowsApi, workflow.id, {
+          [ExecutionStatus.CANCELLED]: SIMULTANEOUS_CANCEL_RUNS - 1,
+          [ExecutionStatus.WAITING_FOR_INPUT]: 1,
+        });
         const ranked = await rankByAdmissionOrder(apiServices.workflowsApi, executionIds);
         expect(ranked.map((execution) => execution.status)).toStrictEqual([
           ExecutionStatus.CANCELLED,
@@ -295,11 +293,10 @@ spaceTest.describe(
           SIMULTANEOUS_CANCEL_MAX_TWO_RUNS
         );
 
-        await waitForAdmissionToSettle(
-          apiServices.workflowsApi,
-          workflow.id,
-          SIMULTANEOUS_CANCEL_MAX_TWO_RUNS
-        );
+        await waitForAdmissionToSettle(apiServices.workflowsApi, workflow.id, {
+          [ExecutionStatus.CANCELLED]: SIMULTANEOUS_CANCEL_MAX_TWO_RUNS - CANCEL_MAX_TWO,
+          [ExecutionStatus.WAITING_FOR_INPUT]: CANCEL_MAX_TWO,
+        });
         const ranked = await rankByAdmissionOrder(apiServices.workflowsApi, executionIds);
         expect(ranked.map((execution) => execution.status)).toStrictEqual([
           ExecutionStatus.CANCELLED,

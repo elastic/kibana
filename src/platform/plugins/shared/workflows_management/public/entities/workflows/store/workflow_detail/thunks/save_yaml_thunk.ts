@@ -31,7 +31,11 @@ import {
 } from '../selectors';
 import { setWorkflow, setYamlString } from '../slice';
 
-export type SaveYamlParams = void;
+/**
+ * Without params, saves the current draft of the open workflow. With them, saves `yamlString` to
+ * `id`, and saves nothing if another workflow has been opened since.
+ */
+export type SaveYamlParams = void | { id: string | undefined; yamlString: string };
 export type SaveYamlResponse = void;
 
 export const saveYamlThunk = createAsyncThunk<
@@ -40,7 +44,10 @@ export const saveYamlThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/saveYamlThunk',
-  async (_, { getState, dispatch, rejectWithValue, extra: { services } }) => {
+  async (params, { getState, dispatch, rejectWithValue, extra: { services } }) => {
+    if (params && selectWorkflowId(getState()) !== params.id) {
+      return rejectWithValue('Another workflow was opened before saving');
+    }
     const { http, notifications, application } = services;
     const workflowApi = new WorkflowApi(http);
 
@@ -68,7 +75,7 @@ export const saveYamlThunk = createAsyncThunk<
 
     try {
       const state = getState();
-      const yamlString = selectYamlString(state);
+      const yamlString = params ? params.yamlString : selectYamlString(state);
       const workflowDefinition = selectWorkflowDefinition(state);
       const id = selectWorkflowId(state);
 

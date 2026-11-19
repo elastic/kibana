@@ -12,7 +12,7 @@ import { chunk } from 'lodash';
 import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import {
@@ -26,7 +26,9 @@ import {
 import {
   type CreateWorkflowCommand,
   type EsWorkflow,
+  getPageTriggerId,
   getWorkflowAccessDecisions,
+  isPageTrigger,
   NonTerminalExecutionStatuses,
   storedWorkflowAccessControlSchema,
   toCustomTriggerSchemaConfigs,
@@ -34,6 +36,7 @@ import {
   type WorkflowDetailDto,
   type WorkflowYaml,
 } from '@kbn/workflows';
+import type { ManagedFilter } from '@kbn/workflows/server';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
@@ -91,8 +94,8 @@ import {
   applyFieldUpdates,
   applyYamlUpdate,
   getTriggerTypesFromDefinition,
+  keepEnabledUnlessDeclared,
   prepareWorkflowDocumentFromYaml,
-  workflowYamlDeclaresTopLevelEnabled,
 } from '../api/lib/workflow_prepare';
 import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
@@ -114,10 +117,23 @@ import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_trigger
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
 import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks';
 
+interface DeleteWorkflowsOptions {
+  force?: boolean;
+  acknowledgeAclLoss?: boolean;
+}
+
+interface WorkflowDeletionOptions extends DeleteWorkflowsOptions {
+  purgeExecutions?: boolean;
+  profileId?: string;
+  request?: KibanaRequest;
+  isAdmin?: boolean;
+}
+
 // How many times to re-resolve a server-generated ID after losing a TOCTOU race
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
+const MAX_IDS_PER_SEARCH = 10_000;
 const INDEX_CALLED_WORKFLOW_IDS_BATCH_SIZE = 500;
 const TOCTOU_MAX_RETRIES = 5;
 
@@ -166,6 +182,12 @@ export interface BulkCreateWorkflowsResult {
 type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
   workflowData: WorkflowProperties;
 };
+
+const hasPageTrigger = (definition: WorkflowYaml | null | undefined): boolean =>
+  Boolean(definition?.triggers.some(isPageTrigger));
+
+const getPageIds = (definition: WorkflowYaml | null | undefined): Set<string> =>
+  new Set(definition?.triggers.filter(isPageTrigger).map(getPageTriggerId));
 
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
@@ -486,13 +508,14 @@ export class WorkflowCrudService {
     const accountId = document.definition?.settings?.run_as;
     const previous =
       options?.previousDocument ??
-      (bindings && !options?.create
+      ((bindings || this.deps.pagesSystemClient) && !options?.create
         ? await this.getWorkflowDocumentSource(id, document.spaceId, {
             includeDeleted: true,
             includeGlobal: true,
           })
         : null);
     const write = async () => {
+      await this.updatePagesBeforeWrite(id, previous, document, options?.request);
       const response = await this.deps.workflowStorage.getClient().index({
         id,
         document,
@@ -820,29 +843,35 @@ export class WorkflowCrudService {
       includeDeleted?: boolean;
       includeGlobal?: boolean;
       accessControlFilter?: estypes.QueryDslQueryContainer;
+      managedFilter?: ManagedFilter;
+      /** False to fail rather than miss the workflows on unavailable shards. */
+      allowPartialResults?: boolean;
     }
   ): Promise<WorkflowPartialDetailDto[]> {
-    if (ids.length === 0) {
-      return [];
+    const workflows: WorkflowPartialDetailDto[] = [];
+    // A search returns at most `index.max_result_window` (10,000 by default) hits.
+    for (const idsChunk of chunk(ids, MAX_IDS_PER_SEARCH)) {
+      const { must, must_not } = buildWorkflowFilters({
+        ids: idsChunk,
+        space: { id: spaceId, includeGlobal: options?.includeGlobal ?? true },
+        deleted: options?.includeDeleted ? 'all' : 'not_deleted',
+        managed: options?.managedFilter,
+      });
+
+      const response = await this.deps.workflowStorage.getClient().search({
+        query: { bool: { must, must_not, filter: options?.accessControlFilter } },
+        _source: source ? [...new Set([...source, 'access_control'])] : true,
+        size: idsChunk.length,
+        track_total_hits: false,
+        ...(options?.allowPartialResults === false ? { allow_partial_search_results: false } : {}),
+      });
+
+      for (const hit of response.hits.hits) {
+        storedWorkflowAccessControlSchema.parse(hit._source?.access_control);
+        workflows.push(transformStoragePartialToWorkflowDto(hit._id, hit._source));
+      }
     }
-
-    const { must, must_not } = buildWorkflowFilters({
-      ids,
-      space: { id: spaceId, includeGlobal: options?.includeGlobal ?? true },
-      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
-    });
-
-    const response = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must, must_not, filter: options?.accessControlFilter } },
-      _source: source ? [...new Set([...source, 'access_control'])] : true,
-      size: ids.length,
-      track_total_hits: false,
-    });
-
-    return response.hits.hits.map((hit) => {
-      storedWorkflowAccessControlSchema.parse(hit._source?.access_control);
-      return transformStoragePartialToWorkflowDto(hit._id, hit._source);
-    });
+    return workflows;
   }
 
   async createWorkflow(
@@ -934,6 +963,12 @@ export class WorkflowCrudService {
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
     });
+
+    await this.syncWorkflowPages(
+      [{ id, definition: workflowData.definition }],
+      workflowData.spaceId,
+      request
+    );
 
     return transformStorageDocumentToWorkflowDto(id, workflowData);
   }
@@ -1135,6 +1170,15 @@ export class WorkflowCrudService {
       );
     }
 
+    await this.syncWorkflowPages(
+      successfullyWritten.map(({ id, workflowData }) => ({
+        id,
+        definition: workflowData.definition,
+      })),
+      spaceId,
+      request
+    );
+
     return { created, failed };
   }
 
@@ -1154,25 +1198,12 @@ export class WorkflowCrudService {
     let shouldUpdateScheduler = false;
 
     const workflowYaml = workflow.yaml;
-    const zodSchema = workflowYaml
-      ? await this.deps.validationService.getWorkflowZodSchema({ loose: false }, spaceId, request)
+    const yamlUpdate = workflowYaml
+      ? await this.prepareYamlUpdate(workflowYaml, id, spaceId, request, {
+          logger: this.deps.logger,
+        })
       : undefined;
-    const triggerDefinitions = workflowYaml
-      ? this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? []
-      : undefined;
-    const yamlResult =
-      workflowYaml && zodSchema && triggerDefinitions
-        ? {
-            workflowYaml,
-            ...(await applyYamlUpdate({
-              workflowYaml,
-              zodSchema,
-              triggerDefinitions,
-              logger: this.deps.logger,
-              workflowId: id,
-            })),
-          }
-        : undefined;
+    const yamlResult = workflowYaml && yamlUpdate ? { workflowYaml, ...yamlUpdate } : undefined;
 
     let previousVersion: number | undefined;
     const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
@@ -1197,26 +1228,15 @@ export class WorkflowCrudService {
           updatedData = {
             ...updatedData,
             yaml: yamlResult.workflowYaml,
-            ...yamlResult.updatedDataPatch,
+            ...keepEnabledUnlessDeclared(
+              yamlResult.workflowYaml,
+              yamlResult,
+              workflow.enabled ?? existingSource.enabled
+            ),
           };
           validationErrors.length = 0;
           validationErrors.push(...yamlResult.validationErrors);
           shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
-
-          if (
-            yamlResult.validationErrors.length === 0 &&
-            yamlResult.updatedDataPatch.valid &&
-            updatedData.definition &&
-            !workflowYamlDeclaresTopLevelEnabled(yamlResult.workflowYaml)
-          ) {
-            const resolvedEnabled =
-              workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
-            updatedData.enabled = resolvedEnabled;
-            const currentDefinition = updatedData.definition;
-            if (currentDefinition) {
-              updatedData.definition = { ...currentDefinition, enabled: resolvedEnabled };
-            }
-          }
         } else if (!workflowYaml) {
           const fieldResult = applyFieldUpdates(workflow, existingSource);
           updatedData = { ...updatedData, ...fieldResult.patch };
@@ -1253,6 +1273,12 @@ export class WorkflowCrudService {
       shouldUpdateScheduler,
     });
 
+    await this.syncWorkflowPages(
+      [{ id, definition: finalData.definition }],
+      finalData.spaceId,
+      request
+    );
+
     return {
       response: {
         id,
@@ -1264,6 +1290,49 @@ export class WorkflowCrudService {
       },
       finalData,
     };
+  }
+
+  // Resolves to undefined when the schema to validate against is unavailable.
+  private async prepareYamlUpdate(
+    workflowYaml: string,
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest,
+    logging: { logger?: Logger } = {}
+  ): Promise<Awaited<ReturnType<typeof applyYamlUpdate>> | undefined> {
+    const zodSchema = await this.deps.validationService.getWorkflowZodSchema(
+      { loose: false },
+      spaceId,
+      request
+    );
+    if (!zodSchema) {
+      return undefined;
+    }
+    return applyYamlUpdate({
+      workflowYaml,
+      zodSchema,
+      triggerDefinitions: this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [],
+      workflowId,
+      ...logging,
+    });
+  }
+
+  /**
+   * Returns the definition that saving `yaml` over the given workflow would store, or null when it
+   * would be stored invalid.
+   */
+  async getDefinitionToStore(
+    yaml: string,
+    { id, enabled }: { id: string; enabled: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<EsWorkflow['definition'] | null> {
+    const yamlResult = await this.prepareYamlUpdate(yaml, id, spaceId, request);
+    if (!yamlResult) {
+      return null;
+    }
+    const { valid, definition } = keepEnabledUnlessDeclared(yaml, yamlResult, enabled);
+    return valid ? definition ?? null : null;
   }
 
   async updateWorkflow(
@@ -1344,7 +1413,7 @@ export class WorkflowCrudService {
   async deleteWorkflows(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean; acknowledgeAclLoss?: boolean },
+    options?: DeleteWorkflowsOptions,
     request?: KibanaRequest
   ): Promise<DeleteWorkflowsResponse> {
     const profileId = request
@@ -1354,6 +1423,17 @@ export class WorkflowCrudService {
       options?.force === true &&
       (await isEntityAccessControlAdmin(this.deps.getCoreStart(), request, this.deps.authz));
     const deletionOptions = { ...options, profileId, request, isAdmin };
+    const result = await this.deleteWorkflowsWithBindings(ids, spaceId, deletionOptions);
+    await this.retireWorkflowPages(result.successfulIds ?? [], spaceId, request);
+    return result;
+  }
+
+  private async deleteWorkflowsWithBindings(
+    ids: string[],
+    spaceId: string,
+    deletionOptions: WorkflowDeletionOptions
+  ): Promise<DeleteWorkflowsResponse> {
+    const { profileId, request, isAdmin, force } = deletionOptions;
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
     const result: DeleteWorkflowsResponse = {
@@ -1403,13 +1483,13 @@ export class WorkflowCrudService {
         }
         assertWorkflowOperation(
           versioned.source,
-          getWorkflowDeleteOperation(versioned.source, options?.force),
+          getWorkflowDeleteOperation(versioned.source, force),
           profileId,
           this.accessAuditContext(request, id, spaceId),
           isAdmin
         );
         const accountId = versioned.source.definition?.settings?.run_as;
-        if (batch && !accountId && !options?.force) {
+        if (batch && !accountId && !force) {
           unboundSoftDeletes.push({
             _id: id,
             _source: versioned.source,
@@ -1428,9 +1508,7 @@ export class WorkflowCrudService {
           );
           if (executions.total > 0) {
             throw new WorkflowConflictError(
-              `Cannot ${
-                options?.force ? 'force-delete' : 'delete'
-              } workflow with running executions: ${id}`,
+              `Cannot ${force ? 'force-delete' : 'delete'} workflow with running executions: ${id}`,
               id
             );
           }
@@ -1491,7 +1569,7 @@ export class WorkflowCrudService {
     }
     if (batch)
       await cleanupDeletedWorkflows(result.successfulIds ?? [], {
-        force: options?.force ?? false,
+        force: force ?? false,
         spaceId,
         taskScheduler: this.deps.getTaskScheduler(),
         workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
@@ -1499,6 +1577,127 @@ export class WorkflowCrudService {
         logger: this.deps.logger,
       });
     return result;
+  }
+
+  /**
+   * Creates and retires pages after a write, for the written workflows with a page trigger. The
+   * others have no pages: a save retires the pages it drops before its write. A failure only logs:
+   * the workflow write already happened, and the resolver checks that the trigger is still there.
+   * Syncs from the stored workflow, not the written one, so a slow sync cannot retire the page
+   * of a newer save.
+   * shortcut: a save that lands between this read and the sync can still lose its page until its
+   * next save; a version guard on the sync closes that if it shows up.
+   */
+  private async syncWorkflowPages(
+    written: Array<{ id: string; definition: WorkflowProperties['definition'] }>,
+    spaceId: string,
+    request: KibanaRequest | undefined
+  ): Promise<void> {
+    const { pagesSystemClient } = this.deps;
+    const ids = written.filter(({ definition }) => hasPageTrigger(definition)).map(({ id }) => id);
+    if (!pagesSystemClient || ids.length === 0) return;
+    let workflows: WorkflowDetailDto[];
+    try {
+      // A workflow deleted or moved since the write is missing: the delete or the move handles it.
+      workflows = await this.getWorkflowsByIds(ids, spaceId);
+    } catch (error) {
+      this.deps.logger.error(`Failed to read workflows [${ids.join(', ')}] for the page sync`, {
+        error,
+      });
+      return;
+    }
+    await pMap(
+      workflows,
+      async ({ id, createdAt, definition, valid }) => {
+        try {
+          await pagesSystemClient.syncWorkflowPages({
+            workflowId: id,
+            workflowCreatedAt: createdAt,
+            spaceId,
+            definition,
+            valid,
+            request,
+          });
+        } catch (error) {
+          this.deps.logger.error(`Failed to sync the pages of workflow [${id}]`, { error });
+        }
+      },
+      { concurrency: 10 }
+    );
+  }
+
+  /**
+   * Retires the pages a write drops, and unpublishes them on an invalid save, right before the
+   * write and after every write gate passed. A failure fails the write, so a page never stays
+   * live by mistake.
+   */
+  private async updatePagesBeforeWrite(
+    id: string,
+    previous: WorkflowProperties | null | undefined,
+    next: WorkflowProperties,
+    request: KibanaRequest | undefined
+  ): Promise<void> {
+    const { pagesSystemClient } = this.deps;
+    if (!pagesSystemClient || !previous) return;
+    // A move or a revive starts without the old pages.
+    if (previous.deleted_at || previous.spaceId !== next.spaceId) {
+      await pagesSystemClient.retireWorkflowPages({
+        workflowIds: [id],
+        spaceId: previous.spaceId,
+        reason: previous.deleted_at ? 'workflow_revived' : 'workflow_moved',
+        request,
+      });
+      return;
+    }
+    if (!next.valid) {
+      // An invalid workflow cannot serve a page. Unpublishing keeps the secret, so an admin can
+      // publish the same link again after a fix.
+      if (previous.valid && hasPageTrigger(previous.definition)) {
+        await pagesSystemClient.unpublishWorkflowPages({
+          workflowId: id,
+          spaceId: next.spaceId,
+          request,
+        });
+      }
+      return;
+    }
+    // A save that keeps every page of a valid stored definition has nothing to retire. Disables
+    // and field updates skip the page store this way, so it can never block them.
+    const kept = getPageIds(next.definition);
+    if (
+      previous.valid &&
+      [...getPageIds(previous.definition)].every((pageId) => kept.has(pageId))
+    ) {
+      return;
+    }
+    await pagesSystemClient.retireRemovedPages({
+      workflowId: id,
+      spaceId: next.spaceId,
+      definition: next.definition,
+      request,
+    });
+  }
+
+  private async retireWorkflowPages(
+    workflowIds: string[],
+    spaceId: string,
+    request: KibanaRequest | undefined
+  ): Promise<void> {
+    const { pagesSystemClient } = this.deps;
+    if (!pagesSystemClient || workflowIds.length === 0) return;
+    try {
+      await pagesSystemClient.retireWorkflowPages({
+        workflowIds,
+        spaceId,
+        reason: 'workflow_deleted',
+        request,
+      });
+    } catch (error) {
+      this.deps.logger.error(
+        `Failed to retire the pages of deleted workflows [${workflowIds.join(', ')}]`,
+        { error }
+      );
+    }
   }
 
   private accessAuditContext(
@@ -1538,13 +1737,7 @@ export class WorkflowCrudService {
   private async deleteWorkflowDocuments(
     ids: string[],
     spaceId: string,
-    options?: {
-      force?: boolean;
-      acknowledgeAclLoss?: boolean;
-      profileId?: string;
-      request?: KibanaRequest;
-      isAdmin?: boolean;
-    },
+    options?: WorkflowDeletionOptions,
     versionedWorkflow?: VersionedWorkflowDocument,
     guardedBatch?: OccWorkflowHit[],
     deferCleanup = false
@@ -1574,6 +1767,7 @@ export class WorkflowCrudService {
           }
         : {}),
       force: options?.force ?? false,
+      purgeExecutions: options?.purgeExecutions,
       acknowledgeAclLoss: options?.acknowledgeAclLoss ?? false,
       assertCanDelete: (workflow, id) =>
         assertWorkflowOperation(
@@ -1660,7 +1854,12 @@ export class WorkflowCrudService {
     });
     if (!versioned) return false;
     ensureManagedOrphanUnchanged({ document: versioned.source, orphan, spaceId });
-    const result = await this.deleteWorkflowDocuments([id], spaceId, { force: true }, versioned);
+    const result = await this.deleteWorkflowDocuments(
+      [id],
+      spaceId,
+      { force: true, purgeExecutions: false },
+      versioned
+    );
     if (result.deleted !== 1) {
       throw new Error(result.failures[0]?.error ?? 'Workflow deletion failed.');
     }
@@ -1802,16 +2001,21 @@ export class WorkflowCrudService {
     prepared: WorkflowProperties,
     existing: WorkflowProperties
   ): WorkflowProperties {
-    return applyWorkflowVersion(
-      {
-        ...prepared,
-        created_at: existing.created_at,
-        createdBy: existing.createdBy,
-        owner_id: existing.owner_id,
-        access_control: existing.access_control,
-      },
-      existing
-    );
+    const document: WorkflowProperties = {
+      ...prepared,
+      created_at: existing.created_at,
+      createdBy: existing.createdBy,
+      owner_id: existing.owner_id,
+      access_control: existing.access_control,
+    };
+    // A rewrite generates a uid. Keep the stored one, and leave a document that
+    // never had one linked by workflow id.
+    if (existing.workflowUid) {
+      document.workflowUid = existing.workflowUid;
+    } else {
+      delete document.workflowUid;
+    }
+    return applyWorkflowVersion(document, existing);
   }
 
   private async executeBulkOverwrite(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KbnClient, ScoutLogger } from '@kbn/scout-security';
 import { apiTest as baseApiTest } from '@kbn/scout-security';
 import {
   FLEET_AND_HOST_TIMEOUT_MS,
@@ -14,29 +15,48 @@ import {
 } from '../../../fixtures/enrolled_endpoint';
 import {
   createProtectedEndpointPolicy,
-  deleteProtectedEndpointPolicy,
-  type ProtectedEndpointPolicy,
+  createUnprotectedEndpointPolicy,
+  deleteEndpointAgentPolicy,
+  type EndpointAgentPolicy,
 } from './protected_policy';
 
-const PROTECTED_POLICIES_TIMEOUT_MS = 180_000;
+const AGENT_POLICIES_TIMEOUT_MS = 180_000;
 
-export type { EnrolledHost, ProtectedEndpointPolicy };
+export type { EnrolledHost, EndpointAgentPolicy };
 
-export interface ProtectedPolicies {
+export interface EndpointAgentPolicies {
   /** The policy the host enrolls on. */
-  first: ProtectedEndpointPolicy;
+  first: EndpointAgentPolicy;
   /** The policy the host is reassigned to. */
-  second: ProtectedEndpointPolicy;
+  second: EndpointAgentPolicy;
+}
+
+interface AgentPolicyOptions {
+  /** Policies are named `<namePrefix>-a-<timestamp>` and `<namePrefix>-b-<timestamp>`. */
+  namePrefix: string;
+  firstProtected: boolean;
+  secondProtected: boolean;
 }
 
 interface TamperProtectionTestFixtures {
-  protectedPolicies: ProtectedPolicies;
+  agentPolicyOptions: AgentPolicyOptions;
+  agentPolicies: EndpointAgentPolicies;
   enrolledHost: EnrolledHost;
 }
 
 interface TamperProtectionWorkerFixtures {
   fleetServer: void;
 }
+
+const createAgentPolicy = (
+  kbnClient: KbnClient,
+  log: ScoutLogger,
+  name: string,
+  isProtected: boolean
+): Promise<EndpointAgentPolicy> =>
+  isProtected
+    ? createProtectedEndpointPolicy(kbnClient, log, name)
+    : createUnprotectedEndpointPolicy(kbnClient, log, name);
 
 export const apiTest = baseApiTest.extend<
   TamperProtectionTestFixtures,
@@ -49,44 +69,52 @@ export const apiTest = baseApiTest.extend<
     { scope: 'worker', timeout: FLEET_AND_HOST_TIMEOUT_MS },
   ],
 
+  agentPolicyOptions: [
+    { namePrefix: 'tamper-enabled-to-enabled', firstProtected: true, secondProtected: true },
+    { option: true },
+  ],
+
   // Depends on `fleetServer` because the Endpoint package must be installed first.
-  protectedPolicies: [
-    async ({ kbnClient, log, fleetServer: _fleetServer }, use) => {
+  agentPolicies: [
+    async ({ kbnClient, log, agentPolicyOptions, fleetServer: _fleetServer }, use) => {
+      const { namePrefix, firstProtected, secondProtected } = agentPolicyOptions;
       const suffix = Date.now();
-      const created: Partial<ProtectedPolicies> = {};
+      const created: Partial<EndpointAgentPolicies> = {};
 
       try {
-        created.first = await createProtectedEndpointPolicy(
+        created.first = await createAgentPolicy(
           kbnClient,
           log,
-          `tamper-enabled-to-enabled-a-${suffix}`
+          `${namePrefix}-a-${suffix}`,
+          firstProtected
         );
-        created.second = await createProtectedEndpointPolicy(
+        created.second = await createAgentPolicy(
           kbnClient,
           log,
-          `tamper-enabled-to-enabled-b-${suffix}`
+          `${namePrefix}-b-${suffix}`,
+          secondProtected
         );
 
         await use({ first: created.first, second: created.second });
       } finally {
         for (const policy of [created.first, created.second]) {
           if (policy) {
-            await deleteProtectedEndpointPolicy(kbnClient, log, policy.indexedPolicy);
+            await deleteEndpointAgentPolicy(kbnClient, log, policy.indexedPolicy);
           }
         }
       }
     },
-    { timeout: PROTECTED_POLICIES_TIMEOUT_MS },
+    { timeout: AGENT_POLICIES_TIMEOUT_MS },
   ],
 
   enrolledHost: [
-    async ({ kbnClient, esClient, log, protectedPolicies }, use) => {
+    async ({ kbnClient, esClient, log, agentPolicies }, use) => {
       await withEnrolledHost(
         {
           kbnClient,
           esClient,
           log,
-          agentPolicyId: protectedPolicies.first.agentPolicyId,
+          agentPolicyId: agentPolicies.first.agentPolicyId,
           hostnamePrefix: 'test-host-tamper-',
         },
         use
