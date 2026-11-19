@@ -6,29 +6,46 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { Logger } from '@kbn/core/server';
 import {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
-  agentToolEventInvestigationAttachEventType,
   agentToolEventStatusUpdateEventType,
   agentToolKiIdentificationStartedEventType,
   detectionScanEventType,
+  discoveryCompletedEventType,
+  discoveryStartedEventType,
   discoveryTriggeredEventType,
+  eventStatusChangedEventType,
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,
   onboardingScheduledEventType,
   agentToolEventWriteEventType,
   agentToolEventSearchEventType,
+  agentToolFailedEventType,
+  knowledgeIndicatorQueriesGenerationFailedEventType,
 } from './events';
 import { EbtTelemetryClient } from './client';
+import {
+  CpsTelemetryContextProvider,
+  type CpsTelemetryContextConfig,
+} from './cps_telemetry_context';
 
 export class EbtTelemetryService {
   private analytics?: AnalyticsServiceSetup;
+  private contextProvider?: CpsTelemetryContextProvider;
+  private logger?: Logger;
 
   constructor() {}
 
-  public setup(analytics: AnalyticsServiceSetup) {
+  public setup(
+    analytics: AnalyticsServiceSetup,
+    contextConfig: CpsTelemetryContextConfig,
+    logger: Logger
+  ) {
     this.analytics = analytics;
+    this.contextProvider = new CpsTelemetryContextProvider(contextConfig);
+    this.logger = logger;
     this.analytics.registerEventType(knowledgeIndicatorEventsGeneratedEventType);
     this.analytics.registerEventType(knowledgeIndicatorFeaturesIdentifiedEventType);
     this.analytics.registerEventType(agentBuilderKnowledgeIndicatorCreatedEventType);
@@ -37,16 +54,20 @@ export class EbtTelemetryService {
     this.analytics.registerEventType(agentToolEventStatusUpdateEventType);
     this.analytics.registerEventType(agentToolEventWriteEventType);
     this.analytics.registerEventType(agentToolEventSearchEventType);
-    this.analytics.registerEventType(agentToolEventInvestigationAttachEventType);
+    this.analytics.registerEventType(agentToolFailedEventType);
+    this.analytics.registerEventType(knowledgeIndicatorQueriesGenerationFailedEventType);
+    this.analytics.registerEventType(eventStatusChangedEventType);
     this.analytics.registerEventType(discoveryTriggeredEventType);
+    this.analytics.registerEventType(discoveryStartedEventType);
+    this.analytics.registerEventType(discoveryCompletedEventType);
     this.analytics.registerEventType(detectionScanEventType);
     this.analytics.registerEventType(onboardingScheduledEventType);
   }
 
   public getClient() {
-    if (!this.analytics) {
+    if (!this.analytics || !this.contextProvider || !this.logger) {
       throw new Error('Analytics service is not available.');
     }
-    return new EbtTelemetryClient(this.analytics);
+    return new EbtTelemetryClient(this.analytics, this.contextProvider, this.logger);
   }
 }

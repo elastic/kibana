@@ -90,6 +90,12 @@ describe('ExecutionListFilters', () => {
     });
   });
 
+  it('hides the execution name filter when runs do not use execution names', async () => {
+    renderComponent();
+    await openPopover();
+    expect(screen.queryByLabelText('Filter by execution name')).not.toBeInTheDocument();
+  });
+
   it('filters by execution name while keeping the other filters', async () => {
     const onFiltersChange = jest.fn();
     const filters = {
@@ -97,7 +103,7 @@ describe('ExecutionListFilters', () => {
       executionTypes: [ExecutionType.PRODUCTION],
       executedBy: ['user-1'],
     };
-    renderComponent({ filters, onFiltersChange });
+    renderComponent({ filters, onFiltersChange, showExecutionName: true });
     await openPopover();
 
     fireEvent.change(screen.getByLabelText('Filter by execution name'), {
@@ -112,6 +118,7 @@ describe('ExecutionListFilters', () => {
     renderComponent({
       filters: { ...defaultFilters, runName: 'production' },
       onFiltersChange,
+      showExecutionName: true,
     });
     await openPopover();
     fireEvent.click(screen.getByText('Failed'));
@@ -128,6 +135,7 @@ describe('ExecutionListFilters', () => {
     renderComponent({
       filters: { ...defaultFilters, runName: 'production' },
       onFiltersChange,
+      showExecutionName: true,
     });
     expect(screen.getByTestId('workflowExecutionListFilterCount')).toHaveTextContent('1');
     await openPopover();

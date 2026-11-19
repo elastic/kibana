@@ -34,13 +34,15 @@ export {
   streamsUnitStatsRequestSchema,
   streamsUnitStatsResponseSchema,
   streamsUnitStatsSeriesSchema,
+  streamsUnitStatsSourceResultSchema,
   streamsUnitUiMetadataSchema,
   streamsUnitUpsertRequestSchema,
 } from './src/models/unit';
 export type { StreamsUnit } from './src/models/unit';
 export {
-  AUTO_WRITE_PATTERN_BY_SIGNAL,
+  AUTO_WRITE_PATTERNS_BY_SIGNAL,
   UNIT_DESTINATION_SIGNALS,
+  getPrometheusDataStream,
   getSignalTargetsWritePatterns,
   getUnitDestinationSignalTargets,
   getUnitDestinationWritePatterns,
@@ -50,6 +52,19 @@ export {
   type UnitDestinationSignal,
   type UnitDestinationSignalTargets,
 } from './src/helpers/unit_destination_targets';
+export {
+  MAX_OTEL_DATASET_BYTES,
+  MAX_OTEL_NAMESPACE_BYTES,
+  OTEL_TYPE_SEPARATOR,
+  PROMETHEUS_TYPE_SEPARATOR,
+  composeOtelDataStreamName,
+  parseOtelDataStreamName,
+  validateOtelDataStreamIndex,
+  validateOtelDataStreamName,
+  type OtelDataStreamName,
+  type OtelDataStreamNameError,
+  type OtelDataStreamSignal,
+} from './src/helpers/otel_data_stream_name';
 export type {
   CatalogueArrayField,
   CatalogueBooleanField,

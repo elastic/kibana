@@ -6,8 +6,7 @@
  */
 
 import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
-import { createDefaultUnit, type Unit } from './unit_repository';
-import { allocateComponentId, withoutUnconnectedRoutes } from './unit_pipeline';
+import { allocateComponentId } from './unit_pipeline';
 
 describe('allocateComponentId', () => {
   it('numbers from 1 by default and marks the id taken', () => {
@@ -36,72 +35,5 @@ describe('allocateComponentId', () => {
 
   it('falls back to a generic stem when nothing usable is left', () => {
     expect(allocateComponentId('___', new Set())).toBe('component-1');
-  });
-});
-
-describe('withoutUnconnectedRoutes', () => {
-  const unitWith = (pipelines: Unit['unit']['pipelines']): Unit => ({
-    ...createDefaultUnit(),
-    unit: { ...createDefaultUnit().unit, pipelines },
-  });
-
-  it('leaves a unit whose rules all have targets as it is', () => {
-    const unit = unitWith([
-      {
-        id: 'main',
-        supported_telemetry: ['logs'],
-        config: [
-          { name: 'sources', value: ['nop-input'] },
-          { name: 'routes', value: [{ destinations: ['debug-out'] }] },
-        ],
-      },
-    ]);
-
-    expect(withoutUnconnectedRoutes(unit)).toBe(unit);
-  });
-
-  it('drops a routing pipeline left without rules, and the child only it reached', () => {
-    const unit = unitWith([
-      {
-        id: 'main',
-        supported_telemetry: ['logs'],
-        config: [
-          { name: 'sources', value: ['nop-input'] },
-          {
-            name: 'routes',
-            value: [{ when: 'true', destinations: [] }, { pipelines: [] }],
-          },
-        ],
-      },
-      {
-        id: 'kept',
-        supported_telemetry: ['logs'],
-        config: [
-          { name: 'sources', value: ['nop-input'] },
-          { name: 'routes', value: [{ when: 'true', pipelines: [] }, { pipelines: ['child'] }] },
-        ],
-      },
-      {
-        id: 'child',
-        supported_telemetry: ['logs'],
-        config: [{ name: 'destinations', value: ['debug-out'] }],
-      },
-    ]);
-
-    expect(withoutUnconnectedRoutes(unit).unit.pipelines).toEqual([
-      {
-        id: 'kept',
-        supported_telemetry: ['logs'],
-        config: [
-          { name: 'sources', value: ['nop-input'] },
-          { name: 'routes', value: [{ pipelines: ['child'] }] },
-        ],
-      },
-      {
-        id: 'child',
-        supported_telemetry: ['logs'],
-        config: [{ name: 'destinations', value: ['debug-out'] }],
-      },
-    ]);
   });
 });

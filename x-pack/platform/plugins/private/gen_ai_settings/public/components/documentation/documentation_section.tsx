@@ -245,7 +245,11 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       <EuiSplitPanel.Inner>
         <EuiText size="s" color="subdued">
           {i18n.DOCUMENTATION_DESCRIPTION}{' '}
-          <EuiLink href={docLinks.links.aiAssistantSettings} target="_blank" external>
+          <EuiLink
+            href={docLinks.links.agentBuilder.replaceKnowledgeBaseContent}
+            target="_blank"
+            external
+          >
             {i18n.LEARN_MORE}
           </EuiLink>
         </EuiText>

@@ -8,13 +8,15 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
+import type {
+  InferenceAnonymizationOptions,
+  RegexWorkerService,
+} from '@kbn/ai-anonymization-server';
 import type {
   DecideAPI,
   DecideOptions,
-  DecideResponse,
   DecisionAnswer,
-  DecisionAnswerFor,
-  DecisionAnswersFor,
   DecisionQuestion,
 } from '@kbn/inference-common';
 import {
@@ -24,106 +26,94 @@ import {
   isInferenceError,
 } from '@kbn/inference-common';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
-import { parseDecisionResponse } from './parse_decision_response';
-import { toKeyedQuestions } from './question_keys';
+import { getTelemetryHeaders } from '../util/telemetry_headers';
+import { anonymizeRequest } from './anonymize_request';
+import { parseDecisionResponse, questionKey } from './parse_decision_response';
 
-interface DecisionEndpointsResponse {
-  endpoints?: Array<{ inference_id: string }>;
+interface CreateDecideApiOptions {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
+  anonymization?: InferenceAnonymizationOptions;
 }
+
+const toKeyedQuestions = (
+  questions: readonly DecisionQuestion[]
+): Record<string, DecisionQuestion> =>
+  Object.fromEntries(questions.map((question, index) => [questionKey(index), question]));
+
+/** Maps Elasticsearch errors to inference errors. */
+const toInferenceError = ({
+  error,
+  options: { inferenceId, abortSignal },
+}: {
+  error: Error;
+  options: DecideOptions;
+}): Error => {
+  if (isInferenceError(error)) {
+    return error;
+  }
+
+  if (abortSignal?.aborted || error instanceof errors.RequestAbortedError) {
+    return createInferenceRequestAbortedError();
+  }
+
+  if (error instanceof errors.ResponseError) {
+    const { statusCode } = error.meta;
+
+    if (statusCode === 404) {
+      return createInferenceRequestError(`Inference endpoint '${inferenceId}' not found`, 404);
+    }
+
+    return createInferenceProviderError(error.message, { status: statusCode ?? undefined });
+  }
+
+  return createInferenceProviderError(error.message);
+};
+
+/** Sends the questions to the `decision` inference task and reads the answers back. */
+const invokeDecision = async ({
+  esClient,
+  options: { input, inferenceId, abortSignal, metadata },
+  questions,
+}: {
+  esClient: ElasticsearchClient;
+  options: DecideOptions;
+  questions: DecisionQuestion[];
+}): Promise<DecisionAnswer[]> => {
+  if (abortSignal?.aborted) {
+    throw createInferenceRequestAbortedError();
+  }
+
+  const body = await esClient.transport.request(
+    {
+      method: 'POST',
+      path: `/_inference/decision/${encodeURIComponent(inferenceId)}`,
+      body: { input, task_settings: { questions: toKeyedQuestions(questions) } },
+    },
+    { signal: abortSignal, headers: getTelemetryHeaders(metadata?.connectorTelemetry) }
+  );
+
+  return parseDecisionResponse(body, questions);
+};
 
 /**
  * Creates the `decide` API, which calls the Elasticsearch `decision` inference task as the
  * user `esClient` is scoped to.
  */
-export const createDecideApi = ({
+export function createDecideApi(opts: CreateDecideApiOptions): DecideAPI;
+export function createDecideApi({
   esClient,
   logger,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-}): DecideAPI => {
-  /** The given inference id, else the first `decision` endpoint the cluster lists. */
-  const resolveInferenceId = async (
-    inferenceId: string | undefined,
-    signal?: AbortSignal
-  ): Promise<string> => {
-    if (inferenceId) {
-      return inferenceId;
-    }
-
-    const { endpoints = [] } = await esClient.transport.request<DecisionEndpointsResponse>(
-      { method: 'GET', path: '/_inference/decision/_all' },
-      { signal }
-    );
-    const [first] = endpoints;
-
-    if (!first) {
-      throw createInferenceRequestError('No decision inference endpoint on the cluster', 404);
-    }
-
-    return first.inference_id;
-  };
-
-  /** Maps Elasticsearch errors: a missing endpoint or task type is a 404 request error. */
-  const toInferenceError = (error: Error, signal?: AbortSignal): Error => {
-    if (isInferenceError(error)) {
-      return error;
-    }
-
-    if (signal?.aborted || error instanceof errors.RequestAbortedError) {
-      return createInferenceRequestAbortedError();
-    }
-
-    if (error instanceof errors.ResponseError) {
-      const { statusCode, body } = error.meta;
-
-      if (
-        statusCode === 404 ||
-        (statusCode === 400 && JSON.stringify(body).includes('task_type'))
-      ) {
-        return createInferenceRequestError(error.message, 404);
-      }
-
-      return createInferenceProviderError(error.message, { status: statusCode ?? undefined });
-    }
-
-    return createInferenceProviderError(error.message);
-  };
-
-  const ask = async (
-    { input, inferenceId: requestedInferenceId, abortSignal }: DecideOptions,
-    questions: DecisionQuestion[]
-  ): Promise<DecideResponse<{ answers: DecisionAnswer[] }>> => {
-    if (abortSignal?.aborted) {
-      throw createInferenceRequestAbortedError();
-    }
-
-    const inferenceId = await resolveInferenceId(requestedInferenceId, abortSignal);
-
-    const body = await esClient.transport.request(
-      {
-        method: 'POST',
-        path: `/_inference/decision/${encodeURIComponent(inferenceId)}`,
-        body: { input, task_settings: { questions: toKeyedQuestions(questions) } },
-      },
-      { signal: abortSignal }
-    );
-
-    return { inferenceId, answers: parseDecisionResponse(body, questions) };
-  };
-
-  function decide<const Q extends DecisionQuestion>(
-    options: DecideOptions,
-    question: Q
-  ): Promise<DecideResponse<{ answer: DecisionAnswerFor<Q> }>>;
-  function decide<const Q extends [DecisionQuestion, DecisionQuestion, ...DecisionQuestion[]]>(
-    options: DecideOptions,
-    ...questions: Q
-  ): Promise<DecideResponse<{ answers: DecisionAnswersFor<Q> }>>;
-  async function decide(
+  anonymizationRulesPromise,
+  regexWorker,
+  anonymization,
+}: CreateDecideApiOptions) {
+  return async (
     options: DecideOptions,
     ...questions: DecisionQuestion[]
-  ): Promise<DecideResponse<{ answer: DecisionAnswer } | { answers: DecisionAnswer[] }>> {
+  ): Promise<{ answers: DecisionAnswer[] }> => {
     if (questions.length === 0) {
       throw createInferenceRequestError('decide() needs at least one question', 400);
     }
@@ -137,22 +127,38 @@ export const createDecideApi = ({
         const startedAt = Date.now();
 
         try {
-          const { inferenceId, answers } = await ask(options, questions);
+          if (options.abortSignal?.aborted) {
+            throw createInferenceRequestAbortedError();
+          }
 
-          span?.setAttributes({ 'elastic.decision.inference_id': inferenceId });
+          const masked = await anonymizeRequest({
+            input: options.input,
+            questions,
+            esClient,
+            logger,
+            anonymizationRulesPromise,
+            regexWorker,
+            anonymization,
+          });
+
+          const answers = await invokeDecision({
+            esClient,
+            options: { ...options, input: masked.input },
+            questions: masked.questions,
+          });
+
+          span?.setAttributes({ 'elastic.decision.inference_id': options.inferenceId });
 
           logger.debug(
             () =>
-              `Decision [${questionTypes}] from [${inferenceId}] in ${
+              `Decision [${questionTypes}] from [${options.inferenceId}] in ${
                 Date.now() - startedAt
               }ms: ${JSON.stringify(answers)}`
           );
 
-          return questions.length === 1
-            ? { inferenceId, answer: answers[0] }
-            : { inferenceId, answers };
+          return { answers };
         } catch (error) {
-          const inferenceError = toInferenceError(error, options.abortSignal);
+          const inferenceError = toInferenceError({ error, options });
 
           logger.debug(
             `Decision [${questionTypes}] failed after ${Date.now() - startedAt}ms: ${
@@ -164,7 +170,5 @@ export const createDecideApi = ({
         }
       }
     );
-  }
-
-  return decide;
-};
+  };
+}

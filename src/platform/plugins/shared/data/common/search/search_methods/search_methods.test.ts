@@ -105,6 +105,26 @@ describe('SearchMethodsService', () => {
       );
     });
 
+    it('defaults locale from the getLocale dependency and lets params override it', async () => {
+      mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+      service = new SearchMethodsService(mockSearch, {
+        getEsQueryConfig,
+        getLocale: () => 'fr-FR',
+      });
+
+      await service.esql({ query: 'FROM logs' });
+      expect(mockSearch).toHaveBeenLastCalledWith(
+        { params: expect.objectContaining({ locale: 'fr-FR' }) },
+        expect.anything()
+      );
+
+      await service.esql({ query: 'FROM logs', locale: 'en-US' });
+      expect(mockSearch).toHaveBeenLastCalledWith(
+        { params: expect.objectContaining({ locale: 'en-US' }) },
+        expect.anything()
+      );
+    });
+
     it('passes options correctly', async () => {
       const mockResponse = { columns: [], values: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));

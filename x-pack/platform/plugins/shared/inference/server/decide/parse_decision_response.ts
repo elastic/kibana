@@ -5,83 +5,54 @@
  * 2.0.
  */
 
-import type { DecisionAnswer, DecisionQuestion } from '@kbn/inference-common';
+import { lazySchema, z } from '@kbn/zod/v4';
+import type { DecisionAnswer, DecisionQuestion, DecisionType } from '@kbn/inference-common';
 import { createInferenceProviderError } from '@kbn/inference-common';
-import { questionKey } from './question_keys';
 
-interface RawProbability {
-  value?: unknown;
-  label?: unknown;
-  probability?: unknown;
-}
+/** The key a question is sent under, from its position: providers need names, callers don't. */
+export const questionKey = (index: number): string => `question_${index + 1}`;
 
-interface RawAnswer {
-  type?: unknown;
-  probability?: unknown;
-  choice?: unknown;
-  score?: unknown;
-  confidence?: unknown;
-  probabilities?: unknown;
-}
+const toProbabilities = (entries: Array<[string, number]>): Record<string, number> =>
+  Object.fromEntries(entries);
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+const responseSchema = lazySchema(() =>
+  z.object({
+    decision: z.object({
+      answers: z.record(z.string(), z.object({ type: z.string() }).loose()),
+    }),
+  })
+);
 
-const requireNumber = (value: unknown, field: string, name: string): number => {
-  if (typeof value !== 'number') {
-    throw createInferenceProviderError(`Decision answer [${name}] has no numeric [${field}]`);
-  }
-  return value;
-};
-
-/** Keys an answer's probability list by `keyField` (`value` for choices, `label` for score levels). */
-const toProbabilities = (
-  value: unknown,
-  keyField: 'value' | 'label',
-  name: string
-): Record<string, number> => {
-  if (!Array.isArray(value)) {
-    throw createInferenceProviderError(`Decision answer [${name}] has no [probabilities] list`);
-  }
-
-  return Object.fromEntries(
-    value.map((entry: RawProbability) => [
-      String(entry[keyField]),
-      requireNumber(entry.probability, 'probability', name),
-    ])
-  );
-};
-
-const toAnswer = (raw: RawAnswer, name: string): DecisionAnswer => {
-  switch (raw.type) {
-    case 'predicate':
-      return {
-        type: 'predicate',
-        probability: requireNumber(raw.probability, 'probability', name),
-      };
-    case 'choice':
-      if (typeof raw.choice !== 'string') {
-        throw createInferenceProviderError(`Decision answer [${name}] has no [choice]`);
-      }
-      return {
-        type: 'choice',
-        choice: raw.choice,
-        confidence: requireNumber(raw.confidence, 'confidence', name),
-        probabilities: toProbabilities(raw.probabilities, 'value', name),
-      };
-    case 'score':
-      return {
-        type: 'score',
-        score: requireNumber(raw.score, 'score', name),
-        confidence: requireNumber(raw.confidence, 'confidence', name),
-        probabilities: toProbabilities(raw.probabilities, 'label', name),
-      };
-    default:
-      throw createInferenceProviderError(
-        `Decision answer [${name}] has unknown type [${String(raw.type)}]`
-      );
-  }
-};
+/**
+ * One schema per decision type, reading Elasticsearch's answer format into the public answer
+ * type, so a new type or a changed answer doesn't compile until its schema matches.
+ */
+const answerSchemas = lazySchema((): { [T in DecisionType]: z.ZodType<DecisionAnswer<T>> } => ({
+  predicate: z.object({
+    type: z.literal('predicate'),
+    probability: z.number(),
+  }),
+  choice: z.object({
+    type: z.literal('choice'),
+    choice: z.string(),
+    confidence: z.number(),
+    probabilities: z
+      .array(z.object({ value: z.string(), probability: z.number() }))
+      .transform((entries) =>
+        toProbabilities(entries.map(({ value, probability }) => [value, probability]))
+      ),
+  }),
+  score: z.object({
+    type: z.literal('score'),
+    score: z.number(),
+    confidence: z.number(),
+    probabilities: z
+      .array(z.object({ label: z.string(), probability: z.number() }))
+      .transform((entries) =>
+        toProbabilities(entries.map(({ label, probability }) => [label, probability]))
+      ),
+  }),
+}));
 
 /**
  * Reads the answers to `questions`, in order, from a `POST _inference/decision` response body,
@@ -91,27 +62,36 @@ export const parseDecisionResponse = (
   body: unknown,
   questions: readonly DecisionQuestion[]
 ): DecisionAnswer[] => {
-  const decision = isObject(body) ? body.decision : undefined;
-  const answers = isObject(decision) ? decision.answers : undefined;
+  const response = responseSchema.safeParse(body);
 
-  if (!isObject(answers)) {
+  if (!response.success) {
     throw createInferenceProviderError('Decision response has no [decision.answers]');
   }
+
+  const { answers } = response.data.decision;
 
   return questions.map((question, index) => {
     const name = questionKey(index);
     const raw = answers[name];
 
-    if (!isObject(raw)) {
+    if (!raw) {
       throw createInferenceProviderError(`Decision response has no answer for question [${name}]`);
     }
 
     if (raw.type !== question.type) {
       throw createInferenceProviderError(
-        `Decision answer [${name}] has type [${String(raw.type)}], expected [${question.type}]`
+        `Decision answer [${name}] has type [${raw.type}], expected [${question.type}]`
       );
     }
 
-    return toAnswer(raw, name);
+    const answer = answerSchemas[question.type].safeParse(raw);
+
+    if (!answer.success) {
+      throw createInferenceProviderError(
+        `Decision answer [${name}] is malformed: ${z.prettifyError(answer.error)}`
+      );
+    }
+
+    return answer.data;
   });
 };

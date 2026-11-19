@@ -7,7 +7,12 @@
 
 import path from 'path';
 import type { BulkDeleteStatusResponse } from '@kbn/slo-schema';
-import { bulkDeleteParamsSchema, bulkDeleteStatusParamsSchema } from '@kbn/slo-schema';
+import {
+  bulkDeleteParamsSchema,
+  bulkDeleteResponseSchema,
+  bulkDeleteStatusParamsSchema,
+  bulkDeleteStatusResponseSchema,
+} from '@kbn/slo-schema';
 import { v4 } from 'uuid';
 import { toEventOrigin } from '../lib/telemetry';
 import type { BulkDeleteTaskParams } from '../services/tasks/bulk_delete/bulk_delete_task';
@@ -31,6 +36,9 @@ export const bulkDeleteSLORoute = createSloServerRoute({
     },
   },
   params: bulkDeleteParamsSchema,
+  responses: {
+    200: { description: 'Successful response', body: () => bulkDeleteResponseSchema },
+  },
   handler: async ({ request, params, plugins }) => {
     await assertPlatinumLicense(plugins);
     const taskManager = await plugins.taskManager.start();
@@ -72,6 +80,9 @@ export const getBulkDeleteStatusRoute = createSloServerRoute({
     },
   },
   params: bulkDeleteStatusParamsSchema,
+  responses: {
+    200: { description: 'Successful response', body: () => bulkDeleteStatusResponseSchema },
+  },
   handler: async ({ params, plugins }): Promise<BulkDeleteStatusResponse> => {
     await assertPlatinumLicense(plugins);
 

@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React from 'react';
@@ -22,6 +29,11 @@ import {
   OVERVIEW_ERROR_TITLE,
   OVERVIEW_RETRY_LABEL,
 } from './translations';
+
+/** Cap at three metrics per row (six slots over two rows with five metrics). */
+const OVERVIEW_MAX_COLUMNS = 3;
+/** Same floor as the previous flex basis — wraps to 1–2 columns when the row is narrow. */
+const OVERVIEW_METRIC_MIN_WIDTH_BASE = 12;
 
 export interface DetectionOverviewCounts {
   entities: number;
@@ -52,6 +64,12 @@ export const DetectionOverview = ({
   onRetry,
   compact = false,
 }: DetectionOverviewProps): React.ReactElement => {
+  const { euiTheme } = useEuiTheme();
+  const metricMinWidthPx = euiTheme.base * OVERVIEW_METRIC_MIN_WIDTH_BASE;
+  // Match auto-fill breakpoints: N columns need N*minWidth + (N-1)*gap.
+  const twoColumnMaxWidthPx =
+    OVERVIEW_MAX_COLUMNS * metricMinWidthPx + (OVERVIEW_MAX_COLUMNS - 1) * euiTheme.base - 1;
+  const oneColumnMaxWidthPx = 2 * metricMinWidthPx + euiTheme.base - 1;
   const metrics: Array<Omit<MetricCellProps, 'isLoading'>> = [
     {
       icon: 'chartTagCloud',
@@ -75,7 +93,7 @@ export const DetectionOverview = ({
       testSubject: 'nightshiftDetectionOverviewActiveRules',
     },
     {
-      icon: 'moon',
+      icon: 'productNightshift',
       tone: 'warning',
       value: counts?.detections,
       getLabel: getSignalsLabel,
@@ -135,13 +153,83 @@ export const DetectionOverview = ({
               }}
             />
           ) : (
-            <EuiFlexGroup gutterSize="xl" justifyContent="spaceBetween" wrap>
-              {metrics.map((metric) => (
-                <EuiFlexItem key={metric.testSubject} grow={false}>
-                  <MetricCell {...metric} isLoading={isCountsLoading} />
-                </EuiFlexItem>
+            <div
+              css={{
+                containerType: 'inline-size',
+                display: 'grid',
+                // auto-fill keeps empty tracks so a short last row does not stretch.
+                // Track min is max(floor, 1/3 of the row) so we never exceed three columns,
+                // and still drop to one or two when the banner is narrow or zoomed.
+                gridTemplateColumns: `repeat(
+                  auto-fill,
+                  minmax(
+                    max(
+                      ${metricMinWidthPx}px,
+                      calc(
+                        (100% - ${(OVERVIEW_MAX_COLUMNS - 1).toString()} * ${euiTheme.size.base}) /
+                          ${OVERVIEW_MAX_COLUMNS}
+                      )
+                    ),
+                    1fr
+                  )
+                )`,
+                gap: euiTheme.size.base,
+                alignItems: 'center',
+                // Hide hairlines on each row start for the current column count.
+                [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
+                  display: 'none',
+                },
+                [`@container (max-width: ${twoColumnMaxWidthPx}px)`]: {
+                  [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
+                    display: 'block',
+                  },
+                  '& > *:nth-child(2n + 1) [data-metric-separator]': {
+                    display: 'none',
+                  },
+                },
+                [`@container (max-width: ${oneColumnMaxWidthPx}px)`]: {
+                  // Match the two-column reset's specificity so `display: block` does not win.
+                  [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
+                    display: 'none',
+                  },
+                  '& > *:nth-child(2n + 1) [data-metric-separator]': {
+                    display: 'none',
+                  },
+                  '& > * [data-metric-separator]': {
+                    display: 'none',
+                  },
+                },
+              }}
+            >
+              {metrics.map((metric, index) => (
+                <div
+                  key={metric.testSubject}
+                  css={{
+                    minWidth: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: euiTheme.size.base,
+                  }}
+                >
+                  {index > 0 ? (
+                    <div
+                      aria-hidden
+                      data-metric-separator
+                      css={{
+                        flexShrink: 0,
+                        width: euiTheme.border.width.thin,
+                        // Match EuiAvatar size="l".
+                        height: euiTheme.size.xxl,
+                        backgroundColor: euiTheme.colors.borderBaseSubdued,
+                      }}
+                    />
+                  ) : null}
+                  <div css={{ minWidth: 0, flex: '1 1 auto' }}>
+                    <MetricCell {...metric} isLoading={isCountsLoading} />
+                  </div>
+                </div>
               ))}
-            </EuiFlexGroup>
+            </div>
           )}
         </>
       )}

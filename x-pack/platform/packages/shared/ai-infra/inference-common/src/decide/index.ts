@@ -8,7 +8,6 @@
 export type {
   DecideAPI,
   DecideOptions,
-  DecideResponse,
   DecisionAnswer,
   DecisionAnswerFor,
   DecisionAnswersFor,
@@ -19,4 +18,5 @@ export type {
   DecisionQuestion,
   DecisionScoreAnswer,
   DecisionScoreQuestion,
+  DecisionType,
 } from './api';

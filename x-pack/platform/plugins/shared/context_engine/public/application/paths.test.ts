@@ -10,6 +10,8 @@ import {
   getAiIndexDetailPath,
   getAiIndexSourcesPath,
   getAiIndexKnowledgeIndicatorsPath,
+  getAiIndexSettingsPath,
+  getAiIndexDreamingTemplatePath,
   getViewKiDocumentPath,
   getViewKiPath,
 } from './paths';
@@ -30,6 +32,20 @@ describe('getAiIndexKnowledgeIndicatorsPath', () => {
   it('builds the knowledge indicators tab path', () => {
     expect(getAiIndexKnowledgeIndicatorsPath('my-ai-index')).toBe(
       '/ai_index/my-ai-index/knowledge_indicators'
+    );
+  });
+});
+
+describe('getAiIndexSettingsPath', () => {
+  it('builds the settings tab path', () => {
+    expect(getAiIndexSettingsPath('my-ai-index')).toBe('/ai_index/my-ai-index/settings');
+  });
+});
+
+describe('getAiIndexDreamingTemplatePath', () => {
+  it('builds the dreaming setup path', () => {
+    expect(getAiIndexDreamingTemplatePath('my-ai-index')).toBe(
+      '/ai_index/my-ai-index/dreaming_template'
     );
   });
 });

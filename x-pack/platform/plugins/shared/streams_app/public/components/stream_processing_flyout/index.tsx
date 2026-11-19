@@ -57,7 +57,14 @@ const closeLabel = i18n.translate('xpack.streams.processingFlyout.close', {
   defaultMessage: 'Close',
 });
 
-export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout }) {
+export function ProcessingFlyout({
+  flyout,
+  readOnly = false,
+}: {
+  flyout: CanvasProcessingFlyout;
+  /** Lists the processors without editing, for users without the V2 manage privilege. */
+  readOnly?: boolean;
+}) {
   const { euiTheme } = useEuiTheme();
   const headerId = useGeneratedHtmlId();
   const { closeProcessingFlyout } = useCanvasEvents();
@@ -92,7 +99,7 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
   const componentIds = useMemo(() => usedComponentIds(unit), [unit]);
 
   const isCatalogueUnsupported = unsupportedVersion !== undefined;
-  const canEdit = editable && !isCatalogueUnsupported;
+  const canEdit = editable && !isCatalogueUnsupported && !readOnly;
   // Steps are still listed from an unsupported catalogue, but nothing in it is interpreted, so the
   // list falls back to raw types for display names.
   const listCatalogue = useMemo(
@@ -104,10 +111,10 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
 
   // A flyout opened to add a processor cannot add one from a catalogue this Kibana cannot read.
   useEffect(() => {
-    if (isCatalogueUnsupported && isEditing) {
+    if ((isCatalogueUnsupported || readOnly) && isEditing) {
       ref.send({ type: 'step.cancel' });
     }
-  }, [isCatalogueUnsupported, isEditing, ref]);
+  }, [isCatalogueUnsupported, isEditing, readOnly, ref]);
 
   const componentRefs = useMemo<ComponentReferenceOption[]>(
     () => [

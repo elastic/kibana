@@ -66,7 +66,9 @@ test.describe(
         timeout: NIGHTSHIFT_PAGE_LOAD_TIMEOUT,
       });
       await expect(page.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toHaveCount(1);
-      await expect(page.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
+      await expect(page.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveText(
+        'Elastic nightshift'
+      );
 
       await pageObjects.appMenu.clickItem('nightshiftSettingsLink');
       await expect(page).toHaveURL(/\/app\/nightshift\/settings\/(general|detections)/);
@@ -74,7 +76,7 @@ test.describe(
 
       await page.getByTestId('nightshiftSettingsTab-investigations').click();
       await expect(page).toHaveURL(/\/app\/nightshift\/settings\/investigations/);
-      await expect(page.getByTestId('nightshiftRunLimitEnabledSwitch-investigation')).toBeVisible();
+      await expect(page.getByTestId('nightshiftRunLimitsEnabledSwitch')).toBeVisible();
     });
 
     test('opens Detections on Events and hides Signals outside developer mode', async ({

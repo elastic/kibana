@@ -5,32 +5,23 @@
  * 2.0.
  */
 
+import type { NonEmptyTuple } from 'type-fest';
+import type { ConnectorTelemetryMetadata } from '../chat_complete';
+
 export interface DecisionPredicateQuestion {
   type: 'predicate';
   instructions: string;
+}
+
+export interface DecisionPredicateAnswer {
+  type: 'predicate';
+  probability: number;
 }
 
 export interface DecisionChoiceQuestion {
   type: 'choice';
   instructions: string;
   choices: Record<string, string>;
-}
-
-export interface DecisionScoreQuestion {
-  type: 'score';
-  instructions: string;
-  levels: Array<{ label: string; description: string }>;
-}
-
-/** A question for a decision model, in the shape of the ES `decision` inference task. */
-export type DecisionQuestion =
-  | DecisionPredicateQuestion
-  | DecisionChoiceQuestion
-  | DecisionScoreQuestion;
-
-export interface DecisionPredicateAnswer {
-  type: 'predicate';
-  probability: number;
 }
 
 export interface DecisionChoiceAnswer {
@@ -40,6 +31,12 @@ export interface DecisionChoiceAnswer {
   probabilities: Record<string, number>;
 }
 
+export interface DecisionScoreQuestion {
+  type: 'score';
+  instructions: string;
+  levels: Array<{ label: string; description: string }>;
+}
+
 export interface DecisionScoreAnswer {
   type: 'score';
   score: number;
@@ -47,44 +44,51 @@ export interface DecisionScoreAnswer {
   probabilities: Record<string, number>;
 }
 
-/** A decision model's answer to one {@link DecisionQuestion}. */
-export type DecisionAnswer = DecisionPredicateAnswer | DecisionChoiceAnswer | DecisionScoreAnswer;
+/** Fails to compile when a question's or answer's `type` doesn't match its key. */
+type WithMatchingTypes<
+  T extends { [K in keyof T]: { question: { type: K }; answer: { type: K } } }
+> = T;
 
-/** The answer type for a question type. */
-export type DecisionAnswerFor<Q extends DecisionQuestion> = Extract<
-  DecisionAnswer,
-  { type: Q['type'] }
->;
+type DecisionTypes = WithMatchingTypes<{
+  predicate: { question: DecisionPredicateQuestion; answer: DecisionPredicateAnswer };
+  choice: { question: DecisionChoiceQuestion; answer: DecisionChoiceAnswer };
+  score: { question: DecisionScoreQuestion; answer: DecisionScoreAnswer };
+}>;
 
-/** The answers to a list of questions, typed by position. */
+export type DecisionType = keyof DecisionTypes;
+
+/** `DecisionQuestion<'choice'>` narrows the union to one type; `DecisionAnswer` works the same way. */
+export type DecisionQuestion<T extends DecisionType = DecisionType> = DecisionTypes[T]['question'];
+
+export type DecisionAnswer<T extends DecisionType = DecisionType> = DecisionTypes[T]['answer'];
+
+export type DecisionAnswerFor<Q extends DecisionQuestion> = DecisionAnswer<Q['type']>;
+
+/**
+ * The answers to a list of questions, in the same order. Literal questions give a tuple typed by
+ * position; a list built at runtime gives `[DecisionAnswer, ...DecisionAnswer[]]`.
+ */
 export type DecisionAnswersFor<Q extends readonly DecisionQuestion[]> = {
-  [I in keyof Q]: DecisionAnswerFor<Q[I]>;
+  -readonly [I in keyof Q]: DecisionAnswerFor<Q[I]>;
 };
 
 export interface DecideOptions {
   /** The text the decision model reads. */
   input: string;
-  /** The `decision` inference endpoint to use. Defaults to the first one the cluster lists. */
-  inferenceId?: string;
+  /** The `decision` inference endpoint to use. */
+  inferenceId: string;
   abortSignal?: AbortSignal;
+  /** Attribution sent as headers with the request. */
+  metadata?: { connectorTelemetry?: ConnectorTelemetryMetadata };
 }
-
-/** A decision, with the inference endpoint that made it. */
-export type DecideResponse<T> = { inferenceId: string } & T;
 
 /**
- * Asks a decision model bounded questions about an input: fast, cheap answers with
- * probabilities. Throws an inference request error with status 404 when the cluster has no
- * usable `decision` endpoint.
+ * Asks a decision model one or more bounded questions about an input, in one call: fast, cheap
+ * answers with probabilities, in the questions' order. Throws an inference request error with
+ * status 404 when the `decision` endpoint doesn't exist.
+ * @experimental The Elasticsearch `decision` inference task it calls is experimental.
  */
-export interface DecideAPI {
-  /** Asks one question about the input. */
-  <const Q extends DecisionQuestion>(options: DecideOptions, question: Q): Promise<
-    DecideResponse<{ answer: DecisionAnswerFor<Q> }>
-  >;
-  /** Asks several questions about the same input in one call; answers follow the questions' order. */
-  <const Q extends [DecisionQuestion, DecisionQuestion, ...DecisionQuestion[]]>(
-    options: DecideOptions,
-    ...questions: Q
-  ): Promise<DecideResponse<{ answers: DecisionAnswersFor<Q> }>>;
-}
+export type DecideAPI = <const Q extends NonEmptyTuple<DecisionQuestion>>(
+  options: DecideOptions,
+  ...questions: Q
+) => Promise<{ answers: DecisionAnswersFor<Q> }>;

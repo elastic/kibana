@@ -50,7 +50,7 @@ export function useDisplayOptions({
   );
 }
 
-const MAX_ACTION_MATCH_RANK = 5;
+const MAX_ACTION_MATCH_RANK = 6;
 
 export function getActionMatchRank(option: ActionOptionData, normalizedTerm: string): number {
   if (!normalizedTerm) return 0;
@@ -64,6 +64,12 @@ export function getActionMatchRank(option: ActionOptionData, normalizedTerm: str
   if (id.includes(normalizedTerm)) return 3;
   if (label.includes(normalizedTerm)) return 4;
   if (description.includes(normalizedTerm)) return 5;
+  // Every word in any order, so "workflow fa" finds `workflow.fail` / "Fail Workflow".
+  // Description is left out: common words there would match too many actions.
+  const words = normalizedTerm.split(/\s+/);
+  if (words.length > 1 && words.every((word) => id.includes(word) || label.includes(word))) {
+    return 6;
+  }
   return MAX_ACTION_MATCH_RANK + 1;
 }
 
