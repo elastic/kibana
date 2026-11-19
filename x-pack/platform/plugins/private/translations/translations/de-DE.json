@@ -33810,7 +33810,6 @@
     "xpack.fleet.packagePolicyValidation.requiredErrorMessage": "{fieldName} ist erforderlich",
     "xpack.fleet.packageUpload.datasetOwned": "Das hochgeladene Paket deklariert den Datensatz „{dataset}“, der bereits dem installierten Paket „{packageName}“ gehört.",
     "xpack.fleet.packageUpload.dataStreamLookupFailed": "Es konnte nicht überprüft werden, dass der Datensatz des hochgeladenen Pakets „{dataset}“ nicht mit einem vorhandenen Elasticsearch-Datenstream übereinstimmt.",
-    "xpack.fleet.packageUpload.existingDataStream": "Ein passender aktiver Datenstream „{dataStreamName}“ ist für den Datensatz „{dataset}“ bereits vorhanden und muss migriert oder entfernt werden, bevor ein neues Paket hochgeladen wird.",
     "xpack.fleet.packageUpload.forbiddenArchiveAsset": "Das hochgeladene Paket enthält ein unzulässiges Asset: {path}",
     "xpack.fleet.packageUpload.invalidDataset": "Das hochgeladene Paket deklariert einen ungültigen Datensatz „{dataset}“.",
     "xpack.fleet.packageUpload.invalidDataStreamType": "Das hochgeladene Paket deklariert einen ungültigen Datenstreamtyp „{type}“: {reason}",

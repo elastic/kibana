@@ -33736,7 +33736,6 @@
     "xpack.fleet.packagePolicyValidation.requiredErrorMessage": "{fieldName} obligatoire",
     "xpack.fleet.packageUpload.datasetOwned": "Le package téléchargé déclare l'ensemble de données \"{dataset}\", qui appartient déjà au package installé \"{packageName}\".",
     "xpack.fleet.packageUpload.dataStreamLookupFailed": "Impossible de vérifier que l'ensemble de données du package téléchargé \"{dataset}\" ne correspond pas à un flux de données Elasticsearch existant.",
-    "xpack.fleet.packageUpload.existingDataStream": "Un flux de données actif correspondant \"{dataStreamName}\" existe déjà pour l'ensemble de données \"{dataset}\" et doit être migré ou supprimé avant de télécharger un nouveau package.",
     "xpack.fleet.packageUpload.forbiddenArchiveAsset": "Le package téléchargé contient une ressource interdite : {path}",
     "xpack.fleet.packageUpload.invalidDataset": "Le package téléchargé déclare un ensemble de données non valide \"{dataset}\".",
     "xpack.fleet.packageUpload.invalidDataStreamType": "Le package téléchargé déclare un type de flux de données non valide \"{type}\" : {reason}",
