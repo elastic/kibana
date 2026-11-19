@@ -21,9 +21,13 @@ import {
   AutomationsPanel,
   ConnectAgentPanel,
   DreamingPanel,
+  FailedAutomationRunsCallout,
+  LearnMorePanel,
   LockedSectionPanel,
   ManageAutomationsLink,
   OverviewPlaceholderPanel,
+  OverviewStatCards,
+  RecentKnowledgeDocumentsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { buildAiIndexOnboardingPrompt } from '../components/ai_index_detail/onboarding_prompt';
@@ -36,6 +40,7 @@ import { useKibanaUrl } from '../hooks/use_kibana_url';
 import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
+import { getVisibleAutomations, getVisibleWorkflowIds } from '../utils/visible_automations';
 import {
   ContextEngineSubPageHeader,
   contextEngineBackDestinationLabel,
@@ -94,38 +99,10 @@ const discoverLinkLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.list
   defaultMessage: 'Open in Discover',
 });
 
-const failedRunsPlaceholderTitle = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.overview.placeholder.failedRunsTitle',
-  {
-    defaultMessage: 'Failed automation runs',
-  }
-);
-
-const summaryCardsPlaceholderTitle = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.overview.placeholder.summaryCardsTitle',
-  {
-    defaultMessage: 'Summary',
-  }
-);
-
-const recentDocumentsPlaceholderTitle = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.overview.placeholder.recentDocumentsTitle',
-  {
-    defaultMessage: 'Recent knowledge documents',
-  }
-);
-
 const documentsChartPlaceholderTitle = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.overview.placeholder.documentsChartTitle',
   {
     defaultMessage: 'Knowledge documents over time',
-  }
-);
-
-const learnMorePlaceholderTitle = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.overview.placeholder.learnMoreTitle',
-  {
-    defaultMessage: 'Learn more',
   }
 );
 
@@ -171,7 +148,11 @@ export const AiIndexDetailPage = () => {
     history.replace({ ...location, state: undefined });
   }, [location, history]);
 
-  const { summary, isLoading: isKiSummaryLoading } = useListKi({
+  const {
+    summary,
+    isLoading: isKiSummaryLoading,
+    error: kiSummaryError,
+  } = useListKi({
     aiIndexId: aiIndex?.id,
     size: KI_SUMMARY_PAGE_SIZE,
     status: KI_NOT_DELETED_STATUSES,
@@ -193,6 +174,16 @@ export const AiIndexDetailPage = () => {
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
   const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex?.sources]);
+  const automations = useMemo(() => aiIndex?.automations ?? [], [aiIndex?.automations]);
+  const visibleAutomationsCount = useMemo(
+    () => getVisibleAutomations(automations, isMemoryEnabled).length,
+    [automations, isMemoryEnabled]
+  );
+  const visibleWorkflowIds = useMemo(
+    () => getVisibleWorkflowIds(automations, isMemoryEnabled),
+    [automations, isMemoryEnabled]
+  );
+  const isManaged = aiIndex?.managed === true;
 
   const { kibanaUrl } = useKibanaUrl();
   const onboardingPrompt = useMemo(() => {
@@ -341,44 +332,58 @@ export const AiIndexDetailPage = () => {
           showMemory={isMemoryEnabled}
         />
       )}
-      <OverviewPlaceholderPanel
-        title={failedRunsPlaceholderTitle}
-        data-test-subj="contextOverviewFailedRunsPlaceholder"
-      />
-      <EuiSpacer size="m" />
+      {aiIndex && !isManaged && <FailedAutomationRunsCallout workflowIds={visibleWorkflowIds} />}
       {showOnboardingPanel && (
         <>
           <ConnectAgentPanel prompt={onboardingPrompt} />
           <EuiSpacer size="m" />
         </>
       )}
-      <OverviewPlaceholderPanel
-        title={summaryCardsPlaceholderTitle}
-        data-test-subj="contextOverviewSummaryCardsPlaceholder"
-      />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
-          <OverviewPlaceholderPanel
-            title={recentDocumentsPlaceholderTitle}
-            data-test-subj="contextOverviewRecentDocumentsPlaceholder"
+      {aiIndex && (
+        <>
+          <OverviewStatCards
+            aiIndexId={aiIndex.id}
+            knowledgeDocumentsCount={kiSummaryError ? undefined : summary.total}
+            sourcesCount={sources.length}
+            automationsCount={visibleAutomationsCount}
+            isManaged={isManaged}
+            isMemoryEnabled={isMemoryEnabled}
+            isLoading={isKiSummaryLoading}
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <OverviewPlaceholderPanel
-            title={documentsChartPlaceholderTitle}
-            data-test-subj="contextOverviewDocumentsChartPlaceholder"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {/* Wait for the summary, so the chart column does not pop in next to Recent documents. */}
+      {hasLoadedKiSummary && (
+        <>
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem>
+              <RecentKnowledgeDocumentsPanel
+                aiIndexId={resolvedAiIndexId}
+                isMemoryEnabled={isMemoryEnabled}
+              />
+            </EuiFlexItem>
+            {hasKnowledgeIndicators && (
+              <EuiFlexItem>
+                <OverviewPlaceholderPanel
+                  title={documentsChartPlaceholderTitle}
+                  data-test-subj="contextOverviewDocumentsChartPlaceholder"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {showAutomationsPanel ? (
         <AutomationsPanel
           isLoading={isLoading}
           aiIndex={aiIndex}
           onSaved={refetch}
-          isManaged={!!aiIndex?.managed}
-          headerAction={<ManageAutomationsLink aiIndexId={resolvedAiIndexId} />}
+          isManaged={isManaged}
+          headerAction={
+            hideEditControls ? undefined : <ManageAutomationsLink aiIndexId={resolvedAiIndexId} />
+          }
         />
       ) : (
         <LockedSectionPanel
@@ -398,11 +403,12 @@ export const AiIndexDetailPage = () => {
           }
         />
       )}
-      <EuiSpacer size="m" />
-      <OverviewPlaceholderPanel
-        title={learnMorePlaceholderTitle}
-        data-test-subj="contextOverviewLearnMorePlaceholder"
-      />
+      {aiIndex && !isManaged && (
+        <>
+          <EuiSpacer size="l" />
+          <LearnMorePanel />
+        </>
+      )}
     </>
   );
 

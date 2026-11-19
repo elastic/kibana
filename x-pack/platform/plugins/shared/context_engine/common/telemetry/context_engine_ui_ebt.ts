@@ -23,6 +23,7 @@ const ebtElement = {
   aiIndexCreatePageTraceSelector: 'contextEngine.aiIndexCreatePage.traceSelector',
   aiIndexDetailPage: 'contextEngine.aiIndexDetailPage',
   aiIndexDetailPageOnboardingPanel: 'contextEngine.aiIndexDetailPage.onboardingPanel',
+  aiIndexDetailPageOverview: 'contextEngine.aiIndexDetailPage.overview',
   aiIndexDetailPageDescriptionPanel: 'contextEngine.aiIndexDetailPage.descriptionPanel',
   aiIndexDetailPageTracesPanel: 'contextEngine.aiIndexDetailPage.tracesPanel',
   aiIndexDetailPageSourcesPanel: 'contextEngine.aiIndexDetailPage.sourcesPanel',
@@ -62,6 +63,12 @@ const ebtAction = {
   },
   onboarding: {
     COPY_PROMPT: 'copy_prompt',
+  },
+  overview: {
+    OPEN_STAT_CARD: 'open_stat_card',
+    OPEN_RECENT_DOCUMENT: 'open_recent_document',
+    VIEW_ALL_DOCUMENTS: 'view_all_documents',
+    OPEN_FAILED_RUN: 'open_failed_run',
   },
   description: {
     EDIT: 'edit_description',

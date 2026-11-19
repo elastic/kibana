@@ -27,7 +27,6 @@ import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import React, { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { isDreamingAutomation } from '../../../../common/dreaming';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
@@ -38,6 +37,7 @@ import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getAiIndexDetailPath } from '../../paths';
+import { getVisibleAutomations, getVisibleWorkflowIds } from '../../utils/visible_automations';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prompt';
 import { AutomationRow } from './automation_row';
@@ -78,18 +78,12 @@ export const AutomationsPanel = ({
     useAutomationsEditor({ aiIndex, onSaved });
   const isMemoryEnabled = useMemoryEnabled();
   const visibleAutomations = useMemo(
-    () =>
-      isMemoryEnabled
-        ? automations
-        : automations.filter((automation) => !isDreamingAutomation(automation)),
+    () => getVisibleAutomations(automations, isMemoryEnabled),
     [automations, isMemoryEnabled]
   );
   const visibleWorkflowIds = useMemo(
-    () =>
-      visibleAutomations
-        .filter((automation) => automation.type === 'workflow')
-        .map((automation) => automation.value),
-    [visibleAutomations]
+    () => getVisibleWorkflowIds(automations, isMemoryEnabled),
+    [automations, isMemoryEnabled]
   );
   const {
     summaries,

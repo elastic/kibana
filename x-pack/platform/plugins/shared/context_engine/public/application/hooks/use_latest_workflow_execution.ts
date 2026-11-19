@@ -15,7 +15,7 @@ import {
 import { useWorkflowsApi, type GetWorkflowExecutionsParams } from '@kbn/workflows-ui';
 
 const RUNNING_REFETCH_MS = 3_000;
-const IDLE_REFETCH_MS = 30_000;
+export const IDLE_REFETCH_MS = 30_000;
 
 const NON_TERMINAL_STATUSES = ExecutionStatusValues.filter((status) => !isTerminalStatus(status));
 
@@ -32,10 +32,34 @@ export interface LatestWorkflowExecution {
   isLoading: boolean;
 }
 
-interface LatestWorkflowExecutionData {
+export interface LatestWorkflowExecutionData {
   execution: WorkflowExecutionListItemDto | null;
   activeExecution: WorkflowExecutionListItemDto | null;
 }
+
+type WorkflowsApi = ReturnType<typeof useWorkflowsApi>;
+
+/** Loads the latest production run and the run in progress (if any) of a workflow. */
+export const fetchLatestWorkflowExecution = async (
+  api: WorkflowsApi,
+  workflowId: string
+): Promise<LatestWorkflowExecutionData> => {
+  const production: GetWorkflowExecutionsParams = {
+    executionTypes: [ExecutionType.PRODUCTION],
+    sortField: 'createdAt',
+    sortOrder: 'desc',
+    size: 1,
+    omitStepRuns: true,
+  };
+  const [latest, active] = await Promise.all([
+    api.getWorkflowExecutions(workflowId, production),
+    api.getWorkflowExecutions(workflowId, { ...production, statuses: NON_TERMINAL_STATUSES }),
+  ]);
+  return {
+    execution: latest.results[0] ?? null,
+    activeExecution: active.results[0] ?? null,
+  };
+};
 
 /**
  * The most recent run of a workflow, kept current while one is in progress.
@@ -51,23 +75,7 @@ export const useLatestWorkflowExecution = (
 
   const { data, isLoading, isError } = useQuery({
     queryKey: latestWorkflowExecutionQueryKey(workflowId),
-    queryFn: async (): Promise<LatestWorkflowExecutionData> => {
-      const production: GetWorkflowExecutionsParams = {
-        executionTypes: [ExecutionType.PRODUCTION],
-        sortField: 'createdAt',
-        sortOrder: 'desc',
-        size: 1,
-        omitStepRuns: true,
-      };
-      const [latest, active] = await Promise.all([
-        api.getWorkflowExecutions(workflowId, production),
-        api.getWorkflowExecutions(workflowId, { ...production, statuses: NON_TERMINAL_STATUSES }),
-      ]);
-      return {
-        execution: latest.results[0] ?? null,
-        activeExecution: active.results[0] ?? null,
-      };
-    },
+    queryFn: () => fetchLatestWorkflowExecution(api, workflowId),
     enabled,
     refetchInterval: (current) =>
       current?.activeExecution || isAwaiting(current?.execution)

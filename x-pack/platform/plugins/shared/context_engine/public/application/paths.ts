@@ -39,3 +39,15 @@ export const getAiIndexDreamingTemplatePath = (id: string): string =>
  */
 export const getKnowledgeDocumentPath = (aiIndexId: string, index: string): string =>
   `${getAiIndexKnowledgeDocumentsPath(aiIndexId)}/${encodeURIComponent(index)}`;
+
+/** Path and query params that open one Knowledge document on the Knowledge documents tab. */
+export const getKnowledgeDocumentLocation = (
+  aiIndexId: string,
+  { id, index }: { id: string; index: string }
+): { path: string; params: Record<string, string> } => ({
+  path:
+    index.length > 0
+      ? getKnowledgeDocumentPath(aiIndexId, index)
+      : getAiIndexKnowledgeDocumentsPath(aiIndexId),
+  params: { [KI_DOC_QUERY_PARAM]: id },
+});
