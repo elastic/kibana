@@ -60,6 +60,7 @@ describe('WorkflowsPlugin', () => {
       available: true,
       library: { ttlMs: 600_000 },
       pages: { enabled: false },
+      secrets: { enabled: false },
     });
 
     const plugin = new WorkflowsPlugin(initializerContext);
@@ -100,6 +101,7 @@ describe('WorkflowsPlugin', () => {
         available: true,
         library: { ttlMs: 600_000 },
         pages: { enabled: pagesEnabled },
+        secrets: { enabled: false },
       });
       const coreSetup = coreMock.createSetup();
       const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -125,6 +127,7 @@ describe('WorkflowsPlugin', () => {
       available: true,
       library: { ttlMs: 600_000 },
       pages: { enabled: false },
+      secrets: { enabled: false },
     });
 
     const plugin = new WorkflowsPlugin(initializerContext);
@@ -158,6 +161,7 @@ describe('WorkflowsPlugin', () => {
       available: true,
       library: { ttlMs: 600_000 },
       pages: { enabled: false },
+      secrets: { enabled: false },
     });
     const plugin = new WorkflowsPlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
@@ -216,6 +220,7 @@ describe('WorkflowsPlugin', () => {
         available: true,
         library: { ttlMs: 600_000 },
         pages: { enabled: false },
+        secrets: { enabled: false },
       })
     );
 
@@ -246,6 +251,7 @@ describe('WorkflowsPlugin', () => {
         available: true,
         library: { ttlMs: 600_000 },
         pages: { enabled: false },
+        secrets: { enabled: false },
       })
     );
 

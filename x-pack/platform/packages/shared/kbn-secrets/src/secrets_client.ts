@@ -96,10 +96,12 @@ export const createSecretsClient = ({
     replace: async (secret) => {
       validateSecret({ secret, connectorSecretsAvailable });
       const { name, description, source } = secret;
-      const { allowedConsumers, createdBy, createdAt } = await findOrThrow(name);
+      const existing = await findOrThrow(name);
+      const { allowedConsumers, createdBy, createdAt } = existing;
       const entry: SecretEntry = {
         name,
-        description,
+        // Replacing a value must not require sending the description again.
+        description: description ?? existing.description,
         allowedConsumers,
         createdBy,
         createdAt,

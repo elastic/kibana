@@ -53,7 +53,10 @@ export type SecretEntry = KibanaSecretEntry | ConnectorSecretEntry;
 /** What list and write operations return: a secret without its value. */
 export type SecretMetadata = Omit<KibanaSecretEntry, 'value'> | ConnectorSecretEntry;
 
-/** What a caller supplies to create a secret, or to replace an existing one as a whole. */
+/**
+ * What a caller supplies to create a secret, or to replace the source of an existing one.
+ * On replace, an omitted description keeps the current one and an empty one clears it.
+ */
 export interface WriteSecretParams extends Pick<SecretDetails, 'name' | 'description'> {
   readonly source: SecretSource;
 }

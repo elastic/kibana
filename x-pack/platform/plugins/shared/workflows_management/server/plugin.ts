@@ -31,6 +31,7 @@ import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { getWorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
 import { WorkflowPagesService } from './pages/workflow_pages_service';
+import { setupWorkflowSecrets, workflowSecretsSubFeature } from './secrets';
 import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
@@ -76,8 +77,13 @@ export class WorkflowsPlugin
 
     registerUISettings(core, plugins);
 
+    const { enabled: secretsEnabled } = this.config.secrets;
+
     plugins.features?.registerKibanaFeature(
-      getWorkflowsManagementFeatureConfig({ pagesEnabled: this.config.pages.enabled })
+      getWorkflowsManagementFeatureConfig({
+        pagesEnabled: this.config.pages.enabled,
+        additionalSubFeatures: secretsEnabled ? [workflowSecretsSubFeature] : [],
+      })
     );
 
     // `workflow-page` is a work-in-progress saved object type: it is registered only with
@@ -145,6 +151,10 @@ export class WorkflowsPlugin
       workflowsService,
       audit,
     });
+
+    if (secretsEnabled) {
+      setupWorkflowSecrets({ core, router });
+    }
 
     core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(
       'workflowsManagement',
