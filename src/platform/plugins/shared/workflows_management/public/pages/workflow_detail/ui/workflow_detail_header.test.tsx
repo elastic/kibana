@@ -101,6 +101,7 @@ describe('WorkflowDetailHeader', () => {
       serverValid = true,
       isSaving = false,
       isManaged = false,
+      enabled = true,
       routerHistory,
     }: {
       isValid?: boolean;
@@ -109,13 +110,16 @@ describe('WorkflowDetailHeader', () => {
       serverValid?: boolean;
       isSaving?: boolean;
       isManaged?: boolean;
+      enabled?: boolean;
       routerHistory?: React.ComponentProps<typeof TestWrapper>['routerHistory'];
     } = {}
   ) => {
     const store = createMockStore();
 
     // Set up the workflow in the store (with server-side valid flag)
-    store.dispatch(setWorkflow({ ...mockWorkflow, managed: isManaged, valid: serverValid }));
+    store.dispatch(
+      setWorkflow({ ...mockWorkflow, managed: isManaged, valid: serverValid, enabled })
+    );
     store.dispatch(setYamlString(hasChanges ? 'modified yaml' : mockWorkflow.yaml));
 
     if (!isValid) {
@@ -310,23 +314,42 @@ describe('WorkflowDetailHeader', () => {
     expect(getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
   });
 
-  it('disables enabled toggle when yaml has validation errors', () => {
+  it('disables enabled toggle for a disabled workflow when yaml has validation errors', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: true,
       hasYamlSchemaValidationErrors: true,
+      enabled: false,
     });
     const toggle = result.getByRole('switch');
     expect(toggle).toBeDisabled();
   });
 
-  it('disables enabled toggle when server reports workflow as invalid (e.g. initial page load)', () => {
+  it('disables enabled toggle for a disabled workflow when server reports workflow as invalid (e.g. initial page load)', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: true,
       serverValid: false,
+      enabled: false,
     });
     const toggle = result.getByRole('switch');
     expect(toggle).toBeDisabled();
   });
+
+  it.each([
+    ['yaml has validation errors', { hasYamlSchemaValidationErrors: true }],
+    ['server reports workflow as invalid', { serverValid: false }],
+  ])(
+    'keeps enabled toggle editable for an enabled workflow when %s, so it can be turned off',
+    (_, options) => {
+      const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+        isValid: true,
+        enabled: true,
+        ...options,
+      });
+      const toggle = result.getByRole('switch');
+      expect(toggle).toBeChecked();
+      expect(toggle).not.toBeDisabled();
+    }
+  );
 
   it('shows the managed badge for managed workflows', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {

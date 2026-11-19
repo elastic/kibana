@@ -506,6 +506,46 @@ describe('WorkflowList', () => {
       expect(mockUpdateWorkflow.mutate).not.toHaveBeenCalled();
     });
 
+    it('lets an invalid workflow that is enabled be turned off', async () => {
+      mockConfirmDisable.mockResolvedValue(true);
+      const workflow = createMockWorkflow({ id: 'wf-toggle', enabled: true, valid: false });
+
+      mockUseWorkflows.mockReturnValue({
+        data: createMockWorkflowListDto([workflow]),
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      const toggle = screen.getByTestId('workflowToggleSwitch-wf-toggle');
+      expect(toggle).not.toBeDisabled();
+      await userEvent.click(toggle);
+
+      await waitFor(() =>
+        expect(mockUpdateWorkflow.mutate).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'wf-toggle', workflow: { enabled: false } }),
+          expect.any(Object)
+        )
+      );
+    });
+
+    it('does not let an invalid workflow that is disabled be turned on', () => {
+      mockUseWorkflows.mockReturnValue({
+        data: createMockWorkflowListDto([
+          createMockWorkflow({ id: 'wf-toggle', enabled: false, valid: false }),
+        ]),
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      expect(screen.getByTestId('workflowToggleSwitch-wf-toggle')).toBeDisabled();
+    });
+
     it('renders multiple workflows', () => {
       const workflows = [
         createMockWorkflow({ id: 'wf-1', name: 'Workflow One' }),

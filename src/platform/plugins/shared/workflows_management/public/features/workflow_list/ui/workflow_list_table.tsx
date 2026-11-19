@@ -241,12 +241,14 @@ export const WorkflowListTable = ({
         width: '90px',
         sortable: true,
         render: (value: unknown, item: WorkflowListItemDto) => {
+          // Validation errors block turning the workflow on, not off.
+          const canToggleEnabled = item.enabled || item.valid;
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={
-                    !item.valid
+                    !canToggleEnabled
                       ? i18n.translate('workflows.workflowList.invalid', {
                           defaultMessage: 'Fix errors to enable workflow',
                         })
@@ -255,7 +257,9 @@ export const WorkflowListTable = ({
                 >
                   <EuiSwitch
                     data-test-subj={`workflowToggleSwitch-${item.id}`}
-                    disabled={!canUpdateWorkflow || item.permissions?.edit === false || !item.valid}
+                    disabled={
+                      !canUpdateWorkflow || item.permissions?.edit === false || !canToggleEnabled
+                    }
                     checked={item.enabled}
                     onChange={() => onToggleWorkflow(item)}
                     label={

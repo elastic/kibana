@@ -10,6 +10,7 @@ import type { ConnectorContractUnion } from '@kbn/workflows';
 import { builtInStepDefinitions } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
+import { getStepExposure } from '@kbn/workflows-management-plugin/common/schema';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { StepDefinitionForAgent } from './get_step_definitions_tool';
@@ -68,6 +69,11 @@ const lookupStepDefinitions = async (
 
   const definitions = [];
   for (const stepType of stepTypes) {
+    // Managed-only steps can't be used in the workflows the agent authors, so their
+    // definitions are never returned, matching get_step_definitions.
+    if (getStepExposure(stepType) === 'managed_only') {
+      continue;
+    }
     const builtIn = builtInMap.get(stepType);
     if (builtIn) {
       definitions.push(compactFields(formatBuiltInStep(builtIn)));
