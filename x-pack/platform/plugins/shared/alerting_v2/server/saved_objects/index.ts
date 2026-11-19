@@ -183,4 +183,8 @@ export function registerSavedObjects({
 
 export type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
 export type { ImportConfigSavedObjectAttributes } from './schemas/import_config_attributes';
+export {
+  CONNECTOR_SAVED_OBJECT_TYPE,
+  IMPORT_CONFIG_CONNECTOR_REFERENCE_NAME,
+} from './import_config_references';
 export type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';

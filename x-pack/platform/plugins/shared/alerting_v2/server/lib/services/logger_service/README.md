@@ -145,6 +145,7 @@ on, so it must identify a bounded slice of behaviour, not a file.
 | `ruleTemplateClient` | Rule template read path.                                                                                                                          | `lib/rule_templates_client/`                                                                                      |
 | `actionPolicyClient` | Action policy CRUD and API key handling.                                                                                                          | `lib/action_policy_client/`                                                                                       |
 | `actionPolicyTest`   | Test-notification preview and send for action policies.                                                                                           | `lib/action_policy_test/action_policy_test_service.ts`                                                            |
+| `importConfigClient` | Alert import config CRUD and its connector reference.                                                                                             | `lib/import_config_client/`                                                                                       |
 | `alertsClient`       | Alert actions and episode read / write clients.                                                                                                   | `lib/alert_actions_client/`, `lib/episodes_client/`                                                               |
 | `ruleExecutor`       | Rule task runner, pipeline steps, middlewares.                                                                                                    | `lib/rule_executor/task_runner.ts`                                                                                |
 | `director`           | Episode state transitions. Runs inside the executor but is its own domain.                                                                        | `lib/director/director.ts`                                                                                        |
@@ -158,7 +159,7 @@ on, so it must identify a bounded slice of behaviour, not a file.
 | `telemetry`          | Event-based telemetry (EBT) reporting.                                                                                                            | `lib/services/ebt_service/ebt_service.ts`                                                                         |
 
 The tree is split along **failure-domain** boundaries, not directory
-boundaries: 16 loggers an operator can remember, not 100+ file names. The
+boundaries: 17 loggers an operator can remember, not 100+ file names. The
 `director` runs inside the executor pipeline but gets its own logger because it
 is reasoned about independently. The `events` bus is one logger even though
 publishers and subscribers live in several directories.
@@ -215,7 +216,7 @@ Rules:
   `workflow_id`).
 
 Current keys: `rule_id`, `rule_kind`, `rule_template_id`, `space_id`,
-`policy_id`, `group_id`, `group_hash`, `alert_id`, `workflow_id`,
+`policy_id`, `import_config_id`, `connector_id`, `group_id`, `group_hash`, `alert_id`, `workflow_id`,
 `execution_id`, `task_id`, `skill_id`, `attachment_type`, `event_type`, `step`,
 `error_source`, `subsystem`, `resource`. `code` is emitted as `labels.code` but
 is passed as a top-level param (see [log codes](#5-log-codes)).
@@ -260,7 +261,7 @@ Naming (the JSDoc above `ALERTING_LOG_CODES` is the source of truth):
 - The domain prefix matches the subsystem that owns the failure, so an operator
   can filter a whole area with a prefix: `ROUTES_`, `RULE_` / `RULE_EXECUTION_`
   / `RULE_TEMPLATE_`, `DIRECTOR_`, `DISPATCH_` / `DISPATCHER_`, `POLICY_` /
-  `ACTION_POLICY_`, `EXECUTION_HISTORY_`, `EVENTS_`, `STORAGE_`, `QUERY_`,
+  `ACTION_POLICY_`, `IMPORT_CONFIG_`, `EXECUTION_HISTORY_`, `EVENTS_`, `STORAGE_`, `QUERY_`,
   `RESOURCES_`, `RETRY_`, `MAINTENANCE_WINDOW_`, `SAVED_OBJECTS_`,
   `AGENT_BUILDER_`, `TASKS_`, `TELEMETRY_`. Add the prefix to that JSDoc when you add a domain.
 - The suffix encodes the outcome. Warns (degraded but continued): `_FAILED`,
@@ -299,7 +300,7 @@ is not.
 
 | Category                                | Examples                                                                                                           |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Opaque IDs                              | `rule_id`, `policy_id`, `group_id`, `group_hash`, `alert_id`, `workflow_id`, `task_id`, `execution_id`, `space_id` |
+| Opaque IDs                              | `rule_id`, `policy_id`, `import_config_id`, `connector_id`, `group_id`, `group_hash`, `alert_id`, `workflow_id`, `task_id`, `execution_id`, `space_id` |
 | Enum values                             | `rule.kind`, `episode.status`, `event.outcome`, `error_source`, log codes, step names, task types, resource names  |
 | Counts, cardinalities, durations        | batch size, matched-rule count, dispatch latency, retry attempt (in messages or metrics, not labels)               |
 | Error class, code, stack trace          | Ours by construction. See downstream errors below                                                                  |

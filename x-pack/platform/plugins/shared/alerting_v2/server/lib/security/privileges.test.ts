@@ -89,16 +89,16 @@ describe('registerFeaturePrivileges', () => {
     expect(rulesFeature.privileges?.read.alerts).toBeUndefined();
   });
 
-  it('grants read access to rule templates on the rules feature (catalog SOs)', () => {
+  it('grants read access to rule templates and access to import configs on the rules feature', () => {
     const rulesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.rules.id);
 
     expect(rulesFeature.privileges?.all.savedObject).toEqual({
-      all: ['alerting_rule'],
+      all: ['alerting_rule', 'alerting_import_config'],
       read: ['alerting_rule_template'],
     });
     expect(rulesFeature.privileges?.read.savedObject).toEqual({
       all: [],
-      read: ['alerting_rule', 'alerting_rule_template'],
+      read: ['alerting_rule', 'alerting_rule_template', 'alerting_import_config'],
     });
   });
 
