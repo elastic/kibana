@@ -276,6 +276,26 @@ describe('findUnconditionalContainment', () => {
     ])('still flags: %s', (text) => {
       expect(findUnconditionalContainment(text)).toHaveLength(1);
     });
+
+    it.each([
+      'Review the account, revoke, and notify the owner.',
+      'Check the host, isolate or notify the owner.',
+      'T1078 remediation: revoke the access key.',
+      'T1078 Remediation: Revoke the access key.',
+      'T1078 Valid Accounts: revoke the access key.',
+      'T1078 Valid Accounts: Revoke the access key.',
+    ])('flags containment the masking must not hide: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toHaveLength(1);
+    });
+
+    it.each([
+      'If hosts A, B, and C are confirmed compromised, isolate them.',
+      'Once the hosts web-1, db-2, or cache-3 are confirmed unauthorized, disable them.',
+      'Observed T1562.008 Impair Defenses: Disable Cloud Logs.',
+      'The actor used T1562.008 Impair Defenses: Disable Cloud Logs on the trail.',
+    ])('still masks entity lists and technique names: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toEqual([]);
+    });
   });
 
   it('documented limits: a gate with no condition word is flagged', () => {

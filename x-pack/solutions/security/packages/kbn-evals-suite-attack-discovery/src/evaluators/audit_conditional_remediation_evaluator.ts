@@ -252,17 +252,49 @@ const splitSentences = (line: string): string[] =>
     )
     .filter((segment) => segment.length > 0);
 
-/** A list of one-word items ("alice, bob, or carol"); its commas do not end a clause. */
-const SERIAL_LIST = /[\w.@`'/-]+(?:,\s+[\w.@`'/-]+)+,?\s+(?:and|or)\s+[\w.@`'/-]+/g;
-/** The colon in a MITRE technique name ("T1562.008 (Impair Defenses: Disable Cloud Logs)"). */
-const TECHNIQUE_NAME_COLON = /\bT\d{4}(?:\.\d{3})?\)?\s*\(?[^,:;.()]{1,60}:/g;
+/**
+ * A list of one-word items ("alice, bob, or carol"); its commas do not end a clause. A containment
+ * verb is never a list item: "Review the account, revoke, and notify the owner" is coordinated
+ * actions, and the comma before "revoke" must still end the clause.
+ */
+const LIST_ITEM_WORD = `(?!(?:${BASE_VERBS})\\b)[\\w.@\`'/-]+`;
+const SERIAL_LIST = new RegExp(
+  `[\\w.@\`'/-]+(?:,\\s+${LIST_ITEM_WORD})+,?\\s+(?:and|or)\\s+${LIST_ITEM_WORD}`,
+  'gi'
+);
+/**
+ * The colon in a MITRE technique name ("T1562.008 (Impair Defenses: Disable Cloud Logs)"). The
+ * name and the sub-name are Title Case, so a lowercase label ("T1078 remediation: revoke the key")
+ * or a sentence after the colon ("T1078 Valid Accounts: Revoke the key.") is not one. Cost: a
+ * Title Case imperative after a technique name ("T1078 Valid Accounts: Revoke Access Keys.") is
+ * indistinguishable from a sub-name and stays masked.
+ */
+const TITLE_WORD = '[A-Z][\\w/+-]*';
+const CONNECTOR = '(?:and|or|of|the|for|to|in|on|with|via|from)';
+const NEXT_NAME_WORD = `\\s+(?:${CONNECTOR}\\s+)?${TITLE_WORD}`;
+const TECHNIQUE_NAME_COLON = new RegExp(
+  `\\bT\\d{4}(?:\\.\\d{3})?\\)?\\s*\\(?${TITLE_WORD}(?:\\s+(?:${CONNECTOR}\\s+)?${TITLE_WORD})*:(?=\\s+${TITLE_WORD}(?:${NEXT_NAME_WORD}|\\s*[).,;]|\\s*$))`,
+  'g'
+);
+/** A capitalized heading ("T1078 Account Remediation: ...") is a label, not a name. */
+const HEADING_NOT_A_NAME = new RegExp(
+  `^\\W*(?:${BASE_VERBS})\\b|\\b(?:remediations?|recommendations?|actions?|responses?|containment|mitigations?|steps?|fix(?:es)?|guidance)\\W*$`,
+  'i'
+);
+const MAX_TECHNIQUE_NAME_LENGTH = 70;
 const KEPT_COMMA = '\u0001';
 const KEPT_COLON = '\u0002';
+
+const keepTechniqueNameColon = (match: string): string => {
+  const name = match.replace(/^T\d{4}(?:\.\d{3})?/, '').slice(0, -1);
+  if (name.length > MAX_TECHNIQUE_NAME_LENGTH || HEADING_NOT_A_NAME.test(name)) return match;
+  return `${match.slice(0, -1)}${KEPT_COLON}`;
+};
 
 const splitClauses = (sentence: string): string[] =>
   sentence
     .replace(SERIAL_LIST, (list) => list.split(',').join(KEPT_COMMA))
-    .replace(TECHNIQUE_NAME_COLON, (name) => `${name.slice(0, -1)}${KEPT_COLON}`)
+    .replace(TECHNIQUE_NAME_COLON, keepTechniqueNameColon)
     .split(/\s*[,:]\s+|\s*[,:]$/)
     .map((clause) => clause.split(KEPT_COMMA).join(',').split(KEPT_COLON).join(':').trim())
     .filter((clause) => clause.length > 0);
