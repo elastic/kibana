@@ -37,6 +37,8 @@ export const FINDINGS_SEVERITIES = ['low', 'medium', 'high', 'critical'] as cons
 const MAX_METADATA_TEXT_LENGTH = 10_000;
 /** Actions the final pass may propose for a person to decide. */
 export const MAX_PROPOSALS = 3;
+/** Open proposals an investigation may hold at once before new ones must supersede existing ones. */
+export const MAX_OPEN_PROPOSALS = 5;
 /** Evidence charts the recorder may attach to one hypothesis. */
 const MAX_HYPOTHESIS_EVIDENCE_ITEMS = 2;
 
@@ -102,6 +104,7 @@ export const findingsOutputSchema = lazySchema(() => {
     proposals: z
       .array(
         z.object({
+          supersedes: z.string().optional(),
           title: z.string().min(1),
           comment: z.string().min(1),
           impact: z.string().optional(),
@@ -206,7 +209,13 @@ export type FindingsRecord = Omit<
   FindingsOutput,
   'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals'
 > & {
-  proposals?: Array<{ title: string; comment: string; impact?: string; confidence?: string }>;
+  proposals?: Array<{
+    supersedes?: string;
+    title: string;
+    comment: string;
+    impact?: string;
+    confidence?: string;
+  }>;
   /** `null` retracts the stored evidence. */
   impact_evidence?: InvestigationEvidence | null;
   impact_entities?: Array<{ name: string; type?: string; evidence?: InvestigationEvidence }>;
@@ -254,15 +263,19 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
       ? {
           proposals: rawProposals
             .slice(0, MAX_PROPOSALS)
-            .map(({ title, comment, impact, confidence }) => ({
-              title: truncate(title.trim(), MAX_TITLE_LENGTH),
-              comment: truncate(comment, MAX_COMMENT_LENGTH),
-              // A value the proposal store does not know is left out, not sent to fail the write.
-              ...(impact && proposalImpactSchema.safeParse(impact).success ? { impact } : {}),
-              ...(confidence && proposalConfidenceSchema.safeParse(confidence).success
-                ? { confidence }
-                : {}),
-            })),
+            .map(({ supersedes, title, comment, impact, confidence }) => {
+              const target = supersedes?.trim();
+              return {
+                ...(target ? { supersedes: truncate(target, MAX_ENTITY_ID_LENGTH) } : {}),
+                title: truncate(title.trim(), MAX_TITLE_LENGTH),
+                comment: truncate(comment, MAX_COMMENT_LENGTH),
+                // A value the proposal store does not know is left out, not sent to fail the write.
+                ...(impact && proposalImpactSchema.safeParse(impact).success ? { impact } : {}),
+                ...(confidence && proposalConfidenceSchema.safeParse(confidence).success
+                  ? { confidence }
+                  : {}),
+              };
+            }),
         }
       : {}),
     hypotheses: rawHypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
@@ -411,15 +424,20 @@ export const FINDINGS_JSON_SCHEMA = {
     },
     proposals: {
       type: 'array',
-      description: `Concrete actions for a person to decide, at most ${MAX_PROPOSALS}: a command, a config change, a code fix or a rollback the findings support. Leave out general advice and anything already proposed.`,
+      description: `New or updated concrete actions for a person to decide, at most ${MAX_PROPOSALS} per pass and at most ${MAX_OPEN_PROPOSALS} open in total: a command, a config change, a code fix, a rollback or a targeted check the findings support. Omit unchanged open proposals, and send [] or omit on follow-ups that add no new or revised action. Set supersedes to an open proposal's ID (such as P1) to update or replace it instead of adding a duplicate.`,
       items: {
         type: 'object',
         properties: {
+          supersedes: {
+            type: 'string',
+            description:
+              'ID of an open proposal listed in this conversation (such as P1) that this proposal refines or replaces. Omit only when the action is genuinely new and not covered by any open proposal.',
+          },
           title: { type: 'string', description: 'Short plain text naming the action.' },
           comment: {
             type: 'string',
             description:
-              'What to do and why, in Markdown: the concrete steps and the findings that support them.',
+              'What to do and why, in Markdown: the concrete steps and the findings that support them. When superseding an open proposal, give the complete standalone comment.',
           },
           impact: {
             type: 'string',

@@ -17,6 +17,7 @@ import {
 } from '@kbn/agentic-investigations-plugin/common';
 import type { Hypothesis, ImpactEntity } from '@kbn/agentic-investigations-plugin/common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import type { ProposalDecision, ProposalStatus } from '@kbn/proposals-common';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { createInvestigationUsageTelemetry } from '../lib/investigation_usage_telemetry';
 import type { ModelUsageCollector } from '../lib/model_usage_collector';
@@ -32,6 +33,7 @@ import {
 import {
   FINDINGS_JSON_SCHEMA,
   LIVE_FINDINGS_JSON_SCHEMA,
+  MAX_OPEN_PROPOSALS,
   entityIdFor,
   findingsOutputSchema,
   limitFindings,
@@ -45,14 +47,39 @@ import {
   type RecorderWorkspace,
 } from './workspace_tools';
 
-/** What the final pass needs from the proposals plugin: what is already proposed, and to propose. */
+export interface ExistingRecorderProposal {
+  id: string;
+  title: string;
+  comment: string;
+  status: ProposalStatus;
+  decision?: ProposalDecision;
+  impact?: string;
+  confidence?: string;
+}
+
+export interface RecorderProposalInput {
+  title: string;
+  comment: string;
+  impact?: string;
+  confidence?: string;
+}
+
+/** What the final pass needs from the proposals plugin: what is already proposed, and to propose or revise. */
 export interface RecorderProposals {
-  /** The titles of the proposals the investigation already has, so a later round does not repeat them. */
-  listTitles: (args: { request: KibanaRequest; conversationId: string }) => Promise<string[]>;
+  /** The non-superseded proposals the investigation already has, oldest first. */
+  list: (args: {
+    request: KibanaRequest;
+    conversationId: string;
+  }) => Promise<ExistingRecorderProposal[]>;
   propose: (args: {
     request: KibanaRequest;
     conversationId: string;
-    proposal: { title: string; comment: string; impact?: string; confidence?: string };
+    proposal: RecorderProposalInput;
+  }) => Promise<void>;
+  revise: (args: {
+    request: KibanaRequest;
+    proposalId: string;
+    proposal: RecorderProposalInput;
   }) => Promise<void>;
 }
 
@@ -192,6 +219,190 @@ const severityNotices = ({ events = [] }: ConversationLike): string[] =>
         }to "${data?.severity}". Do not set the severity.`
     );
 
+const OPEN_PROPOSAL_COMMENT_NOTICE_CHARS = 1_000;
+const CLOSED_PROPOSAL_COMMENT_NOTICE_CHARS = 240;
+
+const clipNoticeText = (text: string, max: number): string =>
+  text.length > max ? `${text.slice(0, max)}…` : text;
+
+const titleKey = (title: string): string => title.trim().replace(/\s+/g, ' ').toLowerCase();
+const collapseSpace = (text: string): string => text.trim().replace(/\s+/g, ' ');
+
+const isSameProposal = (existing: ExistingRecorderProposal, next: RecorderProposalInput): boolean =>
+  titleKey(existing.title) === titleKey(next.title) &&
+  collapseSpace(existing.comment) === collapseSpace(next.comment) &&
+  (next.impact === undefined || next.impact === existing.impact) &&
+  (next.confidence === undefined || next.confidence === existing.confidence);
+
+const closedOutcomeLabel = ({ decision, status }: ExistingRecorderProposal): string => {
+  if (decision === 'approved') return 'applied';
+  if (decision === 'dismissed') return 'declined';
+  if (status === 'expired') return 'expired';
+  return status;
+};
+
+/**
+ * Indexes open proposals as `P1`, `P2`, ... and builds a final-pass notice showing both open and
+ * already-closed proposals, so the recorder updates open ones in place and never repeats closed ones.
+ */
+const buildProposalsContext = (
+  existing: readonly ExistingRecorderProposal[]
+): { byHandle: Map<string, ExistingRecorderProposal>; notice?: string } => {
+  const byHandle = new Map<string, ExistingRecorderProposal>();
+  if (existing.length === 0) return { byHandle };
+
+  const open = existing.filter(({ status }) => status === 'pending');
+  const closed = existing.filter(({ status }) => status !== 'pending');
+  const sections: string[] = ['Existing proposed actions on this investigation:'];
+
+  if (open.length > 0) {
+    const lines = open.map((proposal, index) => {
+      const handle = `P${index + 1}`;
+      byHandle.set(handle.toLowerCase(), proposal);
+      const ratings = [
+        proposal.impact ? `impact: ${proposal.impact}` : undefined,
+        proposal.confidence ? `confidence: ${proposal.confidence}` : undefined,
+      ]
+        .filter(Boolean)
+        .join(', ');
+      const body = clipNoticeText(proposal.comment.trim(), OPEN_PROPOSAL_COMMENT_NOTICE_CHARS)
+        .split('\n')
+        .map((line) => `  ${line}`)
+        .join('\n');
+      return `- ${handle}: ${proposal.title.trim()}${ratings ? ` [${ratings}]` : ''}\n${body}`;
+    });
+    sections.push(
+      `Open (${
+        open.length
+      } of ${MAX_OPEN_PROPOSALS} open slots used — leave unchanged ones out; set supersedes to an ID such as P1 to refine or replace in place):\n${lines.join(
+        '\n'
+      )}`
+    );
+  }
+
+  if (closed.length > 0) {
+    const lines = closed.map((proposal) => {
+      const summary = clipNoticeText(
+        collapseSpace(proposal.comment),
+        CLOSED_PROPOSAL_COMMENT_NOTICE_CHARS
+      );
+      return `- [${closedOutcomeLabel(proposal)}] ${proposal.title.trim()}${
+        summary ? ` — ${summary}` : ''
+      }`;
+    });
+    sections.push(`Already closed (do not re-propose or supersede):\n${lines.join('\n')}`);
+  }
+
+  return { byHandle, notice: sections.join('\n\n') };
+};
+
+const writeRecorderProposals = async ({
+  proposals,
+  request,
+  conversationId,
+  existingAtPrompt,
+  openByHandle,
+  wanted,
+}: {
+  proposals: RecorderProposals;
+  request: KibanaRequest;
+  conversationId: string;
+  existingAtPrompt: readonly ExistingRecorderProposal[];
+  openByHandle: ReadonlyMap<string, ExistingRecorderProposal>;
+  wanted: NonNullable<FindingsRecord['proposals']>;
+}): Promise<void> => {
+  // Re-read right before writing: a human or another round may have acted while the model ran.
+  const latest = await proposals.list({ request, conversationId });
+  const latestById = new Map(latest.map((proposal) => [proposal.id, proposal]));
+  const promptById = new Map(existingAtPrompt.map((proposal) => [proposal.id, proposal]));
+  const openByTitle = new Map<string, ExistingRecorderProposal>();
+  const closedIds = new Set<string>();
+  const closedTitles = new Set<string>();
+
+  for (const proposal of existingAtPrompt) {
+    const current = latestById.get(proposal.id) ?? proposal;
+    if (current.status !== 'pending') {
+      closedIds.add(current.id);
+      closedTitles.add(titleKey(current.title));
+    }
+  }
+  for (const proposal of latest) {
+    if (proposal.status === 'pending') {
+      const key = titleKey(proposal.title);
+      if (!openByTitle.has(key)) openByTitle.set(key, proposal);
+    } else {
+      closedIds.add(proposal.id);
+      closedTitles.add(titleKey(proposal.title));
+    }
+  }
+
+  let openCount = latest.filter(({ status }) => status === 'pending').length;
+  const touchedIds = new Set<string>();
+  const emittedTitles = new Set<string>();
+  let firstError: unknown;
+
+  const runWrite = async (fn: () => Promise<void>) => {
+    try {
+      await fn();
+    } catch (error) {
+      firstError ??= error;
+    }
+  };
+
+  for (const item of wanted) {
+    const payload: RecorderProposalInput = {
+      title: item.title,
+      comment: item.comment,
+      ...(item.impact !== undefined ? { impact: item.impact } : {}),
+      ...(item.confidence !== undefined ? { confidence: item.confidence } : {}),
+    };
+
+    if (item.supersedes) {
+      const ref = item.supersedes.trim();
+      const matched =
+        openByHandle.get(ref.toLowerCase()) ??
+        latestById.get(ref) ??
+        promptById.get(ref) ??
+        openByTitle.get(titleKey(ref));
+      if (matched) {
+        const current = latestById.get(matched.id) ?? matched;
+        if (current.status !== 'pending' || closedIds.has(current.id)) continue;
+        if (touchedIds.has(current.id)) continue;
+        touchedIds.add(current.id);
+        emittedTitles.add(titleKey(item.title));
+        if (isSameProposal(current, payload)) continue;
+        await runWrite(() =>
+          proposals.revise({ request, proposalId: current.id, proposal: payload })
+        );
+        continue;
+      }
+      if (closedTitles.has(titleKey(ref))) continue;
+    }
+
+    const key = titleKey(item.title);
+    if (emittedTitles.has(key) || closedTitles.has(key)) continue;
+
+    const sameOpen = openByTitle.get(key);
+    if (sameOpen) {
+      if (touchedIds.has(sameOpen.id)) continue;
+      touchedIds.add(sameOpen.id);
+      emittedTitles.add(key);
+      if (isSameProposal(sameOpen, payload)) continue;
+      await runWrite(() =>
+        proposals.revise({ request, proposalId: sameOpen.id, proposal: payload })
+      );
+      continue;
+    }
+
+    if (openCount >= MAX_OPEN_PROPOSALS) continue;
+    emittedTitles.add(key);
+    openCount++;
+    await runWrite(() => proposals.propose({ request, conversationId, proposal: payload }));
+  }
+
+  if (firstError !== undefined) throw firstError;
+};
+
 /**
  * The record already stored for the investigation, as an earlier answer of the recorder's own.
  * A follow-up round starts with none of the recorder's memory, and without this it would replace
@@ -202,8 +413,7 @@ const storedRecord = async (
   agenticInvestigations: AgenticInvestigationsPluginStart,
   request: KibanaRequest,
   conversationId: string,
-  conversation: ConversationLike,
-  proposedTitles: readonly string[]
+  conversation: ConversationLike
 ): Promise<Record<string, unknown> | undefined> => {
   try {
     const { hypotheses, impactSummary, impactEvidence, impactEntities } =
@@ -216,12 +426,6 @@ const storedRecord = async (
       ...(typeof severity === 'string' && severity ? { severity } : {}),
       ...(impactSummary ? { impact_summary: impactSummary } : {}),
       ...(impactEvidence ? { impact_evidence: impactEvidence } : {}),
-      // What is already proposed, so a follow-up does not propose it again.
-      ...(proposedTitles.length
-        ? {
-            proposals: proposedTitles.map((title) => ({ title, comment: 'Already proposed.' })),
-          }
-        : {}),
       ...(impactEntities.length
         ? {
             impact_entities: impactEntities.map(({ id, name, type, evidence }) => ({
@@ -294,6 +498,8 @@ const runTrackedFindingsPass = async (
   }
 
   let output: FindingsRecord | undefined;
+  let existingProposals: ExistingRecorderProposal[] = [];
+  let openByHandle = new Map<string, ExistingRecorderProposal>();
   try {
     const model = await createOptimizeModel({
       request,
@@ -309,20 +515,27 @@ const runTrackedFindingsPass = async (
     if (!model) return false;
 
     if (memory.turns().length === 0) {
-      const proposedTitles = await deps
-        .getProposals?.()
-        ?.listTitles({ request, conversationId })
-        .catch(() => []);
       const stored = await storedRecord(
         agenticInvestigations,
         request,
         conversationId,
-        conversation,
-        proposedTitles ?? []
+        conversation
       );
       if (stored) memory.remember({ atGroups: 0, final: false, answer: stored });
     }
-    const notices = severityNotices(conversation);
+    if (final) {
+      existingProposals =
+        (await deps
+          .getProposals?.()
+          ?.list({ request, conversationId })
+          .catch(() => [])) ?? [];
+    }
+    const { byHandle, notice: proposalsNotice } = buildProposalsContext(existingProposals);
+    openByHandle = byHandle;
+    const notices = [
+      ...severityNotices(conversation),
+      ...(proposalsNotice ? [proposalsNotice] : []),
+    ];
 
     // The final pass can read the investigation's workspace. The round's long tool results are
     // written there first, so what the recorder is shown clipped can be read in full.
@@ -637,19 +850,15 @@ const runTrackedFindingsPass = async (
       const wanted = record.proposals;
       writes.push([
         'proposals',
-        async () => {
-          // Read again here: another round may have proposed since the pass started. A title
-          // already proposed is not proposed again, whichever way the model worded the rest.
-          const key = (title: string) => title.trim().toLowerCase();
-          const proposed = new Set(
-            (await proposals.listTitles({ request, conversationId })).map(key)
-          );
-          for (const proposal of wanted) {
-            if (proposed.has(key(proposal.title))) continue;
-            proposed.add(key(proposal.title));
-            await proposals.propose({ request, conversationId, proposal });
-          }
-        },
+        () =>
+          writeRecorderProposals({
+            proposals,
+            request,
+            conversationId,
+            existingAtPrompt: existingProposals,
+            openByHandle,
+            wanted,
+          }),
       ]);
     }
   }
