@@ -32,6 +32,7 @@ const buildDefaultEvaluatorsStub = (): DefaultEvaluators =>
       inputTokens: stubTraceEvaluator('Input Tokens'),
       outputTokens: stubTraceEvaluator('Output Tokens'),
       cachedTokens: stubTraceEvaluator('Cached Tokens'),
+      estimatedCost: stubTraceEvaluator('Estimated Cost (USD)'),
       toolCalls: stubTraceEvaluator('Tool Calls'),
       latency: stubTraceEvaluator('Latency'),
     },
@@ -71,6 +72,9 @@ describe('buildAlertsRagEvaluators', () => {
     'Input Tokens',
     'Output Tokens',
     'Cached Tokens',
+    // List-price estimated USD cost derived from the trace's token usage and the
+    // framework price table; null (unscored) when any model in the trace is unpriced.
+    'Estimated Cost (USD)',
     // Skill activation — verifies the agent invoked the canonical
     // `alert-analysis` skill rather than freelancing with raw tools.
     // Detected via `filestore.read` of `alert-analysis/SKILL.md` in the trace.

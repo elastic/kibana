@@ -59,7 +59,7 @@ const configureExperiment = ({
   }) => Promise<AttackDiscoveryTaskOutput>;
   evaluators: Array<Evaluator<AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput>>;
 } => {
-  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+  const { inputTokens, outputTokens, cachedTokens, estimatedCost, toolCalls, latency } =
     evaluators.traceBasedEvaluators;
 
   return {
@@ -85,6 +85,7 @@ const configureExperiment = ({
       inputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
       outputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
       cachedTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
+      estimatedCost as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
     ],
   };
 };
