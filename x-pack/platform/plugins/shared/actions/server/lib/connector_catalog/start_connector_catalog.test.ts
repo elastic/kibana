@@ -80,9 +80,7 @@ describe('startConnectorCatalog', () => {
     expect(storage.getManifest).toHaveBeenCalledTimes(1);
     expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /^Registered 1 connector type\(s\) from the connector catalog in \d+ ms\.$/
-      )
+      expect.stringMatching(/^Registered 1 connector type\(s\) from the connector catalog\.$/)
     );
     expect(logger.warn).not.toHaveBeenCalled();
   });

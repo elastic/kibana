@@ -1224,9 +1224,7 @@ export class ActionsPlugin
 
   /** Starts the first catalog load, driven by the `xpack.actions.catalog.enabled` config. */
   private startConnectorCatalog(core: CoreStart): ConnectorCatalogHandle {
-    const { setupContract, actionTypeRegistry } = this;
-    // 1 context for the whole catalog start, so `plugins.actions.connectorCatalog` filters it.
-    const logger = this.logger.get('connectorCatalog');
+    const { setupContract, actionTypeRegistry, logger } = this;
     const isEnabled = this.actionsConfig.catalog.enabled;
     const handle = startConnectorCatalog({
       isEnabled,
@@ -1265,16 +1263,10 @@ export class ActionsPlugin
     const pendingTypes = enabledActionTypes.filter(
       (connectorType) => !this.actionTypeRegistry?.has(connectorType)
     );
-    const catalogLogger = this.logger.get('connectorCatalog');
     if (pendingTypes.length === 0) {
       return;
     }
 
-    catalogLogger.debug(
-      `Enabled connector types [${pendingTypes.join(
-        ', '
-      )}] are not registered at start. Checking again when the catalog is ready.`
-    );
     // Catalog types register after start(), so check again once the first load has ended.
     void catalogReady.then(() => {
       const unavailableTypes = pendingTypes.filter(
@@ -1284,9 +1276,7 @@ export class ActionsPlugin
         this.logger.warn(
           `Enabled connector types [${unavailableTypes.join(', ')}] are not registered.`
         );
-        return;
       }
-      catalogLogger.debug('All enabled connector types are registered after the catalog load.');
     });
   };
 

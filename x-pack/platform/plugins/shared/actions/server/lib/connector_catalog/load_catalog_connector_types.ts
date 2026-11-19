@@ -37,7 +37,7 @@ const parseManifestRows = (raw: string, logger: Logger): CatalogDefinitionRef[] 
     return [];
   }
 
-  const refs = rows.flatMap((row: unknown) => {
+  return rows.flatMap((row: unknown) => {
     if (!isRecord(row)) {
       return [];
     }
@@ -50,12 +50,6 @@ const parseManifestRows = (raw: string, logger: Logger): CatalogDefinitionRef[] 
     }
     return [{ id, version }];
   });
-  if (refs.length < rows.length) {
-    logger.debug(
-      `Ignored ${rows.length - refs.length} invalid row(s) of the connector catalog manifest.`
-    );
-  }
-  return refs;
 };
 
 /** Builds and attempts to register every stored catalog definition. Returns the registered count. */
@@ -73,60 +67,29 @@ export const loadCatalogConnectorTypes = async ({
   signal: AbortSignal;
 }): Promise<number> => {
   if (signal.aborted) {
-    logger.debug('The connector catalog load was aborted before it read anything.');
     return 0;
   }
 
   const manifest = await storage.getManifest({ signal });
   if (!manifest) {
-    logger.debug(
-      'No connector catalog manifest found (the index or the manifest document is missing). No catalog types to register.'
-    );
     return 0;
   }
 
   const rows = parseManifestRows(manifest.raw, logger);
   if (rows.length === 0) {
-    logger.debug('The connector catalog manifest lists no valid connectors. Nothing to register.');
     return 0;
   }
-  logger.debug(
-    () =>
-      `The connector catalog manifest lists ${rows.length} connector(s): ${rows
-        .map(({ id, version }) => `${id}@${version}`)
-        .join(', ')}`
-  );
 
   const definitions = await storage.getDefinitions(rows, { signal });
-  logger.debug(`Read ${definitions.length} of ${rows.length} stored catalog definition(s).`);
-  rows
-    .filter(
-      ({ id, version }) =>
-        !definitions.some(
-          ({ connectorId, version: storedVersion }) =>
-            connectorId === id && storedVersion === version
-        )
-    )
-    .forEach(({ id, version }) => {
-      logger.warn(
-        `The connector catalog manifest lists "${id}@${version}" but no definition is stored for it.`
-      );
-    });
 
   let registered = 0;
   for (const definition of definitions) {
     // A result that arrives after the timeout must not register anything.
     if (signal.aborted) {
-      logger.debug(
-        `The connector catalog load was aborted after registering ${registered} type(s).`
-      );
       return registered;
     }
-    const { connectorId, version, catalogVersion } = definition;
+    const { connectorId, version } = definition;
     try {
-      logger.debug(
-        `Building a connector type from catalog definition "${connectorId}@${version}" (catalog ${catalogVersion}).`
-      );
       const actionType = buildType(definition);
       if (actionTypeRegistry.has(actionType.id)) {
         logger.warn(
@@ -137,9 +100,6 @@ export const loadCatalogConnectorTypes = async ({
       ensureSufficientLicense(actionType);
       actionTypeRegistry.register(actionType);
       registered++;
-      logger.debug(
-        `Registered connector type "${actionType.id}" from "${connectorId}@${version}". Task type "actions:${actionType.id}" is now available.`
-      );
     } catch (error) {
       logger.warn(
         `Skipping catalog connector "${connectorId}" version ${version}: ${getErrorMessage(error)}`

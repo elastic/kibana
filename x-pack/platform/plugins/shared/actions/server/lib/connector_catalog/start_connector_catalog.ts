@@ -49,11 +49,9 @@ export const startConnectorCatalog = ({
   timeoutMs = CATALOG_FIRST_LOAD_TIMEOUT_MS,
 }: StartConnectorCatalogDeps): ConnectorCatalogHandle => {
   if (!isEnabled) {
-    logger.debug('The connector catalog is off. Nothing is read.');
     return { ready: Promise.resolve(), stop: () => {} };
   }
 
-  const startedAt = Date.now();
   const controller = new AbortController();
   const { signal } = controller;
 
@@ -62,8 +60,6 @@ export const startConnectorCatalog = ({
     timedOut = true;
     controller.abort();
   }, timeoutMs);
-
-  logger.debug(`Starting the first connector catalog load. Deadline: ${timeoutMs} ms.`);
 
   const firstLoad = async () => {
     const count = await loadCatalogConnectorTypes({
@@ -75,11 +71,7 @@ export const startConnectorCatalog = ({
     });
     // A result that arrives after an abort registers nothing and logs nothing.
     if (!signal.aborted) {
-      logger.info(
-        `Registered ${count} connector type(s) from the connector catalog in ${
-          Date.now() - startedAt
-        } ms.`
-      );
+      logger.info(`Registered ${count} connector type(s) from the connector catalog.`);
     }
   };
 
@@ -101,7 +93,6 @@ export const startConnectorCatalog = ({
           `The first connector catalog load timed out after ${timeoutMs} ms. Only in-tree connector types are available.`
         );
       }
-      logger.debug(`The connector catalog is ready after ${Date.now() - startedAt} ms.`);
     });
 
   return {
