@@ -1787,7 +1787,13 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
   it('still excludes a judged column whose every judged grade was rejected', () => {
     const judgedCfg = parseMatrixConfig({
       columns: [
-        { id: 'rel', label: 'Relevance', suites: ['suite-a'], examplePrefixes: ['alert'], weight: 1 },
+        {
+          id: 'rel',
+          label: 'Relevance',
+          suites: ['suite-a'],
+          examplePrefixes: ['alert'],
+          weight: 1,
+        },
       ],
       models: [{ id: 'model-x', label: 'Model X' }],
     });

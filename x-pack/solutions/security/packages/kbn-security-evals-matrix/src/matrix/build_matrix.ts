@@ -711,39 +711,39 @@ const buildMatrixRow = (
                 .reduce((sum, dataset) => sum + (pick(dataset) || 0), 0)),
         0
       );
-      // Libra round: a column whose effective selection reads no judged (model-graded)
-      // evaluator — e.g. an allowlist of code-only contract checks such as
-      // `FinalAnswerPresent` — must not inherit judge-policy rejections recorded
-      // against other evaluators of the same datasets: its numeric mean rests on
-      // code-only checks that stay admitted under every judge policy, so rendering
-      // it `excluded:*` hides a valid, fully measured cell. Only apply the
-      // exclusion signals when some in-scope dataset carries a judged evaluator
-      // this column actually scores. (A suite rejected wholesale pushes
-      // `datasets: []`, leaving no evaluator record to inspect: the suite's fate
-      // IS the column's fate there, so the counts stay.)
-      const columnAllows = column.evaluators ? new Set(column.evaluators) : undefined;
-      const readsJudgedGrades = columnSuitesAll.some((suite) =>
-        suite.datasets.some(
-          (dataset) =>
-            (!columnDatasetIds || columnDatasetIds.has(dataset.datasetId)) &&
-            dataset.evaluators.some(
-              (e) =>
-                isQualityEvaluator(e) &&
-                !CONTRACT_EVALUATORS.has(e.evaluatorName) &&
-                (columnAllows
-                  ? columnAllows.has(e.evaluatorName)
-                  : !isExcludedEvaluator(e.evaluatorName, excludeEvaluators))
-            )
-        )
-      );
-      const canScopeToSelection = columnSuitesAll.every((suite) => suite.datasets.length > 0);
-      const scopedExcludedSelfJudged = columnDatasetIds
-        ? perDataset((dataset) => dataset.excludedSelfJudged ?? 0)
-        : columnSuitesAll.reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0);
-      const scopedExcludedNonEis = columnDatasetIds
-        ? perDataset((dataset) => dataset.excludedNonEis ?? 0)
-        : columnSuitesAll.reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0);
-      const cellExtras = {
+    // Libra round: a column whose effective selection reads no judged (model-graded)
+    // evaluator — e.g. an allowlist of code-only contract checks such as
+    // `FinalAnswerPresent` — must not inherit judge-policy rejections recorded
+    // against other evaluators of the same datasets: its numeric mean rests on
+    // code-only checks that stay admitted under every judge policy, so rendering
+    // it `excluded:*` hides a valid, fully measured cell. Only apply the
+    // exclusion signals when some in-scope dataset carries a judged evaluator
+    // this column actually scores. (A suite rejected wholesale pushes
+    // `datasets: []`, leaving no evaluator record to inspect: the suite's fate
+    // IS the column's fate there, so the counts stay.)
+    const columnAllows = column.evaluators ? new Set(column.evaluators) : undefined;
+    const readsJudgedGrades = columnSuitesAll.some((suite) =>
+      suite.datasets.some(
+        (dataset) =>
+          (!columnDatasetIds || columnDatasetIds.has(dataset.datasetId)) &&
+          dataset.evaluators.some(
+            (e) =>
+              isQualityEvaluator(e) &&
+              !CONTRACT_EVALUATORS.has(e.evaluatorName) &&
+              (columnAllows
+                ? columnAllows.has(e.evaluatorName)
+                : !isExcludedEvaluator(e.evaluatorName, excludeEvaluators))
+          )
+      )
+    );
+    const canScopeToSelection = columnSuitesAll.every((suite) => suite.datasets.length > 0);
+    const scopedExcludedSelfJudged = columnDatasetIds
+      ? perDataset((dataset) => dataset.excludedSelfJudged ?? 0)
+      : columnSuitesAll.reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0);
+    const scopedExcludedNonEis = columnDatasetIds
+      ? perDataset((dataset) => dataset.excludedNonEis ?? 0)
+      : columnSuitesAll.reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0);
+    const cellExtras = {
       // Per-column, not suite-wide: only the datasets this column actually reads decide
       // whether the published cell is self-judged (a suite mixing self-judged `alert`
       // and independently judged `hunt` prefixes must not label `hunt` self-judged).

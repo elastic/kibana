@@ -1,5 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1"; you may not use this file except in compliance with
@@ -12,9 +19,7 @@ import { listWindowIds } from './list_window_ids';
 const WINDOW = { start: '2026-03-01T00:00:00.000Z', end: '2026-04-01T00:00:00.000Z' };
 
 const pagedSearch = (pages: Array<Array<{ _id: string; sort: string[] }>>) => {
-  const search = jest
-    .fn()
-    .mockImplementationOnce(async () => ({ hits: { hits: pages[0] } }));
+  const search = jest.fn().mockImplementationOnce(async () => ({ hits: { hits: pages[0] } }));
   for (let i = 1; i < pages.length; i++) {
     search.mockResolvedValueOnce({ hits: { hits: pages[i] } });
   }
