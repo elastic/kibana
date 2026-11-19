@@ -316,6 +316,30 @@ describe('loadPromptArm', () => {
     rmSync(root, { recursive: true, force: true });
   });
 
+  it('fetches a baseline commit the clone lacks without making a full clone shallow', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'writeup-fetch-'));
+    const origin = join(tmp, 'origin');
+    const clone = join(tmp, 'clone');
+    const gitIn = (cwd: string, ...args: string[]) =>
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], {
+        cwd,
+        encoding: 'utf8',
+      }).trim();
+    mkdirSync(origin);
+    gitIn(origin, 'init', '-q');
+    gitIn(origin, 'config', 'uploadpack.allowAnySHA1InWant', 'true');
+    gitIn(origin, 'commit', '-q', '--allow-empty', '-m', 'first');
+    gitIn(tmp, 'clone', '-q', `file://${origin}`, clone);
+    // A commit the clone never saw, on no branch, like a PR's merge base after main moved on.
+    gitIn(origin, 'commit', '-q', '--allow-empty', '-m', 'second');
+    const missing = gitIn(origin, 'rev-parse', 'HEAD');
+    gitIn(origin, 'reset', '-q', '--hard', 'HEAD~1');
+
+    expect(resolvePromptCommit(missing, clone)).toBe(missing);
+    expect(gitIn(clone, 'rev-parse', '--is-shallow-repository')).toBe('false');
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
   it('compares a PR build against its merge base unless a baseline is set', () => {
     const pr = { GITHUB_PR_NUMBER: '306343', PR_MERGE_BASE: 'abc123' };
     expect(baselinePromptSpec(pr)).toBe('abc123');

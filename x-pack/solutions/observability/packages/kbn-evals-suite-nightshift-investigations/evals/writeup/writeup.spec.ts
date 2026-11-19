@@ -18,7 +18,13 @@ import {
 } from './datasets';
 import { goldensByCase, goldensDirFor, readGoldens } from './goldens';
 import { createWriteupEvaluators } from './evaluators';
-import { formatReport, judgeCoverage, toWriteupRows, type WriteupResults } from './report';
+import {
+  formatReport,
+  judgeCoverage,
+  pairedReplies,
+  toWriteupRows,
+  type WriteupResults,
+} from './report';
 import {
   WRITEUP_DATA_DIR,
   baselinePromptSpec,
@@ -151,13 +157,13 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
       // With a baseline, the head to head is the point of the run (a PR's before and after), so a
       // baseline that mostly failed to reply leaves nothing to compare and fails the run too.
       if (baseline) {
-        const compared = runs.filter(({ output }) => {
-          const { reply, baseline: base } = output as WriteupTaskOutput;
-          return reply && base?.reply;
-        }).length;
+        const paired = pairedReplies(runs.map(({ output }) => output as WriteupTaskOutput));
+        for (const { caseId, error } of paired.baselineMissing) {
+          log.warning(`No baseline reply for ${caseId}: ${error}`);
+        }
         expect(
-          compared / runs.length,
-          `Too few rounds have both replies to compare (${compared} of ${runs.length})`
+          paired.compared / paired.total,
+          `Too few rounds have both replies to compare (${paired.compared} of ${paired.total})`
         ).toBeGreaterThanOrEqual(MIN_REPLY_RATE);
       }
 

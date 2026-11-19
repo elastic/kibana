@@ -152,6 +152,23 @@ export const judgeCoverage = (evaluationRuns: readonly EvaluationRun[]) => {
 };
 
 /**
+ * How many rounds have a reply under both prompts, which is what a head to head can compare, and
+ * which rounds the baseline missed (with its error), so a failing run says why.
+ */
+export const pairedReplies = (
+  outputs: ReadonlyArray<Pick<WriteupTaskOutput, 'case_id' | 'reply' | 'baseline'>>
+) => ({
+  total: outputs.length,
+  compared: outputs.filter(({ reply, baseline }) => reply && baseline?.reply).length,
+  baselineMissing: outputs
+    .filter(({ baseline }) => !baseline?.reply)
+    .map(({ case_id: caseId, baseline }) => ({
+      caseId,
+      error: baseline?.error ?? 'no baseline reply',
+    })),
+});
+
+/**
  * A candidate may replace its golden when every gate passes, faithfulness is at least 4, and it
  * wins at least five of every six golden comparisons. A person approves before a golden changes.
  */
