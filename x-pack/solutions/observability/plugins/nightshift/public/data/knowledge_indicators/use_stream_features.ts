@@ -38,7 +38,10 @@ export const useStreamFeatures = (
     });
   };
 
-  const { data, isLoading, error, refetch } = useQuery<{ features: Feature[] }, Error>({
+  const { data, isLoading, isError, isFetched, error, refetch } = useQuery<
+    { features: Feature[] },
+    Error
+  >({
     queryKey: [...FEATURES_QUERY_KEY, sourceId, ...deps],
     queryFn: fetchFeatures,
     enabled,
@@ -62,6 +65,8 @@ export const useStreamFeatures = (
     () => allFeatures.filter((feature) => !!feature.excluded),
     [allFeatures]
   );
+  // An initial failed query returns to loading during retries without cached data.
+  const hasError = isError || (isLoading && isFetched);
 
   return {
     features,
@@ -69,5 +74,6 @@ export const useStreamFeatures = (
     featuresLoading: isLoading,
     refreshFeatures: refetch,
     error,
+    hasError,
   };
 };

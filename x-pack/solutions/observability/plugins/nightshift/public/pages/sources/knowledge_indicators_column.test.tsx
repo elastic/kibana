@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SignificantEventsWorkflowStatus, type Feature } from '@kbn/significant-events-schema';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
@@ -39,6 +39,7 @@ const createFeature = (id: string): Feature => ({
 });
 
 const initialFeatures = [createFeature('checkout'), createFeature('payments')];
+const errorTooltip = 'Unable to refresh the KI feature count. Retrying automatically.';
 
 describe('KnowledgeIndicatorsColumn polling', () => {
   let queryClient: QueryClient;
@@ -64,6 +65,13 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     await act(async () => {
       await jest.advanceTimersByTimeAsync(milliseconds);
     });
+  };
+
+  const expectErrorTooltip = async (trigger: HTMLElement) => {
+    fireEvent.mouseOver(trigger);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(errorTooltip);
+    fireEvent.mouseOut(trigger);
+    await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
   };
 
   beforeEach(() => {
@@ -103,7 +111,7 @@ describe('KnowledgeIndicatorsColumn polling', () => {
 
     mockFetch.mockRejectedValue(new Error('Feature fetch failed'));
     await advanceTime(10_000);
-    expect(await screen.findAllByText('—')).toHaveLength(sourceIds.length);
+    expect(await screen.findAllByText(errorTooltip)).toHaveLength(sourceIds.length);
 
     const requestsAfterFailure = mockFetch.mock.calls.length;
     await advanceTime(59_000);
@@ -153,25 +161,29 @@ describe('KnowledgeIndicatorsColumn polling', () => {
 
     renderColumns(['source-1', 'source-2']);
     await screen.findByText('2');
-    expect(screen.getByText('—')).toHaveTextContent(/^—$/);
+    await expectErrorTooltip(await screen.findByText(errorTooltip));
+    expect(screen.queryByText('—')).not.toBeInTheDocument();
 
     isSecondSourceFailing = true;
     await advanceTime(10_000);
-    expect(screen.getAllByText('—')).toHaveLength(2);
+    expect(screen.getAllByText(errorTooltip)).toHaveLength(2);
     expect(screen.queryByText('2')).not.toBeInTheDocument();
 
     isSecondSourceFailing = false;
     secondSourceFeatures = [createFeature('orders')];
     await advanceTime(60_000);
     await screen.findByText('1');
-    expect(screen.getByText('—')).toHaveTextContent(/^—$/);
+    expect(screen.getByText(errorTooltip)).toBeInTheDocument();
   });
 
-  it('shows a dash during a retry without cached features until the count recovers', async () => {
+  it('keeps the error icon focused during a retry without cached features', async () => {
     mockFetch.mockRejectedValue(new Error('Feature fetch failed'));
     renderColumns();
     await waitFor(() => expect(queryClient.isFetching()).toBe(0));
-    expect(screen.getByText('—')).toHaveTextContent(/^—$/);
+    const errorIcon = await screen.findByText(errorTooltip);
+    act(() => errorIcon.focus());
+    expect(errorIcon).toHaveFocus();
+    fireEvent.keyDown(errorIcon, { key: 'Escape' });
 
     let completeRetry: ((response: { features: Feature[] }) => void) | undefined;
     mockFetch.mockReturnValueOnce(
@@ -180,11 +192,13 @@ describe('KnowledgeIndicatorsColumn polling', () => {
       })
     );
     await advanceTime(60_000);
-    expect(screen.getByText('—')).toHaveTextContent(/^—$/);
+    expect(errorIcon).toBeInTheDocument();
+    expect(errorIcon).toHaveFocus();
 
     await act(async () => {
-      completeRetry?.({ features: [createFeature('orders')] });
+      completeRetry?.({ features: [] });
     });
-    await screen.findByText('1');
+    await waitFor(() => expect(errorIcon).not.toBeInTheDocument());
+    expect(screen.getByText('—')).toHaveTextContent(/^—$/);
   });
 });
