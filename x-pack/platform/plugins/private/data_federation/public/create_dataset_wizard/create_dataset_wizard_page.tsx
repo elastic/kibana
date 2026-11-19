@@ -35,6 +35,7 @@ import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_init
 import { StepAdditional } from './options_step/step_additional';
 import { StepDataset } from './define_step/step_dataset';
 import { StepMapping } from './mapping_step/step_mapping';
+import { StepPreview } from './preview_step/step_preview';
 import { StepReview } from './review_step/step_review';
 import { getValidStepIds } from './step_validity';
 import type { DatasetWizardStepContent, DatasetWizardStepId } from './types';
@@ -44,12 +45,13 @@ const STEPS: Array<{ id: DatasetWizardStepId; label: string }> = [
   { id: 'dataset', label: createDatasetWizardStrings.datasetStepLabel },
   { id: 'settings', label: createDatasetWizardStrings.additionalStepLabel },
   { id: 'mapping', label: createDatasetWizardStrings.mappingStepLabel },
+  { id: 'preview', label: createDatasetWizardStrings.previewStepLabel },
   { id: 'review', label: createDatasetWizardStrings.reviewStepLabel },
 ];
 const LAST_STEP_INDEX = STEPS.length - 1;
 const INITIAL_STEP_CONTENT: DatasetWizardStepContent = { validate: async () => true };
 const NARROW_STEPS: DatasetWizardStepId[] = ['dataset'];
-const OPTIONAL_STEP_IDS: DatasetWizardStepId[] = ['settings'];
+const OPTIONAL_STEP_IDS: DatasetWizardStepId[] = ['settings', 'preview'];
 
 const MAX_WIDTH_NARROW_PX = 600;
 const MAX_WIDTH_WIDE_PX = 1024;
@@ -267,6 +269,7 @@ export function CreateDatasetWizardPage({
                   )}
                   {activeStepId === 'settings' && <StepAdditional />}
                   {activeStepId === 'mapping' && <StepMapping />}
+                  {activeStepId === 'preview' && <StepPreview />}
                   {activeStepId === 'review' && <StepReview dataSources={dataSources} />}
                 </div>
               </WizardStepProvider>

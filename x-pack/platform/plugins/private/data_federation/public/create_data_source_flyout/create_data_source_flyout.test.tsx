@@ -11,6 +11,8 @@ import { act, fireEvent, render, waitFor, within } from '@testing-library/react'
 
 import type { HttpStart, ToastsStart } from '@kbn/core/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DataSourcesClient } from '../data_sources_client';
 import { getDataSourceByIdApiPath } from '../../common';
@@ -87,6 +89,8 @@ const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
     serviceRegistry: createServiceRegistry(),
     toasts: createToastsMock(),
     docLinks: createDocLinksMock(),
+    data: dataPluginMock.createStartContract(),
+    http: coreMock.createStart().http,
     featureFlags: {},
     cloudInfo: {
       jwtIssuer: 'https://issuer.example.com',
@@ -119,6 +123,8 @@ const renderCreateFlyout = (
     datasetsClient: createDatasetsClientMock(),
     toasts: createToastsMock(),
     docLinks: createDocLinksMock(),
+    data: dataPluginMock.createStartContract(),
+    http: coreMock.createStart().http,
     featureFlags: {},
     cloudInfo,
     serviceRegistry: createServiceRegistry(),
@@ -142,6 +148,8 @@ describe('CreateDataSourceFlyout', () => {
         datasetsClient: createDatasetsClientMock(),
         toasts: createToastsMock(),
         docLinks: createDocLinksMock(),
+        data: dataPluginMock.createStartContract(),
+        http: coreMock.createStart().http,
         featureFlags: {},
         reportUiCounter,
         serviceRegistry: createServiceRegistry(),
@@ -341,6 +349,8 @@ describe('CreateDataSourceFlyout', () => {
       serviceRegistry: createServiceRegistry(),
       toasts,
       docLinks: createDocLinksMock(),
+      data: dataPluginMock.createStartContract(),
+      http: coreMock.createStart().http,
       featureFlags: {},
     };
     let resolveSave: (value: string | null) => void;
@@ -396,6 +406,8 @@ describe('CreateDataSourceFlyout', () => {
       serviceRegistry: createServiceRegistry(),
       toasts,
       docLinks: createDocLinksMock(),
+      data: dataPluginMock.createStartContract(),
+      http: coreMock.createStart().http,
       featureFlags: {},
     };
     const onSave = jest.fn().mockResolvedValue(null);
@@ -440,6 +452,8 @@ describe('CreateDataSourceFlyout', () => {
       serviceRegistry: createServiceRegistry(),
       toasts: createToastsMock(),
       docLinks: createDocLinksMock(),
+      data: dataPluginMock.createStartContract(),
+      http: coreMock.createStart().http,
       featureFlags: {},
     };
     const onSave = jest.fn().mockResolvedValue('validation_exception: something went wrong');
@@ -481,6 +495,8 @@ describe('CreateDataSourceFlyout', () => {
       serviceRegistry: createServiceRegistry(),
       toasts: createToastsMock(),
       docLinks: createDocLinksMock(),
+      data: dataPluginMock.createStartContract(),
+      http: coreMock.createStart().http,
       featureFlags: {},
     };
     const onSave = jest.fn().mockResolvedValue(null);
@@ -665,6 +681,8 @@ describe('CreateDataSourceFlyout', () => {
         serviceRegistry: createServiceRegistry(),
         toasts: createToastsMock(),
         docLinks: createDocLinksMock(),
+        data: dataPluginMock.createStartContract(),
+        http: coreMock.createStart().http,
         featureFlags: {},
         cloudInfo: {
           jwtIssuer: 'https://issuer.example.com',

@@ -9,7 +9,8 @@ import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LocatorPublic, SharePluginStart } from '@kbn/share-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { ToastsStart } from '@kbn/core/public';
+import type { HttpStart, ToastsStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
@@ -25,6 +26,7 @@ export interface SetupDependencies {
 }
 
 export interface StartDependencies {
+  data: DataPublicPluginStart;
   share?: SharePluginStart;
   licensing: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
@@ -41,6 +43,8 @@ export interface FederatedDataFeatureFlags {
 export interface DataFederationKibanaServices {
   dataSourcesClient: DataSourcesClient;
   datasetsClient: DatasetsClient;
+  data: DataPublicPluginStart;
+  http: HttpStart;
   toasts: ToastsStart;
   docLinks: DocLinksStart;
   discoverLocator?: LocatorPublic<DiscoverEsqlLinkParams>;

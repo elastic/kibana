@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type DatasetWizardStepId = 'dataset' | 'settings' | 'mapping' | 'review';
+export type DatasetWizardStepId = 'dataset' | 'settings' | 'mapping' | 'preview' | 'review';
 
 export interface DatasetWizardStepContent {
   isValid?: boolean;

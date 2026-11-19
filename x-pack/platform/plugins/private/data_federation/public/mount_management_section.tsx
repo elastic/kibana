@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -28,6 +29,7 @@ export const mountManagementSection = (
   { element, history }: ManagementAppMountParams,
   {
     cloudInfo,
+    data,
     share,
     usageCollection,
     featureFlags: {
@@ -36,6 +38,7 @@ export const mountManagementSection = (
     } = {},
   }: {
     cloudInfo?: FederatedIdentityClusterInfo;
+    data: DataPublicPluginStart;
     share?: SharePluginStart;
     usageCollection?: UsageCollectionStart;
     featureFlags?: FederatedDataFeatureFlags;
@@ -49,6 +52,8 @@ export const mountManagementSection = (
   const services: DataFederationKibanaServices = {
     dataSourcesClient: new DataSourcesClient(coreStart.http),
     datasetsClient: new DatasetsClient(coreStart.http),
+    data,
+    http: coreStart.http,
     toasts: coreStart.notifications.toasts,
     docLinks: coreStart.docLinks,
     discoverLocator: getDiscoverLocator(coreStart.application.capabilities, share),
