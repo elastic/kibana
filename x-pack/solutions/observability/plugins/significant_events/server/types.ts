@@ -16,7 +16,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
   RelayClientContract,
 } from '@kbn/actions-plugin/server';
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   AgentBuilderSmlPluginSetup,
@@ -45,7 +45,31 @@ import type {
   NightshiftSourcesServerSetup,
   NightshiftSourcesServerStart,
 } from '@kbn/nightshift-sources-plugin/server';
+import type { KnowledgeIndicatorsChangeListener } from './lib/knowledge_indicators/knowledge_indicator_change_emitter';
+import type { KnowledgeIndicatorReader } from './lib/knowledge_indicators/contract/knowledge_indicator_reader';
 import type { SeveritySync } from './lib/significant_events/events/severity';
+
+/**
+ * What other plugins get at setup. Read-only knowledge indicator events; nothing else is planned on
+ * this contract.
+ */
+export interface SignificantEventsServerSetup {
+  /**
+   * Registers a listener called after every committed write to the knowledge indicators of some
+   * sources, with the request that made it. A listener that throws is logged and never fails or
+   * delays the write. Returns the unsubscribe function.
+   */
+  onKnowledgeIndicatorsChange: (listener: KnowledgeIndicatorsChangeListener) => () => void;
+}
+
+/**
+ * What other plugins get at start. Read-only knowledge indicator access; nothing else is planned on
+ * this contract.
+ */
+export interface SignificantEventsServerStart {
+  /** Reads the knowledge indicators of the request's space, with the request's sources client. */
+  getKnowledgeIndicatorReader: (request: KibanaRequest) => KnowledgeIndicatorReader;
+}
 
 export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;

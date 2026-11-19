@@ -452,6 +452,43 @@ describe('KnowledgeIndicatorClient.deleteIndicators', () => {
   });
 });
 
+describe('KnowledgeIndicatorClient onWrite', () => {
+  it('reports the source once a bulk write commits', async () => {
+    const onWrite = jest.fn();
+    const { client, runEsql } = makeClient({ onWrite });
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc({ id: 'feat-1' })] });
+
+    await client.bulk(SOURCE, [{ delete: { type: KI_TYPE_FEATURE, id: 'feat-1' } }]);
+
+    expect(onWrite).toHaveBeenCalledTimes(1);
+    expect(onWrite).toHaveBeenCalledWith(SOURCE);
+  });
+
+  it('reports nothing when a bulk write applies nothing', async () => {
+    const onWrite = jest.fn();
+    const { client, runEsql } = makeClient({ onWrite });
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.bulk(SOURCE, [{ delete: { type: KI_TYPE_FEATURE, id: 'unknown' } }]);
+
+    expect(onWrite).not.toHaveBeenCalled();
+  });
+
+  it('reports nothing when deleting the indicators fails', async () => {
+    const onWrite = jest.fn();
+    const { client, create, runEsql } = makeClient({ onWrite });
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc({ id: 'feat-1' })] });
+    create.mockResolvedValueOnce({
+      errors: true,
+      items: [{ create: { status: 500, error: { type: 'x', reason: 'x' } } }],
+    });
+
+    await expect(client.deleteIndicators(SOURCE)).rejects.toThrow();
+
+    expect(onWrite).not.toHaveBeenCalled();
+  });
+});
+
 describe('KnowledgeIndicatorClient.getSourceIdsWithKnowledgeIndicators', () => {
   const runEsql = runEsqlQuery as jest.Mock;
 

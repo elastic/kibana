@@ -54,6 +54,11 @@ export interface KnowledgeIndicatorClientDeps {
   logger: Logger;
   /** Kibana space every read is filtered by and every write is stamped with. */
   space: string;
+  /**
+   * Called after a write to a source's knowledge indicators commits. Must not throw or block: the
+   * write already happened.
+   */
+  onWrite?: (sourceId: string) => void;
   /** Test seam for the `search_embedding` model lookup. */
   searchEmbeddingModelResolver?: SearchEmbeddingModelResolver;
   /**
