@@ -422,6 +422,9 @@ export const verifyBlocked = async ({
   const mismatches: string[] = [];
   const scopeOutput = (gate?.output ?? {}) as Partial<HuntIndexScopeResponse>;
 
+  if (['failed', 'cancelled', 'timed_out'].includes(String(gate?.executionStatus).toLowerCase())) {
+    mismatches.push(`the sweep did not finish normally: status ${gate?.executionStatus}`);
+  }
   compare(mismatches, 'gate status', scopeOutput.status, 'blocked');
   compare(mismatches, 'gate resolution', scopeOutput.resolution, 'blocked:empty_universe');
   compare(mismatches, 'gate index_patterns', scopeOutput.index_patterns, []);

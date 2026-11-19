@@ -523,6 +523,8 @@ export interface SweepStepExecution {
 
 export interface FinishedSweepGate {
   executionId: string;
+  /** The whole execution's status, so an aborted sweep is told from a finished one. */
+  executionStatus: string;
   stepStartedAt: string;
   stepFinishedAt: string | undefined;
   output: unknown;
@@ -599,6 +601,7 @@ export const waitForFinishedSweepGate = async ({
       return step
         ? {
             executionId,
+            executionStatus: String((execution.body as { status?: string }).status),
             stepStartedAt: step.startedAt,
             stepFinishedAt: step.finishedAt,
             output: step.output,

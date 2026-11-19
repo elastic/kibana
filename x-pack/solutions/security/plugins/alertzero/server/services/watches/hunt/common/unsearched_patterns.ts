@@ -12,7 +12,7 @@ import {
   stripBackingPrefix,
 } from '../../../../../common/remote_cluster';
 import { codeList } from './text_lists';
-import { buildMatchesRequired } from './matches_required';
+import { globMatches } from './index_glob';
 
 /**
  * Longest `index_not_searched` detail a run reports. Packaging renders a detail up to this
@@ -48,16 +48,25 @@ export const describeUnsearched = (names: string[]): string => {
  * and the name is not one that can be searched. So `['logs-*', '-custom-*', 'custom-1']`
  * searches `custom-1`, while `['custom-1', '-custom-1', 'custom-*']` does not.
  */
-const isIncludedByUniverse = (name: string, universe: string[]): boolean => {
+const isIncludedByUniverse = (name: string, entries: ParsedUniverseEntry[]): boolean => {
   // The name comes from the list's own positive entries, so it starts out included.
   let included = true;
-  for (const entry of universe) {
-    const { exclude, ...target } = parseIndexScopeEntry(entry);
-    const pattern = stripBackingPrefix(joinRemoteCluster(target));
-    if (exclude ? buildMatchesRequired([pattern])(name) : pattern === name) included = !exclude;
+  for (const { exclude, pattern } of entries) {
+    if (exclude ? globMatches(pattern, name) : pattern === name) included = !exclude;
   }
   return included;
 };
+
+interface ParsedUniverseEntry {
+  exclude: boolean;
+  pattern: string;
+}
+
+const parseUniverse = (universe: string[]): ParsedUniverseEntry[] =>
+  universe.map((entry) => {
+    const { exclude, ...target } = parseIndexScopeEntry(entry);
+    return { exclude: Boolean(exclude), pattern: stripBackingPrefix(joinRemoteCluster(target)) };
+  });
 
 /**
  * The names a scope dropped from the search: entries of `missing` that are absent from
@@ -72,9 +81,10 @@ export const unsearchedPatterns = (
   universe: string[]
 ): string[] => {
   const kept = new Set(scope.index_patterns);
+  const entries = parseUniverse(universe);
   return Array.from(new Set(scope.missing))
     .filter((entry) => !kept.has(entry))
-    .filter((entry) => isIncludedByUniverse(stripBackingPrefix(entry), universe));
+    .filter((entry) => isIncludedByUniverse(stripBackingPrefix(entry), entries));
 };
 
 /**
