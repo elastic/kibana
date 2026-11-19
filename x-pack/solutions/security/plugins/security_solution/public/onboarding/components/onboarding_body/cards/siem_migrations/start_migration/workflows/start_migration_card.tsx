@@ -18,7 +18,9 @@ import { CenteredLoadingSpinner } from '../../../../../../../common/components/c
 import { OnboardingCardId } from '../../../../../../constants';
 import type { OnboardingCardComponent } from '../../../../../../types';
 import { OnboardingCardContentPanel } from '../../../common/card_content_panel';
-import type { StartMigrationCardMetadata } from '../common/types';
+import { CardCallOut } from '../../../common/card_callout';
+import { START_WORKFLOW_MIGRATION_CARD_UI_DISABLED_TEXT } from '../../../../../../../siem_migrations/workflows/components/status_panels/translations';
+import type { StartWorkflowMigrationCardMetadata } from './types';
 import { useStyles } from '../common/start_migration_card.styles';
 import { WorkflowMigrationsPanels } from './workflow_migrations_panels';
 import { useLatestStats } from '../../../../../../../siem_migrations/workflows/service/hooks/use_latest_stats';
@@ -63,7 +65,7 @@ const StartWorkflowMigrationBody: OnboardingCardComponent = React.memo(
 );
 StartWorkflowMigrationBody.displayName = 'StartWorkflowMigrationBody';
 
-export const StartWorkflowMigrationCard: OnboardingCardComponent<StartMigrationCardMetadata> =
+export const StartWorkflowMigrationCard: OnboardingCardComponent<StartWorkflowMigrationCardMetadata> =
   React.memo(({ checkCompleteMetadata, ...props }) => {
     const UpsellSectionComp = useUpsellingComponent('siem_migrations_start');
     if (!checkCompleteMetadata) {
@@ -81,6 +83,16 @@ export const StartWorkflowMigrationCard: OnboardingCardComponent<StartMigrationC
               <UploadWorkflowsSectionPanel isDisabled />
             </EuiFlexItem>
           </EuiFlexGroup>
+        </OnboardingCardContentPanel>
+      );
+    }
+
+    if (checkCompleteMetadata.isWorkflowsUiDisabled) {
+      return (
+        <OnboardingCardContentPanel>
+          <div data-test-subj="workflowsUiDisabledCallout">
+            <CardCallOut color="warning" text={START_WORKFLOW_MIGRATION_CARD_UI_DISABLED_TEXT} />
+          </div>
         </OnboardingCardContentPanel>
       );
     }

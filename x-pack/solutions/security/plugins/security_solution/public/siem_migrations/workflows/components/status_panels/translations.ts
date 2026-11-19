@@ -30,6 +30,14 @@ export const START_WORKFLOW_MIGRATION_CARD_UPLOAD_BUTTON = i18n.translate(
   { defaultMessage: 'Upload stories' }
 );
 
+export const START_WORKFLOW_MIGRATION_CARD_UI_DISABLED_TEXT = i18n.translate(
+  'xpack.securitySolution.onboarding.workflows.startMigration.uiDisabled',
+  {
+    defaultMessage:
+      'Elastic Workflows is turned off. Turn it on in Advanced Settings to migrate Tines stories.',
+  }
+);
+
 export const START_WORKFLOW_MIGRATION_CARD_UPLOAD_MORE_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.workflows.startMigration.uploadMore.title',
   { defaultMessage: 'Migrate more Tines stories' }

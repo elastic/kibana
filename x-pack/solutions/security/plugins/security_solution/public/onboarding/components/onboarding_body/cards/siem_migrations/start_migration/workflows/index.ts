@@ -11,19 +11,20 @@ import { START_WORKFLOW_MIGRATION_CARD_TITLE } from '../../../../../../../siem_m
 import { OnboardingCardId } from '../../../../../../constants';
 import type { OnboardingCardConfig } from '../../../../../../types';
 import { checkStartMigrationCardComplete } from './start_migration_check_complete';
-import type { StartMigrationCardMetadata } from '../common/types';
+import type { StartWorkflowMigrationCardMetadata } from './types';
 
-export const startWorkflowMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMetadata> = {
-  id: OnboardingCardId.siemMigrationsWorkflows,
-  title: START_WORKFLOW_MIGRATION_CARD_TITLE,
-  icon: IconSparkles,
-  experimentalFlagRequired: 'tinesWorkflowsMigration',
-  Component: React.lazy(
-    () =>
-      import(
-        /* webpackChunkName: "onboarding_siem_migrations_start_workflow_migration_card" */
-        './start_migration_card'
-      )
-  ),
-  checkComplete: checkStartMigrationCardComplete,
-};
+export const startWorkflowMigrationCardConfig: OnboardingCardConfig<StartWorkflowMigrationCardMetadata> =
+  {
+    id: OnboardingCardId.siemMigrationsWorkflows,
+    title: START_WORKFLOW_MIGRATION_CARD_TITLE,
+    icon: IconSparkles,
+    experimentalFlagRequired: 'tinesWorkflowsMigration',
+    Component: React.lazy(
+      () =>
+        import(
+          /* webpackChunkName: "onboarding_siem_migrations_start_workflow_migration_card" */
+          './start_migration_card'
+        )
+    ),
+    checkComplete: checkStartMigrationCardComplete,
+  };

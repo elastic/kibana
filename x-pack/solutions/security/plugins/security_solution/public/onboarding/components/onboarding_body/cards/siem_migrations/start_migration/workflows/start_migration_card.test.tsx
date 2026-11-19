@@ -47,7 +47,7 @@ const defaultProps: TestComponentProps = {
   setExpandedCardId: jest.fn(),
   checkComplete: jest.fn(),
   isCardAvailable: () => true,
-  checkCompleteMetadata: { missingCapabilities: [] },
+  checkCompleteMetadata: { missingCapabilities: [], isWorkflowsUiDisabled: false },
 };
 
 const renderCard = (props: Partial<TestComponentProps> = {}) =>
@@ -77,16 +77,43 @@ describe('StartWorkflowMigrationCard', () => {
   });
 
   it('should show the missing privileges callout when capabilities are missing', () => {
-    renderCard({ checkCompleteMetadata: { missingCapabilities: ['Workflows: Read'] } });
+    renderCard({
+      checkCompleteMetadata: {
+        missingCapabilities: ['Workflows: Read'],
+        isWorkflowsUiDisabled: false,
+      },
+    });
 
     expect(screen.getByTestId('missingPrivilegesGroup')).toBeVisible();
     expect(screen.getByText(/Workflows: Read/)).toBeVisible();
   });
 
   it('should not show the upload panel when capabilities are missing', () => {
-    renderCard({ checkCompleteMetadata: { missingCapabilities: ['Workflows: Read'] } });
+    renderCard({
+      checkCompleteMetadata: {
+        missingCapabilities: ['Workflows: Read'],
+        isWorkflowsUiDisabled: false,
+      },
+    });
 
     expect(screen.queryByTestId('startWorkflowMigrationUploadButton')).not.toBeInTheDocument();
+  });
+
+  it('should explain that workflows are turned off instead of loading forever when the workflows ui is disabled', () => {
+    renderCard({
+      checkCompleteMetadata: { missingCapabilities: [], isWorkflowsUiDisabled: true },
+    });
+
+    expect(screen.getByTestId('workflowsUiDisabledCallout')).toBeVisible();
+    expect(screen.queryByTestId('startWorkflowMigrationsCardBody')).not.toBeInTheDocument();
+  });
+
+  it('should not show the missing privileges callout when only the workflows ui is disabled', () => {
+    renderCard({
+      checkCompleteMetadata: { missingCapabilities: [], isWorkflowsUiDisabled: true },
+    });
+
+    expect(screen.queryByTestId('missingPrivilegesGroup')).not.toBeInTheDocument();
   });
 
   it('should show the card body with the upload panel when there is nothing missing', () => {

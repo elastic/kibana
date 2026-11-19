@@ -12,9 +12,10 @@ describe('checkStartMigrationCardComplete (workflows)', () => {
   const getMissingCapabilities = jest.fn();
   const isAvailable = jest.fn();
   const getMigrationsStats = jest.fn();
+  const isWorkflowsUiEnabled = jest.fn();
 
   const siemMigrations = {
-    workflows: { getMissingCapabilities, isAvailable, getMigrationsStats },
+    workflows: { getMissingCapabilities, isAvailable, getMigrationsStats, isWorkflowsUiEnabled },
   };
 
   const check = () => checkStartMigrationCardComplete({ siemMigrations } as never);
@@ -23,6 +24,7 @@ describe('checkStartMigrationCardComplete (workflows)', () => {
     jest.resetAllMocks();
     getMissingCapabilities.mockReturnValue([]);
     isAvailable.mockReturnValue(true);
+    isWorkflowsUiEnabled.mockReturnValue(true);
   });
 
   it('should check the minimum capabilities level', async () => {
@@ -64,9 +66,32 @@ describe('checkStartMigrationCardComplete (workflows)', () => {
     expect(await check()).toEqual(
       expect.objectContaining({
         isComplete: false,
-        metadata: { missingCapabilities: ['Workflows: Read'] },
+        metadata: { missingCapabilities: ['Workflows: Read'], isWorkflowsUiDisabled: false },
       })
     );
     expect(getMigrationsStats).not.toHaveBeenCalled();
+  });
+
+  it('should flag the workflows ui as disabled when it is turned off', async () => {
+    isWorkflowsUiEnabled.mockReturnValue(false);
+    isAvailable.mockReturnValue(false);
+
+    expect(await check()).toEqual(
+      expect.objectContaining({
+        isComplete: false,
+        metadata: { missingCapabilities: [], isWorkflowsUiDisabled: true },
+      })
+    );
+    expect(getMigrationsStats).not.toHaveBeenCalled();
+  });
+
+  it('should not flag the workflows ui as disabled when it is turned on', async () => {
+    getMigrationsStats.mockResolvedValue([]);
+
+    expect(await check()).toEqual(
+      expect.objectContaining({
+        metadata: { missingCapabilities: [], isWorkflowsUiDisabled: false },
+      })
+    );
   });
 });

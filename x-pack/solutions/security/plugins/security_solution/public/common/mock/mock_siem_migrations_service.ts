@@ -67,6 +67,7 @@ export const createSiemMigrationsMock = () => {
       stopWorkflowMigration: jest.fn(),
       getMigrationsStats: jest.fn(),
       deleteMigration: jest.fn(),
+      isWorkflowsUiEnabled: jest.fn(),
       api: {
         getWorkflowMigrationStats: jest.fn(),
         updateWorkflowMigration: jest.fn(),

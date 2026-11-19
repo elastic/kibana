@@ -58,7 +58,8 @@ export class SiemWorkflowMigrationsService extends SiemMigrationsServiceBase<Wor
     );
   }
 
-  private isWorkflowsUiEnabled(): boolean {
+  /** Checks if the Workflows UI is turned on (`workflows:ui:enabled`), `false` when the setting is not declared */
+  public isWorkflowsUiEnabled(): boolean {
     const { uiSettings } = this.core;
     return uiSettings.isDeclared(WORKFLOWS_UI_SETTING_ID)
       ? uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID)

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { OnboardingCardCheckComplete } from '../../../../../../types';
-import type { StartMigrationCardMetadata } from '../common/types';
+import type { StartWorkflowMigrationCardMetadata } from './types';
 import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_migrations/constants';
 
 const COMPLETE_BADGE_TEXT = (migrationsCount: number) =>
@@ -21,7 +21,7 @@ const COMPLETE_BADGE_TEXT = (migrationsCount: number) =>
   );
 
 export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
-  StartMigrationCardMetadata
+  StartWorkflowMigrationCardMetadata
 > = async ({ siemMigrations }) => {
   const missingCapabilities = siemMigrations.workflows
     .getMissingCapabilities('minimum')
@@ -41,6 +41,9 @@ export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
   return {
     isComplete,
     completeBadgeText: COMPLETE_BADGE_TEXT(migrationsCount),
-    metadata: { missingCapabilities },
+    metadata: {
+      missingCapabilities,
+      isWorkflowsUiDisabled: !siemMigrations.workflows.isWorkflowsUiEnabled(),
+    },
   };
 };
