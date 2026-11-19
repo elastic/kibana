@@ -17,6 +17,13 @@ jest.mock('../../../hooks/use_memory_enabled', () => ({
   useMemoryEnabled: jest.fn(),
 }));
 
+jest.mock('../../../hooks/use_navigation', () => ({
+  useNavigation: () => ({
+    navigateToContextEngine: jest.fn(),
+    createContextEngineUrl: (path: string) => `/app/context_engine${path}`,
+  }),
+}));
+
 jest.mock('./general_section', () => ({
   GeneralSection: () => <div data-test-subj="contextAiIndexSettingsGeneral" />,
 }));
@@ -90,19 +97,19 @@ describe('SettingsTab', () => {
     expect(screen.getByTestId('contextAiIndexSettingsAdvanced')).toBeInTheDocument();
   });
 
-  it('renders Memory and dreaming only when memory is enabled and aiIndex is defined', () => {
+  it('renders Dreaming only when memory is enabled and aiIndex is defined', () => {
     renderTab({ aiIndex }, true);
 
     expect(screen.getByTestId('contextAiIndexDreamingPanel')).toBeInTheDocument();
   });
 
-  it('does not render Memory and dreaming when memory is disabled', () => {
+  it('does not render Dreaming when memory is disabled', () => {
     renderTab({ aiIndex }, false);
 
     expect(screen.queryByTestId('contextAiIndexDreamingPanel')).not.toBeInTheDocument();
   });
 
-  it('does not render Memory and dreaming without aiIndex even when memory is enabled', () => {
+  it('does not render Dreaming without aiIndex even when memory is enabled', () => {
     renderTab({}, true);
 
     expect(screen.queryByTestId('contextAiIndexDreamingPanel')).not.toBeInTheDocument();
@@ -111,14 +118,14 @@ describe('SettingsTab', () => {
   it('shows the locked Automations panel when automations are not unlocked', () => {
     renderTab({ isAutomationsUnlocked: false });
 
-    expect(screen.getByTestId('contextAiIndexSettingsAutomationsLocked')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAutomationsLocked')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAutomationsPanelStub')).not.toBeInTheDocument();
   });
 
   it('shows the Automations panel when automations are unlocked', () => {
     renderTab({ aiIndex, isAutomationsUnlocked: true });
 
-    expect(screen.queryByTestId('contextAiIndexSettingsAutomationsLocked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAutomationsPanelStub')).toBeInTheDocument();
   });
 });

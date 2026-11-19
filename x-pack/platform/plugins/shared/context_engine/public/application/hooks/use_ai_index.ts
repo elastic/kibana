@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryObserverResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { getAiIndex } from '../api/ai_indices';
@@ -15,7 +16,7 @@ interface UseAiIndexResult {
   aiIndex: GetAiIndexResponse | undefined;
   isLoading: boolean;
   error: Error | undefined;
-  refetch: () => Promise<void>;
+  refetch: () => Promise<QueryObserverResult<GetAiIndexResponse, Error>>;
 }
 
 /**
@@ -33,9 +34,5 @@ export const useAiIndex = (id: string): UseAiIndexResult => {
     queryFn: ({ signal }) => getAiIndex(http, { aiIndexId: id, signal }),
   });
 
-  const refetchAiIndex = async (): Promise<void> => {
-    await refetch();
-  };
-
-  return { aiIndex: data, isLoading, error: error ?? undefined, refetch: refetchAiIndex };
+  return { aiIndex: data, isLoading, error: error ?? undefined, refetch };
 };

@@ -52,20 +52,14 @@ describe('AutomationsSection', () => {
   it('renders the locked panel when automations are locked', () => {
     renderSection(false);
 
-    expect(screen.getByTestId('contextAiIndexSettingsAutomationsLocked')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextAutomationsPanelStub')).not.toBeInTheDocument();
-  });
-
-  it('uses lockedTestSubj on the locked panel', () => {
-    renderSection(false);
-
     expect(screen.getByTestId('contextAutomationsLocked')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAutomationsPanelStub')).not.toBeInTheDocument();
   });
 
   it('renders AutomationsPanel when unlocked', () => {
     renderSection(true);
 
     expect(screen.getByTestId('contextAutomationsPanelStub')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextAiIndexSettingsAutomationsLocked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
   });
 });

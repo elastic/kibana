@@ -274,7 +274,7 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
             <h2>
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.dreaming.title"
-                defaultMessage="Memory and dreaming"
+                defaultMessage="Dreaming"
               />
             </h2>
           </EuiTitle>

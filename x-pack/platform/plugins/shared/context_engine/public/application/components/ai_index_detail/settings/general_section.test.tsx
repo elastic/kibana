@@ -10,7 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React, { useState } from 'react';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
@@ -195,6 +195,43 @@ describe('GeneralSection', () => {
       expect(screen.getByTestId('contextDescriptionTextArea')).toHaveValue('Refetched description');
     });
     expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
+  });
+
+  it('keeps text typed while onSaved is still refetching', async () => {
+    const testServices = coreMock.createStart();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+    let finishRefetch: () => void = () => {};
+    const onSaved = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishRefetch = resolve;
+        })
+    );
+
+    renderWithProviders(
+      <GeneralSection
+        isLoading={false}
+        aiIndex={{ ...aiIndex, description: 'My custom description' }}
+        onSaved={onSaved}
+      />,
+      testServices
+    );
+
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'Updated description' },
+    });
+    fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByTestId('contextDescriptionTextArea')).toBeEnabled());
+
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'Typed during refetch' },
+    });
+    await act(async () => {
+      finishRefetch();
+    });
+
+    expect(screen.getByTestId('contextDescriptionTextArea')).toHaveValue('Typed during refetch');
   });
 
   it('disables Save and shows an error when over MAX_AI_INDEX_DESCRIPTION_LENGTH', () => {

@@ -30,7 +30,7 @@ import { SettingsRow } from './settings_row';
 interface GeneralSectionProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
-  onSaved: () => void | Promise<void>;
+  onSaved: () => Promise<unknown>;
 }
 
 export const GeneralSection = ({ isLoading, aiIndex, onSaved }: GeneralSectionProps) => {
@@ -50,9 +50,10 @@ export const GeneralSection = ({ isLoading, aiIndex, onSaved }: GeneralSectionPr
     if (!aiIndex || !validation.valid) {
       return;
     }
+    const submitted = description;
     if (await saveDescription(aiIndex, trimmedDescription)) {
       await onSaved();
-      setEdited(undefined);
+      setEdited((current) => (current === submitted ? undefined : current));
     }
   };
 

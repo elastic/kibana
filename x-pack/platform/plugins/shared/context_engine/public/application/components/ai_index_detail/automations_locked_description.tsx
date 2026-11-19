@@ -16,11 +16,16 @@ interface AutomationsLockedDescriptionProps {
 }
 
 export const AutomationsLockedDescription = ({ aiIndexId }: AutomationsLockedDescriptionProps) => {
-  const { navigateToContextEngine } = useNavigation();
+  const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
+  const sourcesPath = getAiIndexSourcesPath(aiIndexId);
 
   const addSourceLink = (
     <EuiLink
-      onClick={() => navigateToContextEngine(getAiIndexSourcesPath(aiIndexId))}
+      href={createContextEngineUrl(sourcesPath)}
+      onClick={(event: React.MouseEvent) => {
+        event.preventDefault();
+        navigateToContextEngine(sourcesPath);
+      }}
       data-test-subj="contextAutomationsLockedAddSourceLink"
     >
       <FormattedMessage

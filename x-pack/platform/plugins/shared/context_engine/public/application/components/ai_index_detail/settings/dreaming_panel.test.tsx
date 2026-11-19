@@ -93,7 +93,7 @@ describe('DreamingPanel', () => {
   it('shows a skeleton while the config loads', () => {
     renderPanel(aiIndexWith(undefined), true);
 
-    expect(screen.getByText('Memory and dreaming')).toBeInTheDocument();
+    expect(screen.getByText('Dreaming')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexDreamingLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexDreamingSetUp')).not.toBeInTheDocument();
   });

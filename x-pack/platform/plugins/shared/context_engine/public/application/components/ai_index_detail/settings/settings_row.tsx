@@ -15,7 +15,6 @@ interface SettingsRowProps {
   'data-test-subj'?: string;
 }
 
-/** Label and description on the left, control on the right. */
 export const SettingsRow = ({
   title,
   description,

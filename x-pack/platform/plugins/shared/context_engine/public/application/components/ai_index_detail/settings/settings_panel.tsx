@@ -14,7 +14,6 @@ interface SettingsPanelProps {
   'data-test-subj'?: string;
 }
 
-/** Bordered panel with a title and its rows separated by horizontal rules. */
 export const SettingsPanel = ({
   title,
   children,

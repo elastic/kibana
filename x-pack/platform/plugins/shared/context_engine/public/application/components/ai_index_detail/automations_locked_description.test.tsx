@@ -14,7 +14,10 @@ import { AutomationsLockedDescription } from './automations_locked_description';
 const navigateToContextEngine = jest.fn();
 
 jest.mock('../../hooks/use_navigation', () => ({
-  useNavigation: () => ({ navigateToContextEngine }),
+  useNavigation: () => ({
+    navigateToContextEngine,
+    createContextEngineUrl: (path: string) => `/app/context_engine${path}`,
+  }),
 }));
 
 const renderWithProviders = (ui: React.ReactElement) =>
@@ -27,6 +30,15 @@ const renderWithProviders = (ui: React.ReactElement) =>
 describe('AutomationsLockedDescription', () => {
   beforeEach(() => {
     navigateToContextEngine.mockClear();
+  });
+
+  it('links to the Sources tab so it can open in a new tab', () => {
+    renderWithProviders(<AutomationsLockedDescription aiIndexId="my-index" />);
+
+    expect(screen.getByTestId('contextAutomationsLockedAddSourceLink')).toHaveAttribute(
+      'href',
+      '/app/context_engine/ai_index/my-index/sources'
+    );
   });
 
   it('navigates to the Sources tab when the link is clicked', () => {
