@@ -67,7 +67,7 @@ import type { MlJob } from '../..';
 import { getIsMlCpsEnabled } from '../../lib/cps_utils';
 
 export function chartLimits(data: ChartPoint[] = []) {
-  const domain = extent(data, (d) => {
+  const [domainMin, domainMax] = extent(data, (d) => {
     let metricValue = d.value as number;
     if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
       // If an anomaly coincides with a gap in the data, use the anomaly actual value.
@@ -75,7 +75,10 @@ export function chartLimits(data: ChartPoint[] = []) {
     }
     return metricValue;
   });
-  const limits = { max: domain[1] as number, min: domain[0] as number };
+  const limits: { max: number | undefined; min: number | undefined } = {
+    max: domainMax,
+    min: domainMin,
+  };
 
   if (limits.max === limits.min) {
     // @ts-ignore
@@ -102,6 +105,10 @@ export function chartLimits(data: ChartPoint[] = []) {
     });
   }
 
+  if (limits.max === undefined || limits.min === undefined) {
+    return { max: NaN, min: NaN };
+  }
+
   // add padding of 5% of the difference between max and min
   // if we ended up with the same value for both of them
   if (limits.max === limits.min) {
@@ -110,7 +117,7 @@ export function chartLimits(data: ChartPoint[] = []) {
     limits.min -= padding;
   }
 
-  return limits;
+  return { max: limits.max, min: limits.min };
 }
 
 const CHART_MAX_POINTS = 500;
