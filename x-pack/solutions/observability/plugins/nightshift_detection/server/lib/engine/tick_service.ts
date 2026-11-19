@@ -65,7 +65,7 @@ export class TickService {
       runId: uuidv4(),
       scheduledMinute: Math.floor(now / MINUTE_MS) * MINUTE_MS,
     });
-    // D11: customer data is read as the account, never as kibana_system.
+    // Customer data is read as the account, never as kibana_system.
     scope
       .bind(DetectionEngineDataClient)
       .toConstantValue(this.elasticsearch.client.asScoped(accountRequest).asCurrentUser);

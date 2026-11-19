@@ -61,9 +61,9 @@ export class TickRoute extends BaseEngineRoute<DetectionEngineTickBody> {
     await this.account.assertServiceAccountActsForSpace({ request: this.request, spaceId });
 
     // The run stops when the caller goes away, so a cancelled workflow does not leave a tick running.
-    const aborted = new AbortController();
+    const controller = new AbortController();
     const subscription = this.request.events.aborted$.subscribe(() =>
-      aborted.abort('the request was aborted')
+      controller.abort('the request was aborted')
     );
 
     try {
@@ -75,7 +75,7 @@ export class TickRoute extends BaseEngineRoute<DetectionEngineTickBody> {
             accountRequest,
             spaceId,
             skipBacklog: this.request.body.skip_backlog,
-            abortSignal: aborted.signal,
+            abortSignal: controller.signal,
           }),
       });
 

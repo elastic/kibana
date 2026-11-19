@@ -130,6 +130,7 @@ export const setUpDetectionEngine = async ({
   const body: DetectionEngineEnableBody = { serviceAccountId };
   const deadline = Date.now() + ENABLE_TIMEOUT_MS;
   let last = '';
+  // A loop, not a retry helper: each attempt waits on the previous one, and a cold start needs minutes.
   while (Date.now() < deadline) {
     try {
       return await request<DetectionEngineEnableResponse>(ENABLE_PATH, {
