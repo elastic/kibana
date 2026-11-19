@@ -431,8 +431,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.39.0
-        version: 4.39.0(monaco-editor@0.56.0)
+        specifier: 4.40.0
+        version: 4.40.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -518,8 +518,8 @@ importers:
         specifier: 10.0.4
         version: 10.0.4
       '@hapi/hapi':
-        specifier: 21.4.12
-        version: 21.4.12
+        specifier: 21.4.13
+        version: 21.4.13
       '@hapi/inert':
         specifier: 7.1.3
         version: 7.1.3
@@ -4200,7 +4200,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/workflows_execution_engine
       '@kbn/workflows-extensions':
         specifier: workspace:*
-        version: link:src/platform/plugins/shared/workflows_extensions
+        version: link:x-pack/platform/plugins/shared/workflows_extensions
       '@kbn/workflows-extensions-example':
         specifier: workspace:*
         version: link:examples/workflows_extensions_example
@@ -4212,7 +4212,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-workflows-library
       '@kbn/workflows-management-plugin':
         specifier: workspace:*
-        version: link:src/platform/plugins/shared/workflows_management
+        version: link:x-pack/platform/plugins/shared/workflows_management
       '@kbn/workflows-topics':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-topics
@@ -4262,11 +4262,11 @@ importers:
         specifier: 1.7.0
         version: 1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.2)(ws@8.22.0)
       '@launchdarkly/node-server-sdk':
-        specifier: 9.16.0
-        version: 9.16.0(supports-color@10.2.2)
+        specifier: 9.16.3
+        version: 9.16.3(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.1.3
-        version: 2.1.3(@launchdarkly/node-server-sdk@9.16.0(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.1.6
+        version: 2.1.6(@launchdarkly/node-server-sdk@9.16.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -4482,7 +4482,7 @@ importers:
         version: 2.0.5
       brok:
         specifier: 6.0.0
-        version: 6.0.0(@hapi/hapi@21.4.12)
+        version: 6.0.0(@hapi/hapi@21.4.13)
       byte-size:
         specifier: 9.0.1
         version: 9.0.1
@@ -4667,8 +4667,8 @@ importers:
         specifier: 29.7.0
         version: 29.7.0
       joi:
-        specifier: 18.3.1
-        version: 18.3.1
+        specifier: 18.3.2
+        version: 18.3.2
       joi-to-json:
         specifier: 5.0.0
         version: 5.0.0
@@ -5002,6 +5002,9 @@ importers:
       symbol-observable:
         specifier: 4.0.0
         version: 4.0.0
+      tabbable:
+        specifier: 5.3.3
+        version: 5.3.3
       tar:
         specifier: 7.5.22
         version: 7.5.22
@@ -6695,9 +6698,6 @@ importers:
       has-ansi:
         specifier: 3.0.0
         version: 3.0.0
-      hdr-histogram-js:
-        specifier: 3.0.1
-        version: 3.0.1
       http-proxy:
         specifier: 1.18.1
         version: 1.18.1(debug@4.4.3(supports-color@10.2.2))
@@ -8874,9 +8874,9 @@ importers:
 
   x-pack/platform/plugins/shared/workflows_execution_engine: {}
 
-  src/platform/plugins/shared/workflows_extensions: {}
+  x-pack/platform/plugins/shared/workflows_extensions: {}
 
-  src/platform/plugins/shared/workflows_management: {}
+  x-pack/platform/plugins/shared/workflows_management: {}
 
   src/platform/test: {}
 
@@ -10026,11 +10026,11 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
-
   x-pack/solutions/security/test_helpers/detections-response-ftr-services: {}
 
   x-pack/solutions/security/test_plugins/resolver_test: {}
+
+  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
 
   x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding: {}
 
@@ -10111,9 +10111,6 @@ packages:
 
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
-
-  '@assemblyscript/loader@0.19.23':
-    resolution: {integrity: sha512-ulkCYfFbYj01ie1MDOyxv2F6SpRN1TOj7fQxbP07D6HmeR+gr2JLSmINKjga2emB+b1L2KGrFKBTc+e00p54nw==}
 
   '@asyncapi/specs@6.11.1':
     resolution: {integrity: sha512-A3WBLqAKGoJ2+6FWFtpjBlCQ1oFCcs4GxF7zsIGvNqp/klGUHjlA3aAcZ9XMMpLGE8zPeYDz2x9FmO6DSuKraQ==}
@@ -11352,8 +11349,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.39.0':
-    resolution: {integrity: sha512-AQUmxK7zSKZpS9RqovPsGIbd07EJ5YP1TxHkDbt35KqZedTrs4PuxzOBW930sa2v8Z7cUrvRW9I+zyS5M4HWXg==}
+  '@elastic/monaco-esql@4.40.0':
+    resolution: {integrity: sha512-IrcrJP9C48FQpEOh2Im/GR/V+QUtPSKKYrnGrs1pkhbOAZTksBAWbXyCSJ1tOMoPjtmwr4LLgNFK5ZLS0lBV/A==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -11901,8 +11898,8 @@ packages:
     resolution: {integrity: sha512-dvD8+Y/Okc0fh0blqaYCLIrcy0+1LqIhMr7hjk8elLQZ9mkw2hKFB9dFKuRfWf+1nvHpGlW+PwccqkdebynQbg==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/hapi@21.4.12':
-    resolution: {integrity: sha512-TT6ERrp5qv/pN3ubNILjI1/MZfXQMUum2IVWH2hHR23LHj1We5gsI8WFavfaNRax+T8W2qSUkri9l7FA72/Xdw==}
+  '@hapi/hapi@21.4.13':
+    resolution: {integrity: sha512-eupLASu8jIrFvo8yu+xK/C5v2kydqK7v43XIfBtFW4NrJKylud0sEhESoq7oYRe1uxOIiowJAz6mVYmCxC2w1g==}
     engines: {node: '>=14.15.0'}
 
   '@hapi/heavy@8.0.1':
@@ -12408,25 +12405,25 @@ packages:
     peerDependencies:
       '@langchain/core': 1.3.0
 
-  '@launchdarkly/eventsource@0.2.2':
-    resolution: {integrity: sha512-HeM/SWPrgHwdLytYXhRMNvDB7XKWYY3xSFeo9nAZB3Ep8GhDKOC7uefKuAAKjlxRHyvtQpnm/UHgw3EBBRxNnA==}
+  '@launchdarkly/eventsource@0.2.3':
+    resolution: {integrity: sha512-rOB+mo0ikpUUZf8AFLIgT4eNdng3hO9cnPcLOiT6fqXt1U5KD/1RtJs7xv0KubFVvlWIeSYL4F63IZkQeGnuyA==}
 
-  '@launchdarkly/js-sdk-common@2.32.0':
-    resolution: {integrity: sha512-V2sd9W1ocskNtZNx2gmgym+j4YsmsawZE4kwUj631dO9SE6029SLCNY9wl3csS/8/Pe8qTxZv7pvbxh4mIWJqw==}
+  '@launchdarkly/js-sdk-common@2.32.1':
+    resolution: {integrity: sha512-hpEcEo1wDnyIjFYs80esEZLQpPuRhyCQYXYYC2+Cpmpb7fLYYcTbW3RLeyseqER6d9lZ9QnbB8TbR377AX4cww==}
 
-  '@launchdarkly/js-server-sdk-common@2.26.0':
-    resolution: {integrity: sha512-FqvrDgy2/dibITqjXz4mY9y6Jksj2ZQ6IoL98VOd7a5WPI2RW51iH39Ra6jVGENR8Vs1Tv0klCBiC3LwJIm9mQ==}
+  '@launchdarkly/js-server-sdk-common@2.26.3':
+    resolution: {integrity: sha512-uYC7sTCsXzUFmNTPGcfU8hyRGaSgzfxDaZIOXvCDgfac/IISdL+d5etItKrxwJoDN8KB9fa5gDX5EimKbLcQoA==}
 
-  '@launchdarkly/node-server-sdk@9.16.0':
-    resolution: {integrity: sha512-djgpihWJy/WqZjEKqTvZq8agi+ed6uBbKo18Z8RYDswuSKobweX4q7NVe1PjB6wjbxmsxGbi/wlsPhnrrZi0GQ==}
+  '@launchdarkly/node-server-sdk@9.16.3':
+    resolution: {integrity: sha512-FBmS/rvE0zm46o2iz5F+0Ptj5ScihcSe1m326uPFOEIHBNx4ycRAnzZA9tOm/bVMHChAJZEh/VHhtnylpd/VAQ==}
 
-  '@launchdarkly/openfeature-js-server-common@2.2.1':
-    resolution: {integrity: sha512-pdxqJbZi6Q2iKX4NbvQJ5hWGqXt0amr2525AMplvWbgX+v8TLH3DHdCLWQYyeWtjQib4WsYREa706ehVWhxxdg==}
+  '@launchdarkly/openfeature-js-server-common@2.2.2':
+    resolution: {integrity: sha512-dyW+M0iaF+fxX2g2teIwGKbzI9+gnJB2x+zdaMVojpvo1t5WYzFnrXNRG+oUHmzsIjAE37Ecf3sJz3GAO0N+7w==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.1.3':
-    resolution: {integrity: sha512-kCxs86pZXZsqErzq0jrrIlxG0ZsC2FufMU59YdXcY3f9XbwksHI97uRcqtoOeRJYK4AA5sJ2oJ2MO7c0+noqsw==}
+  '@launchdarkly/openfeature-node-server@2.1.6':
+    resolution: {integrity: sha512-FOce6L3a6ZTPZTosxm0khTAxTZRda9Ol6zjwrzavcnuQv04Lmed5a6Mqy4c5/VCxOayYjIfUHah27YzfOgwjkA==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -19268,10 +19265,6 @@ packages:
   hat@0.0.3:
     resolution: {integrity: sha512-zpImx2GoKXy42fVDSEad2BPKuSQdLcqsCYa48K3zHSzM/ugWuYjLDr8IXxpVuL7uCLHw56eaiLxCRthhOzf5ug==}
 
-  hdr-histogram-js@3.0.1:
-    resolution: {integrity: sha512-l3GSdZL1Jr1C0kyb461tUjEdrRPZr8Qry7jByltf5JGrA0xvqOSrxRBfcrJqqV/AMEtqqhHhC6w8HW0gn76tRQ==}
-    engines: {node: '>=14'}
-
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
@@ -20203,8 +20196,8 @@ packages:
   joi@17.13.9:
     resolution: {integrity: sha512-llFCT2rVtfwgBCaIqxtjim+iHqrgss4ONiGSYiiGH9jnjWq90ppSRffqmqKvwpa8W+YfILyQV6XyGcegXX2T4g==}
 
-  joi@18.3.1:
-    resolution: {integrity: sha512-mV9M4Llh4va3NT90p7KBtQhoZqjs8xLX7EWYE4y/GG3yLF6REbIBEHSUb0UX1JXRht2w5tiLSsvmpYc5akiqIw==}
+  joi@18.3.2:
+    resolution: {integrity: sha512-iUivApKYw5GpZmq2Sy6El99j7noo8QSUFZlyQtr3HCkosC/b5wKF6/Y3teiHIlaM8WI38sAT3P+51rB0lhAhJA==}
     engines: {node: '>= 20'}
 
   jose@6.2.12:
@@ -25641,8 +25634,6 @@ snapshots:
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
 
-  '@assemblyscript/loader@0.19.23': {}
-
   '@asyncapi/specs@6.11.1':
     dependencies:
       '@types/json-schema': 7.0.15
@@ -27410,7 +27401,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.39.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.40.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.41.0
       monaco-editor: 0.56.0
@@ -28127,7 +28118,7 @@ snapshots:
       '@hapi/validate': 2.0.1
       '@hapi/wreck': 18.1.3
 
-  '@hapi/hapi@21.4.12':
+  '@hapi/hapi@21.4.13':
     dependencies:
       '@hapi/accept': 6.0.3
       '@hapi/ammo': 6.0.2
@@ -28851,32 +28842,32 @@ snapshots:
       '@langchain/core': 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
       js-tiktoken: 1.0.21
 
-  '@launchdarkly/eventsource@0.2.2': {}
+  '@launchdarkly/eventsource@0.2.3': {}
 
-  '@launchdarkly/js-sdk-common@2.32.0': {}
+  '@launchdarkly/js-sdk-common@2.32.1': {}
 
-  '@launchdarkly/js-server-sdk-common@2.26.0':
+  '@launchdarkly/js-server-sdk-common@2.26.3':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.32.0
+      '@launchdarkly/js-sdk-common': 2.32.1
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.16.0(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.16.3(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/eventsource': 0.2.2
-      '@launchdarkly/js-server-sdk-common': 2.26.0
+      '@launchdarkly/eventsource': 0.2.3
+      '@launchdarkly/js-server-sdk-common': 2.26.3
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@2.2.1(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-js-server-common@2.2.2(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.32.0
+      '@launchdarkly/js-sdk-common': 2.32.1
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.1.3(@launchdarkly/node-server-sdk@9.16.0(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.1.6(@launchdarkly/node-server-sdk@9.16.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.16.0(supports-color@10.2.2)
-      '@launchdarkly/openfeature-js-server-common': 2.2.1(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+      '@launchdarkly/node-server-sdk': 9.16.3(supports-color@10.2.2)
+      '@launchdarkly/openfeature-js-server-common': 2.2.2(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
   '@loaders.gl/core@3.4.7':
@@ -31641,7 +31632,7 @@ snapshots:
 
   '@types/hapi__cookie@12.0.5':
     dependencies:
-      '@hapi/hapi': 21.4.12
+      '@hapi/hapi': 21.4.13
       '@types/node': 24.10.13
       joi: 17.13.9
 
@@ -33246,9 +33237,9 @@ snapshots:
     dependencies:
       object.entries: 1.1.9
 
-  brok@6.0.0(@hapi/hapi@21.4.12):
+  brok@6.0.0(@hapi/hapi@21.4.13):
     dependencies:
-      '@hapi/hapi': 21.4.12
+      '@hapi/hapi': 21.4.13
       '@hapi/hoek': 11.0.7
       '@hapi/validate': 2.0.1
 
@@ -36715,12 +36706,6 @@ snapshots:
 
   hat@0.0.3: {}
 
-  hdr-histogram-js@3.0.1:
-    dependencies:
-      '@assemblyscript/loader': 0.19.23
-      base64-js: 1.5.1
-      pako: 1.0.11
-
   he@1.2.0: {}
 
   headers-polyfill@5.0.1:
@@ -37855,7 +37840,7 @@ snapshots:
       '@sideway/formula': 3.0.1
       '@sideway/pinpoint': 2.0.0
 
-  joi@18.3.1:
+  joi@18.3.2:
     dependencies:
       '@hapi/address': 5.1.1
       '@hapi/formula': 3.0.2
