@@ -22,6 +22,7 @@ import { TAKE_ACTION_BUTTON_TEST_ID } from './components/take_action_button';
 import { mockDataAsNestedObject } from '../document_details/shared/mocks/mock_data_as_nested_object';
 import { mockSearchHit } from '../document_details/shared/mocks/mock_search_hit';
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/public/flyout/ease/index.test.tsx
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn().mockReturnValue({ closeLeftPanel: jest.fn() }),
   useExpandableFlyoutHistory: jest.fn(),
@@ -31,6 +32,12 @@ jest.mock('@kbn/expandable-flyout', () => ({
 jest.mock('../../common/hooks/use_ai_connectors', () => ({
   useAIConnectors: jest.fn().mockReturnValue({
     aiConnectors: [
+=======
+jest.mock('@kbn/inference-connectors', () => ({
+  ...jest.requireActual('@kbn/inference-connectors'),
+  useLoadConnectors: jest.fn().mockReturnValue({
+    data: [
+>>>>>>> fe763a8242be ([Security Solution] Use the configured default model for the alert AI summary when it is an inference endpoint (#306533)):x-pack/solutions/security/plugins/security_solution/public/detections/components/alert_summary/flyout/ease_flyout.test.tsx
       {
         id: 'test-connector-id',
         name: 'Test Connector',
@@ -38,7 +45,6 @@ jest.mock('../../common/hooks/use_ai_connectors', () => ({
       },
     ],
     isLoading: false,
-    error: null,
   }),
 }));
 
