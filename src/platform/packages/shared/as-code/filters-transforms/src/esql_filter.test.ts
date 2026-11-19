@@ -71,4 +71,17 @@ describe('ES|QL filters', () => {
     expect(asCode).not.toHaveProperty('esql');
     expect(toStoredFilter(asCode!)?.meta).not.toHaveProperty('esql');
   });
+
+  it('only keeps the marker on condition filters, the other types are DSL ones', () => {
+    const custom: StoredFilter = {
+      meta: { type: 'custom', esql: { type: 'string' } },
+      query: { bool: { filter: [{ term: { host: 'a' } }] } },
+    };
+
+    const asCode = fromStoredFilter(custom);
+
+    expect(asCode).toEqual(expect.objectContaining({ type: 'dsl' }));
+    expect(asCode).not.toHaveProperty('esql');
+    expect(asCodeFilterSchema.safeParse(asCode).success).toBe(true);
+  });
 });

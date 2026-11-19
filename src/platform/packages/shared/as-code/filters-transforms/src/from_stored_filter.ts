@@ -312,6 +312,7 @@ function convertPhraseFilter(
       ...baseProperties,
       type: 'condition',
       condition,
+      ...getEsqlProperty(filter),
     } as AsCodeConditionFilter;
   } catch (error) {
     // If conversion fails, fall back to DSL
@@ -329,6 +330,7 @@ function convertPhrasesFilter(
       ...baseProperties,
       type: ASCODE_FILTER_TYPE.CONDITION,
       condition,
+      ...getEsqlProperty(filter),
     } as AsCodeConditionFilter;
   } catch (error) {
     // If conversion fails, fall back to DSL
@@ -369,6 +371,7 @@ function convertExistsFilter(
       ...baseProperties,
       type: ASCODE_FILTER_TYPE.CONDITION,
       condition,
+      ...getEsqlProperty(filter),
     } as AsCodeConditionFilter;
   } catch (error) {
     // If conversion fails, fall back to DSL
@@ -431,11 +434,16 @@ function convertToDSLFilter(
 /**
  * Extract base properties from stored filter
  */
-function toAsCodeEsqlMeta(esql: unknown): NonNullable<AsCodeFilter['esql']> {
-  const { type, esType } = esql as { type?: string; esType?: string };
+/** Only condition filters can be ES|QL filters, the other types are DSL ones */
+function getEsqlProperty(storedFilter: StoredFilter): Pick<AsCodeConditionFilter, 'esql'> | {} {
+  const esql = storedFilter.meta?.esql as { type?: string; esType?: string } | undefined;
+  if (!esql) return {};
+  const { type, esType } = esql;
   return {
-    ...(type !== undefined ? { type } : {}),
-    ...(esType !== undefined ? { es_type: esType } : {}),
+    esql: {
+      ...(type !== undefined ? { type } : {}),
+      ...(esType !== undefined ? { es_type: esType } : {}),
+    },
   };
 }
 
@@ -449,7 +457,6 @@ function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter
     ...(meta?.negate === true ? { negate: true } : {}),
     ...(meta?.alias != null ? { label: meta.alias } : {}),
     ...(meta?.isMultiIndex !== undefined ? { is_multi_index: meta.isMultiIndex } : {}),
-    ...(meta?.esql ? { esql: toAsCodeEsqlMeta(meta.esql) } : {}),
   };
 }
 
