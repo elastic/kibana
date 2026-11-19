@@ -41,6 +41,7 @@ describe('StrategyCatalog', () => {
     { cadence: 1.5, settle: 0 },
     { cadence: Number.NaN, settle: 0 },
     { cadence: 1, settle: -1 },
+    { cadence: 1, settle: 1.5 },
   ])(
     'rejects a strategy with a cadence of $cadence and a settle of $settle',
     ({ cadence, settle }) => {
