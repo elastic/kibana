@@ -1737,6 +1737,89 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
     expect(huntCell.kind).toBe('missing');
   });
 
+  // Regression (Libra PRRT_kwDOAHeGUM65T_uB): a column allowlisting only code-only
+  // contract checks must not inherit judge-policy rejections recorded against a
+  // different (judged) evaluator of the same dataset: its numeric mean rests on
+  // code-only checks that stay admitted under every judge policy.
+  it('keeps a code-only column scoreable when an unrelated judged grade was rejected', () => {
+    const codeOnlyCfg = parseMatrixConfig({
+      columns: [
+        {
+          id: 'answer',
+          label: 'Answer present',
+          suites: ['suite-a'],
+          examplePrefixes: ['alert'],
+          evaluators: ['FinalAnswerPresent'],
+          weight: 1,
+        },
+      ],
+      models: [{ id: 'model-x', label: 'Model X' }],
+    });
+    const rejected: AggregatedModelScores[] = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-a',
+            experimentId: 'run-9',
+            datasets: [
+              {
+                datasetId: 'prefix:alert',
+                datasetName: 'alert',
+                // Every Relevance grade was rejected by judge policy...
+                excludedNonEis: 4,
+                excludedJudgelessOnly: true,
+                evaluators: [
+                  // ...but the column reads only this code-only contract check.
+                  { evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 },
+                  { evaluatorName: 'Relevance', mean: 0, count: 0 },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    const matrix = buildMatrix(rejected, codeOnlyCfg);
+    expect(matrix.proprietary[0].cells.answer).toMatchObject({ kind: 'score' });
+  });
+
+  it('still excludes a judged column whose every judged grade was rejected', () => {
+    const judgedCfg = parseMatrixConfig({
+      columns: [
+        { id: 'rel', label: 'Relevance', suites: ['suite-a'], examplePrefixes: ['alert'], weight: 1 },
+      ],
+      models: [{ id: 'model-x', label: 'Model X' }],
+    });
+    const rejected: AggregatedModelScores[] = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-a',
+            experimentId: 'run-9',
+            datasets: [
+              {
+                datasetId: 'prefix:alert',
+                datasetName: 'alert',
+                excludedNonEis: 4,
+                excludedJudgelessOnly: true,
+                evaluators: [
+                  { evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 },
+                  { evaluatorName: 'Relevance', mean: 0, count: 0 },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    const matrix = buildMatrix(rejected, judgedCfg);
+    const cell = matrix.proprietary[0].cells.rel;
+    expect(cell.kind).toBe('excluded');
+    if (cell.kind === 'excluded') expect(cell.reason).toBe('non-eis-judge');
+  });
+
   it('renders a fully self-judged prefix run as excluded, not missing (R-libra-3)', () => {
     // The `!latest` all-self-judged rejection path (see query_matrix_scores) pushes
     // `datasets: []` with the withholding recorded only at the suite level. An

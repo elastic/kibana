@@ -232,7 +232,9 @@ async function listTodoIds(esClient: EsClient): Promise<Set<string>> {
       index: TODOS_INDEX,
       ignore_unavailable: true,
       size: 1000,
-      sort: [{ _id: 'asc' }],
+      // ES 8 disables fielddata on `_id` by default, so sorting on `_id` throws;
+      // `_shard_doc` is always available for search_after paging.
+      sort: ['_shard_doc'],
       ...(searchAfter ? { search_after: searchAfter } : {}),
     });
     const hits = response.hits?.hits ?? [];
@@ -262,7 +264,9 @@ async function deleteTodosCreatedThisRun(esClient: EsClient): Promise<void> {
       index: TODOS_INDEX,
       ignore_unavailable: true,
       size: 1000,
-      sort: [{ _id: 'asc' }],
+      // ES 8 disables fielddata on `_id` by default, so sorting on `_id` throws;
+      // `_shard_doc` is always available for search_after paging.
+      sort: ['_shard_doc'],
       ...(searchAfter ? { search_after: searchAfter } : {}),
     });
     const hits = response.hits?.hits ?? [];

@@ -32,6 +32,10 @@ describe('loads without GCS_CREDENTIALS', () => {
     jest.isolateModules(() => {
       ({ servers: configServers } = jest.requireActual('./classic.stateful.config'));
     });
+    // The export itself must load: a missing `servers` export would otherwise
+    // pass this test vacuously (undefined config can't hold a secure file) even
+    // though Scout would refuse to start with that config.
+    expect(configServers).toBeDefined();
     expect(configServers?.esTestCluster.secureFiles ?? []).not.toContainEqual(
       expect.stringContaining(GCS_SETTING_PREFIX)
     );

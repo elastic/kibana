@@ -615,6 +615,15 @@ describe('persona_matrix_tools_seed', () => {
         } as unknown as EsClient,
       });
       expect(deleteByQuery).toHaveBeenCalledTimes(1);
+      // Regression (Libra t_uA): sorting on `_id` throws on ES 8+ (fielddata on
+      // `_id` is disabled by default), so cleanup silently never deleted this
+      // run's todos. Paging must use `_shard_doc`, never `_id`.
+      const searchBodies = cleanupSearch.mock.calls.map((call) => call[0]);
+      expect(searchBodies.length).toBeGreaterThan(0);
+      for (const body of searchBodies) {
+        expect(JSON.stringify(body.sort)).not.toContain('_id');
+        expect(body.sort).toContain('_shard_doc');
+      }
       expect(deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: 'persona-matrix-todos',
