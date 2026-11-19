@@ -323,7 +323,7 @@ POST /api/context_engine/memory/_forget
 ```
 
 ```json
-{ "user_id": "jdoe", "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"], "mode": "tombstone" }
+{ "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"], "mode": "tombstone" }
 ```
 
 `ids` takes 1 to 100 ids and duplicates are collapsed. `mode` is `tombstone` (the
@@ -342,14 +342,13 @@ still works after memory is turned off.
 
 ### Privileges and audit
 
-The route needs `contextEngine:write` and `contextEngine:manageMemory` for both modes.
-`contextEngine:manageMemory` is not part of All, so an administrator grants it explicitly.
-With it a caller can forget the memories of any user in the space. The future `_remember`
-route will use the same privilege.
+The route needs `contextEngine:write` for both modes. Without `user_id` it forgets the
+caller's own memories, and a caller without a user profile gets a 403.
 
-`user_id` is the subject of the memory, supplied by the caller as the session memory RFC
-describes. It is not checked against the authenticated user, and a mismatch with the
-memory's owner reads as `not_found`.
+Naming another user in `user_id` also needs `contextEngine:manage_memory`, which is not
+part of All, so an administrator grants it explicitly. Without it the request gets a 403,
+and every id is audited as a failure. A mismatch between `user_id` and a memory's owner
+reads as `not_found`.
 
 Each unique id writes one audit event, `session_memory_forget` or
 `session_memory_hard_delete`. The event records the authenticated actor in `user.*`, the

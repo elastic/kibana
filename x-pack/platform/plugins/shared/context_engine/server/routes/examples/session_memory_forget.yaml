@@ -4,15 +4,14 @@ requestBody:
       examples:
         forgetTombstoneRequestExample:
           summary: "Forget memories"
-          description: "Example request to forget two memories of a user, keeping their revisions until retention removes them"
+          description: "Example request to forget two of the caller's memories, keeping their revisions until retention removes them"
           value:
-            user_id: jdoe
             ids:
               - 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
               - 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
         forgetHardDeleteRequestExample:
           summary: "Permanently delete memories"
-          description: "Example request to remove every revision of a memory of a user"
+          description: "Example request to remove every revision of a memory of another user, which needs the manage memory privilege"
           value:
             user_id: jdoe
             ids:

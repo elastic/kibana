@@ -23,7 +23,7 @@ interface RegisteredRoute {
   config: {
     path: string;
     access: string;
-    security: { authz: { requiredPrivileges: string[] } };
+    security: { authz: { requiredPrivileges: string[]; extendedPrivileges: string[] } };
     options: { availability: unknown };
   };
   handler: RequestHandler;
@@ -36,6 +36,8 @@ describe('session memory routes', () => {
   let featureFlagEnabled: boolean;
   let auditLog: jest.Mock;
   let service: jest.Mocked<SessionMemoryService>;
+  let callerUserId: string | null;
+  let authzResult: Record<string, boolean>;
 
   const createContext = () =>
     ({
@@ -44,11 +46,16 @@ describe('session memory routes', () => {
           client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
         },
         security: { audit: { logger: { log: auditLog } } },
+        userProfile: { getCurrentProfileId: jest.fn(async () => callerUserId) },
       }),
     } as unknown as Parameters<RequestHandler>[0]);
 
   const callRoute = (body: Record<string, unknown>) =>
-    route.handler(createContext(), httpServerMock.createKibanaRequest({ body }), response);
+    route.handler(
+      createContext(),
+      Object.assign(httpServerMock.createKibanaRequest({ body }), { authzResult }),
+      response
+    );
 
   const validateBody = (body: unknown) => route.validate.request.body.validate(body);
 
@@ -56,6 +63,8 @@ describe('session memory routes', () => {
 
   beforeEach(() => {
     featureFlagEnabled = true;
+    callerUserId = 'jdoe';
+    authzResult = { [apiPrivileges.manageMemory]: false };
     auditLog = jest.fn();
     response = httpServerMock.createResponseFactory();
     service = {
@@ -86,13 +95,14 @@ describe('session memory routes', () => {
     });
   });
 
-  it('registers a public experimental route that needs the write and manage memory privileges', () => {
+  it('registers a public experimental route that needs write and checks manage memory', () => {
     expect(route.config).toMatchObject({
       path: SESSION_MEMORY_FORGET_PATH,
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: [apiPrivileges.writeContextEngine, apiPrivileges.manageMemory],
+          requiredPrivileges: [apiPrivileges.writeContextEngine],
+          extendedPrivileges: [apiPrivileges.manageMemory],
         },
       },
       options: { availability: { stability: 'experimental' } },
@@ -107,6 +117,56 @@ describe('session memory routes', () => {
     expect(response.notFound).toHaveBeenCalledTimes(1);
     expect(service.forget).not.toHaveBeenCalled();
     expect(auditLog).not.toHaveBeenCalled();
+  });
+
+  describe('whose memory', () => {
+    it('forgets the memories of the caller when user_id is missing', async () => {
+      service.forget.mockResolvedValue({ a: 'forgotten' });
+
+      await callRoute({ ids: ['a'], mode: 'tombstone' });
+
+      expect(service.forget).toHaveBeenCalledWith({ space: 'marketing', userId: 'jdoe' }, ['a']);
+      expect(response.ok).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns 403 when user_id is missing and the caller has no profile', async () => {
+      callerUserId = null;
+
+      await callRoute({ ids: ['a'], mode: 'tombstone' });
+
+      expect(response.forbidden).toHaveBeenCalledTimes(1);
+      expect(service.forget).not.toHaveBeenCalled();
+    });
+
+    it('returns 403 and audits the attempt when user_id names another user without manage memory', async () => {
+      await callRoute({ user_id: 'other', ids: ['a', 'b'], mode: 'tombstone' });
+
+      expect(response.forbidden).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining(apiPrivileges.manageMemory) },
+      });
+      expect(service.forget).not.toHaveBeenCalled();
+      expect(auditedEvents()).toEqual([
+        expect.objectContaining({
+          event: expect.objectContaining({ outcome: 'failure' }),
+          user: { target: { id: 'other' } },
+          kibana: { saved_object: { type: 'session_memory', id: 'a' } },
+        }),
+        expect.objectContaining({
+          event: expect.objectContaining({ outcome: 'failure' }),
+          kibana: { saved_object: { type: 'session_memory', id: 'b' } },
+        }),
+      ]);
+    });
+
+    it('forgets the memories of another user with manage memory', async () => {
+      authzResult = { [apiPrivileges.manageMemory]: true };
+      service.forget.mockResolvedValue({ a: 'forgotten' });
+
+      await callRoute({ user_id: 'other', ids: ['a'], mode: 'tombstone' });
+
+      expect(service.forget).toHaveBeenCalledWith({ space: 'marketing', userId: 'other' }, ['a']);
+      expect(response.ok).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('tombstone mode', () => {
@@ -234,6 +294,10 @@ describe('session memory routes', () => {
   });
 
   describe('request validation', () => {
+    it('accepts a request without user_id', () => {
+      expect(validateBody({ ids: ['a'] })).toEqual({ ids: ['a'], mode: 'tombstone' });
+    });
+
     it('defaults the mode to tombstone', () => {
       expect(validateBody({ user_id: 'jdoe', ids: ['a'] })).toEqual({
         user_id: 'jdoe',
@@ -251,7 +315,6 @@ describe('session memory routes', () => {
           ids: Array.from({ length: MAX_SESSION_MEMORY_FORGET_IDS + 1 }, (_, i) => `m${i}`),
         },
       ],
-      ['a missing user_id', { ids: ['a'] }],
       ['an empty user_id', { user_id: '', ids: ['a'] }],
       [
         'an over-long user_id',
