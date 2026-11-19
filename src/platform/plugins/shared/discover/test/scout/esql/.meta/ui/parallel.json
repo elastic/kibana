@@ -1,5 +1,5 @@
 {
-  "sha1": "0056e116fd1b3bd7b699b0f82fa2f9d25bb63c50",
+  "sha1": "d96027c8d50816c356bc4d46dd64129331c00d62",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -330,8 +330,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
-        "line": 44,
-        "column": 7
+        "line": 59,
+        "column": 69
       }
     },
     {
@@ -343,8 +343,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 94,
+        "column": 27
+      }
+    },
+    {
+      "id": "c9f80285597a240-feaaf625de49796",
+      "title": "Discover ES|QL controls - saving to a dashboard should update the existing control when saving from Discover to a dashboard that already has it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
+        "line": 143,
+        "column": 27
       }
     },
     {
