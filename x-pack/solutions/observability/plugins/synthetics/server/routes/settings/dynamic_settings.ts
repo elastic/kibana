@@ -103,7 +103,7 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
     ) {
       await new DefaultRuleService(context, server, savedObjectsClient).refreshDefaultRuleActions(
         nextSettings,
-        prevSettings.defaultConnectors ?? []
+        prevSettings.defaultConnectors
       );
     }
 

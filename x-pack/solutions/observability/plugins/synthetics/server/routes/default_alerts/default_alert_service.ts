@@ -24,6 +24,8 @@ import {
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
 import type { DefaultRuleType } from '../../../common/types/default_alerts';
+type ExistingDefaultRule = NonNullable<Awaited<ReturnType<DefaultRuleService['getExistingAlert']>>>;
+
 export class DefaultRuleService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
@@ -215,7 +217,7 @@ export class DefaultRuleService {
 
   private async updateExistingRule(
     ruleType: DefaultRuleType,
-    alert: NonNullable<Awaited<ReturnType<DefaultRuleService['getExistingAlert']>>>,
+    alert: ExistingDefaultRule,
     interval: string,
     {
       previousDefaultConnectors = [],
@@ -270,6 +272,11 @@ export class DefaultRuleService {
   }
 
   async getAlertActions(ruleType: DefaultRuleType, failOnConnectorError = false) {
+    const { defaultConnectors } = await this.getSettings();
+    if (!defaultConnectors?.length) {
+      return [];
+    }
+
     const { actionConnectors, settings } = await this.getActionConnectors(failOnConnectorError);
 
     const defaultActions = (actionConnectors ?? []).filter((act) =>

@@ -576,6 +576,21 @@ describe('DefaultAlertService', () => {
         expect(update).toHaveBeenCalledTimes(1);
       });
 
+      it('does not need connector access when the last default connector is removed', async () => {
+        const {
+          context,
+          server,
+          mocks: { update, getAll },
+        } = setUpUpdateTest();
+        getAll.mockRejectedValue(new Error('no access'));
+        const service = new DefaultRuleService(context as any, server as any, {} as any);
+
+        await service.refreshDefaultRuleActions({ defaultConnectors: [] } as any, ['old']);
+
+        expect(getAll).not.toHaveBeenCalled();
+        expect(update).toHaveBeenCalledTimes(2);
+      });
+
       it('fails without updating rules when connectors cannot be listed', async () => {
         const {
           context,
