@@ -18,7 +18,7 @@ import {
 } from '../edot_shared/constants';
 import { EdotLog } from '../edot_shared/edot_log';
 import { EdotSpan } from '../edot_shared/edot_span';
-import { asFloat } from './as_float';
+import { asFloat } from '../edot_shared/as_float';
 import type { EdotBrowserSpan, EdotBrowserSpanDocument } from './edot_browser_span';
 import { getWebVitalRating, type WebVitalName } from './health_profiles';
 
