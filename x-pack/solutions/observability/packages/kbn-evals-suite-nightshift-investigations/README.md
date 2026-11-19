@@ -399,9 +399,10 @@ out the demo's pinned commit; the Customer-0 retrospective guardrail has the age
 last commit before the alert, so it doesn't read code fixed after the incident.
 
 Every investigation records `sandbox_egress_denied`, the number of sandbox commands the firewall
-refused: `CONNECT tunnel failed, response 403`, a `sandbox_egress_denied` response, git's
-`The requested URL returned error: 403`, or the same `curl -f` error from a command that targets
-github.com. Above zero, the agent needed a host or path the rules leave out.
+refused: `CONNECT tunnel failed, response 403`, a `sandbox_egress_denied` response, or a 403 from
+github.com, whose rules are checked per request (git's `The requested URL returned error: 403` for
+a github.com URL, or curl's from a command that requests one). Above zero, the agent needed a host
+or path the rules leave out.
 
 ## Reinforcement micro-eval
 

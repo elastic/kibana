@@ -131,17 +131,46 @@ describe('countSandboxEgressDenials', () => {
               },
             },
           ]),
-          // `curl -f` doesn't, so the command has to target github.com.
+          // `curl -f` doesn't, so the command has to request github.com, quoted or not.
           command('curl -f https://github.com/elastic/kibana/issues/1', `curl: (22) ${http403}`),
-          // A connector's cluster answering 403 is a permission error, not the firewall.
           command(
-            'curl -f -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" "$CONNECTOR_CONFIG_URL/_search"',
+            `cd /tmp && curl -sSf "https://github.com/elastic/kibana/pulls" | head`,
             `curl: (22) ${http403}`
           ),
         ],
       },
     ] as unknown as ConversationRound[];
-    expect(countSandboxEgressDenials(rounds)).toBe(2);
+    expect(countSandboxEgressDenials(rounds)).toBe(3);
+  });
+
+  it("doesn't count another host's 403 as the firewall's", () => {
+    const http403 = 'The requested URL returned error: 403';
+    const command = (text: string, stderr: string) => ({
+      ...bash([{ type: 'other', data: { stdout: '', stderr, exit_code: 22 } }]),
+      params: { command: text },
+    });
+    const rounds = [
+      {
+        steps: [
+          // A connector's cluster answering 403 is a permission error, not the firewall.
+          command(
+            'curl -f -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" "$CONNECTOR_CONFIG_URL/_search"',
+            `curl: (22) ${http403}`
+          ),
+          // Even when the request body mentions a github.com URL.
+          command(
+            `curl -f "$CONNECTOR_CONFIG_URL/_query" -d '{"query":"FROM logs-* | WHERE url.full == \\"https://github.com/elastic/kibana\\""}'`,
+            `curl: (22) ${http403}`
+          ),
+          // git refused by another host is that host's answer.
+          command(
+            'git clone https://git.example.com/repo',
+            `fatal: unable to access 'https://git.example.com/repo/': ${http403}`
+          ),
+        ],
+      },
+    ] as unknown as ConversationRound[];
+    expect(countSandboxEgressDenials(rounds)).toBe(0);
   });
 });
 
