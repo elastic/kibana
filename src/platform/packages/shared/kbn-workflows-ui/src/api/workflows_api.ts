@@ -34,6 +34,7 @@ import type { z } from '@kbn/zod/v4';
 import type {
   BulkCreateWorkflowsParams,
   BulkCreateWorkflowsResponse,
+  BulkDeleteWorkflowsResponse,
   CheckWorkflowIdConflictsParams,
   CheckWorkflowIdConflictsResponse,
   ExportWorkflowsParams,
@@ -129,7 +130,7 @@ export class WorkflowApi {
     });
   }
 
-  async bulkDeleteWorkflows(ids: string[]): Promise<void> {
+  async bulkDeleteWorkflows(ids: string[]): Promise<BulkDeleteWorkflowsResponse> {
     return this.http.delete(BASE, {
       body: JSON.stringify({ ids }),
       version: API_VERSION,

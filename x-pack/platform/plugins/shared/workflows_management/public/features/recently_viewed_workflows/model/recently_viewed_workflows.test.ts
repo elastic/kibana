@@ -6,12 +6,15 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { ProjectNavigationLinkItem } from '@kbn/core-chrome-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import type { RecentlyAccessed, RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
 import {
   getRecentlyViewedWorkflowPath,
   getRecentlyViewedWorkflowsNavItems$,
+  startRecentlyViewedWorkflows,
 } from './recently_viewed_workflows';
 
 const viewed = (id: string, label: string): RecentlyAccessedHistoryItem => ({
@@ -45,5 +48,48 @@ describe('getRecentlyViewedWorkflowsNavItems$', () => {
       [{ id: 'wf-2', href: '/s/my-space/app/workflows/wf-2', label: 'Second' }],
     ]);
     expect(http.post).not.toHaveBeenCalled();
+  });
+});
+
+describe('startRecentlyViewedWorkflows', () => {
+  const startAs = (getCurrentUser: () => Promise<ReturnType<typeof mockAuthenticatedUser>>) => {
+    const core = coreMock.createStart({ basePath: '/s/my-space' });
+    core.security.authc.getCurrentUser.mockImplementation(getCurrentUser);
+    return startRecentlyViewedWorkflows(core);
+  };
+  const startAsUser = (user: Parameters<typeof mockAuthenticatedUser>[0]) =>
+    startAs(() => Promise.resolve(mockAuthenticatedUser(user)));
+
+  afterEach(() => localStorage.clear());
+
+  it('keeps a separate history for each user of the browser', async () => {
+    (await startAsUser({ profile_uid: 'alice' })).add(
+      getRecentlyViewedWorkflowPath('wf-1'),
+      'Private',
+      'wf-1'
+    );
+
+    expect((await startAsUser({ profile_uid: 'bob' })).get()).toEqual([]);
+    expect((await startAsUser({ profile_uid: 'alice' })).get()).toEqual([
+      viewed('wf-1', 'Private'),
+    ]);
+  });
+
+  it('uses the username when the user has no profile', async () => {
+    (await startAsUser({ profile_uid: undefined, username: 'alice' })).add(
+      getRecentlyViewedWorkflowPath('wf-1'),
+      'Private',
+      'wf-1'
+    );
+
+    expect((await startAsUser({ profile_uid: undefined, username: 'bob' })).get()).toEqual([]);
+  });
+
+  it('shares one history in the space when there is no authenticated user', async () => {
+    const noUser = () => Promise.reject(new Error('No authenticated user'));
+    (await startAs(noUser)).add(getRecentlyViewedWorkflowPath('wf-1'), 'Shared', 'wf-1');
+
+    expect((await startAs(noUser)).get()).toEqual([viewed('wf-1', 'Shared')]);
+    expect((await startAsUser({ profile_uid: 'alice' })).get()).toEqual([]);
   });
 });

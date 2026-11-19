@@ -17,7 +17,7 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
+import type { BulkCreateWorkflowsResponse, BulkDeleteWorkflowsResponse } from '@kbn/workflows-ui';
 import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
 import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
 import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
@@ -199,7 +199,12 @@ export function useWorkflowActions() {
     },
   });
 
-  const deleteWorkflows = useMutation<void, HttpError, { ids: string[] }, OptimisticContext>({
+  const deleteWorkflows = useMutation<
+    BulkDeleteWorkflowsResponse,
+    HttpError,
+    { ids: string[] },
+    OptimisticContext
+  >({
     mutationKey: ['DELETE', 'workflows'],
     mutationFn: ({ ids }: { ids: string[] }) => api.bulkDeleteWorkflows(ids),
     // Optimistic update: immediately remove workflows from UI before server responds
@@ -251,7 +256,7 @@ export function useWorkflowActions() {
         });
       });
     },
-    onSuccess: (_, variables) => {
+    onSuccess: ({ failures }, variables) => {
       // Report telemetry for successful deletion
       variables.ids.forEach((workflowId) => {
         telemetry.reportWorkflowDeleted({
@@ -260,8 +265,12 @@ export function useWorkflowActions() {
           origin: 'workflow_list',
           error: undefined,
         });
-        workflowsManagement.recentlyViewed.remove(workflowId);
       });
+
+      const failedIds = new Set(failures.map(({ id }) => id));
+      variables.ids
+        .filter((workflowId) => !failedIds.has(workflowId))
+        .forEach((workflowId) => workflowsManagement.recentlyViewed.remove(workflowId));
 
       // Refetch to ensure data is in sync with server
       queryClient.invalidateQueries({ queryKey: ['workflows'] });

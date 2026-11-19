@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { combineLatest, filter, type Observable, Subject, type Subscription } from 'rxjs';
+import {
+  combineLatest,
+  defer,
+  filter,
+  type Observable,
+  Subject,
+  type Subscription,
+  switchMap,
+} from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type {
   AppDeepLinkLocations,
@@ -13,7 +21,6 @@ import type {
   AppUpdater,
   CoreSetup,
   CoreStart,
-  HttpStart,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
@@ -21,7 +28,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
-import { type RecentlyAccessed, RecentlyAccessedService } from '@kbn/recently-accessed';
+import type { RecentlyAccessed } from '@kbn/recently-accessed';
 import {
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
@@ -35,7 +42,7 @@ import type { DeepLinksParams } from './deep_links';
 import { getDeepLinks } from './deep_links';
 import {
   getRecentlyViewedWorkflowsNavItems$,
-  RECENTLY_VIEWED_WORKFLOWS_KEY,
+  startRecentlyViewedWorkflows,
 } from './features/recently_viewed_workflows/model/recently_viewed_workflows';
 import { triggerSchemas } from './trigger_schemas';
 import { registerConnectorEventTriggersPublic } from './triggers/register_connector_event_triggers';
@@ -72,7 +79,7 @@ export class WorkflowsPlugin
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
-  private recentlyViewedWorkflows?: RecentlyAccessed;
+  private recentlyViewedWorkflows?: Promise<RecentlyAccessed>;
   private readonly pagesEnabled: boolean;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementPublicConfig>) {
@@ -162,9 +169,10 @@ export class WorkflowsPlugin
         {
           id: 'recent',
           title: i18n.translate('workflows.nav.recentTitle', { defaultMessage: 'Recent' }),
-          items$: getRecentlyViewedWorkflowsNavItems$(
-            core.http,
-            this.getRecentlyViewedWorkflows(core.http)
+          items$: defer(() => this.getRecentlyViewedWorkflows(core)).pipe(
+            switchMap((recentlyViewed) =>
+              getRecentlyViewedWorkflowsNavItems$(core.http, recentlyViewed)
+            )
           ),
         },
       ],
@@ -318,11 +326,8 @@ export class WorkflowsPlugin
   }
 
   /** The side navigation and the app must share one history to see each other's updates. */
-  private getRecentlyViewedWorkflows(http: HttpStart): RecentlyAccessed {
-    this.recentlyViewedWorkflows ??= new RecentlyAccessedService().start({
-      http,
-      key: RECENTLY_VIEWED_WORKFLOWS_KEY,
-    });
+  private getRecentlyViewedWorkflows(core: CoreStart): Promise<RecentlyAccessed> {
+    this.recentlyViewedWorkflows ??= startRecentlyViewedWorkflows(core);
     return this.recentlyViewedWorkflows;
   }
 
@@ -342,7 +347,7 @@ export class WorkflowsPlugin
         availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),
         agentBuilder,
-        recentlyViewed: this.getRecentlyViewedWorkflows(coreStart.http),
+        recentlyViewed: await this.getRecentlyViewedWorkflows(coreStart),
       },
     };
 
