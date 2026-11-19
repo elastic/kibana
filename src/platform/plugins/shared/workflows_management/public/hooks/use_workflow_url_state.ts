@@ -8,7 +8,7 @@
  */
 
 import queryString from 'query-string';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -27,6 +27,7 @@ import {
   getStoredGraphDirection,
   setStoredEditorView,
   setStoredGraphDirection,
+  subscribeToStoredEditorView,
 } from '../lib/workflow_editor_preferences';
 
 export type WorkflowUrlStateTabType = 'workflow' | 'executions';
@@ -148,6 +149,9 @@ export function useWorkflowUrlState() {
   )
     ? 'graph'
     : 'yaml';
+  // The stored view beats the URL, and a switch to the default view leaves the URL unchanged, so
+  // `location.search` alone cannot tell when the view changed: follow the stored value itself.
+  const storedEditorView = useSyncExternalStore(subscribeToStoredEditorView, getStoredEditorView);
 
   const urlState = useMemo((): {
     tab: WorkflowUrlStateTabType;
@@ -172,7 +176,7 @@ export function useWorkflowUrlState() {
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
       view:
-        getStoredEditorView() ??
+        storedEditorView ??
         (params.view === 'graph' || params.view === 'yaml' ? params.view : defaultView),
       direction:
         getStoredGraphDirection() ??
@@ -200,7 +204,7 @@ export function useWorkflowUrlState() {
       },
       lastViewedExecutionId: boundedToken(firstString(params.lastViewedExecutionId)),
     };
-  }, [location.search, defaultView]);
+  }, [location.search, defaultView, storedEditorView]);
 
   const updateUrlState = useCallback(
     (updates: Partial<WorkflowUrlState>, { replace = true }: WorkflowUrlUpdateOptions = {}) => {

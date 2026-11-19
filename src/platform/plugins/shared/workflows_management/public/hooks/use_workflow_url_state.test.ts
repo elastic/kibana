@@ -524,6 +524,67 @@ describe('useWorkflowUrlState', () => {
       expect(result.current.graphDirection).toBe('TB');
     });
   });
+  describe('switching to the default view while another one is stored', () => {
+    // The default view is never written to the URL, so these switches leave the URL as it was:
+    // the shown view must follow the stored preference, not only a change of the URL.
+    it('shows the graph again after YAML was left stored (default view: graph)', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"yaml"');
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/'], { experimentalFeatures: true }),
+      });
+      expect(result.current.editorView).toBe('yaml');
+
+      act(() => {
+        result.current.setEditorView('graph');
+      });
+
+      expect(result.current.editorView).toBe('graph');
+    });
+
+    it('shows YAML again after the graph was left stored (default view: YAML)', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"graph"');
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/'], { experimentalFeatures: false }),
+      });
+      expect(result.current.editorView).toBe('graph');
+
+      act(() => {
+        result.current.setEditorView('yaml');
+      });
+
+      expect(result.current.editorView).toBe('yaml');
+    });
+
+    it('switches when the URL already names the requested view', () => {
+      // The stored graph wins over `?view=yaml`; asking for YAML leaves the URL as it was.
+      localStorage.setItem('workflowsUi.editor.view', '"graph"');
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?view=yaml'], { experimentalFeatures: true }),
+      });
+      expect(result.current.editorView).toBe('graph');
+
+      act(() => {
+        result.current.setEditorView('yaml');
+      });
+
+      expect(result.current.editorView).toBe('yaml');
+    });
+
+    it('updates every consumer of the hook, not only the one that switched', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"yaml"');
+      const { result } = renderHook(
+        () => ({ switcher: useWorkflowUrlState(), reader: useWorkflowUrlState() }),
+        { wrapper: createWrapper(['/'], { experimentalFeatures: true }) }
+      );
+
+      act(() => {
+        result.current.switcher.setEditorView('graph');
+      });
+
+      expect(result.current.reader.editorView).toBe('graph');
+    });
+  });
+
   describe('browser history', () => {
     const renderWithHistory = (initialEntries: InitialEntries) =>
       renderHook(() => ({ urlState: useWorkflowUrlState(), history: useHistory() }), {
