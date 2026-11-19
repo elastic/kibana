@@ -18,6 +18,15 @@ const LIST_RESPONSE: ListResponse = {
   truncated: false,
   took: 0,
   queries: [],
+  probes: [],
+  timings: {
+    definitionMs: 0,
+    planningMs: 0,
+    probesMs: 0,
+    queriesMs: 0,
+    processingMs: 0,
+    totalMs: 0,
+  },
   errors: [],
   unavailableColumns: [],
 };

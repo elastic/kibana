@@ -6,11 +6,14 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SourceError } from '../../../common';
 import { buildProbeQuery } from '../generator';
 import type { GeneratedQuery } from '../generator';
 import { isVerificationError, toSourceError } from './errors/source_error';
 import { executeEsql } from './esql_client';
-import type { EsqlQueryResult } from './esql_client';
+import type { EsqlQueryResult, EsqlStats } from './esql_client';
+import { settleTimed } from './settle_timed';
+import type { TimedOutcome } from './settle_timed';
 
 // The only question the executor asks Elasticsearch before the list queries. On purpose it makes
 // no metadata calls (no resolve-index, `_has_privileges` or field capabilities) and never learns a
@@ -40,8 +43,22 @@ type ProbeOutcome =
   | { failed: false; hasTimeSeries: boolean }
   | { failed: true; status: number | null; reason: string };
 
-/** What the probe found behind one pattern, or why it could not tell, and the probe query sent. */
-export type ProbeResult = ProbeOutcome & { query: GeneratedQuery };
+/** How the probe query ran: its wall time, and its stats or error. */
+export interface ProbeExecution {
+  wallMs: number;
+  /** Null when the probe threw. */
+  stats: EsqlStats | null;
+  /** Null when the probe threw. */
+  isPartial: boolean | null;
+  /** Why the probe threw, a verification error included; null when Elasticsearch answered. */
+  error: Pick<SourceError, 'status' | 'reason'> | null;
+}
+
+/**
+ * What the probe found behind one pattern, or why it could not tell, the probe query sent and how
+ * it ran.
+ */
+export type ProbeResult = ProbeOutcome & { query: GeneratedQuery; execution: ProbeExecution };
 
 const TIMESTAMP_COLUMN = '@timestamp';
 
@@ -64,6 +81,18 @@ const fromError = (pattern: string, error: unknown): ProbeOutcome => {
   return { failed: true, status, reason };
 };
 
+const toExecution = (
+  pattern: string,
+  { outcome, wallMs }: TimedOutcome<EsqlQueryResult>
+): ProbeExecution => {
+  if (outcome.status === 'rejected') {
+    const { status, reason } = toSourceError(pattern, outcome.reason);
+    return { wallMs, stats: null, isPartial: null, error: { status, reason } };
+  }
+  const { stats, isPartial } = outcome.value;
+  return { wallMs, stats, isPartial, error: null };
+};
+
 /**
  * Runs the probe once per distinct pattern, concurrently, and tells for each whether a readable
  * time-series index exists behind it, keeping the probe query it sent.
@@ -77,12 +106,13 @@ export const probeSources = async (
   // Build every probe before sending any, so a pattern that throws cannot leave earlier requests
   // in flight with no rejection handler.
   const probes = unique.map((pattern) => buildProbeQuery(pattern));
-  const settled = await Promise.allSettled(
-    probes.map((probe) => executeEsql(client, probe, { signal }))
+  const settled = await Promise.all(
+    probes.map((probe) => settleTimed(() => executeEsql(client, probe, { signal })))
   );
   return new Map(
     unique.map((pattern, position): [string, ProbeResult] => {
-      const outcome = settled[position];
+      const timed = settled[position];
+      const { outcome } = timed;
       return [
         pattern,
         {
@@ -90,6 +120,7 @@ export const probeSources = async (
             ? fromResponse(outcome.value)
             : fromError(pattern, outcome.reason)),
           query: probes[position],
+          execution: toExecution(pattern, timed),
         },
       ];
     })

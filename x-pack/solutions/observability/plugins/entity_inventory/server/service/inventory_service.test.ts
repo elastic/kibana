@@ -750,7 +750,16 @@ describe('InventoryService.list diagnostics', () => {
       params: [{ from: WINDOW.from }, { to: WINDOW.to }],
       took: 4,
       documentsFound: 2,
+      valuesLoaded: null,
+      rowsEmitted: null,
+      cpuNanos: null,
+      driverNanos: null,
+      bytesRead: null,
+      shards: null,
+      isPartial: false,
       rowCount: 1,
+      wallMs: expect.any(Number),
+      error: null,
     });
   });
 
@@ -768,9 +777,18 @@ describe('InventoryService.list diagnostics', () => {
       indexPattern: STATE_PATTERN,
       took: null,
       documentsFound: null,
+      valuesLoaded: null,
+      cpuNanos: null,
+      shards: null,
+      isPartial: null,
       rowCount: 0,
+      error: { status: 400, reason: 'verification_exception: Unknown column [x]' },
     });
-    expect(response.queries[1]).toMatchObject({ indexPattern: OTEL_PATTERN, rowCount: 1 });
+    expect(response.queries[1]).toMatchObject({
+      indexPattern: OTEL_PATTERN,
+      rowCount: 1,
+      error: null,
+    });
   });
 
   it('leaves out the plan queries of a source whose probe failed', async () => {
@@ -806,6 +824,104 @@ describe('InventoryService.list diagnostics', () => {
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
     expect(response.took).toBe(400);
+  });
+
+  it('splits the call into phases and times each probe and plan query', async () => {
+    jest.useFakeTimers({ now: new Date('2026-11-01T12:00:00.000Z') });
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    // Each request advances the clock as it is sent; requests of one phase are sent together.
+    esClient.esql.query.mockImplementation(async ({ query }) => {
+      if (isProbe(query)) {
+        jest.advanceTimersByTime(query.includes(STATE_PATTERN) ? 10 : 20);
+        return probeResponse(false);
+      }
+      jest.advanceTimersByTime(query.includes(STATE_PATTERN) ? 100 : 200);
+      return query.includes(STATE_PATTERN)
+        ? esqlResponse(STATE_COLUMNS, [])
+        : esqlResponse(OTEL_COLUMNS, []);
+    });
+
+    const { timings, queries, probes } = await service.list({
+      type: 'k8s.deployment',
+      window: WINDOW,
+      limit: 10,
+    });
+
+    expect(timings).toEqual({
+      definitionMs: 0,
+      planningMs: 30,
+      probesMs: 30,
+      queriesMs: 300,
+      processingMs: 0,
+      totalMs: 330,
+    });
+    expect(probes.map(({ indexPattern, wallMs }) => ({ indexPattern, wallMs }))).toEqual([
+      { indexPattern: STATE_PATTERN, wallMs: 30 },
+      { indexPattern: OTEL_PATTERN, wallMs: 20 },
+    ]);
+    expect(queries.map(({ indexPattern, wallMs }) => ({ indexPattern, wallMs }))).toEqual([
+      { indexPattern: STATE_PATTERN, wallMs: 300 },
+      { indexPattern: OTEL_PATTERN, wallMs: 200 },
+    ]);
+  });
+
+  it('lists every probe with its outcome, text and stats, a failed one with its error', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answerByPattern(
+      esClient,
+      {
+        [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+        [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+      },
+      { probeFails: { [STATE_PATTERN]: esError(503, 'timeout_exception', 'timed out') } }
+    );
+
+    const { probes } = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    const sentProbes = esClient.esql.query.mock.calls
+      .map(([body]) => body.query)
+      .filter((query) => isProbe(query));
+    expect(probes.map(({ esql }) => esql)).toEqual(sentProbes);
+    expect(probes[0]).toMatchObject({
+      indexPattern: STATE_PATTERN,
+      outcome: 'failed',
+      took: null,
+      isPartial: null,
+      error: { status: 503, reason: 'timeout_exception: timed out' },
+    });
+    expect(probes[1]).toEqual({
+      indexPattern: OTEL_PATTERN,
+      esql: sentProbes[1],
+      params: expect.any(Array),
+      outcome: 'no_time_series',
+      wallMs: expect.any(Number),
+      took: 1,
+      documentsFound: 0,
+      valuesLoaded: null,
+      rowsEmitted: null,
+      cpuNanos: null,
+      driverNanos: null,
+      bytesRead: null,
+      shards: null,
+      isPartial: false,
+      error: null,
+    });
+  });
+
+  it('reports a probe that found a time-series index', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answerByPattern(
+      esClient,
+      {
+        [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+        [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+      },
+      { timeSeries: [OTEL_PATTERN] }
+    );
+
+    const { probes } = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(probes.map(({ outcome }) => outcome)).toEqual(['no_time_series', 'time_series']);
   });
 });
 

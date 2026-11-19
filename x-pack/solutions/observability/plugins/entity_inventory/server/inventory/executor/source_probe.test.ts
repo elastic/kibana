@@ -25,6 +25,30 @@ const probeResponse = (type?: string) => ({
   values: [],
 });
 
+// How a probe ran when Elasticsearch answered without execution metadata, or threw.
+const answered = {
+  wallMs: expect.any(Number),
+  stats: {
+    took: null,
+    documentsFound: null,
+    valuesLoaded: null,
+    rowsEmitted: null,
+    cpuNanos: null,
+    driverNanos: null,
+    bytesRead: null,
+    shards: null,
+    rowCount: 0,
+  },
+  isPartial: false,
+  error: null,
+};
+const threw = (status: number | null, reason: string) => ({
+  wallMs: expect.any(Number),
+  stats: null,
+  isPartial: null,
+  error: { status, reason },
+});
+
 const setup = (answer: (query: string) => Promise<Record<string, unknown>>) => {
   const client = elasticsearchServiceMock.createElasticsearchClient();
   // The mock's resolved type is the client's response, which lacks the execution metadata.
@@ -55,6 +79,7 @@ describe('probeSources', () => {
       failed: false,
       hasTimeSeries,
       query: buildProbeQuery('metrics-*'),
+      execution: answered,
     });
   });
 
@@ -65,6 +90,7 @@ describe('probeSources', () => {
       failed: false,
       hasTimeSeries: false,
       query: buildProbeQuery('metrics-*'),
+      execution: answered,
     });
   });
 
@@ -110,6 +136,7 @@ describe('probeSources', () => {
       failed: false,
       hasTimeSeries: false,
       query: buildProbeQuery('logs-app'),
+      execution: threw(400, 'verification_exception: Found 1 problem'),
     });
   });
 
@@ -126,6 +153,7 @@ describe('probeSources', () => {
       status,
       reason: `${type}: ${reason}`,
       query: buildProbeQuery('metrics-*'),
+      execution: threw(status, `${type}: ${reason}`),
     });
   });
 
@@ -139,6 +167,7 @@ describe('probeSources', () => {
       status: null,
       reason: 'connection reset',
       query: buildProbeQuery('metrics-*'),
+      execution: threw(null, 'connection reset'),
     });
   });
 
@@ -152,6 +181,7 @@ describe('probeSources', () => {
       status: 400,
       reason: 'parsing_exception: verification_exception',
       query: buildProbeQuery('metrics-*'),
+      execution: threw(400, 'parsing_exception: verification_exception'),
     });
   });
 
@@ -176,7 +206,15 @@ describe('probeSources', () => {
 
     expect(results).toEqual(
       new Map([
-        ['metrics-*', { failed: false, hasTimeSeries: true, query: buildProbeQuery('metrics-*') }],
+        [
+          'metrics-*',
+          {
+            failed: false,
+            hasTimeSeries: true,
+            query: buildProbeQuery('metrics-*'),
+            execution: answered,
+          },
+        ],
         [
           'logs-*',
           {
@@ -184,10 +222,37 @@ describe('probeSources', () => {
             status: 503,
             reason: 'unavailable_shards_exception: no shard available',
             query: buildProbeQuery('logs-*'),
+            execution: threw(503, 'unavailable_shards_exception: no shard available'),
           },
         ],
       ])
     );
+  });
+
+  it('times each probe from its sending to its settling', async () => {
+    jest.useFakeTimers();
+    try {
+      const client = setup(async (query) => {
+        jest.advanceTimersByTime(patternOf(query) === 'logs-*' ? 30 : 10);
+        if (patternOf(query) === 'logs-*') {
+          throw responseError(503, 'unavailable_shards_exception', 'no shard available');
+        }
+        return { ...probeResponse('date'), took: 7, is_partial: true };
+      });
+
+      const results = await probeSources(client, ['metrics-*', 'logs-*']);
+
+      // Both are sent before either settles, so the first waits for the second's 30ms too.
+      expect(results.get('metrics-*')?.execution).toMatchObject({
+        wallMs: 40,
+        stats: { took: 7 },
+        isPartial: true,
+        error: null,
+      });
+      expect(results.get('logs-*')?.execution).toMatchObject({ wallMs: 30, stats: null });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('passes the abort signal to every probe', async () => {
