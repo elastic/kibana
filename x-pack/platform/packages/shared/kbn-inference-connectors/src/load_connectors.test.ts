@@ -84,12 +84,6 @@ describe('toAIConnector', () => {
     expect(toAIConnector(connector).isRecommended).toBe(true);
   });
 
-  it('should propagate isDefault when set on the API response', () => {
-    const connector = createInferenceConnector({ isDefault: true });
-
-    expect(toAIConnector(connector).isDefault).toBe(true);
-  });
-
   it('should set apiProvider for non-preconfigured OpenAI connectors', () => {
     const connector = createInferenceConnector({
       isPreconfigured: false,

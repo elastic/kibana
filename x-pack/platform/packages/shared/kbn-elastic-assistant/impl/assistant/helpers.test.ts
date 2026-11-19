@@ -94,41 +94,6 @@ describe('helpers', () => {
       expect(result).toBe(defaultConnector);
     });
 
-    it('should return the connector flagged as default by the server when the setting holds an alias that matches no id', () => {
-      clientGet.mockImplementation((key: string) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return '.stack-connector-alias';
-        }
-        return undefined;
-      });
-      const inferenceEndpoint: AIConnector = {
-        ...defaultConnector,
-        id: 'underlying-inference-endpoint',
-        name: 'Underlying endpoint',
-        config: {},
-        isDefault: true,
-      };
-
-      // The OpenAI connector would win the priority fallback, so the flag must take precedence.
-      const result = getDefaultConnector([connector2, inferenceEndpoint], settings);
-
-      expect(result).toBe(inferenceEndpoint);
-    });
-
-    it('should prefer the exact id match over a connector flagged as default', () => {
-      clientGet.mockImplementation((key: string) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return defaultConnector.id;
-        }
-        return undefined;
-      });
-      const flagged: AIConnector = { ...connector2, isDefault: true };
-
-      const result = getDefaultConnector([flagged, defaultConnector], settings);
-
-      expect(result).toBe(defaultConnector);
-    });
-
     it('should return the first connector if there are multiple connectors and no default connector is defined', () => {
       clientGet.mockImplementation(() => {
         return undefined;

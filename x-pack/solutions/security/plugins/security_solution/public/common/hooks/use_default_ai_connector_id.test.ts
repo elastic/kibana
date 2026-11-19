@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import React from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDefaultAIConnectorId } from './use_default_ai_connector_id';
 import { useKibana } from '../lib/kibana';
 import { useLoadConnectors } from '@kbn/inference-connectors';
@@ -19,21 +21,38 @@ const mockUseKibana = useKibana as jest.Mock;
 const mockUseLoadConnectors = useLoadConnectors as jest.Mock;
 const mockGetDefaultConnector = getDefaultConnector as jest.Mock;
 
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, cacheTime: 0 } },
+  });
+  const Wrapper = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+  return Wrapper;
+};
+
 describe('useDefaultAIConnectorId', () => {
-  const mockSettings = {};
-  const mockHttp = {};
   const mockToasts = {};
   const mockConnectors = [
     { id: 'connector-1', name: 'Connector 1' },
     { id: 'connector-2', name: 'Connector 2' },
   ];
+  let mockHttpGet: jest.Mock;
+  let mockSettingsGet: jest.Mock;
+  let mockSettings: { client: { get: jest.Mock } };
+
+  const renderUseDefaultAIConnectorId = () =>
+    renderHook(() => useDefaultAIConnectorId(), { wrapper: createWrapper() });
 
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockHttpGet = jest.fn();
+    mockSettingsGet = jest.fn().mockReturnValue(undefined);
+    mockSettings = { client: { get: mockSettingsGet } };
+
     mockUseKibana.mockReturnValue({
       services: {
-        http: mockHttp,
+        http: { get: mockHttpGet },
         notifications: { toasts: mockToasts },
         settings: mockSettings,
       },
@@ -48,7 +67,7 @@ describe('useDefaultAIConnectorId', () => {
   });
 
   it('should return connector id from getDefaultConnector', () => {
-    const { result } = renderHook(() => useDefaultAIConnectorId());
+    const { result } = renderUseDefaultAIConnectorId();
 
     expect(result.current.defaultConnectorId).toBe('connector-id');
   });
@@ -56,7 +75,7 @@ describe('useDefaultAIConnectorId', () => {
   it('should return undefined when getDefaultConnector returns undefined', () => {
     mockGetDefaultConnector.mockReturnValue(undefined);
 
-    const { result } = renderHook(() => useDefaultAIConnectorId());
+    const { result } = renderUseDefaultAIConnectorId();
 
     expect(result.current.defaultConnectorId).toBeUndefined();
   });
@@ -64,22 +83,22 @@ describe('useDefaultAIConnectorId', () => {
   it('should return undefined when getDefaultConnector returns null', () => {
     mockGetDefaultConnector.mockReturnValue(null);
 
-    const { result } = renderHook(() => useDefaultAIConnectorId());
+    const { result } = renderUseDefaultAIConnectorId();
 
     expect(result.current.defaultConnectorId).toBeUndefined();
   });
 
   it('should call getDefaultConnector with correct parameters', () => {
-    renderHook(() => useDefaultAIConnectorId());
+    renderUseDefaultAIConnectorId();
 
     expect(mockGetDefaultConnector).toHaveBeenCalledWith(mockConnectors, mockSettings);
   });
 
   it('should load the connectors from the alert_ai_summary inference feature, reporting load errors through toasts, so that inference endpoints are included', () => {
-    renderHook(() => useDefaultAIConnectorId());
+    renderUseDefaultAIConnectorId();
 
     expect(mockUseLoadConnectors).toHaveBeenCalledWith({
-      http: mockHttp,
+      http: { get: mockHttpGet },
       toasts: mockToasts,
       featureId: 'alert_ai_summary',
     });
@@ -90,13 +109,7 @@ describe('useDefaultAIConnectorId', () => {
       '@kbn/elastic-assistant/impl/assistant/helpers'
     );
     mockGetDefaultConnector.mockImplementation(actualGetDefaultConnector);
-    mockUseKibana.mockReturnValue({
-      services: {
-        http: mockHttp,
-        notifications: { toasts: mockToasts },
-        settings: { client: { get: jest.fn().mockReturnValue('custom-inference-endpoint') } },
-      },
-    });
+    mockSettingsGet.mockReturnValue('custom-inference-endpoint');
     mockUseLoadConnectors.mockReturnValue({
       data: [
         { id: 'Anthropic-Claude-Sonnet-3-7', name: 'Anthropic Claude Sonnet 3.7' },
@@ -109,39 +122,10 @@ describe('useDefaultAIConnectorId', () => {
       isLoading: false,
     });
 
-    const { result } = renderHook(() => useDefaultAIConnectorId());
+    const { result } = renderUseDefaultAIConnectorId();
 
     expect(result.current.defaultConnectorId).toBe('custom-inference-endpoint');
-  });
-
-  it('should return the endpoint the server flagged as default when the setting holds a stack connector alias', () => {
-    const { getDefaultConnector: actualGetDefaultConnector } = jest.requireActual(
-      '@kbn/elastic-assistant/impl/assistant/helpers'
-    );
-    mockGetDefaultConnector.mockImplementation(actualGetDefaultConnector);
-    mockUseKibana.mockReturnValue({
-      services: {
-        http: mockHttp,
-        notifications: { toasts: mockToasts },
-        settings: { client: { get: jest.fn().mockReturnValue('.custom-stack-connector') } },
-      },
-    });
-    mockUseLoadConnectors.mockReturnValue({
-      data: [
-        { id: 'Anthropic-Claude-Sonnet-3-7', name: 'Anthropic Claude Sonnet 3.7' },
-        {
-          id: 'custom-inference-endpoint',
-          name: 'custom-inference-endpoint',
-          isInferenceEndpoint: true,
-          isDefault: true,
-        },
-      ],
-      isLoading: false,
-    });
-
-    const { result } = renderHook(() => useDefaultAIConnectorId());
-
-    expect(result.current.defaultConnectorId).toBe('custom-inference-endpoint');
+    expect(mockHttpGet).not.toHaveBeenCalled();
   });
 
   it('should return isLoading true when connectors are loading', () => {
@@ -150,7 +134,7 @@ describe('useDefaultAIConnectorId', () => {
       isLoading: true,
     });
 
-    const { result } = renderHook(() => useDefaultAIConnectorId());
+    const { result } = renderUseDefaultAIConnectorId();
 
     expect(result.current.isLoading).toBe(true);
   });
@@ -161,8 +145,85 @@ describe('useDefaultAIConnectorId', () => {
       isLoading: false,
     });
 
-    const { result } = renderHook(() => useDefaultAIConnectorId());
+    const { result } = renderUseDefaultAIConnectorId();
 
     expect(result.current.isLoading).toBe(false);
+  });
+
+  describe('when the default setting is a stack connector alias of an inference endpoint', () => {
+    const aliasId = '.custom-stack-connector';
+    const connectorsWithEndpoint = [
+      { id: 'Anthropic-Claude-Sonnet-3-7', name: 'Anthropic Claude Sonnet 3.7' },
+      {
+        id: 'custom-inference-endpoint',
+        name: 'custom-inference-endpoint',
+        isInferenceEndpoint: true,
+      },
+    ];
+
+    beforeEach(() => {
+      const { getDefaultConnector: actualGetDefaultConnector } = jest.requireActual(
+        '@kbn/elastic-assistant/impl/assistant/helpers'
+      );
+      mockGetDefaultConnector.mockImplementation(actualGetDefaultConnector);
+      mockSettingsGet.mockReturnValue(aliasId);
+      mockUseLoadConnectors.mockReturnValue({ data: connectorsWithEndpoint, isLoading: false });
+    });
+
+    it('should resolve the alias on the server and return the endpoint it points to', async () => {
+      mockHttpGet.mockResolvedValue({ connector: { connectorId: 'custom-inference-endpoint' } });
+
+      const { result } = renderUseDefaultAIConnectorId();
+
+      await waitFor(() =>
+        expect(result.current.defaultConnectorId).toBe('custom-inference-endpoint')
+      );
+      expect(mockHttpGet).toHaveBeenCalledWith(
+        `/internal/inference/connectors/${encodeURIComponent(aliasId)}`
+      );
+    });
+
+    it('should report loading while the alias is being resolved', async () => {
+      mockHttpGet.mockResolvedValue({ connector: { connectorId: 'custom-inference-endpoint' } });
+
+      const { result } = renderUseDefaultAIConnectorId();
+
+      expect(result.current.isLoading).toBe(true);
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+    });
+
+    it('should fall back to the priority pick when the alias cannot be resolved', async () => {
+      mockHttpGet.mockRejectedValue(new Error('Not found'));
+
+      const { result } = renderUseDefaultAIConnectorId();
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.defaultConnectorId).toBe('Anthropic-Claude-Sonnet-3-7');
+    });
+
+    it('should fall back when the resolved endpoint is not in the list', async () => {
+      mockHttpGet.mockResolvedValue({ connector: { connectorId: 'not-in-the-list' } });
+
+      const { result } = renderUseDefaultAIConnectorId();
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.defaultConnectorId).toBe('Anthropic-Claude-Sonnet-3-7');
+    });
+
+    it('should not look the alias up before the connectors have loaded', () => {
+      mockUseLoadConnectors.mockReturnValue({ data: undefined, isLoading: true });
+
+      renderUseDefaultAIConnectorId();
+
+      expect(mockHttpGet).not.toHaveBeenCalled();
+    });
+
+    it('should not look anything up when no default is configured', () => {
+      mockSettingsGet.mockReturnValue('NO_DEFAULT_CONNECTOR');
+
+      renderUseDefaultAIConnectorId();
+
+      expect(mockHttpGet).not.toHaveBeenCalled();
+    });
   });
 });

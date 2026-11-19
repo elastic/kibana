@@ -425,7 +425,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
           { onlyReturnConfigured: true }
         );
         expect(result).toEqual({
-          endpoints: [{ ...defaultConnector, isDefault: true }],
+          endpoints: [defaultConnector],
           warnings: [],
           soEntryFound: false,
         });

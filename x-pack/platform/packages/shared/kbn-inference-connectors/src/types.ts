@@ -14,11 +14,6 @@ export type AIConnector = ActionConnector & {
   // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
   apiProvider?: OpenAiProviderType;
   isRecommended?: boolean;
-  /**
-   * Set when the server resolved this entry as the global default model. The default setting can
-   * hold a stack connector alias, so match on this flag in addition to the id.
-   */
-  isDefault?: boolean;
   /** When true, this connector represents an Elastic-managed inference endpoint (EIS). */
   isEis?: boolean;
   /** EIS metadata for the underlying inference endpoint (capabilities, release date, etc.). */

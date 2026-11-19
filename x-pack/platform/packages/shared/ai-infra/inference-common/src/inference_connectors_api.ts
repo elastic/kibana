@@ -22,13 +22,6 @@ export const INFERENCE_CONNECTORS_INTERNAL_API_PATH =
  */
 export interface ApiInferenceConnector extends InferenceConnector {
   isRecommended?: boolean;
-  /**
-   * Set server-side on the entry that the `genAiSettings:defaultAIConnector` setting resolves to.
-   * The setting may hold a stack connector alias (for example a `.inference` connector id) while
-   * `connectorId` holds the underlying inference endpoint id, so clients cannot always match the
-   * setting against `connectorId`.
-   */
-  isDefault?: boolean;
   parameters?: Pick<ChatCompleteOptions, 'reasoning'>;
 }
 
