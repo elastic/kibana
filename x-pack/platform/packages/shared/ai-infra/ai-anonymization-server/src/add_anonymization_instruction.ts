@@ -46,6 +46,7 @@ export function addAnonymizationInstruction(system: string, rules: Anonymization
     These represent named entities such as people (PER), locations (LOC), organizations (ORG), and miscellaneous types (MISC)${
       customClasses.length ? `, as well as custom types like ${customClasses.join(', ')}.` : '.'
     }
-    Do not attempt to infer their meaning, type, or real‑world identity. Refer to them exactly as they appear unless explicitly resolved or described.`
+    Do not attempt to infer their meaning, type, or real‑world identity. Refer to them exactly as they appear unless explicitly resolved or described.
+    Each token is a class name followed by a long hexadecimal string, and it is only replaced with the original value when it appears complete. Always copy a token in full, character for character: never shorten, truncate or abbreviate one, never add an ellipsis to it, and never change its case, even in tables, lists or narrow columns.`
   );
 }

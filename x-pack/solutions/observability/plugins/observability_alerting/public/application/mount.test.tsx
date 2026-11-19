@@ -7,6 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { mountObservabilityAlertingApp } from './mount';
 
 const mockCreateAlertingV2HostApp: jest.Mock = jest.fn(
@@ -29,6 +30,7 @@ describe('mountObservabilityAlertingApp', () => {
       RulesPage: () => null,
       RuleLibraryPage: () => null,
       EpisodesPage: () => null,
+      AlertsProvider: ({ children }: { children?: React.ReactNode }) => children ?? null,
       ActionPoliciesPage: () => null,
       ExecutionHistoryPage: () => null,
       CreateRuleOptionsFlyout: () => null,
@@ -36,12 +38,20 @@ describe('mountObservabilityAlertingApp', () => {
     };
     const triggersActionsUi = {
       getClassicRulesPage: () => <div />,
+      getAlertFormatter: () => undefined,
+    };
+
+    const observabilityShared = {
+      navigation: {
+        PageTemplate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      },
     };
 
     const unmount = mountObservabilityAlertingApp({
       coreStart,
       alertingVTwo,
       triggersActionsUi,
+      observabilityShared: observabilityShared as unknown as ObservabilitySharedPluginStart,
       params,
     });
 

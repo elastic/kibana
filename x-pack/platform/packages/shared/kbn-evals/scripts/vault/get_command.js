@@ -6,12 +6,12 @@
  */
 
 require('@kbn/swc-register').install();
-const { getCommand, getVaultPath } = require('./manage_secrets');
-const { KBN_EVALS_VAULT_TYPES, getKbnEvalsVaultAddr } = require('../../src/cli/utils');
+const { getCommand, resolveVaultTarget, describeVaultTarget } = require('./manage_secrets');
+const { KBN_EVALS_VAULT_TYPES } = require('../../src/cli/utils');
 const minimist = require('minimist');
 
 async function run() {
-  const argv = minimist(process.argv.slice(2));
+  const argv = minimist(process.argv.slice(2), { string: ['suite'] });
   const format = argv.format || 'vault-write';
   const vault = argv.vault;
 
@@ -27,9 +27,16 @@ async function run() {
     process.exit(1);
   }
 
+  if (format === 'env-var' && argv.suite) {
+    // eslint-disable-next-line no-console
+    console.error('Error: --format env-var only applies to the general config, not --suite');
+    process.exit(1);
+  }
+
+  const target = resolveVaultTarget(vault, argv.suite);
   // eslint-disable-next-line no-console
-  console.log(`Using ${vault} vault (${getKbnEvalsVaultAddr(vault)}, ${getVaultPath(vault)})...`);
-  const cmd = await getCommand(format, vault);
+  console.log(describeVaultTarget(target));
+  const cmd = await getCommand(format, target);
   // eslint-disable-next-line no-console
   console.log(cmd);
 }

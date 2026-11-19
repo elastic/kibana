@@ -6,10 +6,14 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
-import { isToolMessage } from '@langchain/core/messages';
+import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
+import { ToolMessage } from '@langchain/core/messages';
 import type { ReasoningStep, ToolCallProgress, ToolCallStep } from '@kbn/agent-builder-common';
-import { ConversationRoundStepType, createAskUserQuestionStep } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  createAskUserQuestionStep,
+  internalTools,
+} from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import {
   isAskUserQuestionPrompt,
@@ -18,7 +22,7 @@ import {
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import {
   extractTextContent,
-  extractToolCallsWithReasoning,
+  extractToolCallsWithIntent,
   toolIdentifierFromToolCall,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
@@ -32,6 +36,7 @@ import type {
   ToolPromptEntry,
   ToolRenderStateUpdate,
 } from './transient_state';
+import { dynamicToolCallStepFields } from './utils/dynamic_tool_call';
 import { extractToolReturn } from './utils/extract_tool_return';
 
 export interface ResearchTurn {
@@ -93,8 +98,8 @@ export const processResearchResponse = (
     };
   }
 
-  // strips `_reasoning` out of the args into `reasoning`
-  const toolCalls = extractToolCallsWithReasoning(message);
+  // strips `_intent` out of the args into `intent`
+  const toolCalls = extractToolCallsWithIntent(message);
   const toolCallGroupId = uuidv4();
   const updates: RunStepUpdate[] = [];
   const renderState: ToolRenderStateUpdate = {};
@@ -119,32 +124,28 @@ export const processResearchResponse = (
     const isBrowser = toolId.startsWith(BROWSER_TOOL_PREFIX);
     const isDedicated = TOOLS_WITH_DEDICATED_STEP_LIFECYCLE.has(toolId);
 
-    if (toolCall.reasoning && toolCall.reasoning.trim().length > 0) {
-      updates.push(
-        stepUpdates.append(
-          reasoningStep({
-            reasoning: toolCall.reasoning,
-            tool_call_id: toolCall.toolCallId,
-            tool_call_group_id: toolCallGroupId,
-          })
-        )
-      );
-    }
-
     // Every call gets a step so the ToolNode reply — including a schema-validation error for a
     // dedicated-lifecycle tool such as ask_user_question — always has something to resolve and
     // render back to the model. `kind` decides whether the step is durable (see `persistableSteps`).
-    const meta = toolManager.getToolMeta(toolId);
+    // A call through `execute_dynamic_tool` is stored unwrapped (inner tool id and params, plus
+    // `invocation`); the ToolNode still runs the outer call.
+    const dynamicFields =
+      toolId === internalTools.executeDynamicTool
+        ? dynamicToolCallStepFields(toolCall.args)
+        : undefined;
+    const meta = toolManager.getToolMeta(dynamicFields?.tool_id ?? toolId);
     const step: ToolCallStep = {
       type: ConversationRoundStepType.toolCall,
       tool_call_id: toolCall.toolCallId,
       tool_id: isBrowser ? toolId.slice(BROWSER_TOOL_PREFIX.length) : toolId,
       params: toolCall.args,
+      ...dynamicFields,
       results: [],
       progression: [],
       tool_call_group_id: toolCallGroupId,
       tool_origin: meta?.origin,
       tool_type: meta?.type,
+      ...(toolCall.intent ? { intent: toolCall.intent } : {}),
     };
     updates.push(stepUpdates.appendToolCall(step));
 
@@ -167,7 +168,9 @@ export const processResearchResponse = (
 export type ToolNodeResult = BaseMessage[] | { messages: BaseMessage[] };
 
 const toToolMessages = (toolNodeResult: ToolNodeResult): ToolMessage[] =>
-  (Array.isArray(toolNodeResult) ? toolNodeResult : toolNodeResult.messages).filter(isToolMessage);
+  (Array.isArray(toolNodeResult) ? toolNodeResult : toolNodeResult.messages).filter(
+    ToolMessage.isInstance
+  );
 
 /** `artifact` is untyped on LangChain's `ToolMessage`; this is the parsing boundary. */
 const extractInterruptPrompt = (artifact: unknown): PromptRequest | undefined => {

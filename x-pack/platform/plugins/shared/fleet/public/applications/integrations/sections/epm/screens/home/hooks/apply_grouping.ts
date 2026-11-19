@@ -20,6 +20,7 @@ interface ApplyGroupingParams {
   getAbsolutePath: (path: string) => string;
   addBasePath: (url: string) => string;
   packageVerificationKeyId?: string;
+  canAddIntegration?: boolean;
 }
 
 interface ApplyGroupingResult {
@@ -36,6 +37,7 @@ export const applyGrouping = ({
   getAbsolutePath,
   addBasePath,
   packageVerificationKeyId,
+  canAddIntegration,
 }: ApplyGroupingParams): ApplyGroupingResult => {
   const byGroup = new Map<string, PackageListItem[]>();
   const ungroupedItems: Array<PackageListItem | CustomIntegration> = [];
@@ -83,6 +85,7 @@ export const applyGrouping = ({
         item,
         addBasePath,
         packageVerificationKeyId,
+        canAddIntegration,
       }),
       fromCollection: { groupId, title: groupConfig.title },
     }));
@@ -99,17 +102,23 @@ export const applyGrouping = ({
       ...new Set(representativeItems.flatMap((m) => (m.categories ?? []) as string[])),
     ];
 
+    // Groups without their own icon use the icon of the member named after the group (the ECS
+    // package). The card's name and version resolve the icon path, so the version must match it.
+    const iconMember = groupConfig.icons.length
+      ? undefined
+      : representativeItems.find((m) => m.name === groupId && m.icons?.length);
+
     const collectionCard: IntegrationCardItem = {
       id: `collection:${groupId}`,
       name: groupId,
       title: groupConfig.title,
       description: groupConfig.description,
-      icons: groupConfig.icons,
+      icons: iconMember?.icons ?? groupConfig.icons,
       // Point to the browse page: the collection detail route has been removed and both browse
       // pages override onCardClick to open the flyout. This URL acts as a safe fallback.
       url: getHref('integrations_all'),
       integration: '',
-      version: '',
+      version: iconMember?.version ?? '',
       categories,
       isCollectionCard: true,
       groupMembers: memberCards,

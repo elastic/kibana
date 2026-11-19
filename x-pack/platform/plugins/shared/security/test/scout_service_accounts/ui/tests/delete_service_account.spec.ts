@@ -15,7 +15,11 @@ import {
   deleteServiceAccounts,
   type ServiceAccountPrincipal,
 } from '../../api/fixtures/service_account_cleanup';
-import { bindWorkload, unbindWorkloads } from '../../api/fixtures/service_account_workloads';
+import {
+  bindWorkload,
+  type TestWorkload,
+  unbindWorkloads,
+} from '../../api/fixtures/service_account_workloads';
 import { test } from '../fixtures';
 
 const SERVICE_ACCOUNT_ENDPOINT = 'internal/security/service_account';
@@ -30,7 +34,7 @@ const uniqueName = (prefix: string) => `${prefix}-${randomUUID()}`;
 test.describe('Delete service accounts', { tag: ['@local-stateful-classic'] }, () => {
   const workloadRole = uniqueName('scout-sa-delete-role');
   const created: ServiceAccountPrincipal[] = [];
-  const boundWorkloads: string[] = [];
+  const boundWorkloads: TestWorkload[] = [];
 
   const idOf = (name: string) => `${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`;
 
@@ -120,7 +124,7 @@ test.describe('Delete service accounts', { tag: ['@local-stateful-classic'] }, (
     const name = uniqueName('scout-sa-bound');
     const workloadId = uniqueName('scout-sa-job');
     await createAccount(kbnClient, name);
-    boundWorkloads.push(workloadId);
+    boundWorkloads.push({ workloadId });
     await bindWorkload(kbnClient, workloadId, idOf(name));
 
     await browserAuth.loginWithCustomRole(SERVICE_ACCOUNT_ADMIN_ROLE);
@@ -138,8 +142,14 @@ test.describe('Delete service accounts', { tag: ['@local-stateful-classic'] }, (
       await expect(serviceAccounts.deleteConfirmModal).toBeHidden();
       // `toContainText`, since EUI adds hidden copy markers to each cell's text.
       await expect(await serviceAccounts.boundWorkloadsTable.cells('displayName')).toContainText([
-        workloadId,
+        `Test job ${workloadId}`,
       ]);
+      await expect(await serviceAccounts.boundWorkloadsTable.cells('workloadType')).toContainText([
+        'Test job',
+      ]);
+      const link = serviceAccounts.boundWorkloadLink(`Test job ${workloadId}`);
+      await expect(link).toHaveAttribute('href', `/app/service_accounts_test/jobs/${workloadId}`);
+      await expect(link).toHaveAttribute('target', '_blank');
     });
 
     await test.step('the warning has no accessibility violations', async () => {

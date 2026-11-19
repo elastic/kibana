@@ -12,6 +12,13 @@ export const chatApiPath = `/api/chat`;
 
 export const AGENTBUILDER_PLUGIN_ID = 'agentBuilder';
 
+/**
+ * Unregistered advanced setting gating the `execute_dynamic_tool` meta-tool. Not surfaced in
+ * Advanced Settings; set it through the settings API for controlled experimentation:
+ * `POST /internal/kibana/settings { "changes": { "agentBuilder:dynamicTools": true } }`.
+ */
+export const AGENT_BUILDER_DYNAMIC_TOOLS_SETTING_ID = 'agentBuilder:dynamicTools';
+
 export const PREFERRED_DEFAULT_CONNECTOR_ID = 'Anthropic-Claude-Sonnet-4-5';
 
 /** Maximum number of conversations returned per page. Also the default. */

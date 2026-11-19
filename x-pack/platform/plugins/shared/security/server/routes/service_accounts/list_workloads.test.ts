@@ -94,7 +94,15 @@ describe('List service account workloads route', () => {
         pluginId: 'workflows',
         workloadType: 'workflow',
         workloadId: 'w-1',
-        displayName: 'w-1',
+        displayName: 'Nightly report',
+        typeName: 'Workflow',
+        href: '/s/marketing/app/workflows/w-1',
+      },
+      {
+        pluginId: 'alerting',
+        workloadType: 'rule',
+        workloadId: 'r-1',
+        displayName: 'r-1',
       },
     ];
     serviceAccounts.management.listWorkloads.mockResolvedValue(workloads);

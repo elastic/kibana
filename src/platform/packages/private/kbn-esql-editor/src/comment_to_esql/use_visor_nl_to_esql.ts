@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useCallback, useMemo, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import type { VisorNlResultHandler } from '../types';
 import { useReplaceReview } from './use_replace_review';
 import type { ReviewState } from './use_replace_review';
 import { getVisorNlInsertPlan } from './visor_nl_insert';
@@ -34,6 +35,7 @@ export const useVisorNlToEsql = ({
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const generatedContentRef = useRef<string>('');
+  const reviewRef = useRef<Parameters<VisorNlResultHandler>[1] | undefined>(undefined);
   const isSupersedingRef = useRef(false);
 
   const onAfterAccept = useCallback(
@@ -43,6 +45,7 @@ export const useVisorNlToEsql = ({
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
       onSubmit(generatedContentRef.current);
+      reviewRef.current?.onAccept();
     },
     [onSubmit, telemetryService]
   );
@@ -54,18 +57,9 @@ export const useVisorNlToEsql = ({
         action: AiReviewAction.REJECT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
+      reviewRef.current?.onReject?.();
     },
     [telemetryService]
-  );
-
-  const acceptAction = useMemo(
-    () => ({
-      id: 'esql.visorReview.accept',
-      label: i18n.translate('esqlEditor.visor.review.acceptLabel', {
-        defaultMessage: 'Replace with generated query',
-      }),
-    }),
-    []
   );
 
   const rejectAction = useMemo(
@@ -78,20 +72,24 @@ export const useVisorNlToEsql = ({
     []
   );
 
-  const { showReview, reject } = useReplaceReview({
+  const {
+    showReview,
+    reject,
+    accept: acceptReview,
+    cleanup: discardReview,
+  } = useReplaceReview({
     editorRef,
     editorModel,
     euiTheme,
     contextKeyId: 'esqlVisorReviewActive',
-    acceptAction,
     rejectAction,
     editSourceId: 'nl-to-esql-visor',
     onAfterAccept,
     onAfterReject,
   });
 
-  const showVisorReview = useCallback(
-    (generatedContent: string) => {
+  const showVisorReview = useCallback<VisorNlResultHandler>(
+    (generatedContent, review) => {
       const editor = editorRef.current;
       const model = editorModel.current;
       if (!editor || !model) return;
@@ -103,6 +101,7 @@ export const useVisorNlToEsql = ({
       isSupersedingRef.current = false;
 
       generatedContentRef.current = generatedContent;
+      reviewRef.current = review;
 
       const plan = getVisorNlInsertPlan(model.getValue().split('\n'), generatedContent.split('\n'));
       if (!plan) return;
@@ -146,5 +145,5 @@ export const useVisorNlToEsql = ({
     [editorRef, editorModel, reject, showReview, onAfterInsert]
   );
 
-  return { showVisorReview };
+  return { showVisorReview, acceptReview, discardReview };
 };

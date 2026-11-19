@@ -28,9 +28,7 @@ const mockAvailability: ToolAvailabilityConfig = {
 };
 
 describe('registerAgentBuilderTools', () => {
-  const telemetry = {
-    trackAgentBuilderKnowledgeIndicatorCreated: jest.fn(),
-  } as unknown as EbtTelemetryClient;
+  const telemetry = {} as unknown as EbtTelemetryClient;
 
   it('registers all expected tools', () => {
     const agentBuilder = agentBuilderMocks.createSetup();

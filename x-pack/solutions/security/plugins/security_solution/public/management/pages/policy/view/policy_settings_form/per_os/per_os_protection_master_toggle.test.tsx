@@ -15,6 +15,7 @@ import { createLicenseServiceMock } from '../../../../../../../common/license/mo
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import { DefaultPolicyNotificationMessage } from '../../../../../../../common/endpoint/models/policy_config';
 import type { PerOsProtectionMasterToggleProps } from './per_os_protection_master_toggle';
 import { PerOsProtectionMasterToggle } from './per_os_protection_master_toggle';
 import { adjustMalwareSubfeatures } from './per_os_malware_protections_card';
@@ -104,9 +105,8 @@ describe('PerOsProtectionMasterToggle', () => {
     expect(updatedPolicy.linux.popup.malware.enabled).toBe(false);
   });
 
-  it('writes popup.ransomware.enabled on Windows and macOS when toggled off', async () => {
+  it('writes popup.ransomware.enabled on every OS when toggled off', async () => {
     props.protection = 'ransomware';
-    props.osList = ['windows', 'mac'];
     render();
 
     await userEvent.click(renderResult.getByTestId('test'));
@@ -114,6 +114,25 @@ describe('PerOsProtectionMasterToggle', () => {
     const updatedPolicy = getUpdatedPolicy();
     expect(updatedPolicy.windows.popup.ransomware.enabled).toBe(false);
     expect(updatedPolicy.mac.popup.ransomware.enabled).toBe(false);
+    expect(updatedPolicy.linux.popup.ransomware?.enabled).toBe(false);
+  });
+
+  it('creates complete Linux ransomware branches when the policy has none', async () => {
+    props.protection = 'ransomware';
+    policy.windows.ransomware.mode = ProtectionModes.off;
+    policy.mac.ransomware.mode = ProtectionModes.off;
+    delete policy.linux.ransomware;
+    delete policy.linux.popup.ransomware;
+    render();
+
+    await userEvent.click(renderResult.getByTestId('test'));
+
+    const updatedPolicy = getUpdatedPolicy();
+    expect(updatedPolicy.linux.ransomware?.mode).toBe(ProtectionModes.prevent);
+    expect(updatedPolicy.linux.popup.ransomware).toEqual({
+      enabled: true,
+      message: DefaultPolicyNotificationMessage,
+    });
   });
 
   it('writes popup.memory_protection.enabled on every OS when toggled off', async () => {

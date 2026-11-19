@@ -87,8 +87,8 @@ export enum TaskCost {
 }
 
 /**
- * String values for task cost as stored in the task schema (e.g. in saved objects).
- * Use these when reading cost from task params or instance attributes.
+ * String values for task cost as stored on the task saved object. Internal to Task Manager:
+ * consumers only see TaskCost, and the task store converts at the saved object boundary.
  */
 export enum InstanceTaskCost {
   Tiny = 'tiny',
@@ -97,23 +97,33 @@ export enum InstanceTaskCost {
   ExtraLarge = 'extralarge',
 }
 
-/** Maps schema cost strings to their integer values for capacity calculations. */
-const INSTANCE_TASK_COST_TO_INT: Record<InstanceTaskCost, TaskCost> = {
-  [InstanceTaskCost.Tiny]: TaskCost.Tiny,
-  [InstanceTaskCost.Normal]: TaskCost.Normal,
-  [InstanceTaskCost.Large]: TaskCost.Large,
-  [InstanceTaskCost.ExtraLarge]: TaskCost.ExtraLarge,
+const INSTANCE_TASK_COST_TO_TASK_COST: ReadonlyMap<string, TaskCost> = new Map([
+  [InstanceTaskCost.Tiny, TaskCost.Tiny],
+  [InstanceTaskCost.Normal, TaskCost.Normal],
+  [InstanceTaskCost.Large, TaskCost.Large],
+  [InstanceTaskCost.ExtraLarge, TaskCost.ExtraLarge],
+]);
+
+const TASK_COST_TO_INSTANCE_TASK_COST: Record<TaskCost, InstanceTaskCost> = {
+  [TaskCost.Tiny]: InstanceTaskCost.Tiny,
+  [TaskCost.Normal]: InstanceTaskCost.Normal,
+  [TaskCost.Large]: InstanceTaskCost.Large,
+  [TaskCost.ExtraLarge]: InstanceTaskCost.ExtraLarge,
 };
 
 /**
- * Translates cost string from task params/instance (e.g. 'extralarge') to the
- * corresponding TaskCost integer. Returns undefined if the string is invalid or null.
+ * Translates a stored cost string (e.g. 'extralarge') to its TaskCost. Returns undefined when
+ * the string is missing or unknown, e.g. a cost tier added by a newer version of Kibana.
  */
-export const getTaskCostFromInstance = (cost?: InstanceTaskCost): number | undefined => {
-  if (cost) {
-    return INSTANCE_TASK_COST_TO_INT[cost];
-  }
-};
+export const getTaskCostFromInstance = (cost?: string): TaskCost | undefined =>
+  cost ? INSTANCE_TASK_COST_TO_TASK_COST.get(cost) : undefined;
+
+/**
+ * Translates a TaskCost to the string stored on the task saved object. Returns undefined when
+ * the cost is missing or not a TaskCost value.
+ */
+export const getInstanceCostFromTaskCost = (cost?: TaskCost): InstanceTaskCost | undefined =>
+  cost === undefined ? undefined : TASK_COST_TO_INSTANCE_TASK_COST[cost];
 
 /*
  * Type definitions and validations for tasks.
@@ -147,6 +157,12 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
+
+  /**
+   * Set instead of `fakeRequest` when the task was scheduled with `runAs`. Do all the work that
+   * needs the service account inside `runAs.withScopedRequest`.
+   */
+  runAs?: TaskRunAsContext;
   signal: AbortSignal;
 
   /**
@@ -422,6 +438,22 @@ export interface TaskRunAsDefinition {
   ): Promise<T>;
 }
 
+/**
+ * Runs work as the service account bound to the workload a task was scheduled to run as.
+ */
+export interface TaskRunAsContext {
+  /**
+   * Runs `fn` with a request authenticated as the workload's service account. The request stops
+   * working once `fn` settles. Pass `expectedServiceAccountId` to reject before minting when the
+   * workload is bound to another account; `null` is the same as omitting it. A task scheduled with
+   * a non-null `expectedServiceAccountId` always uses that one, and rejects a different one.
+   */
+  withScopedRequest<T>(
+    fn: (request: KibanaRequest) => Promise<T>,
+    options?: { expectedServiceAccountId?: string | null }
+  ): Promise<T>;
+}
+
 export enum TaskStatus {
   Idle = 'idle',
   Claiming = 'claiming',
@@ -615,11 +647,9 @@ export interface TaskInstance {
 
   /**
    * Optional cost for this task instance, overriding the task type's default cost.
-   * When set, must be one of the InstanceTaskCost enum values ('tiny', 'normal', 'extralarge').
    * Used by the task selector and capacity logic to limit concurrent work.
-   * Use getTaskCostFromInstance() to translate to the integer TaskCost.
    */
-  cost?: InstanceTaskCost;
+  cost?: TaskCost;
 
   /**
    * Runs the task as the service account bound to this workload, instead of with an API key. The
@@ -741,6 +771,12 @@ export interface ConcreteTaskInstance extends Omit<TaskInstance, 'runAs'> {
    * value whose decryption fails if `credential` was changed. Only written when the task is created.
    */
   encryptedCredential?: string;
+
+  /**
+   * The stored cost when it isn't a tier this version of Kibana knows, e.g. one added by a newer
+   * version. `cost` is unset in that case; a full replace writes this back so the tier is kept.
+   */
+  unrecognizedCost?: string;
 }
 
 export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
@@ -770,7 +806,14 @@ export interface ConcreteTaskInstanceVersion {
 
 export type SerializedConcreteTaskInstance = Omit<
   ConcreteTaskInstance,
-  'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'
+  | 'state'
+  | 'params'
+  | 'scheduledAt'
+  | 'startedAt'
+  | 'retryAt'
+  | 'runAt'
+  | 'cost'
+  | 'unrecognizedCost'
 > & {
   state: string;
   params: string;
@@ -783,6 +826,8 @@ export type SerializedConcreteTaskInstance = Omit<
   apiKey?: string;
   uiamApiKey?: string;
   userScope?: TaskUserScope;
+  /** Not limited to InstanceTaskCost: a newer version of Kibana may store a tier this one doesn't know. */
+  cost?: string;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
@@ -791,6 +836,13 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 
 export interface ApiKeyOptions {
   request?: KibanaRequest;
+  /**
+   * When true with a request, replace the API key of tasks that already exist with one granted (or
+   * cloned, see `cloneApiKey`) from this request, and queue the previous key for invalidation.
+   * Honored by `bulkUpdateSchedules` and by `ensureScheduled` when the task is already scheduled;
+   * `ensureScheduled` only replaces the key of an idle task and rejects with a conflict error when
+   * concurrent updates prevented the replacement.
+   */
   regenerateApiKey?: boolean;
   /**
    * When true with a request that includes an API key, clone the caller's credentials into a
@@ -799,6 +851,12 @@ export interface ApiKeyOptions {
    * such as workflows.
    */
   cloneApiKey?: boolean;
+  /**
+   * Defaults to true, so Elasticsearch refreshes after granting or cloning the task's API key and a
+   * search-based lookup of the new key (e.g. `GET _security/api_key`) finds it when the task runs.
+   * Set to false to skip the refresh: scheduling is faster, but that lookup may briefly miss the key.
+   */
+  refreshApiKey?: boolean;
   /**
    * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
    * tests and narrow internal flows that need tasks with ES credentials only.

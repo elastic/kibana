@@ -13,9 +13,6 @@ import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../../../alerting/use_alert_prefill');
-jest.mock('../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
-  useIsPodSchemaSelectorEnabled: jest.fn(() => false),
-}));
 
 const updateTopbarMenuVisibilityBySchema = jest.fn();
 jest.mock('../../../../containers/ml/infra_ml_capabilities', () => ({

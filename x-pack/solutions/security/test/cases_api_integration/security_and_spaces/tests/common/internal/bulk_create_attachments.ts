@@ -37,7 +37,6 @@ import {
   postUnifiedAlertMultipleIdsReq,
   postUnifiedAlertReq,
   postUnifiedCommentReq,
-  postUnifiedIndicatorReq,
   postUnifiedLensReq,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
@@ -54,7 +53,6 @@ import {
   createAndUploadFile,
   deleteAllFiles,
   getAllComments,
-  createComment,
   getCaseSavedObjectsFromES,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
@@ -92,6 +90,9 @@ const unifiedOtherAttachmentReq = {
   metadata: { agentIds: ['agent-1'], queryId: 'query-1' },
   owner: 'securitySolutionFixture',
 };
+
+const persistableStateAndExternalReferenceLimitMessage =
+  'Case has reached the maximum allowed number (100) of attached persistable state and external reference attachments.';
 
 // User actions persist the legacy shape, regardless of the unified shape sent on the wire.
 const toLegacyUserActionPayload = (attachment: UnifiedAttachmentPayload) => {
@@ -680,42 +681,42 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        // Skipped pending the attachment-cap redesign (UNIFIED_ATTACHMENT_PLAN "Deferred").
-        it.skip('400s when attempting to bulk create persistable state attachments reaching the 100 limit', async () => {
+        it('400s when attempting to bulk create persistable state attachments reaching the 100 limit', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
 
-          await createComment({
+          await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: postUnifiedIndicatorReq,
-            expectedHttpCode: 200,
+            params: [unifiedOtherAttachmentReq],
           });
 
-          await bulkCreateAttachments({
+          const error = (await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
             params: Array(100).fill(postUnifiedLensReq),
             expectedHttpCode: 400,
-          });
+          })) as unknown as Error;
+
+          expect(error.message).to.be(persistableStateAndExternalReferenceLimitMessage);
         });
 
-        // Skipped pending the attachment-cap redesign (see the sibling persistable-state limit test above).
-        it.skip('400s when attempting to bulk create >100 external reference attachments reaching the 100 limit', async () => {
+        it('400s when attempting to bulk create >100 external reference attachments reaching the 100 limit', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
-
-          await createComment({
-            supertest,
-            caseId: postedCase.id,
-            params: postUnifiedLensReq,
-            expectedHttpCode: 200,
-          });
 
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: Array(100).fill(postUnifiedIndicatorReq),
-            expectedHttpCode: 400,
+            params: [postUnifiedLensReq],
           });
+
+          const error = (await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: Array(100).fill(unifiedOtherAttachmentReq),
+            expectedHttpCode: 400,
+          })) as unknown as Error;
+
+          expect(error.message).to.be(persistableStateAndExternalReferenceLimitMessage);
         });
       });
     });

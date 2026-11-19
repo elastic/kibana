@@ -22,8 +22,20 @@ type ValidatorArgs = Parameters<ReturnType<typeof requireTimestampOptionValidato
 const validate = (options: TimestampOption[], value?: { label: string; value: string }) =>
   requireTimestampOptionValidator(options).validator({ value } as unknown as ValidatorArgs);
 
-const TimestampFieldInForm = (props: ComponentProps<typeof TimestampField>) => {
-  const { form } = useForm();
+type TimestampFieldValue = Pick<TimestampOption, 'display'> & { value: string };
+
+const TimestampFieldInForm = ({
+  timestampField,
+  ...props
+}: ComponentProps<typeof TimestampField> & {
+  // the saved timestamp field the form is prefilled with when editing a data view
+  timestampField?: TimestampFieldValue;
+}) => {
+  const { form } = useForm({
+    defaultValue: timestampField
+      ? { timestampField: { label: timestampField.display, value: timestampField.value } }
+      : undefined,
+  });
   return (
     <Form form={form}>
       <TimestampField {...props} />
@@ -35,31 +47,42 @@ const renderTimestampField = async ({
   options = [],
   isLoadingOptions = false,
   optionsError,
+  hasMatchedIndices = true,
+  timestampField,
 }: {
   options?: TimestampOption[];
   isLoadingOptions?: boolean;
   optionsError?: Error;
+  hasMatchedIndices?: boolean;
+  timestampField?: TimestampFieldValue;
 } = {}) => {
   const options$ = new BehaviorSubject(options);
+  const isLoadingOptions$ = new BehaviorSubject(isLoadingOptions);
   const optionsError$ = new BehaviorSubject(optionsError);
   const matchedIndices$ = of({
     ...matchedIndiciesDefault,
-    exactMatchedIndices: [{ name: 'tracks', tags: [], item: { name: 'tracks' } }],
+    exactMatchedIndices: hasMatchedIndices
+      ? [{ name: 'tracks', tags: [], item: { name: 'tracks' } }]
+      : [],
   });
 
   await act(async () => {
     renderWithI18n(
       <TimestampFieldInForm
         options$={options$}
-        isLoadingOptions$={of(isLoadingOptions)}
+        isLoadingOptions$={isLoadingOptions$}
         matchedIndices$={matchedIndices$}
         optionsError$={optionsError$}
+        timestampField={timestampField}
       />
     );
   });
 
-  return { options$, optionsError$ };
+  return { options$, isLoadingOptions$, optionsError$ };
 };
+
+const getSelectedTimestampField = () =>
+  (screen.getByTestId('comboBoxSearchInput') as HTMLInputElement).value;
 
 describe('TimestampField', () => {
   describe('requireTimestampOptionValidator', () => {
@@ -119,6 +142,80 @@ describe('TimestampField', () => {
       expect(
         screen.getByText('Select a timestamp field for use with the global time filter.')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('saved timestamp field which is missing in the list', () => {
+    const missingTimestampField: TimestampFieldValue = {
+      display: 'ghost_timestamp',
+      value: 'ghost_timestamp',
+    };
+    const options: TimestampOption[] = [
+      { display: '@timestamp', fieldName: '@timestamp' },
+      { display: 'utc_time', fieldName: 'utc_time' },
+    ];
+    it('should warn about the missing field instead of replacing it with @timestamp', async () => {
+      await renderTimestampField({ options, timestampField: missingTimestampField });
+
+      expect(screen.getByTestId('timestampFieldNotFoundCallout')).toHaveTextContent(
+        'This data view uses ghost_timestamp as its timestamp field, but no matching data stream, index, or index alias has that field.'
+      );
+      expect(getSelectedTimestampField()).toBe('');
+    });
+
+    it('should not warn while the options are loading', async () => {
+      const { isLoadingOptions$ } = await renderTimestampField({
+        options,
+        isLoadingOptions: true,
+        timestampField: missingTimestampField,
+      });
+
+      expect(screen.queryByTestId('timestampFieldNotFoundCallout')).not.toBeInTheDocument();
+
+      await act(async () => {
+        isLoadingOptions$.next(false);
+      });
+
+      expect(screen.getByTestId('timestampFieldNotFoundCallout')).toBeInTheDocument();
+      expect(getSelectedTimestampField()).toBe('');
+    });
+
+    it.each([
+      {
+        state: 'the field list request failed',
+        renderOptions: { optionsError: new Error('Fields API is unavailable') },
+      },
+      { state: 'there are no matching indices', renderOptions: { hasMatchedIndices: false } },
+    ])('should not warn when $state', async ({ renderOptions }) => {
+      await renderTimestampField({ ...renderOptions, timestampField: missingTimestampField });
+
+      expect(screen.queryByTestId('timestampFieldNotFoundCallout')).not.toBeInTheDocument();
+    });
+
+    it('should not warn when the saved field is in the list', async () => {
+      await renderTimestampField({
+        options,
+        timestampField: { display: 'utc_time', value: 'utc_time' },
+      });
+
+      expect(screen.queryByTestId('timestampFieldNotFoundCallout')).not.toBeInTheDocument();
+      expect(getSelectedTimestampField()).toBe('utc_time');
+    });
+
+    it('should not warn for a data view without a time field when the matching indices have no date fields', async () => {
+      await renderTimestampField({
+        options: [],
+        timestampField: { display: "--- I don't want to use the time filter ---", value: '' },
+      });
+
+      expect(screen.queryByTestId('timestampFieldNotFoundCallout')).not.toBeInTheDocument();
+    });
+
+    it('should still auto-select @timestamp when no timestamp field was saved', async () => {
+      await renderTimestampField({ options });
+
+      expect(screen.queryByTestId('timestampFieldNotFoundCallout')).not.toBeInTheDocument();
+      expect(getSelectedTimestampField()).toBe('@timestamp');
     });
   });
 });

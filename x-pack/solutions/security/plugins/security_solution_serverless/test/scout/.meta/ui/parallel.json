@@ -1,5 +1,5 @@
 {
-  "sha1": "e14b2d4140a938177c7dad676d750e71306f10ce",
+  "sha1": "c0332852bae67cb76996aff92ae526e0d9af0b64",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -95,22 +95,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
-        "line": 18,
-        "column": 51
-      }
-    },
-    {
-      "id": "b760102fdea7e93-c6ca0e098797183",
-      "title": "serverless security navigation shows a flat Alerts link when alerts-and-attacks alignment is disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
-        "line": 46,
-        "column": 15
+        "line": 14,
+        "column": 9
       }
     }
   ]

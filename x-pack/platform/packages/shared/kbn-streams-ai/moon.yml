@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/streamlang'
   - '@kbn/streams-schema'
-  - '@kbn/significant-events-schema'
   - '@kbn/inference-common'
   - '@kbn/zod'
   - '@kbn/inference-prompt-utils'
@@ -30,7 +29,6 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/apm-utils'
   - '@kbn/i18n'
-  - '@kbn/nightshift-ai'
 tags:
   - shared-server
   - package
@@ -42,6 +40,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

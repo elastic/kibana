@@ -591,3 +591,92 @@ describe('FlyoutTemplate body data attributes', () => {
     expect(screen.getByTestId('subsection')).not.toHaveAttribute('data-bordered');
   });
 });
+
+describe('FlyoutTemplate body sections in tabbed mode', () => {
+  const TABS = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'metadata', label: 'Metadata' },
+  ];
+
+  const renderCount = jest.fn();
+  const CountRenders = () => {
+    renderCount();
+    return <span>shared content</span>;
+  };
+
+  const TabbedFlyout = () => (
+    <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
+      <FlyoutTemplate.Header title="Span" />
+      <FlyoutTemplate.Body>
+        <FlyoutTemplate.Body.Callout level="warning" title="Flyout-wide callout" />
+        <FlyoutTemplate.Body.Section title="Shared section" data-test-subj="sharedSection">
+          <CountRenders />
+        </FlyoutTemplate.Body.Section>
+        <FlyoutTemplate.Body.TabPanel tabId="overview" data-test-subj="overviewPanel">
+          overview content
+        </FlyoutTemplate.Body.TabPanel>
+        <FlyoutTemplate.Body.TabPanel tabId="metadata" data-test-subj="metadataPanel">
+          metadata content
+        </FlyoutTemplate.Body.TabPanel>
+      </FlyoutTemplate.Body>
+    </FlyoutTemplate>
+  );
+
+  beforeEach(() => renderCount.mockClear());
+
+  it('renders a section under Body above the active tab panel, after the callouts', () => {
+    renderTemplate(<TabbedFlyout />);
+
+    const section = screen.getByRole('region', { name: 'Shared section' });
+    expect(section).toHaveTextContent('shared content');
+    expect(screen.getByTestId('overviewPanel')).not.toContainElement(section);
+    expect(screen.getByText('Flyout-wide callout').compareDocumentPosition(section)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(section.compareDocumentPosition(screen.getByTestId('overviewPanel'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it('does not remount or re-render a section under Body on tab switch', async () => {
+    const user = userEvent.setup();
+    renderTemplate(<TabbedFlyout />);
+
+    const section = screen.getByTestId('sharedSection');
+    const rendersBeforeSwitch = renderCount.mock.calls.length;
+    await user.click(screen.getByRole('tab', { name: 'Metadata' }));
+
+    expect(screen.getByText('metadata content')).toBeInTheDocument();
+    expect(screen.getByTestId('sharedSection')).toBe(section);
+    expect(renderCount).toHaveBeenCalledTimes(rendersBeforeSwitch);
+  });
+
+  it('renders an accordion under Body above the active tab panel, in source order with sections', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
+        <FlyoutTemplate.Header title="Span" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Accordion title="Shared accordion" initialIsOpen>
+            accordion content
+          </FlyoutTemplate.Body.Accordion>
+          <FlyoutTemplate.Body.Section title="Shared section">
+            section content
+          </FlyoutTemplate.Body.Section>
+          <FlyoutTemplate.Body.TabPanel tabId="overview" data-test-subj="overviewPanel">
+            overview content
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const accordionContent = screen.getByText('accordion content');
+    const sectionContent = screen.getByText('section content');
+    expect(screen.getByTestId('overviewPanel')).not.toContainElement(accordionContent);
+    expect(accordionContent.compareDocumentPosition(sectionContent)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(sectionContent.compareDocumentPosition(screen.getByTestId('overviewPanel'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+});

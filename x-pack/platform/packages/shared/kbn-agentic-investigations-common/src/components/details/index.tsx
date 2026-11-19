@@ -23,6 +23,7 @@ export { WhatsHappenedBlock, type WhatsHappenedBlockProps } from './whats_happen
 export { EscalationOverviewTab, type EscalationOverviewTabProps } from './escalation_overview_tab';
 export { StatusToggle, type StatusToggleProps } from './status_toggle';
 export { ProposedActionButton, type ProposedActionButtonProps } from './proposed_action_button';
+export { ProposedActionsList, type ProposedActionsListProps } from './proposed_actions_list';
 export {
   LinkedInvestigationsList,
   type LinkedInvestigationItem,

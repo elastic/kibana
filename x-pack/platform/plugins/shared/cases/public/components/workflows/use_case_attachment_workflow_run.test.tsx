@@ -27,6 +27,10 @@ jest.mock('./use_run_case_workflow', () => ({
   useCanRunCaseWorkflow: jest.fn(),
 }));
 
+jest.mock('../cases_context/use_cases_context', () => ({
+  useCasesContext: () => ({ owner: ['securitySolution'] }),
+}));
+
 const mockUseCanRunCaseWorkflow = jest.mocked(useCanRunCaseWorkflow);
 const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
 
@@ -62,7 +66,11 @@ describe('useCaseAttachmentWorkflowRun', () => {
       })
     );
 
-    expect(result.current).toEqual({ runWorkflow: undefined, showSuccessToast: true });
+    expect(result.current).toEqual({
+      runWorkflow: undefined,
+      showSuccessToast: true,
+      telemetry: undefined,
+    });
   });
 
   it('falls back to the panel executor and toast when the user cannot run workflows through Cases', () => {
@@ -76,7 +84,11 @@ describe('useCaseAttachmentWorkflowRun', () => {
       { wrapper }
     );
 
-    expect(result.current).toEqual({ runWorkflow: undefined, showSuccessToast: true });
+    expect(result.current).toEqual({
+      runWorkflow: undefined,
+      showSuccessToast: true,
+      telemetry: undefined,
+    });
   });
 
   it('suppresses the panel success toast when it returns a Cases executor', () => {
@@ -89,7 +101,84 @@ describe('useCaseAttachmentWorkflowRun', () => {
       { wrapper }
     );
 
-    expect(result.current).toEqual({ runWorkflow: expect.any(Function), showSuccessToast: false });
+    expect(result.current).toEqual({
+      runWorkflow: expect.any(Function),
+      showSuccessToast: false,
+      telemetry: {
+        origin: 'cases.attachment',
+        attachmentType: 'security.alert',
+        itemCount: 1,
+        owner: 'securitySolution',
+      },
+    });
+  });
+
+  it('reports the attachment type and selection size for a bulk attachment run', () => {
+    const { result } = renderHook(
+      () =>
+        useCaseAttachmentWorkflowRun({
+          attachmentType: 'security.event',
+          target: { attachmentIds: ['event-1', 'event-2'] },
+        }),
+      { wrapper }
+    );
+
+    expect(result.current.telemetry).toEqual({
+      origin: 'cases.attachments',
+      attachmentType: 'security.event',
+      itemCount: 2,
+      owner: 'securitySolution',
+    });
+  });
+
+  describe('fallback telemetry', () => {
+    const fallbackTelemetry = { origin: 'alert', itemCount: 1, owner: 'securitySolution' };
+
+    it('reports the fallback telemetry outside the attachment provider', () => {
+      const { result } = renderHook(() =>
+        useCaseAttachmentWorkflowRun({
+          attachmentType: 'security.alert',
+          target: { attachmentId: 'alert-1' },
+          fallbackTelemetry,
+        })
+      );
+
+      expect(result.current.telemetry).toBe(fallbackTelemetry);
+    });
+
+    it('does not report the fallback telemetry when the user cannot run workflows through Cases', () => {
+      mockUseCanRunCaseWorkflow.mockReturnValue(false);
+      const { result } = renderHook(
+        () =>
+          useCaseAttachmentWorkflowRun({
+            attachmentType: 'security.alert',
+            target: { attachmentId: 'alert-1' },
+            fallbackTelemetry,
+          }),
+        { wrapper }
+      );
+
+      expect(result.current.telemetry).toBeUndefined();
+    });
+
+    it('reports the case attachment origin instead of the fallback telemetry inside a case', () => {
+      const { result } = renderHook(
+        () =>
+          useCaseAttachmentWorkflowRun({
+            attachmentType: 'security.alert',
+            target: { attachmentId: 'alert-1' },
+            fallbackTelemetry,
+          }),
+        { wrapper }
+      );
+
+      expect(result.current.telemetry).toEqual({
+        origin: 'cases.attachment',
+        attachmentType: 'security.alert',
+        itemCount: 1,
+        owner: 'securitySolution',
+      });
+    });
   });
 
   it('posts a singular attachment origin', async () => {

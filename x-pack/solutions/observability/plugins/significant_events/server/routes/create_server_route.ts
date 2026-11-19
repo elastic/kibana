@@ -13,17 +13,32 @@ import {
   NightshiftModelBlockedError,
   NightshiftModelNotFoundError,
 } from '@kbn/significant-events-schema';
+import {
+  isNightshiftSpaceGatedEndpoint,
+  isNightshiftSupportedSpace,
+  NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
+} from '@kbn/nightshift-shared';
 import type { SignificantEventsRouteHandlerResources } from './types';
 import type { StatusError } from '../lib/errors/status_error';
 
-// The streams plugin throws its own StatusError class (e.g. SecurityError from
-// StreamsClient.ensureStream), so match status errors by shape, not by class.
+// Errors can come from other plugins with their own StatusError class, so match status
+// errors by shape, not by class.
 const isStatusErrorLike = (error: unknown): error is StatusError =>
   error instanceof Error &&
   !(error instanceof errors.ResponseError) &&
   !isBoom(error) &&
   'statusCode' in error &&
   typeof error.statusCode === 'number';
+
+/**
+ * The writes that stay reachable outside the default space, so a space set up on an earlier build
+ * can be taken back down: pausing maintenance stops the work it was left with, and the reset
+ * deletes what it was left with.
+ */
+const SPACE_GATE_EXEMPT_ENDPOINTS: ReadonlySet<string> = new Set([
+  'POST /internal/significant_events/maintenance/_pause',
+  'POST /internal/significant_events/maintenance/_reset',
+]);
 
 const createPlainSignificantEventsServerRoute =
   createServerRouteFactory<SignificantEventsRouteHandlerResources>();
@@ -32,13 +47,22 @@ export const createServerRoute: CreateServerRouteFactory<
   SignificantEventsRouteHandlerResources,
   undefined
 > = ({ handler, ...config }) => {
+  // Applied here rather than route by route, so a new write route is gated by default: these
+  // routes install enabled workflows and write per-space state, and Nightshift only runs in the
+  // default space. Reads stay open everywhere.
+  const gated = isNightshiftSpaceGatedEndpoint(config.endpoint, SPACE_GATE_EXEMPT_ENDPOINTS);
+
   return createPlainSignificantEventsServerRoute({
     ...config,
     options: {
       ...config.options,
       tags: [...(config.options?.tags ?? []), 'oas-tag:significant_events'],
     },
-    handler: (options) => {
+    // Async, so the refusal below surfaces as a rejected promise like any other route error.
+    handler: async (options) => {
+      if (gated && !isNightshiftSupportedSpace(options.request.spaceId)) {
+        throw badRequest(NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE);
+      }
       return handler(options).catch((error) => {
         if (
           error instanceof NightshiftModelNotFoundError ||
@@ -56,7 +80,7 @@ export const createServerRoute: CreateServerRouteFactory<
             case 404:
               throw notFound(error.message);
             case 409:
-              throw conflict(error.message);
+              throw conflict(error.message, error.data);
             default:
               throw internal(error.message);
           }

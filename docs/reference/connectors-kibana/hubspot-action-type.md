@@ -105,7 +105,7 @@ Creating a Private App (app integration) is the **legacy** way to obtain a token
 2. Select the **Settings** icon in the top navigation bar.
 3. In the left sidebar, select **Integrations → Private Apps**.
 4. Select **Create a private app**.
-5. On the **Basic Info** tab, give your app a name (for example, "Elastic Workplace AI").
+5. On the **Basic Info** tab, give your app a name (for example, "Elastic Agent Builder").
 6. Go to the **Scopes** tab and add at least:
    - `crm.objects.contacts.read`
    - `crm.objects.companies.read`
@@ -123,7 +123,7 @@ OAuth uses the authorization code flow with a HubSpot Public App. Unlike Private
 
 1. Log in to your [HubSpot developer account](https://developers.hubspot.com/).
 2. Select **Apps** in the top navigation, then select **Create app** (or open an existing app).
-3. On the **App Info** tab, give your app a name (for example, "Elastic Workplace AI").
+3. On the **App Info** tab, give your app a name (for example, "Elastic Agent Builder").
 4. On the **Auth** tab, under **Redirect URLs**, add your {{kib}} OAuth callback URL:
    `https://<your-kibana-host>/api/actions/connector/_oauth_callback`
 5. Under **Scopes**, add at least:

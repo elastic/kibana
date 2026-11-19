@@ -20,6 +20,8 @@ export interface TimeFieldOption {
 export interface ComposeDiscoverTimeFieldValue {
   timeFieldOptions: TimeFieldOption[];
   isTimeFieldResolved: boolean;
+  /** True while date-field discovery is in flight. Unresolved is not an error yet. */
+  isResolvingTimeField: boolean;
 }
 
 /**
@@ -33,7 +35,7 @@ export const useComposeDiscoverTimeField = (): ComposeDiscoverTimeFieldValue => 
   const { watch } = useFormContext<FormValues>();
   const query = watch('query');
   const timeField = watch('timeField');
-  const { http, dataViews, data } = useRuleFormServices();
+  const { http, dataViews, data, cps } = useRuleFormServices();
 
   const resolutionQuery = useMemo(() => getTimeFieldResolutionQuery(query, true), [query]);
 
@@ -43,5 +45,6 @@ export const useComposeDiscoverTimeField = (): ComposeDiscoverTimeFieldValue => 
     http,
     dataViews,
     search: data.search.search,
+    projectRouting: cps?.cpsManager?.getDefaultProjectRouting(),
   });
 };

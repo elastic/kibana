@@ -15,6 +15,7 @@ export enum AddIntegrationButtonDisabledReason {
   OUTDATED_VERSION = 'OUTDATED_VERSION',
   MISSING_SECURITY = 'MISSING_SECURITY',
   MISSING_PRIVILEGES = 'MISSING_PRIVILEGES',
+  FIPS_INCOMPATIBLE = 'FIPS_INCOMPATIBLE',
 }
 
 const TOOLTIP_MESSAGES: Record<AddIntegrationButtonDisabledReason, React.ReactNode> = {
@@ -40,6 +41,12 @@ const TOOLTIP_MESSAGES: Record<AddIntegrationButtonDisabledReason, React.ReactNo
     <FormattedMessage
       id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
       defaultMessage="Elastic Agent Integrations require the All privilege for Agent policies and All privilege for Integrations. Contact your administrator."
+    />
+  ),
+  [AddIntegrationButtonDisabledReason.FIPS_INCOMPATIBLE]: (
+    <FormattedMessage
+      id="xpack.fleet.epm.addPackagePolicyButtonFipsIncompatibleTooltip"
+      defaultMessage="This integration is not FIPS compliant and cannot be added on a FIPS-enabled deployment."
     />
   ),
 };

@@ -28,6 +28,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 import type { ConnectorSpecEvents } from './connector_spec_events';
 import type { ClientRegistry, ClientTypeId } from './lib/clients/client_registry';
+import type { RelayActionClient } from './relay_action_client';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -138,6 +139,12 @@ export interface AuthContext {
   logger: Logger;
   proxySettings?: ProxySettings;
   sslSettings: SSLSettings;
+  /**
+   * Test-only `fetch` for requests an auth type sends itself rather than through the axios
+   * client, such as token exchanges. Unset in Kibana, which uses the global `fetch`. Never use it
+   * for vendor calls; those go through `client`.
+   */
+  fetchTestOnly?: typeof fetch;
 }
 
 export type AuthMode = 'per-user' | 'shared';
@@ -267,34 +274,6 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   scope: ActionScope;
 }
 
-/**
- * The slice of the Actions plugin's Relay client that action handlers use. Declared structurally so
- * this package does not depend on x-pack; the concrete `RelayClient` satisfies it by shape.
- */
-export interface RelayActionClient {
-  trigger(input: {
-    tenantKey: string;
-    /** Slack conversation id or a connected channel name (`#general`). */
-    channel: string;
-    message: string;
-    threadTs?: string;
-    /** Edits this previously posted message instead of posting a new one. */
-    messageTs?: string;
-  }): Promise<{ ref: string; tenantKey: string; channel: string }>;
-  /** One page of the channels this deployment has connected; follow `nextCursor` for the rest. */
-  listBindings(
-    tenantKey: string,
-    options?: { cursor?: string; limit?: number }
-  ): Promise<{
-    bindings: Array<{
-      scope_id?: string;
-      display_name?: string;
-      visibility?: 'public' | 'private';
-    }>;
-    nextCursor?: string;
-  }>;
-}
-
 export interface ActionContext {
   client: AxiosInstance;
   /**
@@ -313,11 +292,22 @@ export interface ActionContext {
   log: Logger;
   secrets?: Record<string, unknown>;
   /**
+   * Signs claims with the connector's private key and sets `iss` to the connector issuer.
+   * Defined only when the spec declares `signingKey`.
+   */
+  signJwt?: (claims: Record<string, unknown>) => Promise<string>;
+  /**
    * Reaches the third party through the Elastic-hosted Relay, for specs whose auth type routes that
    * way. Undefined when the auth type does not use Relay transport or the deployment has no Relay
    * configured.
    */
   relay?: RelayActionClient;
+  /**
+   * Test-only `fetch` for requests a handler sends itself rather than through `client`, such as
+   * token exchanges. Unset in Kibana, which uses the global `fetch`. Never use it for vendor
+   * calls; those go through `client`.
+   */
+  fetchTestOnly?: typeof fetch;
 }
 
 // ============================================================================
@@ -364,6 +354,15 @@ export interface ConnectorTest {
 }
 
 // ============================================================================
+// SIGNING KEY
+// ============================================================================
+
+export interface ConnectorSigningKey {
+  /** Value of the JWT `typ` header, for example `secevent+jwt`. */
+  jwtType: string;
+}
+
+// ============================================================================
 // MAIN CONNECTOR DEFINITION
 // ============================================================================
 
@@ -374,6 +373,8 @@ export interface AuthTypeDef {
   /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
   isLegacy?: boolean;
   isExperimental?: boolean;
+  /** When true, this auth type may be used with sandbox credential injection. */
+  supportsSandbox?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
     /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
@@ -382,6 +383,13 @@ export interface AuthTypeDef {
     fields?: Record<string, z.ZodType>;
   };
 }
+export interface ConnectorSandbox {
+  /** Fixed hostnames the connector calls, e.g. `api.github.com`: lowercase, no scheme or port. */
+  hosts?: readonly string[];
+  /** Config fields holding a URL; the host of each configured URL is added to `hosts`. */
+  hostsFromConfig?: readonly string[];
+}
+
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
@@ -398,6 +406,11 @@ export interface ConnectorSpec {
     fields?: string[];
   };
 
+  // Hosts a sandbox command may send this connector's auth headers to. Required when an
+  // auth type sets supportsSandbox; a connector that resolves to no hosts cannot be used
+  // from the sandbox.
+  sandbox?: ConnectorSandbox;
+
   policies?: ConnectorPolicies;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
@@ -410,13 +423,53 @@ export interface ConnectorSpec {
   // `actions` and `events`. Only allowlisted specs may set this (see contract tests).
   events?: ConnectorSpecEvents;
 
+  // Optional Kibana-managed signing key. When present, creating a connector generates
+  // a key pair, Kibana publishes the public key, and actions get `signJwt`.
+  signingKey?: ConnectorSigningKey;
+
   transformations?: Transformations;
 
+  // `skill` is inline text added to the connector's agent attachment; `skillFiles` are separate
+  // built-in skills the agent loads on demand.
   // Optional skill content for Agent Builder. When present, this string is
   // included in the connector's agent attachment representation so the LLM
   // has richer context about how to use the connector's sub-actions.
   skill?: string;
+
+  // Skills registered as built-in Agent Builder skills. An agent is granted a skill at run time
+  // when it has a connector of this type, so the content must work for any instance of the type.
+  skillFiles?: ConnectorSkillSpec[];
 }
+
+export interface ConnectorSkillSpec {
+  /** Stable identifier. The built-in skill is registered as `platform.connectors.<id>`. */
+  id: string;
+  /** Display name. Lowercase letters, numbers, and hyphens only. Max 64 chars. */
+  name: string;
+  /** Describes what the skill does and when to use it. Max 1024 chars. */
+  description: string;
+  /** Skill instructions (markdown). Shared by every connector of this type. */
+  content: string;
+  /** Supplemental reference files co-located with the skill. */
+  resources?: ConnectorSkillResource[];
+}
+
+export interface ConnectorSkillResource {
+  /** File name (no extension). Lowercase letters, numbers, and hyphens only. */
+  name: string;
+  /** Path relative to the skill directory, e.g. './resources' */
+  relativePath: string;
+  /** File content (markdown). Shared by every connector of this type. */
+  content: string;
+}
+
+/**
+ * Build a skill spec with backtick/fence tokens injected so skill authors
+ * never need to escape backticks in template literals.
+ */
+export const buildSkill = (
+  factory: (tokens: { bt: string; fence: string }) => ConnectorSkillSpec
+): ConnectorSkillSpec => factory({ bt: '`', fence: '```' });
 
 // ============================================================================
 // HELPER UTILITIES

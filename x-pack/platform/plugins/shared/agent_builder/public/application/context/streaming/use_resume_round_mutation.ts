@@ -27,7 +27,7 @@ import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
-import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
+import { isDetached, isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
 
 /** Placeholder id of the answer until `execution_started` reveals the saved one. */
 const PENDING_PROMPT_RESPONSE_ID = 'pending::prompt_response';
@@ -122,6 +122,7 @@ export const useResumeRoundMutation = ({
         });
 
         const events$ = rawEvents$.pipe(
+          conversationStreamService.trackStream(vars.conversationId),
           tap((event) => {
             if (isExecutionStartedEvent(event)) {
               markStreamStarted(vars.conversationId);
@@ -157,6 +158,10 @@ export const useResumeRoundMutation = ({
           }
         });
 
+        if (isDetached(handle)) {
+          return;
+        }
+
         await releaseLocalContent({
           refetch: streamActions.refetchConversation,
           executionId: timelineExecutionId,
@@ -181,26 +186,28 @@ export const useResumeRoundMutation = ({
   });
 
   const cancel = useCallback(
-    (conversationId: string) => {
+    (conversationId: string): string | undefined => {
       const handle = controllersRef.current.get(conversationId);
-      if (handle) {
-        requestAbort(handle, chatService);
+      if (!handle) {
+        return undefined;
       }
+      requestAbort(handle, chatService);
+      return handle.executionId;
     },
     [chatService]
   );
 
-  const cancelAll = useCallback(() => {
-    for (const { controller, executionId } of controllersRef.current.values()) {
-      chatService.abort(executionId).catch(() => {});
+  /** Closes every connection locally; the runs keep going on the server. */
+  const detachAll = useCallback(() => {
+    for (const { controller } of controllersRef.current.values()) {
       controller.abort();
     }
-  }, [chatService]);
+  }, []);
 
   return {
     mutate,
     isLoading,
     cancel,
-    cancelAll,
+    detachAll,
   };
 };

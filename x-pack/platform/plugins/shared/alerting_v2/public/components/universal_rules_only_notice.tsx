@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
@@ -14,7 +14,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 export const universalRulesOnlyBadge: AppHeaderBadge = {
   label: i18n.translate('xpack.alertingV2.universalRulesOnly.badgeLabel', {
-    defaultMessage: 'Universal rules only',
+    defaultMessage: 'Universal',
   }),
   color: 'hollow',
   'data-test-subj': 'universalRulesOnlyBadge',
@@ -29,7 +29,7 @@ export const UniversalRulesOnlyCallout = ({
   description,
 }: {
   appId: string;
-  description: string;
+  description: ReactNode;
 }) => {
   const [isDismissed, setIsDismissed] = useLocalStorage<boolean>(
     `${ALERTING_V2_SECTION_ID}.${appId}.universalRulesOnlyCalloutDismissed`,
@@ -44,6 +44,7 @@ export const UniversalRulesOnlyCallout = ({
     <>
       <EuiCallOut
         announceOnMount
+        size="s"
         title={CALLOUT_TITLE}
         iconType="info"
         data-test-subj="universalRulesOnlyCallout"

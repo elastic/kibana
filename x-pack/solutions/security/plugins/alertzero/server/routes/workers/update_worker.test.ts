@@ -7,7 +7,10 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import { SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID } from '@kbn/alertzero-common';
+import {
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+} from '@kbn/alertzero-common';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
@@ -86,17 +89,17 @@ describe('registerUpdateWorkerRoute', () => {
     );
   });
 
-  it('maps a blocked Alert Triage enable to 400 with a message for the reason', async () => {
+  it('maps a template-free reports index block to 400 naming the index', async () => {
     const update = jest
       .fn()
-      .mockResolvedValue({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
+      .mockResolvedValue({ outcome: 'blocked', reason: 'huntSupplyReportsIndexUnmanaged' });
     const { handler } = setupRoute(update);
     const response = httpServerMock.createResponseFactory();
 
     await handler(
       createRouteContextMock(),
       httpServerMock.createKibanaRequest({
-        params: { workerId: TRIAGE },
+        params: { workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID },
         body: { enabled: true },
         kibanaRequestState: {
           requestId: '123',
@@ -109,9 +112,7 @@ describe('registerUpdateWorkerRoute', () => {
     );
 
     expect(response.badRequest).toHaveBeenCalledWith({
-      body: {
-        message: expect.stringContaining('alert analysis to be turned on for this space'),
-      },
+      body: { message: expect.stringContaining('exists without its template') },
     });
   });
 

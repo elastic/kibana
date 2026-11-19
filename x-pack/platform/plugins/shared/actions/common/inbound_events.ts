@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addSpaceIdToPath } from '@kbn/core-spaces-common';
+import { addSpaceIdToPath, type SpaceId } from '@kbn/core-spaces-common';
 
 export const INBOUND_EVENTS_TOKEN_MAX_LENGTH = 128;
 
@@ -34,7 +34,7 @@ export const buildInboundEventsUrl = ({
   connectorId,
 }: {
   publicBaseUrl?: string;
-  spaceId: string;
+  spaceId: SpaceId;
   connectorTypeId: string;
   connectorId: string;
 }): string =>

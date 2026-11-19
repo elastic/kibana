@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MISSING_UIAM_API_KEY_TAG } from '@kbn/alerting-plugin/common';
 import { createPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
 import { applyRuleDefaults } from '../apply_rule_defaults';
 import { calculateRuleSource } from './calculate_rule_source';
@@ -94,6 +95,29 @@ describe('calculateRuleSource', () => {
         type: 'external',
         is_customized: true,
         customized_fields: [{ field_name: 'tags' }],
+        has_base_version: true,
+      })
+    );
+  });
+
+  it('returns is_customized false when the rule only has the missing UIAM API key tag added', async () => {
+    const rule = getSampleRule();
+    rule.immutable = true;
+    rule.tags = [...rule.tags, MISSING_UIAM_API_KEY_TAG];
+
+    const baseRule = getSampleRuleAsset();
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [baseRule] });
+
+    const result = await calculateRuleSource({
+      prebuiltRuleAssetClient,
+      nextRule: rule,
+      currentRule: getSampleRule(),
+    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        type: 'external',
+        is_customized: false,
+        customized_fields: [],
         has_base_version: true,
       })
     );

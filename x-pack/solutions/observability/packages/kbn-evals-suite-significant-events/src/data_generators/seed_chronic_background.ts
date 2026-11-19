@@ -42,13 +42,20 @@ export const seedChronicBackground = async ({
   esClient,
   log,
   streamName,
+  sourceId,
+  spaceId,
   ruleUuid,
   ruleName,
   config,
 }: {
   esClient: Client;
   log: ToolingLog;
+  /** Data index the chronic logs are written to and the KI query reads from. */
   streamName: string;
+  /** Nightshift source id the KI is keyed on; the KI reader looks it up by this, not by the index name. */
+  sourceId: string;
+  /** The reader filters on `kibana.space_ids`, so a KI without it is invisible to the agent. */
+  spaceId: string;
   ruleUuid: string;
   ruleName: string;
   config: ChronicSeedConfig;
@@ -110,7 +117,8 @@ export const seedChronicBackground = async ({
       title: config.ki_title,
       description: config.ki_description,
       evidence: [`body.text: "${config.service} | ${config.phrase}"`],
-      'stream.name': streamName,
+      'source.id': sourceId,
+      'kibana.space_ids': [spaceId],
       query: {
         esql: `FROM ${streamName}, ${streamName}.* | WHERE body.text : "${config.phrase}"`,
         query_type: 'match',

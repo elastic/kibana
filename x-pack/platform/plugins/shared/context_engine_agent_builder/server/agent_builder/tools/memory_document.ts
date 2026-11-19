@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { StoredKi } from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
+
 interface MemoryReference {
   uri: string;
   relation?: string;
@@ -31,6 +33,7 @@ interface MemoryGovernance {
 export interface StoredMemoryDocument {
   '@timestamp': string;
   id: string;
+  user_id?: string;
   type: string;
   title: string;
   description: string;
@@ -42,6 +45,10 @@ export interface StoredMemoryDocument {
   attributes?: Record<string, string | number | boolean | string[]>;
   governance?: MemoryGovernance;
 }
+
+/** Narrows a stored KI to a memory document by its `type` discriminant. */
+export const isMemoryDocument = (source: StoredKi): source is StoredKi & StoredMemoryDocument =>
+  source.type === 'memory.session' || source.type === 'memory.session_fact';
 
 export const createMemoryWriter = ({
   toolId,

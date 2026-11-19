@@ -48,7 +48,7 @@ apiTest.describe(
           group_hash: eventId,
           rule: { id: eventId, version: 1 },
           alert: { id: eventId, status: 'active' },
-          data: { event_id: eventId, title: 'Rule events read check', stream_names: [] },
+          data: { event_id: eventId, title: 'Rule events read check', source_ids: [] },
         },
       });
     });

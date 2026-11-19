@@ -53,9 +53,11 @@ const groupKey = (groupItem: OverviewGroupValue): string => groupItem.id ?? grou
 export const GridItemsByGroup = ({
   setFlyoutConfigCallback,
   view,
+  isInteractive = true,
 }: {
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   view: OverviewView;
+  isInteractive?: boolean;
 }) => {
   const [fullScreenGroup, setFullScreenGroup] = useState('');
   const { field: groupField, order: groupOrder } = useSelector(selectOverviewGroupBy);
@@ -278,6 +280,7 @@ export const GridItemsByGroup = ({
                 setFullScreenGroup={setFullScreenGroup}
                 fullScreenGroup={fullScreenGroup}
                 view={view}
+                isInteractive={isInteractive}
               />
             </WrappedPanel>
             <EuiSpacer size="m" />
@@ -295,6 +298,7 @@ export const GridItemsByGroup = ({
             setFullScreenGroup={setFullScreenGroup}
             fullScreenGroup={fullScreenGroup}
             view={view}
+            isInteractive={isInteractive}
           />
         </WrappedPanel>
       )}

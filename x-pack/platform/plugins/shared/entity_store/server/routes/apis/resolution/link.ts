@@ -22,8 +22,6 @@ import {
   ResolutionSearchTruncatedError,
   SelfLinkError,
 } from '../../../domain/errors';
-import { ENTITY_STORE_RESOLUTION_LINK_EVENT } from '../../../telemetry/events';
-import { reportResolutionError } from './utils/resolution_telemetry';
 
 const bodySchema = lazySchema(() =>
   z.object({
@@ -43,7 +41,7 @@ export async function handleResolutionLink(
   req: KibanaRequest<unknown, unknown, LinkRequestBody>,
   res: KibanaResponseFactory
 ): Promise<IKibanaResponse> {
-  const { logger, resolutionClient, analytics, namespace } = await ctx.entityStore;
+  const { logger, resolutionClient } = await ctx.entityStore;
 
   logger.debug('Resolution Link API called');
 
@@ -52,17 +50,8 @@ export async function handleResolutionLink(
       awaitVisibility: true,
     });
 
-    analytics.reportEvent(ENTITY_STORE_RESOLUTION_LINK_EVENT, {
-      entityType: result.entity_type,
-      entitiesLinked: result.linked.length,
-      entitiesSkipped: result.skipped.length,
-      namespace,
-    });
-
     return res.ok({ body: result });
   } catch (error) {
-    reportResolutionError(analytics, 'link', namespace, error);
-
     if (
       error instanceof EntitiesNotFoundError ||
       error instanceof SelfLinkError ||

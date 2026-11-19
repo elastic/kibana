@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CATEGORY_LABELS, CATEGORY_SHORT_LABELS, parseIocCategoryRows } from './parse_iocs';
+import { CATEGORY_LABELS, parseIocCategoryRows } from './parse_iocs';
 import { INVESTIGATION_IOC_CATEGORIES } from './types';
 
 describe('parseIocCategoryRows', () => {
@@ -16,7 +16,6 @@ describe('parseIocCategoryRows', () => {
       {
         id: 'ips',
         typeLabel: CATEGORY_LABELS.ips,
-        shortLabel: CATEGORY_SHORT_LABELS.ips,
         items,
       },
     ]);
@@ -40,9 +39,8 @@ describe('parseIocCategoryRows', () => {
     const rows = parseIocCategoryRows(data);
 
     expect(rows.map(({ id }) => id)).toEqual([...INVESTIGATION_IOC_CATEGORIES]);
-    rows.forEach(({ id, typeLabel, shortLabel }) => {
+    rows.forEach(({ id, typeLabel }) => {
       expect(typeLabel).toBe(CATEGORY_LABELS[id]);
-      expect(shortLabel).toBe(CATEGORY_SHORT_LABELS[id]);
     });
   });
 
@@ -108,7 +106,6 @@ describe('parseIocCategoryRows', () => {
       {
         id: 'ips',
         typeLabel: CATEGORY_LABELS.ips,
-        shortLabel: CATEGORY_SHORT_LABELS.ips,
         items: [valid],
       },
     ]);

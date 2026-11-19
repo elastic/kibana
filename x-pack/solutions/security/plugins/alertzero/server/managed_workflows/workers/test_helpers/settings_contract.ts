@@ -299,6 +299,13 @@ const normalizeNode = (value: unknown, path: string): SettingsNode => {
     }
     return withNullable(normalizeNode(branches[0], path), true);
   }
+  if (Array.isArray(value.type)) {
+    const types = value.type.filter((type) => type !== 'null');
+    if (value.type.length !== 2 || types.length !== 1) {
+      throw unclassified('JSON Schema type', path);
+    }
+    return withNullable(normalizeNode({ ...value, type: types[0] }, path), true);
+  }
 
   const unknownKeys = Object.keys(value).filter((key) => !KNOWN_SCHEMA_KEYS.has(key));
   if (unknownKeys.length > 0) {

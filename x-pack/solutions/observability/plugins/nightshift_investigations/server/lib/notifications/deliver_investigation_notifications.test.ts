@@ -6,14 +6,11 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type {
-  GetInvestigationResponse,
-  InvestigationNotificationDestination,
-} from '../../../common';
-import type { NotificationExecution } from './notification_delivery';
+import type { InvestigationNotificationDestination } from '../../../common';
+import type { NotifiableInvestigation, NotificationExecution } from './notification_delivery';
 import type { NotificationPhase } from './notification_routing';
 import { deliverInvestigationNotifications } from './deliver_investigation_notifications';
-import { createRoutingTestContext } from './notification_routing.mock';
+import { createRoutingTestContext, getTestIsomerRuntime } from './notification_routing.mock';
 
 const destination = {
   type: 'slack',
@@ -22,14 +19,11 @@ const destination = {
   automation_id: 'automation-1',
   automation_name: 'CPU alerts',
 };
-const investigation: GetInvestigationResponse = {
+const investigation: NotifiableInvestigation = {
   investigation_id: 'inv-1',
   title: 'CPU saturation',
-  status: 'running',
-  subject: { type: 'manual', id: 'manual' },
-  created_at: '2026-10-07T00:00:00Z',
   summary: 'CPU was saturated',
-  recommendations: [{ title: 'Scale the service', confidence: 0.9 }],
+  recommendations: [{ title: 'Scale the service' }],
 };
 const setup = (spaceId = 'default') => {
   const context = createRoutingTestContext(spaceId);
@@ -56,6 +50,7 @@ const setup = (spaceId = 'default') => {
       investigationUrl: 'https://kibana.example/app/nightshift',
       routingClient: context.client,
       getExecute,
+      getIsomerRuntime: getTestIsomerRuntime,
       signal: controller.signal,
       logger,
     });
@@ -63,8 +58,63 @@ const setup = (spaceId = 'default') => {
 };
 
 describe('investigation notification lifecycle', () => {
-  it.each(['completed', 'failed'] as const)(
-    'posts a started root and a %s reply',
+  it.each(['started', 'failed'] as const)(
+    'does not deliver %s over a terminal phase written by a newer version',
+    async (phase) => {
+      const { client, storage, send, execute, getExecute } = setup();
+      const routing = await client.initialize('exec-1', 'system-nightshift-investigation', [
+        destination,
+      ]);
+      storage.put(client.id, {
+        ...routing,
+        executions: routing.executions.map((entry) => ({
+          ...entry,
+          terminal_phase: 'cancelled',
+          lifecycle_claim_id: 'newer-claim',
+        })),
+      });
+
+      expect(await send(phase)).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+      expect(execute).not.toHaveBeenCalled();
+      expect(getExecute).not.toHaveBeenCalled();
+      expect((await client.get())?.executions[0]).toMatchObject({
+        terminal_phase: 'cancelled',
+        lifecycle_claim_id: 'newer-claim',
+      });
+    }
+  );
+
+  it.each(['started', 'paused'])(
+    'preserves unfamiliar root outcomes for %s and blocks duplicate roots',
+    async (phase) => {
+      const { client, storage, send, execute } = setup();
+      const routing = await client.initialize('exec-1', 'system-nightshift-investigation', [
+        destination,
+      ]);
+      const attempt = {
+        execution_id: 'exec-1',
+        destination_id: routing.destinations[0].id,
+        phase,
+        attempt_id: 'newer-attempt',
+        status: 'pending_confirmation',
+        attempted_at: '2026-11-04T10:00:00.000Z',
+        creates_root: true,
+      };
+      storage.put(client.id, { ...routing, attempts: [attempt] });
+
+      expect(await send('started')).toEqual({
+        sent: 0,
+        failed: phase === 'started' ? 0 : 1,
+        unconfirmed: phase === 'started' ? 1 : 0,
+      });
+      expect(await send('started', 'exec-2')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+      expect(execute).not.toHaveBeenCalled();
+      expect((await client.get())?.attempts).toContainEqual(attempt);
+    }
+  );
+
+  it.each(['completed', 'failed', 'timed_out'] as const)(
+    'posts a started root and edits it for %s',
     async (terminalPhase) => {
       const { send, execute, client } = setup();
       expect(await send('started')).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
@@ -75,7 +125,10 @@ describe('investigation notification lifecycle', () => {
       expect(execute.mock.calls[0][0].params.subActionParams).not.toHaveProperty('threadTs');
       expect(await send(terminalPhase)).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
       expect(execute.mock.calls[1][0]).toMatchObject({
-        params: { subActionParams: { channel: 'C123', threadTs: '1.000001' } },
+        params: {
+          subAction: 'updateMessage',
+          subActionParams: { channel: 'C123', messageTs: '1.000001' },
+        },
       });
       const routing = await client.get();
       expect(routing?.destinations[0].params).toEqual({ channel: '#alerts' });
@@ -85,6 +138,29 @@ describe('investigation notification lifecycle', () => {
     }
   );
 
+  it('creates one early timeout root and suppresses replay', async () => {
+    const { send, execute, client } = setup();
+    await send('timed_out');
+    await send('timed_out');
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(execute.mock.calls[0][0].params).toMatchObject({
+      subAction: 'sendMessage',
+      subActionParams: { text: expect.stringContaining('Investigation timed out') },
+    });
+    expect((await client.get())?.executions[0].terminal_phase).toBe('timed_out');
+  });
+
+  it('claims lifecycle emission once under concurrent reconciliation', async () => {
+    const { client } = setup();
+    await client.initialize('exec-1', 'system-nightshift-investigation', []);
+    await client.selectTerminalPhase('exec-1', 'timed_out');
+    const claims = await Promise.all([
+      client.claimTerminalLifecycle('exec-1', 'timed_out', 'claim-a'),
+      client.claimTerminalLifecycle('exec-1', 'timed_out', 'claim-b'),
+    ]);
+    expect(claims.filter(Boolean)).toHaveLength(1);
+  });
+
   it('later executions reuse the retained thread even without new destination inputs', async () => {
     const { send, execute } = setup();
     await send('started');
@@ -92,25 +168,79 @@ describe('investigation notification lifecycle', () => {
     await send('started', 'exec-2', []);
     await send('completed', 'exec-2', []);
     expect(execute).toHaveBeenCalledTimes(4);
-    for (const [call] of execute.mock.calls.slice(1)) {
-      expect(call.params).toMatchObject({
-        subActionParams: { channel: 'C123', threadTs: '1.000001' },
+    // The later execution's started message replies in the thread, and its terminal phase edits it.
+    expect(execute.mock.calls[2][0].params).toMatchObject({
+      subAction: 'sendMessage',
+      subActionParams: { channel: 'C123', threadTs: '1.000001' },
+    });
+    for (const index of [1, 3])
+      expect(execute.mock.calls[index][0].params).toMatchObject({
+        subAction: 'updateMessage',
+        subActionParams: { channel: 'C123', messageTs: '1.000001' },
       });
-    }
   });
 
-  it('preserves an explicitly supplied parent timestamp', async () => {
-    const { send, execute, client } = setup();
+  describe('under a caller-named parent message', () => {
     const input = { ...destination, params: { channel: '#alerts', thread_ts: '0.000001' } };
-    await send('started', 'exec-1', [input]);
-    await send('completed', 'exec-1', [input]);
-    expect(execute.mock.calls[0][0].params).toMatchObject({
-      subActionParams: { threadTs: '0.000001' },
+
+    it.each(['completed', 'failed'] as const)(
+      'posts the started reply there and edits it for %s',
+      async (terminalPhase) => {
+        const { send, execute, client } = setup();
+        await send('started', 'exec-1', [input]);
+        await send(terminalPhase, 'exec-1', [input]);
+        expect(execute.mock.calls[0][0].params).toMatchObject({
+          subAction: 'sendMessage',
+          subActionParams: { threadTs: '0.000001', blocks: expect.any(Array) },
+        });
+        expect(execute.mock.calls[1][0].params).toEqual({
+          subAction: 'updateMessage',
+          subActionParams: {
+            channel: 'C123',
+            messageTs: '1.000001',
+            text: expect.any(String),
+            blocks: expect.any(Array),
+          },
+        });
+        expect((await client.get())?.destinations[0].thread?.thread_ts).toBe('0.000001');
+      }
+    );
+
+    it('retries without blocks when Slack rejects the blocks', async () => {
+      const { send, execute, client } = setup();
+      execute.mockResolvedValueOnce({ status: 'error', message: 'invalid_blocks' } as never);
+      expect(await send('started', 'exec-1', [input])).toEqual({
+        sent: 1,
+        failed: 0,
+        unconfirmed: 0,
+      });
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[1][0].params.subActionParams).not.toHaveProperty('blocks');
+      expect((await client.get())?.attempts[0]).toMatchObject({
+        status: 'sent',
+        message_ts: '1.000001',
+      });
     });
-    expect(execute.mock.calls[1][0].params).toMatchObject({
-      subActionParams: { threadTs: '0.000001' },
+
+    it('posts a terminal reply when the started reply was not confirmed', async () => {
+      const { send, execute } = setup();
+      execute.mockResolvedValueOnce({ status: 'error', message: 'not_in_channel' } as never);
+      await send('started', 'exec-1', [input]);
+      await send('completed', 'exec-1', [input]);
+      expect(execute.mock.calls[1][0].params).toMatchObject({
+        subAction: 'sendMessage',
+        subActionParams: { channel: '#alerts', threadTs: '0.000001' },
+      });
     });
-    expect((await client.get())?.destinations[0].thread?.thread_ts).toBe('0.000001');
+
+    it('leaves the thread to later executions that do not ask for it', async () => {
+      const { send, execute } = setup();
+      await send('started', 'exec-1', [input]);
+      await send('completed', 'exec-1', [input]);
+      expect(await send('started', 'exec-2', [])).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+      expect(await send('completed', 'exec-2', [])).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+      expect(execute).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('fans out lifecycle messages and isolates destination connector errors', async () => {
@@ -299,7 +429,56 @@ describe('investigation notification lifecycle', () => {
     await expect(send('completed')).rejects.toThrow('not initialized');
     await send('started');
     await send('completed');
-    await expect(send('failed')).rejects.toThrow('different terminal phase');
+    expect(await send('failed')).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
     expect(execute).toHaveBeenCalledTimes(2);
+  });
+
+  it('creates a failure root before started and reuses it for the next execution', async () => {
+    const { send, execute, client } = setup();
+    expect(await send('failed')).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
+    expect(execute.mock.calls[0][0].params.subActionParams).not.toHaveProperty('threadTs');
+    expect((await client.get())?.attempts[0].creates_root).toBe(true);
+    await send('started', 'exec-2', []);
+    expect(execute.mock.calls[1][0].params.subActionParams).toMatchObject({
+      channel: 'C123',
+      threadTs: '1.000001',
+    });
+  });
+
+  it('uses an explicit parent for early failure and freezes the execution snapshot', async () => {
+    const { send, execute, client } = setup();
+    const input = { ...destination, params: { channel: '#alerts', thread_ts: '0.1' } };
+    await send('failed', 'exec-1', [input]);
+    await send('failed', 'exec-1', [{ ...destination, params: { channel: '#another' } }]);
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(execute.mock.calls[0][0].params.subActionParams).toMatchObject({ threadTs: '0.1' });
+    expect((await client.get())?.destinations).toHaveLength(1);
+  });
+
+  it('fans out an early failure once even with concurrent handlers', async () => {
+    const { send, execute, client } = setup('ops');
+    const inputs = [destination, { ...destination, params: { channel: '#oncall' } }];
+    await Promise.all([send('failed', 'exec-1', inputs), send('failed', 'exec-1', inputs)]);
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect((await client.get())?.attempts).toHaveLength(2);
+  });
+
+  it.each(['failed', 'timed_out'] as const)(
+    'does not recreate an uncertain early %s root',
+    async (phase) => {
+      const { send, execute, client } = setup();
+      execute.mockRejectedValueOnce(new Error('Connection lost'));
+      expect(await send(phase)).toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
+      expect(await send(phase, 'exec-2', [])).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect((await client.get())?.attempts[1].error).toContain('unconfirmed');
+    }
+  );
+
+  it('can report a failure after a definitely rejected started root', async () => {
+    const { send, execute } = setup();
+    execute.mockResolvedValueOnce({ status: 'error', message: 'not_in_channel' } as never);
+    await send('started');
+    expect(await send('failed')).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
   });
 });

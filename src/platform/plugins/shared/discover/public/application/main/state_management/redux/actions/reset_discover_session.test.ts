@@ -10,7 +10,7 @@
 import { cloneDeep } from 'lodash';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { internalStateActions, selectTab, selectTabRuntimeState } from '..';
+import { getTabDataView, internalStateActions, selectTab, selectTabRuntimeState } from '..';
 import type { InternalStateStore } from '../internal_state';
 import { internalStateSlice } from '../internal_state';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
@@ -33,11 +33,17 @@ const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
 
 export const setup = async () => {
   const services = createDiscoverServicesMock();
-  const { internalState, runtimeStateManager, initializeTabs, initializeSingleTab, switchToTab } =
-    getDiscoverInternalStateMock({
-      services,
-      persistedDataViews: [dataViewWithTimefieldMock, dataViewWithNoTimefieldMock],
-    });
+  const {
+    internalState,
+    runtimeStateManager,
+    searchSessionManager,
+    initializeTabs,
+    initializeSingleTab,
+    switchToTab,
+  } = getDiscoverInternalStateMock({
+    services,
+    persistedDataViews: [dataViewWithTimefieldMock, dataViewWithNoTimefieldMock],
+  });
   const persistedTab1 = getPersistedTabMock({
     tabId: 'tab-1',
     dataView: dataViewWithTimefieldMock,
@@ -68,6 +74,7 @@ export const setup = async () => {
   return {
     internalState,
     runtimeStateManager,
+    searchSessionManager,
     services,
     persistedTab1,
     persistedTab2,
@@ -125,6 +132,7 @@ describe('resetDiscoverSession', () => {
     const {
       internalState,
       runtimeStateManager,
+      searchSessionManager,
       services,
       persistedTab1,
       persistedTab2,
@@ -133,6 +141,7 @@ describe('resetDiscoverSession', () => {
     } = await setup();
 
     jest.mocked(services.data.search.searchSource.create).mockClear();
+    const forgetTab = jest.spyOn(searchSessionManager, 'forgetTab');
 
     const tab1RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab1.id);
     const tab2RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab2.id);
@@ -169,14 +178,17 @@ describe('resetDiscoverSession', () => {
     expect(tab1.forceFetchOnSelect).toBe(false);
     expect(tab2.forceFetchOnSelect).toBe(true);
     expect(tab3.forceFetchOnSelect).toBe(true);
+    expect(forgetTab.mock.calls).toEqual([[persistedTab2.id], [persistedTab3.id]]);
 
-    expect(tab1RuntimeState.currentDataView$.getValue()).toBe(dataViewWithTimefieldMock);
-    expect(tab2RuntimeState.currentDataView$.getValue()).toBe(dataViewWithNoTimefieldMock);
-    expect(tab3RuntimeState.currentDataView$.getValue()).toBeUndefined();
+    expect(getTabDataView(tab1RuntimeState)).toBe(dataViewWithTimefieldMock);
+    expect(getTabDataView(tab2RuntimeState)).toBe(dataViewWithNoTimefieldMock);
+    expect(getTabDataView(tab3RuntimeState)).toBeUndefined();
   });
 
   it('should use provided discover session and next selected tab', async () => {
-    const { internalState, persistedTab2, persistedDiscoverSession } = await setup();
+    const { internalState, searchSessionManager, persistedTab2, persistedDiscoverSession } =
+      await setup();
+    const forgetTab = jest.spyOn(searchSessionManager, 'forgetTab');
 
     markUnsavedTabs(internalState, [persistedTab2.id]);
 
@@ -200,6 +212,7 @@ describe('resetDiscoverSession', () => {
 
     const refetchedTab = selectTab(internalState.getState(), persistedTab2.id);
     expect(refetchedTab.forceFetchOnSelect).toBe(false);
+    expect(forgetTab).not.toHaveBeenCalled();
   });
 
   it('should keep current tab runtime state available while replacing all session tabs', async () => {

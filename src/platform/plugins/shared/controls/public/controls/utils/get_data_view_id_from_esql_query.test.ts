@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FilterableSource } from '@kbn/data-source';
 import { BehaviorSubject } from 'rxjs';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -29,9 +30,10 @@ describe('getDataViewIdFromESQLQuery', () => {
 
   it('returns a matching parent-published data view id before checking saved data views', async () => {
     dataViewsService.find = jest.fn();
+    dataViewsService.get = jest.fn().mockResolvedValue({ id: 'published-data-view' });
     const parentApi = {
-      dataViews$: new BehaviorSubject<DataView[] | undefined>([
-        { id: 'published-data-view', getIndexPattern: () => 'logs-*' },
+      dataSources$: new BehaviorSubject<DataView[] | undefined>([
+        { id: 'published-data-view', title: 'logs-*', getIndexPattern: () => 'logs-*' },
       ] as DataView[]),
     };
 
@@ -41,8 +43,30 @@ describe('getDataViewIdFromESQLQuery', () => {
       })
     ).resolves.toBe('published-data-view');
 
+    expect(dataViewsService.get).toHaveBeenCalledWith('published-data-view', false);
     expect(dataViewsService.find).not.toHaveBeenCalled();
     expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+  });
+
+  it('does not use the id of a parent-published ES|QL source, which is not a data view', async () => {
+    dataViewsService.get = jest.fn().mockRejectedValue(new Error('Saved object not found'));
+    dataViewsService.find = jest.fn().mockResolvedValue([{ id: 'saved-data-view' }]);
+    const esqlSource: FilterableSource = {
+      id: 'esql-dataset-id',
+      title: 'logs-*',
+      fields: [],
+      isTimeBased: () => false,
+    };
+    const parentApi = {
+      dataSources$: new BehaviorSubject<FilterableSource[] | undefined>([esqlSource]),
+    };
+
+    await expect(
+      getDataViewIdFromESQLQuery('FROM logs-* | STATS BY service.name', { parentApi })
+    ).resolves.toBe('saved-data-view');
+
+    expect(dataViewsService.get).toHaveBeenCalledWith('esql-dataset-id', false);
+    expect(dataViewsService.find).toHaveBeenCalledWith('logs-*');
   });
 
   it('returns the matching saved data view id', async () => {

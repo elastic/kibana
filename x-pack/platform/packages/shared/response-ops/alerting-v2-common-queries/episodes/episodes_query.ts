@@ -22,6 +22,13 @@ import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
 } from './episode_severity';
+import {
+  EPISODE_SOURCE_FILTER_UNIVERSAL,
+  NATIVE_EPISODE_SOURCE,
+  isConnectorEpisodeSource,
+} from './episode_source';
+import { convertKqlToEsqlExpression } from './kql_to_esql';
+import { SERIES_ID_EVAL } from './series_id_eval';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 /**
@@ -37,6 +44,7 @@ export const ALERT_EPISODE_FIELDS = [
   'episode.status',
   'rule.id',
   'group_hash',
+  'series_id',
   'first_timestamp',
   'last_timestamp',
   'duration',
@@ -48,6 +56,7 @@ export const ALERT_EPISODE_FIELDS = [
   'last_tags',
   'episode_data',
   'severity',
+  'source',
 ] as const;
 
 export interface EpisodesFilterState {
@@ -72,6 +81,11 @@ export interface EpisodesFilterState {
   severity?: string[] | null;
   /** Assignee UID — episodes whose last assignee matches this user profile UID */
   assigneeUid?: string;
+  /**
+   * Source values (OR). `v1` is Classic, `v2` is Universal, and any other
+   * value is a connector slug. Empty/undefined shows every source.
+   */
+  sources?: string[] | null;
 }
 
 export interface EpisodesSortState {
@@ -110,26 +124,35 @@ const resolveSortField = (sortField: string): string => {
   return sanitizeSortField(sortField);
 };
 
+/**
+ * Reduces the episode events to one row per episode: its latest event, with the
+ * episode-level stats.
+ */
 export const addEpisodeAggregation = (query: ComposerQuery) => {
   /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
-   * Matches `buildEpisodeEventDataQuery`.
+   * Matches `buildEpisodeDataRequest`.
    */
 
+  // A single rule run can write many events with the same timestamp for one
+  // episode, so matching on the latest timestamp can keep many rows. LIMIT 1 BY
+  // keeps one of them.
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
     .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", start_event_timestamp = MIN(@timestamp) WHERE \`episode.status\` == "pending" AND \`episode.status_count\` == 1, episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
-    .pipe`WHERE @timestamp == last_timestamp`;
+    .pipe`WHERE @timestamp == last_timestamp`
+    .pipe`LIMIT 1 BY episode.id`;
 };
 
-const addGroupHashActionStats = (query: ComposerQuery) => {
+const addSeriesActionStats = (query: ComposerQuery) => {
   // prettier-ignore
   query
+    .pipe(SERIES_ID_EVAL)
     .pipe`INLINE STATS last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
                        snoozed_until      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
-                       first_series_event_timestamp = MIN(@timestamp)    WHERE type == "alert"
-          BY group_hash`;
+                       first_series_event_timestamp = MIN(@timestamp)     WHERE type == "alert"
+          BY series_id`;
 };
 
 const addEpisodeIdActionStats = (query: ComposerQuery) => {
@@ -196,13 +219,43 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
   query.pipe(`WHERE ${parts.join(' OR ')}`);
 };
 
+/** Native Universal rows: no connector `source` on the latest episode event. */
+const UNIVERSAL_SOURCE_PREDICATE = `source IS NULL OR source == "" OR source == ${escapeStringValue(
+  NATIVE_EPISODE_SOURCE
+)}`;
+
+const addSourceFilter = (query: ComposerQuery, sources: string[]) => {
+  const parts: string[] = [];
+  if (sources.includes(EPISODE_SOURCE_FILTER_UNIVERSAL)) {
+    parts.push(UNIVERSAL_SOURCE_PREDICATE);
+  }
+  const connectors = [...new Set(sources.filter(isConnectorEpisodeSource))];
+  if (connectors.length) {
+    const inList = connectors.map((source) => escapeStringValue(source)).join(', ');
+    parts.push(`source IN (${inList})`);
+  }
+  if (!parts.length) {
+    // Classic-only, or no value the v2 documents can match — exclude all v2 rows
+    query.pipe('WHERE false');
+    return;
+  }
+  query.pipe(`WHERE ${parts.join(' OR ')}`);
+};
+
 /**
  * Applies the filters that must run after the aggregations: they either read
  * columns the aggregations compute (tags, severity, assignee) or must only
- * narrow the aggregated rows (status). `ruleId`, `groupHash` and `queryString`
- * are applied before the aggregations by `buildEpisodesBaseQuery` instead.
+ * narrow the aggregated rows (status, source, and queryString). `source` is the
+ * value on the latest episode row (`WHERE @timestamp == last_timestamp`), not an
+ * earlier event.
+ * `ruleId` and `groupHash` are applied before the aggregations by
+ * `buildEpisodesBaseQuery` instead.
  */
 export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
+  const trimmedSearch = filterState.queryString?.trim();
+  if (trimmedSearch) {
+    query.pipe(`WHERE ${convertKqlToEsqlExpression(trimmedSearch)}`);
+  }
   if (filterState.status?.length) {
     addStatusFilter(query, filterState.status);
   }
@@ -214,6 +267,9 @@ export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilt
   }
   if (filterState.assigneeUid) {
     query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  }
+  if (filterState.sources?.length) {
+    addSourceFilter(query, filterState.sources);
   }
 };
 
@@ -229,8 +285,8 @@ export type EpisodesBaseFilterState = Pick<
 
 /**
  * Builds an ES|QL query that aggregates episode data from `.rule-events` and
- * `.alert-actions` (last tags per group_hash, last ack / assignee per
- * episode) and narrows to alert episode rows.
+ * `.alert-actions` (last snooze state per series, last ack / assignee / tags
+ * per episode) and narrows to alert episode rows.
  *
  * `episode.status` comes straight from `.rule-events`. User-initiated
  * `deactivate` / `activate` actions also write a synthetic `.rule-events`
@@ -246,7 +302,8 @@ export const buildEpisodesBaseQuery = (
 
   // Narrowing to a single rule or series before the INLINE STATS lets ES skip
   // the space-wide aggregation: all the event and action docs of an episode
-  // carry its rule id and `group_hash`, so the aggregated rows are identical.
+  // carry its space, owner and `group_hash`, so they share one `series_id` and
+  // the aggregated rows are identical.
   if (filterState?.ruleId) {
     // `.rule-events` docs carry the nested `rule.id`, `.alert-actions` docs
     // the flat `rule_id` — match both so action docs aren't dropped.
@@ -256,18 +313,9 @@ export const buildEpisodesBaseQuery = (
     query.where`group_hash == ${filterState.groupHash}`;
   }
 
-  const trimmedSearch = filterState?.queryString?.trim();
-  if (trimmedSearch) {
-    query.pipe(
-      `WHERE ((type == "alert" AND QSTR(${escapeStringValue(
-        trimmedSearch
-      )})) OR (action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")))`
-    );
-  } else {
-    query.where`type == "alert" OR action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
-  }
+  query.where`type == "alert" OR action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
 
-  addGroupHashActionStats(query);
+  addSeriesActionStats(query);
   addEpisodeIdActionStats(query);
   query.where`type == "alert"`;
   addEpisodeAggregation(query);

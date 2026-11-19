@@ -69,7 +69,7 @@ describe('WorkerSelectionRow', () => {
       screen.getByTestId(
         `alertZeroOnboardingWorkerTrigger-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
       )
-    ).toHaveTextContent('Every 4 hours');
+    ).toHaveTextContent('Runs every 4 hours');
   });
 
   it('falls back to the event trigger label when there is no schedule interval', () => {
@@ -78,7 +78,7 @@ describe('WorkerSelectionRow', () => {
       screen.getByTestId(
         `alertZeroOnboardingWorkerTrigger-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
       )
-    ).toHaveTextContent('On new alerts');
+    ).toHaveTextContent('Runs on new alerts');
   });
 
   it('omits the trigger badge when neither a schedule nor an event trigger is known', () => {
@@ -113,6 +113,28 @@ describe('WorkerSelectionRow', () => {
       )
     );
     expect(onToggle).toHaveBeenCalledWith(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID, false);
+  });
+
+  it('shows the toggle state as text without renaming the switch', () => {
+    const { unmount } = render(
+      <I18nProvider>
+        <EuiProvider>
+          <WorkerSelectionRow
+            worker={getWorker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)}
+            checked
+            disabled={false}
+            onToggle={jest.fn()}
+          />
+        </EuiProvider>
+      </I18nProvider>
+    );
+    expect(screen.getByText('On')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByRole('switch', { name: 'Alert Triage' })).toBeInTheDocument();
+    unmount();
+
+    renderRow({ workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID, checked: false });
+    expect(screen.getByText('Off')).toBeInTheDocument();
+    expect(screen.queryByText('On')).toBeNull();
   });
 
   it('disables the toggle when disabled is set', () => {

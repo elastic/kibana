@@ -223,7 +223,7 @@ export function createEsqlResultEquivalenceEvaluator<
       if (!goldQuery) {
         return skippedResult('No gold query declared for this example.');
       }
-      const normalizedGold = normalizeEsqlForEquivalence(goldQuery);
+      const normalizedGold = normalizeEsqlForEquivalence(goldQuery, { anyTimeField: true });
       const goldLimit = analyzeLimit(normalizedGold);
       if (goldLimit.unordered) {
         return skippedResult(
@@ -238,11 +238,14 @@ export function createEsqlResultEquivalenceEvaluator<
         };
       }
 
-      // The suite treats the time-picker WHERE as cosmetic (the chart supplies the
-      // window), so strip it from every side before executing, as the LLM judge does.
+      // Row overlap is compared over the whole fixture, so strip the time-picker WHERE
+      // on any date field from every side before executing. Whether a non-@timestamp
+      // query keeps that filter is left to the LLM judge.
       const [goldResult, ...candidateResults] = await Promise.allSettled([
         runQuery(normalizedGold),
-        ...candidateQueries.map((query) => runQuery(normalizeEsqlForEquivalence(query))),
+        ...candidateQueries.map((query) =>
+          runQuery(normalizeEsqlForEquivalence(query, { anyTimeField: true }))
+        ),
       ]);
 
       if (goldResult.status === 'rejected') {

@@ -8,7 +8,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod';
-import { z as z4 } from '@kbn/zod/v4';
+import { z as z4, isoDateTime, savedObjectId, description } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 import {
@@ -221,6 +221,65 @@ describe('zod', () => {
         );
 
         expect(JSON.stringify(result)).not.toContain('{"nullable":true}');
+      });
+    });
+
+    describe('Zod 4.5+ JSON Schema type arrays', () => {
+      test('maps a nullable primitive type array to nullable: true', () => {
+        const result = convert(z.object({ flag: z.boolean().nullable() }) as any);
+
+        expect(result.schema).toMatchObject({
+          properties: { flag: { type: 'boolean', nullable: true } },
+        });
+        expect(result.schema.properties!.flag).not.toHaveProperty('type', expect.any(Array));
+      });
+
+      test('maps a primitive union type array to anyOf', () => {
+        const result = convert(z.object({ value: z.union([z.string(), z.number()]) }) as any);
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            value: { anyOf: [{ type: 'string' }, { type: 'number' }] },
+          },
+        });
+        expect(result.schema.properties!.value).not.toHaveProperty('type');
+      });
+
+      test('maps a nullable primitive union type array to anyOf with nullable: true', () => {
+        const result = convert(
+          z.object({ value: z.union([z.string(), z.number()]).nullable() }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            value: {
+              nullable: true,
+              anyOf: [{ type: 'string' }, { type: 'number' }],
+            },
+          },
+        });
+      });
+
+      test('maps type arrays nested under properties and array items', () => {
+        const result = convert(
+          z.object({
+            meta: z.object({ note: z.string().nullable() }),
+            tags: z.array(z.union([z.string(), z.number()])),
+          }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            meta: {
+              type: 'object',
+              properties: { note: { type: 'string', nullable: true } },
+            },
+            tags: {
+              type: 'array',
+              items: { anyOf: [{ type: 'string' }, { type: 'number' }] },
+            },
+          },
+        });
       });
     });
 
@@ -927,6 +986,48 @@ describe('zod', () => {
         expect(actual.shared.LazyColorMapping).toHaveProperty('anyOf');
         expect(actual.shared.LazyBucket).toHaveProperty('additionalProperties', false);
       });
+    });
+  });
+
+  test('isoDateTime converts to format date-time', () => {
+    const schema = z4.object({ createdAt: isoDateTime({ offset: true }) });
+    const result = convert(schema as any);
+
+    expect(result.schema.properties?.createdAt).toMatchObject({
+      type: 'string',
+      format: 'date-time',
+    });
+  });
+
+  test('isoDateTime OpenAPI schema bounds length and omits pattern', () => {
+    const schema = z4.object({ createdAt: isoDateTime({ offset: true }) });
+    const result = convert(schema as any);
+    const createdAt = result.schema.properties?.createdAt;
+
+    expect(createdAt).toMatchObject({
+      type: 'string',
+      format: 'date-time',
+      maxLength: 64,
+    });
+    expect(createdAt).not.toHaveProperty('pattern');
+  });
+
+  test('publishes the planned bounds of reporting-mode strings as vendor extensions', () => {
+    const schema = z4.object({
+      strict: savedObjectId(),
+      reporting: savedObjectId.warn({ label: 'dashboard.panelId' }),
+      reportingWithoutMinimum: description.warn(),
+    });
+    const result = convert(schema as any);
+
+    expect(result.schema.properties).toEqual({
+      strict: { type: 'string', minLength: 1, maxLength: 512 },
+      reporting: {
+        type: 'string',
+        'x-kibana-planned-min-length': 1,
+        'x-kibana-planned-max-length': 512,
+      },
+      reportingWithoutMinimum: { type: 'string', 'x-kibana-planned-max-length': 10000 },
     });
   });
 });

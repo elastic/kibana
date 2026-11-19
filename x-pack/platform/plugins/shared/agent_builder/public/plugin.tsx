@@ -87,13 +87,23 @@ const getConversationPath = ({
   conversationId,
   agentId,
   openDetails,
+  collapseSidebar,
 }: {
   conversationId: string;
   agentId: string;
   openDetails?: boolean;
+  collapseSidebar?: boolean;
 }): string => {
   const basePath = appPaths.agent.conversations.byId({ agentId, conversationId });
-  return openDetails ? `${basePath}?${searchParamNames.openConversationDetails}=true` : basePath;
+  const searchParams = new URLSearchParams();
+  if (openDetails) {
+    searchParams.set(searchParamNames.openConversationDetails, 'true');
+  }
+  if (collapseSidebar) {
+    searchParams.set(searchParamNames.sidebarCollapsed, 'true');
+  }
+  const search = searchParams.toString();
+  return search ? `${basePath}?${search}` : basePath;
 };
 
 export class AgentBuilderPlugin
@@ -122,11 +132,13 @@ export class AgentBuilderPlugin
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = true;
   private isEarsExperimentalEnabled = false;
+  private readonly isServerless: boolean;
   private experimentalDeepLinksSubscription?: Subscription;
   private sidebarOpenSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
   setup(
     core: CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>,
@@ -262,6 +274,7 @@ export class AgentBuilderPlugin
     const openConversationDetails = async ({
       conversationId,
       onClose,
+      onConversationUpdated,
       trailingActions,
     }: OpenConversationDetailsOptions): Promise<() => void> => {
       const { openConversationDetailsFlyout } = await import(
@@ -273,6 +286,7 @@ export class AgentBuilderPlugin
         conversationTemplatesService,
         conversationId,
         onClose,
+        onConversationUpdated,
         trailingActions,
       });
     };
@@ -300,6 +314,7 @@ export class AgentBuilderPlugin
       eventsService,
       isEarsEnabled: this.isEarsEnabled,
       isEarsExperimentalEnabled: this.isEarsExperimentalEnabled,
+      isServerless: this.isServerless,
       openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
         return openSidebarInternal(options);
       },

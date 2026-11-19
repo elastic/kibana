@@ -39,10 +39,10 @@ export const showSessionWarnings = ({
       const tabName =
         session.tabs.find((tab) => tab.id === warning.tab_id)?.label || warning.tab_id;
       const title =
-        warning.type === 'dropped_panel'
+        warning.type === 'dropped_item'
           ? i18n.translate('discover.sessionLoadWarnings.controlTitle', {
               defaultMessage: 'Tab "{tabName}": control "{controlId}"',
-              values: { tabName, controlId: warning.panel_id },
+              values: { tabName, controlId: warning.item_id },
             })
           : i18n.translate('discover.sessionLoadWarnings.propertyTitle', {
               defaultMessage: 'Tab "{tabName}": property "{property}"',
@@ -50,7 +50,7 @@ export const showSessionWarnings = ({
             });
 
       return (
-        <li key={`${index}-${warning.tab_id}`}>
+        <li key={`${index}-${warning.tab_id}`} data-test-subj="discoverSessionWarningDetailsItem">
           <strong>{title}</strong>
           <p css={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{warning.message}</p>
         </li>
@@ -61,6 +61,7 @@ export const showSessionWarnings = ({
       toMountPoint(
         <EuiModal
           aria-labelledby="discoverSessionWarningDetailsTitle"
+          data-test-subj="discoverSessionWarningDetailsModal"
           onClose={() => modal.close()}
         >
           <EuiModalHeader>
@@ -77,7 +78,10 @@ export const showSessionWarnings = ({
             </EuiText>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={() => modal.close()}>
+            <EuiButtonEmpty
+              data-test-subj="discoverSessionWarningDetailsCloseButton"
+              onClick={() => modal.close()}
+            >
               <FormattedMessage
                 id="discover.sessionLoadWarnings.closeButtonLabel"
                 defaultMessage="Close"
@@ -91,8 +95,8 @@ export const showSessionWarnings = ({
   };
 
   core.notifications.toasts.addWarning({
-    title: i18n.translate('discover.sessionLoadWarnings.title', {
-      defaultMessage: 'Some session content could not be loaded',
+    title: i18n.translate('discover.sessionLoadWarnings.skippedContentTitle', {
+      defaultMessage: 'Some session content was skipped while loading',
     }),
     actionProps: {
       primary: {

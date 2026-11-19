@@ -11,6 +11,7 @@ import {
   MONITOR_ERROR_EVENT_TYPE,
   MONITOR_UPDATE_EVENT_TYPE,
 } from './constants';
+import { registerShardingEventTypes } from './sharding_events';
 import type { MonitorErrorEvent, MonitorUpdateEvent } from './types';
 
 const monitorUpdateSchema: RootSchema<MonitorUpdateEvent> = {
@@ -166,4 +167,5 @@ export const registerSyntheticsEventTypes = (analytics: AnalyticsServiceSetup): 
   analytics.registerEventType(monitorUpdateEventType);
   analytics.registerEventType(monitorCurrentEventType);
   analytics.registerEventType(monitorErrorEventType);
+  registerShardingEventTypes(analytics);
 };

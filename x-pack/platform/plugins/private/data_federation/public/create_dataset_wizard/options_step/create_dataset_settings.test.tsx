@@ -23,23 +23,7 @@ import type {
 } from '../create_dataset_form_state';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_form_state';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-
-const docLinksMock = {
-  links: {
-    dataFederation: {
-      overview: '',
-      quickstart: '',
-      dataSources: '',
-      datasets: '',
-      datasetSettings: '',
-      authentication: '',
-      staticCredentials: '',
-      federatedIdentity: '',
-      querying: '',
-      security: '',
-    },
-  },
-};
+import { docLinksMock } from '../../doc_links_mock';
 
 const renderSettings = () => {
   const Wrapper = () => {
@@ -106,6 +90,9 @@ describe('CreateDatasetSettings', () => {
     await act(async () => {
       fireEvent.click(getByTestId(optionTestId));
     });
+    // The select returns focus to its control a frame after closing; until that lands it can still
+    // pull focus out of whichever control the next step opens.
+    await waitFor(() => expect(getByTestId('createDatasetSettingsFormat')).toHaveFocus());
   };
 
   it('shows the format select', () => {

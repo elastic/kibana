@@ -29,6 +29,7 @@
     "@kbn/data-plugin",
     "@kbn/core",
     "@kbn/ui-actions-plugin",
+    "@kbn/es-query",
     "@kbn/kibana-react-plugin",
     "@kbn/monaco",
     "@kbn/code-editor",

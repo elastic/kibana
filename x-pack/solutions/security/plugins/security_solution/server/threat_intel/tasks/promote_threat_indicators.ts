@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 import net from 'node:net';
 import type { estypes } from '@elastic/elasticsearch';
+import { isNonRoutableIpIoc } from '@kbn/alertzero-common';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import {
@@ -210,7 +211,7 @@ const PROMOTABLE_TIER_RANK_LITERAL = PROMOTABLE_TIERS_BY_PRECISION.map(
  * Params (passed via `params` — never interpolated into the script body):
  *   report_id  — dedup key
  *   provider   — source.name of the citing report
- *   trail      — Maltrail trail label (content.title), null for non-maltrail
+ *   trail      — indicator-list label (content.title), null when absent
  *   reference  — per-IOC nearest-ref URL (or source.url), null when absent
  *   first_seen — lineage.extracted_at of the citing report
  *   now        — wall-clock ISO string at the time of the bulk call
@@ -406,12 +407,15 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     const trailLabel = report._source?.content?.title ?? null;
     const firstSeen = report._source?.lineage?.extracted_at ?? now;
 
-    // Three filters. The type/value check is defensive on the indexer boundary so
+    // Four filters. The type/value check is defensive on the indexer boundary so
     // a single malformed row never poisons the bulk write. The tier check is the
     // vetting gate: only IOCs the extractor did not already classify as noise
     // become live Indicator Match rows. `deferred_unreviewed` means semantic
     // review never ran on this IOC (batch/overflow budget) — its tier is a kept
     // heuristic, not a verdict, so it stays out until a later run reviews it.
+    // The non-routable check is by value: reports extracted before the shared
+    // range set existed can carry a promotable tier on CGNAT, multicast or other
+    // special-use space, and promoting it would match internal traffic.
     const usableIocs = iocs.filter(
       (ioc): ioc is typeof ioc & { type: IocType; value: string; tier: string } =>
         typeof ioc.value === 'string' &&
@@ -419,7 +423,8 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
         isIocType(ioc.type) &&
         isWellFormedForType(ioc.type, ioc.value) &&
         isPromotableTier(ioc.tier) &&
-        ioc.deferred_unreviewed !== true
+        ioc.deferred_unreviewed !== true &&
+        !isNonRoutableIpIoc(ioc)
     );
     for (const ioc of usableIocs) {
       const id = indicatorId(spaceId, ioc.type, ioc.value);
@@ -554,11 +559,27 @@ interface BulkScriptedUpsert {
   upsert: Record<string, unknown>;
 }
 
+/**
+ * Rejects when the task is aborted during the wait, so a hung wait cannot outlast the task
+ * timeout. An already-aborted signal is left to the run loop's own abort handling.
+ */
+const raceWithSignal = <T>(promise: Promise<T>, signal: AbortSignal): Promise<T> => {
+  if (signal.aborted) {
+    return promise;
+  }
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(new Error('task aborted'));
+    signal.addEventListener('abort', onAbort, { once: true });
+    promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort));
+  });
+};
+
 export const registerPromoteThreatIndicatorsTask = ({
   taskManager,
   coreSetup,
   logger,
   getReconcileAttributeWorkflows,
+  getBootstrapReady,
 }: {
   taskManager: TaskManagerSetupContract;
   /**
@@ -577,6 +598,11 @@ export const registerPromoteThreatIndicatorsTask = ({
    * setup to a runtime slot that start fills when the supply flag is on.
    */
   getReconcileAttributeWorkflows: () => Promise<void>;
+  /**
+   * Resolves once index templates are installed. Writing earlier would auto-create the
+   * indicator index without its strict mapping, so a rejection skips this run.
+   */
+  getBootstrapReady: () => Promise<void>;
 }): void => {
   taskManager.registerTaskDefinitions({
     [PROMOTE_THREAT_INDICATORS_TASK_TYPE]: {
@@ -600,6 +626,19 @@ export const registerPromoteThreatIndicatorsTask = ({
       },
       createTaskRunner: ({ taskInstance, signal }: RunContext) => ({
         run: async () => {
+          const previousState = (taskInstance.state ?? {}) as PromoteThreatIndicatorsState;
+
+          try {
+            await raceWithSignal(getBootstrapReady(), signal);
+          } catch (err) {
+            logger.warn(
+              `Skipping threat indicator promotion until threat intel bootstrap completes: ${
+                (err as Error).message
+              }`
+            );
+            return { state: previousState };
+          }
+
           // Catch spaces created after boot before scanning reports. Failures
           // here must not block promotion — install is idempotent and the next
           // 15m pass will retry.
@@ -609,7 +648,6 @@ export const registerPromoteThreatIndicatorsTask = ({
             );
           });
 
-          const previousState = (taskInstance.state ?? {}) as PromoteThreatIndicatorsState;
           const lower = previousState.lastSyncedAt ?? LOOKBACK_ON_FIRST_RUN;
 
           const [coreStart] = await coreSetup.getStartServices();
@@ -622,8 +660,9 @@ export const registerPromoteThreatIndicatorsTask = ({
           let latestExtractedAt = previousState.lastSyncedAt;
           // Only advance the cursor when the scan drained the backlog. A
           // completed scan that stored a mid-batch tick used to skip remaining
-          // siblings: `text_indicator_list` stamps one `lineage.extracted_at`
-          // across every chunk of a large list (5_000 nested objects), so `gt`
+          // siblings: the retired `text_indicator_list` adapter stamped one
+          // `lineage.extracted_at` across every chunk of a large list (5_000
+          // nested objects), and those reports are still in the index, so `gt`
           // on that tick dropped the rest. Writes are idempotent (stable `_id`
           // + report_id dedupe), so the range is `gte` and re-scanning the
           // handful of boundary-timestamp docs every 15m is cheap. Enrich is

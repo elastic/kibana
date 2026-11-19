@@ -37,6 +37,30 @@ describe('dataset registry', () => {
   });
 });
 
+describe('continuation paths', () => {
+  const KNOWN_PATHS = ['rule-uuid-no-topology', 'rule-uuid-inactive', 'cascade'];
+
+  it('only restricts a scenario to known paths, and a restricted cascade has its chain', () => {
+    const scenarios = getAllDatasetIds().flatMap((id) => getDatasetById(id)?.discovery ?? []);
+    const restricted = scenarios.filter(({ continuationPaths }) => continuationPaths);
+
+    expect(restricted.length).toBeGreaterThan(0);
+    for (const { continuationPaths = [], continuationChains = {} } of restricted) {
+      expect(continuationPaths.every((path) => KNOWN_PATHS.includes(path))).toBe(true);
+      if (continuationPaths.includes('cascade')) {
+        expect(Object.keys(continuationChains)).toContain('cascade');
+      }
+    }
+  });
+
+  it('still replays the same-rule and closed-event paths on at least one scenario', () => {
+    const scenarios = getAllDatasetIds().flatMap((id) => getDatasetById(id)?.discovery ?? []);
+    const unrestricted = scenarios.filter(({ continuationPaths }) => !continuationPaths);
+
+    expect(unrestricted.length).toBeGreaterThan(0);
+  });
+});
+
 describe('dataset selection', () => {
   it.each([undefined, '', '   '])(
     'selects the default datasets when the selection is %j',

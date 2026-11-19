@@ -6,7 +6,10 @@
  */
 
 import React, { useCallback } from 'react';
+import { FormProvider, useController } from 'react-hook-form';
+import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCheckableCard,
@@ -14,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiFormFieldset,
   EuiFormRow,
   EuiModal,
   EuiModalBody,
@@ -21,37 +25,110 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  EuiSteps,
   EuiText,
+  EuiTextArea,
+  mathWithUnits,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DestinationsController } from './destinations_context';
-import { DestinationTypeFields } from './destination_type_fields';
-import { DESTINATION_TYPE_DEFINITIONS } from './destination_type_registry';
-import type { DestinationStorageKind } from './types';
+import { getDestinationTypeSteps } from './destination_type_fields';
+import {
+  DESTINATION_TYPE_DEFINITIONS,
+  type DestinationTypeDefinition,
+} from './destination_type_registry';
+import type { DestinationCreationFormData } from './types';
+import { useDestinationCreationForm } from './use_destination_creation_form';
+
+const CREATE_DESTINATION_MODAL_WIDTH = 576;
+/** Unit schema `description` limit. */
+const MAX_DESCRIPTION_LENGTH = 10000;
+
+interface FormRowChildProps {
+  id?: string;
+  'aria-describedby'?: string;
+}
+
+const DestinationNameInput = ({
+  isInvalid,
+  disabled,
+  ...rowProps
+}: FormRowChildProps & { isInvalid: boolean; disabled: boolean }) => {
+  const {
+    field: { value, onChange, onBlur, ref },
+  } = useController<DestinationCreationFormData, 'destinationName'>({ name: 'destinationName' });
+  return (
+    <EuiFieldText
+      {...rowProps}
+      fullWidth
+      value={value}
+      inputRef={ref}
+      disabled={disabled}
+      isInvalid={isInvalid}
+      onChange={onChange}
+      onBlur={onBlur}
+      data-test-subj="streamsCreateDestinationName"
+    />
+  );
+};
+
+const DescriptionInput = ({ disabled, ...rowProps }: FormRowChildProps & { disabled: boolean }) => {
+  const {
+    field: { value, onChange, onBlur, ref },
+  } = useController<DestinationCreationFormData, 'description'>({ name: 'description' });
+  return (
+    <EuiTextArea
+      {...rowProps}
+      fullWidth
+      rows={3}
+      value={value}
+      inputRef={ref}
+      maxLength={MAX_DESCRIPTION_LENGTH}
+      disabled={disabled}
+      onChange={onChange}
+      onBlur={onBlur}
+      data-test-subj="streamsCreateDestinationDescription"
+    />
+  );
+};
+
+const STORAGE_KIND_LABEL = i18n.translate('xpack.streams.destinations.storageKindLabel', {
+  defaultMessage: "Where will this destination's data live?",
+});
+
+// The description sits in the label because EuiCheckableCard puts a fixed 16px gap before `children`.
+const StorageCardLabel = ({ label, description, badge }: DestinationTypeDefinition) => (
+  <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+    <EuiFlexItem>
+      <EuiText size="s">
+        <strong>{label}</strong>
+      </EuiText>
+      <EuiText size="xs" color="subdued">
+        {description}
+      </EuiText>
+    </EuiFlexItem>
+    {badge && (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">{badge}</EuiBadge>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);
 
 interface CreateDestinationModalProps {
   destinations: Pick<
     DestinationsController,
     | 'createDestination'
-    | 'storageKind'
-    | 'destinationName'
-    | 'destinationNameError'
-    | 'elasticsearchIndex'
-    | 'elasticsearchIndexPatterns'
-    | 'indexError'
-    | 'indexPatternsError'
-    | 'canCreateDestination'
+    | 'unitDefinition'
+    | 'isUnitSaving'
+    | 'apiKeyError'
     | 'persistenceError'
     | 'isCreatingDestination'
     | 'isCreateFailed'
-    | 'setStorageKind'
-    | 'setCreateDestinationName'
-    | 'setElasticsearchIndex'
-    | 'setElasticsearchIndexPatterns'
-    | 'validateCreationForm'
   >;
   onClose: () => void;
 }
@@ -59,24 +136,41 @@ interface CreateDestinationModalProps {
 export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinationModalProps) => {
   const {
     createDestination,
-    storageKind,
-    destinationName,
-    destinationNameError,
-    elasticsearchIndex,
-    elasticsearchIndexPatterns,
-    indexError,
-    indexPatternsError,
-    canCreateDestination,
+    unitDefinition,
+    isUnitSaving,
     persistenceError,
+    apiKeyError,
     isCreatingDestination,
     isCreateFailed,
-    setStorageKind,
-    setCreateDestinationName,
-    setElasticsearchIndex,
-    setElasticsearchIndexPatterns,
-    validateCreationForm,
   } = destinations;
+  const { euiTheme } = useEuiTheme();
+  const modalStyles = css({
+    inlineSize: CREATE_DESTINATION_MODAL_WIDTH,
+    // EuiModal caps height at 75vh, so the longer forms scroll on a laptop. Keep an xxl margin instead.
+    maxBlockSize: `calc(100vh - ${mathWithUnits(euiTheme.size.xxl, (xxl) => xxl * 2)})`,
+  });
+  // EuiSteps pads the last step's bottom by xl + s, so the modal scrolls into blank space. Keep `base`
+  // (the Figma gap) and clip the rest, since a negative margin alone still counts toward scroll height.
+  const formStyles = css({ overflow: 'hidden' });
+  const stepsStyles = css({
+    marginBlockEnd: mathWithUnits(
+      [euiTheme.size.xl, euiTheme.size.s, euiTheme.size.base],
+      (xl, s, base) => -(xl + s - base)
+    ),
+    // Step content also gets a `base` right padding that Figma doesn't have, which wraps the card copy.
+    marginInlineEnd: mathWithUnits(euiTheme.size.base, (base) => -base),
+  });
   const modalTitleId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationModalTitle' });
+  const formId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationForm' });
+  const {
+    methods,
+    formData: { storageKind },
+    formErrors: validationErrors,
+    canSubmit,
+  } = useDestinationCreationForm({ unitDefinition });
+  // The destination being saved is already in the unit, so its own name would read as taken.
+  const formErrors = isCreatingDestination ? {} : validationErrors;
+  const { destinationName: destinationNameError } = formErrors;
   const destinationNameErrorText =
     destinationNameError === 'required'
       ? i18n.translate('xpack.streams.destinations.destinationNameRequiredErrorMessage', {
@@ -86,18 +180,37 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
       ? i18n.translate('xpack.streams.destinations.destinationNameDuplicateErrorMessage', {
           defaultMessage: 'A destination with this name already exists.',
         })
+      : destinationNameError === 'tooLong'
+      ? i18n.translate('xpack.streams.destinations.destinationNameTooLongErrorMessage', {
+          defaultMessage: 'This name is too long for this destination type.',
+        })
+      : destinationNameError === 'credentialConflict'
+      ? i18n.translate('xpack.streams.destinations.destinationNameCredentialConflictErrorMessage', {
+          defaultMessage: 'This name conflicts with an existing credential.',
+        })
       : undefined;
-
-  const selectStorageKind = useCallback(
-    (nextStorageKind: DestinationStorageKind) => () => setStorageKind(nextStorageKind),
-    [setStorageKind]
+  const createError = apiKeyError ?? persistenceError;
+  // Create sits below the details step, so the body is usually scrolled past the callout. Create is
+  // also disabled while it runs, which drops focus to the body, so the callout takes it.
+  const revealCreateError = useCallback(
+    (callout: HTMLDivElement | null) => {
+      if (!createError || !callout) {
+        return;
+      }
+      callout.scrollIntoView({ block: 'nearest' });
+      if (document.activeElement === document.body) {
+        callout.focus({ preventScroll: true });
+      }
+    },
+    [createError]
   );
 
   return (
     <EuiModal
       aria-labelledby={modalTitleId}
       onClose={isCreatingDestination ? () => undefined : onClose}
-      maxWidth={480}
+      maxWidth={CREATE_DESTINATION_MODAL_WIDTH}
+      css={modalStyles}
       data-test-subj="streamsCreateDestinationModal"
     >
       <EuiModalHeader>
@@ -113,25 +226,34 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
               <FormattedMessage
-                id="xpack.streams.destinations.createDestinationModalDescription"
-                defaultMessage="Define where your data will land"
+                id="xpack.streams.destinations.createDestinationModalSubtitle"
+                defaultMessage="Choose where your data lives and how it's organized."
               />
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
-        {persistenceError && (
-          <>
+        {createError && (
+          <div ref={revealCreateError} tabIndex={-1}>
             <KbnDangerCallout
               announceOnMount
-              title={i18n.translate('xpack.streams.destinations.createDestinationFailedTitle', {
-                defaultMessage: 'Could not create the destination',
-              })}
-              text={persistenceError}
+              title={
+                apiKeyError
+                  ? i18n.translate(
+                      'xpack.streams.destinations.createDestinationApiKeyFailedTitle',
+                      {
+                        defaultMessage: 'Could not create an API key for this destination',
+                      }
+                    )
+                  : i18n.translate('xpack.streams.destinations.createDestinationFailedTitle', {
+                      defaultMessage: 'Could not create the destination',
+                    })
+              }
+              text={createError}
             />
             <EuiSpacer size="s" />
-          </>
+          </div>
         )}
         {isCreateFailed ? (
           <EuiText size="s" color="subdued">
@@ -141,70 +263,106 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
             />
           </EuiText>
         ) : (
-          <EuiForm
-            component="form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              createDestination();
-            }}
-          >
-            <EuiFormRow
-              fullWidth
-              label={i18n.translate('xpack.streams.destinations.destinationNameLabel', {
-                defaultMessage: 'Name',
-              })}
-              helpText={i18n.translate(
-                'xpack.streams.destinations.destinationNameHelpDescription',
-                {
-                  defaultMessage: "Destinations can't be renamed.",
-                }
-              )}
-              isInvalid={Boolean(destinationNameErrorText)}
-              error={destinationNameErrorText}
+          <FormProvider {...methods}>
+            <EuiForm
+              css={formStyles}
+              id={formId}
+              component="form"
+              noValidate
+              onSubmit={methods.handleSubmit(createDestination)}
             >
-              <EuiFieldText
-                fullWidth
-                value={destinationName}
-                disabled={isCreatingDestination}
-                isInvalid={Boolean(destinationNameErrorText)}
-                onChange={(event) => setCreateDestinationName(event.target.value)}
-                onBlur={validateCreationForm}
-                data-test-subj="streamsCreateDestinationName"
+              <EuiSteps
+                css={stepsStyles}
+                titleSize="xxs"
+                headingElement="h3"
+                data-test-subj="streamsCreateDestinationSteps"
+                steps={[
+                  {
+                    title: STORAGE_KIND_LABEL,
+                    children: (
+                      <EuiFormFieldset legend={{ children: STORAGE_KIND_LABEL, display: 'hidden' }}>
+                        <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+                          {DESTINATION_TYPE_DEFINITIONS.filter(
+                            (definition) => definition.available
+                          ).map((definition) => (
+                            <EuiFlexItem key={definition.storageKind} grow={false}>
+                              <EuiCheckableCard
+                                id={`streamsDestinationStorage-${definition.storageKind}`}
+                                name="destinationStorageKind"
+                                label={<StorageCardLabel {...definition} />}
+                                checked={storageKind === definition.storageKind}
+                                disabled={isCreatingDestination}
+                                onChange={() =>
+                                  methods.setValue('storageKind', definition.storageKind, {
+                                    shouldDirty: true,
+                                  })
+                                }
+                                data-test-subj={definition.testSubject}
+                              />
+                            </EuiFlexItem>
+                          ))}
+                        </EuiFlexGroup>
+                      </EuiFormFieldset>
+                    ),
+                  },
+                  ...getDestinationTypeSteps({
+                    storageKind,
+                    errors: formErrors,
+                    disabled: isCreatingDestination,
+                  }),
+                  {
+                    title: i18n.translate(
+                      'xpack.streams.destinations.destinationDetailsStepTitle',
+                      { defaultMessage: 'Destination details' }
+                    ),
+                    children: (
+                      <>
+                        <EuiFormRow
+                          fullWidth
+                          label={i18n.translate(
+                            'xpack.streams.destinations.destinationNameFieldLabel',
+                            { defaultMessage: 'Name' }
+                          )}
+                          helpText={i18n.translate(
+                            'xpack.streams.destinations.destinationNameHelpDescription',
+                            {
+                              defaultMessage:
+                                "Permanent once created. Destinations can't be renamed.",
+                            }
+                          )}
+                          isInvalid={Boolean(destinationNameErrorText)}
+                          error={destinationNameErrorText}
+                          id="streamsCreateDestinationNameRow"
+                        >
+                          <DestinationNameInput
+                            isInvalid={Boolean(destinationNameErrorText)}
+                            disabled={isCreatingDestination}
+                          />
+                        </EuiFormRow>
+                        <EuiFormRow
+                          fullWidth
+                          label={i18n.translate('xpack.streams.destinations.descriptionLabel', {
+                            defaultMessage: 'Description',
+                          })}
+                          labelAppend={
+                            <EuiText size="xs" color="subdued">
+                              {i18n.translate(
+                                'xpack.streams.destinations.descriptionOptionalLabel',
+                                { defaultMessage: 'Optional' }
+                              )}
+                            </EuiText>
+                          }
+                          id="streamsCreateDestinationDescriptionRow"
+                        >
+                          <DescriptionInput disabled={isCreatingDestination} />
+                        </EuiFormRow>
+                      </>
+                    ),
+                  },
+                ]}
               />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-              {DESTINATION_TYPE_DEFINITIONS.filter((definition) => definition.available).map(
-                (definition) => (
-                  <EuiFlexItem key={definition.storageKind} grow={false}>
-                    <EuiCheckableCard
-                      id={`streamsDestinationStorage-${definition.storageKind}`}
-                      name="destinationStorageKind"
-                      label={definition.label}
-                      checked={storageKind === definition.storageKind}
-                      disabled={isCreatingDestination}
-                      onChange={selectStorageKind(definition.storageKind)}
-                      data-test-subj={definition.testSubject}
-                    >
-                      {storageKind === definition.storageKind && (
-                        <DestinationTypeFields
-                          storageKind={storageKind}
-                          index={elasticsearchIndex}
-                          indexPatterns={elasticsearchIndexPatterns}
-                          indexError={indexError}
-                          indexPatternsError={indexPatternsError}
-                          disabled={isCreatingDestination}
-                          onIndexChange={setElasticsearchIndex}
-                          onIndexPatternsChange={setElasticsearchIndexPatterns}
-                          onBlur={validateCreationForm}
-                        />
-                      )}
-                    </EuiCheckableCard>
-                  </EuiFlexItem>
-                )
-              )}
-            </EuiFlexGroup>
-          </EuiForm>
+            </EuiForm>
+          </FormProvider>
         )}
       </EuiModalBody>
       <EuiModalFooter>
@@ -222,9 +380,9 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
           <EuiButton
             fill
             type="submit"
-            onClick={createDestination}
+            form={formId}
             isLoading={isCreatingDestination}
-            isDisabled={!canCreateDestination || isCreatingDestination}
+            isDisabled={!canSubmit || isUnitSaving || isCreatingDestination}
             data-test-subj="streamsCreateDestinationSubmit"
           >
             <FormattedMessage

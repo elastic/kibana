@@ -6,8 +6,10 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  ALERTS_INDEX,
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
   EVAL_TAG_PREFIX,
   SECURITY_SOLUTION_INTERNAL_API_VERSION,
@@ -20,7 +22,7 @@ import {
  * a non-empty `connectorId`, so this must be set before any run.
  *
  * `connectorId` is pinned to the current Playwright project's connector so the workflow's
- * `ai.agent` step uses the same model the suite is evaluating. Auto-close is disabled so
+ * classification step (agent or prompt, per `usePrompt`) uses the same model the suite is evaluating. Auto-close is disabled so
  * the eval never mutates alert status (we only read the classification verdict).
  */
 export const configureAlertAnalysisWorkflow = async ({
@@ -28,16 +30,19 @@ export const configureAlertAnalysisWorkflow = async ({
   log,
   connectorId,
   agentId,
+  usePrompt,
   tagPrefix = EVAL_TAG_PREFIX,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
   agentId: string;
+  /** Classify with a single prompt instead of the agent. */
+  usePrompt: boolean;
   tagPrefix?: string;
 }): Promise<void> => {
   log.info(
-    `Configuring alert-analysis workflow settings (connectorId=${connectorId}, agentId=${agentId})`
+    `Configuring alert-analysis workflow settings (connectorId=${connectorId}, agentId=${agentId}, usePrompt=${usePrompt})`
   );
 
   await fetch(ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE, {
@@ -49,10 +54,30 @@ export const configureAlertAnalysisWorkflow = async ({
       connectorId,
       agentId,
       createConversation: false,
+      usePrompt,
       autoCloseEnabled: false,
       autoCloseConfidenceScoreMinThreshold: 0.9,
       autoCloseConfidenceScoreMaxThreshold: 1,
       tagPrefix,
     }),
+  });
+};
+
+/**
+ * Makes sure the alerts alias has its real backing index before the first alert is written.
+ *
+ * The workflow's ES|QL queries read alert fields such as `kibana.alert.workflow_reason` that only
+ * the alerts index template maps. On a fresh cluster the rule registry has not created the index
+ * yet (it does so when a rule first runs), so writing to the missing alias would create a
+ * dynamically mapped index instead and every run would fail on an unknown column. This creates
+ * the first backing index, as the registry would.
+ */
+export const ensureAlertsIndex = async (esClient: EsClient): Promise<void> => {
+  if (await esClient.indices.existsAlias({ name: ALERTS_INDEX })) {
+    return;
+  }
+  await esClient.indices.create({
+    index: '.internal.alerts-security.alerts-default-000001',
+    aliases: { [ALERTS_INDEX]: { is_write_index: true } },
   });
 };

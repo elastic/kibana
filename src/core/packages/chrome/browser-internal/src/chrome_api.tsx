@@ -84,6 +84,9 @@ export function createChromeApi({
       projectNavigation.registerCustomizeNavigationHandler(handler),
     registerNavigationLinks: (links) => projectNavigation.registerNavigationLinks(links),
     getRegisteredNavigationLinks$: () => projectNavigation.getRegisteredNavigationLinks$(),
+    registerNavTreeDependencies: (ownerPluginId, navigationTree$) =>
+      projectNavigation.registerNavTreeDependencies(ownerPluginId, navigationTree$),
+    getNavTreeDependencies: () => projectNavigation.getNavTreeDependencies(),
   };
 
   let appHeaderRegistrationId = 0;
@@ -145,6 +148,10 @@ export function createChromeApi({
     projectPicker: {
       get$: () => state.projectPicker.$,
       set: state.projectPicker.set,
+    },
+    subscriptionBadge: {
+      get$: () => state.subscriptionBadge.$,
+      set: state.subscriptionBadge.set,
     },
     userMenu: {
       get$: () => state.userMenu.$,

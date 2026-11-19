@@ -181,7 +181,7 @@ describe('createConversationPublicClient', () => {
     expect(internalClient.patchMetadata).toHaveBeenCalledWith(
       'conv-1',
       { status: 'open' },
-      { access: 'owner', source: 'workflow' }
+      { access: 'converse', source: 'workflow' }
     );
     expect(internalClient.update).toHaveBeenCalledWith(
       { id: 'conv-1', title: 'Renamed' },
@@ -189,7 +189,7 @@ describe('createConversationPublicClient', () => {
     );
   });
 
-  it('does not expose delete, upsertRound, or exists methods', () => {
+  it('does not expose upsertRound or exists methods', () => {
     const clientKeys = Object.keys(publicClient);
     expect(clientKeys).toEqual(
       expect.arrayContaining([
@@ -204,8 +204,14 @@ describe('createConversationPublicClient', () => {
         'update',
       ])
     );
-    expect(clientKeys).not.toContain('delete');
     expect(clientKeys).not.toContain('upsertRound');
     expect(clientKeys).not.toContain('exists');
+  });
+
+  it('delegates delete() to the internal client, which enforces delete access', async () => {
+    internalClient.delete.mockResolvedValue(true);
+
+    await expect(publicClient.delete('conv-1')).resolves.toBe(true);
+    expect(internalClient.delete).toHaveBeenCalledWith('conv-1');
   });
 });

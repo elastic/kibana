@@ -9,6 +9,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   getCaseFindUserActionsUrl,
   buildAlertCaseAttachment,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 import type { UserActionFindResponse } from '@kbn/cases-plugin/common';
 import { ELASTIC_SECURITY_RULE_ID } from '../../../../common';
@@ -76,11 +77,11 @@ export const addAlertsToCase = ({
         if (
           userAction.type === 'comment' &&
           userAction.action === 'create' &&
-          userAction.payload.comment.type === 'alert' &&
-          'alertId' in userAction.payload.comment &&
-          alertIds.includes(userAction.payload.comment.alertId as string)
+          userAction.payload.comment.type === SECURITY_ALERT_ATTACHMENT_TYPE &&
+          'attachmentId' in userAction.payload.comment &&
+          alertIds.includes(userAction.payload.comment.attachmentId as string)
         ) {
-          comments[userAction.payload.comment.alertId as string] = userAction.id;
+          comments[userAction.payload.comment.attachmentId as string] = userAction.id;
         }
       }
     });

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { describeAiIndex } from './describe';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
@@ -18,12 +18,11 @@ jest.mock('./describe_aggregations');
 const describeAiIndexFieldsMock = jest.mocked(describeAiIndexFields);
 const describeAiIndexAggregationsMock = jest.mocked(describeAiIndexAggregations);
 
-const aiIndex: AiIndexHttpItem = {
+const aiIndex: AiIndexItem = {
   id: 'support',
   description: 'Support KIs',
   dest: { type: 'index', value: 'ai-index-idx-support*' },
-  managed: false,
-  memory_enabled: false,
+  managed: true,
   automations: [],
   sources: [],
   traces: [],
@@ -204,7 +203,7 @@ describe('describeAiIndex', () => {
         '| WHERE type == "memory.session_fact"',
         '| INLINE STATS latest_at = MAX(@timestamp) BY id',
         '| WHERE @timestamp == latest_at',
-        '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")',
+        '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active")',
         '  AND (expires_at IS NULL OR expires_at > NOW())',
         '| FORK',
       ].join('\n')
@@ -223,6 +222,14 @@ describe('describeAiIndex', () => {
 
     expect(response).not.toContain('\nMemory\n');
     expect(response).not.toContain('platform.context_engine.remember');
+  });
+
+  it('passes the user scope to the counts', async () => {
+    await describeAiIndex({ ...params, userId: 'alice' });
+
+    expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'marketing', userId: 'alice' })
+    );
   });
 
   it('omits memory capability when the memory feature flag is disabled', async () => {

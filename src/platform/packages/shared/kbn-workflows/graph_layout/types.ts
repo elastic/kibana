@@ -15,7 +15,6 @@ export const DEFAULT_NODE_STYLE = { width: 300, height: 52 } as const;
 
 export const FLOW_CONTROL_STEP_TYPES: ReadonlySet<string> = new Set([
   'if',
-  'merge',
   'parallel',
   'foreach',
   'while',
@@ -190,6 +189,69 @@ export interface ForeachGroup {
   innerEdges: GraphEdge[];
   /** Layout-only bypass lane nodes for unbalanced branches inside this foreach body. */
   bypassLaneNodes: PreLayoutBypassLaneNode[];
+}
+
+/**
+ * The block structure of a workflow, emitted by the transform alongside the flat
+ * nodes and edges. Layout code reads forks, branches, containers and fallback lanes
+ * from here instead of re-deriving them from edge reachability.
+ *
+ * Every id is a node id from the same `TransformResult`. A sequence's items run in
+ * order, so the item after a fork is its join, and the item after a step is its
+ * successor. Every node appears exactly once in the tree.
+ */
+export type StructureItem = StructureStep | StructureFork | StructureContainer;
+
+export type StructureSequence = readonly StructureItem[];
+
+/** A plain step. */
+export interface StructureStep {
+  readonly kind: 'step';
+  readonly id: string;
+  readonly lanes: readonly StructureLane[];
+}
+
+/** An `if`, `switch` or `parallel` step. Branches are in YAML declaration order. */
+export interface StructureFork {
+  readonly kind: 'fork';
+  readonly id: string;
+  readonly branches: readonly StructureBranch[];
+  readonly lanes: readonly StructureLane[];
+}
+
+/** A `foreach` or `while` step: a box around its own body graph. */
+export interface StructureContainer {
+  readonly kind: 'container';
+  readonly id: string;
+  readonly body: StructureSequence;
+  readonly lanes: readonly StructureLane[];
+}
+
+/**
+ * One branch of a fork. `head` is the branch's first node: `items[0].id`, or the id
+ * of a bypass lane node when the branch has no steps (then `items` is empty).
+ * `label` is the text on the edge into the branch (`true`, a case value, a branch name).
+ */
+export interface StructureBranch {
+  readonly head: string;
+  readonly items: StructureSequence;
+  readonly label: string;
+}
+
+/**
+ * An `on-failure.fallback` lane owned by the item it is listed on. It rejoins the
+ * spine after its owner when `continue` is set.
+ */
+export interface StructureLane {
+  readonly head: string;
+  readonly items: StructureSequence;
+  readonly rejoins: boolean;
+}
+
+export interface LayoutStructure {
+  /** Trigger node ids in YAML declaration order. */
+  readonly triggers: readonly string[];
+  readonly items: StructureSequence;
 }
 
 /**

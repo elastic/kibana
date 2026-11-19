@@ -1272,6 +1272,34 @@ describe('search embeddable transform utils', () => {
       expect(fromStoredSearchEmbeddableByValue(state)).toEqual(apiState);
     });
 
+    it('round-trips histogram visualization for a by-value metrics panel', () => {
+      const apiState: DiscoverSessionEmbeddableByValueState = {
+        title: 'Metrics panel',
+        description: '',
+        tabs: [
+          {
+            type: DiscoverTabType.Metrics,
+            dimensions: ['host.name'],
+            search_term: 'cpu',
+            counter_aggregation: 'max',
+            gauge_aggregation: 'avg',
+            histogram_percentile: 'p99',
+            histogram_visualization: 'lnsHeatmap',
+            column_order: [],
+            sort: [],
+            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'TS metrics-*' },
+          },
+        ],
+      };
+
+      const { state } = toStoredSearchEmbeddableByValue(apiState);
+
+      expect(state.attributes.tabs[0].attributes.tabTypeState).toMatchObject({
+        histogramVisualization: 'lnsHeatmap',
+      });
+      expect(fromStoredSearchEmbeddableByValue(state)).toEqual(apiState);
+    });
+
     it('does not store profile state for an explicit default tab type', () => {
       const apiState: DiscoverSessionEmbeddableByValueState = {
         title: 'Default panel',

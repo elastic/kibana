@@ -43,7 +43,10 @@ const setupMocks = ({
   workflowsUIEnabled = true,
   canExecuteWorkflow = true,
 } = {}) => {
-  useCasesContext.mockReturnValue({ permissions: { update: permissionsUpdate } });
+  useCasesContext.mockReturnValue({
+    owner: ['securitySolution'],
+    permissions: { update: permissionsUpdate },
+  });
   useCasesConfig.mockReturnValue({ runWorkflowsEnabled });
   mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow });
   mockUseWorkflowsUIEnabledSetting.mockReturnValue(workflowsUIEnabled);
@@ -196,6 +199,21 @@ describe('useRunWorkflowAction', () => {
       expect(typeof modalProps.runWorkflow).toBe('function');
       expect(typeof modalProps.filterWorkflow).toBe('function');
       expect(typeof modalProps.sortWorkflow).toBe('function');
+    });
+
+    it('reports a cases-list run over the selected cases', () => {
+      const { result } = renderAction();
+      act(() => {
+        (
+          result.current.getAction([basicCase, { ...basicCase, id: 'case-2' }])
+            .onClick as () => void
+        )();
+      });
+      expect(result.current.modalProps.telemetry).toEqual({
+        origin: 'cases.cases',
+        itemCount: 2,
+        owner: 'securitySolution',
+      });
     });
   });
 });

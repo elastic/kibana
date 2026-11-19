@@ -10,7 +10,6 @@ import { inject, injectable } from 'inversify';
 import { ALERT_EPISODE_ACTION_TYPE, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
-import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
@@ -93,13 +92,40 @@ interface ResolveEpisodeIdResult {
   readonly isNew: boolean;
 }
 
+/** A genuine change of an episode's status, recorded while computing the next state. */
+export interface AlertStatusTransition {
+  readonly groupHash: string;
+  readonly episodeId: string;
+  /** The series' last episode status, or `null` when it has none yet. */
+  readonly previousStatus: AlertEpisodeStatus | null;
+  readonly status: AlertEpisodeStatus;
+}
+
+interface NextEpisodeResult {
+  readonly alertEvent: AlertEventDocument;
+  readonly isNewEpisode: boolean;
+  readonly transition: AlertStatusTransition | null;
+}
+
 export interface DirectorRunStats {
   readonly newEpisodeIds: readonly string[];
+  /**
+   * One entry per episode whose status changed in this batch. Sibling rows of
+   * one group share an episode and collapse to a single entry. User-locked
+   * episodes are left out, since the strategy does not own their status.
+   */
+  readonly statusTransitions: readonly AlertStatusTransition[];
 }
 
 export interface DirectorRunResult {
   readonly alertEvents: AlertEventDocument[];
   readonly stats: DirectorRunStats;
+  /**
+   * Latest persisted lifecycle state per `group_hash`, as loaded for this batch.
+   * Exposed so downstream write-policy steps can compare each enriched event
+   * against what is already persisted without a second round trip.
+   */
+  readonly previousAlertStateByGroupHash: ReadonlyMap<string, LatestAlertEventState>;
 }
 
 @injectable()
@@ -118,7 +144,11 @@ export class DirectorService {
     spaceId,
   }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
-      return { alertEvents: [], stats: { newEpisodeIds: [] } };
+      return {
+        alertEvents: [],
+        stats: { newEpisodeIds: [], statusTransitions: [] },
+        previousAlertStateByGroupHash: new Map(),
+      };
     }
 
     const logger = this.logger.forSubsystem('director').withLabels({
@@ -139,50 +169,44 @@ export class DirectorService {
     executionContext: ExecutionContext,
     logger: LoggerServiceContract
   ): Promise<DirectorRunResult> {
-    const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
-    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
+    const previousAlertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
       rule,
       groupHashes,
       executionContext
     );
 
-    scope.add(() => alertStateByGroupHash.clear());
+    executionContext.throwIfAborted();
 
-    try {
-      executionContext.throwIfAborted();
-
-      const newEpisodeIds: string[] = [];
-      const evaluatedAt = new Date().toISOString();
-      const processed = alertEvents.map((currentAlertEvent) => {
-        const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
-          rule,
-          currentAlertEvent,
-          previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
-          strategy,
-          evaluatedAt,
-          logger,
-        });
-
-        if (isNewEpisode && alertEvent.alert) {
-          newEpisodeIds.push(alertEvent.alert.id);
-        }
-
-        return alertEvent;
+    const newEpisodeIds: string[] = [];
+    const statusTransitions = new Map<string, AlertStatusTransition>();
+    const evaluatedAt = new Date().toISOString();
+    const processed = alertEvents.map((currentAlertEvent) => {
+      const { alertEvent, isNewEpisode, transition } = this.getAlertEventWithNextEpisode({
+        rule,
+        currentAlertEvent,
+        previousAlertEvent: previousAlertStateByGroupHash.get(currentAlertEvent.group_hash),
+        strategy,
+        evaluatedAt,
+        logger,
       });
 
-      return { alertEvents: processed, stats: { newEpisodeIds } };
-    } finally {
-      try {
-        await scope.disposeAll();
-      } catch (error) {
-        logger.warn({
-          message: 'Failed to release alert state cache',
-          error,
-          code: ALERTING_LOG_CODES.DIRECTOR_CLEANUP_FAILED,
-        });
+      if (isNewEpisode && alertEvent.alert) {
+        newEpisodeIds.push(alertEvent.alert.id);
       }
-    }
+
+      if (transition && !statusTransitions.has(transition.episodeId)) {
+        statusTransitions.set(transition.episodeId, transition);
+      }
+
+      return alertEvent;
+    });
+
+    return {
+      alertEvents: processed,
+      stats: { newEpisodeIds, statusTransitions: [...statusTransitions.values()] },
+      previousAlertStateByGroupHash,
+    };
   }
 
   private async fetchLatestAlertStateByGroupHash(
@@ -191,7 +215,7 @@ export class DirectorService {
     context: ExecutionContext
   ): Promise<Map<string, LatestAlertEventState>> {
     const request = getLatestAlertEventStateQuery({ ruleId: rule.id, groupHashes }).toRequest();
-    const records = await this.queryService.executeQueryRows<LatestAlertEventState>({
+    const records = await this.queryService.executeQuery<LatestAlertEventState>({
       query: request.query,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,
@@ -210,7 +234,7 @@ export class DirectorService {
     strategy,
     evaluatedAt,
     logger,
-  }: CalculateNextStateParams): { alertEvent: AlertEventDocument; isNewEpisode: boolean } {
+  }: CalculateNextStateParams): NextEpisodeResult {
     // User lock: once a user hits `activate` on a group, the episode
     // stays `active` regardless of what the strategy computes, until
     // the user hits `deactivate` (which flips the lifecycle marker
@@ -230,6 +254,7 @@ export class DirectorService {
           },
         },
         isNewEpisode: false,
+        transition: null,
       };
     }
 
@@ -252,7 +277,17 @@ export class DirectorService {
       scheduledTimestamp: currentAlertEvent.scheduled_timestamp ?? evaluatedAt,
     });
 
-    if (currentStatus !== result.status) {
+    const transition: AlertStatusTransition | null =
+      currentStatus !== result.status
+        ? {
+            groupHash: currentAlertEvent.group_hash,
+            episodeId,
+            previousStatus: currentStatus ?? null,
+            status: result.status,
+          }
+        : null;
+
+    if (transition) {
       logger.debug({
         message: 'Episode status transition',
         labels: {
@@ -273,6 +308,7 @@ export class DirectorService {
         },
       },
       isNewEpisode: isNew,
+      transition,
     };
   }
 

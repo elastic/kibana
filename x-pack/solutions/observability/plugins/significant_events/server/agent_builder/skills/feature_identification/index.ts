@@ -16,7 +16,7 @@ export const featureIdentificationSkill = defineSkillType({
   id: FEATURE_IDENTIFICATION_SKILL_ID,
   name: 'feature-identification',
   basePath: 'skills/platform/streams',
-  experimental: true,
+  hidden: true,
   excludeFromElasticCapabilities: true,
   description,
   content: groundingContent,

@@ -11,7 +11,7 @@ import {
   MAX_ENTITY_NAME_LENGTH,
 } from '@kbn/agentic-investigations-plugin/common';
 import { EntityType } from '@kbn/entity-store/common';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 export const ALERT_ANALYSIS_WORKFLOW_API_VERSION = '1' as const;
 
@@ -66,13 +66,13 @@ export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflow
 // in @kbn/workflows builtinWorkflowInputDefinitions — keep both in lockstep
 // (see alert_analysis_builtin_workflow_input_definition.test.ts).
 export const ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN =
-  /^\.(internal\.)?(preview\.)?alerts-security\.alerts-[a-zA-Z0-9._-]+$/;
+  /^(\.ds-)?\.(internal\.)?(preview\.)?alerts-security\.alerts-[a-zA-Z0-9._-]+$/;
 
 export const AlertAnalysisCallerAlertItem = lazySchema(() =>
   z.looseObject({
     _id: z.string().min(1).max(512),
     _index: z.string().min(1).max(512).regex(ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN),
-    '@timestamp': z.iso.datetime().min(1).max(64),
+    '@timestamp': isoDateTime().min(1).max(64),
     kibana: z.looseObject({
       alert: z.looseObject({
         rule: z.looseObject({
@@ -145,6 +145,9 @@ export const AlertAnalysisWorkflowOutputFields = lazySchema(() =>
     // Alert ids from the analyzed set with no matching agent verdict. Empty when
     // every alert was reconciled; non-empty means a partial (still completed) result.
     missing_alert_ids: z.array(z.string().max(512)).max(1000),
+    // Agent Builder conversations the run created, one per batch. Empty on the prompt path
+    // and when Create conversation is off.
+    conversation_ids: z.array(z.string().max(512)).max(1000),
   })
 );
 

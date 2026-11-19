@@ -64,10 +64,11 @@ export class ServerlessObservabilityPlugin
           genAiSettingsAvailable: core.pricing.isFeatureAvailable('observability:gen_ai_settings'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
+          entityInventoryNavGroup: setupDeps.entityInventoryApp?.navTreeGroup,
         });
       })
     );
-    navigation.initNavigation('oblt', navigationTree$);
+    navigation.initNavigation('oblt', navigationTree$, 'serverlessObservability');
 
     if (workflowsManagement && !core.pricing.isFeatureAvailable('observability:workflows')) {
       workflowsManagement.setUnavailableInServerlessTier({

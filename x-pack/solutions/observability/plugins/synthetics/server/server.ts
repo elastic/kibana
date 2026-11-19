@@ -12,7 +12,6 @@ import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
 import type { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { syntheticsRouteWrapper } from './synthetics_route_wrapper';
 import { syntheticsAppPublicRestApiRoutes, syntheticsAppRestApiRoutes } from './routes';
-
 export const initSyntheticsServer = (
   server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient,
@@ -53,87 +52,58 @@ export const initSyntheticsServer = (
   });
 
   syntheticsAppPublicRestApiRoutes.forEach((route) => {
-    const { method, options, handler, validate, path, validation, security } =
-      syntheticsRouteWrapper(createSyntheticsRouteWithAuth(route), server, syntheticsMonitorClient);
+    const { method, options, handler, path, validation, security } = syntheticsRouteWrapper(
+      createSyntheticsRouteWithAuth(route),
+      server,
+      syntheticsMonitorClient
+    );
 
-    const routeDefinition = {
+    const { summary, description, operationId, oasOperationObject, ...routeOptions } =
+      options ?? {};
+    const tags = [...(routeOptions.tags ?? []), 'oas-tag:synthetics'];
+    const routeConfig = {
+      access: 'public' as const,
       path,
-      validate,
-      options,
+      security,
+      summary,
+      description,
+      operationId,
     };
     const getVersionedRouteOptions = {
-      availability: options?.availability,
-      excludeFromOAS: options?.excludeFromOAS,
-      excludeFromRateLimiter: options?.excludeFromRateLimiter,
-      httpResource: options?.httpResource,
-      httpResponseLogLevel: options?.httpResponseLogLevel,
-      tags: options?.tags,
-      timeout: options?.timeout && { idleSocket: options.timeout.idleSocket },
+      availability: routeOptions.availability,
+      excludeFromOAS: routeOptions.excludeFromOAS,
+      excludeFromRateLimiter: routeOptions.excludeFromRateLimiter,
+      httpResource: routeOptions.httpResource,
+      httpResponseLogLevel: routeOptions.httpResponseLogLevel,
+      tags,
+      timeout: routeOptions.timeout && { idleSocket: routeOptions.timeout.idleSocket },
     };
+    const versionConfig = {
+      version: '2023-10-31' as const,
+      validate: validation ?? (false as const),
+      options: { oasOperationObject },
+    };
+
     switch (method) {
       case 'GET':
         router.versioned
-          .get({
-            access: 'public',
-            security,
-            path: routeDefinition.path,
-            options: getVersionedRouteOptions,
-          })
-          .addVersion(
-            {
-              version: '2023-10-31',
-              validate: validation ?? false,
-            },
-            handler
-          );
+          .get({ ...routeConfig, options: getVersionedRouteOptions })
+          .addVersion(versionConfig, handler);
         break;
       case 'PUT':
         router.versioned
-          .put({
-            access: 'public',
-            security,
-            path: routeDefinition.path,
-            options,
-          })
-          .addVersion(
-            {
-              version: '2023-10-31',
-              validate: validation ?? false,
-            },
-            handler
-          );
+          .put({ ...routeConfig, options: { ...routeOptions, tags } })
+          .addVersion(versionConfig, handler);
         break;
       case 'POST':
         router.versioned
-          .post({
-            access: 'public',
-            security,
-            path: routeDefinition.path,
-            options,
-          })
-          .addVersion(
-            {
-              version: '2023-10-31',
-              validate: validation ?? false,
-            },
-            handler
-          );
+          .post({ ...routeConfig, options: { ...routeOptions, tags } })
+          .addVersion(versionConfig, handler);
         break;
       case 'DELETE':
         router.versioned
-          .delete({
-            access: 'public',
-            path: routeDefinition.path,
-            security,
-            options,
-          })
-          .addVersion(
-            {
-              version: '2023-10-31',
-              validate: validation ?? false,
-            },
-            handler
-          );
+          .delete({ ...routeConfig, options: { ...routeOptions, tags } })
+          .addVersion(versionConfig, handler);
         break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);

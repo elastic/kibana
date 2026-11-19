@@ -65,7 +65,7 @@ export const useDefaultModelValidation = (
     } else if (selectedConnector && selectedConnector.metadata) {
       const modelStatus = getModelStatus(selectedConnector.metadata);
       if (modelStatus === EisModelStatus.DeprecatedEOL) {
-        const eolDate = getModelEOLDate(selectedConnector.metadata)?.format('l') ?? null;
+        const eolDate = getModelEOLDate(selectedConnector.metadata)?.format('YYYY-MM-DD') ?? null;
         errors.push(getModelEOLMessage(eolDate));
       }
     }

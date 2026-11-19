@@ -20,7 +20,6 @@ const projectTypeLabels = {
   observability: 'Observability',
   security: 'Security',
   search: 'Elasticsearch',
-  workplaceai: 'Workplace AI',
   vectordb: 'Vector Database',
 } satisfies Record<KibanaSolution, string>;
 
@@ -35,7 +34,6 @@ const solutionViewLabels = {
   oblt: 'Observability',
   security: 'Security',
   es: 'Elasticsearch',
-  workplaceai: 'Workplace AI',
   vectordb: 'Vector Database',
   classic: 'Classic (all solutions)',
 } satisfies Record<SolutionView, string>;

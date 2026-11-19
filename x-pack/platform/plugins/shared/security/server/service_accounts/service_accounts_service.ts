@@ -13,6 +13,7 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { CoreSecurityDelegateServiceAccounts } from '@kbn/core-security-server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
   AuditServiceSetup,
@@ -25,6 +26,7 @@ import {
   WorkloadBindingStore,
 } from './bindings';
 import { SERVICE_ACCOUNT_CREDENTIAL_TYPE, ServiceAccountCredentialStore } from './credentials';
+import type { EsServiceAccountsOptions } from './es_service_accounts';
 import { EsServiceAccounts } from './es_service_accounts';
 import { ServiceAccountsManagement } from './service_accounts_management';
 import type {
@@ -54,7 +56,11 @@ export interface ServiceAccountsServiceStartParams {
   canEncrypt: boolean;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>;
+  /** Reads user profiles by uid. Only the Elasticsearch backend uses it, to name account creators. */
+  getUserProfiles: EsServiceAccountsOptions['getUserProfiles'];
   getSpaceId: (request: KibanaRequest) => string;
+  /** What Core knows about the workload types plugins register. */
+  workloadTypes: CoreSecurityDelegateServiceAccounts;
 }
 
 export class ServiceAccountsService {
@@ -78,7 +84,9 @@ export class ServiceAccountsService {
     canEncrypt,
     getCurrentUser,
     getCurrentUserProfileId,
+    getUserProfiles,
     getSpaceId,
+    workloadTypes,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
     if (!config.serviceAccounts.enabled) {
       this.logger.debug('Service accounts are not enabled.');
@@ -142,6 +150,7 @@ export class ServiceAccountsService {
         canEncrypt,
         getCurrentUser,
         getCurrentUserProfileId,
+        getUserProfiles,
       });
     }
 
@@ -168,6 +177,7 @@ export class ServiceAccountsService {
         store,
         checkPrivilegesWithRequest,
         audit,
+        workloadTypes,
       }),
       workloads: new ServiceAccountWorkloadBindings({
         logger: bindingsLogger,

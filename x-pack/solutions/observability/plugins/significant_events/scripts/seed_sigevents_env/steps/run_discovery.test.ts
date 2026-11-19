@@ -23,6 +23,8 @@ const config: ConnectionConfig = {
 const ctx: SeedContext = {
   ...config,
   streamName: 'logs-synth-default',
+  sourceId: 'seed-source-id',
+  viewName: '$.nightshift.sources.default.significant-events-seed',
   scenarioName: 'fraud_check_redis_herring',
   seed: 42,
   space: 'seed-space',

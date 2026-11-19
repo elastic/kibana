@@ -12,6 +12,7 @@ import { loadApi } from './load_api';
 import type { LoadApiFailure } from './load_api';
 import { getValidator } from './validate_params';
 import type { ParamsValidationError, ParamsValidator } from './validate_params';
+import { isBodyValidationSkipped } from './unvalidated_body_apis';
 import { BODY_ROOT_KEY, isRecord } from './types';
 import type { ApiRegistryDefinition, ApiRequest } from './types';
 
@@ -51,7 +52,7 @@ export type PrepareApiRequestFailure =
   | { status: 'cross_space'; requestedSpaceId: string; currentSpaceId: string };
 
 export type PrepareApiRequestResult =
-  | { status: 'prepared'; request: ApiRequest; destructive: boolean }
+  | { status: 'prepared'; request: ApiRequest; destructive: boolean; readOnly: boolean }
   | PrepareApiRequestFailure;
 
 export interface PrepareApiRequestParams {
@@ -65,8 +66,8 @@ export interface PrepareApiRequestParams {
  * Validates a flat params map against its API's schema and transforms it into an HTTP request.
  *
  * @param params - The target, API identifier, caller-supplied params, and current space.
- * @returns The request to dispatch along with whether the API is destructive, or the reason no
- * request could be built.
+ * @returns The request to dispatch along with whether the API is destructive or read-only, or the
+ * reason no request could be built.
  */
 export const prepareApiRequest = async ({
   target,
@@ -84,7 +85,9 @@ export const prepareApiRequest = async ({
   if (definition.input) {
     let validate: ParamsValidator;
     try {
-      validate = await getValidator(target, definition.input);
+      validate = await getValidator(target, definition.input, {
+        skipBodyValidation: isBodyValidationSkipped(target, api),
+      });
     } catch (error) {
       return { status: 'schema_unavailable', error };
     }
@@ -114,7 +117,12 @@ export const prepareApiRequest = async ({
   }
 
   if (target !== 'kibana') {
-    return { status: 'prepared', request, destructive: definition.destructive };
+    return {
+      status: 'prepared',
+      request,
+      destructive: definition.destructive,
+      readOnly: definition.readOnly,
+    };
   }
 
   // Workaround: some Kibana specs hardcode a `/s/{spaceId}` prefix in their path keys
@@ -133,5 +141,6 @@ export const prepareApiRequest = async ({
     status: 'prepared',
     request: { ...request, path: pathname },
     destructive: definition.destructive,
+    readOnly: definition.readOnly,
   };
 };

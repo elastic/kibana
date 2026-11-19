@@ -7,46 +7,16 @@
 
 import React, { memo } from 'react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { i18n } from '@kbn/i18n';
 import type { EventFormOption } from '../event_collection_card';
 import { EventCollectionCard } from '../event_collection_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
+import { POLICY_EVENT_COLLECTION_LABELS } from '../../../../../../../../common/endpoint/models/policy_settings_ui_labels';
 
-const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> = [
-  {
-    name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.dns', {
-      defaultMessage: 'DNS',
-    }),
-    protectionField: 'dns',
-  },
-  {
-    name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.file', {
-      defaultMessage: 'File',
-    }),
-    protectionField: 'file',
-  },
-  {
-    name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.process', {
-      defaultMessage: 'Process',
-    }),
-    protectionField: 'process',
-  },
-  {
-    name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.network', {
-      defaultMessage: 'Network',
-    }),
-    protectionField: 'network',
-  },
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.security',
-      {
-        defaultMessage: 'Security',
-      }
-    ),
-    protectionField: 'security',
-  },
-];
+const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> =
+  POLICY_EVENT_COLLECTION_LABELS.mac.map(({ field, label }) => ({
+    name: label,
+    protectionField: field,
+  }));
 
 export type MacEventCollectionCardProps = PolicyFormComponentCommonProps;
 

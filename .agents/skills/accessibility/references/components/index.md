@@ -4,6 +4,7 @@ Open the guide that matches the component(s) you are writing or refactoring. Rea
 
 | Guide | Topic | EUI components |
 |-------|-------|----------------|
+| `button_links.md` | Buttons that navigate (`href` on the button, external icon, no nested `EuiLink`) | `EuiButton`, `EuiButtonEmpty`, `EuiLink`, `EuiCallOut` / `EuiBanner` / `EuiToast` `actionProps` |
 | `callouts.md` | Callouts (announce when conditional) | `EuiCallOut` |
 | `clickable_cards.md` | Clickable cards (one action per card) | `EuiCard`, `EuiButton` |
 | `copy_tooltip.md` | Copy-to-clipboard tooltip (`beforeMessage`, no nested tooltip) | `EuiCopy`, `EuiToolTip`, `EuiButtonIcon` |
@@ -14,5 +15,6 @@ Open the guide that matches the component(s) you are writing or refactoring. Rea
 | `interactive_components.md` | Names for interactive controls | `EuiBetaBadge`, `EuiButtonIcon`, `EuiComboBox`, `EuiSelect`, `EuiSuperSelect`, `EuiPagination`, `EuiTreeView`, `EuiBreadcrumbs` |
 | `overlays.md` | Modals, flyouts, popovers | `EuiModal`, `EuiFlyout`, `EuiFlyoutResizable`, `EuiConfirmModal`, `EuiPopover` |
 | `radio_groups.md` | Radio groups (`name` grouping) | `EuiRadio`, `EuiRadioGroup` |
+| `status_messages.md` | Status messages (toasts, `notifications.screenReader.notify`, feedback inside open dialogs) | `EuiLiveAnnouncer`, `EuiScreenReaderLive`, `EuiToast`, `EuiCallOut` |
 | `tooltip_content.md` | No interactive elements in tooltip `content` / `title` | `EuiToolTip`, `EuiIconTip` |
 | `tooltip_icon.md` | Tooltip on icon button (wrap + no duplicate SR text, no native `title`) | `EuiToolTip`, `EuiButtonIcon` |

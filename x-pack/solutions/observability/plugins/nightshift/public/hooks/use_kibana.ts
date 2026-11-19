@@ -7,6 +7,7 @@
 
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { FocusedSignificantEventService } from '../chat/focused_significant_event_service';
 import type { NightshiftStartDependencies } from '../types';
 
 /**
@@ -16,9 +17,12 @@ import type { NightshiftStartDependencies } from '../types';
  */
 export type StartServices = CoreStart &
   NightshiftStartDependencies & {
+    /** Set by the app root; false outside it, for example in a test that does not provide it. */
+    isServerless?: boolean;
     appParams: {
       history: ScopedHistory;
     };
+    focusedSignificantEventService: FocusedSignificantEventService;
   };
 
 const useTypedKibana = () => useKibana<StartServices>();

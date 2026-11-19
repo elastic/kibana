@@ -13,6 +13,7 @@ import { EdgeLabelRenderer } from '@xyflow/react';
 import React, { memo } from 'react';
 import type { EdgeBranchType } from '@kbn/workflows';
 import { computeEdgePath } from './compute_edge_path';
+import { EDGE_LABEL_MAX_CHARS } from './edge_label_metrics';
 
 interface WorkflowEdgeData extends Record<string, unknown> {
   readonly label?: string;
@@ -40,7 +41,6 @@ interface WorkflowEdgeData extends Record<string, unknown> {
   readonly isFailure?: boolean;
 }
 
-const LABEL_TRUNCATE = 24;
 // Branch labels are annotations on the graph and must paint above the container
 // frames they sit inside — a foreach/while body is a 50%-opaque panel that would
 // otherwise veil them. `.react-flow__edgelabel-renderer` ships no z-index, and it
@@ -98,7 +98,9 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
 
   const fullLabel = edgeData?.label ?? '';
   const truncated =
-    fullLabel.length > LABEL_TRUNCATE ? `${fullLabel.slice(0, LABEL_TRUNCATE - 1)}…` : fullLabel;
+    fullLabel.length > EDGE_LABEL_MAX_CHARS
+      ? `${fullLabel.slice(0, EDGE_LABEL_MAX_CHARS - 1)}…`
+      : fullLabel;
 
   return (
     <>

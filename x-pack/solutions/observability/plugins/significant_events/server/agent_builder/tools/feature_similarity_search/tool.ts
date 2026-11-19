@@ -9,7 +9,7 @@ import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-com
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
+import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -21,14 +21,25 @@ import {
   featureCandidateSchema,
   searchFeaturesForCandidates,
 } from '../../../lib/significant_events/features/feature_similarity_search';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { reportToolFailure } from '../tool_failure';
+import {
+  loadSourceCatalog,
+  resolveSourcesBySlugOrId,
+  presentSlug,
+  restrictCatalogToReadable,
+  toSourceRef,
+} from '../../utils/resolve_source_slugs';
 
 export const SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID =
   platformSignificantEventsTools.searchSimilarFeatures;
 
 const featureSimilaritySearchSchema = lazySchema(() =>
   z.object({
-    stream_name: z.string().max(MAX_ID_LENGTH).describe('Stream containing the known KI features.'),
+    slug: nightshiftSourceSlugField(
+      'Source being analyzed; the search itself spans every source you can read. Disabled sources are included.'
+    ),
     candidates: z
       .array(featureCandidateSchema)
       .max(MAX_SEARCH_CANDIDATES)
@@ -40,10 +51,12 @@ export const createFeatureSimilaritySearchTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   getScopedClients: GetScopedClients;
   server: SignificantEventsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof featureSimilaritySearchSchema> => {
   const toolDefinition: BuiltinToolDefinition<typeof featureSimilaritySearchSchema> = {
     id: SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
@@ -59,7 +72,7 @@ export const createFeatureSimilaritySearchTool = ({
     schema: featureSimilaritySearchSchema,
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
-    handler: async ({ stream_name: streamName, candidates }, context) => {
+    handler: async ({ slug, candidates }, context) => {
       try {
         const scopedClients = await getScopedClients({ request: context.request });
         await assertSignificantEventsAccess({
@@ -67,17 +80,44 @@ export const createFeatureSimilaritySearchTool = ({
           licensing: scopedClients.licensing,
         });
         await assertCanReadSignificantEvents({ request: context.request, server });
-        await scopedClients.streamsClient.getStream(streamName);
+        const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
+        // Stored features are read as the internal user, so check the caller's own data access first.
+        await scopedClients.sourcesClient.assertReadable(source.id);
+        const readableCatalog = await restrictCatalogToReadable(
+          catalog,
+          scopedClients.sourcesClient
+        );
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
-        const groups = await searchFeaturesForCandidates({ kiClient, streamName, candidates });
+        const groups = await searchFeaturesForCandidates({
+          kiClient,
+          sourceIds: [...readableCatalog.byId.keys()],
+          currentSourceId: source.id,
+          getSourceSlug: (id) => presentSlug(catalog, id),
+          candidates,
+        });
+        const sourceRef = toSourceRef(source);
 
         return {
-          results: groups.map((group) => ({ type: ToolResultType.other, data: group })),
+          results: groups.map((group) => ({
+            type: ToolResultType.other,
+            data: { ...sourceRef, ...group },
+          })),
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        logger.warn(`Feature similarity search failed: ${message}`);
+        reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
+          errorLogMessage: `Feature similarity search failed: ${message}`,
+          errorLogLevel: 'warn',
+          logger,
+          telemetry,
+          request: context.request,
+          runContext: context.runContext,
+          itemCount: candidates.length,
+        });
         return {
           results: [
             {

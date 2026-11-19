@@ -16,6 +16,7 @@ import { executeGenerationWorkflow } from '@kbn/discoveries/impl/attack_discover
 import type { WorkflowConfig } from '@kbn/discoveries/impl/attack_discovery/generation/types';
 import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { withTimeout } from '@kbn/std';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getAlertsIndexForSpace } from '../../../../lib/get_alerts_index_for_space';
@@ -26,9 +27,6 @@ import { resolveConnectorDetails } from '../../../../workflows/helpers/resolve_c
 import { ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS } from '../../../../workflows/steps/run_step/constants';
 
 export const RUN_ATTACK_DISCOVERY_TOOL_ID = 'security.attack-discovery.run';
-
-const SOFT_DEADLINE_SENTINEL = Symbol('attack-discovery-run-soft-deadline');
-type SoftDeadlineSentinel = typeof SOFT_DEADLINE_SENTINEL;
 
 export interface RunAttackDiscoveryToolDeps {
   analytics?: AnalyticsServiceSetup;
@@ -310,13 +308,12 @@ export const getRunAttackDiscoveryTool = ({
 
       const pipelinePromise = executeGenerationWorkflow(executeParams);
 
-      const softDeadlinePromise = new Promise<SoftDeadlineSentinel>((resolve) => {
-        setTimeout(() => resolve(SOFT_DEADLINE_SENTINEL), ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS);
+      const outcome = await withTimeout({
+        promise: pipelinePromise,
+        timeoutMs: ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS,
       });
 
-      const raced = await Promise.race([pipelinePromise, softDeadlinePromise]);
-
-      if (raced === SOFT_DEADLINE_SENTINEL) {
+      if (outcome.timedout) {
         logger.info(
           `Attack Discovery tool sync pipeline exceeded soft deadline of ${ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS}ms; returning execution_uuid for slow-path resume (execution=${executionUuid})`
         );
@@ -334,6 +331,7 @@ export const getRunAttackDiscoveryTool = ({
         };
       }
 
+      const raced = outcome.value;
       if (raced.outcome === 'validation_succeeded') {
         const { alertRetrievalResult, generationResult, validationResult } = raced;
 

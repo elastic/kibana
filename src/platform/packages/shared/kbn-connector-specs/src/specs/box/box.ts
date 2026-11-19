@@ -68,7 +68,7 @@ export const Box: ConnectorSpec = {
   metadata: {
     id: '.box',
     displayName: 'Box',
-    description: i18n.translate('core.kibanaConnectorSpecs.box.metadata.description', {
+    description: i18n.translate('connectorSpecs.box.metadata.description', {
       defaultMessage:
         'Search files and folders, read content, and query enterprise content using Box AI',
     }),

@@ -17,6 +17,7 @@ jest.mock('execa', () => jest.fn());
 jest.mock('./constants', () => ({
   LINT_LOG_PREFIX: '[oxlint]',
   OXLINT_CONFIG_PATH: 'oxlint.config.mjs',
+  OXLINT_FIX_CONFIG_PATH: 'oxlint.fix.config.mjs',
   oxlintBinPath: '/bin/oxlint',
 }));
 jest.mock('fs/promises', () => ({ ...jest.requireActual('fs/promises'), readFile: jest.fn() }));
@@ -101,22 +102,6 @@ describe('oxlint lintFiles', () => {
       'json',
       'src/dev/file.ts',
     ]);
-  });
-
-  it('runs oxlint without paths for a full-repo scope and forwards --fix', async () => {
-    respondWith({ exitCode: 0, numberOfFiles: 5000 });
-
-    const result = await lintFiles(log, files, { fix: true, fullRepo: true });
-
-    expect(passedArgs(0)).toEqual([
-      '/bin/oxlint',
-      '--config',
-      'oxlint.config.mjs',
-      '--format',
-      'json',
-      '--fix',
-    ]);
-    expect(result.lintedFileCount).toBe(5000);
   });
 
   it('reports failed files once, sorted, and counts warnings', async () => {
@@ -220,43 +205,53 @@ describe('oxlint lintFiles', () => {
     await expect(lintFiles(log, many)).rejects.toThrow('[oxlint] exited with 2:\nparser crashed');
   });
 
-  it('re-runs --fix on files whose overlapping fixes need another pass', async () => {
+  it('fixes only files with errors, with the errors-only config, until they stop changing', async () => {
     respondWith(
+      // errors-only scan
       {
         exitCode: 1,
-        numberOfFiles: 2,
+        numberOfFiles: 5000,
         diagnostics: [{ filename: 'src/a.ts', severity: 'error' }],
       },
-      { exitCode: 0, numberOfFiles: 1 }
+      // two fix passes: the first changes the file, the second does not
+      { exitCode: 0 },
+      { exitCode: 0 },
+      // report with the full config
+      {
+        exitCode: 0,
+        numberOfFiles: 5000,
+        diagnostics: [{ filename: 'src/b.ts', severity: 'warning' }],
+      }
     );
-    mockReadFile.mockResolvedValueOnce('both headers').mockResolvedValueOnce('one header');
+    mockReadFile
+      .mockResolvedValueOnce('no header')
+      .mockResolvedValueOnce('header')
+      .mockResolvedValueOnce('header')
+      .mockResolvedValueOnce('header');
 
-    const result = await lintFiles(log, files, { fix: true });
+    const result = await lintFiles(log, files, { fix: true, fullRepo: true });
 
-    expect(mockExeca).toHaveBeenCalledTimes(2);
-    expect(passedArgs(1)).toEqual([
+    const fixConfig = ['/bin/oxlint', '--config', 'oxlint.fix.config.mjs', '--format', 'json'];
+    expect(mockExeca).toHaveBeenCalledTimes(4);
+    expect(passedArgs(0)).toEqual(fixConfig);
+    expect(passedArgs(1)).toEqual([...fixConfig, '--fix', 'src/a.ts']);
+    expect(passedArgs(2)).toEqual([...fixConfig, '--fix', 'src/a.ts']);
+    expect(passedArgs(3)).toEqual([
       '/bin/oxlint',
       '--config',
       'oxlint.config.mjs',
       '--format',
       'json',
-      '--fix',
-      'src/a.ts',
     ]);
-    expect(result).toEqual({ failedFiles: [], lintedFileCount: 2, warningCount: 0 });
+    expect(result).toEqual({ failedFiles: [], lintedFileCount: 5000, warningCount: 1 });
   });
 
-  it('stops fix passes once a file no longer changes', async () => {
-    const unfixable: FakeRun = {
-      exitCode: 1,
-      diagnostics: [{ filename: 'src/a.ts', severity: 'error' }],
-    };
-    respondWith({ ...unfixable, numberOfFiles: 2 }, unfixable);
-    mockReadFile.mockResolvedValue('unchanged');
+  it('does not run --fix when no file has errors', async () => {
+    respondWith({ exitCode: 0, numberOfFiles: 2 }, { exitCode: 0, numberOfFiles: 2 });
 
-    const result = await lintFiles(log, files, { fix: true });
+    await lintFiles(log, files, { fix: true });
 
     expect(mockExeca).toHaveBeenCalledTimes(2);
-    expect(result).toEqual({ failedFiles: ['src/a.ts'], lintedFileCount: 2, warningCount: 0 });
+    expect(mockExeca.mock.calls.flatMap(([, args]) => args)).not.toContain('--fix');
   });
 });

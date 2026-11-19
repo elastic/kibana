@@ -8,28 +8,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps, RouteProps } from 'react-router-dom';
 import type { AppMountParameters, ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
-import { InspectorContextProvider, useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { DASHBOARD_LABEL, RumHome } from '../components/app/rum_dashboard/rum_home';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 
-import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { createStaticDataView } from '../services/rest/data_view';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
-import { PluginContext } from '../context/plugin_context';
+import { UxProviders } from './ux_providers';
 
 export type BreadcrumbTitle<T = {}> =
   | string
@@ -75,8 +69,6 @@ function UxApp() {
   );
 }
 
-export const uxRouter = createRouter({});
-
 export function UXAppRoot({
   appMountParameters,
   core,
@@ -116,7 +108,8 @@ export function UXAppRoot({
             application: core.application,
           }}
         >
-          <KibanaContextProvider
+          <UxProviders
+            core={core}
             services={{
               ...core,
               ...plugins,
@@ -130,39 +123,17 @@ export function UXAppRoot({
               dataViews,
               lens,
             }}
+            pluginContext={{
+              appMountParameters,
+              exploratoryView,
+              observabilityShared,
+              spaceId,
+              isDev,
+            }}
+            history={history}
           >
-            <KibanaThemeProvider
-              theme={core.theme}
-              modify={{
-                breakpoint: {
-                  xxl: 1600,
-                  xxxl: 2000,
-                },
-              }}
-            >
-              <PluginContext.Provider
-                value={{
-                  appMountParameters,
-                  exploratoryView,
-                  observabilityShared,
-                  spaceId,
-                  isDev,
-                }}
-              >
-                <RouterProvider history={history} router={uxRouter}>
-                  <DatePickerContextProvider>
-                    <InspectorContextProvider>
-                      <UrlParamsProvider>
-                        <CsmSharedContextProvider>
-                          <UxApp />
-                        </CsmSharedContextProvider>
-                      </UrlParamsProvider>
-                    </InspectorContextProvider>
-                  </DatePickerContextProvider>
-                </RouterProvider>
-              </PluginContext.Provider>
-            </KibanaThemeProvider>
-          </KibanaContextProvider>
+            <UxApp />
+          </UxProviders>
         </RedirectAppLinks>
       </div>
     </KibanaRenderContextProvider>

@@ -14,7 +14,7 @@ export const PATH_SELECTION_APP = 'vectordb/getting_started';
 export const INGEST_STEP_APP = 'vectordb/getting_started/ingest';
 export const SEARCH_STEP_APP = 'vectordb/getting_started/search';
 
-export const DEPLOYMENT_STATS_API_PATH = '/internal/serverless_vectordb/deployment_stats';
+export const DEPLOYMENT_STATS_API_PATH = '/internal/elasticsearch_home/deployment_stats';
 export const API_KEY_API_PATH = '/internal/serverless_vectordb/api_key';
 
 /** Mirrors `ONBOARDING_SEEN_STORAGE_KEY` in `@kbn/vectordb-onboarding`. */

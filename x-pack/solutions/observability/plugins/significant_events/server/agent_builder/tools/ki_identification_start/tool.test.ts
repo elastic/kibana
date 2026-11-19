@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { createKiIdentificationStartTool } from './tool';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import {
+  createKiIdentificationStartTool,
+  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
+} from './tool';
 import {
   createMockToolContext,
   createSignificantEventsServer,
+  mockSourcesClient,
   type NightshiftFeaturePrivilege,
 } from '../../utils/test_helpers';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
@@ -17,7 +22,12 @@ import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onb
 describe('createKiIdentificationStartTool', () => {
   const telemetry = {
     trackAgentToolKiIdentificationStarted: jest.fn(),
+    trackAgentToolFailed: jest.fn(),
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   const setup = ({
     featurePrivilege = 'all',
@@ -32,9 +42,16 @@ describe('createKiIdentificationStartTool', () => {
       }),
       runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
     };
+    // `run()` resolves the slug and query revision from the catalog itself, so it needs `get`.
+    const sourcesGet = jest.fn().mockResolvedValue({
+      source: { slug: 'logs.nginx', esql_updated_at: '2026-01-01T00:00:00.000Z' },
+    });
+    const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesGet });
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      logger: loggingSystemMock.createLogger(),
+      getSourcesClient,
     });
     const maintenanceService = {
       getState: jest.fn().mockResolvedValue('enabled'),
@@ -42,21 +59,32 @@ describe('createKiIdentificationStartTool', () => {
 
     const tool = createKiIdentificationStartTool({
       server: createSignificantEventsServer({ featurePrivilege }),
+      logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
       maintenanceService: maintenanceService as never,
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: mockSourcesClient(['logs.nginx']),
+      }) as never,
     });
     const context = createMockToolContext();
 
-    return { tool, context, managementApi, maintenanceService };
+    return {
+      tool,
+      context,
+      managementApi,
+      maintenanceService,
+      streamsKIsOnboardingClient,
+      sourcesGet,
+    };
   };
 
   it('triggers onboarding workflow and returns immediately by default', async () => {
-    const { tool, context, managementApi } = setup();
+    const { tool, context, managementApi, sourcesGet } = setup();
 
     const result = await tool.handler(
       {
-        stream_name: 'logs.nginx',
+        slug: 'logs.nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
       },
       context
@@ -66,16 +94,22 @@ describe('createKiIdentificationStartTool', () => {
       expect.objectContaining({ id: 'system-streams-ki-onboarding' }),
       'default',
       expect.objectContaining({
-        streamName: 'logs.nginx',
+        sourceId: 'logs.nginx',
+        sourceSlug: 'logs.nginx',
+        sourceRevision: '2026-01-01T00:00:00.000Z',
         skipFeatures: false,
         skipQueries: false,
       }),
       context.request
     );
+    expect(sourcesGet).toHaveBeenCalledWith('logs.nginx');
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({
-        kibanaPath: '/app/significant_events/knowledge_indicators?stream=logs.nginx',
+        kibanaPath: '/app/nightshift/sources',
+        slug: 'logs.nginx',
+        title: 'logs.nginx',
+        view_name: '$.nightshift.sources.default.logs.nginx',
       });
     }
   });
@@ -86,7 +120,7 @@ describe('createKiIdentificationStartTool', () => {
 
     const result = await tool.handler(
       {
-        stream_name: 'logs.nginx',
+        slug: 'logs.nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
       },
       context
@@ -100,11 +134,61 @@ describe('createKiIdentificationStartTool', () => {
     }
   });
 
+  it('reports an unknown source by its cause, without the slug, and still names it to the agent', async () => {
+    const { tool, context, managementApi } = setup();
+
+    const result = await tool.handler(
+      { slug: 'motel-ingest-collector', steps: [KIsOnboardingStep.FeaturesIdentification] },
+      context
+    );
+
+    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
+    expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledTimes(1);
+    expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error_message: 'unknown_source' }),
+      expect.anything()
+    );
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool_id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
+        error_code: 'unknown_source',
+      }),
+      expect.anything()
+    );
+    expect(result).toMatchObject({
+      results: [
+        {
+          type: 'error',
+          data: {
+            message:
+              'Failed to start KI identification background task for "motel-ingest-collector": Source not found in this space: motel-ingest-collector',
+          },
+        },
+      ],
+    });
+  });
+
+  it('keeps the message of a failure the caller did not cause', async () => {
+    const { tool, context, managementApi } = setup();
+    managementApi.runWorkflow.mockRejectedValueOnce(new Error('version conflict'));
+
+    await tool.handler(
+      { slug: 'logs.nginx', steps: [KIsOnboardingStep.FeaturesIdentification] },
+      context
+    );
+
+    expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledTimes(1);
+    expect(telemetry.trackAgentToolKiIdentificationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error_message: 'version conflict' }),
+      expect.anything()
+    );
+  });
+
   it('does not let a Nightshift reader start onboarding', async () => {
     const { tool, context, managementApi } = setup({ featurePrivilege: 'read' });
 
     const result = await tool.handler(
-      { stream_name: 'logs.nginx', steps: [KIsOnboardingStep.FeaturesIdentification] },
+      { slug: 'logs.nginx', steps: [KIsOnboardingStep.FeaturesIdentification] },
       context
     );
 

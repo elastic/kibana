@@ -4,7 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
-CONFIG_PATH="src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts"
+CONFIG_PATH="x-pack/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts"
 
 echo "--- Workflow Schema OOM Prevention Test"
 echo "Config: $CONFIG_PATH"
@@ -23,7 +23,7 @@ for mode in "${RUN_MODES[@]}"; do
   start=$(date +%s)
 
   set +e
-  node scripts/scout run-tests --location local --serverConfigSet workflows_oom_testing $mode --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
+  node scripts/scout run-tests --location local $mode --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
   EXIT_CODE=$?
   set -e
 

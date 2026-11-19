@@ -5,7 +5,37 @@
  * 2.0.
  */
 
-import { alertEventSchema, buildRuleEventDocument } from './alert_events';
+import { signalEventStatusSchema } from '@kbn/alerting-v2-schemas';
+import {
+  alertEventSchema,
+  alertEventStatus,
+  buildRuleEventDocument,
+  getAlertEventsResourceDefinition,
+} from './alert_events';
+
+describe('signal event statuses', () => {
+  it('match the stored event statuses, so Create Signal can write every one of them', () => {
+    expect([...signalEventStatusSchema.options].sort()).toEqual(
+      Object.values(alertEventStatus).sort()
+    );
+  });
+});
+
+describe('getAlertEventsResourceDefinition', () => {
+  it('has no retention by default', () => {
+    expect(getAlertEventsResourceDefinition().lifecycle).toEqual({});
+  });
+
+  it('manages its lifecycle so retention changes reach existing data streams', () => {
+    expect(getAlertEventsResourceDefinition().manageLifecycle).toBe(true);
+  });
+
+  it('sets data_retention when a retention is provided', () => {
+    expect(getAlertEventsResourceDefinition({ dataRetention: '90d' }).lifecycle).toEqual({
+      data_retention: '90d',
+    });
+  });
+});
 
 describe('buildRuleEventDocument', () => {
   const baseParams = {

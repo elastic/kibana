@@ -29,7 +29,12 @@ export type RunWorkflowParams = RunWorkflowOptions & {
  *
  * runWorkflow({
  *   id: workflowId,
- *   inputs: { alertIds: ['alert-1'] }
+ *   inputs: {
+ *     event: {
+ *       triggerType: 'alert',
+ *       alertIds: [{ _id: 'alert-1', _index: '.alerts-security.alerts-default' }],
+ *     },
+ *   },
  * });
  * ```
  */

@@ -1,0 +1,5 @@
+type: string
+description: >
+  The current version of the attachment. To retrieve it, use the get case attachment API.
+  If the attachment changed since you read it, the request fails with a 409 status code.
+example: WzIwNDMxLDFd

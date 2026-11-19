@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { z } from '@kbn/zod';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { routeId } from '../../zod_query';
@@ -18,12 +19,19 @@ import { privateLocationSavedObjectName } from '../../../../common/saved_objects
 
 export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined> = () => ({
   method: 'DELETE',
-  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
+  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{id}',
+  options: {
+    summary: 'Delete a private location',
+    description:
+      'You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.\n\nA location cannot be deleted if it has associated monitors in use in any space. You must delete all monitors associated with the location before deleting the location.',
+    operationId: 'delete-private-location',
+    oasOperationObject: () => path.join(__dirname, 'examples/delete_private_location.yaml'),
+  },
   validate: {},
   validation: {
     request: {
       params: z.strictObject({
-        locationId: routeId,
+        id: routeId.describe('The unique identifier of the private location to delete.'),
       }),
     },
   },
@@ -41,7 +49,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
 
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
-    const { locationId } = request.params as { locationId: string };
+    const { id: locationId } = request.params;
 
     const { locations } = await getPrivateLocationsAndAgentPolicies(
       savedObjectsClient,

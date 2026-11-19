@@ -11,13 +11,9 @@ import { z } from '@kbn/zod';
 import { VIEW_MODE } from '@kbn/discover-session-constants';
 
 export const viewModeSchema = z
-  .union([
-    z.literal(VIEW_MODE.DOCUMENT_LEVEL),
-    z.literal(VIEW_MODE.PATTERN_LEVEL),
-    z.literal(VIEW_MODE.AGGREGATED_LEVEL),
-  ])
+  .enum([VIEW_MODE.DOCUMENT_LEVEL, VIEW_MODE.PATTERN_LEVEL, VIEW_MODE.AGGREGATED_LEVEL])
   .default(VIEW_MODE.DOCUMENT_LEVEL)
   .meta({
     description:
-      'Discover view mode. Choose "documents" (search hits), "patterns" (pattern analysis), or "aggregated" (field statistics).',
+      'The Discover view mode: `documents` (search hits), `patterns` (pattern analysis), or `aggregated` (field statistics).',
   });

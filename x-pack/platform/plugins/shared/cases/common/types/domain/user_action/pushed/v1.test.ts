@@ -7,14 +7,14 @@
 
 import { UserActionTypes } from '../action/v1';
 import {
-  PushedUserActionPayloadWithoutConnectorIdRt,
-  PushedUserActionPayloadRt,
-  PushedUserActionWithoutConnectorIdRt,
-  PushedUserActionRt,
+  PushedUserActionPayloadWithoutConnectorIdSchema,
+  PushedUserActionPayloadSchema,
+  PushedUserActionWithoutConnectorIdSchema,
+  PushedUserActionSchema,
 } from './v1';
 
 describe('Pushed', () => {
-  describe('PushedUserActionPayloadWithoutConnectorIdRt', () => {
+  describe('PushedUserActionPayloadWithoutConnectorIdSchema', () => {
     const defaultRequest = {
       externalService: {
         connector_name: 'My SN connector',
@@ -31,39 +31,31 @@ describe('Pushed', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = PushedUserActionPayloadWithoutConnectorIdRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = PushedUserActionPayloadWithoutConnectorIdSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = PushedUserActionPayloadWithoutConnectorIdRt.decode({
+    it('strips unknown fields', () => {
+      const result = PushedUserActionPayloadWithoutConnectorIdSchema.safeParse({
         ...defaultRequest,
         foo: 'bar',
       });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from externalService', () => {
-      const query = PushedUserActionPayloadWithoutConnectorIdRt.decode({
+    it('strips unknown fields from externalService', () => {
+      const result = PushedUserActionPayloadWithoutConnectorIdSchema.safeParse({
         externalService: { ...defaultRequest.externalService, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('PushedUserActionPayloadRt', () => {
+  describe('PushedUserActionPayloadSchema', () => {
     const defaultRequest = {
       externalService: {
         connector_id: 'servicenow-1',
@@ -81,36 +73,28 @@ describe('Pushed', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = PushedUserActionPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = PushedUserActionPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = PushedUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = PushedUserActionPayloadSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from externalService', () => {
-      const query = PushedUserActionPayloadRt.decode({
+    it('strips unknown fields from externalService', () => {
+      const result = PushedUserActionPayloadSchema.safeParse({
         externalService: { ...defaultRequest.externalService, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('PushedUserActionWithoutConnectorIdRt', () => {
+  describe('PushedUserActionWithoutConnectorIdSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.pushed,
       payload: {
@@ -130,37 +114,32 @@ describe('Pushed', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = PushedUserActionWithoutConnectorIdRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = PushedUserActionWithoutConnectorIdSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = PushedUserActionWithoutConnectorIdRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+    it('strips unknown fields', () => {
+      const result = PushedUserActionWithoutConnectorIdSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
       });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      const query = PushedUserActionWithoutConnectorIdRt.decode({
+    it('strips unknown fields from payload', () => {
+      const result = PushedUserActionWithoutConnectorIdSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('PushedUserActionRt', () => {
+  describe('PushedUserActionSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.pushed,
       payload: {
@@ -181,33 +160,25 @@ describe('Pushed', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = PushedUserActionRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = PushedUserActionSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = PushedUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = PushedUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from externalService', () => {
-      const query = PushedUserActionRt.decode({
+    it('strips unknown fields from externalService', () => {
+      const result = PushedUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

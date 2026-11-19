@@ -10,9 +10,11 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import {
   DATE_WITH_POD_DATA,
+  DATE_WITH_SEMCONV_DATA,
   DATE_WITH_SEMCONV_POD_DATA,
   EXTENDED_TIMEOUT,
   POD_NAMES,
+  SEMCONV_HOST1_NAME,
   SEMCONV_PODS,
 } from '../../fixtures/constants';
 import {
@@ -27,15 +29,9 @@ test.describe(
   'Pod Metric Detail - OpenTelemetry kubeletstats',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // Sequential project (`playwright.config.ts` / `testDir: './tests'`). The flag
-    // override is server-wide, so this must not run beside parallel Inventory.
-    // Sequential specs also do not run `parallel_tests/global.setup.ts`.
-    test.beforeAll(async ({ apiServices, esClient, kbnUrl, log, config }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          'observability.infra.podSchemaSelectorEnabled': true,
-        },
-      });
+    // Sequential project (`playwright.config.ts` / `testDir: './tests'`). Sequential
+    // specs also do not run `parallel_tests/global.setup.ts`.
+    test.beforeAll(async ({ esClient, kbnUrl, log, config }) => {
       log.info('Sequential suite: ingesting pod metric detail SemConv fixtures');
       await ingestInventoryPodsSemconvSynthtraceData({ esClient, kbnUrl, log, config });
     });
@@ -46,14 +42,9 @@ test.describe(
       await inventoryPage.goToPage();
     });
 
-    test.afterAll(async ({ apiServices, esClient, kbnUrl, log, config }) => {
+    test.afterAll(async ({ esClient, kbnUrl, log, config }) => {
       log.info('Sequential suite: cleaning pod metric detail SemConv fixtures');
       await cleanInventoryPodsSemconvSynthtraceData({ esClient, kbnUrl, log, config });
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          'observability.infra.podSchemaSelectorEnabled': false,
-        },
-      });
     });
 
     test('opens kubeletstats charts from an OpenTelemetry tile', async ({
@@ -97,6 +88,35 @@ test.describe(
         nodeType: 'pod',
         schema: 'semconv',
       });
+    });
+
+    test('shows the node metadata resolved from the OpenTelemetry host record', async ({
+      page,
+      pageObjects: { inventoryPage },
+    }) => {
+      // `DATE_WITH_SEMCONV_DATA` is the only window that also carries semconv host documents, and
+      // the pod metadata strip is resolved through `k8s.node.name` -> the host record.
+      await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
+      await inventoryPage.showPods();
+      await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
+        timeout: EXTENDED_TIMEOUT,
+      });
+
+      const waffleNode = await inventoryPage.podWaffleNodeByName(SEMCONV_POD.name);
+      await waffleNode.container.click();
+      await expect(inventoryPage.contextMenuMetricsLink).toBeVisible();
+      await inventoryPage.contextMenuMetricsLink.click();
+
+      await expect(page).toHaveURL(new RegExp(`/app/metrics/detail/pod/${SEMCONV_POD.uid}`));
+
+      const item = (field: string) => page.testSubj.locator(`infraMetadataDetailsItem-${field}`);
+
+      await expect(item('cloud.provider')).toContainText('aws', { timeout: EXTENDED_TIMEOUT });
+      // `cloud.instance.id` is absent on OpenTelemetry data; `cloud.resource_id` carries it.
+      await expect(item('cloud.instance.id')).toContainText(`instance-${SEMCONV_HOST1_NAME}`);
+      await expect(item('host.os.name')).toContainText('linux');
+      // No semantic conventions attribute maps to `host.os.kernel`.
+      await expect(item('host.os.kernel')).toContainText('--');
     });
 
     test('keeps an Elastic Common Schema tile off the kubeletstats request', async ({

@@ -49,7 +49,7 @@ const existingLocation = {
 const makeRouteContext = (body: Record<string, unknown>) => {
   const response = httpServerMock.createResponseFactory();
   const routeContext = {
-    request: { params: { locationId: 'loc-1' }, body },
+    request: { params: { id: 'loc-1' }, body },
     response,
     spaceId: 'default',
     savedObjectsClient: {},

@@ -22,6 +22,7 @@ import {
 } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
@@ -30,12 +31,13 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
+import { getGraphFetchErrorCategory } from '../../hooks/graph_fetch_error';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
 import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
 import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
-import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
-import { analyzeDocuments } from '../node/label_node/analyze_documents';
+import type { DocumentAnalysisOutput } from '../node/event_node/analyze_documents';
+import { analyzeDocuments } from '../node/event_node/analyze_documents';
 import {
   ENTITY_ID,
   EVENT_ID,
@@ -50,25 +52,50 @@ import {
   addFilter,
 } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
-import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
+import { useEventNodeExpandPopover } from '../popovers/node_expand/use_event_node_expand_popover';
 import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from '../popovers/primitives/list_graph_popover';
 import type { NodeProps, NodeViewModel } from '../types';
-import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
+import { isEventNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
 import { getEntityTimelineFilter } from './entity_timeline_filters';
+import type {
+  GraphExpansionAction,
+  GraphNodeType,
+  GraphTelemetryEvent,
+  GraphTelemetryHandler,
+  GraphToggleState,
+} from '../graph_telemetry';
+import {
+  getEmptyStateReason,
+  getFiltersChangedEvent,
+  getSearchSubmittedEvent,
+  isExpansionAction,
+} from '../graph_telemetry';
+
+interface PendingExpansion {
+  action: GraphExpansionAction;
+  nodeType: GraphNodeType;
+  state: GraphToggleState;
+  /** Number of nodes in the graph when the toggle was clicked. */
+  previousNodeCount: number;
+  /** Set once the fetch triggered by the toggle has been seen in flight. */
+  fetchObserved: boolean;
+}
 
 const useGraphPopovers = ({
   scopeId,
   onOpenEventPreview,
   onOpenNetworkPreview,
+  onTelemetryEvent,
 }: {
   scopeId: string;
   onOpenEventPreview?: (node: NodeViewModel) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
+  onTelemetryEvent?: GraphTelemetryHandler;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
@@ -78,9 +105,18 @@ const useGraphPopovers = ({
   const [currentEventText, setCurrentEventText] = useState<string>('');
   // Async-hydrated: `null` until the EUID chunk loads, in which case entity filters fall back to
   // the unnarrowed sourceFields (see getIdentityFilterFields).
-  const euidApi = useEntityStoreEuidApi()?.euid;
-  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview, euidApi);
-  const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
+  const euidApi = useEntityStoreEuidApi() ?? undefined;
+  const nodeExpandPopover = useEntityNodeExpandPopover(
+    scopeId,
+    onOpenEventPreview,
+    euidApi,
+    onTelemetryEvent
+  );
+  const eventExpandPopover = useEventNodeExpandPopover(
+    scopeId,
+    onOpenEventPreview,
+    onTelemetryEvent
+  );
   // Pass onOpenNetworkPreview so popover items call it directly instead of relying on PreviewLink.
   const onNetworkPreviewForPopover = useMemo(
     () =>
@@ -93,14 +129,14 @@ const useGraphPopovers = ({
 
   const openPopoverCallback = useCallback(
     (cb: Function, ...args: unknown[]) => {
-      [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover].forEach(
+      [nodeExpandPopover, eventExpandPopover, ipPopover, countryFlagsPopover, eventPopover].forEach(
         ({ actions: { closePopover } }) => {
           closePopover();
         }
       );
       cb(...args);
     },
-    [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover]
+    [nodeExpandPopover, eventExpandPopover, ipPopover, countryFlagsPopover, eventPopover]
   );
 
   const createIpClickHandler = useCallback(
@@ -139,7 +175,7 @@ const useGraphPopovers = ({
 
   return {
     nodeExpandPopover,
-    labelExpandPopover,
+    eventExpandPopover,
     ipPopover,
     countryFlagsPopover,
     eventPopover,
@@ -275,6 +311,12 @@ export interface GraphInvestigationProps {
    * Whether to show toggle search action button. Defaults value is false.
    */
   showToggleSearch?: boolean;
+
+  /**
+   * Optional callback invoked with semantic engagement events (popover actions, filter and
+   * search changes). Events carry enums and booleans only. When omitted, nothing is reported.
+   */
+  onTelemetryEvent?: GraphTelemetryHandler;
 }
 
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' } as const;
@@ -299,6 +341,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onInvestigateInTimeline,
     onOpenEventPreview,
     onOpenNetworkPreview,
+    onTelemetryEvent,
   }: GraphInvestigationProps) => {
     const emptyEntityIds = useMemo(() => [], []);
 
@@ -400,6 +443,21 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     );
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
+    const wasLoadedAndEmptyRef = useRef(false);
+    const pendingExpansionRef = useRef<PendingExpansion | undefined>();
+    const latestNodeCountRef = useRef(0);
+    const isFetchingRef = useRef(false);
+
+    const onFiltersUpdated = useCallback(
+      (filters: Filter[]) => {
+        const event = getFiltersChangedEvent(searchFilters, filters);
+        if (event) onTelemetryEvent?.(event);
+        // The next fetch result is no longer attributable to the node action.
+        pendingExpansionRef.current = undefined;
+        setSearchFilters(filters);
+      },
+      [searchFilters, setSearchFilters, onTelemetryEvent]
+    );
 
     const {
       services: { uiSettings, notifications },
@@ -445,7 +503,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       },
     });
 
-    const euidApi = useEntityStoreEuidApi()?.euid;
+    const euidApi = useEntityStoreEuidApi() ?? undefined;
     const entityTimelineFilters = useMemo(() => {
       if (originEventIds?.length) return [];
       const filters: Filter[] = [];
@@ -519,15 +577,78 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     ]);
 
     useEffect(() => {
+      latestNodeCountRef.current = data?.nodes.length ?? 0;
+    }, [data?.nodes]);
+
+    useEffect(() => {
+      isFetchingRef.current = isFetching;
+    }, [isFetching]);
+
+    useEffect(() => {
+      const pending = pendingExpansionRef.current;
+      if (!pending) return;
+      if (isFetching) {
+        pending.fetchObserved = true;
+        return;
+      }
+      if (!pending.fetchObserved) return;
+
+      pendingExpansionRef.current = undefined;
+      if (isError) return;
+      onTelemetryEvent?.({
+        type: 'expansion_result',
+        action: pending.action,
+        nodeType: pending.nodeType,
+        state: pending.state,
+        // Node ids are not stable across responses, so only the node count is comparable.
+        nodesAdded: (data?.nodes.length ?? 0) > pending.previousNodeCount,
+        nodesLimitReached: data?.messages?.includes(ApiMessageCode.ReachedNodesLimit) ?? false,
+      });
+    }, [data, isFetching, isError, onTelemetryEvent]);
+
+    // Remembers expansion toggles so the outcome can be reported once their fetch completes.
+    const trackExpansionTelemetryEvent = useCallback(
+      (event: GraphTelemetryEvent) => {
+        if (event.type === 'node_action') {
+          const { action, nodeType, state } = event;
+          if (isExpansionAction(action) && state) {
+            const pending = pendingExpansionRef.current;
+            pendingExpansionRef.current = {
+              action,
+              nodeType,
+              state,
+              previousNodeCount: pending?.previousNodeCount ?? latestNodeCountRef.current,
+              // A fetch already in flight stays `isFetching` through the query key change, so the
+              // effect below would never see it start.
+              fetchObserved: pending?.fetchObserved ?? isFetchingRef.current,
+            };
+          }
+        }
+        onTelemetryEvent?.(event);
+      },
+      [onTelemetryEvent]
+    );
+
+    useEffect(() => {
       const toasts = notifications?.toasts;
       if (isError && error && toasts) {
         showErrorToast(toasts, error);
       }
     }, [error, isError, notifications]);
 
+    const lastReportedErrorRef = useRef<unknown>();
+    useEffect(() => {
+      if (!isError || !error || lastReportedErrorRef.current === error) return;
+      lastReportedErrorRef.current = error;
+      onTelemetryEvent?.({
+        type: 'fetch_failed',
+        errorCategory: getGraphFetchErrorCategory(error),
+      });
+    }, [error, isError, onTelemetryEvent]);
+
     const {
       nodeExpandPopover,
-      labelExpandPopover,
+      eventExpandPopover,
       ipPopover,
       countryFlagsPopover,
       eventPopover,
@@ -539,12 +660,13 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       scopeId,
       onOpenEventPreview,
       onOpenNetworkPreview,
+      onTelemetryEvent: trackExpansionTelemetryEvent,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
-    const labelExpandButtonClickHandler = (...args: unknown[]) =>
-      openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
+    const eventExpandButtonClickHandler = (...args: unknown[]) =>
+      openPopoverCallback(eventExpandPopover.onNodeExpandButtonClick, ...args);
 
     // Converts a raw expand-popover itemsFn into the minimal NodeToolbarItem shape:
     // filters out separators and maps iconType + label + onClick + disabled + testSubject.
@@ -585,14 +707,14 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       [nodeItemsFn, toToolbarItemsFn]
     );
 
-    const { itemsFn: labelItemsFn } = labelExpandPopover;
-    const labelToolbarItemsFn = useMemo(
-      () => (labelItemsFn ? toToolbarItemsFn(labelItemsFn) : undefined),
-      [labelItemsFn, toToolbarItemsFn]
+    const { itemsFn: eventItemsFn } = eventExpandPopover;
+    const eventToolbarItemsFn = useMemo(
+      () => (eventItemsFn ? toToolbarItemsFn(eventItemsFn) : undefined),
+      [eventItemsFn, toToolbarItemsFn]
     );
     const isPopoverOpen = [
       nodeExpandPopover,
-      labelExpandPopover,
+      eventExpandPopover,
       ipPopover,
       countryFlagsPopover,
       eventPopover,
@@ -701,7 +823,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
             };
-          } else if (isLabelNode(node)) {
+          } else if (isEventNode(node)) {
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
             const numEvents = node.uniqueEventsCount ?? 0;
@@ -719,8 +841,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               ...node,
               isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
               isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
-              expandButtonClick: labelExpandButtonClickHandler,
-              toolbarItemsFn: labelToolbarItemsFn,
+              expandButtonClick: eventExpandButtonClickHandler,
+              toolbarItemsFn: eventToolbarItemsFn,
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
               eventClickHandler: createEventClickHandler(analysis, text),
@@ -740,7 +862,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       );
       // Callbacks (expandButtonClick, ipClickHandler, etc.) are excluded from deps intentionally —
       // they are stable or recreated from memoized state and do not affect layout or node keys.
-      // nodeToolbarItemsFn and labelToolbarItemsFn ARE included: they capture euidApi which
+      // nodeToolbarItemsFn and eventToolbarItemsFn ARE included: they capture euidApi which
       // hydrates asynchronously; excluding them would leave nodes with a stale factory until an
       // unrelated dep (e.g. searchFilters) triggers a rebuild.
       // searchFilters IS included: when a filter is toggled the node list recomputes so
@@ -755,7 +877,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       relationshipNodeSources,
       searchFilters,
       nodeToolbarItemsFn,
-      labelToolbarItemsFn,
+      eventToolbarItemsFn,
     ]);
 
     const searchFilterCounter = useMemo(() => {
@@ -772,6 +894,25 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       const queryCounter = kquery.query.trim().length > 0 ? 1 : 0;
       return filtersCount + queryCounter;
     }, [kquery.query, searchFilters]);
+
+    const isLoadedAndEmpty =
+      !isFetching && !isError && data !== undefined && data.nodes.length === 0;
+
+    // Reports once per transition into the loaded-and-empty state.
+    useEffect(() => {
+      const wasLoadedAndEmpty = wasLoadedAndEmptyRef.current;
+      wasLoadedAndEmptyRef.current = isLoadedAndEmpty;
+      if (!isLoadedAndEmpty || wasLoadedAndEmpty) return;
+
+      onTelemetryEvent?.({
+        type: 'empty_state_shown',
+        emptyReason: getEmptyStateReason({
+          hasActiveFilters: searchFilterCounter > 0,
+          timeRangeChanged:
+            timeRange.from !== initialTimeRange.from || timeRange.to !== initialTimeRange.to,
+        }),
+      });
+    }, [isLoadedAndEmpty, searchFilterCounter, timeRange, initialTimeRange, onTelemetryEvent]);
 
     const searchWarningMessage =
       searchFilters.filter(
@@ -838,9 +979,17 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                       ) : undefined
                     }
                     submitButtonStyle={'iconOnly'}
-                    onFiltersUpdated={setSearchFilters}
+                    onFiltersUpdated={onFiltersUpdated}
                     onQuerySubmit={(payload, isUpdate) => {
                       if (isUpdate) {
+                        const event = getSearchSubmittedEvent(
+                          { timeRange, query: kquery },
+                          payload
+                        );
+                        if (event) {
+                          onTelemetryEvent?.(event);
+                          pendingExpansionRef.current = undefined;
+                        }
                         setTimeRange({ ...payload.dateRange });
                         setKQuery(payload.query || EMPTY_QUERY);
                       } else {
@@ -899,7 +1048,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           </EuiFlexItem>
         </EuiFlexGroup>
         <nodeExpandPopover.PopoverComponent />
-        <labelExpandPopover.PopoverComponent />
+        <eventExpandPopover.PopoverComponent />
         <ipPopover.PopoverComponent />
         <countryFlagsPopover.PopoverComponent />
         <eventPopover.PopoverComponent />

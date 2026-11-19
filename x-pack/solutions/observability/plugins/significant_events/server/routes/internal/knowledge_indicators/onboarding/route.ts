@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { z } from '@kbn/zod/v4';
-import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import {
   MAX_ID_LENGTH,
   KIsOnboardingStep,
@@ -21,8 +21,11 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
+import { StatusError } from '../../../../lib/errors/status_error';
+import { listAllSources } from '../../../utils/list_all_sources';
+import { filterReadableSourceIds, sourceIdsArraySchema } from '../../../utils/resolve_source_ids';
 import {
-  MAX_STREAMS_PER_QUERY,
+  MAX_SOURCES_PER_QUERY,
   type SignificantEventsKIsOnboardingInputs,
 } from '../../../../lib/workflows/onboarding_workflow_client';
 
@@ -38,13 +41,20 @@ const mapStepsToSkipFlags = (
   skipQueries: !steps.includes(KIsOnboardingStep.QueriesGeneration),
 });
 
+/**
+ * The features, queries and keep-alive output of a completed run are stored knowledge, read as the
+ * internal user. A caller who cannot read the source's data gets the status without them.
+ */
+const withoutStoredOutput = (status: KIsOnboardingStatusResult): KIsOnboardingStatusResult =>
+  omit(status, ['features', 'queries', 'keepAlive']) as KIsOnboardingStatusResult;
+
 const onboardingExecuteRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/onboarding/_execute',
+  endpoint: 'POST /internal/streams/{sourceId}/onboarding/_execute',
   options: {
     access: 'internal',
-    summary: 'Onboard stream',
+    summary: 'Onboard source',
     description:
-      'Generate features and queries for a stream as part of the significant events discovery workflow.',
+      'Generate features and queries for a source as part of the significant events discovery workflow.',
   },
   security: {
     authz: {
@@ -52,7 +62,7 @@ const onboardingExecuteRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z.discriminatedUnion('action', [
       z.object({
         action: z.literal('schedule').describe('Schedule a new onboarding workflow run'),
@@ -63,7 +73,7 @@ const onboardingExecuteRoute = createServerRoute({
           .optional()
           .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
           .describe(
-            'Optional list of steps to perform as part of stream onboarding in the specified sequence. By default it will execute all steps.'
+            'Optional list of steps to perform as part of source onboarding in the specified sequence. By default it will execute all steps.'
           ),
         connectors: z
           .object({
@@ -103,17 +113,20 @@ const onboardingExecuteRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, streamsClient } = await getScopedClients({ request });
+    const { licensing, sourcesClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
-      path: { streamName },
+      path: { sourceId },
       body,
     } = params;
 
-    await streamsClient.ensureStream(streamName);
+    const { source } = await sourcesClient.get(sourceId);
 
     if (body.action === 'schedule') {
+      if (!source.enabled) {
+        throw new StatusError('Cannot schedule onboarding for a disabled source', 400);
+      }
       await assertNotPaused({ maintenanceService, request });
       const { skipFeatures, skipQueries } = mapStepsToSkipFlags(body.steps);
       const [featuresConnectorId, queriesConnectorId] = await Promise.all([
@@ -140,7 +153,8 @@ const onboardingExecuteRoute = createServerRoute({
       ]);
 
       const inputs: SignificantEventsKIsOnboardingInputs = {
-        streamName,
+        sourceId: source.id,
+        sourceSlug: source.slug,
         features: {
           skip: skipFeatures,
           start: body.from,
@@ -161,18 +175,32 @@ const onboardingExecuteRoute = createServerRoute({
     // action === 'cancel'
     // Cancellation may be a no-op (nothing running, or already terminal), so we
     // return the real post-cancel status rather than assuming `canceled`.
-    await streamsKIsOnboardingClient.cancel({ streamName, request });
+    await streamsKIsOnboardingClient.cancel({
+      sourceId: source.id,
+      sourceSlug: source.slug,
+      request,
+    });
+    // The sub-workflows wind down after the parent stops. Answering only once they are gone lets
+    // the caller schedule a new run right away without a step being dropped on a held slot.
+    await streamsKIsOnboardingClient.waitForSourceRunsToStop({ sourceId: source.id, request });
 
-    return streamsKIsOnboardingClient.getStatus({ streamName, request });
+    const status = await streamsKIsOnboardingClient.getStatus({
+      sourceId: source.id,
+      sourceSlug: source.slug,
+      queryUpdatedAt: source.esql_updated_at,
+      request,
+    });
+    const readable = await filterReadableSourceIds([source.id], sourcesClient);
+    return readable.length > 0 ? status : withoutStoredOutput(status);
   },
 });
 
 const onboardingStatusRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{streamName}/onboarding/_status',
+  endpoint: 'GET /internal/streams/{sourceId}/onboarding/_status',
   options: {
     access: 'internal',
-    summary: 'Check the status of stream onboarding',
-    description: 'Check the status of onboarding progress for a stream',
+    summary: 'Check the status of source onboarding',
+    description: 'Check the status of onboarding progress for a source',
   },
   security: {
     authz: {
@@ -180,7 +208,7 @@ const onboardingStatusRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
   }),
   handler: async ({
     params,
@@ -194,16 +222,23 @@ const onboardingStatusRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, streamsClient } = await getScopedClients({ request });
+    const { licensing, sourcesClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
-      path: { streamName },
+      path: { sourceId },
     } = params;
 
-    await streamsClient.assertReadAccess(streamName);
+    const { source } = await sourcesClient.get(sourceId);
+    // A completed run's status carries stored features and queries, read as the internal user.
+    await sourcesClient.assertReadable(source.id);
 
-    return streamsKIsOnboardingClient.getStatus({ streamName, request });
+    return streamsKIsOnboardingClient.getStatus({
+      sourceId: source.id,
+      sourceSlug: source.slug,
+      queryUpdatedAt: source.esql_updated_at,
+      request,
+    });
   },
 });
 
@@ -211,9 +246,9 @@ const onboardingBulkStatusRoute = createServerRoute({
   endpoint: 'POST /internal/streams/onboarding/_bulk_status',
   options: {
     access: 'internal',
-    summary: 'Check the onboarding status of multiple streams',
+    summary: 'Check the onboarding status of multiple sources',
     description:
-      'Check the status of onboarding progress for a list of streams in a single request. Streams the caller cannot read are omitted from the response.',
+      'Check the status of onboarding progress for a list of source ids in a single request.',
   },
   security: {
     authz: {
@@ -222,10 +257,7 @@ const onboardingBulkStatusRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      streamNames: z
-        .array(z.string().max(MAX_STREAM_NAME_LENGTH))
-        .min(1)
-        .max(MAX_STREAMS_PER_QUERY),
+      sourceIds: sourceIdsArraySchema({ min: 1, max: MAX_SOURCES_PER_QUERY }),
     }),
   }),
   handler: async ({
@@ -240,19 +272,31 @@ const onboardingBulkStatusRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { licensing, streamsClient } = await getScopedClients({ request });
+    const { licensing, sourcesClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
-      body: { streamNames },
+      body: { sourceIds },
     } = params;
 
-    const readableStreamNames = await streamsClient.getReadableStreamNames(streamNames);
-    if (readableStreamNames.length === 0) {
-      return {};
-    }
+    // Executions are keyed by slug, so ids are resolved through this space's catalog.
+    // Anything outside the catalog stays not_started.
+    const catalog = await listAllSources(sourcesClient);
+    const requestedIds = new Set(sourceIds);
+    const knownSources = catalog.filter((source) => requestedIds.has(source.id));
+    const knownStatuses = await streamsKIsOnboardingClient.getStatuses({
+      sources: knownSources,
+      request,
+    });
 
-    return streamsKIsOnboardingClient.getStatuses({ streamNames: readableStreamNames, request });
+    const statuses: Record<string, SignificantEventsWorkflowStatusResult> = {};
+    for (const sourceId of sourceIds) {
+      statuses[sourceId] = knownStatuses[sourceId] ?? {
+        status: SignificantEventsWorkflowStatus.NotStarted,
+        executionId: null,
+      };
+    }
+    return statuses;
   },
 });
 

@@ -30,6 +30,20 @@ describe('builtinWorkflowInputDefinitions', () => {
     expect(schema.properties?.rules?.type).toBe('object');
   });
 
+  it('requires only name on alertingV2NotificationGroup rule values, so payloads without grouping_fields stay valid', () => {
+    const ruleValue =
+      builtinWorkflowInputDefinitions.alertingV2NotificationGroup.properties?.rules
+        ?.additionalProperties;
+    if (ruleValue == null || typeof ruleValue === 'boolean') {
+      throw new Error('expected rules.additionalProperties to be a value schema');
+    }
+    expect(ruleValue.required).toEqual(['name']);
+    expect(ruleValue.properties?.grouping_fields).toMatchObject({
+      type: 'array',
+      items: { type: 'string' },
+    });
+  });
+
   it('registers securityAlertAnalysisCallerAlerts as a bounded alert-document array', () => {
     const schema = builtinWorkflowInputDefinitions.securityAlertAnalysisCallerAlerts;
     expect(schema.type).toBe('array');
@@ -43,7 +57,7 @@ describe('builtinWorkflowInputDefinitions', () => {
     );
     expect(items?.properties?._id?.type).toBe('string');
     expect(items?.properties?._index?.pattern).toBe(
-      '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
+      '^(\\.ds-)?\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
     );
     expect(items?.properties?.['@timestamp']?.format).toBe('date-time');
   });

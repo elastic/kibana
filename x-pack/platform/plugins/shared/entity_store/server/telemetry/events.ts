@@ -959,7 +959,7 @@ interface TelemetryEventMap {
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;
 
-export const createReportEvent = (analytics: AnalyticsServiceSetup) => ({
+export const createReportEvent = (analytics: Pick<AnalyticsServiceSetup, 'reportEvent'>) => ({
   reportEvent: <T extends (typeof events)[number]>(
     event: T,
     eventData: TelemetryEventMap[T['eventType']]

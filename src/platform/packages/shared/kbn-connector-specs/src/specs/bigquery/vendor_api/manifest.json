@@ -1,0 +1,62 @@
+{
+  "operations": {
+    "executeQuery": [
+      {
+        "method": "post",
+        "path": "/projects/{projectsId}/queries",
+        "source": "v2"
+      }
+    ],
+    "getQueryResults": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "rows",
+            "nextPath": "pageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/projects/{projectsId}/queries/{queriesId}",
+        "source": "v2"
+      }
+    ],
+    "listDatasets": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "datasets",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/projects/{projectsId}/datasets",
+        "source": "v2"
+      }
+    ],
+    "runQuery": [
+      {
+        "method": "post",
+        "path": "/projects/{projectsId}/queries",
+        "source": "v2"
+      }
+    ]
+  },
+  "sources": {
+    "v2": {
+      "apiVersion": "v2",
+      "fetchedAt": "2026-10-07T20:20:08.818Z",
+      "format": "discovery",
+      "url": "https://bigquery.googleapis.com/$discovery/rest?version=v2"
+    }
+  }
+}

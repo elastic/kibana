@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-/** The system flyout and the in-chat flyout. Either one is the panel the page is inset for. */
+/**
+ * The snapshot system flyout and the live panel have different entry points, so normally
+ * only one is mounted.
+ */
 const CONVERSATION_FLYOUT_TEST_SUBJECTS = [
   'agentBuilderConversationDetailsFlyout-snapshot',
   'agentBuilderConversationDetailsFlyout-live',

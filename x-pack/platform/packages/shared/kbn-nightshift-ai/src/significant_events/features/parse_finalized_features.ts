@@ -40,7 +40,6 @@ function tryParseFilter(maybeFilter: unknown): Condition | undefined {
  */
 export function parseFinalizedFeatures(
   rawParams: RawFinalizeFeaturesParams,
-  streamName: string,
   logger?: Logger
 ): { features: BaseFeature[]; ignoredFeatures: IgnoredFeature[] } {
   const finalizedFeatures: BaseFeature[] = [];
@@ -50,7 +49,6 @@ export function parseFinalizedFeatures(
     const raw = item as Record<string, unknown>;
     const candidate = {
       ...raw,
-      stream_name: streamName,
       filter: tryParseFilter(raw.filter),
       ...(Array.isArray(raw.evidence)
         ? { evidence: (raw.evidence as unknown[]).slice(0, MAX_EVIDENCE_ITEMS) }

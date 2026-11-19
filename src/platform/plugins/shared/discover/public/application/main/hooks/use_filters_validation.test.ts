@@ -10,6 +10,8 @@
 import { renderHook } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
+import { DataViewSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { useFiltersValidation } from './use_filters_validation';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
@@ -37,7 +39,7 @@ describe('useFiltersValidation', () => {
 
     renderHook(() =>
       useFiltersValidation({
-        dataView: dataViewAdHoc,
+        dataSource: new DataViewSource(dataViewAdHoc),
         filterManager: services.filterManager,
         toastNotifications: services.toastNotifications,
       })
@@ -59,7 +61,7 @@ describe('useFiltersValidation', () => {
 
     renderHook(() =>
       useFiltersValidation({
-        dataView: dataViewMock,
+        dataSource: new DataViewSource(dataViewMock),
         filterManager: services.filterManager,
         toastNotifications: services.toastNotifications,
       })
@@ -77,7 +79,7 @@ describe('useFiltersValidation', () => {
 
     renderHook(() =>
       useFiltersValidation({
-        dataView: dataViewAdHoc,
+        dataSource: new DataViewSource(dataViewAdHoc),
         filterManager: services.filterManager,
         toastNotifications: services.toastNotifications,
       })
@@ -92,7 +94,7 @@ describe('useFiltersValidation', () => {
   it('should not show warning when no filters exist', () => {
     renderHook(() =>
       useFiltersValidation({
-        dataView: dataViewAdHoc,
+        dataSource: new DataViewSource(dataViewAdHoc),
         filterManager: services.filterManager,
         toastNotifications: services.toastNotifications,
       })
@@ -110,7 +112,7 @@ describe('useFiltersValidation', () => {
 
     const { unmount } = renderHook(() =>
       useFiltersValidation({
-        dataView: dataViewAdHoc,
+        dataSource: new DataViewSource(dataViewAdHoc),
         filterManager: services.filterManager,
         toastNotifications: services.toastNotifications,
       })
@@ -122,5 +124,30 @@ describe('useFiltersValidation', () => {
     jest.advanceTimersByTime(500);
 
     expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
+  });
+
+  it('should compare ES|QL filter indices with the dataset id', () => {
+    const dataSource = createMockEsqlSource();
+    const renderWithFilterIndex = (index: string) => {
+      jest
+        .spyOn(services.filterManager, 'getFilters')
+        .mockReturnValue([{ meta: { index } } as Filter]);
+      const { unmount } = renderHook(() =>
+        useFiltersValidation({
+          dataSource,
+          filterManager: services.filterManager,
+          toastNotifications: services.toastNotifications,
+        })
+      );
+      filterUpdates$.next();
+      jest.advanceTimersByTime(500);
+      unmount();
+    };
+
+    renderWithFilterIndex(dataSource.datasetId);
+    expect(services.toastNotifications.addWarning).not.toHaveBeenCalled();
+
+    renderWithFilterIndex(dataSource.id);
+    expect(services.toastNotifications.addWarning).toHaveBeenCalledTimes(1);
   });
 });

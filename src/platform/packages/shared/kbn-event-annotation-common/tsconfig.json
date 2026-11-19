@@ -18,5 +18,6 @@
     "@kbn/visualization-ui-components",
     "@kbn/i18n",
     "@kbn/content-management-table-list-view-common",
+    "@kbn/chart-icons",
   ]
 }

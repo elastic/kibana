@@ -10,10 +10,19 @@
 import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormHelpText, EuiFormRow, EuiTextColor } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiComboBox,
+  EuiFormHelpText,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTextColor,
+} from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
 import type { FieldConfig, FieldHook, ValidationConfig } from '../../shared_imports';
@@ -127,6 +136,8 @@ export const TimestampField = ({
 
   const timestampConfig = useMemo(() => getTimestampConfig(options), [options]);
   const helpText = getHelpText({ options, isLoadingOptions, hasMatchedIndices, optionsError });
+  // the options only reflect the date fields of the matching indices once they are loaded without an error
+  const areOptionsLoaded = !isLoadingOptions && !optionsError && hasMatchedIndices;
 
   return (
     <UseField<EuiComboBoxOptionOption<string>> config={timestampConfig} path="timestampField">
@@ -140,6 +151,7 @@ export const TimestampField = ({
             field={field}
             optionsAsComboBoxOptions={optionsAsComboBoxOptions}
             isLoadingOptions={isLoadingOptions}
+            areOptionsLoaded={areOptionsLoaded}
             disabled={disabled}
             helpText={helpText}
           />
@@ -153,6 +165,7 @@ interface TimestampFieldRendererProps {
   field: FieldHook<EuiComboBoxOptionOption<string>>;
   optionsAsComboBoxOptions: Array<EuiComboBoxOptionOption<string>>;
   isLoadingOptions: boolean;
+  areOptionsLoaded: boolean;
   disabled?: boolean;
   helpText: ReactNode;
 }
@@ -161,6 +174,7 @@ const TimestampFieldRenderer = ({
   field,
   optionsAsComboBoxOptions,
   isLoadingOptions,
+  areOptionsLoaded,
   disabled,
   helpText,
 }: TimestampFieldRendererProps) => {
@@ -169,10 +183,18 @@ const TimestampFieldRenderer = ({
 
   const isDisabled = !optionsAsComboBoxOptions.length || isLoadingOptions || disabled;
   const valueInList = optionsAsComboBoxOptions.some((option) => option.value === value.value);
+  const isSavedValueMissingInList =
+    Boolean(value.value) && !valueInList && !wasValueInTheListRef.current;
 
   useEffect(() => {
     if (valueInList) {
       wasValueInTheListRef.current = true;
+      return;
+    }
+
+    // Keep the saved timestamp field which is missing in the list, so the user is told about it
+    // instead of silently replacing it with @timestamp
+    if (isSavedValueMissingInList) {
       return;
     }
 
@@ -191,7 +213,16 @@ const TimestampFieldRenderer = ({
       wasValueInTheListRef.current = false;
       reset();
     }
-  }, [optionsAsComboBoxOptions, value, isDisabled, isLoadingOptions, setValue, reset, valueInList]);
+  }, [
+    optionsAsComboBoxOptions,
+    value,
+    isDisabled,
+    isLoadingOptions,
+    setValue,
+    reset,
+    valueInList,
+    isSavedValueMissingInList,
+  ]);
 
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const isComboBoxInvalid = !isDisabled && isInvalid;
@@ -236,6 +267,22 @@ const TimestampFieldRenderer = ({
           <EuiFormHelpText>{helpText}</EuiFormHelpText>
         </>
       </EuiFormRow>
+      {areOptionsLoaded && isSavedValueMissingInList && (
+        <>
+          <EuiSpacer size="s" />
+          <KbnWarningCallout
+            size="s"
+            data-test-subj="timestampFieldNotFoundCallout"
+            title={
+              <FormattedMessage
+                id="indexPatternEditor.editor.form.timestampFieldNotFoundWarning"
+                defaultMessage="This data view uses {fieldName} as its timestamp field, but no matching data stream, index, or index alias has that field."
+                values={{ fieldName: <EuiCode>{value.value}</EuiCode> }}
+              />
+            }
+          />
+        </>
+      )}
     </>
   );
 };

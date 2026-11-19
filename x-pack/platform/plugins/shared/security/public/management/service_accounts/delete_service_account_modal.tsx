@@ -5,41 +5,36 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBadge,
-  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiPagination,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import type { ServiceAccountBoundWorkload } from '@kbn/core-security-common';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { BoundWorkloadsTable } from './bound_workloads_table';
 import type {
-  ServiceAccountBoundWorkload,
   ServiceAccountDirectoryEntry,
   ServiceAccountsAPIClient,
 } from '../../service_accounts';
-
-const WORKLOADS_PAGE_SIZE = 5;
 
 /**
  * What came of a confirmed delete. An account deleted from somewhere else in the meantime is
@@ -88,34 +83,9 @@ const getBoundWorkloads = (error: unknown): ServiceAccountBoundWorkload[] | unde
 };
 
 /**
- * A bound workload as the table shows it. The same workload id can be bound in more than one
- * space, and the space is not reported, so rows are keyed by position.
- */
-interface WorkloadRow extends ServiceAccountBoundWorkload {
-  rowKey: number;
-}
-
-const workloadColumns: Array<EuiBasicTableColumn<WorkloadRow>> = [
-  {
-    field: 'displayName',
-    name: i18n.translate('xpack.security.management.serviceAccounts.delete.workloadNameColumn', {
-      defaultMessage: 'Name',
-    }),
-    truncateText: true,
-  },
-  {
-    field: 'workloadType',
-    name: i18n.translate('xpack.security.management.serviceAccounts.delete.workloadTypeColumn', {
-      defaultMessage: 'Type',
-    }),
-    render: (workloadType: string) => <EuiBadge color="hollow">{workloadType}</EuiBadge>,
-  },
-];
-
-/**
- * Deletes one service account after checking whether workloads are bound to it. Shows nothing
- * until that check answers, then asks the user to confirm, listing the bound workloads and warning
- * that they stop running when there are any.
+ * Deletes one service account after checking whether workloads are bound to it. Shows a loading
+ * state until that check answers, then asks the user to confirm, listing the bound workloads and
+ * warning that they stop running when there are any.
  */
 export const DeleteServiceAccountModal = ({
   serviceAccount: { id, name },
@@ -189,10 +159,6 @@ export const DeleteServiceAccountModal = ({
     if (isMounted()) onDeleted({ status: 'deleted', warnings });
   };
 
-  if (state.status === 'loading') {
-    return null;
-  }
-
   const title = i18n.translate('xpack.security.management.serviceAccounts.delete.confirmTitle', {
     defaultMessage: 'Delete "{name}"?',
     values: { name },
@@ -204,6 +170,42 @@ export const DeleteServiceAccountModal = ({
   const cancel = () => {
     if (!isDeleting) onClose();
   };
+
+  // Looking up the bound workloads can take a while, since each workload type resolves its own,
+  // so the modal opens right away and can be cancelled while it waits.
+  if (state.status === 'loading') {
+    return (
+      <EuiModal
+        aria-labelledby={titleId}
+        onClose={cancel}
+        initialFocus="[data-test-subj=serviceAccountDeleteLoadingCancel]"
+        data-test-subj="serviceAccountDeleteLoadingModal"
+      >
+        <EuiModalHeader>
+          <EuiModalHeaderTitle id={titleId}>{title}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner
+                size="l"
+                aria-label={i18n.translate(
+                  'xpack.security.management.serviceAccounts.delete.loadingWorkloads',
+                  { defaultMessage: 'Checking for bound workloads' }
+                )}
+                data-test-subj="serviceAccountDeleteLoading"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={cancel} data-test-subj="serviceAccountDeleteLoadingCancel">
+            {cancelButtonText}
+          </EuiButtonEmpty>
+        </EuiModalFooter>
+      </EuiModal>
+    );
+  }
 
   if (state.status === 'confirm') {
     return (
@@ -245,7 +247,17 @@ export const DeleteServiceAccountModal = ({
         <EuiModalHeaderTitle id={titleId}>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <BoundWorkloads workloads={state.workloads} />
+        <EuiText size="s">
+          <p>
+            {i18n.translate('xpack.security.management.serviceAccounts.delete.boundWarning', {
+              defaultMessage:
+                'This account is bound to the following {count, plural, one {# workload} other {# workloads}}. Removing it means that workloads will not be executed.',
+              values: { count: state.workloads.length },
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <BoundWorkloadsTable workloads={state.workloads} />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={cancel} data-test-subj="serviceAccountBoundModalCancel">
@@ -264,82 +276,5 @@ export const DeleteServiceAccountModal = ({
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
-  );
-};
-
-/** The warning and the paged list of workloads that stop running when the account is deleted. */
-const BoundWorkloads = ({ workloads }: { workloads: ServiceAccountBoundWorkload[] }) => {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [minTableHeight, setMinTableHeight] = useState<number>();
-  const tableRef = useRef<HTMLDivElement>(null);
-  const rows = useMemo(
-    () => workloads.map((workload, rowKey): WorkloadRow => ({ ...workload, rowKey })),
-    [workloads]
-  );
-  const pageCount = Math.ceil(rows.length / WORKLOADS_PAGE_SIZE);
-  const firstRow = pageIndex * WORKLOADS_PAGE_SIZE;
-  const pageRows = rows.slice(firstRow, firstRow + WORKLOADS_PAGE_SIZE);
-
-  // A short last page would pull the pagination and the modal footer up with it, so the table
-  // keeps the height of the tallest page it has shown.
-  useLayoutEffect(() => {
-    const height = tableRef.current?.offsetHeight;
-    if (height) setMinTableHeight((current) => Math.max(current ?? 0, height));
-  }, [pageIndex]);
-
-  return (
-    <>
-      <EuiText size="s">
-        <p>
-          {i18n.translate('xpack.security.management.serviceAccounts.delete.boundWarning', {
-            defaultMessage:
-              'This account is bound to the following {count, plural, one {# workload} other {# workloads}}. Removing it means that workloads will not be executed.',
-            values: { count: workloads.length },
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiText size="xs" data-test-subj="serviceAccountBoundWorkloadsSummary">
-        <FormattedMessage
-          id="xpack.security.management.serviceAccounts.delete.workloadsTableSummary"
-          defaultMessage="Showing {start}-{end}"
-          values={{
-            start: <strong>{firstRow + 1}</strong>,
-            end: <strong>{firstRow + pageRows.length}</strong>,
-          }}
-        />
-      </EuiText>
-      <div ref={tableRef} style={minTableHeight ? { minHeight: minTableHeight } : undefined}>
-        <EuiBasicTable
-          itemId="rowKey"
-          items={pageRows}
-          columns={workloadColumns}
-          tableCaption={i18n.translate(
-            'xpack.security.management.serviceAccounts.delete.workloadsTableCaption',
-            { defaultMessage: 'Bound workloads' }
-          )}
-          data-test-subj="serviceAccountBoundWorkloadsTable"
-        />
-      </div>
-      {pageCount > 1 && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiPagination
-                aria-label={i18n.translate(
-                  'xpack.security.management.serviceAccounts.delete.workloadsPagination',
-                  { defaultMessage: 'Bound workloads pages' }
-                )}
-                pageCount={pageCount}
-                activePage={pageIndex}
-                onPageClick={setPageIndex}
-                data-test-subj="serviceAccountBoundWorkloadsPagination"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
-    </>
   );
 };

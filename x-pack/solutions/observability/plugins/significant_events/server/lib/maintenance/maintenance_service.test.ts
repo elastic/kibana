@@ -7,7 +7,12 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE } from './saved_object';
-import { REQUEST, makeManagementApi, makeService } from './maintenance_service.test_helpers';
+import {
+  REQUEST,
+  makeManagementApi,
+  makeService,
+  requestInSpace,
+} from './maintenance_service.test_helpers';
 
 describe('SignificantEventsMaintenanceService', () => {
   describe('getState', () => {
@@ -18,13 +23,13 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('returns the persisted state without reading feature settings', async () => {
       const { api } = makeManagementApi();
-      const { service, globalUiSettingsClient } = makeService({ management: api });
+      const { service, spaceUiSettingsClient } = makeService({ management: api });
 
       await service.pause({ request: REQUEST });
-      globalUiSettingsClient.get.mockClear();
+      spaceUiSettingsClient.get.mockClear();
 
       await expect(service.getState({ request: REQUEST })).resolves.toBe('paused');
-      expect(globalUiSettingsClient.get).not.toHaveBeenCalled();
+      expect(spaceUiSettingsClient.get).not.toHaveBeenCalled();
     });
   });
 
@@ -40,12 +45,13 @@ describe('SignificantEventsMaintenanceService', () => {
       });
     });
 
-    it('reads state through the internal repository, not a scoped client', async () => {
-      const { service, savedObjects } = makeService();
-      await service.getStatus({ request: REQUEST });
-      expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([
-        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-      ]);
+    it('reads state through the internal client scoped to the space, not a user client', async () => {
+      const { service, savedObjects, internalClient } = makeService();
+      await service.getStatus({ request: requestInSpace('space-a') });
+      expect(savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
+        includedHiddenTypes: [SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE],
+      });
+      expect(internalClient.asScopedToNamespace).toHaveBeenCalledWith('space-a');
       expect(savedObjects.getScopedClient).not.toHaveBeenCalled();
     });
   });

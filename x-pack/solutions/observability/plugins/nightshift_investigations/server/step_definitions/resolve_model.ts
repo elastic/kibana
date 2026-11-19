@@ -27,9 +27,9 @@ export const resolveModelStepDefinition = ({
 }) =>
   createServerStepDefinition({
     id: 'nightshift.resolveModel',
-    label: 'Resolve Nightshift model',
+    label: 'Resolve nightshift model',
     category: StepCategory.Ai,
-    description: 'Validates and resolves the model used by a Nightshift investigation step.',
+    description: 'Validates and resolves the model used by a nightshift investigation step.',
     inputSchema: z.object({
       step: z.literal('investigation'),
       connector_id: z.string().max(MAX_KEYWORD_LENGTH).optional(),

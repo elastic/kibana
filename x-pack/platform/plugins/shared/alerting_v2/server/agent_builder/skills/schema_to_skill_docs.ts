@@ -6,7 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ACTION_POLICY_MANAGEMENT_SKILL_ID, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
+import {
+  ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_TOOL_IDS,
+  ALERTING_API_IDS,
+  RULE_KIND_LABELS,
+} from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
@@ -572,7 +577,7 @@ export const getDescribedVariants = (
   return values;
 };
 
-export const getEpisodeStatusValues = (): string[] =>
+export const getAlertStatusValues = (): string[] =>
   getDescribedEnumValues(alertEpisodeStatusSchema, 'alertEpisodeStatusSchema').map(
     ({ value }) => value
   );
@@ -672,14 +677,14 @@ const getRuleKindProductLabel = (kind: string): string => {
 /** Generates the Rule Kind section with heading, per-kind subsections, and immutability note. */
 export const generateRuleKindDoc = (): string => {
   const kinds = getDescribedEnumValues(ruleKindSchema, 'ruleKindSchema');
-  const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
+  const alertStatuses = formatEnumValuesList(getAlertStatusValues());
   const transitionFields = formatEnumValuesList(getStateTransitionFields());
 
   const kindSections = kinds.flatMap(({ value, description }, i) => {
     const heading = `### ${getRuleKindProductLabel(value)} (\`kind: ${value}\`)`;
     const lines = [heading, description];
     if (value === 'alert') {
-      lines.push(`Alert statuses: ${episodeStatuses}.`);
+      lines.push(`Alert statuses: ${alertStatuses}.`);
       lines.push(`State transition fields: ${transitionFields}.`);
     }
     return i > 0 ? ['', ...lines] : lines;
@@ -713,7 +718,7 @@ export const generateNotificationsOverviewDoc = (): string => {
     '',
     'Notifications are not configured on the rule itself. Alerts are matched and dispatched by **action policies** — space-scoped saved objects that send matched alerts to workflow destinations.',
     '',
-    `When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
+    `When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
     '',
     '## Notifications Require Alert Kind',
     '',
@@ -722,9 +727,9 @@ export const generateNotificationsOverviewDoc = (): string => {
     'When a user asks for notifications on a rule that is currently `kind: signal` (or when composing a new rule where the user wants notifications):',
     '',
     `1. **Explain the difference**: ${signalLabel} (\`kind: signal\`) rules are observation-only and do not trigger notifications. ${alertLabel} (\`kind: alert\`) track alert lifecycle and can dispatch to action policies.`,
-    `2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
+    `2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill for notification setup.`,
     `3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing ${signalLabel} (\`kind: signal\`) rule cannot be converted. Offer to create a new ${alertLabel} (\`kind: alert\`) rule with the same query and schedule, then set up notifications on the new rule.`,
-    `4. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
+    `4. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill for notification setup.`,
   ].join('\n');
 };
 
@@ -855,11 +860,11 @@ export const generateRecoveryStrategyDoc = (): string => {
  * / `alertEventSeveritySchema`.
  */
 export const generateMatcherContextDoc = (): string => {
-  const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
+  const alertStatuses = formatEnumValuesList(getAlertStatusValues());
   const severities = formatEnumValuesList(getSeverityValues());
 
   const formatMatcherFieldType = (path: string, type: string): string => {
-    if (path === 'alert_status') return episodeStatuses;
+    if (path === 'alert_status') return alertStatuses;
     if (path === 'severity') return severities;
     if (path === 'data') return '`data.*` object';
     return type;
@@ -1008,34 +1013,24 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     'Use this path when the user wants notifications for **one specific rule**.',
     '',
     'Action policies only process alerts. If the rule is `kind: signal`, do not',
-    'proceed: ask the user (or the rule-management skill) to convert or recreate the',
+    'proceed: ask the user (or the rule-authoring skill) to convert or recreate the',
     'rule as `kind: alert` first.',
     '',
     '## Scoping a policy to one rule',
     '',
     'A policy matches **alerts**, not a rule object. The only way to scope one policy',
-    'to one rule is a **shared routing tag on both sides**:',
+    "to one rule is a **shared routing tag on both sides** (the rule's",
+    "`metadata.routing_tags` and the policy's `matcher.tags`).",
     '',
-    "- The rule's `metadata.routing_tags` must contain a tag that uniquely identifies it.",
-    "- The policy's `matcher.tags` must contain that same tag.",
-    '',
-    'Use the convention `notify-<rule-slug>` (lowercase kebab of the rule name,',
-    'for example `notify-high-cpu-prod`).',
+    `**Never set this tag by hand.** Call \`${ALERTING_TOOL_IDS.linkRuleAndActionPolicy}\`: it generates the tag, writes it`,
+    'to both attachments in one call and restores the rule if the policy update fails.',
     '',
     '## Steps',
     '',
-    '### 1. Add the routing tag to the rule',
+    '### 1. Make sure the rule exists',
     '',
-    'Call `manage_rule` → `set_metadata` with `routing_tags: [<all existing routing tags>, "notify-<rule-slug>"]`.',
-    '',
-    '> **Routing tags are replaced wholesale.** Read the current routing tags off the rule',
-    '> attachment first and re-send them alongside the new one. The routing tag cap is 20.',
-    '> If the rule is already at the cap, ask the user which existing routing tag to drop.',
-    '> Do not put the routing tag in `tags`; rule tags do not link policies.',
-    '',
-    '> **Save reminder**: `manage_rule` only updates the in-memory rule attachment.',
-    '> The routing tag only takes effect once the user saves the rule',
-    '> (Rule → Workflow → Action Policy save order).',
+    'The rule attachment must already be in the conversation (created with `manage_rule`),',
+    'named and with `kind: alert`.',
     '',
     '### 2. Create the action policy',
     '',
@@ -1044,14 +1039,36 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '1. `set_metadata`: name = `"Notify on <rule-name>"`, description = `"Default notification for <rule-name>"`',
     '2. `set_destinations`: `[{ type: "workflow", id: "<workflowId>" }]`',
     '   - Use the `workflowId` passed to `generate_workflow`, **not** the workflow `attachmentId`.',
-    '3. `set_matcher`: `{ tags: ["notify-<rule-slug>"] }` — **do not omit**.',
-    '   An omitted or empty matcher is a space-wide catch-all, not "this rule".',
-    '4. `set_grouping`: `per_alert`',
-    '5. `set_throttle`: `{ strategy: "on_status_change" }`',
-    '6. `validate`',
+    '3. `set_grouping`: `per_alert`',
+    '4. `set_throttle`: `{ strategy: "on_status_change" }`',
+    '5. `validate`',
     '',
-    'If the rule already has a routing tag that uniquely identifies it, you may reuse it',
-    'instead of adding `notify-<rule-slug>` — but confirm it is not shared with other rules.',
+    'Do **not** set `matcher.tags` yourself: the link tool does it in the next step.',
+    '> Until the linking step below is done the policy has no matcher, which is a space-wide catch-all, not',
+    '> "this rule". Never present the policy to the user before linking it.',
+    '',
+    '### 3. Link the rule and the policy',
+    '',
+    `Call \`${ALERTING_TOOL_IDS.linkRuleAndActionPolicy}\` with the \`ruleAttachmentId\` and the \`policyAttachmentId\`.`,
+    'Existing routing tags and matcher tags are kept.',
+    '',
+    '> **Render after linking**: render both attachments again with the `ruleAttachment.version`',
+    '> and `actionPolicyAttachment.version` from the link result, not the versions from',
+    '> `manage_rule` / `manage_action_policy`, which do not include the routing tag. Saving those',
+    '> would persist an untagged rule or a catch-all policy. If `alreadyLinked` is `true` the result',
+    '> has no versions: keep the ones you already have.',
+    '',
+    '> **Warnings**: if the result has `warnings`, explain them to the user. This happens when',
+    '> the policy is already saved and has no `matcher.tags`:',
+    '> - a saved catch-all (no `matcher.expression` either) applies to every rule today; linking',
+    '>   narrows it to this rule, so other rules stop notifying through it once saved.',
+    '> - a saved expression-only policy keeps its KQL; the new tag is combined with it and',
+    '>   restricts the policy to this rule, so other rules stop notifying through it once saved.',
+    '> Explain this to the user **before** calling the tool on such a policy.',
+    '',
+    '> **Save reminder**: the tools only update the in-memory attachments. The routing tag only',
+    '> exists once the user saves the rule; until then, this policy will not match any alerts',
+    '> (unless another saved rule already carries the tag).',
     '',
     'If the user explicitly requests a cross-rule or shared policy, consult the',
     '[multi-rule action policies reference](./action-policy-multi-rule.md).',
@@ -1086,8 +1103,8 @@ export const generateMultiRuleActionPolicyDoc = (): string =>
     '  `alert.data.*` — because query columns often differ across rules. If two rules need',
     '  different message shapes, use two policies (or two workflows) rather than one',
     '  brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).',
-    '- **Search first**: run `platform.core.sml_search` for existing policies before adding',
-    '  another catch-all or overlapping tag matcher.',
+    `- **Search first**: list existing policies with the Kibana API tools (\`${ALERTING_API_IDS.listActionPolicies}\`)`,
+    '  before adding another catch-all or overlapping tag matcher.',
     '- **Grouping**: `per_alert` is still a safe default. `all` batches mixed-rule',
     '  alerts into a single notification; only use it when the user wants one combined',
     '  message.',
@@ -1169,6 +1186,44 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '- Discover columns with `| LIMIT 0` if they are unclear.',
     '- Guard empty `data` on recovering/inactive: `| default` or `{% if alert.data %}`.',
     '',
+    '## Full JSON Schema (`alertingV2NotificationGroup`)',
+    '',
+    "This is the schema resolved by `$ref: '#/kibana/definitions/alertingV2NotificationGroup'`.",
+    'Including this `$ref` on the manual trigger is **required**. It enables the',
+    'validation service to statically check every `inputs.payload.*` Liquid reference against',
+    'the dispatch payload schema. Without it, invalid field paths are only caught at runtime.',
+    '',
+    '```json',
+    JSON.stringify(jsonSchema, null, 2),
+    '```',
+    '',
+    '## Liquid Usage',
+    '',
+    '- Top-level fields: `{{ inputs.payload.<field> }}`',
+    '- Alert iteration: `{% for alert in inputs.payload.alerts %}{{ alert.<field> }}{% endfor %}`',
+    '- Rule metadata: `{{ inputs.payload.rules[alert.rule_id].name }}`',
+    '- Rule grouping fields: `{{ inputs.payload.rules[alert.rule_id].grouping_fields | join: ", " }}` (empty when the rule has no grouping; dotted names are nested under `alert.data`, e.g. `alert.data.host.name`)',
+    '- Alert details link: `{{ alert.alert_url }}` (absolute URL; include it in every notification)',
+    '',
+    '### Test notifications (`execution.isTestRun`)',
+    '',
+    '"Send test notification" on an action policy runs its destination workflows as workflow',
+    'test runs, with a payload of the same shape built from synthetic alerts and placeholder rules.',
+    'Ids are prefixed with `test-`, and `alert.alert_url` points to an alert that does not exist.',
+    '',
+    '- Detect a test with `{{ execution.isTestRun }}` (`true` for test runs, `false` otherwise).',
+    '- Guard steps that act on alerts or page people, for example',
+    '  `{% if execution.isTestRun %}[TEST] {% endif %}` in a message, or an `if` step condition.',
+    '',
+    '### `data` (dynamic query columns)',
+    '',
+    "`data` is the rule's ES|QL result row (each query row is written as `data: rowDoc`",
+    'on the alert event). Columns depend on the rule query, so they are not in the schema.',
+    '',
+    '- Nested dotted names: `alert.data.host.name`, not `alert.data["host.name"]`.',
+    '- Discover columns with `| LIMIT 0` if they are unclear.',
+    '- Guard empty `data` on recovering/inactive: `| default` or `{% if alert.data %}`.',
+    '',
     '## Example',
     '',
     'For `FROM logs-* | STATS error_count = COUNT(*) BY host.name | WHERE error_count >= 5`:',
@@ -1179,6 +1234,10 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     'enabled: true',
     'triggers:',
     '  - type: manual',
+    '    inputs:',
+    '      properties:',
+    '        payload:',
+    "          $ref: '#/kibana/definitions/alertingV2NotificationGroup'",
     'steps:',
     '  - name: send_email',
     '    type: email',
@@ -1187,15 +1246,20 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '      to:',
     '        - <user-provided-email>',
     '      subject: "Alert: {{ inputs.payload.alerts | size }} alert(s)"',
-    '      message: >',
-    '        {% for alert in inputs.payload.alerts %}',
-    '        - Rule: {{ inputs.payload.rules[alert.rule_id].name | default: "unknown" }}',
-    '          Host: {{ alert.data.host.name | default: "unknown" }}',
-    '          Errors: {{ alert.data.error_count | default: "n/a" }}',
-    '          Status: {{ alert.alert_status }}',
-    '        {% endfor %}',
+    '      message: |',
+    '        {%- assign alert_count = inputs.payload.alerts | size -%}',
+    '        {%- if alert_count > 1 -%}',
+    '        **{{ alert_count }} alerts**',
     '',
-    '        View execution: {{ execution.url }}',
+    '        {% endif -%}',
+    '        {%- for alert in inputs.payload.alerts -%}',
+    '        **{{ inputs.payload.rules[alert.rule_id].name | default: "Unnamed rule" }}** — {{ alert.alert_status | capitalize }}{% if alert.severity %} · {{ alert.severity | capitalize }}{% endif %}\\',
+    '        Last event {{ alert.last_event_timestamp | date: "%Y-%m-%d %H:%M UTC", 0 }} · [View in app]({{ alert.alert_url }})\\',
+    '        Alert id: {{ alert.alert_id }}\\',
+    '        Host: {{ alert.data.host.name | default: "unknown" }} · Errors: {{ alert.data.error_count | default: "n/a" }}',
+    '        {% unless forloop.last %}',
+    '        {% endunless -%}',
+    '        {%- endfor -%}',
     '```'
   );
 

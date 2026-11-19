@@ -11,11 +11,14 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
+import { EMPTY_VALUE } from '../constants';
 import { ELASTIC_SOURCE_ICON } from '../source_labels';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import {
   EpisodeDurationCell,
+  EpisodeReasonCell,
+  EpisodeSuppressedCell,
   EpisodeSourceCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -84,6 +87,47 @@ describe('EpisodeSourceCell', () => {
 
     expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('zabbix');
     expect(screen.queryByTestId('episodeSourceIcon')).not.toBeInTheDocument();
+  });
+
+  describe('alert ingested from an external connector', () => {
+    const renderWithConnector = (connector: unknown) =>
+      renderWithI18n(
+        <EpisodeSourceCell
+          {...baseCellProps}
+          columnId="alerting_source"
+          row={makeRow({ source: connector })}
+        />
+      );
+
+    it('shows only the connector icon followed by its name for a known connector', () => {
+      renderWithConnector('zabbix');
+
+      expect(screen.getByTestId('episodeConnectorSourceIcon')).toBeInTheDocument();
+      expect(screen.getByTestId('episodeConnectorSourceName')).toHaveTextContent('zabbix');
+      expect(screen.queryByTestId('episodeSourceCell')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('episodeSourceIcon')).not.toBeInTheDocument();
+    });
+
+    it('shows only the connector name when there is no icon for it', () => {
+      renderWithConnector('my-custom-source');
+
+      expect(screen.getByTestId('episodeConnectorSourceName')).toHaveTextContent(
+        'my-custom-source'
+      );
+      expect(screen.queryByTestId('episodeConnectorSourceIcon')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('episodeSourceCell')).not.toBeInTheDocument();
+    });
+
+    it.each([['internal'], [''], [null], [undefined]])(
+      'falls back to the alerting system label when the source is %p',
+      (connector) => {
+        renderWithConnector(connector);
+
+        expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('Universal');
+        expect(screen.queryByTestId('episodeConnectorSourceIcon')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('episodeConnectorSourceName')).not.toBeInTheDocument();
+      }
+    );
   });
 });
 
@@ -824,5 +868,59 @@ describe('EpisodeRuleCell', () => {
     );
     expect(screen.getByText('Classic CPU Rule')).toBeInTheDocument();
     expect(screen.queryByRole('code')).not.toBeInTheDocument();
+  });
+});
+
+describe('EpisodeSuppressedCell', () => {
+  const renderCell = (maintenanceWindowIds: string[] | undefined) =>
+    renderWithI18n(
+      <EpisodeSuppressedCell
+        {...baseCellProps}
+        columnId="suppressed"
+        row={makeRow({ maintenance_window_ids: maintenanceWindowIds })}
+      />
+    );
+
+  it('shows that the alert was suppressed by a maintenance window, without listing any', () => {
+    renderCell(['mw-1', 'mw-2']);
+
+    expect(screen.getByText('Suppressed by maintenance window')).toBeInTheDocument();
+    expect(screen.queryByText('mw-1', { exact: false })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['the field is absent', undefined],
+    ['the field is empty', []],
+  ])('renders the empty value when %s', (_name, maintenanceWindowIds) => {
+    const { container } = renderCell(maintenanceWindowIds);
+
+    expect(container).toHaveTextContent(EMPTY_VALUE);
+    expect(screen.queryByText('Suppressed by maintenance window')).not.toBeInTheDocument();
+  });
+});
+
+describe('EpisodeReasonCell', () => {
+  const renderCell = (reason: unknown) =>
+    renderWithI18n(
+      <EpisodeReasonCell {...baseCellProps} columnId="reason" row={makeRow({ reason })} />
+    );
+
+  it('renders the full reason text without truncating it', () => {
+    const reason = `Error count is 1200 in the last 5 minutes for service ${'checkout-'.repeat(
+      40
+    )}api, above the threshold of 25`;
+    renderCell(reason);
+
+    expect(screen.getByTestId('episodeReasonCell')).toHaveTextContent(reason);
+  });
+
+  it.each([
+    ['the field is absent (v2 episodes)', undefined],
+    ['the field is empty', ''],
+  ])('renders the empty value when %s', (_name, reason) => {
+    const { container } = renderCell(reason);
+
+    expect(container).toHaveTextContent(EMPTY_VALUE);
+    expect(screen.queryByTestId('episodeReasonCell')).not.toBeInTheDocument();
   });
 });

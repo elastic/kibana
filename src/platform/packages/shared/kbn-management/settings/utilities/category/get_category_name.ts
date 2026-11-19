@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import {
   ACCESSIBILITY_CATEGORY,
   ALERTING_CATEGORY,
-  ALERTING_V2_CATEGORY,
   AUTOCOMPLETE_CATEGORY,
   BANNER_CATEGORY,
   DATA_FEDERATION_CATEGORY,
@@ -102,9 +101,6 @@ const names: Record<string, string> = {
   }),
   [ALERTING_CATEGORY]: i18n.translate('management.settings.categoryNames.alertingLabel', {
     defaultMessage: 'Alerting',
-  }),
-  [ALERTING_V2_CATEGORY]: i18n.translate('management.settings.categoryNames.alertingV2Label', {
-    defaultMessage: 'Alerting V2',
   }),
   [DATA_FEDERATION_CATEGORY]: i18n.translate(
     'management.settings.categoryNames.dataFederationLabel',

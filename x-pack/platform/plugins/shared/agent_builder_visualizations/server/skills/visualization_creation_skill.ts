@@ -8,6 +8,7 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
+  dataDiscoveryAgentGuidance,
   getChartTypeSelectionPromptContent,
   seriesStatisticsAgentGuidance,
 } from '@kbn/agent-builder-visualizations-server';
@@ -20,7 +21,7 @@ export const visualizationCreationSkill = defineSkillType({
   name: 'visualization-creation',
   basePath: 'skills/platform/visualization',
   description:
-    'Create standalone or reusable visualizations from grounded index and field context.',
+    'Create or update standalone charts and visualizations shown in the conversation, not on a dashboard. If the request involves a dashboard, use the dashboards skill instead.',
   content: `## When to Use This Skill
 
 Use this skill when:
@@ -30,7 +31,12 @@ Use this skill when:
 - A user asks to update an existing visualization by attachment ID.
 
 Do **not** use this skill when:
-- The user only needs raw documents or table/query output without a visualization.
+- The user wants raw documents, events, search hits, or a Discover-style document table:
+  - If the discover-session skill is listed in the available or relevant skills, use that skill and \`${
+    platformCoreTools.createDiscoverSession
+  }\` instead. Do **not** use chartType \`"data_table"\` as a substitute for that Discover table.
+  - If discover-session is not available, do not use this skill for those requests.
+- The user only needs other table/query output without a visualization.
 - The user first needs broad data discovery and exploration across unknown sources.
 - The request is about persisted saved objects instead of in-memory attachment workflows.
 - The primary goal is to compose or update a dashboard. Use the dashboards skill for dashboard panel creation and layout.
@@ -56,9 +62,8 @@ Do **not** use this skill when:
      platformCoreTools.createVisualization
    } call, know the target index and confirm every field you reference exists in its mapping.
    - If the index and fields are already grounded in context, continue directly.
-   - If not, discover them first: list indices and inspect the index mapping (optionally probe with ${
-     platformCoreTools.executeEsql
-   }). Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
+   - ${dataDiscoveryAgentGuidance}
+   - Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
    - ${
      platformCoreTools.createVisualization
    } auto-discovers an index only when you omit \`index\`, and that discovery FAILS when the referenced fields do not exist in any index. Guessing fields and relying on auto-discovery is the most common cause of failures — ground first.
@@ -82,8 +87,8 @@ Do **not** use this skill when:
      - \`target\` (required) — one of:
        - \`{ "type": "lens", "chartType": <required>, "esql"?: <ES|QL from generate_esql or the user> }\` for a standard chart
        - \`{ "type": "vega", "chartType"?: <styling hint>, "esql"?: <ES|QL from generate_esql or the user> }\` for a custom Vega-Lite visualization
-       - \`{ "type": "custom_content", "esql"?: <ES|QL from generate_esql or the user>, "has_data"?: false }\` for an HTML layout — omit \`esql\` to have a query generated; pass \`has_data: false\` only when the panel genuinely has no data
-       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "has_data"? }\` to update an existing visualization
+       - \`{ "type": "custom_content", "dataQueries": [...] }\` or \`{ "type": "custom_content", "removeAllQueries": true }\` for an HTML layout — always pass one: \`dataQueries\` has a query generated for each entry, \`removeAllQueries\` is for a panel that genuinely has no data
+       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "dataQueries"?, "removeAllQueries"? }\` (\`esql\` for Lens and Vega, \`dataQueries\` and \`removeAllQueries\` for custom content) to update an existing visualization
        \`esql\` is optional everywhere it appears: pass it only when the query came from ${
          platformCoreTools.generateEsql
        } or the user pasted it, otherwise it is generated for you.
@@ -148,15 +153,15 @@ ${
 
 Pass \`target.type: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Do not write HTML, and never pass a template: the markup is generated server-side.
 
-You decide whether the panel has data:
-- Omit \`target.esql\` and a query is generated from \`query\` (the common case), or pass a query from ${
+You always decide whether the panel has data and say so; there is no default:
+- Pass \`target.dataQueries\` for a panel with live data: one entry per query, each saying what ONE query returns, and a query is generated for it from \`query\` and the description (the common case). The entry can carry a query from ${
     platformCoreTools.generateEsql
-  } or the user.
-- Pass \`target.has_data: false\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use \`has_data: false\` to get past a failed query generation; fix the index or fields and retry instead. Do not pass \`esql: null\` to mean "no data" — that is treated as omitting the query so one is generated.
+  } or the user as \`esql\`.
+- Pass \`target.removeAllQueries: true\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use it to get past a failed query generation; fix the index or fields and retry instead.
 
-To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Omitting \`esql\` and \`has_data\` on an update keeps the panel's current data state (its query, or none); pass an \`esql\` from ${
-    platformCoreTools.generateEsql
-  } or the user to add or replace data, \`has_data: true\` to ensure it has data (the stored query is kept; one is generated only when the panel has none), and \`has_data: false\` to remove it. If the generated query is rejected, correct \`query\` (or pass an \`esql\` from ${
+When a panel needs data of more than one shape — headline numbers above a ranked list, say — pass one \`dataQueries\` entry per query. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`. Each entry says what ONE query returns, not how it looks: \`{ "description": "total requests and the number of 5xx errors, as one row" }\`, then \`{ "description": "the five hosts with the most requests" }\`; \`query\` stays the layout and says how each query is used. Keep a panel to a few queries (at most ten). On an update, pass \`dataQueries\` only for the queries you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one; queries you do not list are kept, and \`removeAllQueries: true\` removes them all. A layout or style edit omits \`dataQueries\` and keeps every query.
+
+To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Layout, copy and style edits (colors, sizes, wording) keep the stored queries, so pass no \`dataQueries\`. Pass a \`dataQueries\` entry at the position of the query to change when the edit needs different data, such as a new measure, grouping, filter or time window ("also show the average bytes"): without it the stored query is kept and the new data can never appear, and with a \`description\` the stored query is regenerated, keeping what the request does not change. Give \`esql\` only when the user supplied one. If the generated query is rejected, correct \`query\` (or pass an \`esql\` from ${
     platformCoreTools.generateEsql
   }) and retry; do not fall back to writing markup yourself.
 
@@ -234,7 +239,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 {
   "query": "A status board with one card per host showing its log count and a colored badge",
   "index": "logs-*",
-  "target": { "type": "custom_content" }
+  "target": { "type": "custom_content", "dataQueries": [{ "description": "the log count per host" }] }
 }
 \`\`\`
 
@@ -243,7 +248,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 \`\`\`json
 {
   "query": "A header banner reading 'Production overview' with a short subtitle",
-  "target": { "type": "custom_content", "has_data": false }
+  "target": { "type": "custom_content", "removeAllQueries": true }
 }
 \`\`\`
 

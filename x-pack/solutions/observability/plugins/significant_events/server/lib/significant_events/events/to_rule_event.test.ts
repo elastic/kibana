@@ -11,7 +11,6 @@ import {
   type BlastRadiusEntry,
   type CausalFeature,
   type SignalEntry,
-  type SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { toRuleEvent } from './to_rule_event';
@@ -20,7 +19,7 @@ const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): Sign
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: 'stable-id-1',
   status: 'active',
-  stream_names: ['logs.test'],
+  source_ids: ['logs.test'],
   title: 'API gateway — upstream connection refused',
   summary: 'Connection refused on port 8080.',
   severity: 'high',
@@ -36,7 +35,7 @@ const getEventData = (event: SignificantEvent): Record<string, unknown> => {
 
 const SIGNAL: SignalEntry = {
   type: 'detection',
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   description: 'Connection refused rows found.',
   verdict: 'confirms',
   evidence: { esql_query: 'FROM logs.test | LIMIT 1', result: 'found' },
@@ -53,19 +52,14 @@ const SIGNAL: SignalEntry = {
 const CAUSAL_FEATURE: CausalFeature = {
   feature_id: 'fi-1',
   name: 'API Gateway',
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
 };
 
 const BLAST_RADIUS_ENTRY: BlastRadiusEntry = {
   type: 'entity',
   feature_id: 'fi-2',
   name: 'Payment Service',
-  stream_name: 'logs.test',
-};
-
-const INVESTIGATION: SignificantEventInvestigation = {
-  workflow_execution_id: 'wf-exec-1',
-  started_at: '2026-01-01T01:00:00.000Z',
+  source_id: 'logs.test',
 };
 
 describe('toRuleEvent', () => {
@@ -83,7 +77,7 @@ describe('toRuleEvent', () => {
           title: 'API gateway — upstream connection refused',
           summary: 'Connection refused on port 8080.',
           confidence: 0.75,
-          stream_names: ['logs.test'],
+          source_ids: ['logs.test'],
         },
       });
     });
@@ -97,11 +91,10 @@ describe('toRuleEvent', () => {
         confidence: 0.9,
         symptom_hypothesis: 'Pool exhausted.',
         assessment_note: 'False alarm.',
-        stream_names: ['logs.app', 'logs.db'],
+        source_ids: ['logs.app', 'logs.db'],
         signals: [SIGNAL],
         causal_features: [CAUSAL_FEATURE],
         blast_radius: [BLAST_RADIUS_ENTRY],
-        investigations: [INVESTIGATION],
         workflow_execution_id: 'wf-1',
         conversation_id: 'conv-1',
       });
@@ -118,13 +111,12 @@ describe('toRuleEvent', () => {
           title: 'API gateway — upstream connection refused',
           summary: 'Connection refused on port 8080.',
           confidence: 0.9,
-          stream_names: ['logs.app', 'logs.db'],
+          source_ids: ['logs.app', 'logs.db'],
           symptom_hypothesis: 'Pool exhausted.',
           assessment_note: 'False alarm.',
           signals: [SIGNAL],
           causal_features: [CAUSAL_FEATURE],
           blast_radius: [BLAST_RADIUS_ENTRY],
-          investigations: [INVESTIGATION],
           workflow_execution_id: 'wf-1',
           conversation_id: 'conv-1',
         },
@@ -151,7 +143,6 @@ describe('toRuleEvent', () => {
         signals: [SIGNAL],
         causal_features: [CAUSAL_FEATURE],
         blast_radius: [BLAST_RADIUS_ENTRY],
-        investigations: [INVESTIGATION],
         workflow_execution_id: 'wf-exec-0',
         conversation_id: 'conv-1',
       });
@@ -212,7 +203,7 @@ describe('toRuleEvent', () => {
         title: 'API gateway — upstream connection refused',
         summary: 'Connection refused on port 8080.',
         confidence: 0.75,
-        stream_names: ['logs.test'],
+        source_ids: ['logs.test'],
       });
     });
 
@@ -244,7 +235,6 @@ describe('toRuleEvent', () => {
         'signals',
         'causal_features',
         'blast_radius',
-        'investigations',
         'workflow_execution_id',
         'conversation_id',
       ]) {
@@ -271,27 +261,24 @@ describe('toRuleEvent', () => {
       const signals: SignalEntry[] = [SIGNAL];
       const causalFeatures: CausalFeature[] = [CAUSAL_FEATURE];
       const blastRadius: BlastRadiusEntry[] = [BLAST_RADIUS_ENTRY];
-      const investigations: SignificantEventInvestigation[] = [INVESTIGATION];
 
       const data = getEventData(
         createSignificantEvent({
           signals,
           causal_features: causalFeatures,
           blast_radius: blastRadius,
-          investigations,
         })
       );
 
       expect(data.signals).toEqual(signals);
       expect(data.causal_features).toEqual(causalFeatures);
       expect(data.blast_radius).toEqual(blastRadius);
-      expect(data.investigations).toEqual(investigations);
     });
 
     it('has exactly the required keys for a minimal event', () => {
       const data = getEventData(createSignificantEvent());
       expect(Object.keys(data).sort()).toEqual(
-        ['confidence', 'event_id', 'rule_name', 'stream_names', 'summary', 'title'].sort()
+        ['confidence', 'event_id', 'rule_name', 'source_ids', 'summary', 'title'].sort()
       );
     });
 
@@ -303,7 +290,6 @@ describe('toRuleEvent', () => {
           signals: [SIGNAL],
           causal_features: [CAUSAL_FEATURE],
           blast_radius: [BLAST_RADIUS_ENTRY],
-          investigations: [INVESTIGATION],
           workflow_execution_id: 'wf-1',
           conversation_id: 'conv-1',
         })
@@ -316,10 +302,9 @@ describe('toRuleEvent', () => {
           'confidence',
           'conversation_id',
           'event_id',
-          'investigations',
           'rule_name',
           'signals',
-          'stream_names',
+          'source_ids',
           'summary',
           'symptom_hypothesis',
           'title',
@@ -336,7 +321,6 @@ describe('toRuleEvent', () => {
           signals: [SIGNAL],
           causal_features: [CAUSAL_FEATURE],
           blast_radius: [BLAST_RADIUS_ENTRY],
-          investigations: [INVESTIGATION],
           workflow_execution_id: 'wf-1',
           conversation_id: 'conv-1',
         })

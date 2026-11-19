@@ -20,7 +20,7 @@ import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import type { App, PublicAppInfo } from '@kbn/core-application-browser';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { settingsServiceMock, uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
@@ -41,11 +41,11 @@ import { ChromeService } from './chrome_service';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
 
-const mockhandleSystemColorModeChange = jest.fn();
+const mockSyncColorMode = jest.fn();
 
-jest.mock('./side_effects/handle_system_colormode_change', () => {
+jest.mock('./side_effects/sync_color_mode', () => {
   return {
-    handleSystemColorModeChange: (...args: any[]) => mockhandleSystemColorModeChange(...args),
+    syncColorMode: (...args: any[]) => mockSyncColorMode(...args),
   };
 });
 
@@ -74,7 +74,7 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
   const notifications = notificationServiceMock.createStartContract();
   const deps = {
     i18n: i18nServiceMock.createStartContract(),
-    theme: themeServiceMock.createStartContract(),
+    theme: themeServiceMock.createInternalStartContract(),
     userProfile: userProfileServiceMock.createStart(),
     application: applicationServiceMock.createInternalStartContract(currentAppId),
     docLinks: docLinksServiceMock.createStartContract(),
@@ -83,6 +83,7 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     getNotifications: () => Promise.resolve(notifications),
     notifications, // Keep for test assertions
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    settings: settingsServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
   };
 
@@ -214,26 +215,30 @@ describe('start', () => {
     expect(startDeps.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 
-  it('calls handleSystemColorModeChange() with the correct parameters', async () => {
-    mockhandleSystemColorModeChange.mockReset();
-    await start();
-    expect(mockhandleSystemColorModeChange).toHaveBeenCalledTimes(1);
+  it('calls syncColorMode() with the correct parameters', async () => {
+    mockSyncColorMode.mockReset();
+    const { startDeps } = await start();
+    expect(mockSyncColorMode).toHaveBeenCalledTimes(1);
 
-    const [firstCallArg] = mockhandleSystemColorModeChange.mock.calls[0];
+    const [firstCallArg] = mockSyncColorMode.mock.calls[0];
     expect(Object.keys(firstCallArg).sort()).toEqual([
-      'coreStart',
-      'getNotifications',
       'http',
+      'injectedMetadata',
       'logger',
+      'settings',
       'stop$',
+      'theme',
       'uiSettings',
+      'userProfile',
     ]);
 
-    expect(mockhandleSystemColorModeChange).toHaveBeenCalledWith({
-      http: expect.any(Object),
-      coreStart: expect.any(Object),
-      uiSettings: expect.any(Object),
-      getNotifications: expect.any(Function),
+    expect(mockSyncColorMode).toHaveBeenCalledWith({
+      theme: startDeps.theme,
+      injectedMetadata: startDeps.injectedMetadata,
+      userProfile: startDeps.userProfile,
+      uiSettings: startDeps.uiSettings,
+      settings: startDeps.settings,
+      http: startDeps.http,
       stop$: expect.any(Object),
       logger: expect.any(Object),
     });
@@ -245,6 +250,7 @@ describe('start', () => {
       http: startDeps.http,
       docLinks: startDeps.docLinks,
       customBranding: startDeps.customBranding,
+      notifications: startDeps.notifications,
     });
 
     it('ClassicHeader renders within ChromeComponentsProvider', async () => {

@@ -7,7 +7,7 @@
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   OVERRIDES_KEY,
   READ_ALL_BEFORE_DEFAULT,
@@ -83,7 +83,8 @@ describe('GET /internal/notification_center/notifications/_unread_status', () =>
       get: jest.fn(async (key: string) => (key === OVERRIDES_KEY ? {} : READ_ALL_BEFORE_DEFAULT)),
       set: jest.fn(),
     };
-    const search = jest.fn().mockResolvedValue({
+    const elasticsearch = elasticsearchServiceMock.createStart();
+    elasticsearch.client.asInternalUser.search.mockResolvedValue({
       hits: {
         hits: [
           {
@@ -95,12 +96,10 @@ describe('GET /internal/notification_center/notifications/_unread_status', () =>
           },
         ],
       },
-    });
-    const dataStreams = dataStreamServiceMock.createStartContract();
-    dataStreams.initializeClient.mockResolvedValue({ search } as never);
+    } as never);
     const getStartServices = jest.fn().mockResolvedValue([
       {
-        dataStreams,
+        elasticsearch,
         userStorage: { asScoped: jest.fn().mockReturnValue(client) },
       },
     ]);

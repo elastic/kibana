@@ -72,11 +72,16 @@ test.describe('Onboarding ECF Deployment Section', { tag: tags.stateful.classic 
   }) => {
     // Seed the post-launch state directly into session storage — avoids relying on the AWS
     // Console popup (which opens in a new tab and can't be controlled by Playwright here).
+    // A valid ARN is required for the family to count as done and show the Done badge.
     await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
       selectedServiceIds: [ECF_SERVICE_ID],
       ecfLaunchStep: {
         launchedFamilies: ['unified'],
         stackVersions: { unified: MOCK_ECF_VERSION },
+        stackArns: {
+          unified:
+            'arn:aws:cloudformation:us-east-1:123456789012:stack/edot-cloud-forwarder/a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        },
       },
     });
 
@@ -162,6 +167,11 @@ test.describe('Onboarding ECF Deployment Section', { tag: tags.stateful.classic 
       ecfLaunchStep: {
         launchedFamilies: ['unified'],
         stackVersions: { unified: MOCK_ECF_VERSION },
+        // A valid ARN is required for isDone; without it Next stays disabled regardless of stack name.
+        stackArns: {
+          unified:
+            'arn:aws:cloudformation:us-east-1:123456789012:stack/edot-cloud-forwarder/a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        },
       },
     });
 

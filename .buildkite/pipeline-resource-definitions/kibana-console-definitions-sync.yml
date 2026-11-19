@@ -20,9 +20,9 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-management'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: false
-      branch_configuration: main 9.5 9.4 8.19
+      branch_configuration: main 9.6 9.5 8.19
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/console_definitions_sync.yml
@@ -55,5 +55,17 @@ spec:
           cronline: 0 0 * * 1 America/New_York
           message: Weekly build
           branch: main
+        Review reminder:
+          cronline: 0 0 * * 3 America/New_York
+          message: Review reminder
+          branch: main
+          env:
+            SYNC_REMINDER_MODE: review
+        Review or close reminder:
+          cronline: 0 0 * * 5 America/New_York
+          message: Review or close reminder
+          branch: main
+          env:
+            SYNC_REMINDER_MODE: review_or_close
       tags:
         - kibana

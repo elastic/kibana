@@ -6,9 +6,11 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { Logger } from '@kbn/core/server';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import type { GetScopedClients } from '../../../routes/types';
 import { createKiIdentificationCancelTool } from '../../tools/ki_identification_cancel/tool';
 import { createKiIdentificationStartTool } from '../../tools/ki_identification_start/tool';
 import { createKiIdentificationStatusTool } from '../../tools/ki_identification_status/tool';
@@ -18,14 +20,18 @@ import content from './skill.md.text';
 
 export const createKiIdentificationManagementSkill = ({
   server,
+  logger,
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
+  getScopedClients,
 }: {
   server: Pick<SignificantEventsServer, 'security'>;
+  logger: Logger;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
+  getScopedClients: GetScopedClients;
 }) =>
   defineSkillType({
     id: 'ki-identification-management',
@@ -37,13 +43,15 @@ export const createKiIdentificationManagementSkill = ({
     description,
     content,
     getInlineTools: () => [
-      createKiIdentificationCancelTool({ server, streamsKIsOnboardingClient }),
+      createKiIdentificationCancelTool({ server, streamsKIsOnboardingClient, getScopedClients }),
       createKiIdentificationStartTool({
         server,
+        logger: logger.get('ki_identification_start_tool'),
         telemetry,
         streamsKIsOnboardingClient,
         maintenanceService,
+        getScopedClients,
       }),
-      createKiIdentificationStatusTool({ server, streamsKIsOnboardingClient }),
+      createKiIdentificationStatusTool({ server, streamsKIsOnboardingClient, getScopedClients }),
     ],
   });
