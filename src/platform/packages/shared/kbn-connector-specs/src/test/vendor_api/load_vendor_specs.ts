@@ -64,6 +64,23 @@ export const applyOverlayToSources = (
   overlay: OverlayDocument | undefined,
   log: VendorApiLog
 ): Record<string, OpenApiDocument> => {
+  const { specs, unmatchedActions } = applyOverlayWithFindings(raw, overlay);
+  for (const index of unmatchedActions) {
+    log.warning(
+      `${OVERLAY} action ${index} matches nothing in any source; the vendor may have fixed it`
+    );
+  }
+  return specs;
+};
+
+/**
+ * Applies the overlay to every source, and lists the (zero-based) indexes of the overlay actions
+ * that match nothing in any of them.
+ */
+export const applyOverlayWithFindings = (
+  raw: Readonly<Record<string, OpenApiDocument>>,
+  overlay: OverlayDocument | undefined
+): { specs: Record<string, OpenApiDocument>; unmatchedActions: number[] } => {
   const specs: Record<string, OpenApiDocument> = {};
   const matched = new Set<number>();
   for (const [name, document] of Object.entries(raw)) {
@@ -74,14 +91,10 @@ export const applyOverlayToSources = (
     );
     overlay?.actions.forEach((_, index) => !missed.has(index) && matched.add(index));
   }
-  overlay?.actions.forEach((_, index) => {
-    if (!matched.has(index)) {
-      log.warning(
-        `${OVERLAY} action ${index} matches nothing in any source; the vendor may have fixed it`
-      );
-    }
-  });
-  return specs;
+  const unmatchedActions = (overlay?.actions ?? []).flatMap((_, index) =>
+    matched.has(index) ? [] : [index]
+  );
+  return { specs, unmatchedActions };
 };
 
 /** The manifest's pagination entries, once per operation, as the contract mock takes them. */

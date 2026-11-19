@@ -6,8 +6,15 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  AlertEventSeverity,
+  AlertEventStatus,
+  CreateRuleData,
+} from '@kbn/alerting-v2-schemas';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
+import type { z } from '@kbn/zod/v4';
+import type { detectionSignalReadingSchema } from '../../../common/detection_signal';
+import type { SeriesId } from './series_key';
 
 /** What a strategy declares about itself; the engine reads it to schedule the strategy. */
 export interface DetectionStrategyDescriptor {
@@ -16,6 +23,9 @@ export interface DetectionStrategyDescriptor {
   /**
    * Bump it when the strategy's logic changes what a reading means. The engine stamps it on every
    * signal, so history written by an older version stays distinguishable.
+   * A bump costs a baseline: the history read leaves older versions out, so every series of the
+   * strategy is `warming_up` until it has enough readings again, and nothing that compares with
+   * normal opens an event meanwhile. Don't bump it for a change that keeps the value comparable.
    */
   version: number;
   name: string;
@@ -33,45 +43,26 @@ export interface DetectionStrategyDescriptor {
  * `DetectionSignal`: it adds the strategy id, space, group hash and schedule time, so a reading
  * carries only what the generator knows.
  */
-export interface DetectionSignalReading {
+export type DetectionSignalReading = z.infer<typeof detectionSignalReadingSchema> & {
   /** `recovered` and `no_data` are reported as readings too, not only `breached`. */
-  status: 'breached' | 'recovered' | 'no_data';
-  /** Identifies the series within the strategy; the engine hashes it into the group hash. */
-  fingerprint: string;
-  rule_id?: string;
-  source_id?: string;
-  entity: { type: string; name: string };
-  /** Start of the bucket, in epoch milliseconds. */
-  bucket_start: number;
-  /** End of the bucket, in epoch milliseconds. */
-  bucket_end: number;
-  value: number;
-  unit: string;
-  title: string;
-  description: string;
-  /** 0 to 100. */
-  importance: number;
-  /** The ES|QL query that reproduces the reading. */
-  evidence_esql: string;
-  /** A supporting reading may join an open event but never opens one. */
-  role: 'primary' | 'supporting';
-  /** Whether the judge should compare the reading with what is normal for the series. */
-  compare_with_normal: boolean;
-  /** Strategy-specific detail, kept as reported. */
-  details: Record<string, unknown>;
-}
+  status: AlertEventStatus;
+  /** A severity decided outside the engine, such as an external alert's; most strategies omit it. */
+  severity?: AlertEventSeverity;
+};
 
 /** Reads back the readings a strategy wrote before, so a generator can compare with its history. */
 export interface SignalHistoryReader {
   /**
    * Readings of the calling strategy only, for the given series, whose bucket starts in
-   * `[from, to)` (epoch milliseconds), grouped by fingerprint. A fingerprint without readings is
-   * absent from the result.
+   * `[from, to)` (epoch milliseconds), keyed by `getSeriesKey`. A series without readings
+   * is absent from the result.
    */
   readHistory(params: {
-    fingerprints: string[];
+    series: SeriesId[];
     from: number;
     to: number;
+    /** Stops the search when the run is out of time or cancelled. */
+    abortSignal?: AbortSignal;
   }): Promise<Map<string, DetectionSignalReading[]>>;
 }
 
