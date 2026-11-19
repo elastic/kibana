@@ -7,7 +7,10 @@
 
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { type Condition, isAndCondition, isNotCondition, isOrCondition } from '@kbn/streamlang';
-import { sumBy } from 'lodash';
+import { isEqual, sumBy } from 'lodash';
+
+// ES|QL rejects an expression with more than 500 left parentheses; a merged filter uses three.
+export const MAX_ENTITY_FILTERS = 50;
 
 // Bounds the size of the ES|QL query.
 export const MAX_ENTITY_FILTER_VALUES = 1000;
@@ -69,6 +72,9 @@ export const getEntityFilters = (
 
   for (const { filter } of sorted) {
     if (!isEqualityFilter(filter)) {
+      if (filters.some((included) => isEqual(included, filter))) {
+        continue;
+      }
       const cost = countComparisons(filter);
       if (filters.length >= maxFilters || comparisons + cost > MAX_ENTITY_FILTER_COMPARISONS) {
         omitted++;

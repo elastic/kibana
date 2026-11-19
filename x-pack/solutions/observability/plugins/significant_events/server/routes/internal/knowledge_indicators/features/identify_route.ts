@@ -24,6 +24,7 @@ import {
   MAX_INFERENCE_DOCUMENTS_BYTES,
   MAX_INFERENCE_DOCUMENT_BYTES,
   MAX_INFERENCE_DOCUMENT_FIELDS,
+  MAX_ENTITY_FILTERS,
   MAX_INFERENCE_FIELD_NAME_LENGTH,
   prepareInferredSampling,
 } from '../../../../lib/significant_events/features';
@@ -118,7 +119,7 @@ const prepareInferredSamplingRoute = createServerRoute({
         sampleSize: z.number().int().min(1).max(100),
         entityFilteredRatio: z.number().min(0).max(1),
         diverseRatio: z.number().min(0).max(1),
-        maxEntityFilters: z.number().int().min(1).max(50),
+        maxEntityFilters: z.number().int().min(1).max(MAX_ENTITY_FILTERS),
         samplingTimeoutMs: z.number().int().min(1_000).max(240_000),
       }),
     })

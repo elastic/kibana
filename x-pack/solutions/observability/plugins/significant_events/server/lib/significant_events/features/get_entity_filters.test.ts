@@ -39,10 +39,16 @@ describe('getEntityFilters', () => {
   });
 
   it('counts features sharing a filter as covered', () => {
-    const features = [createFeature(service('cart'), 1), createFeature(service('cart'), 2)];
+    const contains: Condition = { field: 'message', contains: 'timeout' };
+    const features = [
+      createFeature(service('cart'), 1),
+      createFeature(service('cart'), 2),
+      createFeature(contains, 3),
+      createFeature({ ...contains }, 4),
+    ];
 
-    expect(getEntityFilters(features, 10)).toEqual({
-      filters: [{ field: 'service.name', values: ['cart'] }],
+    expect(getEntityFilters(features, 2)).toEqual({
+      filters: [contains, { field: 'service.name', values: ['cart'] }],
       omitted: 0,
     });
   });
