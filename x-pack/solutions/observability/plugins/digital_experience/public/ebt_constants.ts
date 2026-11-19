@@ -14,6 +14,23 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   OPEN_FILTER: 'openFilter',
   /** The user narrows the list, e.g. to one environment or source. */
   SET_FILTER: 'setFilter',
+  /** The user applies a saved view of filters, query and percentile. */
+  APPLY_VIEW: 'applyView',
+  /** The user opens the list of saved views. */
+  OPEN_VIEWS: 'openViews',
+  /**
+   * The user saves the filters, query and percentile as a view, or asks to save a view again, and
+   * then confirms it.
+   */
+  SAVE_VIEW: 'saveView',
+  /** The user keeps a saved view as it is, rather than saving the current filters in it. */
+  CANCEL_UPDATE_VIEW: 'cancelUpdateView',
+  /** The user asks to delete a saved view, and then confirms it. */
+  DELETE_VIEW: 'deleteView',
+  /** The user keeps a saved view they were about to delete. */
+  CANCEL_DELETE_VIEW: 'cancelDeleteView',
+  /** The user leaves a value out of the data, e.g. every Chrome page load. */
+  EXCLUDE_FILTER_VALUE: 'excludeFilterValue',
   /** The user opens the list of columns to show or hide. */
   SELECT_COLUMNS: 'selectColumns',
   /** The user loads the list again after it failed. */
@@ -32,6 +49,14 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   BACK_TO_SESSIONS: 'backToSessions',
   /** The user clears the list's search and filters. */
   CLEAR_FILTERS: 'clearFilters',
+  /** The user closes the filters flyout without applying what they picked. */
+  CANCEL_FILTERS: 'cancelFilters',
+  /** The user opens the details of a request, an error or folded requests in a page visit. */
+  EXPAND_ACTIVITY: 'expandActivity',
+  /** The user leaves for the distributed trace of a request. */
+  VIEW_TRACE: 'viewTrace',
+  /** The user opens the raw events behind a page in Discover. */
+  OPEN_IN_DISCOVER: 'openInDiscover',
 } as const;
 
 /*
@@ -64,14 +89,27 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   OS_FILTER: 'overviewOsFilter',
   DEVICE_FILTER: 'overviewDeviceFilter',
   COUNTRY_FILTER: 'overviewCountryFilter',
+  SAVED_VIEWS: 'overviewSavedViews',
+  SAVED_VIEW_UPDATE: 'overviewSavedViewUpdate',
+  SAVED_VIEW_UPDATE_CONFIRM: 'overviewSavedViewUpdateConfirm',
+  SAVED_VIEW_DELETE: 'overviewSavedViewDelete',
+  SAVED_VIEW_DELETE_CONFIRM: 'overviewSavedViewDeleteConfirm',
+  APP_VERSION_FILTER: 'overviewAppVersionFilter',
   PAGE_FILTER: 'overviewPageFilter',
+  PAGE_CONTAINS_FILTER: 'overviewPageContainsFilter',
+  ALL_FILTERS: 'overviewAllFilters',
+  ALL_FILTERS_APPLY: 'overviewAllFiltersApply',
+  ALL_FILTERS_CANCEL: 'overviewAllFiltersCancel',
+  ALL_FILTERS_RESET: 'overviewAllFiltersReset',
   CLEAR_FILTERS: 'overviewClearFilters',
+  PERCENTILE: 'overviewPercentile',
 } as const;
 
 export const ERRORS_EBT_ELEMENTS = {
   RETRY: 'errorsRetry',
   ERROR: 'errorsError',
   VIEW_ALL: 'errorsViewAll',
+  CLEAR_KUERY: 'errorsClearKuery',
 } as const;
 
 export const NETWORK_EBT_ELEMENTS = {
@@ -86,6 +124,7 @@ export const SESSIONS_EBT_ELEMENTS = {
   SESSION_RETRY: 'sessionRetry',
   SESSION_LINK: 'sessionLink',
   ERRORS_FILTER: 'sessionsErrorsFilter',
+  FAILED_REQUESTS_FILTER: 'sessionsFailedRequestsFilter',
   DURATION_FILTER: 'sessionsDurationFilter',
   BROWSER_FILTER: 'sessionsBrowserFilter',
   OS_FILTER: 'sessionsOsFilter',
@@ -96,4 +135,9 @@ export const SESSIONS_EBT_ELEMENTS = {
   DOCS_LINK: 'sessionsDocsLink',
   COLUMN_SELECTOR: 'sessionsColumnSelector',
   SESSION_NOT_FOUND_BACK: 'sessionNotFoundBack',
+  ACTIVITY_KIND_FILTER: 'sessionActivityKindFilter',
+  ACTIVITY_SEARCH: 'sessionActivitySearch',
+  ACTIVITY_ROW: 'sessionActivityRow',
+  ACTIVITY_SHOW_ALL: 'sessionActivityShowAll',
+  TRACE_LINK: 'sessionTraceLink',
 } as const;

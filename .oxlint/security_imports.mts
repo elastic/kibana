@@ -39,11 +39,11 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/platform/plugins/shared/fleet/server/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/inference/scripts/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/observability_ai_assistant/server/service/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/osquery/cypress/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/packages/private/osquery-plugin-cypress/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/screenshotting/server/browsers/download/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/stack_connectors/server/connector_types/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts',
+  'x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/sub_action_connector.ts',
   'x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/tests/alerting/mustache_templates.ts',
   'x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/mustache_templates.ts',
   'x-pack/platform/test/fleet_api_integration/**/*.{js,mjs,ts,tsx}',
@@ -63,7 +63,7 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/test/security_solution_api_integration/config/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/config/services/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/test/security_solution_cypress/cypress/support/**/*.{js,mjs,ts,tsx}',
 ];
 

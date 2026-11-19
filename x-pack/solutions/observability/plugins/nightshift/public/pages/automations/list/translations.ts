@@ -62,7 +62,7 @@ export const listLabels = {
   }),
   emptyBody: i18n.translate('xpack.nightshift.automations.emptyBody', {
     defaultMessage:
-      'When something happens in Slack, PagerDuty, or your stack, Nightshift can investigate and respond automatically.',
+      'When something happens in Slack, PagerDuty, or your stack, nightshift can investigate and respond automatically.',
   }),
   createCustom: i18n.translate('xpack.nightshift.automations.createCustomButton', {
     defaultMessage: 'Create custom automation',
@@ -127,6 +127,14 @@ export const globalLimitLabels = {
   body: i18n.translate('xpack.nightshift.automations.globalLimitBannerBody', {
     defaultMessage:
       'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue.',
+  }),
+  zeroBody: i18n.translate('xpack.nightshift.automations.globalLimitBannerZeroBody', {
+    defaultMessage:
+      'Further triggers will be skipped until the limit is changed or enforcement is turned off. Already started investigations will continue.',
+  }),
+  zeroTotalBody: i18n.translate('xpack.nightshift.automations.totalLimitBannerZeroBody', {
+    defaultMessage:
+      'The limit covers automatic and manual investigations together. Further triggers will be skipped until the limit is changed or enforcement is turned off. Already started investigations will continue.',
   }),
   getTotalTitle: (limit: number) =>
     i18n.translate('xpack.nightshift.automations.totalLimitBannerTitle', {

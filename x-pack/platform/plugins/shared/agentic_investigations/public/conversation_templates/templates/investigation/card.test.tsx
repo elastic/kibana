@@ -59,6 +59,32 @@ const renderCard = (props: React.ComponentProps<typeof InvestigationCard>) =>
   );
 
 describe('InvestigationCard', () => {
+  describe('age', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-07-30T14:00:00.000Z'));
+    });
+    afterEach(() => jest.useRealTimers());
+
+    const aged = {
+      created_at: '2026-07-28T14:00:00.000Z',
+      updated_at: '2026-07-30T12:00:00.000Z',
+    };
+
+    it('shows when the investigation was created by default', () => {
+      renderCard({ investigation: investigation(aged) });
+
+      expect(screen.getByText('2 days ago')).toBeInTheDocument();
+      expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
+    });
+
+    it('shows when it was last updated, labelled, when the host asks for it', () => {
+      renderCard({ investigation: investigation(aged), timestamp: 'updated' });
+
+      expect(screen.getByText(/Updated/)).toHaveTextContent('Updated 2 hours ago');
+      expect(screen.queryByText('2 days ago')).not.toBeInTheDocument();
+    });
+  });
+
   it('shows the title, summary, and impacted entities, but not subjects or proposals', () => {
     renderCard({ investigation: investigation() });
 

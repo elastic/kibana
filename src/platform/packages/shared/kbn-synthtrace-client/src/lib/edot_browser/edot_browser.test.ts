@@ -24,8 +24,8 @@ import {
   type EdotBrowserSite,
 } from '.';
 
-const LOGS_INDEX = 'logs-generic.otel-default';
-const TRACES_INDEX = 'traces-generic.otel-default';
+const LOGS_INDEX = 'logs-browser.otel-default';
+const TRACES_INDEX = 'traces-browser.otel-default';
 const TIMESTAMP = new Date('2026-10-16T12:00:00.000Z').getTime();
 
 const resourceTimings = {
@@ -826,9 +826,7 @@ describe('edotBrowser', () => {
       );
       expect([...vitals].sort()).toEqual(['cls', 'fcp', 'inp', 'lcp', 'ttfb']);
       expect(spans.length).toBeGreaterThan(0);
-      expect(spans.map((span) => span._index)).toEqual(
-        spans.map(() => 'traces-generic.otel-default')
-      );
+      expect(spans.map((span) => span._index)).toEqual(spans.map(() => TRACES_INDEX));
     });
 
     it('only reports INP for documents with interactions', () => {

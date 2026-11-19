@@ -25,6 +25,7 @@ import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
 import type { SessionMemoryService } from './session_memory/types';
+import type { SessionEventsService } from './session_events/types';
 import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
@@ -58,6 +59,11 @@ export interface ContextEnginePluginStart {
    * authenticated user.
    */
   getSessionMemoryService: () => SessionMemoryService;
+  /**
+   * Writes as the internal user, so callers check privileges before using it. The user in each
+   * call is the end user the events belong to, and is never checked against the authenticated user.
+   */
+  getSessionEventsService: () => SessionEventsService;
 }
 
 /** Duck-typed so Context Engine does not depend on `@kbn/workflows-management-plugin` (Moon cycle). */

@@ -25,10 +25,9 @@ import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../
 import type { Formatters } from '../../../hooks/use_formatters';
 import { FacetFilter } from '../../../components/facet_filter';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
+import { SEARCH_DEBOUNCE_MS } from '../../../hooks/use_debounced_text';
 import type { SessionsListState } from '../hooks/use_sessions_list_query';
 import { DURATION_BUCKETS, type SessionsListUrlQuery } from '../../../utils/sessions_list_query';
-
-export const SEARCH_DEBOUNCE_MS = 300;
 
 /** The "any value" option of a facet, which removes its filter. */
 const ANY_VALUE = '';
@@ -82,7 +81,8 @@ const FACETS: ReadonlyArray<{
 export function SessionsFilters({
   state,
   facets,
-  sessionsWithErrors,
+  sessionsWithJsErrors,
+  sessionsWithFailedRequests,
   hasActiveFilters,
   isLoading,
   formatters,
@@ -92,8 +92,9 @@ export function SessionsFilters({
 }: {
   state: SessionsListState;
   facets: SessionListFacets | undefined;
-  /** Shown on the errors filter, so users see how many sessions it keeps. */
-  sessionsWithErrors: number | undefined;
+  /** Shown on the error filters, so users see how many sessions each keeps. */
+  sessionsWithJsErrors: number | undefined;
+  sessionsWithFailedRequests: number | undefined;
   hasActiveFilters: boolean;
   isLoading: boolean;
   formatters: Formatters;
@@ -148,18 +149,35 @@ export function SessionsFilters({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiFilterButton
-            data-test-subj="digitalExperienceSessionsErrorsFilter"
+            data-test-subj="digitalExperienceSessionsJsErrorsFilter"
             {...getEbtProps({
               action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
               element: SESSIONS_EBT_ELEMENTS.ERRORS_FILTER,
             })}
             withNext
-            hasActiveFilters={state.hasErrors}
-            numFilters={sessionsWithErrors}
-            onClick={() => onChange({ hasErrors: state.hasErrors ? undefined : 'true' })}
+            hasActiveFilters={state.withJsErrors}
+            numFilters={sessionsWithJsErrors}
+            onClick={() => onChange({ withJsErrors: state.withJsErrors ? undefined : 'true' })}
           >
-            {i18n.translate('xpack.digitalExperience.sessions.filters.hasErrorsLabel', {
-              defaultMessage: 'Has errors',
+            {i18n.translate('xpack.digitalExperience.sessions.filters.withJsErrorsLabel', {
+              defaultMessage: 'JS errors',
+            })}
+          </EuiFilterButton>
+          <EuiFilterButton
+            data-test-subj="digitalExperienceSessionsFailedRequestsFilter"
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+              element: SESSIONS_EBT_ELEMENTS.FAILED_REQUESTS_FILTER,
+            })}
+            withNext
+            hasActiveFilters={state.withFailedRequests}
+            numFilters={sessionsWithFailedRequests}
+            onClick={() =>
+              onChange({ withFailedRequests: state.withFailedRequests ? undefined : 'true' })
+            }
+          >
+            {i18n.translate('xpack.digitalExperience.sessions.filters.withFailedRequestsLabel', {
+              defaultMessage: 'Failed requests',
             })}
           </EuiFilterButton>
           <SingleSelectFilter

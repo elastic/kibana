@@ -5,14 +5,29 @@
  * 2.0.
  */
 
+import { useEffect, useMemo } from 'react';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { useMutation, useQueries, useQuery, useQueryClient } from '@kbn/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from '@kbn/react-query';
 import type {
   NightshiftInvestigationsAPIClientRequestParamsOf,
   NightshiftInvestigationsAPIReturnType,
 } from '@kbn/nightshift-investigations-plugin/public';
+import { isScheduleOnlyAutomation } from '@kbn/nightshift-investigations-plugin/common';
 import { isHttpClientError } from '../../common/http_error';
 import { useKibana } from '../../hooks/use_kibana';
+import {
+  AUTOMATIONS_QUERY_KEY,
+  INVESTIGATION_QUOTAS_QUERY_KEY,
+  automationRunActivityQueryKey,
+  automationDetailQueryKey,
+} from '../query_keys';
 
 type AutomationsResponse =
   NightshiftInvestigationsAPIReturnType<'GET /internal/nightshift/automations'>;
@@ -22,7 +37,7 @@ type CreateAutomationBody =
 type UpdateAutomationBody =
   NightshiftInvestigationsAPIClientRequestParamsOf<'PUT /internal/nightshift/automations/{id}'>['params']['body'];
 
-export const AUTOMATIONS_QUERY_KEY = ['nightshift.automations'] as const;
+export { AUTOMATIONS_QUERY_KEY } from '../query_keys';
 
 export const AUTOMATIONS_LOAD_ERROR_TITLE = i18n.translate(
   'xpack.nightshift.automations.loadError',
@@ -37,13 +52,26 @@ const errorToastTitles = {
   update: i18n.translate('xpack.nightshift.automations.updateError', {
     defaultMessage: 'Failed to update automation',
   }),
+  run: i18n.translate('xpack.nightshift.automations.runErrorMessage', {
+    defaultMessage: 'Failed to run automation',
+  }),
+  repair: i18n.translate('xpack.nightshift.automations.repairError', {
+    defaultMessage: 'Failed to repair automation',
+  }),
   delete: i18n.translate('xpack.nightshift.automations.deleteError', {
     defaultMessage: 'Failed to delete automation',
   }),
 };
 
-const toError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error(String(error));
+const toError = (error: unknown): Error => {
+  if (isHttpFetchError(error)) {
+    const { body } = error;
+    if (body && typeof body === 'object' && 'message' in body && typeof body.message === 'string') {
+      return new Error(body.message);
+    }
+  }
+  return error instanceof Error ? error : new Error(String(error));
+};
 
 export const useFetchAutomations = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { notifications, nightshiftInvestigations } = useKibana().services;
@@ -63,6 +91,24 @@ export const useFetchAutomations = ({ enabled = true }: { enabled?: boolean } = 
     retry: (failureCount, error) => !isHttpClientError(error) && failureCount < 3,
     onError: (error: unknown) =>
       notifications.toasts.addError(toError(error), { title: errorToastTitles.load }),
+  });
+};
+
+export const useAutomationDetail = (id: string) => {
+  const { nightshiftInvestigations } = useKibana().services;
+  const investigationsClient = nightshiftInvestigations?.investigationsClient;
+  return useQuery({
+    queryKey: automationDetailQueryKey(id),
+    enabled: investigationsClient != null,
+    queryFn: async ({ signal }) => {
+      if (!investigationsClient) throw new Error('Nightshift investigations plugin is unavailable');
+      return investigationsClient.fetch('GET /internal/nightshift/automations/{id}', {
+        params: { path: { id } },
+        signal: signal ?? null,
+      });
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -99,20 +145,118 @@ const getAutomationRunsQuery = (
   retry: false,
 });
 
+const RUNS_PAGE_SIZE = 100;
+
 export const useAutomationRunsInRange = (
   id: string,
   startedAfter: string,
   startedBefore: string
 ) => {
+  const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage, refetch, isLoading, isError } =
+    useInfiniteQuery({
+      queryKey: [...AUTOMATIONS_QUERY_KEY, id, 'pagedRuns', startedAfter, startedBefore],
+      enabled: investigationsClient != null,
+      queryFn: async ({ pageParam = 1 }) => {
+        if (!investigationsClient) {
+          throw new Error('Nightshift investigations plugin is unavailable');
+        }
+        return investigationsClient.fetch('GET /internal/nightshift/automations/{id}/runs', {
+          params: {
+            path: { id },
+            query: { page: pageParam, size: RUNS_PAGE_SIZE, startedAfter, startedBefore },
+          },
+          signal: null,
+        });
+      },
+      getNextPageParam: (lastPage, pages) =>
+        pages.length * RUNS_PAGE_SIZE < lastPage.total ? pages.length + 1 : undefined,
+      retry: false,
+    });
+
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage && !isError) fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
+
+  const runs = useMemo(() => data?.pages.flatMap((page) => page.runs) ?? [], [data]);
+  const [firstPage] = data?.pages ?? [];
+  return {
+    runs,
+    isLoading,
+    isError,
+    retry: () => (hasNextPage ? fetchNextPage() : refetch()),
+    usedToday: firstPage?.usedToday,
+    total: firstPage?.total,
+  };
+};
+
+type RunCountsResponse =
+  NightshiftInvestigationsAPIReturnType<'POST /internal/nightshift/automations/run_counts'>;
+const RUN_COUNTS_CHUNK_SIZE = 100;
+
+export const useAutomationsRunCounts = (
+  ids: string[],
+  startedAfter: string,
+  startedBefore: string
+) => {
+  const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
+  return useQuery({
+    queryKey: [...AUTOMATIONS_QUERY_KEY, 'runCounts', ids, startedAfter, startedBefore],
+    enabled: investigationsClient != null && ids.length > 0,
+    queryFn: async ({ signal }): Promise<RunCountsResponse['counts']> => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      const chunks = Array.from({ length: Math.ceil(ids.length / RUN_COUNTS_CHUNK_SIZE) }, (_, i) =>
+        ids.slice(i * RUN_COUNTS_CHUNK_SIZE, (i + 1) * RUN_COUNTS_CHUNK_SIZE)
+      );
+      const responses = await Promise.all(
+        chunks.map((chunk) =>
+          investigationsClient.fetch('POST /internal/nightshift/automations/run_counts', {
+            params: { body: { ids: chunk, startedAfter, startedBefore } },
+            signal: signal ?? null,
+          })
+        )
+      );
+      return Object.assign({}, ...responses.map(({ counts }) => counts));
+    },
+    retry: false,
+  }).data;
+};
+
+type AutomationRunActivity =
+  NightshiftInvestigationsAPIReturnType<'GET /internal/nightshift/automations/{id}/run_activity'>;
+const RUN_ACTIVITY_POLL_INTERVAL_MS = 5_000;
+
+export const useAutomationRunActivity = (
+  automation: Pick<Automation, 'id' | 'isEnabled' | 'trigger' | 'runtime'>,
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
   const { nightshiftInvestigations } = useKibana().services;
-  return useQuery(
-    getAutomationRunsQuery(
-      nightshiftInvestigations?.investigationsClient,
-      id,
-      startedAfter,
-      startedBefore
-    )
-  );
+  const investigationsClient = nightshiftInvestigations?.investigationsClient;
+  const queryClient = useQueryClient();
+  const queryKey = automationRunActivityQueryKey(automation.id);
+
+  return useQuery({
+    queryKey,
+    enabled:
+      enabled &&
+      investigationsClient != null &&
+      automation.isEnabled &&
+      isScheduleOnlyAutomation(automation) &&
+      (automation.runtime.overlapPolicy ?? 'drop') === 'drop',
+    queryFn: async ({ signal }): Promise<AutomationRunActivity> => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      const activity = queryClient.getQueryData<AutomationRunActivity>(queryKey);
+      return investigationsClient.fetch('GET /internal/nightshift/automations/{id}/run_activity', {
+        params: { path: { id: automation.id }, query: { executionId: activity?.executionId } },
+        signal: signal ?? null,
+      });
+    },
+    refetchInterval: RUN_ACTIVITY_POLL_INTERVAL_MS,
+  });
 };
 
 export const useRefreshAutomations = () => {
@@ -141,7 +285,7 @@ export const useAutomationsRunsInRange = (
 const useAutomationMutation = <TVariables, TData = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   errorTitle: string,
-  onSuccess?: (variables: TVariables) => void
+  onSuccess?: (variables: TVariables, data: TData) => void
 ) => {
   const { notifications } = useKibana().services;
   const queryClient = useQueryClient();
@@ -149,7 +293,7 @@ const useAutomationMutation = <TVariables, TData = unknown>(
   return useMutation({
     mutationFn,
     onSuccess: async (_data, variables) => {
-      onSuccess?.(variables);
+      await onSuccess?.(variables, _data);
       await queryClient.invalidateQueries({ queryKey: AUTOMATIONS_QUERY_KEY });
     },
     onError: (error: unknown) =>
@@ -239,6 +383,65 @@ export const useUpdateAutomation = () => {
           defaultMessage: 'Automation updated',
         }),
         text: body.name,
+      })
+  );
+};
+
+export const useRunAutomation = () => {
+  const queryClient = useQueryClient();
+  const { nightshiftInvestigations, notifications } = useKibana().services;
+  const investigationsClient = nightshiftInvestigations?.investigationsClient;
+
+  return useAutomationMutation<Pick<Automation, 'id' | 'name'>, { workflowExecutionId: string }>(
+    ({ id }) => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      return investigationsClient.fetch('POST /internal/nightshift/automations/{id}/run', {
+        params: { path: { id } },
+        signal: null,
+      });
+    },
+    errorToastTitles.run,
+    async ({ id, name }, { workflowExecutionId }) => {
+      const queryKey = automationRunActivityQueryKey(id);
+      await queryClient.cancelQueries({ queryKey });
+      queryClient.setQueryData<AutomationRunActivity>(queryKey, {
+        isRunning: true,
+        executionId: workflowExecutionId,
+      });
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.automations.runRequestedTitle', {
+          defaultMessage: 'Run requested',
+        }),
+        text: name,
+      });
+      await queryClient.invalidateQueries({ queryKey: INVESTIGATION_QUOTAS_QUERY_KEY });
+    }
+  );
+};
+
+export const useRepairAutomation = () => {
+  const { nightshiftInvestigations, notifications } = useKibana().services;
+  const investigationsClient = nightshiftInvestigations?.investigationsClient;
+
+  return useAutomationMutation<Pick<Automation, 'id' | 'name'>>(
+    ({ id }) => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      return investigationsClient.fetch('POST /internal/nightshift/automations/{id}/repair', {
+        params: { path: { id } },
+        signal: null,
+      });
+    },
+    errorToastTitles.repair,
+    ({ name }) =>
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.automations.repairedToast', {
+          defaultMessage: 'Automation repaired',
+        }),
+        text: name,
       })
   );
 };

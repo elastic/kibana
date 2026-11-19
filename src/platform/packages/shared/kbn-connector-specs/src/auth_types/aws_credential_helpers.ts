@@ -23,8 +23,14 @@ const EMPTY_BODY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca4959
 const REGION_BEFORE_SERVICE_HOSTS = new Set(['es', 'aoss']);
 
 /**
+ * Global endpoints such as iam.amazonaws.com and sts.amazonaws.com carry no
+ * region in their hostname and are signed in us-east-1.
+ */
+const GLOBAL_ENDPOINT_SIGNING_REGION = 'us-east-1';
+
+/**
  * Parse an AWS hostname into service and region.
- * Supports: {service}.{region}.amazonaws.com
+ * Supports: {service}.{region}.amazonaws.com and global {service}.amazonaws.com
  */
 export function parseAwsHost(
   hostname: string
@@ -33,8 +39,8 @@ export function parseAwsHost(
     return null;
   }
   const parts = hostname.replace('.amazonaws.com', '').split('.');
-  if (parts.length < 2) {
-    return null;
+  if (parts.length === 1) {
+    return { service: parts[0], region: GLOBAL_ENDPOINT_SIGNING_REGION };
   }
 
   if (parts.length === 2) {
@@ -130,6 +136,9 @@ export async function signRequest(
 
   const hasBody = body !== undefined && body !== '';
   const payloadHash = hasBody ? await sha256Hash(body) : EMPTY_BODY_SHA256;
+  const contentType =
+    Object.entries(existingHeaders).find(([key]) => key.toLowerCase() === 'content-type')?.[1] ??
+    'application/json';
 
   // Build canonical headers: host + content-type (if body) + x-amz-date + any existing x-amz-* headers
   const headersToSign: Record<string, string> = {
@@ -138,7 +147,7 @@ export async function signRequest(
   };
 
   if (hasBody) {
-    headersToSign['content-type'] = 'application/json';
+    headersToSign['content-type'] = contentType;
   }
 
   // Include any x-amz-* headers set by the action handler (AWS requires them signed)
@@ -191,7 +200,7 @@ export async function signRequest(
   }
 
   if (hasBody) {
-    result['Content-Type'] = 'application/json';
+    result['Content-Type'] = contentType;
   }
 
   return result;

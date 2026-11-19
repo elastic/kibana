@@ -91,6 +91,8 @@ export class StreamsApp {
   public readonly streamsAddSourceButton;
   public readonly streamsDestinationsTable;
   public readonly streamsDestinationsSearch;
+  public readonly newExperienceCallout;
+  public readonly newExperienceCalloutOpenMapButton;
   private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
@@ -176,6 +178,10 @@ export class StreamsApp {
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
     this.streamsDestinationsTable = this.page.testSubj.locator('streamsDestinationsTable');
     this.streamsDestinationsSearch = this.page.testSubj.locator('streamsDestinationsSearch');
+    this.newExperienceCallout = this.page.testSubj.locator('streamsNewExperienceCallout');
+    this.newExperienceCalloutOpenMapButton = this.page.testSubj.locator(
+      'streamsNewExperienceCalloutOpenMap'
+    );
   }
 
   // Scoped to the toast list: core's screen reader announcer repeats every toast's text page-wide.
@@ -188,7 +194,9 @@ export class StreamsApp {
   }
 
   async gotoStreamMainPage() {
-    await this.page.gotoApp(`streams`);
+    await this.page.gotoApp(`streams`, {
+      readyWhen: this.page.testSubj.locator('streamsTable'),
+    });
   }
 
   async gotoStreamManagementTab(
@@ -228,15 +236,19 @@ export class StreamsApp {
   }
 
   async gotoStreamsLayout() {
-    await this.page.gotoApp('streams/new-experience');
+    await this.page.gotoApp('streams/v2');
   }
 
   async gotoStreamsLayoutTab(tabName: string) {
-    await this.page.gotoApp(`streams/new-experience/${tabName}`);
+    await this.page.gotoApp(`streams/v2/unit/default/${tabName}`);
   }
 
   getStreamsLayoutTab(tabName: string) {
     return this.page.testSubj.locator(`streamsLayoutTab-${tabName}`);
+  }
+
+  async dismissNewExperienceCallout() {
+    await this.newExperienceCallout.getByTestId('euiDismissCalloutButton').click();
   }
 
   async clickStreamsLayoutTab(tabName: string) {
@@ -245,7 +257,7 @@ export class StreamsApp {
 
   /** Opens the map with its search pre-filled from the URL. */
   async gotoCanvasSearch(query: string) {
-    await this.page.gotoApp('streams/new-experience/map', {
+    await this.page.gotoApp('streams/v2/unit/default/map', {
       params: { mapState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
     });
   }

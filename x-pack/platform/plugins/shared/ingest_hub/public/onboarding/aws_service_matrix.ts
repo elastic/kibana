@@ -131,6 +131,11 @@ export interface AwsServiceMatrixEntry {
   showInUI: boolean;
   /** True when the package manifest for this entry was fetched successfully. */
   isManifestLoaded: boolean;
+  /**
+   * True when the package declares a `proxy_url` var, at package level or on one of the service's
+   * streams. Decides whether the shared Proxy URL setting reaches this service.
+   */
+  declaresProxyUrl?: boolean;
   /** True when the package manifest query has failed. The entry will have static/fallback metadata only. */
   isManifestError: boolean;
   /** True when the static routing table explicitly declares only agent_based deployment methods.
@@ -243,6 +248,10 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'ecs',
+    packageName: 'aws',
+  },
+  {
+    id: 'eks',
     packageName: 'aws',
   },
   {
@@ -827,11 +836,23 @@ export function applyDeploymentMethodView(
     dataStreams: ecf.dataStreams,
     inputs: ecf.inputs,
     defaultEnabledInputs: ecf.defaultEnabledInputs,
+    // ECF collects only the trigger ARN, so a source selector would hide it with nothing to replace it.
+    varGroupsByInput: undefined,
     settingsScope: 'ecf',
   };
 }
 
 // ── Main builder ─────────────────────────────────────────────────────────────
+
+/**
+ * Fleet treats a var_group option with a cloud `provider` as the Cloud Connector option, so an
+ * option with `provider: 'aws'` is the manifest's signal of Identity Federation support.
+ */
+export function hasIdentityFederationVarGroup(varGroups: PackageInfo['var_groups']): boolean {
+  return (varGroups ?? []).some((group) =>
+    (group.options ?? []).some((option) => option.provider === 'aws')
+  );
+}
 
 /**
  * Merge the static routing table with data from any Fleet package manifest.
@@ -982,11 +1003,11 @@ export function buildAwsServiceMatrix(
           // pt.inputs[] is empty for input packages, so the normal inputTitles loop below
           // never fires. Store pt.title here so getInputDisplayLabel can return it.
           if ((pt as any).title) inputTitles[ptInputType] = (pt as any).title as string;
-          // Input packages (e.g. otelcol) have no pt.inputs[] so the IDF derivation below
-          // cannot run and leaves identityFederationSupported as undefined. The gate is
-          // !== false, so undefined would incorrectly show IDF. Default to false until the
-          // package manifest explicitly signals support.
-          identityFederationSupported = false;
+          // Input packages have no pt.inputs[], so the per-input IDF derivation below cannot run;
+          // their manifest signals support through a var_group option with a cloud provider.
+          identityFederationSupported = hasIdentityFederationVarGroup(
+            (pt as any).var_groups ?? packageInfo.var_groups
+          );
         }
 
         // Derive union requiredConfig / optionalConfig.
@@ -1107,6 +1128,9 @@ export function buildAwsServiceMatrix(
       inputTitles: Object.keys(inputTitles).length > 0 ? inputTitles : undefined,
       showInUI,
       isManifestLoaded: packageInfo !== undefined,
+      declaresProxyUrl:
+        !!packageInfo?.vars?.some((v) => v.name === 'proxy_url') ||
+        Object.values(varDefsByInput).some((byName) => 'proxy_url' in byName),
       isManifestError: packageInfo === undefined && erroredPackageNames.has(entry.packageName),
       isStaticAgentBasedOnly:
         (staticMethods ?? []).length > 0 &&
@@ -1143,7 +1167,7 @@ export function makeDsView(service: AwsServiceMatrixEntry, dsId: string): AwsSer
     requiredConfig: isEcfOnly ? service.requiredConfig : dsInfo.requiredConfig,
     optionalConfig: isEcfOnly ? service.optionalConfig : dsInfo.optionalConfig,
     varDefsByInput: dsInfo.varDefsByInput,
-    varGroupsByInput: dsInfo.varGroupsByInput,
+    varGroupsByInput: isEcfOnly ? undefined : dsInfo.varGroupsByInput,
     varDefsByDataStream: { [dsId]: dsInfo },
   };
 }

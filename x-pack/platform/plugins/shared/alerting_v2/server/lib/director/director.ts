@@ -215,7 +215,7 @@ export class DirectorService {
     context: ExecutionContext
   ): Promise<Map<string, LatestAlertEventState>> {
     const request = getLatestAlertEventStateQuery({ ruleId: rule.id, groupHashes }).toRequest();
-    const records = await this.queryService.executeQueryRows<LatestAlertEventState>({
+    const records = await this.queryService.executeQuery<LatestAlertEventState>({
       query: request.query,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,

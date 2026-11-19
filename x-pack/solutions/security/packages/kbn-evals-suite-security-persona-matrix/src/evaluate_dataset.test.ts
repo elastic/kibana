@@ -6,8 +6,21 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { DefaultEvaluators, EvalsExecutorClient, Evaluator, TaskOutput } from '@kbn/evals';
+import {
+  PERSONA_RUBRIC_EVALUATOR_NAME,
+  PERSONA_RUBRIC_JUDGE_ENV,
+  runPersonaRubricJudge,
+} from './evaluators/persona_rubric_evaluator';
+import { EICAR_TRAP_EVALUATOR_NAME } from './evaluators/eicar_trap_evaluator';
+import { RUBRIC_CAP_NO_TOOL_CALL_EVALUATOR_NAME } from './evaluators/rubric_cap_no_tool_call_evaluator';
+import { SIMULATION_AWARENESS_EVALUATOR_NAME } from './evaluators/simulation_awareness_evaluator';
+import { STALLED_AFTER_LOAD_SKILL_EVALUATOR_NAME } from './evaluators/stalled_after_load_skill_evaluator';
+import { UNREQUESTED_SIDE_EFFECTS_EVALUATOR_NAME } from './evaluators/unrequested_side_effects_evaluator';
+import { WORKFLOW_VALIDITY_EVALUATOR_NAME } from './evaluators/workflow_validity_evaluator';
 import {
   toDatasetExample,
   createEvaluatePersonaMatrixDataset,
@@ -20,10 +33,23 @@ import {
   type PersonaMatrixDatasetExample,
 } from './evaluate_dataset';
 import type { PersonaMatrixChatClient } from './chat_client';
+import type { AgentProfile } from './agent_profile';
 import {
   PERSONA_MATRIX_EXAMPLES,
   type PersonaMatrixExample,
 } from './datasets/persona_matrix_prompts';
+
+jest.mock('@kbn/inference-prompt-utils', () => ({
+  ...jest.requireActual('@kbn/inference-prompt-utils'),
+  executeUntilValid: jest.fn(),
+}));
+
+jest.mock('./evaluators/persona_rubric_evaluator', () => {
+  const actual = jest.requireActual('./evaluators/persona_rubric_evaluator');
+  return { ...actual, runPersonaRubricJudge: jest.fn(actual.runPersonaRubricJudge) };
+});
+
+const runPersonaRubricJudgeMock = jest.mocked(runPersonaRubricJudge);
 
 const baseExample: PersonaMatrixExample = {
   id: 'example-a',
@@ -690,6 +716,7 @@ describe('task output shape', () => {
         }),
       } as unknown as EvalsExecutorClient,
       traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
       log,
     });
 
@@ -746,6 +773,7 @@ describe('task judges and the last-assistant-step fallback', () => {
         }),
       } as unknown as EvalsExecutorClient,
       traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
       log: buildLog(),
     });
     await evaluateDataset({
@@ -760,6 +788,22 @@ describe('task judges and the last-assistant-step fallback', () => {
       capturedEvaluators,
     };
   };
+
+  it('registers the deterministic behaviour evaluators', async () => {
+    const { capturedEvaluators } = await runTask({ messages: [{ message: 'ok' }] });
+    const names = capturedEvaluators.map(({ name }) => name);
+    expect(names).toEqual(
+      expect.arrayContaining([
+        WORKFLOW_VALIDITY_EVALUATOR_NAME,
+        EICAR_TRAP_EVALUATOR_NAME,
+        SIMULATION_AWARENESS_EVALUATOR_NAME,
+        UNREQUESTED_SIDE_EFFECTS_EVALUATOR_NAME,
+        STALLED_AFTER_LOAD_SKILL_EVALUATOR_NAME,
+        RUBRIC_CAP_NO_TOOL_CALL_EVALUATOR_NAME,
+      ])
+    );
+    expect(new Set(names).size).toBe(names.length);
+  });
 
   const judgedAnswer = (evaluate: jest.Mock) => {
     const { output } = evaluate.mock.calls[0][0] as {
@@ -1038,6 +1082,7 @@ describe('task judge failure isolation', () => {
         }),
       } as unknown as EvalsExecutorClient,
       traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
       log,
     });
 
@@ -1056,5 +1101,386 @@ describe('task judge failure isolation', () => {
     expect((output.messages as Array<{ message: string }>)[0].message).toBe('the real answer');
     expect(log.error).toHaveBeenCalledWith(expect.stringContaining('CorrectnessAnalysis failed'));
     expect((log.error as jest.Mock).mock.calls.flat().join(' ')).toContain('toolValidationError');
+  });
+});
+
+describe('createEvaluatePersonaMatrixDataset judge payload cap', () => {
+  const HUGE = 'h'.repeat(50_000);
+  const hugeSteps = [
+    {
+      type: 'tool_call',
+      tool_id: 'security.alerts',
+      results: [{ type: 'other', data: { content: HUGE } }],
+    },
+  ];
+
+  const run = async () => {
+    const analysisOutputs: unknown[] = [];
+    const analysis = () => ({
+      evaluate: jest.fn(async ({ output }: { output: unknown }) => {
+        analysisOutputs.push(output);
+        return { metadata: { ok: true } };
+      }),
+    });
+    const evaluators = {
+      correctnessAnalysis: analysis,
+      groundednessAnalysis: analysis,
+      criteria: () => ({ name: 'criteria', kind: 'LLM', evaluate: jest.fn() }),
+      traceBasedEvaluators: {},
+    };
+    let taskResult: Record<string, unknown> | undefined;
+    const executorClient = {
+      runExperiment: jest.fn(async ({ task }: { task: (example: unknown) => Promise<unknown> }) => {
+        taskResult = (await task(toDatasetExample(baseExample))) as Record<string, unknown>;
+      }),
+    };
+    const chatClient = {
+      query: jest.fn(async () => ({
+        messages: [{ message: 'final answer' }],
+        steps: hugeSteps,
+        errors: [],
+        traceId: 'trace-1',
+      })),
+    };
+
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient,
+      evaluators,
+      executorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log: buildLog(),
+    } as unknown as Parameters<typeof createEvaluatePersonaMatrixDataset>[0]);
+    await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [baseExample] } });
+    return { analysisOutputs, taskResult: taskResult! };
+  };
+
+  const previous = process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP;
+  afterEach(() => {
+    if (previous === undefined) {
+      delete process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP;
+    } else {
+      process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP = previous;
+    }
+  });
+
+  it('gives the analysis judges a capped copy, keeps the stored transcript verbatim, and reports the trim', async () => {
+    process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP = '1000';
+    const { analysisOutputs, taskResult } = await run();
+
+    expect(analysisOutputs).toHaveLength(2);
+    for (const seen of analysisOutputs) {
+      expect(JSON.stringify(seen).length).toBeLessThan(5_000);
+    }
+    expect(JSON.stringify(taskResult.steps)).toContain(HUGE);
+    expect(taskResult.judgePayloadTrim).toMatchObject({
+      trimmed: [expect.objectContaining({ toolId: 'security.alerts', pass: 'result-cap' })],
+    });
+  });
+
+  it('leaves the judges and the stored output untouched when no cap is configured', async () => {
+    delete process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP;
+    const { analysisOutputs, taskResult } = await run();
+
+    for (const seen of analysisOutputs) {
+      expect(JSON.stringify(seen)).toContain(HUGE);
+    }
+    expect(taskResult).not.toHaveProperty('judgePayloadTrim');
+  });
+});
+
+describe('createEvaluatePersonaMatrixDataset rawResponse', () => {
+  const runWith = async (extra: Record<string, unknown>) => {
+    const judged: unknown[] = [];
+    const analysis = () => ({
+      evaluate: jest.fn(async ({ output }: { output: unknown }) => {
+        judged.push(output);
+        return { metadata: { ok: true } };
+      }),
+    });
+    const criteria = {
+      name: 'criteria',
+      kind: 'LLM',
+      evaluate: jest.fn(async ({ output }: { output: unknown }) => {
+        judged.push(output);
+        return { score: 1 };
+      }),
+    };
+    let taskResult: Record<string, unknown> | undefined;
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn(async () => ({
+          messages: [{ message: 'final answer' }],
+          steps: [{ type: 'tool_call', tool_id: 'security.alerts', results: [] }],
+          errors: [],
+          traceId: 'trace-1',
+          ...extra,
+        })),
+      },
+      evaluators: {
+        correctnessAnalysis: analysis,
+        groundednessAnalysis: analysis,
+        criteria: () => criteria,
+        traceBasedEvaluators: {},
+      },
+      executorClient: {
+        runExperiment: jest.fn(
+          async ({ task }: { task: (example: unknown) => Promise<unknown> }) => {
+            taskResult = (await task(toDatasetExample(baseExample))) as Record<string, unknown>;
+          }
+        ),
+      },
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log: buildLog(),
+    } as unknown as Parameters<typeof createEvaluatePersonaMatrixDataset>[0]);
+    await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [baseExample] } });
+    return { judged, taskResult: taskResult as Record<string, unknown> };
+  };
+
+  it('stores rawResponse on the task output but leaves the judge payload unchanged', async () => {
+    const withRaw = await runWith({ rawResponse: '{"message":"final answer","secret":"RAW"}' });
+    const withoutRaw = await runWith({});
+
+    expect(withRaw.taskResult.rawResponse).toBe('{"message":"final answer","secret":"RAW"}');
+    expect(withRaw.judged).toHaveLength(3);
+    expect(withRaw.judged).toEqual(withoutRaw.judged);
+    expect(JSON.stringify(withRaw.judged)).not.toContain('RAW');
+  });
+});
+
+describe('reporting identity per agent profile', () => {
+  const captureExperiment = async (agentProfile: AgentProfile) => {
+    const runExperiment = jest.fn(async () => {});
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: { query: jest.fn() } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {},
+        criteria: () => ({ name: 'criteria', kind: 'LLM', evaluate: jest.fn() }),
+        correctnessAnalysis: () => ({ evaluate: jest.fn() }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn() }),
+      } as unknown as DefaultEvaluators,
+      executorClient: { runExperiment } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log: buildLog(),
+      agentProfile,
+    });
+    await evaluateDataset({
+      dataset: {
+        name: 'security: security-persona-matrix',
+        description: 'd',
+        examples: [baseExample],
+      },
+    });
+    return (
+      runExperiment.mock.calls as unknown as Array<
+        [
+          {
+            datasets: Array<{
+              name: string;
+              examples: Array<{ metadata?: Record<string, unknown> }>;
+            }>;
+            metadata: Record<string, unknown>;
+          }
+        ]
+      >
+    )[0][0];
+  };
+
+  it('keeps the established dataset and suite names for the default agent', async () => {
+    const experiment = await captureExperiment('default');
+    expect(experiment.datasets[0].name).toBe('security: security-persona-matrix');
+    // Example metadata feeds the dataset example id, so default runs must stay
+    // byte-identical to the unprofiled shape or every example is re-added.
+    expect(experiment.metadata).toEqual({
+      suite: 'security-persona-matrix',
+      source: 'persona-matrix-eval',
+    });
+    const exampleMetadata = experiment.datasets[0].examples[0].metadata;
+    expect(exampleMetadata).not.toHaveProperty('agentProfile');
+    expect(exampleMetadata).toEqual(toDatasetExample(baseExample).metadata);
+  });
+
+  it('gives the parity agent its own dataset name, suite and per-example profile', async () => {
+    const experiment = await captureExperiment('chrysalis-parity');
+    expect(experiment.datasets[0].name).toBe(
+      'security: security-persona-matrix (chrysalis-parity)'
+    );
+    expect(experiment.metadata).toMatchObject({
+      suite: 'security-persona-matrix-chrysalis-parity',
+      agent_profile: 'chrysalis-parity',
+    });
+    expect(experiment.datasets[0].examples[0].metadata).toMatchObject({
+      agentProfile: 'chrysalis-parity',
+    });
+  });
+});
+
+describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
+  const previous = process.env[PERSONA_RUBRIC_JUDGE_ENV];
+  const executeUntilValidMock = executeUntilValid as jest.MockedFunction<typeof executeUntilValid>;
+
+  beforeEach(() => {
+    executeUntilValidMock.mockReset();
+    executeUntilValidMock.mockResolvedValue({
+      toolCalls: [{ function: { name: 'grade', arguments: { score: 8, explanation: 'ok' } } }],
+    } as never);
+  });
+
+  afterEach(() => {
+    if (previous === undefined) {
+      delete process.env[PERSONA_RUBRIC_JUDGE_ENV];
+    } else {
+      process.env[PERSONA_RUBRIC_JUDGE_ENV] = previous;
+    }
+  });
+
+  const runWith = async ({
+    client,
+    log = buildLog(),
+    example = baseExample,
+    response = {},
+  }: {
+    client: BoundInferenceClient | undefined;
+    log?: ToolingLog;
+    example?: PersonaMatrixExample;
+    response?: Record<string, unknown>;
+  }) => {
+    let taskResult: Record<string, unknown> | undefined;
+    const runExperiment = jest.fn(async (_experiment: unknown, _evaluators: Evaluator[]) => {
+      const { task } = _experiment as { task: (example: unknown) => Promise<unknown> };
+      taskResult = (await task(toDatasetExample(example))) as Record<string, unknown>;
+    });
+    const analysis = () => ({ evaluate: jest.fn(async () => ({ metadata: { ok: true } })) });
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn(async () => ({
+          messages: [{ message: 'final answer' }],
+          steps: [{ type: 'tool_call', tool_id: 'security.alerts', results: [] }],
+          errors: [],
+          traceId: 'trace-1',
+          ...response,
+        })),
+      },
+      evaluators: {
+        correctnessAnalysis: analysis,
+        groundednessAnalysis: analysis,
+        criteria: () => ({ name: 'criteria', kind: 'LLM', evaluate: jest.fn(async () => ({})) }),
+        traceBasedEvaluators: {},
+      },
+      executorClient: { runExperiment },
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log,
+      evaluationInferenceClient: client,
+    } as unknown as Parameters<typeof createEvaluatePersonaMatrixDataset>[0]);
+    await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [example] } });
+    const evaluatorNames = (runExperiment.mock.calls[0][1] as Evaluator[]).map(({ name }) => name);
+    return { evaluatorNames, taskResult: taskResult! };
+  };
+
+  const client = {} as BoundInferenceClient;
+
+  it('does not register or run the evaluator when the flag is off', async () => {
+    delete process.env[PERSONA_RUBRIC_JUDGE_ENV];
+    const { evaluatorNames, taskResult } = await runWith({ client });
+    expect(evaluatorNames).not.toContain(PERSONA_RUBRIC_EVALUATOR_NAME);
+    expect(taskResult).not.toHaveProperty('personaRubricAnalysis');
+    expect(executeUntilValidMock).not.toHaveBeenCalled();
+  });
+
+  it('registers the evaluator and attaches the judge result when the flag is on', async () => {
+    process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+    const { evaluatorNames, taskResult } = await runWith({ client });
+    expect(evaluatorNames).toContain(PERSONA_RUBRIC_EVALUATOR_NAME);
+    expect(taskResult.personaRubricAnalysis).toMatchObject({
+      score: 0.8,
+      metadata: { category: 'alert-analysis', capped: false },
+    });
+  });
+
+  it('forwards the example expectedTools to the judge input when the flag is on', async () => {
+    process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+    await runWith({ client });
+    expect(executeUntilValidMock).toHaveBeenCalledTimes(1);
+    const { input } = executeUntilValidMock.mock.calls[0][0] as {
+      input: { expectedTools: string };
+    };
+    expect(input.expectedTools).toContain('security.alerts');
+    expect(input.expectedTools).not.toContain('(none listed');
+  });
+
+  it.each([undefined, 'last_assistant_step'])(
+    'shows the delivered workflow YAML to the judge (messageSource %s)',
+    async (messageSource) => {
+      process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+      await runWith({
+        client,
+        response: {
+          messages: [{ message: 'Done. <render_attachment id="wf-7" version="1"/>' }],
+          messageSource,
+          workflowAttachments: [{ id: 'wf-7', version: 1, yaml: 'name: chrysalis-workflow' }],
+        },
+      });
+      expect(executeUntilValidMock).toHaveBeenCalledTimes(1);
+      const { input } = executeUntilValidMock.mock.calls[0][0] as {
+        input: { submission: string };
+      };
+      expect(input.submission).toContain(
+        '--- attachment wf-7 (version 1) ---\nname: chrysalis-workflow'
+      );
+    }
+  );
+
+  it('logs a PersonaRubric rejection and keeps the example', async () => {
+    process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+    const log = buildLog();
+    // runPersonaRubricJudge is contractually non-throwing, so the slot can only reject if that
+    // contract is broken (or the span wrapper fails); the caller must still keep the example.
+    runPersonaRubricJudgeMock.mockRejectedValueOnce(new Error('judge module exploded'));
+    const { taskResult } = await runWith({ client, log });
+    expect(log.error).toHaveBeenCalledWith(
+      expect.stringContaining('PersonaRubric failed for example "example-a": judge module exploded')
+    );
+    expect(taskResult).not.toHaveProperty('personaRubricAnalysis');
+    expect(taskResult).toHaveProperty('correctnessAnalysis');
+  });
+
+  it('logs an unavailable PersonaRubric verdict and keeps the example, even if the logger throws', async () => {
+    process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+    const log = buildLog();
+    (log.warning as jest.Mock).mockImplementation(() => {
+      throw new Error('logger exploded');
+    });
+    const { taskResult } = await runWith({
+      client,
+      log,
+      example: { ...baseExample, category: 'not-a-category' } as PersonaMatrixExample,
+    });
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('PersonaRubric skipped'));
+    expect(log.error).not.toHaveBeenCalledWith(expect.stringContaining('PersonaRubric failed'));
+    expect(taskResult).toHaveProperty('correctnessAnalysis');
+  });
+
+  it('grades an example that has no id with its own category', async () => {
+    process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+    const { id, ...withoutId } = baseExample;
+    const { taskResult } = await runWith({
+      client,
+      example: withoutId as unknown as PersonaMatrixExample,
+    });
+    expect(executeUntilValidMock).toHaveBeenCalledTimes(1);
+    expect(taskResult.personaRubricAnalysis).toMatchObject({
+      score: 0.8,
+      metadata: { category: 'alert-analysis' },
+    });
+  });
+
+  it('skips the judge when the flag is on but no client is available', async () => {
+    process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+    const { evaluatorNames, taskResult } = await runWith({ client: undefined });
+    expect(evaluatorNames).not.toContain(PERSONA_RUBRIC_EVALUATOR_NAME);
+    expect(taskResult).not.toHaveProperty('personaRubricAnalysis');
   });
 });

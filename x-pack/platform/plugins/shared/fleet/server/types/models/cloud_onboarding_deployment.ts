@@ -7,7 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
+import {
+  CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+  PACKAGE_POLICY_CONDITION_MAX_LENGTH,
+} from '../../../common/constants';
 
 // ── Shared schema primitives reused across V1 and V2 ─────────────────────────
 
@@ -155,22 +158,66 @@ export const CloudOnboardingDeploymentSchemaV6 = CloudOnboardingDeploymentSchema
 // so no mapping change is needed.
 const POLICY_SETTINGS_MAX_KEYS = 20;
 
-// Bounded so the open record cannot store an arbitrary payload: package policy settings are short
+const validatePolicySettingsKeyCount = (settings: Record<string, unknown>) =>
+  Object.keys(settings).length > POLICY_SETTINGS_MAX_KEYS
+    ? `must not have more than ${POLICY_SETTINGS_MAX_KEYS} settings`
+    : undefined;
+
+// Bounded so the open record cannot store an arbitrary payload: package policy settings are
 // strings, or null for one cleared back to its Fleet default.
-export const PolicySettingsRecordSchema = (meta?: { description: string; availability: object }) =>
+const policySettingsRecordSchema = (
+  valueMaxLength: number,
+  meta?: { description: string; availability: object }
+) =>
   schema.recordOf(
     schema.string({ maxLength: 256 }),
-    schema.nullable(schema.string({ maxLength: 1024 })),
+    schema.nullable(schema.string({ maxLength: valueMaxLength })),
     {
-      validate: (settings) =>
-        Object.keys(settings).length > POLICY_SETTINGS_MAX_KEYS
-          ? `must not have more than ${POLICY_SETTINGS_MAX_KEYS} settings`
-          : undefined,
+      validate: validatePolicySettingsKeyCount,
       ...(meta ? { meta } : {}),
     }
   );
 
 export const CloudOnboardingDeploymentSchemaV7 = CloudOnboardingDeploymentSchemaV6.extends({
+  policySettings: schema.maybe(policySettingsRecordSchema(1024)),
+});
+
+// ── V8: dedicatedNamespaceTemplates + longer policySettings values ───────────
+// Whether the global namespace uses dedicated index templates. Not in mappings.properties
+// (dynamic: false), so no mapping change is needed.
+// A policySettings value may be as long as the longest package policy field kept there: the
+// condition, which Fleet allows up to 10000 characters. V7 keeps 1024.
+const POLICY_SETTINGS_MAX_VALUE_LENGTH = PACKAGE_POLICY_CONDITION_MAX_LENGTH;
+
+// The V8 shape, kept as it was released: V8 must not accept more than it did.
+const PolicySettingsRecordSchemaV8 = () =>
+  policySettingsRecordSchema(POLICY_SETTINGS_MAX_VALUE_LENGTH);
+
+export const CloudOnboardingDeploymentSchemaV8 = CloudOnboardingDeploymentSchemaV7.extends({
+  dedicatedNamespaceTemplates: schema.maybe(schema.boolean()),
+  policySettings: schema.maybe(PolicySettingsRecordSchemaV8()),
+});
+
+// ── V9: policySettings values may be string arrays ───────────────────────────
+// A setting can also be a list of short strings (e.g. additional_datastreams_permissions, up to the
+// 100 entries of 256 characters a package policy takes). Same bounds as V8 otherwise. Not in
+// mappings.properties (dynamic: false), so no mapping change is needed.
+export const PolicySettingsRecordSchema = (meta?: { description: string; availability: object }) =>
+  schema.recordOf(
+    schema.string({ maxLength: 256 }),
+    schema.nullable(
+      schema.oneOf([
+        schema.string({ maxLength: POLICY_SETTINGS_MAX_VALUE_LENGTH }),
+        schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
+      ])
+    ),
+    {
+      validate: validatePolicySettingsKeyCount,
+      ...(meta ? { meta } : {}),
+    }
+  );
+
+export const CloudOnboardingDeploymentSchemaV9 = CloudOnboardingDeploymentSchemaV8.extends({
   policySettings: schema.maybe(PolicySettingsRecordSchema()),
 });
 

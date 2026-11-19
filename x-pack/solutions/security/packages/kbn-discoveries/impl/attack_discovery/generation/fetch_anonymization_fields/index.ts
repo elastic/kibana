@@ -13,6 +13,10 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/i
  * anonymization fields index. These fields configure which alert fields
  * are allowed to be sent to the model and which should be anonymized.
  *
+ * The index is Kibana-owned configuration, so callers should pass an internal
+ * user client (`asInternalUser`) rather than one scoped to the end user, who is
+ * not expected to hold index privileges on it.
+ *
  * Throws if no anonymization fields are found or if none are allowed,
  * using error messaging similar to `throwIfInvalidAnonymization` in the
  * public Attack Discovery API.

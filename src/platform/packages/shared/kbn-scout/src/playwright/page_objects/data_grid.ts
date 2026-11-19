@@ -285,7 +285,7 @@ export class DataGrid {
     );
     await buttonGroup.waitFor({ state: 'visible' });
 
-    const selectedButton = buttonGroup.locator('.euiButtonGroupButton-isSelected');
+    const selectedButton = buttonGroup.getByRole('button', { pressed: true });
     await selectedButton.waitFor({ state: 'visible' });
 
     return (await selectedButton.innerText()).trim() as DataGridRowHeight;
@@ -597,6 +597,11 @@ export class DataGrid {
     await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
       state: 'visible',
     });
+  }
+
+  async removeColumn(field: string) {
+    await this.openColumnMenuByField(field);
+    await this.page.getByRole('button', { name: 'Remove column' }).click();
   }
 
   async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
