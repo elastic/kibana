@@ -10,6 +10,7 @@
 /** @typedef {import("eslint").Rule.RuleModule} Rule */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.CallExpression} CallExpression */
 
+const SCOUT_CALLERS = new Set(['test', 'apiTest', 'spaceTest']);
 const MISSING_MSG =
   'Root-level Scout describe blocks must declare `tag`, e.g. ' +
   '`{ tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }` ' +
@@ -19,20 +20,45 @@ const MISSING_MSG =
 const EMPTY_MSG = 'The `tag` option of this Scout describe block is empty.';
 
 const DESCRIBE_MODIFIERS = new Set(['skip', 'only', 'fixme', 'serial', 'parallel']);
+const TEST_MODIFIERS = new Set(['skip', 'only', 'fixme']);
 
 /**
- * Matches `*.describe(...)` and `*.describe.skip|only|fixme|serial|parallel(...)`.
+ * Matches `test|apiTest|spaceTest.describe(...)` and its supported modifiers.
  * @param {CallExpression} node
  */
 const isDescribeCall = (node) => {
   const { callee } = node;
   if (callee.type !== 'MemberExpression' || callee.property.type !== 'Identifier') return false;
-  if (callee.property.name === 'describe') return true;
+  if (
+    callee.property.name === 'describe' &&
+    callee.object.type === 'Identifier' &&
+    SCOUT_CALLERS.has(callee.object.name)
+  ) {
+    return true;
+  }
   return (
     DESCRIBE_MODIFIERS.has(callee.property.name) &&
     callee.object.type === 'MemberExpression' &&
     callee.object.property.type === 'Identifier' &&
-    callee.object.property.name === 'describe'
+    callee.object.property.name === 'describe' &&
+    callee.object.object.type === 'Identifier' &&
+    SCOUT_CALLERS.has(callee.object.object.name)
+  );
+};
+
+/**
+ * Matches direct Scout test declarations, including test modifiers.
+ * @param {CallExpression} node
+ */
+const isTestCall = (node) => {
+  const { callee } = node;
+  if (callee.type === 'Identifier') return SCOUT_CALLERS.has(callee.name);
+  return (
+    callee.type === 'MemberExpression' &&
+    callee.object.type === 'Identifier' &&
+    SCOUT_CALLERS.has(callee.object.name) &&
+    callee.property.type === 'Identifier' &&
+    TEST_MODIFIERS.has(callee.property.name)
   );
 };
 
@@ -52,73 +78,78 @@ module.exports = {
     },
   },
   createOnce(context) {
-    let depth;
-    // Set while inside an untagged root describe: report only if none of its tests are tagged
+    let suiteStack;
     let pending;
 
-    const hasTagOption = (callNode) =>
-      callNode.arguments.some(
-        (arg) =>
-          arg.type === 'ObjectExpression' &&
-          arg.properties.some(
-            (p) => p.type === 'Property' && p.key.type === 'Identifier' && p.key.name === 'tag'
-          )
+    const getTagState = (callNode) => {
+      const optionsArg = callNode.arguments[1];
+      if (
+        !optionsArg ||
+        optionsArg.type === 'ArrowFunctionExpression' ||
+        optionsArg.type === 'FunctionExpression'
+      ) {
+        return 'missing';
+      }
+      if (optionsArg.type !== 'ObjectExpression') return 'unknown';
+
+      if (optionsArg.properties.some((property) => property.type === 'SpreadElement')) {
+        return 'unknown';
+      }
+
+      const tagProperty = optionsArg.properties.find(
+        (property) =>
+          property.type === 'Property' &&
+          ((property.key.type === 'Identifier' && property.key.name === 'tag') ||
+            (property.key.type === 'Literal' && property.key.value === 'tag'))
       );
+      if (!tagProperty) return 'missing';
+      if (tagProperty.value.type === 'ArrayExpression' && tagProperty.value.elements.length === 0) {
+        return 'empty';
+      }
+      return 'tagged';
+    };
 
     return {
       before() {
-        depth = 0;
+        suiteStack = [];
         pending = null;
       },
       CallExpression(node) {
-        if (!isDescribeCall(node)) {
-          // Tests inside an untagged root describe may carry their own tags
-          if (pending && hasTagOption(node)) pending.hasInnerTag = true;
-          return;
-        }
-        const isRoot = depth === 0;
-        depth++;
-        // Nested describes inherit the tags of the root one
-        if (!isRoot) {
-          if (pending && hasTagOption(node)) pending.hasInnerTag = true;
+        if (isTestCall(node)) {
+          if (!pending) return;
+
+          pending.testCount++;
+          const testTagState = getTagState(node);
+          const suiteHasTag = suiteStack.some((suite) => suite.hasTag);
+          if (!suiteHasTag && testTagState !== 'tagged' && testTagState !== 'unknown') {
+            pending.hasUntaggedTest = true;
+          }
           return;
         }
 
-        // describe(title, fn) / describe(title, options, fn); anything else is not ours to judge
-        const optionsArg = node.arguments[1];
-        if (
-          !optionsArg ||
-          optionsArg.type === 'ArrowFunctionExpression' ||
-          optionsArg.type === 'FunctionExpression'
-        ) {
-          pending = { node, hasInnerTag: false };
+        if (!isDescribeCall(node)) return;
+
+        const isRoot = suiteStack.length === 0;
+        const tagState = getTagState(node);
+        suiteStack.push({ hasTag: tagState === 'tagged' || tagState === 'unknown' });
+
+        if (!isRoot) return;
+        if (tagState === 'missing') {
+          pending = { node, testCount: 0, hasUntaggedTest: false };
           return;
         }
-        if (optionsArg.type !== 'ObjectExpression') return;
-
-        // A spread may supply `tag`, so we can't tell
-        if (optionsArg.properties.some((p) => p.type === 'SpreadElement')) return;
-
-        const tagProp = optionsArg.properties.find(
-          (p) => p.type === 'Property' && p.key.type === 'Identifier' && p.key.name === 'tag'
-        );
-        if (!tagProp) {
-          pending = { node, hasInnerTag: false };
-        } else if (
-          tagProp.value.type === 'ArrayExpression' &&
-          tagProp.value.elements.length === 0
-        ) {
-          context.report({ node: tagProp, messageId: 'emptyTag' });
+        if (tagState === 'empty') {
+          context.report({ node: node.arguments[1], messageId: 'emptyTag' });
         }
       },
       'CallExpression:exit'(node) {
         if (!isDescribeCall(node)) return;
-        depth--;
-        if (depth === 0 && pending) {
-          if (pending.node === node && !pending.hasInnerTag) {
+        suiteStack.pop();
+        if (suiteStack.length === 0 && pending?.node === node) {
+          if (pending.testCount === 0 || pending.hasUntaggedTest) {
             context.report({ node, messageId: 'missingTag' });
           }
-          if (pending.node === node) pending = null;
+          pending = null;
         }
       },
     };

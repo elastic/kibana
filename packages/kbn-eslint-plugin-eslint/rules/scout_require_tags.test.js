@@ -85,6 +85,18 @@ ruleTester.run('@kbn/eslint/scout_require_tags', rule, {
         });
       `,
     },
+    // Tagged nested suites cover their tests
+    {
+      code: dedent`
+        test.describe('suite', () => {
+          test.describe('tagged', { tag: tags.stateful.classic }, () => {
+            test('a', () => {});
+            test('b', () => {});
+          });
+          test('c', { tag: tags.serverless.observability.complete }, () => {});
+        });
+      `,
+    },
     // A spread may provide the tag
     {
       code: dedent`
@@ -136,6 +148,29 @@ ruleTester.run('@kbn/eslint/scout_require_tags', rule, {
       code: dedent`
         test.describe('suite', () => {
           test.describe('nested', () => {});
+        });
+      `,
+      errors: [{ messageId: 'missingTag' }],
+    },
+    // One tagged descendant does not cover an untagged sibling test
+    {
+      code: dedent`
+        test.describe('suite', () => {
+          test.describe('tagged', { tag: tags.stateful.classic }, () => {
+            test('a', () => {});
+          });
+          test('b', () => {});
+        });
+      `,
+      errors: [{ messageId: 'missingTag' }],
+    },
+    // Objects in test bodies do not tag the test declaration
+    {
+      code: dedent`
+        test.describe('suite', () => {
+          test('works', () => {
+            expect(response).toMatchObject({ tag: 'example' });
+          });
         });
       `,
       errors: [{ messageId: 'missingTag' }],
