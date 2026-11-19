@@ -14,7 +14,7 @@ import type {
 } from '@kbn/ai-anonymization-server';
 import { anonymizeMessages } from '@kbn/ai-anonymization-server';
 import type { DecisionQuestion } from '@kbn/inference-common';
-import { createInferenceInternalError, MessageRole } from '@kbn/inference-common';
+import { createInferenceInternalError, isInferenceError, MessageRole } from '@kbn/inference-common';
 
 /**
  * The free text of a question: its instructions, then its choice or level descriptions. Choice
@@ -66,7 +66,7 @@ const withQuestionTexts = (
 /**
  * Masks the input and the questions' text with the space's anonymization rules, like chat
  * completion does. Answers are probabilities and caller-defined keys, so there's nothing to
- * restore and no replacements to keep.
+ * restore and no replacements to keep. Throws an inference internal error when masking fails.
  */
 export const anonymizeRequest = async ({
   input,
@@ -85,33 +85,41 @@ export const anonymizeRequest = async ({
   regexWorker: RegexWorkerService;
   anonymization?: InferenceAnonymizationOptions;
 }): Promise<{ input: string; questions: DecisionQuestion[] }> => {
-  const questionTexts = questions.map(getQuestionTexts);
+  try {
+    const questionTexts = questions.map(getQuestionTexts);
 
-  const { messages } = await anonymizeMessages({
-    messages: [input, ...questionTexts.flat()].map((content) => ({
-      role: MessageRole.User,
-      content,
-    })),
-    anonymizationRules: await anonymizationRulesPromise,
-    regexWorker,
-    esClient,
-    salt: await anonymization?.saltPromise,
-    onFailure: (await anonymization?.onFailurePromise) ?? 'block',
-    logger,
-  });
+    const { messages } = await anonymizeMessages({
+      messages: [input, ...questionTexts.flat()].map((content) => ({
+        role: MessageRole.User,
+        content,
+      })),
+      anonymizationRules: await anonymizationRulesPromise,
+      regexWorker,
+      esClient,
+      salt: await anonymization?.saltPromise,
+      onFailure: (await anonymization?.onFailurePromise) ?? 'block',
+      logger,
+    });
 
-  const [maskedInput, ...maskedTexts] = messages.map((message) => {
-    if (message.role !== MessageRole.User || typeof message.content !== 'string') {
-      throw createInferenceInternalError('Anonymization did not return the decision text as text');
-    }
+    const [maskedInput, ...maskedTexts] = messages.map((message) => {
+      if (message.role !== MessageRole.User || typeof message.content !== 'string') {
+        throw createInferenceInternalError(
+          'Anonymization did not return the decision text as text'
+        );
+      }
 
-    return message.content;
-  });
+      return message.content;
+    });
 
-  return {
-    input: maskedInput,
-    questions: questions.map((question, index) =>
-      withQuestionTexts(question, maskedTexts.splice(0, questionTexts[index].length))
-    ),
-  };
+    return {
+      input: maskedInput,
+      questions: questions.map((question, index) =>
+        withQuestionTexts(question, maskedTexts.splice(0, questionTexts[index].length))
+      ),
+    };
+  } catch (error) {
+    throw isInferenceError(error)
+      ? error
+      : createInferenceInternalError(`Anonymization failed: ${error.message}`);
+  }
 };

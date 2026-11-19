@@ -16,6 +16,7 @@ import type {
 } from '@kbn/inference-common';
 import {
   InferenceTaskErrorCode,
+  isInferenceInternalError,
   isInferenceProviderError,
   isInferenceRequestAbortedError,
   isInferenceRequestError,
@@ -377,10 +378,13 @@ describe('createDecideApi', () => {
 
     jest.mocked(regexWorker.run).mockRejectedValue(new Error('regex failed'));
 
-    await expect(
-      decide({ input: 'Ask claudia@example.com', inferenceId: 'my-decision' }, shouldRespond)
-    ).rejects.toThrow('regex failed');
+    const error = await decide(
+      { input: 'Ask claudia@example.com', inferenceId: 'my-decision' },
+      shouldRespond
+    ).catch((thrown) => thrown);
 
+    expect(isInferenceInternalError(error)).toBe(true);
+    expect(error.message).toBe('Anonymization failed: regex failed');
     expect(transportRequest).not.toHaveBeenCalled();
   });
 
