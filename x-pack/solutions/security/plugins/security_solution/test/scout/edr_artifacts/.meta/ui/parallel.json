@@ -1,5 +1,5 @@
 {
-  "sha1": "98ed07cf009ac3c0cd0b18c307d92df27be62524",
+  "sha1": "10e7debb5d0a51696f764fa43d97f455429db129",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -491,6 +491,86 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 187,
         "column": 29
+      }
+    },
+    {
+      "id": "9667109acb83f7a-f70cf5de3656e32",
+      "title": "Artifact list page — Event Filters T1 analyst sees no privileges on the list page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 65,
+        "column": 26
+      }
+    },
+    {
+      "id": "9667109acb83f7a-79ddf7ac4aa66fa",
+      "title": "Artifact list page — Event Filters READ user sees empty state without add",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 77,
+        "column": 29
+      }
+    },
+    {
+      "id": "9667109acb83f7a-2f8d510c40dc92a",
+      "title": "Artifact list page — Event Filters READ user can view artifacts but cannot add, edit, or delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 85,
+        "column": 17
+      }
+    },
+    {
+      "id": "9667109acb83f7a-eb19ef866759bfe",
+      "title": "Artifact list page — Event Filters WRITE user can create, update, and delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 108,
+        "column": 57
+      }
+    },
+    {
+      "id": "9667109acb83f7a-31041ebb2ae94e4",
+      "title": "Artifact list page — Event Filters WRITE user can change the condition field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
+        "line": 152,
+        "column": 13
       }
     },
     {
