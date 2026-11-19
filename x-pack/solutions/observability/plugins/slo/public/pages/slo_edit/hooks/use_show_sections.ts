@@ -12,7 +12,7 @@ export function useShowSections(
   isFormValidating: boolean,
   isIndicatorSectionValid: boolean,
   isObjectiveSectionValid: boolean
-) {
+): { showDescriptionSection: boolean; showObjectiveSection: boolean } {
   const [showDescriptionSection, setShowDescriptionSection] = useState<boolean>(isEditMode);
   const [showObjectiveSection, setShowObjectiveSection] = useState<boolean>(isEditMode);
 
