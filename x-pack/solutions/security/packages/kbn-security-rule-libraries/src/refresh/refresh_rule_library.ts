@@ -8,11 +8,11 @@
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { PREBUILT_RULE_SO_TYPE, RULE_LIBRARY_SO_TYPE, UPDATE_LOCK_TIMEOUT_MS } from '../constants';
+import { PREBUILT_RULE_SO_TYPE, RULE_LIBRARY_SO_TYPE, REFRESH_LOCK_TIMEOUT_MS } from '../constants';
 import type { RuleLibraryProvider } from '../providers/types';
-import type { RuleLibraryAttributes, RuleLibraryItem, UpdateResult } from '../types';
+import type { RuleLibraryAttributes, RuleLibraryItem, RefreshResult } from '../types';
 
-export interface UpdateParams {
+export interface RefreshParams {
   client: SavedObjectsClientContract;
   provider: RuleLibraryProvider;
   logger: Logger;
@@ -22,10 +22,13 @@ export interface UpdateParams {
   force?: boolean;
 }
 
-const isLocked = ({ update_status: status, update_started_at: startedAt }: RuleLibraryAttributes) =>
-  status === 'updating' &&
+const isLocked = ({
+  refresh_status: status,
+  refresh_started_at: startedAt,
+}: RuleLibraryAttributes) =>
+  status === 'refreshing' &&
   startedAt !== undefined &&
-  Date.now() - new Date(startedAt).getTime() < UPDATE_LOCK_TIMEOUT_MS;
+  Date.now() - new Date(startedAt).getTime() < REFRESH_LOCK_TIMEOUT_MS;
 
 const writeBatch = async (
   client: SavedObjectsClientContract,
@@ -47,14 +50,14 @@ const writeBatch = async (
   }
 };
 
-export const updateRuleLibrary = async ({
+export const refreshRuleLibrary = async ({
   client,
   provider,
   logger,
   id,
   secret,
   force = false,
-}: UpdateParams): Promise<UpdateResult> => {
+}: RefreshParams): Promise<RefreshResult> => {
   const library = await client.get<RuleLibraryAttributes>(RULE_LIBRARY_SO_TYPE, id);
   const { attributes } = library;
   if (isLocked(attributes)) return { id, outcome: 'skipped', version: attributes.version };
@@ -63,7 +66,7 @@ export const updateRuleLibrary = async ({
     await client.update(
       RULE_LIBRARY_SO_TYPE,
       id,
-      { update_status: 'updating', update_started_at: new Date().toISOString() },
+      { refresh_status: 'refreshing', refresh_started_at: new Date().toISOString() },
       { version: library.version }
     );
   } catch (error) {
@@ -79,18 +82,18 @@ export const updateRuleLibrary = async ({
       { pinned: attributes.pinned_version }
     );
 
-    // An updated library with no items is retried; a parse miss should not stick.
+    // A refreshed library with no items is retried; a parse miss should not stick.
     const loaded =
       !force &&
       ref.version === attributes.version &&
-      attributes.update_status === 'updated' &&
+      attributes.refresh_status === 'refreshed' &&
       (attributes.item_count ?? 0) > 0;
     if (loaded) {
-      await client.update(RULE_LIBRARY_SO_TYPE, id, { update_status: 'updated' });
+      await client.update(RULE_LIBRARY_SO_TYPE, id, { refresh_status: 'refreshed' });
       return { id, outcome: 'up_to_date', version: ref.version, item_count: attributes.item_count };
     }
 
-    // No deletes for now: rules removed upstream stay until a cleanup strategy lands.
+    // Nothing is ever deleted: historical versions and rules removed upstream are kept.
     let count = 0;
     await provider.readLatestItems({ ...attributes, secret }, ref, async (items) => {
       await writeBatch(client, id, items);
@@ -102,17 +105,17 @@ export const updateRuleLibrary = async ({
       version: ref.version,
       ref: typeof ref.ref === 'string' ? ref.ref : undefined,
       item_count: count,
-      update_status: 'updated',
-      updated_at: new Date().toISOString(),
+      refresh_status: 'refreshed',
+      refreshed_at: new Date().toISOString(),
       last_error: null,
     });
-    logger.info(`Rule library "${id}" updated to ${ref.version} (${count} rules)`);
-    return { id, outcome: 'updated', version: ref.version, item_count: count };
+    logger.info(`Rule library "${id}" refreshed to ${ref.version} (${count} rules)`);
+    return { id, outcome: 'refreshed', version: ref.version, item_count: count };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    logger.error(`Rule library "${id}" update failed: ${message}`);
+    logger.error(`Rule library "${id}" refresh failed: ${message}`);
     await client.update(RULE_LIBRARY_SO_TYPE, id, {
-      update_status: 'update_failed',
+      refresh_status: 'refresh_failed',
       last_error: message,
     });
     return { id, outcome: 'failed', version: attributes.version, error: message };

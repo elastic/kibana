@@ -14,8 +14,14 @@ import type {
   CoreStart,
   IScopedClusterClient,
   ElasticsearchClient,
+  ISavedObjectsRepository,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import {
+  ELASTIC_LIBRARY_ID,
+  RULE_LIBRARY_SO_TYPE,
+  type RuleLibraryAttributes,
+} from '@kbn/security-rule-libraries';
 import type {
   AggregationsAggregate,
   IlmExplainLifecycleRequest,
@@ -133,7 +139,7 @@ export interface ITelemetryReceiver {
 
   closePointInTime(pitId: string): Promise<void>;
 
-  fetchDetectionRulesPackageVersion(): Promise<Nullable<Installation>>;
+  fetchDetectionRulesPackageVersion(): Promise<Nullable<Pick<Installation, 'version'>>>;
 
   /**
    * As the policy id + policy version does not exist on the Endpoint Metrics document
@@ -292,6 +298,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private _esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
+  private ruleLibraryRepository?: ISavedObjectsRepository;
   private getIndexForType?: (type: string) => string;
   private alertsIndex?: string;
   private clusterInfo?: ESClusterInfo;
@@ -328,6 +335,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.packageService = packageService;
     this.soClient =
       core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
+    this.ruleLibraryRepository = core?.savedObjects.createInternalRepository([
+      RULE_LIBRARY_SO_TYPE,
+    ]);
     this.clusterInfo = await this.fetchClusterInfo();
     this.licenseInfo = await this.fetchLicenseInfo();
     this.experimentalFeatures = endpointContextService?.experimentalFeatures;
@@ -354,7 +364,18 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.experimentalFeatures;
   }
 
-  public async fetchDetectionRulesPackageVersion(): Promise<Installation | undefined> {
+  public async fetchDetectionRulesPackageVersion(): Promise<
+    Pick<Installation, 'version'> | undefined
+  > {
+    if (this.experimentalFeatures?.ruleLibrariesEnabled) {
+      const library = await this.ruleLibraryRepository?.get<RuleLibraryAttributes>(
+        RULE_LIBRARY_SO_TYPE,
+        ELASTIC_LIBRARY_ID
+      );
+      const version = library?.attributes.version;
+      return version ? { version } : undefined;
+    }
+
     return this.packageService?.asInternalUser.getInstallation(PREBUILT_RULES_PACKAGE_NAME);
   }
 

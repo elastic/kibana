@@ -163,7 +163,8 @@ export const importRulesRoute = (
           // the import path can look up prebuilt assets during rule_source calc.
           await ensureLatestRulesPackageInstalled(
             createPrebuiltRuleAssetsClient(savedObjectsClient, {
-              ruleLibraryEnabled: ctx.securitySolution.getConfig().ruleLibrary.enabled,
+              ruleLibraryEnabled:
+                ctx.securitySolution.getConfig().experimentalFeatures.ruleLibrariesEnabled,
             }),
             ctx.securitySolution,
             logger

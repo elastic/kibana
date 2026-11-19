@@ -18,7 +18,7 @@ export interface EnsureParams {
   definitions?: readonly RuleLibraryDefinition[];
 }
 
-// Existing library objects are left alone; provider changes go through ESO-aware updates.
+// Existing library objects are left alone; provider changes go through ESO-aware writes.
 export const ensureLibraries = async ({
   client,
   logger,

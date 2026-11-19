@@ -18,7 +18,7 @@ import type {
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import { invariant } from '../../../../../../../../common/utils/invariant';
-import { buildLibraryIdsKueryFilter, collapseLibraryTwins } from '../utils';
+import { buildLibraryIdsKueryFilter } from '../utils';
 import { fetchDeprecatedRules } from './fetch_deprecated_rules';
 
 export interface FetchLatestAssetsOptions {
@@ -48,7 +48,11 @@ export async function fetchLatestAssets(
   }
 ): Promise<PrebuiltRuleAssetRecord[]> {
   const size = options.size ?? MAX_PREBUILT_RULES_COUNT;
-  const deprecatedRuleAssets = await fetchDeprecatedRules(savedObjectsClient);
+  const deprecatedRuleAssets = await fetchDeprecatedRules(
+    savedObjectsClient,
+    undefined,
+    options.libraryIds
+  );
   const deprecatedRuleIds = deprecatedRuleAssets.map((asset) => asset.rule_id);
 
   const filterParts = [
@@ -75,10 +79,7 @@ export async function fetchLatestAssets(
             multi_terms: {
               terms: [
                 { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id` },
-                {
-                  field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.library_id`,
-                  missing: '',
-                },
+                { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.library_id` },
               ],
               size,
             },
@@ -120,6 +121,5 @@ export async function fetchLatestAssets(
     return hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
   });
 
-  const collapsed = options.libraryIds?.length ? collapseLibraryTwins(ruleAssets) : ruleAssets;
-  return validatePrebuiltRuleAssets(collapsed);
+  return validatePrebuiltRuleAssets(ruleAssets);
 }

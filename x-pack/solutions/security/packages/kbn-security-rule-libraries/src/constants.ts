@@ -10,4 +10,4 @@ export const PREBUILT_RULE_SO_TYPE = 'security-rule';
 export const ELASTIC_LIBRARY_ID = 'elastic';
 export const COMMUNITY_LIBRARY_ID = 'elastic-community';
 export const BATCH_SIZE = 100;
-export const UPDATE_LOCK_TIMEOUT_MS = 30 * 60 * 1000;
+export const REFRESH_LOCK_TIMEOUT_MS = 30 * 60 * 1000;

@@ -405,6 +405,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
   siemRuleMigrationsAgentBuilderEnabled: true,
+
+  /**
+   * Delivers prebuilt rules through rule libraries (Fleet, git and S3 providers) instead of
+   * installing the `security_detection_engine` package through Fleet.
+   */
+  ruleLibrariesEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

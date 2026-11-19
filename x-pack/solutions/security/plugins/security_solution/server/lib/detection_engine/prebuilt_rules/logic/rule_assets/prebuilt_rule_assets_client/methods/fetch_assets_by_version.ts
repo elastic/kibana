@@ -7,7 +7,6 @@
 
 import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { ELASTIC_LIBRARY_ID } from '@kbn/security-rule-libraries';
 import type {
   AggregationsAggregate,
   AggregationsAggregationContainer,
@@ -138,13 +137,7 @@ const versionSoIds = (
     return [getPrebuiltRuleAssetSoId(version.rule_id, version.version, libraryId)];
   }
 
-  const ids = libraryIds.map((id) =>
-    getPrebuiltRuleAssetSoId(version.rule_id, version.version, id)
-  );
-  if (libraryIds.includes(ELASTIC_LIBRARY_ID)) {
-    ids.push(getPrebuiltRuleAssetSoId(version.rule_id, version.version));
-  }
-  return ids;
+  return libraryIds.map((id) => getPrebuiltRuleAssetSoId(version.rule_id, version.version, id));
 };
 
 const buildQuery = (soIds: string[], filter: string | undefined): QueryDslQueryContainer => {

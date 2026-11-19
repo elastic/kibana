@@ -35,7 +35,7 @@ export const bootstrapEaseRulesHandler = async (
     const detectionRulesClient = securityContext.getDetectionRulesClient();
     const rulesClient = await ctx.alerting.getRulesClient();
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient, {
-      ruleLibraryEnabled: securityContext.getConfig().ruleLibrary.enabled,
+      ruleLibraryEnabled: securityContext.getConfig().experimentalFeatures.ruleLibrariesEnabled,
     });
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 

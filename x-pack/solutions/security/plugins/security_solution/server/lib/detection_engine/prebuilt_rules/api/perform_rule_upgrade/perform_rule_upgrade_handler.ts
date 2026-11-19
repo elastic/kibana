@@ -66,7 +66,8 @@ export const performRuleUpgradeHandler = async (
     const rulesClient = await ctx.alerting.getRulesClient();
     const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient, {
-      ruleLibraryEnabled: ctx.securitySolution.getConfig().ruleLibrary.enabled,
+      ruleLibraryEnabled:
+        ctx.securitySolution.getConfig().experimentalFeatures.ruleLibrariesEnabled,
     });
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();

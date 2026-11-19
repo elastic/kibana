@@ -7,7 +7,7 @@
 
 export type ProviderType = 'fleet' | 'git' | 's3';
 export type AuthType = 'none' | 'token' | 'basic' | 'ssh_key' | 's3_access_key';
-export type UpdateStatus = 'updated' | 'updating' | 'update_failed';
+export type RefreshStatus = 'refreshed' | 'refreshing' | 'refresh_failed';
 
 export interface RuleLibraryProviderConfig {
   type: ProviderType;
@@ -47,9 +47,9 @@ export interface RuleLibraryAttributes {
   version?: string;
   ref?: string;
   previous_version?: string;
-  update_status?: UpdateStatus;
-  update_started_at?: string;
-  updated_at?: string;
+  refresh_status?: RefreshStatus;
+  refresh_started_at?: string;
+  refreshed_at?: string;
   last_error?: string | null;
   item_count?: number;
 }
@@ -81,11 +81,11 @@ export interface RuleLibraryDefinition {
   pinned_version?: string;
 }
 
-export type UpdateOutcome = 'updated' | 'up_to_date' | 'skipped' | 'failed';
+export type RefreshOutcome = 'refreshed' | 'up_to_date' | 'skipped' | 'failed';
 
-export interface UpdateResult {
+export interface RefreshResult {
   id: string;
-  outcome: UpdateOutcome;
+  outcome: RefreshOutcome;
   version?: string;
   item_count?: number;
   error?: string;

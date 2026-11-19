@@ -60,6 +60,38 @@ describe('fetchAssetsByVersion', () => {
     );
   });
 
+  describe('with libraries', () => {
+    const libraryIds = ['elastic', 'elastic-community'];
+    const queriedIds = () => searchMock.mock.calls[0][0].query.bool.must[0].terms._id;
+
+    it('looks a version up in every library and never by its two-part id', async () => {
+      await fetchAssetsByVersion(savedObjectsClient, [{ rule_id: 'rule-1', version: 2 }], {
+        libraryIds,
+      });
+
+      expect(queriedIds()).toEqual([
+        `${PREBUILT_RULE_ASSETS_SO_TYPE}:elastic_rule-1_2`,
+        `${PREBUILT_RULE_ASSETS_SO_TYPE}:elastic-community_rule-1_2`,
+      ]);
+    });
+
+    it('looks a version up only in the library it names', async () => {
+      await fetchAssetsByVersion(
+        savedObjectsClient,
+        [
+          { rule_id: 'rule-1', version: 2, library: { id: 'elastic' } },
+          { rule_id: 'rule-2', version: 1, library_id: 'elastic-community' },
+        ],
+        { libraryIds }
+      );
+
+      expect(queriedIds()).toEqual([
+        `${PREBUILT_RULE_ASSETS_SO_TYPE}:elastic_rule-1_2`,
+        `${PREBUILT_RULE_ASSETS_SO_TYPE}:elastic-community_rule-2_1`,
+      ]);
+    });
+  });
+
   it('omits _source when no fields are provided so ES returns the full document', async () => {
     const versions = [{ rule_id: 'rule-1', version: 1 }];
 

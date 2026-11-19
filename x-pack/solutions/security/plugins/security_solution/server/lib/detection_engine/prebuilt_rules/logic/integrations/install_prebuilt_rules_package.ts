@@ -10,7 +10,7 @@ import {
   ELASTIC_LIBRARY_ID,
   RULE_LIBRARY_DEFINITIONS,
   RULE_LIBRARY_SO_TYPE,
-  updateAllLibraries,
+  refreshRuleLibraries,
   type LibraryEnsureResult,
 } from '@kbn/security-rule-libraries';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
@@ -35,8 +35,8 @@ export async function installPrebuiltRulesPackage(
 ): Promise<PrebuiltRulesInstallResult> {
   const config = context.getConfig();
 
-  if (config.ruleLibrary.enabled) {
-    return updateLibraries(context, logger);
+  if (config.experimentalFeatures.ruleLibrariesEnabled) {
+    return refreshLibraries(context, logger);
   }
 
   let pkgVersion = config.prebuiltRulesPackageVersion;
@@ -51,7 +51,7 @@ export async function installPrebuiltRulesPackage(
   return ensureInstalledPackage(context, PREBUILT_RULES_PACKAGE_NAME, pkgVersion, logger);
 }
 
-async function updateLibraries(
+async function refreshLibraries(
   context: SecuritySolutionApiRequestHandlerContext,
   logger: Logger
 ): Promise<LibraryEnsureResult> {
@@ -67,11 +67,13 @@ async function updateLibraries(
       : definition
   );
 
-  const { elastic, results } = await updateAllLibraries({
+  const { elastic, results } = await refreshRuleLibraries({
     client,
     packages,
     logger,
     definitions,
+    // Other libraries are refreshed on demand, so app loads do not hammer their hosts.
+    libraryIds: [ELASTIC_LIBRARY_ID],
   });
 
   for (const result of results) {
@@ -82,7 +84,7 @@ async function updateLibraries(
 
   if (!elastic) {
     const failed = results.find((r) => r.id === ELASTIC_LIBRARY_ID);
-    throw new Error(failed?.error ?? 'Elastic rule library update failed');
+    throw new Error(failed?.error ?? 'Elastic rule library refresh failed');
   }
 
   return elastic;

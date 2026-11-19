@@ -48,7 +48,8 @@ export const reviewRuleDeprecationRoute = (router: SecuritySolutionPluginRouter)
           const soClient = ctx.core.savedObjects.client;
           const rulesClient = await ctx.alerting.getRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient, {
-            ruleLibraryEnabled: ctx.securitySolution.getConfig().ruleLibrary.enabled,
+            ruleLibraryEnabled:
+              ctx.securitySolution.getConfig().experimentalFeatures.ruleLibrariesEnabled,
           });
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 

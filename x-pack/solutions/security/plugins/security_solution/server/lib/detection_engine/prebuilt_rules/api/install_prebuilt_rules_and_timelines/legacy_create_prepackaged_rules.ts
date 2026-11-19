@@ -44,7 +44,7 @@ export const legacyCreatePrepackagedRules = async (
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
   const detectionRulesClient = context.getDetectionRulesClient();
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient, {
-    ruleLibraryEnabled: context.getConfig().ruleLibrary.enabled,
+    ruleLibraryEnabled: context.getConfig().experimentalFeatures.ruleLibrariesEnabled,
   });
   const mlAuthz = context.getMlAuthz();
 

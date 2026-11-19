@@ -100,7 +100,7 @@ export const createPrebuiltRuleAssetsClient = (
 
     fetchDeprecatedRules: (ruleIds?: string[]): Promise<DeprecatedPrebuiltRuleAsset[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchDeprecatedRules', async () => {
-        return fetchDeprecatedRules(savedObjectsClient, ruleIds);
+        return fetchDeprecatedRules(savedObjectsClient, ruleIds, libraryIds);
       });
     },
   };

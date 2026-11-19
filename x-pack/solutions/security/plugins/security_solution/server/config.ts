@@ -145,9 +145,6 @@ export const configSchema = schema.object({
    * on Kibana start if the package is not already installed.
    */
   prebuiltRulesPackageVersion: schema.maybe(schema.string()),
-  ruleLibrary: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
   enabled: schema.boolean({ defaultValue: true }),
   enableUiSettingsValidations: schema.boolean({ defaultValue: false }),
 

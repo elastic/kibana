@@ -8,7 +8,6 @@
 import type { ESFilter } from '@kbn/es-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { ELASTIC_LIBRARY_ID } from '@kbn/security-rule-libraries';
 import type { MappingRuntimeFields, Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { PrebuiltRuleAssetsSort } from '../../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../prebuilt_rule_assets_type';
@@ -28,6 +27,25 @@ export const PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS: MappingRuntimeFields = {
   },
 };
 
+export function buildLibraryIdsEsFilter(libraryIds?: string[]): ESFilter | undefined {
+  if (!libraryIds?.length) {
+    return undefined;
+  }
+
+  return { terms: { [`${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id`]: libraryIds } };
+}
+
+export function buildLibraryIdsKueryFilter(libraryIds?: string[]): string | undefined {
+  if (!libraryIds?.length) {
+    return undefined;
+  }
+
+  const attr = `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.library_id`;
+  const parts = libraryIds.map((id) => `${attr}: "${id}"`);
+
+  return parts.length === 1 ? parts[0] : `(${parts.join(' OR ')})`;
+}
+
 /**
  * Builds the filter clauses for prebuilt rule
  * asset searches.
@@ -38,61 +56,6 @@ export const PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS: MappingRuntimeFields = {
  * suppress fully-deprecated rule_ids from the latest-version aggregation
  * the caller is responsible for sourcing the list (typically from `fetchDeprecatedRules`)
  */
-export function buildLibraryIdsEsFilter(libraryIds?: string[]): ESFilter | undefined {
-  if (!libraryIds?.length) {
-    return undefined;
-  }
-
-  const field = `${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id`;
-  const otherIds = libraryIds.filter((id) => id !== ELASTIC_LIBRARY_ID);
-  const includesElastic = libraryIds.includes(ELASTIC_LIBRARY_ID);
-  const should: ESFilter[] = [];
-
-  if (otherIds.length > 0) {
-    should.push({ terms: { [field]: otherIds } });
-  }
-
-  if (includesElastic) {
-    should.push(
-      { term: { [field]: ELASTIC_LIBRARY_ID } },
-      { bool: { must_not: [{ exists: { field } }] } }
-    );
-  }
-
-  if (should.length === 0) {
-    return undefined;
-  }
-
-  if (should.length === 1) {
-    return should[0];
-  }
-
-  return { bool: { should, minimum_should_match: 1 } };
-}
-
-export function buildLibraryIdsKueryFilter(libraryIds?: string[]): string | undefined {
-  if (!libraryIds?.length) {
-    return undefined;
-  }
-
-  const attr = `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.library_id`;
-  const parts: string[] = [];
-
-  for (const id of libraryIds) {
-    if (id === ELASTIC_LIBRARY_ID) {
-      parts.push(`(${attr}: "${ELASTIC_LIBRARY_ID}" OR NOT ${attr}: *)`);
-    } else {
-      parts.push(`${attr}: "${id}"`);
-    }
-  }
-
-  if (parts.length === 1) {
-    return parts[0];
-  }
-
-  return `(${parts.join(' OR ')})`;
-}
-
 export function prepareQueryDslFilter({
   ruleIds,
   excludeRuleIds,
@@ -171,26 +134,4 @@ export function getPrebuiltRuleAssetSoId(
 ): string {
   const idBody = libraryId ? `${libraryId}_${ruleId}_${version}` : `${ruleId}_${version}`;
   return `${PREBUILT_RULE_ASSETS_SO_TYPE}:${idBody}`;
-}
-
-/** Fleet copies have no library_id and belong with the Elastic library. */
-export function collapseLibraryTwins<
-  T extends { rule_id: string; version: number; library_id?: string }
->(items: T[]): T[] {
-  const byKey = new Map<string, T>();
-
-  for (const item of items) {
-    const key = `${item.library_id || ELASTIC_LIBRARY_ID}:${item.rule_id}`;
-    const prev = byKey.get(key);
-    const preferItem =
-      !prev ||
-      item.version > prev.version ||
-      (item.version === prev.version && item.library_id && !prev.library_id);
-
-    if (preferItem) {
-      byKey.set(key, item);
-    }
-  }
-
-  return [...byKey.values()];
 }

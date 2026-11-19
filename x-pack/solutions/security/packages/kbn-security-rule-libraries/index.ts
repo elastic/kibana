@@ -11,7 +11,7 @@ export {
   ELASTIC_LIBRARY_ID,
   COMMUNITY_LIBRARY_ID,
   BATCH_SIZE,
-  UPDATE_LOCK_TIMEOUT_MS,
+  REFRESH_LOCK_TIMEOUT_MS,
 } from './src/constants';
 export { RULE_LIBRARY_DEFINITIONS } from './src/definitions';
 export { ruleLibraryType } from './src/saved_objects/rule_library_type';
@@ -25,13 +25,13 @@ export {
   type ItemBatch,
   type ProviderFactoryDeps,
 } from './src/providers';
-export { ensureLibraries, type EnsureParams } from './src/update/ensure_libraries';
-export { updateRuleLibrary, type UpdateParams } from './src/update/update_rule_library';
+export { ensureLibraries, type EnsureParams } from './src/refresh/ensure_libraries';
+export { refreshRuleLibrary, type RefreshParams } from './src/refresh/refresh_rule_library';
 export {
-  updateAllLibraries,
-  type UpdateAllParams,
-  type UpdateAllResult,
-} from './src/update/update_all_libraries';
+  refreshRuleLibraries,
+  type RefreshRuleLibrariesParams,
+  type RefreshRuleLibrariesResult,
+} from './src/refresh/refresh_rule_libraries';
 
 export type {
   AuthType,
@@ -45,7 +45,7 @@ export type {
   RuleLibraryItem,
   RuleLibraryOwner,
   RuleLibraryProviderConfig,
-  UpdateOutcome,
-  UpdateResult,
-  UpdateStatus,
+  RefreshOutcome,
+  RefreshResult,
+  RefreshStatus,
 } from './src/types';

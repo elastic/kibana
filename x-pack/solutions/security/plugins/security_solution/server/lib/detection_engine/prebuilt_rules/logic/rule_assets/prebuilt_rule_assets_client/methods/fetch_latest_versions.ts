@@ -21,7 +21,6 @@ import {
   PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
   prepareQueryDslFilter,
   prepareQueryDslSort,
-  collapseLibraryTwins,
   getPrebuiltRuleAssetSoId,
   getPrebuiltRuleAssetsSearchNamespace,
 } from '../utils';
@@ -81,7 +80,7 @@ async function fetchLatestVersionSpecifiers(
    * version older. This filter ensures all rule assets fetched will not contain any rule ids that
    * have been labeled as deprecated.
    */
-  const deprecatedRuleAssets = await fetchDeprecatedRules(savedObjectsClient, ruleIds);
+  const deprecatedRuleAssets = await fetchDeprecatedRules(savedObjectsClient, ruleIds, libraryIds);
   const deprecatedRuleIds = deprecatedRuleAssets.map((asset) => asset.rule_id);
 
   const latestVersionSpecifiersResult = await savedObjectsClient.search<
@@ -109,7 +108,7 @@ async function fetchLatestVersionSpecifiers(
             multi_terms: {
               terms: [
                 { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id` },
-                { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id`, missing: '' },
+                { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id` },
               ],
               size: MAX_PREBUILT_RULES_COUNT,
             },
@@ -147,9 +146,7 @@ async function fetchLatestVersionSpecifiers(
     };
   });
 
-  return libraryIds?.length
-    ? collapseLibraryTwins(latestVersionSpecifiers)
-    : latestVersionSpecifiers;
+  return latestVersionSpecifiers;
 }
 
 const latestVersionAgg = () => ({

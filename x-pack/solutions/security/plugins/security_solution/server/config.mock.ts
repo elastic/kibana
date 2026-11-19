@@ -29,7 +29,6 @@ export const createMockConfig = (): ConfigType => {
     completeExternalResponseActionsTaskInterval: '60s',
     completeExternalResponseActionsTaskTimeout: '20m',
     prebuiltRulesPackageVersion: '',
-    ruleLibrary: { enabled: false },
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
     maxUploadResponseActionFileBytes: 26214400,

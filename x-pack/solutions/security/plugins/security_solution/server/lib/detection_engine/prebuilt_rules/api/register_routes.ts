@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import type { ConfigType } from '../../../../config';
 import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route';
 import { getPrebuiltRulesStatusRoute } from './get_prebuilt_rules_status/get_prebuilt_rules_status_route';
 import { installPrebuiltRulesAndTimelinesRoute } from './install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route';
@@ -18,10 +19,12 @@ import { bootstrapEaseRulesRoute } from './bootstrap_ease_rules/bootstrap_ease_r
 import { getPrebuiltRuleBaseVersion } from './get_prebuilt_rule_base_version/get_prebuilt_rule_base_version_route';
 import { revertPrebuiltRule } from './revert_prebuilt_rule/revert_prebuilt_rule_route';
 import { reviewRuleDeprecationRoute } from './review_rule_deprecation/review_rule_deprecation_route';
+import { refreshRuleLibrariesRoute } from './refresh_rule_libraries/refresh_rule_libraries_route';
 
 export const registerPrebuiltRulesRoutes = (
   router: SecuritySolutionPluginRouter,
-  logger: Logger
+  logger: Logger,
+  config: ConfigType
 ) => {
   // Legacy endpoints that we're going to deprecate
   getPrebuiltRulesAndTimelinesStatusRoute(router, logger);
@@ -37,4 +40,8 @@ export const registerPrebuiltRulesRoutes = (
   getPrebuiltRuleBaseVersion(router);
   revertPrebuiltRule(router);
   reviewRuleDeprecationRoute(router);
+
+  if (config.experimentalFeatures.ruleLibrariesEnabled) {
+    refreshRuleLibrariesRoute(router, logger);
+  }
 };
