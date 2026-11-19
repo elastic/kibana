@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { getESQLResults, formatESQLColumns } from '@kbn/esql-utils';
+import { formatESQLColumns } from '@kbn/esql-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ChartType } from '@kbn/visualization-utils';
@@ -36,7 +36,6 @@ const getTextBasedLayers = (
 };
 
 const mockSuggestionApi = suggestionsApi as jest.Mock;
-const mockFetchData = getESQLResults as jest.Mock;
 const mockformatESQLColumns = formatESQLColumns as jest.Mock;
 const mockCreateEsqlAdHocDataView = createEsqlAdHocDataView as jest.Mock;
 const mockReadUserChartTypeFromSessionStorage = readUserChartTypeFromSessionStorage as jest.Mock;
@@ -73,14 +72,15 @@ const queryResponseColumns = [
   },
 ];
 
+const mockFetchData = jest.fn().mockResolvedValue({
+  rawResponse: {
+    columns: queryResponseColumns,
+    values: [],
+  },
+});
+
 jest.mock('@kbn/esql-utils', () => {
   return {
-    getESQLResults: jest.fn().mockResolvedValue({
-      response: {
-        columns: queryResponseColumns,
-        values: [],
-      },
-    }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     formatESQLColumns: jest.fn().mockReturnValue(queryResponseColumns),
   };
@@ -178,6 +178,7 @@ describe('Lens inline editing helpers', () => {
     const httpMock = coreMock.createStart().http;
     dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
     mockStartDependencies.data.dataViews = dataViews;
+    mockStartDependencies.data.search.esql = mockFetchData;
     const uiSettingsMock = {
       get: jest.fn(),
     } as unknown as IUiSettingsClient;
@@ -387,7 +388,7 @@ describe('Lens inline editing helpers', () => {
 
       beforeEach(() => {
         mockFetchData.mockResolvedValue({
-          response: { columns: queryResponseColumns, values: [] },
+          rawResponse: { columns: queryResponseColumns, values: [] },
         });
       });
 
@@ -957,6 +958,7 @@ describe('Lens inline editing helpers', () => {
     const dataViews = dataViewPluginMocks.createStartContract();
     dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
     mockStartDependencies.data.dataViews = dataViews;
+    mockStartDependencies.data.search.esql = mockFetchData;
     const dataviewSpecArr = [
       {
         id: 'd2588ae7-9ea0-4439-9f5b-f808754a3b97',
@@ -983,7 +985,7 @@ describe('Lens inline editing helpers', () => {
     it('returns the columns if the array is not empty in the response', async () => {
       mockFetchData.mockImplementation(() => {
         return {
-          response: {
+          rawResponse: {
             columns: queryResponseColumns,
             values: [],
           },
@@ -1011,7 +1013,7 @@ describe('Lens inline editing helpers', () => {
       ];
       mockFetchData.mockImplementation(() => {
         return {
-          response: {
+          rawResponse: {
             columns: [],
             values: [],
             all_columns: emptyColumns,
@@ -1041,7 +1043,7 @@ describe('Lens inline editing helpers', () => {
       ];
 
       mockFetchData.mockImplementation(() => ({
-        response: {
+        rawResponse: {
           all_columns: allColumnsRaw,
           columns: subsetColumns,
           values: [[500]],
@@ -1068,7 +1070,7 @@ describe('Lens inline editing helpers', () => {
     it('falls back to createEsqlAdHocDataView when spec has no timeFieldName', async () => {
       dataViews.create.mockClear();
       mockFetchData.mockImplementation(() => ({
-        response: { columns: queryResponseColumns, values: [] },
+        rawResponse: { columns: queryResponseColumns, values: [] },
       }));
       mockCreateEsqlAdHocDataView.mockResolvedValue({
         timeFieldName: '@timestamp',
@@ -1107,7 +1109,7 @@ describe('Lens inline editing helpers', () => {
 
     it('falls back to createEsqlAdHocDataView with id undefined when no spec matches', async () => {
       mockFetchData.mockImplementation(() => ({
-        response: { columns: queryResponseColumns, values: [] },
+        rawResponse: { columns: queryResponseColumns, values: [] },
       }));
       mockCreateEsqlAdHocDataView.mockResolvedValue({
         timeFieldName: '@timestamp',
@@ -1125,7 +1127,7 @@ describe('Lens inline editing helpers', () => {
 
     it('uses dataViews.create without fetching fields when spec has timeFieldName', async () => {
       mockFetchData.mockImplementation(() => ({
-        response: { columns: queryResponseColumns, values: [] },
+        rawResponse: { columns: queryResponseColumns, values: [] },
       }));
       mockCreateEsqlAdHocDataView.mockClear();
 

@@ -11,7 +11,7 @@ import { of, throwError } from 'rxjs';
 import { SearchMethodsService } from './search_methods';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { RequestAdapter, RequestStatus } from '@kbn/inspector-plugin/common';
 import type { EsQueryConfig, Filter } from '@kbn/es-query';
 import { ESQLVariableType } from '@kbn/esql-types';
 
@@ -55,7 +55,10 @@ describe('SearchMethodsService', () => {
   const createMockInspector = (
     requestResponder: ReturnType<typeof createMockRequestResponder>
   ) => ({
-    adapter: { start: jest.fn().mockReturnValue(requestResponder) } as unknown as RequestAdapter,
+    adapter: {
+      start: jest.fn().mockReturnValue(requestResponder),
+      resetRequest: jest.fn(),
+    } as unknown as RequestAdapter,
     title: 'Test Request',
     description: 'Test description',
   });
@@ -103,6 +106,16 @@ describe('SearchMethodsService', () => {
         },
         expect.anything()
       );
+    });
+
+    it('reports all-empty rows as no rows', async () => {
+      mockSearch.mockReturnValue(
+        createMockResponse({ columns: [{ name: 'a', type: 'keyword' }], values: [[], []] })
+      );
+
+      const { rawResponse } = await service.esql({ query: 'FROM logs' });
+
+      expect(rawResponse.values).toEqual([]);
     });
 
     it('defaults locale from the getLocale dependency and lets params override it', async () => {
@@ -195,6 +208,36 @@ describe('SearchMethodsService', () => {
       expect(result.datatable).toBeUndefined();
     });
 
+    describe('errors', () => {
+      it('rethrows an abort unchanged, so callers can recognize it', async () => {
+        const abort = new DOMException('The operation was aborted', 'AbortError');
+        mockSearch.mockReturnValue(throwError(() => abort));
+
+        await expect(service.esql({ query: 'FROM logs' })).rejects.toBe(abort);
+      });
+
+      it('does not present a failure that did not come from Elasticsearch as one', async () => {
+        const failure = new TypeError('Failed to fetch');
+        mockSearch.mockReturnValue(throwError(() => failure));
+
+        await expect(service.esql({ query: 'FROM logs' })).rejects.toMatchObject({
+          message: 'Failed to fetch',
+        });
+      });
+
+      it('rewords an Elasticsearch error', async () => {
+        const original = Object.assign(new Error('original message'), {
+          attributes: { type: 'verification_exception', reason: 'Unknown column [foo]' },
+        });
+        mockSearch.mockReturnValue(throwError(() => original));
+
+        await expect(service.esql({ query: 'FROM logs' })).rejects.toMatchObject({
+          message:
+            'Unexpected error from Elasticsearch: verification_exception - Unknown column [foo]',
+        });
+      });
+    });
+
     describe('inspector', () => {
       it('calls inspector.adapter.start with correct parameters', async () => {
         const mockResponse = { columns: [], values: [] };
@@ -205,6 +248,19 @@ describe('SearchMethodsService', () => {
         await service.esql({ query: 'FROM logs' }, { inspector, sessionId: 'test-session-123' });
 
         expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          description: 'Test description',
+          id: expect.any(String),
+        });
+      });
+
+      it('passes inspector id to inspector.adapter.start', async () => {
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const inspector = { ...createMockInspector(createMockRequestResponder()), id: 'request-1' };
+
+        await service.esql({ query: 'FROM logs' }, { inspector });
+
+        expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          id: 'request-1',
           description: 'Test description',
         });
       });
@@ -237,6 +293,207 @@ describe('SearchMethodsService', () => {
         });
       });
 
+      it('does not log a request that was already aborted before it started', async () => {
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+        const controller = new AbortController();
+        controller.abort();
+
+        await service.esql({ query: 'FROM logs' }, { inspector, abortSignal: controller.signal });
+
+        expect(inspector.adapter.start).not.toHaveBeenCalled();
+      });
+
+      describe('with a real RequestAdapter', () => {
+        const inspectorFor = (adapter: RequestAdapter) => ({
+          adapter,
+          title: 'Test Request',
+          description: 'Test description',
+        });
+
+        it('removes the entry of a request aborted while it was running', async () => {
+          const adapter = new RequestAdapter();
+          const controller = new AbortController();
+          mockSearch.mockImplementation(() =>
+            throwError(() => {
+              controller.abort();
+              return new DOMException('The operation was aborted', 'AbortError');
+            })
+          );
+
+          await expect(
+            service.esql(
+              { query: 'FROM logs' },
+              { inspector: inspectorFor(adapter), abortSignal: controller.signal }
+            )
+          ).rejects.toMatchObject({ name: 'AbortError' });
+
+          expect(adapter.getRequests()).toEqual([]);
+        });
+
+        it('keeps the entry of a partial response that arrives after the request was aborted', async () => {
+          // Cancelling a running request resolves with its partial result; callers (e.g. Discover)
+          // read that result's warnings from the Inspector entry
+          const adapter = new RequestAdapter();
+          const controller = new AbortController();
+          mockSearch.mockImplementation(() => {
+            controller.abort();
+            return createMockResponse({ columns: [], values: [] });
+          });
+
+          await service.esql(
+            { query: 'FROM logs' },
+            { inspector: inspectorFor(adapter), abortSignal: controller.signal }
+          );
+
+          const requests = adapter.getRequests();
+          expect(requests).toHaveLength(1);
+          expect(requests[0].status).toBe(RequestStatus.OK);
+        });
+
+        it('removes only the aborted entry, leaving the others in place', async () => {
+          const adapter = new RequestAdapter();
+          const controller = new AbortController();
+          mockSearch.mockReturnValueOnce(createMockResponse({ columns: [], values: [] }));
+          await service.esql({ query: 'FROM a' }, { inspector: inspectorFor(adapter) });
+          mockSearch.mockImplementationOnce(() =>
+            throwError(() => {
+              controller.abort();
+              return new DOMException('The operation was aborted', 'AbortError');
+            })
+          );
+
+          await expect(
+            service.esql(
+              { query: 'FROM b' },
+              { inspector: inspectorFor(adapter), abortSignal: controller.signal }
+            )
+          ).rejects.toBeDefined();
+
+          expect(adapter.getRequests()).toHaveLength(1);
+          expect(adapter.getRequests()[0].status).toBe(RequestStatus.OK);
+        });
+
+        it('keeps a failure that was not aborted', async () => {
+          const adapter = new RequestAdapter();
+          mockSearch.mockReturnValue(throwError(() => new Error('boom')));
+
+          await expect(
+            service.esql(
+              { query: 'FROM logs' },
+              { inspector: inspectorFor(adapter), abortSignal: new AbortController().signal }
+            )
+          ).rejects.toThrow();
+
+          expect(adapter.getRequests()).toHaveLength(1);
+          expect(adapter.getRequests()[0].status).toBe(RequestStatus.ERROR);
+        });
+      });
+
+      it('still logs a failure when the request was not aborted', async () => {
+        mockSearch.mockReturnValue(throwError(() => new Error('boom')));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await expect(
+          service.esql(
+            { query: 'FROM logs' },
+            { inspector, abortSignal: new AbortController().signal }
+          )
+        ).rejects.toThrow();
+
+        expect(requestResponder.error).toHaveBeenCalledWith({ json: { message: 'boom' } });
+      });
+
+      it('includes approximation and project_routing in the request params when set', async () => {
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql(
+          { query: 'FROM logs', approximation: true, projectRouting: '_alias:_origin' },
+          { inspector }
+        );
+
+        expect(requestResponder.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: 'FROM logs',
+            approximation: true,
+            project_routing: '_alias:_origin',
+          })
+        );
+      });
+
+      it('logs the effective project_routing resolved by the getProjectRouting dependency', async () => {
+        const getProjectRouting = jest.fn((override?: string) => override ?? '_alias:*');
+        service = new SearchMethodsService(mockSearch, { getEsQueryConfig, getProjectRouting });
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs' }, { inspector });
+        expect(getProjectRouting).toHaveBeenLastCalledWith(undefined);
+        expect(requestResponder.json).toHaveBeenLastCalledWith(
+          expect.objectContaining({ project_routing: '_alias:*' })
+        );
+
+        await service.esql({ query: 'FROM logs', projectRouting: '_alias:_origin' }, { inspector });
+        expect(requestResponder.json).toHaveBeenLastCalledWith(
+          expect.objectContaining({ project_routing: '_alias:_origin' })
+        );
+      });
+
+      it('omits project_routing from the request params when it is not set', async () => {
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs' }, { inspector });
+
+        expect(requestResponder.json.mock.calls[0][0]).not.toHaveProperty('project_routing');
+      });
+
+      it.each([
+        [
+          'an error with attributes',
+          Object.assign(new Error('x'), {
+            attributes: { type: 'parsing_exception', reason: 'bad' },
+          }),
+          { type: 'parsing_exception', reason: 'bad' },
+        ],
+        ['an error without attributes', new Error('network down'), { message: 'network down' }],
+        ['a string', 'plain failure', { message: 'plain failure' }],
+        ['null', null, { message: 'null' }],
+        ['undefined', undefined, { message: 'undefined' }],
+      ])('logs a rejection with %s without failing on it', async (_label, rejection, json) => {
+        mockSearch.mockReturnValue(throwError(() => rejection));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await expect(service.esql({ query: 'FROM logs' }, { inspector })).rejects.toBeInstanceOf(
+          Error
+        );
+
+        expect(requestResponder.error).toHaveBeenCalledWith({ json });
+      });
+      it('reports all-empty rows as zero hits in the inspector stats', async () => {
+        mockSearch.mockReturnValue(
+          createMockResponse({
+            columns: [{ name: 'a', type: 'keyword' }],
+            values: [[], []],
+            took: 5,
+          })
+        );
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs' }, { inspector });
+
+        expect(requestResponder.stats).toHaveBeenCalledWith(
+          expect.objectContaining({ hits: expect.objectContaining({ value: '0' }) })
+        );
+      });
       it('calls requestResponder.stats with getEsqlInspectorStats result on success', async () => {
         const mockResponse = {
           columns: [{ name: 'status', type: 'integer' }],
@@ -742,6 +999,18 @@ describe('SearchMethodsService', () => {
         );
 
         expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          description: 'Test description',
+        });
+      });
+
+      it('passes inspector id to inspector.adapter.start', async () => {
+        mockSearch.mockReturnValue(createMockResponse({ hits: { hits: [], total: 0 } }));
+        const inspector = { ...createMockInspector(createMockRequestResponder()), id: 'request-1' };
+
+        await service.dsl({ index: 'logs-*', query: { match_all: {} } }, { inspector });
+
+        expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          id: 'request-1',
           description: 'Test description',
         });
       });

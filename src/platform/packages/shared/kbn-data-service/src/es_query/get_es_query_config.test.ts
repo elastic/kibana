@@ -8,7 +8,7 @@
  */
 
 import { get } from 'lodash';
-import { getEsQueryConfig } from './get_es_query_config';
+import { getEsQueryConfig, getEsQueryConfigAsync } from './get_es_query_config';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '../constants';
 
@@ -54,5 +54,23 @@ describe('getEsQueryConfig', () => {
     expect(result).toHaveProperty('dateFormatTZ');
     expect(result).toHaveProperty('ignoreFilterIfFieldNotInIndex');
     expect(result).toHaveProperty('queryStringOptions');
+  });
+});
+
+describe('getEsQueryConfigAsync', () => {
+  test('should resolve the same config as getEsQueryConfig reading only the settings it needs', async () => {
+    const getSetting = jest.fn(async (item: string) => config.get(item));
+
+    const result = await getEsQueryConfigAsync({ get: getSetting });
+
+    expect(result).toEqual(getEsQueryConfig(config));
+    expect(getSetting.mock.calls.map(([key]) => key).sort()).toEqual(
+      [
+        UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS,
+        UI_SETTINGS.QUERY_STRING_OPTIONS,
+        UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
+        'dateFormat:tz',
+      ].sort()
+    );
   });
 });

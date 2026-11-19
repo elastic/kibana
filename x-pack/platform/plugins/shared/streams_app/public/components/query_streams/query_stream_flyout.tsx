@@ -106,7 +106,7 @@ export function QueryStreamFlyout({
 
       const results = await executeEsqlQuery({
         query: query.esql,
-        search: data.search.search,
+        search: data.search,
         signal: controller?.signal,
         start: timeStateRef.current.start,
         end: timeStateRef.current.end,
@@ -116,7 +116,7 @@ export function QueryStreamFlyout({
 
       return esqlResultToPlainObjects(results) as SampleDocument[];
     },
-    [data.search.search, uiSettings]
+    [data.search, uiSettings]
   );
 
   useEffect(() => {

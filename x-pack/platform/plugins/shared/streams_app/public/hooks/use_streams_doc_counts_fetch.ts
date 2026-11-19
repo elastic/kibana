@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { StreamDocsStat } from '@kbn/streams-plugin/common';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useKibana } from './use_kibana';
@@ -265,12 +264,10 @@ export function useStreamDocCountsFetch({
       // Check per-stream privilege
       const canReadFailureStore = getCanReadFailureStore(streamName);
       const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
-      const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
 
       const histogramPromise = executeEsqlQuery({
         query: buildStreamIngestHistogramEsql(source, minInterval),
-        search: data.search.search,
-        timezone,
+        search: data.search,
         signal: abortController.signal,
         start: timeState.start,
         end: timeState.end,

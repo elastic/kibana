@@ -16,5 +16,3 @@ export const isDSLOptionsListApi = (
 ): api is DSLOptionsListComponentApi => {
   return api.type === OPTIONS_LIST_CONTROL;
 };
-
-export { getControlsTimezone } from './get_controls_timezone';

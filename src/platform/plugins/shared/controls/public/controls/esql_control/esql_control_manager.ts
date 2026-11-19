@@ -49,7 +49,6 @@ import {
 import { dataService } from '../../services/kibana_services';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 import type { ESQLOptionsListRuntimeState } from './types';
-import { getControlsTimezone } from '../utils';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -207,11 +206,10 @@ export function initializeESQLControlManager(
             return from(
               getESQLSingleColumnValues({
                 query: esqlQuery$.getValue(),
-                search: dataService.search.search,
+                search: dataService.search,
                 signal,
                 timeRange,
                 esqlVariables: variablesInParent,
-                timezone: getControlsTimezone(),
               })
             );
           })
