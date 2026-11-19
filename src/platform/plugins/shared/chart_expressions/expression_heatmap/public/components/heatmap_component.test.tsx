@@ -528,90 +528,79 @@ describe('HeatmapComponent', function () {
   });
 
   describe('missing numeric Y buckets', () => {
-    const gappedRows = [
-      { 'col-0-1': 1, 'col-1-2': 'a', 'col-2-3': 0 },
-      { 'col-0-1': 2, 'col-1-2': 'a', 'col-2-3': 2 },
-    ];
-    const countAndXColumns: Datatable['columns'] = [
-      { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
-      { id: 'col-1-2', name: 'Dest', meta: { type: 'string' } },
-    ];
+    const row = (y: number | string, value: number) => ({
+      'col-0-1': value,
+      'col-1-2': 'a',
+      'col-2-3': y,
+    });
+    const table = (
+      rows: Datatable['rows'],
+      yMeta: Datatable['columns'][number]['meta'],
+      esql = false
+    ): Datatable => ({
+      type: 'datatable',
+      ...(esql ? { meta: { type: ESQL_TABLE_TYPE } } : {}),
+      rows,
+      columns: [
+        { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
+        { id: 'col-1-2', name: 'Dest', meta: { type: 'string' } },
+        { id: 'col-2-3', name: 'Bytes', meta: yMeta },
+      ],
+    });
+    const heatmap = (data: Datatable, ySortPredicate?: 'asc' | 'desc') =>
+      shallowWithIntl(
+        <HeatmapComponent
+          {...wrapperProps}
+          data={data}
+          args={{
+            ...wrapperProps.args,
+            gridConfig: { ...wrapperProps.args.gridConfig, ySortPredicate },
+          }}
+        />
+      ).find(Heatmap);
 
     it('fills a missing ES|QL histogram step from the column interval', () => {
-      const esqlData: Datatable = {
-        type: 'datatable',
-        meta: { type: ESQL_TABLE_TYPE },
-        rows: gappedRows,
-        columns: [
-          ...countAndXColumns,
-          {
-            id: 'col-2-3',
-            name: 'Bytes',
-            meta: { type: 'number', esMeta: { bucket: { interval: 1 } } },
-          },
-        ],
-      };
-      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} data={esqlData} />);
-      const chartData = component.find(Heatmap).prop('data') as Datatable['rows'];
+      const chart = heatmap(
+        table(
+          [row(0, 1), row(2, 2)],
+          { type: 'number', esMeta: { bucket: { interval: 1 } } },
+          true
+        )
+      );
+      const chartData = chart.prop('data') as Datatable['rows'];
 
-      expect(chartData.map((row) => row['col-2-3'])).toEqual([0, 1, 2]);
+      expect(chartData.map((entry) => entry['col-2-3'])).toEqual([0, 1, 2]);
       expect(chartData[1]['col-0-1']).toBeNull();
     });
 
     it('leaves a DSL histogram gap for the agg empty-row toggle', () => {
-      const dslData: Datatable = {
-        type: 'datatable',
-        rows: gappedRows,
-        columns: [
-          ...countAndXColumns,
-          {
-            id: 'col-2-3',
-            name: 'Bytes',
-            meta: {
-              type: 'number',
-              source: 'esaggs',
-              sourceParams: { type: 'histogram', params: { used_interval: 1 } },
-            },
-          },
-        ],
-      };
-      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} data={dslData} />);
+      const rows = [row(0, 1), row(2, 2)];
+      const chart = heatmap(
+        table(rows, {
+          type: 'number',
+          source: 'esaggs',
+          sourceParams: { type: 'histogram', params: { used_interval: 1 } },
+        })
+      );
 
-      expect(component.find(Heatmap).prop('data')).toEqual(gappedRows);
+      expect(chart.prop('data')).toEqual(rows);
     });
 
-    it('fills a missing ES|QL range step and keeps it between the populated ranges when Y sort is descending', () => {
-      const rangeRows = [
-        { 'col-0-1': 2, 'col-1-2': 'a', 'col-2-3': '2..3' },
-        { 'col-0-1': 1, 'col-1-2': 'a', 'col-2-3': '0..1' },
-      ];
-      const esqlData: Datatable = {
-        type: 'datatable',
-        meta: { type: ESQL_TABLE_TYPE },
-        rows: rangeRows,
-        columns: [
-          ...countAndXColumns,
-          {
-            id: 'col-2-3',
-            name: 'Bytes',
-            meta: { type: 'number_range', esMeta: { bucket: { interval: 1 } } },
-          },
-        ],
-      };
-      const component = shallowWithIntl(
-        <HeatmapComponent
-          {...wrapperProps}
-          data={esqlData}
-          args={{
-            ...wrapperProps.args,
-            gridConfig: { ...wrapperProps.args.gridConfig, ySortPredicate: 'desc' },
-          }}
-        />
+    it('fills a 9-to-11 range gap and tells the chart to keep that row order', () => {
+      // Alphabetical descending would put "9..10" first and "10..11" last.
+      const chart = heatmap(
+        table(
+          [row('9..10', 1), row('11..12', 2)],
+          { type: 'number_range', esMeta: { bucket: { interval: 1 } } },
+          true
+        ),
+        'desc'
       );
-      const chartData = component.find(Heatmap).prop('data') as Datatable['rows'];
+      const chartData = chart.prop('data') as Datatable['rows'];
 
-      expect(chartData.map((row) => row['col-2-3'])).toEqual(['2..3', '1..2', '0..1']);
+      expect(chartData.map((entry) => entry['col-2-3'])).toEqual(['11..12', '10..11', '9..10']);
       expect(chartData[1]['col-0-1']).toBeNull();
+      expect(chart.prop('ySortPredicate')).toBe('dataIndex');
     });
   });
 
