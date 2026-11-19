@@ -51,13 +51,13 @@ export const useOperatorStripStyles = () => {
       `,
       stripShare: css`
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         gap: ${euiTheme.size.xs};
         color: ${euiTheme.colors.textSubdued};
         font-size: ${small};
         font-variant-numeric: tabular-nums;
         line-height: 1.4;
-        white-space: nowrap;
       `,
     }),
     [euiTheme, small]

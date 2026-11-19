@@ -316,6 +316,12 @@ describe('QueryProfileView', () => {
       expect(strip).toHaveTextContent('Rows 10 → 10');
       expect(strip).toHaveTextContent('HashAggregation');
 
+      // Each bar is filled to the share of its own operator, so they are not all the same.
+      const fills = Array.from(strip.querySelectorAll('progress')).map((bar) =>
+        Math.round(bar.value)
+      );
+      expect(fills).toEqual([60, 30, 10, 0]);
+
       await userEvent.click(dataLane);
 
       expect(screen.queryByTestId('esqlQueryProfileOperatorStrip')).not.toBeInTheDocument();

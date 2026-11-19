@@ -140,13 +140,14 @@ const OperatorStrip = ({
                 },
               })}
             </span>
-            <EuiProgress
-              value={operator.share * 100}
-              max={100}
-              size="s"
-              color={categoryColor[operatorCategory(operator.title)]}
-              aria-hidden="true"
-            />
+            <div aria-hidden="true">
+              <EuiProgress
+                value={operator.share * 100}
+                max={100}
+                size="s"
+                color={categoryColor[operatorCategory(operator.title)]}
+              />
+            </div>
           </button>
         );
       })}

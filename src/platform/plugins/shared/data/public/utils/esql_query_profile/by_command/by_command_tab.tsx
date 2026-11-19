@@ -47,7 +47,7 @@ const useCommandStyles = () => {
         display: grid;
         grid-template-columns: minmax(0, 1fr) ${euiTheme.base * 3}px;
         column-gap: ${euiTheme.size.s};
-        padding: ${euiTheme.size.xs} 0;
+        padding: ${euiTheme.size.s} 0;
       `,
       nested: css`
         padding-inline-start: ${euiTheme.size.m};
@@ -96,13 +96,12 @@ const CommandRow = ({ entry, isNested }: { entry: CommandHeat; isNested: boolean
     >
       <div css={styles.command}>{entry.command.text}</div>
       <div css={styles.share}>{entry.share > 0 ? formatShare(entry.share) : '–'}</div>
-      <div css={styles.bar}>
+      <div css={styles.bar} aria-hidden="true">
         <EuiProgress
           value={entry.share * 100}
           max={100}
           size="s"
           color={HEAT_COLOR[heatLevel(entry.share)]}
-          aria-hidden="true"
           data-test-subj="esqlQueryProfileCommandBar"
         />
       </div>
