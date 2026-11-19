@@ -427,7 +427,7 @@ const ConversationsPageContent: React.FC = () => {
             isLoading={isLoading}
             hasError={hasSummaryError}
             // Closed proposals are rows but not work: a window holding only decisions
-            // already made is an empty queue, and must not read as "0 actions need you"
+            // already made is an empty queue, and must not read as "0 actions need your approval"
             // beside a populated header.
             isQueueEmpty={openCount === 0}
             eventCount={openCount}

@@ -29,13 +29,13 @@ describe('AlertZeroPageHeader', () => {
   it('should render the pending action count', () => {
     setup({ eventCount: 3 });
 
-    expect(heading()).toContain('3 actions need you');
+    expect(heading()).toContain('3 actions need your approval');
   });
 
   it('should render the singular form for a single action', () => {
     setup({ eventCount: 1 });
 
-    expect(heading()).toContain('1 action needs you');
+    expect(heading()).toContain('1 action needs your approval');
   });
 
   it('should say the queue is clear only when it has a count to back it up', () => {
@@ -86,13 +86,13 @@ describe('AlertZeroPageHeader', () => {
       setup({ eventCount: 3, title: 'Custom title' });
 
       expect(heading()).toContain('Custom title');
-      expect(heading()).not.toContain('3 actions need you');
+      expect(heading()).not.toContain('3 actions need your approval');
     });
 
     it('should keep the derived title and greeting when no overrides are given', () => {
       setup({ eventCount: 3 });
 
-      expect(heading()).toContain('3 actions need you');
+      expect(heading()).toContain('3 actions need your approval');
       expect(heading()).toMatch(/Good (morning|afternoon|evening)!/);
     });
   });

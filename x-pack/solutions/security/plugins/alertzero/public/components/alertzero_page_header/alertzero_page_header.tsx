@@ -91,8 +91,9 @@ const getAlertZeroHeroTitle = ({
   }
 
   if (hasNeedsAction) {
-    return i18n.translate('xpack.alertzero.hero.needsActionTitle', {
-      defaultMessage: '{eventCount, plural, one {# action needs you} other {# actions need you}}',
+    return i18n.translate('xpack.alertzero.hero.needsApprovalTitle', {
+      defaultMessage:
+        '{eventCount, plural, one {# action needs your approval} other {# actions need your approval}}',
       values: {
         eventCount,
       },

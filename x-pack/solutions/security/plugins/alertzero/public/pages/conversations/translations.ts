@@ -45,8 +45,8 @@ export const IDLE_HEADER = {
   greeting: i18n.translate('xpack.alertzero.queue.idleHeader.greeting', {
     defaultMessage: 'Your Watches are running.',
   }),
-  title: i18n.translate('xpack.alertzero.queue.idleHeader.title', {
-    defaultMessage: 'No actions need you',
+  title: i18n.translate('xpack.alertzero.queue.idleHeader.noApprovalsTitle', {
+    defaultMessage: 'No actions need your approval',
   }),
   subtitle: ({
     watchCount,
