@@ -7,7 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { SESSIONS_INDEX } from '../../../common/sessions';
+import { MOBILE_SESSIONS_INDEX, SESSIONS_INDEX } from '../../../common/sessions';
+import { BROWSER_SESSIONS_PLATFORM, MOBILE_SESSIONS_PLATFORM } from './sessions_platforms';
 import {
   IDS_PER_QUERY,
   INITIAL_WINDOW_MS,
@@ -91,6 +92,7 @@ const logger = loggingSystemMock.createLogger();
 
 const run = (esClient: ReturnType<typeof setUp>, overrides = {}) =>
   summarizeSessions({
+    platform: BROWSER_SESSIONS_PLATFORM,
     esClient,
     signal: new AbortController().signal,
     now: NOW,
@@ -499,5 +501,37 @@ describe('summarizeSessions', () => {
 
     expect(progress.windowMs).toBeGreaterThanOrEqual(MIN_WINDOW_MS);
     expect(progress.windowMs).toBeLessThanOrEqual(MAX_WINDOW_MS);
+  });
+
+  it('stops at `until` when it is before the sync delay, and is caught up there', async () => {
+    const esClient = setUp({ changed: () => 0 });
+    const until = UNTIL - 10 * MINUTE;
+
+    const progress = await run(esClient, {
+      checkpoint: new Date(until - 30 * MINUTE).toISOString(),
+      until,
+    });
+
+    expect(progress).toMatchObject({ checkpoint: new Date(until).toISOString(), caughtUp: true });
+    const [{ params }] = esClient.esql.query.mock.calls[0];
+    expect(paramOf(params as estypes.EsqlNamedValue[], 'changed_to')).toBe(
+      new Date(until).toISOString()
+    );
+  });
+
+  it('reads and writes with the platform’s events, summary query and index', async () => {
+    const esClient = setUp();
+
+    await run(esClient, { platform: MOBILE_SESSIONS_PLATFORM });
+
+    const queries = esClient.esql.query.mock.calls.map(([{ query }]) => query);
+    expect(queries).toHaveLength(3);
+    queries.forEach((query) => expect(query).toContain('telemetry.sdk.name IN ("android", "iOS")'));
+    expect(queries[2]).toContain('crash_count = COUNT(*) WHERE is_crash');
+    const [{ operations }] = esClient.bulk.mock.calls[0];
+    expect(operations?.[0]).toEqual({
+      index: { _index: MOBILE_SESSIONS_INDEX, _id: expect.any(String) },
+    });
+    expect(operations?.[1]).toMatchObject({ session: { id: 'a' }, crash_count: 0 });
   });
 });

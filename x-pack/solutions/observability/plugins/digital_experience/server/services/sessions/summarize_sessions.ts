@@ -10,7 +10,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import {
-  SESSIONS_INDEX,
   SESSIONS_LOOKBACK_DAYS,
   SESSIONS_MAX_ID_LENGTH,
   SESSIONS_MAX_SESSION_HOURS,
@@ -18,22 +17,18 @@ import {
 } from '../../../common/sessions';
 import { stringsOf } from '../../lib/helpers/values';
 import { hashRanges } from './hash_ranges';
-import type { SessionDocument } from './sessions_index';
+import type { SessionsPlatform, SummaryDocument } from './sessions_platforms';
 import {
   ESQL_MAX_ROWS,
   SESSION_IDS_COLUMN,
   changedSessionIdsQuery,
   changedSessionsCountQuery,
-  sessionSummaryQuery,
   type ChangedWindow,
+  type RebuildWindow,
+  type SessionEvents,
   type SummaryQuery,
 } from './summary_queries';
-import {
-  sessionDocumentId,
-  toEsqlRows,
-  toSessionDocuments,
-  type EsqlRow,
-} from './summary_documents';
+import { sessionDocumentId, toEsqlRows, type EsqlRow } from './summary_documents';
 
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -67,11 +62,14 @@ export const INITIAL_WINDOW_MS = HOUR_MS;
 export const ROWS_PER_TICK = 500;
 
 export interface SummarizeSessionsParams {
+  platform: SessionsPlatform;
   esClient: ElasticsearchClient;
   signal: AbortSignal;
   now: number;
   /** Events before it are summarized; `null` to start from the lookback. */
   checkpoint: string | null;
+  /** Summarizes no event from it on; the sync delay bounds it either way. */
+  until?: number;
   windowMs: number;
   /** Starts no window after this much time, so the run ends before its timeout. */
   budgetMs: number;
@@ -119,15 +117,15 @@ const runEsql = async (
 ): Promise<EsqlRow[]> => toEsqlRows(await queryEsql(esClient, query, signal));
 
 /** The summaries of a summary query's rows, `ROWS_PER_TICK` at a time between event loop turns. */
-const toSessionDocumentsInChunks = async ({
-  columns,
-  values,
-}: estypes.EsqlEsqlResult): Promise<SessionDocument[]> => {
-  const documents: SessionDocument[] = [];
+const toSessionDocumentsInChunks = async (
+  { columns, values }: estypes.EsqlEsqlResult,
+  toDocuments: SessionsPlatform['toDocuments']
+): Promise<SummaryDocument[]> => {
+  const documents: SummaryDocument[] = [];
   for (let start = 0; start < values.length; start += ROWS_PER_TICK) {
     await yieldToEventLoop();
     const rows = toEsqlRows({ columns, values: values.slice(start, start + ROWS_PER_TICK) });
-    documents.push(...toSessionDocuments(rows));
+    documents.push(...toDocuments(rows));
   }
   return documents;
 };
@@ -135,9 +133,10 @@ const toSessionDocumentsInChunks = async ({
 const countChangedSessions = async (
   esClient: ElasticsearchClient,
   window: ChangedWindow,
+  events: SessionEvents,
   signal: AbortSignal
 ): Promise<number> => {
-  const [row] = await runEsql(esClient, changedSessionsCountQuery(window), signal);
+  const [row] = await runEsql(esClient, changedSessionsCountQuery(window, events), signal);
   return typeof row?.sessions === 'number' ? row.sessions : 0;
 };
 
@@ -168,7 +167,8 @@ const isRetryable = ({ status, error }: estypes.BulkResponseItem): boolean =>
  */
 const writeSessions = async (
   esClient: ElasticsearchClient,
-  documents: SessionDocument[],
+  index: string,
+  documents: SummaryDocument[],
   signal: AbortSignal,
   logger: Logger
 ): Promise<void> => {
@@ -178,7 +178,7 @@ const writeSessions = async (
   const operations = documents.flatMap((document) => [
     {
       index: {
-        _index: SESSIONS_INDEX,
+        _index: index,
         _id: sessionDocumentId(document.service.name, document.session.id),
       },
     },
@@ -209,13 +209,18 @@ const writeSessions = async (
 const changedSessionIds = async (
   esClient: ElasticsearchClient,
   window: ChangedWindow,
+  events: SessionEvents,
   changedSessions: number,
   signal: AbortSignal,
   maxRows: number
 ): Promise<string[]> => {
   let ids: string[] = [];
   for (const range of hashRanges(Math.ceil(changedSessions / IDS_PER_QUERY))) {
-    const rows = await runEsql(esClient, changedSessionIdsQuery(window, range, maxRows), signal);
+    const rows = await runEsql(
+      esClient,
+      changedSessionIdsQuery(window, range, events, maxRows),
+      signal
+    );
     // `concat`, as spreading 100,000 ids into `push` can overflow the call stack.
     ids = ids.concat(
       ...rows.map((row) =>
@@ -227,15 +232,11 @@ const changedSessionIds = async (
   return ids;
 };
 
-interface RebuildWindow {
-  changedTo: string;
-  rebuildFrom: string;
-}
-
 /** The sessions written, or the two halves of a batch whose rows filled the ES|QL response. */
 type BatchResult = { written: number } | { halves: [string[], string[]] };
 
 const summarizeBatch = async (
+  platform: SessionsPlatform,
   esClient: ElasticsearchClient,
   window: RebuildWindow,
   batch: string[],
@@ -243,13 +244,13 @@ const summarizeBatch = async (
   logger: Logger,
   maxRows: number
 ): Promise<BatchResult> => {
-  const response = await queryEsql(esClient, sessionSummaryQuery(window, batch, maxRows), signal);
+  const response = await queryEsql(esClient, platform.summaryQuery(window, batch, maxRows), signal);
   if (response.values.length >= maxRows && batch.length > 1) {
     const half = Math.ceil(batch.length / 2);
     return { halves: [batch.slice(0, half), batch.slice(half)] };
   }
-  const documents = await toSessionDocumentsInChunks(response);
-  await writeSessions(esClient, documents, signal, logger);
+  const documents = await toSessionDocumentsInChunks(response, platform.toDocuments);
+  await writeSessions(esClient, platform.index, documents, signal, logger);
   return { written: documents.length };
 };
 
@@ -260,6 +261,7 @@ const summarizeBatch = async (
  * round after `stopAt`, and then reports the window unfinished.
  */
 const summarizeSessionIds = async (
+  platform: SessionsPlatform,
   esClient: ElasticsearchClient,
   window: RebuildWindow,
   ids: string[],
@@ -277,7 +279,9 @@ const summarizeSessionIds = async (
     }
     const round = batches.splice(0, Math.max(1, concurrency));
     const results = await Promise.allSettled(
-      round.map((batch) => summarizeBatch(esClient, window, batch, signal, logger, maxRows))
+      round.map((batch) =>
+        summarizeBatch(platform, esClient, window, batch, signal, logger, maxRows)
+      )
     );
     for (const result of results) {
       if (result.status === 'rejected') {
@@ -306,10 +310,12 @@ export const windowTooLargeMessage = (sessions: number, timeLimitMs: number): st
  * of an earlier one. The checkpoint only moves past a window once all of it is written.
  */
 export const summarizeSessions = async ({
+  platform,
   esClient,
   signal,
   now,
   checkpoint,
+  until: untilParam = Infinity,
   windowMs,
   budgetMs,
   timeLimitMs,
@@ -317,7 +323,7 @@ export const summarizeSessions = async ({
   logger,
   maxRows = ESQL_MAX_ROWS,
 }: SummarizeSessionsParams): Promise<SummarizeSessionsResult> => {
-  const until = now - SESSIONS_SYNC_DELAY_SECONDS * 1000;
+  const until = Math.min(untilParam, now - SESSIONS_SYNC_DELAY_SECONDS * 1000);
   const earliest = lookbackStart(now);
   const started = Date.now();
   const deadline = started + budgetMs;
@@ -331,13 +337,21 @@ export const summarizeSessions = async ({
   while (from < until && Date.now() < deadline) {
     const to = Math.min(until, from + size);
     const window: ChangedWindow = { changedFrom: iso(from), changedTo: iso(to) };
-    const changed = await countChangedSessions(esClient, window, signal);
+    const changed = await countChangedSessions(esClient, window, platform.events, signal);
     if (changed > maxSessions && to - from > MIN_WINDOW_MS) {
       size = Math.max(MIN_WINDOW_MS, Math.floor((to - from) / 2));
     } else {
       if (changed > 0) {
-        const ids = await changedSessionIds(esClient, window, changed, signal, maxRows);
+        const ids = await changedSessionIds(
+          esClient,
+          window,
+          platform.events,
+          changed,
+          signal,
+          maxRows
+        );
         const { written, finished } = await summarizeSessionIds(
+          platform,
           esClient,
           {
             changedTo: window.changedTo,

@@ -14,16 +14,27 @@ import {
 } from '@kbn/core/server/mocks';
 import { TaskCost, type TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { SESSIONS_TASK_ID, SESSIONS_TASK_TYPE, SESSIONS_VERSION } from '../../../common/sessions';
+import {
+  MOBILE_SESSIONS_TASK_ID,
+  MOBILE_SESSIONS_TASK_TYPE,
+  MOBILE_SESSIONS_VERSION,
+  SESSIONS_TASK_ID,
+  SESSIONS_TASK_TYPE,
+  SESSIONS_VERSION,
+} from '../../../common/sessions';
 import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import {
   createSessionsIndex,
   putSessionsIndexTemplate,
   sessionsIndexExists,
 } from './sessions_index';
+import { BROWSER_SESSIONS_PLATFORM, MOBILE_SESSIONS_PLATFORM } from './sessions_platforms';
 import {
   NO_API_KEY_MESSAGE,
+  RECONCILE_INTERVAL_MS,
+  RECONCILE_MS,
   apiKeyIdOf,
+  reconcilePassOf,
   registerSessionsTask,
   withConfiguredInterval,
   runSessionsTask,
@@ -79,6 +90,7 @@ describe('runSessionsTask', () => {
 
   const run = (state: SessionsTaskState, overrides: Partial<RunSessionsTaskParams> = {}) =>
     runSessionsTask({
+      platform: BROWSER_SESSIONS_PLATFORM,
       state,
       esClient,
       apiKeyId: 'key-1',
@@ -140,13 +152,13 @@ describe('runSessionsTask', () => {
       expect(state).toEqual({
         ...newerState,
         lastRunAt: AT,
-        lastError: { message: newerVersionMessage(newer), at: AT },
+        lastError: { message: newerVersionMessage(newer, SESSIONS_VERSION), at: AT },
       });
     });
 
     it('logs it once, not on every run', async () => {
       const { state } = await run(newerState);
-      expect(logger.warn).toHaveBeenCalledWith(newerVersionMessage(newer));
+      expect(logger.warn).toHaveBeenCalledWith(newerVersionMessage(newer, SESSIONS_VERSION));
 
       await run(state);
 
@@ -161,9 +173,14 @@ describe('runSessionsTask', () => {
     ])('puts the template and starts from the lookback on %s', async (_name, state) => {
       const result = await run(state);
 
-      expect(putSessionsIndexTemplate).toHaveBeenCalledWith(internalClient, signal);
-      expect(createSessionsIndex).toHaveBeenCalledWith(esClient, signal);
+      expect(putSessionsIndexTemplate).toHaveBeenCalledWith(
+        internalClient,
+        BROWSER_SESSIONS_PLATFORM,
+        signal
+      );
+      expect(createSessionsIndex).toHaveBeenCalledWith(esClient, BROWSER_SESSIONS_PLATFORM, signal);
       expect(summarizeSessions).toHaveBeenCalledWith({
+        platform: BROWSER_SESSIONS_PLATFORM,
         esClient,
         signal,
         now: NOW,
@@ -192,7 +209,7 @@ describe('runSessionsTask', () => {
       const result = await run(caughtUpState);
 
       expect(putSessionsIndexTemplate).not.toHaveBeenCalled();
-      expect(createSessionsIndex).toHaveBeenCalledWith(esClient, signal);
+      expect(createSessionsIndex).toHaveBeenCalledWith(esClient, BROWSER_SESSIONS_PLATFORM, signal);
       expect(summarizeSessions).toHaveBeenCalledWith(
         expect.objectContaining({
           checkpoint: caughtUpState.checkpoint,
@@ -226,7 +243,11 @@ describe('runSessionsTask', () => {
       );
       expect(state.caughtUp).toBe(false);
       // The template goes back first, or the new index would get dynamic mappings.
-      expect(putSessionsIndexTemplate).toHaveBeenCalledWith(internalClient, signal);
+      expect(putSessionsIndexTemplate).toHaveBeenCalledWith(
+        internalClient,
+        BROWSER_SESSIONS_PLATFORM,
+        signal
+      );
     });
 
     it('stays caught up when one run falls behind, and runs again right away', async () => {
@@ -372,14 +393,160 @@ describe('runSessionsTask', () => {
       );
     });
   });
+
+  describe('a platform that rebuilds its recent sessions', () => {
+    const mobileState: SessionsTaskState = { ...caughtUpState, version: MOBILE_SESSIONS_VERSION };
+    const runMobile = (state: SessionsTaskState) =>
+      run(state, { platform: MOBILE_SESSIONS_PLATFORM });
+    const reconcileCall = () => jest.mocked(summarizeSessions).mock.calls[1]?.[0];
+
+    it('starts a pass over the day before the checkpoint once caught up', async () => {
+      const { state } = await runMobile(mobileState);
+
+      const checkpoint = Date.parse(summarized.checkpoint);
+      expect(reconcileCall()).toEqual(
+        expect.objectContaining({
+          platform: MOBILE_SESSIONS_PLATFORM,
+          checkpoint: new Date(checkpoint - RECONCILE_MS).toISOString(),
+          until: checkpoint,
+          windowMs: INITIAL_WINDOW_MS,
+        })
+      );
+      expect(state).toEqual(
+        expect.objectContaining({
+          checkpoint: summarized.checkpoint,
+          lastError: null,
+          reconcileFrom: null,
+          reconcileUntil: null,
+          lastReconcileStartedAt: AT,
+        })
+      );
+    });
+
+    it('carries on with a pass under way, and keeps when it started', async () => {
+      const passState: SessionsTaskState = {
+        ...mobileState,
+        reconcileFrom: minutesAgo(600),
+        reconcileUntil: minutesAgo(10),
+        reconcileWindowMs: 3 * INITIAL_WINDOW_MS,
+        lastReconcileStartedAt: minutesAgo(5),
+      };
+      jest
+        .mocked(summarizeSessions)
+        .mockResolvedValueOnce(summarized)
+        .mockResolvedValueOnce({
+          checkpoint: minutesAgo(300),
+          windowMs: 6 * INITIAL_WINDOW_MS,
+          caughtUp: false,
+          sessions: 40,
+        });
+
+      const { state } = await runMobile(passState);
+
+      expect(reconcileCall()).toEqual(
+        expect.objectContaining({
+          checkpoint: minutesAgo(600),
+          until: Date.parse(minutesAgo(10)),
+          windowMs: 3 * INITIAL_WINDOW_MS,
+        })
+      );
+      expect(state).toEqual(
+        expect.objectContaining({
+          reconcileFrom: minutesAgo(300),
+          reconcileUntil: minutesAgo(10),
+          reconcileWindowMs: 6 * INITIAL_WINDOW_MS,
+          lastReconcileStartedAt: minutesAgo(5),
+        })
+      );
+    });
+
+    it('waits for the interval after the last pass started', async () => {
+      const recent = new Date(NOW - RECONCILE_INTERVAL_MS + MINUTE_MS).toISOString();
+
+      const { state } = await runMobile({ ...mobileState, lastReconcileStartedAt: recent });
+
+      expect(summarizeSessions).toHaveBeenCalledTimes(1);
+      expect(state.lastReconcileStartedAt).toBe(recent);
+    });
+
+    it('waits while the new events are behind', async () => {
+      jest.mocked(summarizeSessions).mockResolvedValue({ ...summarized, caughtUp: false });
+
+      const { runAt } = await runMobile(mobileState);
+
+      expect(summarizeSessions).toHaveBeenCalledTimes(1);
+      expect(runAt).toEqual(expect.any(Date));
+    });
+
+    it('waits for the interval after a rebuild, which read every event anyway', async () => {
+      const { state } = await runMobile({});
+
+      expect(summarizeSessions).toHaveBeenCalledTimes(1);
+      expect(state).toEqual(
+        expect.objectContaining({ reconcileFrom: null, lastReconcileStartedAt: AT })
+      );
+    });
+
+    it('keeps the new events summarized when the pass fails, and retries the pass', async () => {
+      jest
+        .mocked(summarizeSessions)
+        .mockResolvedValueOnce(summarized)
+        .mockRejectedValueOnce(new Error('esql timed out'));
+
+      const { state } = await runMobile(mobileState);
+
+      const checkpoint = Date.parse(summarized.checkpoint);
+      expect(state).toEqual(
+        expect.objectContaining({
+          checkpoint: summarized.checkpoint,
+          lastSuccessAt: AT,
+          lastError: { message: 'esql timed out', at: AT },
+          reconcileFrom: new Date(checkpoint - RECONCILE_MS).toISOString(),
+          reconcileUntil: summarized.checkpoint,
+          lastReconcileStartedAt: AT,
+        })
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Summarizing Digital Experience mobile sessions failed: esql timed out'
+      );
+    });
+
+    it('never runs a pass for the browser sessions', async () => {
+      await run(caughtUpState);
+
+      expect(summarizeSessions).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+
+describe('reconcilePassOf', () => {
+  const checkpoint = minutesAgo(2);
+
+  it('starts the first pass right away', () => {
+    expect(reconcilePassOf({}, checkpoint, NOW)).toEqual({
+      from: new Date(Date.parse(checkpoint) - RECONCILE_MS).toISOString(),
+      until: checkpoint,
+      windowMs: INITIAL_WINDOW_MS,
+      startedAt: AT,
+    });
+  });
+
+  it('starts the next once the interval has passed since the last one started', () => {
+    const due = new Date(NOW - RECONCILE_INTERVAL_MS).toISOString();
+
+    expect(reconcilePassOf({ lastReconcileStartedAt: due }, checkpoint, NOW)).toEqual(
+      expect.objectContaining({ until: checkpoint, startedAt: AT })
+    );
+  });
 });
 
 describe('registerSessionsTask', () => {
-  const setup = () => {
+  const setup = (platform = BROWSER_SESSIONS_PLATFORM) => {
     const core = coreMock.createSetup();
     const logger = loggingSystemMock.createLogger();
     const taskManager = taskManagerMock.createSetup();
     registerSessionsTask({
+      platform,
       core,
       logger,
       taskManager,
@@ -387,7 +554,7 @@ describe('registerSessionsTask', () => {
     });
     const definitions: TaskDefinitionRegistry =
       taskManager.registerTaskDefinitions.mock.calls[0][0];
-    return { core, definition: definitions[SESSIONS_TASK_TYPE] };
+    return { core, definition: definitions[platform.taskType] };
   };
 
   beforeEach(() => {
@@ -426,6 +593,25 @@ describe('registerSessionsTask', () => {
     expect(version1?.schema.validate({})).toEqual({});
     expect(() => version1?.schema.validate({ caughtUp: 'yes' })).toThrow();
     expect(version1?.up(caughtUpState)).toBe(caughtUpState);
+    expect(() => version1?.schema.validate({ reconcileFrom: minutesAgo(1) })).toThrow();
+  });
+
+  it('registers the mobile task under its own type, with the state of its passes', () => {
+    const { definition } = setup(MOBILE_SESSIONS_PLATFORM);
+    const reconcilingState: SessionsTaskState = {
+      ...caughtUpState,
+      reconcileFrom: minutesAgo(600),
+      reconcileUntil: minutesAgo(10),
+      reconcileWindowMs: INITIAL_WINDOW_MS,
+      lastReconcileStartedAt: minutesAgo(5),
+    };
+
+    expect(definition).toEqual(
+      expect.objectContaining({ title: 'Digital Experience mobile session summaries' })
+    );
+    expect(definition.stateSchemaByVersion?.[1]?.schema.validate(reconcilingState)).toEqual(
+      reconcilingState
+    );
   });
 
   it('runs with the API key of the user who enabled sessions, and the internal user for the template', async () => {
@@ -447,7 +633,11 @@ describe('registerSessionsTask', () => {
 
     expect(client.asScoped).toHaveBeenCalledWith(fakeRequest);
     const scopedClient = jest.mocked(client.asScoped).mock.results[0].value.asCurrentUser;
-    expect(putSessionsIndexTemplate).toHaveBeenCalledWith(client.asInternalUser, signal);
+    expect(putSessionsIndexTemplate).toHaveBeenCalledWith(
+      client.asInternalUser,
+      BROWSER_SESSIONS_PLATFORM,
+      signal
+    );
     expect(summarizeSessions).toHaveBeenCalledWith(
       expect.objectContaining({ esClient: scopedClient, signal, concurrency: 3 })
     );
@@ -508,7 +698,12 @@ describe('scheduleSessionsTask', () => {
     const taskManager = taskManagerMock.createStart();
     const request = httpServerMock.createKibanaRequest();
 
-    await scheduleSessionsTask({ taskManager, request, settings: { frequency: '5m' } });
+    await scheduleSessionsTask({
+      platform: BROWSER_SESSIONS_PLATFORM,
+      taskManager,
+      request,
+      settings: { frequency: '5m' },
+    });
 
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
       {
@@ -522,12 +717,29 @@ describe('scheduleSessionsTask', () => {
     );
   });
 
+  it('schedules the mobile task as its own', async () => {
+    const taskManager = taskManagerMock.createStart();
+
+    await scheduleSessionsTask({
+      platform: MOBILE_SESSIONS_PLATFORM,
+      taskManager,
+      request: httpServerMock.createKibanaRequest(),
+      settings: { frequency: '1m' },
+    });
+
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: MOBILE_SESSIONS_TASK_ID, taskType: MOBILE_SESSIONS_TASK_TYPE }),
+      expect.anything()
+    );
+  });
+
   it('fails when Task Manager cannot schedule it', async () => {
     const taskManager = taskManagerMock.createStart();
     taskManager.ensureScheduled.mockRejectedValue(new Error('unable to grant an API key'));
 
     await expect(
       scheduleSessionsTask({
+        platform: BROWSER_SESSIONS_PLATFORM,
         taskManager,
         request: httpServerMock.createKibanaRequest(),
         settings: { frequency: '1m' },

@@ -13,6 +13,22 @@ export const OTEL_TRACES_INDEX = 'traces-*.otel-*';
 export const BROWSER_SDK_LANGUAGE = 'webjs';
 
 /**
+ * `telemetry.sdk.name` of EDOT Android and EDOT iOS, which EDOT React Native runs on. Not the
+ * language: EDOT Android's is `java`, as backend Java services'.
+ */
+export const MOBILE_SDK_NAMES = ['android', 'iOS'] as const;
+
+/** EDOT Android and EDOT iOS crash events; EDOT iOS names them `crash` with legacy names. */
+export const CRASH_EVENTS = ['app.crash', 'crash'] as const;
+/** The taps EDOT React Native records. */
+export const EVENT_WIDGET_CLICK = 'app.widget.click';
+/** The instrumentation scope of EDOT iOS view controller spans: one per screen shown. */
+export const VIEW_CONTROLLER_SCOPE = 'UIViewController';
+export const OTEL_SCOPE_NAME = 'scope.name';
+/** When the SDK observed a log record; only the OTel logs indices map it, as `date_nanos`. */
+export const OTEL_OBSERVED_TIMESTAMP = 'observed_timestamp';
+
+/**
  * An attribute as stored in the OTel indices, e.g. `attributes.session.id`. Queries can use the
  * unprefixed name, which the templates' passthrough objects resolve to the highest-priority
  * scope that maps it; the session summaries group by the stored fields so that a scope mapping
