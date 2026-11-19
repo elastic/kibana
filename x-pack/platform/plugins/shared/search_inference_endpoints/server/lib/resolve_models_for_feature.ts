@@ -130,11 +130,12 @@ export const resolveModelsForFeature = async ({
   ) {
     const defaultConnector = await fetchConnectorById(defaultConnectorId);
     if (defaultConnector) {
+      // The setting may hold a stack connector alias of an inference endpoint, in which case the
+      // feature declares its parameters under the endpoint id (`defaultConnector.connectorId`).
       const parameters = featureResult.endpoints.find(
-        ({ connectorId }) => connectorId === defaultConnectorId
+        ({ connectorId }) =>
+          connectorId === defaultConnectorId || connectorId === defaultConnector.connectorId
       )?.parameters;
-      // The setting may hold a stack connector alias of an inference endpoint, in which case
-      // `defaultConnector.connectorId` is the endpoint id, so filter on both ids.
       connectors = [
         { ...defaultConnector, ...(parameters ? { parameters } : {}), isDefault: true },
         ...merged.filter(

@@ -330,6 +330,22 @@ describe('resolveModelsForFeature', () => {
     expect(result.connectors).toEqual([{ ...endpoint, isDefault: true }, other]);
   });
 
+  it('keeps the recommended parameters when the default setting is an alias of the recommended endpoint', async () => {
+    const parameters = { reasoning: { effort: 'low' as const } };
+    const endpoint = inferenceConnector('endpoint-id');
+    getForFeature.mockResolvedValue({
+      endpoints: [{ ...endpoint, parameters }],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([endpoint]);
+    getConnectorById.mockResolvedValue(endpoint);
+
+    const result = await resolve({ defaultConnectorId: '.my-alias' });
+
+    expect(result.connectors).toEqual([{ ...endpoint, parameters, isDefault: true }]);
+  });
+
   it('does not flag any connector when there is no default connector', async () => {
     const other = inferenceConnector('other');
     getForFeature.mockResolvedValue({ endpoints: [], warnings: [], soEntryFound: false });
