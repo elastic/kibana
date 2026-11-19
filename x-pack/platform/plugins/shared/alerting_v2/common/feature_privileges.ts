@@ -190,7 +190,8 @@ export const ALERTING_V2_FEATURES = {
         api: [ALERTING_V2_API_PRIVILEGES.alerts.read, ALERTING_V2_API_PRIVILEGES.alerts.write],
         ui: [ALERTING_V2_UI_CAPABILITIES.alerts.all, ALERTING_V2_UI_CAPABILITIES.alerts.read],
         savedObject: {
-          all: [],
+          // Alert imports configure where alerts come from, so they follow alerts access.
+          all: [IMPORT_CONFIG_SAVED_OBJECT_TYPE],
           read: [],
         },
       },
@@ -200,7 +201,7 @@ export const ALERTING_V2_FEATURES = {
         ui: [ALERTING_V2_UI_CAPABILITIES.alerts.read],
         savedObject: {
           all: [],
-          read: [],
+          read: [IMPORT_CONFIG_SAVED_OBJECT_TYPE],
         },
       },
     },
