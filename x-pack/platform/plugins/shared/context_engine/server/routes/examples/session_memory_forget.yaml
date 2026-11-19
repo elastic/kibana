@@ -40,6 +40,17 @@ responses:
               results:
                 - id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
                   outcome: deleted
+  403:
+    content:
+      application/json:
+        examples:
+          manageMemoryRequiredExample:
+            summary: "Missing manage memory privilege"
+            description: "The request names another user in user_id and the caller lacks the manage memory privilege"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "Acting on the memory of another user requires the [contextEngine:manage_memory] privilege."
   404:
     content:
       application/json:
@@ -60,6 +71,5 @@ x-codeSamples:
         -H "Content-Type: application/json" \
         -H "kbn-xsrf: true" \
         -d '{
-          "user_id": "jdoe",
           "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10", "0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44"]
         }'
