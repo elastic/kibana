@@ -1,5 +1,5 @@
 {
-  "sha1": "13e52d07418382802dc1598c8b5c637c6afc8371",
+  "sha1": "22b0f6b15326d86ef3ead6302b76d5edf7590ba4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -40,7 +40,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
-        "line": 61,
+        "line": 57,
         "column": 29
       }
     },
@@ -54,7 +54,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
-        "line": 79,
+        "line": 75,
         "column": 29
       }
     },
@@ -68,7 +68,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
-        "line": 101,
+        "line": 97,
         "column": 41
       }
     },
