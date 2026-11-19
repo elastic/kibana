@@ -10,6 +10,7 @@ import type { ComponentType, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import { FlyoutTemplate } from '@kbn/flyout-template';
+import type { FlyoutTemplateProps } from '@kbn/flyout-template';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type {
@@ -111,21 +112,29 @@ const DetailsTemplate = ({
 }: DetailsTemplateProps) => {
   const header = descriptor?.header ?? { title: FLYOUT_TITLE };
   const footer = descriptor?.footer;
-  const hasTabBar = tabs.length > 1;
   const SingleTabContent = tabs[0]?.content;
 
+  let tabRootProps: Pick<
+    FlyoutTemplateProps,
+    'tabs' | 'tabBarProps' | 'selectedTabId' | 'onTabChange'
+  > = {};
+  let bodyContent: ReactNode = SingleTabContent && <SingleTabContent {...renderProps} />;
+  if (tabs.length > 1) {
+    tabRootProps = {
+      tabs: tabs.map(({ id, label }) => ({ id, label, 'data-test-subj': TEST_SUBJ.tab(id) })),
+      tabBarProps: { 'aria-label': TAB_BAR_LABEL, 'data-test-subj': TEST_SUBJ.tabBar },
+      selectedTabId,
+      onTabChange,
+    };
+    bodyContent = tabs.map(({ id, content: TabContent }) => (
+      <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
+        <TabContent {...renderProps} />
+      </FlyoutTemplate.Body.TabPanel>
+    ));
+  }
+
   return (
-    <FlyoutTemplate
-      onClose={onClose}
-      {...(hasTabBar
-        ? {
-            tabs: tabs.map(({ id, label }) => ({ id, label, 'data-test-subj': TEST_SUBJ.tab(id) })),
-            tabBarProps: { 'aria-label': TAB_BAR_LABEL, 'data-test-subj': TEST_SUBJ.tabBar },
-            selectedTabId,
-            onTabChange,
-          }
-        : {})}
-    >
+    <FlyoutTemplate onClose={onClose} {...tabRootProps}>
       <FlyoutTemplate.Header
         title={header.title}
         description={header.description}
@@ -143,15 +152,7 @@ const DetailsTemplate = ({
           <FlyoutTemplate.Header.InfoBlock key={block.id ?? index} {...block} />
         ))}
       </FlyoutTemplate.Header>
-      <FlyoutTemplate.Body data-test-subj={TEST_SUBJ.body}>
-        {hasTabBar
-          ? tabs.map(({ id, content: TabContent }) => (
-              <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
-                <TabContent {...renderProps} />
-              </FlyoutTemplate.Body.TabPanel>
-            ))
-          : SingleTabContent && <SingleTabContent {...renderProps} />}
-      </FlyoutTemplate.Body>
+      <FlyoutTemplate.Body data-test-subj={TEST_SUBJ.body}>{bodyContent}</FlyoutTemplate.Body>
       {(footer?.primary || footer?.secondary) && (
         <FlyoutTemplate.Footer data-test-subj={TEST_SUBJ.footer}>
           {footer.secondary && <FlyoutTemplate.Footer.SecondaryAction {...footer.secondary} />}

@@ -82,16 +82,18 @@ const InvestigationDescription = ({
   </EuiFlexGroup>
 );
 
-const getSeverityBadges = (severity: string | undefined): Badges =>
-  severity
-    ? [
-        {
-          color: BADGE_COLORS[severity] ?? 'hollow',
-          children: BADGE_LABELS[severity] ?? severity,
-          'data-test-subj': 'investigationFlyoutSeverity',
-        },
-      ]
-    : [];
+const getSeverityBadges = (severity: string | undefined): Badges => {
+  if (!severity) {
+    return [];
+  }
+  return [
+    {
+      color: BADGE_COLORS[severity] ?? 'hollow',
+      children: BADGE_LABELS[severity] ?? severity,
+      'data-test-subj': 'investigationFlyoutSeverity',
+    },
+  ];
+};
 
 const useConversationTitle = ({ title }: TitleSlotRenderProps) => title;
 
