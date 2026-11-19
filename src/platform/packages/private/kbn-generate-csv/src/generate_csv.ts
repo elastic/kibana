@@ -37,6 +37,7 @@ import type { JobParamsCSV } from '../types';
 import { overrideTimeRange } from './lib/override_time_range';
 import { getExportSettings, type CsvExportSettings } from './lib/get_export_settings';
 import { i18nTexts } from './lib/i18n_texts';
+import { isResponseTooLargeError } from './lib/is_response_too_large_error';
 import { MaxSizeStringBuilder } from './lib/max_size_string_builder';
 import type { SearchCursor } from './lib/search_cursor';
 import { SearchCursorPit } from './lib/search_cursor_pit';
@@ -468,16 +469,22 @@ export class CsvGenerator {
         warnings.push(i18nTexts.escapedFormulaValuesMessage);
       }
     } catch (err) {
-      logger.error(err, { tags: [this.jobId] });
-      if (err instanceof esErrors.ResponseError) {
-        if ([401, 403].includes(err.statusCode ?? 0)) {
-          reportingError = new AuthenticationExpiredError();
-          warnings.push(i18nTexts.authenticationError.partialResultsMessage);
-        } else {
-          warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));
-        }
+      if (isResponseTooLargeError(err)) {
+        // The user can fix this by exporting less data, so it is not logged as an error.
+        logger.warn(err.message, { tags: [this.jobId] });
+        warnings.push(i18nTexts.responseTooLargeError);
       } else {
-        warnings.push(i18nTexts.unknownError(err?.message ?? err));
+        logger.error(err, { tags: [this.jobId] });
+        if (err instanceof esErrors.ResponseError) {
+          if ([401, 403].includes(err.statusCode ?? 0)) {
+            reportingError = new AuthenticationExpiredError();
+            warnings.push(i18nTexts.authenticationError.partialResultsMessage);
+          } else {
+            warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));
+          }
+        } else {
+          warnings.push(i18nTexts.unknownError(err?.message ?? err));
+        }
       }
     } finally {
       try {
