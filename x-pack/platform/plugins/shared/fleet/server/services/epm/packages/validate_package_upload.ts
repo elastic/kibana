@@ -568,7 +568,7 @@ function unownedLiveDataStreamError({
   return new PackageInvalidArchiveError(
     i18n.translate('xpack.fleet.packageUpload.unownedDataStream', {
       defaultMessage:
-        'Data stream "{dataStreamName}" matches dataset "{dataset}" but is not owned by package "{packageName}": {reason}. Uploaded packages cannot take over existing data streams. Use a different dataset name, or remove the existing data stream before uploading.',
+        'Data stream "{dataStreamName}" matches dataset "{dataset}" but is not owned by package "{packageName}": {reason}. Uploaded packages cannot take over existing data streams. To avoid this, use a different dataset name. Deleting the existing data stream also deletes its backing indices and all data stored in them, so only do that if the data is no longer needed.',
       values: { dataStreamName, dataset, packageName, reason },
     })
   );
