@@ -16,6 +16,7 @@ const {
   APM_ONLY_ROLE,
   APPLICATIONS_IN_HTTP_ONLY_TIME_RANGE_PATH,
   APPLICATIONS_IN_TIME_RANGE_PATH,
+  APPLICATIONS_IN_TRACE_ONLY_TIME_RANGE_PATH,
   APPLICATIONS_PATH,
   COMMON_HEADERS,
   DIGITAL_EXPERIENCE_ONLY_ROLE,
@@ -24,6 +25,7 @@ const {
   SERVICE_NAME,
   STAGING_ENVIRONMENT,
   TIME_RANGE,
+  TRACE_ONLY_APPS,
 } = testData;
 
 apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
@@ -127,6 +129,34 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
         httpRequests: { count: 4, failedCount: 1, failedRatio: 0.25 },
         lastSeen: '2021-01-18T12:33:30.000Z',
       });
+    }
+  );
+
+  apiTest(
+    'offers only the trace-only environments whose requests list an application',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+      const { withRequests, withoutOutcome } = TRACE_ONLY_APPS;
+
+      const response = await apiClient.get(APPLICATIONS_IN_TRACE_ONLY_TIME_RANGE_PATH, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const { applications, environments } = response.body as ApplicationsResponse;
+      expect(environments).toContain(withRequests.environment);
+      // Its only span has no outcome, so picking it would list nothing.
+      expect(environments).not.toContain(withoutOutcome.environment);
+
+      expect(findApplication(applications, withRequests.serviceName, 'otel')).toMatchObject({
+        environments: [withRequests.environment],
+        pageLoads: { count: 0 },
+        httpRequests: { count: 1, failedCount: 0, failedRatio: 0 },
+      });
+      expect(applications.map(({ serviceName }) => serviceName)).not.toContain(
+        withoutOutcome.serviceName
+      );
     }
   );
 

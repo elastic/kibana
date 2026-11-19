@@ -32,6 +32,21 @@ export const OTEL_APPS = {
   blog: 'otel-blog',
 } as const;
 
+/**
+ * Two EDOT Browser applications with spans only, each in an environment of its own, in
+ * `TRACE_ONLY_TIME_RANGE` (outside `TIME_RANGE`): one made a request with a response, the other
+ * only a request without any outcome (no HTTP status, `Unset` span status).
+ */
+export const TRACE_ONLY_APPS = {
+  withRequests: { serviceName: 'otel-api', environment: 'trace-requests' },
+  withoutOutcome: { serviceName: 'otel-beacon', environment: 'trace-no-outcome' },
+} as const;
+
+export const TRACE_ONLY_TIME_RANGE = {
+  rangeFrom: '2021-01-18T13:30:00.000Z',
+  rangeTo: '2021-01-18T13:34:00.000Z',
+} as const;
+
 /** The page loads of `OTEL_APPS.shop` inside `TIME_RANGE`, as its Overview KPI shows them. */
 export const OTEL_SHOP_PAGE_LOADS = '5';
 

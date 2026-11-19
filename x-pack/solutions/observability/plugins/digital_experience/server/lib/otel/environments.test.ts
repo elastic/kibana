@@ -32,7 +32,6 @@ describe('pickerEnvironments', () => {
     environments: terms('production'),
     environmentNames: terms('staging'),
     environmentNotDefined: { doc_count: notDefinedCount },
-    inEnvironment: {},
   });
 
   it('adds "Not defined" when some documents have no environment', () => {
@@ -58,7 +57,6 @@ describe('pickerEnvironments', () => {
         environments: terms('canary'),
         environmentNames: terms('production'),
         environmentNotDefined: { doc_count: 1 },
-        inEnvironment: {},
       })
     ).toEqual(['production', 'staging', 'canary', ENVIRONMENT_NOT_DEFINED_VALUE]);
   });

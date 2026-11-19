@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TIME_RANGE } from '../../common/fixtures/constants';
+import { TIME_RANGE, TRACE_ONLY_TIME_RANGE } from '../../common/fixtures/constants';
 
 export * from '../../common/fixtures/constants';
 
@@ -42,6 +42,8 @@ export const HTTP_ONLY_TIME_RANGE = {
 } as const;
 
 export const APPLICATIONS_IN_HTTP_ONLY_TIME_RANGE_PATH = `${APPLICATIONS_PATH}?start=${HTTP_ONLY_TIME_RANGE.rangeFrom}&end=${HTTP_ONLY_TIME_RANGE.rangeTo}`;
+
+export const APPLICATIONS_IN_TRACE_ONLY_TIME_RANGE_PATH = `${APPLICATIONS_PATH}?start=${TRACE_ONLY_TIME_RANGE.rangeFrom}&end=${TRACE_ONLY_TIME_RANGE.rangeTo}`;
 
 export const SESSIONS_ENABLE_PATH = 'internal/digital_experience/sessions/enable';
 
