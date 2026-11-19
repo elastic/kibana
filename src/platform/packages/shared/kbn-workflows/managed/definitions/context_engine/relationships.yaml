@@ -107,14 +107,15 @@ steps:
           sort:
             - updated_at: desc
           _source:
-            - id
-            - type
-            - title
-            - description
-            - content
-            - updated_at
-            - permissions
-            - governance.lifecycle.status
+            includes:
+              - id
+              - type
+              - title
+              - description
+              - content
+              - updated_at
+              - permissions
+              - governance.lifecycle.status
       _source:
         - updated_at
         - id
@@ -124,9 +125,11 @@ steps:
             - bool:
                 should:
                   - prefix:
-                      type: 'fact.'
+                      type:
+                        value: 'fact.'
                   - prefix:
-                      type: 'entity.'
+                      type:
+                        value: 'entity.'
                 minimum_should_match: 1
             - bool:
                 should:
@@ -214,7 +217,8 @@ steps:
                 bool:
                   filter:
                     - prefix:
-                        type: 'entity.'
+                        type:
+                          value: 'entity.'
                     - bool:
                         should:
                           - bool:
@@ -309,7 +313,8 @@ steps:
                 bool:
                   filter:
                     - prefix:
-                        type: 'fact.'
+                        type:
+                          value: 'fact.'
                     - bool:
                         should:
                           - bool:

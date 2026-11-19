@@ -106,14 +106,15 @@ steps:
           sort:
             - updated_at: desc
           _source:
-            - id
-            - type
-            - title
-            - content
-            - updated_at
-            - attributes
-            - permissions
-            - governance.lifecycle.status
+            includes:
+              - id
+              - type
+              - title
+              - content
+              - updated_at
+              - attributes
+              - permissions
+              - governance.lifecycle.status
           docvalue_fields:
             - field: expires_at
               format: strict_date_time
@@ -216,9 +217,11 @@ steps:
                 bool:
                   should:
                     - prefix:
-                        type: 'fact.'
+                        type:
+                          value: 'fact.'
                     - prefix:
-                        type: 'entity.'
+                        type:
+                          value: 'entity.'
                   minimum_should_match: 1
                   filter:
                     - bool:
