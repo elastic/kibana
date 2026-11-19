@@ -9267,7 +9267,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/{id}/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
+        Creates an action policy. You can supply your own `id`; if you omit it, Kibana generates one. If an action policy with that `id` already exists, the request fails with HTTP 409 and the existing policy is not changed. To create or replace an action policy at a specific ID, use PUT /api/alerting/v2/action_policies/{id}.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: post-alerting-v2-action-policies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9386,6 +9386,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
+        '409':
+          content:
+            application/json:
+              examples:
+                actionPolicyAlreadyExists:
+                  summary: An action policy with the requested ID already exists
+                  value:
+                    code: ACTION_POLICY_ALREADY_EXISTS
+                    details:
+                      action_policy_id: action-policy-1
+                    error: Conflict
+                    message: Action policy with ID "action-policy-1" already exists
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an action policy with the given ID already exists.
         '500':
           content:
             application/json:
@@ -10187,7 +10202,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -10304,7 +10319,7 @@ paths:
         Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -10456,7 +10471,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -10639,7 +10654,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an action policy with the given identifier, or fully replaces it if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
+        Creates an action policy with the given identifier, or replaces its definition if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: put-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -10649,7 +10664,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -10864,7 +10879,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -11032,7 +11047,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -11210,7 +11225,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -11389,7 +11404,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -11557,7 +11572,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -16008,7 +16023,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a rule with the given identifier, or fully replaces it if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Creates a rule with the given identifier, or replaces its definition if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: put-alerting-v2-rules-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -24581,7 +24596,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most 1000 rows.
+        Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most 1000 rows. When the body carries `user_id`, rows are also limited to documents with that `user_id` or no `user_id`.
 
         The query determines which indices it reads. Elasticsearch index privileges limit which indices the current user can access.
 
@@ -24632,6 +24647,11 @@ paths:
                 query:
                   description: The ES|QL query to run. Its FROM decides which Elasticsearch indices are read (normally `ai-index-*`); the server adds the space filter and a row limit.
                   maxLength: 10000
+                  minLength: 1
+                  type: string
+                user_id:
+                  description: When set, limits reads to documents with this `user_id` and documents with no `user_id`. When omitted, no user filter is applied.
+                  maxLength: 256
                   minLength: 1
                   type: string
               required:
@@ -25735,7 +25755,7 @@ paths:
 
         Returns a free-form text context block for an agent. The block describes the AI Index and its ES|QL target. It also includes up to 500 fields exposed by the backing indices, identifies which fields are semantic, provides knowledge item type and tag counts for the current space, and includes example ES|QL queries.
 
-        The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response.
+        The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response. When `user_id` is given, the counts are limited to documents with that `user_id` or no `user_id`.
 
         The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.
 
@@ -25748,6 +25768,14 @@ paths:
           in: path
           name: aiIndexId
           required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+        - description: When set, limits reads to documents with this `user_id` and documents with no `user_id`. When omitted, no user filter is applied.
+          in: query
+          name: user_id
+          required: false
           schema:
             maxLength: 256
             minLength: 1
@@ -40588,6 +40616,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -40670,6 +40699,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -40869,6 +40899,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -41187,8 +41218,8 @@ paths:
           name: sortField
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 256
         - description: Sort order, ascending or descending
           in: query
           name: sortOrder
@@ -41209,8 +41240,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
         - description: When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.
           in: query
           name: showAgentless
@@ -41470,6 +41501,7 @@ paths:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 512
                   maxItems: 1000
                   type: array
                 ignoreMissing:
@@ -41562,6 +41594,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -41664,6 +41697,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -41763,6 +41797,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -41883,6 +41918,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -41979,6 +42015,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: If true, returns the policy as a downloadable file
           in: query
           name: download
@@ -42098,6 +42135,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: If true, returns the policy as a downloadable file
           in: query
           name: download
@@ -42211,6 +42249,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -42460,6 +42499,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Filter by one or more agent policy IDs
           in: query
           name: policyIds
@@ -42468,6 +42508,7 @@ paths:
             items:
               minLength: 0
               type: string
+              x-kibana-planned-max-length: 512
             maxItems: 1000
             type: array
         - description: A KQL query string to filter results
@@ -42475,8 +42516,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
       responses:
         '200':
           content:
@@ -42593,6 +42634,7 @@ paths:
             items:
               minLength: 0
               type: string
+              x-kibana-planned-max-length: 512
             maxItems: 10000
             type: array
         - description: Filter by integration package name
@@ -42602,6 +42644,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Filter by integration package version
           in: query
           name: pkgVersion
@@ -44116,8 +44159,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
         - description: When true, include agentless agents in the results
           in: query
           name: showAgentless
@@ -44165,8 +44208,8 @@ paths:
           name: sortField
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 256
         - description: Sort order, ascending or descending
           in: query
           name: sortOrder
@@ -44696,6 +44739,7 @@ paths:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 512
                   maxItems: 1000
                   type: array
               required:
@@ -44787,6 +44831,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -44872,6 +44917,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: When true, include CPU and memory metrics in the response
           in: query
           name: withMetrics
@@ -45368,6 +45414,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -45386,6 +45433,7 @@ paths:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 255
                   maxItems: 10
                   type: array
                 user_provided_metadata:
@@ -45869,6 +45917,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -46046,6 +46095,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -46121,6 +46171,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -46174,6 +46225,7 @@ paths:
                       items:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       maxItems: 10
                       type: array
                 uri:
@@ -46261,6 +46313,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -46359,6 +46412,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -46374,6 +46428,7 @@ paths:
                 policy_id:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 512
               required:
                 - policy_id
       responses:
@@ -46450,6 +46505,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -46503,6 +46559,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -46730,6 +46787,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -46802,6 +46860,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -46874,6 +46933,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -46963,6 +47023,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -47296,6 +47357,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -47560,6 +47622,7 @@ paths:
                       items:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       maxItems: 10
                       type: array
                 uri:
@@ -47800,6 +47863,7 @@ paths:
                 policy_id:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 512
               required:
                 - policy_id
                 - agents
@@ -48489,12 +48553,14 @@ paths:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 255
                   maxItems: 10
                   type: array
                 tagsToRemove:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 255
                   maxItems: 10
                   type: array
               required:
@@ -48714,6 +48780,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -48790,6 +48857,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: The name of the uploaded file
           in: path
           name: fileName
@@ -49065,8 +49133,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
         - description: When true, include tags from inactive agents
           in: query
           name: showInactive
@@ -49244,8 +49312,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
       responses:
         '200':
           content:
@@ -49679,6 +49747,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: If true, forces deletion even if the cloud connector is in use.
           in: query
           name: force
@@ -49757,6 +49826,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -49924,6 +49994,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -50174,6 +50245,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: The page number for pagination.
           in: query
           name: page
@@ -53103,8 +53175,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
       responses:
         '200':
           content:
@@ -53369,6 +53441,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.
           in: query
           name: forceDelete
@@ -53459,6 +53532,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -53795,6 +53869,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -54492,6 +54567,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -54632,6 +54708,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -54781,6 +54858,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -55248,6 +55326,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -55327,6 +55406,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -55441,6 +55521,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -55563,6 +55644,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -55654,6 +55736,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -55737,6 +55820,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -55750,6 +55834,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -55818,6 +55903,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -55903,6 +55989,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -55983,6 +56070,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -56076,6 +56164,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -56169,6 +56258,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -56283,6 +56373,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -56363,6 +56454,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -56427,6 +56519,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -56676,6 +56769,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: Package version
           in: path
           name: pkgVersion
@@ -56875,6 +56969,7 @@ paths:
                         id:
                           minLength: 0
                           type: string
+                          x-kibana-planned-max-length: 512
                         is_default:
                           default: false
                           type: boolean
@@ -56886,10 +56981,12 @@ paths:
                         name:
                           minLength: 0
                           type: string
+                          x-kibana-planned-max-length: 255
                         proxy_id:
                           minLength: 0
                           nullable: true
                           type: string
+                          x-kibana-planned-max-length: 512
                         secrets:
                           additionalProperties: false
                           type: object
@@ -56906,6 +57003,7 @@ paths:
                                         id:
                                           minLength: 0
                                           type: string
+                                          x-kibana-planned-max-length: 512
                                       required:
                                         - id
                                     - type: string
@@ -56918,6 +57016,7 @@ paths:
                                         id:
                                           minLength: 0
                                           type: string
+                                          x-kibana-planned-max-length: 512
                                       required:
                                         - id
                                     - type: string
@@ -56930,6 +57029,7 @@ paths:
                                         id:
                                           minLength: 0
                                           type: string
+                                          x-kibana-planned-max-length: 512
                                       required:
                                         - id
                                     - type: string
@@ -57073,6 +57173,7 @@ paths:
                 id:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 512
                 is_default:
                   default: false
                   type: boolean
@@ -57084,10 +57185,12 @@ paths:
                 name:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 255
                 proxy_id:
                   minLength: 0
                   nullable: true
                   type: string
+                  x-kibana-planned-max-length: 512
                 secrets:
                   additionalProperties: false
                   type: object
@@ -57104,6 +57207,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -57116,6 +57220,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -57128,6 +57233,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -57211,6 +57317,7 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_default:
                         default: false
                         type: boolean
@@ -57222,10 +57329,12 @@ paths:
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_id:
                         minLength: 0
                         nullable: true
                         type: string
+                        x-kibana-planned-max-length: 512
                       secrets:
                         additionalProperties: false
                         type: object
@@ -57242,6 +57351,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -57254,6 +57364,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -57266,6 +57377,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -57376,6 +57488,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -57458,6 +57571,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -57496,6 +57610,7 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_default:
                         default: false
                         type: boolean
@@ -57507,10 +57622,12 @@ paths:
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_id:
                         minLength: 0
                         nullable: true
                         type: string
+                        x-kibana-planned-max-length: 512
                       secrets:
                         additionalProperties: false
                         type: object
@@ -57527,6 +57644,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -57539,6 +57657,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -57551,6 +57670,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -57671,6 +57791,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -57705,11 +57826,13 @@ paths:
                 name:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 255
                 proxy_id:
                   default: null
                   minLength: 0
                   nullable: true
                   type: string
+                  x-kibana-planned-max-length: 512
                 secrets:
                   additionalProperties: false
                   type: object
@@ -57726,6 +57849,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -57738,6 +57862,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -57750,6 +57875,7 @@ paths:
                                 id:
                                   minLength: 0
                                   type: string
+                                  x-kibana-planned-max-length: 512
                               required:
                                 - id
                             - type: string
@@ -57830,6 +57956,7 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_default:
                         default: false
                         type: boolean
@@ -57841,10 +57968,12 @@ paths:
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_id:
                         minLength: 0
                         nullable: true
                         type: string
+                        x-kibana-planned-max-length: 512
                       secrets:
                         additionalProperties: false
                         type: object
@@ -57861,6 +57990,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -57873,6 +58003,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -57885,6 +58016,7 @@ paths:
                                       id:
                                         minLength: 0
                                         type: string
+                                        x-kibana-planned-max-length: 512
                                     required:
                                       - id
                                   - type: string
@@ -58014,6 +58146,7 @@ paths:
                 id:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 512
               required:
                 - id
       responses:
@@ -60306,6 +60439,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -60406,6 +60540,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -60515,6 +60650,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -60635,6 +60771,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -60728,8 +60865,8 @@ paths:
           name: sortField
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 256
         - description: Sort order, ascending or descending
           in: query
           name: sortOrder
@@ -60750,8 +60887,8 @@ paths:
           name: kuery
           required: false
           schema:
-            minLength: 0
             type: string
+            x-kibana-planned-max-length: 10000
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -61031,6 +61168,7 @@ paths:
                   items:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 512
                   maxItems: 1000
                   type: array
                 ignoreMissing:
@@ -61142,6 +61280,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: When true, delete the package policy even if it is managed
           in: query
           name: force
@@ -61221,6 +61360,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -61340,6 +61480,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
         - description: 'Format for the response: simplified or legacy'
           in: query
           name: format
@@ -61911,12 +62052,14 @@ paths:
                         id:
                           minLength: 0
                           type: string
+                          x-kibana-planned-max-length: 512
                         is_preconfigured:
                           default: false
                           type: boolean
                         name:
                           minLength: 0
                           type: string
+                          x-kibana-planned-max-length: 255
                         proxy_headers:
                           additionalProperties:
                             anyOf:
@@ -62023,12 +62166,14 @@ paths:
                 id:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 512
                 is_preconfigured:
                   default: false
                   type: boolean
                 name:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 255
                 proxy_headers:
                   additionalProperties:
                     anyOf:
@@ -62075,12 +62220,14 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_headers:
                         additionalProperties:
                           anyOf:
@@ -62159,6 +62306,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -62241,6 +62389,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -62274,12 +62423,14 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_headers:
                         additionalProperties:
                           anyOf:
@@ -62368,6 +62519,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       requestBody:
         content:
           application/json:
@@ -62396,6 +62548,7 @@ paths:
                 name:
                   minLength: 0
                   type: string
+                  x-kibana-planned-max-length: 255
                 proxy_headers:
                   additionalProperties:
                     anyOf:
@@ -62439,12 +62592,14 @@ paths:
                       id:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 512
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
                         minLength: 0
                         type: string
+                        x-kibana-planned-max-length: 255
                       proxy_headers:
                         additionalProperties:
                           anyOf:
@@ -62527,6 +62682,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -63860,6 +64016,7 @@ paths:
           schema:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
       responses:
         '200':
           content:
@@ -70306,7 +70463,7 @@ paths:
                   - message
                 title: Conflict
                 type: object
-          description: Conflict - The SLO id already exists
+          description: Conflict - The SLO ID already exists
         '503':
           content:
             application/json:
@@ -70375,7 +70532,7 @@ paths:
               type: object
               properties:
                 list:
-                  description: An array of SLO Definition id
+                  description: An array of SLO definition IDs
                   items:
                     description: The identifier of the SLO.
                     maxLength: 48
@@ -70525,11 +70682,12 @@ paths:
         Retrieve the status of the bulk deletion operation for SLOs. This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.<br/><br/>[Required authorization] Route required privileges: slo_write.
       operationId: bulkDeleteStatusOp
       parameters:
-        - description: The task id of the bulk delete operation
+        - description: The task ID of the bulk delete operation
           in: path
           name: taskId
           required: true
           schema:
+            maxLength: 1024
             type: string
       requestBody:
         content:
@@ -70684,7 +70842,7 @@ paths:
                 force:
                   type: boolean
                 list:
-                  description: An array of slo ids
+                  description: An array of SLO IDs
                   items:
                     type: string
                   type: array
@@ -71412,7 +71570,7 @@ paths:
               type: object
               properties:
                 list:
-                  description: An array of slo id and instance id
+                  description: An array of SLO ID and instance ID pairs
                   items:
                     type: object
                     properties:
@@ -71462,7 +71620,7 @@ paths:
                             0,
                             "sloId"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -71474,7 +71632,7 @@ paths:
                             0,
                             "sloId"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -71634,7 +71792,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -71644,7 +71802,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -72002,7 +72160,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -72012,7 +72170,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -72524,7 +72682,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -72534,7 +72692,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -72792,7 +72950,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -72802,7 +72960,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -73082,7 +73240,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -73092,7 +73250,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -73281,7 +73439,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -73291,7 +73449,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -73479,7 +73637,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -73489,7 +73647,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -160611,8 +160769,7 @@ components:
           minItems: 1
           type: array
         enabled:
-          default: true
-          description: If `true` (default), the rule runs on its schedule after creation. If `false`, the rule is saved but does not run until you enable it.
+          description: Whether the rule is enabled. Defaults to `true` when omitted. A disabled rule is saved but does not run until you enable it.
           type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
@@ -160938,9 +161095,18 @@ components:
           maxItems: 10
           minItems: 1
           type: array
+        enabled:
+          description: Whether the action policy is enabled. Defaults to `true` when omitted. A disabled policy is saved but is not applied to alerts until you enable it.
+          type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
           description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
+        id:
+          description: "The action policy ID. If omitted, Kibana generates one. If a policy with this ID already exists, the request returns a 409 error. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
+          maxLength: 150
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
+          type: string
         matcher:
           additionalProperties: false
           description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. At least one of `tags` and `expression` must be set, so an empty `matcher` is rejected. Omit `matcher` entirely for a catch-all policy that applies to all alerts.
@@ -161016,6 +161182,9 @@ components:
           maxItems: 100
           minItems: 1
           type: array
+        enabled:
+          description: Whether the rule is enabled. Defaults to `true` when omitted. A disabled rule is saved but does not run until you enable it.
+          type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
         id:
@@ -161094,6 +161263,9 @@ components:
           maxItems: 10
           minItems: 1
           type: array
+        enabled:
+          description: Whether the action policy is enabled. Unlike the other fields in this body, omitting it does not clear it. When the request creates the policy it defaults to `true`. When the request replaces an existing policy, omitting it keeps the current state and supplying it enables or disables the policy, the same as `_enable` or `_disable`. A disabled policy is saved but is not applied to alerts until you enable it.
+          type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
           description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
@@ -161139,7 +161311,7 @@ components:
           minItems: 1
           type: array
         enabled:
-          description: Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.
+          description: Whether the rule is enabled. Unlike the other fields in this body, omitting it does not clear it. When the request creates the rule it defaults to `true`. When the request replaces an existing rule, omitting it keeps the current state and supplying it enables or disables the rule, the same as `_enable` or `_disable`. A disabled rule is saved but does not run until you enable it.
           type: boolean
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
@@ -161731,12 +161903,12 @@ components:
           type: integer
       required:
         - kind
+        - enabled
         - metadata
         - schedule
         - query
         - id
         - version
-        - enabled
         - created_by
         - created_at
         - updated_by
@@ -163392,13 +163564,14 @@ components:
           type: boolean
         kuery:
           description: KQL query to select enrollment tokens to delete.
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 10000
         tokenIds:
           description: List of enrollment token IDs to delete.
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 10000
           type: array
       title: bulk_delete_enrollment_api_keys_request
@@ -163465,12 +163638,14 @@ components:
             anyOf:
               - minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               - additionalProperties: false
                 type: object
                 properties:
                   name:
                     minLength: 0
                     type: string
+                    x-kibana-planned-max-length: 512
                   prerelease:
                     type: boolean
                   version:
@@ -163573,6 +163748,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 1000
           minItems: 1
           type: array
@@ -163668,6 +163844,7 @@ components:
                 description: Package name to rollback
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
             required:
               - name
           maxItems: 1000
@@ -163700,6 +163877,7 @@ components:
               name:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               version:
                 type: string
             required:
@@ -163782,6 +163960,7 @@ components:
               name:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               version:
                 type: string
             required:
@@ -164279,11 +164458,12 @@ components:
       additionalProperties: false
       properties:
         description:
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 10000
         name:
           minLength: 1
           type: string
+          x-kibana-planned-max-length: 255
       required:
         - name
       title: copy_agent_policy_request
@@ -164596,6 +164776,7 @@ components:
         integrationName:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 512
       required:
         - integrationName
         - datasets
@@ -164852,6 +165033,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         cloud_connector_name:
           description: Transient field for cloud connector name during creation.
           maxLength: 255
@@ -164868,8 +165050,8 @@ components:
           type: boolean
         description:
           description: Package policy description
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 2048
         enabled:
           type: boolean
         force:
@@ -164884,6 +165066,7 @@ components:
                 description: The name of the custom field. Cannot contain spaces.
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 255
               value:
                 anyOf:
                   - type: string
@@ -164899,6 +165082,7 @@ components:
           description: Package policy unique identifier
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 255
         inputs:
           items:
             additionalProperties: false
@@ -164931,6 +165115,7 @@ components:
               id:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               keep_enabled:
                 type: boolean
               migrate_from:
@@ -165000,6 +165185,7 @@ components:
                     id:
                       minLength: 0
                       type: string
+                      x-kibana-planned-max-length: 512
                     keep_enabled:
                       type: boolean
                     migrate_from:
@@ -165071,6 +165257,7 @@ components:
           description: Unique name for the package policy.
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 255
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
@@ -165079,6 +165266,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         overrides:
           additionalProperties: false
           description: Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.
@@ -165099,17 +165287,20 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         policy_ids:
           items:
             description: IDs of the agent policies that the package policy will be added to.
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 255
           maxItems: 1000
           type: array
         spaceIds:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 100
           type: array
         supports_agentless:
@@ -165459,9 +165650,7 @@ components:
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                        default:
-                          type: auto
-                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
                       summary:
                         additionalProperties: false
                         description: Summary row configuration
@@ -165546,8 +165735,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
                   visible:
                     default: true
                     description: When `false`, hides the column from the datatable.
@@ -165609,6 +165797,7 @@ components:
           description: The ID of the agent policy
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 512
         force:
           description: bypass validation checks that can prevent agent policy deletion
           type: boolean
@@ -165666,6 +165855,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 1000
           type: array
       required:
@@ -165734,6 +165924,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 1000
           type: array
         packageVersion:
@@ -168140,8 +168331,7 @@ components:
                         - enum:
                             - bands
                           type: string
-                      default: bands
-                      description: Tick placement mode.
+                      description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                     visible:
                       default: true
                       description: When `true`, displays tick marks on the gauge.
@@ -168427,9 +168617,11 @@ components:
               id:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               type:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 256
             required:
               - id
               - type
@@ -168731,6 +168923,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 1000
           type: array
       required:
@@ -169980,6 +170173,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 100
           minItems: 1
           type: array
@@ -175479,9 +175673,7 @@ components:
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyColorByValueAbsolute'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                  default:
-                    type: auto
-                  description: Color configuration based on the metric value.
+                  description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
                 labels:
                   additionalProperties: false
                   description: Labels configuration
@@ -179202,15 +179394,17 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         description:
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 10000
         download_source_id:
           deprecated: true
           description: Use `download_source_ids` instead
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         download_source_ids:
           items:
             description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
@@ -179222,6 +179416,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         force:
           type: boolean
         global_data_tags:
@@ -179233,6 +179428,7 @@ components:
               name:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 255
               value:
                 anyOf:
                   - type: string
@@ -179249,6 +179445,7 @@ components:
         id:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 512
         inactivity_timeout:
           default: 1209600
           minimum: 0
@@ -179324,18 +179521,20 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         monitoring_pprof_enabled:
           type: boolean
         name:
           minLength: 1
           type: string
+          x-kibana-planned-max-length: 255
         namespace:
           minLength: 1
           type: string
         overrides:
           additionalProperties:
             nullable: true
-          description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
+          description: Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
           nullable: true
           type: object
         package_agent_version_conditions:
@@ -179379,6 +179578,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 100
           type: array
         supports_agentless:
@@ -179478,9 +179678,11 @@ components:
         name:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 255
         policy_id:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 512
       required:
         - policy_id
       title: new_enrollment_api_key
@@ -184078,8 +184280,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -186118,7 +186319,7 @@ components:
             type: object
             properties:
               id:
-                description: Dashboard saved-object id
+                description: Dashboard saved-object ID
                 type: string
             required:
               - id
@@ -186211,11 +186412,11 @@ components:
         - timestamp
     Kibana_HTTP_APIs_SLOBulkPurgeRollupResponse:
       additionalProperties: true
-      description: The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.
+      description: The bulk purge rollup data response returns a task ID from the elasticsearch deleteByQuery response.
       type: object
       properties:
         taskId:
-          description: The task id of the purge operation
+          description: The task ID of the purge operation
           type: string
     Kibana_HTTP_APIs_SLOCreateResponse:
       additionalProperties: true
@@ -186696,7 +186897,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             environment:
               anyOf:
@@ -186760,7 +186961,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             environment:
               anyOf:
@@ -186828,7 +187029,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -186878,7 +187079,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -187032,7 +187233,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -187172,7 +187373,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -187268,7 +187469,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -187420,10 +187621,10 @@ components:
           type: object
           properties:
             id:
-              description: The SLO definition id
+              description: The SLO definition ID
               type: string
             instanceId:
-              description: The SLO instance id. '*' represents the default (ungrouped) instance.
+              description: The SLO instance ID. '*' represents the default (ungrouped) instance.
               type: string
             summary:
               additionalProperties: true
@@ -187489,10 +187690,10 @@ components:
                 - statusCode
                 - message
             id:
-              description: The SLO definition id
+              description: The SLO definition ID
               type: string
             instanceId:
-              description: The SLO instance id. '*' represents the default (ungrouped) instance.
+              description: The SLO instance ID. '*' represents the default (ungrouped) instance.
               type: string
           required:
             - id
@@ -187685,7 +187886,8 @@ components:
         groupings:
           additionalProperties:
             anyOf:
-              - type: string
+              - maxLength: 1024
+                type: string
               - type: number
           type: object
         id:
@@ -188972,6 +189174,10 @@ components:
               properties:
                 color:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                  default:
+                    mapping: []
+                    mode: categorical
+                    palette: default
         tags:
           default: []
           description: Tag IDs to associate with this visualization.
@@ -189441,8 +189647,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -189562,15 +189767,17 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         description:
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 10000
         download_source_id:
           deprecated: true
           description: Use `download_source_ids` instead
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         download_source_ids:
           items:
             description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
@@ -189582,6 +189789,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         force:
           type: boolean
         global_data_tags:
@@ -189593,6 +189801,7 @@ components:
               name:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 255
               value:
                 anyOf:
                   - type: string
@@ -189609,6 +189818,7 @@ components:
         id:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 512
         inactivity_timeout:
           default: 1209600
           minimum: 0
@@ -189684,18 +189894,20 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 512
         monitoring_pprof_enabled:
           type: boolean
         name:
           minLength: 1
           type: string
+          x-kibana-planned-max-length: 255
         namespace:
           minLength: 1
           type: string
         overrides:
           additionalProperties:
             nullable: true
-          description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
+          description: Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
           nullable: true
           type: object
         package_agent_version_conditions:
@@ -189739,6 +189951,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 100
           type: array
         supports_agentless:
@@ -190593,6 +190806,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         cloud_connector_name:
           description: Transient field for cloud connector name during creation.
           maxLength: 255
@@ -190606,8 +190820,8 @@ components:
           type: string
         description:
           description: Package policy description
-          minLength: 0
           type: string
+          x-kibana-planned-max-length: 2048
         enabled:
           type: boolean
         force:
@@ -190621,6 +190835,7 @@ components:
                 description: The name of the custom field. Cannot contain spaces.
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 255
               value:
                 anyOf:
                   - type: string
@@ -190664,6 +190879,7 @@ components:
               id:
                 minLength: 0
                 type: string
+                x-kibana-planned-max-length: 512
               keep_enabled:
                 type: boolean
               migrate_from:
@@ -190733,6 +190949,7 @@ components:
                     id:
                       minLength: 0
                       type: string
+                      x-kibana-planned-max-length: 512
                     keep_enabled:
                       type: boolean
                     migrate_from:
@@ -190803,6 +191020,7 @@ components:
         name:
           minLength: 0
           type: string
+          x-kibana-planned-max-length: 255
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
@@ -190811,6 +191029,7 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         overrides:
           additionalProperties: false
           description: Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.
@@ -190831,17 +191050,20 @@ components:
           minLength: 0
           nullable: true
           type: string
+          x-kibana-planned-max-length: 255
         policy_ids:
           items:
             description: IDs of the agent policies that the package policy will be added to.
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 255
           maxItems: 1000
           type: array
         spaceIds:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 100
           type: array
         supports_agentless:
@@ -191157,6 +191379,7 @@ components:
           items:
             minLength: 0
             type: string
+            x-kibana-planned-max-length: 512
           maxItems: 1000
           type: array
       required:
@@ -191637,6 +191860,11 @@ components:
                 - gray
               type: string
           description: The name of the palette to apply across the value range.
+        steps:
+          description: Number of color bands the palette is split into. Defaults to the chart's default band count.
+          maximum: 100
+          minimum: 1
+          type: integer
         type:
           enum:
             - distributed_palette
@@ -191729,10 +191957,6 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCategoricalColorMapping'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGradientColorMapping'
-      default:
-        mapping: []
-        mode: categorical
-        palette: default
       description: Color mapping for dimension values, either categorical (for specific values) or as a gradient.
       title: Color Mapping
     Kibana_HTTP_APIs_visCounterRateOperation:
@@ -191981,9 +192205,7 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
-                    description: Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                    description: Color configuration for ES|QL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
                   column:
                     description: Column to use
                     type: string
@@ -192071,9 +192293,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-          default:
-            type: auto
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         column:
           description: Column to use
           type: string
@@ -192669,9 +192889,7 @@ components:
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                           - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                        default:
-                          type: auto
-                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                        description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
                       summary:
                         additionalProperties: false
                         description: Summary row configuration
@@ -192756,8 +192974,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
                   visible:
                     default: true
                     description: When `false`, hides the column from the datatable.
@@ -193087,23 +193304,14 @@ components:
         density:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableDensity'
         paging:
-          anyOf:
-            - enum:
-                - 10
-              type: number
-            - enum:
-                - 20
-              type: number
-            - enum:
-                - 30
-              type: number
-            - enum:
-                - 50
-              type: number
-            - enum:
-                - 100
-              type: number
           description: Rows per page. When set, pagination is enabled with the specified number of rows.
+          enum:
+            - 10
+            - 20
+            - 30
+            - 50
+            - 100
+          type: number
         row_numbers:
           additionalProperties: false
           description: Configuration for row numbers
@@ -193487,8 +193695,7 @@ components:
                     - enum:
                         - bands
                       type: string
-                  default: bands
-                  description: Tick placement mode.
+                  description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                 visible:
                   default: true
                   description: When `true`, displays tick marks on the gauge.
@@ -193626,8 +193833,7 @@ components:
                         - enum:
                             - bands
                           type: string
-                      default: bands
-                      description: Tick placement mode.
+                      description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                     visible:
                       default: true
                       description: When `true`, displays tick marks on the gauge.
@@ -194357,9 +194563,7 @@ components:
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValuePalette'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyColorByValueAbsolute'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                  default:
-                    type: auto
-                  description: Color configuration based on the metric value.
+                  description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
                 labels:
                   additionalProperties: false
                   description: Labels configuration
@@ -195091,8 +195295,7 @@ components:
               type: object
               properties:
                 placement:
-                  default: before
-                  description: 'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Ignored when the label is not visible.'
+                  description: 'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Defaults to `before`. Ignored when the label is not visible.'
                   enum:
                     - before
                     - after
@@ -195681,8 +195884,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -195847,8 +196049,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -196287,6 +196488,10 @@ components:
           properties:
             color:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+              default:
+                mapping: []
+                mode: categorical
+                palette: default
             column:
               description: Column to use
               type: string
@@ -196396,6 +196601,10 @@ components:
               properties:
                 color:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
+                  default:
+                    mapping: []
+                    mode: categorical
+                    palette: default
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -196808,8 +197017,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -196974,8 +197182,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -197132,8 +197339,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -197303,8 +197509,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array
@@ -197942,8 +198147,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                default:
-                  type: auto
+                description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
               column:
                 description: Column to use
                 type: string
@@ -198078,8 +198282,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
           maxItems: 100
           type: array
       required:
@@ -199061,7 +199264,7 @@ components:
           type: object
           properties:
             visible:
-              default: false
+              default: true
               description: Show partial bucket indicators at time range edges
               type: boolean
     Kibana_HTTP_APIs_visXyStylingPoints:
@@ -199183,8 +199386,7 @@ components:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
+                    description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
           maxItems: 100
           minItems: 1
           type: array

@@ -26,7 +26,15 @@ interface RowAction {
   enabled?: (row: TransformListRow) => boolean;
 }
 
-const renderActions = (): RowAction[] => {
+const toEnabledState = (actions: RowAction[]) =>
+  Object.fromEntries(
+    actions.flatMap(({ 'data-test-subj': testSubj, enabled }) =>
+      enabled ? [[testSubj, enabled(item)]] : []
+    )
+  );
+
+/** Renders `useActions` and returns a reader for the actions' current enabled state. */
+const renderActions = () => {
   const queryClient = new QueryClient();
   const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -34,15 +42,9 @@ const renderActions = (): RowAction[] => {
   const { result } = renderHook(() => useActions({ forceDisable: false, transformNodes: 1 }), {
     wrapper,
   });
-  return result.current.actions as RowAction[];
-};
 
-const getEnabledState = (actions: RowAction[]) =>
-  Object.fromEntries(
-    actions.flatMap(({ 'data-test-subj': testSubj, enabled }) =>
-      enabled ? [[testSubj, enabled(item)]] : []
-    )
-  );
+  return () => toEnabledState(result.current.actions as RowAction[]);
+};
 
 describe('Transform: Transform List Actions', () => {
   afterEach(() => {
@@ -83,7 +85,8 @@ describe('Transform: Transform List Actions', () => {
   });
 
   test('useActions() disables every row action without transform capabilities', () => {
-    const enabledState = getEnabledState(renderActions());
+    const getEnabledState = renderActions();
+    const enabledState = getEnabledState();
 
     expect(Object.keys(enabledState).length).toBeGreaterThan(0);
     expect(Object.values(enabledState).every((enabled) => enabled === false)).toBe(true);
@@ -94,14 +97,37 @@ describe('Transform: Transform List Actions', () => {
       transform: getInitialTransformCapabilities(true),
     });
 
-    const enabledState = getEnabledState(renderActions());
+    const getEnabledState = renderActions();
 
-    expect(enabledState).toEqual(
+    expect(getEnabledState()).toEqual(
       expect.objectContaining({
-        transformActionEdit: true,
         transformActionDelete: true,
         transformActionCreateAlertRule: true,
       })
+    );
+  });
+
+  test('useActions() enables the data view dependent actions once the data views map loads', async () => {
+    Object.assign(useAppDependencies().application.capabilities, {
+      transform: getInitialTransformCapabilities(true),
+    });
+
+    const getEnabledState = renderActions();
+
+    expect(getEnabledState()).toEqual(
+      expect.objectContaining({
+        transformActionClone: false,
+        transformActionEdit: false,
+      })
+    );
+
+    await waitFor(() =>
+      expect(getEnabledState()).toEqual(
+        expect.objectContaining({
+          transformActionClone: true,
+          transformActionEdit: true,
+        })
+      )
     );
   });
 });
