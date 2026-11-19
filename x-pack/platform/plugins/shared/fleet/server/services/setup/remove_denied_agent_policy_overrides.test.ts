@@ -270,7 +270,7 @@ describe('removeDeniedAgentPolicyOverrides', () => {
     expect(mockedBumpRevision).not.toHaveBeenCalled();
   });
 
-  it('does not schedule a redeploy when re-reading the policy fails', async () => {
+  it('does not schedule a redeploy when the policy cannot be read before the update', async () => {
     mockStoredPolicies(soClient, [
       { id: 'policy-1', namespaces: ['default'], overrides: { receivers: {} } },
     ]);
@@ -280,6 +280,24 @@ describe('removeDeniedAgentPolicyOverrides', () => {
 
     expect(mockedUpdate).not.toHaveBeenCalled();
     expect(mockedBumpRevision).not.toHaveBeenCalled();
+  });
+
+  it('does not schedule a redeploy when the update fails and the recovery read fails too', async () => {
+    mockStoredPolicies(soClient, [
+      { id: 'policy-1', namespaces: ['default'], overrides: { receivers: {} } },
+    ]);
+    // The first read succeeds, so the update is attempted; the read that verifies the save fails
+    mockedGet
+      .mockResolvedValueOnce({ id: 'policy-1', overrides: { receivers: {} } } as any)
+      .mockRejectedValueOnce(new Error('read failed'));
+    mockedUpdate.mockRejectedValue(new Error('deploy failed'));
+
+    await expect(removeDeniedAgentPolicyOverrides(esClient)).resolves.toBeUndefined();
+
+    expect(mockedUpdate).toHaveBeenCalledTimes(1);
+    expect(mockedGet).toHaveBeenCalledTimes(2);
+    expect(mockedBumpRevision).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('read failed'));
   });
 
   it('only logs when scheduling the redeploy fails too', async () => {
