@@ -153,7 +153,7 @@ export class WorkflowContextManager {
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
-  // src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts
+  // x-pack/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts
   public getContext(): StepContext {
     const stepContext: StepContext = {
       ...this.buildWorkflowContext(),
