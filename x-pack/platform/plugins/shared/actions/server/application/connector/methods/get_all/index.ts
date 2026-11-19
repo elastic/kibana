@@ -8,6 +8,7 @@
 export {
   getAll,
   getAllUnsecured,
+  getAllUnsecuredWithAcl,
   getAllSystemConnectors,
   filterInferenceConnectors,
 } from './get_all';

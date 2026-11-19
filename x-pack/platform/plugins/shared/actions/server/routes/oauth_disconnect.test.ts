@@ -35,6 +35,7 @@ const mockEncryptedSavedObjectsClient = {
 const mockActionsClient = {
   get: jest.fn(),
   evictClientPool: jest.fn(),
+  ensureOAuthAccess: jest.fn(),
 };
 
 const createMockCoreSetup = () => ({
@@ -178,6 +179,25 @@ describe('oauthDisconnectRoute', () => {
     await handler(context, req, res);
 
     expect(mockActionsClient.get).toHaveBeenCalledWith({ id: 'connector-1' });
+  });
+
+  it('stops before deleting tokens when the caller cannot access the connector', async () => {
+    mockActionsClient.get.mockResolvedValue({ id: 'connector-1' });
+    mockActionsClient.ensureOAuthAccess.mockRejectedValueOnce(
+      Object.assign(new Error('Unable to edit connector'), { output: { statusCode: 403 } })
+    );
+
+    const [, handler] = registerRoute();
+    const req = httpServerMock.createKibanaRequest({ params: { connectorId: 'connector-1' } });
+    const res = httpServerMock.createResponseFactory();
+
+    await expect(handler(createMockContext(), req, res)).rejects.toThrow(
+      'Unable to edit connector'
+    );
+
+    expect(mockActionsClient.ensureOAuthAccess).toHaveBeenCalledWith('connector-1');
+    expect(mockActionsClient.evictClientPool).not.toHaveBeenCalled();
+    expect(mockConnectorTokenClientInstance.deleteConnectorTokens).not.toHaveBeenCalled();
   });
 
   it('deletes connector tokens for the given connector ID', async () => {

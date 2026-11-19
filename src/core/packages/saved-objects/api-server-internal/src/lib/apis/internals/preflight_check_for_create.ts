@@ -77,6 +77,8 @@ export interface PreflightCheckForCreateResult {
       spacesWithConflictingAliases?: string[];
       isNotOverwritable?: boolean;
     };
+    /** The document occupying the ID, for a `conflict` error. Object-level security checks whether the caller can see it. */
+    conflictingDocument?: SavedObjectsRawDoc;
   };
 }
 
@@ -182,7 +184,10 @@ export async function preflightCheckForCreate(params: PreflightCheckForCreatePar
           results.push({ type, id, error });
           continue;
         } else if (!overwrite) {
-          const error = { type: 'conflict' as const };
+          const error = {
+            type: 'conflict' as const,
+            conflictingDocument: objectDoc as SavedObjectsRawDoc,
+          };
           results.push({ type, id, error });
           continue;
         }
@@ -262,7 +267,7 @@ async function bulkGetObjectsAndAliases(
     docsToBulkGet.push({
       _id: serializer.generateRawId(undefined, type, id), // namespace is intentionally undefined because multi-namespace objects don't have a namespace in their raw ID
       _index: getIndexForType(type),
-      _source: ['type', 'namespaces', 'originId', 'accessControl'],
+      _source: ['type', 'namespaces', 'originId', 'accessControl', 'acl'],
     });
     if (checkAliases) {
       for (const space of spaces) {

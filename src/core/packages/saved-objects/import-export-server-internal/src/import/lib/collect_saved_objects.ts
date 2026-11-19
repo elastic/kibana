@@ -66,6 +66,9 @@ export async function collectSavedObjects({
       });
       return false;
     }),
+    // Access control lists in a file are never trusted: new objects follow the destination's creation
+    // rules, and overwrites keep the destination's access.
+    createMapStream(({ acl, ...obj }: SavedObject) => obj),
     ...(accessControlTransforms?.filterStream ? [accessControlTransforms.filterStream] : []),
     ...(accessControlTransforms?.mapStream ? [accessControlTransforms.mapStream] : []),
     createFilterStream<SavedObject>((obj) => (filter ? filter(obj) : true)),

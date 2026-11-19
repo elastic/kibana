@@ -8,6 +8,8 @@
  */
 
 import type {
+  CoreOlsService,
+  CoreScopedOlsService,
   CoreSecurityDelegateHandle,
   CoreServiceAccountsService,
   ResolvedServiceAccountWorkload,
@@ -67,6 +69,21 @@ const createSetupMock = () => {
   return mock;
 };
 
+// Start contracts default to `authz.ols: null`, which means OLS is disabled. Tests that need OLS assign
+// `createOls()`, whose scoped service allows everything until a test mocks a decision.
+const createScopedOlsMock = (): jest.Mocked<CoreScopedOlsService> => ({
+  getPrincipal: jest.fn().mockResolvedValue(undefined),
+  evaluate: jest.fn(),
+  authorize: jest.fn().mockResolvedValue(new Map()),
+  filterVisible: jest.fn().mockImplementation(async ({ objects }) => objects),
+  getReadFilter: jest.fn().mockResolvedValue(undefined),
+  validateInitialAcl: jest.fn().mockResolvedValue(undefined),
+});
+
+const createOlsMock = (): jest.MockedObjectDeep<CoreOlsService> => ({
+  asScoped: jest.fn().mockImplementation(createScopedOlsMock),
+});
+
 export type SecurityStartMock = jest.MockedObjectDeep<Omit<SecurityServiceStart, 'audit'>> & {
   audit: MockedAuditService;
 };
@@ -84,6 +101,7 @@ const createStartMock = (): SecurityStartMock => {
         canViewBillingDetails: jest.fn().mockResolvedValue(false),
         canInviteOrganizationMembers: jest.fn().mockResolvedValue(false),
       }),
+      ols: null,
     }),
     audit: auditServiceMock.create(),
     serviceAccounts: createServiceAccountsStartMock(),
@@ -130,6 +148,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
         canViewBillingDetails: jest.fn().mockResolvedValue(false),
         canInviteOrganizationMembers: jest.fn().mockResolvedValue(false),
       }),
+      ols: null,
     }),
     audit: auditServiceMock.create(),
     serviceAccounts: lazyObject({
@@ -189,6 +208,8 @@ export const securityServiceMock = {
   create: createServiceMock,
   createSetup: createSetupMock,
   createServiceAccounts: createServiceAccountsStartMock,
+  createOls: createOlsMock,
+  createScopedOls: createScopedOlsMock,
   createDelegateHandle: createDelegateHandleMock,
   createStart: createStartMock,
   createInternalSetup: createInternalSetupMock,

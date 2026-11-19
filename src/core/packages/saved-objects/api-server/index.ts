@@ -68,6 +68,8 @@ export type {
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeAclOptions,
+  SavedObjectsChangeAclResponse,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
   SavedObjectsEsqlOptions,

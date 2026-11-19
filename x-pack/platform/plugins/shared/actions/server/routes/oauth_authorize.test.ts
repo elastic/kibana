@@ -79,6 +79,7 @@ const createMockCoreSetup = (publicBaseUrl: string | undefined = KIBANA_URL) => 
 
 const mockActionsClient = {
   get: jest.fn().mockResolvedValue({}),
+  ensureOAuthAccess: jest.fn(),
 };
 
 const createMockContext = (

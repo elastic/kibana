@@ -21,6 +21,7 @@ export type {
   DeleteServiceAccountResult,
   ServiceAccountPlatformAssumer,
 } from './src/service_accounts';
+export type { CoreOlsService, CoreScopedOlsService } from './src/ols';
 export type {
   CoreServiceAccountsSetup,
   ServiceAccountWorkloadDetails,

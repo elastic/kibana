@@ -44,7 +44,10 @@ import {
 import { ruleDomainSchema } from '../../schemas';
 import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
-import { createRuleSavedObject } from '../../../../rules_client/lib';
+import {
+  createRuleSavedObject,
+  validateNewRuleKeyConnectorAccess,
+} from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
@@ -193,6 +196,21 @@ export async function createRule<Params extends RuleParams = never>(
     validateActions(context, ruleType, data, allowMissingConnectorSecrets)
   );
 
+  const apiKeyProps = apiKeyAsRuleDomainProperties(
+    createdAPIKey,
+    username,
+    isAuthTypeApiKey,
+    profileUid
+  );
+
+  await withSpan({ name: 'validateRuleKeyConnectorAccess', type: 'rules' }, () =>
+    validateNewRuleKeyConnectorAccess(context, {
+      spaceId: context.spaceId,
+      connectorIds: data.actions.map(({ id: connectorId }) => connectorId),
+      keySet: apiKeyProps,
+    })
+  );
+
   await withSpan({ name: 'validateAndAuthorizeSystemActions', type: 'rules' }, () =>
     validateAndAuthorizeSystemActions({
       actionsClient,
@@ -233,13 +251,6 @@ export async function createRule<Params extends RuleParams = never>(
   const throttle = data.throttle ?? null;
 
   const { systemActions, actions: actionToNotUse, ...restData } = data;
-
-  const apiKeyProps = apiKeyAsRuleDomainProperties(
-    createdAPIKey,
-    username,
-    isAuthTypeApiKey,
-    profileUid
-  );
 
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({

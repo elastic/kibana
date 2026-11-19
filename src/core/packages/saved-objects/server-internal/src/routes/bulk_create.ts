@@ -28,6 +28,7 @@ import {
   catchAndReturnBoomErrors,
   logWarnOnExternalRequest,
   throwIfAnyTypeNotVisibleByAPI,
+  stripAcl,
 } from './utils';
 
 interface RouteDependencies {
@@ -138,7 +139,7 @@ For transferring or backing up saved objects, prefer the import and export APIs 
         overwrite,
         migrationVersionCompatibility: 'compatible',
       });
-      return response.ok({ body: result });
+      return response.ok({ body: stripAcl(result) });
     })
   );
 };

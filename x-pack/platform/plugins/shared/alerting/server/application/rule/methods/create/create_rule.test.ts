@@ -13,7 +13,13 @@ import { getRulesClientMockParams } from '../../../../test_utils';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleNotifyWhen } from '../../constants';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import {
+  CALLER_PRINCIPAL,
+  getBeforeSetup,
+  refuseConnector,
+  setGlobalDate,
+  setupRuleKeyConnectorAccess,
+} from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../../lib';
@@ -5425,5 +5431,90 @@ This is the type of text _investigation guides_ will contain.`;
       }),
       expect.any(Object)
     );
+  });
+
+  describe('rule key connector access', () => {
+    const NEW_API_KEY = 'MTIzOmFiYw==';
+
+    beforeEach(() => {
+      rulesClientParams.createAPIKey.mockResolvedValue({
+        apiKeysEnabled: true,
+        result: { id: '123', name: '123', api_key: 'abc' },
+      });
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? '1',
+        type,
+        attributes,
+        references: options?.references ?? [],
+      }));
+    });
+
+    test('makes no extra call when the connectors are unrestricted', async () => {
+      const { options, getActionsClientWithRequest } = await setupRuleKeyConnectorAccess(
+        rulesClientParams,
+        []
+      );
+
+      await new RulesClient(options).create({ data: getMockData() });
+
+      expect(getActionsClientWithRequest).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    test('validates a new key as the caller before the rule is written', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        '1',
+      ]);
+
+      await new RulesClient(options).create({ data: getMockData() });
+
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['1'], {
+        principal: CALLER_PRINCIPAL,
+      });
+      expect(keyActionsClient.ensureConnectorsUsable.mock.invocationCallOrder[0]).toBeLessThan(
+        unsecuredSavedObjectsClient.create.mock.invocationCallOrder[0]
+      );
+      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
+
+    test('refuses a new key and invalidates it', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        '1',
+      ]);
+      refuseConnector(keyActionsClient, '1');
+
+      const error = await new RulesClient(options).create({ data: getMockData() }).catch((e) => e);
+
+      expect(error.output.statusCode).toBe(403);
+      expect(error.message).toBe(`The rule's API key cannot use connector "1"`);
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: [NEW_API_KEY] },
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
+
+    test('refuses the caller-owned key without invalidating it', async () => {
+      rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValue(true);
+      rulesClientParams.getAuthenticationAPIKey.mockReturnValue({
+        apiKeysEnabled: true,
+        result: { id: '123', name: '123', api_key: 'abc' },
+      });
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        '1',
+      ]);
+      refuseConnector(keyActionsClient, '1');
+
+      await expect(new RulesClient(options).create({ data: getMockData() })).rejects.toThrow(
+        `The rule's API key cannot use connector "1"`
+      );
+
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['1'], {
+        principal: undefined,
+      });
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
   });
 });

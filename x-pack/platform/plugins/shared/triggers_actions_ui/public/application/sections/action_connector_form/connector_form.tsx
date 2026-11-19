@@ -45,6 +45,7 @@ interface Props {
   actionTypeModel: ActionTypeModel | null;
   connector: ConnectorFormSchema & { isMissingSecrets: boolean };
   isEdit: boolean;
+  readOnly?: boolean;
   /** Handler to receive state changes updates */
   onChange?: (state: ConnectorFormState) => void;
   /** Handler to receive update on the form "isModified" state */
@@ -60,6 +61,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
   actionTypeModel,
   connector,
   isEdit,
+  readOnly = false,
   onChange,
   onFormModifiedChange,
   setResetForm,
@@ -110,6 +112,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
       <ConnectorFormFields
         actionTypeModel={actionTypeModel}
         isEdit={isEdit}
+        readOnly={readOnly}
         registerPreSubmitValidator={registerPreSubmitValidator}
         authMode={connector.authMode}
         settingsContent={

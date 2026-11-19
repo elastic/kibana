@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import Boom from '@hapi/boom';
 import { escape } from 'lodash';
+import type { AuthMode } from '@kbn/connector-specs';
 import { OAuthAuthorizationService } from '../lib';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ILicenseState } from '../lib';
@@ -34,6 +35,7 @@ import { getEarsErrorLogFields, logEarsEvent } from '../lib/ears/log_ears_event'
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 import { getConnectorAuthType, recordConnectorAuth } from '../lib/connector_metrics';
+import { ensureConnectorOperation, operationForAuthMode } from '../lib/connector_access';
 
 const querySchema = schema.object(
   {
@@ -618,9 +620,21 @@ export const oauthCallbackRoute = (
           const rawAction = await connectorEncryptedClient.getDecryptedAsInternalUser<{
             actionTypeId: string;
             name: string;
+            authMode?: AuthMode;
             config: OAuthConnectorConfig;
             secrets: OAuthConnectorSecrets;
           }>('action', stateConnectorId, { namespace });
+
+          // The read above is a system read, and this route has no space, so object-level access is
+          // checked in the space the flow started in, before the code is exchanged for a token.
+          await ensureConnectorOperation(
+            { request: req, securityService: coreStart.security, spaceId: oauthState.spaceId },
+            {
+              id: stateConnectorId,
+              acl: rawAction.acl,
+              operation: operationForAuthMode(rawAction.attributes.authMode),
+            }
+          );
 
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;

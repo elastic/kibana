@@ -6,7 +6,13 @@
  */
 
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { getBeforeSetup } from '../../../../rules_client/tests/lib';
+import {
+  CALLER_PRINCIPAL,
+  getBeforeSetup,
+  refuseConnector,
+  setupRuleKeyConnectorAccess,
+} from '../../../../rules_client/tests/lib';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../..';
 import type { RuleDomain } from '../../types';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
@@ -386,6 +392,98 @@ describe('clone', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('rule key connector access', () => {
+    const sourceRule = {
+      id: 'test-rule',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        name: 'My rule',
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [{ group: 'default', actionRef: 'action_0', actionTypeId: 'test', params: {} }],
+        enabled: true,
+        executionStatus: {},
+        apiKey: Buffer.from('source-id:source-secret').toString('base64'),
+        apiKeyCreatedByUser: false,
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+    };
+
+    beforeEach(() => {
+      createAPIKeyMock.mockResolvedValue({
+        apiKeysEnabled: true,
+        result: { id: 'fresh-id', name: 'fresh', api_key: 'fresh-secret' },
+      });
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(sourceRule);
+      unsecuredSavedObjectsClient.create.mockResolvedValue(sourceRule);
+      taskManager.schedule.mockResolvedValue({
+        id: 'scheduled-task-id',
+        taskType: 'alerting:123',
+        scheduledAt: new Date(),
+        attempts: 1,
+        status: TaskStatus.Idle,
+        runAt: new Date(),
+        startedAt: null,
+        retryAt: null,
+        state: {},
+        params: {},
+        ownerId: null,
+        enabled: true,
+      });
+    });
+
+    it('makes no extra call when the connectors are unrestricted', async () => {
+      const { options, getActionsClientWithRequest } = await setupRuleKeyConnectorAccess(
+        rulesClientParams,
+        []
+      );
+
+      await new RulesClient(options).clone({ id: sourceRule.id, newId: 'cloned-rule' });
+
+      expect(getActionsClientWithRequest).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    it('validates the new key as the caller before the clone is written', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        '1',
+      ]);
+
+      await new RulesClient(options).clone({ id: sourceRule.id, newId: 'cloned-rule' });
+
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['1'], {
+        principal: CALLER_PRINCIPAL,
+      });
+      expect(keyActionsClient.ensureConnectorsUsable.mock.invocationCallOrder[0]).toBeLessThan(
+        unsecuredSavedObjectsClient.create.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('refuses the new key and invalidates it', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        '1',
+      ]);
+      refuseConnector(keyActionsClient, '1');
+
+      const error = await new RulesClient(options)
+        .clone({ id: sourceRule.id, newId: 'cloned-rule' })
+        .catch((e) => e);
+
+      expect(error.output.statusCode).toBe(403);
+      expect(error.message).toBe(`The rule's API key cannot use connector "1"`);
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          type: API_KEY_PENDING_INVALIDATION_TYPE,
+          attributes: expect.objectContaining({ apiKeyId: 'fresh-id' }),
+        },
+      ]);
     });
   });
 });

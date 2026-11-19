@@ -18,6 +18,11 @@ export { getAuthorizationFilter } from './get_authorization_filter';
 export { checkAuthorizationAndGetTotal } from './check_authorization_and_get_total';
 export { scheduleTask, bulkScheduleTask, buildTaskInstance } from './schedule_task';
 export { createNewAPIKeySet } from './create_new_api_key_set';
+export {
+  getReferencedConnectorIds,
+  validateNewRuleKeyConnectorAccess,
+  validateRuleKeyConnectorAccess,
+} from './validate_rule_key_connector_access';
 export { untrackRuleAlerts } from './untrack_rule_alerts';
 export { bulkMigrateLegacyActions } from './siem_legacy_actions/migrate_legacy_actions';
 export { deleteLegacyActionsForRules } from './siem_legacy_actions/transform_and_delete_legacy_actions';
