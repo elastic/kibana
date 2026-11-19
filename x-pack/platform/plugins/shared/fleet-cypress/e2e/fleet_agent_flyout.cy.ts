@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { ADD_AGENT_BUTTON, AGENT_FLYOUT } from '../screens/fleet';
 import { cleanupAgentPolicies, deleteAgentDocs } from '../tasks/cleanup';
 import { createAgentDoc } from '../tasks/agents';
@@ -12,7 +13,6 @@ import { setFleetServerHost } from '../tasks/fleet_server';
 import { FLEET, navigateTo } from '../tasks/navigation';
 import { request } from '../tasks/common';
 
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { login } from '../tasks/login';
 
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
