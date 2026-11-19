@@ -1076,6 +1076,32 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix connector and step icons in the workflows list showing the generic plugs fallback [#263880]({{kib-pull}}263880).
 * Fix the `max-step-size` setting of the `ai.agent` workflow step being ignored for streamed completions, which could fail large responses with a maximum content length error [#275842]({{kib-pull}}275842).
 
+## 9.4.10 [kibana-9.4.10-release-notes]
+
+### Fixes [kibana-9.4.10-fixes]
+
+**Alerting and cases**:
+* Fix the rules list failing to load when one or more rules can't be loaded correctly. The list now leaves those rules out and shows a warning [#300110]({{kib-pull}}300110).
+
+**Data management**:
+* Fix creating and fetching {{data-sources}} with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist, which returned a `400` error while still saving it [#299790]({{kib-pull}}299790).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.4.10 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{elastic-sec}} solution**:
+For the {{elastic-sec}} 9.4.10 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{kib}} platform**:
+* Fix `bin/kibana-plugin install` finishing before the last file in the plugin archive is fully written, which could leave the installed plugin directory with that file missing or empty [#301845]({{kib-pull}}301845).
+
+% !!DEFERRED!! Elastic Agent Builder. Not on the 9.4 branch (backport PR #304224 was closed without merging, as of 2026-11-19). Re-verify against the next BC.
+% * Fix Agent Builder running tools with empty arguments when a model provider, such as Amazon Bedrock, returns several tool calls in one response [#301775]({{kib-pull}}301775).
+% !!DEFERRED!! Data ingestion and {{fleet}}. Not in the latest BC (9.4.10-513dc4d8, built from 72893353); the backport merged after the BC was cut. Re-verify against the next BC.
+% * Fix {{fleet}} running {{es}} transforms from uploaded integration packages with {{kib}}'s internal system identity. Transforms in uploaded packages now run as the user who installed the package [#297771]({{kib-pull}}297771).
+% !!DEFERRED!! Workflows. Not in the latest BC (9.4.10-513dc4d8, built from 72893353); the backport merged after the BC was cut. Re-verify against the next BC.
+% * Fix workflows that you overwrite in bulk, for example when you import over existing workflows, continuing to run on their previous schedule when the new version has no scheduled trigger or is disabled [#302861]({{kib-pull}}302861).
+
 ## 9.4.9 [kibana-9.4.9-release-notes]
 
 :::{important}
@@ -1120,8 +1146,6 @@ The 9.4.9 release contains fixes for potential security vulnerabilities. Check o
 * Fix the runtime field editor ignoring **Save** when you edit a field's script while the preview is still updating [#294753]({{kib-pull}}294753).
 * Fix the runtime field editor discarding the script when you change the field type to or from `composite` [#299025]({{kib-pull}}299025).
 * Fix saved object labels showing "index patterns" instead of "data views" when you copy a dashboard that references data views in another space [#297621]({{kib-pull}}297621).
-% !!DEFERRED!! Data management. Not in the latest BC (9.4.9-a3d257d5, built from 29f3bc23); the backport merged after the BC was cut. Re-verify against the next BC.
-% * Fix creating and fetching {{data-sources}} with `allowNoIndex: true` that target a nonexistent remote cluster failing with a `400` error [#299790]({{kib-pull}}299790).
 
 **Discover**:
 * Fix Discover showing an invalid time range from the URL instead of falling back to the default time range [#290358]({{kib-pull}}290358).
@@ -1146,8 +1170,6 @@ For the {{elastic-sec}} 9.4.9 release information, refer to [{{elastic-sec}} Sol
 * Fix paging through the API keys list showing the same API key on more than one page, or leaving a key out [#296117]({{kib-pull}}296117).
 * Fix Permissions-Policy violation reports reaching the configured reporting endpoint only for the last directive. Reports for every directive now reach it [#299786]({{kib-pull}}299786).
 * Fix {{kib}}'s OpenTelemetry process resource exposing command-line arguments. {{kib}} now records the number of arguments instead [#299043]({{kib-pull}}299043).
-% !!DEFERRED!! Not in the latest BC (9.4.9-a3d257d5, built from 29f3bc23); the backport merged after the BC was cut. Re-verify against the next BC.
-% * Fix `bin/kibana-plugin install` finishing before the last file in the plugin archive is fully written, which could leave the installed plugin directory with that file missing or empty [#301845]({{kib-pull}}301845).
 
 **Machine learning and {{infer}}**:
 * Fix the data frame analytics audit messages API returning messages for jobs that don't exist in the current {{kib}} space [#297821]({{kib-pull}}297821).
