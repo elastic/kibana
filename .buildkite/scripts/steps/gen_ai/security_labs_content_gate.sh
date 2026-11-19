@@ -81,6 +81,7 @@ if [[ ! "$CONTENTSTACK_HOST" =~ ^([a-z0-9-]+-)?cdn\.contentstack\.(io|com)$ ]]; 
   upload_build_steps "Unexpected Contentstack host [${CONTENTSTACK_HOST}]; not fingerprinting"
 fi
 
+source .buildkite/scripts/steps/gen_ai/security_labs_contentstack_credentials.sh
 if [[ -z "${SECURITY_LABS_CONTENTSTACK_API_KEY:-}" || -z "${SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN:-}" ]]; then
   upload_build_steps "Contentstack credentials unavailable; not fingerprinting"
 fi

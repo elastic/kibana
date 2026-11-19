@@ -4,8 +4,7 @@ set -euo pipefail
 
 # The Security Labs builder reads published articles from the Contentstack Content
 # Delivery API, which requires the stack API key and a read-only delivery token.
-# Expect both from pre-command (setup_job_env.sh) so Buildkite log redaction applies —
-# do not vault_get mid-command.
+source .buildkite/scripts/steps/gen_ai/security_labs_contentstack_credentials.sh
 for var in SECURITY_LABS_CONTENTSTACK_API_KEY SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN; do
   if [[ -z "${!var:-}" || "${!var}" == "null" ]]; then
     echo "ERROR: $var is not set; cannot fetch Security Labs content from Contentstack." >&2
