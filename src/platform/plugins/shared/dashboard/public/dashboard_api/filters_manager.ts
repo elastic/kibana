@@ -16,13 +16,13 @@ import {
   distinctUntilChanged,
   filter,
   first,
-  from,
   map,
   of,
   skip,
   switchMap,
+  takeUntil,
   type Observable,
-  type Subject,
+  Subject,
 } from 'rxjs';
 
 import type { Filter } from '@kbn/es-query';
@@ -51,27 +51,23 @@ export const initializeFiltersManager = (
   const publishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   /**
-   * `undefined` until we know whether any pinned panel is waiting on a required value (briefly, while the
-   * panels' definitions load). Consumers must not treat `undefined` as "not waiting".
+   * `undefined` until we know whether any pinned panel is waiting on a required value (while panels that
+   * block loading have not mounted yet). Consumers must not treat `undefined` as "not waiting", but it must not
+   * show the awaiting screen either: loading is just paused.
    */
   const awaitingRequiredFilters$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   /**
-   * Before a pinned panel has mounted, ask its registered definition whether its saved state will leave it
-   * waiting on a required value; once it has mounted, the live `awaitingRequiredFilters$` takes over.
+   * Before a pinned panel has mounted its API is not available, so its awaiting state is unknown if its type is
+   * registered as blocking loading until then; once it has mounted, its live `awaitingRequiredFilters$` takes over.
    */
-  const getUnmountedAwaitingRequired = async (uuid: string): Promise<boolean> => {
+  const isUnmountedPanelBlocking = (uuid: string): boolean => {
     const panel = layoutManager.api.layout$.getValue().pinnedPanels[uuid];
-    if (!panel) return false;
-    try {
-      const definition = await embeddableService.getEmbeddableDefinition(panel.type);
-      const state = layoutManager.internalApi.getSerializedStateForPanel(uuid);
-      return Boolean(state && definition?.isAwaitingRequiredFilters?.(state));
-    } catch (e) {
-      // if the definition cannot be loaded, do not block the dashboard; the live value takes over once mounted
-      return false;
-    }
+    return Boolean(panel && embeddableService.shouldBlockLoadingUntilApiAvailable(panel.type));
   };
+
+  /** whether any pinned panel itself reports that it is waiting on a required value */
+  const childAwaitingRequired$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const awaitingRequiredSubscription = combineLatest([
     layoutManager.api.layout$,
@@ -84,22 +80,40 @@ export const initializeFiltersManager = (
         if (pinnedIds.length === 0) return of(false);
 
         return combineLatest(
-          pinnedIds.map((uuid): Observable<boolean> => {
+          pinnedIds.map((uuid): Observable<boolean | undefined> => {
             const child = children[uuid];
-            if (!child) return from(getUnmountedAwaitingRequired(uuid));
+            if (!child) return of(isUnmountedPanelBlocking(uuid) ? undefined : false);
             return apiPublishesAwaitingRequiredFilters(child)
               ? child.awaitingRequiredFilters$
               : of(false);
           })
-        ).pipe(map((values) => values.some(Boolean)));
+        ).pipe(map((values) => (values.includes(undefined) ? undefined : values.some(Boolean))));
       }),
       distinctUntilChanged()
     )
-    .subscribe((awaitingRequired) => awaitingRequiredFilters$.next(awaitingRequired));
+    .subscribe((awaitingRequired) => childAwaitingRequired$.next(awaitingRequired));
+
+  /**
+   * With auto-apply on, the dashboard's awaiting state follows the children. With auto-apply off, it takes
+   * the children's value once (when it is first known) and afterwards only when filters are published, in
+   * both directions: supplying a required value keeps the awaiting screen up, and clearing one keeps the
+   * grid up, until the user applies the change.
+   */
+  const awaitingSyncSubscription = combineLatest([
+    childAwaitingRequired$,
+    settingsManager.api.settings.autoApplyFilters$,
+  ]).subscribe(([childAwaiting, autoApply]) => {
+    if (childAwaiting === undefined) return;
+    if (autoApply || awaitingRequiredFilters$.getValue() === undefined) {
+      awaitingRequiredFilters$.next(childAwaiting);
+    }
+  });
 
   const childFiltersLoading$ = combineLatest([
     layoutManager.internalApi.childrenLoading$,
-    awaitingRequiredFilters$,
+    // use the children's own flag, not the deferred one: it must not block unpublished filters
+    // from updating, since that is what lets the user publish them
+    childAwaitingRequired$,
   ])
     .pipe(
       map(([childrenLoading, awaitingRequiredFilters]) => {
@@ -148,7 +162,11 @@ export const initializeFiltersManager = (
       unpublishedChildFilters$.next(allChildFilters);
     });
 
+  const filtersPublished$ = new Subject<void>();
   const publishFilters = () => {
+    const childAwaiting = childAwaitingRequired$.getValue();
+    if (childAwaiting !== undefined) awaitingRequiredFilters$.next(childAwaiting);
+    filtersPublished$.next();
     const published = publishedChildFilters$.getValue();
     const unpublished = unpublishedChildFilters$.getValue();
     if (!deepEqual(published, unpublished)) {
@@ -168,9 +186,17 @@ export const initializeFiltersManager = (
 
   /** when auto-apply is `false`, publish the first set of filters once the children are done loading them */
   if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
-    unpublishedChildFilters$.pipe(skip(1), first()).subscribe(() => {
-      publishFilters();
-    });
+    unpublishedChildFilters$
+      .pipe(
+        skip(1),
+        // a change to whether a required value is supplied must be published by the user, not automatically
+        filter(() => awaitingRequiredFilters$.getValue() !== true),
+        takeUntil(filtersPublished$),
+        first()
+      )
+      .subscribe(() => {
+        publishFilters();
+      });
   }
 
   /** when auto-apply is `false` and the dashboard is reset, wait for new filters to be updated and publish them */
@@ -213,6 +239,7 @@ export const initializeFiltersManager = (
       autoPublishFiltersSubscription.unsubscribe();
       filterManagerSubscription.unsubscribe();
       awaitingRequiredSubscription.unsubscribe();
+      awaitingSyncSubscription.unsubscribe();
       forcePublishSubscription.unsubscribe();
     },
   };

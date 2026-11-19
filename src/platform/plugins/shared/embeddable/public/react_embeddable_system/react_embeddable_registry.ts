@@ -12,6 +12,8 @@ import type { DefaultEmbeddableApi, EmbeddablePublicDefinition } from './types';
 
 const registry: { [key: string]: () => Promise<EmbeddablePublicDefinition<any, any>> } = {};
 
+const typesBlockingLoadingUntilApiAvailable = new Set<string>();
+
 export const TYPE_REGEX = /^[a-z_]+$/; // lowercase letters and underscores
 
 let isSetupComplete = false;
@@ -24,13 +26,16 @@ let isSetupComplete = false;
  * Must be lower case, snake cased, and concise.
  * @param getEmbeddable an async function that gets the factory definition for this key. This should always async import the
  * actual factory definition file to avoid polluting page load.
+ * @param blockLoadingUntilApiAvailable when `true`, containers should hold back rendering results that depend on this type
+ * (e.g. a dashboard's panels) until an embeddable of this type has mounted and its API is available. Only for controls.
  */
 export const registerEmbeddablePublicDefinition = <
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 >(
   type: string,
-  getEmbeddableDefinition: () => Promise<EmbeddablePublicDefinition<SerializedState, Api>>
+  getEmbeddableDefinition: () => Promise<EmbeddablePublicDefinition<SerializedState, Api>>,
+  blockLoadingUntilApiAvailable?: boolean
 ) => {
   if (isSetupComplete)
     throw new Error(
@@ -55,6 +60,7 @@ export const registerEmbeddablePublicDefinition = <
     );
 
   registry[type] = getEmbeddableDefinition;
+  if (blockLoadingUntilApiAvailable) typesBlockingLoadingUntilApiAvailable.add(type);
 };
 
 export const getEmbeddableDefinition = async <
@@ -65,6 +71,9 @@ export const getEmbeddableDefinition = async <
 ): Promise<EmbeddablePublicDefinition<SerializedState, Api> | undefined> => {
   return registry[key]?.() as Promise<EmbeddablePublicDefinition<SerializedState, Api> | undefined>;
 };
+
+export const shouldBlockLoadingUntilApiAvailable = (type: string): boolean =>
+  typesBlockingLoadingUntilApiAvailable.has(type);
 
 export function closeSetup() {
   isSetupComplete = true;

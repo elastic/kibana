@@ -78,8 +78,6 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
     type: OPTIONS_LIST_CONTROL,
     getPlacementHints,
     layoutConstraints: LAYOUT_CONSTRAINTS,
-    isAwaitingRequiredFilters: (state) =>
-      Boolean(state.required && !state.selected_options?.length && !state.exists_selected),
     buildEmbeddable: async ({ initialState: state, finalizeApi, uuid, parentApi }) => {
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager<OptionsListSelection>();

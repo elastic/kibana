@@ -12,11 +12,15 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { untilPluginStartServicesReady } from '../../../services/kibana_services';
 
 export function registerOptionsListControl(embeddable: EmbeddableSetup) {
-  embeddable.registerEmbeddablePublicDefinition(OPTIONS_LIST_CONTROL, async () => {
-    const [{ getOptionsListControlFactory }] = await Promise.all([
-      import('../../../controls_module'),
-      untilPluginStartServicesReady(),
-    ]);
-    return getOptionsListControlFactory();
-  });
+  embeddable.registerEmbeddablePublicDefinition(
+    OPTIONS_LIST_CONTROL,
+    async () => {
+      const [{ getOptionsListControlFactory }] = await Promise.all([
+        import('../../../controls_module'),
+        untilPluginStartServicesReady(),
+      ]);
+      return getOptionsListControlFactory();
+    },
+    true
+  );
 }

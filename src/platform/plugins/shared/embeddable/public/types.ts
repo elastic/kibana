@@ -107,6 +107,8 @@ export interface EmbeddableStart {
   >(
     type: string
   ) => Promise<EmbeddablePublicDefinition<SerializedState, Api>>;
+  /** Whether panels of this type must have their API available before results that depend on them are shown. */
+  shouldBlockLoadingUntilApiAvailable: (type: string) => boolean;
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
   getLegacyURLTransform: (
     type: string

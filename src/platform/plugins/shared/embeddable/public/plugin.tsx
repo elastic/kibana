@@ -39,7 +39,10 @@ import type {
   SearchLibraryResponseType,
 } from '../server/search_route/types';
 import { SEARCH_ROUTE_PATH } from '../common/constants';
-import { getEmbeddableDefinition } from './react_embeddable_system/react_embeddable_registry';
+import {
+  getEmbeddableDefinition,
+  shouldBlockLoadingUntilApiAvailable,
+} from './react_embeddable_system/react_embeddable_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -98,6 +101,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       },
       // @ts-ignore
       getEmbeddableDefinition,
+      shouldBlockLoadingUntilApiAvailable,
       getStateTransfer: (storage?: Storage) =>
         storage
           ? new EmbeddableStateTransfer(
