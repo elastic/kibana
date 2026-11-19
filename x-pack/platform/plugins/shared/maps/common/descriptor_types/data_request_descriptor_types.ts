@@ -105,10 +105,10 @@ export type DataRequestMeta = {
 >;
 
 type NumericalStyleFieldData = {
-  avg: number;
-  max: number;
-  min: number;
-  std_deviation: number;
+  avg: number | null;
+  max: number | null;
+  min: number | null;
+  std_deviation: number | null;
 };
 
 type CategoricalStyleFieldData = {
