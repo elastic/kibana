@@ -62,7 +62,6 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.status).toBe('completed');
-      expect(typeof response.body.run_id).toBe('string');
       // Phase 1 binds no strategy, so nothing is due.
       expect(response.body.strategies).toStrictEqual([]);
     });

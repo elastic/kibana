@@ -129,9 +129,10 @@ describe('module', () => {
       );
     // The real lock writes to Elasticsearch; this test is about the scope, not the lock.
     await container.unbind(SpaceRunLock);
-    container.bind(SpaceRunLock).toConstantValue({
+    const lock: Pick<SpaceRunLock, 'run'> = {
       run: async ({ callback }) => ({ ran: true, result: await callback() }),
-    } as SpaceRunLock);
+    };
+    container.bind(SpaceRunLock).toConstantValue(lock as unknown as SpaceRunLock);
 
     const result = await container.get(TickService).run({
       accountRequest: httpServerMock.createKibanaRequest(),

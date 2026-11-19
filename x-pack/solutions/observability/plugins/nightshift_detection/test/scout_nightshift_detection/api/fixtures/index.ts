@@ -37,6 +37,15 @@ const ENABLE_PATH = '/internal/nightshift/detection/service_account/_enable';
 const ENABLE_TIMEOUT_MS = 120_000;
 const ENABLE_RETRY_INTERVAL_MS = 5_000;
 
+/** The HTTP status `createAdminRequester` attaches to the errors it throws. */
+const getRequestStatus = (error: unknown): number | undefined =>
+  typeof error === 'object' &&
+  error !== null &&
+  'status' in error &&
+  typeof error.status === 'number'
+    ? error.status
+    : undefined;
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
@@ -113,7 +122,7 @@ export const setUpDetectionEngine = async ({
   const serviceAccountId = await ensureNightshiftServiceAccount(
     createHttpServiceAccountsApi({
       request,
-      getStatus: (error) => (error as { status?: number })?.status,
+      getStatus: getRequestStatus,
     }),
     { kind: 'detection', isServerless }
   );
