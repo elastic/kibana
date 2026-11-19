@@ -963,7 +963,6 @@ src/platform/plugins/shared/usage_collection @elastic/kibana-core
 src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-dashboards
 src/platform/plugins/shared/visualization_listing @elastic/kibana-dashboards
 src/platform/plugins/shared/visualizations @elastic/kibana-dashboards
-src/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
 src/platform/test
 src/platform/test_plugins/analytics/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test_plugins/analytics/analytics_plugin_a @elastic/kibana-core
@@ -1348,6 +1347,7 @@ x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/plugins/shared/usage_api @elastic/kibana-core
 x-pack/platform/plugins/shared/workflows_execution_engine @elastic/workflows-eng
+x-pack/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
 x-pack/platform/plugins/shared/workflows_management @elastic/workflows-eng
 x-pack/platform/test
 x-pack/platform/test_plugins/agent_builder_sml_test_types @elastic/workchat-eng
@@ -3245,6 +3245,9 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/significant_event
 
 # Nightshift investigations managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift
+
+# Nightshift detection managed workflows
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_detection @elastic/nightshift
 
 # Context Engine managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/context_engine @elastic/context-eng
