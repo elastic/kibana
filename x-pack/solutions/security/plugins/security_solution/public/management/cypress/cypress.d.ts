@@ -204,20 +204,14 @@ declare global {
       ): Chainable<null>;
 
       task(
-        name: 'uploadFileToEndpoint',
-        arg: { hostname: string; srcPath: string; destPath: string },
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<null>;
-
-      task(
         name: 'installPackagesOnEndpoint',
         arg: { hostname: string; packages: string[] },
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<null>;
 
       task(
-        name: 'readZippedFileContentOnEndpoint',
-        arg: { hostname: string; path: string; password?: string },
+        name: 'readZippedFileContent',
+        arg: { path: string; password?: string },
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<string>;
 
