@@ -67,8 +67,31 @@ describe('suggest_evals', () => {
         commentBody: expect.stringContaining('**Agent Builder** (`agent-builder`)'),
         commentContext: 'evals-suggestions',
         clearPrevious: false,
+        authorLogin: 'kibanamachine',
       });
       expect(annotate).not.toHaveBeenCalled();
+    });
+
+    it('leaves the comment alone when the PR is too large to list every file', async () => {
+      const tooMany = Array.from({ length: 3000 }, (_, index) => ({ filename: `f/${index}.ts` }));
+
+      await run(tooMany, 'comment');
+
+      expect(upsert).not.toHaveBeenCalled();
+    });
+
+    it('leaves the comment alone when the build is not for the latest PR commit', async () => {
+      await runSuggestEvals({
+        changes: MATCHING,
+        suites: SUITES,
+        labels: [OPT_IN],
+        mode: 'comment',
+        isCurrentRevision: false,
+        upsert,
+        annotate,
+      });
+
+      expect(upsert).not.toHaveBeenCalled();
     });
 
     it('only updates an existing comment, never creates one, when nothing matches', async () => {
@@ -80,6 +103,7 @@ describe('suggest_evals', () => {
         commentContext: 'evals-suggestions',
         clearPrevious: false,
         createIfMissing: false,
+        authorLogin: 'kibanamachine',
       });
     });
   });

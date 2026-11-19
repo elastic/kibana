@@ -14,7 +14,10 @@ import {
   readEvalsSuiteMetadata,
 } from '../../../pipelines/evals/eval_pipeline.ts';
 import type { ChangedFile } from '../../../pipelines/evals/evals_suggestions.ts';
-import { getEvalSuggestions } from '../../../pipelines/evals/evals_suggestions.ts';
+import {
+  getEvalSuggestions,
+  isChangeListComplete,
+} from '../../../pipelines/evals/evals_suggestions.ts';
 import {
   EVALS_SUGGESTIONS_CONTEXT,
   NO_SUGGESTIONS_BODY,
@@ -22,7 +25,15 @@ import {
 } from '../../../pipelines/evals/evals_suggestions_comment.ts';
 import { listSkillDirs } from '../../../pipelines/evals/skill_dirs.ts';
 import { EVALS_SUGGESTIONS_LABEL } from '../../../pipeline-utils/step-library/steps/evals_suggestions.ts';
-import { BuildkiteClient, getPrChangesCached, upsertComment } from '#pipeline-utils';
+import {
+  BuildkiteClient,
+  getGithubClient,
+  getPrChangesCached,
+  upsertComment,
+} from '#pipeline-utils';
+
+/** The account CI posts as; a marker in anyone else's comment is not ours to edit. */
+const COMMENT_AUTHOR_LOGIN = 'kibanamachine';
 
 /**
  * The labels the evals child build actually receives. Labels the trigger cannot forward (whitespace
@@ -45,6 +56,8 @@ interface RunSuggestEvalsArgs {
   /** The PR target branch, so the prompt can show the diff against it. */
   baseBranch?: string;
   mode: SuggestionsMode;
+  /** False when this build is not for the PR's current head, so the PR file list may not match the checkout. */
+  isCurrentRevision?: boolean;
   upsert: typeof upsertComment;
   annotate: (markdown: string) => void;
 }
@@ -57,10 +70,23 @@ export const runSuggestEvals = async ({
   skillDirs,
   baseBranch,
   mode: requestedMode,
+  isCurrentRevision = true,
   upsert,
   annotate,
 }: RunSuggestEvalsArgs): Promise<void> => {
   try {
+    // Leave an existing comment alone rather than overwrite it with advice we cannot stand behind.
+    if (!isChangeListComplete(changes)) {
+      console.log('Not suggesting: the PR is too large for GitHub to list every changed file.');
+      return;
+    }
+    if (!isCurrentRevision) {
+      console.log(
+        'Not suggesting: this build is not for the latest PR commit, so its checkout and the PR file list differ.'
+      );
+      return;
+    }
+
     const body = renderEvalSuggestionsComment(
       getEvalSuggestions({ changes, suites, labels, skillDirs }),
       {
@@ -94,6 +120,7 @@ export const runSuggestEvals = async ({
         commentContext: EVALS_SUGGESTIONS_CONTEXT,
         clearPrevious: false,
         createIfMissing: false,
+        authorLogin: COMMENT_AUTHOR_LOGIN,
       });
       return;
     }
@@ -102,9 +129,30 @@ export const runSuggestEvals = async ({
       commentBody: body,
       commentContext: EVALS_SUGGESTIONS_CONTEXT,
       clearPrevious: false,
+      authorLogin: COMMENT_AUTHOR_LOGIN,
     });
   } catch (error) {
     console.error('Could not post evals suggestions:', error);
+  }
+};
+
+/** Whether the PR's head is the commit this build checked out. Unknown counts as current. */
+const isBuildForPrHead = async (): Promise<boolean> => {
+  const {
+    BUILDKITE_COMMIT: commit,
+    GITHUB_PR_BASE_OWNER: owner,
+    GITHUB_PR_BASE_REPO: repo,
+  } = process.env;
+  const pullNumber = Number(process.env.GITHUB_PR_NUMBER);
+  if (!commit || !owner || !repo || !pullNumber) {
+    return true;
+  }
+  try {
+    const { data } = await getGithubClient().pulls.get({ owner, repo, pull_number: pullNumber });
+    return data.head.sha === commit;
+  } catch (error) {
+    console.error('Could not read the PR head commit:', error);
+    return true;
   }
 };
 
@@ -112,6 +160,7 @@ export const main = async (): Promise<void> => {
   try {
     await runSuggestEvals({
       changes: await getPrChangesCached(),
+      isCurrentRevision: await isBuildForPrHead(),
       suites: readEvalsSuiteMetadata(),
       labels: getSuggestionLabels(process.env.GITHUB_PR_LABELS ?? ''),
       skillDirs: listSkillDirs(),

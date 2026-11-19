@@ -13,6 +13,7 @@ import {
   meetsAcceptanceThresholds,
   scoreReplay,
   validateFixtures,
+  parseSplit,
   selectFixtures,
   summarizeUnscored,
   NUDGE_THRESHOLDS,
@@ -354,6 +355,21 @@ describe('selectFixtures', () => {
     expect(() => selectFixtures([fixture(1, 'ordinary', [], 'tuning')], 'acceptance')).toThrow(
       /no fixtures/i
     );
+  });
+});
+
+describe('parseSplit', () => {
+  it('defaults to tuning when no split is given', () => {
+    expect(parseSplit(['--nudge'])).toBe('tuning');
+  });
+
+  it.each(['tuning', 'acceptance', 'all'] as const)('accepts %s', (split) => {
+    expect(parseSplit(['--split', split])).toBe(split);
+  });
+
+  it('rejects a mistyped or missing value instead of scoring tuning', () => {
+    expect(() => parseSplit(['--split', 'acceptence'])).toThrow('Unknown --split');
+    expect(() => parseSplit(['--split'])).toThrow('Unknown --split');
   });
 });
 

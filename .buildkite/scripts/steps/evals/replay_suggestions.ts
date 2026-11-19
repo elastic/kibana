@@ -261,9 +261,16 @@ export const selectFixtures = (
   return selected;
 };
 
-const parseSplit = (argv: string[]): 'tuning' | 'acceptance' | 'all' => {
-  const value = argv[argv.indexOf('--split') + 1];
-  return value === 'acceptance' || value === 'all' ? value : 'tuning';
+export const parseSplit = (argv: string[]): 'tuning' | 'acceptance' | 'all' => {
+  const index = argv.indexOf('--split');
+  if (index === -1) {
+    return 'tuning';
+  }
+  const value = argv[index + 1];
+  if (value === 'tuning' || value === 'acceptance' || value === 'all') {
+    return value;
+  }
+  throw new Error(`Unknown --split "${value}"; expected tuning, acceptance or all.`);
 };
 
 const runNudge = async (argv: string[]): Promise<number> => {

@@ -48,6 +48,10 @@ const MAX_SUGGESTIONS = 3;
 // partially visible and any suggestion would be a guess.
 const MAX_ANALYZABLE_CHANGES = 3000;
 
+/** Whether the file list shows the whole PR, so "no matches" means no matches rather than "unknown". */
+export const isChangeListComplete = (changes: readonly ChangedFile[]): boolean =>
+  changes.length < MAX_ANALYZABLE_CHANGES;
+
 const GLOB_OPTIONS = { dot: true } as const;
 
 // Never evidence that LLM behavior changed, anywhere (including a suite's own package).
@@ -150,7 +154,7 @@ export const getEvalSuggestions = ({
   /** Skill directories in the checkout; those of changed `SKILL.md` files are added automatically. */
   skillDirs?: readonly string[];
 }): EvalSuggestionResult => {
-  if (changes.length >= MAX_ANALYZABLE_CHANGES) {
+  if (!isChangeListComplete(changes)) {
     return { suggestions: [], overflow: [], unmappedLlmFiles: [] };
   }
 

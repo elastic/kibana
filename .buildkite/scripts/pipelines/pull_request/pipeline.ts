@@ -165,10 +165,14 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     if (skippable) {
       // An opted-in PR that stops matching any suite must still clear the comment an earlier push left.
+      // It also keeps the eval trigger, so the labels the comment recommends do start the evals even
+      // when every changed file is otherwise skippable (for example a mapped runtime `.md` file).
+      const evalsTrigger = getEvalTriggerStep(GITHUB_PR_LABELS);
       emitPipeline(
         EVALS_SUGGESTIONS_OPTED_IN
           ? [
               getAgentImageConfig({ returnYaml: true }),
+              ...(evalsTrigger ? [evalsTrigger] : []),
               renderSteps(evalsSuggestions(), { header: true }),
             ]
           : [emptyStep]
@@ -207,6 +211,10 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     if (await doAllChangesMatch(/^renovate\.json$/)) {
       pipeline.push(renderSteps(renovateValidation(), { header: true }));
+      // An opted-in PR left with only this change must still clear the comment an earlier push left.
+      if (EVALS_SUGGESTIONS_OPTED_IN) {
+        pipeline.push(renderSteps(evalsSuggestions(), { header: true }));
+      }
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
       await frequentCancellationsTip;
       emitPipeline(pipeline);
