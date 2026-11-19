@@ -6,7 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { EvaluateEvidence, EvaluateFn } from '@kbn/evals-plugin/server';
@@ -14,11 +14,15 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { buildOnlineEvalsEvidence } from '../online_evals/build_evidence';
 import { buildOnlineEvalScoreEvent, type EvaluateResult } from '../online_evals/build_score_event';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { OnlineEvalsStepError, reportOnlineEvalsStepFailure } from '../online_evals/step_failure';
 import type { NightshiftTelemetryClient } from '../telemetry';
 
-/** Judges run in parallel within one evaluation, so this bounds concurrent judge calls. */
-export const MAX_ONLINE_EVALS_EVALUATORS = 4;
+/**
+ * The most evaluators one evaluation takes. The evals plugin grades four at a time, so a larger
+ * set does not raise the number of concurrent judge calls.
+ */
+export const MAX_ONLINE_EVALS_EVALUATORS = 5;
 
 const isDate = (value: string) => !Number.isNaN(Date.parse(value));
 
@@ -229,6 +233,8 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
   isPaused,
   shouldIncludeExplanations,
   telemetry,
+  getSavedObjects,
+  getUiSettings,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   /** The evals plugin's `evaluate()`; absent when the evals plugin isn't loaded. */
@@ -240,6 +246,8 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
   /** The `nightshift.onlineEvals.includeExplanations` flag. */
   shouldIncludeExplanations: () => boolean;
   telemetry: NightshiftTelemetryClient;
+  getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings?: () => CoreStart['uiSettings'] | undefined;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.onlineEvals.score',
@@ -279,24 +287,47 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
           getAgentBuilder,
           request,
         });
-        const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+        // A round resumed after human-in-the-loop has one trace per execution; the latest is the
+        // one whose response the user sees.
+        const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id.at(-1) : round.trace_id;
         const judgeConnectorId = await resolveJudge(resolveJudgeConnectorId, request);
-        const { results, failedEvaluators } = await runJudges({
-          input,
-          evidence: buildOnlineEvalsEvidence({
-            round: gradedRound,
-            // Only first-round judges read the recovery as ground truth.
-            alertOutcome:
-              input.round_kind === 'alert_recovery' && input.graded_report === 'first_round'
-                ? round.response.message
-                : undefined,
-          }),
-          judgeConnectorId,
-          evaluate,
-          request,
-          spaceId: workflow.spaceId,
-          logger: context.logger,
-        });
+        // Joins the round's trace so the judges show up in the conversation trace flyout.
+        const { results, failedEvaluators } = await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.onlineEvals.score',
+            traceId: execution.id,
+            foregroundTraceId: roundTraceId,
+            roundId: input.round_id,
+            conversationId: input.investigation_id,
+            spaceId: workflow.spaceId,
+            workflowExecutionId: execution.id,
+            request,
+            getSavedObjects,
+            getUiSettings,
+            logger: context.logger,
+            attributes: {
+              'nightshift.evaluator_set': input.evaluator_set,
+              'nightshift.round_kind': input.round_kind,
+            },
+          },
+          () =>
+            runJudges({
+              input,
+              evidence: buildOnlineEvalsEvidence({
+                round: gradedRound,
+                // Only first-round judges read the recovery as ground truth.
+                alertOutcome:
+                  input.round_kind === 'alert_recovery' && input.graded_report === 'first_round'
+                    ? round.response.message
+                    : undefined,
+              }),
+              judgeConnectorId,
+              evaluate,
+              request,
+              spaceId: workflow.spaceId,
+              logger: context.logger,
+            })
+        );
 
         const event = buildOnlineEvalScoreEvent({
           metadata: {

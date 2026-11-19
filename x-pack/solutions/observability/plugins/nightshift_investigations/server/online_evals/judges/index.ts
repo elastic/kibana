@@ -10,6 +10,7 @@ import { alertOutcomeBenignClassificationJudge } from './alert_outcome_benign_cl
 import { alertOutcomeRcaAccuracyJudge } from './alert_outcome_rca_accuracy';
 import { alertOutcomeRcaReportingGapJudge } from './alert_outcome_rca_reporting_gap';
 import { conclusionQualityJudge } from './conclusion_quality';
+import { missingDataJudge } from './missing_data';
 import { wikiPageInfluenceJudge } from './wiki_page_influence';
 import { wikiPagesReadJudge } from './wiki_pages_read';
 import { investigationProcessJudge } from './investigation_process';
@@ -29,6 +30,7 @@ import {
 } from './memory_write';
 import { rcaRewardJudge } from './rca_reward';
 import { recoveryDueDiligenceJudges } from './recovery_due_diligence';
+import { toolCallHealthJudge } from './tool_call_health';
 
 export {
   MEMORY_READ_JUDGE_VERSION,
@@ -48,6 +50,8 @@ export const referenceFreeJudges: readonly RegisteredEvaluatorDefinition[] = [
   rcaRewardJudge,
   investigationProcessJudge,
   conclusionQualityJudge,
+  missingDataJudge,
+  toolCallHealthJudge,
 ];
 
 /** Reference-based judges ported from Deductive's alert-outcome scoring. */

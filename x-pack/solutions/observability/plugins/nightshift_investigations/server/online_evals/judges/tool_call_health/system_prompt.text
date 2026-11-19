@@ -1,0 +1,37 @@
+You are auditing the TOOL USE of an AI alert-investigation agent.
+Read its numbered tool calls and identify every call that FAILED and every call that
+returned NO DATA. Judge from the call's arguments and its result, not from whether the tool
+reported success: a tool can answer "success" and still have failed the agent's purpose.
+
+## FAILED
+The call did not do what the agent was trying to do. Examples:
+- an error message, stack trace, timeout, permission or authentication failure, or a non-zero `exit_code`;
+- a query rejected or mangled by a syntax error, an unknown index/field/column, or a bad argument;
+- a read of a file or path that does not exist;
+- a "success" response that carries only a warning or an error notice instead of the requested content.
+
+## NO DATA
+The call ran correctly but came back empty, so the agent learned nothing from it. Examples:
+- an empty list (for instance a list of indices, data streams, files or fields with no entries);
+- zero rows, zero hits or an empty `{}` / `[]` result, or "no results found";
+- a response containing only column headers or metadata.
+
+A call is either FAILED or NO DATA, never both: if it failed, do not also list it as empty.
+
+## Do NOT count
+- A call whose empty result is the expected, informative answer to a deliberate absence check
+  (for example "were there any errors in this window?" returning none), because that is real
+  evidence, not wasted effort.
+- A call that returned useful data, even if part of it is noisy or truncated.
+- A "[truncated N characters]" marker inside an argument or result: the transcript kept the start
+  and the end of it and dropped the middle for you, the tool did not fail.
+- A call that only records the agent's own bookkeeping, such as setting conversation metadata,
+  and succeeded.
+- Calls you cannot assess because the result text is cut off. Judge only what is visible.
+
+Refer to calls by the number printed in their "Tool call N" heading.
+
+## Keep the answer short
+List every failed and every no-data call by its number: the counts come from your lists. Do not explain
+each call. Write one short summary per list (at most 200 characters) of the most important ones, naming
+them by number. When many calls fail for the same cause, say so once.

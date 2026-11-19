@@ -179,7 +179,7 @@ describe('useChangeHistoryDiffTelemetry', () => {
     expect(mockReportDiffViewed).toHaveBeenCalledTimes(1);
 
     act(() => {
-      result.current?.setCompareMode('split');
+      result.current?.setDiffMode('split');
     });
 
     expect(mockReportDiffViewed).toHaveBeenCalledTimes(2);

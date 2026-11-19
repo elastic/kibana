@@ -196,7 +196,7 @@ describe('EventsTab', () => {
         expect.objectContaining({
           page: 1,
           search: 'checkout',
-          status: ['active'],
+          status: ['recovering'],
           severity: ['high'],
           investigation: ['not_started'],
         })
@@ -205,9 +205,71 @@ describe('EventsTab', () => {
     const params = new URLSearchParams(history.location.search);
     expect(params.has('page')).toBe(false);
     expect(params.get('search')).toBe('checkout');
-    expect(params.getAll('status')).toEqual(['active']);
+    expect(params.getAll('status')).toEqual(['recovering']);
     expect(params.getAll('severity')).toEqual(['high']);
     expect(params.getAll('investigation')).toEqual(['not_started']);
+  });
+
+  it('hides inactive events by default and keeps the URL clean', () => {
+    const history = renderTab();
+
+    expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: ['active', 'recovering'] })
+    );
+    expect(new URLSearchParams(history.location.search).has('status')).toBe(false);
+  });
+
+  it('lets the user select inactive to see those events too', async () => {
+    const history = renderTab();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsStatusFilterButton'));
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsStatusFilterOption-inactive')
+    );
+
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: ['active', 'recovering', 'inactive'] })
+      )
+    );
+    expect(new URLSearchParams(history.location.search).getAll('status')).toEqual([
+      'active',
+      'recovering',
+      'inactive',
+    ]);
+  });
+
+  it('writes status=all when the last selected status is cleared', async () => {
+    const history = renderTab();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsStatusFilterButton'));
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsStatusFilterOption-active')
+    );
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: ['recovering'] })
+      )
+    );
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsStatusFilterOption-recovering')
+    );
+
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: [] })
+      )
+    );
+    // The sentinel is what keeps an empty selection from restoring the default.
+    expect(new URLSearchParams(history.location.search).getAll('status')).toEqual(['all']);
+  });
+
+  it('treats status=all as no status filter', () => {
+    renderTab('/detections/events?status=all');
+
+    expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: [] })
+    );
   });
 
   it('labels an event whose investigation state could not be read as unknown', () => {

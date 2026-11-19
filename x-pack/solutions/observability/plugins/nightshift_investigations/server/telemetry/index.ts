@@ -13,6 +13,7 @@ import { onlineEvalsStepFailedEvent } from './online_evals_step_failed_event';
 import { investigationSkippedEvent } from './investigation_skipped_event';
 import { alertEnteredPipelineEvent } from './alert_entered_pipeline_event';
 import { investigationStartedEvent } from './investigation_started_event';
+import { detectionSnapshotEvent } from './detection_snapshot_event';
 import { investigationEndedEvent } from './investigation_ended_event';
 import { backgroundActivityEvent } from './background_activity_event';
 import { decisionTreeCausalCheckEvent } from './decision_tree_causal_check_event';
@@ -31,6 +32,7 @@ export const setupNightshiftTelemetry = ({
   analytics.registerEventType(investigationSkippedEvent);
   analytics.registerEventType(alertEnteredPipelineEvent);
   analytics.registerEventType(investigationStartedEvent);
+  analytics.registerEventType(detectionSnapshotEvent);
   analytics.registerEventType(investigationEndedEvent);
   analytics.registerEventType(backgroundActivityEvent);
   analytics.registerEventType(decisionTreeCausalCheckEvent);
@@ -45,6 +47,13 @@ export {
   type OnlineEvalGradedReport,
   type OnlineEvalScoreEvent,
 } from './online_eval_score_event';
+export {
+  alertIdentityOf,
+  toAlertFingerprint,
+  triggeringAlertOf,
+  type AlertIdentity,
+  type AlertSourceKind,
+} from './alert_identity';
 export {
   ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY,
   NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT,
@@ -71,6 +80,19 @@ export {
   NIGHTSHIFT_ONLINE_EVALS_STEP_FAILED_EVENT,
   type OnlineEvalsStepFailedEvent,
 } from './online_evals_step_failed_event';
+export type {
+  DetectionSnapshotContributor,
+  DetectionSnapshotKnowledgeCounts,
+} from './detection_snapshot_event';
+export {
+  registerDetectionSnapshotTask,
+  removeDetectionSnapshotTask,
+  scheduleDetectionSnapshotTask,
+} from './detection_snapshot_task';
+export {
+  createDetectionSnapshotSources,
+  DETECTION_SNAPSHOT_SO_TYPES,
+} from './detection_snapshot_sources';
 export {
   NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT,
   decisionTreeCausalCheckEvent,

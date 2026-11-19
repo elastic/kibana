@@ -154,6 +154,7 @@ describe('source knowledge write coordination', () => {
     expect(documents.get('default:source')?.attributes).toEqual({
       revision: 'revision-1',
       onboardingScheduled: false,
+      onboardingReservedAt: null,
       lease: null,
     });
     await expect(client.write({ sourceId: 'source', run: async () => {} })).rejects.toMatchObject(

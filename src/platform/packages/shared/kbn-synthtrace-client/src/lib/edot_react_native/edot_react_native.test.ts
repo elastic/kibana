@@ -17,6 +17,23 @@ import { ANDROID_MAX_SESSION_MS, SESSION_IDLE_TIMEOUT_MS } from './edot_react_na
 import type { EdotReactNativeSpanDocument } from './edot_react_native_span';
 import { MOBILE_HEALTH_PROFILES, type MobileHealthProfile } from './health_profiles';
 import {
+  ATTR_APP_START_DURATION,
+  ATTR_ERROR_KIND,
+  ATTR_SCREEN_NAME,
+  ATTR_SESSION_PREVIOUS_ID,
+  ATTR_START_TYPE,
+  ERROR_KIND_ANR,
+  ERROR_KIND_HANG,
+  EVENT_APP_START,
+  EVENT_SCREEN_CLICK,
+  EVENT_SESSION_END,
+  EVENT_SESSION_START,
+  SPAN_SCREEN_LOAD,
+  START_TYPE_COLD,
+  START_TYPE_WARM,
+} from '../edot_shared/proposed_signals';
+import { EVENT_EXCEPTION, EVENT_WIDGET_CLICK } from '../edot_shared/constants';
+import {
   edotReactNative,
   type EdotReactNativeAppModel,
   type EdotReactNativeDocument,
@@ -41,28 +58,37 @@ const app = edotReactNative.app({
   buildNumber: 42,
 });
 
+const nativeApp = edotReactNative.app({
+  serviceName: 'trailmap',
+  appId: 'com.example.trailmap',
+  native: true,
+});
+
+interface ClientOptions {
+  sessionId?: string;
+  network?: NetworkConnection;
+  native?: boolean;
+}
+
 const createClient = (
   profileId: DeviceProfileId,
-  { sessionId = SESSION_ID, network }: { sessionId?: string; network?: NetworkConnection } = {}
+  { sessionId = SESSION_ID, network, native }: ClientOptions = {}
 ) =>
-  app.client(DEVICE_PROFILES[profileId], {
+  (native ? nativeApp : app).client(DEVICE_PROFILES[profileId], {
     installationId: INSTALLATION_ID,
     sessionId,
     deviceId: 'd2a6c1b0-0000-4000-8000-000000000002',
     network,
   });
 
-const android = (options?: {
-  sessionId?: string;
-  network?: NetworkConnection;
-}): EdotAndroidClient => {
+const android = (options?: ClientOptions): EdotAndroidClient => {
   const client = createClient('pixel8Android15', options);
   if (client.platform !== 'android') {
     throw new Error('Expected an Android client');
   }
   return client;
 };
-const ios = (options?: { sessionId?: string; network?: NetworkConnection }): EdotIosClient => {
+const ios = (options?: ClientOptions): EdotIosClient => {
   const client = createClient('iphone15ProIos18', options);
   if (client.platform !== 'ios') {
     throw new Error('Expected an iOS client');
@@ -125,6 +151,10 @@ const simulate = ({
   visits = 1,
   manualSpans,
   sessionId,
+  model = APP_MODEL,
+  native,
+  proposedSignals,
+  previousSessionId,
 }: {
   platform: 'android' | 'ios';
   health?: MobileHealthProfile;
@@ -133,15 +163,21 @@ const simulate = ({
   visits?: number;
   manualSpans?: { launch?: boolean; screens?: boolean };
   sessionId?: string;
+  model?: EdotReactNativeAppModel;
+  native?: boolean;
+  proposedSignals?: boolean;
+  previousSessionId?: string;
 }) =>
   serialize(
     edotReactNative.session({
-      client: platform === 'ios' ? ios({ sessionId }) : android({ sessionId }),
-      app: APP_MODEL,
+      client: platform === 'ios' ? ios({ sessionId, native }) : android({ sessionId, native }),
+      app: model,
       health,
       screenViews,
       visits,
       manualSpans,
+      proposedSignals,
+      previousSessionId,
       start: TIMESTAMP,
       random: seededRandom(seed),
     })
@@ -995,6 +1031,562 @@ describe('edotReactNative', () => {
       const critical = count(MOBILE_HEALTH_PROFILES.critical);
       expect(critical.failures).toBeGreaterThan(healthy.failures);
       expect(critical.crashes).toBeGreaterThan(healthy.crashes);
+    });
+  });
+
+  describe('proposed signals', () => {
+    const NATIVE_MODEL: EdotReactNativeAppModel = {
+      screens: [
+        {
+          name: 'Map',
+          iosTitle: 'Map',
+          requests: [
+            { method: 'GET', url: 'https://api.example.com/v1/trails', backend: 'trails' },
+          ],
+          widgets: [{ id: 'locate', name: 'Locate' }],
+        },
+        {
+          name: 'Detail',
+          iosTitle: 'Detail',
+          requests: [
+            { method: 'GET', url: 'https://api.example.com/v1/trails/1', backend: 'trails' },
+          ],
+        },
+      ],
+    };
+    const IOS_SESSION_ID = SESSION_ID.toUpperCase();
+    const ANDROID_SESSION_ID = SESSION_ID.toLowerCase();
+
+    const named = (docs: EdotReactNativeDocument[], eventName: string) =>
+      logs(docs).filter(({ event_name: name }) => name === eventName);
+    const spansNamed = (docs: EdotReactNativeDocument[], name: string) =>
+      docs.filter(isSpan).filter((span) => span.name === name);
+    const proposed = (options: Parameters<typeof simulate>[0]) =>
+      simulate({ model: NATIVE_MODEL, native: true, proposedSignals: true, ...options });
+
+    describe('client methods', () => {
+      it('writes session events with the session id of the platform', () => {
+        const [androidStart] = android({ sessionId: SESSION_ID })
+          .sessionStart({ previousSessionId: SESSION_ID })
+          .timestamp(TIMESTAMP)
+          .serialize();
+        expect(androidStart._index).toBe('logs-generic.otel-default');
+        expect(androidStart.event_name).toBe(EVENT_SESSION_START);
+        expect(androidStart.attributes).toMatchObject({
+          'session.id': ANDROID_SESSION_ID,
+          [ATTR_SESSION_PREVIOUS_ID]: ANDROID_SESSION_ID,
+        });
+
+        const [iosStart] = ios({ sessionId: ANDROID_SESSION_ID })
+          .sessionStart({ previousSessionId: ANDROID_SESSION_ID })
+          .serialize();
+        expect(iosStart.attributes).toMatchObject({
+          'session.id': IOS_SESSION_ID,
+          [ATTR_SESSION_PREVIOUS_ID]: IOS_SESSION_ID,
+        });
+
+        const [first] = ios().sessionStart().serialize();
+        expect(Object.keys(first.attributes ?? {})).not.toContain(ATTR_SESSION_PREVIOUS_ID);
+
+        const [androidEnd] = android().sessionEnd().serialize();
+        const [iosEnd] = ios({ sessionId: ANDROID_SESSION_ID }).sessionEnd().serialize();
+        expect(androidEnd.event_name).toBe(EVENT_SESSION_END);
+        expect(androidEnd.attributes?.['session.id']).toBe(ANDROID_SESSION_ID);
+        expect(iosEnd.event_name).toBe(EVENT_SESSION_END);
+        expect(iosEnd.attributes?.['session.id']).toBe(IOS_SESSION_ID);
+      });
+
+      it('writes the app start with its type and a float duration', () => {
+        for (const client of [android(), ios()]) {
+          const [cold] = client.appStart({ type: START_TYPE_COLD, durationMs: 1_200 }).serialize();
+          const [warm] = client.appStart({ type: START_TYPE_WARM, durationMs: 310.46 }).serialize();
+          expect(cold.event_name).toBe(EVENT_APP_START);
+          expect(cold.attributes?.[ATTR_START_TYPE]).toBe(START_TYPE_COLD);
+          expect(warm.attributes?.[ATTR_START_TYPE]).toBe(START_TYPE_WARM);
+          [cold, warm].forEach(({ attributes }) => {
+            expect(Number.isInteger(attributes?.[ATTR_APP_START_DURATION])).toBe(false);
+          });
+          expect(warm.attributes?.[ATTR_APP_START_DURATION]).toBe(310.5);
+        }
+      });
+
+      it('writes screen and widget clicks as events with the session id of the platform', () => {
+        const [androidClick] = android().screenClick().serialize();
+        const [iosClick] = ios({ sessionId: ANDROID_SESSION_ID }).screenClick().serialize();
+        const [widgetClick] = ios().widgetClick({ id: 'locate' }).serialize();
+        expect(androidClick.event_name).toBe(EVENT_SCREEN_CLICK);
+        expect(androidClick.attributes?.['session.id']).toBe(ANDROID_SESSION_ID);
+        expect(iosClick.event_name).toBe(EVENT_SCREEN_CLICK);
+        expect(iosClick.attributes?.['session.id']).toBe(IOS_SESSION_ID);
+        expect(widgetClick.event_name).toBe(EVENT_WIDGET_CLICK);
+      });
+
+      it('writes an ANR on Android and a hang on iOS as ERROR logs', () => {
+        const [anr] = android().freeze({ durationMs: 6_000 }).timestamp(TIMESTAMP).serialize();
+        const [hang] = ios().freeze({ durationMs: 2_500 }).timestamp(TIMESTAMP).serialize();
+        expect(anr._index).toBe('logs-generic.otel-default');
+        expect(anr.severity_number).toBe(17);
+        expect(anr.severity_text).toBe('ERROR');
+        expect(anr.attributes).toMatchObject({
+          [ATTR_ERROR_KIND]: ERROR_KIND_ANR,
+          'session.id': ANDROID_SESSION_ID,
+        });
+        expect(hang.severity_number).toBe(17);
+        expect(hang.attributes).toMatchObject({
+          [ATTR_ERROR_KIND]: ERROR_KIND_HANG,
+          'session.id': IOS_SESSION_ID,
+        });
+        [anr, hang].forEach(({ attributes }) => {
+          expect(attributes?.['exception.type']).toEqual(expect.any(String));
+          expect(attributes?.['exception.message']).toEqual(expect.any(String));
+          expect(attributes?.['exception.stacktrace']).toEqual(expect.any(String));
+        });
+      });
+
+      it('writes a handled error as a WARN exception event without a span', () => {
+        const error = { type: 'java.io.IOException', message: 'boom', stacktrace: '...' };
+        const [androidError] = android().handledError(error).timestamp(TIMESTAMP).serialize();
+        const [iosError] = ios({ sessionId: ANDROID_SESSION_ID }).handledError(error).serialize();
+        expect(androidError).toMatchObject({
+          _index: 'logs-generic.otel-default',
+          event_name: EVENT_EXCEPTION,
+          severity_number: 13,
+          severity_text: 'WARN',
+          attributes: {
+            'exception.type': 'java.io.IOException',
+            'exception.message': 'boom',
+            'exception.stacktrace': '...',
+            'session.id': ANDROID_SESSION_ID,
+          },
+        });
+        expect(androidError).not.toHaveProperty('span_id');
+        expect(iosError.attributes?.['session.id']).toBe(IOS_SESSION_ID);
+      });
+
+      it('writes the screen load as an INTERNAL span with the screen name', () => {
+        const [span] = ios()
+          .screenLoad({ screenName: 'Map' })
+          .timestamp(TIMESTAMP)
+          .duration(120)
+          .serialize();
+        expect(span).toMatchObject({
+          _index: 'traces-generic.otel-default',
+          name: SPAN_SCREEN_LOAD,
+          kind: 'Internal',
+          attributes: { [ATTR_SCREEN_NAME]: 'Map', 'session.id': IOS_SESSION_ID },
+        });
+      });
+
+      it('writes the backend as a SERVER span of its own service under the client span', () => {
+        const ids = { traceId: 'a'.repeat(32), parentSpanId: 'b'.repeat(16) };
+        const [span] = android()
+          .backendSpan({
+            service: 'trails',
+            method: 'GET',
+            url: 'https://api.example.com/v1/trails',
+            statusCode: 503,
+            ...ids,
+          })
+          .serialize();
+        expect(span).toMatchObject({
+          kind: 'Server',
+          trace_id: ids.traceId,
+          parent_span_id: ids.parentSpanId,
+          status: { code: 'Error' },
+          resource: {
+            attributes: { 'service.name': 'trails', 'deployment.environment.name': 'production' },
+          },
+        });
+        expect(Object.keys(span.attributes)).not.toContain('session.id');
+      });
+
+      it("writes no environment on backend spans when the app isn't configured with one", () => {
+        const [span] = edotReactNative
+          .app({ serviceName: 'internal-tools' })
+          .client(DEVICE_PROFILES.iphone12Ios17, { installationId: INSTALLATION_ID })
+          .backendSpan({
+            service: 'trails',
+            method: 'GET',
+            url: 'https://api.example.com/v1/trails',
+            statusCode: 200,
+            traceId: 'a'.repeat(32),
+            parentSpanId: 'b'.repeat(16),
+          })
+          .serialize();
+        // EDOT iOS writes `default` for the app itself, which says nothing about the backend
+        expect(span.resource.attributes).toEqual({ 'service.name': 'trails' });
+      });
+    });
+
+    describe('session', () => {
+      it('writes one session start and end around the session, with the previous session', () => {
+        for (const platform of ['android', 'ios'] as const) {
+          const docs = proposed({ platform, visits: 2, previousSessionId: SESSION_ID });
+          const [start, ...rest] = named(docs, EVENT_SESSION_START);
+          const ends = named(docs, EVENT_SESSION_END);
+          expect(rest).toHaveLength(0);
+          expect(ends).toHaveLength(1);
+          expect(start.attributes?.[ATTR_SESSION_PREVIOUS_ID]).toBe(
+            platform === 'ios' ? IOS_SESSION_ID : ANDROID_SESSION_ID
+          );
+          const times = docs.map(timeOf);
+          expect(timeOf(start)).toBe(Math.min(...times));
+          expect(timeOf(ends[0])).toBe(Math.max(...times));
+        }
+      });
+
+      it('writes an app start per launch, cold then warm', () => {
+        for (const platform of ['android', 'ios'] as const) {
+          const docs = proposed({ platform, visits: 2, screenViews: 4 });
+          const starts = named(docs, EVENT_APP_START).sort((a, b) => timeOf(a) - timeOf(b));
+          expect(starts.map(({ attributes }) => attributes?.[ATTR_START_TYPE])).toEqual([
+            START_TYPE_COLD,
+            START_TYPE_WARM,
+          ]);
+          starts.forEach(({ attributes }) => {
+            expect(Number.isInteger(attributes?.[ATTR_APP_START_DURATION])).toBe(false);
+          });
+        }
+      });
+
+      it('writes a screen load per screen view, parent of the requests of the screen', () => {
+        for (const platform of ['android', 'ios'] as const) {
+          const docs = proposed({ platform, screenViews: 4 });
+          const loads = spansNamed(docs, SPAN_SCREEN_LOAD);
+          expect(loads).toHaveLength(4);
+          const requests = docs
+            .filter(isSpan)
+            .filter(({ kind, name }) => kind === 'Client' && name.startsWith('GET'));
+          expect(requests.length).toBeGreaterThan(0);
+          requests.forEach((request) => {
+            const parent = loads.find(({ span_id: spanId }) => spanId === request.parent_span_id);
+            expect(parent?.trace_id).toBe(request.trace_id);
+            expect(request.attributes[ATTR_SCREEN_NAME]).toBe(parent?.attributes[ATTR_SCREEN_NAME]);
+          });
+          loads.forEach(({ attributes }) => {
+            expect(attributes[ATTR_SCREEN_NAME]).toEqual(expect.any(String));
+          });
+        }
+      });
+
+      it('writes backend SERVER spans under the client span, shorter than it, unless it failed', () => {
+        for (const platform of ['android', 'ios'] as const) {
+          const docs = proposed({ platform, screenViews: 4 });
+          const servers = docs.filter(isSpan).filter(({ kind }) => kind === 'Server');
+          const clients = docs.filter(isSpan).filter(({ kind }) => kind === 'Client');
+          expect(servers.length).toBeGreaterThan(0);
+          servers.forEach((server) => {
+            const client = clients.find(({ span_id: spanId }) => spanId === server.parent_span_id);
+            expect(client?.trace_id).toBe(server.trace_id);
+            expect(Number(server.duration)).toBeLessThan(Number(client?.duration));
+            expect(server.resource.attributes['service.name']).toBe('trails');
+          });
+
+          const offline = proposed({
+            platform,
+            screenViews: 4,
+            health: withHealth({ networkErrorRate: 1 }),
+          });
+          expect(offline.filter(isSpan).filter(({ kind }) => kind === 'Server')).toHaveLength(0);
+          offline
+            .filter(isSpan)
+            .filter(({ kind, name }) => kind === 'Client' && name.startsWith('GET'))
+            .forEach(({ attributes }) => {
+              expect(attributes['error.type']).toEqual(expect.any(String));
+            });
+        }
+      });
+
+      it('stamps the screen name on the logs written while a screen is shown', () => {
+        const docs = proposed({
+          platform: 'android',
+          screenViews: 4,
+          health: withHealth({ errorLogRate: 1 }),
+        });
+        const errorLogs = logs(docs).filter(({ severity_number: severity }) => severity === 17);
+        expect(errorLogs.length).toBeGreaterThan(0);
+        errorLogs.forEach(({ attributes }) => {
+          expect(attributes?.[ATTR_SCREEN_NAME]).toEqual(expect.any(String));
+        });
+      });
+
+      it('writes screen and widget clicks', () => {
+        const docs = Array.from({ length: 20 }, (_, i) =>
+          proposed({ platform: 'ios', seed: `taps:${i}`, screenViews: 5 })
+        ).flat();
+        expect(named(docs, EVENT_SCREEN_CLICK).length).toBeGreaterThan(0);
+        expect(named(docs, EVENT_WIDGET_CLICK).length).toBeGreaterThan(0);
+      });
+
+      it('writes an ANR per screen view on Android and a hang on iOS at the right rates', () => {
+        const kindOf = (platform: 'android' | 'ios') =>
+          logs(
+            proposed({
+              platform,
+              screenViews: 4,
+              health: withHealth({ anrRate: 1, hangRate: 1 }),
+            })
+          )
+            .map(({ attributes }) => attributes?.[ATTR_ERROR_KIND])
+            .filter((kind) => kind !== undefined);
+        expect(kindOf('android')).toEqual(Array(4).fill(ERROR_KIND_ANR));
+        expect(kindOf('ios')).toEqual(Array(4).fill(ERROR_KIND_HANG));
+        const none = proposed({
+          platform: 'android',
+          screenViews: 4,
+          health: withHealth({ anrRate: 0, hangRate: 0 }),
+        });
+        const freezes = logs(none).filter(
+          ({ attributes }) => ATTR_ERROR_KIND in (attributes ?? {})
+        );
+        expect(freezes).toEqual([]);
+      });
+
+      it('writes handled errors on the screen they happen on, and only when asked to', () => {
+        const health = withHealth({ handledErrorRate: 1 });
+        for (const platform of ['android', 'ios'] as const) {
+          const handled = logs(proposed({ platform, screenViews: 4, health })).filter(
+            ({ event_name: name, span_id: spanId }) =>
+              name === EVENT_EXCEPTION && spanId === undefined
+          );
+          expect(handled).toHaveLength(4);
+          handled.forEach(({ severity_text: severity, attributes }) => {
+            expect(severity).toBe('WARN');
+            expect(attributes?.[ATTR_SCREEN_NAME]).toEqual(expect.any(String));
+            expect(attributes?.['exception.stacktrace']).toEqual(expect.any(String));
+          });
+        }
+        const without = simulate({
+          platform: 'android',
+          model: NATIVE_MODEL,
+          native: true,
+          health,
+        });
+        expect(logs(without).filter(({ severity_text: severity }) => severity === 'WARN')).toEqual(
+          []
+        );
+      });
+
+      it('reports a crash on the next launch with the id of the crashed session', () => {
+        for (const platform of ['android', 'ios'] as const) {
+          const docs = proposed({ platform, screenViews: 3, health: withHealth({ crashRate: 1 }) });
+          const crashes = named(docs, 'app.crash');
+          expect(crashes).toHaveLength(1);
+          const [crash] = crashes;
+          expect(crash.attributes?.['session.id']).toBe(
+            platform === 'ios' ? IOS_SESSION_ID : ANDROID_SESSION_ID
+          );
+          const starts = named(docs, EVENT_APP_START).sort((a, b) => timeOf(a) - timeOf(b));
+          const relaunch = starts[starts.length - 1];
+          expect(timeOf(crash)).toBeLessThan(timeOf(relaunch));
+          // Backdated to the crash, and observed when the relaunch reports it
+          expect(Number(crash.observed_timestamp)).toBeGreaterThan(timeOf(crash));
+          expect(Number(crash.observed_timestamp)).toBeLessThanOrEqual(timeOf(relaunch));
+          expect(relaunch.attributes?.[ATTR_START_TYPE]).toBe(START_TYPE_COLD);
+          expect(timeOf(named(docs, EVENT_SESSION_END)[0])).toBeGreaterThan(timeOf(relaunch));
+        }
+      });
+
+      it('writes native iOS crashes as crashes of the app itself, not of React Native', () => {
+        const reports = ['SIGABRT', 'SIGSEGV', 'SIGBUS'].map((signal) => ({
+          signal,
+          ...ios({ native: true }).crashReport({
+            signal,
+            code: 'CODE',
+            crashedAt: TIMESTAMP,
+            random: seededRandom(`native-ios:${signal}`),
+          }),
+        }));
+
+        reports.forEach(({ signal, excerpt, address }) => {
+          expect(excerpt).not.toMatch(/hermes|RCTFatal|Unhandled JS/i);
+          // The app's own code crashes on the main thread
+          expect(excerpt).toContain('Thread 0 Crashed:');
+          expect(excerpt).toContain('Crashed Thread:  0');
+          expect(address).toBeGreaterThan(0);
+        });
+        const abort = reports.find(({ signal }) => signal === 'SIGABRT')?.excerpt;
+        expect(abort).toMatch(/uncaught exception 'NS\w+Exception', reason: '/);
+        expect(abort).toContain('Last Exception Backtrace:');
+      });
+
+      it('keeps the backend spans that had ended when the app crashed', () => {
+        // Requests that ended in the last seconds before the crash are lost with their client
+        // span, while the backend that answered them had exported its own
+        const spansOfCrashes = Array.from({ length: 150 }, (_, i) =>
+          proposed({
+            platform: 'ios',
+            seed: `backend-crash:${i}`,
+            screenViews: 3,
+            health: withHealth({ crashRate: 1, httpLatency: { median: 1_500, sigma: 0.3 } }),
+          })
+        );
+        const withoutClient = spansOfCrashes.flatMap((docs) => {
+          const ids = new Set(docs.filter(isSpan).map(({ span_id: spanId }) => spanId));
+          return docs
+            .filter(isSpan)
+            .filter(
+              ({ kind, parent_span_id: parentSpanId }) =>
+                kind === 'Server' && parentSpanId !== undefined && !ids.has(parentSpanId)
+            );
+        });
+        expect(withoutClient.length).toBeGreaterThan(0);
+
+        // A request still running at the crash is lost with its backend span. The ones that follow
+        // the crash are those of the relaunch.
+        spansOfCrashes.forEach((docs) => {
+          const [crash] = named(docs, 'app.crash');
+          docs
+            .filter(isSpan)
+            .filter(({ kind }) => kind === 'Server')
+            .filter((span) => timeOf(span) < timeOf(crash))
+            .forEach((span) => {
+              expect(timeOf(span) + Number(span.duration) / 1_000_000).toBeLessThanOrEqual(
+                timeOf(crash)
+              );
+            });
+        });
+      });
+
+      it('stamps the iOS inactive event with the last screen of the visit', () => {
+        const docs = proposed({ platform: 'ios', screenViews: 3 });
+        const [lastLoad] = docs
+          .filter(isSpan)
+          .filter(({ name }) => name === SPAN_SCREEN_LOAD)
+          .sort((a, b) => timeOf(b) - timeOf(a));
+        const [inactive] = logs(docs).filter(
+          ({ attributes }) => attributes?.['ios.app.state'] === 'inactive'
+        );
+
+        expect(lastLoad.attributes[ATTR_SCREEN_NAME]).toEqual(expect.any(String));
+        expect(inactive.attributes?.[ATTR_SCREEN_NAME]).toBe(lastLoad.attributes[ATTR_SCREEN_NAME]);
+      });
+
+      it('keeps a request exported before a crash even when its screen load was lost', () => {
+        // On a screen slow to appear, requests end before it has, and so can be exported before
+        // the screen load span, which a crash right after then loses, as with the SDKs
+        const orphans = Array.from({ length: 100 }, (_, i) =>
+          proposed({
+            platform: 'ios',
+            seed: `orphan:${i}`,
+            screenViews: 1,
+            health: withHealth({ crashRate: 1, viewAppear: { median: 3_000, sigma: 0.3 } }),
+          })
+        ).flatMap((docs) => {
+          const spanIds = new Set(docs.filter(isSpan).map(({ span_id: spanId }) => spanId));
+          return docs
+            .filter(isSpan)
+            .filter(
+              ({ kind, parent_span_id: parentSpanId }) =>
+                kind === 'Client' && parentSpanId !== undefined && !spanIds.has(parentSpanId)
+            );
+        });
+        expect(orphans.length).toBeGreaterThan(0);
+      });
+
+      it('gives native apps native crashes only', () => {
+        const docs = Array.from({ length: 20 }, (_, i) =>
+          proposed({
+            platform: 'android',
+            seed: `native:${i}`,
+            screenViews: 2,
+            health: withHealth({ crashRate: 1 }),
+          })
+        ).flat();
+        const types = named(docs, 'app.crash').map(
+          ({ attributes }) => attributes?.['exception.type']
+        );
+        expect(types.length).toBeGreaterThan(0);
+        expect(types).not.toContain('com.facebook.react.common.JavascriptException');
+      });
+
+      it("leaves JavaScript crashes out of a native app's own crashes too", () => {
+        const model: EdotReactNativeAppModel = {
+          ...NATIVE_MODEL,
+          crashes: {
+            android: [
+              {
+                type: 'com.facebook.react.common.JavascriptException',
+                message: 'TypeError: undefined is not a function',
+              },
+            ],
+          },
+        };
+        const types = Array.from({ length: 20 }, (_, i) =>
+          proposed({
+            platform: 'android',
+            model,
+            seed: `native-own:${i}`,
+            screenViews: 2,
+            health: withHealth({ crashRate: 1 }),
+          })
+        )
+          .flatMap((docs) => named(docs, 'app.crash'))
+          .map(({ attributes }) => attributes?.['exception.type']);
+        expect(types.length).toBeGreaterThan(0);
+        expect(types).not.toContain('com.facebook.react.common.JavascriptException');
+      });
+
+      it('writes no freezes or handled errors for a health profile without their rates', () => {
+        const { anrRate, hangRate, handledErrorRate, ...withoutRates } =
+          MOBILE_HEALTH_PROFILES.critical;
+        for (const platform of ['android', 'ios'] as const) {
+          const docs = proposed({ platform, screenViews: 6, health: withoutRates });
+          expect(logs(docs).filter(({ attributes }) => attributes?.[ATTR_ERROR_KIND])).toEqual([]);
+          expect(logs(docs).filter(({ severity_text: severity }) => severity === 'WARN')).toEqual(
+            []
+          );
+        }
+      });
+
+      it('gives native apps native scopes and no React Native root view', () => {
+        for (const platform of ['android', 'ios'] as const) {
+          const docs = Array.from({ length: 10 }, (_, i) =>
+            proposed({
+              platform,
+              seed: `scopes:${i}`,
+              screenViews: 4,
+              health: withHealth({ errorLogRate: 1 }),
+            })
+          ).flat();
+          const scopes = new Set(docs.map(({ scope }) => scope?.name));
+          expect(scopes).toContain('co.elastic.otel.mobile.interactions');
+          expect(scopes).toContain('com.example.trailmap');
+          scopes.forEach((name) => expect(name).not.toContain('react-native'));
+          expect(spansNamed(docs, 'UIViewController - view appearing')).toEqual([]);
+        }
+      });
+
+      it('writes none of the proposed signals unless asked to', () => {
+        const names = [
+          EVENT_SESSION_START,
+          EVENT_SESSION_END,
+          EVENT_APP_START,
+          EVENT_SCREEN_CLICK,
+          SPAN_SCREEN_LOAD,
+          ATTR_SESSION_PREVIOUS_ID,
+          ATTR_START_TYPE,
+          ATTR_APP_START_DURATION,
+          ATTR_SCREEN_NAME,
+          ATTR_ERROR_KIND,
+        ];
+        for (const platform of ['android', 'ios'] as const) {
+          const json = JSON.stringify(
+            simulate({
+              platform,
+              model: NATIVE_MODEL,
+              native: true,
+              proposedSignals: false,
+              previousSessionId: SESSION_ID,
+              health: MOBILE_HEALTH_PROFILES.critical,
+              screenViews: 6,
+              visits: 2,
+            })
+          );
+          names.forEach((name) => expect(json).not.toContain(name));
+          expect(json).not.toContain('"Server"');
+        }
+      });
     });
   });
 });
