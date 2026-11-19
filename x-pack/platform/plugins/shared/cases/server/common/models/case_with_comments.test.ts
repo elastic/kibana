@@ -1730,4 +1730,48 @@ describe('CaseCommentModel', () => {
       clientArgs.services.caseService.patchCase.mockResolvedValue(theCase);
     });
   });
+
+  describe('encodeWithComments', () => {
+    it('loads every page of comments so counts derived from comments.length match total', async () => {
+      // Attachment write steps return `encodeWithComments()`; the agent builder case card
+      // derives `totalAttachments` from `comments.length`. A single find page only holds
+      // `perPage` objects even though `total` is the full count, so a case with more
+      // comments than one page would overwrite the card's total with the page size.
+      const page1 = {
+        saved_objects: mockCaseComments,
+        total: mockCaseComments.length + 1,
+        per_page: mockCaseComments.length,
+        page: 1,
+      };
+      const page2 = {
+        saved_objects: [{ ...mockCaseComments[0], id: 'comment-page-2' }],
+        total: page1.total,
+        per_page: page1.per_page,
+        page: 2,
+      };
+      clientArgs.services.caseService.getAllCaseComments
+        .mockResolvedValueOnce(page1 as never)
+        .mockResolvedValueOnce(page2 as never);
+
+      const encoded = await model.encodeWithComments();
+
+      expect(clientArgs.services.caseService.getAllCaseComments).toHaveBeenCalledTimes(2);
+      expect(encoded.comments).toHaveLength(page1.total);
+      expect(encoded.comments?.map(({ id }) => id)).toContain('comment-page-2');
+    });
+
+    it('makes a single request when all comments fit on the first page', async () => {
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: mockCaseComments,
+        total: mockCaseComments.length,
+        per_page: mockCaseComments.length,
+        page: 1,
+      } as never);
+
+      const encoded = await model.encodeWithComments();
+
+      expect(clientArgs.services.caseService.getAllCaseComments).toHaveBeenCalledTimes(1);
+      expect(encoded.comments).toHaveLength(mockCaseComments.length);
+    });
+  });
 });
