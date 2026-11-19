@@ -12,10 +12,14 @@
  * for several apps in different states of health, for Digital Experience development.
  *
  * Data shape (OTel-native, no APM enrichment):
- * - `logs-generic.otel-default`: `browser.navigation`, `browser.navigation_timing`,
+ * - `logs-browser.otel-default`: `browser.navigation`, `browser.navigation_timing`,
  *   `browser.resource_timing`, `browser.web_vital`, `browser.user_action.click` and
  *   `exception` events
- * - `traces-generic.otel-default`: fetch/XHR CLIENT spans
+ * - `traces-browser.otel-default`: fetch/XHR CLIENT spans
+ * - both are sorted by `service.name`, `session.id` and `@timestamp` (latest first), the dedicated
+ *   browser dataset of elastic/observability-dev#6361: the run installs their index templates,
+ *   built from the cluster's OTel templates. A data stream created before them keeps its sort
+ *   until it rolls over, so use `--clean` once
  * - `logs-rum.replay.otel-default`: session replay, with the `replayRate` and `errorReplayRate`
  *   options only (see Session replay below)
  * - non-zero timings and web vital values always carry a fractional part, so they map as `float`;
@@ -134,6 +138,7 @@ const scenario: Scenario<OtelDocument> = async ({ scenarioOpts, logger, from }) 
   logger.info(`Generating EDOT Browser data with ${JSON.stringify(opts)}; ${SEED_LOG_HINT}`);
 
   return {
+    bootstrap: ({ otelEsClient }) => otelEsClient.installBrowserIndexTemplates(),
     generate: ({ range, clients: { otelEsClient } }) =>
       withClient(
         otelEsClient,
