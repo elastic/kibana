@@ -196,6 +196,14 @@ export const KPI_METRIC_CLOSED_DATE_HINT = i18n.translate(
   }
 );
 
+export const KPI_METRIC_ALERT_ACKNOWLEDGE_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricAlertAcknowledgeHint',
+  {
+    defaultMessage:
+      'Time from the alert start to the first assignment or In progress status after the alert was added to the case. Alerts that are not acknowledged yet are not counted. Reopened cases are not handled separately.',
+  }
+);
+
 export const KPI_METRIC_DURATION_MINUTES = (value: string) =>
   i18n.translate('xpack.cases.casesStats.kpiMetricDurationMinutes', {
     values: { value },

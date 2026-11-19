@@ -233,6 +233,30 @@ describe('Cases metrics', () => {
       expect(within(screen.getByTestId('cases-kpi-tile-c1')).queryByText('11')).toBeNull();
     });
 
+    it('shows the acknowledge rule in the info icon of an alert tile', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_avg',
+              display: 'value',
+            },
+          ]}
+          kpiResults={[{ id: 'tta', type: 'value', format: 'duration', value: 101 }]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      await userEvent.hover(await screen.findByTestId('cases-kpi-tile-tta-date-hint'));
+
+      expect(
+        await screen.findByText(/Time from the alert start to the first assignment or In progress/)
+      ).toBeInTheDocument();
+    });
+
     it('shows the date hint for a custom tile with the closed date', async () => {
       const closedDateMetric: CustomKpiMetricConfiguration = {
         id: 'c1',

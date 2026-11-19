@@ -32,6 +32,7 @@ import {
   ATTC_STAT,
   ATTC_STAT_INFO_ARIA_LABEL,
   KPI_METRIC_ANALYTICS_DISABLED,
+  KPI_METRIC_ALERT_ACKNOWLEDGE_HINT,
   KPI_METRIC_CLOSED_DATE_HINT,
   KPI_METRIC_UNKNOWN,
 } from '../translations';
@@ -165,10 +166,15 @@ const getBreakdownTileValues = (
   return { label, result, isLoading: isLoadingKpiResults };
 };
 
-const getDateHint = (metric: KpiMetricConfiguration): string | undefined =>
-  metric.kind === 'custom' && metric.dateField === 'closed_at'
-    ? KPI_METRIC_CLOSED_DATE_HINT
+const getDateHint = (metric: KpiMetricConfiguration): string | undefined => {
+  if (metric.kind === 'custom') {
+    return metric.dateField === 'closed_at' ? KPI_METRIC_CLOSED_DATE_HINT : undefined;
+  }
+
+  return isAnalyticsPredefinedKpiMetric(metric.predefinedId)
+    ? KPI_METRIC_ALERT_ACKNOWLEDGE_HINT
     : undefined;
+};
 
 const getKpiTileValues = (
   metric: KpiMetricConfiguration,
