@@ -1,9 +1,22 @@
 {
-  "sha1": "68ee009c64d4e8341cc52259ddff01c57f166eec",
+  "sha1": "09dcba365625c738feebcf862047ab00544f6e66",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "7e7ba89b17c6e8e-547ae70d8260400",
+      "title": "Unenroll an agent from Fleet when tamper protection is enabled the agent acknowledges a Fleet unenroll",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/unenroll_agent_with_tamper_protection_enabled.spec.ts",
+        "line": 48,
+        "column": 25
+      }
+    },
     {
       "id": "3e782c425501181-1a0e35decd0951c",
       "title": "Uninstall an agent moved from an unprotected to a tamper protected policy rejects an uninstall without a token and accepts the protected policy token",
