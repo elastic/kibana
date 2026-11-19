@@ -27,7 +27,6 @@ import { appContextService } from '../../app_context';
 import { airGappedUtils } from '../airgapped';
 import { getPathParts } from '../archive';
 import { isTopLevelPipeline } from '../elasticsearch/ingest_pipeline/helpers';
-import { isRemoteIndexExpression } from '../elasticsearch/transform/ccs_transform_source';
 import {
   getDestinationIndexAliases,
   isTransform,
@@ -36,6 +35,23 @@ import * as Registry from '../registry';
 
 import { getBundledPackageByName } from './bundled_packages';
 import { getPackageSavedObjects } from './get';
+
+/**
+ * Whether an index expression targets a remote cluster (`<cluster>:<index>`). Mirrors ES
+ * `RemoteClusterAware#isRemoteIndexName`. Date math (`<...>`, `-<...>`) is never remote, and a
+ * `::` data-stream selector separator is not a cluster separator.
+ */
+const isRemoteIndexExpression = (indexExpression: string): boolean => {
+  if (
+    indexExpression.length === 0 ||
+    indexExpression.startsWith('<') ||
+    indexExpression.startsWith('-<')
+  ) {
+    return false;
+  }
+  const separatorIndex = indexExpression.indexOf(':');
+  return separatorIndex > 0 && !indexExpression.startsWith('::', separatorIndex);
+};
 
 const UPLOAD_PACKAGE_NAME_MIN_LENGTH = 2;
 const UPLOAD_PACKAGE_NAME_MAX_LENGTH = 150;
