@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { UnifiedDataTable, getRowHeight } from '@kbn/unified-data-table';
 import { createEpisodeActions } from '../../actions';
 import { useFetchAlertingEpisodesQuery } from '../../hooks/use_fetch_alerting_episodes_query';
+import { useAlertingRulesCache } from '../../hooks/use_alerting_rules_cache';
 import { AlertHostProvider, type AlertHostContextValue } from '../../context/alert_host_context';
 import { EpisodeRuleCell } from '../episodes_table_cell_renderers';
 import {
@@ -28,6 +29,10 @@ const setEpisodes = (data: Array<ReturnType<typeof episode>>) => {
     dataView: { timeFieldName: '@timestamp' },
     isLoading: false,
   });
+};
+
+const setRulesCache = (rulesCache: Record<string, unknown>) => {
+  (useAlertingRulesCache as unknown as jest.Mock).mockReturnValue({ rulesCache, loading: false });
 };
 
 const ruleCellProps = () => {
@@ -134,6 +139,7 @@ describe('EpisodesTable', () => {
     jest.clearAllMocks();
     (getRowHeight as unknown as jest.Mock).mockReturnValue(1);
     setEpisodes([]);
+    setRulesCache({});
   });
 
   it('always shows the loaded alert count in the toolbar', () => {
@@ -302,7 +308,20 @@ describe('EpisodesTable', () => {
       render(<I18nProvider>{renderRuleCell({ row: { flattened: {} } })}</I18nProvider>);
       act(() => ruleCellProps().onRuleNameClick('rule-1'));
 
-      expect(openRuleFlyout).toHaveBeenCalledWith('rule-1', undefined);
+      expect(openRuleFlyout).toHaveBeenCalledWith('rule-1', undefined, undefined);
+    });
+
+    it('hands the host the resolved rule so its flyout opens populated', () => {
+      const cachedRule = { id: 'rule-1', metadata: { name: 'Cached rule' } };
+      setRulesCache({ 'rule-1': cachedRule });
+      const openRuleFlyout = jest.fn();
+      renderTable({}, { openRuleFlyout });
+
+      const renderRuleCell = lastGridProps().externalCustomRenderers['rule.id'];
+      render(<I18nProvider>{renderRuleCell({ row: { flattened: {} } })}</I18nProvider>);
+      act(() => ruleCellProps().onRuleNameClick('rule-1'));
+
+      expect(openRuleFlyout).toHaveBeenCalledWith('rule-1', undefined, cachedRule);
     });
 
     it('collapses an expanded alert when the rule flyout opens', () => {

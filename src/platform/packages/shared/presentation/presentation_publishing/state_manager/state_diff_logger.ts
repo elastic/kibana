@@ -13,8 +13,10 @@ const options = {
 };
 
 export function shouldLogStateDiff() {
+  // window is not defined on the server
+  if (typeof window === 'undefined') return false;
   // @ts-expect-error
-  return Boolean(window?.ELASTIC_PRESENTATION_LOGGER);
+  return Boolean(window.ELASTIC_PRESENTATION_LOGGER);
 }
 
 /**

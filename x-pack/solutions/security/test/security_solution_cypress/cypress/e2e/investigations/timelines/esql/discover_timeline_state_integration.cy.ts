@@ -10,6 +10,7 @@ import {
   addDiscoverEsqlQuery,
   addFieldToTable,
   assertFieldsAreLoaded,
+  submitDiscoverSearchBar,
   verifyDiscoverEsqlQuery,
 } from '../../../../tasks/discover';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -119,6 +120,8 @@ describe(
             cy.intercept('POST', '**/internal/search/esql_async').as(ESQL_QUERY_REQ);
             goToEsqlTab();
             cy.get(LOADING_INDICATOR).should('not.exist');
+            // Reopening the timeline replays the tab's cached results, a refresh asks Elasticsearch again.
+            submitDiscoverSearchBar();
             cy.wait(`@${ESQL_QUERY_REQ}`, { timeout: ESQL_QUERY_REQ_TIMEOUT });
             verifyDiscoverEsqlQuery(esqlQuery);
             // Assert the time range before the columns: the columns only render once the query

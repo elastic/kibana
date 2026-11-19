@@ -112,6 +112,19 @@ describe('CreatedByFilterRenderer', () => {
     expect(screen.getByTestId('createdBy-searchbar-option-u_jane')).toBeInTheDocument();
   });
 
+  it('keys the option subject on the username, not the uid or the full name', async () => {
+    await act(async () => {
+      render(<CreatedByFilterRenderer query={Query.parse('')} />, {
+        wrapper: createWrapper(mockUserProfilesService),
+      });
+    });
+
+    fireEvent.click(screen.getByText('Created by'));
+
+    expect(await screen.findByTestId('createdBy-option-jane')).toBeInTheDocument();
+    expect(screen.getByTestId('createdBy-option-john')).toBeInTheDocument();
+  });
+
   it('calls onChange with the selected email value', async () => {
     const onChange = jest.fn();
 

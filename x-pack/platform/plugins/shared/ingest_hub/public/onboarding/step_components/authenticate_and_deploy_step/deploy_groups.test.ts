@@ -192,3 +192,153 @@ describe('deployGroup — proxy URL', () => {
     expect(mockCreatePolicy.mock.calls[0][0]).not.toHaveProperty('output_id');
   });
 });
+
+describe('deployGroup — custom fields', () => {
+  const ec2 = {
+    id: 'ec2',
+    name: 'Amazon EC2',
+    packageName: 'aws',
+    dataStreams: ['ec2'],
+    inputs: ['aws-s3'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByInput: {},
+    varDefsByDataStream: {},
+  } as unknown as AwsServiceMatrixEntry;
+
+  const customFieldsGroup: DeployGroup = {
+    groupId: 'aws',
+    instanceIds: ['ec2'],
+    members: [
+      {
+        instance: { instanceId: 'ec2', serviceId: 'ec2', name: 'Amazon EC2', isDuplicate: false },
+        service: ec2,
+      },
+    ],
+    isDuplicateGroup: false,
+    namespace: '',
+  };
+
+  const deploy = async (global_data_tags: string | undefined) => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '1.0.0', vars: [], policy_templates: [] } },
+    });
+    await deployGroup(customFieldsGroup, {
+      namespace: 'default',
+      globalRegion: 'us-east-1',
+      storedServiceVars: {},
+      authenticateAndDeployStep: {} as never,
+      integrationName: 'aws-1',
+      policySettings: global_data_tags === undefined ? {} : { global_data_tags },
+    });
+    return mockCreatePolicy.mock.calls[0][0];
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCreatePolicy.mockResolvedValue({ item: { id: 'policy-1' } });
+  });
+
+  it('sends the fields as the top-level list the agentless API takes', async () => {
+    const body = await deploy(JSON.stringify([{ name: ' team ', value: ' platform ' }]));
+    expect(body.global_data_tags).toEqual([{ name: 'team', value: 'platform' }]);
+    expect(body.vars?.global_data_tags).toBeUndefined();
+  });
+
+  it('sends a value of digits only as a number, as Fleet does', async () => {
+    const body = await deploy(JSON.stringify([{ name: 'priority', value: '1' }]));
+    expect(body.global_data_tags).toEqual([{ name: 'priority', value: 1 }]);
+  });
+
+  it('leaves them out when none were set or all were removed', async () => {
+    expect(await deploy(undefined)).not.toHaveProperty('global_data_tags');
+    jest.clearAllMocks();
+    mockCreatePolicy.mockResolvedValue({ item: { id: 'policy-1' } });
+    expect(await deploy('[]')).not.toHaveProperty('global_data_tags');
+  });
+});
+
+describe('deployGroup — dedicated index template for a custom dataset', () => {
+  const otel = {
+    id: 'ec2',
+    name: 'Amazon EC2',
+    packageName: 'aws_cloudwatch_input_otel',
+    dataStreams: ['ec2'],
+    inputs: ['otelcol'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByInput: {},
+    varDefsByDataStream: {
+      ec2: {
+        inputs: ['otelcol'],
+        defaultEnabledInputs: ['otelcol'],
+        varDefsByInput: {
+          otelcol: { 'data_stream.dataset': { name: 'data_stream.dataset', default: 'aws.ec2' } },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  const otelGroup: DeployGroup = {
+    groupId: 'aws_cloudwatch_input_otel',
+    instanceIds: ['ec2'],
+    members: [
+      {
+        instance: { instanceId: 'ec2', serviceId: 'ec2', name: 'Amazon EC2', isDuplicate: false },
+        service: otel,
+      },
+    ],
+    isDuplicateGroup: false,
+    namespace: '',
+  };
+
+  const deploy = async (dataset: string, createDatasetTemplates?: boolean) => {
+    await deployGroup(otelGroup, {
+      namespace: 'default',
+      globalRegion: 'us-east-1',
+      storedServiceVars: {
+        ec2: {
+          enabledDataStreams: ['ec2'],
+          varsByDataStream: {
+            ec2: {
+              enabledInputs: ['otelcol'],
+              varsByInput: { otelcol: { 'data_stream.dataset': dataset } },
+            },
+          },
+          ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
+        },
+      },
+      authenticateAndDeployStep: {} as never,
+    });
+    return mockCreatePolicy.mock.calls[0][0];
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '1.0.0', policy_templates: [] } },
+    });
+    mockCreatePolicy.mockResolvedValue({ item: { id: 'policy-1' } });
+  });
+
+  it('asks Fleet not to create the template when the user opted out', async () => {
+    expect(await deploy('aws.prod', false)).toHaveProperty('create_dataset_templates', false);
+  });
+
+  it('says so when the template is on, which is the default', async () => {
+    expect(await deploy('aws.prod')).toHaveProperty('create_dataset_templates', true);
+  });
+
+  it('offers the choice for the default dataset too, as Fleet does for an input package', async () => {
+    expect(await deploy('aws.ec2', false)).toHaveProperty('create_dataset_templates', false);
+  });
+
+  it('leaves the flag out for the generic dataset, where Fleet shows no switch', async () => {
+    expect(await deploy('generic', false)).not.toHaveProperty('create_dataset_templates');
+  });
+
+  it('never sends the choice as a package var', async () => {
+    const body = await deploy('aws.prod', false);
+    expect(JSON.stringify(body.inputs)).not.toContain('createDatasetTemplates');
+  });
+});

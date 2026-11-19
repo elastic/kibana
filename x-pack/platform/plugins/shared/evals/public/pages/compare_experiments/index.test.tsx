@@ -36,17 +36,20 @@ const mockUseExperimentExampleDetails = jest.mocked(useExperimentExampleDetails)
 const mockUseEvalsTraceFetcher = jest.mocked(useEvalsTraceFetcher);
 const mockUseTraceSpans = jest.mocked(useTraceSpans);
 
+const side = (mean: number) => ({ mean, used: 12, missing: 0, stability: null });
+
 const buildResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'dataset-1',
   datasetName: 'Dataset 1',
   evaluatorName: 'quality',
   sampleSize: 12,
-  meanBaseline: 0.5,
-  meanTarget: 0.7,
+  baseline: side(0.5),
+  target: side(0.7),
   pValue: 0.2,
   direction: 'maximize',
   metricType: 'continuous_bounded',
   hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 10 },
+  repetitionWarning: false,
   ...overrides,
 });
 
@@ -63,8 +66,8 @@ describe('CompareExperimentsPage', () => {
           buildResult(),
           buildResult({
             evaluatorName: 'pass',
-            meanBaseline: 0.5,
-            meanTarget: 0.75,
+            baseline: side(0.5),
+            target: side(0.75),
             metricType: 'binary',
             hypothesisTest: {
               id: 'mcnemar',
@@ -109,6 +112,31 @@ describe('CompareExperimentsPage', () => {
     expect(
       screen.getByText(/4 examples score 1 only in target, 1 example score 1 only in baseline/)
     ).toBeInTheDocument();
+  });
+
+  it('sorts the rows by the baseline mean', () => {
+    mockUseCompareExperiments.mockReturnValue({
+      data: {
+        results: [
+          buildResult({ evaluatorName: 'high', baseline: side(0.9) }),
+          buildResult({ evaluatorName: 'low', baseline: side(0.1) }),
+        ],
+        pairing: {},
+      },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useCompareExperiments>);
+    render(
+      <MemoryRouter initialEntries={['/compare?baseline=baseline&target=target']}>
+        <CompareExperimentsPage />
+      </MemoryRouter>
+    );
+    const evaluators = () => screen.getAllByText(/^(high|low)$/).map((cell) => cell.textContent);
+
+    expect(evaluators()).toEqual(['high', 'low']);
+    fireEvent.click(screen.getByText('Mean baseline'));
+    expect(evaluators()).toEqual(['low', 'high']);
   });
 });
 

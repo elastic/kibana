@@ -9,7 +9,6 @@
 
 import { createHash } from 'crypto';
 import { timerange, type EdotBrowserDocument, type ReplaySize } from '@kbn/synthtrace-client';
-import type { ToolingLog } from '@kbn/tooling-log';
 import {
   generateEdotBrowserSessions,
   parseDigitalExperienceScenarioOpts,
@@ -18,11 +17,7 @@ import {
 } from './digital_experience_apps';
 
 const REPLAY_INDEX = 'logs-rum.replay.otel-default';
-const range = timerange(
-  new Date('2026-10-16T12:00:00.000Z'),
-  new Date('2026-10-16T12:10:00.000Z'),
-  {} as ToolingLog
-);
+const range = timerange(new Date('2026-10-16T12:00:00.000Z'), new Date('2026-10-16T12:10:00.000Z'));
 const FROM = range.from.getTime();
 const TO = range.to.getTime();
 
@@ -44,6 +39,7 @@ const generate = (
     errorReplayRate: 0,
     replaySize: 'light' as ReplaySize,
     sessionLength: 'typical' as SessionLength,
+    ongoingSessions: false,
     scale: 1,
     seed: 'digital-experience-replay-test',
     ...opts,
@@ -283,7 +279,8 @@ describe('digital experience session replay', () => {
       };
 
       it('keeps typical sessions as they were before the option existed', () => {
-        // Taken from the output of the scenario before `sessionLength` was added
+        // Taken from the output of the scenario before `sessionLength` was added, with the browser
+        // dataset's index names
         const docs = generate(
           { replaySize: 'light', seed: 'fingerprint-seed', sessionLength: 'typical' },
           { from: FROM }
@@ -298,7 +295,7 @@ describe('digital experience session replay', () => {
           count: 6035,
           first: 1792152000326,
           last: 1792152599999,
-          sha: '86b04dce0083098ac1b024eebfefb918cbff00dd0aa2a3c293093807e9380009',
+          sha: 'a118ec96033e232517165d1729767f93b6fd0ef9dbb4de44614e4dccbb63145f',
         });
       });
 

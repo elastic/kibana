@@ -22,7 +22,10 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
 import { Readable } from 'stream';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { ResponseActionsRequestBody } from '../../../../../../common/api/endpoint';
+import type {
+  ResponseActionGetFileRequestBody,
+  ResponseActionsRequestBody,
+} from '../../../../../../common/api/endpoint';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
@@ -639,6 +642,83 @@ describe('EndpointActionsClient', () => {
   });
 
   describe('#getFile()', () => {
+    // NOTE: the options mock merges its defaults (which include `path`), so `parameters` is
+    //       set explicitly here to be able to test `paths` on its own.
+    const createGetFileOptions = (parameters: ResponseActionGetFileRequestBody['parameters']) => ({
+      ...responseActionsClientMock.createGetFileOptions(getCommonResponseActionOptions()),
+      parameters,
+    });
+
+    describe('when `paths` parameter is defined', () => {
+      it('should throw error when endpoint does not support `get_file_multi_path` capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.getFile(createGetFileOptions({ paths: ['/one', '/two'] }))
+        ).rejects.toThrow('The following agent IDs do not support the get-file `paths` parameter');
+      });
+
+      it('should succeed when endpoint supports the `get_file_multi_path` capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(
+              generator.generate({ Endpoint: { capabilities: ['get_file_multi_path'] } })
+            ),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.getFile(createGetFileOptions({ paths: ['/one', '/two'] }))
+        ).resolves.toBeDefined();
+      });
+
+      it('should send `paths` to the endpoint in the action request', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(
+              generator.generate({ Endpoint: { capabilities: ['get_file_multi_path'] } })
+            ),
+          ]),
+        });
+
+        await endpointActionsClient.getFile(createGetFileOptions({ paths: ['/one', '/two'] }));
+
+        const fleetActionsClient =
+          await classConstructorOptions.endpointService.getFleetActionsClient();
+
+        expect(fleetActionsClient.create as jest.Mock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              command: 'get-file',
+              parameters: { paths: ['/one', '/two'] },
+            }),
+          })
+        );
+      });
+    });
+
+    it('should succeed without checking capability when only `path` is defined', async () => {
+      await expect(
+        endpointActionsClient.getFile(createGetFileOptions({ path: '/some/file' }))
+      ).resolves.toBeDefined();
+    });
+
     describe('when `force` parameter is set to `true`', () => {
       it('should throw error when endpoint does not support `get_file_force` capability', async () => {
         const generator = new EndpointMetadataGenerator('seed');

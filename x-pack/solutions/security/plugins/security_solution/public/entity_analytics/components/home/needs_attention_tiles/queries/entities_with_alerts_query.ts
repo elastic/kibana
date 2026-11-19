@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
 import { ALERT_OPEN_STATUS_FILTER } from '../../entities_grid/queries/alerts';
 import { getAlertsIndex } from '../../entities_grid/queries/esql';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';

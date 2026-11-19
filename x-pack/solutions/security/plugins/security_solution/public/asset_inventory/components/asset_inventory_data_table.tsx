@@ -154,7 +154,7 @@ export const AssetInventoryDataTable = ({
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
-  const { openDynamicFlyout } = useDynamicEntityFlyout({
+  const { openDynamicFlyout, closeDynamicFlyout } = useDynamicEntityFlyout({
     onFlyoutClose: () => setExpandedDoc(undefined),
   });
 
@@ -171,6 +171,7 @@ export const AssetInventoryDataTable = ({
         contextId: ASSET_INVENTORY_TABLE_ID,
       });
     } else {
+      closeDynamicFlyout();
       setExpandedDoc(undefined);
     }
   };

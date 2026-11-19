@@ -103,6 +103,7 @@ export const createMockAppContext = (): AppDependencies =>
       enableDataStreamStats: true,
       enableTogglingDataRetention: true,
       enableIndexMode: true,
+      showManagedDataStreamsByDefault: true,
       isServerless: false,
     },
   } as unknown as AppDependencies);

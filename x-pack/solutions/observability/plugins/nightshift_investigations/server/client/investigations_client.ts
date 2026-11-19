@@ -22,7 +22,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import { isConversationNotFoundError } from '@kbn/agent-builder-common';
+import { isConversationNotFoundError, isZeroModelUsage } from '@kbn/agent-builder-common';
 import type {
   Investigation as SharedInvestigation,
   InvestigationSubject as StoredInvestigationSubject,
@@ -42,6 +42,7 @@ import {
 import { assertNever } from '@kbn/std';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { UNKNOWN_ALERT_FIELD } from '../lib/alert_snapshot';
 import { assertNightshiftSpace } from '../lib/assert_nightshift_space';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -90,7 +91,14 @@ import {
   InvalidInvestigationContextError,
   InvestigationUnavailableError,
 } from './errors';
-import type { NightshiftTelemetryClient } from '../telemetry';
+import {
+  alertIdentityOf,
+  triggeringAlertOf,
+  type InvestigationEndedEvent,
+  type InvestigationRunOutcome,
+  type NightshiftTelemetryClient,
+} from '../telemetry';
+import { ModelUsageCollector } from '../lib/model_usage_collector';
 import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 import {
@@ -145,6 +153,12 @@ const significantEventIdOf = (
 };
 
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
+export const UNSUCCESSFUL_EXECUTION_STATUSES: readonly ExecutionStatus[] = [
+  ExecutionStatus.FAILED,
+  ExecutionStatus.TIMED_OUT,
+  ExecutionStatus.CANCELLED,
+];
+
 export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
 
 /** How an investigation run started, recorded as `inputs.context.entry_point`. */
@@ -318,7 +332,7 @@ export interface LifecycleCorrelation {
 
 /**
  * A lifecycle message's view of an investigation. Until Agent Builder titles it, the title is the
- * run's `title` input; the first pending proposal stands in for the top recommendation.
+ * run's `title` input; its recommendations are the pending proposals.
  */
 const toNotifiableInvestigation = (
   {
@@ -528,7 +542,6 @@ export class NightshiftInvestigationsClient {
       message,
       instructions,
       timeout_seconds,
-      source_ids,
       connector_id,
       context = {},
       notificationDestinations,
@@ -585,6 +598,7 @@ export class NightshiftInvestigationsClient {
     const workflow = await this.getInvestigationWorkflow(spaceId);
 
     const { alerts } = prepared;
+    const alertIdentity = alertIdentityOf(spaceId, triggeringAlertOf(subject.id, alerts));
     const newInvestigationId = uuidv4();
     const subjects = toStartSubjects({
       subject: resolvedSubject,
@@ -627,6 +641,8 @@ export class NightshiftInvestigationsClient {
                 origin: subject.type,
                 ...(automationId ? { automation_id: automationId } : {}),
                 skip_reason: 'deployment_quota',
+                event_id: significantEventIdOf(subject, alerts),
+                ...alertIdentity,
               });
             }
             throw error;
@@ -667,7 +683,6 @@ export class NightshiftInvestigationsClient {
         // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
         // investigation from the first round instead.
         ...(title ? { title } : {}),
-        ...(source_ids?.length ? { source_ids } : {}),
         ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
         investigation_id: investigationId,
         subjects: newSubjects,
@@ -710,6 +725,7 @@ export class NightshiftInvestigationsClient {
       automation_id: automationId,
       ...correlation,
       event_id: significantEventIdOf(resolvedSubject, alerts) ?? correlation.event_id,
+      ...alertIdentity,
     });
 
     this.logger.info(
@@ -1021,7 +1037,7 @@ export class NightshiftInvestigationsClient {
     );
     if (
       TerminalExecutionStatuses.includes(execution.status) &&
-      (reopen || ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status))
+      (reopen || !UNSUCCESSFUL_EXECUTION_STATUSES.includes(execution.status))
     ) {
       throw new InvestigationNotFoundError(investigationId);
     }
@@ -1176,10 +1192,7 @@ export class NightshiftInvestigationsClient {
   ): Promise<{ execution: WorkflowExecutionDto; investigationId: string }> {
     if (!executionId || executionId.length > 500) throw new InvestigationNotFoundError(executionId);
     const { execution, inputs } = await this.readInvestigationExecution(undefined, executionId);
-    if (
-      execution.isTestRun ||
-      ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status)
-    ) {
+    if (execution.isTestRun || !UNSUCCESSFUL_EXECUTION_STATUSES.includes(execution.status)) {
       throw new InvestigationNotFoundError(executionId);
     }
     const investigationId = asString(inputs?.investigation_id) ?? executionId;
@@ -1260,6 +1273,103 @@ export class NightshiftInvestigationsClient {
       return {};
     }
     return correlationFromContext(inputs?.context);
+  }
+
+  /**
+   * Reports the end of an investigation run with its duration and the token usage of the round
+   * it ran. Best-effort: a read that fails leaves its fields off, and nothing here throws.
+   */
+  async reportRunEnded(
+    investigationId: string,
+    executionId: string,
+    outcome: InvestigationRunOutcome
+  ): Promise<void> {
+    if (!this.telemetry) {
+      return;
+    }
+    const event: InvestigationEndedEvent = {
+      investigation_id: investigationId,
+      workflow_execution_id: executionId,
+      outcome,
+    };
+    let runStartedAt: number | undefined;
+    try {
+      const { execution, inputs } = await this.readInvestigationExecution(
+        investigationId,
+        executionId
+      );
+      const context = isPlainObject(inputs?.context) ? inputs?.context : {};
+      const entryPoint = asString(context?.entry_point);
+      const parentExecutionId = isPlainObject(execution.context)
+        ? asString(execution.context.parentWorkflowExecutionId)
+        : undefined;
+      // Only `start()` records the trigger type; a recovery round is always automatic.
+      const triggerType =
+        asString(context?.trigger_type) ??
+        (entryPoint === 'alert_recovery' ? 'automatic' : undefined);
+      // A Slack reply records only its entry point, and its subject is the thread.
+      const subjectType =
+        asString(context?.source) ?? (entryPoint === 'slack' ? 'slack_thread' : undefined);
+      runStartedAt = Date.parse(execution.startedAt);
+      Object.assign(event, {
+        ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
+        ...(Number.isNaN(runStartedAt) ? {} : { duration_ms: Date.now() - runStartedAt }),
+        ...(triggerType ? { trigger_type: triggerType } : {}),
+        ...(entryPoint ? { entry_point: entryPoint } : {}),
+        ...(subjectType ? { subject_type: subjectType } : {}),
+        // Replaced below by what the conversation shows, when it can be read. Alert recovery
+        // rounds always continue an investigation but predate the flag.
+        ...(typeof context?.is_follow_up === 'boolean'
+          ? { is_follow_up: context.is_follow_up }
+          : entryPoint === 'alert_recovery'
+          ? { is_follow_up: true }
+          : {}),
+        ...(asString(context?.nightshift_automation_id)
+          ? { automation_id: asString(context?.nightshift_automation_id) }
+          : {}),
+      });
+    } catch (error) {
+      this.logger.debug(
+        `Could not read run "${executionId}" of investigation "${investigationId}" for telemetry: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
+    if (runStartedAt !== undefined && !Number.isNaN(runStartedAt)) {
+      const startedAtMs = runStartedAt;
+      try {
+        const { agentBuilder } = this.requireWriteDeps();
+        const conversations = await agentBuilder.conversations.getScopedClient({
+          request: this.request,
+        });
+        const { rounds } = await conversations.get(investigationId);
+        // Runs that do not go through `start()` carry no follow-up flag, and every one of them
+        // leaves its rounds on the conversation.
+        event.is_follow_up = rounds.some(
+          ({ started_at: startedAt }) => Date.parse(startedAt) < startedAtMs
+        );
+        // The run's agent round is the first one started after the run did. Taking the first
+        // keeps a chat message sent right after the run out of its cost.
+        const round = rounds.find(
+          ({ started_at: startedAt }) => Date.parse(startedAt) >= startedAtMs
+        );
+        // An interrupted round has unknown usage, which zeros would report as free.
+        if (round && !isZeroModelUsage(round.model_usage)) {
+          const usage = new ModelUsageCollector();
+          usage.addRound(round.model_usage);
+          Object.assign(event, usage.summarize());
+        }
+      } catch (error) {
+        this.logger.debug(
+          `Could not read the round of run "${executionId}" for telemetry: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
+
+    this.telemetry.reportInvestigationEnded(event);
   }
 
   /**
@@ -1510,6 +1620,15 @@ export class NightshiftInvestigationsClient {
       snapshot: alertSubject?.snapshot,
     });
 
+    // The recovery context has no `alerts`, so the rule type travels on its own for online evals.
+    // The step passes an empty string when the rule event has no type.
+    const snapshotRuleType = alertSubject?.snapshot?.rule_type_id;
+    const alertRuleType =
+      alertInput.ruleTypeId ||
+      (typeof snapshotRuleType === 'string' && snapshotRuleType !== UNKNOWN_ALERT_FIELD
+        ? snapshotRuleType
+        : '');
+
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
     const workflow = await this.getInvestigationWorkflow(spaceId);
@@ -1520,6 +1639,7 @@ export class NightshiftInvestigationsClient {
         source: 'alert',
         follow_up: ALERT_RECOVERED_FOLLOW_UP,
         entry_point: 'alert_recovery' satisfies InvestigationEntryPoint,
+        ...(alertRuleType ? { alert_rule_type: alertRuleType } : {}),
       },
     });
     this.telemetry?.reportInvestigationStarted({
@@ -1529,6 +1649,7 @@ export class NightshiftInvestigationsClient {
       entry_point: 'alert_recovery',
       subject_type: 'alert',
       is_follow_up: true,
+      ...alertIdentityOf(spaceId, alertSubject?.snapshot),
     });
     this.logger.info(
       `Requested a recovery round on investigation "${existing.id}" for alert/${alertUuid}, execution_id=${executionId}`
