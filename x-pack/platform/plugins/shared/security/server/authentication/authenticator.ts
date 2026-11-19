@@ -341,6 +341,7 @@ export class Authenticator {
 
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
+          providerInstance: provider,
           authenticationResult,
           existingSessionValue,
         });
@@ -425,6 +426,7 @@ export class Authenticator {
 
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
+          providerInstance: provider,
           authenticationResult,
           existingSessionValue: existingSession.value,
         });
@@ -537,6 +539,7 @@ export class Authenticator {
     if (!authenticationResult.notHandled()) {
       const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
+        providerInstance: provider,
         authenticationResult,
         existingSessionValue,
       });
@@ -724,6 +727,7 @@ export class Authenticator {
    * Updates, creates, extends or clears session value based on the received authentication result.
    * @param request Request instance.
    * @param provider Provider that produced provided authentication result.
+   * @param providerInstance Provider instance that produced provided authentication result.
    * @param authenticationResult Result of the authentication or login attempt.
    * @param existingSessionValue Value of the existing session if any.
    */
@@ -731,10 +735,12 @@ export class Authenticator {
     request: KibanaRequest,
     {
       provider,
+      providerInstance,
       authenticationResult,
       existingSessionValue,
     }: {
       provider: AuthenticationProvider;
+      providerInstance: BaseAuthenticationProvider;
       authenticationResult: AuthenticationResult;
       existingSessionValue: Readonly<SessionValue> | null;
     }
@@ -803,12 +809,12 @@ export class Authenticator {
       isNewSessionAuthenticated &&
       authenticationResult.user!.username !== existingSessionValue!.username;
 
-    // There are 3 cases when we SHOULD invalidate existing session and create a new one with
+    // There are 3 cases when we may invalidate the existing session and create a new one with
     // regenerated SID/AAD:
     // 1. If a new session must be created while existing is still valid (e.g. IdP initiated login
     // for the user with active session created by another provider).
     // 2. If the existing session was unauthenticated (e.g. intermediate session used during SSO
-    // handshake) and can now be turned into an authenticated one.
+    // handshake) and the provider no longer needs it for pending login attempts.
     // 3. If we re-authenticated user with another username (e.g. during IdP initiated SSO login or
     // when client certificate changes and PKI provider needs to re-authenticate user).
     if (providerHasChanged) {
@@ -818,14 +824,18 @@ export class Authenticator {
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
-      this.logger.debug(
-        'Session is authenticated, existing unauthenticated session will be invalidated.'
-      );
-      await this.invalidateSessionValue({
-        request,
-        sessionValue: existingSessionValue,
-        skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
-      });
+      if (
+        providerInstance.shouldInvalidateIntermediateSessionAfterLogin(existingSessionValue?.state)
+      ) {
+        this.logger.debug(
+          'Session is authenticated, existing unauthenticated session will be invalidated.'
+        );
+        await this.invalidateSessionValue({
+          request,
+          sessionValue: existingSessionValue,
+          skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
+        });
+      }
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.warn('Username has changed, existing session will be invalidated.');
