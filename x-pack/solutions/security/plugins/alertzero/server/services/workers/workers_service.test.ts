@@ -1682,7 +1682,7 @@ describe('WorkersService', () => {
       expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
     });
 
-    it('tears down TI supply when the shared agent ensure fails after the supply was set up', async () => {
+    it('does not touch TI supply when the shared agent ensure fails', async () => {
       const harness = createPersistentHarness();
       const threatIntelSupply = makeThreatIntelSupply();
       const service = makeHuntService(harness, threatIntelSupply, {
@@ -1704,9 +1704,55 @@ describe('WorkersService', () => {
         )
       ).resolves.toEqual({ outcome: 'unavailable' });
 
-      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
-      expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+      expect(threatIntelSupply.assertHardGate).not.toHaveBeenCalled();
+      expect(threatIntelSupply.ensureSupplyForSpace).not.toHaveBeenCalled();
+      expect(threatIntelSupply.teardownSupplyForSpace).not.toHaveBeenCalled();
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    // Regression (Libra P3): a PATCH with enabled:true can target an ALREADY-enabled Hunt
+    // worker. If the agent ensure runs after the supply ensure, its failure rolls back
+    // (tears down) a supply the still-enabled Hunt worker depends on. The agent ensure must
+    // run before any supply change so this failure leaves existing workflows untouched.
+    it('does not tear down TI supply of an already-enabled Hunt worker when the agent ensure fails', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      let requireAgent = false;
+      const service = makeHuntService(harness, threatIntelSupply, {
+        requireAgentForSpace: async () => {
+          if (requireAgent) throw new Error('agent store unavailable');
+        },
+      });
+
+      // Enable Hunt once while the agent store is healthy, so the supply is live and
+      // Hunt stays enabled.
+      await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalled();
+      threatIntelSupply.assertHardGate.mockClear();
+      threatIntelSupply.ensureSupplyForSpace.mockClear();
+      threatIntelSupply.teardownSupplyForSpace.mockClear();
+
+      // PATCH enabled:true again (no settings change, so no revision needed); now the
+      // agent store fails. The supply must not be re-ensured nor torn down, and Hunt
+      // must stay enabled.
+      requireAgent = true;
+      await expect(service.update(HUNT, { enabled: true }, SPACE, request)).resolves.toEqual({
+        outcome: 'unavailable',
+      });
+
+      expect(threatIntelSupply.assertHardGate).not.toHaveBeenCalled();
+      expect(threatIntelSupply.ensureSupplyForSpace).not.toHaveBeenCalled();
+      expect(threatIntelSupply.teardownSupplyForSpace).not.toHaveBeenCalled();
+      expect(harness.documents.get(`${HUNT}-${SPACE}`)?.enabled).toBe(true);
     });
 
     it('does not ensure TI supply when enable is rejected for a missing service account', async () => {

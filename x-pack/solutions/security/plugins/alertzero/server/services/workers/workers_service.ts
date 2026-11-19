@@ -395,6 +395,23 @@ export class WorkersService {
       pendingSettingsValues = applied.values;
     }
 
+    // A worker that is on runs as the shared agent, which any earlier list only ensured
+    // best-effort, and a worker enabled without it fails every run: a failed ensure refuses
+    // the save as transient so the caller can retry. Run it before the Hunt supply ensure so
+    // an agent-store failure never tears down a supply a still-enabled Hunt worker depends on.
+    if (nextEnabled) {
+      try {
+        await this.requireAgent(spaceId);
+      } catch (err) {
+        this.logger.warn(
+          `Failed to ensure the shared agent in space "${spaceId}" before a worker update: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+        return { outcome: 'unavailable' };
+      }
+    }
+
     // Hunt supply: hard-gate + ensure TI after request validation and before enabling
     // CTH so a failed ensure never leaves Hunt on without reports. If Hunt never ends up
     // enabled after this ensure, roll supply back (Restore only shows when Hunt is on).
@@ -437,26 +454,6 @@ export class WorkersService {
     }
 
     try {
-      // A worker that is on runs as the shared agent, which any earlier list only ensured
-      // best-effort, and a worker enabled without it fails every run: a failed ensure refuses
-      // the save as transient so the caller can retry.
-      if (nextEnabled) {
-        try {
-          await this.requireAgent(spaceId);
-        } catch (err) {
-          this.logger.warn(
-            `Failed to ensure the shared agent in space "${spaceId}" before a worker update: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
-          // A Hunt enable that got this far already ensured the shared threat-intel supply;
-          // without it the enabled-by-request ingest/enrich/attribution workflows would keep
-          // running while Hunt itself stays off behind a 503.
-          await rollbackHuntSupplyIfNeeded();
-          return { outcome: 'unavailable' };
-        }
-      }
-
       if (pendingSettingsValues) {
         await this.persistWorker(request, registration, {
           spaceId,
