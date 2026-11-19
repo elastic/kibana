@@ -376,6 +376,10 @@ per recorded segment to `logs-rum.replay.otel-*`, which the task already reads a
 would cost. It is absent rather than `false` until something sets it, and readers expose it as
 `hasReplay`.
 
+`load_time` was added without a bump too, as nothing reads it yet. An index built before it keeps
+it in `_source` only (`dynamic: false`), and the summaries it already holds lack it until their
+session gets new events, so the first reader of `load_time` needs a `SESSIONS_VERSION` bump.
+
 ### Summary query
 
 `sessionSummaryQuery` (`server/services/sessions/summary_queries.ts`) rebuilds a batch of sessions
