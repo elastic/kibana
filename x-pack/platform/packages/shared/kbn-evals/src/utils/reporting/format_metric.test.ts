@@ -28,8 +28,14 @@ describe('formatMetricValue', () => {
     expect(formatMetricValue(value)).toBe(expected);
   });
 
-  it('treats float noise below the precision floor as zero', () => {
+  it('treats float noise as zero', () => {
     expect(formatMetricValue(0.1 + 0.2 - 0.3)).toBe('0.00');
-    expect(formatMetricValue(1e-9)).toBe('0.00');
+    expect(formatMetricValue(1e-15)).toBe('0.00');
+  });
+
+  it('falls back to scientific notation instead of hiding a real nonzero delta', () => {
+    expect(formatMetricValue(0.0020005 - 0.002)).toBe('5.0e-7');
+    expect(formatMetricValue(-5e-7)).toBe('-5.0e-7');
+    expect(formatMetricValue(1e-9)).toBe('1.0e-9');
   });
 });

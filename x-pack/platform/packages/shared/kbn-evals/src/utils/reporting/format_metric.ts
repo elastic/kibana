@@ -7,8 +7,8 @@
 
 const DEFAULT_DECIMALS = 2;
 const MAX_DECIMALS = 6;
-// Below this magnitude a value is float noise from subtracting two equal means, not a real delta.
-const NOISE_FLOOR = 10 ** -MAX_DECIMALS;
+// Float noise from subtracting two equal means is ~1e-16; anything above this is a real delta.
+const NOISE_FLOOR = 1e-12;
 
 /**
  * Fixed-point formatting that keeps two decimals for ordinary values but widens for sub-cent
@@ -20,6 +20,7 @@ export function formatMetricValue(value: number): string {
     return value.toFixed(DEFAULT_DECIMALS);
   }
   // Two significant digits: 0.004 -> 0.0040, 0.00004 -> 0.000040.
-  const decimals = Math.min(Math.ceil(-Math.log10(magnitude)) + 1, MAX_DECIMALS);
-  return value.toFixed(decimals);
+  const decimals = Math.ceil(-Math.log10(magnitude)) + 1;
+  // Too small for fixed-point at MAX_DECIMALS: scientific notation keeps a real delta visible.
+  return decimals > MAX_DECIMALS ? value.toExponential(1) : value.toFixed(decimals);
 }
