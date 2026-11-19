@@ -46,7 +46,9 @@ import {
   type SessionSignalId,
 } from '../../../utils/describe_session';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
+import type { RailPlacement } from './session_split_view';
 import { pickSessionsListQuery } from '../../../utils/sessions_list_query';
+import { MAX_LISTED_SESSIONS } from '../../sessions/components/sessions_table';
 import { useSessionsList } from '../../sessions/hooks/sessions_list_request';
 import {
   hasSessionsListFilters,
@@ -62,6 +64,21 @@ const TITLE = i18n.translate('xpack.digitalExperience.sessionDetail.rail.title',
 const HIDE_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.rail.hide', {
   defaultMessage: 'Hide the sessions list',
 });
+
+const OPEN_AS_FLYOUT_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.rail.asFlyout', {
+  defaultMessage: 'Show as a flyout',
+});
+
+const DOCK_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.rail.dock', {
+  defaultMessage: 'Show beside the session',
+});
+
+const hideIconOf = (placement: RailPlacement): string => {
+  if (placement === 'flyout') {
+    return 'cross';
+  }
+  return placement === 'right' ? 'transitionRightOut' : 'transitionLeftOut';
+};
 
 const PREVIOUS_PAGE_LABEL = i18n.translate(
   'xpack.digitalExperience.sessionDetail.rail.previousPage',
@@ -241,16 +258,19 @@ export function SessionsRail({
   serviceName,
   sessionId,
   source,
-  side,
+  placement,
   onHide,
+  onToggleFlyout,
   headerHeight,
 }: {
   serviceName: string;
   sessionId: string;
   source: ApplicationSource;
-  /** The side of the session the list shows on, which its hide button points to. */
-  side: 'left' | 'right';
+  /** Where the list shows, which its hide button points to. */
+  placement: Exclude<RailPlacement, 'hidden'>;
   onHide: () => void;
+  /** Turns the list from beside the session into a flyout, or back. */
+  onToggleFlyout: () => void;
   /** The height of the session's page header, which the list's header matches. */
   headerHeight?: number;
 }) {
@@ -282,6 +302,8 @@ export function SessionsRail({
   );
 
   const total = response?.total ?? 0;
+  // The API can't page past its result window, as the sessions list.
+  const pageableTotal = Math.min(total, MAX_LISTED_SESSIONS);
   const firstShown = state.page * state.perPage + 1;
   const lastShown = Math.min(total, (state.page + 1) * state.perPage);
   const setPage = (page: number) =>
@@ -319,9 +341,26 @@ export function SessionsRail({
           )}
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={placement === 'flyout' ? DOCK_LABEL : OPEN_AS_FLYOUT_LABEL}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType={placement === 'flyout' ? 'pin' : 'external'}
+                aria-label={placement === 'flyout' ? DOCK_LABEL : OPEN_AS_FLYOUT_LABEL}
+                onClick={onToggleFlyout}
+                data-test-subj="digitalExperienceSessionsRailFlyoutToggle"
+                {...getEbtProps({
+                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_SESSIONS_LIST,
+                  element: SESSIONS_EBT_ELEMENTS.RAIL_FLYOUT,
+                })}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiToolTip content={HIDE_LABEL} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType={side === 'right' ? 'transitionRightOut' : 'transitionLeftOut'}
+                iconType={hideIconOf(placement)}
                 aria-label={HIDE_LABEL}
                 onClick={onHide}
                 data-test-subj="digitalExperienceSessionsRailHide"
@@ -425,7 +464,7 @@ export function SessionsRail({
         )}
       </div>
 
-      {total > state.perPage && (
+      {(total > state.perPage || state.page > 0) && (
         <EuiFlexGroup
           gutterSize="s"
           alignItems="center"
@@ -462,7 +501,7 @@ export function SessionsRail({
                 id: 'next',
                 iconType: 'chevronSingleRight',
                 label: NEXT_PAGE_LABEL,
-                disabled: lastShown >= total,
+                disabled: (state.page + 1) * state.perPage >= pageableTotal,
                 page: state.page + 1,
               },
             ] as const

@@ -15,7 +15,10 @@ import type {
 
 export const LazyObservabilityPageTemplate = React.lazy(() => import('./page_template'));
 
-export type LazyObservabilityPageTemplateProps = WrappedPageTemplateProps;
+export type LazyObservabilityPageTemplateProps = WrappedPageTemplateProps & {
+  /** Hides the solution navigation whatever the sidebar setting is, e.g. to give its width to the page. */
+  hideSolutionNav?: boolean;
+};
 
 export function createLazyObservabilityPageTemplate({
   isSidebarEnabled$,
@@ -23,9 +26,8 @@ export function createLazyObservabilityPageTemplate({
 }: ObservabilityPageTemplateDependencies) {
   return (pageTemplateProps: LazyObservabilityPageTemplateProps) => {
     const isSidebarEnabled = useObservable(isSidebarEnabled$, isSidebarEnabled$.getValue());
-    const { showSolutionNav: showSolutionNavProp, ...props } = pageTemplateProps;
-    // The sidebar setting decides unless the page does, e.g. to give its width to the content.
-    const showSolutionNav = showSolutionNavProp ?? isSidebarEnabled;
+    const { showSolutionNav: showSolutionNavProp, hideSolutionNav, ...props } = pageTemplateProps;
+    const showSolutionNav = !hideSolutionNav && Boolean(!!showSolutionNavProp || isSidebarEnabled);
 
     return (
       <React.Suspense fallback={null}>

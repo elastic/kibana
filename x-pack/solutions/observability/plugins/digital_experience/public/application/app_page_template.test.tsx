@@ -22,7 +22,7 @@ jest.mock('../hooks/use_kibana_services', () => ({
 }));
 
 const pageTemplateProps = jest.fn();
-const PageTemplate = ((props: { showSolutionNav?: boolean; children?: React.ReactNode }) => {
+const PageTemplate = ((props: { hideSolutionNav?: boolean; children?: React.ReactNode }) => {
   pageTemplateProps(props);
   return <>{props.children}</>;
 }) as unknown as DigitalExperienceStartDeps['observabilityShared']['navigation']['PageTemplate'];
@@ -33,20 +33,19 @@ function PageHidingTheNav() {
   return null;
 }
 
-const showSolutionNav = () => pageTemplateProps.mock.calls.at(-1)?.[0].showSolutionNav;
+const hideSolutionNav = () => pageTemplateProps.mock.calls.at(-1)?.[0].hideSolutionNav;
 
 describe('AppPageTemplate', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('leaves the navigation to the sidebar setting while no page hides it', () => {
+  it('keeps the navigation while no page hides it', () => {
     render(
       <SideNavProvider>
         <AppPageTemplate PageTemplate={PageTemplate} />
       </SideNavProvider>
     );
 
-    // Not `true`: the setting is off where the layout has a navigation of its own.
-    expect(showSolutionNav()).toBeUndefined();
+    expect(hideSolutionNav()).toBe(false);
   });
 
   it('hides the navigation for a page that asked for its width', () => {
@@ -57,6 +56,6 @@ describe('AppPageTemplate', () => {
       </SideNavProvider>
     );
 
-    expect(showSolutionNav()).toBe(false);
+    expect(hideSolutionNav()).toBe(true);
   });
 });

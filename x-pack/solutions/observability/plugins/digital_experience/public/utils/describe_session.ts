@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SessionSummary } from '../../common/sessions';
+import { SESSIONS_JOURNEY_SIZE, type SessionSummary } from '../../common/sessions';
 
 /** Browser, OS and device, as far as they're known, e.g. "Chrome 130 · macOS". */
 export const clientOf = ({ userAgent }: Pick<SessionSummary, 'userAgent'>): string =>
@@ -29,25 +29,30 @@ export const shortSessionId = (sessionId: string): string => sessionId.slice(0, 
 const JOURNEY_PAGES_SHOWN = 3;
 
 /**
- * The pages a session went through, as far as they're known, e.g. "/cart → /checkout +2", without
- * repeating a page it stayed on; what tells anonymous sessions apart.
+ * The pages a session went through, as far as they're known, e.g. "/cart → /checkout +2"; what
+ * tells anonymous sessions apart. The server caps a journey, so a full one only says there is more.
  */
 export const journeyOf = ({
   journey,
   entryPage,
 }: Pick<SessionSummary, 'journey' | 'entryPage'>): string | null => {
-  const pages = journey.filter((page, index) => page !== journey[index - 1]);
-  if (pages.length === 0) {
+  if (journey.length === 0) {
     return entryPage;
   }
-  const shown = pages.slice(0, JOURNEY_PAGES_SHOWN).join(' → ');
-  const more = pages.length - JOURNEY_PAGES_SHOWN;
-  return more > 0
-    ? i18n.translate('xpack.digitalExperience.describeSession.journeyMore', {
+  const shown = journey.slice(0, JOURNEY_PAGES_SHOWN).join(' → ');
+  const more = journey.length - JOURNEY_PAGES_SHOWN;
+  if (more <= 0) {
+    return shown;
+  }
+  return journey.length >= SESSIONS_JOURNEY_SIZE
+    ? i18n.translate('xpack.digitalExperience.describeSession.journeyMoreCapped', {
+        defaultMessage: '{pages} …',
+        values: { pages: shown },
+      })
+    : i18n.translate('xpack.digitalExperience.describeSession.journeyMore', {
         defaultMessage: '{pages} +{more}',
         values: { pages: shown, more },
-      })
-    : shown;
+      });
 };
 
 /** What stands out about a session: something broke, or the user left at once. */

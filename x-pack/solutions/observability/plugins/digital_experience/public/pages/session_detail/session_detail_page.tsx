@@ -99,6 +99,13 @@ const RAIL_PLACEMENT_OPTIONS = [
     iconType: 'transitionRightIn',
   },
   {
+    placement: 'flyout',
+    label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.showFlyout', {
+      defaultMessage: 'Show as a flyout',
+    }),
+    iconType: 'external',
+  },
+  {
     placement: 'hidden',
     label: i18n.translate('xpack.digitalExperience.sessionDetail.sessionsList.hide', {
       defaultMessage: 'Hide',
@@ -108,6 +115,13 @@ const RAIL_PLACEMENT_OPTIONS = [
 ] as const;
 
 const RAIL_PLACEMENTS = RAIL_PLACEMENT_OPTIONS.map(({ placement }) => placement);
+
+const railMenuIcon: Record<(typeof RAIL_PLACEMENTS)[number], string> = {
+  left: 'transitionLeftIn',
+  right: 'transitionRightIn',
+  flyout: 'popout',
+  hidden: 'transitionLeftIn',
+};
 
 const OPEN_IN_DISCOVER_LABEL = i18n.translate(
   'xpack.digitalExperience.sessionDetail.openInDiscoverLabel',
@@ -344,9 +358,9 @@ export function SessionDetailPage({
     'left'
   );
   const railOpen = railPlacement !== 'hidden';
-  const railSide = railPlacement === 'right' ? 'right' : 'left';
-  // The list takes the width of the side navigation while it shows.
-  useHideSideNav(railOpen);
+  const railIsDocked = railPlacement === 'left' || railPlacement === 'right';
+  // Docked, the list takes the width of the side navigation; as a flyout, it leaves it be.
+  useHideSideNav(railIsDocked);
 
   // Another session opens at its top, whether the page or the panel beside the list scrolls.
   const pageRef = useRef<HTMLDivElement>(null);
@@ -447,7 +461,9 @@ export function SessionDetailPage({
     }
   };
 
-  const session = detail?.session;
+  // While the next session loads, the previous one stays on screen, but its header must not
+  // describe a session other than the one in the breadcrumb.
+  const session = detail?.session.sessionId === sessionId ? detail.session : undefined;
   const discoverTimeRange = useMemo(
     () => (session ? sessionTimeRange(session) : undefined),
     [session]
@@ -493,16 +509,17 @@ export function SessionDetailPage({
 
   return (
     <SessionSplitView
-      railOpen={railOpen}
-      railSide={railSide}
+      placement={railPlacement}
+      onHideRail={() => setRailPlacement('hidden')}
       rail={
         <SessionsRail
           serviceName={serviceName}
           sessionId={sessionId}
           source={query.source}
-          side={railSide}
+          placement={railPlacement === 'hidden' ? 'left' : railPlacement}
           onHide={() => setRailPlacement('hidden')}
-          headerHeight={headerHeight || undefined}
+          onToggleFlyout={() => setRailPlacement(railPlacement === 'flyout' ? 'left' : 'flyout')}
+          headerHeight={railIsDocked ? headerHeight || undefined : undefined}
         />
       }
     >
@@ -523,7 +540,7 @@ export function SessionDetailPage({
                   id: 'sessionsList',
                   order: 1,
                   label: SESSIONS_LIST_LABEL,
-                  iconType: railSide === 'right' ? 'transitionRightIn' : 'transitionLeftIn',
+                  iconType: railMenuIcon[railPlacement],
                   isSelected: railOpen,
                   testId: 'digitalExperienceSessionsListToggle',
                   popoverTestId: 'digitalExperienceSessionsListPlacement',

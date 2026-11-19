@@ -7,8 +7,10 @@
 
 import React, { useState, type ReactNode } from 'react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { EuiFlyout } from '@elastic/eui';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
@@ -35,20 +37,27 @@ const containerCss = css({
   height: 'var(--kbn-application--content-height, calc(100vh - var(--euiFixedHeadersOffset, 0px)))',
 });
 
+/** Where the sessions list shows: beside the session, in a flyout over it, or not at all. */
+export type RailPlacement = 'left' | 'right' | 'flyout' | 'hidden';
+
+const FLYOUT_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.rail.flyoutLabel', {
+  defaultMessage: 'Sessions',
+});
+
 /**
- * The session beside the sessions list, which the user can resize, or the session alone when the
- * list is hidden.
+ * The session beside the sessions list, which the user can resize, the list in a flyout, or the
+ * session alone when the list is hidden.
  */
 export function SessionSplitView({
-  railOpen,
-  railSide,
+  placement,
   rail,
+  onHideRail,
   children,
 }: {
-  railOpen: boolean;
-  /** The side of the session the list shows on. */
-  railSide: 'left' | 'right';
+  placement: RailPlacement;
   rail: ReactNode;
+  /** Called when the flyout is closed, e.g. with Escape. */
+  onHideRail: () => void;
   children: ReactNode;
 }) {
   const [savedWidth, setSavedWidth] = useLocalStorage<number>(
@@ -67,10 +76,35 @@ export function SessionSplitView({
     [railWidth]
   );
 
-  if (!railOpen) {
+  if (placement === 'hidden') {
     return <>{children}</>;
   }
 
+  if (placement === 'flyout') {
+    return (
+      <>
+        {children}
+        {/* Pushes the session aside, so the list and the session can be used together. */}
+        <EuiFlyout
+          type="push"
+          ownFocus={false}
+          paddingSize="none"
+          hideCloseButton
+          resizable
+          size={railWidth}
+          minWidth={MIN_RAIL_WIDTH}
+          onResize={setRailWidth}
+          onClose={onHideRail}
+          aria-label={FLYOUT_LABEL}
+          data-test-subj="digitalExperienceSessionsFlyout"
+        >
+          {rail}
+        </EuiFlyout>
+      </>
+    );
+  }
+
+  const railSide = placement;
   return (
     <div
       css={containerCss}

@@ -769,6 +769,30 @@ describe('SessionDetailPage', () => {
     expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"right"');
   });
 
+  it('turns the list into a flyout, and back beside the session', async () => {
+    mockChrome.getChromeStyle.mockReturnValue('project');
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceSessionsRail');
+    expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(true);
+
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionsRailFlyoutToggle'));
+
+    const flyout = await screen.findByTestId('digitalExperienceSessionsFlyout');
+    expect(within(flyout).getByTestId('digitalExperienceSessionsRail')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceSessionSplitView')).not.toBeInTheDocument();
+    expect(window.localStorage.getItem('digitalExperience.sessionDetail.rail')).toBe('"flyout"');
+    // A flyout leaves the side navigation as the user had it.
+    expect(mockChrome.sideNav.setIsCollapsed).toHaveBeenLastCalledWith(false);
+
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionsRailFlyoutToggle'));
+
+    expect(await screen.findByTestId('digitalExperienceSessionSplitView')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceSessionsFlyout')).not.toBeInTheDocument();
+    mockChrome.getChromeStyle.mockReturnValue('classic');
+  });
+
   it('shows the list on the left for a choice stored before it could move', async () => {
     window.localStorage.setItem('digitalExperience.sessionDetail.rail', '"open"');
     mockDetail.mockResolvedValue(detail());
@@ -829,6 +853,9 @@ describe('SessionDetailPage', () => {
     expect(screen.getByTestId('digitalExperienceSessionSummary')).toBeInTheDocument();
     expect(screen.getByTestId('digitalExperienceSessionLoadingNext')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceSessionLoading')).not.toBeInTheDocument();
+    // The header no longer describes the previous session, whose ID the breadcrumb has left.
+    expect(screen.queryByTestId('digitalExperienceSessionUser')).not.toBeInTheDocument();
+    expect(screen.getByTestId('digitalExperienceSessionId')).toHaveTextContent('first111');
 
     await act(async () => {
       resolveNext(

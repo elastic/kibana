@@ -18,12 +18,7 @@ export function AppPageTemplate({ PageTemplate }: { PageTemplate: ObservabilityP
   const isSideNavHidden = useIsSideNavHidden();
   return (
     // Unpadded, so each page's AppHeader spans the page; pages pad their own content.
-    <PageTemplate
-      pageSectionProps={{ paddingSize: 'none' }}
-      // Only a page that hides the navigation decides; otherwise the sidebar setting does, which
-      // is off where the layout has a navigation of its own, e.g. a serverless project.
-      showSolutionNav={isSideNavHidden ? false : undefined}
-    >
+    <PageTemplate pageSectionProps={{ paddingSize: 'none' }} hideSolutionNav={isSideNavHidden}>
       <RouteRenderer />
     </PageTemplate>
   );

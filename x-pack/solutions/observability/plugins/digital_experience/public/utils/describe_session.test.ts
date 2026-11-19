@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SESSIONS_JOURNEY_SIZE } from '../../common/sessions';
 import { journeyOf, shortSessionId } from './describe_session';
 
 describe('journeyOf', () => {
@@ -17,8 +18,9 @@ describe('journeyOf', () => {
     expect(journeyOf({ journey, entryPage: journey[0] })).toBe(expected);
   });
 
-  it('does not repeat a page the session stayed on', () => {
-    expect(journeyOf({ journey: ['/', '/', '/cart', '/cart'], entryPage: '/' })).toBe('/ → /cart');
+  it('only says there is more once the journey is as long as the server keeps it', () => {
+    const journey = Array.from({ length: SESSIONS_JOURNEY_SIZE }, (_, index) => `/page-${index}`);
+    expect(journeyOf({ journey, entryPage: journey[0] })).toBe('/page-0 → /page-1 → /page-2 …');
   });
 
   it('falls back to the entry page, else nothing', () => {
