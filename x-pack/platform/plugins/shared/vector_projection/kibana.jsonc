@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/vector-projection-plugin",
+  "owner": ["@elastic/search-ml-ux"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Dashboard panel that projects dense_vector fields to 2D or 3D with WebGPU-accelerated UMAP",
+  "plugin": {
+    "id": "vectorProjection",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["data", "dataViews", "embeddable", "uiActions"]
+  }
+}

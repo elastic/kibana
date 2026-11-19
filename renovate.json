@@ -483,7 +483,9 @@
         "async",
         "he",
         "icalendar",
-        "react-popper-tooltip"
+        "ml-levenberg-marquardt",
+        "react-popper-tooltip",
+        "@webgpu/types"
       ],
       "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],

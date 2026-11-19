@@ -4021,6 +4021,9 @@ importers:
       '@kbn/uiam-api-keys-provisioning-status':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-uiam-api-keys-provisioning-status
+      '@kbn/umap-webgpu':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/private/kbn-umap-webgpu
       '@kbn/unified-chart-section-viewer':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-unified-chart-section-viewer
@@ -4123,6 +4126,9 @@ importers:
       '@kbn/v8-profiler-examples-plugin':
         specifier: workspace:*
         version: link:examples/v8_profiler_examples
+      '@kbn/vector-projection-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/vector_projection
       '@kbn/vectordb-onboarding':
         specifier: workspace:*
         version: link:x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding
@@ -4735,6 +4741,9 @@ importers:
       minimatch:
         specifier: 11.0.4
         version: 11.0.4
+      ml-levenberg-marquardt:
+        specifier: 4.1.3
+        version: 4.1.3
       moment:
         specifier: 2.31.0
         version: 2.31.0
@@ -6497,6 +6506,9 @@ importers:
       '@typescript-eslint/typescript-estree':
         specifier: 8.60.0
         version: 8.60.0(supports-color@10.2.2)(typescript@6.0.3)
+      '@webgpu/types':
+        specifier: 0.1.69
+        version: 0.1.69
       '@wojtekmaj/enzyme-adapter-react-17':
         specifier: 0.6.7
         version: 0.6.7(enzyme@3.11.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -9008,6 +9020,8 @@ importers:
 
   x-pack/platform/packages/private/kbn-scout-release-testing: {}
 
+  x-pack/platform/packages/private/kbn-umap-webgpu: {}
+
   x-pack/platform/packages/private/maps/vector_tile_utils: {}
 
   x-pack/platform/packages/private/ml/agg_utils: {}
@@ -9643,6 +9657,8 @@ importers:
   x-pack/platform/plugins/shared/triggers_actions_ui: {}
 
   x-pack/platform/plugins/shared/usage_api: {}
+
+  x-pack/platform/plugins/shared/vector_projection: {}
 
   x-pack/platform/test: {}
 
@@ -15692,6 +15708,9 @@ packages:
   '@webassemblyjs/wast-printer@1.14.1':
     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
 
+  '@webgpu/types@0.1.69':
+    resolution: {integrity: sha512-RPmm6kgRbI8e98zSD3RVACvnuktIja5+yLgDAkTmxLr90BEwdTXRQWNLF3ETTTyH/8mKhznZuN5AveXYFEsMGQ==}
+
   '@webpack-cli/configtest@2.1.1':
     resolution: {integrity: sha512-wy0mglZpDSiSS0XHrVR+BAdId2+yxPSoJW8fsna3ZpYSlufjvxnP4YbKTCBZnNIcGN4r6ZPXV55X4mYExOfLmw==}
     engines: {node: '>=14.15.0'}
@@ -19635,6 +19654,12 @@ packages:
   is-alphanumerical@2.0.1:
     resolution: {integrity: sha512-hmbYhX/9MUMF5uh7tOXyK/n0ZvWpad5caBA17GsC6vyuCqaWliRG5K1qS9inmUhEMaOBIW7/whAnSwveW/LtZw==}
 
+  is-any-array@2.0.1:
+    resolution: {integrity: sha512-UtilS7hLRu++wb/WBAw9bNuP1Eg04Ivn1vERJck8zJthEvXCBEBpGR/33u/xLKWEQf95803oalHrVDptcAvFdQ==}
+
+  is-any-array@3.0.0:
+    resolution: {integrity: sha512-o4h+tylWykC4BD1vaejp6gDxoM13bwW8FGuNs4yIKpj8xbBJcRxJx8vZpq0dCr7ZDEfeKjmsi/euolKhX6f/ww==}
+
   is-arguments@1.2.0:
     resolution: {integrity: sha512-7bVbi0huj/wrIAOzb8U1aszg9kdi3KN/CyU19CTI7tAoZYEZoL9yCDXpbXN+uPsuWnP02cyug1gleqq+TU+YCA==}
     engines: {node: '>= 0.4'}
@@ -21196,6 +21221,21 @@ packages:
     resolution: {integrity: sha512-+NsyUUAZDmo6YVHzL/stxSu3t9YS1iljliy3BSDrXJ/dkn1KYdmtZODGGjLcc9XLgVVpH4KshHB8XmZgMhaBXg==}
     engines: {node: '>=10'}
     hasBin: true
+
+  ml-array-max@2.0.0:
+    resolution: {integrity: sha512-QQZ4kENwpWmyNb98UXRDFXrmtIXuXtt1+bSbda/2KA85+F+rrJP8hZk6QOkCQXM2Th9mUDYdq/PNByPdT9ID4A==}
+
+  ml-array-min@2.0.0:
+    resolution: {integrity: sha512-GRj6Ky6sW9vGL6yIjgsHmXZ9YgrdmcQ8nCxPqEGeKc6dkfYg1XDYxGFxADUjNuZyoCd5PUscWAS4N+cFaX6hFg==}
+
+  ml-array-rescale@2.0.0:
+    resolution: {integrity: sha512-2GGtKfSno94/kIloWGvpp/U5Q5vLvLrza+SAaGsLeo6Xj4mEbA6Gqx+oTfZFkxnd1grT2X007HfJNs3T5BsiVg==}
+
+  ml-levenberg-marquardt@4.1.3:
+    resolution: {integrity: sha512-CuR8mg1IIgb5IuDkdJBpnHmx+r6FpRDDPvYhAGq+4WVMLw/lu44P6PniyCrdvk1PNBmxVXN/LwBDMpQ/VaWhgA==}
+
+  ml-matrix@6.15.1:
+    resolution: {integrity: sha512-DUVxsB+hsXhha9FTp6kQiy6UopxW9F7IXsbWhYVTHRfKdb0UimLYUDYqLQ1WwGPERnp8T5Usbwb47xxkAzSfOg==}
 
   mocha-junit-reporter@2.2.1:
     resolution: {integrity: sha512-iDn2tlKHn8Vh8o4nCzcUVW4q7iXp7cC4EB78N0cDHIobLymyHNwe0XG8HEHHjc3hJlXm0Vy6zcrxaIhnI2fWmw==}
@@ -32398,6 +32438,8 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
 
+  '@webgpu/types@0.1.69': {}
+
   '@webpack-cli/configtest@2.1.1(webpack-cli@5.1.4)(webpack@5.96.1)':
     dependencies:
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -37132,6 +37174,10 @@ snapshots:
       is-alphabetical: 2.0.1
       is-decimal: 2.0.1
 
+  is-any-array@2.0.1: {}
+
+  is-any-array@3.0.0: {}
+
   is-arguments@1.2.0:
     dependencies:
       call-bound: 1.0.4
@@ -39079,6 +39125,30 @@ snapshots:
       minimist: 1.2.8
 
   mkdirp@3.0.1: {}
+
+  ml-array-max@2.0.0:
+    dependencies:
+      is-any-array: 3.0.0
+
+  ml-array-min@2.0.0:
+    dependencies:
+      is-any-array: 3.0.0
+
+  ml-array-rescale@2.0.0:
+    dependencies:
+      is-any-array: 3.0.0
+      ml-array-max: 2.0.0
+      ml-array-min: 2.0.0
+
+  ml-levenberg-marquardt@4.1.3:
+    dependencies:
+      is-any-array: 2.0.1
+      ml-matrix: 6.15.1
+
+  ml-matrix@6.15.1:
+    dependencies:
+      is-any-array: 3.0.0
+      ml-array-rescale: 2.0.0
 
   mocha-junit-reporter@2.2.1(mocha@11.3.0)(supports-color@10.2.2):
     dependencies:

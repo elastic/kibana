@@ -1030,6 +1030,7 @@ x-pack/platform/packages/private/kbn-data-quality @elastic/kibana-management
 x-pack/platform/packages/private/kbn-infra-forge @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-dashboards
 x-pack/platform/packages/private/kbn-scout-release-testing @elastic/appex-qa
+x-pack/platform/packages/private/kbn-umap-webgpu @elastic/search-ml-ux
 x-pack/platform/packages/private/maps/vector_tile_utils @elastic/kibana-dashboards
 x-pack/platform/packages/private/ml/agg_utils @elastic/search-ml-ux
 x-pack/platform/packages/private/ml/aiops_components @elastic/search-ml-ux
@@ -1348,6 +1349,7 @@ x-pack/platform/plugins/shared/streams_app @elastic/streams-ui
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/plugins/shared/usage_api @elastic/kibana-core
+x-pack/platform/plugins/shared/vector_projection @elastic/search-ml-ux
 x-pack/platform/test
 x-pack/platform/test_plugins/agent_builder_sml_test_types @elastic/workchat-eng
 x-pack/platform/test_plugins/cloud_integration/saml_provider @elastic/kibana-core

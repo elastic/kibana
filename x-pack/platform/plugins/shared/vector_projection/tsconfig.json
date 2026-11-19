@@ -1,0 +1,26 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "@kbn/ambient-ui-types", "@webgpu/types"]
+  },
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/embeddable-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/presentation-util",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/es-query",
+    "@kbn/ui-actions-plugin",
+    "@kbn/content-management-utils",
+    "@kbn/zod",
+    "@kbn/ui-callout",
+    "@kbn/umap-webgpu"
+  ],
+  "exclude": ["target/**/*"]
+}
