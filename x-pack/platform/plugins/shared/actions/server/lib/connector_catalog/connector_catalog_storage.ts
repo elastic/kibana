@@ -137,7 +137,6 @@ export const createConnectorCatalogStorage = ({
             );
           }
           if (!doc.found || !doc._source) {
-            logger.debug(`Connector catalog definition "${doc._id}" was not found.`);
             return [];
           }
           const { connectorId, version, yaml, contentHash, catalogVersion } = doc._source;
