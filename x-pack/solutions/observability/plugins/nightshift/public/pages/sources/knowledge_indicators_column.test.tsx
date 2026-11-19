@@ -95,66 +95,28 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     await screen.findByText('1');
   });
 
-  it('shares one notification across failing sources and backs off subsequent requests', async () => {
+  it('backs off failures silently and restores normal polling after recovery', async () => {
     const sourceIds = ['source-1', 'source-2', 'source-3', 'source-4', 'source-5', 'source-6'];
-    mockFetch.mockImplementation(async () => {
-      throw new Error('Feature fetch failed');
-    });
+    mockFetch.mockResolvedValue({ features: initialFeatures });
     renderColumns(sourceIds);
-    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(1));
-    expect(screen.getAllByText('—')).toHaveLength(sourceIds.length);
-    expect(mockAddError.mock.calls[0][1]).toEqual({
-      title: 'Could not refresh KI feature counts',
-      toastMessage:
-        'Unavailable counts are shown as a dash. Refreshing will continue automatically.',
-    });
+    expect(await screen.findAllByText('2')).toHaveLength(sourceIds.length);
+
+    mockFetch.mockRejectedValue(new Error('Feature fetch failed'));
+    await advanceTime(10_000);
+    expect(await screen.findAllByText('—')).toHaveLength(sourceIds.length);
 
     const requestsAfterFailure = mockFetch.mock.calls.length;
     await advanceTime(59_000);
     expect(mockFetch).toHaveBeenCalledTimes(requestsAfterFailure);
-    expect(mockAddError).toHaveBeenCalledTimes(1);
-
-    await advanceTime(1_000);
-    expect(mockFetch.mock.calls.length).toBeGreaterThan(requestsAfterFailure);
-    expect(mockAddError).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps the existing outage notification when only some sources recover', async () => {
-    mockFetch.mockRejectedValue(new Error('Feature fetch failed'));
-    renderColumns(['source-1', 'source-2']);
-    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(1));
-
-    mockFetch.mockResolvedValueOnce({ features: [createFeature('orders')] });
-    await advanceTime(60_000);
-    await screen.findByText('1');
-
-    await advanceTime(10_000);
-    expect(screen.getAllByText('—')).toHaveLength(2);
-    expect(mockAddError).toHaveBeenCalledTimes(1);
-  });
-
-  it('reports a new outage after all failing sources recover', async () => {
-    mockFetch.mockRejectedValue(new Error('Feature fetch failed'));
-    renderColumns(['source-1', 'source-2']);
-    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(1));
 
     mockFetch.mockResolvedValue({ features: [createFeature('orders')] });
-    await advanceTime(60_000);
-    expect(await screen.findAllByText('1')).toHaveLength(2);
+    await advanceTime(1_000);
+    expect(await screen.findAllByText('1')).toHaveLength(sourceIds.length);
 
-    mockFetch.mockRejectedValue(new Error('Another feature fetch failure'));
+    mockFetch.mockResolvedValue({ features: [] });
     await advanceTime(10_000);
-    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(2));
-  });
-
-  it('reports a fresh outage when the table remounts with cached failures', async () => {
-    mockFetch.mockRejectedValue(new Error('Feature fetch failed'));
-    const { unmount } = renderColumns();
-    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(1));
-
-    unmount();
-    renderColumns();
-    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(2));
+    expect(await screen.findAllByText('—')).toHaveLength(sourceIds.length);
+    expect(mockAddError).not.toHaveBeenCalled();
   });
 
   it('shows unavailable counts independently while another source remains forbidden', async () => {
@@ -208,7 +170,7 @@ describe('KnowledgeIndicatorsColumn polling', () => {
   it('shows a dash during a retry without cached features until the count recovers', async () => {
     mockFetch.mockRejectedValue(new Error('Feature fetch failed'));
     renderColumns();
-    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
     expect(screen.getByText('—')).toHaveTextContent(/^—$/);
 
     let completeRetry: ((response: { features: Feature[] }) => void) | undefined;
@@ -219,12 +181,10 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     );
     await advanceTime(60_000);
     expect(screen.getByText('—')).toHaveTextContent(/^—$/);
-    expect(mockAddError).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       completeRetry?.({ features: [createFeature('orders')] });
     });
     await screen.findByText('1');
-    expect(mockAddError).toHaveBeenCalledTimes(1);
   });
 });

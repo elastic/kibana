@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { useEffect, useId, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import { useMemo } from 'react';
 import { isComputedFeature, type Feature } from '@kbn/significant-events-schema';
-import type { QueryClient, QueryFunctionContext } from '@kbn/react-query';
-import { useQuery, useQueryClient } from '@kbn/react-query';
-import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
+import type { QueryFunctionContext } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
-import { getFormattedError } from '../../common/errors';
 import { FEATURES_QUERY_KEY } from '../query_keys';
 
 const ERROR_REFETCH_INTERVAL_MS = 60_000;
-// Report one outage until every failing polling observer recovers or unmounts.
-// Scope tracking to each query client so independent app instances do not suppress each other.
-const failedPollingObservers = new WeakMap<QueryClient, Set<string>>();
 
 export const useStreamFeatures = (
   sourceId: string,
@@ -28,21 +22,7 @@ export const useStreamFeatures = (
     refetchInterval = false,
   }: { enabled?: boolean; refetchInterval?: number | false } = {}
 ) => {
-  const {
-    significantEvents: { significantEventsRepositoryClient },
-    notifications: { toasts },
-  } = useKibana().services;
-  const showFetchErrorToast = useFetchErrorToast();
-  const queryClient = useQueryClient();
-  const pollingObserverId = useId();
-  const isPollingEnabled = enabled && !!refetchInterval;
-
-  useEffect(
-    () => () => {
-      failedPollingObservers.get(queryClient)?.delete(pollingObserverId);
-    },
-    [queryClient, pollingObserverId, sourceId, isPollingEnabled]
-  );
+  const { significantEventsRepositoryClient } = useKibana().services.significantEvents;
 
   const fetchFeatures = async ({ signal: querySignal }: QueryFunctionContext) => {
     return significantEventsRepositoryClient.fetch('GET /internal/streams/{sourceId}/features', {
@@ -61,35 +41,6 @@ export const useStreamFeatures = (
   const { data, isLoading, error, refetch } = useQuery<{ features: Feature[] }, Error>({
     queryKey: [...FEATURES_QUERY_KEY, sourceId, ...deps],
     queryFn: fetchFeatures,
-    onError: (fetchError) => {
-      if (!isPollingEnabled) {
-        showFetchErrorToast(fetchError);
-        return;
-      }
-
-      const failures = failedPollingObservers.get(queryClient) ?? new Set<string>();
-      const shouldShowErrorToast = failures.size === 0;
-      failures.add(pollingObserverId);
-      failedPollingObservers.set(queryClient, failures);
-
-      if (shouldShowErrorToast) {
-        toasts.addError(getFormattedError(fetchError), {
-          title: i18n.translate('xpack.nightshift.knowledgeIndicators.refreshCountsErrorTitle', {
-            defaultMessage: 'Could not refresh KI feature counts',
-          }),
-          toastMessage: i18n.translate(
-            'xpack.nightshift.knowledgeIndicators.refreshCountsErrorMessage',
-            {
-              defaultMessage:
-                'Unavailable counts are shown as a dash. Refreshing will continue automatically.',
-            }
-          ),
-        });
-      }
-    },
-    onSuccess: () => {
-      failedPollingObservers.get(queryClient)?.delete(pollingObserverId);
-    },
     enabled,
     refetchInterval: (_data, query) => {
       if (!refetchInterval || query.state.status !== 'error') {
