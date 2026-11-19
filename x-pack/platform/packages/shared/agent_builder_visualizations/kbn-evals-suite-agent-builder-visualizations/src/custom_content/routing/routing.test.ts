@@ -32,12 +32,12 @@ describe('getRequestedPanelTypes', () => {
     ).toEqual(['custom_content', 'vis', 'vega']);
   });
 
-  it('reads the visualization target type, scoring a lens target as vis', () => {
+  it('reads the visualization target type', () => {
     expect(
       getRequestedPanelTypes([
         call('platform.core.create_visualization', { target: { type: 'custom_content' } }),
         call('platform.core.create_visualization', { target: { type: 'vega' } }),
-        call('platform.core.create_visualization', { target: { type: 'lens' } }),
+        call('platform.core.create_visualization', { target: { type: 'vis' } }),
         call('platform.core.create_visualization', { target: { type: 'attachment' } }),
       ])
     ).toEqual(['custom_content', 'vega', 'vis']);

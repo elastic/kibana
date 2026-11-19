@@ -14,7 +14,7 @@ const CREATE_VISUALIZATION_TOOL_ID = 'platform.core.create_visualization';
 /**
  * The panel types the agent asked for, from the arguments of its tool calls. Which one it picked is
  * the routing decision, and it is in the request whichever tool stores the panel: a dashboard panel
- * names it as its content type (`vis` for Lens) and a visualization as its target type.
+ * names it as its content type and a visualization as its target type, with the same names.
  */
 export const getRequestedPanelTypes = (
   steps: Array<Record<string, unknown>> | undefined
@@ -38,10 +38,7 @@ export const getRequestedPanelTypes = (
 
     if (step.tool_id === CREATE_VISUALIZATION_TOOL_ID && isRecord(params.target)) {
       const { type } = params.target;
-      if (isRequestPanelType(type)) {
-        return [type];
-      }
-      return typeof type === 'string' && type !== 'attachment' ? ['vis'] : [];
+      return isRequestPanelType(type) ? [type] : [];
     }
 
     return [];
