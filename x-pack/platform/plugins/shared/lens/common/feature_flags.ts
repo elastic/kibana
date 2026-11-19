@@ -26,6 +26,10 @@ interface FeatureFlagBase {
 type BooleanFeatureFlag = FeatureFlagBase & {
   type: 'boolean';
   fallback: boolean;
+  /**
+   * Fallback used instead of `fallback` when Kibana runs in dev mode (`env.mode.dev`)
+   */
+  devFallback?: boolean;
 };
 type NumberFeatureFlag = FeatureFlagBase & {
   type: 'number';
@@ -45,8 +49,8 @@ export const lensFeatureFlags = {
   apiFormat: {
     id: 'lens.apiFormat',
     type: 'boolean',
-    // Enable by default in dev and CI, fallback to false otherwise
-    fallback: process.env.NODE_ENV !== 'production',
+    fallback: false as boolean,
+    devFallback: true as boolean,
   },
   /**
    * Enables ES|QL mode for form-based datasources, allowing Lens to generate
@@ -71,9 +75,10 @@ export const lensFeatureFlags = {
 export type LensFeatureFlags = GetFlagTypes<typeof lensFeatureFlags>;
 
 export async function fetchLensFeatureFlags(
-  service: FeatureFlagsStartPublic | FeatureFlagsStartServer
+  service: FeatureFlagsStartPublic | FeatureFlagsStartServer,
+  isDev: boolean = false
 ): Promise<LensFeatureFlags> {
-  const getFeatureFlag = getFeatureFlagFn(service);
+  const getFeatureFlag = getFeatureFlagFn(service, isDev);
   const flags = (
     await Promise.all(
       Object.entries(lensFeatureFlags).map(async ([key, flag]) => {
@@ -89,13 +94,19 @@ export async function fetchLensFeatureFlags(
   return Object.fromEntries(flags) as LensFeatureFlags;
 }
 
-function getFeatureFlagFn(service: FeatureFlagsStartPublic | FeatureFlagsStartServer) {
+function getFeatureFlagFn(
+  service: FeatureFlagsStartPublic | FeatureFlagsStartServer,
+  isDev: boolean
+) {
   return async function getFeatureFlag(
     flag: LensFeatureFlag
   ): Promise<[boolean | number | string, Observable<boolean | number | string>]> {
     switch (flag.type) {
       case 'boolean': {
-        const value$ = service.getBooleanValue$(flag.id, flag.fallback);
+        const value$ = service.getBooleanValue$(
+          flag.id,
+          isDev ? flag.devFallback ?? flag.fallback : flag.fallback
+        );
         return [await firstValueFrom(value$), value$];
       }
       case 'number': {
@@ -113,10 +124,10 @@ function getFeatureFlagFn(service: FeatureFlagsStartPublic | FeatureFlagsStartSe
   };
 }
 
-export function getLensFeatureFlagDefaults(): LensFeatureFlags {
+export function getLensFeatureFlagDefaults(isDev: boolean = false): LensFeatureFlags {
   return Object.entries(lensFeatureFlags).reduce((acc, [k, flag]) => {
     const key = k as keyof typeof lensFeatureFlags;
-    acc[key] = flag.fallback;
+    acc[key] = (isDev && 'devFallback' in flag ? flag.devFallback : flag.fallback);
     return acc;
   }, {} as LensFeatureFlags);
 }

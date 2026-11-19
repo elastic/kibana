@@ -11,6 +11,8 @@ import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { LensFeatureFlags } from '../common';
 import { fetchLensFeatureFlags, getLensFeatureFlagDefaults } from '../common';
 
+let isDevMode = false;
+
 const [getFeatureFlags, setFeatureFlags] = createGetterSetter<LensFeatureFlags>(
   'LensFeatureFlags',
   false
@@ -24,11 +26,15 @@ const [getFeatureFlags, setFeatureFlags] = createGetterSetter<LensFeatureFlags>(
 export function getLensFeatureFlags(): LensFeatureFlags {
   const flags = getFeatureFlags();
   if (flags) return flags;
-  return getLensFeatureFlagDefaults();
+  return getLensFeatureFlagDefaults(isDevMode);
 }
 
-export async function setLensFeatureFlags(service: FeatureFlagsStart): Promise<LensFeatureFlags> {
-  const flags = await fetchLensFeatureFlags(service);
+export async function setLensFeatureFlags(
+  service: FeatureFlagsStart,
+  isDev: boolean = false
+): Promise<LensFeatureFlags> {
+  isDevMode = isDev;
+  const flags = await fetchLensFeatureFlags(service, isDev);
   setFeatureFlags(flags);
   return flags;
 }
