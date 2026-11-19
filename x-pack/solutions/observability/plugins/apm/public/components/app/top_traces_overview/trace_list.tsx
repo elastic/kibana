@@ -6,7 +6,7 @@
  */
 
 import { EuiScreenReaderOnly, EuiToolTip, RIGHT_ALIGNMENT, useEuiFontSize } from '@elastic/eui';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo } from 'react';

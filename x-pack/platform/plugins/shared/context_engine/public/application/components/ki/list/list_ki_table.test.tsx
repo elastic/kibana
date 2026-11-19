@@ -34,6 +34,7 @@ describe('ListKiTable', () => {
           index: 'ai-index-idx-sample-ki',
           type: 'playbook',
           title: 'Refund playbook',
+          status: 'active',
         },
       ],
       total: 6,
@@ -62,7 +63,7 @@ describe('ListKiTable', () => {
     expect(screen.getByTestId('contextKiRowTitle')).toHaveTextContent('Refund playbook');
   });
 
-  it('renders an expired status badge when expires_at is in the past', () => {
+  it('renders the status the server computed', () => {
     mockUseListKi.mockReturnValue({
       kis: [
         {
@@ -70,6 +71,7 @@ describe('ListKiTable', () => {
           index: 'ai-index-idx-sample-ki',
           title: 'Old memory',
           expires_at: '2000-01-01T00:00:00.000Z',
+          status: 'expired',
         },
       ],
       total: 1,

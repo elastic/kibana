@@ -62,9 +62,15 @@ export const handleInvestigationFailureStepDefinition = (
             }
             const lifecycleSubject = await client.getLifecycleSubject(investigationId);
             if (lifecycleSubject) {
+              const correlation = await client.getLifecycleCorrelation(
+                investigationId,
+                executionId
+              );
               emitter(INVESTIGATION_FAILED_TRIGGER_ID, {
                 investigation_id: investigationId,
+                workflow_execution_id: executionId,
                 execution_id: executionId,
+                ...correlation,
                 subject: lifecycleSubject.subject,
                 trigger_type: lifecycleSubject.triggerType,
                 started_at: lifecycleSubject.startedAt,
@@ -77,6 +83,8 @@ export const handleInvestigationFailureStepDefinition = (
           }
         },
       });
+      // After notifications, so the reads it makes never delay them.
+      await client.reportRunEnded(investigationId, executionId, 'failed');
       return { output };
     },
   });

@@ -264,7 +264,10 @@ describe('searchEventsToolHandler', () => {
         eventSearchClient: makeClient() as never,
         params: { view: 'full' },
       })
-    ).rejects.toThrow('Full event search requires exactly one event ID');
+    ).rejects.toMatchObject({
+      message: 'Full event search requires exactly one event ID',
+      statusCode: 400,
+    });
   });
 
   it('leaves max-length full-view signal descriptions unchanged', async () => {

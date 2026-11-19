@@ -73,6 +73,7 @@ const setup = ({ canEncrypt = true, requestLifetimeMs = 600_000 } = {}) => {
     audit: auditServiceMock.create(),
     getCurrentUser: jest.fn(),
     getCurrentUserProfileId: jest.fn(),
+    getUserProfiles: jest.fn().mockResolvedValue([]),
   });
   return { backend, exchange, credentialStore, clusterClient, license, logger };
 };
@@ -112,17 +113,21 @@ describe('Elasticsearch service account token exchange', () => {
   ])('rejects invalid or unmanaged ID %s before reading credentials', async (serviceAccountId) => {
     const { backend, credentialStore, exchange } = setup();
     await expect(backend.createFakeRequest({ serviceAccountId })).rejects.toMatchObject({
+      refusal: 'account_id_invalid',
       output: { statusCode: 400 },
     });
     expect(credentialStore.getDecrypted).not.toHaveBeenCalled();
     expect(exchange).not.toHaveBeenCalled();
   });
 
-  it.each(['security', 'encryption'])('refuses exchange without %s', async (gate) => {
+  it.each([
+    ['security', 'security_disabled'],
+    ['encryption', 'encryption_unavailable'],
+  ])('refuses exchange without %s', async (gate, refusal) => {
     const { backend, license, credentialStore } = setup({ canEncrypt: gate !== 'encryption' });
     license.isEnabled.mockReturnValue(gate !== 'security');
     await expect(backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID })).rejects.toMatchObject(
-      { output: { statusCode: 403 } }
+      { refusal, output: { statusCode: 403 } }
     );
     expect(credentialStore.getDecrypted).not.toHaveBeenCalled();
   });
@@ -131,7 +136,7 @@ describe('Elasticsearch service account token exchange', () => {
     const { backend, credentialStore, exchange } = setup();
     credentialStore.getDecrypted.mockResolvedValue(null);
     await expect(backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID })).rejects.toMatchObject(
-      { output: { statusCode: 404 } }
+      { refusal: 'account_not_found', output: { statusCode: 404 } }
     );
     expect(exchange).not.toHaveBeenCalled();
   });
@@ -145,6 +150,7 @@ describe('Elasticsearch service account token exchange', () => {
         backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID })
       ).rejects.toMatchObject({
         message: 'The stored service account credential is inconsistent.',
+        refusal: 'credential_integrity',
         output: { statusCode: 403 },
       });
       expect(exchange).not.toHaveBeenCalled();
@@ -181,6 +187,7 @@ describe('Elasticsearch service account token exchange', () => {
       backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID, boundAt })
     ).rejects.toMatchObject({
       message: 'The workload was bound to an earlier service account with the same name.',
+      refusal: 'account_replaced',
       output: { statusCode: 403 },
     });
 

@@ -45,6 +45,7 @@ import {
   markBidirectionalConnections,
 } from './get_service_map_nodes';
 import { DEFAULT_EDGE_STYLE } from './constants';
+import { markIdleServices } from './mark_idle_services';
 
 function toServiceNodeData(node: ServiceConnectionNode): ServiceNodeData {
   return {
@@ -53,6 +54,7 @@ function toServiceNodeData(node: ServiceConnectionNode): ServiceNodeData {
     agentName: node[AGENT_NAME] as AgentName,
     isService: true,
     serviceAnomalyStats: node.serviceAnomalyStats,
+    ...(node.stats && { stats: node.stats }),
   };
 }
 
@@ -114,7 +116,12 @@ export function transformToReactFlow(
 
   const allConnections = addMessagingConnections(paths.connections, paths.exitSpanDestinations);
   const allNodes = getAllNodes(data.servicesData, allConnections);
-  const allServices = getAllServices(allNodes, paths.exitSpanDestinations, data.anomalies);
+  const allServices = getAllServices(
+    allNodes,
+    paths.exitSpanDestinations,
+    data.anomalies,
+    data.servicesData
+  );
 
   const mappedNodes = mapNodes({
     allConnections,
@@ -153,7 +160,7 @@ export function transformToReactFlow(
   const grouped = groupResourceNodes(reactFlowNodes, reactFlowEdges);
 
   return {
-    nodes: grouped.nodes,
+    nodes: markIdleServices(grouped.nodes),
     edges: grouped.edges,
     nodesCount: grouped.nodesCount,
     tracesCount,

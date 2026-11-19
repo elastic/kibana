@@ -8,15 +8,22 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { DecisionChoiceQuestion, DecisionPredicateQuestion } from '@kbn/inference-common';
+import type {
+  DecisionAnswer,
+  DecisionChoiceQuestion,
+  DecisionPredicateQuestion,
+  DecisionQuestion,
+} from '@kbn/inference-common';
 import {
   InferenceTaskErrorCode,
   isInferenceProviderError,
   isInferenceRequestAbortedError,
   isInferenceRequestError,
 } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
+import { executeRegexRulesTask } from '@kbn/ai-anonymization-server';
+import { createRegexWorkerServiceMock } from '../test_utils';
 import { decisionResponse } from './__fixtures__/decision_response';
-import { decisionEndpoints } from './__fixtures__/decision_endpoints';
 import { createDecideApi } from './create_decide_api';
 
 const shouldRespond: DecisionPredicateQuestion = {
@@ -41,21 +48,41 @@ const responseError = (statusCode: number, reason: string) =>
     meta: {} as never,
   });
 
-const setup = () => {
+const emailRule: AnonymizationRule = {
+  type: 'RegExp',
+  entityClass: 'EMAIL',
+  pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+  enabled: true,
+};
+
+const setup = ({ anonymizationRules = [] }: { anonymizationRules?: AnonymizationRule[] } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggerMock.create();
-  const decide = createDecideApi({ esClient, logger });
+  const regexWorker = createRegexWorkerServiceMock();
 
-  return { decide, logger, transportRequest: esClient.transport.request };
+  jest
+    .mocked(regexWorker.run)
+    .mockImplementation(async (payload) => executeRegexRulesTask(payload));
+
+  const decide = createDecideApi({
+    esClient,
+    logger,
+    anonymizationRulesPromise: Promise.resolve(anonymizationRules),
+    regexWorker,
+  });
+
+  return { decide, logger, regexWorker, transportRequest: esClient.transport.request };
 };
 
 describe('createDecideApi', () => {
-  it('returns a single answer for one question, using the given inference id', async () => {
+  it('returns the answer to one question, using the given inference id', async () => {
     const { decide, transportRequest } = setup();
 
     transportRequest.mockResolvedValue(decisionResponse);
 
-    const result = await decide({ input, inferenceId: 'my-decision' }, shouldRespond);
+    const {
+      answers: [answer],
+    } = await decide({ input, inferenceId: 'my-decision' }, shouldRespond);
 
     expect(transportRequest).toHaveBeenCalledTimes(1);
     expect(transportRequest.mock.calls[0][0]).toEqual({
@@ -63,12 +90,9 @@ describe('createDecideApi', () => {
       path: '/_inference/decision/my-decision',
       body: { input, task_settings: { questions: { question_1: shouldRespond } } },
     });
-    expect(result).toEqual({
-      inferenceId: 'my-decision',
-      answer: { type: 'predicate', probability: 0.94 },
-    });
+    expect(answer).toEqual({ type: 'predicate', probability: 0.94 });
 
-    const probability: number = result.answer.probability;
+    const probability: number = answer.probability;
     expect(probability).toBe(0.94);
   });
 
@@ -91,43 +115,66 @@ describe('createDecideApi', () => {
     );
   });
 
-  it('uses the first decision endpoint the cluster lists when no inference id is given', async () => {
+  it('sends the inference use case header by default', async () => {
     const { decide, transportRequest } = setup();
 
-    transportRequest.mockImplementation(async ({ method }) =>
-      method === 'GET' ? decisionEndpoints : decisionResponse
+    transportRequest.mockResolvedValue(decisionResponse);
+
+    await decide({ input, inferenceId: 'my-decision' }, shouldRespond);
+
+    expect(transportRequest.mock.calls[0][1]).toEqual(
+      expect.objectContaining({ headers: { 'X-Elastic-Product-Use-Case': 'inference' } })
+    );
+  });
+
+  it('sends the attribution headers the caller passes', async () => {
+    const { decide, transportRequest } = setup();
+
+    transportRequest.mockResolvedValue(decisionResponse);
+
+    await decide(
+      {
+        input,
+        inferenceId: 'my-decision',
+        metadata: { connectorTelemetry: { pluginId: 'agent_builder', productFeature: 'triggers' } },
+      },
+      shouldRespond
     );
 
-    const { inferenceId } = await decide({ input }, shouldRespond);
+    expect(transportRequest.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        headers: {
+          'X-Elastic-Product-Use-Case': 'agent_builder',
+          'X-Elastic-Product-Feature': 'triggers',
+        },
+      })
+    );
+  });
 
-    expect(transportRequest.mock.calls[0][0]).toEqual({
-      method: 'GET',
-      path: '/_inference/decision/_all',
-    });
-    expect(inferenceId).toBe('.jev-1.13-decision');
+  it('accepts a list of questions built at runtime', async () => {
+    const { decide, transportRequest } = setup();
+
+    transportRequest.mockResolvedValue(decisionResponse);
+
+    const [first, ...rest]: DecisionQuestion[] = [shouldRespond, topic];
+    const { answers } = await decide({ input, inferenceId: 'my-decision' }, first, ...rest);
+
+    const [{ type }]: [DecisionAnswer, ...DecisionAnswer[]] = answers;
+
+    expect(type).toBe('predicate');
+    expect(answers).toHaveLength(2);
   });
 
   it('rejects a call without questions', async () => {
     const { decide, transportRequest } = setup();
 
-    const error = await Reflect.apply(decide, undefined, [{ input }]).catch(
-      (thrown: Error) => thrown
-    );
+    const error = await Reflect.apply(decide, undefined, [
+      { input, inferenceId: 'my-decision' },
+    ]).catch((thrown: Error) => thrown);
 
     expect(isInferenceRequestError(error)).toBe(true);
     expect(error.message).toContain('at least one question');
     expect(transportRequest).not.toHaveBeenCalled();
-  });
-
-  it('throws a 404 request error when the cluster lists no decision endpoint', async () => {
-    const { decide, transportRequest } = setup();
-
-    transportRequest.mockResolvedValue({ endpoints: [] });
-
-    const error = await decide({ input }, shouldRespond).catch((thrown) => thrown);
-
-    expect(isInferenceRequestError(error)).toBe(true);
-    expect(error.meta.status).toBe(404);
   });
 
   it('throws a 404 request error when the endpoint does not exist', async () => {
@@ -141,17 +188,23 @@ describe('createDecideApi', () => {
 
     expect(isInferenceRequestError(error)).toBe(true);
     expect(error.meta.status).toBe(404);
+    expect(error.message).toBe("Inference endpoint 'missing' not found");
   });
 
-  it('throws a 404 request error when Elasticsearch does not know the decision task type', async () => {
+  it('keeps a 400 for an endpoint with another task type', async () => {
     const { decide, transportRequest } = setup();
 
-    transportRequest.mockRejectedValue(responseError(400, 'Unknown task_type [decision]'));
+    transportRequest.mockRejectedValue(
+      responseError(400, 'Incompatible task_type, the requested type [decision] does not match')
+    );
 
-    const error = await decide({ input }, shouldRespond).catch((thrown) => thrown);
+    const error = await decide({ input, inferenceId: 'my-chat-model' }, shouldRespond).catch(
+      (thrown) => thrown
+    );
 
-    expect(isInferenceRequestError(error)).toBe(true);
-    expect(error.meta.status).toBe(404);
+    expect(isInferenceRequestError(error)).toBe(false);
+    expect(isInferenceProviderError(error)).toBe(true);
+    expect(error.meta.status).toBe(400);
   });
 
   it('throws other Elasticsearch errors as provider errors with their status', async () => {
@@ -182,11 +235,30 @@ describe('createDecideApi', () => {
     );
   });
 
-  it('throws an aborted error without calling Elasticsearch when already aborted', async () => {
-    const { decide, transportRequest } = setup();
+  it('throws an aborted error without masking or calling Elasticsearch when already aborted', async () => {
+    const { decide, regexWorker, transportRequest } = setup({ anonymizationRules: [emailRule] });
     const controller = new AbortController();
 
     controller.abort();
+
+    const error = await decide(
+      { input, inferenceId: 'my-decision', abortSignal: controller.signal },
+      shouldRespond
+    ).catch((thrown) => thrown);
+
+    expect(isInferenceRequestAbortedError(error)).toBe(true);
+    expect(regexWorker.run).not.toHaveBeenCalled();
+    expect(transportRequest).not.toHaveBeenCalled();
+  });
+
+  it('does not call Elasticsearch when aborted while the input is masked', async () => {
+    const { decide, regexWorker, transportRequest } = setup({ anonymizationRules: [emailRule] });
+    const controller = new AbortController();
+
+    jest.mocked(regexWorker.run).mockImplementation(async (payload) => {
+      controller.abort();
+      return executeRegexRulesTask(payload);
+    });
 
     const error = await decide(
       { input, inferenceId: 'my-decision', abortSignal: controller.signal },
@@ -211,8 +283,96 @@ describe('createDecideApi', () => {
       shouldRespond
     ).catch((thrown) => thrown);
 
-    expect(transportRequest.mock.calls[0][1]).toEqual({ signal: controller.signal });
+    expect(transportRequest.mock.calls[0][1]).toEqual(
+      expect.objectContaining({ signal: controller.signal })
+    );
     expect(isInferenceRequestAbortedError(error)).toBe(true);
+  });
+
+  it('masks the input with the anonymization rules before sending it', async () => {
+    const { decide, transportRequest } = setup({ anonymizationRules: [emailRule] });
+
+    transportRequest.mockResolvedValue(decisionResponse);
+
+    await decide(
+      { input: 'Ask claudia@example.com about checkout', inferenceId: 'my-decision' },
+      shouldRespond
+    );
+
+    expect(transportRequest.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          input: expect.stringMatching(/^Ask EMAIL_\w+ about checkout$/),
+        }),
+      })
+    );
+  });
+
+  it('masks the question text, keeping choice keys and level labels', async () => {
+    const { decide, transportRequest } = setup({ anonymizationRules: [emailRule] });
+
+    transportRequest.mockResolvedValue(decisionResponse);
+
+    await decide(
+      { input, inferenceId: 'my-decision' },
+      { type: 'predicate', instructions: 'Is this from a@example.com?' },
+      {
+        type: 'choice',
+        instructions: 'Who owns b@example.com?',
+        choices: { a: 'The team of c@example.com', b: 'Nobody' },
+      },
+      {
+        type: 'score',
+        instructions: 'How urgent is it for d@example.com?',
+        levels: [
+          { label: 'low', description: 'e@example.com can wait' },
+          { label: 'medium', description: 'Soon' },
+          { label: 'high', description: 'Now' },
+        ],
+      }
+    );
+
+    expect(transportRequest.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        body: {
+          input,
+          task_settings: {
+            questions: {
+              question_1: {
+                type: 'predicate',
+                instructions: expect.stringMatching(/^Is this from EMAIL_\w+\?$/),
+              },
+              question_2: {
+                type: 'choice',
+                instructions: expect.stringMatching(/^Who owns EMAIL_\w+\?$/),
+                choices: { a: expect.stringMatching(/^The team of EMAIL_\w+$/), b: 'Nobody' },
+              },
+              question_3: {
+                type: 'score',
+                instructions: expect.stringMatching(/^How urgent is it for EMAIL_\w+\?$/),
+                levels: [
+                  { label: 'low', description: expect.stringMatching(/^EMAIL_\w+ can wait$/) },
+                  { label: 'medium', description: 'Soon' },
+                  { label: 'high', description: 'Now' },
+                ],
+              },
+            },
+          },
+        },
+      })
+    );
+  });
+
+  it('does not send the input when anonymization fails', async () => {
+    const { decide, regexWorker, transportRequest } = setup({ anonymizationRules: [emailRule] });
+
+    jest.mocked(regexWorker.run).mockRejectedValue(new Error('regex failed'));
+
+    await expect(
+      decide({ input: 'Ask claudia@example.com', inferenceId: 'my-decision' }, shouldRespond)
+    ).rejects.toThrow('regex failed');
+
+    expect(transportRequest).not.toHaveBeenCalled();
   });
 
   it('never logs the input text', async () => {

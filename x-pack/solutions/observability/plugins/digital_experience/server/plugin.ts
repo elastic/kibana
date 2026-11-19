@@ -7,12 +7,12 @@
 
 import type {
   CoreSetup,
-  CoreStart,
   Logger,
   PluginInitializerContext,
   Plugin as PluginType,
 } from '@kbn/core/server';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type {
@@ -22,10 +22,8 @@ import type {
 import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
-import {
-  registerSessionsHealthTask,
-  scheduleSessionsHealthTask,
-} from './sessions/sessions_health_task';
+import { createSessionsReadableCache } from './services/sessions/sessions_readable';
+import { registerSessionsTask } from './services/sessions/sessions_task';
 
 interface DigitalExperienceSetupDeps {
   features: FeaturesPluginSetup;
@@ -33,7 +31,10 @@ interface DigitalExperienceSetupDeps {
   apmDataAccess?: ApmDataAccessPluginSetup;
   /** Optional: only its presence is read, as the Classic RUM source needs it. */
   ux?: unknown;
+  /** Optional: it runs the summaries task, so sessions need it. */
   taskManager?: TaskManagerSetupContract;
+  /** Optional: without it, or without an encryption key, the task's API key can't be stored. */
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
 }
 
 interface DigitalExperienceStartDeps {
@@ -51,11 +52,18 @@ export class Plugin
     this.config = initializerContext.config.get<DigitalExperienceConfig>();
   }
 
-  public setup(core: CoreSetup, plugins: DigitalExperienceSetupDeps) {
+  public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
     registerDigitalExperienceFeature(plugins.features);
 
+    const { taskManager, encryptedSavedObjects } = plugins;
+    const canEncrypt = encryptedSavedObjects?.canEncrypt === true;
+    if (taskManager && encryptedSavedObjects) {
+      // Task Manager stores the summaries task's API key encrypted.
+      taskManager.registerCanEncryptedSavedObjects(encryptedSavedObjects.canEncrypt);
+    }
+
+    const sessionsReadable = createSessionsReadableCache();
     const { buildFlavor } = this.initializerContext.env.packageInfo;
-    const settings = this.config.sessions;
     registerRoutes({
       core,
       logger: this.logger,
@@ -64,26 +72,26 @@ export class Plugin
         plugins: { apmDataAccess: plugins.apmDataAccess },
         isServerless: buildFlavor === 'serverless',
         isUxEnabled: plugins.ux !== undefined,
-        sessionsSettings: settings,
+        sessionsSettings: this.config.sessions,
+        getSessionsServices: async () => {
+          const [, pluginsStart] = await core.getStartServices();
+          return { taskManager: pluginsStart.taskManager, canEncrypt, sessionsReadable };
+        },
       },
       runDevModeChecks: this.initializerContext.env.mode.dev,
     });
 
-    if (plugins.taskManager) {
-      registerSessionsHealthTask({
+    if (taskManager) {
+      registerSessionsTask({
         core,
         logger: this.logger,
-        taskManager: plugins.taskManager,
-        settings,
+        taskManager,
+        settings: this.config.sessions,
       });
     }
   }
 
-  public start(_core: CoreStart, plugins: DigitalExperienceStartDeps) {
-    if (plugins.taskManager) {
-      void scheduleSessionsHealthTask({ logger: this.logger, taskManager: plugins.taskManager });
-    }
-  }
+  public start() {}
 
   public stop() {}
 }

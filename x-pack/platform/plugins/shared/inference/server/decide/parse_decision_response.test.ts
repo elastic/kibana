@@ -61,6 +61,26 @@ describe('parseDecisionResponse', () => {
     );
   });
 
+  it('throws when an answer has a type decide() does not know', () => {
+    const body = { decision: { answers: { question_1: { type: 'ranking' } } } };
+
+    expect(() => parseDecisionResponse(body, [predicate])).toThrow(
+      'Decision answer [question_1] has type [ranking], expected [predicate]'
+    );
+  });
+
+  it('throws when a choice answer has no choice', () => {
+    const body = {
+      decision: {
+        answers: { question_1: { type: 'choice', confidence: 0.5, probabilities: [] } },
+      },
+    };
+
+    expect(() => parseDecisionResponse(body, [choice])).toThrow(
+      /Decision answer \[question_1\] is malformed: .*\n.*at choice/
+    );
+  });
+
   it('throws when the body is not an object', () => {
     expect(() => parseDecisionResponse('oops', [predicate])).toThrow();
   });

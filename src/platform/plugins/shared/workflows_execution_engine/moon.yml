@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/es-mappings'
   - '@kbn/workflows-extensions'
   - '@kbn/licensing-plugin'
+  - '@kbn/lock-manager'
   - '@kbn/usage-api-plugin'
   - '@kbn/logging-mocks'
   - '@kbn/std'

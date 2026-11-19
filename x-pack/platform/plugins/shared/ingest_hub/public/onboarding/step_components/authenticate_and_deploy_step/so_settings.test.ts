@@ -23,24 +23,28 @@ const duplicate: ServiceInstance = {
 
 describe('toSOSettings', () => {
   it('returns the trimmed name and description', () => {
-    expect(toSOSettings({ integrationName: ' my-aws ', description: ' Production ' })).toEqual({
+    expect(
+      toSOSettings({ integrationName: ' my-aws ', description: ' Production ' }, 'agent_based')
+    ).toEqual({
       integrationName: 'my-aws',
       description: 'Production',
     });
   });
 
   it('returns the trimmed namespace', () => {
-    expect(toSOSettings({ namespace: ' prod ' })).toEqual({ namespace: 'prod' });
+    expect(toSOSettings({ namespace: ' prod ' }, 'agent_based')).toEqual({ namespace: 'prod' });
   });
 
   it('leaves out fields that are missing or blank', () => {
-    expect(toSOSettings({ integrationName: '  ', description: '', namespace: ' ' })).toEqual({});
-    expect(toSOSettings(undefined)).toEqual({});
-    expect(toSOSettings(null)).toEqual({});
+    expect(
+      toSOSettings({ integrationName: '  ', description: '', namespace: ' ' }, 'agent_based')
+    ).toEqual({});
+    expect(toSOSettings(undefined, 'agent_based')).toEqual({});
+    expect(toSOSettings(null, 'agent_based')).toEqual({});
   });
 
   it('returns the instances, duplicates included', () => {
-    expect(toSOSettings({ instances: [original, duplicate] })).toEqual({
+    expect(toSOSettings({ instances: [original, duplicate] }, 'agent_based')).toEqual({
       instances: [original, duplicate],
     });
   });
@@ -48,72 +52,191 @@ describe('toSOSettings', () => {
   it('keeps only the stored fields of an instance', () => {
     const withExtras = { ...duplicate, somethingElse: 'x' } as ServiceInstance;
 
-    expect(toSOSettings({ instances: [withExtras] })).toEqual({ instances: [duplicate] });
+    expect(toSOSettings({ instances: [withExtras] }, 'agent_based')).toEqual({
+      instances: [duplicate],
+    });
+  });
+
+  it('returns the package policy settings that have a value', () => {
+    expect(toSOSettings({ policySettings: { output_id: 'logstash-1' } }, 'agent_based')).toEqual({
+      policySettings: { output_id: 'logstash-1' },
+    });
+    expect(toSOSettings({ policySettings: { output_id: '' } }, 'agent_based')).toEqual({});
+  });
+
+  it('leaves out the package policy settings of other deployment methods', () => {
+    const policySettings = { output_id: 'logstash-1', condition: 'x'.repeat(10001) };
+    expect(toSOSettings({ policySettings }, 'managed_integration')).toEqual({});
+    expect(toSOSettings({ policySettings }, 'ecf')).toEqual({});
+  });
+
+  it('keeps package var settings, such as the proxy URL, along with the fields', () => {
+    const policySettings = { output_id: 'logstash-1', proxy_url: 'http://proxy:3128' };
+    expect(toSOSettings({ policySettings }, 'agent_based')).toEqual({ policySettings });
+    expect(toSOSettings({ policySettings }, 'managed_integration')).toEqual({
+      policySettings: { proxy_url: 'http://proxy:3128' },
+    });
   });
 
   it('leaves out the instances when there are none, so a stored list is never cleared by an empty one', () => {
-    expect(toSOSettings({ instances: [] })).toEqual({});
-    expect(toSOSettings({ integrationName: 'my-aws' })).toEqual({ integrationName: 'my-aws' });
+    expect(toSOSettings({ instances: [] }, 'agent_based')).toEqual({});
+    expect(toSOSettings({ integrationName: 'my-aws' }, 'agent_based')).toEqual({
+      integrationName: 'my-aws',
+    });
+  });
+});
+
+describe('dedicatedNamespaceTemplates', () => {
+  it('is saved when it is on and there is a namespace', () => {
+    expect(
+      toSOSettings({ namespace: 'prod', dedicatedNamespaceTemplates: true }, 'agent_based')
+    ).toEqual({
+      namespace: 'prod',
+      dedicatedNamespaceTemplates: true,
+    });
+  });
+
+  it('is left out when it is off', () => {
+    expect(
+      toSOSettings({ namespace: 'prod', dedicatedNamespaceTemplates: false }, 'agent_based')
+    ).toEqual({
+      namespace: 'prod',
+    });
+  });
+
+  it('is not saved without a namespace, so a stale value is dropped', () => {
+    expect(
+      toSOSettings({ namespace: ' ', dedicatedNamespaceTemplates: true }, 'agent_based')
+    ).toEqual({});
+    expect(toSOSettings({ dedicatedNamespaceTemplates: true }, 'agent_based')).toEqual({});
+  });
+
+  it('is always sent on an update, so turning it off clears the stored value', () => {
+    expect(
+      toSOSettingsUpdate({ namespace: 'prod', dedicatedNamespaceTemplates: true }, 'agent_based')
+    ).toMatchObject({ dedicatedNamespaceTemplates: true });
+    expect(
+      toSOSettingsUpdate({ namespace: 'prod', dedicatedNamespaceTemplates: false }, 'agent_based')
+    ).toMatchObject({ dedicatedNamespaceTemplates: false });
+    expect(toSOSettingsUpdate({ namespace: 'prod' }, 'agent_based')).toMatchObject({
+      dedicatedNamespaceTemplates: false,
+    });
+  });
+
+  it('is left out of the metadata update, so it stays paired with the namespace', () => {
+    expect(
+      toSOMetadataUpdate({
+        integrationName: 'my-aws',
+        namespace: 'prod',
+        dedicatedNamespaceTemplates: true,
+      })
+    ).toEqual({ integrationName: 'my-aws', description: null });
   });
 });
 
 describe('toSOSettingsUpdate', () => {
   it('returns the trimmed name and description', () => {
     expect(
-      toSOSettingsUpdate({ integrationName: ' my-aws ', description: ' Production ' })
+      toSOSettingsUpdate(
+        { integrationName: ' my-aws ', description: ' Production ' },
+        'agent_based'
+      )
     ).toEqual({
       integrationName: 'my-aws',
       description: 'Production',
       namespace: null,
+      dedicatedNamespaceTemplates: false,
+      policySettings: {},
     });
   });
 
   it('sends the trimmed namespace', () => {
-    expect(toSOSettingsUpdate({ namespace: ' prod ' })).toEqual({
+    expect(toSOSettingsUpdate({ namespace: ' prod ' }, 'agent_based')).toEqual({
       description: null,
       namespace: 'prod',
+      dedicatedNamespaceTemplates: false,
+      policySettings: {},
     });
   });
 
   it('sends null for a blank description or namespace so a cleared one is removed from the record', () => {
     expect(
-      toSOSettingsUpdate({ integrationName: 'my-aws', description: '  ', namespace: '' })
+      toSOSettingsUpdate(
+        { integrationName: 'my-aws', description: '  ', namespace: '' },
+        'agent_based'
+      )
     ).toEqual({
       integrationName: 'my-aws',
       description: null,
       namespace: null,
+      dedicatedNamespaceTemplates: false,
+      policySettings: {},
     });
-    expect(toSOSettingsUpdate({ integrationName: 'my-aws' })).toEqual({
+    expect(toSOSettingsUpdate({ integrationName: 'my-aws' }, 'agent_based')).toEqual({
       integrationName: 'my-aws',
       description: null,
       namespace: null,
+      dedicatedNamespaceTemplates: false,
+      policySettings: {},
     });
   });
 
   it('never sends a blank name', () => {
-    expect(toSOSettingsUpdate({ integrationName: ' ', description: 'x' })).toEqual({
+    expect(toSOSettingsUpdate({ integrationName: ' ', description: 'x' }, 'agent_based')).toEqual({
       description: 'x',
       namespace: null,
+      dedicatedNamespaceTemplates: false,
+      policySettings: {},
     });
   });
 
   it('sends the instances along with the other settings', () => {
     expect(
-      toSOSettingsUpdate({ integrationName: 'my-aws', instances: [original, duplicate] })
+      toSOSettingsUpdate(
+        { integrationName: 'my-aws', instances: [original, duplicate] },
+        'agent_based'
+      )
     ).toEqual({
       integrationName: 'my-aws',
       description: null,
       namespace: null,
+      dedicatedNamespaceTemplates: false,
+      policySettings: {},
       instances: [original, duplicate],
     });
   });
 
   it('leaves out the instances when there are none', () => {
-    expect(toSOSettingsUpdate({ integrationName: 'my-aws', instances: [] })).toEqual({
-      integrationName: 'my-aws',
-      description: null,
-      namespace: null,
-    });
+    expect(toSOSettingsUpdate({ integrationName: 'my-aws', instances: [] }, 'agent_based')).toEqual(
+      {
+        integrationName: 'my-aws',
+        description: null,
+        namespace: null,
+        dedicatedNamespaceTemplates: false,
+        policySettings: {},
+      }
+    );
+  });
+
+  it('sends the package policy settings, empty when none has a value so a cleared one is removed', () => {
+    expect(
+      toSOSettingsUpdate({ policySettings: { output_id: 'logstash-1' } }, 'agent_based')
+    ).toEqual(expect.objectContaining({ policySettings: { output_id: 'logstash-1' } }));
+    expect(toSOSettingsUpdate({ policySettings: { output_id: '' } }, 'agent_based')).toEqual(
+      expect.objectContaining({ policySettings: {} })
+    );
+  });
+});
+
+describe('toSOSettingsUpdate — other deployment methods', () => {
+  it('clears the package policy settings a managed integration or ECF deploy does not apply', () => {
+    const policySettings = { condition: '${host.platform} == "linux"' };
+    expect(toSOSettingsUpdate({ policySettings }, 'managed_integration')).toEqual(
+      expect.objectContaining({ policySettings: {} })
+    );
+    expect(toSOSettingsUpdate({ policySettings }, 'ecf')).toEqual(
+      expect.objectContaining({ policySettings: {} })
+    );
   });
 });
 
@@ -138,6 +261,15 @@ describe('toSOMetadataUpdate', () => {
         description: 'Production',
         instances: [original, duplicate],
       })
-    ).toEqual({ integrationName: 'my-aws', description: 'Production' });
+    ).toEqual({
+      integrationName: 'my-aws',
+      description: 'Production',
+    });
+  });
+
+  it('leaves out the package policy settings, which are saved only with a deploy', () => {
+    expect(
+      toSOMetadataUpdate({ integrationName: 'my-aws', policySettings: { output_id: 'logstash-1' } })
+    ).toEqual({ integrationName: 'my-aws', description: null });
   });
 });

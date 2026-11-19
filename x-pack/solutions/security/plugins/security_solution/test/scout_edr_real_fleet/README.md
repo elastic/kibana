@@ -7,12 +7,15 @@ The default `test/scout/` config set has no Fleet Server and no VirtualBox/Multi
 ## What it runs
 
 - Config set: `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/edr_real_fleet/`
-- Playwright UI: `ui/playwright.config.ts` (`workers: 1`) — browser assertions
-- Playwright API: `api/playwright.config.ts` (`workers: 1`) — HTTP only, still enrolls a live host
+- Playwright UI: `shared_host/ui/playwright.config.ts` (`workers: 1`) — browser assertions
+- Playwright API: `shared_host/api/playwright.config.ts` (`workers: 1`) — HTTP only, still enrolls a live host
+- Playwright API: `tamper_protection/api/playwright.config.ts` (`workers: 1`) — HTTP only, enrolls a new host per test; stateful only
 - Host: Vagrant + VirtualBox on CI (`CI=true`), Multipass locally
 - Fleet Server: Docker via `startFleetServerIfNecessary()` after Kibana is up
 
-Both configs are listed in `.buildkite/scout_ci_config.yml` `excluded_configs` so default Scout discovery never picks them up. CI runs them one after the other, so each boots Elasticsearch, Kibana, and its own Endpoint VM.
+Specs are grouped in namespaces (`<namespace>/{ui,api}/`). `shared_host/` holds the specs that share one enrolled host per Playwright worker (`fixtures/enrolled_endpoint.ts`). Scout does not allow root-level `ui/` or `api/` next to namespaces, so new suites go in a namespace of their own.
+
+All configs are listed in `.buildkite/scout_ci_config.yml` `excluded_configs` so default Scout discovery never picks them up. CI runs them one after the other, so each boots Elasticsearch, Kibana, and its own Endpoint VM.
 
 ## Local
 
@@ -25,7 +28,7 @@ Start servers and run tests in one step:
 ```bash
 node scripts/scout run-tests --location local --arch stateful --domain classic \
   --serverConfigSet edr_real_fleet \
-  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts
+  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/playwright.config.ts
 ```
 
 Local serverless Security (complete) uses the same Playwright config and a different server config:
@@ -33,7 +36,7 @@ Local serverless Security (complete) uses the same Playwright config and a diffe
 ```bash
 node scripts/scout run-tests --location local --arch serverless --domain security_complete \
   --serverConfigSet edr_real_fleet \
-  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts
+  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/playwright.config.ts
 ```
 
 The API project uses the same server config set and a different Playwright config:
@@ -41,7 +44,7 @@ The API project uses the same server config set and a different Playwright confi
 ```bash
 node scripts/scout run-tests --location local --arch stateful --domain classic \
   --serverConfigSet edr_real_fleet \
-  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/playwright.config.ts
+  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/api/playwright.config.ts
 ```
 
 To iterate against an already-running stack, start servers once:
@@ -54,17 +57,17 @@ Then run Playwright only:
 
 ```bash
 node scripts/playwright test \
-  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts \
+  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/playwright.config.ts \
   --project local
 ```
 
-Swap that config path for `api/playwright.config.ts` to run the HTTP-only specs against the same stack.
+Swap that config path for `shared_host/api/playwright.config.ts` to run the HTTP-only specs against the same stack.
 
 ## CI
 
 Not part of default Scout (`excluded_configs`). Agents use nested virtualization (`n2-highmem-4`), same class as Defend Workflows Cypress.
 
-- **Targets:** two parallel jobs. One runs stateful classic (ECH). One runs local serverless `security_complete`. Each job runs the UI config and then the API config. Specs opt in with `@local-stateful-classic` and `@local-serverless-security_complete` (no cloud tag, so Scout does not schedule them against a real project).
+- **Targets:** two parallel jobs. One runs stateful classic (ECH). One runs local serverless `security_complete`. Each job runs the `shared_host` UI config and then the `shared_host` API config; the stateful job then runs the `tamper_protection` API config, whose specs are stateful only. Specs opt in with `@local-stateful-classic` and `@local-serverless-security_complete` (no cloud tag, so Scout does not schedule them against a real project).
 - **PRs:** path-filtered (`fleet_packages.json`, Endpoint/EDR, response-actions, this suite, or its CI wiring) or labels `ci:scout-edr-real-fleet` / `ci:all-ui-test-suites`. Fleet plugin-only PRs do not upload this job.
 - **Weekdays on `main`:** dedicated Buildkite pipeline `kibana / security solution / scout edr real fleet` (05:00 America/New_York, Mon–Fri). Failures go to `#security-defend-workflows-tests`.
 - **Not** on every `kibana-security-solution-on-merge` run.

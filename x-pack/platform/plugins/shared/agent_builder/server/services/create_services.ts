@@ -141,6 +141,8 @@ export class ServiceManager {
     deploymentInfo,
     deductiveRegister,
     isomer,
+    getSmlTypeDefinition,
+    cloud,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
@@ -204,7 +206,7 @@ export class ServiceManager {
       toolsService: tools,
     });
 
-    const hooks = this.services.hooks.start();
+    const hooks = this.services.hooks.start({ security, spaces });
 
     const plugins = this.services.plugins.start({
       logger: logger.get('plugins'),
@@ -273,6 +275,8 @@ export class ServiceManager {
     const surfaces = new SurfacesServiceImpl({
       attachmentsService: attachments,
       isomer,
+      basePath: http.basePath,
+      cloud,
       logger: logger.get('surfaces'),
     });
 
@@ -293,6 +297,8 @@ export class ServiceManager {
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
       surfacesService: surfaces,
+      taskManager,
+      getExecutionService,
     });
 
     const decisions = new DecisionService({
@@ -300,6 +306,7 @@ export class ServiceManager {
       providers: createDecisionProviders({
         config: this.config.decisionModel,
         inference,
+        elasticsearch,
         createModelProvider: createModelProviderFactory({
           inference,
           trackingService,
@@ -323,6 +330,7 @@ export class ServiceManager {
       agentService: agents,
       runAgent: runner.runAgent,
       attachmentsService: attachments,
+      getSmlTypeDefinition,
       uiSettings,
       savedObjects,
       trackingService,

@@ -1,6 +1,7 @@
 {
   ".abuseipdb": "AbuseIPDB publishes only HTML docs (https://docs.abuseipdb.com/) and no OpenAPI/Swagger. Common guessed spec URLs return 404/403. The only OpenAPI descriptions found are community-authored ones (api-evangelist/abuseipdb on GitHub), which are not mirrors of a vendor file, and the referenced raw path did not resolve.",
   ".alienvault-otx": "AlienVault/LevelBlue OTX publishes no OpenAPI/Swagger for its DirectConnect API (otx.alienvault.com/api/v1). The only references are the HTML docs and the OTX-Python-SDK. /api/openapi.json just serves the SPA HTML.",
+  ".aws": "Generic connector: the caller picks the AWS service, path, and protocol per request, so there is no single vendor spec to pin",
   ".azure_sql": "Talks to Azure SQL Database through the mssql driver's TDS protocol, not an HTTP API",
   ".box": "Connector does not call the Box REST API through ctx.client; all actions go through the Box remote MCP server (https://mcp.box.com) via withMcpClient. The MCP adapter can record it, but the server's `tools/list` needs authentication, so it stays exempt until credentials exist. box/box-openapi does not describe the MCP surface.",
   ".buildkite": "MCP connector: all actions go through Buildkite's hosted MCP server (https://mcp.buildkite.com/direct) via the MCP client, not ctx.client. The MCP adapter can record it, but the server's `tools/list` needs authentication, so it stays exempt until credentials exist.",

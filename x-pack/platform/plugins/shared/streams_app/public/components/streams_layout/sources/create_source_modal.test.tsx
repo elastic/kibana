@@ -12,11 +12,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { createDefaultUnit } from '../../../services/unit_repository';
 import { CreateSourceModal } from './create_source_modal';
 import { selectableSignalsForSourceType } from './source_models';
+import type { SourceType } from './types';
 
 const NAME_REQUIRED = 'Enter a source name.';
 const SIGNALS_REQUIRED = 'Select at least one signal.';
 
-const renderModal = () => {
+const renderModal = (availableSourceTypes: SourceType[] = ['otlp']) => {
   const createSource = jest.fn();
   render(
     <I18nProvider>
@@ -24,7 +25,7 @@ const renderModal = () => {
         sources={{
           createSource,
           unitDefinition: createDefaultUnit(),
-          availableSourceTypes: ['otlp'],
+          availableSourceTypes,
           isUnitSaving: false,
           isGeneratingApiKey: false,
           isCreatingSource: false,
@@ -74,6 +75,22 @@ describe('CreateSourceModal', () => {
           sourceName: 'Edge',
           signals: selectableSignalsForSourceType('otlp'),
         },
+        expect.anything()
+      )
+    );
+  });
+
+  it('creates a Managed _bulk source without a signal choice', async () => {
+    const { createSource } = renderModal(['async_bulk']);
+
+    expect(screen.queryByTestId('streamsSourceSignal-logs')).not.toBeInTheDocument();
+
+    await userEvent.type(screen.getByTestId('streamsSourceNameInput'), 'Orders');
+    await userEvent.click(screen.getByTestId('streamsCreateSourceContinueButton'));
+
+    await waitFor(() =>
+      expect(createSource).toHaveBeenCalledWith(
+        { sourceType: 'async_bulk', sourceName: 'Orders', signals: [] },
         expect.anything()
       )
     );

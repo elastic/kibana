@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { DecisionQuestion } from '@kbn/inference-common';
 import { createInferenceProviderError, createInferenceRequestError } from '@kbn/inference-common';
@@ -30,9 +31,14 @@ const setup = ({ inferenceId }: { inferenceId?: string } = {}) => {
   const request = httpServerMock.createKibanaRequest();
   const getClient = jest.fn().mockReturnValue({ decide });
   const inference = { getClient } as unknown as InferenceServerStart;
+  const elasticsearch = elasticsearchServiceMock.createStart();
+  const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
+
+  elasticsearch.client.asScoped.mockReturnValue(scopedClient);
 
   const provider = new DecisionModelProvider({
     inference,
+    elasticsearch,
     inferenceId,
     timeoutMs: 1000,
     unavailableTtlMs: 1000,
@@ -41,20 +47,27 @@ const setup = ({ inferenceId }: { inferenceId?: string } = {}) => {
   const run = (questions: DecisionQuestion[] = [shouldRespond]) =>
     provider.decide({ request, input, questions });
 
-  return { run, provider, decide, getClient, request };
+  return {
+    run,
+    provider,
+    decide,
+    getClient,
+    request,
+    listEndpoints: scopedClient.asCurrentUser.transport.request,
+  };
 };
 
 describe('DecisionModelProvider', () => {
-  it('asks one question with the configured inference id, as the requesting user', async () => {
-    const { run, decide, getClient, request } = setup({ inferenceId: 'my-decision' });
-
-    decide.mockResolvedValue({
+  it('asks with the configured inference id, as the requesting user, without listing endpoints', async () => {
+    const { run, decide, getClient, request, listEndpoints } = setup({
       inferenceId: 'my-decision',
-      answer: { type: 'predicate', probability: 0.94 },
     });
+
+    decide.mockResolvedValue({ answers: [{ type: 'predicate', probability: 0.94 }] });
 
     const result = await run();
 
+    expect(listEndpoints).not.toHaveBeenCalled();
     expect(getClient).toHaveBeenCalledWith({ request });
     expect(decide).toHaveBeenCalledWith(
       { input, inferenceId: 'my-decision', abortSignal: expect.any(AbortSignal) },
@@ -66,31 +79,55 @@ describe('DecisionModelProvider', () => {
     });
   });
 
+  it('uses the first decision endpoint the cluster lists when none is configured', async () => {
+    const { run, decide, listEndpoints } = setup();
+
+    listEndpoints.mockResolvedValue({
+      endpoints: [{ inference_id: '.jev-1.13-decision' }, { inference_id: '.other-decision' }],
+    });
+    decide.mockResolvedValue({ answers: [{ type: 'predicate', probability: 0.6 }] });
+
+    const result = await run();
+
+    expect(listEndpoints.mock.calls[0][0]).toEqual({
+      method: 'GET',
+      path: '/_inference/decision/_all',
+    });
+    expect(decide.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ inferenceId: '.jev-1.13-decision' })
+    );
+    expect(result.inferenceId).toBe('.jev-1.13-decision');
+  });
+
   it('asks several questions in one call and keeps their order', async () => {
-    const { run, decide } = setup();
+    const { run, decide } = setup({ inferenceId: 'my-decision' });
     const answers = [
       { type: 'predicate', probability: 0.6 },
       { type: 'choice', choice: 'a', confidence: 0.8, probabilities: { a: 0.8, b: 0.2 } },
     ];
 
-    decide.mockResolvedValue({ inferenceId: '.jev-1.13-decision', answers });
+    decide.mockResolvedValue({ answers });
 
     const result = await run([shouldRespond, topic]);
 
-    expect(decide).toHaveBeenCalledWith(
-      { input, inferenceId: undefined, abortSignal: expect.any(AbortSignal) },
-      shouldRespond,
-      topic
-    );
-    expect(result).toEqual({ inferenceId: '.jev-1.13-decision', answers });
+    expect(decide).toHaveBeenCalledWith(expect.anything(), shouldRespond, topic);
+    expect(result).toEqual({ inferenceId: 'my-decision', answers });
   });
 
-  it('is unavailable when decide() reports no decision endpoint', async () => {
-    const { run, provider, decide } = setup();
+  it('is unavailable when the cluster lists no decision endpoint', async () => {
+    const { run, provider, decide, listEndpoints } = setup();
 
-    decide.mockRejectedValue(
-      createInferenceRequestError('No decision inference endpoint on the cluster', 404)
-    );
+    listEndpoints.mockResolvedValue({ endpoints: [] });
+
+    await expect(run()).rejects.toBeInstanceOf(DecisionProviderUnavailableError);
+    expect(decide).not.toHaveBeenCalled();
+    expect(provider.isAvailable()).toBe(false);
+  });
+
+  it('is unavailable when decide() reports the endpoint does not exist', async () => {
+    const { run, provider, decide } = setup({ inferenceId: 'missing' });
+
+    decide.mockRejectedValue(createInferenceRequestError('Inference endpoint not found', 404));
 
     await expect(run()).rejects.toBeInstanceOf(DecisionProviderUnavailableError);
     expect(provider.isAvailable()).toBe(false);

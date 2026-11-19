@@ -93,6 +93,8 @@ export enum ChatTriggerMode {
 export enum TimelineTriggerType {
   /** A user message. */
   userMessage = 'user_message',
+  /** A message another agent posted, such as a background sub-agent's report. */
+  agentMessage = 'agent_message',
   /** A human answering a prompt (HITL resume). */
   promptResponse = 'prompt_response',
   /** A scheduled task, no user present. */
@@ -107,6 +109,7 @@ export enum TimelineTriggerType {
 export enum TimelineEventType {
   // Content
   userMessage = 'user_message',
+  agentMessage = 'agent_message',
   promptResponse = 'prompt_response',
   // Execution lifecycle
   executionStarted = 'execution_started',
@@ -186,6 +189,28 @@ export const isUserMessageEvent = <E extends { type: string }>(
   event: E
 ): event is Extract<E, { type: TimelineEventType.userMessage }> =>
   event.type === TimelineEventType.userMessage;
+
+export interface AgentMessageEventData {
+  message: string;
+}
+/**
+ * A message posted by an agent that is not this conversation's run, such as a background
+ * sub-agent reporting back. Text only; a run starts from it or reads it later.
+ */
+export type AgentMessageEvent = BaseTimelineEvent<
+  TimelineEventType.agentMessage,
+  AgentMessageEventData
+>;
+
+/** A message that starts a run or is read by the next one, whoever posted it. */
+export type MessageEvent = UserMessageEvent | AgentMessageEvent;
+
+export const isMessageEvent = <E extends { type: string }>(
+  event: E
+): event is Extract<
+  E,
+  { type: TimelineEventType.userMessage } | { type: TimelineEventType.agentMessage }
+> => event.type === TimelineEventType.userMessage || event.type === TimelineEventType.agentMessage;
 
 /** A human's answer to a `prompt_requested` event. Resumes a specific run; does not start one. */
 export interface PromptResponseEventData {
@@ -569,6 +594,7 @@ export const interruptionOfTerminal = (
 /** The discriminated union of all stored timeline events. */
 export type TimelineEvent =
   | UserMessageEvent
+  | AgentMessageEvent
   | PromptResponseEvent
   | ExecutionStartedEvent
   | ExecutionStepEvent
@@ -583,6 +609,7 @@ export type TimelineEvent =
 /** A timeline event as supplied by a caller, before the server assigns id/created_at/actor. */
 export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.userMessage, UserMessageEventData>
+  | BaseTimelineEventInput<TimelineEventType.agentMessage, UserMessageEventData>
   | BaseTimelineEventInput<TimelineEventType.promptResponse, PromptResponseEventData>
   | BaseTimelineEventInput<TimelineEventType.executionStarted, ExecutionStartedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionStep, ExecutionStepEventData>

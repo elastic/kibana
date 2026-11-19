@@ -39,6 +39,7 @@ import {
 } from './external_resume/external_resume_service';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { ManagedWorkflowReadForbiddenError } from './managed_workflow_read_error';
 import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_trigger_inputs';
 import { WorkflowForbiddenError } from './workflow_forbidden_error';
 import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
@@ -140,6 +141,7 @@ describe('WorkflowsManagementApi', () => {
         .fn()
         .mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
       getWorkflowExecutions: jest.fn(),
+      getWorkflowExecutionStatusCounts: jest.fn(),
       getExecutionStepExecutions: jest.fn(),
       searchStepExecutions: jest.fn(),
       markStepAsResponded: jest.fn(),
@@ -273,6 +275,29 @@ describe('WorkflowsManagementApi', () => {
       expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
     });
 
+    it('rejects managed workflow history without managed workflow read access', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ ...workflow, managed: true });
+
+      await expect(
+        api.getHistoryForWorkflow(workflow.id, 'default', { request: mockRequest })
+      ).rejects.toBeInstanceOf(ManagedWorkflowReadForbiddenError);
+
+      expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('returns managed workflow history with managed workflow read access', async () => {
+      const historyResponse = { page: 1, perPage: 20, total: 0, items: [] };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ ...workflow, managed: true });
+      mockWorkflowsService.getHistoryForWorkflow.mockResolvedValue(historyResponse);
+
+      await expect(
+        api.getHistoryForWorkflow(workflow.id, 'default', {
+          request: mockRequest,
+          allowManagedWorkflowRead: true,
+        })
+      ).resolves.toBe(historyResponse);
+    });
+
     it.each(['edit', 'execute'] as const)(
       'still excludes soft-deleted workflows from %s access',
       async (operation) => {
@@ -314,6 +339,21 @@ describe('WorkflowsManagementApi', () => {
       expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
       expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
         { request: mockRequest, accessControlFilter: filter },
+        'default'
+      );
+    });
+
+    it('applies the execution access filter to status counts', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };
+      jest.mocked(access.executionFilter).mockResolvedValue(filter);
+      const params = { workflowIds: [workflow.id], request: mockRequest };
+
+      await api.getWorkflowExecutionStatusCounts(params, 'default');
+
+      expect(access.executionFilter).toHaveBeenCalledWith('default', mockRequest);
+      expect(mockWorkflowsService.getWorkflowExecutionStatusCounts).toHaveBeenCalledWith(
+        { ...params, accessControlFilter: filter },
         'default'
       );
     });

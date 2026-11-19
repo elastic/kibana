@@ -131,14 +131,17 @@ export class ConcurrencyManager {
 
       if (queuedCount >= queueMax) {
         const skipTimestamp = new Date().toISOString();
-        await this.workflowExecutionRepository.updateWorkflowExecution({
-          id: currentExecutionId,
-          status: ExecutionStatus.SKIPPED,
-          cancelRequested: true,
-          cancellationReason: `Queue full (queue-size: ${queueMax})`,
-          cancelledAt: skipTimestamp,
-          cancelledBy: 'system',
-        });
+        await this.workflowExecutionRepository.updateWorkflowExecution(
+          {
+            id: currentExecutionId,
+            status: ExecutionStatus.SKIPPED,
+            cancelRequested: true,
+            cancellationReason: `Queue full (queue-size: ${queueMax})`,
+            cancelledAt: skipTimestamp,
+            cancelledBy: 'system',
+          },
+          { refresh: true }
+        );
         return false;
       }
 
@@ -147,7 +150,7 @@ export class ConcurrencyManager {
           id: currentExecutionId,
           status: ExecutionStatus.QUEUED,
         },
-        { refresh: 'wait_for' }
+        { refresh: true }
       );
       return false;
     }
@@ -170,14 +173,17 @@ export class ConcurrencyManager {
     // Handle 'drop' strategy: mark new execution as SKIPPED if limit is exceeded
     if (strategy === 'drop') {
       const skipTimestamp = new Date().toISOString();
-      await this.workflowExecutionRepository.updateWorkflowExecution({
-        id: currentExecutionId,
-        status: ExecutionStatus.SKIPPED,
-        cancelRequested: true,
-        cancellationReason: `Dropped due to concurrency limit (max: ${maxConcurrency})`,
-        cancelledAt: skipTimestamp,
-        cancelledBy: 'system',
-      });
+      await this.workflowExecutionRepository.updateWorkflowExecution(
+        {
+          id: currentExecutionId,
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason: `Dropped due to concurrency limit (max: ${maxConcurrency})`,
+          cancelledAt: skipTimestamp,
+          cancelledBy: 'system',
+        },
+        { refresh: true }
+      );
       return false; // Drop the new execution
     }
 

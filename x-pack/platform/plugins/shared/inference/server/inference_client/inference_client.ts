@@ -105,7 +105,13 @@ export function createInferenceClient({
   const prompt = createPromptApi({
     callbackApi,
   });
-  const decide = createDecideApi({ esClient, logger });
+  const decide = createDecideApi({
+    esClient,
+    logger,
+    anonymizationRulesPromise,
+    regexWorker,
+    anonymization,
+  });
 
   const eventEmitter = callbackManager.asEventEmitter();
 

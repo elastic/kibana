@@ -1,5 +1,5 @@
 {
-  "sha1": "c04c10365972c625a093dd9398eae951b5b3fa95",
+  "sha1": "959d4c859b9da9618dc48008778997e2ead2791f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -364,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 114,
+        "line": 116,
         "column": 23
       }
     },
@@ -377,7 +377,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 144,
+        "line": 146,
         "column": 14
       }
     },
@@ -390,7 +390,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 212,
+        "line": 214,
         "column": 14
       }
     },
@@ -403,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 219,
+        "line": 221,
         "column": 19
       }
     },
@@ -416,7 +416,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 242,
+        "line": 244,
         "column": 28
       }
     },
@@ -429,7 +429,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 271,
+        "line": 273,
         "column": 97
       }
     },
@@ -442,7 +442,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
-        "line": 298,
+        "line": 300,
         "column": 28
       }
     },
@@ -585,8 +585,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 164,
-        "column": 1
+        "line": 200,
+        "column": 5
       }
     },
     {
@@ -598,8 +598,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 188,
-        "column": 5
+        "line": 230,
+        "column": 24
       }
     },
     {
@@ -611,8 +611,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 219,
-        "column": 14
+        "line": 258,
+        "column": 17
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-3429d9a84072140",
+      "title": "List and get Elasticsearch service accounts names an account created with an API key by the key and its owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 265,
+        "column": 84
       }
     },
     {
@@ -624,8 +637,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 225,
-        "column": 45
+        "line": 306,
+        "column": 12
       }
     },
     {
@@ -637,8 +650,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 241,
-        "column": 7
+        "line": 321,
+        "column": 29
       }
     },
     {
@@ -650,8 +663,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 293,
-        "column": 13
+        "line": 371,
+        "column": 5
       }
     },
     {
@@ -663,8 +676,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 356,
-        "column": 15
+        "line": 434,
+        "column": 23
       }
     },
     {
@@ -676,8 +689,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 393,
-        "column": 14
+        "line": 475,
+        "column": 53
       }
     },
     {
@@ -689,8 +702,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 403,
-        "column": 7
+        "line": 485,
+        "column": 18
       }
     },
     {
@@ -702,8 +715,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 412,
-        "column": 23
+        "line": 493,
+        "column": 65
       }
     },
     {
@@ -715,8 +728,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 455,
-        "column": 18
+        "line": 532,
+        "column": 4
       }
     },
     {
@@ -741,7 +754,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/principal_uiam_service_account.spec.ts",
-        "line": 28,
+        "line": 30,
         "column": 15
       }
     },
@@ -884,7 +897,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
-        "line": 182,
+        "line": 184,
         "column": 70
       }
     },
@@ -897,7 +910,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
-        "line": 200,
+        "line": 202,
         "column": 17
       }
     },
@@ -910,7 +923,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
-        "line": 216,
+        "line": 218,
         "column": 27
       }
     },
@@ -923,7 +936,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
-        "line": 244,
+        "line": 246,
         "column": 15
       }
     }
