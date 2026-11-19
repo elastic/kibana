@@ -337,8 +337,12 @@ describe('toSlackPlainText', () => {
       '_Disk full_ on ~db-1~ (*_nested_*)',
       'Disk full on db-1 (nested)',
     ],
-    ['identifiers kept', 'checkout_service_v2 is ~2x slower', 'checkout_service_v2 is ~2x slower'],
-    ['code spans kept as written', 'run `kill *_x_*` now', 'run `kill *_x_*` now'],
+    [
+      'identifiers kept',
+      'checkout_service_v2 is ~2x slower, _checkout_service_v2 is down_',
+      'checkout_service_v2 is ~2x slower, checkout_service_v2 is down',
+    ],
+    ['code spans kept as written', '*run `kill *_x_*` now*', 'run `kill *_x_*` now'],
     ['whitespace collapsed', 'a\n\n  b', 'a b'],
   ])('reads %s', (_, text, expected) => {
     expect(toSlackPlainText(text)).toBe(expected);
