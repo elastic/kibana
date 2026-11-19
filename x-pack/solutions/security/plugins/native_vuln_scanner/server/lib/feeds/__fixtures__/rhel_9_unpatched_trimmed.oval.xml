@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:unix-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#unix" xmlns:red-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#linux" xmlns:ind-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#independent" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#unix unix-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#linux linux-definitions-schema.xsd">
+<generator>
+<oval:product_name>Red Hat OVAL Patch Definition Merger</oval:product_name>
+<oval:product_version>3</oval:product_version>
+<oval:schema_version>5.10</oval:schema_version>
+<oval:timestamp>2026-11-18T07:35:58</oval:timestamp>
+<oval:content_version>1794987358</oval:content_version>
+</generator>
+<definitions>
+<definition class="vulnerability" id="oval:com.redhat.cve:def:20052541" version="637">
+ <metadata>
+  <title>tar: does not properly warn the user when extracting setuid or setgid files (moderate)</title>
+  <reference ref_id="CVE-2005-2541" ref_url="https://access.redhat.com/security/cve/CVE-2005-2541" source="CVE"/>
+  <description>DOCUMENTATION: A flaw was found in tar utility that can allow the root user to extract files with preserved setuid and setgid permissions without any warning. This behavior can lead to the creation of malicious setuid executables owned by root from a crafted tar file, posing significant security risks. 
+            STATEMENT: Currently, there are no plans to change tar behaviour to strip setuid and setgid bits when extracting archives.
+
+This vulnerability is considered moderate rather than important because the exploitation scenario requires specific conditions: the `tar` extraction must be performed by the root user, and the tarball itself must be crafted maliciously with setuid or setgid bits. In typical use cases, users do not routinely extract untrusted tar files as root, reducing the likelihood of exploitation. Additionally, non-root extractions do not preserve these bits unless explicitly requested with the `-p` option.
+            MITIGATION: To mitigate the risks associated with this vulnerability, avoid extracting tar files as the root user, especially when dealing with untrusted sources. Instead, perform extractions as a non-root user or in a restricted environment. Use a dedicated, empty directory for extracting archives to prevent accidental exposure of sensitive files. After extraction, review the file permissions to check for unexpected setuid or setgid bits before granting access. When extraction as root is necessary, use the --no-same-permissions option to prevent preserving the setuid and setgid bits.</description>
+  <advisory from="secalert@redhat.com">
+   <severity>Moderate</severity>
+   <updated date="2026-03-16"/>
+   <cve cvss3="7.0/CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H" href="https://access.redhat.com/security/cve/CVE-2005-2541" impact="moderate" public="20050804">CVE-2005-2541</cve>
+   <affected>
+    <resolution state="Will not fix">
+     <component>tar</component>
+    </resolution>
+   </affected>
+   <affected_cpe_list>
+    <cpe>cpe:/a:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::appstream</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::baseos</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::crb</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::extensions</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::highavailability</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::nfv</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::realtime</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::supplementary</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::appstream</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::baseos</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::crb</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::extensions</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::highavailability</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::nfv</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::realtime</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::supplementary</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9::baseos</cpe>
+   </affected_cpe_list>
+  </advisory>
+ </metadata>
+ <criteria operator="OR">
+  <criterion comment="Red Hat Enterprise Linux must be installed" test_ref="oval:com.redhat.cve:tst:20052541004"/>
+  <criteria operator="AND">
+   <criterion comment="Red Hat Enterprise Linux 9 is installed" test_ref="oval:com.redhat.cve:tst:20052541003"/>
+   <criterion comment="tar is installed" test_ref="oval:com.redhat.cve:tst:20052541001"/>
+   <criterion comment="tar is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:20052541002"/>
+  </criteria>
+ </criteria>
+</definition>
+<definition class="vulnerability" id="oval:com.redhat.cve:def:20161247" version="637">
+ <metadata>
+  <title>nginx: Local privilege escalation via log files (low)</title>
+  <reference ref_id="CVE-2016-1247" ref_url="https://access.redhat.com/security/cve/CVE-2016-1247" source="CVE"/>
+  <description>DOCUMENTATION: A vulnerability was discovered in nginx. An attacker who could already run commands under the nginx user id could use this access to append data to files owned by root, potentially elevating their own privileges to root. 
+            STATEMENT: Red Hat Product Security has rated this issue as having Low security impact. This issue is not currently planned to be addressed in future updates. For additional information, refer to the Issue Severity Classification: https://access.redhat.com/security/updates/classification/.</description>
+  <advisory from="secalert@redhat.com">
+   <severity>Low</severity>
+   <updated date="2025-04-12"/>
+   <cve cvss2="3.7/AV:L/AC:H/Au:N/C:P/I:P/A:P" cvss3="7.4/CVSS:3.0/AV:L/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H" href="https://access.redhat.com/security/cve/CVE-2016-1247" impact="low" public="20161025">CVE-2016-1247</cve>
+   <affected>
+    <resolution state="Affected">
+     <component>nginx</component>
+     <component>nginx-all-modules</component>
+     <component>nginx-core</component>
+     <component>nginx-filesystem</component>
+     <component>nginx-mod-devel</component>
+     <component>nginx-mod-http-image-filter</component>
+     <component>nginx-mod-http-perl</component>
+     <component>nginx-mod-http-xslt-filter</component>
+     <component>nginx-mod-mail</component>
+     <component>nginx-mod-stream</component>
+    </resolution>
+   </affected>
+   <affected_cpe_list>
+    <cpe>cpe:/a:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::appstream</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::baseos</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::crb</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::extensions</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::highavailability</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::nfv</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::realtime</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:enterprise_linux:9::supplementary</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::appstream</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::baseos</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::crb</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::extensions</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::highavailability</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::nfv</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::realtime</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::resilientstorage</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::sap_hana</cpe>
+    <cpe>cpe:/a:redhat:rhel_eus:9.10::supplementary</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9</cpe>
+    <cpe>cpe:/o:redhat:enterprise_linux:9::baseos</cpe>
+   </affected_cpe_list>
+  </advisory>
+ </metadata>
+ <criteria operator="OR">
+  <criterion comment="Red Hat Enterprise Linux must be installed" test_ref="oval:com.redhat.cve:tst:20052541004"/>
+  <criteria operator="AND">
+   <criterion comment="Red Hat Enterprise Linux 9 is installed" test_ref="oval:com.redhat.cve:tst:20052541003"/>
+   <criteria operator="OR">
+    <criteria operator="AND">
+     <criterion comment="nginx-core is installed" test_ref="oval:com.redhat.cve:tst:20161247001"/>
+     <criterion comment="nginx-core is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:20161247002"/>
+    </criteria>
+    <criteria operator="AND">
+     <criterion comment="nginx-all-modules is installed" test_ref="oval:com.redhat.cve:tst:20161247003"/>
+     <criterion comment="nginx-all-modules is signed with Red Hat redhatrelease2 key" test_ref="oval:com.redhat.cve:tst:20161247004"/>
+    </criteria>
+   </criteria>
+  </criteria>
+ </criteria>
+</definition>
+</definitions>
+<tests>
+<red-def:rpminfo_test check="at least one" comment="tar is installed" id="oval:com.redhat.cve:tst:20052541001" version="637">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20052541001"/>
+</red-def:rpminfo_test>
+<red-def:rpminfo_test check="at least one" comment="tar is signed with Red Hat redhatrelease2 key" id="oval:com.redhat.cve:tst:20052541002" version="637">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20052541001"/>
+ <red-def:state state_ref="oval:com.redhat.cve:ste:20052541001"/>
+</red-def:rpminfo_test>
+<red-def:rpmverifyfile_test check="at least one" comment="Red Hat Enterprise Linux 9 is installed" id="oval:com.redhat.cve:tst:20052541003" version="637">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20052541002"/>
+ <red-def:state state_ref="oval:com.redhat.cve:ste:20052541002"/>
+</red-def:rpmverifyfile_test>
+<red-def:rpmverifyfile_test check="none satisfy" comment="Red Hat Enterprise Linux must be installed" id="oval:com.redhat.cve:tst:20052541004" version="637">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20052541002"/>
+ <red-def:state state_ref="oval:com.redhat.cve:ste:20052541003"/>
+</red-def:rpmverifyfile_test>
+<red-def:rpminfo_test check="at least one" comment="nginx-core is installed" id="oval:com.redhat.cve:tst:20161247001" version="637">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20161247001"/>
+</red-def:rpminfo_test>
+<red-def:rpminfo_test check="at least one" comment="nginx-core is signed with Red Hat redhatrelease2 key" id="oval:com.redhat.cve:tst:20161247002" version="637">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20161247001"/>
+ <red-def:state state_ref="oval:com.redhat.cve:ste:20052541001"/>
+</red-def:rpminfo_test>
+<red-def:rpminfo_test check="at least one" comment="nginx-all-modules is installed" id="oval:com.redhat.cve:tst:20161247003" version="637">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20161247002"/>
+</red-def:rpminfo_test>
+<red-def:rpminfo_test check="at least one" comment="nginx-all-modules is signed with Red Hat redhatrelease2 key" id="oval:com.redhat.cve:tst:20161247004" version="637">
+ <red-def:object object_ref="oval:com.redhat.cve:obj:20161247002"/>
+ <red-def:state state_ref="oval:com.redhat.cve:ste:20052541001"/>
+</red-def:rpminfo_test>
+</tests>
+<objects>
+<red-def:rpminfo_object id="oval:com.redhat.cve:obj:20052541001" version="637">
+ <red-def:name>tar</red-def:name>
+</red-def:rpminfo_object>
+<red-def:rpmverifyfile_object id="oval:com.redhat.cve:obj:20052541002" version="637">
+ <red-def:behaviors noconfigfiles="true" noghostfiles="true" nogroup="true" nolinkto="true" nomd5="true" nomode="true" nomtime="true" nordev="true" nosize="true" nouser="true"/>
+ <red-def:name operation="pattern match"/>
+ <red-def:epoch operation="pattern match"/>
+ <red-def:version operation="pattern match"/>
+ <red-def:release operation="pattern match"/>
+ <red-def:arch operation="pattern match"/>
+ <red-def:filepath>/etc/redhat-release</red-def:filepath>
+</red-def:rpmverifyfile_object>
+<red-def:rpminfo_object id="oval:com.redhat.cve:obj:20161247001" version="637">
+ <red-def:name>nginx-core</red-def:name>
+</red-def:rpminfo_object>
+<red-def:rpminfo_object id="oval:com.redhat.cve:obj:20161247002" version="637">
+ <red-def:name>nginx-all-modules</red-def:name>
+</red-def:rpminfo_object>
+</objects>
+<states>
+<red-def:rpminfo_state id="oval:com.redhat.cve:ste:20052541001" version="637">
+ <red-def:signature_keyid operation="equals">199e2f91fd431d51</red-def:signature_keyid>
+</red-def:rpminfo_state>
+<red-def:rpmverifyfile_state id="oval:com.redhat.cve:ste:20052541002" version="637">
+ <red-def:name operation="pattern match">^redhat-release</red-def:name>
+ <red-def:version operation="pattern match">^9[^\d]</red-def:version>
+</red-def:rpmverifyfile_state>
+<red-def:rpmverifyfile_state id="oval:com.redhat.cve:ste:20052541003" version="637">
+ <red-def:name operation="pattern match">^redhat-release</red-def:name>
+</red-def:rpmverifyfile_state>
+</states>
+</oval_definitions>

@@ -74,6 +74,7 @@ import {
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW,
 } from './endpoint/configuration_troubleshooting';
 import { ENDPOINT_KNOWLEDGE_SEARCH_WORKFLOW } from './endpoint/knowledge_search';
+import { NATIVE_VULN_SCANNER_SCAN_WORKFLOW } from './native_vuln_scanner';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW } from './nightshift_investigations/agent_optimize';
 import {
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW,
@@ -263,6 +264,11 @@ export {
   THREAT_INTEL_WORKFLOW_IDS,
 } from './threat_intel';
 export {
+  NATIVE_VULN_SCANNER_SCAN_WORKFLOW,
+  NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID,
+  NATIVE_VULN_SCANNER_WORKFLOW_IDS,
+} from './native_vuln_scanner';
+export {
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW,
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW_ID,
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW,
@@ -380,6 +386,8 @@ export const managedWorkflowDefinitions = [
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW,
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW,
+  // Installs only when `xpack.nativeVulnScanner.enabled`; the registry entry is inert otherwise.
+  NATIVE_VULN_SCANNER_SCAN_WORKFLOW,
   // Elastic Defend endpoint workflows. security_solution installs them in start()
   // only while a consumer flag is on; registry membership only makes a definition
   // discoverable by id.

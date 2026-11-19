@@ -55,8 +55,8 @@
     "@kbn/unified-field-list",
     "@kbn/unified-doc-viewer",
     "@kbn/kibana-utils-plugin",
+    "@kbn/test-jest-helpers",
     "@kbn/ui-actions-plugin",
-    "@kbn/core-http-server-mocks",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/grouping",
     "@kbn/alerting-plugin",
@@ -65,6 +65,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/spaces-plugin",
     "@kbn/cloud-security-posture-common",
+    "@kbn/deeplinks-workflows",
+    "@kbn/workflows",
     "@kbn/cloud-security-posture",
     "@kbn/analytics",
     "@kbn/management-settings-ids",
@@ -82,7 +84,8 @@
     "@kbn/es-errors",
     "@kbn/app-header",
     "@kbn/app-menu",
-    "@kbn/security-solution-features"
+    "@kbn/security-solution-features",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

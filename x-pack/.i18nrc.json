@@ -237,6 +237,7 @@
     "xpack.inbox": "platform/plugins/shared/inbox",
     "xpack.ingestHub": "platform/plugins/shared/ingest_hub",
     "xpack.maintenanceWindows": "platform/plugins/shared/maintenance_windows",
+    "xpack.nativeVulnScanner": "solutions/security/plugins/native_vuln_scanner",
     "xpack.responseOps": [
       "platform/packages/shared/response-ops/detections-close-reason",
       "platform/packages/shared/response-ops/rule_params"

@@ -8,7 +8,7 @@
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  CDR_CNVM_AND_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
 
@@ -35,7 +35,9 @@ export const getVulnerabilitiesStatisticsQuery = (): SearchRequest => ({
   query: {
     match_all: {},
   },
-  index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  index: CDR_CNVM_AND_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN,
+  ignore_unavailable: true,
+  allow_no_indices: true,
   aggs: {
     critical: {
       filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.CRITICAL } },

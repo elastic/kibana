@@ -54,7 +54,11 @@ export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
 export const CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN =
   'security_solution-*.vulnerability_latest';
+export const CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN =
+  'security_solution-native.vulnerability_latest';
 export const CDR_VULNERABILITIES_INDEX_PATTERN = `${CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`;
+/** CNVM plus the native scanner alias only; excludes other third-party vendors (Wiz, Qualys). */
+export const CDR_CNVM_AND_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN = `${CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`;
 export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
 export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';

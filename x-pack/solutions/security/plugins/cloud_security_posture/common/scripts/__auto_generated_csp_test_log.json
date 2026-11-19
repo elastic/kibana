@@ -15548,7 +15548,7 @@
     "lines": [
       "  describe('Vulnerability Dashboard API')",
       "    it('responds with a 200 status code and matching data mock')",
-      "    it('returns a 400 error when necessary indices are nonexistent')",
+      "    it('returns an empty dashboard when the vulnerability indices do not exist')",
       "    it('GET vulnerabilities dashboard API with users with read access to cloud security posture')",
       "    it('GET vulnerabilities dashboard API with users without read access to cloud security posture')"
     ],
@@ -15574,10 +15574,10 @@
         "isTodo": false
       },
       {
-        "id": "returns-a-400-error-when-necessary-indices-are-nonexistent",
-        "rawLine": "    it('returns a 400 error when necessary indices are nonexistent', async () => {",
-        "line": "    it('returns a 400 error when necessary indices are nonexistent')",
-        "label": "returns a 400 error when necessary indices are nonexistent",
+        "id": "returns-an-empty-dashboard-when-the-vulnerability-indices-do-not-exist",
+        "rawLine": "    it('returns an empty dashboard when the vulnerability indices do not exist', async () => {",
+        "line": "    it('returns an empty dashboard when the vulnerability indices do not exist')",
+        "label": "returns an empty dashboard when the vulnerability indices do not exist",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
@@ -15626,10 +15626,10 @@
             "isTodo": false
           },
           {
-            "id": "returns-a-400-error-when-necessary-indices-are-nonexistent",
-            "rawLine": "    it('returns a 400 error when necessary indices are nonexistent', async () => {",
-            "line": "    it('returns a 400 error when necessary indices are nonexistent')",
-            "label": "returns a 400 error when necessary indices are nonexistent",
+            "id": "returns-an-empty-dashboard-when-the-vulnerability-indices-do-not-exist",
+            "rawLine": "    it('returns an empty dashboard when the vulnerability indices do not exist', async () => {",
+            "line": "    it('returns an empty dashboard when the vulnerability indices do not exist')",
+            "label": "returns an empty dashboard when the vulnerability indices do not exist",
             "indent": 4,
             "type": "it",
             "isSkipped": false,

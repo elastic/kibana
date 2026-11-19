@@ -32,6 +32,7 @@ import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CloudPosturePage } from './cloud_posture_page';
 import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
+  NATIVE_VULN_SCANNER_EMPTY_STATE_SUBJECTS,
   CNVM_NOT_INSTALLED_ACTION_SUBJ,
   THIRD_PARTY_INTEGRATIONS_NO_VULNERABILITIES_FINDINGS_PROMPT,
   THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_INTEGRATION_BUTTON,
@@ -44,8 +45,12 @@ import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 import vulnerabilityVendorDarkSVG from '../assets/illustrations/vulnerability_vendor_dark.svg';
 import vulnerabilityVendorBrightSVG from '../assets/illustrations/vulnerability_vendor_bright.svg';
 import { useAddIntegrationRoute } from '../common/api/use_add_integrations_route';
+import { useNativeVulnScannerAvailability } from '../common/api/use_native_vuln_scanner_api';
+import { useKibana } from '../common/hooks/use_kibana';
+import { SCANNER_SETTINGS_PATH } from '../common/navigation/constants';
 
 const REFETCH_INTERVAL_MS = 20000;
+const SECURITY_APP_NAME = 'securitySolutionUI';
 
 const ScanningVulnerabilitiesEmptyPrompt = () => (
   <EuiEmptyPrompt
@@ -81,6 +86,11 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
   const addIntegrationRouteLink = useAddIntegrationRoute('vulnerability_workflow');
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.vulnerabilities.path);
   const isDarkMode = useKibanaIsDarkMode();
+  const { application } = useKibana().services;
+  const { data: isNativeScannerAvailable } = useNativeVulnScannerAvailability();
+  const nativeScannerSettingsLink = application.getUrlForApp(SECURITY_APP_NAME, {
+    path: SCANNER_SETTINGS_PATH,
+  });
 
   return (
     <EuiFlexGroup>
@@ -146,6 +156,55 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
           }
         />
       </EuiFlexItem>
+      {isNativeScannerAvailable === true && (
+        <EuiFlexItem>
+          <EuiEmptyPrompt
+            css={{ padding: euiTheme.size.l }}
+            data-test-subj={NATIVE_VULN_SCANNER_EMPTY_STATE_SUBJECTS.PROMPT}
+            icon={
+              <EmptyStatesIllustrationContainer>
+                <EuiImage size="fullWidth" src={cloudsSVG} alt="" role="presentation" />
+              </EmptyStatesIllustrationContainer>
+            }
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.csp.nativeVulnScanner.emptyState.title"
+                  defaultMessage="Scan hosts with{lineBreak} Elastic Agent"
+                  values={{ lineBreak: <br /> }}
+                />
+              </h2>
+            }
+            layout="vertical"
+            color="plain"
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.csp.nativeVulnScanner.emptyState.description"
+                  defaultMessage="Detect vulnerable packages on the hosts you already monitor with Elastic Agent and the Osquery Manager integration. No additional agent is needed."
+                />
+              </p>
+            }
+            actions={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="primary"
+                    fill
+                    href={nativeScannerSettingsLink}
+                    data-test-subj={NATIVE_VULN_SCANNER_EMPTY_STATE_SUBJECTS.BUTTON}
+                  >
+                    <FormattedMessage
+                      id="xpack.csp.nativeVulnScanner.emptyState.button"
+                      defaultMessage="Scan hosts with Elastic Agent"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          />
+        </EuiFlexItem>
+      )}
       {is3PSupportedPage && (
         <EuiFlexItem>
           <EuiEmptyPrompt

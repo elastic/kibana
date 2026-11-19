@@ -1,0 +1,436 @@
+<oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:ind-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#independent" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:unix-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#unix" xmlns:linux-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#linux" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd   http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd   http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd   http://oval.mitre.org/XMLSchema/oval-definitions-5#unix unix-definitions-schema.xsd  http://oval.mitre.org/XMLSchema/oval-definitions-5#linux linux-definitions-schema.xsd">
+  <generator>
+    <oval:product_name>Canonical OVAL Generator</oval:product_name>
+    <oval:product_version>2</oval:product_version>
+    <oval:schema_version>5.11.1</oval:schema_version>
+    <oval:timestamp>2026-11-10T00:16:52</oval:timestamp>
+  </generator>
+  <definitions>
+    <definition id="oval:com.ubuntu.noble:def:100" class="inventory" version="1">
+      <metadata>
+        <title>Check that Ubuntu 24.04 LTS (noble) is installed.</title>
+        <description />
+      </metadata>
+      <criteria>
+        <criterion test_ref="oval:com.ubuntu.noble:tst:100" comment="The host is part of the unix family." />
+        <criterion test_ref="oval:com.ubuntu.noble:tst:101" comment="The host is running Ubuntu 24.04 LTS (noble)." />
+      </criteria>
+    </definition>
+    <definition id="oval:com.ubuntu.noble:def:2018146280000000" class="vulnerability" version="1">
+      <metadata>
+        <title>CVE-2018-14628 on Ubuntu 24.04 LTS (noble) - low</title>
+        <affected family="unix">
+          <platform>Ubuntu 24.04 LTS</platform>
+        </affected>
+        <reference source="CVE" ref_id="CVE-2018-14628" ref_url="https://www.cve.org/CVERecord?id=CVE-2018-14628" />
+        <description>An information leak vulnerability was discovered in Samba's LDAP server. Due to missing access control checks, an authenticated but unprivileged attacker could discover the names and preserved attributes of deleted objects in the LDAP store.  Update Instructions:  Run `sudo pro fix CVE-2018-14628` to fix the vulnerability. The problem can be corrected by updating your system to the following package versions:  ctdb - 2:4.19.4+dfsg-3ubuntu1 ldb-tools - 2:2.8.0+samba4.19.4+dfsg-3ubuntu1 libldb2 - 2:2.8.0+samba4.19.4+dfsg-3ubuntu1 libnss-winbind - 2:4.19.4+dfsg-3ubuntu1 libpam-winbind - 2:4.19.4+dfsg-3ubuntu1 libsmbclient - 2:4.19.4+dfsg-3ubuntu1 libwbclient0 - 2:4.19.4+dfsg-3ubuntu1 python3-ldb - 2:2.8.0+samba4.19.4+dfsg-3ubuntu1 python3-samba - 2:4.19.4+dfsg-3ubuntu1 registry-tools - 2:4.19.4+dfsg-3ubuntu1 samba - 2:4.19.4+dfsg-3ubuntu1 samba-ad-dc - 2:4.19.4+dfsg-3ubuntu1 samba-ad-provision - 2:4.19.4+dfsg-3ubuntu1 samba-common - 2:4.19.4+dfsg-3ubuntu1 samba-common-bin - 2:4.19.4+dfsg-3ubuntu1 samba-dsdb-modules - 2:4.19.4+dfsg-3ubuntu1 samba-libs - 2:4.19.4+dfsg-3ubuntu1 samba-testsuite - 2:4.19.4+dfsg-3ubuntu1 samba-vfs-modules - 2:4.19.4+dfsg-3ubuntu1 samba-vfs-modules-extra - 2:4.19.4+dfsg-3ubuntu1 smbclient - 2:4.19.4+dfsg-3ubuntu1 winbind - 2:4.19.4+dfsg-3ubuntu1 No subscription required</description>
+        <advisory from="security@ubuntu.com">
+          <severity>Low</severity>
+          <rights>Copyright (C) 2026 Canonical Ltd.</rights>
+          <public_date>2023-01-17T18:15:00Z</public_date>
+          <cve href="https://ubuntu.com/security/CVE-2018-14628" priority="low" public="20230117" cvss_score="4.3" cvss_vector="CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N" cvss_severity="medium">CVE-2018-14628</cve>
+        </advisory>
+      </metadata>
+      <criteria>
+        <extend_definition applicability_check="true" definition_ref="oval:com.ubuntu.noble:def:100" comment="Ubuntu 24.04 LTS (noble) is installed" />
+        <criteria operator="OR">
+          <criterion test_ref="oval:com.ubuntu.noble:tst:2018146280000000" comment="samba source package in noble, is affected and has been fixed (note: '2:4.19.4+dfsg-3ubuntu1')." />
+          <criterion test_ref="oval:com.ubuntu.noble:tst:2018146280000010" comment="samba source package in noble, is affected and has been fixed (note: '2:4.19.4+dfsg-3ubuntu1')." />
+        </criteria>
+      </criteria>
+    </definition>
+    <definition id="oval:com.ubuntu.noble:def:2021474880000000" class="vulnerability" version="1">
+      <metadata>
+        <title>CVE-2021-47488 on Ubuntu 24.04 LTS (noble) - medium</title>
+        <affected family="unix">
+          <platform>Ubuntu 24.04 LTS</platform>
+        </affected>
+        <reference source="CVE" ref_id="CVE-2021-47488" ref_url="https://www.cve.org/CVERecord?id=CVE-2021-47488" />
+        <description>Rejected reason: This CVE ID has been rejected or withdrawn by its CVE Numbering Authority.  Update Instructions:  Run `sudo pro fix CVE-2021-47488` to fix the vulnerability. The problem can be corrected by updating your system to the following package versions:  linux-image-6.8.0-1024-raspi - 6.8.0-1024.28 No subscription required</description>
+        <advisory from="security@ubuntu.com">
+          <severity>Medium</severity>
+          <rights>Copyright (C) 2026 Canonical Ltd.</rights>
+          <public_date>2024-05-22T09:15:00Z</public_date>
+          <cve href="https://ubuntu.com/security/CVE-2021-47488" priority="medium" public="20240522">CVE-2021-47488</cve>
+        </advisory>
+      </metadata>
+      <criteria>
+        <extend_definition applicability_check="true" definition_ref="oval:com.ubuntu.noble:def:100" comment="Ubuntu 24.04 LTS (noble) is installed" />
+        <criteria operator="OR">
+          <criteria operator="AND">
+            <criterion test_ref="oval:com.ubuntu.noble:tst:201245420000450" comment="Is kernel 'linux-raspi' running?" />
+            <criterion test_ref="oval:com.ubuntu.noble:tst:2021474880000000" comment="'linux-raspi' kernel in noble was vulnerable but has been fixed (note: '6.8.0-1024.28')." />
+          </criteria>
+          <criterion test_ref="oval:com.ubuntu.noble:tst:201111800000000" comment="Is kernel 'linux-raspi-realtime' running?" />
+        </criteria>
+      </criteria>
+    </definition>
+    <definition id="oval:com.ubuntu.noble:def:2023359580000000" class="vulnerability" version="1">
+      <metadata>
+        <title>CVE-2023-35958 on Ubuntu 24.04 LTS (noble) - medium</title>
+        <affected family="unix">
+          <platform>Ubuntu 24.04 LTS</platform>
+        </affected>
+        <reference source="CVE" ref_id="CVE-2023-35958" ref_url="https://www.cve.org/CVERecord?id=CVE-2023-35958" />
+        <description>Multiple heap-based buffer overflow vulnerabilities exist in the fstReaderIterBlocks2 VCDATA parsing functionality of GTKWave 3.3.115. A specially-crafted .fst file can lead to arbitrary code execution. A victim would need to open a malicious file to trigger these vulnerabilities.This vulnerability concerns the copy function `fstFread`.</description>
+        <advisory from="security@ubuntu.com">
+          <severity>Medium</severity>
+          <rights>Copyright (C) 2026 Canonical Ltd.</rights>
+          <public_date>2024-01-08T15:15:00Z</public_date>
+          <cve href="https://ubuntu.com/security/CVE-2023-35958" priority="medium" public="20240108" cvss_score="7.8" cvss_vector="CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H" cvss_severity="high">CVE-2023-35958</cve>
+        </advisory>
+      </metadata>
+      <criteria>
+        <extend_definition applicability_check="true" definition_ref="oval:com.ubuntu.noble:def:100" comment="Ubuntu 24.04 LTS (noble) is installed" />
+        <criterion test_ref="oval:com.ubuntu.noble:tst:2023326500000000" comment="gtkwave source package in noble, might be affected and may need fixing." />
+      </criteria>
+    </definition>
+    <definition id="oval:com.ubuntu.noble:def:202464840000000" class="vulnerability" version="1">
+      <metadata>
+        <title>CVE-2024-6484 on Ubuntu 24.04 LTS (noble) - medium</title>
+        <affected family="unix">
+          <platform>Ubuntu 24.04 LTS</platform>
+        </affected>
+        <reference source="CVE" ref_id="CVE-2024-6484" ref_url="https://www.cve.org/CVERecord?id=CVE-2024-6484" />
+        <reference source="USN" ref_id="USN-7556-1" ref_url="https://ubuntu.com/security/notices/USN-7556-1" />
+        <description>Rejected reason: This was not a security issue in Bootstrap. Bootstrap&#8217;s JavaScript is not intended to sanitize unsafe or intentionally dangerous HTML. As such, the reported behavior fell outside the scope of Bootstrap&#8217;s security model, and the associated CVE has been rescinded.  Update Instructions:  Run `sudo pro fix CVE-2024-6484` to fix the vulnerability. The problem can be corrected by updating your system to the following package versions:  fonts-glyphicons-halflings - 1.009~3.4.1+dfsg-3+deb12u1build0.24.04.1 libjs-bootstrap - 3.4.1+dfsg-3+deb12u1build0.24.04.1 No subscription required</description>
+        <advisory from="security@ubuntu.com">
+          <severity>Medium</severity>
+          <rights>Copyright (C) 2026 Canonical Ltd.</rights>
+          <public_date>2024-07-11T17:15:00Z</public_date>
+          <cve href="https://ubuntu.com/security/CVE-2024-6484" priority="medium" public="20240711" cvss_score="6.4" cvss_vector="CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:L/A:L" cvss_severity="medium" usns="7556-1">CVE-2024-6484</cve>
+        </advisory>
+      </metadata>
+      <criteria>
+        <extend_definition applicability_check="true" definition_ref="oval:com.ubuntu.noble:def:100" comment="Ubuntu 24.04 LTS (noble) is installed" />
+        <criteria operator="OR">
+          <criterion test_ref="oval:com.ubuntu.noble:tst:202464840000000" comment="twitter-bootstrap3 source package in noble, is affected and has been fixed (note: '3.4.1+dfsg-3+deb12u1build0.24.04.1')." />
+          <criterion test_ref="oval:com.ubuntu.noble:tst:202464840000010" comment="twitter-bootstrap3 source package in noble, is affected and has been fixed (note: '3.4.1+dfsg-3+deb12u1build0.24.04.1')." />
+        </criteria>
+      </criteria>
+    </definition>
+    <definition id="oval:com.ubuntu.noble:def:2024388280000000" class="vulnerability" version="1">
+      <metadata>
+        <title>CVE-2024-38828 on Ubuntu 24.04 LTS (noble) - medium</title>
+        <affected family="unix">
+          <platform>Ubuntu 24.04 LTS</platform>
+        </affected>
+        <reference source="CVE" ref_id="CVE-2024-38828" ref_url="https://www.cve.org/CVERecord?id=CVE-2024-38828" />
+        <description>Spring MVC controller methods with an @RequestBody byte[]&#160;method parameter are vulnerable to a DoS attack.</description>
+        <advisory from="security@ubuntu.com">
+          <severity>Medium</severity>
+          <rights>Copyright (C) 2026 Canonical Ltd.</rights>
+          <public_date>2024-11-18T04:15:00Z</public_date>
+          <cve href="https://ubuntu.com/security/CVE-2024-38828" priority="medium" public="20241118" cvss_score="5.3" cvss_vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L" cvss_severity="medium">CVE-2024-38828</cve>
+        </advisory>
+      </metadata>
+      <criteria>
+        <extend_definition applicability_check="true" definition_ref="oval:com.ubuntu.noble:def:100" comment="Ubuntu 24.04 LTS (noble) is installed" />
+        <criterion test_ref="oval:com.ubuntu.noble:tst:202053970000000" comment="libspring-java source package in esm-apps/noble, might be affected and may need fixing." />
+      </criteria>
+    </definition>
+    <definition id="oval:com.ubuntu.noble:def:202671800000000" class="vulnerability" version="1">
+      <metadata>
+        <title>CVE-2026-7180 on Ubuntu 24.04 LTS (noble) - medium</title>
+        <affected family="unix">
+          <platform>Ubuntu 24.04 LTS</platform>
+        </affected>
+        <reference source="CVE" ref_id="CVE-2026-7180" ref_url="https://www.cve.org/CVERecord?id=CVE-2026-7180" />
+        <description>[Unknown description]</description>
+        <advisory from="security@ubuntu.com">
+          <severity>Medium</severity>
+          <rights>Copyright (C) 2026 Canonical Ltd.</rights>
+          <public_date>2026-11-03T00:00:00Z</public_date>
+          <cve href="https://ubuntu.com/security/CVE-2026-7180" priority="medium" public="20261103">CVE-2026-7180</cve>
+        </advisory>
+      </metadata>
+      <criteria>
+        <extend_definition applicability_check="true" definition_ref="oval:com.ubuntu.noble:def:100" comment="Ubuntu 24.04 LTS (noble) is installed" />
+        <criterion test_ref="oval:com.ubuntu.noble:tst:2019120670000000" comment="qemu source package in noble, might be affected and may need fixing." />
+      </criteria>
+    </definition>
+    <definition id="oval:com.ubuntu.noble:def:2026633470000000" class="vulnerability" version="1">
+      <metadata>
+        <title>CVE-2026-63347 on Ubuntu 24.04 LTS (noble) - medium</title>
+        <affected family="unix">
+          <platform>Ubuntu 24.04 LTS</platform>
+        </affected>
+        <reference source="CVE" ref_id="CVE-2026-63347" ref_url="https://www.cve.org/CVERecord?id=CVE-2026-63347" />
+        <reference source="USN" ref_id="USN-8766-1" ref_url="https://ubuntu.com/security/notices/USN-8766-1" />
+        <description>[Unknown description]  Update Instructions:  Run `sudo pro fix CVE-2026-63347` to fix the vulnerability. The problem can be corrected by updating your system to the following package versions:  suricata-update - 1.3.0-2ubuntu0.1~esm1 Available with Ubuntu Pro: https://ubuntu.com/pro</description>
+        <advisory from="security@ubuntu.com">
+          <severity>Medium</severity>
+          <rights>Copyright (C) 2026 Canonical Ltd.</rights>
+          <public_date>2026-08-18T00:00:00Z</public_date>
+          <cve href="https://ubuntu.com/security/CVE-2026-63347" priority="medium" public="20260818" usns="8766-1">CVE-2026-63347</cve>
+        </advisory>
+      </metadata>
+      <criteria>
+        <extend_definition applicability_check="true" definition_ref="oval:com.ubuntu.noble:def:100" comment="Ubuntu 24.04 LTS (noble) is installed" />
+        <criterion test_ref="oval:com.ubuntu.noble:tst:2026633470000000" comment="suricata-update source package in esm-apps/noble, is affected and has been fixed (note: '1.3.0-2ubuntu0.1~esm1')." />
+      </criteria>
+    </definition>
+    <definition id="oval:com.ubuntu.noble:def:2026942870000000" class="vulnerability" version="1">
+      <metadata>
+        <title>CVE-2026-94287 on Ubuntu 24.04 LTS (noble) - medium</title>
+        <affected family="unix">
+          <platform>Ubuntu 24.04 LTS</platform>
+        </affected>
+        <reference source="CVE" ref_id="CVE-2026-94287" ref_url="https://www.cve.org/CVERecord?id=CVE-2026-94287" />
+        <reference source="USN" ref_id="USN-8862-1" ref_url="https://ubuntu.com/security/notices/USN-8862-1" />
+        <description>A denial of service via unsigned underflow in libXpm's write path in libXpm before 3.5.19 could be used by local attackers to cause unbounded CPU usage and memory exhaustion.  Update Instructions:  Run `sudo pro fix CVE-2026-94287` to fix the vulnerability. The problem can be corrected by updating your system to the following package versions:  libxpm4 - 1:3.5.17-1ubuntu0.24.04.2 xpmutils - 1:3.5.17-1ubuntu0.24.04.2 No subscription required</description>
+        <advisory from="security@ubuntu.com">
+          <severity>Medium</severity>
+          <rights>Copyright (C) 2026 Canonical Ltd.</rights>
+          <public_date>2026-09-28T09:17:00Z</public_date>
+          <cve href="https://ubuntu.com/security/CVE-2026-94287" priority="medium" public="20260928" cvss_score="5.5" cvss_vector="CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H" cvss_severity="medium" usns="8862-1">CVE-2026-94287</cve>
+        </advisory>
+      </metadata>
+      <criteria>
+        <extend_definition applicability_check="true" definition_ref="oval:com.ubuntu.noble:def:100" comment="Ubuntu 24.04 LTS (noble) is installed" />
+        <criteria operator="OR">
+          <criterion test_ref="oval:com.ubuntu.noble:tst:2026942870000000" comment="libxpm source package in noble, is affected and has been fixed (note: '1:3.5.17-1ubuntu0.24.04.2')." />
+          <criterion test_ref="oval:com.ubuntu.noble:tst:202248830000000" comment="motif source package in noble, might be affected and may need fixing." />
+        </criteria>
+      </criteria>
+    </definition>
+  </definitions>
+  <tests>
+    <ind-def:family_test id="oval:com.ubuntu.noble:tst:100" version="1" check="at least one" check_existence="at_least_one_exists" comment="Is the host part of the unix family?">
+      <ind-def:object object_ref="oval:com.ubuntu.noble:obj:100" />
+      <ind-def:state state_ref="oval:com.ubuntu.noble:ste:100" />
+    </ind-def:family_test>
+    <ind-def:textfilecontent54_test id="oval:com.ubuntu.noble:tst:101" version="1" check="at least one" check_existence="at_least_one_exists" comment="Is the host running Ubuntu trusty?">
+      <ind-def:object object_ref="oval:com.ubuntu.noble:obj:101" />
+      <ind-def:state state_ref="oval:com.ubuntu.noble:ste:101" />
+    </ind-def:textfilecontent54_test>
+    <unix-def:uname_test id="oval:com.ubuntu.noble:tst:201111800000000" version="1" check="at least one" check_existence="at_least_one_exists" comment="Is kernel 'linux-raspi-realtime' running?">
+      <unix-def:object object_ref="oval:com.ubuntu.noble:obj:200" />
+      <unix-def:state state_ref="oval:com.ubuntu.noble:ste:201111800000000" />
+    </unix-def:uname_test>
+    <unix-def:uname_test id="oval:com.ubuntu.noble:tst:201245420000450" version="1" check="at least one" check_existence="at_least_one_exists" comment="Is kernel 'linux-raspi' running?">
+      <unix-def:object object_ref="oval:com.ubuntu.noble:obj:200" />
+      <unix-def:state state_ref="oval:com.ubuntu.noble:ste:201245420000450" />
+    </unix-def:uname_test>
+    <linux-def:dpkginfo_test id="oval:com.ubuntu.noble:tst:2018146280000000" version="1" check="at least one" check_existence="at_least_one_exists" comment="Does the 'samba' package exist?">
+      <linux-def:object object_ref="oval:com.ubuntu.noble:obj:2018146280000000" />
+      <linux-def:state state_ref="oval:com.ubuntu.noble:ste:2018146280000000" />
+    </linux-def:dpkginfo_test>
+    <linux-def:dpkginfo_test id="oval:com.ubuntu.noble:tst:2018146280000010" version="1" check="at least one" check_existence="at_least_one_exists" comment="Does the 'samba' package exist?">
+      <linux-def:object object_ref="oval:com.ubuntu.noble:obj:2018146280000010" />
+      <linux-def:state state_ref="oval:com.ubuntu.noble:ste:2018146280000010" />
+    </linux-def:dpkginfo_test>
+    <linux-def:dpkginfo_test id="oval:com.ubuntu.noble:tst:2019120670000000" version="1" check="at least one" check_existence="at_least_one_exists" comment="Does the 'qemu' package exist?">
+      <linux-def:object object_ref="oval:com.ubuntu.noble:obj:2019120670000000" />
+    </linux-def:dpkginfo_test>
+    <linux-def:dpkginfo_test id="oval:com.ubuntu.noble:tst:202053970000000" version="1" check="at least one" check_existence="at_least_one_exists" comment="Does the 'libspring-java' package exist?">
+      <linux-def:object object_ref="oval:com.ubuntu.noble:obj:202053970000000" />
+    </linux-def:dpkginfo_test>
+    <ind-def:variable_test id="oval:com.ubuntu.noble:tst:2021474880000000" version="1" check="all" check_existence="all_exist" comment="kernel 'linux-raspi' version comparison">
+      <ind-def:object object_ref="oval:com.ubuntu.noble:obj:210" />
+      <ind-def:state state_ref="oval:com.ubuntu.noble:ste:2021474880000000" />
+    </ind-def:variable_test>
+    <linux-def:dpkginfo_test id="oval:com.ubuntu.noble:tst:202248830000000" version="1" check="at least one" check_existence="at_least_one_exists" comment="Does the 'motif' package exist?">
+      <linux-def:object object_ref="oval:com.ubuntu.noble:obj:202248830000000" />
+    </linux-def:dpkginfo_test>
+    <linux-def:dpkginfo_test id="oval:com.ubuntu.noble:tst:2023326500000000" version="1" check="at least one" check_existence="at_least_one_exists" comment="Does the 'gtkwave' package exist?">
+      <linux-def:object object_ref="oval:com.ubuntu.noble:obj:2023326500000000" />
+    </linux-def:dpkginfo_test>
+    <linux-def:dpkginfo_test id="oval:com.ubuntu.noble:tst:202464840000000" version="1" check="at least one" check_existence="at_least_one_exists" comment="Does the 'twitter-bootstrap3' package exist?">
+      <linux-def:object object_ref="oval:com.ubuntu.noble:obj:202464840000000" />
+      <linux-def:state state_ref="oval:com.ubuntu.noble:ste:202464840000000" />
+    </linux-def:dpkginfo_test>
+    <linux-def:dpkginfo_test id="oval:com.ubuntu.noble:tst:202464840000010" version="1" check="at least one" check_existence="at_least_one_exists" comment="Does the 'twitter-bootstrap3' package exist?">
+      <linux-def:object object_ref="oval:com.ubuntu.noble:obj:202464840000010" />
+      <linux-def:state state_ref="oval:com.ubuntu.noble:ste:202464840000010" />
+    </linux-def:dpkginfo_test>
+    <linux-def:dpkginfo_test id="oval:com.ubuntu.noble:tst:2026633470000000" version="1" check="at least one" check_existence="at_least_one_exists" comment="Does the 'suricata-update' package exist?">
+      <linux-def:object object_ref="oval:com.ubuntu.noble:obj:2026633470000000" />
+      <linux-def:state state_ref="oval:com.ubuntu.noble:ste:2026633470000000" />
+    </linux-def:dpkginfo_test>
+    <linux-def:dpkginfo_test id="oval:com.ubuntu.noble:tst:2026942870000000" version="1" check="at least one" check_existence="at_least_one_exists" comment="Does the 'libxpm' package exist?">
+      <linux-def:object object_ref="oval:com.ubuntu.noble:obj:2023437860000010" />
+      <linux-def:state state_ref="oval:com.ubuntu.noble:ste:2026942870000000" />
+    </linux-def:dpkginfo_test>
+  </tests>
+  <objects>
+    <ind-def:family_object id="oval:com.ubuntu.noble:obj:100" version="1" comment="The singleton family object" />
+    <ind-def:textfilecontent54_object id="oval:com.ubuntu.noble:obj:101" version="1">
+      <ind-def:filepath datatype="string">/etc/lsb-release</ind-def:filepath>
+      <ind-def:pattern operation="pattern match">^[\s\S]*DISTRIB_CODENAME=([a-z]+)$</ind-def:pattern>
+      <ind-def:instance datatype="int">1</ind-def:instance>
+    </ind-def:textfilecontent54_object>
+    <unix-def:uname_object id="oval:com.ubuntu.noble:obj:200" version="1" />
+    <ind-def:variable_object id="oval:com.ubuntu.noble:obj:210" version="1">
+      <ind-def:var_ref>oval:com.ubuntu.noble:var:200</ind-def:var_ref>
+    </ind-def:variable_object>
+    <linux-def:dpkginfo_object id="oval:com.ubuntu.noble:obj:2018146280000000" version="1" comment="The 'samba' package binaries">
+      <linux-def:name var_ref="oval:com.ubuntu.noble:var:2018146280000000" var_check="at least one" />
+    </linux-def:dpkginfo_object>
+    <linux-def:dpkginfo_object id="oval:com.ubuntu.noble:obj:2018146280000010" version="1" comment="The 'samba' package binaries">
+      <linux-def:name var_ref="oval:com.ubuntu.noble:var:2018146280000010" var_check="at least one" />
+    </linux-def:dpkginfo_object>
+    <linux-def:dpkginfo_object id="oval:com.ubuntu.noble:obj:2019120670000000" version="1" comment="The 'qemu' package binaries">
+      <linux-def:name var_ref="oval:com.ubuntu.noble:var:2019120670000000" var_check="at least one" />
+    </linux-def:dpkginfo_object>
+    <linux-def:dpkginfo_object id="oval:com.ubuntu.noble:obj:202053970000000" version="1" comment="The 'libspring-java' package binaries">
+      <linux-def:name var_ref="oval:com.ubuntu.noble:var:202053970000000" var_check="at least one" />
+    </linux-def:dpkginfo_object>
+    <linux-def:dpkginfo_object id="oval:com.ubuntu.noble:obj:202248830000000" version="1" comment="The 'motif' package binaries">
+      <linux-def:name var_ref="oval:com.ubuntu.noble:var:202248830000000" var_check="at least one" />
+    </linux-def:dpkginfo_object>
+    <linux-def:dpkginfo_object id="oval:com.ubuntu.noble:obj:2023326500000000" version="1" comment="The 'gtkwave' package binaries">
+      <linux-def:name var_ref="oval:com.ubuntu.noble:var:2023326500000000" var_check="at least one" />
+    </linux-def:dpkginfo_object>
+    <linux-def:dpkginfo_object id="oval:com.ubuntu.noble:obj:2023437860000010" version="1" comment="The 'libxpm' package binaries">
+      <linux-def:name var_ref="oval:com.ubuntu.noble:var:2023437860000010" var_check="at least one" />
+    </linux-def:dpkginfo_object>
+    <linux-def:dpkginfo_object id="oval:com.ubuntu.noble:obj:202464840000000" version="1" comment="The 'twitter-bootstrap3' package binaries">
+      <linux-def:name var_ref="oval:com.ubuntu.noble:var:202464840000000" var_check="at least one" />
+    </linux-def:dpkginfo_object>
+    <linux-def:dpkginfo_object id="oval:com.ubuntu.noble:obj:202464840000010" version="1" comment="The 'twitter-bootstrap3' package binaries">
+      <linux-def:name var_ref="oval:com.ubuntu.noble:var:202464840000010" var_check="at least one" />
+    </linux-def:dpkginfo_object>
+    <linux-def:dpkginfo_object id="oval:com.ubuntu.noble:obj:2026633470000000" version="1" comment="The 'suricata-update' package binary">
+      <linux-def:name var_ref="oval:com.ubuntu.noble:var:2026633470000000" var_check="at least one" />
+    </linux-def:dpkginfo_object>
+  </objects>
+  <states>
+    <ind-def:family_state id="oval:com.ubuntu.noble:ste:100" version="1" comment="The singleton family state">
+      <ind-def:family>unix</ind-def:family>
+    </ind-def:family_state>
+    <ind-def:textfilecontent54_state id="oval:com.ubuntu.noble:ste:101" version="1" comment="Ubuntu 24.04 LTS">
+      <ind-def:subexpression datatype="string" operation="equals">noble</ind-def:subexpression>
+    </ind-def:textfilecontent54_state>
+    <unix-def:uname_state id="oval:com.ubuntu.noble:ste:201111800000000" version="1">
+      <unix-def:os_release operation="pattern match">6\.8\.0\-\d+(\-raspi\-realtime)</unix-def:os_release>
+    </unix-def:uname_state>
+    <unix-def:uname_state id="oval:com.ubuntu.noble:ste:201245420000450" version="1">
+      <unix-def:os_release operation="pattern match">6\.8\.0\-\d+(\-raspi)</unix-def:os_release>
+    </unix-def:uname_state>
+    <linux-def:dpkginfo_state id="oval:com.ubuntu.noble:ste:2018146280000000" version="1" comment="The binary package version is less than '2:4.19.4+dfsg-3ubuntu1'">
+      <linux-def:evr datatype="debian_evr_string" operation="less than">2:4.19.4+dfsg-3ubuntu1</linux-def:evr>
+    </linux-def:dpkginfo_state>
+    <linux-def:dpkginfo_state id="oval:com.ubuntu.noble:ste:2018146280000010" version="1" comment="The binary package version is less than '2:2.8.0+samba4.19.4+dfsg-3ubuntu1'">
+      <linux-def:evr datatype="debian_evr_string" operation="less than">2:2.8.0+samba4.19.4+dfsg-3ubuntu1</linux-def:evr>
+    </linux-def:dpkginfo_state>
+    <ind-def:variable_state id="oval:com.ubuntu.noble:ste:2021474880000000" version="1" comment="'linux-raspi' kernel version">
+      <ind-def:value datatype="debian_evr_string" operation="less than">0:6.8.0-1024</ind-def:value>
+    </ind-def:variable_state>
+    <linux-def:dpkginfo_state id="oval:com.ubuntu.noble:ste:202464840000000" version="1" comment="The binary package version is less than '1.009~3.4.1+dfsg-3+deb12u1build0.24.04.1'">
+      <linux-def:evr datatype="debian_evr_string" operation="less than">1.009~3.4.1+dfsg-3+deb12u1build0.24.04.1</linux-def:evr>
+    </linux-def:dpkginfo_state>
+    <linux-def:dpkginfo_state id="oval:com.ubuntu.noble:ste:202464840000010" version="1" comment="The binary package version is less than '3.4.1+dfsg-3+deb12u1build0.24.04.1'">
+      <linux-def:evr datatype="debian_evr_string" operation="less than">3.4.1+dfsg-3+deb12u1build0.24.04.1</linux-def:evr>
+    </linux-def:dpkginfo_state>
+    <linux-def:dpkginfo_state id="oval:com.ubuntu.noble:ste:2026633470000000" version="1" comment="The binary package version is less than '1.3.0-2ubuntu0.1~esm1'">
+      <linux-def:evr datatype="debian_evr_string" operation="less than">1.3.0-2ubuntu0.1~esm1</linux-def:evr>
+    </linux-def:dpkginfo_state>
+    <linux-def:dpkginfo_state id="oval:com.ubuntu.noble:ste:2026942870000000" version="1" comment="The binary package version is less than '1:3.5.17-1ubuntu0.24.04.2'">
+      <linux-def:evr datatype="debian_evr_string" operation="less than">1:3.5.17-1ubuntu0.24.04.2</linux-def:evr>
+    </linux-def:dpkginfo_state>
+  </states>
+  <variables>
+    <local_variable id="oval:com.ubuntu.noble:var:200" version="1" datatype="debian_evr_string" comment="kernel version in evr format">
+      <concat>
+        <literal_component>0:</literal_component>
+        <regex_capture pattern="^([\d|\.]+-\d+)[-|\w]+$">
+          <object_component object_ref="oval:com.ubuntu.noble:obj:200" item_field="os_release" />
+        </regex_capture>
+      </concat>
+    </local_variable>
+    <constant_variable id="oval:com.ubuntu.noble:var:2018146280000000" version="1" datatype="string" comment="The 'samba' package binaries">
+      <value>ctdb</value>
+      <value>libnss-winbind</value>
+      <value>libpam-winbind</value>
+      <value>libsmbclient</value>
+      <value>libwbclient0</value>
+      <value>python3-samba</value>
+      <value>registry-tools</value>
+      <value>samba</value>
+      <value>samba-ad-dc</value>
+      <value>samba-ad-provision</value>
+      <value>samba-common</value>
+      <value>samba-common-bin</value>
+      <value>samba-dsdb-modules</value>
+      <value>samba-libs</value>
+      <value>samba-testsuite</value>
+      <value>samba-vfs-modules</value>
+      <value>samba-vfs-modules-extra</value>
+      <value>smbclient</value>
+      <value>winbind</value>
+    </constant_variable>
+    <constant_variable id="oval:com.ubuntu.noble:var:2018146280000010" version="1" datatype="string" comment="The 'samba' package binaries">
+      <value>ldb-tools</value>
+      <value>libldb2</value>
+      <value>python3-ldb</value>
+    </constant_variable>
+    <constant_variable id="oval:com.ubuntu.noble:var:2019120670000000" version="1" datatype="string" comment="The 'qemu' package binaries">
+      <value>qemu-block-extra</value>
+      <value>qemu-block-supplemental</value>
+      <value>qemu-guest-agent</value>
+      <value>qemu-system</value>
+      <value>qemu-system-arm</value>
+      <value>qemu-system-common</value>
+      <value>qemu-system-data</value>
+      <value>qemu-system-gui</value>
+      <value>qemu-system-mips</value>
+      <value>qemu-system-misc</value>
+      <value>qemu-system-modules-opengl</value>
+      <value>qemu-system-modules-spice</value>
+      <value>qemu-system-ppc</value>
+      <value>qemu-system-s390x</value>
+      <value>qemu-system-sparc</value>
+      <value>qemu-system-x86</value>
+      <value>qemu-system-x86-xen</value>
+      <value>qemu-system-xen</value>
+      <value>qemu-user</value>
+      <value>qemu-user-binfmt</value>
+      <value>qemu-user-static</value>
+      <value>qemu-utils</value>
+    </constant_variable>
+    <constant_variable id="oval:com.ubuntu.noble:var:202053970000000" version="1" datatype="string" comment="The 'libspring-java' package binaries">
+      <value>libspring-aop-java</value>
+      <value>libspring-beans-java</value>
+      <value>libspring-context-java</value>
+      <value>libspring-context-support-java</value>
+      <value>libspring-core-java</value>
+      <value>libspring-expression-java</value>
+      <value>libspring-instrument-java</value>
+      <value>libspring-jdbc-java</value>
+      <value>libspring-jms-java</value>
+      <value>libspring-messaging-java</value>
+      <value>libspring-orm-java</value>
+      <value>libspring-oxm-java</value>
+      <value>libspring-test-java</value>
+      <value>libspring-transaction-java</value>
+      <value>libspring-web-java</value>
+      <value>libspring-web-portlet-java</value>
+      <value>libspring-web-servlet-java</value>
+    </constant_variable>
+    <constant_variable id="oval:com.ubuntu.noble:var:202248830000000" version="1" datatype="string" comment="The 'motif' package binaries">
+      <value>libmotif-common</value>
+      <value>libmrm4</value>
+      <value>libuil4</value>
+      <value>libxm4</value>
+      <value>mwm</value>
+      <value>uil</value>
+    </constant_variable>
+    <constant_variable id="oval:com.ubuntu.noble:var:2023326500000000" version="1" datatype="string" comment="The 'gtkwave' package binaries">
+      <value>gtkwave</value>
+    </constant_variable>
+    <constant_variable id="oval:com.ubuntu.noble:var:2023437860000010" version="1" datatype="string" comment="The 'libxpm' package binaries">
+      <value>libxpm4</value>
+      <value>xpmutils</value>
+    </constant_variable>
+    <constant_variable id="oval:com.ubuntu.noble:var:202464840000000" version="1" datatype="string" comment="The 'twitter-bootstrap3' package binaries">
+      <value>fonts-glyphicons-halflings</value>
+    </constant_variable>
+    <constant_variable id="oval:com.ubuntu.noble:var:202464840000010" version="1" datatype="string" comment="The 'twitter-bootstrap3' package binaries">
+      <value>libjs-bootstrap</value>
+    </constant_variable>
+    <constant_variable id="oval:com.ubuntu.noble:var:2026633470000000" version="1" datatype="string" comment="The 'suricata-update' package binary">
+      <value>suricata-update</value>
+    </constant_variable>
+  </variables>
+</oval_definitions>

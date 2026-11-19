@@ -28,6 +28,8 @@ interface VulnStatsTrendResponse {
 
 export const getVulnTrendsQuery = () => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  ignore_unavailable: true,
+  allow_no_indices: true,
   size: 0,
   query: {
     bool: {
@@ -82,7 +84,7 @@ export const getVulnerabilitiesTrends = async (
   const vulnTrendsQueryResult = await esClient.search<LastDocBucket, VulnStatsTrendResponse>(
     getVulnTrendsQuery()
   );
-  if (!vulnTrendsQueryResult.hits.hits) {
+  if (!vulnTrendsQueryResult.hits?.hits) {
     throw new Error('Missing trend results from score index');
   }
 

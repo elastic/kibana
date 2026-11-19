@@ -253,13 +253,24 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    it('returns a 400 error when necessary indices are nonexistent', async () => {
+    it('returns an empty dashboard when the vulnerability indices do not exist', async () => {
       await vulnerabilitiesIndex.destroyIndex();
+      await scoresIndex.deleteAll();
 
-      await supertest
+      const { body } = await supertest
         .get('/internal/cloud_security_posture/vulnerabilities_dashboard')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(500);
+        .expect(200);
+
+      expect(body).to.eql({
+        // No aggregations come back when no index matches, so every statistic is undefined
+        // and dropped from the JSON body.
+        cnvmStatistics: {},
+        vulnTrends: [],
+        topVulnerableResources: [],
+        topPatchableVulnerabilities: [],
+        topVulnerabilities: [],
+      });
     });
 
     it('GET vulnerabilities dashboard API with users with read access to cloud security posture', async () => {

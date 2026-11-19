@@ -19,6 +19,7 @@ export interface AgentPolicyServiceInterface {
   createWithPackagePolicies: (typeof agentPolicyService)['createWithPackagePolicies'];
   get: (typeof agentPolicyService)['get'];
   list: (typeof agentPolicyService)['list'];
+  update: (typeof agentPolicyService)['update'];
   delete: (typeof agentPolicyService)['delete'];
   getFullAgentPolicy: (typeof agentPolicyService)['getFullAgentPolicy'];
   getByIds: (typeof agentPolicyService)['getByIds'];

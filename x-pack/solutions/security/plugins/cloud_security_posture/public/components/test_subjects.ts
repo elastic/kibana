@@ -29,6 +29,10 @@ export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
   NO_VULNERABILITIES: 'no-vulnerabilities-vuln-mgmt-found',
   INDEX_TIMEOUT: 'vulnerabilities-timeout',
 };
+export const NATIVE_VULN_SCANNER_EMPTY_STATE_SUBJECTS = {
+  PROMPT: 'native-vuln-scanner-empty-state',
+  BUTTON: 'native-vuln-scanner-empty-state-button',
+};
 export const CNVM_NOT_INSTALLED_ACTION_SUBJ = 'cnvm-not-installed-action';
 export const CSPM_NOT_INSTALLED_ACTION_SUBJ = 'cspm-not-installed-action';
 export const KSPM_NOT_INSTALLED_ACTION_SUBJ = 'kspm-not-installed-action';
