@@ -260,14 +260,16 @@ const toEmphasisPattern = (marker: string): RegExp => {
 const SLACK_EMPHASIS = ['*', '_', '~'].map(toEmphasisPattern);
 
 const stripEmphasis = (text: string): string => {
+  let markerPrefix = '\uE000';
+  while (text.includes(markerPrefix)) markerPrefix += '\uE000';
+  const toMarker = (index: number) => `${markerPrefix}${index}\uE001`;
+
   const codeSpans: string[] = [];
-  const masked = text
-    .replace(/[\uE000\uE001]/g, '')
-    .replace(SLACK_CODE_SPAN, (span) => `\uE000${codeSpans.push(span) - 1}\uE001`);
-  return SLACK_EMPHASIS.reduce(
-    (result, pattern) => result.replace(pattern, '$1$2'),
-    masked
-  ).replace(/\uE000(\d+)\uE001/g, (_, index: string) => codeSpans[Number(index)]);
+  const masked = text.replace(SLACK_CODE_SPAN, (span) => toMarker(codeSpans.push(span) - 1));
+  return codeSpans.reduce(
+    (result, span, index) => result.replaceAll(toMarker(index), span),
+    SLACK_EMPHASIS.reduce((result, pattern) => result.replace(pattern, '$1$2'), masked)
+  );
 };
 
 /** Slack markup as one readable line; ids Slack sends without a name are dropped. */

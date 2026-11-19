@@ -348,7 +348,11 @@ describe('toSlackPlainText', () => {
       'run `kill *_x_*` now Note:`x`',
     ],
     ['a wildcard kept', 'Check *.log for *failed* requests', 'Check *.log for failed requests'],
-    ['private-use placeholders dropped', 'a\uE0000\uE001 `b`', 'a0 `b`'],
+    [
+      'private-use characters kept',
+      'a\uE0000\uE001 `\uE000b\uE001` *c*',
+      'a\uE0000\uE001 `\uE000b\uE001` c',
+    ],
     ['whitespace collapsed', 'a\n\n  b', 'a b'],
   ])('reads %s', (_, text, expected) => {
     expect(toSlackPlainText(text)).toBe(expected);
