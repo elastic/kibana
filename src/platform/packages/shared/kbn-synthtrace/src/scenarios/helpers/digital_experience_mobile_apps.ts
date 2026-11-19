@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createHash } from 'crypto';
 import {
   createSeededRandom,
   edotReactNative,
@@ -855,6 +856,9 @@ const sentAt = (event: Serializable<EdotReactNativeDocument>): number => {
   return Math.max(time, doc.observed_timestamp ?? time);
 };
 
+const digestOf = (value: unknown): string =>
+  createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 16);
+
 const ongoingNativeSessions: OngoingSessionStore<EdotReactNativeDocument> = new Map();
 
 /** One generator of EDOT React Native sessions per app, ending at their tick and cut off at `from`. */
@@ -904,21 +908,25 @@ const generateSessions = (
   const platforms: readonly MobilePlatform[] =
     platform === ALL_MOBILE_PLATFORMS ? MOBILE_PLATFORMS : [platform];
   const runKey = JSON.stringify({ environment, from, scale, seed, platform, withManualSpans });
+  const appDigests = apps.map(digestOf);
 
   return apps.map(
-    ({
-      serviceName,
-      versions,
-      appId,
-      health,
-      sessionsPerMinute,
-      installations: installationCount,
-      withoutEnvironment,
-      deviceWeights,
-      model,
-      manualSpans = {},
-      native,
-    }) => {
+    (
+      {
+        serviceName,
+        versions,
+        appId,
+        health,
+        sessionsPerMinute,
+        installations: installationCount,
+        withoutEnvironment,
+        deviceWeights,
+        model,
+        manualSpans = {},
+        native,
+      },
+      appIndex
+    ) => {
       if (versions.slice(1).some(({ rollout }) => rollout)) {
         throw new Error(`${serviceName}: only the newest version can roll out`);
       }
@@ -1006,7 +1014,9 @@ const generateSessions = (
       if (proposedSignals) {
         return generateOngoingPerMinute(range, perMinute, {
           store: ongoingNativeSessions,
-          key: `${runKey}:${serviceName}`,
+          // The sessions in progress depend on the whole app, e.g. its rate, so apps that differ
+          // can't share them
+          key: `${runKey}:${serviceName}:${appDigests[appIndex]}`,
           maxDuration: MAX_NATIVE_SESSION_MS,
           releaseTime: sentAt,
           // A session that started before the run is left out whole

@@ -215,6 +215,7 @@ export class EdotIosClient extends EdotReactNativeClientBase {
       osVersion,
       osBuild,
       installationId: this.formatUuid(this.options.installationId),
+      native: this.native,
       random,
     });
   }

@@ -1387,6 +1387,81 @@ describe('edotReactNative', () => {
         }
       });
 
+      it('writes native iOS crashes as crashes of the app itself, not of React Native', () => {
+        const reports = ['SIGABRT', 'SIGSEGV', 'SIGBUS'].map((signal) => ({
+          signal,
+          ...ios({ native: true }).crashReport({
+            signal,
+            code: 'CODE',
+            crashedAt: TIMESTAMP,
+            random: seededRandom(`native-ios:${signal}`),
+          }),
+        }));
+
+        reports.forEach(({ signal, excerpt, address }) => {
+          expect(excerpt).not.toMatch(/hermes|RCTFatal|Unhandled JS/i);
+          // The app's own code crashes on the main thread
+          expect(excerpt).toContain('Thread 0 Crashed:');
+          expect(excerpt).toContain('Crashed Thread:  0');
+          expect(address).toBeGreaterThan(0);
+        });
+        const abort = reports.find(({ signal }) => signal === 'SIGABRT')?.excerpt;
+        expect(abort).toMatch(/uncaught exception 'NS\w+Exception', reason: '/);
+        expect(abort).toContain('Last Exception Backtrace:');
+      });
+
+      it('keeps the backend spans that had ended when the app crashed', () => {
+        // Requests that ended in the last seconds before the crash are lost with their client
+        // span, while the backend that answered them had exported its own
+        const spansOfCrashes = Array.from({ length: 150 }, (_, i) =>
+          proposed({
+            platform: 'ios',
+            seed: `backend-crash:${i}`,
+            screenViews: 3,
+            health: withHealth({ crashRate: 1, httpLatency: { median: 1_500, sigma: 0.3 } }),
+          })
+        );
+        const withoutClient = spansOfCrashes.flatMap((docs) => {
+          const ids = new Set(docs.filter(isSpan).map(({ span_id: spanId }) => spanId));
+          return docs
+            .filter(isSpan)
+            .filter(
+              ({ kind, parent_span_id: parentSpanId }) =>
+                kind === 'Server' && parentSpanId !== undefined && !ids.has(parentSpanId)
+            );
+        });
+        expect(withoutClient.length).toBeGreaterThan(0);
+
+        // A request still running at the crash is lost with its backend span. The ones that follow
+        // the crash are those of the relaunch.
+        spansOfCrashes.forEach((docs) => {
+          const [crash] = named(docs, 'app.crash');
+          docs
+            .filter(isSpan)
+            .filter(({ kind }) => kind === 'Server')
+            .filter((span) => timeOf(span) < timeOf(crash))
+            .forEach((span) => {
+              expect(timeOf(span) + Number(span.duration) / 1_000_000).toBeLessThanOrEqual(
+                timeOf(crash)
+              );
+            });
+        });
+      });
+
+      it('stamps the iOS inactive event with the last screen of the visit', () => {
+        const docs = proposed({ platform: 'ios', screenViews: 3 });
+        const [lastLoad] = docs
+          .filter(isSpan)
+          .filter(({ name }) => name === SPAN_SCREEN_LOAD)
+          .sort((a, b) => timeOf(b) - timeOf(a));
+        const [inactive] = logs(docs).filter(
+          ({ attributes }) => attributes?.['ios.app.state'] === 'inactive'
+        );
+
+        expect(lastLoad.attributes[ATTR_SCREEN_NAME]).toEqual(expect.any(String));
+        expect(inactive.attributes?.[ATTR_SCREEN_NAME]).toBe(lastLoad.attributes[ATTR_SCREEN_NAME]);
+      });
+
       it('keeps a request exported before a crash even when its screen load was lost', () => {
         // On a screen slow to appear, requests end before it has, and so can be exported before
         // the screen load span, which a crash right after then loses, as with the SDKs

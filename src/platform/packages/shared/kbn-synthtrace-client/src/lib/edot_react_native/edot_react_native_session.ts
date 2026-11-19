@@ -535,7 +535,8 @@ const describeCrash = ({ client, app, random }: SessionContext, crashedAt: numbe
  * events go through the span processor with their span, and only become logs in the exporter, so
  * they are kept or lost with it. A span can be exported while its parent is lost, like a request
  * that ended before its screen load did, so its `parent_span_id` points to a span that was never
- * sent, as with the SDKs. Nothing happens after the crash.
+ * sent, as with the SDKs. A backend exports its spans on its own, so those that had ended are kept
+ * whether or not the request they answer was exported. Nothing happens after the crash.
  */
 const exportedBeforeCrash = (
   { client, random }: SessionContext,
@@ -558,10 +559,11 @@ const exportedBeforeCrash = (
   );
   return events.filter(({ fields }) => {
     if ('kind' in fields) {
-      // A backend span is kept along with the request it answers
-      return exportedSpanIds.has(
-        fields.kind === MOBILE_SPAN_KIND.SERVER ? fields.parent_span_id ?? '' : fields.span_id
-      );
+      if (fields.kind === MOBILE_SPAN_KIND.SERVER) {
+        const { '@timestamp': time = 0, duration = 0 } = fields;
+        return time + duration / 1_000_000 <= crashedAt;
+      }
+      return exportedSpanIds.has(fields.span_id);
     }
     const { '@timestamp': time = 0, span_id: spanId } = fields;
     if (spanId !== undefined) {
@@ -764,10 +766,12 @@ const simulateVisit = (
 
   if (client.platform === MOBILE_PLATFORM.IOS) {
     // The user leaves the app at the end of the visit, which the session doesn't outlast
-    events.push(
-      client.lifecycle('inactive').timestamp(end - 1),
-      client.lifecycle('background').timestamp(end)
-    );
+    const inactive = client.lifecycle('inactive').timestamp(end - 1);
+    if (proposedSignals) {
+      // The app is still on the last screen when it becomes inactive
+      stampScreen([inactive], screenViews[lastView].screen.name);
+    }
+    events.push(inactive, client.lifecycle('background').timestamp(end));
   }
   return { events };
 };

@@ -634,6 +634,37 @@ describe('digital experience mobile apps', () => {
       ).toEqual(new Set([newest.serviceVersion]));
     });
 
+    it('does not carry sessions in progress over to a different configuration of an app', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const withVersion = (serviceVersion: string, sessionsPerMinute = app.sessionsPerMinute) => ({
+        ...app,
+        sessionsPerMinute,
+        versions: [{ ...app.versions[0], serviceVersion, rollout: undefined }],
+      });
+      const batch = (from: number, apps: DigitalExperienceMobileApp[]) =>
+        logsOf(
+          generateEdotNativeSessions(timerange(new Date(from), new Date(from + 5 * 60_000)), {
+            environment: 'test',
+            from: FROM,
+            scale: 1,
+            platform: 'both',
+            seed: 'digital-experience-native-test',
+            apps,
+          }).flatMap((generator) =>
+            Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+          )
+        );
+      const versionsOf = (batchLogs: OtelLogDocument[]) =>
+        new Set(batchLogs.map(({ resource }) => resource?.attributes?.['service.version']));
+
+      // Batches that follow each other, as in live mode, of apps that differ in version and rate
+      expect(versionsOf(batch(FROM, [withVersion('9.1.0')]))).toEqual(new Set(['9.1.0']));
+      const next = batch(FROM + 5 * 60_000, [withVersion('9.2.0', app.sessionsPerMinute + 1)]);
+      expect(versionsOf(next)).toEqual(new Set(['9.2.0']));
+      const starts = next.filter(({ event_name: eventName }) => eventName === EVENT_SESSION_START);
+      expect(starts).toHaveLength((app.sessionsPerMinute + 1) * 5);
+    });
+
     it('rejects a rollout of a version other than the newest', () => {
       const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
       const [newest, previous, ...older] = app.versions;
