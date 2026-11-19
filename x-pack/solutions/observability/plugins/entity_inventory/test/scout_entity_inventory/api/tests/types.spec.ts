@@ -16,6 +16,7 @@ const SPACE_ID = `entity-inventory-types-${randomUUID()}`;
 const INVENTORY_TYPES = ['host', 'k8s.deployment'];
 const K8S_DEPLOYMENT_IDENTITY_FIELDS = ['kubernetes.namespace', 'kubernetes.deployment.name'];
 const K8S_DEPLOYMENT_SUGGESTED_FILTERS = ['k8s.cluster.name', 'kubernetes.namespace'];
+const HOST_SUGGESTED_FILTERS = ['os.type', 'cloud.provider'];
 
 interface InventoryTypeResponse {
   type: string;
@@ -58,6 +59,20 @@ apiTest.describe(
       expect(k8sDeployment?.columns[0].name).toBe('entity.id');
       expect(k8sDeployment?.suggestedFilters).toStrictEqual(K8S_DEPLOYMENT_SUGGESTED_FILTERS);
       expect(k8sDeployment?.sources).toHaveLength(2);
+    });
+
+    apiTest('returns the suggested filters of the built-in host', async ({ apiClient }) => {
+      const response = await apiClient.get(TYPES_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const { types }: { types: InventoryTypeResponse[] } = response.body;
+
+      expect(types.find(({ type }) => type === 'host')?.suggestedFilters).toStrictEqual(
+        HOST_SUGGESTED_FILTERS
+      );
     });
 
     apiTest('returns every type with a dynamic block', async ({ apiClient }) => {
