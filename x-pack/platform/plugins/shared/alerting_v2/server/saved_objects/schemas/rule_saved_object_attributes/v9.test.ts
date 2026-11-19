@@ -33,24 +33,39 @@ describe('rule saved object attributes v9', () => {
   });
 
   it('preserves the original unresolved template including whitespace', () => {
-    const reason = '  CPU on {{host.name}} was {{cpu_pct}}%.\n';
-    expect(ruleSavedObjectAttributesSchema.validate({ ...attributes, reason }).reason).toBe(reason);
+    const reason = { template: '  CPU on {{host.name}} was {{cpu_pct}}%.\n' };
+    expect(ruleSavedObjectAttributesSchema.validate({ ...attributes, reason }).reason).toEqual(
+      reason
+    );
   });
 
   it('accepts the 1024-character boundary', () => {
-    const reason = 'a'.repeat(1024);
-    expect(ruleSavedObjectAttributesSchema.validate({ ...attributes, reason }).reason).toBe(reason);
+    const reason = { template: 'a'.repeat(1024) };
+    expect(ruleSavedObjectAttributesSchema.validate({ ...attributes, reason }).reason).toEqual(
+      reason
+    );
   });
 
   it('rejects templates exceeding 1024 characters', () => {
     expect(() =>
-      ruleSavedObjectAttributesSchema.validate({ ...attributes, reason: 'a'.repeat(1025) })
-    ).toThrow('[reason]');
+      ruleSavedObjectAttributesSchema.validate({
+        ...attributes,
+        reason: { template: 'a'.repeat(1025) },
+      })
+    ).toThrow('[reason');
   });
 
-  it.each(['', ' ', '\t\n', null, 42])('rejects an invalid reason: %p', (reason) => {
+  it.each([
+    { template: '' },
+    { template: ' ' },
+    { template: '\t\n' },
+    { template: 42 },
+    {},
+    'CPU on {{host.name}}',
+    null,
+  ])('rejects an invalid reason: %p', (reason) => {
     expect(() => ruleSavedObjectAttributesSchema.validate({ ...attributes, reason })).toThrow(
-      '[reason]'
+      '[reason'
     );
   });
 });

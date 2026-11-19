@@ -98,23 +98,30 @@ describe.each(reasonSchemaCases)('$api reason template', ({ schema, payload }) =
   });
 
   it('preserves the original unresolved template and surrounding whitespace', () => {
-    const reason = '  CPU on {{host.name}} was {{cpu_pct}}%.\n';
+    const reason = { template: '  CPU on {{host.name}} was {{cpu_pct}}%.\n' };
 
     expect(schema.parse({ ...payload, reason })).toMatchObject({ reason });
   });
 
   it('accepts the maximum length', () => {
-    const reason = 'a'.repeat(MAX_REASON_TEMPLATE_LENGTH);
+    const reason = { template: 'a'.repeat(MAX_REASON_TEMPLATE_LENGTH) };
 
     expect(schema.parse({ ...payload, reason })).toMatchObject({ reason });
   });
 
-  it.each(['', ' ', '\t\n', 'a'.repeat(MAX_REASON_TEMPLATE_LENGTH + 1), 42])(
-    'rejects an invalid reason: %p',
-    (reason) => {
-      expect(schema.safeParse({ ...payload, reason }).success).toBe(false);
-    }
-  );
+  it.each([
+    { template: '' },
+    { template: ' ' },
+    { template: '\t\n' },
+    { template: 'a'.repeat(MAX_REASON_TEMPLATE_LENGTH + 1) },
+    { template: 42 },
+    {},
+    { template: 'CPU', unknown_key: true },
+    'CPU on {{host.name}}',
+    42,
+  ])('rejects an invalid reason: %p', (reason) => {
+    expect(schema.safeParse({ ...payload, reason }).success).toBe(false);
+  });
 });
 
 describe('reason template clearing and inheritance', () => {
@@ -133,7 +140,10 @@ describe('reason template clearing and inheritance', () => {
     { api: 'create', schema: createRuleDataSchema },
     { api: 'PUT', schema: putRuleDataSchema },
   ])('rejects a reason on a signal rule in $api', ({ schema }) => {
-    const result = schema.safeParse({ ...validSignalCreateData, reason: 'Match on {{host.name}}' });
+    const result = schema.safeParse({
+      ...validSignalCreateData,
+      reason: { template: 'Match on {{host.name}}' },
+    });
 
     expect(result.success).toBe(false);
     expect(result.error?.issues).toEqual([
@@ -150,7 +160,7 @@ describe('reason template clearing and inheritance', () => {
 
   it('rejects a reason on a signal rule in bulk create', () => {
     const result = bulkCreateRulesRequestSchema.safeParse({
-      items: [{ ...validSignalCreateData, reason: 'Match on {{host.name}}' }],
+      items: [{ ...validSignalCreateData, reason: { template: 'Match on {{host.name}}' } }],
     });
 
     expect(result.success).toBe(false);
@@ -169,7 +179,7 @@ describe('reason template clearing and inheritance', () => {
   });
 
   it('inherits the reason contract in bulk-create items', () => {
-    const reason = 'CPU on {{host.name}} was {{cpu_pct}}%.';
+    const reason = { template: 'CPU on {{host.name}} was {{cpu_pct}}%.' };
 
     expect(
       bulkCreateRulesRequestSchema.parse({ items: [{ ...validCreateData, reason }] }).items[0]
@@ -201,7 +211,9 @@ describe('reason template clearing and inheritance', () => {
 
 describe('isReasonAllowedForKind', () => {
   it('accepts an alert reason template', () => {
-    expect(isReasonAllowedForKind({ kind: 'alert', reason: 'CPU on {{host.name}}' })).toBe(true);
+    expect(
+      isReasonAllowedForKind({ kind: 'alert', reason: { template: 'CPU on {{host.name}}' } })
+    ).toBe(true);
   });
 
   it('treats omitted and null reasons as absent on a signal rule', () => {
@@ -210,7 +222,9 @@ describe('isReasonAllowedForKind', () => {
   });
 
   it('rejects a configured reason on a signal rule', () => {
-    expect(isReasonAllowedForKind({ kind: 'signal', reason: 'CPU on {{host.name}}' })).toBe(false);
+    expect(
+      isReasonAllowedForKind({ kind: 'signal', reason: { template: 'CPU on {{host.name}}' } })
+    ).toBe(false);
   });
 });
 

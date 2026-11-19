@@ -342,12 +342,18 @@ describe('ruleModelVersions', () => {
         ?.forwardCompatibility as ObjectType;
       const attributes = {
         ...createV11RuleDocument().attributes,
-        reason: 'CPU on {{host.name}} was {{cpu_pct}}%.',
+        reason: { template: 'CPU on {{host.name}} was {{cpu_pct}}%.' },
       };
 
       expect(forwardCompatibility.validate({ ...attributes, future_field: true })).toEqual(
         ruleSavedObjectAttributesSchemaV9.validate(attributes)
       );
+      expect(
+        forwardCompatibility.validate({
+          ...attributes,
+          reason: { ...attributes.reason, future_field: true },
+        })
+      ).toEqual(ruleSavedObjectAttributesSchemaV9.validate(attributes));
     });
 
     it('strips the reason when rolling back to v11', () => {
@@ -355,7 +361,10 @@ describe('ruleModelVersions', () => {
       const migrated = migrator.migrate({
         document: {
           ...document,
-          attributes: { ...document.attributes, reason: 'CPU on {{host.name}} was {{cpu_pct}}%.' },
+          attributes: {
+            ...document.attributes,
+            reason: { template: 'CPU on {{host.name}} was {{cpu_pct}}%.' },
+          },
         },
         fromVersion: 12,
         toVersion: 11,

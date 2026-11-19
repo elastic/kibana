@@ -8,13 +8,15 @@
 import { schema } from '@kbn/config-schema';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV8 } from './v8';
 
-/** Adds the optional, unresolved reason template without backfilling existing rules. */
+/** Adds the optional reason configuration without backfilling existing rules. */
 export const ruleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV8.extends({
   reason: schema.maybe(
-    schema.description({
-      maxLength: 1024,
-      validate: (value) =>
-        value.trim().length === 0 ? 'Reason template must not be blank.' : undefined,
+    schema.object({
+      template: schema.description({
+        maxLength: 1024,
+        validate: (value) =>
+          value.trim().length === 0 ? 'Reason template must not be blank.' : undefined,
+      }),
     })
   ),
 });

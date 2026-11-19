@@ -708,13 +708,21 @@ const artifactsSchema = lazySchema(() =>
 
 /** Create rule API schema */
 
-const REASON_DESCRIPTION = `Alert reason template, for example "CPU on {{host.name}} was {{cpu_pct}}%." Only allowed when kind is "alert". Maximum ${MAX_REASON_TEMPLATE_LENGTH} characters. Whitespace is preserved; empty or whitespace-only templates are rejected.`;
+const REASON_DESCRIPTION = `Alert reason configuration. Only allowed when kind is "alert". \`template\` is the alert reason template, for example "CPU on {{host.name}} was {{cpu_pct}}%." Maximum ${MAX_REASON_TEMPLATE_LENGTH} characters. Whitespace is preserved; empty or whitespace-only templates are rejected.`;
 
 const reasonSchema = lazySchema(() =>
-  stringDescription({ minLength: 1, maxLength: MAX_REASON_TEMPLATE_LENGTH }).refine(
-    (value) => value.trim().length > 0,
-    { message: 'Reason template must not be blank.' }
-  )
+  z
+    .object({
+      template: stringDescription({
+        minLength: 1,
+        maxLength: MAX_REASON_TEMPLATE_LENGTH,
+      })
+        .refine((value) => value.trim().length > 0, {
+          message: 'Reason template must not be blank.',
+        })
+        .describe('Alert reason template.'),
+    })
+    .strict()
 );
 
 const TIME_FIELD_DESCRIPTION =
@@ -800,8 +808,10 @@ export const ROUTING_TAGS_SIGNAL_RULE_MESSAGE =
   'metadata.routing_tags is only allowed when kind is "alert".';
 
 /** Only alert rules can configure an alert reason template. */
-export const isReasonAllowedForKind = (data: { kind?: string; reason?: string | null }): boolean =>
-  data.kind === 'alert' || data.reason == null;
+export const isReasonAllowedForKind = (data: {
+  kind?: string;
+  reason?: { template: string } | null;
+}): boolean => data.kind === 'alert' || data.reason == null;
 
 export const REASON_SIGNAL_RULE_MESSAGE = 'reason is only allowed when kind is "alert".';
 

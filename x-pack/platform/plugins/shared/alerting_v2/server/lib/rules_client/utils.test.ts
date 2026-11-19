@@ -96,11 +96,11 @@ describe('utils', () => {
 
     it('stores the reason template at the top level', () => {
       const result = transformCreateRuleBodyToRuleSoAttributes(
-        { ...baseCreateData, reason: 'CPU on {{host.name}} is {{cpu_pct}}%' },
+        { ...baseCreateData, reason: { template: 'CPU on {{host.name}} is {{cpu_pct}}%' } },
         serverFields
       );
 
-      expect(result.reason).toBe('CPU on {{host.name}} is {{cpu_pct}}%');
+      expect(result.reason).toEqual({ template: 'CPU on {{host.name}} is {{cpu_pct}}%' });
     });
 
     it('leaves reason unset when not provided', () => {
@@ -326,7 +326,9 @@ describe('utils', () => {
     });
 
     it('preserves the reason when update omits it', () => {
-      const existing = createRuleSoAttributes({ reason: 'High CPU on {{host.name}}' });
+      const existing = createRuleSoAttributes({
+        reason: { template: 'High CPU on {{host.name}}' },
+      });
 
       const result = buildUpdateRuleAttributes(
         existing,
@@ -334,21 +336,29 @@ describe('utils', () => {
         { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
       );
 
-      expect(result.reason).toBe('High CPU on {{host.name}}');
+      expect(result.reason).toEqual({ template: 'High CPU on {{host.name}}' });
     });
 
     it('replaces the reason when update sends a new value', () => {
-      const existing = createRuleSoAttributes({ reason: 'old' });
+      const existing = createRuleSoAttributes({ reason: { template: 'old' } });
 
-      const result = buildUpdateRuleAttributes(existing, { reason: 'new' }, { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 });
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { reason: { template: 'new' } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
 
-      expect(result.reason).toBe('new');
+      expect(result.reason).toEqual({ template: 'new' });
     });
 
     it('clears the reason when update sends null', () => {
-      const existing = createRuleSoAttributes({ reason: 'old' });
+      const existing = createRuleSoAttributes({ reason: { template: 'old' } });
 
-      const result = buildUpdateRuleAttributes(existing, { reason: null }, { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 });
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { reason: null },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
 
       expect(result.reason).toBeUndefined();
     });
@@ -356,9 +366,13 @@ describe('utils', () => {
     it('carries a reason through an update of a rule that has none', () => {
       const existing = createRuleSoAttributes();
 
-      const result = buildUpdateRuleAttributes(existing, { reason: 'new' }, { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 });
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { reason: { template: 'new' } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
 
-      expect(result.reason).toBe('new');
+      expect(result.reason).toEqual({ template: 'new' });
     });
 
     it('clears routing tags when update sends null', () => {
@@ -849,11 +863,11 @@ describe('utils', () => {
     });
 
     it('returns the reason in a response that satisfies the schema', () => {
-      const attrs = createRuleSoAttributes({ reason: 'High CPU on {{host.name}}' });
+      const attrs = createRuleSoAttributes({ reason: { template: 'High CPU on {{host.name}}' } });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.reason).toBe('High CPU on {{host.name}}');
+      expect(result.reason).toEqual({ template: 'High CPU on {{host.name}}' });
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 
@@ -1123,7 +1137,7 @@ describe('utils', () => {
     });
 
     it('does not throw for an alert rule with a reason', () => {
-      const attrs = createRuleSoAttributes({ kind: 'alert', reason: 'High CPU' });
+      const attrs = createRuleSoAttributes({ kind: 'alert', reason: { template: 'High CPU' } });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
@@ -1134,7 +1148,7 @@ describe('utils', () => {
         recovery: undefined,
         no_data: undefined,
         query: { base: 'FROM logs-* | LIMIT 1' },
-        reason: 'High CPU',
+        reason: { template: 'High CPU' },
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
