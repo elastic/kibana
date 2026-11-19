@@ -216,7 +216,7 @@ export function initializeLayoutManager(
     if (!embeddables?.length) return;
     const first = embeddables[0];
     if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
-    const applyStatePromises: Array<Promise<void>> = [];
+    const applyStateThunks: Array<() => MaybePromise<void>> = [];
     let anchorId: string | undefined;
 
     for (const incomingEmbeddable of embeddables) {
@@ -236,10 +236,7 @@ export function initializeLayoutManager(
       const child = children$.value[uuid];
       if (sameType && child && apiHasSerializableState(child)) {
         const stateToApply = cloneDeep(nextState);
-        // Apply state after the loop so loading is set first and a synchronous error doesn't stop the remaining panels.
-        applyStatePromises.push(
-          Promise.resolve().then(() => child.applySerializedState(stateToApply))
-        );
+        applyStateThunks.push(() => child.applySerializedState(stateToApply));
       }
 
       if (!existingPanel && existingPinnedPanel) {
@@ -284,8 +281,10 @@ export function initializeLayoutManager(
       layout$.next(updatedLayout);
     }
 
-    if (applyStatePromises.length) {
-      void setApplyingChildStateWhile(() => Promise.allSettled(applyStatePromises));
+    if (applyStateThunks.length) {
+      void setApplyingChildStateWhile(() =>
+        Promise.allSettled(applyStateThunks.map(async (applyState) => applyState()))
+      );
     }
 
     if (anchorId) {
