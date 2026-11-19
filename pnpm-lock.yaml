@@ -6695,9 +6695,6 @@ importers:
       has-ansi:
         specifier: 3.0.0
         version: 3.0.0
-      hdr-histogram-js:
-        specifier: 3.0.1
-        version: 3.0.1
       http-proxy:
         specifier: 1.18.1
         version: 1.18.1(debug@4.4.3(supports-color@10.2.2))
@@ -10111,9 +10108,6 @@ packages:
 
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
-
-  '@assemblyscript/loader@0.19.23':
-    resolution: {integrity: sha512-ulkCYfFbYj01ie1MDOyxv2F6SpRN1TOj7fQxbP07D6HmeR+gr2JLSmINKjga2emB+b1L2KGrFKBTc+e00p54nw==}
 
   '@asyncapi/specs@6.11.1':
     resolution: {integrity: sha512-A3WBLqAKGoJ2+6FWFtpjBlCQ1oFCcs4GxF7zsIGvNqp/klGUHjlA3aAcZ9XMMpLGE8zPeYDz2x9FmO6DSuKraQ==}
@@ -19268,10 +19262,6 @@ packages:
   hat@0.0.3:
     resolution: {integrity: sha512-zpImx2GoKXy42fVDSEad2BPKuSQdLcqsCYa48K3zHSzM/ugWuYjLDr8IXxpVuL7uCLHw56eaiLxCRthhOzf5ug==}
 
-  hdr-histogram-js@3.0.1:
-    resolution: {integrity: sha512-l3GSdZL1Jr1C0kyb461tUjEdrRPZr8Qry7jByltf5JGrA0xvqOSrxRBfcrJqqV/AMEtqqhHhC6w8HW0gn76tRQ==}
-    engines: {node: '>=14'}
-
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
@@ -25640,8 +25630,6 @@ snapshots:
       '@csstools/css-parser-algorithms': 3.0.5(@csstools/css-tokenizer@3.0.4)
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
-
-  '@assemblyscript/loader@0.19.23': {}
 
   '@asyncapi/specs@6.11.1':
     dependencies:
@@ -36714,12 +36702,6 @@ snapshots:
       space-separated-tokens: 2.0.2
 
   hat@0.0.3: {}
-
-  hdr-histogram-js@3.0.1:
-    dependencies:
-      '@assemblyscript/loader': 0.19.23
-      base64-js: 1.5.1
-      pako: 1.0.11
 
   he@1.2.0: {}
 

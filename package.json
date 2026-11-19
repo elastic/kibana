@@ -2257,7 +2257,6 @@
     "geckodriver": "6.1.1",
     "globby": "16.2.4",
     "has-ansi": "3.0.0",
-    "hdr-histogram-js": "3.0.1",
     "http-proxy": "1.18.1",
     "http2-proxy": "5.0.53",
     "http2-wrapper": "2.2.1",
