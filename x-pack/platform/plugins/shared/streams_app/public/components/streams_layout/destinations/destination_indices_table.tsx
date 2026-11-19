@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  euiTextTruncate,
   formatNumber,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -68,8 +69,13 @@ import type {
 } from './state_machines/destinations_state_machine';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-// The index name takes the spare width; stat columns keep a fixed width and never wrap.
+// The index name takes the spare width, down to a minimum, and truncates with a tooltip showing
+// the full name. Stat columns keep a fixed width and never wrap.
+const NAME_COLUMN_MIN_WIDTH = '100px';
 const STAT_COLUMN_WIDTH = '120px';
+const truncateStyles = css`
+  ${euiTextTruncate()}
+`;
 const noWrapStyles = css`
   white-space: nowrap;
 `;
@@ -258,13 +264,16 @@ export const DestinationIndicesTable = ({
         }),
         sortable: true,
         truncateText: true,
+        minWidth: NAME_COLUMN_MIN_WIDTH,
         render: (name: string) => (
-          <EuiLink
-            data-test-subj="streamsDestinationIndexLink"
-            {...indexLinkProps(name, 'overview')}
-          >
-            {name}
-          </EuiLink>
+          <EuiToolTip content={name} display="block" anchorProps={{ css: truncateStyles }}>
+            <EuiLink
+              data-test-subj="streamsDestinationIndexLink"
+              {...indexLinkProps(name, 'overview')}
+            >
+              {name}
+            </EuiLink>
+          </EuiToolTip>
         ),
       },
       {
