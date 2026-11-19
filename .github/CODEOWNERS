@@ -1159,6 +1159,7 @@ x-pack/platform/packages/shared/kbn-proposals-common @elastic/alertzero-common-l
 x-pack/platform/packages/shared/kbn-proposals-ui @elastic/alertzero-common-layer
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
+x-pack/platform/packages/shared/kbn-secrets @elastic/workflows-eng
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/nightshift
 x-pack/platform/packages/shared/kbn-slo-constants @elastic/nightshift-sre-agent-team
@@ -1335,6 +1336,7 @@ x-pack/platform/plugins/shared/saved_objects_tagging @elastic/appex-sharedux
 x-pack/platform/plugins/shared/screenshotting @elastic/kibana-reporting-services
 x-pack/platform/plugins/shared/search_inference_endpoints @elastic/search-ml-ux
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
+x-pack/platform/plugins/shared/secrets @elastic/workflows-eng
 x-pack/platform/plugins/shared/security @elastic/kibana-security
 x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
 x-pack/platform/plugins/shared/slo_shared @elastic/nightshift-sre-agent-team

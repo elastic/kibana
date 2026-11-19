@@ -3439,6 +3439,12 @@ importers:
       '@kbn/searchprofiler-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/searchprofiler
+      '@kbn/secrets':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-secrets
+      '@kbn/secrets-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/secrets
       '@kbn/security-ai-prompts':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/security-ai-prompts
@@ -8869,11 +8875,7 @@ importers:
 
   src/platform/plugins/shared/visualizations: {}
 
-  x-pack/platform/plugins/shared/workflows_execution_engine: {}
-
   src/platform/plugins/shared/workflows_extensions: {}
-
-  x-pack/platform/plugins/shared/workflows_management: {}
 
   src/platform/test: {}
 
@@ -9267,6 +9269,8 @@ importers:
 
   x-pack/platform/packages/shared/kbn-search-index-documents: {}
 
+  x-pack/platform/packages/shared/kbn-secrets: {}
+
   x-pack/platform/packages/shared/kbn-shared-components: {}
 
   x-pack/platform/packages/shared/kbn-significant-events-schema: {}
@@ -9619,6 +9623,8 @@ importers:
 
   x-pack/platform/plugins/shared/searchprofiler: {}
 
+  x-pack/platform/plugins/shared/secrets: {}
+
   x-pack/platform/plugins/shared/security: {}
 
   x-pack/platform/plugins/shared/serverless: {}
@@ -9640,6 +9646,10 @@ importers:
   x-pack/platform/plugins/shared/triggers_actions_ui: {}
 
   x-pack/platform/plugins/shared/usage_api: {}
+
+  x-pack/platform/plugins/shared/workflows_execution_engine: {}
+
+  x-pack/platform/plugins/shared/workflows_management: {}
 
   x-pack/platform/test: {}
 
@@ -10023,11 +10033,11 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
-
   x-pack/solutions/security/test_helpers/detections-response-ftr-services: {}
 
   x-pack/solutions/security/test_plugins/resolver_test: {}
+
+  x-pack/solutions/security/test_suites/test-suites-security-solution-apis: {}
 
   x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding: {}
 

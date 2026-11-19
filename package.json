@@ -1170,6 +1170,8 @@
     "@kbn/search-synonyms": "workspace:*",
     "@kbn/search-types": "workspace:*",
     "@kbn/searchprofiler-plugin": "workspace:*",
+    "@kbn/secrets": "workspace:*",
+    "@kbn/secrets-plugin": "workspace:*",
     "@kbn/security-ai-prompts": "workspace:*",
     "@kbn/security-api-key-management": "workspace:*",
     "@kbn/security-authorization-core": "workspace:*",
