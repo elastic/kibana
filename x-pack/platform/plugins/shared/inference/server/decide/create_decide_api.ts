@@ -71,6 +71,10 @@ const toInferenceError = ({
       return createInferenceRequestError(`Inference endpoint '${inferenceId}' not found`, 404);
     }
 
+    if (statusCode === 401 || statusCode === 403) {
+      return createInferenceRequestError(error.message, statusCode);
+    }
+
     return createInferenceProviderError(error.message, { status: statusCode ?? undefined });
   }
 

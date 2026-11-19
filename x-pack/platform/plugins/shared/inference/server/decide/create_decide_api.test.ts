@@ -217,6 +217,21 @@ describe('createDecideApi', () => {
     expect(error.meta.status).toBe(400);
   });
 
+  it('throws a 401 or 403 from Elasticsearch as a request error', async () => {
+    const { decide, transportRequest } = setup();
+
+    for (const status of [401, 403]) {
+      transportRequest.mockRejectedValue(responseError(status, 'security_exception'));
+
+      const error = await decide({ input, inferenceId: 'my-decision' }, shouldRespond).catch(
+        (thrown) => thrown
+      );
+
+      expect(isInferenceRequestError(error)).toBe(true);
+      expect(error.meta.status).toBe(status);
+    }
+  });
+
   it('throws other Elasticsearch errors as provider errors with their status', async () => {
     const { decide, transportRequest } = setup();
 
