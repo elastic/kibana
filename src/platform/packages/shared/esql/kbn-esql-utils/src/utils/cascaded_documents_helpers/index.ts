@@ -194,6 +194,13 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
 
   const esqlQuery = EsqlQuery.fromSrc(queryString);
 
+  if (esqlQuery.errors.length) {
+    // the parser reports a malformed query on the result rather than throwing, and every helper
+    // below treats the half built AST as a query that simply declares nothing, so without this
+    // the query would be reported as one we understood and found no cascade in
+    return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.PARSE_FAILURE);
+  }
+
   const dataSourceCommand = getESQLQueryDataSourceCommand(esqlQuery);
   const summarizedStatsCommand = getStatsCommandToOperateOn(esqlQuery);
 
