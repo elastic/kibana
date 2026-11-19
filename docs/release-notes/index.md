@@ -1084,7 +1084,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the rules list failing to load when one or more rules can't be loaded correctly. The list now leaves those rules out and shows a warning [#300110]({{kib-pull}}300110).
 
 **Data management**:
-* Fix creating and fetching {{data-sources}} with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist, which returned a `400` error while still saving it [#299790]({{kib-pull}}299790).
+* Fix `400` errors when you create or fetch {{data-sources}} with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist. The create request returned the error even though {{kib}} saved the data view [#299790]({{kib-pull}}299790).
 
 **{{product.observability}} solution**:
 For the {{product.observability}} 9.4.10 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
