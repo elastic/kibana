@@ -314,6 +314,8 @@ export class AgenticInvestigationsPlugin
             security: coreStart.security,
             esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
           }),
+        getAssignmentsService: () => this.requireAssignmentsService(),
+        investigationsPrivileges: startPrivileges,
       });
     }
 

@@ -13,8 +13,10 @@ import {
   PUBLIC_HEADERS,
   CREATE_ESCALATION_PATH,
   AB_CONVERSATIONS_PATH,
+  INVESTIGATIONS_PATH,
   expectCreated,
   deleteConversations,
+  seedInvestigation,
 } from '../../fixtures';
 
 const ESCALATION_TEMPLATE_ID = 'escalation';
@@ -178,6 +180,31 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect(response.body.metadata.linked_investigations).toStrictEqual([investigationId]);
       if (response.body.id) createdIds.push(response.body.id);
+    });
+
+    apiTest('assigns the creator to the escalated investigation', async ({ apiClient }) => {
+      const unassignedId = await seedInvestigation(apiClient, cookieHeader, {
+        title: 'Scout unassigned investigation',
+      });
+      createdIds.push(unassignedId);
+
+      const response = await apiClient.post(CREATE_ESCALATION_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+        body: {
+          linked_investigation_id: unassignedId,
+          visibility: 'public',
+          assignees: [adminProfileUid],
+        },
+        responseType: 'json',
+      });
+      createdIds.push(expectCreated(response, 'escalation'));
+
+      const investigations = await apiClient.get(
+        `${INVESTIGATIONS_PATH}?id=${encodeURIComponent(unassignedId)}`,
+        { headers: { ...INTERNAL_HEADERS, ...cookieHeader }, responseType: 'json' }
+      );
+      expect(investigations).toHaveStatusCode(200);
+      expect(investigations.body.results[0].metadata.assignees).toStrictEqual([adminProfileUid]);
     });
 
     apiTest('returns 400 when assignees is empty', async ({ apiClient }) => {
