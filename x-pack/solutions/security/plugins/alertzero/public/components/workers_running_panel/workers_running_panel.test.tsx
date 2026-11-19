@@ -23,6 +23,18 @@ describe('WorkersRunningPanel', () => {
     ).toBeVisible();
   });
 
+  it('should say nothing needs your approval', () => {
+    render(
+      <EuiProvider>
+        <WorkersRunningPanel />
+      </EuiProvider>
+    );
+
+    expect(screen.getByTestId('alertZeroWorkersRunningPanel')).toHaveTextContent(
+      'Nothing needs your approval right now.'
+    );
+  });
+
   it('should not use first-run wording', () => {
     render(
       <EuiProvider>

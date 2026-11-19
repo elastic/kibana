@@ -752,7 +752,7 @@ describe('ConversationsPage decisions', () => {
 
     renderPage('/');
 
-    expect(screen.getByText('1 action needs you')).toBeInTheDocument();
+    expect(screen.getByText('1 action needs your approval')).toBeInTheDocument();
   });
 
   it('keeps the last good count when a poll fails, rather than reporting it lost', () => {
@@ -766,7 +766,7 @@ describe('ConversationsPage decisions', () => {
 
     renderPage('/');
 
-    expect(screen.getByText('1 action needs you')).toBeInTheDocument();
+    expect(screen.getByText('1 action needs your approval')).toBeInTheDocument();
     expect(screen.queryByText("Your action count couldn't be loaded")).not.toBeInTheDocument();
   });
 
@@ -781,7 +781,7 @@ describe('ConversationsPage decisions', () => {
     renderPage('/');
 
     // Closed holds rows, but they are not work: the header must not read
-    // "0 actions need you" beside them.
+    // "0 actions need your approval" beside them.
     expect(screen.getByText('No events found')).toBeInTheDocument();
   });
 });
@@ -795,7 +795,7 @@ describe('ConversationsPage idle state', () => {
 
     expect(screen.getByTestId('alertZeroWorkersRunningPanel')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 1 }).textContent).toContain(
-      'Your Watches are running. No actions need you'
+      'Your Watches are running. No actions need your approval'
     );
     expect(screen.getByTestId('alertZeroPageHeaderSubtitle')).toHaveTextContent(
       '4 Watches are running right now · 6 of 6 Workers are enabled'
