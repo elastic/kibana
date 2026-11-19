@@ -2283,6 +2283,8 @@
       "@kbn/response-ops-schedule-schema/*": ["./x-pack/platform/packages/shared/response-ops/schedule-schema/*"],
       "@kbn/response-ops-scheduling-types": ["./x-pack/platform/packages/shared/response-ops/scheduling-types"],
       "@kbn/response-ops-scheduling-types/*": ["./x-pack/platform/packages/shared/response-ops/scheduling-types/*"],
+      "@kbn/response-ops-scheduling-utils": ["./x-pack/platform/packages/shared/response-ops/scheduling-utils"],
+      "@kbn/response-ops-scheduling-utils/*": ["./x-pack/platform/packages/shared/response-ops/scheduling-utils/*"],
       "@kbn/response-stream-plugin": ["./examples/response_stream"],
       "@kbn/response-stream-plugin/*": ["./examples/response_stream/*"],
       "@kbn/restorable-state": ["./src/platform/packages/shared/kbn-restorable-state"],

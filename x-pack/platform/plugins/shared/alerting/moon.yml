@@ -96,6 +96,7 @@ dependsOn:
   - '@kbn/core-saved-objects-common'
   - '@kbn/workflows-extensions'
   - '@kbn/response-ops-scheduling-types'
+  - '@kbn/response-ops-scheduling-utils'
 tags:
   - plugin
   - prod

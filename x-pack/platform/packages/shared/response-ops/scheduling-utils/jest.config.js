@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './v1';
+module.exports = {
+  preset: '@kbn/jest',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/response-ops/scheduling-utils'],
+};

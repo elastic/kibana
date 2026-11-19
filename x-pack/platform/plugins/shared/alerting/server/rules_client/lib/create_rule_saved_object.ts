@@ -7,7 +7,7 @@
 
 import type { SavedObjectReference, SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-utils';
 import type { Rule, RuleWithLegacyId, RawRule, RuleTypeParams } from '../../types';
 import { parseDuration } from '../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';

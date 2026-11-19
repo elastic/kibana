@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { RRule } from '@kbn/rrule';
-import { isIntervalSchedule, isRruleSchedule } from '@kbn/response-ops-scheduling-types';
+import {
+  getRruleOccurrences,
+  isIntervalSchedule,
+  isRruleSchedule,
+} from '@kbn/response-ops-scheduling-utils';
 import type { Rrule } from '@kbn/response-ops-scheduling-types';
 import { adHocRunStatus } from '../../../common/constants';
 import { parseDuration } from '../../../common';
@@ -55,31 +58,6 @@ const formatMsAsDuration = (ms: number): string => {
   if (safeMs % MS_PER_MINUTE === 0) return `${safeMs / MS_PER_MINUTE}m`;
 
   return `${Math.round(safeMs / MS_PER_SECOND)}s`;
-};
-
-// Walks the rrule one occurrence at a time, re-anchoring dtstart to the previous occurrence the
-// way Task Manager's getNextRunAt does. RRule.between would materialise every occurrence since the
-// original dtstart and throws once it passes its internal iteration limit, which a wide backfill
-// range easily does.
-const getRruleOccurrences = (rrule: Rrule, start: string, end: string, maxEntries?: number) => {
-  const endMs = new Date(end).valueOf();
-  const occurrences: Date[] = [];
-  // Start strictly after the range start, matching the interval schedule, where the first run
-  // covers the window that opens at the range start rather than the one closing on it.
-  let cursor = new Date(start);
-
-  while (!maxEntries || occurrences.length < maxEntries) {
-    const next = new RRule({ ...rrule, dtstart: cursor }).after(new Date(cursor.valueOf() + 1));
-
-    if (!next || next.valueOf() > endMs) {
-      break;
-    }
-
-    occurrences.push(next);
-    cursor = next;
-  }
-
-  return occurrences;
 };
 
 const getScheduleFromRrule = (

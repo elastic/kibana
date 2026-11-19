@@ -12,7 +12,7 @@ import {
   RRULE_STRING_FREQUENCIES,
   RRULE_STRING_PLACEHOLDER_DTSTART,
   type RruleStringFrequency,
-} from '../../constants';
+} from './constants';
 
 export type ParseRruleStringResult =
   | { rrule: Rrule; error?: never }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IntervalSchedule, RruleSchedule, Schedule } from './schedule_types';
+import type { IntervalSchedule, RruleSchedule, Schedule } from '@kbn/response-ops-scheduling-types';
 
 /** Narrows a schedule to the interval based variant. */
 export const isIntervalSchedule = (schedule?: Schedule): schedule is IntervalSchedule =>

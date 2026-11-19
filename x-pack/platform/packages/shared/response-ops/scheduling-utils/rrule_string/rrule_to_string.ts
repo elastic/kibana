@@ -12,7 +12,7 @@ import {
   RRULE_STRING_PLACEHOLDER_DTSTART,
   RRULE_STRING_UTC_TZID,
   type RruleStringFrequency,
-} from '../../constants';
+} from './constants';
 
 const FREQUENCY_NAMES: Record<Rrule['freq'], RruleStringFrequency> = {
   [Frequency.MONTHLY]: 'MONTHLY',

@@ -6,7 +6,7 @@
  */
 
 import type { IEvent } from '@kbn/event-log-plugin/server';
-import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-utils';
 import type { AlertSummary, SanitizedRuleWithLegacyId } from '../../types';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { alertSummaryFromEventLog } from '../../lib/alert_summary_from_event_log';

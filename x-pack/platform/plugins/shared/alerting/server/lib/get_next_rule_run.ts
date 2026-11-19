@@ -6,8 +6,11 @@
  */
 
 import moment from 'moment';
-import { RRule } from '@kbn/rrule';
-import { isIntervalSchedule, isRruleSchedule } from '@kbn/response-ops-scheduling-types';
+import {
+  getNextRruleOccurrence,
+  isIntervalSchedule,
+  isRruleSchedule,
+} from '@kbn/response-ops-scheduling-utils';
 import type { RuleSchedule } from '../../common';
 import { parseDuration } from '../../common';
 
@@ -29,18 +32,7 @@ export const getNextRuleRun = ({
   }
 
   if (isRruleSchedule(schedule)) {
-    const { dtstart, ...rrule } = schedule.rrule;
-    const from = startDate || new Date();
-    // RRule.after is inclusive, so step past the start date to get the following occurrence
-    // instead of the one landing on it.
-    // Mirror how Task Manager builds the rrule so nextRun matches the task's real run time:
-    // an explicit dtstart is used as is, otherwise start from now pinned to the start of the
-    // minute. See task_manager/server/lib/get_first_run_at.ts.
-    const nextRun = new RRule(
-      dtstart
-        ? { ...rrule, dtstart: new Date(dtstart) }
-        : { ...rrule, dtstart: new Date(), bysecond: [0] }
-    ).after(new Date(from.getTime() + 1));
+    const nextRun = getNextRruleOccurrence(schedule.rrule, startDate || new Date());
 
     if (!nextRun) {
       throw new Error('Rrule schedule has no occurrence after the given start date');

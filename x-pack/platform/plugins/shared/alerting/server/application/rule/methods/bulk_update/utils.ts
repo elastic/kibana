@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import type { SavedObject } from '@kbn/core/server';
-import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-utils';
 import { parseDuration, type RuleSchedule } from '../../../../../common';
 import {
   convertRuleIdsToKueryNode,

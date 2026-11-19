@@ -6,7 +6,7 @@
  */
 
 import { rruleStringSchema } from './v1';
-import { RRULE_STRING_MAX_LENGTH } from '../constants';
+import { RRULE_STRING_MAX_LENGTH } from '@kbn/response-ops-scheduling-utils';
 
 describe('rruleStringSchema', () => {
   it('accepts a valid rrule string as is', () => {

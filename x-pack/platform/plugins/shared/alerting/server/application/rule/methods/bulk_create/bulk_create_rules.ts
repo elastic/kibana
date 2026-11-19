@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-utils';
 import pMap from 'p-map';
 import { withSpan } from '@kbn/apm-utils';
 import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';

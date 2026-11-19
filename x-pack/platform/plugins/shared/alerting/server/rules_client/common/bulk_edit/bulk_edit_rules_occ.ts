@@ -16,7 +16,7 @@ import type {
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
-import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-utils';
 import { logRuleChanges } from '../../../application/rule/methods/common_utils/log_rule_changes';
 import type { RuleParams } from '../../../application/rule/types';
 import type { ValidateScheduleLimitResult } from '../../../application/rule/methods/get_schedule_frequency';
