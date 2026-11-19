@@ -42,6 +42,7 @@ const generate = (
     ongoingSessions: false,
     scale: 1,
     seed: 'digital-experience-replay-test',
+    frustration: true,
     ...opts,
   }).flatMap((generator) =>
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
@@ -280,13 +281,15 @@ describe('digital experience session replay', () => {
 
       it('keeps typical sessions as they were before the option existed', () => {
         // Taken from the output of the scenario before `sessionLength` was added, with the browser
-        // dataset's index names, and before users, which don't change anything else
+        // dataset's index names, and before users and frustration signals, which don't change
+        // anything else
         const docs = generate(
           {
             replaySize: 'light',
             seed: 'fingerprint-seed',
             sessionLength: 'typical',
             signedInRate: 0,
+            frustration: false,
           },
           { from: FROM }
         );

@@ -30,6 +30,8 @@ const SCOPE_VERSION = '0.8.2';
 
 const HTTP_PORT_FROM_PROTOCOL: Readonly<Record<string, number>> = { 'http:': 80, 'https:': 443 };
 
+export type EdotBrowserFrustrationKind = 'rage_click' | 'dead_click' | 'error_click';
+
 /** The signed-in user, as an app passes it to EDOT Browser's `setUser()`. */
 export interface EdotBrowserUser {
   id: string;
@@ -417,6 +419,53 @@ export class EdotBrowserClient {
       'browser.mouse_event.button': button,
       ...(cssSelector !== undefined ? { 'browser.css_selector': cssSelector } : {}),
     });
+  }
+
+  /**
+   * A rage, dead or error click, which EDOT Browser's frustration detection reports with the
+   * distro's logger, without a severity. Its timestamp is the one of the first click.
+   */
+  frustration({
+    kind,
+    pageX,
+    pageY,
+    tagName,
+    cssSelector,
+    url,
+    clickCount,
+    exception,
+  }: {
+    kind: EdotBrowserFrustrationKind;
+    pageX: number;
+    pageY: number;
+    tagName: string;
+    cssSelector?: string;
+    /** The page URL when the user clicked. */
+    url: string;
+    /** Rage clicks only: the number of clicks in the burst. */
+    clickCount?: number;
+    /** Error clicks only: the first uncaught exception after the click. */
+    exception?: { type?: string; message: string };
+  }) {
+    const distroVersion = this.resourceAttributes['telemetry.distro.version'];
+    return new EdotLog({ _index: BROWSER_LOGS_INDEX })
+      .eventName(`browser.frustration.${kind}`)
+      .scope({
+        name: DISTRO_SCOPE_NAME,
+        ...(typeof distroVersion === 'string' ? { version: distroVersion } : {}),
+      })
+      .addResourceAttributes({ ...this.resourceAttributes })
+      .addAttributes({
+        ...(cssSelector !== undefined ? { 'browser.css_selector': cssSelector } : {}),
+        'browser.tag_name': tagName,
+        'browser.page.x': Math.round(pageX),
+        'browser.page.y': Math.round(pageY),
+        'url.full': url,
+        ...(clickCount !== undefined ? { 'browser.frustration.click_count': clickCount } : {}),
+        ...(exception?.type ? { 'exception.type': exception.type } : {}),
+        ...(exception ? { 'exception.message': exception.message } : {}),
+        ...this.processorAttributes,
+      });
   }
 
   /**

@@ -127,6 +127,11 @@ export interface DigitalExperienceScenarioOpts {
    * Users need sessions: with `withSessionId` off, every session is anonymous.
    */
   signedInRate?: number;
+  /**
+   * Report rage, dead and error clicks, like EDOT Browser's frustration detection, which is on by
+   * default. Like users, they need sessions: with `withSessionId` off, there are none.
+   */
+  frustration: boolean;
 }
 
 const DEFAULT_SCENARIO_OPTS: Omit<DigitalExperienceScenarioOpts, 'seed'> = {
@@ -141,6 +146,7 @@ const DEFAULT_SCENARIO_OPTS: Omit<DigitalExperienceScenarioOpts, 'seed'> = {
   ongoingSessions: false,
   scale: 1,
   signedInRate: undefined,
+  frustration: true,
 };
 
 export const PRODUCTION_ENVIRONMENT = 'production';
@@ -963,7 +969,8 @@ type BooleanOptKey =
   | 'includeRawAttribution'
   | 'environments'
   | 'edgeCases'
-  | 'ongoingSessions';
+  | 'ongoingSessions'
+  | 'frustration';
 
 /** Parses a boolean scenario option given as a boolean or a `true`/`false` string. */
 export const parseBooleanOption = (key: string, value: unknown, defaultValue: boolean): boolean => {
@@ -1110,6 +1117,7 @@ export const parseDigitalExperienceScenarioOpts = (
       opts?.signedInRate === undefined
         ? undefined
         : parseRate('signedInRate', opts.signedInRate, 0),
+    frustration: parseBooleanOpt(opts, 'frustration'),
   };
 };
 
@@ -1369,6 +1377,7 @@ export const generateEdotBrowserSessions = (
     scale,
     seed,
     signedInRate,
+    frustration,
   } = opts;
   const { minPageViews, maxPageViews, dwell, maxDuration } = SESSION_LENGTHS[sessionLength];
   // Every option changes the sessions, so ongoing sessions are kept apart for each set of them
@@ -1469,6 +1478,11 @@ export const generateEdotBrowserSessions = (
             user && !expired && signInDraw < SIGN_IN_DURING_SESSION_RATE
               ? { user, atDocument: 1 }
               : undefined;
+          // Drawn apart from the session too, which then stays as it was without the option
+          const frustrationRandom =
+            withSessionId && frustration
+              ? createSeededRandom(`${seed}:${sessionKey}:${index}:frustration`)
+              : undefined;
 
           // A user who signs in during the session is anonymous until then, in every visit before
           const client = (options: EdotBrowserClientOptions = {}) =>
@@ -1493,6 +1507,7 @@ export const generateEdotBrowserSessions = (
               dwell,
               resumed,
               ...(last && signIn ? { signIn } : {}),
+              frustrationRandom,
               ...reporting,
               ...anchor,
             });

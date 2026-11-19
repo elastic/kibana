@@ -29,6 +29,8 @@
  *   environments. The classic RUM app then runs in `production`.
  * - signedInRate (number from 0 to 1, default: each app's share): share of EDOT Browser sessions
  *   with a signed-in user (see `digital_experience_browser`)
+ * - frustration (boolean, default: true): report rage, dead and error clicks in EDOT Browser
+ *   sessions (see `digital_experience_browser`)
  * - scale (number, default: 1): multiplies the number of sessions/page loads per minute
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible

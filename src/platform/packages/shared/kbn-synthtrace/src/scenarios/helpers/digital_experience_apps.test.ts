@@ -52,6 +52,7 @@ const collect = (
     scale,
     // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-test',
+    frustration: true,
   }).flatMap((generator) =>
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
   );
@@ -71,6 +72,7 @@ describe('digital experience apps', () => {
         ongoingSessions: false,
         scale: 1,
         seed: getDefaultSeed(FROM),
+        frustration: true,
       });
     });
 
@@ -88,6 +90,7 @@ describe('digital experience apps', () => {
             sessionLength: 'typical',
             ongoingSessions: false,
             scale: 3,
+            frustration: false,
           },
           FROM
         )
@@ -103,6 +106,7 @@ describe('digital experience apps', () => {
         ongoingSessions: false,
         scale: 3,
         seed: getDefaultSeed(FROM),
+        frustration: false,
       });
     });
 
@@ -115,6 +119,7 @@ describe('digital experience apps', () => {
             environments: 'true',
             edgeCases: 'true',
             scale: '2.5',
+            frustration: 'false',
           },
           FROM
         )
@@ -130,6 +135,7 @@ describe('digital experience apps', () => {
         ongoingSessions: false,
         scale: 2.5,
         seed: getDefaultSeed(FROM),
+        frustration: false,
       });
     });
 
@@ -354,6 +360,99 @@ describe('digital experience apps', () => {
       });
     });
 
+    describe('frustration', () => {
+      const generate = (opts: { withSessionId?: boolean; frustration?: boolean } = {}) =>
+        generateEdotBrowserSessions(timerange(at(0), at(1800)), {
+          ...parseDigitalExperienceScenarioOpts({ seed: 'frustration', ...opts }, FROM),
+          environment: 'test',
+          from: FROM,
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
+        );
+      const eventNameOf = (doc: EdotBrowserDocument) =>
+        'event_name' in doc ? doc.event_name : undefined;
+      const isFrustration = (doc: EdotBrowserDocument) =>
+        String(eventNameOf(doc)).startsWith('browser.frustration.');
+      const docs = generate();
+      const signals = docs.filter(isFrustration);
+      const ofKind = (kind: string) =>
+        signals.filter((doc) => eventNameOf(doc) === `browser.frustration.${kind}`);
+
+      it('reports rage, dead and error clicks on the clicked element', () => {
+        ['rage_click', 'dead_click', 'error_click'].forEach((kind) =>
+          expect(ofKind(kind).length).toBeGreaterThan(0)
+        );
+        signals.forEach((doc) => {
+          expect(doc.attributes).toEqual(
+            expect.objectContaining({
+              'browser.tag_name': expect.any(String),
+              'browser.page.x': expect.any(Number),
+              'browser.page.y': expect.any(Number),
+              'url.full': expect.stringMatching(/^https:\/\//),
+              'session.id': expect.any(String),
+            })
+          );
+          const click = docs.find(
+            (other) =>
+              eventNameOf(other) === 'browser.user_action.click' &&
+              other['@timestamp'] === doc['@timestamp'] &&
+              other.attributes?.['session.id'] === doc.attributes?.['session.id']
+          );
+          expect(click?.attributes?.['browser.css_selector']).toBe(
+            doc.attributes?.['browser.css_selector']
+          );
+        });
+      });
+
+      it('repeats the click of a rage click, and counts the clicks', () => {
+        ofKind('rage_click').forEach(({ attributes = {}, ...doc }) => {
+          const count = attributes['browser.frustration.click_count'] as number;
+          const burst = docs.filter(
+            (other) =>
+              eventNameOf(other) === 'browser.user_action.click' &&
+              other.attributes?.['session.id'] === attributes['session.id'] &&
+              other.attributes?.['browser.page.x'] === attributes['browser.page.x'] &&
+              Number(other['@timestamp']) >= Number(doc['@timestamp']) &&
+              Number(other['@timestamp']) < Number(doc['@timestamp']) + count * 300
+          );
+          expect(count).toBeGreaterThanOrEqual(3);
+          expect(burst.length).toBeGreaterThanOrEqual(count);
+        });
+      });
+
+      it('carries the exception of an error click', () => {
+        ofKind('error_click').forEach(({ attributes = {} }) =>
+          expect(attributes['exception.message']).toEqual(expect.any(String))
+        );
+      });
+
+      it('leaves the sessions without frustration signals as they were', () => {
+        const bySession = (all: EdotBrowserDocument[]) => {
+          const sessions = new Map<unknown, EdotBrowserDocument[]>();
+          all.forEach((doc) => {
+            const sessionId = doc.attributes?.['session.id'];
+            sessions.set(sessionId, [...(sessions.get(sessionId) ?? []), doc]);
+          });
+          return sessions;
+        };
+        const withSignals = new Set(signals.map((doc) => doc.attributes?.['session.id']));
+        const without = bySession(generate({ frustration: false }));
+        const unchanged = [...bySession(docs)].filter(
+          ([sessionId]) => sessionId !== undefined && !withSignals.has(sessionId)
+        );
+
+        expect(unchanged.length).toBeGreaterThan(0);
+        unchanged.forEach(([sessionId, sessionDocs]) =>
+          expect(sessionDocs).toEqual(without.get(sessionId))
+        );
+        expect([...without.values()].flat().some(isFrustration)).toBe(false);
+      });
+
+      it('reports none without session IDs', () => {
+        expect(generate({ withSessionId: false }).some(isFrustration)).toBe(false);
+      });
+    });
+
     describe('seed', () => {
       const generate = (
         seed?: string,
@@ -362,7 +461,14 @@ describe('digital experience apps', () => {
           from = timeRange.from.getTime(),
           withSessionId = true,
           scale = 1,
-        }: { timeRange?: Timerange; from?: number; withSessionId?: boolean; scale?: number } = {}
+          frustration = true,
+        }: {
+          timeRange?: Timerange;
+          from?: number;
+          withSessionId?: boolean;
+          scale?: number;
+          frustration?: boolean;
+        } = {}
       ) =>
         generateEdotBrowserSessions(timeRange, {
           environment: 'test',
@@ -379,6 +485,7 @@ describe('digital experience apps', () => {
           scale,
           // Like the scenarios, without a seed option the parser defaults it to the run's start
           seed: parseDigitalExperienceScenarioOpts(seed === undefined ? {} : { seed }, from).seed,
+          frustration,
         }).flatMap((generator) =>
           Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
         );
@@ -462,8 +569,11 @@ describe('digital experience apps', () => {
           ),
         });
         // Without session IDs a session is a single visit. With them, some get more visits, an idle
-        // tab and a session.start log, all get session attributes and some get a user.
-        const withSessionIds = new Set(sorted(generate('seed-a').map(asWithoutSessions)));
+        // tab and a session.start log, all get session attributes and some get a user. Rage clicks,
+        // which need sessions, add clicks that INP can be reported for.
+        const withSessionIds = new Set(
+          sorted(generate('seed-a', { frustration: false }).map(asWithoutSessions))
+        );
 
         expect(withoutSessionIds.length).toBeGreaterThan(0);
         sorted(withoutSessionIds).forEach((doc) => expect(withSessionIds.has(doc)).toBe(true));
@@ -693,6 +803,7 @@ describe('digital experience apps', () => {
         ongoingSessions: false,
         scale: 2,
         seed: 'digital-experience-test',
+        frustration: true,
       }).flatMap((generator) =>
         Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
       );
@@ -930,6 +1041,7 @@ describe('digital experience apps', () => {
           ongoingSessions: false,
           scale: 1,
           seed: 'digital-experience-test',
+          frustration: true,
         }).flatMap((generator) =>
           Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
         );

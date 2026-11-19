@@ -86,6 +86,19 @@
  * - the tab keeps the user once its session expires, so the session that follows is signed in
  *   from the start
  *
+ * Frustration signals: like EDOT Browser's frustration detection (elastic/elastic-otel-rum-js#191),
+ * `browser.frustration.rage_click`, `dead_click` and `error_click` log records with the clicked
+ * element's `browser.css_selector`, `browser.tag_name`, `browser.page.x` and `.y`, and `url.full`,
+ * timestamped with the first click:
+ * - rage clicks repeat a click 3 to 7 times, each within 300 ms of the previous one, and carry
+ *   `browser.frustration.click_count`. The repeated clicks are `browser.user_action.click` records
+ *   too
+ * - dead clicks are clicks that fire no request
+ * - error clicks are clicks followed by an uncaught exception within a second, or by the failure
+ *   of the request they fired, and carry its `exception.type` and `exception.message`
+ * - the slower and more erroring the app, the more of them: 1% of clicks are rage clicks and 2%
+ *   dead clicks in a healthy app, 10% and 12% in a critical one
+ *
  * Scenario options:
  * - withSessionId (boolean, default: true): write `attributes.session.id`, with the tab ID
  *   and `session.start` that come with sessions. Set to false to match EDOT Browser 0.3.0 and
@@ -121,6 +134,8 @@
  *   or `marathon`) to find them, and keeps the ones in progress in memory
  * - signedInRate (number from 0 to 1, default: each app's share above): share of sessions with a
  *   signed-in user in every app. Users need sessions: with `withSessionId=false` there are none
+ * - frustration (boolean, default: true): report rage, dead and error clicks, like EDOT Browser
+ *   does by default. They need sessions too: with `withSessionId=false` there are none
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible
