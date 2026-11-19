@@ -254,16 +254,32 @@ describe('useCustomContentHtml', () => {
       expect(result.current.columns).toEqual(new Set(['host', 'n']));
     });
 
-    it('reports no columns for a static panel', async () => {
-      const { result } = renderHook(() =>
-        useCustomContentHtml({
-          ...baseParams,
-          savedTemplate: '<p>static</p>',
-        })
-      );
+    it.each<[string, { esqlQueries: string[]; savedTemplate: string | undefined }]>([
+      ['becomes static', { esqlQueries: [], savedTemplate: '<p>static</p>' }],
+      ['loses its template', { esqlQueries: ['FROM logs | LIMIT 10'], savedTemplate: undefined }],
+    ])('forgets the columns when a panel with data %s', async (_, next) => {
+      mockFetchEsqlData.mockResolvedValueOnce({
+        columns: [{ name: 'host', type: 'keyword' }],
+        values: [],
+        all_columns: [],
+      });
 
-      await waitFor(() => expect(result.current.noContent).toBe(false));
-      expect(result.current.columns.size).toBe(0);
+      const { result, rerender } = renderHook(
+        (props: { esqlQueries: string[]; savedTemplate: string | undefined }) =>
+          useCustomContentHtml({ ...baseParams, ...props }),
+        {
+          initialProps: {
+            esqlQueries: ['FROM logs | LIMIT 10'],
+            savedTemplate: '<p>{{ rows.size }}</p>' as string | undefined,
+          },
+        }
+      );
+      await waitFor(() => expect(result.current.columns).toEqual(new Set(['host'])));
+
+      // Clicks must stop being checked against columns the panel no longer has.
+      rerender(next);
+
+      await waitFor(() => expect(result.current.columns.size).toBe(0));
     });
 
     it('refetches only when the additional queries change, not when the list is rebuilt', async () => {

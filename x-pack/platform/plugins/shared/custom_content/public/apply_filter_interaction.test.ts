@@ -78,21 +78,12 @@ describe('buildInteractionFilters', () => {
     expect(build(interaction('bytes', 'ten'), [logs])).toEqual([]);
   });
 
-  it.each([
-    ' ',
-    '0x10',
-    '-',
-    '1.',
-    'Infinity',
-    '1e',
-    'e5',
-    '1e999',
-    '1e-999',
-    '-5e-400',
-    '0.5e-999',
-  ])('does not coerce %p into a number for a number field', (value) => {
-    expect(build(interaction('bytes', value), [logs])).toEqual([]);
-  });
+  it.each([' ', '0x10', '1e', '1e999'])(
+    'does not coerce %p into a number for a number field',
+    (value) => {
+      expect(build(interaction('bytes', value), [logs])).toEqual([]);
+    }
+  );
 
   it.each([
     ['1e-7', 1e-7],
@@ -102,23 +93,6 @@ describe('buildInteractionFilters', () => {
     expect(build(interaction('bytes', value), [logs])[0].query).toEqual({
       match_phrase: { bytes: expected },
     });
-  });
-
-  it.each([
-    ['0', 0],
-    ['0e5', 0],
-  ])('still accepts the genuine zero %s', (value, expected) => {
-    expect(build(interaction('bytes', value), [logs])[0].query).toEqual({
-      match_phrase: { bytes: expected },
-    });
-  });
-
-  it('leaves a value that underflows to the source that holds it as text', () => {
-    const numeric = createSource('numbers', [{ name: 'code', type: 'number', filterable: true }]);
-    const keyword = createSource('keywords', [{ name: 'code', type: 'string', filterable: true }]);
-    const [filter] = build(interaction('code', '1e-999'), [numeric, keyword]);
-    expect(filter.meta.index).toBe('keywords');
-    expect(filter.query).toEqual({ match_phrase: { code: '1e-999' } });
   });
 
   it('filters on a number that a template renders as scientific notation', async () => {

@@ -5,13 +5,26 @@
  * 2.0.
  */
 
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { assertNever } from '@kbn/std';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type {
   CustomContentInteraction,
   CustomContentInteractionAction,
 } from '@kbn/custom-content-renderer';
 import { applyFilterInteraction } from './apply_filter_interaction';
-import type { InteractionHost } from './interaction_host';
+
+/** What the panel offers an interaction to act on. Add to it when an action needs more. */
+export interface InteractionHost {
+  /** What the panel's queries read (data views or ES|QL datasets), once resolved. */
+  dataSources: readonly FilterableSource[] | undefined;
+  /** The dashboard's filters, to reuse a filter that is already there. */
+  filterManager: FilterManager;
+  uiActions: UiActionsStart;
+  /** The panel's own API, passed along as the source of what the action does. */
+  embeddable: unknown;
+}
 
 /** The actions this host runs. Narrow it here to offer a host fewer than the renderer can read. */
 export const SUPPORTED_INTERACTION_ACTIONS: readonly CustomContentInteractionAction[] = ['filter'];

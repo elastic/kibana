@@ -10,7 +10,7 @@ import { getConvertedValueForField, type Filter } from '@kbn/es-query';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { FilterInteraction } from '@kbn/custom-content-renderer';
-import type { InteractionHost } from './interaction_host';
+import type { InteractionHost } from './run_interaction';
 
 // What a number looks like once Liquid has printed it: `1e-7` and `1e+21` as well as `12.5`.
 const PLAIN_NUMBER = /^-?\d+(\.\d+)?([eE][+-]?\d+)?$/;
@@ -51,16 +51,10 @@ export const buildInteractionFilters = (
 
 /**
  * Whether text is a number the field can hold. `Number()` alone would turn " " into 0 and "0x10"
- * into 16, and `1e-999` is finite only because it underflowed to 0: a filter on any of them is not
- * the value that was clicked.
+ * into 16, and "ten" into NaN, which JSON sends as null.
  */
-const isPlainNumber = (value: string): boolean => {
-  if (!PLAIN_NUMBER.test(value)) return false;
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return false;
-  const [mantissa] = value.split(/e/i);
-  return !(parsed === 0 && /[1-9]/.test(mantissa));
-};
+const isPlainNumber = (value: string): boolean =>
+  PLAIN_NUMBER.test(value) && Number.isFinite(Number(value));
 
 /**
  * The value as the field holds it, with the platform's own conversion (the one `buildPhraseFilter`
