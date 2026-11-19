@@ -57,7 +57,10 @@ export const initializeFiltersManager = (
       )
     )
     .pipe(
-      map(([childrenLoading, filtersLoading]) => childrenLoading || filtersLoading),
+      map(
+        ([hasPendingChildApis, hasChildFiltersLoading]) =>
+          hasPendingChildApis || hasChildFiltersLoading
+      ),
       distinctUntilChanged()
     );
 

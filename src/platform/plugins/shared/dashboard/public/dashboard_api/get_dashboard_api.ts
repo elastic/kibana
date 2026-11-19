@@ -249,8 +249,8 @@ export function getDashboardApi({
       layoutManager.internalApi.childApisPending$,
       dataLoadingManager.api.dataLoading$,
     ]).pipe(
-      map(([childStateLoading, childrenLoading, dataLoading]) =>
-        Boolean(childStateLoading || childrenLoading || dataLoading)
+      map(([isApplyingChildState, hasPendingChildApis, isDataLoading]) =>
+        Boolean(isApplyingChildState || hasPendingChildApis || isDataLoading)
       )
     ),
     initialState$,
