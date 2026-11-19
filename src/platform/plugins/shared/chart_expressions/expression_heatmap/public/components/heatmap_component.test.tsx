@@ -561,11 +561,7 @@ describe('HeatmapComponent', function () {
 
     it('fills a missing ES|QL histogram step from the column interval', () => {
       const chart = heatmap(
-        table(
-          [row(0, 1), row(2, 2)],
-          { type: 'number', esMeta: { bucket: { interval: 1 } } },
-          true
-        )
+        table([row(0, 1), row(2, 2)], { type: 'number', esMeta: { bucket: { interval: 1 } } }, true)
       );
       const chartData = chart.prop('data') as Datatable['rows'];
 
