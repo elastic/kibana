@@ -79,6 +79,7 @@ export type ManagementId =
   | 'tags'
   | 'trained_models'
   | 'transform'
+  | 'housekeeping'
   | 'action_policies'
   | 'execution_history'
   | 'rules'
