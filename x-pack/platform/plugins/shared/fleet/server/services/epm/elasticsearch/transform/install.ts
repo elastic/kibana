@@ -62,7 +62,6 @@ import { deleteTransforms } from './remove';
 import { reconcileTransforms } from './reconcile';
 import { getDestinationIndexAliases, isTransform } from './transform_utils';
 import { loadMappingForTransform } from './mappings';
-import { appContextService } from '../../../app_context';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
