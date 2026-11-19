@@ -55,7 +55,7 @@ const isGitHubUrl = (text: string): boolean => {
 
 /** The words of each command in a shell line, split at `&&`, `||`, `;`, `|`, `&` and newlines. */
 const splitCommands = (line: string): string[][] =>
-  (line.replace(/\\\n/g, ' ').match(SHELL_TOKEN) ?? []).reduce<string[][]>(
+  (line.replace(/\\\n/g, '').match(SHELL_TOKEN) ?? []).reduce<string[][]>(
     (commands, token) => {
       if (SHELL_OPERATORS.has(token)) commands.push([]);
       else commands[commands.length - 1].push(unquote(token));
