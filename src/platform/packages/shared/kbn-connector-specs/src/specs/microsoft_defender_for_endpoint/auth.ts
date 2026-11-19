@@ -45,7 +45,7 @@ export const mdeAuth: NonNullable<ConnectorSpec['auth']> = {
       // secret field would overwrite the stored value when the connector is edited.
       defaults: { tokenEndpointAuthMethod: 'client_secret_post' },
       overrides: {
-        fields: { scope: z.string().trim().min(1) },
+        fields: { scope: lazySchema(() => z.string().trim().min(1)) },
         meta: {
           tokenUrl: {
             placeholder: TOKEN_URL_PLACEHOLDER,
@@ -75,7 +75,7 @@ export const mdeAuth: NonNullable<ConnectorSpec['auth']> = {
       // Microsoft Entra expects a PS256 client assertion bound to the certificate by x5t#S256.
       defaults: { algorithm: 'PS256', certificateBinding: 'x5t#S256' },
       overrides: {
-        fields: { scope: z.string().trim().min(1) },
+        fields: { scope: lazySchema(() => z.string().trim().min(1)) },
         meta: {
           algorithm: { hidden: true },
           certificateBinding: { hidden: true },
