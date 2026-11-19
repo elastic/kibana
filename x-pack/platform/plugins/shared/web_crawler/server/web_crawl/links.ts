@@ -6,6 +6,10 @@
  */
 
 const MAX_URL_LENGTH = 2048;
+// Deeper paths and longer queries are mostly calendars, faceted listings and other URL traps.
+const MAX_URL_SEGMENTS = 16;
+const MAX_URL_PARAMS = 10;
+const PATH_DIRECTORY_FIELDS = 3;
 const MAX_LINKS_PER_PAGE = 2000;
 const LINK_TARGET_OPEN = '](';
 
@@ -47,8 +51,19 @@ const SKIPPED_EXTENSIONS = new Set([
   'zip',
 ]);
 
-/** Returns the absolute http(s) URL without fragment or credentials, or `null` when it is not crawlable. */
-export const normalizeUrl = (rawUrl: string, baseUrl?: string): string | null => {
+const getPathSegments = (pathname: string): string[] =>
+  pathname.split('/').filter((segment) => segment !== '');
+
+/**
+ * Returns the absolute http(s) URL without fragment or credentials, or `null` when it is not
+ * crawlable. `isDiscovered` is for links a crawl came across, which are also held to the limits
+ * that keep it out of URL traps; the URL a user asks for is not.
+ */
+export const normalizeUrl = (
+  rawUrl: string,
+  baseUrl?: string,
+  { isDiscovered = true }: { isDiscovered?: boolean } = {}
+): string | null => {
   if (rawUrl.length > MAX_URL_LENGTH) {
     return null;
   }
@@ -64,6 +79,14 @@ export const normalizeUrl = (rawUrl: string, baseUrl?: string): string | null =>
     return null;
   }
 
+  if (
+    isDiscovered &&
+    (getPathSegments(url.pathname).length > MAX_URL_SEGMENTS ||
+      [...url.searchParams.keys()].length > MAX_URL_PARAMS)
+  ) {
+    return null;
+  }
+
   url.hash = '';
   url.username = '';
   url.password = '';
@@ -73,6 +96,27 @@ export const normalizeUrl = (rawUrl: string, baseUrl?: string): string | null =>
 
 /** Identifies the site a URL belongs to, treating the `www.` host as the bare host. */
 export const getSiteKey = (url: string): string => new URL(url).hostname.replace(/^www\./, '');
+
+export interface UrlFields {
+  url_host: string;
+  url_path: string;
+  url_path_dir1?: string;
+  url_path_dir2?: string;
+  url_path_dir3?: string;
+}
+
+/** Splits a URL into the fields that let a search filter or facet by site section. */
+export const getUrlFields = (url: string): UrlFields => {
+  const { hostname, pathname } = new URL(url);
+  const [dir1, dir2, dir3] = getPathSegments(pathname).slice(0, PATH_DIRECTORY_FIELDS);
+  return {
+    url_host: hostname,
+    url_path: pathname,
+    url_path_dir1: dir1,
+    url_path_dir2: dir2,
+    url_path_dir3: dir3,
+  };
+};
 
 const hasSkippedExtension = (url: string): boolean => {
   const { pathname } = new URL(url);

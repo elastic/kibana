@@ -15,12 +15,15 @@ import {
   createCrawlIndex,
   getCrawlIndexName,
   getIndexPrivileges,
+  isValidCrawlIndexName,
   readCrawlIndexState,
+  updateCrawlIndexMappings,
 } from './crawl_index';
 import type { CrawlDocument, CrawlStorage, StoredCrawl } from './crawl_storage';
 import { ACTIVE_CRAWL_STATUSES } from './crawl_storage';
 import { findDocumentExtractionEndpoint } from './document_extraction';
 import { normalizeUrl } from './links';
+import { normalizePathPrefixes } from './path_rules';
 import type { WebCrawlTaskParams } from './task';
 import { WEB_CRAWL_TASK_TYPE } from './task';
 
@@ -53,6 +56,12 @@ export interface StartCrawlOptions {
   url: string;
   maxDepth: number;
   maxDocuments: number;
+  includePaths?: string[];
+  excludePaths?: string[];
+  /** The index to crawl into. Defaults to the one named after the host of `url`. */
+  indexName?: string;
+  seedUrls?: string[];
+  sitemapUrls?: string[];
   startedBy?: string;
   workflowId?: string;
 }
@@ -64,10 +73,17 @@ export const toWebCrawl = (crawl: StoredCrawl): WebCrawl => ({
   status: crawl.status,
   maxDepth: crawl.max_depth,
   maxDocuments: crawl.max_documents,
+  includePaths: crawl.include_paths ?? [],
+  excludePaths: crawl.exclude_paths ?? [],
+  seedUrls: crawl.seed_urls ?? [],
+  sitemapUrls: crawl.sitemap_urls ?? [],
   documentsCount: crawl.documents_count,
   failedCount: crawl.failed_count,
   requestedCount: crawl.requested_count,
   queuedCount: crawl.queued_count,
+  skippedByRobotsCount: crawl.skipped_robots_count ?? 0,
+  skippedByRulesCount: crawl.skipped_rules_count ?? 0,
+  purgedCount: crawl.purged_count ?? 0,
   startedAt: crawl.started_at,
   finishedAt: crawl.finished_at,
   error: crawl.error,
@@ -164,18 +180,53 @@ export const listCrawls = async (deps: CrawlServiceDeps): Promise<StoredCrawl[]>
   return reconciled.filter((crawl): crawl is StoredCrawl => crawl !== undefined);
 };
 
+/** Normalizes a list of URLs the user asked for, or returns `null` when one of them is not crawlable. */
+const normalizeRequestedUrls = (rawUrls: string[] = []): string[] | null => {
+  const urls = rawUrls.map((rawUrl) => normalizeUrl(rawUrl, undefined, { isDiscovered: false }));
+  return urls.every((url): url is string => url !== null) ? [...new Set(urls)] : null;
+};
+
 /**
- * Starts a crawl of `url` into the index named after its host. Crawls of different sites run side
- * by side; a site that is already being crawled is not crawled again until that crawl ends.
+ * Starts a crawl of `url`, and of any further start URLs, into one index: the one asked for, or
+ * the one named after the host of `url`. Crawls into different indices run side by side; an index
+ * that is already being crawled into is not crawled into again until that crawl ends.
  */
 export const startCrawl = async (
   deps: CrawlServiceDeps,
-  { request, url: rawUrl, maxDepth, maxDocuments, startedBy, workflowId }: StartCrawlOptions
+  {
+    request,
+    url: rawUrl,
+    maxDepth,
+    maxDocuments,
+    includePaths: rawIncludePaths,
+    excludePaths: rawExcludePaths,
+    indexName: requestedIndexName,
+    seedUrls: rawSeedUrls,
+    sitemapUrls: rawSitemapUrls,
+    startedBy,
+    workflowId,
+  }: StartCrawlOptions
 ): Promise<StoredCrawl> => {
   const { esClient, storage, taskManager, logger } = deps;
-  const url = normalizeUrl(rawUrl);
+  const url = normalizeUrl(rawUrl, undefined, { isDiscovered: false });
   if (!url) {
     throw new WebCrawlError('Enter a valid http or https URL', 400);
+  }
+  const seedUrls = normalizeRequestedUrls(rawSeedUrls)?.filter((seedUrl) => seedUrl !== url);
+  const sitemapUrls = normalizeRequestedUrls(rawSitemapUrls);
+  if (!seedUrls || !sitemapUrls) {
+    throw new WebCrawlError('Start URLs and sitemap URLs must be valid http or https URLs', 400);
+  }
+  if (requestedIndexName !== undefined && !isValidCrawlIndexName(requestedIndexName)) {
+    throw new WebCrawlError(
+      'Index names start with a lowercase letter or a digit, and contain only lowercase letters, digits, dots, hyphens and underscores',
+      400
+    );
+  }
+  const includePaths = normalizePathPrefixes(rawIncludePaths);
+  const excludePaths = normalizePathPrefixes(rawExcludePaths);
+  if (!includePaths || !excludePaths) {
+    throw new WebCrawlError('Paths to include or exclude must start with a /', 400);
   }
 
   const inferenceId = await findDocumentExtractionEndpoint(esClient);
@@ -183,7 +234,7 @@ export const startCrawl = async (
     throw new WebCrawlError('No document_extraction inference endpoint is available', 400);
   }
 
-  const indexName = getCrawlIndexName(url);
+  const indexName = requestedIndexName ?? getCrawlIndexName(url);
   const { exists, isCrawlIndex } = await readCrawlIndexState(esClient, indexName);
   if (exists && !isCrawlIndex) {
     throw new WebCrawlError(
@@ -205,7 +256,12 @@ export const startCrawl = async (
     throw new WebCrawlError(`A crawl into ${indexName} is already running`, 409);
   }
 
-  if (!exists) {
+  if (exists) {
+    // Without them the new fields are still indexed, only with the types Elasticsearch guesses.
+    await updateCrawlIndexMappings(esClient, indexName).catch((error) => {
+      logger.debug(`Web crawl could not update the mappings of ${indexName}: ${error.message}`);
+    });
+  } else {
     await createCrawlIndex(esClient, indexName, { url });
   }
 
@@ -223,6 +279,10 @@ export const startCrawl = async (
     failed_count: 0,
     requested_count: 0,
     queued_count: 0,
+    include_paths: includePaths,
+    exclude_paths: excludePaths,
+    seed_urls: seedUrls,
+    sitemap_urls: sitemapUrls,
     started_by: startedBy,
     workflow_id: workflowId,
   };
@@ -235,7 +295,17 @@ export const startCrawl = async (
     throw new WebCrawlError(`A crawl into ${indexName} is already running`, 409);
   }
 
-  const params: WebCrawlTaskParams = { url, indexName, inferenceId, maxDepth, maxDocuments };
+  const params: WebCrawlTaskParams = {
+    url,
+    indexName,
+    inferenceId,
+    maxDepth,
+    maxDocuments,
+    includePaths,
+    excludePaths,
+    seedUrls,
+    sitemapUrls,
+  };
   try {
     await taskManager.schedule(
       { id, taskType: WEB_CRAWL_TASK_TYPE, params, state: {} },

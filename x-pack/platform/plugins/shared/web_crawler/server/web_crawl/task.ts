@@ -10,7 +10,15 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskCost, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
-import { WEB_CRAWL_MAX_DEPTH_LIMIT, WEB_CRAWL_MAX_DOCUMENTS_LIMIT } from '../../common/constants';
+import {
+  WEB_CRAWL_MAX_DEPTH_LIMIT,
+  WEB_CRAWL_MAX_DOCUMENTS_LIMIT,
+  WEB_CRAWL_MAX_PATH_RULES,
+  WEB_CRAWL_MAX_PATH_RULE_LENGTH,
+  WEB_CRAWL_MAX_SEED_URLS,
+  WEB_CRAWL_MAX_SITEMAP_URLS,
+  WEB_CRAWL_MAX_URL_LENGTH,
+} from '../../common/constants';
 import type { WebCrawlerServerStartDependencies } from '../types';
 import type { CrawlDocument } from './crawl_storage';
 import { createCrawlStorage } from './crawl_storage';
@@ -25,6 +33,21 @@ const STOPPED_BY_TASK_MANAGER_ERROR = 'The crawl was stopped before it finished'
 export const validateInteger = (value: number): string | undefined =>
   Number.isInteger(value) ? undefined : 'must be an integer';
 
+export const pathRulesSchema = schema.arrayOf(
+  schema.string({ minLength: 1, maxLength: WEB_CRAWL_MAX_PATH_RULE_LENGTH }),
+  { maxSize: WEB_CRAWL_MAX_PATH_RULES, defaultValue: [] }
+);
+
+const urlSchema = schema.string({ minLength: 1, maxLength: WEB_CRAWL_MAX_URL_LENGTH });
+export const seedUrlsSchema = schema.arrayOf(urlSchema, {
+  maxSize: WEB_CRAWL_MAX_SEED_URLS,
+  defaultValue: [],
+});
+export const sitemapUrlsSchema = schema.arrayOf(urlSchema, {
+  maxSize: WEB_CRAWL_MAX_SITEMAP_URLS,
+  defaultValue: [],
+});
+
 const paramsSchema = schema.object({
   url: schema.string({ maxLength: 2048 }),
   indexName: schema.string({ maxLength: 255 }),
@@ -35,6 +58,10 @@ const paramsSchema = schema.object({
     max: WEB_CRAWL_MAX_DOCUMENTS_LIMIT,
     validate: validateInteger,
   }),
+  includePaths: pathRulesSchema,
+  excludePaths: pathRulesSchema,
+  seedUrls: seedUrlsSchema,
+  sitemapUrls: sitemapUrlsSchema,
 });
 
 export type WebCrawlTaskParams = TypeOf<typeof paramsSchema>;
@@ -48,7 +75,7 @@ interface RegisterWebCrawlTaskDeps {
 export const registerWebCrawlTask = ({ core, taskManager, logger }: RegisterWebCrawlTaskDeps) => {
   taskManager.registerTaskDefinitions({
     [WEB_CRAWL_TASK_TYPE]: {
-      title: 'Elasticsearch home web crawl',
+      title: 'Web crawl',
       description:
         'Crawls a website through a document_extraction inference endpoint and indexes its pages for full-text and semantic search.',
       // Up to 1000 extraction calls, 10 at a time and around 10s each, plus ingest-time inference.
@@ -65,8 +92,17 @@ export const registerWebCrawlTask = ({ core, taskManager, logger }: RegisterWebC
           }
 
           const { id: crawlId } = taskInstance;
-          const { url, indexName, inferenceId, maxDepth, maxDocuments } =
-            taskInstance.params as WebCrawlTaskParams;
+          const {
+            url,
+            indexName,
+            inferenceId,
+            maxDepth,
+            maxDocuments,
+            includePaths = [],
+            excludePaths = [],
+            seedUrls = [],
+            sitemapUrls = [],
+          } = taskInstance.params as WebCrawlTaskParams;
           const [{ elasticsearch }] = await core.getStartServices();
           const esClient = elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
           const storage = createCrawlStorage(elasticsearch.client.asInternalUser, logger);
@@ -84,7 +120,10 @@ export const registerWebCrawlTask = ({ core, taskManager, logger }: RegisterWebC
             failedCount: 0,
             requestedCount: 0,
             queuedCount: 0,
+            skippedByRobotsCount: 0,
+            skippedByRulesCount: 0,
           };
+          let purgedCount = 0;
           let wasCanceled = false;
           let pendingRecord: Promise<void> | undefined;
           const toProgressPatch = (): Partial<CrawlDocument> => ({
@@ -92,6 +131,8 @@ export const registerWebCrawlTask = ({ core, taskManager, logger }: RegisterWebC
             failed_count: progress.failedCount,
             requested_count: progress.requestedCount,
             queued_count: progress.queuedCount,
+            skipped_robots_count: progress.skippedByRobotsCount,
+            skipped_rules_count: progress.skippedByRulesCount,
             updated_at: new Date().toISOString(),
           });
           // Doubles as the heartbeat that tells a running crawl from an interrupted one.
@@ -122,11 +163,14 @@ export const registerWebCrawlTask = ({ core, taskManager, logger }: RegisterWebC
               logger,
               signal: crawlAbort.signal,
               url,
+              additionalSeedUrls: seedUrls,
+              sitemapUrls,
               indexName,
               inferenceId,
               crawlId,
               maxDepth,
               maxDocuments,
+              pathRules: { includePaths, excludePaths },
               onProgress: (latest) => {
                 progress = latest;
               },
@@ -136,7 +180,10 @@ export const registerWebCrawlTask = ({ core, taskManager, logger }: RegisterWebC
               documentsCount: result.documentsCount,
               failedCount: result.failedCount,
               queuedCount: 0,
+              skippedByRobotsCount: result.skippedByRobotsCount,
+              skippedByRulesCount: result.skippedByRulesCount,
             };
+            ({ purgedCount } = result);
             if (result.aborted && !wasCanceled) {
               error = STOPPED_BY_TASK_MANAGER_ERROR;
             }
@@ -162,6 +209,7 @@ export const registerWebCrawlTask = ({ core, taskManager, logger }: RegisterWebC
             {
               ...toProgressPatch(),
               status,
+              purged_count: purgedCount,
               finished_at: new Date().toISOString(),
               ...(status === 'failed' ? { error } : {}),
             },

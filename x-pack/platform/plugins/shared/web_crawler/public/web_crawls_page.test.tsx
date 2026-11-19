@@ -22,6 +22,7 @@ import {
   createWebCrawl,
   renderWithWebCrawlerContext,
 } from './test_utils';
+import { INVALID_PATHS_MESSAGE } from './components/web_crawl_path_rules';
 import { WebCrawlsPage } from './web_crawls_page';
 
 const WORKFLOWS_PATH = '/api/workflows';
@@ -34,6 +35,10 @@ const SCHEDULE = 'webCrawlsSchedule';
 const DELETE = 'webCrawlsDelete';
 const ERROR_CALLOUT = 'webCrawlsError';
 const SCHEDULE_MODAL = 'webCrawlScheduleModal';
+const MORE_START_URLS = 'webCrawlsMoreStartUrls';
+const INVALID_INDEX_NAME_MESSAGE =
+  'Start with a lowercase letter or a digit, and use only lowercase letters, digits, dots, hyphens and underscores.';
+const INVALID_URLS_MESSAGE = 'Enter up to 20 URLs that start with http:// or https://';
 
 interface WorkflowSummary {
   id: string;
@@ -171,6 +176,24 @@ describe('WebCrawlsPage', () => {
       expect(await findRow(completedCrawl.url)).toHaveTextContent('Completed');
     });
 
+    it('tells how many more start URLs a crawl had, in its row only', async () => {
+      crawls = [
+        runningCrawl,
+        {
+          ...completedCrawl,
+          seedUrls: ['https://completed.example/blog', 'https://docs.completed.example'],
+        },
+      ];
+      await renderPage();
+
+      expect(
+        within(await findRow(completedCrawl.url)).getByTestId(MORE_START_URLS)
+      ).toHaveTextContent('and 2 more start URLs');
+      expect(
+        within(await findRow(runningCrawl.url)).queryByTestId(MORE_START_URLS)
+      ).not.toBeInTheDocument();
+    });
+
     it('has no back link when the host supplies no home route', async () => {
       await renderPage();
 
@@ -236,6 +259,43 @@ describe('WebCrawlsPage', () => {
       expect(await findRow(completedCrawl.url)).toHaveTextContent(
         '37 of at most 120 indexed, 2 failed'
       );
+    });
+
+    it('reports removed pages, a reached page limit and skipped links', async () => {
+      crawls = [
+        { ...runningCrawl, skippedByRobotsCount: 2 },
+        {
+          ...completedCrawl,
+          requestedCount: 120,
+          purgedCount: 4,
+          skippedByRobotsCount: 1,
+          skippedByRulesCount: 6,
+        },
+      ];
+      await renderPage();
+
+      const completedRow = await findRow(completedCrawl.url);
+      expect(completedRow).toHaveTextContent('37 of at most 120 indexed, 4 removed');
+      expect(within(completedRow).getByTestId('webCrawlsPageLimitReached')).toHaveTextContent(
+        'Page limit reached'
+      );
+      expect(within(completedRow).getByTestId('webCrawlsSkipped')).toHaveTextContent(
+        'Skipped links: 1 by robots.txt, 6 by path rules'
+      );
+
+      const runningRow = await findRow(runningCrawl.url);
+      expect(within(runningRow).getByTestId('webCrawlsSkipped')).toHaveTextContent(
+        'Skipped links: 2 by robots.txt, 0 by path rules'
+      );
+      expect(within(runningRow).queryByTestId('webCrawlsPageLimitReached')).not.toBeInTheDocument();
+    });
+
+    it('mentions neither a page limit nor skipped links for crawls without them', async () => {
+      await renderPage();
+
+      await findRow(completedCrawl.url);
+      expect(screen.queryByTestId('webCrawlsPageLimitReached')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('webCrawlsSkipped')).not.toBeInTheDocument();
     });
   });
 
@@ -306,9 +366,121 @@ describe('WebCrawlsPage', () => {
       expect(await findRow('https://new.example')).toHaveTextContent('Running');
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
-        body: JSON.stringify({ url: 'https://new.example', maxDepth: 2, maxDocuments: 500 }),
+        body: JSON.stringify({
+          url: 'https://new.example',
+          maxDepth: 2,
+          maxDocuments: 500,
+          includePaths: [],
+          excludePaths: [],
+          seedUrls: [],
+          sitemapUrls: [],
+        }),
       });
       expect(await screen.findByTestId('webCrawlsRunningCount')).toHaveTextContent('2 running');
+    });
+
+    it('starts the crawl with the paths entered in the form', async () => {
+      await renderPage();
+      http.post.mockResolvedValue(createWebCrawl({ id: 'running-2', url: 'https://new.example' }));
+      fireEvent.change(screen.getByTestId('webCrawlIncludePaths'), {
+        target: { value: '/docs, /blog /docs' },
+      });
+      fireEvent.change(screen.getByTestId('webCrawlExcludePaths'), {
+        target: { value: '/docs/archive' },
+      });
+
+      submitUrl('https://new.example');
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({
+          url: 'https://new.example',
+          maxDepth: 2,
+          maxDocuments: 500,
+          includePaths: ['/docs', '/blog'],
+          excludePaths: ['/docs/archive'],
+          seedUrls: [],
+          sitemapUrls: [],
+        }),
+      });
+    });
+
+    it('starts the crawl with the index, start URLs and sitemap URLs entered in the form', async () => {
+      await renderPage();
+      http.post.mockResolvedValue(createWebCrawl({ id: 'running-2', url: 'https://new.example' }));
+      fireEvent.click(screen.getByText('Index, start URLs and sitemaps'));
+      fireEvent.change(screen.getByTestId('webCrawlIndexName'), { target: { value: ' docs ' } });
+      fireEvent.change(screen.getByTestId('webCrawlSeedUrls'), {
+        target: {
+          value: 'https://new.example/blog, https://docs.new.example https://new.example/blog',
+        },
+      });
+      fireEvent.change(screen.getByTestId('webCrawlSitemapUrls'), {
+        target: { value: 'https://new.example/sitemap-docs.xml' },
+      });
+
+      submitUrl('https://new.example');
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({
+          url: 'https://new.example',
+          maxDepth: 2,
+          maxDocuments: 500,
+          includePaths: [],
+          excludePaths: [],
+          indexName: 'docs',
+          seedUrls: ['https://new.example/blog', 'https://docs.new.example'],
+          sitemapUrls: ['https://new.example/sitemap-docs.xml'],
+        }),
+      });
+    });
+
+    it('leaves the choice of index to the server when the form names none', async () => {
+      await renderPage();
+      http.post.mockResolvedValue(createWebCrawl({ id: 'running-2', url: 'https://new.example' }));
+      fireEvent.change(screen.getByTestId('webCrawlIndexName'), { target: { value: '  ' } });
+
+      submitUrl('https://new.example');
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(
+        WEB_CRAWLS_PATH,
+        expect.objectContaining({ body: expect.not.stringContaining('indexName') })
+      );
+    });
+
+    it.each([
+      ['webCrawlIndexName', 'Docs', INVALID_INDEX_NAME_MESSAGE],
+      ['webCrawlIndexName', '_docs', INVALID_INDEX_NAME_MESSAGE],
+      ['webCrawlSeedUrls', 'docs.new.example', INVALID_URLS_MESSAGE],
+      ['webCrawlSitemapUrls', 'ftp://new.example/sitemap.xml', INVALID_URLS_MESSAGE],
+    ])(
+      'does not start a crawl while %s in the form is set to %p',
+      async (testSubj, value, message) => {
+        await renderPage();
+        fireEvent.click(screen.getByText('Index, start URLs and sitemaps'));
+        fireEvent.change(screen.getByTestId(testSubj), { target: { value } });
+
+        submitUrl('https://new.example');
+
+        expect(screen.getByText(message)).toBeVisible();
+        expect(screen.getByTestId(testSubj)).toBeInvalid();
+        expect(http.post).not.toHaveBeenCalled();
+        expect(screen.queryByTestId(ERROR_CALLOUT)).not.toBeInTheDocument();
+      }
+    );
+
+    it('does not start a crawl while the paths in the form are invalid', async () => {
+      await renderPage();
+      fireEvent.change(screen.getByTestId('webCrawlExcludePaths'), { target: { value: 'tags' } });
+
+      submitUrl('https://new.example');
+
+      expect(screen.getByText(INVALID_PATHS_MESSAGE)).toBeInTheDocument();
+      expect(screen.getByTestId('webCrawlExcludePaths')).toBeInvalid();
+      expect(http.post).not.toHaveBeenCalled();
+      expect(screen.queryByTestId(ERROR_CALLOUT)).not.toBeInTheDocument();
     });
 
     it('keeps the form enabled while other crawls are running', async () => {
@@ -459,11 +631,130 @@ describe('WebCrawlsPage', () => {
           url: 'https://completed.example/docs',
           maxDepth: 4,
           maxDocuments: 120,
+          includePaths: [],
+          excludePaths: [],
+          indexName: 'web-crawl-completed-example',
+          seedUrls: [],
+          sitemapUrls: [],
         }),
       });
       await waitFor(async () =>
         expect(await findRow(completedCrawl.url)).toHaveTextContent('Running')
       );
+    });
+
+    it("starts a crawl with the earlier crawl's paths", async () => {
+      crawls = [
+        runningCrawl,
+        { ...completedCrawl, includePaths: ['/docs', '/blog'], excludePaths: ['/docs/archive'] },
+      ];
+      await renderPage({ canCreateWorkflows: false });
+      http.post.mockResolvedValue({ ...completedCrawl, id: 'running-3', status: 'running' });
+
+      fireEvent.click(await findRowAction(completedCrawl.url, CRAWL_AGAIN));
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({
+          url: 'https://completed.example/docs',
+          maxDepth: 4,
+          maxDocuments: 120,
+          includePaths: ['/docs', '/blog'],
+          excludePaths: ['/docs/archive'],
+          indexName: 'web-crawl-completed-example',
+          seedUrls: [],
+          sitemapUrls: [],
+        }),
+      });
+    });
+
+    it("ignores the paths in the form and uses the earlier crawl's", async () => {
+      crawls = [runningCrawl, { ...completedCrawl, excludePaths: ['/tags'] }];
+      await renderPage({ canCreateWorkflows: false });
+      http.post.mockResolvedValue({ ...completedCrawl, id: 'running-3', status: 'running' });
+      fireEvent.change(screen.getByTestId('webCrawlIncludePaths'), {
+        target: { value: 'not-a-path' },
+      });
+
+      fireEvent.click(await findRowAction(completedCrawl.url, CRAWL_AGAIN));
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({
+          url: 'https://completed.example/docs',
+          maxDepth: 4,
+          maxDocuments: 120,
+          includePaths: [],
+          excludePaths: ['/tags'],
+          indexName: 'web-crawl-completed-example',
+          seedUrls: [],
+          sitemapUrls: [],
+        }),
+      });
+    });
+
+    it("starts a crawl with the earlier crawl's index, start URLs and sitemap URLs", async () => {
+      crawls = [
+        runningCrawl,
+        {
+          ...completedCrawl,
+          indexName: 'docs',
+          seedUrls: ['https://completed.example/blog', 'https://docs.completed.example/x,y'],
+          sitemapUrls: ['https://completed.example/sitemap-docs.xml'],
+        },
+      ];
+      await renderPage({ canCreateWorkflows: false });
+      http.post.mockResolvedValue({ ...completedCrawl, id: 'running-3', status: 'running' });
+
+      fireEvent.click(await findRowAction(completedCrawl.url, CRAWL_AGAIN));
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({
+          url: 'https://completed.example/docs',
+          maxDepth: 4,
+          maxDocuments: 120,
+          includePaths: [],
+          excludePaths: [],
+          indexName: 'docs',
+          seedUrls: ['https://completed.example/blog', 'https://docs.completed.example/x,y'],
+          sitemapUrls: ['https://completed.example/sitemap-docs.xml'],
+        }),
+      });
+    });
+
+    it("ignores the targets in the form and uses the earlier crawl's", async () => {
+      crawls = [
+        runningCrawl,
+        { ...completedCrawl, sitemapUrls: ['https://completed.example/sitemap-docs.xml'] },
+      ];
+      await renderPage({ canCreateWorkflows: false });
+      http.post.mockResolvedValue({ ...completedCrawl, id: 'running-3', status: 'running' });
+      fireEvent.change(screen.getByTestId('webCrawlIndexName'), {
+        target: { value: 'Not An Index' },
+      });
+      fireEvent.change(screen.getByTestId('webCrawlSeedUrls'), {
+        target: { value: 'https://other.example' },
+      });
+      fireEvent.change(screen.getByTestId('webCrawlSitemapUrls'), {
+        target: { value: 'not-a-url' },
+      });
+
+      fireEvent.click(await findRowAction(completedCrawl.url, CRAWL_AGAIN));
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({
+          url: 'https://completed.example/docs',
+          maxDepth: 4,
+          maxDocuments: 120,
+          includePaths: [],
+          excludePaths: [],
+          indexName: 'web-crawl-completed-example',
+          seedUrls: [],
+          sitemapUrls: ['https://completed.example/sitemap-docs.xml'],
+        }),
+      });
     });
 
     it("shows the server's refusal when the site cannot be crawled again", async () => {
@@ -483,6 +774,7 @@ describe('WebCrawlsPage', () => {
       url: 'https://completed.example/docs',
       maxDepth: 4,
       maxDocuments: 120,
+      indexName: 'web-crawl-completed-example',
       every: 2,
       unit: 'h' as const,
     };
@@ -568,6 +860,254 @@ describe('WebCrawlsPage', () => {
         'href',
         '/app/workflows/workflow-2'
       );
+    });
+
+    it('schedules a crawl of a site that was never crawled with the paths the user entered', async () => {
+      await renderPage();
+      http.post.mockResolvedValue({ id: 'workflow-2', name: 'Web crawl', enabled: true });
+      const request = {
+        url: 'https://new.example',
+        maxDepth: 2,
+        maxDocuments: 500,
+        includePaths: ['/docs', '/blog'],
+        excludePaths: ['/docs/archive'],
+        every: 2,
+        unit: 'h' as const,
+      };
+
+      fireEvent.click(await screen.findByTestId('webCrawlsNewSchedule'));
+      await screen.findByTestId(SCHEDULE_MODAL);
+      fireEvent.change(screen.getByTestId('webCrawlScheduleUrl'), {
+        target: { value: 'https://new.example' },
+      });
+      // The crawl form behind the modal has path inputs of its own.
+      const modal = within(screen.getByTestId(SCHEDULE_MODAL));
+      fireEvent.change(modal.getByTestId('webCrawlIncludePaths'), {
+        target: { value: '/docs, /blog, /docs' },
+      });
+      fireEvent.change(modal.getByTestId('webCrawlExcludePaths'), {
+        target: { value: '/docs/archive' },
+      });
+      confirmEveryTwoHours();
+
+      await waitFor(() => expect(screen.queryByTestId(SCHEDULE_MODAL)).not.toBeInTheDocument());
+      const yaml = buildWebCrawlWorkflowYaml(request);
+      expect(yaml).toContain('include_paths');
+      expect(yaml).toContain('exclude_paths');
+      expect(yaml).toContain('/docs/archive');
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(WORKFLOW_PATH, {
+        body: JSON.stringify({ yaml }),
+        version: API_VERSION,
+      });
+    });
+
+    it('cannot schedule a new crawl while its paths are invalid', async () => {
+      await renderPage();
+
+      fireEvent.click(await screen.findByTestId('webCrawlsNewSchedule'));
+      await screen.findByTestId(SCHEDULE_MODAL);
+      fireEvent.change(screen.getByTestId('webCrawlScheduleUrl'), {
+        target: { value: 'https://new.example' },
+      });
+      const modal = within(screen.getByTestId(SCHEDULE_MODAL));
+      expect(screen.getByTestId('confirmModalConfirmButton')).toBeEnabled();
+
+      fireEvent.change(modal.getByTestId('webCrawlIncludePaths'), { target: { value: 'docs' } });
+
+      expect(modal.getByText(INVALID_PATHS_MESSAGE)).toBeInTheDocument();
+      expect(screen.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(http.post).not.toHaveBeenCalled();
+      expect(screen.getByTestId(SCHEDULE_MODAL)).toBeInTheDocument();
+    });
+
+    it("creates a workflow that repeats the crawl's paths", async () => {
+      crawls = [
+        runningCrawl,
+        { ...completedCrawl, includePaths: ['/docs'], excludePaths: ['/docs/archive', '/tags'] },
+      ];
+      await renderPage();
+      http.post.mockResolvedValue({ id: 'workflow-1', name: 'Web crawl', enabled: true });
+      const modal = await openScheduleModal();
+      expect(modal).toHaveTextContent('into the same index and with the same options');
+      expect(within(modal).queryByTestId('webCrawlIncludePaths')).not.toBeInTheDocument();
+
+      confirmEveryTwoHours();
+
+      await waitFor(() => expect(screen.queryByTestId(SCHEDULE_MODAL)).not.toBeInTheDocument());
+      const yaml = buildWebCrawlWorkflowYaml({
+        ...scheduleRequest,
+        includePaths: ['/docs'],
+        excludePaths: ['/docs/archive', '/tags'],
+      });
+      expect(yaml).not.toBe(buildWebCrawlWorkflowYaml(scheduleRequest));
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(WORKFLOW_PATH, {
+        body: JSON.stringify({ yaml }),
+        version: API_VERSION,
+      });
+    });
+
+    it("creates a workflow that repeats the crawl's index, start URLs and sitemap URLs", async () => {
+      const targets = {
+        indexName: 'docs',
+        seedUrls: ['https://completed.example/blog', 'https://docs.completed.example'],
+        sitemapUrls: ['https://completed.example/sitemap-docs.xml'],
+      };
+      crawls = [runningCrawl, { ...completedCrawl, ...targets }];
+      await renderPage();
+      http.post.mockResolvedValue({ id: 'workflow-1', name: 'Web crawl', enabled: true });
+      const modal = await openScheduleModal();
+      expect(within(modal).queryByTestId('webCrawlTargets')).not.toBeInTheDocument();
+
+      confirmEveryTwoHours();
+
+      await waitFor(() => expect(screen.queryByTestId(SCHEDULE_MODAL)).not.toBeInTheDocument());
+      const yaml = buildWebCrawlWorkflowYaml({ ...scheduleRequest, ...targets });
+      expect(yaml).toContain('index_name: docs');
+      expect(yaml).toMatch(
+        /seed_urls:\s*\n\s*- https:\/\/completed\.example\/blog\s*\n\s*- https:\/\/docs\.completed\.example\s*\n/
+      );
+      expect(yaml).toMatch(
+        /sitemap_urls:\s*\n\s*- https:\/\/completed\.example\/sitemap-docs\.xml\s*\n/
+      );
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(WORKFLOW_PATH, {
+        body: JSON.stringify({ yaml }),
+        version: API_VERSION,
+      });
+    });
+
+    it("creates a workflow that crawls into the crawl's index, without URL lists it did not have", async () => {
+      await renderPage();
+      http.post.mockResolvedValue({ id: 'workflow-1', name: 'Web crawl', enabled: true });
+      await openScheduleModal();
+
+      confirmEveryTwoHours();
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      const yaml = buildWebCrawlWorkflowYaml(scheduleRequest);
+      expect(yaml).toContain('index_name: web-crawl-completed-example');
+      expect(yaml).not.toContain('seed_urls');
+      expect(yaml).not.toContain('sitemap_urls');
+      expect(http.post).toHaveBeenCalledWith(WORKFLOW_PATH, {
+        body: JSON.stringify({ yaml }),
+        version: API_VERSION,
+      });
+    });
+
+    it('schedules a crawl of a site that was never crawled with the targets the user entered', async () => {
+      await renderPage();
+      http.post.mockResolvedValue({ id: 'workflow-2', name: 'Web crawl', enabled: true });
+      const request = {
+        url: 'https://new.example',
+        maxDepth: 2,
+        maxDocuments: 500,
+        indexName: 'docs',
+        seedUrls: ['https://new.example/blog', 'https://docs.new.example'],
+        sitemapUrls: ['https://new.example/sitemap-docs.xml'],
+        every: 2,
+        unit: 'h' as const,
+      };
+
+      fireEvent.click(await screen.findByTestId('webCrawlsNewSchedule'));
+      await screen.findByTestId(SCHEDULE_MODAL);
+      fireEvent.change(screen.getByTestId('webCrawlScheduleUrl'), {
+        target: { value: 'https://new.example' },
+      });
+      // The crawl form behind the modal has target inputs of its own.
+      const modal = within(screen.getByTestId(SCHEDULE_MODAL));
+      fireEvent.click(modal.getByText('Index, start URLs and sitemaps'));
+      fireEvent.change(modal.getByTestId('webCrawlIndexName'), { target: { value: ' docs ' } });
+      fireEvent.change(modal.getByTestId('webCrawlSeedUrls'), {
+        target: {
+          value: 'https://new.example/blog,https://docs.new.example  https://new.example/blog',
+        },
+      });
+      fireEvent.change(modal.getByTestId('webCrawlSitemapUrls'), {
+        target: { value: 'https://new.example/sitemap-docs.xml' },
+      });
+      confirmEveryTwoHours();
+
+      await waitFor(() => expect(screen.queryByTestId(SCHEDULE_MODAL)).not.toBeInTheDocument());
+      const yaml = buildWebCrawlWorkflowYaml(request);
+      expect(yaml).toContain('index_name: docs');
+      expect(yaml).toContain('seed_urls');
+      expect(yaml).toContain('sitemap_urls');
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(WORKFLOW_PATH, {
+        body: JSON.stringify({ yaml }),
+        version: API_VERSION,
+      });
+    });
+
+    it('schedules a crawl of a site that was never crawled into the default index when none is named', async () => {
+      await renderPage();
+      http.post.mockResolvedValue({ id: 'workflow-2', name: 'Web crawl', enabled: true });
+
+      fireEvent.click(await screen.findByTestId('webCrawlsNewSchedule'));
+      await screen.findByTestId(SCHEDULE_MODAL);
+      fireEvent.change(screen.getByTestId('webCrawlScheduleUrl'), {
+        target: { value: 'https://new.example' },
+      });
+      confirmEveryTwoHours();
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      for (const key of ['index_name', 'seed_urls', 'sitemap_urls']) {
+        expect(http.post).toHaveBeenCalledWith(
+          WORKFLOW_PATH,
+          expect.objectContaining({ body: expect.not.stringContaining(key) })
+        );
+      }
+    });
+
+    it.each([
+      ['webCrawlIndexName', 'Docs', INVALID_INDEX_NAME_MESSAGE],
+      ['webCrawlSeedUrls', 'docs.new.example', INVALID_URLS_MESSAGE],
+      ['webCrawlSitemapUrls', '/sitemap.xml', INVALID_URLS_MESSAGE],
+    ])(
+      'cannot schedule a new crawl while its %s is set to %p',
+      async (testSubj, value, message) => {
+        await renderPage();
+
+        fireEvent.click(await screen.findByTestId('webCrawlsNewSchedule'));
+        await screen.findByTestId(SCHEDULE_MODAL);
+        fireEvent.change(screen.getByTestId('webCrawlScheduleUrl'), {
+          target: { value: 'https://new.example' },
+        });
+        const modal = within(screen.getByTestId(SCHEDULE_MODAL));
+        fireEvent.click(modal.getByText('Index, start URLs and sitemaps'));
+        expect(screen.getByTestId('confirmModalConfirmButton')).toBeEnabled();
+
+        fireEvent.change(modal.getByTestId(testSubj), { target: { value } });
+
+        expect(modal.getByText(message)).toBeVisible();
+        expect(screen.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+        expect(http.post).not.toHaveBeenCalled();
+        expect(screen.getByTestId(SCHEDULE_MODAL)).toBeInTheDocument();
+      }
+    );
+
+    it('does not carry invalid targets of the crawl form into a new schedule', async () => {
+      await renderPage();
+      http.post.mockResolvedValue({ id: 'workflow-2', name: 'Web crawl', enabled: true });
+      fireEvent.change(screen.getByTestId('webCrawlIndexName'), { target: { value: 'Docs' } });
+
+      fireEvent.click(await screen.findByTestId('webCrawlsNewSchedule'));
+      await screen.findByTestId(SCHEDULE_MODAL);
+      const modal = within(screen.getByTestId(SCHEDULE_MODAL));
+      fireEvent.change(screen.getByTestId('webCrawlScheduleUrl'), {
+        target: { value: 'https://new.example' },
+      });
+
+      expect(modal.getByTestId('webCrawlIndexName')).toHaveValue('');
+      expect(screen.getByTestId('confirmModalConfirmButton')).toBeEnabled();
     });
 
     it('offers the schedule action for running and finished crawls alike', async () => {

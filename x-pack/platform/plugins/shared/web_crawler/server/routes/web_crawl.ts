@@ -22,6 +22,7 @@ import {
   WEB_CRAWL_DEFAULT_MAX_DOCUMENTS,
   WEB_CRAWL_MAX_DEPTH_LIMIT,
   WEB_CRAWL_MAX_DOCUMENTS_LIMIT,
+  WEB_CRAWL_MAX_INDEX_NAME_LENGTH,
   WEB_CRAWL_PATH,
 } from '../../common/constants';
 import type { WebCrawl, WebCrawlListResponse } from '../../common/types';
@@ -37,7 +38,12 @@ import {
   toWebCrawl,
 } from '../web_crawl/crawl_service';
 import { createCrawlStorage } from '../web_crawl/crawl_storage';
-import { validateInteger } from '../web_crawl/task';
+import {
+  pathRulesSchema,
+  seedUrlsSchema,
+  sitemapUrlsSchema,
+  validateInteger,
+} from '../web_crawl/task';
 
 export const WEB_CRAWL_AUTHZ_REASON =
   'Crawls are authorized through the index they write to: Elasticsearch checks the current user for the inference endpoint and for creating, writing and reading that index, and the crawl task runs with an API key granted from the request';
@@ -111,6 +117,13 @@ export const registerWebCrawlRoutes = (
         body: schema.object({
           url: schema.string({ minLength: 1, maxLength: 2048 }),
           ...crawlLimitsSchema,
+          includePaths: pathRulesSchema,
+          excludePaths: pathRulesSchema,
+          indexName: schema.maybe(
+            schema.string({ minLength: 1, maxLength: WEB_CRAWL_MAX_INDEX_NAME_LENGTH })
+          ),
+          seedUrls: seedUrlsSchema,
+          sitemapUrls: sitemapUrlsSchema,
         }),
       },
       security,

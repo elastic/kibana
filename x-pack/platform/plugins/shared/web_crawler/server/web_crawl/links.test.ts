@@ -8,6 +8,7 @@
 import {
   extractLinks,
   getSiteKey,
+  getUrlFields,
   isSameSitePage,
   iterateLinkTargets,
   normalizeUrl,
@@ -71,6 +72,134 @@ describe('normalizeUrl', () => {
 
   it('rejects relative URLs that resolve to more than 2048 characters', () => {
     expect(normalizeUrl('a'.repeat(2040), PAGE_URL)).toBeNull();
+  });
+
+  describe('URL traps', () => {
+    const toPath = (segmentCount: number): string =>
+      Array.from({ length: segmentCount }, (_, segment) => `/s${segment}`).join('');
+
+    const toQuery = (paramCount: number): string =>
+      Array.from({ length: paramCount }, (_, param) => `p${param}=${param}`).join('&');
+
+    it('accepts a path of 16 segments and rejects one of 17', () => {
+      expect(normalizeUrl(`https://example.com${toPath(16)}`)).toBe(
+        `https://example.com${toPath(16)}`
+      );
+      expect(normalizeUrl(`https://example.com${toPath(17)}`)).toBeNull();
+    });
+
+    it('does not count a trailing slash or empty segments as path segments', () => {
+      expect(normalizeUrl(`https://example.com${toPath(16)}/`)).toBe(
+        `https://example.com${toPath(16)}/`
+      );
+      expect(normalizeUrl(`https://example.com//${toPath(16)}//`)).toBe(
+        `https://example.com//${toPath(16)}//`
+      );
+    });
+
+    it('counts the path segments after resolving a relative URL', () => {
+      const baseUrl = `https://example.com${toPath(15)}/page`;
+
+      expect(normalizeUrl('sibling', baseUrl)).toBe(`https://example.com${toPath(15)}/sibling`);
+      expect(normalizeUrl('child/page', baseUrl)).toBeNull();
+      expect(normalizeUrl('../../child/page', baseUrl)).toBe(
+        `https://example.com${toPath(13)}/child/page`
+      );
+    });
+
+    it('accepts 10 query parameters and rejects 11', () => {
+      expect(normalizeUrl(`https://example.com/a?${toQuery(10)}`)).toBe(
+        `https://example.com/a?${toQuery(10)}`
+      );
+      expect(normalizeUrl(`https://example.com/a?${toQuery(11)}`)).toBeNull();
+    });
+
+    it('counts every occurrence of a repeated query parameter, and those without a value', () => {
+      const repeated = (count: number): string =>
+        Array.from({ length: count }, () => 'tag=a').join('&');
+      const bare = (count: number): string =>
+        Array.from({ length: count }, (_, param) => `flag${param}`).join('&');
+
+      expect(normalizeUrl(`https://example.com/a?${repeated(10)}`)).not.toBeNull();
+      expect(normalizeUrl(`https://example.com/a?${repeated(11)}`)).toBeNull();
+      expect(normalizeUrl(`https://example.com/a?${bare(10)}`)).not.toBeNull();
+      expect(normalizeUrl(`https://example.com/a?${bare(11)}`)).toBeNull();
+    });
+
+    it('accepts a URL that is at both limits', () => {
+      const url = `https://example.com${toPath(16)}?${toQuery(10)}`;
+
+      expect(normalizeUrl(url)).toBe(url);
+    });
+
+    it('does not count what is in the fragment', () => {
+      expect(normalizeUrl(`https://example.com/a#${toPath(17)}?${toQuery(11)}`)).toBe(
+        'https://example.com/a'
+      );
+    });
+  });
+});
+
+describe('getUrlFields', () => {
+  it('returns the host, the path and the first three directories', () => {
+    expect(getUrlFields('https://example.com/docs/guide/intro/install')).toEqual({
+      url_host: 'example.com',
+      url_path: '/docs/guide/intro/install',
+      url_path_dir1: 'docs',
+      url_path_dir2: 'guide',
+      url_path_dir3: 'intro',
+    });
+  });
+
+  it.each([
+    ['https://example.com/', '/', undefined, undefined, undefined],
+    ['https://example.com/docs', '/docs', 'docs', undefined, undefined],
+    ['https://example.com/docs/', '/docs/', 'docs', undefined, undefined],
+    ['https://example.com/docs/guide', '/docs/guide', 'docs', 'guide', undefined],
+    ['https://example.com/docs/guide/intro', '/docs/guide/intro', 'docs', 'guide', 'intro'],
+    ['https://example.com//docs//guide', '//docs//guide', 'docs', 'guide', undefined],
+  ])('splits %s', (url, path, dir1, dir2, dir3) => {
+    expect(getUrlFields(url)).toEqual({
+      url_host: 'example.com',
+      url_path: path,
+      url_path_dir1: dir1,
+      url_path_dir2: dir2,
+      url_path_dir3: dir3,
+    });
+  });
+
+  it('leaves the directories that the path does not have undefined', () => {
+    const fields = getUrlFields('https://example.com/docs');
+
+    expect(fields.url_path_dir2).toBeUndefined();
+    expect(fields.url_path_dir3).toBeUndefined();
+    expect(JSON.parse(JSON.stringify(fields))).toEqual({
+      url_host: 'example.com',
+      url_path: '/docs',
+      url_path_dir1: 'docs',
+    });
+  });
+
+  it('keeps the query and the fragment out of the path', () => {
+    expect(getUrlFields('https://example.com/docs/guide?tab=1#top')).toEqual(
+      expect.objectContaining({ url_path: '/docs/guide', url_path_dir2: 'guide' })
+    );
+  });
+
+  it('keeps the www. prefix and other subdomains, and drops the port', () => {
+    expect(getUrlFields('https://www.example.com/').url_host).toBe('www.example.com');
+    expect(getUrlFields('https://docs.example.com:8443/').url_host).toBe('docs.example.com');
+  });
+
+  it('lowercases the host and keeps the path as the URL has it', () => {
+    expect(getUrlFields('https://EXAMPLE.com/Docs/caf%C3%A9')).toEqual(
+      expect.objectContaining({
+        url_host: 'example.com',
+        url_path: '/Docs/caf%C3%A9',
+        url_path_dir1: 'Docs',
+        url_path_dir2: 'caf%C3%A9',
+      })
+    );
   });
 });
 
@@ -253,6 +382,14 @@ describe('extractLinks', () => {
     expect(extractLinks(markdown, PAGE_URL)).toEqual(['https://example.com/next']);
   });
 
+  it('skips links with more path segments or query parameters than a page URL may have', () => {
+    const deepPath = Array.from({ length: 17 }, (_, segment) => `/s${segment}`).join('');
+    const longQuery = Array.from({ length: 11 }, (_, param) => `p${param}=1`).join('&');
+    const markdown = `[deep](${deepPath}) [calendar](/events?${longQuery}) [fine](/events?month=5)`;
+
+    expect(extractLinks(markdown, PAGE_URL)).toEqual(['https://example.com/events?month=5']);
+  });
+
   it('returns at most 2000 links per page', () => {
     const markdown = Array.from({ length: 2500 }, (_, i) => `[page ${i}](/page-${i})`).join('\n');
 
@@ -424,5 +561,25 @@ describe('isSameSitePage', () => {
       true
     );
     expect(isSameSitePage('https://example.com/page', 'www.example.com')).toBe(false);
+  });
+});
+
+describe('normalizeUrl for a URL the user asked for', () => {
+  const deepUrl = `https://example.com/${Array.from({ length: 17 }, (_, i) => `s${i}`).join('/')}`;
+  const manyParamsUrl = `https://example.com/?${Array.from(
+    { length: 11 },
+    (_, i) => `p${i}=1`
+  ).join('&')}`;
+
+  it.each([deepUrl, manyParamsUrl])('keeps %s, which a crawl would not follow as a link', (url) => {
+    expect(normalizeUrl(url)).toBeNull();
+    expect(normalizeUrl(url, undefined, { isDiscovered: false })).toBe(url);
+  });
+
+  it('still refuses a URL that is not crawlable at all', () => {
+    expect(normalizeUrl('ftp://example.com/', undefined, { isDiscovered: false })).toBeNull();
+    expect(
+      normalizeUrl(`https://example.com/${'a'.repeat(2048)}`, undefined, { isDiscovered: false })
+    ).toBeNull();
   });
 });

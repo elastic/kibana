@@ -25,7 +25,14 @@ import {
 } from '../../common/constants';
 import type { WebCrawlStartRequest } from '../../common/types';
 import { useTelemetryId } from '../context';
-import { isCrawlableUrl, isIntegerInRange } from '../validation';
+import {
+  arePathPrefixesValid,
+  isCrawlableUrl,
+  isIntegerInRange,
+  parsePathPrefixes,
+} from '../validation';
+import { INVALID_PATHS_MESSAGE, WebCrawlPathRules } from './web_crawl_path_rules';
+import { WebCrawlTargets, useCrawlTargetFields } from './web_crawl_targets';
 
 const INVALID_URL_MESSAGE = i18n.translate('xpack.webCrawler.panel.invalidUrl', {
   defaultMessage: 'Enter a URL that starts with http:// or https://',
@@ -45,7 +52,7 @@ const URL_LABEL = i18n.translate('xpack.webCrawler.panel.label', {
 });
 
 interface WebCrawlFormProps {
-  onSubmit: (request: Required<WebCrawlStartRequest>) => void;
+  onSubmit: (request: WebCrawlStartRequest) => void;
   isStarting: boolean;
   /** The server's answer to the last submission, when it refused it. */
   errorMessage?: string;
@@ -60,6 +67,13 @@ export const WebCrawlForm = ({ onSubmit, isStarting, errorMessage }: WebCrawlFor
   const [maxDocuments, setMaxDocuments] = useState(WEB_CRAWL_DEFAULT_MAX_DOCUMENTS);
   const isMaxDepthInvalid = !isIntegerInRange(maxDepth, 0, WEB_CRAWL_MAX_DEPTH_LIMIT);
   const isMaxDocumentsInvalid = !isIntegerInRange(maxDocuments, 1, WEB_CRAWL_MAX_DOCUMENTS_LIMIT);
+  const [includePathsText, setIncludePathsText] = useState('');
+  const [excludePathsText, setExcludePathsText] = useState('');
+  const isIncludeInvalid = !arePathPrefixesValid(parsePathPrefixes(includePathsText));
+  const isExcludeInvalid = !arePathPrefixesValid(parsePathPrefixes(excludePathsText));
+  const hasInvalidPaths = isIncludeInvalid || isExcludeInvalid;
+  const targetFields = useCrawlTargetFields();
+  const { isInvalid: hasInvalidTargets, targets } = targetFields;
 
   const handleSubmit = useCallback(
     (event: FormEvent) => {
@@ -69,17 +83,37 @@ export const WebCrawlForm = ({ onSubmit, isStarting, errorMessage }: WebCrawlFor
         setIsUrlInvalid(true);
         return;
       }
-      if (isMaxDepthInvalid || isMaxDocumentsInvalid) {
+      if (isMaxDepthInvalid || isMaxDocumentsInvalid || hasInvalidPaths || hasInvalidTargets) {
         return;
       }
-      onSubmit({ url: trimmedUrl, maxDepth, maxDocuments });
+      onSubmit({
+        url: trimmedUrl,
+        maxDepth,
+        maxDocuments,
+        includePaths: parsePathPrefixes(includePathsText),
+        excludePaths: parsePathPrefixes(excludePathsText),
+        ...targets,
+      });
     },
-    [url, maxDepth, maxDocuments, isMaxDepthInvalid, isMaxDocumentsInvalid, onSubmit]
+    [
+      url,
+      maxDepth,
+      maxDocuments,
+      includePathsText,
+      excludePathsText,
+      isMaxDepthInvalid,
+      isMaxDocumentsInvalid,
+      hasInvalidPaths,
+      hasInvalidTargets,
+      targets,
+      onSubmit,
+    ]
   );
 
   const limitsError =
     isMaxDepthInvalid || isMaxDocumentsInvalid ? INVALID_LIMITS_MESSAGE : undefined;
-  const error = isUrlInvalid ? INVALID_URL_MESSAGE : limitsError ?? errorMessage;
+  const pathsError = hasInvalidPaths ? INVALID_PATHS_MESSAGE : undefined;
+  const error = isUrlInvalid ? INVALID_URL_MESSAGE : limitsError ?? pathsError ?? errorMessage;
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -171,6 +205,19 @@ export const WebCrawlForm = ({ onSubmit, isStarting, errorMessage }: WebCrawlFor
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <WebCrawlPathRules
+        compressed
+        includePaths={includePathsText}
+        excludePaths={excludePathsText}
+        isIncludeInvalid={isIncludeInvalid}
+        isExcludeInvalid={isExcludeInvalid}
+        onIncludePathsChange={setIncludePathsText}
+        onExcludePathsChange={setExcludePathsText}
+        isDisabled={isStarting}
+      />
+      <EuiSpacer size="s" />
+      <WebCrawlTargets compressed fields={targetFields} isDisabled={isStarting} />
     </form>
   );
 };

@@ -10,8 +10,11 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 // `semantic_text` runs inference on every document at ingest, so a single request stays small.
 export const BULK_SIZE = 20;
+/** A request also closes once its pages add up to this much, so a few large pages do not make a huge one. */
+export const MAX_BULK_BYTES = 1024 * 1024;
 export const MAX_CONCURRENT_BULKS = 3;
 const MAX_BUFFERED_DOCUMENTS = BULK_SIZE * MAX_CONCURRENT_BULKS;
+const MAX_BUFFERED_BYTES = MAX_BULK_BYTES * MAX_CONCURRENT_BULKS;
 
 export interface CrawledDocument {
   url: string;
@@ -21,6 +24,16 @@ export interface CrawledDocument {
   depth: number;
   crawl_id: string;
   crawled_at: string;
+  url_host: string;
+  url_path: string;
+  url_path_dir1?: string;
+  url_path_dir2?: string;
+  url_path_dir3?: string;
+}
+
+interface BufferedDocument {
+  document: CrawledDocument;
+  bytes: number;
 }
 
 interface BulkIndexerOptions {
@@ -61,7 +74,8 @@ export const createBulkIndexer = ({
   onIndexed,
   onError,
 }: BulkIndexerOptions): BulkIndexer => {
-  const buffer: CrawledDocument[] = [];
+  const buffer: BufferedDocument[] = [];
+  let bufferedBytes = 0;
   const inFlight = new Set<Promise<void>>();
   let documentsCount = 0;
   let failedCount = 0;
@@ -92,15 +106,34 @@ export const createBulkIndexer = ({
     onIndexed();
   };
 
+  const takeBatch = (): CrawledDocument[] => {
+    const batch: CrawledDocument[] = [];
+    let batchBytes = 0;
+    while (
+      buffer.length > 0 &&
+      batch.length < BULK_SIZE &&
+      (batch.length === 0 || batchBytes + buffer[0].bytes <= MAX_BULK_BYTES)
+    ) {
+      const [{ document, bytes }] = buffer.splice(0, 1);
+      batch.push(document);
+      batchBytes += bytes;
+    }
+    bufferedBytes -= batchBytes;
+    return batch;
+  };
+
   const pump = () => {
     while (
       !hasFailed &&
       !signal.aborted &&
       buffer.length > 0 &&
       inFlight.size < MAX_CONCURRENT_BULKS &&
-      (isDraining || inFlight.size === 0 || buffer.length >= BULK_SIZE)
+      (isDraining ||
+        inFlight.size === 0 ||
+        buffer.length >= BULK_SIZE ||
+        bufferedBytes >= MAX_BULK_BYTES)
     ) {
-      const request: Promise<void> = send(buffer.splice(0, BULK_SIZE))
+      const request: Promise<void> = send(takeBatch())
         .catch((error: Error) => {
           if (!hasFailed) {
             hasFailed = true;
@@ -126,10 +159,12 @@ export const createBulkIndexer = ({
       if (hasFailed || signal.aborted) {
         return;
       }
-      buffer.push(document);
+      const bytes = Buffer.byteLength(document.content);
+      buffer.push({ document, bytes });
+      bufferedBytes += bytes;
       pump();
       while (
-        buffer.length >= MAX_BUFFERED_DOCUMENTS &&
+        (buffer.length >= MAX_BUFFERED_DOCUMENTS || bufferedBytes >= MAX_BUFFERED_BYTES) &&
         !hasFailed &&
         !signal.aborted &&
         inFlight.size > 0

@@ -14,9 +14,21 @@ import {
   WEB_CRAWL_DEFAULT_MAX_DOCUMENTS,
   WEB_CRAWL_MAX_DEPTH_LIMIT,
   WEB_CRAWL_MAX_DOCUMENTS_LIMIT,
+  WEB_CRAWL_MAX_INDEX_NAME_LENGTH,
+  WEB_CRAWL_MAX_PATH_RULES,
+  WEB_CRAWL_MAX_PATH_RULE_LENGTH,
+  WEB_CRAWL_MAX_SEED_URLS,
+  WEB_CRAWL_MAX_SITEMAP_URLS,
+  WEB_CRAWL_MAX_URL_LENGTH,
 } from './constants';
 
 export const WEB_CRAWL_STEP_ID = 'webCrawl.run' as const;
+
+const getPathRulesSchema = () =>
+  z.array(z.string().min(1).max(WEB_CRAWL_MAX_PATH_RULE_LENGTH)).max(WEB_CRAWL_MAX_PATH_RULES);
+
+const getUrlListSchema = (maxSize: number) =>
+  z.array(z.string().min(1).max(WEB_CRAWL_MAX_URL_LENGTH)).max(maxSize);
 
 export const webCrawlStepInputSchema = lazySchema(() =>
   z.object({
@@ -39,6 +51,28 @@ export const webCrawlStepInputSchema = lazySchema(() =>
       .describe(
         `How many pages to request and index. Defaults to ${WEB_CRAWL_DEFAULT_MAX_DOCUMENTS}.`
       ),
+    include_paths: getPathRulesSchema()
+      .optional()
+      .describe(
+        'Path prefixes, such as /docs. When given, only pages under one of them are crawled.'
+      ),
+    exclude_paths: getPathRulesSchema()
+      .optional()
+      .describe('Path prefixes whose pages are not crawled. They win over include_paths.'),
+    index_name: z
+      .string()
+      .min(1)
+      .max(WEB_CRAWL_MAX_INDEX_NAME_LENGTH)
+      .optional()
+      .describe(
+        "The index to crawl into. Defaults to the web-crawl index named after the URL's host."
+      ),
+    seed_urls: getUrlListSchema(WEB_CRAWL_MAX_SEED_URLS)
+      .optional()
+      .describe('More pages to start from, on the same site or on other sites.'),
+    sitemap_urls: getUrlListSchema(WEB_CRAWL_MAX_SITEMAP_URLS)
+      .optional()
+      .describe('Sitemaps to read besides the ones the sites declare.'),
   })
 );
 
@@ -49,6 +83,7 @@ export const webCrawlStepOutputSchema = lazySchema(() =>
     status: z.enum(['completed', 'canceled']),
     documents_count: z.number(),
     failed_count: z.number(),
+    purged_count: z.number(),
   })
 );
 
@@ -70,7 +105,7 @@ export const webCrawlStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.webCrawler.workflowStep.details', {
       defaultMessage:
-        "Follows the site's links and sitemap, respects its robots.txt, and indexes every page into the web-crawl index named after the site's host. Pages crawled before are updated in place. The step fails when the site is already being crawled.",
+        "Follows the site's links and sitemap, respects its robots.txt, and indexes every page into one index: the one given, or the web-crawl index named after the site's host. Pages crawled before are updated in place, and a crawl that reads the whole site removes the pages it no longer finds. The step fails when a crawl into that index is already running.",
     }),
     examples: [
       `## Re-crawl a documentation site every day

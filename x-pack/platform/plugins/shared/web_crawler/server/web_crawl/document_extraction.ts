@@ -52,7 +52,7 @@ export const findDocumentExtractionEndpoint = async (
   return endpoint?.inference_id;
 };
 
-const waitFor = (delayMs: number, signal: AbortSignal): Promise<void> =>
+export const waitFor = (delayMs: number, signal: AbortSignal): Promise<void> =>
   new Promise((resolve) => {
     const finish = () => {
       clearTimeout(timer);

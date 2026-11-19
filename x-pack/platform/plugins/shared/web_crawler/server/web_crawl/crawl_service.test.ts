@@ -14,7 +14,11 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { WEB_CRAWLS_LIST_SIZE } from '../../common/constants';
+import {
+  WEB_CRAWLS_LIST_SIZE,
+  WEB_CRAWL_MAX_PATH_RULES,
+  WEB_CRAWL_MAX_PATH_RULE_LENGTH,
+} from '../../common/constants';
 import type { CrawlServiceDeps } from './crawl_service';
 import {
   INTERRUPTED_AFTER_MS,
@@ -45,6 +49,12 @@ const CRAWL_ID = 'crawl-1';
 const LOWEST_ID = '00000000-0000-0000-0000-000000000000';
 const HIGHEST_ID = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
 const ALREADY_RUNNING = `A crawl into ${INDEX_NAME} is already running`;
+const INVALID_PATHS = 'Paths to include or exclude must start with a /';
+const INVALID_URLS = 'Start URLs and sitemap URLs must be valid http or https URLs';
+const INVALID_INDEX_NAME =
+  'Index names start with a lowercase letter or a digit, and contain only lowercase letters, digits, dots, hyphens and underscores';
+const CUSTOM_INDEX_NAME = 'product-docs';
+const OTHER_SITE_URL = 'https://docs.example.org/';
 
 const msAgo = (ms: number): string => new Date(NOW - ms).toISOString();
 
@@ -125,10 +135,17 @@ describe('toWebCrawl', () => {
       status: 'completed',
       maxDepth: 2,
       maxDocuments: 500,
+      includePaths: [],
+      excludePaths: [],
+      seedUrls: [],
+      sitemapUrls: [],
       documentsCount: 42,
       failedCount: 1,
       requestedCount: 9,
       queuedCount: 0,
+      skippedByRobotsCount: 0,
+      skippedByRulesCount: 0,
+      purgedCount: 0,
       startedAt: COMPLETED.started_at,
       finishedAt: COMPLETED.finished_at,
       error: 'boom',
@@ -136,6 +153,90 @@ describe('toWebCrawl', () => {
       startedBy: 'elastic',
       workflowId: 'workflow-1',
     });
+  });
+
+  it('exposes the path rules, the skipped links and the removed pages of the crawl', () => {
+    expect(
+      toWebCrawl({
+        ...COMPLETED,
+        id: CRAWL_ID,
+        include_paths: ['/docs', '/blog'],
+        exclude_paths: ['/docs/internal'],
+        skipped_robots_count: 3,
+        skipped_rules_count: 12,
+        purged_count: 5,
+      })
+    ).toEqual(
+      expect.objectContaining({
+        includePaths: ['/docs', '/blog'],
+        excludePaths: ['/docs/internal'],
+        skippedByRobotsCount: 3,
+        skippedByRulesCount: 12,
+        purgedCount: 5,
+      })
+    );
+  });
+
+  it('reports no path rules, skipped links or removed pages for a crawl stored without them', () => {
+    const { includePaths, excludePaths, skippedByRobotsCount, skippedByRulesCount, purgedCount } =
+      toWebCrawl({ ...RUNNING, id: CRAWL_ID });
+
+    expect(includePaths).toEqual([]);
+    expect(excludePaths).toEqual([]);
+    expect(skippedByRobotsCount).toBe(0);
+    expect(skippedByRulesCount).toBe(0);
+    expect(purgedCount).toBe(0);
+  });
+
+  it('defaults each of those fields independently', () => {
+    expect(
+      toWebCrawl({ ...RUNNING, id: CRAWL_ID, exclude_paths: ['/blog'], skipped_rules_count: 2 })
+    ).toEqual(
+      expect.objectContaining({
+        includePaths: [],
+        excludePaths: ['/blog'],
+        skippedByRobotsCount: 0,
+        skippedByRulesCount: 2,
+        purgedCount: 0,
+      })
+    );
+  });
+
+  it('exposes the start URLs, the sitemap URLs and the index the crawl was pointed at', () => {
+    expect(
+      toWebCrawl({
+        ...COMPLETED,
+        id: CRAWL_ID,
+        index_name: CUSTOM_INDEX_NAME,
+        seed_urls: ['https://example.com/blog', OTHER_SITE_URL],
+        sitemap_urls: ['https://example.com/sitemaps/docs.xml'],
+      })
+    ).toEqual(
+      expect.objectContaining({
+        url: CRAWL_URL,
+        indexName: CUSTOM_INDEX_NAME,
+        seedUrls: ['https://example.com/blog', OTHER_SITE_URL],
+        sitemapUrls: ['https://example.com/sitemaps/docs.xml'],
+      })
+    );
+  });
+
+  it('reports no start URLs besides the URL and no sitemap URLs for a crawl stored without them', () => {
+    const { seedUrls, sitemapUrls } = toWebCrawl({ ...RUNNING, id: CRAWL_ID });
+
+    expect(seedUrls).toEqual([]);
+    expect(sitemapUrls).toEqual([]);
+  });
+
+  it('defaults the start URLs and the sitemap URLs independently', () => {
+    expect(toWebCrawl({ ...RUNNING, id: CRAWL_ID, seed_urls: [OTHER_SITE_URL] })).toEqual(
+      expect.objectContaining({ seedUrls: [OTHER_SITE_URL], sitemapUrls: [] })
+    );
+    expect(
+      toWebCrawl({ ...RUNNING, id: CRAWL_ID, sitemap_urls: ['https://example.com/s.xml'] })
+    ).toEqual(
+      expect.objectContaining({ seedUrls: [], sitemapUrls: ['https://example.com/s.xml'] })
+    );
   });
 
   it('reports a running crawl as stopping once a stop was requested', () => {
@@ -269,6 +370,811 @@ describe('crawl service', () => {
       expect(taskManager.schedule).not.toHaveBeenCalled();
     });
 
+    it.each([
+      [
+        'more than 16 path segments',
+        `${CRAWL_URL}${Array.from({ length: 17 }, (_, segment) => `s${segment}`).join('/')}`,
+      ],
+      [
+        'more than 10 query parameters',
+        `${CRAWL_URL}?${Array.from({ length: 11 }, (_, param) => `p${param}=1`).join('&')}`,
+      ],
+    ])('crawls a URL with %s when the user asks for it', async (_, url) => {
+      mockIndexMissing();
+
+      const crawl = await start({ url });
+
+      expect(crawl.url).toBe(url);
+      expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+    });
+
+    describe('path rules', () => {
+      const longestPath = `/${'a'.repeat(WEB_CRAWL_MAX_PATH_RULE_LENGTH - 1)}`;
+      const toPaths = (count: number): string[] =>
+        Array.from({ length: count }, (_, position) => `/section-${position}`);
+
+      it.each<[string, string[]]>([
+        ['does not start with a /', ['docs']],
+        ['is a full URL', ['https://example.com/docs']],
+        ['is not valid next to valid ones', ['/docs', 'blog']],
+        ['is longer than the limit', [`${longestPath}a`]],
+      ])(
+        'rejects with a 400 before touching Elasticsearch when an included path %s',
+        async (_, includePaths) => {
+          await expectWebCrawlError(start({ includePaths }), 400, INVALID_PATHS);
+
+          expect(mockFindEndpoint).not.toHaveBeenCalled();
+          expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+          expect(esClient.indices.create).not.toHaveBeenCalled();
+          expect(storage.create).not.toHaveBeenCalled();
+          expect(taskManager.schedule).not.toHaveBeenCalled();
+        }
+      );
+
+      it.each<[string, string[]]>([
+        ['does not start with a /', ['blog']],
+        ['is a full URL', ['https://example.com/blog']],
+        ['is not valid next to valid ones', ['/blog', 'shop']],
+        ['is longer than the limit', [`${longestPath}a`]],
+      ])(
+        'rejects with a 400 before touching Elasticsearch when an excluded path %s',
+        async (_, excludePaths) => {
+          await expectWebCrawlError(
+            start({ includePaths: ['/docs'], excludePaths }),
+            400,
+            INVALID_PATHS
+          );
+
+          expect(mockFindEndpoint).not.toHaveBeenCalled();
+          expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+          expect(storage.create).not.toHaveBeenCalled();
+          expect(taskManager.schedule).not.toHaveBeenCalled();
+        }
+      );
+
+      it(`rejects more than ${WEB_CRAWL_MAX_PATH_RULES} included or excluded paths with a 400`, async () => {
+        const tooManyPaths = toPaths(WEB_CRAWL_MAX_PATH_RULES + 1);
+
+        await expectWebCrawlError(start({ includePaths: tooManyPaths }), 400, INVALID_PATHS);
+        await expectWebCrawlError(start({ excludePaths: tooManyPaths }), 400, INVALID_PATHS);
+
+        expect(storage.create).not.toHaveBeenCalled();
+      });
+
+      it('reports an invalid URL before invalid paths', async () => {
+        await expectWebCrawlError(
+          start({ url: 'not a url', includePaths: ['docs'] }),
+          400,
+          'Enter a valid http or https URL'
+        );
+      });
+
+      it('records the paths and passes them to the crawl task', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({
+          includePaths: ['/docs', '/blog'],
+          excludePaths: ['/docs/internal'],
+        });
+
+        expect(crawl.include_paths).toEqual(['/docs', '/blog']);
+        expect(crawl.exclude_paths).toEqual(['/docs/internal']);
+        expect(documents.get(crawl.id)).toEqual(
+          expect.objectContaining({
+            include_paths: ['/docs', '/blog'],
+            exclude_paths: ['/docs/internal'],
+          })
+        );
+        expect(taskManager.schedule.mock.calls[0][0].params).toEqual(
+          expect.objectContaining({
+            includePaths: ['/docs', '/blog'],
+            excludePaths: ['/docs/internal'],
+          })
+        );
+      });
+
+      it('trims the paths and drops the empty and duplicate ones', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({
+          includePaths: [' /docs ', '/docs', '', '/blog'],
+          excludePaths: ['   ', '/docs/internal\n', '/docs/internal'],
+        });
+
+        expect(documents.get(crawl.id)).toEqual(
+          expect.objectContaining({
+            include_paths: ['/docs', '/blog'],
+            exclude_paths: ['/docs/internal'],
+          })
+        );
+        expect(taskManager.schedule.mock.calls[0][0].params).toEqual(
+          expect.objectContaining({
+            includePaths: ['/docs', '/blog'],
+            excludePaths: ['/docs/internal'],
+          })
+        );
+      });
+
+      it(`accepts ${WEB_CRAWL_MAX_PATH_RULES} paths of ${WEB_CRAWL_MAX_PATH_RULE_LENGTH} characters`, async () => {
+        mockIndexMissing();
+        const paths = toPaths(WEB_CRAWL_MAX_PATH_RULES - 1);
+
+        const crawl = await start({
+          includePaths: [...paths, longestPath],
+          excludePaths: [...paths, longestPath],
+        });
+
+        expect(crawl.include_paths).toHaveLength(WEB_CRAWL_MAX_PATH_RULES);
+        expect(crawl.exclude_paths).toHaveLength(WEB_CRAWL_MAX_PATH_RULES);
+      });
+
+      it('records and schedules a crawl without path rules when none are given', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({ includePaths: undefined, excludePaths: undefined });
+
+        expect(crawl.include_paths).toEqual([]);
+        expect(crawl.exclude_paths).toEqual([]);
+        expect(taskManager.schedule.mock.calls[0][0].params).toEqual(
+          expect.objectContaining({ includePaths: [], excludePaths: [] })
+        );
+      });
+    });
+
+    describe('start URLs and sitemap URLs', () => {
+      const toSegments = (count: number): string =>
+        Array.from({ length: count }, (_, segment) => `s${segment}`).join('/');
+
+      it('records them, returns them and passes them to the crawl task', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({
+          seedUrls: ['https://example.com/blog', OTHER_SITE_URL],
+          sitemapUrls: ['https://example.com/sitemaps/docs.xml', 'https://docs.example.org/map'],
+        });
+
+        expect(crawl.url).toBe(CRAWL_URL);
+        expect(crawl.seed_urls).toEqual(['https://example.com/blog', OTHER_SITE_URL]);
+        expect(crawl.sitemap_urls).toEqual([
+          'https://example.com/sitemaps/docs.xml',
+          'https://docs.example.org/map',
+        ]);
+        expect(documents.get(crawl.id)).toEqual(
+          expect.objectContaining({
+            url: CRAWL_URL,
+            seed_urls: ['https://example.com/blog', OTHER_SITE_URL],
+            sitemap_urls: ['https://example.com/sitemaps/docs.xml', 'https://docs.example.org/map'],
+          })
+        );
+        expect(taskManager.schedule.mock.calls[0][0].params).toEqual(
+          expect.objectContaining({
+            url: CRAWL_URL,
+            seedUrls: ['https://example.com/blog', OTHER_SITE_URL],
+            sitemapUrls: ['https://example.com/sitemaps/docs.xml', 'https://docs.example.org/map'],
+          })
+        );
+      });
+
+      it.each([
+        ['none are given', undefined],
+        ['empty lists are given', []],
+      ])('records and schedules a crawl of the one URL when %s', async (_, urls) => {
+        mockIndexMissing();
+
+        const crawl = await start({ seedUrls: urls, sitemapUrls: urls });
+
+        expect(crawl.seed_urls).toEqual([]);
+        expect(crawl.sitemap_urls).toEqual([]);
+        expect(taskManager.schedule.mock.calls[0][0].params).toEqual(
+          expect.objectContaining({ seedUrls: [], sitemapUrls: [] })
+        );
+      });
+
+      it('normalizes them the way it normalizes the URL', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({
+          seedUrls: ['https://user:secret@www.Example.com/docs#intro', 'HTTP://Docs.Example.ORG'],
+          sitemapUrls: ['https://user:secret@Example.com/sitemap.xml#top'],
+        });
+
+        expect(crawl.seed_urls).toEqual([
+          'https://www.example.com/docs',
+          'http://docs.example.org/',
+        ]);
+        expect(crawl.sitemap_urls).toEqual(['https://example.com/sitemap.xml']);
+        expect(taskManager.schedule.mock.calls[0][0].params).toEqual(
+          expect.objectContaining({
+            seedUrls: ['https://www.example.com/docs', 'http://docs.example.org/'],
+            sitemapUrls: ['https://example.com/sitemap.xml'],
+          })
+        );
+      });
+
+      it('drops the duplicates that normalizing reveals, keeping the order of the first ones', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({
+          seedUrls: [
+            'https://example.com/blog',
+            OTHER_SITE_URL,
+            'https://example.com/blog#latest',
+            'https://DOCS.example.org',
+            'https://example.com/blog',
+            'https://example.com/about',
+          ],
+          sitemapUrls: [
+            'https://example.com/b.xml',
+            'https://example.com/a.xml',
+            'https://EXAMPLE.com/b.xml#x',
+          ],
+        });
+
+        expect(crawl.seed_urls).toEqual([
+          'https://example.com/blog',
+          OTHER_SITE_URL,
+          'https://example.com/about',
+        ]);
+        expect(crawl.sitemap_urls).toEqual([
+          'https://example.com/b.xml',
+          'https://example.com/a.xml',
+        ]);
+      });
+
+      it('leaves the URL the crawl starts from out of the other start URLs', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({
+          seedUrls: [CRAWL_URL, 'https://example.com/blog', 'https://EXAMPLE.com#top'],
+        });
+
+        expect(crawl.url).toBe(CRAWL_URL);
+        expect(crawl.seed_urls).toEqual(['https://example.com/blog']);
+        expect(taskManager.schedule.mock.calls[0][0].params).toEqual(
+          expect.objectContaining({ url: CRAWL_URL, seedUrls: ['https://example.com/blog'] })
+        );
+      });
+
+      it('leaves it out when the URL itself was only equal after normalizing', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({
+          url: 'https://user:secret@www.Example.com/docs#intro',
+          seedUrls: ['https://www.example.com/docs', 'https://www.example.com/docs/'],
+        });
+
+        expect(crawl.url).toBe('https://www.example.com/docs');
+        expect(crawl.seed_urls).toEqual(['https://www.example.com/docs/']);
+      });
+
+      it('records no other start URL when they all are the URL the crawl starts from', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({ seedUrls: [CRAWL_URL, 'https://example.com', CRAWL_URL] });
+
+        expect(crawl.seed_urls).toEqual([]);
+      });
+
+      it('keeps start URLs that only differ from the URL by protocol, www. or path', async () => {
+        mockIndexMissing();
+        const seedUrls = ['http://example.com/', 'https://www.example.com/', `${CRAWL_URL}?page=2`];
+
+        const crawl = await start({ seedUrls });
+
+        expect(crawl.seed_urls).toEqual(seedUrls);
+      });
+
+      it('keeps the URL the crawl starts from in the sitemap URLs', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({
+          url: 'https://example.com/sitemap.xml',
+          sitemapUrls: ['https://example.com/sitemap.xml'],
+        });
+
+        expect(crawl.sitemap_urls).toEqual(['https://example.com/sitemap.xml']);
+      });
+
+      it('does not mix the start URLs and the sitemap URLs up', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({
+          seedUrls: ['https://example.com/shared'],
+          sitemapUrls: ['https://example.com/shared'],
+        });
+
+        expect(crawl.seed_urls).toEqual(['https://example.com/shared']);
+        expect(crawl.sitemap_urls).toEqual(['https://example.com/shared']);
+      });
+
+      it.each([
+        'not a url',
+        'example.com/blog',
+        '/blog',
+        'ftp://example.com/',
+        'mailto:someone@example.com',
+        ['javascript', 'alert(1)'].join(':'),
+        'http://[bad]/',
+        `${CRAWL_URL}${'a'.repeat(2048)}`,
+      ])(
+        'rejects the invalid start URL %p with a 400 before touching Elasticsearch',
+        async (url) => {
+          await expectWebCrawlError(start({ seedUrls: [url] }), 400, INVALID_URLS);
+
+          expect(mockFindEndpoint).not.toHaveBeenCalled();
+          expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+          expect(storage.create).not.toHaveBeenCalled();
+          expect(taskManager.schedule).not.toHaveBeenCalled();
+        }
+      );
+
+      it.each([
+        'not a url',
+        'sitemap.xml',
+        '/sitemap.xml',
+        'ftp://example.com/sitemap.xml',
+        'file:///etc/sitemap.xml',
+        'http://[bad]/sitemap.xml',
+        `${CRAWL_URL}${'a'.repeat(2048)}.xml`,
+      ])(
+        'rejects the invalid sitemap URL %p with a 400 before touching Elasticsearch',
+        async (url) => {
+          await expectWebCrawlError(start({ sitemapUrls: [url] }), 400, INVALID_URLS);
+
+          expect(mockFindEndpoint).not.toHaveBeenCalled();
+          expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+          expect(storage.create).not.toHaveBeenCalled();
+          expect(taskManager.schedule).not.toHaveBeenCalled();
+        }
+      );
+
+      it('rejects the lists when one URL among valid ones is invalid, wherever it is', async () => {
+        await expectWebCrawlError(
+          start({ seedUrls: ['https://example.com/blog', 'nope', OTHER_SITE_URL] }),
+          400,
+          INVALID_URLS
+        );
+        await expectWebCrawlError(
+          start({
+            sitemapUrls: ['https://example.com/a.xml', 'https://example.com/b.xml', 'nope'],
+          }),
+          400,
+          INVALID_URLS
+        );
+        await expectWebCrawlError(start({ seedUrls: [CRAWL_URL, 'nope'] }), 400, INVALID_URLS);
+        expect(storage.create).not.toHaveBeenCalled();
+      });
+
+      it('reports an invalid URL before invalid start URLs', async () => {
+        await expectWebCrawlError(
+          start({ url: 'not a url', seedUrls: ['nope'], sitemapUrls: ['nope'] }),
+          400,
+          'Enter a valid http or https URL'
+        );
+      });
+
+      it('reports invalid start URLs or sitemap URLs before an invalid index name or invalid paths', async () => {
+        await expectWebCrawlError(
+          start({ seedUrls: ['nope'], indexName: 'Not Valid', includePaths: ['docs'] }),
+          400,
+          INVALID_URLS
+        );
+        await expectWebCrawlError(
+          start({ sitemapUrls: ['nope'], indexName: 'Not Valid', includePaths: ['docs'] }),
+          400,
+          INVALID_URLS
+        );
+      });
+
+      it('accepts start URLs and sitemap URLs that a discovered link would be too deep or too long for', async () => {
+        mockIndexMissing();
+        const deepUrl = `${CRAWL_URL}${toSegments(17)}`;
+        const manyParamsUrl = `${CRAWL_URL}?${Array.from(
+          { length: 11 },
+          (_, param) => `p${param}=1`
+        ).join('&')}`;
+        const longestUrl = `${CRAWL_URL}${'a'.repeat(2048 - CRAWL_URL.length)}`;
+
+        const crawl = await start({
+          seedUrls: [deepUrl, manyParamsUrl, longestUrl],
+          sitemapUrls: [`${deepUrl}/sitemap.xml`],
+        });
+
+        expect(crawl.seed_urls).toEqual([deepUrl, manyParamsUrl, longestUrl]);
+        expect(crawl.sitemap_urls).toEqual([`${deepUrl}/sitemap.xml`]);
+      });
+
+      it('names the index after the URL the crawl starts from, whatever the other start URLs', async () => {
+        mockIndexMissing();
+
+        const crawl = await start({
+          seedUrls: [OTHER_SITE_URL, 'https://blog.example.net/'],
+          sitemapUrls: ['https://docs.example.org/sitemap.xml'],
+        });
+
+        expect(crawl.index_name).toBe(INDEX_NAME);
+        expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
+        expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: INDEX_NAME });
+        expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+        const [{ index, mappings }] = esClient.indices.create.mock.calls[0];
+        expect(index).toBe(INDEX_NAME);
+        expect(mappings?._meta).toEqual({ web_crawl: { url: CRAWL_URL } });
+        expect(storage.find).toHaveBeenCalledWith(
+          expect.objectContaining({ indexName: INDEX_NAME })
+        );
+      });
+
+      it('is not blocked by a crawl that is running on the site of another start URL', async () => {
+        mockIndexMissing();
+        documents.set(CRAWL_ID, {
+          ...RUNNING,
+          url: OTHER_SITE_URL,
+          index_name: 'web-crawl-docs.example.org',
+        });
+
+        const crawl = await start({ seedUrls: [OTHER_SITE_URL] });
+
+        expect(documents.get(crawl.id)?.status).toBe('running');
+        expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('index name', () => {
+      const ALREADY_RUNNING_IN_CUSTOM = `A crawl into ${CUSTOM_INDEX_NAME} is already running`;
+      let crawlIndices: Set<string>;
+      let foreignIndices: Set<string>;
+
+      const startInto = (
+        indexName: string | undefined,
+        overrides: Partial<Parameters<typeof startCrawl>[1]> = {}
+      ) => start({ indexName, ...overrides });
+
+      beforeEach(() => {
+        crawlIndices = new Set();
+        foreignIndices = new Set();
+        esClient.indices.getMapping.mockImplementation(async (params) => {
+          const index = String(params?.index);
+          if (crawlIndices.has(index)) {
+            return { [index]: { mappings: { _meta: { web_crawl: { url: CRAWL_URL } } } } };
+          }
+          if (foreignIndices.has(index)) {
+            return { [index]: { mappings: {} } };
+          }
+          throw createEsError(404);
+        });
+        esClient.indices.create.mockImplementation(async (params) => {
+          crawlIndices.add(params.index);
+          return { acknowledged: true, shards_acknowledged: true, index: params.index };
+        });
+      });
+
+      it.each([
+        ['is not given', {}],
+        ['is undefined', { indexName: undefined }],
+      ])('crawls into the index named after the host of the URL when it %s', async (_, options) => {
+        const crawl = await start(options);
+
+        expect(crawl.index_name).toBe(INDEX_NAME);
+        expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: INDEX_NAME });
+        expect([...crawlIndices]).toEqual([INDEX_NAME]);
+        expect(taskManager.schedule.mock.calls[0][0].params).toEqual(
+          expect.objectContaining({ indexName: INDEX_NAME })
+        );
+      });
+
+      it('creates the index that was asked for, records the crawl into it and schedules its task', async () => {
+        const crawl = await startInto(CUSTOM_INDEX_NAME);
+
+        expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
+        expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: CUSTOM_INDEX_NAME });
+        expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+        const [{ index, mappings }] = esClient.indices.create.mock.calls[0];
+        expect(index).toBe(CUSTOM_INDEX_NAME);
+        expect(mappings?._meta).toEqual({ web_crawl: { url: CRAWL_URL } });
+        expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
+        expect(storage.find.mock.calls.map(([{ indexName }]) => indexName)).toEqual([
+          CUSTOM_INDEX_NAME,
+          CUSTOM_INDEX_NAME,
+        ]);
+
+        expect(crawl.url).toBe(CRAWL_URL);
+        expect(crawl.index_name).toBe(CUSTOM_INDEX_NAME);
+        expect(documents.get(crawl.id)).toEqual(
+          expect.objectContaining({ url: CRAWL_URL, index_name: CUSTOM_INDEX_NAME })
+        );
+        expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+        expect(taskManager.schedule.mock.calls[0][0].params).toEqual(
+          expect.objectContaining({ url: CRAWL_URL, indexName: CUSTOM_INDEX_NAME })
+        );
+      });
+
+      it('never reads, creates or checks the index named after the host when another was asked for', async () => {
+        crawlIndices.add(INDEX_NAME);
+        crawlIndices.add(CUSTOM_INDEX_NAME);
+
+        await startInto(CUSTOM_INDEX_NAME);
+
+        expect(esClient.indices.getMapping.mock.calls.map(([params]) => params?.index)).toEqual([
+          CUSTOM_INDEX_NAME,
+        ]);
+        expect(getPrivilegeChecks()).toEqual([
+          [{ names: [CUSTOM_INDEX_NAME], privileges: ['write'] }],
+        ]);
+        expect(esClient.indices.putMapping.mock.calls.map(([params]) => params.index)).toEqual([
+          CUSTOM_INDEX_NAME,
+        ]);
+        expect(esClient.indices.create).not.toHaveBeenCalled();
+        expect(storage.find.mock.calls.map(([{ indexName }]) => indexName)).toEqual([
+          CUSTOM_INDEX_NAME,
+          CUSTOM_INDEX_NAME,
+        ]);
+      });
+
+      it('crawls into the index again when a crawl created it, without recreating it', async () => {
+        crawlIndices.add(CUSTOM_INDEX_NAME);
+        documents.set(CRAWL_ID, { ...COMPLETED, index_name: CUSTOM_INDEX_NAME });
+
+        const crawl = await startInto(CUSTOM_INDEX_NAME);
+
+        expect(esClient.indices.create).not.toHaveBeenCalled();
+        expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+          expect.objectContaining({ index: CUSTOM_INDEX_NAME })
+        );
+        expect(crawl.index_name).toBe(CUSTOM_INDEX_NAME);
+        expect(documents.get(crawl.id)?.status).toBe('running');
+      });
+
+      it('crawls a second site into an index that the crawl of another site created', async () => {
+        const first = await startInto(CUSTOM_INDEX_NAME);
+        documents.set(first.id, { ...first, status: 'completed' });
+
+        const second = await startInto(CUSTOM_INDEX_NAME, { url: OTHER_SITE_URL });
+
+        expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+        expect(second.url).toBe(OTHER_SITE_URL);
+        expect(second.index_name).toBe(CUSTOM_INDEX_NAME);
+        expect(taskManager.schedule).toHaveBeenCalledTimes(2);
+        expect(taskManager.schedule.mock.calls[1][0].params).toEqual(
+          expect.objectContaining({ url: OTHER_SITE_URL, indexName: CUSTOM_INDEX_NAME })
+        );
+      });
+
+      it('refuses the crawl of a second site into the index while the crawl of the first is running', async () => {
+        const first = await startInto(CUSTOM_INDEX_NAME);
+
+        await expectWebCrawlError(
+          startInto(CUSTOM_INDEX_NAME, { url: OTHER_SITE_URL }),
+          409,
+          ALREADY_RUNNING_IN_CUSTOM
+        );
+
+        expect(taskManager.get).not.toHaveBeenCalled();
+        expect([...documents.keys()]).toEqual([first.id]);
+        expect(documents.get(first.id)?.status).toBe('running');
+        expect(storage.create).toHaveBeenCalledTimes(1);
+        expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+        expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+      });
+
+      it('refuses it for as long as the first crawl reports progress, and no longer once it ended', async () => {
+        const first = await startInto(CUSTOM_INDEX_NAME);
+        jest.setSystemTime(NOW + INTERRUPTED_AFTER_MS);
+        await expectWebCrawlError(
+          startInto(CUSTOM_INDEX_NAME, { url: OTHER_SITE_URL }),
+          409,
+          ALREADY_RUNNING_IN_CUSTOM
+        );
+        expect(taskManager.get).toHaveBeenCalledWith(first.id);
+
+        documents.set(first.id, { ...first, status: 'canceled' });
+
+        await expect(startInto(CUSTOM_INDEX_NAME, { url: OTHER_SITE_URL })).resolves.toEqual(
+          expect.objectContaining({ url: OTHER_SITE_URL, index_name: CUSTOM_INDEX_NAME })
+        );
+      });
+
+      it('settles an interrupted crawl of another site into the index and starts the new one', async () => {
+        crawlIndices.add(CUSTOM_INDEX_NAME);
+        documents.set(CRAWL_ID, { ...STALE, url: OTHER_SITE_URL, index_name: CUSTOM_INDEX_NAME });
+        mockTaskMissing();
+
+        const crawl = await startInto(CUSTOM_INDEX_NAME);
+
+        expect(documents.get(CRAWL_ID)).toEqual(
+          expect.objectContaining({ status: 'failed', error: INTERRUPTED_ERROR })
+        );
+        expect(documents.get(crawl.id)?.status).toBe('running');
+      });
+
+      it('crawls the same site into two indices side by side', async () => {
+        const intoDefault = await startInto(undefined);
+        const intoCustom = await startInto(CUSTOM_INDEX_NAME);
+
+        expect(intoDefault.index_name).toBe(INDEX_NAME);
+        expect(intoCustom.index_name).toBe(CUSTOM_INDEX_NAME);
+        expect(documents.get(intoDefault.id)?.status).toBe('running');
+        expect(documents.get(intoCustom.id)?.status).toBe('running');
+        expect(taskManager.schedule).toHaveBeenCalledTimes(2);
+        expect(storage.delete).not.toHaveBeenCalled();
+      });
+
+      it('is blocked by a crawl of another site that was pointed at the index named after this one', async () => {
+        await startInto(INDEX_NAME, { url: OTHER_SITE_URL });
+
+        await expectWebCrawlError(start(), 409, ALREADY_RUNNING);
+      });
+
+      it.each([
+        ['has no metadata', undefined],
+        ['has metadata that does not come from a crawl', { managed_by: 'something else' }],
+      ])('rejects with a 409 when the index asked for exists and %s', async (_, meta) => {
+        esClient.indices.getMapping.mockResolvedValue({
+          [CUSTOM_INDEX_NAME]: { mappings: meta ? { _meta: meta } : {} },
+        });
+
+        await expectWebCrawlError(
+          startInto(CUSTOM_INDEX_NAME),
+          409,
+          `Index ${CUSTOM_INDEX_NAME} already exists and was not created by a crawl`
+        );
+
+        expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: CUSTOM_INDEX_NAME });
+        expect(esClient.indices.create).not.toHaveBeenCalled();
+        expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+        expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
+        expect(storage.find).not.toHaveBeenCalled();
+        expect(storage.create).not.toHaveBeenCalled();
+        expect(taskManager.schedule).not.toHaveBeenCalled();
+      });
+
+      it('does not mind an index named after the host that no crawl created', async () => {
+        foreignIndices.add(INDEX_NAME);
+
+        const crawl = await startInto(CUSTOM_INDEX_NAME);
+
+        expect(crawl.index_name).toBe(CUSTOM_INDEX_NAME);
+      });
+
+      it('rejects with a 403 when the user cannot write to the index asked for', async () => {
+        crawlIndices.add(CUSTOM_INDEX_NAME);
+        unwritable.add(CUSTOM_INDEX_NAME);
+
+        await expectWebCrawlError(
+          startInto(CUSTOM_INDEX_NAME),
+          403,
+          `Missing the write privilege on ${CUSTOM_INDEX_NAME}`
+        );
+
+        expect(getPrivilegeChecks()).toEqual([
+          [{ names: [CUSTOM_INDEX_NAME], privileges: ['write'] }],
+        ]);
+        expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+        expect(storage.find).not.toHaveBeenCalled();
+        expect(storage.create).not.toHaveBeenCalled();
+        expect(taskManager.schedule).not.toHaveBeenCalled();
+      });
+
+      it('does not need the write privilege on the index named after the host', async () => {
+        crawlIndices.add(INDEX_NAME);
+        crawlIndices.add(CUSTOM_INDEX_NAME);
+        unwritable.add(INDEX_NAME);
+
+        await expect(startInto(CUSTOM_INDEX_NAME)).resolves.toEqual(
+          expect.objectContaining({ index_name: CUSTOM_INDEX_NAME, status: 'running' })
+        );
+      });
+
+      it('gives way to a crawl into the same index that was recorded at the same time, whatever its site', async () => {
+        storage.create.mockImplementationOnce(async (id, document) => {
+          documents.set(id, document);
+          documents.set(HIGHEST_ID, { ...document, url: OTHER_SITE_URL });
+        });
+
+        await expectWebCrawlError(startInto(CUSTOM_INDEX_NAME), 409, ALREADY_RUNNING_IN_CUSTOM);
+
+        const [ownId] = storage.create.mock.calls[0];
+        expect(storage.delete).toHaveBeenCalledWith(ownId);
+        expect([...documents.keys()]).toEqual([HIGHEST_ID]);
+        expect(taskManager.schedule).not.toHaveBeenCalled();
+      });
+
+      it('does not give way to a crawl of the same site into the index named after it', async () => {
+        storage.create.mockImplementationOnce(async (id, document) => {
+          documents.set(id, document);
+          documents.set(LOWEST_ID, { ...document, index_name: INDEX_NAME });
+        });
+
+        await expect(startInto(CUSTOM_INDEX_NAME)).resolves.toEqual(
+          expect.objectContaining({ index_name: CUSTOM_INDEX_NAME, status: 'running' })
+        );
+
+        expect(storage.delete).not.toHaveBeenCalled();
+      });
+
+      it('marks the crawl into the index as failed when its task cannot be scheduled', async () => {
+        const schedulingError = new Error('task manager unavailable');
+        taskManager.schedule.mockRejectedValue(schedulingError);
+
+        await expect(startInto(CUSTOM_INDEX_NAME)).rejects.toBe(schedulingError);
+
+        const [crawlId] = storage.create.mock.calls[0];
+        expect(documents.get(crawlId)).toEqual(
+          expect.objectContaining({ index_name: CUSTOM_INDEX_NAME, status: 'failed' })
+        );
+      });
+
+      it.each([
+        'a',
+        '0',
+        '7-docs',
+        'my_docs.v2-2026',
+        'web-crawl-other.org',
+        INDEX_NAME,
+        'a'.repeat(255),
+      ])('accepts the index name %p', async (indexName) => {
+        const crawl = await startInto(indexName);
+
+        expect(crawl.index_name).toBe(indexName);
+        expect(esClient.indices.create.mock.calls[0][0].index).toBe(indexName);
+      });
+
+      it.each([
+        ['an empty name', ''],
+        ['a name of 256 characters', 'a'.repeat(256)],
+        ['an uppercase letter', 'Product-docs'],
+        ['a leading dot', '.kibana-web-crawls'],
+        ['a leading hyphen', '-docs'],
+        ['a leading underscore', '_docs'],
+        ['a space', 'product docs'],
+        ['surrounding whitespace', ' product-docs '],
+        ['a wildcard', 'product-*'],
+        ['a comma', 'product-docs,logs'],
+        ['a remote cluster', 'remote:product-docs'],
+        ['a slash', 'product/docs'],
+        ['a date math expression', '<product-docs-{now/d}>'],
+        ['a non-ASCII letter', 'prodúct-docs'],
+      ])('rejects %s with a 400 before touching Elasticsearch', async (_, indexName) => {
+        await expectWebCrawlError(startInto(indexName), 400, INVALID_INDEX_NAME);
+
+        expect(mockFindEndpoint).not.toHaveBeenCalled();
+        expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+        expect(esClient.indices.create).not.toHaveBeenCalled();
+        expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
+        expect(storage.find).not.toHaveBeenCalled();
+        expect(storage.create).not.toHaveBeenCalled();
+        expect(taskManager.schedule).not.toHaveBeenCalled();
+      });
+
+      it('does not fall back to the index named after the host when the name is invalid', async () => {
+        await expectWebCrawlError(startInto('Not Valid'), 400, INVALID_INDEX_NAME);
+
+        expect([...crawlIndices]).toEqual([]);
+        expect(documents.size).toBe(0);
+      });
+
+      it('reports an invalid URL before an invalid index name', async () => {
+        await expectWebCrawlError(
+          startInto('Not Valid', { url: 'not a url' }),
+          400,
+          'Enter a valid http or https URL'
+        );
+      });
+
+      it('reports an invalid index name before invalid paths', async () => {
+        await expectWebCrawlError(
+          startInto('Not Valid', { includePaths: ['docs'] }),
+          400,
+          INVALID_INDEX_NAME
+        );
+      });
+
+      it('reports an invalid index name before a missing inference endpoint', async () => {
+        mockFindEndpoint.mockResolvedValue(undefined);
+
+        await expectWebCrawlError(startInto('Not Valid'), 400, INVALID_INDEX_NAME);
+      });
+    });
+
     it('rejects with a 400 when there is no document_extraction inference endpoint', async () => {
       mockFindEndpoint.mockResolvedValue(undefined);
       mockIndexMissing();
@@ -341,6 +1247,10 @@ describe('crawl service', () => {
           failed_count: 0,
           requested_count: 0,
           queued_count: 0,
+          include_paths: [],
+          exclude_paths: [],
+          seed_urls: [],
+          sitemap_urls: [],
           started_by: undefined,
           workflow_id: undefined,
         };
@@ -359,6 +1269,10 @@ describe('crawl service', () => {
               inferenceId: INFERENCE_ID,
               maxDepth: 3,
               maxDocuments: 50,
+              includePaths: [],
+              excludePaths: [],
+              seedUrls: [],
+              sitemapUrls: [],
             },
             state: {},
           },
@@ -394,6 +1308,12 @@ describe('crawl service', () => {
         expect(documents.get(crawl.id)).toEqual(
           expect.objectContaining({ started_by: 'elastic', workflow_id: 'workflow-1' })
         );
+      });
+
+      it('does not update the mappings of the index it just created', async () => {
+        await start();
+
+        expect(esClient.indices.putMapping).not.toHaveBeenCalled();
       });
 
       it('uses a new ID for every crawl', async () => {
@@ -441,6 +1361,66 @@ describe('crawl service', () => {
         expect(documents.get(CRAWL_ID)).toEqual(COMPLETED);
         expect(taskManager.get).not.toHaveBeenCalled();
         expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+      });
+
+      it('adds the fields the index may be missing before recording the crawl', async () => {
+        await start();
+
+        expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
+        expect(esClient.indices.putMapping).toHaveBeenCalledWith({
+          index: INDEX_NAME,
+          properties: {
+            url_host: { type: 'keyword' },
+            url_path: { type: 'keyword' },
+            url_path_dir1: { type: 'keyword' },
+            url_path_dir2: { type: 'keyword' },
+            url_path_dir3: { type: 'keyword' },
+          },
+        });
+        const [updateMappingsOrder] = esClient.indices.putMapping.mock.invocationCallOrder;
+        const [recordOrder] = storage.create.mock.invocationCallOrder;
+        const [scheduleOrder] = taskManager.schedule.mock.invocationCallOrder;
+        expect(updateMappingsOrder).toBeLessThan(recordOrder);
+        expect(recordOrder).toBeLessThan(scheduleOrder);
+      });
+
+      it.each([400, 403, 503])(
+        'starts the crawl all the same when updating the mappings fails with a %i',
+        async (statusCode) => {
+          esClient.indices.putMapping.mockRejectedValue(createEsError(statusCode));
+
+          const crawl = await start();
+
+          expect(documents.get(crawl.id)?.status).toBe('running');
+          expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Web crawl could not update the mappings of ${INDEX_NAME}: status ${statusCode}`
+          );
+          expect(logger.warn).not.toHaveBeenCalled();
+          expect(logger.error).not.toHaveBeenCalled();
+        }
+      );
+
+      it('does not log anything when the mappings were updated', async () => {
+        await start();
+
+        expect(logger.debug).not.toHaveBeenCalled();
+      });
+
+      it('does not update the mappings when the user cannot write to the index', async () => {
+        unwritable.add(INDEX_NAME);
+
+        await expectWebCrawlError(start(), 403, `Missing the write privilege on ${INDEX_NAME}`);
+
+        expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+      });
+
+      it('does not update the mappings while a crawl into the index is running', async () => {
+        documents.set(CRAWL_ID, RUNNING);
+
+        await expectWebCrawlError(start(), 409, ALREADY_RUNNING);
+
+        expect(esClient.indices.putMapping).not.toHaveBeenCalled();
       });
 
       it('rejects with a 403 before looking at running crawls when the user cannot write to it', async () => {

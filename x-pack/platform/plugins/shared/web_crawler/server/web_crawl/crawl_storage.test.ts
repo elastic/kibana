@@ -35,6 +35,22 @@ const DOCUMENT: CrawlDocument = {
   queued_count: 20,
 };
 
+const DOCUMENT_WITH_PATH_RULES: CrawlDocument = {
+  ...DOCUMENT,
+  include_paths: ['/docs', '/blog'],
+  exclude_paths: ['/docs/internal'],
+  skipped_robots_count: 3,
+  skipped_rules_count: 12,
+  purged_count: 5,
+};
+
+const DOCUMENT_WITH_START_URLS: CrawlDocument = {
+  ...DOCUMENT,
+  index_name: 'product-docs',
+  seed_urls: ['https://example.com/blog', 'https://docs.example.org/'],
+  sitemap_urls: ['https://example.com/sitemaps/docs.xml'],
+};
+
 const createEsError = (statusCode: number) =>
   Object.assign(new Error(`status ${statusCode}`), { statusCode });
 
@@ -99,6 +115,13 @@ describe('createCrawlStorage', () => {
       'cancel_requested',
       'started_by',
       'workflow_id',
+      'include_paths',
+      'exclude_paths',
+      'seed_urls',
+      'sitemap_urls',
+      'skipped_robots_count',
+      'skipped_rules_count',
+      'purged_count',
     ];
 
     expect(Object.keys(settings.schema.properties).sort()).toEqual([...storedFields].sort());
@@ -106,6 +129,25 @@ describe('createCrawlStorage', () => {
     expect(settings.schema.properties.status.type).toBe('keyword');
     expect(settings.schema.properties.started_at.type).toBe('date');
     expect(settings.schema.properties.cancel_requested.type).toBe('boolean');
+  });
+
+  it('maps the path rules as keywords and the skipped and purged counts as numbers', () => {
+    const [, , settings] = MockStorageIndexAdapter.mock.calls[0];
+    const { properties } = settings.schema;
+
+    expect(properties.include_paths.type).toBe('keyword');
+    expect(properties.exclude_paths.type).toBe('keyword');
+    expect(properties.skipped_robots_count.type).toBe('long');
+    expect(properties.skipped_rules_count.type).toBe('long');
+    expect(properties.purged_count.type).toBe('long');
+  });
+
+  it('maps the start URLs and the sitemap URLs as keywords that hold the longest URL a crawl accepts', () => {
+    const [, , settings] = MockStorageIndexAdapter.mock.calls[0];
+    const { properties } = settings.schema;
+
+    expect(properties.seed_urls).toEqual({ type: 'keyword', ignore_above: 2048 });
+    expect(properties.sitemap_urls).toEqual({ type: 'keyword', ignore_above: 2048 });
   });
 
   describe('create', () => {
@@ -121,6 +163,39 @@ describe('createCrawlStorage', () => {
         op_type: 'create',
         refresh: true,
       });
+    });
+
+    it('stores the path rules of the crawl', async () => {
+      storageClient.index.mockResolvedValue({ _index: BACKING_INDEX, result: 'created' });
+
+      await storage.create(CRAWL_ID, DOCUMENT_WITH_PATH_RULES);
+
+      const [{ document }] = storageClient.index.mock.calls[0];
+      expect(document).toEqual(DOCUMENT_WITH_PATH_RULES);
+      expect(document.include_paths).toEqual(['/docs', '/blog']);
+      expect(document.exclude_paths).toEqual(['/docs/internal']);
+    });
+
+    it('stores the start URLs, the sitemap URLs and the index the crawl was pointed at', async () => {
+      storageClient.index.mockResolvedValue({ _index: BACKING_INDEX, result: 'created' });
+
+      await storage.create(CRAWL_ID, DOCUMENT_WITH_START_URLS);
+
+      const [{ document }] = storageClient.index.mock.calls[0];
+      expect(document).toEqual(DOCUMENT_WITH_START_URLS);
+      expect(document.index_name).toBe('product-docs');
+      expect(document.seed_urls).toEqual(['https://example.com/blog', 'https://docs.example.org/']);
+      expect(document.sitemap_urls).toEqual(['https://example.com/sitemaps/docs.xml']);
+    });
+
+    it('stores empty lists of start URLs and sitemap URLs as they are', async () => {
+      storageClient.index.mockResolvedValue({ _index: BACKING_INDEX, result: 'created' });
+
+      await storage.create(CRAWL_ID, { ...DOCUMENT, seed_urls: [], sitemap_urls: [] });
+
+      const [{ document }] = storageClient.index.mock.calls[0];
+      expect(document.seed_urls).toEqual([]);
+      expect(document.sitemap_urls).toEqual([]);
     });
 
     it('fails when a crawl with the same ID exists', async () => {
@@ -144,6 +219,53 @@ describe('createCrawlStorage', () => {
 
       expect(esClient.get).toHaveBeenCalledWith({ index: WEB_CRAWLS_INDEX_NAME, id: CRAWL_ID });
       expect(storageClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns the path rules and the skipped and purged counts of the crawl', async () => {
+      esClient.get.mockResolvedValue({
+        _id: CRAWL_ID,
+        _index: BACKING_INDEX,
+        found: true,
+        _source: DOCUMENT_WITH_PATH_RULES,
+      });
+
+      await expect(storage.get(CRAWL_ID)).resolves.toEqual({
+        ...DOCUMENT_WITH_PATH_RULES,
+        id: CRAWL_ID,
+      });
+    });
+
+    it('returns the start URLs and the sitemap URLs of the crawl', async () => {
+      esClient.get.mockResolvedValue({
+        _id: CRAWL_ID,
+        _index: BACKING_INDEX,
+        found: true,
+        _source: DOCUMENT_WITH_START_URLS,
+      });
+
+      await expect(storage.get(CRAWL_ID)).resolves.toEqual({
+        ...DOCUMENT_WITH_START_URLS,
+        id: CRAWL_ID,
+      });
+    });
+
+    it('leaves the fields that an older crawl does not have undefined', async () => {
+      esClient.get.mockResolvedValue({
+        _id: CRAWL_ID,
+        _index: BACKING_INDEX,
+        found: true,
+        _source: DOCUMENT,
+      });
+
+      const crawl = await storage.get(CRAWL_ID);
+
+      expect(crawl?.include_paths).toBeUndefined();
+      expect(crawl?.exclude_paths).toBeUndefined();
+      expect(crawl?.seed_urls).toBeUndefined();
+      expect(crawl?.sitemap_urls).toBeUndefined();
+      expect(crawl?.skipped_robots_count).toBeUndefined();
+      expect(crawl?.skipped_rules_count).toBeUndefined();
+      expect(crawl?.purged_count).toBeUndefined();
     });
 
     it('returns undefined when the crawl or the index does not exist', async () => {
@@ -193,6 +315,31 @@ describe('createCrawlStorage', () => {
         retry_on_conflict: 3,
         _source: true,
       });
+    });
+
+    it('writes the skipped and purged counts without touching the path rules', async () => {
+      const patch: Partial<CrawlDocument> = {
+        skipped_robots_count: 4,
+        skipped_rules_count: 13,
+        purged_count: 6,
+      };
+      const stored: CrawlDocument = { ...DOCUMENT_WITH_PATH_RULES, ...patch };
+      esClient.update.mockResolvedValue(toUpdateResponse(stored));
+
+      await expect(storage.update(CRAWL_ID, patch)).resolves.toEqual({ ...stored, id: CRAWL_ID });
+
+      const [{ doc }] = esClient.update.mock.calls[0];
+      expect(doc).toEqual(patch);
+    });
+
+    it('writes the progress without touching the start URLs or the sitemap URLs', async () => {
+      const stored: CrawlDocument = { ...DOCUMENT_WITH_START_URLS, ...PATCH };
+      esClient.update.mockResolvedValue(toUpdateResponse(stored));
+
+      await expect(storage.update(CRAWL_ID, PATCH)).resolves.toEqual({ ...stored, id: CRAWL_ID });
+
+      const [{ doc }] = esClient.update.mock.calls[0];
+      expect(doc).toEqual(PATCH);
     });
 
     it('refreshes only when asked to', async () => {

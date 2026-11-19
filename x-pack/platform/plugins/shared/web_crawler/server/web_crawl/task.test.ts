@@ -16,7 +16,15 @@ import {
 } from '@kbn/core/server/mocks';
 import { TaskCost, isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { WEB_CRAWL_MAX_DEPTH_LIMIT, WEB_CRAWL_MAX_DOCUMENTS_LIMIT } from '../../common/constants';
+import {
+  WEB_CRAWL_MAX_DEPTH_LIMIT,
+  WEB_CRAWL_MAX_DOCUMENTS_LIMIT,
+  WEB_CRAWL_MAX_PATH_RULES,
+  WEB_CRAWL_MAX_PATH_RULE_LENGTH,
+  WEB_CRAWL_MAX_SEED_URLS,
+  WEB_CRAWL_MAX_SITEMAP_URLS,
+  WEB_CRAWL_MAX_URL_LENGTH,
+} from '../../common/constants';
 import type { CrawlStorage, StoredCrawl } from './crawl_storage';
 import { createCrawlStorage } from './crawl_storage';
 import type { CrawlOptions, CrawlProgress, CrawlResult } from './crawler';
@@ -25,7 +33,10 @@ import type { WebCrawlTaskParams } from './task';
 import {
   PROGRESS_INTERVAL_MS,
   WEB_CRAWL_TASK_TYPE,
+  pathRulesSchema,
   registerWebCrawlTask,
+  seedUrlsSchema,
+  sitemapUrlsSchema,
   validateInteger,
 } from './task';
 
@@ -43,6 +54,10 @@ const PARAMS: WebCrawlTaskParams = {
   inferenceId: '.jina-reader',
   maxDepth: 3,
   maxDocuments: 250,
+  includePaths: ['/docs', '/blog'],
+  excludePaths: ['/docs/internal'],
+  seedUrls: ['https://example.com/blog', 'https://docs.example.org/'],
+  sitemapUrls: ['https://example.com/sitemaps/docs.xml'],
 };
 
 const STORED: StoredCrawl = {
@@ -65,9 +80,28 @@ const PROGRESS: CrawlProgress = {
   failedCount: 2,
   requestedCount: 9,
   queuedCount: 30,
+  skippedByRobotsCount: 3,
+  skippedByRulesCount: 7,
 };
 
-const COMPLETED_RESULT: CrawlResult = { documentsCount: 12, failedCount: 1, aborted: false };
+const COMPLETED_RESULT: CrawlResult = {
+  documentsCount: 12,
+  failedCount: 1,
+  skippedByRobotsCount: 4,
+  skippedByRulesCount: 8,
+  purgedCount: 6,
+  aborted: false,
+};
+
+const toAbortedResult = (counts: Partial<CrawlResult> = {}): CrawlResult => ({
+  documentsCount: 0,
+  failedCount: 0,
+  skippedByRobotsCount: 0,
+  skippedByRulesCount: 0,
+  purgedCount: 0,
+  ...counts,
+  aborted: true,
+});
 
 interface Deferred<T> {
   promise: Promise<T>;
@@ -95,6 +129,94 @@ describe('validateInteger', () => {
   });
 });
 
+describe('pathRulesSchema', () => {
+  it('defaults to no paths', () => {
+    expect(pathRulesSchema.validate(undefined)).toEqual([]);
+  });
+
+  it('accepts a list of paths', () => {
+    expect(pathRulesSchema.validate(['/docs', '/blog/2026'])).toEqual(['/docs', '/blog/2026']);
+    expect(pathRulesSchema.validate([])).toEqual([]);
+  });
+
+  it(`accepts ${WEB_CRAWL_MAX_PATH_RULES} paths and rejects more`, () => {
+    const toPaths = (count: number) => Array.from({ length: count }, (_, path) => `/p${path}`);
+
+    expect(pathRulesSchema.validate(toPaths(WEB_CRAWL_MAX_PATH_RULES))).toHaveLength(
+      WEB_CRAWL_MAX_PATH_RULES
+    );
+    expect(() => pathRulesSchema.validate(toPaths(WEB_CRAWL_MAX_PATH_RULES + 1))).toThrow(
+      /array size/
+    );
+  });
+
+  it(`accepts a path of ${WEB_CRAWL_MAX_PATH_RULE_LENGTH} characters and rejects a longer one`, () => {
+    const longestPath = `/${'a'.repeat(WEB_CRAWL_MAX_PATH_RULE_LENGTH - 1)}`;
+
+    expect(pathRulesSchema.validate([longestPath])).toEqual([longestPath]);
+    expect(() => pathRulesSchema.validate([`${longestPath}a`])).toThrow(/maximum length/);
+  });
+
+  it('rejects an empty path', () => {
+    expect(() => pathRulesSchema.validate(['/docs', ''])).toThrow(/minimum length/);
+  });
+
+  it('rejects what is not a list of strings', () => {
+    expect(() => pathRulesSchema.validate('/docs')).toThrow();
+    expect(() => pathRulesSchema.validate([42])).toThrow();
+    expect(() => pathRulesSchema.validate([null])).toThrow();
+    expect(() => pathRulesSchema.validate([['/docs']])).toThrow();
+  });
+});
+
+describe.each([
+  ['seedUrlsSchema', seedUrlsSchema, WEB_CRAWL_MAX_SEED_URLS],
+  ['sitemapUrlsSchema', sitemapUrlsSchema, WEB_CRAWL_MAX_SITEMAP_URLS],
+] as const)('%s', (_, urlsSchema, maxUrls) => {
+  const toUrls = (count: number) =>
+    Array.from({ length: count }, (__, page) => `https://example.com/p${page}`);
+
+  it('defaults to no URLs', () => {
+    expect(urlsSchema.validate(undefined)).toEqual([]);
+  });
+
+  it('accepts a list of URLs, in the order given', () => {
+    const urls = ['https://example.com/blog', 'https://docs.example.org/sitemap.xml'];
+
+    expect(urlsSchema.validate(urls)).toEqual(urls);
+    expect(urlsSchema.validate([])).toEqual([]);
+  });
+
+  it('accepts 20 URLs and rejects more', () => {
+    expect(maxUrls).toBe(20);
+    expect(urlsSchema.validate(toUrls(maxUrls))).toHaveLength(maxUrls);
+    expect(() => urlsSchema.validate(toUrls(maxUrls + 1))).toThrow(/array size/);
+  });
+
+  it('accepts a URL of 2048 characters and rejects a longer one', () => {
+    expect(WEB_CRAWL_MAX_URL_LENGTH).toBe(2048);
+    const prefix = 'https://example.com/';
+    const longestUrl = `${prefix}${'a'.repeat(WEB_CRAWL_MAX_URL_LENGTH - prefix.length)}`;
+
+    expect(longestUrl).toHaveLength(WEB_CRAWL_MAX_URL_LENGTH);
+    expect(urlsSchema.validate([longestUrl])).toEqual([longestUrl]);
+    expect(() => urlsSchema.validate([`${longestUrl}a`])).toThrow(/maximum length/);
+  });
+
+  it('accepts a URL of a single character and rejects an empty one', () => {
+    expect(urlsSchema.validate(['a'])).toEqual(['a']);
+    expect(() => urlsSchema.validate(['https://example.com/', ''])).toThrow(/minimum length/);
+  });
+
+  it('rejects what is not a list of strings', () => {
+    expect(() => urlsSchema.validate('https://example.com/')).toThrow();
+    expect(() => urlsSchema.validate([42])).toThrow();
+    expect(() => urlsSchema.validate([null])).toThrow();
+    expect(() => urlsSchema.validate([['https://example.com/']])).toThrow();
+    expect(() => urlsSchema.validate({ 0: 'https://example.com/' })).toThrow();
+  });
+});
+
 describe('registerWebCrawlTask', () => {
   let core: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
@@ -109,13 +231,21 @@ describe('registerWebCrawlTask', () => {
   const getDefinition = () =>
     taskManager.registerTaskDefinitions.mock.calls[0][0][WEB_CRAWL_TASK_TYPE];
 
-  const createRunner = ({ withFakeRequest = true }: { withFakeRequest?: boolean } = {}) =>
+  type LaterParams = 'includePaths' | 'excludePaths' | 'seedUrls' | 'sitemapUrls';
+  /** Params as stored with the task, where a task scheduled before a param existed does not have it. */
+  type StoredParams = Omit<WebCrawlTaskParams, LaterParams> &
+    Partial<Pick<WebCrawlTaskParams, LaterParams>>;
+
+  const createRunner = ({
+    withFakeRequest = true,
+    params = PARAMS,
+  }: { withFakeRequest?: boolean; params?: StoredParams } = {}) =>
     getDefinition().createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: taskManagerMock.createTask({
           id: TASK_ID,
           taskType: WEB_CRAWL_TASK_TYPE,
-          params: PARAMS,
+          params,
           state: {},
         }),
         fakeRequest: withFakeRequest ? fakeRequest : undefined,
@@ -128,8 +258,8 @@ describe('registerWebCrawlTask', () => {
     jest.advanceTimersByTimeAsync(intervals * PROGRESS_INTERVAL_MS);
 
   /** Starts a run and waits until the crawl is under way. */
-  const startRun = async () => {
-    const outcome = createRunner()
+  const startRun = async (params: StoredParams = PARAMS) => {
+    const outcome = createRunner({ params })
       .run()
       .then(
         (value) => ({ value, error: undefined }),
@@ -197,7 +327,7 @@ describe('registerWebCrawlTask', () => {
     it('runs once, with a one hour timeout and a normal cost', () => {
       const { title, timeout, maxAttempts, cost } = getDefinition();
 
-      expect(title).toEqual(expect.any(String));
+      expect(title).toBe('Web crawl');
       expect(timeout).toBe('1h');
       expect(maxAttempts).toBe(1);
       expect(cost).toBe(TaskCost.Normal);
@@ -287,6 +417,97 @@ describe('registerWebCrawlTask', () => {
         );
       });
 
+      it('defaults the path rules to none when the params have none', () => {
+        expect(validateParams(omit(PARAMS, ['includePaths', 'excludePaths']))()).toEqual({
+          ...PARAMS,
+          includePaths: [],
+          excludePaths: [],
+        });
+      });
+
+      it('defaults each path rule independently', () => {
+        expect(validateParams(omit(PARAMS, 'includePaths'))()).toEqual({
+          ...PARAMS,
+          includePaths: [],
+        });
+        expect(validateParams(omit(PARAMS, 'excludePaths'))()).toEqual({
+          ...PARAMS,
+          excludePaths: [],
+        });
+      });
+
+      it.each(['includePaths', 'excludePaths'] as const)(
+        `bounds %s to ${WEB_CRAWL_MAX_PATH_RULES} paths of 1 to ${WEB_CRAWL_MAX_PATH_RULE_LENGTH} characters`,
+        (key) => {
+          const toPaths = (count: number) =>
+            Array.from({ length: count }, (_, path) => `/p${path}`);
+          const longestPath = `/${'a'.repeat(WEB_CRAWL_MAX_PATH_RULE_LENGTH - 1)}`;
+          const pattern = new RegExp(`\\[${key}`);
+
+          expect(
+            validateParams({ ...PARAMS, [key]: toPaths(WEB_CRAWL_MAX_PATH_RULES) })
+          ).not.toThrow();
+          expect(
+            validateParams({ ...PARAMS, [key]: toPaths(WEB_CRAWL_MAX_PATH_RULES + 1) })
+          ).toThrow(pattern);
+          expect(validateParams({ ...PARAMS, [key]: [longestPath] })).not.toThrow();
+          expect(validateParams({ ...PARAMS, [key]: [`${longestPath}a`] })).toThrow(pattern);
+          expect(validateParams({ ...PARAMS, [key]: [''] })).toThrow(pattern);
+          expect(validateParams({ ...PARAMS, [key]: '/docs' })).toThrow(pattern);
+          expect(validateParams({ ...PARAMS, [key]: [5] })).toThrow(pattern);
+        }
+      );
+
+      it('defaults the start URLs and the sitemap URLs to none when the params have none', () => {
+        expect(validateParams(omit(PARAMS, ['seedUrls', 'sitemapUrls']))()).toEqual({
+          ...PARAMS,
+          seedUrls: [],
+          sitemapUrls: [],
+        });
+      });
+
+      it('defaults the start URLs and the sitemap URLs independently', () => {
+        expect(validateParams(omit(PARAMS, 'seedUrls'))()).toEqual({ ...PARAMS, seedUrls: [] });
+        expect(validateParams(omit(PARAMS, 'sitemapUrls'))()).toEqual({
+          ...PARAMS,
+          sitemapUrls: [],
+        });
+      });
+
+      it('accepts the params of a task that was scheduled before any optional param existed', () => {
+        const oldParams = omit(PARAMS, ['includePaths', 'excludePaths', 'seedUrls', 'sitemapUrls']);
+
+        expect(validateParams(oldParams)()).toEqual({
+          ...oldParams,
+          includePaths: [],
+          excludePaths: [],
+          seedUrls: [],
+          sitemapUrls: [],
+        });
+      });
+
+      it.each([
+        ['seedUrls', WEB_CRAWL_MAX_SEED_URLS],
+        ['sitemapUrls', WEB_CRAWL_MAX_SITEMAP_URLS],
+      ] as const)(
+        `bounds %s to %i URLs of 1 to ${WEB_CRAWL_MAX_URL_LENGTH} characters`,
+        (key, maxUrls) => {
+          const toUrls = (count: number) =>
+            Array.from({ length: count }, (_, page) => `https://example.com/p${page}`);
+          const prefix = 'https://example.com/';
+          const longestUrl = `${prefix}${'a'.repeat(WEB_CRAWL_MAX_URL_LENGTH - prefix.length)}`;
+          const pattern = new RegExp(`\\[${key}`);
+
+          expect(validateParams({ ...PARAMS, [key]: toUrls(maxUrls) })).not.toThrow();
+          expect(validateParams({ ...PARAMS, [key]: toUrls(maxUrls + 1) })).toThrow(pattern);
+          expect(validateParams({ ...PARAMS, [key]: [longestUrl] })).not.toThrow();
+          expect(validateParams({ ...PARAMS, [key]: [`${longestUrl}a`] })).toThrow(pattern);
+          expect(validateParams({ ...PARAMS, [key]: [''] })).toThrow(pattern);
+          expect(validateParams({ ...PARAMS, [key]: 'https://example.com/' })).toThrow(pattern);
+          expect(validateParams({ ...PARAMS, [key]: [5] })).toThrow(pattern);
+        }
+      );
+
       it('rejects unknown params', () => {
         expect(validateParams({ ...PARAMS, depth: 5 })).toThrow(/\[depth\]/);
       });
@@ -318,14 +539,77 @@ describe('registerWebCrawlTask', () => {
         logger,
         signal: expect.any(AbortSignal),
         url: PARAMS.url,
+        additionalSeedUrls: ['https://example.com/blog', 'https://docs.example.org/'],
+        sitemapUrls: ['https://example.com/sitemaps/docs.xml'],
         indexName: PARAMS.indexName,
         inferenceId: PARAMS.inferenceId,
         crawlId: TASK_ID,
         maxDepth: PARAMS.maxDepth,
         maxDocuments: PARAMS.maxDocuments,
+        pathRules: { includePaths: ['/docs', '/blog'], excludePaths: ['/docs/internal'] },
         onProgress: expect.any(Function),
       });
       expect(getCrawlOptions().signal.aborted).toBe(false);
+    });
+
+    it('crawls without path rules when the task has empty ones', async () => {
+      await startRun({ ...PARAMS, includePaths: [], excludePaths: [] });
+
+      expect(getCrawlOptions().pathRules).toEqual({ includePaths: [], excludePaths: [] });
+    });
+
+    it('crawls without path rules when the task was stored without any', async () => {
+      const { includePaths, excludePaths, ...paramsWithoutPaths } = PARAMS;
+
+      await startRun(paramsWithoutPaths);
+
+      expect(getCrawlOptions().pathRules).toEqual({ includePaths: [], excludePaths: [] });
+    });
+
+    it('crawls from the one URL, without explicit sitemaps, when the task has no other', async () => {
+      await startRun({ ...PARAMS, seedUrls: [], sitemapUrls: [] });
+
+      expect(getCrawlOptions().url).toBe(PARAMS.url);
+      expect(getCrawlOptions().additionalSeedUrls).toEqual([]);
+      expect(getCrawlOptions().sitemapUrls).toEqual([]);
+    });
+
+    it('crawls from the one URL, without explicit sitemaps, when the task was stored without them', async () => {
+      const { seedUrls, sitemapUrls, ...paramsWithoutUrls } = PARAMS;
+
+      await startRun(paramsWithoutUrls);
+
+      expect(getCrawlOptions().url).toBe(PARAMS.url);
+      expect(getCrawlOptions().additionalSeedUrls).toEqual([]);
+      expect(getCrawlOptions().sitemapUrls).toEqual([]);
+      expect(getCrawlOptions().pathRules).toEqual({
+        includePaths: ['/docs', '/blog'],
+        excludePaths: ['/docs/internal'],
+      });
+    });
+
+    it('defaults the start URLs and the sitemap URLs of a stored task independently', async () => {
+      const { seedUrls, ...paramsWithoutSeedUrls } = PARAMS;
+
+      await startRun(paramsWithoutSeedUrls);
+
+      expect(getCrawlOptions().additionalSeedUrls).toEqual([]);
+      expect(getCrawlOptions().sitemapUrls).toEqual(['https://example.com/sitemaps/docs.xml']);
+    });
+
+    it('hands the start URLs to the crawl in the order they were stored, apart from the URL', async () => {
+      const seedUrls = ['https://docs.example.org/', 'https://example.com/blog', PARAMS.url];
+
+      await startRun({ ...PARAMS, seedUrls });
+
+      expect(getCrawlOptions().url).toBe(PARAMS.url);
+      expect(getCrawlOptions().additionalSeedUrls).toEqual(seedUrls);
+    });
+
+    it('crawls into the index of the task, whatever the site of its URL', async () => {
+      await startRun({ ...PARAMS, indexName: 'product-docs' });
+
+      expect(getCrawlOptions().indexName).toBe('product-docs');
     });
 
     it('records the crawl state as the Kibana system user', async () => {
@@ -355,6 +639,9 @@ describe('registerWebCrawlTask', () => {
             failed_count: 1,
             requested_count: 9,
             queued_count: 0,
+            skipped_robots_count: 4,
+            skipped_rules_count: 8,
+            purged_count: 6,
             updated_at: new Date(NOW).toISOString(),
             finished_at: new Date(NOW).toISOString(),
           },
@@ -379,6 +666,9 @@ describe('registerWebCrawlTask', () => {
             failed_count: 2,
             requested_count: 9,
             queued_count: 30,
+            skipped_robots_count: 3,
+            skipped_rules_count: 7,
+            purged_count: 0,
             updated_at: new Date(NOW).toISOString(),
             finished_at: new Date(NOW).toISOString(),
           },
@@ -394,7 +684,7 @@ describe('registerWebCrawlTask', () => {
 
         abortController.abort();
         expect(getCrawlOptions().signal.aborted).toBe(true);
-        crawl.resolve({ documentsCount: 4, failedCount: 0, aborted: true });
+        crawl.resolve(toAbortedResult({ documentsCount: 4 }));
 
         expect((await outcome).value).toEqual({ state: {} });
         const [, patch] = getFinalWrite();
@@ -421,6 +711,46 @@ describe('registerWebCrawlTask', () => {
         crawl.resolve(COMPLETED_RESULT);
 
         expect((await outcome).error?.message).toBe('index is read-only');
+      });
+
+      it('records how many outdated pages the crawl removed', async () => {
+        const { outcome } = await startRun();
+        crawl.resolve({ ...COMPLETED_RESULT, purgedCount: 41 });
+        await outcome;
+
+        expect(getFinalWrite()[1].purged_count).toBe(41);
+      });
+
+      it.each<[string, () => void]>([
+        ['fails', () => crawl.reject(new Error('boom'))],
+        ['is aborted', () => crawl.resolve(toAbortedResult({ documentsCount: 4 }))],
+      ])('records that no outdated pages were removed when the crawl %s', async (_, finish) => {
+        const { outcome } = await startRun();
+        finish();
+        await outcome;
+
+        expect(getFinalWrite()[1].purged_count).toBe(0);
+      });
+
+      it('records the skipped links of the result rather than the last reported ones', async () => {
+        const { outcome } = await startRun();
+        reportProgress(PROGRESS);
+        crawl.resolve({ ...COMPLETED_RESULT, skippedByRobotsCount: 10, skippedByRulesCount: 20 });
+        await outcome;
+
+        expect(getFinalWrite()[1]).toEqual(
+          expect.objectContaining({ skipped_robots_count: 10, skipped_rules_count: 20 })
+        );
+      });
+
+      it('records no skipped links for a crawl that failed before it reported any', async () => {
+        const { outcome } = await startRun();
+        crawl.reject(new Error('boom'));
+        await outcome;
+
+        expect(getFinalWrite()[1]).toEqual(
+          expect.objectContaining({ skipped_robots_count: 0, skipped_rules_count: 0 })
+        );
       });
 
       it('does not write an error for a completed crawl', async () => {
@@ -459,6 +789,8 @@ describe('registerWebCrawlTask', () => {
               failed_count: 0,
               requested_count: 0,
               queued_count: 0,
+              skipped_robots_count: 0,
+              skipped_rules_count: 0,
               updated_at: new Date(NOW + PROGRESS_INTERVAL_MS).toISOString(),
             },
           ],
@@ -469,10 +801,22 @@ describe('registerWebCrawlTask', () => {
               failed_count: 2,
               requested_count: 9,
               queued_count: 30,
+              skipped_robots_count: 3,
+              skipped_rules_count: 7,
               updated_at: new Date(NOW + 2 * PROGRESS_INTERVAL_MS).toISOString(),
             },
           ],
         ]);
+      });
+
+      it('does not write the purged count before the crawl has ended', async () => {
+        await startRun();
+
+        await tick(2);
+
+        for (const [, patch] of storage.update.mock.calls) {
+          expect(Object.keys(patch)).not.toContain('purged_count');
+        }
       });
 
       it('does not start a write while the previous one is in flight', async () => {
@@ -532,7 +876,14 @@ describe('registerWebCrawlTask', () => {
 
         await tick();
         expect(getCrawlOptions().signal.aborted).toBe(true);
-        crawl.resolve({ documentsCount: 5, failedCount: 2, aborted: true });
+        crawl.resolve(
+          toAbortedResult({
+            documentsCount: 5,
+            failedCount: 2,
+            skippedByRobotsCount: 3,
+            skippedByRulesCount: 9,
+          })
+        );
 
         expect((await outcome).value).toEqual({ state: {} });
         const [, patch, options] = getFinalWrite();
@@ -542,6 +893,9 @@ describe('registerWebCrawlTask', () => {
           failed_count: 2,
           requested_count: 9,
           queued_count: 0,
+          skipped_robots_count: 3,
+          skipped_rules_count: 9,
+          purged_count: 0,
           updated_at: new Date(NOW + PROGRESS_INTERVAL_MS).toISOString(),
           finished_at: new Date(NOW + PROGRESS_INTERVAL_MS).toISOString(),
         });
@@ -607,7 +961,7 @@ describe('registerWebCrawlTask', () => {
       const finishers: Array<[string, () => void]> = [
         ['completes', () => crawl.resolve(COMPLETED_RESULT)],
         ['fails', () => crawl.reject(new Error('boom'))],
-        ['is aborted', () => crawl.resolve({ documentsCount: 0, failedCount: 0, aborted: true })],
+        ['is aborted', () => crawl.resolve(toAbortedResult())],
         [
           'cannot record its outcome',
           () => {

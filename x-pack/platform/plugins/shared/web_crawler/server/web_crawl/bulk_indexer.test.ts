@@ -10,10 +10,17 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { BulkIndexer, CrawledDocument } from './bulk_indexer';
-import { BULK_SIZE, MAX_CONCURRENT_BULKS, createBulkIndexer, getDocumentId } from './bulk_indexer';
+import {
+  BULK_SIZE,
+  MAX_BULK_BYTES,
+  MAX_CONCURRENT_BULKS,
+  createBulkIndexer,
+  getDocumentId,
+} from './bulk_indexer';
 
 const INDEX_NAME = 'web-crawl-example.com';
 const MAX_BUFFERED_DOCUMENTS = BULK_SIZE * MAX_CONCURRENT_BULKS;
+const MAX_BUFFERED_BYTES = MAX_BULK_BYTES * MAX_CONCURRENT_BULKS;
 
 interface ItemError {
   type: string;
@@ -33,6 +40,14 @@ const toDocument = (position: number): CrawledDocument => ({
   depth: 1,
   crawl_id: 'crawl-1',
   crawled_at: '2026-01-01T00:00:00.000Z',
+  url_host: 'example.com',
+  url_path: `/page-${position}`,
+  url_path_dir1: `page-${position}`,
+});
+
+const toSizedDocument = (position: number, bytes: number): CrawledDocument => ({
+  ...toDocument(position),
+  content: 'a'.repeat(bytes),
 });
 
 const toDocuments = (count: number, offset: number = 0): CrawledDocument[] =>
@@ -66,6 +81,13 @@ describe('createBulkIndexer', () => {
       (params?.operations ?? [])
         .filter((_, position) => position % 2 === 1)
         .map((operation) => (operation as CrawledDocument).url)
+    );
+
+  const getSentBytes = (): number[][] =>
+    esClient.bulk.mock.calls.map(([params]) =>
+      (params?.operations ?? [])
+        .filter((_, position) => position % 2 === 1)
+        .map((operation) => Buffer.byteLength((operation as CrawledDocument).content))
     );
 
   const toResponse = (
@@ -235,7 +257,221 @@ describe('createBulkIndexer', () => {
     });
   });
 
+  describe('request size', () => {
+    // The first document is sent on its own right away, so what follows meets a request in flight.
+    const addFirstDocument = () => indexer.add(toDocument(0));
+
+    it('sends the buffered documents once their content adds up to the size limit', async () => {
+      await addFirstDocument();
+      await Promise.all(addAll([toSizedDocument(1, MAX_BULK_BYTES / 2)]));
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+
+      await indexer.add(toSizedDocument(2, MAX_BULK_BYTES / 2));
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+      expect(getSentBytes()[1]).toEqual([MAX_BULK_BYTES / 2, MAX_BULK_BYTES / 2]);
+    });
+
+    it('keeps buffering while the content stays one byte under the size limit', async () => {
+      await addFirstDocument();
+      await Promise.all(
+        addAll([toSizedDocument(1, MAX_BULK_BYTES / 2), toSizedDocument(2, MAX_BULK_BYTES / 2 - 1)])
+      );
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes a request before the document that would take it over the size limit', async () => {
+      await addFirstDocument();
+      await Promise.all(
+        addAll([toSizedDocument(1, MAX_BULK_BYTES / 2), toSizedDocument(2, MAX_BULK_BYTES / 2 + 1)])
+      );
+
+      expect(getSentUrls()).toEqual([[toDocument(0).url], [toDocument(1).url]]);
+
+      pendingBulks[0].succeed();
+      pendingBulks[1].succeed();
+      await flushPromises();
+
+      expect(getSentUrls()[2]).toEqual([toDocument(2).url]);
+    });
+
+    it('sends a document larger than the size limit on its own', async () => {
+      await addFirstDocument();
+      await Promise.all(addAll([toSizedDocument(1, MAX_BULK_BYTES * 2), toSizedDocument(2, 10)]));
+
+      expect(getSentUrls()).toEqual([[toDocument(0).url], [toDocument(1).url]]);
+      expect(getSentBytes()[1]).toEqual([MAX_BULK_BYTES * 2]);
+    });
+
+    it('does not add a document larger than the size limit to the documents waiting before it', async () => {
+      await addFirstDocument();
+      await Promise.all(addAll([toSizedDocument(1, 10), toSizedDocument(2, MAX_BULK_BYTES + 1)]));
+
+      expect(getSentUrls()).toEqual([
+        [toDocument(0).url],
+        [toDocument(1).url],
+        [toDocument(2).url],
+      ]);
+    });
+
+    it('measures the content in bytes rather than characters', async () => {
+      const toWideDocument = (position: number): CrawledDocument => ({
+        ...toDocument(position),
+        content: 'é'.repeat(MAX_BULK_BYTES / 4),
+      });
+      await addFirstDocument();
+      await Promise.all(addAll([toWideDocument(1), toWideDocument(2)]));
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+      expect(getSentBytes()[1]).toEqual([MAX_BULK_BYTES / 2, MAX_BULK_BYTES / 2]);
+    });
+
+    it(`never runs more than ${MAX_CONCURRENT_BULKS} requests side by side, whatever the size of what is waiting`, async () => {
+      await addFirstDocument();
+      await Promise.all(
+        addAll([
+          toSizedDocument(1, MAX_BULK_BYTES),
+          toSizedDocument(2, MAX_BULK_BYTES),
+          toSizedDocument(3, MAX_BULK_BYTES),
+        ])
+      );
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(MAX_CONCURRENT_BULKS);
+
+      pendingBulks[0].succeed();
+      await flushPromises();
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(MAX_CONCURRENT_BULKS + 1);
+      expect(getSentUrls()[MAX_CONCURRENT_BULKS]).toEqual([toDocument(3).url]);
+    });
+
+    it('never goes over the size limit with more than one document, and sends each document once', async () => {
+      const sizes = [0.3, 0.5, 0.7, 1.5, 0.1, 0.1, 1, 0.25].map((share) => share * MAX_BULK_BYTES);
+      const documents = Array.from({ length: 40 }, (_, position) =>
+        toSizedDocument(position, sizes[position % sizes.length])
+      );
+      const additions = addAll(documents);
+      answerBulks();
+      pendingBulks.forEach(({ succeed }) => succeed());
+
+      await Promise.all(additions);
+      await indexer.drain();
+
+      const sentBytes = getSentBytes();
+      expect(sentBytes.length).toBeGreaterThan(1);
+      for (const bytes of sentBytes) {
+        const requestBytes = bytes.reduce((total, documentBytes) => total + documentBytes, 0);
+        expect(bytes.length).toBeGreaterThan(0);
+        expect(bytes.length === 1 || requestBytes <= MAX_BULK_BYTES).toBe(true);
+      }
+      expect(getSentUrls().flat()).toEqual(documents.map(({ url }) => url));
+    });
+
+    it('sends what is left under the size limit when draining', async () => {
+      await addFirstDocument();
+      await Promise.all(
+        addAll([toSizedDocument(1, MAX_BULK_BYTES * 0.4), toSizedDocument(2, MAX_BULK_BYTES * 0.4)])
+      );
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      await Promise.all(addAll([toSizedDocument(3, MAX_BULK_BYTES * 0.4)]));
+      expect(getSentUrls()[1]).toEqual([toDocument(1).url, toDocument(2).url]);
+
+      const draining = indexer.drain();
+
+      expect(getSentUrls()[2]).toEqual([toDocument(3).url]);
+
+      pendingBulks.forEach(({ succeed }) => succeed());
+      await draining;
+
+      expect(indexer.getCounts()).toEqual({ documentsCount: 4, failedCount: 0 });
+    });
+  });
+
   describe('backpressure', () => {
+    /** Fills every request slot, then leaves `waitingCount` documents of the size limit waiting. */
+    const addLargeDocuments = async (waitingCount: number) => {
+      await Promise.all(
+        addAll(
+          Array.from({ length: MAX_CONCURRENT_BULKS + waitingCount }, (_, position) =>
+            toSizedDocument(position, MAX_BULK_BYTES)
+          )
+        )
+      );
+    };
+
+    it(`does not hold up the caller while less than ${MAX_BUFFERED_BYTES} bytes are waiting`, async () => {
+      await addLargeDocuments(MAX_CONCURRENT_BULKS - 1);
+
+      await expect(
+        indexer.add(toSizedDocument(1_000, MAX_BULK_BYTES - 1))
+      ).resolves.toBeUndefined();
+      expect(esClient.bulk).toHaveBeenCalledTimes(MAX_CONCURRENT_BULKS);
+    });
+
+    it(`holds up the caller once ${MAX_BUFFERED_BYTES} bytes are waiting, until a request settles`, async () => {
+      await addLargeDocuments(MAX_CONCURRENT_BULKS - 1);
+
+      const blocked = indexer.add(toSizedDocument(1_000, MAX_BULK_BYTES));
+
+      expect(await isSettled(blocked)).toBe(false);
+
+      pendingBulks[0].succeed();
+
+      await expect(blocked).resolves.toBeUndefined();
+      expect(esClient.bulk).toHaveBeenCalledTimes(MAX_CONCURRENT_BULKS + 1);
+    });
+
+    it('holds up the caller that adds a single document as large as everything that may wait', async () => {
+      await addLargeDocuments(0);
+
+      const blocked = indexer.add(toSizedDocument(1_000, MAX_BUFFERED_BYTES));
+
+      expect(await isSettled(blocked)).toBe(false);
+
+      pendingBulks[0].succeed();
+
+      await expect(blocked).resolves.toBeUndefined();
+      expect(getSentUrls().at(-1)).toEqual([toDocument(1_000).url]);
+    });
+
+    it('releases the caller held up by the size of what is waiting when a request fails as a whole', async () => {
+      await addLargeDocuments(MAX_CONCURRENT_BULKS - 1);
+      const blocked = indexer.add(toSizedDocument(1_000, MAX_BULK_BYTES));
+
+      pendingBulks[0].fail(new Error('bulk unavailable'));
+
+      await expect(blocked).resolves.toBeUndefined();
+      expect(esClient.bulk).toHaveBeenCalledTimes(MAX_CONCURRENT_BULKS);
+    });
+
+    it('releases the caller held up by the size of what is waiting when the signal is aborted', async () => {
+      await addLargeDocuments(MAX_CONCURRENT_BULKS - 1);
+      const blocked = indexer.add(toSizedDocument(1_000, MAX_BULK_BYTES));
+      expect(await isSettled(blocked)).toBe(false);
+
+      abortController.abort();
+      pendingBulks[0].succeed();
+
+      await expect(blocked).resolves.toBeUndefined();
+      expect(esClient.bulk).toHaveBeenCalledTimes(MAX_CONCURRENT_BULKS);
+    });
+
+    it('stops counting the bytes of the documents it has sent', async () => {
+      answerBulks();
+      for (let position = 0; position < MAX_CONCURRENT_BULKS; position++) {
+        await indexer.add(toSizedDocument(100 + position, MAX_BULK_BYTES));
+        await flushPromises();
+      }
+      holdBulks();
+      await addLargeDocuments(MAX_CONCURRENT_BULKS - 1);
+
+      await expect(
+        indexer.add(toSizedDocument(1_000, MAX_BULK_BYTES - 1))
+      ).resolves.toBeUndefined();
+    });
+
     it('does not hold up the caller while indexing keeps up', async () => {
       const additions = addAll(toDocuments(1 + BULK_SIZE * 2 + MAX_BUFFERED_DOCUMENTS - 1));
 

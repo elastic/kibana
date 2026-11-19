@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { discoverSitemapPages, parseSitemap } from './sitemap';
+import { MAX_SITEMAP_REQUESTS, discoverSitemapPages, parseSitemap } from './sitemap';
 
 const ORIGIN = 'https://example.com';
 const SITE_URL = `${ORIGIN}/docs/start`;
@@ -180,6 +180,103 @@ describe('parseSitemap', () => {
     ).toEqual([`${ORIGIN}/a`]);
   });
 
+  describe('with several site keys', () => {
+    const MIXED_SITES = toUrlSet([
+      `${ORIGIN}/a`,
+      'https://docs.example.org/b',
+      'https://www.docs.example.org/c',
+      'https://other.net/d',
+      'https://blog.example.com/e',
+      `${ORIGIN}/f`,
+    ]);
+
+    it('keeps the pages of every given site, in the order they are listed', () => {
+      expect(
+        parseSitemap(MIXED_SITES, SITEMAP_URL, [SITE_KEY, 'docs.example.org'], 100).pageUrls
+      ).toEqual([
+        `${ORIGIN}/a`,
+        'https://docs.example.org/b',
+        'https://www.docs.example.org/c',
+        `${ORIGIN}/f`,
+      ]);
+    });
+
+    it('does not depend on the order of the site keys', () => {
+      expect(
+        parseSitemap(MIXED_SITES, SITEMAP_URL, ['docs.example.org', SITE_KEY], 100).pageUrls
+      ).toEqual(
+        parseSitemap(MIXED_SITES, SITEMAP_URL, [SITE_KEY, 'docs.example.org'], 100).pageUrls
+      );
+    });
+
+    it('reads an array with one site key like that site key on its own', () => {
+      expect(parseSitemap(MIXED_SITES, SITEMAP_URL, [SITE_KEY], 100)).toEqual(
+        parseSitemap(MIXED_SITES, SITEMAP_URL, SITE_KEY, 100)
+      );
+      expect(parseSitemap(MIXED_SITES, SITEMAP_URL, [SITE_KEY], 100).pageUrls).toEqual([
+        `${ORIGIN}/a`,
+        `${ORIGIN}/f`,
+      ]);
+    });
+
+    it('keeps no page, and still the nested sitemaps, when there is no site key', () => {
+      const content = [MIXED_SITES, toSitemapIndex([`${ORIGIN}/nested.xml`])].join('\n');
+
+      expect(parseSitemap(content, SITEMAP_URL, [], 100)).toEqual({
+        pageUrls: [],
+        sitemapUrls: [`${ORIGIN}/nested.xml`],
+      });
+    });
+
+    it('does not keep the pages of a site that only resembles one of the given sites', () => {
+      const content = toUrlSet([
+        'https://example.com.evil.org/a',
+        'https://docs.example.org.evil.net/b',
+        'https://notexample.com/c',
+        'https://sub.docs.example.org/d',
+      ]);
+
+      expect(
+        parseSitemap(content, SITEMAP_URL, [SITE_KEY, 'docs.example.org'], 100).pageUrls
+      ).toEqual([]);
+    });
+
+    it('skips binary and asset entries on every site', () => {
+      const content = toUrlSet([
+        `${ORIGIN}/file.pdf`,
+        'https://docs.example.org/logo.png',
+        'https://docs.example.org/page',
+      ]);
+
+      expect(
+        parseSitemap(content, SITEMAP_URL, [SITE_KEY, 'docs.example.org'], 100).pageUrls
+      ).toEqual(['https://docs.example.org/page']);
+    });
+
+    it('applies the page cap across the sites', () => {
+      expect(
+        parseSitemap(MIXED_SITES, SITEMAP_URL, [SITE_KEY, 'docs.example.org'], 2).pageUrls
+      ).toEqual([`${ORIGIN}/a`, 'https://docs.example.org/b']);
+    });
+
+    it('returns the nested sitemaps of any host, whatever the site keys', () => {
+      const content = toSitemapIndex([
+        `${ORIGIN}/a.xml`,
+        'https://docs.example.org/b.xml',
+        'https://cdn.example.net/c.xml',
+      ]);
+
+      expect(parseSitemap(content, SITEMAP_URL, [SITE_KEY, 'docs.example.org'], 100)).toEqual({
+        pageUrls: [],
+        sitemapUrls: [
+          `${ORIGIN}/a.xml`,
+          'https://docs.example.org/b.xml',
+          'https://cdn.example.net/c.xml',
+        ],
+      });
+    });
+  });
+
   it('skips entries with a binary or asset extension', () => {
     const content = toUrlSet([
       `${ORIGIN}/files/report.pdf`,
@@ -287,11 +384,20 @@ describe('discoverSitemapPages', () => {
   const discover = ({
     declaredSitemaps = [],
     maxPages = 100,
-  }: { declaredSitemaps?: string[]; maxPages?: number } = {}) =>
+    siteKeys,
+    maxRequests,
+  }: {
+    declaredSitemaps?: string[];
+    maxPages?: number;
+    siteKeys?: string[];
+    maxRequests?: number;
+  } = {}) =>
     discoverSitemapPages({
       siteUrl: SITE_URL,
       declaredSitemaps,
       maxPages,
+      siteKeys,
+      maxRequests,
       signal: abortController.signal,
       fetchContent,
     });
@@ -634,5 +740,203 @@ describe('discoverSitemapPages', () => {
     await expect(
       discover({ declaredSitemaps: ['https://cdn.example.net/sitemap.xml'] })
     ).resolves.toEqual([`${ORIGIN}/a`]);
+  });
+
+  describe('siteKeys', () => {
+    const OTHER_ORIGIN = 'https://docs.example.org';
+    const MIXED_SITES = toUrlSet([
+      `${ORIGIN}/a`,
+      `${OTHER_ORIGIN}/b`,
+      'https://www.docs.example.org/c',
+      'https://other.net/d',
+    ]);
+
+    it('collects only the pages of the site of the site URL by default', async () => {
+      mockSitemaps({ [SITEMAP_URL]: MIXED_SITES });
+
+      await expect(discover()).resolves.toEqual([`${ORIGIN}/a`]);
+    });
+
+    it('treats a www. site URL as the bare host by default', async () => {
+      mockSitemaps({ 'https://www.example.com/sitemap.xml': MIXED_SITES });
+
+      await expect(
+        discoverSitemapPages({
+          siteUrl: 'https://www.example.com/docs/start',
+          declaredSitemaps: [],
+          maxPages: 100,
+          signal: abortController.signal,
+          fetchContent,
+        })
+      ).resolves.toEqual([`${ORIGIN}/a`]);
+      expect(getFetchedUrls()).toEqual(['https://www.example.com/sitemap.xml']);
+    });
+
+    it('collects the pages of every given site', async () => {
+      mockSitemaps({ [SITEMAP_URL]: MIXED_SITES });
+
+      await expect(discover({ siteKeys: [SITE_KEY, 'docs.example.org'] })).resolves.toEqual([
+        `${ORIGIN}/a`,
+        `${OTHER_ORIGIN}/b`,
+        'https://www.docs.example.org/c',
+      ]);
+    });
+
+    it('collects the pages of the given sites instead of those of the site URL', async () => {
+      mockSitemaps({ [SITEMAP_URL]: MIXED_SITES });
+
+      await expect(discover({ siteKeys: ['docs.example.org'] })).resolves.toEqual([
+        `${OTHER_ORIGIN}/b`,
+        'https://www.docs.example.org/c',
+      ]);
+    });
+
+    it('collects no page, and still follows the sitemap index, when there is no site key', async () => {
+      mockSitemaps({
+        [SITEMAP_URL]: toSitemapIndex([`${ORIGIN}/nested.xml`]),
+        [`${ORIGIN}/nested.xml`]: MIXED_SITES,
+      });
+
+      await expect(discover({ siteKeys: [] })).resolves.toEqual([]);
+      expect(getFetchedUrls()).toEqual([SITEMAP_URL, `${ORIGIN}/nested.xml`]);
+    });
+
+    it('applies the site keys to the nested sitemaps too', async () => {
+      mockSitemaps({
+        [`${OTHER_ORIGIN}/index.xml`]: toSitemapIndex([`${OTHER_ORIGIN}/nested.xml`]),
+        [`${OTHER_ORIGIN}/nested.xml`]: MIXED_SITES,
+      });
+
+      await expect(
+        discover({
+          declaredSitemaps: [`${OTHER_ORIGIN}/index.xml`],
+          siteKeys: [SITE_KEY, 'docs.example.org'],
+        })
+      ).resolves.toEqual([`${ORIGIN}/a`, `${OTHER_ORIGIN}/b`, 'https://www.docs.example.org/c']);
+    });
+
+    it('dedupes a page that several sitemaps list, across sites', async () => {
+      mockSitemaps({
+        [`${ORIGIN}/a.xml`]: toUrlSet([`${OTHER_ORIGIN}/shared`, `${ORIGIN}/a`]),
+        [`${OTHER_ORIGIN}/b.xml`]: toUrlSet([`${OTHER_ORIGIN}/shared`, `${OTHER_ORIGIN}/b`]),
+      });
+
+      await expect(
+        discover({
+          declaredSitemaps: [`${ORIGIN}/a.xml`, `${OTHER_ORIGIN}/b.xml`],
+          siteKeys: [SITE_KEY, 'docs.example.org'],
+        })
+      ).resolves.toEqual([`${OTHER_ORIGIN}/shared`, `${ORIGIN}/a`, `${OTHER_ORIGIN}/b`]);
+    });
+
+    it('fills the page budget across the sites, in the order the sitemaps were declared', async () => {
+      mockSitemaps({
+        [`${ORIGIN}/a.xml`]: toUrlSet(toPages(3, 'a')),
+        [`${OTHER_ORIGIN}/b.xml`]: toUrlSet([`${OTHER_ORIGIN}/b-0`, `${OTHER_ORIGIN}/b-1`]),
+      });
+
+      await expect(
+        discover({
+          declaredSitemaps: [`${ORIGIN}/a.xml`, `${OTHER_ORIGIN}/b.xml`],
+          siteKeys: [SITE_KEY, 'docs.example.org'],
+          maxPages: 4,
+        })
+      ).resolves.toEqual([...toPages(3, 'a'), `${OTHER_ORIGIN}/b-0`]);
+    });
+  });
+
+  describe('maxRequests', () => {
+    const toSitemapUrls = (count: number): string[] =>
+      Array.from({ length: count }, (_, index) => `${ORIGIN}/sitemap-${index}.xml`);
+
+    beforeEach(() => {
+      fetchContent.mockImplementation(async (url) => toUrlSet([`${url.replace('.xml', '')}/page`]));
+    });
+
+    it('allows 3 requests by default', async () => {
+      expect(MAX_SITEMAP_REQUESTS).toBe(3);
+
+      await discover({ declaredSitemaps: toSitemapUrls(6) });
+
+      expect(getFetchedUrls()).toEqual(toSitemapUrls(6).slice(0, MAX_SITEMAP_REQUESTS));
+    });
+
+    it.each([1, 2, 4, 5])('fetches no more than %i of 6 declared sitemaps', async (maxRequests) => {
+      const declaredSitemaps = toSitemapUrls(6);
+
+      const pages = await discover({ declaredSitemaps, maxRequests });
+
+      expect(getFetchedUrls()).toEqual(declaredSitemaps.slice(0, maxRequests));
+      expect(pages).toEqual(
+        declaredSitemaps.slice(0, maxRequests).map((url) => `${url.replace('.xml', '')}/page`)
+      );
+    });
+
+    it('fetches every declared sitemap when the budget is larger than their number', async () => {
+      const declaredSitemaps = toSitemapUrls(4);
+
+      await expect(discover({ declaredSitemaps, maxRequests: 10 })).resolves.toHaveLength(4);
+      expect(getFetchedUrls()).toEqual(declaredSitemaps);
+    });
+
+    it('fetches nothing when no request is allowed', async () => {
+      await expect(
+        discover({ declaredSitemaps: toSitemapUrls(2), maxRequests: 0 })
+      ).resolves.toEqual([]);
+      expect(fetchContent).not.toHaveBeenCalled();
+    });
+
+    it('counts the sitemap index and the sitemaps it lists against the same budget', async () => {
+      const nested = toSitemapUrls(8);
+      fetchContent.mockImplementation(async (url) =>
+        url === SITEMAP_URL ? toSitemapIndex(nested) : toUrlSet([`${url.replace('.xml', '')}/page`])
+      );
+
+      const pages = await discover({ maxRequests: 5 });
+
+      expect(getFetchedUrls()).toEqual([SITEMAP_URL, ...nested.slice(0, 4)]);
+      expect(pages).toHaveLength(4);
+    });
+
+    it('leaves the requests the declared sitemaps did not use to the sitemaps they list', async () => {
+      const declaredSitemaps = [`${ORIGIN}/index-a.xml`, `${ORIGIN}/index-b.xml`];
+      const nested = toSitemapUrls(6);
+      mockSitemaps({
+        [declaredSitemaps[0]]: toSitemapIndex(nested.slice(0, 3)),
+        [declaredSitemaps[1]]: toSitemapIndex(nested.slice(3)),
+        ...Object.fromEntries(nested.map((url) => [url, toUrlSet([`${url}/page`])])),
+      });
+
+      await discover({ declaredSitemaps, maxRequests: declaredSitemaps.length + 3 });
+
+      expect(getFetchedUrls()).toEqual([...declaredSitemaps, ...nested.slice(0, 3)]);
+    });
+
+    it('does not spend a request on a sitemap that is declared twice', async () => {
+      const [first, second, third] = toSitemapUrls(3);
+
+      await discover({ declaredSitemaps: [first, first, second, third], maxRequests: 3 });
+
+      expect(getFetchedUrls()).toEqual([first, second, third]);
+    });
+
+    it('spends a request on a sitemap that cannot be read', async () => {
+      const declaredSitemaps = toSitemapUrls(4);
+      mockSitemaps({ [declaredSitemaps[2]]: toUrlSet(toPages(1)) });
+
+      await expect(discover({ declaredSitemaps, maxRequests: 2 })).resolves.toEqual([]);
+      expect(getFetchedUrls()).toEqual(declaredSitemaps.slice(0, 2));
+    });
+
+    it('still stops at maxPages before the requests are used up', async () => {
+      const nested = toSitemapUrls(8);
+      mockSitemaps({
+        [SITEMAP_URL]: toSitemapIndex([`${ORIGIN}/first.xml`]),
+        [`${ORIGIN}/first.xml`]: [toUrlSet(toPages(2)), toSitemapIndex(nested)].join('\n'),
+      });
+
+      await expect(discover({ maxRequests: 10, maxPages: 2 })).resolves.toEqual(toPages(2));
+      expect(getFetchedUrls()).toEqual([SITEMAP_URL, `${ORIGIN}/first.xml`]);
+    });
   });
 });

@@ -76,7 +76,26 @@ export const WebCrawlsPage = ({ onNavigateHome }: WebCrawlsPageContentProps) => 
   const handleStop = useCallback(({ id }: WebCrawl) => stopCrawl(id), [stopCrawl]);
   const handleDelete = useCallback(({ id }: WebCrawl) => deleteCrawl(id), [deleteCrawl]);
   const handleCrawlAgain = useCallback(
-    ({ url, maxDepth, maxDocuments }: WebCrawl) => startCrawl({ url, maxDepth, maxDocuments }),
+    ({
+      url,
+      maxDepth,
+      maxDocuments,
+      includePaths,
+      excludePaths,
+      indexName,
+      seedUrls,
+      sitemapUrls,
+    }: WebCrawl) =>
+      startCrawl({
+        url,
+        maxDepth,
+        maxDocuments,
+        includePaths,
+        excludePaths,
+        indexName,
+        seedUrls,
+        sitemapUrls,
+      }),
     [startCrawl]
   );
   const closeScheduleModal = () => {

@@ -18,3 +18,11 @@ export const WEB_CRAWL_DEFAULT_MAX_DOCUMENTS = 500;
 /** Upper bounds on what a single crawl may ask for. */
 export const WEB_CRAWL_MAX_DEPTH_LIMIT = 5;
 export const WEB_CRAWL_MAX_DOCUMENTS_LIMIT = 1000;
+/** Bounds on the path prefixes that narrow a crawl. */
+export const WEB_CRAWL_MAX_PATH_RULES = 20;
+export const WEB_CRAWL_MAX_PATH_RULE_LENGTH = 256;
+/** Bounds on the extra start URLs and the sitemap URLs a crawl can be given. */
+export const WEB_CRAWL_MAX_SEED_URLS = 20;
+export const WEB_CRAWL_MAX_SITEMAP_URLS = 20;
+export const WEB_CRAWL_MAX_URL_LENGTH = 2048;
+export const WEB_CRAWL_MAX_INDEX_NAME_LENGTH = 255;

@@ -7,7 +7,7 @@
 
 import { getSiteKey, isSameSitePage, iterateLinkTargets, normalizeUrl } from './links';
 
-const MAX_SITEMAP_REQUESTS = 3;
+export const MAX_SITEMAP_REQUESTS = 3;
 const LOC_OPEN = '<loc>';
 const LOC_CLOSE = '</loc>';
 
@@ -61,9 +61,10 @@ export interface SitemapEntries {
 export const parseSitemap = (
   content: string,
   sitemapUrl: string,
-  siteKey: string,
+  siteKeys: string | string[],
   maxPages: number
 ): SitemapEntries => {
+  const allowedSiteKeys = [siteKeys].flat();
   const pageUrls = new Set<string>();
   const sitemapUrls = new Set<string>();
 
@@ -77,7 +78,7 @@ export const parseSitemap = (
     }
     if (isSitemapUrl(url)) {
       sitemapUrls.add(url);
-    } else if (isSameSitePage(url, siteKey)) {
+    } else if (allowedSiteKeys.some((siteKey) => isSameSitePage(url, siteKey))) {
       pageUrls.add(url);
     }
   }
@@ -89,6 +90,10 @@ interface DiscoverSitemapPagesOptions {
   siteUrl: string;
   /** Sitemaps named by robots.txt. The conventional `/sitemap.xml` is tried when there are none. */
   declaredSitemaps: string[];
+  /** The sites whose pages are collected. Defaults to the site of `siteUrl`. */
+  siteKeys?: string[];
+  /** How many sitemaps may be requested. */
+  maxRequests?: number;
   maxPages: number;
   signal: AbortSignal;
   fetchContent: (url: string) => Promise<string | undefined>;
@@ -101,13 +106,14 @@ interface DiscoverSitemapPagesOptions {
 export const discoverSitemapPages = async ({
   siteUrl,
   declaredSitemaps,
+  siteKeys = [getSiteKey(siteUrl)],
+  maxRequests = MAX_SITEMAP_REQUESTS,
   maxPages,
   signal,
   fetchContent,
 }: DiscoverSitemapPagesOptions): Promise<string[]> => {
-  const siteKey = getSiteKey(siteUrl);
   const declared = declaredSitemaps
-    .map((sitemap) => normalizeUrl(sitemap, siteUrl))
+    .map((sitemap) => normalizeUrl(sitemap, siteUrl, { isDiscovered: false }))
     .filter((sitemap): sitemap is string => sitemap !== null);
   const queue = declared.length > 0 ? declared : [new URL('/sitemap.xml', siteUrl).href];
   const requested = new Set<string>();
@@ -115,12 +121,12 @@ export const discoverSitemapPages = async ({
 
   while (
     queue.length > 0 &&
-    requested.size < MAX_SITEMAP_REQUESTS &&
+    requested.size < maxRequests &&
     pages.size < maxPages &&
     !signal.aborted
   ) {
     const batch: string[] = [];
-    while (queue.length > 0 && requested.size < MAX_SITEMAP_REQUESTS) {
+    while (queue.length > 0 && requested.size < maxRequests) {
       const sitemapUrl = queue.shift();
       if (sitemapUrl !== undefined && !requested.has(sitemapUrl)) {
         requested.add(sitemapUrl);
@@ -136,7 +142,7 @@ export const discoverSitemapPages = async ({
       const { pageUrls, sitemapUrls } = parseSitemap(
         content,
         batch[position],
-        siteKey,
+        siteKeys,
         maxPages - pages.size
       );
       pageUrls.forEach((pageUrl) => pages.add(pageUrl));

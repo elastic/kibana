@@ -26,7 +26,14 @@ import {
   WEB_CRAWL_MAX_DOCUMENTS_LIMIT,
 } from '../../common/constants';
 import type { WebCrawl, WebCrawlScheduleRequest, WebCrawlScheduleUnit } from '../../common/types';
-import { isCrawlableUrl, isIntegerInRange } from '../validation';
+import {
+  arePathPrefixesValid,
+  isCrawlableUrl,
+  isIntegerInRange,
+  parsePathPrefixes,
+} from '../validation';
+import { INVALID_PATHS_MESSAGE, WebCrawlPathRules } from './web_crawl_path_rules';
+import { WebCrawlTargets, useCrawlTargetFields } from './web_crawl_targets';
 
 const MAX_INTERVAL = 365;
 
@@ -85,6 +92,13 @@ export const WebCrawlScheduleModal = ({
   const [maxDocuments, setMaxDocuments] = useState(
     crawl?.maxDocuments ?? WEB_CRAWL_DEFAULT_MAX_DOCUMENTS
   );
+  const [includePathsText, setIncludePathsText] = useState(crawl?.includePaths.join(', ') ?? '');
+  const [excludePathsText, setExcludePathsText] = useState(crawl?.excludePaths.join(', ') ?? '');
+  const includePaths = parsePathPrefixes(includePathsText);
+  const excludePaths = parsePathPrefixes(excludePathsText);
+  const isIncludeInvalid = !arePathPrefixesValid(includePaths);
+  const isExcludeInvalid = !arePathPrefixesValid(excludePaths);
+  const targetFields = useCrawlTargetFields();
   const [isUrlTouched, setIsUrlTouched] = useState(false);
   const trimmedUrl = url.trim();
   const isUrlInvalid = !isCrawlableUrl(trimmedUrl);
@@ -100,7 +114,25 @@ export const WebCrawlScheduleModal = ({
         defaultMessage: 'Schedule a recurring crawl',
       })}
       onCancel={onCancel}
-      onConfirm={() => onConfirm({ url: trimmedUrl, maxDepth, maxDocuments, every, unit })}
+      onConfirm={() =>
+        onConfirm({
+          url: trimmedUrl,
+          maxDepth,
+          maxDocuments,
+          includePaths,
+          excludePaths,
+          // A crawl's own values are repeated as they are; only typed ones are parsed.
+          ...(crawl
+            ? {
+                indexName: crawl.indexName,
+                seedUrls: crawl.seedUrls,
+                sitemapUrls: crawl.sitemapUrls,
+              }
+            : targetFields.targets),
+          every,
+          unit,
+        })
+      }
       cancelButtonText={i18n.translate('xpack.webCrawler.crawls.schedule.cancel', {
         defaultMessage: 'Cancel',
       })}
@@ -108,7 +140,13 @@ export const WebCrawlScheduleModal = ({
         defaultMessage: 'Create workflow',
       })}
       confirmButtonDisabled={
-        isEveryInvalid || isUrlInvalid || isMaxDepthInvalid || isMaxDocumentsInvalid
+        isEveryInvalid ||
+        isUrlInvalid ||
+        isMaxDepthInvalid ||
+        isMaxDocumentsInvalid ||
+        isIncludeInvalid ||
+        isExcludeInvalid ||
+        (!crawl && targetFields.isInvalid)
       }
       isLoading={isCreating}
       data-test-subj="webCrawlScheduleModal"
@@ -118,7 +156,7 @@ export const WebCrawlScheduleModal = ({
           {crawl
             ? i18n.translate('xpack.webCrawler.crawls.schedule.description', {
                 defaultMessage:
-                  'Creates a workflow that crawls {url} again on this interval, with the same depth and page limits. Change or pause it in Workflows.',
+                  'Creates a workflow that crawls {url} again on this interval, into the same index and with the same options. Change or pause it in Workflows.',
                 values: { url: crawl.url },
               })
             : i18n.translate('xpack.webCrawler.crawls.schedule.newDescription', {
@@ -191,6 +229,22 @@ export const WebCrawlScheduleModal = ({
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiFormRow
+            fullWidth
+            isInvalid={isIncludeInvalid || isExcludeInvalid}
+            error={INVALID_PATHS_MESSAGE}
+          >
+            <WebCrawlPathRules
+              includePaths={includePathsText}
+              excludePaths={excludePathsText}
+              isIncludeInvalid={isIncludeInvalid}
+              isExcludeInvalid={isExcludeInvalid}
+              onIncludePathsChange={setIncludePathsText}
+              onExcludePathsChange={setExcludePathsText}
+            />
+          </EuiFormRow>
+          <WebCrawlTargets fields={targetFields} />
+          <EuiSpacer size="m" />
         </>
       )}
       <EuiFormRow

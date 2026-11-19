@@ -38,7 +38,8 @@ panel.
 
 ## How a crawl works
 
-The panel takes a website URL and crawls it into a `web-crawl-<host>` index. The crawl runs as a
+The panel takes a website URL and crawls it into a `web-crawl-<host>` index, or into the index
+the user names. The crawl runs as a
 Task Manager task, so it survives the request, runs on background task nodes where a deployment has
 them, and stays off the request path. Kibana never fetches the site itself: each page is fetched and
 converted to markdown by a `document_extraction` inference endpoint, preferring the Elastic
@@ -53,7 +54,39 @@ sitemaps are read through the same inference endpoint as the pages.
 Each crawl takes a maximum depth (default 2, at most 5) and a maximum number of pages (default 500,
 at most 1000). The page maximum caps the pages requested, so it also caps the documents indexed.
 Each page is indexed once, keyed by its URL, with its markdown in `content` for full-text search and
-copied into the `semantic_text` field `content_semantic`.
+copied into the `semantic_text` field `content_semantic`. `url_host`, `url_path` and
+`url_path_dir1` to `url_path_dir3` hold the parts of the URL, for filtering by site section.
+
+A crawl can be narrowed with path prefixes: with `includePaths` only pages under one of them are
+followed, and pages under an `excludePaths` prefix never are. The URL the crawl starts from is always
+crawled. Links with more than 16 path segments or more than 10 query parameters are not followed, as
+those are mostly calendars and faceted listings. Each crawl counts the links it skipped because of
+`robots.txt` and because of the path rules.
+
+When `robots.txt` sets a `Crawl-delay`, requests to the site are spaced out by it, up to three
+seconds: a longer pause could not fit the largest crawl into the hour the task is given.
+
+### Several sites, one index
+
+A crawl writes to one index. By default that is `web-crawl-<host>` for the host of its URL; a
+crawl can name another one, which is how several sites end up in the same index. A crawl only
+writes into an index that does not exist yet or that a crawl created, and one crawl at a time runs
+into an index.
+
+A crawl can also be given more start URLs. They may be on other sites, and every site with a start
+URL is then crawled: each has its own `robots.txt`, `Crawl-delay` and sitemaps, and links are
+followed within the site of the page they are on. Explicit sitemap URLs are read besides the
+sitemaps the sites declare, and the pages they list are crawled when they are on one of those
+sites. A start URL its site's `robots.txt` disallows is skipped; the crawl fails only when none
+is allowed.
+
+### Pages that disappear
+
+A crawl that reads the whole site ends by deleting the documents earlier crawls indexed and it did
+not find again, so pages removed from the site leave the index. Documents deeper than the crawl went,
+and documents of sites the crawl had no start URL on, are left alone, so crawls of different sites
+into one index do not delete each other's pages. A crawl that failed on any page, reached the page maximum or was stopped deletes
+nothing, because it cannot tell a removed page from one it did not get to.
 
 ### How a crawl runs
 
@@ -61,9 +94,10 @@ Ten workers pull pages from a queue that always hands out the shallowest page fo
 keeps the crawl close to breadth-first without waiting for a whole depth level to finish, so one
 slow page costs one worker rather than the level. `robots.txt` is read first; the sitemaps are read
 while the first page is crawled. Indexing runs beside extraction: a bulk request goes out as soon as
-there is a page and nothing in flight, and under load up to three requests of twenty pages run at
-once. Extraction only waits when indexing has fallen a full set of requests behind. A rate-limited
-extraction is retried twice with a backoff.
+there is a page and nothing in flight, and under load up to three requests run at once, each closed
+at twenty pages or one megabyte of content, whichever comes first. Extraction only waits when
+indexing has fallen a full set of requests behind. A rate-limited extraction is retried twice with a
+backoff.
 
 ### Crawl state and history
 
@@ -74,8 +108,8 @@ seconds and reads a stop request back from the same document, and data streams a
 `.kibana*` prefix is already granted to the Kibana system user, so the index needs no registration
 in Elasticsearch. Fields are only ever added to its schema.
 
-Crawls of different sites run side by side. A site that is being crawled is not crawled again until
-that crawl ends. A crawl whose task disappeared without recording an outcome, as after a restart, is
+Crawls into different indices run side by side. An index that is being crawled into is not crawled
+into again until that crawl ends. A crawl whose task disappeared without recording an outcome, as after a restart, is
 reported as failed once it has been silent for a minute.
 
 The state index is written by the Kibana system user, so access is decided by the index a crawl
@@ -92,7 +126,7 @@ Recurring crawls are workflows. With the optional `workflowsExtensions` plugin, 
 registers the `webCrawl.run` step, which starts a crawl as the workflow's user and waits for it to
 finish, so later steps can use its outcome. The page creates a workflow with a scheduled trigger
 and that step, tagged `web-crawl`, either for a website entered in the "Schedule a crawl" dialog or,
-from a crawl's schedule action, for that crawl's website and limits. Pausing, changing and deleting
+from a crawl's schedule action, for that crawl's website, index and options. Pausing, changing and deleting
 a schedule happens in Workflows. Scheduling is offered to users who can create workflows.
 
 ## Public API

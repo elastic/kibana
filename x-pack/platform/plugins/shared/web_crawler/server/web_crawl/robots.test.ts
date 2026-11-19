@@ -15,10 +15,17 @@ const isAllowed = (robotsTxt: string, path: string, userAgent: string = USER_AGE
 
 const lines = (...content: string[]): string => content.join('\n');
 
+const getCrawlDelayMs = (robotsTxt: string, userAgent: string = USER_AGENT): number | undefined =>
+  parseRobotsTxt(robotsTxt, userAgent).crawlDelayMs;
+
 describe('ALLOW_ALL_ROBOTS', () => {
   it('allows every URL and declares no sitemap', () => {
     expect(ALLOW_ALL_ROBOTS.isAllowed(`${ORIGIN}/anything?at=all`)).toBe(true);
     expect(ALLOW_ALL_ROBOTS.sitemaps).toEqual([]);
+  });
+
+  it('asks for no crawl delay', () => {
+    expect(ALLOW_ALL_ROBOTS.crawlDelayMs).toBeUndefined();
   });
 });
 
@@ -479,6 +486,185 @@ describe('parseRobotsTxt', () => {
 
       expect(sitemaps).toHaveLength(20);
       expect(sitemaps[19]).toBe('https://example.com/sitemap-19.xml');
+    });
+  });
+
+  describe('crawl delay', () => {
+    it('returns the Crawl-delay of the `*` group in milliseconds when no group names the user agent', () => {
+      const robotsTxt = lines(
+        'User-agent: Googlebot',
+        'Crawl-delay: 7',
+        '',
+        'User-agent: *',
+        'Crawl-delay: 2'
+      );
+
+      expect(getCrawlDelayMs(robotsTxt)).toBe(2_000);
+    });
+
+    it.each([
+      [
+        'after',
+        ['User-agent: *', 'Crawl-delay: 9', '', 'User-agent: Elastic-Crawler', 'Crawl-delay: 4'],
+      ],
+      [
+        'before',
+        ['User-agent: Elastic-Crawler', 'Crawl-delay: 4', '', 'User-agent: *', 'Crawl-delay: 9'],
+      ],
+    ])(
+      'prefers the delay of the group naming the user agent when it comes %s the `*` group',
+      (_, content) => {
+        expect(getCrawlDelayMs(lines(...content))).toBe(4_000);
+      }
+    );
+
+    it('does not fall back to the delay of the `*` group when the group naming the user agent has none', () => {
+      const robotsTxt = lines(
+        'User-agent: *',
+        'Crawl-delay: 9',
+        '',
+        'User-agent: Elastic-Crawler',
+        'Disallow: /private'
+      );
+
+      expect(getCrawlDelayMs(robotsTxt)).toBeUndefined();
+    });
+
+    it('ignores the delay of a group for another user agent', () => {
+      const robotsTxt = lines(
+        'User-agent: Googlebot',
+        'Crawl-delay: 7',
+        '',
+        'User-agent: *',
+        'Disallow: /private'
+      );
+
+      expect(getCrawlDelayMs(robotsTxt)).toBeUndefined();
+      expect(getCrawlDelayMs(robotsTxt, 'Googlebot')).toBe(7_000);
+    });
+
+    it('returns no delay when none is declared', () => {
+      expect(getCrawlDelayMs('')).toBeUndefined();
+      expect(getCrawlDelayMs(lines('User-agent: *', 'Disallow: /private'))).toBeUndefined();
+    });
+
+    it.each([
+      ['0.5', 500],
+      ['1.5', 1_500],
+      ['0.001', 1],
+      ['10', 10_000],
+      ['  3  ', 3_000],
+      ['3 # be gentle', 3_000],
+      ['86400', 86_400_000],
+    ])('reads a Crawl-delay of "%s" seconds', (value, expectedDelayMs) => {
+      expect(getCrawlDelayMs(lines('User-agent: *', `Crawl-delay: ${value}`))).toBe(
+        expectedDelayMs
+      );
+    });
+
+    it.each([
+      '0',
+      '0.0',
+      '-1',
+      '-0.5',
+      '',
+      'soon',
+      '1s',
+      '1,5',
+      '1 2',
+      'NaN',
+      'Infinity',
+      '0x10',
+      '1e3',
+      '.5',
+      '5.',
+      '+2',
+    ])('ignores a Crawl-delay of "%s"', (value) => {
+      expect(getCrawlDelayMs(lines('User-agent: *', `Crawl-delay: ${value}`))).toBeUndefined();
+    });
+
+    it('keeps the earlier delay of a group when a later one is not a positive number', () => {
+      const robotsTxt = lines('User-agent: *', 'Crawl-delay: 2', 'Crawl-delay: 0');
+
+      expect(getCrawlDelayMs(robotsTxt)).toBe(2_000);
+    });
+
+    it('uses the last delay of a group that declares several', () => {
+      const robotsTxt = lines('User-agent: *', 'Crawl-delay: 2', 'Crawl-delay: 5');
+
+      expect(getCrawlDelayMs(robotsTxt)).toBe(5_000);
+    });
+
+    it('matches the field name case-insensitively', () => {
+      expect(getCrawlDelayMs(lines('User-agent: *', 'CRAWL-DELAY: 2'))).toBe(2_000);
+      expect(getCrawlDelayMs(lines('User-agent: *', 'crawl-delay:2'))).toBe(2_000);
+    });
+
+    it('applies the delay to every user agent line that introduces its group', () => {
+      const robotsTxt = lines(
+        'User-agent: Googlebot',
+        'User-agent: Elastic-Crawler',
+        'Crawl-delay: 6',
+        'Disallow: /private'
+      );
+
+      expect(getCrawlDelayMs(robotsTxt)).toBe(6_000);
+      expect(getCrawlDelayMs(robotsTxt, 'Googlebot')).toBe(6_000);
+      expect(getCrawlDelayMs(robotsTxt, 'Bingbot')).toBeUndefined();
+    });
+
+    it('reads the delay wherever it stands in its group', () => {
+      const robotsTxt = lines(
+        'User-agent: *',
+        'Disallow: /private',
+        'Crawl-delay: 2',
+        'Allow: /private/press'
+      );
+
+      expect(getCrawlDelayMs(robotsTxt)).toBe(2_000);
+      expect(isAllowed(robotsTxt, '/private')).toBe(false);
+      expect(isAllowed(robotsTxt, '/private/press')).toBe(true);
+    });
+
+    it('ends the user agent lines of a group, like a rule does', () => {
+      const robotsTxt = lines(
+        'User-agent: Elastic-Crawler',
+        'Crawl-delay: 2',
+        'User-agent: *',
+        'Disallow: /'
+      );
+
+      expect(getCrawlDelayMs(robotsTxt)).toBe(2_000);
+      expect(isAllowed(robotsTxt, '/anything')).toBe(true);
+      expect(isAllowed(robotsTxt, '/anything', 'Bingbot')).toBe(false);
+    });
+
+    it('ignores a delay that comes before any user agent line', () => {
+      expect(
+        getCrawlDelayMs(lines('Crawl-delay: 2', 'User-agent: *', 'Disallow:'))
+      ).toBeUndefined();
+    });
+
+    it('merges the delay of the groups that name the same user agent', () => {
+      const robotsTxt = lines(
+        'User-agent: Elastic-Crawler',
+        'Disallow: /private',
+        '',
+        'User-agent: Googlebot',
+        'Crawl-delay: 9',
+        '',
+        'User-agent: Elastic-Crawler',
+        'Crawl-delay: 3'
+      );
+
+      expect(getCrawlDelayMs(robotsTxt)).toBe(3_000);
+      expect(isAllowed(robotsTxt, '/private')).toBe(false);
+    });
+
+    it('handles CRLF line endings', () => {
+      expect(getCrawlDelayMs('User-agent: *\r\nCrawl-delay: 2\r\nDisallow: /private\r\n')).toBe(
+        2_000
+      );
     });
   });
 

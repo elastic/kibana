@@ -42,6 +42,13 @@ const crawlStorageSettings = {
       cancel_requested: types.boolean({}),
       started_by: types.keyword({}),
       workflow_id: types.keyword({}),
+      include_paths: types.keyword({}),
+      exclude_paths: types.keyword({}),
+      seed_urls: types.keyword({ ignore_above: 2048 }),
+      sitemap_urls: types.keyword({ ignore_above: 2048 }),
+      skipped_robots_count: types.long({}),
+      skipped_rules_count: types.long({}),
+      purged_count: types.long({}),
     },
   },
 } satisfies IndexStorageSettings;
@@ -66,6 +73,14 @@ export interface CrawlDocument {
   started_by?: string;
   /** Set when a workflow step started the crawl. */
   workflow_id?: string;
+  include_paths?: string[];
+  exclude_paths?: string[];
+  /** The pages the crawl started from besides `url`. */
+  seed_urls?: string[];
+  sitemap_urls?: string[];
+  skipped_robots_count?: number;
+  skipped_rules_count?: number;
+  purged_count?: number;
 }
 
 export interface StoredCrawl extends CrawlDocument {

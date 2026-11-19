@@ -7,17 +7,22 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createBulkIndexer } from './bulk_indexer';
-import { extractPage } from './document_extraction';
-import { extractLinks } from './links';
+import { extractPage, waitFor } from './document_extraction';
+import { extractLinks, getSiteKey, getUrlFields } from './links';
+import type { PathRules } from './path_rules';
+import { NO_PATH_RULES, isPathAllowed } from './path_rules';
+import { purgeStaleDocuments } from './purge';
 import type { RobotsRules } from './robots';
 import { ALLOW_ALL_ROBOTS, parseRobotsTxt } from './robots';
-import { discoverSitemapPages } from './sitemap';
+import { MAX_SITEMAP_REQUESTS, discoverSitemapPages } from './sitemap';
 
 export const EXTRACTION_CONCURRENCY = 10;
 const MAX_CONTENT_LENGTH = 500_000;
 // Pages are fetched by the inference endpoint, so this only selects which robots.txt group applies.
 export const ROBOTS_USER_AGENT = 'Elastic-Crawler';
 const ROBOTS_CHECKS_PER_TICK = 100;
+// A longer pause could not fit the largest crawl into the time the crawl task is given.
+export const MAX_CRAWL_DELAY_MS = 3_000;
 
 export interface CrawlProgress {
   documentsCount: number;
@@ -26,6 +31,10 @@ export interface CrawlProgress {
   requestedCount: number;
   /** Pages found and waiting for a free extraction slot. */
   queuedCount: number;
+  /** Links not followed because robots.txt disallows them. */
+  skippedByRobotsCount: number;
+  /** Links not followed because of the path rules. */
+  skippedByRulesCount: number;
 }
 
 export interface CrawlOptions {
@@ -33,11 +42,17 @@ export interface CrawlOptions {
   logger: Logger;
   signal: AbortSignal;
   url: string;
+  /** More pages to start from, on the site of `url` or on other sites. */
+  additionalSeedUrls?: string[];
+  /** Sitemaps to read besides the ones the sites declare. */
+  sitemapUrls?: string[];
   indexName: string;
   inferenceId: string;
   crawlId: string;
   maxDepth: number;
   maxDocuments: number;
+  /** Narrow the links the crawl follows. The URL it starts from is always crawled. */
+  pathRules?: PathRules;
   /** Called synchronously whenever the counts change, so it has to be cheap. */
   onProgress?: (progress: CrawlProgress) => void;
 }
@@ -45,6 +60,10 @@ export interface CrawlOptions {
 export interface CrawlResult {
   documentsCount: number;
   failedCount: number;
+  skippedByRobotsCount: number;
+  skippedByRulesCount: number;
+  /** Pages of earlier crawls that were deleted because this crawl did not find them again. */
+  purgedCount: number;
   aborted: boolean;
 }
 
@@ -63,25 +82,41 @@ const yieldToEventLoop = (): Promise<void> => new Promise((resolve) => setImmedi
  * depth level. Indexing runs alongside extraction rather than in between it.
  *
  * At most `maxDocuments` pages are requested, so that is also the ceiling on indexed documents.
- * robots.txt is read first and honoured for every page. The sitemaps are read while the seed page
+ * The crawl starts from one or more pages, and stays on the sites those pages are on. The
+ * robots.txt of every site is read first and honoured for its pages, as is the pause between
+ * requests it asks for, up to a limit. The sitemaps are read while the seed page
  * is crawled, and the pages they list join the links of the seed page at depth 1. Pages,
  * robots.txt and sitemaps are all fetched by the inference endpoint; the work left on this process
  * is parsing, which yields to the event loop as it goes.
+ *
+ * A crawl that read the whole site without a failure ends by deleting the pages earlier crawls
+ * indexed and this one did not find. One that failed on a page, hit the page limit or was stopped
+ * cannot tell a removed page from one it did not get to, so it deletes nothing.
  */
 export const crawlSite = async ({
   esClient,
   logger,
   signal: taskSignal,
   url,
+  additionalSeedUrls = [],
+  sitemapUrls = [],
   indexName,
   inferenceId,
   crawlId,
   maxDepth,
   maxDocuments,
+  pathRules = NO_PATH_RULES,
   onProgress,
 }: CrawlOptions): Promise<CrawlResult> => {
   if (taskSignal.aborted) {
-    return { documentsCount: 0, failedCount: 0, aborted: true };
+    return {
+      documentsCount: 0,
+      failedCount: 0,
+      skippedByRobotsCount: 0,
+      skippedByRulesCount: 0,
+      purgedCount: 0,
+      aborted: true,
+    };
   }
 
   // Aborted with the task, and on an indexing error that makes further requests pointless.
@@ -90,15 +125,28 @@ export const crawlSite = async ({
   const abortCrawl = () => crawlAbort.abort();
   taskSignal.addEventListener('abort', abortCrawl, { once: true });
 
-  const seen = new Set<string>([url]);
+  const seedUrls = [...new Set([url, ...additionalSeedUrls])];
+  // The first start URL of each site, which is where that site's robots.txt and sitemap are looked for.
+  const siteSeeds = new Map<string, string>();
+  for (const seedUrl of seedUrls) {
+    const siteKey = getSiteKey(seedUrl);
+    if (!siteSeeds.has(siteKey)) {
+      siteSeeds.set(siteKey, seedUrl);
+    }
+  }
+  // Sitemaps a page links to are not pages to crawl.
+  const seen = new Set<string>([...seedUrls, ...sitemapUrls]);
   const queues: string[][] = Array.from({ length: maxDepth + 1 }, () => []);
   const queueCursors: number[] = queues.map(() => 0);
-  queues[0].push(url);
   let idleWorkers: Array<() => void> = [];
   let requestedCount = 0;
   let inFlightCount = 0;
   let isDiscoveringSitemaps = false;
   let extractionFailedCount = 0;
+  let skippedByRobotsCount = 0;
+  let skippedByRulesCount = 0;
+  let purgedCount = 0;
+  const nextRequestAtBySite = new Map<string, number>();
   let lastPageError: Error | undefined;
   let fatalError: Error | undefined;
 
@@ -137,6 +185,8 @@ export const crawlSite = async ({
         failedCount: failedCount + extractionFailedCount,
         requestedCount,
         queuedCount: Math.min(getQueuedCount(), maxDocuments - requestedCount),
+        skippedByRobotsCount,
+        skippedByRulesCount,
       });
     } catch (error) {
       logger.debug(`Web crawl progress could not be reported: ${error.message}`);
@@ -162,16 +212,41 @@ export const crawlSite = async ({
 
   try {
     // A robots.txt that cannot be read is treated as absent, which allows everything.
-    const robotsUrl = new URL('/robots.txt', url).href;
-    seen.add(robotsUrl);
-    const robotsContent = await fetchContent(robotsUrl);
-    const robots: RobotsRules = robotsContent
-      ? parseRobotsTxt(robotsContent, ROBOTS_USER_AGENT)
-      : ALLOW_ALL_ROBOTS;
+    const robotsBySite = new Map<string, RobotsRules>();
+    await Promise.all(
+      [...siteSeeds].map(async ([siteKey, seedUrl]) => {
+        const robotsUrl = new URL('/robots.txt', seedUrl).href;
+        seen.add(robotsUrl);
+        const robotsContent = await fetchContent(robotsUrl);
+        robotsBySite.set(
+          siteKey,
+          robotsContent ? parseRobotsTxt(robotsContent, ROBOTS_USER_AGENT) : ALLOW_ALL_ROBOTS
+        );
+      })
+    );
+    const getRobots = (pageUrl: string): RobotsRules =>
+      robotsBySite.get(getSiteKey(pageUrl)) ?? ALLOW_ALL_ROBOTS;
 
-    if (!robots.isAllowed(url)) {
-      throw new Error(`The site's robots.txt does not allow crawling ${url}`);
+    const allowedSeedUrls = seedUrls.filter((seedUrl) => getRobots(seedUrl).isAllowed(seedUrl));
+    if (allowedSeedUrls.length === 0) {
+      throw new Error(
+        seedUrls.length === 1
+          ? `The site's robots.txt does not allow crawling ${url}`
+          : 'The robots.txt of the sites does not allow crawling any of the start URLs'
+      );
     }
+    skippedByRobotsCount += seedUrls.length - allowedSeedUrls.length;
+    queues[0].push(...allowedSeedUrls);
+
+    // Spaces out the requests of all workers to a site by the pause that site asked for.
+    const waitForRequestSlot = async (siteKey: string, crawlDelayMs: number) => {
+      const now = Date.now();
+      const startAt = Math.max(now, nextRequestAtBySite.get(siteKey) ?? 0);
+      nextRequestAtBySite.set(siteKey, startAt + crawlDelayMs);
+      if (startAt > now) {
+        await waitFor(startAt - now, signal);
+      }
+    };
 
     const enqueue = async (links: string[], depth: number) => {
       const queue = queues[depth];
@@ -185,7 +260,11 @@ export const crawlSite = async ({
           continue;
         }
         seen.add(link);
-        if (robots.isAllowed(link)) {
+        if (!isPathAllowed(link, pathRules)) {
+          skippedByRulesCount++;
+        } else if (!getRobots(link).isAllowed(link)) {
+          skippedByRobotsCount++;
+        } else {
           queue.push(link);
         }
         if (++checks % ROBOTS_CHECKS_PER_TICK === 0) {
@@ -208,17 +287,26 @@ export const crawlSite = async ({
       return undefined;
     };
 
-    let markSeedCrawled: () => void = () => {};
-    const seedCrawled = new Promise<void>((resolve) => {
-      markSeedCrawled = resolve;
+    let markSeedsCrawled: () => void = () => {};
+    const seedsCrawled = new Promise<void>((resolve) => {
+      markSeedsCrawled = resolve;
     });
-    signal.addEventListener('abort', markSeedCrawled, { once: true });
+    // Start URLs past the page limit are never requested, so they are not waited for.
+    let pendingSeedCount = Math.min(allowedSeedUrls.length, maxDocuments);
+    signal.addEventListener('abort', markSeedsCrawled, { once: true });
     // An abort while robots.txt was read happened before the listener was there.
     if (signal.aborted) {
-      markSeedCrawled();
+      markSeedsCrawled();
     }
 
     const crawlPage = async ({ pageUrl, depth }: QueuedPage) => {
+      const crawlDelayMs = Math.min(getRobots(pageUrl).crawlDelayMs ?? 0, MAX_CRAWL_DELAY_MS);
+      if (crawlDelayMs > 0) {
+        await waitForRequestSlot(getSiteKey(pageUrl), crawlDelayMs);
+        if (signal.aborted) {
+          return;
+        }
+      }
       let page;
       try {
         page = await extractPage(esClient, { inferenceId, url: pageUrl, signal });
@@ -248,6 +336,7 @@ export const crawlSite = async ({
         depth,
         crawl_id: crawlId,
         crawled_at: new Date().toISOString(),
+        ...getUrlFields(pageUrl),
       });
     };
 
@@ -260,8 +349,8 @@ export const crawlSite = async ({
             await crawlPage(page);
           } finally {
             inFlightCount--;
-            if (page.depth === 0) {
-              markSeedCrawled();
+            if (page.depth === 0 && --pendingSeedCount === 0) {
+              markSeedsCrawled();
             }
             reportProgress();
             wakeWorkers();
@@ -292,15 +381,35 @@ export const crawlSite = async ({
       }
       isDiscoveringSitemaps = true;
       try {
-        const sitemapPages = await discoverSitemapPages({
-          siteUrl: url,
-          declaredSitemaps: robots.sitemaps,
+        const discovery = {
           maxPages: maxDocuments,
           signal: sitemapAbort.signal,
-          fetchContent: (sitemapUrl) => fetchContent(sitemapUrl, sitemapAbort.signal),
-        });
-        // The links of the seed page come first, as they are what the user pointed the crawl at.
-        await seedCrawled;
+          fetchContent: (sitemapUrl: string) => fetchContent(sitemapUrl, sitemapAbort.signal),
+        };
+        const sitemapPages = (
+          await Promise.all([
+            ...(sitemapUrls.length > 0
+              ? [
+                  discoverSitemapPages({
+                    ...discovery,
+                    siteUrl: url,
+                    declaredSitemaps: sitemapUrls,
+                    siteKeys: [...siteSeeds.keys()],
+                    maxRequests: sitemapUrls.length + MAX_SITEMAP_REQUESTS,
+                  }),
+                ]
+              : []),
+            ...[...siteSeeds].map(([siteKey, seedUrl]) =>
+              discoverSitemapPages({
+                ...discovery,
+                siteUrl: seedUrl,
+                declaredSitemaps: robotsBySite.get(siteKey)?.sitemaps ?? [],
+              })
+            ),
+          ])
+        ).flat();
+        // The links of the start pages come first, as they are what the user pointed the crawl at.
+        await seedsCrawled;
         if (!sitemapAbort.signal.aborted) {
           await enqueue(sitemapPages, 1);
         }
@@ -324,6 +433,34 @@ export const crawlSite = async ({
     } else {
       await indexer.drain();
     }
+
+    const { documentsCount: indexedCount, failedCount: indexingFailedCount } = indexer.getCounts();
+    const sawWholeSite =
+      !signal.aborted &&
+      indexedCount > 0 &&
+      extractionFailedCount === 0 &&
+      indexingFailedCount === 0 &&
+      requestedCount < maxDocuments;
+    if (sawWholeSite) {
+      try {
+        purgedCount = await purgeStaleDocuments({
+          esClient,
+          signal,
+          indexName,
+          crawlId,
+          maxDepth,
+          // A site none of whose start URLs could be crawled was not read, so its pages stay.
+          hosts: [...new Set(allowedSeedUrls.map(getSiteKey))].flatMap((siteKey) => [
+            siteKey,
+            `www.${siteKey}`,
+          ]),
+        });
+      } catch (error) {
+        logger.warn(
+          `Web crawl of ${url} could not remove outdated pages from ${indexName}: ${error.message}`
+        );
+      }
+    }
   } finally {
     taskSignal.removeEventListener('abort', abortCrawl);
   }
@@ -342,6 +479,9 @@ export const crawlSite = async ({
   return {
     documentsCount,
     failedCount: failedCount + extractionFailedCount,
+    skippedByRobotsCount,
+    skippedByRulesCount,
+    purgedCount,
     aborted: taskSignal.aborted,
   };
 };

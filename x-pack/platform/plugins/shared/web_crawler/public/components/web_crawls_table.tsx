@@ -95,10 +95,21 @@ export const WebCrawlsTable = ({
         }),
         truncateText: true,
         sortable: true,
-        render: (url: string) => (
-          <EuiLink href={url} target="_blank" external>
-            {url}
-          </EuiLink>
+        render: (url: string, { seedUrls }: WebCrawl) => (
+          <>
+            <EuiLink href={url} target="_blank" external>
+              {url}
+            </EuiLink>
+            {seedUrls.length > 0 && (
+              <EuiText size="xs" color="subdued" data-test-subj="webCrawlsMoreStartUrls">
+                {i18n.translate('xpack.webCrawler.crawls.moreStartUrls', {
+                  defaultMessage:
+                    'and {count, plural, one {# more start URL} other {# more start URLs}}',
+                  values: { count: seedUrls.length },
+                })}
+              </EuiText>
+            )}
+          </>
         ),
       },
       {
@@ -139,7 +150,16 @@ export const WebCrawlsTable = ({
         sortable: true,
         render: (
           documentsCount: number,
-          { status, failedCount, queuedCount, requestedCount, maxDocuments }: WebCrawl
+          {
+            status,
+            failedCount,
+            queuedCount,
+            requestedCount,
+            maxDocuments,
+            purgedCount,
+            skippedByRobotsCount,
+            skippedByRulesCount,
+          }: WebCrawl
         ) => (
           <EuiText size="s">
             {status === 'running'
@@ -154,9 +174,25 @@ export const WebCrawlsTable = ({
                 })
               : i18n.translate('xpack.webCrawler.crawls.pages.finished', {
                   defaultMessage:
-                    '{documentsCount} of at most {maxDocuments} indexed{failedCount, plural, =0 {} other {, # failed}}',
-                  values: { documentsCount, maxDocuments, failedCount },
+                    '{documentsCount} of at most {maxDocuments} indexed{failedCount, plural, =0 {} other {, # failed}}{purgedCount, plural, =0 {} other {, # removed}}',
+                  values: { documentsCount, maxDocuments, failedCount, purgedCount },
                 })}
+            {status !== 'running' && requestedCount >= maxDocuments && (
+              <EuiText size="xs" color="subdued" data-test-subj="webCrawlsPageLimitReached">
+                {i18n.translate('xpack.webCrawler.crawls.pages.limitReached', {
+                  defaultMessage: 'Page limit reached',
+                })}
+              </EuiText>
+            )}
+            {skippedByRobotsCount + skippedByRulesCount > 0 && (
+              <EuiText size="xs" color="subdued" data-test-subj="webCrawlsSkipped">
+                {i18n.translate('xpack.webCrawler.crawls.pages.skipped', {
+                  defaultMessage:
+                    'Skipped links: {skippedByRobotsCount} by robots.txt, {skippedByRulesCount} by path rules',
+                  values: { skippedByRobotsCount, skippedByRulesCount },
+                })}
+              </EuiText>
+            )}
           </EuiText>
         ),
       },

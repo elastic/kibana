@@ -152,6 +152,131 @@ describe('useWebCrawl', () => {
     });
   });
 
+  it('posts the path rules of a request', async () => {
+    http.post.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+    http.get.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+
+    const { result } = renderWebCrawl();
+
+    act(() => {
+      result.current.startCrawl({
+        ...startRequest,
+        includePaths: ['/docs', '/blog'],
+        excludePaths: ['/docs/archive'],
+      });
+    });
+
+    await waitFor(() => expect(result.current.crawl?.id).toBe(CRAWL_ID));
+    expect(http.post).toHaveBeenCalledTimes(1);
+    expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+      body: JSON.stringify({
+        url: 'https://example.com',
+        maxDepth: 3,
+        maxDocuments: 250,
+        includePaths: ['/docs', '/blog'],
+        excludePaths: ['/docs/archive'],
+      }),
+    });
+  });
+
+  it('posts the index, start URLs and sitemap URLs of a request', async () => {
+    http.post.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+    http.get.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+
+    const { result } = renderWebCrawl();
+
+    act(() => {
+      result.current.startCrawl({
+        ...startRequest,
+        indexName: 'docs',
+        seedUrls: ['https://example.com/blog', 'https://docs.example.com/x,y'],
+        sitemapUrls: ['https://example.com/sitemap-docs.xml'],
+      });
+    });
+
+    await waitFor(() => expect(result.current.crawl?.id).toBe(CRAWL_ID));
+    expect(http.post).toHaveBeenCalledTimes(1);
+    expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+      body: JSON.stringify({
+        url: 'https://example.com',
+        maxDepth: 3,
+        maxDocuments: 250,
+        indexName: 'docs',
+        seedUrls: ['https://example.com/blog', 'https://docs.example.com/x,y'],
+        sitemapUrls: ['https://example.com/sitemap-docs.xml'],
+      }),
+    });
+  });
+
+  it('posts empty URL lists as given and leaves an undefined index name out', async () => {
+    http.post.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+    http.get.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+
+    const { result } = renderWebCrawl();
+
+    act(() => {
+      result.current.startCrawl({
+        url: 'https://example.com',
+        indexName: undefined,
+        seedUrls: [],
+        sitemapUrls: [],
+      });
+    });
+
+    await waitFor(() => expect(result.current.crawl?.id).toBe(CRAWL_ID));
+    expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+      body: '{"url":"https://example.com","seedUrls":[],"sitemapUrls":[]}',
+    });
+  });
+
+  it('exposes the index, start URLs and sitemap URLs of the crawl it follows', async () => {
+    const crawl = createWebCrawl({
+      status: 'completed',
+      indexName: 'docs',
+      seedUrls: ['https://example.com/blog', 'https://docs.example.com'],
+      sitemapUrls: ['https://example.com/sitemap-docs.xml'],
+    });
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(crawl.id));
+    http.get.mockResolvedValue(crawl);
+
+    const { result } = renderWebCrawl();
+
+    await waitFor(() => expect(result.current.crawl).toEqual(crawl));
+  });
+
+  it('posts empty path rules as given, without dropping them', async () => {
+    http.post.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+    http.get.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+
+    const { result } = renderWebCrawl();
+
+    act(() => {
+      result.current.startCrawl({ url: 'https://example.com', includePaths: [], excludePaths: [] });
+    });
+
+    await waitFor(() => expect(result.current.crawl?.id).toBe(CRAWL_ID));
+    expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+      body: JSON.stringify({ url: 'https://example.com', includePaths: [], excludePaths: [] }),
+    });
+  });
+
+  it('exposes the path rules and skip counts of the crawl it follows', async () => {
+    const crawl = createWebCrawl({
+      status: 'completed',
+      includePaths: ['/docs'],
+      excludePaths: ['/tags'],
+      skippedByRobotsCount: 2,
+      skippedByRulesCount: 5,
+      purgedCount: 1,
+    });
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(crawl.id));
+    http.get.mockResolvedValue(crawl);
+
+    const { result } = renderWebCrawl();
+
+    await waitFor(() => expect(result.current.crawl).toEqual(crawl));
+  });
+
   it("surfaces the server's message when starting fails", async () => {
     http.post.mockRejectedValue(createHttpError('The URL is not reachable'));
 

@@ -57,6 +57,11 @@ export const getWebCrawlStepDefinition = ({ getStartServices, logger }: WebCrawl
         url: input.url,
         maxDepth: input.max_depth ?? WEB_CRAWL_DEFAULT_MAX_DEPTH,
         maxDocuments: input.max_documents ?? WEB_CRAWL_DEFAULT_MAX_DOCUMENTS,
+        includePaths: input.include_paths,
+        excludePaths: input.exclude_paths,
+        indexName: input.index_name,
+        seedUrls: input.seed_urls,
+        sitemapUrls: input.sitemap_urls,
         startedBy: execution.executedBy,
         workflowId: workflow.id,
       });
@@ -80,6 +85,7 @@ export const getWebCrawlStepDefinition = ({ getStartServices, logger }: WebCrawl
               status: crawl.status,
               documents_count: crawl.documents_count,
               failed_count: crawl.failed_count,
+              purged_count: crawl.purged_count ?? 0,
             },
           };
       }

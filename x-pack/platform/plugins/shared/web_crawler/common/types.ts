@@ -13,6 +13,16 @@ export interface WebCrawlStartRequest {
   maxDepth?: number;
   /** How many pages the crawl may request and index. Defaults to 500. */
   maxDocuments?: number;
+  /** Path prefixes, such as `/docs`. When given, only pages under one of them are crawled. */
+  includePaths?: string[];
+  /** Path prefixes whose pages are not crawled. They win over `includePaths`. */
+  excludePaths?: string[];
+  /** The index to crawl into. Defaults to `web-crawl-<host of url>`. */
+  indexName?: string;
+  /** More pages to start from besides `url`, on the same site or on other sites. */
+  seedUrls?: string[];
+  /** Sitemaps to read besides the ones the sites declare. */
+  sitemapUrls?: string[];
 }
 
 export interface WebCrawl {
@@ -22,6 +32,11 @@ export interface WebCrawl {
   status: WebCrawlStatus;
   maxDepth: number;
   maxDocuments: number;
+  includePaths: string[];
+  excludePaths: string[];
+  /** The pages the crawl started from besides `url`. */
+  seedUrls: string[];
+  sitemapUrls: string[];
   documentsCount: number;
   /** Pages that could not be extracted or indexed. */
   failedCount: number;
@@ -29,6 +44,12 @@ export interface WebCrawl {
   requestedCount: number;
   /** Pages found and still waiting to be requested. */
   queuedCount: number;
+  /** Links the crawl did not follow because the site's robots.txt disallows them. */
+  skippedByRobotsCount: number;
+  /** Links the crawl did not follow because of `includePaths` and `excludePaths`. */
+  skippedByRulesCount: number;
+  /** Pages removed from the index because this crawl no longer found them. */
+  purgedCount: number;
   startedAt: string;
   finishedAt?: string;
   error?: string;

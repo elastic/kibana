@@ -28,6 +28,7 @@ import {
   renderWithWebCrawlerContext,
 } from '../test_utils';
 import { WebCrawlPanel } from './web_crawl_panel';
+import { INVALID_PATHS_MESSAGE } from './web_crawl_path_rules';
 
 const INDEX_NAME = 'web-crawl-example-com';
 const STORAGE_KEY = `${TEST_STORAGE_KEY_PREFIX}.${WEB_CRAWL_ID_KEY_SUFFIX}`;
@@ -62,8 +63,37 @@ describe('WebCrawlPanel', () => {
   const getMaxDepthInput = () => screen.getByTestId('webCrawlMaxDepth');
   const getMaxDocumentsInput = () => screen.getByTestId('webCrawlMaxDocuments');
 
-  const expectStartRequest = (request: WebCrawlStartRequest) =>
-    expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, { body: JSON.stringify(request) });
+  const getIncludePathsInput = () => screen.getByTestId('webCrawlIncludePaths');
+  const getExcludePathsInput = () => screen.getByTestId('webCrawlExcludePaths');
+
+  const getIndexNameInput = () => screen.getByTestId('webCrawlIndexName');
+  const getSeedUrlsInput = () => screen.getByTestId('webCrawlSeedUrls');
+  const getSitemapUrlsInput = () => screen.getByTestId('webCrawlSitemapUrls');
+
+  // The form always sends the path and URL lists, empty when the user entered none, and the index
+  // name only when the user entered one.
+  const expectStartRequest = ({
+    url,
+    maxDepth,
+    maxDocuments,
+    includePaths = [],
+    excludePaths = [],
+    indexName,
+    seedUrls = [],
+    sitemapUrls = [],
+  }: WebCrawlStartRequest) =>
+    expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+      body: JSON.stringify({
+        url,
+        maxDepth,
+        maxDocuments,
+        includePaths,
+        excludePaths,
+        indexName,
+        seedUrls,
+        sitemapUrls,
+      }),
+    });
 
   const submitUrl = (url: string) => {
     fireEvent.change(getUrlInput(), { target: { value: url } });
@@ -91,6 +121,17 @@ describe('WebCrawlPanel', () => {
     expect(getMaxDocumentsInput()).toBeEnabled();
     expect(getMaxDocumentsInput()).toHaveValue(WEB_CRAWL_DEFAULT_MAX_DOCUMENTS);
     expect(getMaxDocumentsInput()).not.toHaveAttribute('aria-invalid', 'true');
+    expect(getIncludePathsInput()).toBeEnabled();
+    expect(getIncludePathsInput()).toHaveValue('');
+    expect(getIncludePathsInput()).not.toBeInvalid();
+    expect(getExcludePathsInput()).toBeEnabled();
+    expect(getExcludePathsInput()).toHaveValue('');
+    expect(getExcludePathsInput()).not.toBeInvalid();
+    for (const input of [getIndexNameInput(), getSeedUrlsInput(), getSitemapUrlsInput()]) {
+      expect(input).toBeEnabled();
+      expect(input).toHaveValue('');
+      expect(input).not.toBeInvalid();
+    }
     expect(getSubmitButton()).toHaveAttribute('data-telemetry-id', 'testHost-home-webCrawl-start');
     expect(screen.queryByTestId('webCrawlStatus')).not.toBeInTheDocument();
     expect(http.get).not.toHaveBeenCalled();
@@ -110,6 +151,19 @@ describe('WebCrawlPanel', () => {
         name: `Maximum number of pages to index, 1 to ${WEB_CRAWL_MAX_DOCUMENTS_LIMIT}`,
       })
     ).toBe(getMaxDocumentsInput());
+    expect(
+      screen.getByRole('textbox', {
+        name: 'Only crawl pages under these paths, separated by commas',
+      })
+    ).toBe(getIncludePathsInput());
+    expect(
+      screen.getByRole('textbox', {
+        name: 'Do not crawl pages under these paths, separated by commas',
+      })
+    ).toBe(getExcludePathsInput());
+    expect(screen.getByRole('textbox', { name: 'Index' })).toBe(getIndexNameInput());
+    expect(screen.getByRole('textbox', { name: 'More start URLs' })).toBe(getSeedUrlsInput());
+    expect(screen.getByRole('textbox', { name: 'Sitemap URLs' })).toBe(getSitemapUrlsInput());
     expect(screen.getByRole('button', { name: 'Crawl' })).toBe(getSubmitButton());
   });
 
@@ -230,6 +284,460 @@ describe('WebCrawlPanel', () => {
     });
   });
 
+  describe('path rules', () => {
+    const createPaths = (count: number) =>
+      Array.from({ length: count }, (_, index) => `/p${index}`);
+    const setIncludePaths = (value: string) =>
+      fireEvent.change(getIncludePathsInput(), { target: { value } });
+    const setExcludePaths = (value: string) =>
+      fireEvent.change(getExcludePathsInput(), { target: { value } });
+
+    beforeEach(() => {
+      http.post.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+      http.get.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+    });
+
+    it('submits empty path lists when the paths are untouched', async () => {
+      renderPanel();
+
+      submitUrl('https://example.com');
+
+      await screen.findByTestId('webCrawlStatus');
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({
+          url: 'https://example.com',
+          maxDepth: WEB_CRAWL_DEFAULT_MAX_DEPTH,
+          maxDocuments: WEB_CRAWL_DEFAULT_MAX_DOCUMENTS,
+          includePaths: [],
+          excludePaths: [],
+          seedUrls: [],
+          sitemapUrls: [],
+        }),
+      });
+    });
+
+    it('submits the paths the user entered, without blanks or duplicates', async () => {
+      renderPanel();
+      setIncludePaths('/docs, /blog,/docs  /guide,');
+      setExcludePaths(' /docs/archive\t/tags ');
+
+      submitUrl('https://example.com');
+
+      await screen.findByTestId('webCrawlStatus');
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expectStartRequest({
+        url: 'https://example.com',
+        maxDepth: 2,
+        maxDocuments: 500,
+        includePaths: ['/docs', '/blog', '/guide'],
+        excludePaths: ['/docs/archive', '/tags'],
+      });
+    });
+
+    it('submits the paths along with the limits the user entered', async () => {
+      renderPanel();
+      fireEvent.change(getMaxDepthInput(), { target: { value: '1' } });
+      fireEvent.change(getMaxDocumentsInput(), { target: { value: '30' } });
+      setExcludePaths('/search');
+
+      submitUrl('https://example.com');
+
+      await screen.findByTestId('webCrawlStatus');
+      expectStartRequest({
+        url: 'https://example.com',
+        maxDepth: 1,
+        maxDocuments: 30,
+        includePaths: [],
+        excludePaths: ['/search'],
+      });
+    });
+
+    it.each([
+      ['webCrawlIncludePaths', 'docs'],
+      ['webCrawlIncludePaths', '/docs, blog'],
+      ['webCrawlExcludePaths', 'tags'],
+      ['webCrawlExcludePaths', '/tags search'],
+    ])('marks %s of %p invalid and does not start a crawl', (testSubj, value) => {
+      renderPanel();
+      fireEvent.change(screen.getByTestId(testSubj), { target: { value } });
+
+      submitUrl('https://example.com');
+
+      expect(screen.getByTestId(testSubj)).toBeInvalid();
+      expect(screen.getByText(INVALID_PATHS_MESSAGE)).toBeInTheDocument();
+      expect(http.post).not.toHaveBeenCalled();
+    });
+
+    it('submits 20 paths', async () => {
+      renderPanel();
+      const paths = createPaths(20);
+      setIncludePaths(paths.join(', '));
+
+      submitUrl('https://example.com');
+
+      await screen.findByTestId('webCrawlStatus');
+      expectStartRequest({
+        url: 'https://example.com',
+        maxDepth: 2,
+        maxDocuments: 500,
+        includePaths: paths,
+      });
+    });
+
+    it('does not start a crawl with 21 paths', () => {
+      renderPanel();
+      setIncludePaths(createPaths(21).join(', '));
+
+      submitUrl('https://example.com');
+
+      expect(getIncludePathsInput()).toBeInvalid();
+      expect(screen.getByText(INVALID_PATHS_MESSAGE)).toBeInTheDocument();
+      expect(http.post).not.toHaveBeenCalled();
+    });
+
+    it('submits a path of 256 characters but not one of 257', async () => {
+      renderPanel();
+      const longestPath = `/${'a'.repeat(255)}`;
+      setExcludePaths(`${longestPath}a`);
+
+      submitUrl('https://example.com');
+
+      expect(screen.getByText(INVALID_PATHS_MESSAGE)).toBeInTheDocument();
+      expect(http.post).not.toHaveBeenCalled();
+
+      setExcludePaths(longestPath);
+      fireEvent.click(getSubmitButton());
+
+      await screen.findByTestId('webCrawlStatus');
+      expectStartRequest({
+        url: 'https://example.com',
+        maxDepth: 2,
+        maxDocuments: 500,
+        excludePaths: [longestPath],
+      });
+    });
+
+    it('starts the crawl once invalid paths are corrected', async () => {
+      renderPanel();
+      setIncludePaths('docs');
+      submitUrl('https://example.com');
+      expect(http.post).not.toHaveBeenCalled();
+
+      setIncludePaths('/docs');
+      expect(screen.queryByText(INVALID_PATHS_MESSAGE)).not.toBeInTheDocument();
+      fireEvent.click(getSubmitButton());
+
+      await screen.findByTestId('webCrawlStatus');
+      expect(getIncludePathsInput()).not.toBeInvalid();
+      expectStartRequest({
+        url: 'https://example.com',
+        maxDepth: 2,
+        maxDocuments: 500,
+        includePaths: ['/docs'],
+      });
+    });
+
+    it('reports invalid limits before invalid paths', () => {
+      renderPanel();
+      setIncludePaths('docs');
+      fireEvent.change(getMaxDocumentsInput(), { target: { value: '0' } });
+
+      submitUrl('https://example.com');
+
+      expect(screen.getByText(INVALID_LIMITS_MESSAGE)).toBeInTheDocument();
+      expect(screen.queryByText(INVALID_PATHS_MESSAGE)).not.toBeInTheDocument();
+      expect(http.post).not.toHaveBeenCalled();
+    });
+
+    it("shows invalid paths instead of the server's error from the last start", async () => {
+      http.post.mockRejectedValue(createHttpError('The URL is not reachable'));
+      renderPanel();
+      submitUrl('https://example.com');
+      expect(await screen.findByText('The URL is not reachable')).toBeInTheDocument();
+
+      setExcludePaths('tags');
+
+      expect(screen.getByText(INVALID_PATHS_MESSAGE)).toBeInTheDocument();
+      expect(screen.queryByText('The URL is not reachable')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('crawl targets', () => {
+    const INVALID_INDEX_NAME_MESSAGE =
+      'Start with a lowercase letter or a digit, and use only lowercase letters, digits, dots, hyphens and underscores.';
+    const INVALID_URLS_MESSAGE = 'Enter up to 20 URLs that start with http:// or https://';
+    const createUrls = (count: number) =>
+      Array.from({ length: count }, (_, index) => `https://example.com/p${index}`);
+    const createUrlOfLength = (length: number) => {
+      const prefix = 'https://example.com/';
+      return `${prefix}${'a'.repeat(length - prefix.length)}`;
+    };
+    const setIndexName = (value: string) =>
+      fireEvent.change(getIndexNameInput(), { target: { value } });
+    const setSeedUrls = (value: string) =>
+      fireEvent.change(getSeedUrlsInput(), { target: { value } });
+    const setSitemapUrls = (value: string) =>
+      fireEvent.change(getSitemapUrlsInput(), { target: { value } });
+    const openTargets = () => fireEvent.click(screen.getByText('Index, start URLs and sitemaps'));
+
+    beforeEach(() => {
+      http.post.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+      http.get.mockResolvedValue(createWebCrawl({ status: 'completed' }));
+    });
+
+    it('keeps the targets out of sight until they are opened', () => {
+      renderPanel();
+
+      expect(getIndexNameInput()).not.toBeVisible();
+      expect(getSeedUrlsInput()).not.toBeVisible();
+      expect(getSitemapUrlsInput()).not.toBeVisible();
+
+      openTargets();
+
+      expect(getIndexNameInput()).toBeVisible();
+      expect(getSeedUrlsInput()).toBeVisible();
+      expect(getSitemapUrlsInput()).toBeVisible();
+    });
+
+    it('submits empty URL lists and no index name when the targets are untouched', async () => {
+      renderPanel();
+
+      submitUrl('https://example.com');
+
+      await screen.findByTestId('webCrawlStatus');
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({
+          url: 'https://example.com',
+          maxDepth: WEB_CRAWL_DEFAULT_MAX_DEPTH,
+          maxDocuments: WEB_CRAWL_DEFAULT_MAX_DOCUMENTS,
+          includePaths: [],
+          excludePaths: [],
+          seedUrls: [],
+          sitemapUrls: [],
+        }),
+      });
+      expect(http.post).toHaveBeenCalledWith(
+        WEB_CRAWLS_PATH,
+        expect.objectContaining({ body: expect.not.stringContaining('indexName') })
+      );
+    });
+
+    it('submits the index, start URLs and sitemap URLs the user entered', async () => {
+      renderPanel();
+      openTargets();
+      setIndexName('  docs ');
+      setSeedUrls('https://example.com/blog, https://docs.example.com  https://example.com/blog');
+      setSitemapUrls(' https://example.com/sitemap-docs.xml ');
+
+      submitUrl('https://example.com');
+
+      await screen.findByTestId('webCrawlStatus');
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({
+          url: 'https://example.com',
+          maxDepth: WEB_CRAWL_DEFAULT_MAX_DEPTH,
+          maxDocuments: WEB_CRAWL_DEFAULT_MAX_DOCUMENTS,
+          includePaths: [],
+          excludePaths: [],
+          indexName: 'docs',
+          seedUrls: ['https://example.com/blog', 'https://docs.example.com'],
+          sitemapUrls: ['https://example.com/sitemap-docs.xml'],
+        }),
+      });
+    });
+
+    it('submits the targets along with the limits and paths the user entered', async () => {
+      renderPanel();
+      fireEvent.change(getMaxDepthInput(), { target: { value: '1' } });
+      fireEvent.change(getMaxDocumentsInput(), { target: { value: '40' } });
+      fireEvent.change(getIncludePathsInput(), { target: { value: '/docs' } });
+      setIndexName('docs');
+      setSeedUrls('https://docs.example.com/x,y');
+
+      submitUrl('https://example.com');
+
+      await screen.findByTestId('webCrawlStatus');
+      expectStartRequest({
+        url: 'https://example.com',
+        maxDepth: 1,
+        maxDocuments: 40,
+        includePaths: ['/docs'],
+        indexName: 'docs',
+        seedUrls: ['https://docs.example.com/x,y'],
+      });
+    });
+
+    it('leaves the index name out when it is blank', async () => {
+      renderPanel();
+      setIndexName('   ');
+      setSeedUrls('https://docs.example.com');
+
+      submitUrl('https://example.com');
+
+      await screen.findByTestId('webCrawlStatus');
+      expectStartRequest({
+        url: 'https://example.com',
+        maxDepth: 2,
+        maxDocuments: 500,
+        seedUrls: ['https://docs.example.com'],
+      });
+      expect(http.post).toHaveBeenCalledWith(
+        WEB_CRAWLS_PATH,
+        expect.objectContaining({ body: expect.not.stringContaining('indexName') })
+      );
+    });
+
+    it.each(['Docs', '.docs', '-docs', '_docs', 'my docs', 'a'.repeat(256)])(
+      'does not start a crawl into an index named %p',
+      (value) => {
+        renderPanel();
+        openTargets();
+        setIndexName(value);
+
+        submitUrl('https://example.com');
+
+        expect(screen.getByText(INVALID_INDEX_NAME_MESSAGE)).toBeVisible();
+        expect(getIndexNameInput()).toBeInvalid();
+        expect(getSeedUrlsInput()).not.toBeInvalid();
+        expect(getSitemapUrlsInput()).not.toBeInvalid();
+        expect(http.post).not.toHaveBeenCalled();
+      }
+    );
+
+    it('starts a crawl into an index with a name of 255 characters', async () => {
+      renderPanel();
+      const longestName = 'a'.repeat(255);
+      setIndexName(longestName);
+
+      submitUrl('https://example.com');
+
+      await screen.findByTestId('webCrawlStatus');
+      expectStartRequest({
+        url: 'https://example.com',
+        maxDepth: 2,
+        maxDocuments: 500,
+        indexName: longestName,
+      });
+    });
+
+    it.each([
+      ['webCrawlSeedUrls', 'webCrawlSitemapUrls', 'docs.example.com'],
+      ['webCrawlSeedUrls', 'webCrawlSitemapUrls', 'https://a.example ftp://b.example'],
+      ['webCrawlSitemapUrls', 'webCrawlSeedUrls', '/sitemap.xml'],
+      ['webCrawlSitemapUrls', 'webCrawlSeedUrls', 'file:///sitemap.xml'],
+    ])('does not start a crawl with %s set to %p', (testSubj, otherSubj, value) => {
+      renderPanel();
+      openTargets();
+      fireEvent.change(screen.getByTestId(testSubj), { target: { value } });
+
+      submitUrl('https://example.com');
+
+      expect(screen.getAllByText(INVALID_URLS_MESSAGE)).toHaveLength(1);
+      expect(screen.getByTestId(testSubj)).toBeInvalid();
+      expect(screen.getByTestId(otherSubj)).not.toBeInvalid();
+      expect(http.post).not.toHaveBeenCalled();
+    });
+
+    it('submits 20 start URLs and 20 sitemap URLs', async () => {
+      renderPanel();
+      const urls = createUrls(20);
+      setSeedUrls(urls.join(' '));
+      setSitemapUrls(urls.join(', '));
+
+      submitUrl('https://example.com');
+
+      await screen.findByTestId('webCrawlStatus');
+      expectStartRequest({
+        url: 'https://example.com',
+        maxDepth: 2,
+        maxDocuments: 500,
+        seedUrls: urls,
+        sitemapUrls: urls,
+      });
+    });
+
+    it.each(['webCrawlSeedUrls', 'webCrawlSitemapUrls'])(
+      'does not start a crawl with 21 URLs in %s',
+      (testSubj) => {
+        renderPanel();
+        fireEvent.change(screen.getByTestId(testSubj), {
+          target: { value: createUrls(21).join(' ') },
+        });
+
+        submitUrl('https://example.com');
+
+        expect(screen.getByText(INVALID_URLS_MESSAGE)).toBeInTheDocument();
+        expect(screen.getByTestId(testSubj)).toBeInvalid();
+        expect(http.post).not.toHaveBeenCalled();
+      }
+    );
+
+    it('submits a start URL of 2048 characters but not one of 2049', async () => {
+      renderPanel();
+      const longestUrl = createUrlOfLength(2048);
+      setSeedUrls(`${longestUrl}a`);
+
+      submitUrl('https://example.com');
+
+      expect(screen.getByText(INVALID_URLS_MESSAGE)).toBeInTheDocument();
+      expect(http.post).not.toHaveBeenCalled();
+
+      setSeedUrls(longestUrl);
+      fireEvent.click(getSubmitButton());
+
+      await screen.findByTestId('webCrawlStatus');
+      expectStartRequest({
+        url: 'https://example.com',
+        maxDepth: 2,
+        maxDocuments: 500,
+        seedUrls: [longestUrl],
+      });
+    });
+
+    it('starts the crawl once invalid targets are corrected', async () => {
+      renderPanel();
+      openTargets();
+      setIndexName('Docs');
+      setSitemapUrls('sitemap.xml');
+      submitUrl('https://example.com');
+      expect(http.post).not.toHaveBeenCalled();
+
+      setIndexName('docs');
+      setSitemapUrls('https://example.com/sitemap.xml');
+
+      expect(screen.queryByText(INVALID_INDEX_NAME_MESSAGE)).not.toBeInTheDocument();
+      expect(screen.queryByText(INVALID_URLS_MESSAGE)).not.toBeInTheDocument();
+
+      fireEvent.click(getSubmitButton());
+
+      await screen.findByTestId('webCrawlStatus');
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expectStartRequest({
+        url: 'https://example.com',
+        maxDepth: 2,
+        maxDocuments: 500,
+        indexName: 'docs',
+        sitemapUrls: ['https://example.com/sitemap.xml'],
+      });
+    });
+
+    it('disables the targets while the start request is in flight', async () => {
+      http.post.mockReturnValue(new Promise(() => {}));
+      renderPanel();
+      setIndexName('docs');
+
+      submitUrl('https://example.com');
+
+      await waitFor(() => expect(getIndexNameInput()).toBeDisabled());
+      expect(getSeedUrlsInput()).toBeDisabled();
+      expect(getSitemapUrlsInput()).toBeDisabled();
+      expect(getIndexNameInput()).toHaveValue('docs');
+    });
+  });
+
   describe('starting a crawl', () => {
     it('submits the trimmed URL and shows the status of the new crawl', async () => {
       http.post.mockResolvedValue(createWebCrawl({ status: 'completed', documentsCount: 4 }));
@@ -297,6 +805,8 @@ describe('WebCrawlPanel', () => {
       expect(getSubmitButton()).toBeDisabled();
       expect(getMaxDepthInput()).toBeDisabled();
       expect(getMaxDocumentsInput()).toBeDisabled();
+      expect(getIncludePathsInput()).toBeDisabled();
+      expect(getExcludePathsInput()).toBeDisabled();
 
       resolveStart(createWebCrawl({ status: 'completed' }));
 
@@ -305,6 +815,8 @@ describe('WebCrawlPanel', () => {
       expect(getSubmitButton()).toBeEnabled();
       expect(getMaxDepthInput()).toBeEnabled();
       expect(getMaxDocumentsInput()).toBeEnabled();
+      expect(getIncludePathsInput()).toBeEnabled();
+      expect(getExcludePathsInput()).toBeEnabled();
     });
 
     it("displays the server's error when the crawl cannot be started", async () => {

@@ -12,12 +12,22 @@ import {
   createCrawlIndex,
   getCrawlIndexName,
   getIndexPrivileges,
+  isValidCrawlIndexName,
   readCrawlIndexState,
+  updateCrawlIndexMappings,
 } from './crawl_index';
 
 const INDEX_NAME = 'web-crawl-example.com';
 
 const INDEX_META: WebCrawlIndexMeta = { url: 'https://example.com/' };
+
+const URL_FIELD_PROPERTIES = {
+  url_host: { type: 'keyword' },
+  url_path: { type: 'keyword' },
+  url_path_dir1: { type: 'keyword' },
+  url_path_dir2: { type: 'keyword' },
+  url_path_dir3: { type: 'keyword' },
+};
 
 const createEsError = (statusCode: number) =>
   Object.assign(new Error(`status ${statusCode}`), { statusCode });
@@ -54,6 +64,96 @@ describe('getCrawlIndexName', () => {
     expect(getCrawlIndexName('https://a.b.com/')).toBe('web-crawl-a.b.com');
     expect(getCrawlIndexName('https://a-b.com/')).toBe('web-crawl-a-b.com');
     expect(getCrawlIndexName('https://ab.com/')).toBe('web-crawl-ab.com');
+  });
+});
+
+describe('isValidCrawlIndexName', () => {
+  it.each([
+    'web-crawl-example.com',
+    'docs',
+    'a',
+    '0',
+    '9docs',
+    'my_docs',
+    'my-docs',
+    'my.docs',
+    'a._-',
+    'docs-2024.01.31_v2',
+    'web-crawl--1-',
+  ])('accepts %s', (indexName) => {
+    expect(isValidCrawlIndexName(indexName)).toBe(true);
+  });
+
+  it('rejects an empty name', () => {
+    expect(isValidCrawlIndexName('')).toBe(false);
+  });
+
+  it.each(['.docs', '-docs', '_docs', '.kibana', '..', '.', '-', '_'])(
+    'rejects %s, which does not start with a lowercase letter or a digit',
+    (indexName) => {
+      expect(isValidCrawlIndexName(indexName)).toBe(false);
+    }
+  );
+
+  it.each(['Docs', 'dOcs', 'docS', 'DOCS', 'web-crawl-Example.com'])(
+    'rejects %s, which has an uppercase letter',
+    (indexName) => {
+      expect(isValidCrawlIndexName(indexName)).toBe(false);
+    }
+  );
+
+  it.each([
+    ['a space', 'my docs'],
+    ['a leading space', ' docs'],
+    ['a trailing space', 'docs '],
+    ['a trailing line break', 'docs\n'],
+    ['a line break', 'do\ncs'],
+    ['a tab', 'do\tcs'],
+    ['a wildcard', 'docs-*'],
+    ['a question mark', 'docs?'],
+    ['a comma', 'docs,logs'],
+    ['a slash', 'docs/2024'],
+    ['a backslash', 'docs\\2024'],
+    ['a colon', 'remote:docs'],
+    ['a hash', 'docs#1'],
+    ['a pipe', 'docs|logs'],
+    ['a quote', 'docs"'],
+    ['an angle bracket', '<docs>'],
+    ['a plus', 'docs+logs'],
+    ['an accented letter', 'dócs'],
+    ['a non-latin letter', 'документы'],
+    ['a non-ASCII digit', 'docs٣'],
+    ['an emoji', 'docs🚀'],
+  ])('rejects a name with %s', (_, indexName) => {
+    expect(isValidCrawlIndexName(indexName)).toBe(false);
+  });
+
+  it.each([1, 2, 254, 255])('accepts a name of %i characters', (length) => {
+    expect(isValidCrawlIndexName('a'.repeat(length))).toBe(true);
+  });
+
+  it.each([256, 257, 1000])('rejects a name of %i characters', (length) => {
+    expect(isValidCrawlIndexName('a'.repeat(length))).toBe(false);
+  });
+
+  it('accepts every name that is derived from a URL', () => {
+    [
+      'https://example.com/',
+      'https://www.Docs.EXAMPLE.co.uk/guide',
+      'http://127.0.0.1:3000/',
+      'http://[::1]/',
+      'https://my_site.example.com/',
+    ].forEach((url) => {
+      expect(isValidCrawlIndexName(getCrawlIndexName(url))).toBe(true);
+    });
+  });
+
+  it('stays fast on a long name of repeated valid characters followed by an invalid one', () => {
+    const indexName = `${'a.-_'.repeat(60)}!`;
+
+    const startedAt = performance.now();
+    expect(isValidCrawlIndexName(indexName)).toBe(false);
+    expect(performance.now() - startedAt).toBeLessThan(50);
   });
 });
 
@@ -152,11 +252,89 @@ describe('createCrawlIndex', () => {
     );
   });
 
+  it('maps every field of a crawled page', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    await createCrawlIndex(esClient, INDEX_NAME, INDEX_META);
+
+    const [{ mappings }] = esClient.indices.create.mock.calls[0];
+    expect(mappings?.properties).toEqual({
+      url: { type: 'keyword' },
+      title: { type: 'text' },
+      description: { type: 'text' },
+      content: { type: 'text', copy_to: 'content_semantic' },
+      content_semantic: { type: 'semantic_text' },
+      depth: { type: 'integer' },
+      crawl_id: { type: 'keyword' },
+      crawled_at: { type: 'date' },
+      ...URL_FIELD_PROPERTIES,
+    });
+  });
+
+  it('maps the host, the path and the path directories as keywords', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    await createCrawlIndex(esClient, INDEX_NAME, INDEX_META);
+
+    const [{ mappings }] = esClient.indices.create.mock.calls[0];
+    expect(mappings?.properties).toEqual(expect.objectContaining(URL_FIELD_PROPERTIES));
+  });
+
   it('propagates Elasticsearch errors', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.create.mockRejectedValue(createEsError(403));
 
     await expect(createCrawlIndex(esClient, INDEX_NAME, INDEX_META)).rejects.toThrow('status 403');
+  });
+});
+
+describe('updateCrawlIndexMappings', () => {
+  let esClient: ElasticsearchClientMock;
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+  });
+
+  it('adds the host, path and path directory fields to the index, and nothing else', async () => {
+    await expect(updateCrawlIndexMappings(esClient, INDEX_NAME)).resolves.toBeUndefined();
+
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith({
+      index: INDEX_NAME,
+      properties: URL_FIELD_PROPERTIES,
+    });
+  });
+
+  it('leaves the metadata and the fields the index was created with alone', async () => {
+    await updateCrawlIndexMappings(esClient, INDEX_NAME);
+
+    const [params] = esClient.indices.putMapping.mock.calls[0];
+    expect(Object.keys(params).sort()).toEqual(['index', 'properties']);
+    expect(Object.keys(params.properties ?? {})).not.toContain('content_semantic');
+  });
+
+  it('adds the same fields that a new index is created with', async () => {
+    await createCrawlIndex(esClient, INDEX_NAME, INDEX_META);
+    await updateCrawlIndexMappings(esClient, INDEX_NAME);
+
+    const [{ mappings }] = esClient.indices.create.mock.calls[0];
+    const [{ properties }] = esClient.indices.putMapping.mock.calls[0];
+    expect(mappings?.properties).toEqual(expect.objectContaining(properties ?? {}));
+  });
+
+  it('does not create or read the index', async () => {
+    await updateCrawlIndexMappings(esClient, INDEX_NAME);
+
+    expect(esClient.indices.create).not.toHaveBeenCalled();
+    expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+  });
+
+  it.each([400, 403, 404])('propagates a %i from Elasticsearch', async (statusCode) => {
+    esClient.indices.putMapping.mockRejectedValue(createEsError(statusCode));
+
+    await expect(updateCrawlIndexMappings(esClient, INDEX_NAME)).rejects.toThrow(
+      `status ${statusCode}`
+    );
   });
 });
 

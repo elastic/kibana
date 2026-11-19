@@ -70,6 +70,38 @@ describe('useWebCrawls', () => {
       expect(http.get).toHaveBeenCalledWith(WEB_CRAWLS_PATH);
     });
 
+    it('lists the path rules and skip counts of each crawl as the server reported them', async () => {
+      const crawlWithRules = createWebCrawl({
+        id: 'completed-2',
+        status: 'completed',
+        includePaths: ['/docs'],
+        excludePaths: ['/tags'],
+        skippedByRobotsCount: 2,
+        skippedByRulesCount: 5,
+        purgedCount: 1,
+      });
+
+      const { result } = await renderLoadedWebCrawls(crawlWithRules, completedCrawl);
+
+      expect(result.current.crawls).toEqual([crawlWithRules, completedCrawl]);
+    });
+
+    it('lists the index, start URLs and sitemap URLs of each crawl as the server reported them', async () => {
+      const crawlWithTargets = createWebCrawl({
+        id: 'completed-2',
+        status: 'completed',
+        indexName: 'docs',
+        seedUrls: ['https://example.com/blog', 'https://docs.example.com'],
+        sitemapUrls: ['https://example.com/sitemap-docs.xml'],
+      });
+
+      const { result } = await renderLoadedWebCrawls(crawlWithTargets, completedCrawl);
+
+      expect(result.current.crawls).toEqual([crawlWithTargets, completedCrawl]);
+      expect(result.current.crawls[1].seedUrls).toEqual([]);
+      expect(result.current.crawls[1].sitemapUrls).toEqual([]);
+    });
+
     it("surfaces the server's message when the list cannot be loaded", async () => {
       http.get.mockRejectedValue(createHttpError('Crawl history is unavailable', 500));
 
@@ -109,6 +141,105 @@ describe('useWebCrawls', () => {
       expect(http.get).toHaveBeenCalledTimes(2);
       expect(result.current.isStarting).toBe(false);
       expect(result.current.startErrorMessage).toBeUndefined();
+    });
+
+    it('posts the path rules of the request', async () => {
+      const { result } = await renderLoadedWebCrawls(completedCrawl);
+      http.post.mockResolvedValue(runningCrawl);
+
+      act(() => {
+        result.current.startCrawl({
+          url: 'https://example.com',
+          maxDepth: 1,
+          maxDocuments: 10,
+          includePaths: ['/docs', '/blog'],
+          excludePaths: ['/docs/archive'],
+        });
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({
+          url: 'https://example.com',
+          maxDepth: 1,
+          maxDocuments: 10,
+          includePaths: ['/docs', '/blog'],
+          excludePaths: ['/docs/archive'],
+        }),
+      });
+      await waitFor(() => expect(result.current.isStarting).toBe(false));
+    });
+
+    it('posts empty path rules as given, without dropping them', async () => {
+      const { result } = await renderLoadedWebCrawls(completedCrawl);
+      http.post.mockResolvedValue(runningCrawl);
+
+      act(() => {
+        result.current.startCrawl({
+          url: 'https://example.com',
+          includePaths: [],
+          excludePaths: [],
+        });
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({ url: 'https://example.com', includePaths: [], excludePaths: [] }),
+      });
+      await waitFor(() => expect(result.current.isStarting).toBe(false));
+    });
+
+    it('posts the index, start URLs and sitemap URLs of the request', async () => {
+      const { result } = await renderLoadedWebCrawls(completedCrawl);
+      http.post.mockResolvedValue(runningCrawl);
+
+      act(() => {
+        result.current.startCrawl({
+          url: 'https://example.com',
+          maxDepth: 1,
+          maxDocuments: 10,
+          includePaths: [],
+          excludePaths: [],
+          indexName: 'docs',
+          seedUrls: ['https://example.com/blog', 'https://docs.example.com/x,y'],
+          sitemapUrls: ['https://example.com/sitemap-docs.xml'],
+        });
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: JSON.stringify({
+          url: 'https://example.com',
+          maxDepth: 1,
+          maxDocuments: 10,
+          includePaths: [],
+          excludePaths: [],
+          indexName: 'docs',
+          seedUrls: ['https://example.com/blog', 'https://docs.example.com/x,y'],
+          sitemapUrls: ['https://example.com/sitemap-docs.xml'],
+        }),
+      });
+      await waitFor(() => expect(result.current.isStarting).toBe(false));
+    });
+
+    it('posts empty URL lists as given and leaves an undefined index name out', async () => {
+      const { result } = await renderLoadedWebCrawls(completedCrawl);
+      http.post.mockResolvedValue(runningCrawl);
+
+      act(() => {
+        result.current.startCrawl({
+          url: 'https://example.com',
+          indexName: undefined,
+          seedUrls: [],
+          sitemapUrls: [],
+        });
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WEB_CRAWLS_PATH, {
+        body: '{"url":"https://example.com","seedUrls":[],"sitemapUrls":[]}',
+      });
+      await waitFor(() => expect(result.current.isStarting).toBe(false));
     });
 
     it('reports that it is starting while the request is in flight', async () => {

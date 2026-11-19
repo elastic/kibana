@@ -206,6 +206,160 @@ describe('useWebCrawlSchedules', () => {
       }
     });
 
+    const expectPostedBody = (body: string) =>
+      expect(http.post).toHaveBeenCalledWith(WORKFLOW_PATH, expect.objectContaining({ body }));
+
+    it('sends a workflow without path rules when the request has none', async () => {
+      const { result } = renderSchedules();
+      http.post.mockResolvedValue({ id: 'workflow-3', name: 'n', enabled: true });
+
+      act(() => {
+        result.current.createSchedule(scheduleRequest);
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expectPostedBody(expect.not.stringContaining('include_paths'));
+      expectPostedBody(expect.not.stringContaining('exclude_paths'));
+    });
+
+    it('sends a workflow without path rules when the request has empty ones', async () => {
+      const { result } = renderSchedules();
+      http.post.mockResolvedValue({ id: 'workflow-3', name: 'n', enabled: true });
+
+      act(() => {
+        result.current.createSchedule({ ...scheduleRequest, includePaths: [], excludePaths: [] });
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expectPostedBody(JSON.stringify({ yaml: buildWebCrawlWorkflowYaml(scheduleRequest) }));
+    });
+
+    it('sends a workflow that crawls with the path rules of the request', async () => {
+      const { result } = renderSchedules();
+      http.post.mockResolvedValue({ id: 'workflow-3', name: 'n', enabled: true });
+      const request: WebCrawlScheduleRequest = {
+        ...scheduleRequest,
+        includePaths: ['/docs', '/blog'],
+        excludePaths: ['/docs/archive'],
+      };
+
+      act(() => {
+        result.current.createSchedule(request);
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WORKFLOW_PATH, {
+        body: JSON.stringify({ yaml: buildWebCrawlWorkflowYaml(request) }),
+        version: API_VERSION,
+      });
+      const yaml = buildWebCrawlWorkflowYaml(request);
+      expect(yaml).toMatch(/include_paths:\s*\n\s*- \/docs\s*\n\s*- \/blog\s*\n/);
+      expect(yaml).toMatch(/exclude_paths:\s*\n\s*- \/docs\/archive\s*\n/);
+    });
+
+    it.each([
+      ['only paths', { includePaths: ['/docs'] }, 'include_paths', 'exclude_paths'],
+      ['skip paths', { excludePaths: ['/tags'] }, 'exclude_paths', 'include_paths'],
+    ])('sends a workflow with just the %s of the request', async (_, paths, sent, omitted) => {
+      const { result } = renderSchedules();
+      http.post.mockResolvedValue({ id: 'workflow-3', name: 'n', enabled: true });
+
+      act(() => {
+        result.current.createSchedule({ ...scheduleRequest, ...paths });
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expectPostedBody(expect.stringContaining(sent));
+      expectPostedBody(expect.not.stringContaining(omitted));
+    });
+
+    it('sends a workflow without an index, start URLs or sitemap URLs when the request has none', async () => {
+      const { result } = renderSchedules();
+      http.post.mockResolvedValue({ id: 'workflow-3', name: 'n', enabled: true });
+
+      act(() => {
+        result.current.createSchedule(scheduleRequest);
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expectPostedBody(expect.not.stringContaining('index_name'));
+      expectPostedBody(expect.not.stringContaining('seed_urls'));
+      expectPostedBody(expect.not.stringContaining('sitemap_urls'));
+    });
+
+    it('sends the same workflow for empty URL lists and an undefined index as for none', async () => {
+      const { result } = renderSchedules();
+      http.post.mockResolvedValue({ id: 'workflow-3', name: 'n', enabled: true });
+
+      act(() => {
+        result.current.createSchedule({
+          ...scheduleRequest,
+          indexName: undefined,
+          seedUrls: [],
+          sitemapUrls: [],
+        });
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expectPostedBody(JSON.stringify({ yaml: buildWebCrawlWorkflowYaml(scheduleRequest) }));
+    });
+
+    it('sends a workflow that crawls into the index and from the URLs of the request', async () => {
+      const { result } = renderSchedules();
+      http.post.mockResolvedValue({ id: 'workflow-3', name: 'n', enabled: true });
+      const request: WebCrawlScheduleRequest = {
+        ...scheduleRequest,
+        indexName: 'docs',
+        seedUrls: ['https://example.com/blog', 'https://docs.example.com'],
+        sitemapUrls: ['https://example.com/sitemap-docs.xml'],
+      };
+
+      act(() => {
+        result.current.createSchedule(request);
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expect(http.post).toHaveBeenCalledWith(WORKFLOW_PATH, {
+        body: JSON.stringify({ yaml: buildWebCrawlWorkflowYaml(request) }),
+        version: API_VERSION,
+      });
+      const yaml = buildWebCrawlWorkflowYaml(request);
+      expect(yaml).toMatch(/index_name: docs\s*\n/);
+      expect(yaml).toMatch(
+        /seed_urls:\s*\n\s*- https:\/\/example\.com\/blog\s*\n\s*- https:\/\/docs\.example\.com\s*\n/
+      );
+      expect(yaml).toMatch(/sitemap_urls:\s*\n\s*- https:\/\/example\.com\/sitemap-docs\.xml\s*\n/);
+    });
+
+    it.each([
+      ['index', { indexName: 'docs' }, 'index_name', ['seed_urls', 'sitemap_urls']],
+      [
+        'start URLs',
+        { seedUrls: ['https://docs.example.com'] },
+        'seed_urls',
+        ['index_name', 'sitemap_urls'],
+      ],
+      [
+        'sitemap URLs',
+        { sitemapUrls: ['https://example.com/sitemap-docs.xml'] },
+        'sitemap_urls',
+        ['index_name', 'seed_urls'],
+      ],
+    ])('sends a workflow with just the %s of the request', async (_, targets, sent, omitted) => {
+      const { result } = renderSchedules();
+      http.post.mockResolvedValue({ id: 'workflow-3', name: 'n', enabled: true });
+
+      act(() => {
+        result.current.createSchedule({ ...scheduleRequest, ...targets });
+      });
+
+      await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+      expectPostedBody(expect.stringContaining(sent));
+      for (const key of omitted) {
+        expectPostedBody(expect.not.stringContaining(key));
+      }
+    });
+
     it('reports that it is creating while the request is in flight', async () => {
       const { result } = renderSchedules();
       http.post.mockReturnValue(new Promise(() => {}));
