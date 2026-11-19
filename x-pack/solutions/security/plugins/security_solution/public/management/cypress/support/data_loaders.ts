@@ -8,6 +8,7 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common';
+import AdmZip from 'adm-zip';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -405,19 +406,6 @@ export const dataLoadersForRealEndpoints = (
       return null;
     },
 
-    uploadFileToEndpoint: async ({
-      hostname,
-      srcPath,
-      destPath = '.',
-    }: {
-      hostname: string;
-      srcPath: string;
-      destPath: string;
-    }): Promise<null> => {
-      await getHostVmClient(hostname).transfer(srcPath, destPath);
-      return null;
-    },
-
     installPackagesOnEndpoint: async ({
       hostname,
       packages,
@@ -436,24 +424,17 @@ export const dataLoadersForRealEndpoints = (
       return null;
     },
 
-    readZippedFileContentOnEndpoint: async ({
-      hostname,
+    readZippedFileContent: async ({
       path,
       password,
     }: {
-      hostname: string;
       path: string;
       password?: string;
     }): Promise<string> => {
-      const hostVmClient = getHostVmClient(hostname);
-
-      // Installed on demand so that only this task, and not every endpoint host VM boot, needs apt
-      await hostVmClient.exec(
-        `command -v unzip || ( sudo apt-get update && sudo apt-get install -y unzip )`
-      );
-
-      return (await hostVmClient.exec(`unzip -p ${password ? `-P ${password} ` : ''}${path}`))
-        .stdout;
+      return new AdmZip(path)
+        .getEntries()
+        .map((entry) => entry.getData(password).toString('utf8'))
+        .join('');
     },
 
     stopEndpointHost: async (hostName) => {

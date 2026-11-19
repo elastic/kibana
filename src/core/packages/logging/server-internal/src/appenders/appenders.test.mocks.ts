@@ -54,6 +54,7 @@ jest.mock('@opentelemetry/api', () => {
 });
 jest.mock('@kbn/apm-config-loader', () => ({
   getConfiguration: jest.fn(() => ({ serviceName: 'kibana', serviceVersion: '9.0.0' })),
+  getKibanaName: jest.fn(),
 }));
 // @kbn/telemetry re-exports initTelemetry which transitively imports @kbn/tracing and
 // @kbn/metrics. Those packages load heavy OTel SDK modules at require-time that are
