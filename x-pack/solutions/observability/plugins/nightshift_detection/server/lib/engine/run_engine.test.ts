@@ -140,6 +140,28 @@ describe('EngineRunner', () => {
     ).toEqual(new Map());
   });
 
+  it('keeps the generator state when the run ends while its signals are being stored', async () => {
+    const signals = new InMemorySignalStore();
+    const write = signals.write.bind(signals);
+    const controller = new AbortController();
+    // The run ends mid-write, as when the budget runs out and another node can take the space.
+    jest.spyOn(signals, 'write').mockImplementationOnce(async (batch) => {
+      const outcome = await write(batch);
+      controller.abort('the run ended');
+      return outcome;
+    });
+    const { runner, state } = createRunner({ signals });
+
+    const result = await runner.run({ now: NOW, abortSignal: controller.signal });
+
+    expect(result).toMatchObject({
+      strategies: [{ id: TEST_STRATEGY_ID, error: expect.stringContaining('run ended') }],
+    });
+    expect(
+      await state.readGeneratorStates({ spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })
+    ).toEqual(new Map());
+  });
+
   it('reports busy and writes nothing while another run holds the space', async () => {
     const { lock, held } = createSpaceRunLock();
     held.add(SPACE_ID);
