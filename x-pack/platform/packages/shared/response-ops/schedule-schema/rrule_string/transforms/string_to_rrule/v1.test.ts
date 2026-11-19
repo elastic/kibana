@@ -124,7 +124,7 @@ describe('parseRruleString', () => {
   });
 
   // rrule-temporal accepts these without errors, the tests document what gets stored
-  describe('lenient parsing', () => {
+  describe('values that are accepted but ignored', () => {
     it.each([
       ['drops out of range BYHOUR values', 'RRULE:FREQ=DAILY;BYHOUR=9,24', { byhour: [9] }],
       ['drops out of range BYMINUTE values', 'RRULE:FREQ=DAILY;BYMINUTE=60', {}],
