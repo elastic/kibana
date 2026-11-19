@@ -284,12 +284,13 @@ describe('getServiceMap grouping attributes', () => {
     );
   });
 
-  it('reads grouping attributes for the services the map draws and leaves the response unchanged', async () => {
+  it('reads grouping attributes for the services the map draws and groups them by those', async () => {
     getEnhancedServiceStatsMock.mockResolvedValue(groupedServicesData);
-    getServiceGroupingAttributesMock.mockResolvedValue({
+    const attributes = {
       gateway: { serviceNamespace: 'shop', kubernetesNamespace: 'team-gateway' },
       cart: { kubernetesNamespace: 'team-cart' },
-    });
+    };
+    getServiceGroupingAttributesMock.mockResolvedValue(attributes);
     const { options, logger } = makeOptions({ grouping: enabledGrouping });
 
     const map = await getServiceMap(options);
@@ -306,7 +307,7 @@ describe('getServiceMap grouping attributes', () => {
       source: enabledGrouping.source,
     });
     expect(buildServiceGroupingMock).toHaveBeenCalledWith(
-      expect.objectContaining({ services: groupedServices })
+      expect.objectContaining({ services: groupedServices, attributes })
     );
     expect(logger.info).not.toHaveBeenCalled();
   });

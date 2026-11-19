@@ -136,7 +136,7 @@ export function getServiceMap(
 
     // The services the map draws, which every grouping and its labels are built over.
     let mapServicesPromise: Promise<string[] | undefined> = Promise.resolve(undefined);
-    // groupingAttributes is fetched for group selection. It stays off the response until then.
+    // The labels of the drawn services, to group them by attribute.
     let groupingAttributesPromise: Promise<ServiceGroupingAttributes | undefined> =
       Promise.resolve(undefined);
     if (shouldApplyGrouping) {
@@ -159,14 +159,15 @@ export function getServiceMap(
       });
     }
 
-    const [connectionData, servicesData, anomalies, callGraph, services] = await Promise.all([
-      connectionDataPromise,
-      servicesDataPromise,
-      anomaliesPromise,
-      callGraphPromise,
-      mapServicesPromise,
-      groupingAttributesPromise,
-    ]);
+    const [connectionData, servicesData, anomalies, callGraph, services, groupingAttributes] =
+      await Promise.all([
+        connectionDataPromise,
+        servicesDataPromise,
+        anomaliesPromise,
+        callGraphPromise,
+        mapServicesPromise,
+        groupingAttributesPromise,
+      ]);
 
     // If the grouping logic fails, the service map will remain ungrouped.
     // Grouping is pure code over data already read, so a failure here is an unexpected bug
@@ -178,6 +179,7 @@ export function getServiceMap(
           callGraph,
           spans: connectionData.spans,
           services,
+          attributes: groupingAttributes,
         });
         if (builtGrouping) {
           serviceGrouping = {

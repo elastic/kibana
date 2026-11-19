@@ -32,7 +32,7 @@ export interface ServiceGroupingAttributeValues {
   savedGroups?: ServiceGroupingSavedGroup[];
 }
 
-/** Labels for each service, keyed by `service.name`. Not yet used to choose groups. */
+/** Labels for each service, keyed by `service.name`, to group services by attribute. */
 export type ServiceGroupingAttributes = Record<string, ServiceGroupingAttributeValues>;
 
 interface ServiceAttributeBucket {
