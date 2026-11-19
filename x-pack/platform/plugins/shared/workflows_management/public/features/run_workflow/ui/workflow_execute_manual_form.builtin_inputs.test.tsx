@@ -54,10 +54,6 @@ jest.mock('@kbn/code-editor', () => {
   };
 });
 
-jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
-  useWorkflowsExperimentalUiSetting: () => false,
-}));
-
 jest.mock('./input_validation_callout', () => ({
   InputValidationCallout: ({ errors }: { errors: string }) => (
     <div data-test-subj="workflow-input-validation-callout">{errors}</div>
@@ -121,8 +117,6 @@ describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
             properties: {
               who: { type: 'string', default: 'world' },
               name: { type: 'string' },
-              // `anyOf` is not builder-editable, so the form falls back to the Monaco editor.
-              either: { anyOf: [{ type: 'string' }, { type: 'number' }] },
             },
             required: ['who', 'name'],
           } as JsonModelSchemaType
