@@ -5,7 +5,25 @@
  * 2.0.
  */
 
-import { getKibanaRoleSchema } from './role_schema';
+import { elasticsearchRoleSchema, getKibanaRoleSchema } from './role_schema';
+
+describe('elasticsearchRoleSchema', () => {
+  test('accepts more than 100 index names in one privilege entry', () => {
+    const names = Array.from({ length: 657 }, (_unused, index) => `index-${index}`);
+
+    expect(() =>
+      elasticsearchRoleSchema.validate({ indices: [{ names, privileges: ['read'] }] })
+    ).not.toThrow();
+  });
+
+  test('rejects more than 1000 index names in one privilege entry', () => {
+    const names = Array.from({ length: 1001 }, (_unused, index) => `index-${index}`);
+
+    expect(() =>
+      elasticsearchRoleSchema.validate({ indices: [{ names, privileges: ['read'] }] })
+    ).toThrow('array size is [1001], but cannot be greater than [1000]');
+  });
+});
 
 const basePrivilegeNamesMap = {
   global: ['all', 'read'],
