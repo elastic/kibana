@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { InvalidStrategyScheduleError } from '../errors/invalid_strategy_schedule_error';
 import type { DetectionStrategy } from '../strategies/detection_strategy';
 
 const MINUTE_MS = 60_000;
@@ -44,13 +43,8 @@ function planWindow({
   now: number;
   skipBacklog: boolean;
 }): PlannedWindow | undefined {
-  const { id, cadence_minutes: cadence, settle_minutes: settle } = strategy.descriptor;
-
-  // A zero cadence divides by zero and a fractional one breaks the whole-minute windows; either
-  // would plan a window of `NaN` and save it as the strategy's progress.
-  if (!Number.isInteger(cadence) || cadence < 1 || !Number.isInteger(settle) || settle < 0) {
-    throw new InvalidStrategyScheduleError(id);
-  }
+  // The catalog refuses a schedule that isn't whole minutes in range, so it's safe to divide here.
+  const { cadence_minutes: cadence, settle_minutes: settle } = strategy.descriptor;
 
   const cadenceMs = cadence * MINUTE_MS;
   const maxRunMs = Math.max(MAX_MINUTES_PER_RUN, cadence) * MINUTE_MS;
@@ -97,9 +91,6 @@ function planWindow({
  * settled since its last processed minute; its window starts there and covers at most one run's
  * worth of minutes. A strategy that never ran starts one run back; one too far behind jumps to
  * `MAX_CATCH_UP_MINUTES` back, or with `skipBacklog` to its latest settled cadence step.
- *
- * Throws `InvalidStrategyScheduleError` for a strategy whose cadence or settle time is not a whole
- * number of minutes in range.
  */
 export function planWindows({
   strategies,

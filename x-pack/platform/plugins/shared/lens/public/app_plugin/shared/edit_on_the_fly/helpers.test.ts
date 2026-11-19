@@ -125,7 +125,46 @@ describe('Lens inline editing helpers', () => {
           valueColumns,
           values,
         })
-      ).toEqual([[null, 500]]);
+      ).toEqual([[500]]);
+    });
+
+    it('keeps value cells in display order when all_columns reorders them', () => {
+      const displayColumns = [
+        { name: 'empty', type: 'keyword' },
+        { name: 'b', type: 'integer' },
+        { name: 'a', type: 'integer' },
+      ];
+      const valueColumns = [
+        { name: 'a', type: 'integer' },
+        { name: 'b', type: 'integer' },
+      ];
+
+      expect(
+        buildDisplayRowsFromEsqlValues({
+          displayColumns,
+          valueColumns,
+          values: [[1, 2]],
+        })
+      ).toEqual([[2, 1]]);
+    });
+
+    it('uses the first value column when a name appears more than once', () => {
+      const displayColumns = [
+        { name: 'empty', type: 'keyword' },
+        { name: 'a', type: 'integer' },
+      ];
+      const valueColumns = [
+        { name: 'a', type: 'integer' },
+        { name: 'a', type: 'integer' },
+      ];
+
+      expect(
+        buildDisplayRowsFromEsqlValues({
+          displayColumns,
+          valueColumns,
+          values: [[1, 2]],
+        })
+      ).toEqual([[1]]);
     });
   });
 
@@ -989,10 +1028,10 @@ describe('Lens inline editing helpers', () => {
         startDependencies.http,
         uiSettingsMock
       );
-      expect(gridAttributes.columns).toStrictEqual(emptyColumns);
+      expect(gridAttributes.columns).toStrictEqual([{ ...emptyColumns[0], isNull: true }]);
     });
 
-    it('passes all_columns to formatESQLColumns and expands values by name when columns is a subset', async () => {
+    it('passes all_columns to formatESQLColumns and keeps only value cells when columns is a subset', async () => {
       const allColumnsRaw = [
         { name: 'count', type: 'double' },
         { name: 'max_value', type: 'integer' },
@@ -1021,8 +1060,11 @@ describe('Lens inline editing helpers', () => {
       );
 
       expect(mockformatESQLColumns).toHaveBeenCalledWith(allColumnsRaw);
-      expect(gridAttributes.rows).toEqual([[null, 500]]);
-      expect(gridAttributes.columns).toStrictEqual(formattedColumns);
+      expect(gridAttributes.rows).toEqual([[500]]);
+      expect(gridAttributes.columns).toStrictEqual([
+        { ...formattedColumns[0], isNull: true },
+        formattedColumns[1],
+      ]);
     });
 
     it('falls back to createEsqlAdHocDataView when spec has no timeFieldName', async () => {

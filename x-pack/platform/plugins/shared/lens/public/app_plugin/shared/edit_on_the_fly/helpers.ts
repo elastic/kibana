@@ -50,12 +50,17 @@ export const buildDisplayRowsFromEsqlValues = ({
     return values;
   }
 
-  // Pre-compute which value column index each display column maps to (-1 if missing)
-  const valueIndexPerGridColumn = displayColumns.map((col) =>
-    valueColumns.findIndex((v) => v.name === col.name)
-  );
-  // For each row, pick values by index; fill null for columns with no data
-  return values.map((row) => valueIndexPerGridColumn.map((i) => (i >= 0 ? row[i] : null)));
+  // Columns with no values stay on the column list (`isNull`) and are left out of
+  // each row. Index by name so a different `columns` order still lines up.
+  const valueIndexByName = new Map<string, number>();
+  valueColumns.forEach(({ name }, index) => {
+    if (!valueIndexByName.has(name)) valueIndexByName.set(name, index);
+  });
+  const valueIndexPerGridColumn = displayColumns.flatMap(({ name }) => {
+    const index = valueIndexByName.get(name);
+    return index === undefined ? [] : [index];
+  });
+  return values.map((row) => valueIndexPerGridColumn.map((index) => row[index]));
 };
 
 const getDSLFilter = (
@@ -129,7 +134,10 @@ export const getGridAttrs = async (
   const displayColumns = allColumns.length > 0 ? allColumns : valueColumns;
 
   const rows = buildDisplayRowsFromEsqlValues({ displayColumns, valueColumns, values });
-  const columns = formatESQLColumns(displayColumns);
+  const valueColumnNames = new Set(valueColumns.map(({ name }) => name));
+  const columns = formatESQLColumns(displayColumns).map((column) =>
+    valueColumnNames.has(column.name) ? column : { ...column, isNull: true }
+  );
 
   return {
     rows,
