@@ -105,10 +105,10 @@ export const createKnowledgeIndicatorReader = ({
           title: query.title,
           description: query.description,
           esql: query.esql.query,
-          ...(query.severity_score !== undefined ? { severity_score: query.severity_score } : {}),
+          severity_score: query.severity_score,
           query_type: deriveQueryType(query.esql.query),
           feature_ids: (query.features ?? []).map(({ id }) => id),
-          ...(expiresAt !== undefined ? { expires_at: expiresAt } : {}),
+          expires_at: expiresAt,
         },
       ];
     });
@@ -126,10 +126,10 @@ export const createKnowledgeIndicatorReader = ({
       id,
       source_id: sourceId,
       type,
-      ...(subtype !== undefined ? { subtype } : {}),
-      ...(title !== undefined ? { title } : {}),
+      subtype,
+      title,
       properties,
-      ...(filter !== undefined ? { filter } : {}),
+      filter,
     }));
   },
 });
