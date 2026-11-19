@@ -127,22 +127,20 @@ steps:
     expect(result).toContain('name: Test');
   });
 
-  it('removes the tags key when set to an empty array', () => {
+  it('writes an empty tags array when tags are cleared', () => {
     const yaml = 'name: Test\ntags:\n  - alpha\nsteps: []';
     const result = updateWorkflowYamlFields(yaml, { tags: [] });
 
-    expect(result).not.toMatch(/\btags\b/);
+    expect(result).toMatch(/tags: \[\]/);
+    expect(result).not.toContain('alpha');
     expect(result).toContain('name: Test');
   });
 
-  it.each([
-    ['description', { description: '' }, 'description: Keep me\n'],
-    ['tags', { tags: [] }, 'tags:\n    - alpha\n'],
-  ])('removing an empty %s keeps the rest of the YAML byte for byte', (_key, update, removed) => {
+  it('removing an empty description keeps the rest of the YAML byte for byte', () => {
     const longMessage = 'word '.repeat(40).trim();
     const rest = `name: Test\nsteps:\n    - name: a\n      type: console\n      with:\n          message: ${longMessage}\n`;
-    const yaml = `${removed}${rest}`;
+    const yaml = `description: Keep me\n${rest}`;
 
-    expect(updateWorkflowYamlFields(yaml, update)).toBe(rest);
+    expect(updateWorkflowYamlFields(yaml, { description: '' })).toBe(rest);
   });
 });

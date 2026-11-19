@@ -42,8 +42,8 @@ const deleteYamlField = (yamlString: string, fieldPath: string): string => {
  * Updates multiple YAML fields in a workflow YAML string while preserving formatting.
  * This is a convenience function that applies multiple field updates in sequence.
  *
- * Empty optional metadata (`description: ''`, `tags: []`) removes the key from the
- * document — empty optional keys must not linger in YAML.
+ * An empty `description` removes the key from the document. Empty `tags` are written
+ * as `tags: []`.
  *
  * @param yamlString - The original YAML string
  * @param workflow - The workflow update object containing fields to update
@@ -70,10 +70,7 @@ export function updateWorkflowYamlFields(
         : updateYamlField(updatedYaml, 'description', workflow.description);
   }
   if (workflow.tags !== undefined) {
-    updatedYaml =
-      workflow.tags.length === 0
-        ? deleteYamlField(updatedYaml, 'tags')
-        : updateYamlField(updatedYaml, 'tags', workflow.tags);
+    updatedYaml = updateYamlField(updatedYaml, 'tags', workflow.tags);
   }
 
   return updatedYaml;
