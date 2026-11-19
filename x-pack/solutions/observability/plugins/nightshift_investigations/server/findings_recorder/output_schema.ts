@@ -112,6 +112,7 @@ export const findingsOutputSchema = lazySchema(() => {
         })
       )
       .optional(),
+    retire_proposals: z.array(z.string()).optional(),
     hypotheses: z.array(hypothesisSchema),
   });
 });
@@ -207,7 +208,7 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
 /** A parsed record with its evidence trimmed to what the stores accept. */
 export type FindingsRecord = Omit<
   FindingsOutput,
-  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals'
+  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals' | 'retire_proposals'
 > & {
   proposals?: Array<{
     supersedes?: string;
@@ -216,6 +217,7 @@ export type FindingsRecord = Omit<
     impact?: string;
     confidence?: string;
   }>;
+  retire_proposals?: string[];
   /** `null` retracts the stored evidence. */
   impact_evidence?: InvestigationEvidence | null;
   impact_entities?: Array<{ name: string; type?: string; evidence?: InvestigationEvidence }>;
@@ -231,10 +233,28 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
     impact_evidence: rawImpactEvidence,
     impact_entities: rawEntities,
     proposals: rawProposals,
+    retire_proposals: rawRetireProposals,
     hypotheses: rawHypotheses,
     ...rest
   } = output;
   const impactEvidence = rawImpactEvidence ? limitEvidence(rawImpactEvidence) : rawImpactEvidence;
+  const retiredProposals =
+    rawRetireProposals !== undefined
+      ? (() => {
+          const seen = new Set<string>();
+          const kept: string[] = [];
+          for (const rawId of rawRetireProposals) {
+            const id = truncate(rawId.trim(), MAX_ENTITY_ID_LENGTH);
+            if (!id) continue;
+            const key = id.toLowerCase();
+            if (seen.has(key)) continue;
+            seen.add(key);
+            kept.push(id);
+            if (kept.length >= MAX_OPEN_PROPOSALS * 2) break;
+          }
+          return kept;
+        })()
+      : undefined;
   return {
     ...rest,
     impact_evidence: impactEvidence,
@@ -278,6 +298,7 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
             }),
         }
       : {}),
+    ...(retiredProposals !== undefined ? { retire_proposals: retiredProposals } : {}),
     hypotheses: rawHypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
       const kept = (evidence ?? [])
         .map(limitEvidence)
@@ -452,6 +473,12 @@ export const FINDINGS_JSON_SCHEMA = {
         },
         required: ['title', 'comment'],
       },
+    },
+    retire_proposals: {
+      type: 'array',
+      description:
+        'IDs of open proposals listed in this conversation (such as P1) that are now obsolete and should be retired without a replacement — for example an investigative check this round already carried out or made moot, or the extra open proposal when merging two overlapping open proposals into one.',
+      items: { type: 'string' },
     },
     hypotheses: {
       type: 'array',

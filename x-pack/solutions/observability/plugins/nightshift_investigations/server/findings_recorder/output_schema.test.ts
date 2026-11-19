@@ -192,7 +192,19 @@ describe('proposals', () => {
 
   it('asks for proposals in the final schema only', () => {
     expect(FINDINGS_JSON_SCHEMA.properties).toHaveProperty('proposals');
+    expect(FINDINGS_JSON_SCHEMA.properties).toHaveProperty('retire_proposals');
     expect(LIVE_FINDINGS_JSON_SCHEMA.properties).not.toHaveProperty('proposals');
+    expect(LIVE_FINDINGS_JSON_SCHEMA.properties).not.toHaveProperty('retire_proposals');
+  });
+
+  it('trims and deduplicates retire_proposals handles', () => {
+    const parsed = findingsOutputSchema.safeParse({
+      summary: 's',
+      hypotheses: [],
+      retire_proposals: [' P1 ', 'p1', '  ', 'P2'],
+    });
+    if (!parsed.success) throw new Error(parsed.error.message);
+    expect(limitFindings(parsed.data).retire_proposals).toEqual(['P1', 'P2']);
   });
 });
 

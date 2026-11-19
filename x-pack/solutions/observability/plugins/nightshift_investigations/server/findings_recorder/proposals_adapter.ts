@@ -113,4 +113,19 @@ export const createRecorderProposals = ({
       throw error;
     }
   },
+
+  retire: async ({ request, proposalId }) => {
+    await proposals.getProposalPrivileges().assertCanManage(request);
+    const spaceId = getSpaceId(request);
+    const service = proposals.getProposalsService();
+    try {
+      const { proposalId: liveId } = await service.getLatestRevision(proposalId, spaceId);
+      await service.retire(liveId, spaceId);
+    } catch (error) {
+      if (error instanceof ProposalConflictError || error instanceof ProposalNotFoundError) {
+        return;
+      }
+      throw error;
+    }
+  },
 });

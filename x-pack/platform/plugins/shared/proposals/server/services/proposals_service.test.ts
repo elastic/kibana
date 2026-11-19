@@ -2928,7 +2928,11 @@ describe('ProposalsService', () => {
       expect(searchRequest.query.bool.filter).toEqual(
         expect.arrayContaining([
           { term: { spaceId: SPACE_ID } },
-          { bool: { must_not: { exists: { field: 'supersededBy' } } } },
+          {
+            bool: {
+              must_not: [{ exists: { field: 'supersededBy' } }, { term: { status: 'superseded' } }],
+            },
+          },
           { terms: { rootProposalId: ['root-1', 'root-2'] } },
         ])
       );
@@ -3240,7 +3244,13 @@ describe('ProposalsService', () => {
 
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.query.bool.filter).toEqual(
-        expect.arrayContaining([{ bool: { must_not: { exists: { field: 'supersededBy' } } } }])
+        expect.arrayContaining([
+          {
+            bool: {
+              must_not: [{ exists: { field: 'supersededBy' } }, { term: { status: 'superseded' } }],
+            },
+          },
+        ])
       );
     });
 
@@ -3845,7 +3855,7 @@ describe('ProposalsService', () => {
 
       const currentOpenQuery = issuedQueries(storage)[3];
       expect(currentOpenQuery).toContain('status == "pending"');
-      expect(currentOpenQuery).toContain('supersededBy IS NULL');
+      expect(currentOpenQuery).toContain('supersededBy IS NULL AND status != "superseded"');
     });
 
     /**
@@ -3880,7 +3890,7 @@ describe('ProposalsService', () => {
       const queries = issuedQueries(storage);
       expect(queries).toHaveLength(4);
       for (const query of queries) {
-        expect(query).toMatch(/supersededBy\s+IS\s+NULL/i);
+        expect(query).toMatch(/supersededBy\s+IS\s+NULL\s+AND\s+status\s*!=\s*"superseded"/i);
       }
     });
 
@@ -4380,6 +4390,73 @@ describe('ProposalsService — gateless proposals', () => {
         service.update({ id: 'proposal-1', status: 'expired' }, SPACE_ID)
       ).rejects.toBeInstanceOf(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('retire', () => {
+    it('marks a pending gateless proposal superseded without recording a human decision or attachment', async () => {
+      const storage = createStorage(gateless());
+      const { service, analytics, attachmentsClient } = createService(storage);
+
+      const retired = await service.retire('proposal-1', SPACE_ID);
+
+      expect(retired).toMatchObject({
+        id: 'proposal-1',
+        status: 'superseded',
+        gate: 'none',
+      });
+      expect(retired.decision).toBeUndefined();
+      expect(retired.decidedAt).toBeUndefined();
+      expect(retired.supersededBy).toBeUndefined();
+      expect(retired).not.toHaveProperty('ranks');
+
+      const [[writeArgs]] = storage.index.mock.calls;
+      expect(writeArgs).toMatchObject({
+        id: 'proposal-1',
+        if_seq_no: 7,
+        document: expect.objectContaining({ status: 'superseded' }),
+      });
+      expect(writeArgs.document.supersededBy).toBeUndefined();
+      expect(analytics.reportEvent).not.toHaveBeenCalled();
+      expect(attachmentsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('refuses a gated proposal', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await expect(service.retire('proposal-1', SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it.each<[string, Partial<ProposalDocument>]>([
+      ['was already approved', { decision: 'approved', status: 'no_action' }],
+      ['was already dismissed', { decision: 'dismissed', status: 'no_action' }],
+      ['has expired', { status: 'expired' }],
+      ['was already retired', { status: 'superseded' }],
+      ['was already superseded by a revision', { supersededBy: 'proposal-2' }],
+    ])('refuses a gateless proposal that %s', async (_, overrides) => {
+      const storage = createStorage(gateless(overrides));
+      const { service } = createService(storage);
+
+      await expect(service.retire('proposal-1', SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('reports a version conflict when a concurrent write lands first', async () => {
+      const storage = createStorage(gateless());
+      storage.index.mockRejectedValue(
+        Object.assign(new Error('version conflict'), { statusCode: 409 })
+      );
+      const { service } = createService(storage);
+
+      await expect(service.retire('proposal-1', SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
     });
   });
 });

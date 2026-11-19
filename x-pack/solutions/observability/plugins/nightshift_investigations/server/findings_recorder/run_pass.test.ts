@@ -627,6 +627,7 @@ describe('runFindingsPass', () => {
       list: jest.fn().mockResolvedValue(items),
       propose: jest.fn().mockResolvedValue(undefined),
       revise: jest.fn().mockResolvedValue(undefined),
+      retire: jest.fn().mockResolvedValue(undefined),
     });
 
     const withProposals = {
@@ -846,6 +847,78 @@ describe('runFindingsPass', () => {
       expect(proposals.revise).toHaveBeenCalledTimes(1);
       expect(proposals.revise).toHaveBeenCalledWith(expect.objectContaining({ proposalId: 'p-2' }));
       expect(proposals.propose).not.toHaveBeenCalled();
+    });
+
+    it('retires obsolete open proposals even when no new proposals are emitted', async () => {
+      const proposals = proposed([
+        existingProposal({
+          id: 'p-diag',
+          title: 'Inspect Cloud Run revision logs',
+          comment: 'Check Cloud Run logs for startup failures.',
+        }),
+        existingProposal({
+          id: 'p-closed',
+          title: 'Already applied action',
+          status: 'no_action',
+          decision: 'approved',
+        }),
+      ]);
+      const { deps, memory } = setup({
+        answers: [answerWith({ ...output, retire_proposals: ['P1', 'p-closed'] })],
+        proposals,
+      });
+
+      await run(deps, memory, { answer: 'Cloud Run logs were clean.' });
+
+      expect(proposals.retire).toHaveBeenCalledTimes(1);
+      expect(proposals.retire).toHaveBeenCalledWith({ request, proposalId: 'p-diag' });
+      expect(proposals.propose).not.toHaveBeenCalled();
+      expect(proposals.revise).not.toHaveBeenCalled();
+    });
+
+    it('merges two overlapping open proposals via supersedes + retire_proposals and frees open slots', async () => {
+      const openFive = Array.from({ length: 5 }, (_, i) =>
+        existingProposal({
+          id: `p-${i + 1}`,
+          title: `Open action ${i + 1}`,
+          comment: `Step ${i + 1}`,
+        })
+      );
+      const proposals = proposed(openFive);
+      const { deps, memory } = setup({
+        answers: [
+          answerWith({
+            ...output,
+            retire_proposals: ['P1', 'P2'],
+            proposals: [
+              {
+                supersedes: 'P1',
+                title: 'Combined action 1 + 2',
+                comment: 'Unified step covering both 1 and 2.',
+              },
+              {
+                title: 'Brand-new remediation',
+                comment: 'Fits in the slot freed by retiring P2.',
+              },
+            ],
+          }),
+        ],
+        proposals,
+      });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      // P1 is reserved for revise, so only P2 is retired; freeing P2's slot lets the new action through.
+      expect(proposals.retire).toHaveBeenCalledTimes(1);
+      expect(proposals.retire).toHaveBeenCalledWith({ request, proposalId: 'p-2' });
+      expect(proposals.revise).toHaveBeenCalledTimes(1);
+      expect(proposals.revise).toHaveBeenCalledWith(expect.objectContaining({ proposalId: 'p-1' }));
+      expect(proposals.propose).toHaveBeenCalledTimes(1);
+      expect(proposals.propose).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proposal: expect.objectContaining({ title: 'Brand-new remediation' }),
+        })
+      );
     });
 
     it('proposes a repeated title once', async () => {

@@ -737,12 +737,11 @@ export class ProposalsService {
   ): Promise<Proposal> {
     const { id } = params;
 
-    // The status vocabulary admits `superseded`, but it is only correct alongside
-    // the successor that replaced the row, which only `revise()` establishes.
+    // The status vocabulary admits `superseded`, which only `revise()` (alongside
+    // a successor) and `retire()` (for a gateless proposal) establish directly.
     if (params.status === 'superseded') {
       throw new ProposalConflictError(
-        `Proposal [${id}] cannot be moved to superseded: only revise() establishes that ` +
-          `status, together with the successor it points at`
+        `Proposal [${id}] cannot be moved to superseded: only revise() and retire() establish that status`
       );
     }
 
@@ -1134,6 +1133,50 @@ export class ProposalsService {
     await this.attachToConversation(revisionId, document.conversationId, document.title, request);
 
     return { proposalId: revisionId, revision };
+  }
+
+  /**
+   * Retires an undecided gateless proposal without a replacement — for example an
+   * earlier investigative to-do that later findings answered or merged into
+   * another proposal.
+   *
+   * Marked `superseded` rather than `dismissed`: no human declined it, so
+   * `decision` and `decidedAt` stay absent, no decision telemetry is emitted,
+   * and no new card is attached to the conversation. Gated proposals are
+   * refused because a parked gate workflow requires a live head to settle.
+   */
+  async retire(id: string, spaceId: string): Promise<Proposal> {
+    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+
+    if (!isGatelessProposal(proposal)) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] is owned by a gate workflow and cannot be retired without a successor`
+      );
+    }
+    if (proposal.decision !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already decided as ${proposal.decision} and cannot be retired`
+      );
+    }
+    if (proposal.status !== 'pending') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] has settled as ${proposal.status} and cannot be retired`
+      );
+    }
+    if (proposal.supersededBy !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
+      );
+    }
+
+    const { id: _id, ...original } = proposal;
+    const retired: ProposalDocument = {
+      ...original,
+      status: 'superseded',
+    };
+
+    await this.writeDocument(id, retired, { seqNo, primaryTerm });
+    return toProposal(id, retired);
   }
 
   /**
@@ -1833,9 +1876,14 @@ const toFilterClauses = (
     filter.push({ range: { decidedAt: { gte: `now-${filters.decidedWithinHours}h` } } });
   }
   if (filters.excludeSuperseded) {
-    // A superseded proposal is represented by its successor, so showing both
-    // would put every retry of the same subject in the queue.
-    filter.push({ bool: { must_not: { exists: { field: 'supersededBy' } } } });
+    // A superseded proposal is either represented by its successor (`supersededBy`,
+    // including retries and reopened to-dos whose status is not `superseded`) or
+    // retired with none (`status: 'superseded'`).
+    filter.push({
+      bool: {
+        must_not: [{ exists: { field: 'supersededBy' } }, { term: { status: 'superseded' } }],
+      },
+    });
   }
   if (filters.excludeExpired) {
     // A proposal with no deadline never expires, so it has to survive the
