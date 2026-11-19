@@ -159,12 +159,16 @@ spaceTest.describe(
         await lens.layers.closeLayerActions(1);
         await expect(lens.applyFlyoutButton).toBeVisible();
 
-        // The annotation editor is manual-only: no placement type switch (no "Custom query").
+        // The annotation editor offers static date and ES|QL placement, but no data view based
+        // "Custom query" option.
         await lens.dimensions.openDimensionEditor(
           `${ANNOTATIONS_DIMENSION} > lns-dimensionTrigger`,
           1
         );
-        await expect(page.testSubj.locator('lns-xyAnnotation-placementType')).toHaveCount(0);
+        await expect(page.testSubj.locator('lns-xyAnnotation-placementType')).toBeVisible();
+        await expect(page.testSubj.locator('lnsXY_annotation_manual')).toBeVisible();
+        await expect(page.testSubj.locator('lnsXY_annotation_esql')).toBeVisible();
+        await expect(page.testSubj.locator('lnsXY_annotation_query')).toHaveCount(0);
         await expect(page.testSubj.locator('lns-xyAnnotation-time')).toBeVisible();
         await lens.closeDimensionEditor();
 
