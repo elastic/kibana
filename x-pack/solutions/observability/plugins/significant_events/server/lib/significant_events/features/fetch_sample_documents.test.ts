@@ -14,6 +14,7 @@ import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getEsqlColumnSchema, getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
 import { fetchSampleDocuments } from './fetch_sample_documents';
+import { MAX_ENTITY_FILTER_COMPARISONS } from './get_entity_filters';
 
 jest.mock('@kbn/ai-tools', () => ({
   getEsqlColumnSchema: jest.fn(),
@@ -165,6 +166,44 @@ describe('fetchSampleDocuments', () => {
     expect(result.hasFilteredDocuments).toBe(false);
   });
 
+  it('reports omitted filters when none fit the query budget', async () => {
+    const feature = {
+      ...createFeature({
+        id: 'oversized',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        field: 'service.name',
+        value: 'checkout',
+      }),
+      filter: {
+        and: Array.from({ length: MAX_ENTITY_FILTER_COMPARISONS + 1 }, (_, i) => ({
+          field: 'service.name',
+          eq: `service-${i}`,
+        })),
+      },
+    } as FeatureWithFilter;
+    getSampleDocumentsEsqlMock.mockResolvedValueOnce({
+      hits: [createHit('random-1')],
+      total: 1,
+    });
+
+    const result = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [feature],
+      logger,
+      size: 5,
+      entityFilteredRatio: 0.4,
+      diverseRatio: 0,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
+      iteration: 1,
+    });
+
+    expect(result).toMatchObject({ totalFilters: 1, filtersCapped: true });
+  });
+
   it('filters on mapped fields without SET unmapped_fields and leaves the random arm unfiltered', async () => {
     const esClient = {} as ElasticsearchClient;
     const features = [
@@ -217,7 +256,7 @@ describe('fetchSampleDocuments', () => {
     );
     expect(entityFilteredCall).not.toHaveProperty('unmappedFields');
     expect(BasicPrettyPrinter.print(entityFilteredCall.whereCondition!)).toBe(
-      '(`service.name` != "checkout" OR `service.name` IS NULL)'
+      '((`service.name` NOT IN ("checkout")) OR `service.name` IS NULL)'
     );
 
     expect(getDiverseSampleDocumentsMock).toHaveBeenCalledWith({
@@ -244,6 +283,58 @@ describe('fetchSampleDocuments', () => {
     ]);
     expect(result.filtersCapped).toBe(true);
     expect(result.hasFilteredDocuments).toBe(true);
+  });
+
+  it('excludes grouped values with NOT IN and joins slots with AND', async () => {
+    const features = [
+      createFeature({
+        id: 'checkout',
+        updatedAt: '2026-01-02T00:00:00.000Z',
+        field: 'service.name',
+        value: 'checkout',
+      }),
+      createFeature({
+        id: 'cart',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        field: 'service.name',
+        value: 'cart',
+      }),
+      createFeature({
+        id: 'host',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        field: 'host.name',
+        value: 'host-a',
+      }),
+    ];
+
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      { name: 'service.name', type: 'keyword' },
+      { name: 'host.name', type: 'keyword' },
+    ]);
+    getSampleDocumentsEsqlMock.mockImplementation(async ({ whereCondition }) => ({
+      hits: [createHit(whereCondition ? 'entity-1' : 'random-1')],
+      total: 1,
+    }));
+
+    const result = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features,
+      logger,
+      size: 5,
+      entityFilteredRatio: 0.4,
+      diverseRatio: 0,
+      maxEntityFilters: 2,
+      samplingTimeoutMs: 30_000,
+      iteration: 2,
+    });
+
+    expect(BasicPrettyPrinter.print(getEntityFilteredCall()!.whereCondition!)).toBe(
+      '((`service.name` NOT IN ("checkout", "cart")) OR `service.name` IS NULL) AND ((`host.name` NOT IN ("host-a")) OR `host.name` IS NULL)'
+    );
+    expect(result.filtersCapped).toBe(false);
   });
 
   it('skips entity filters on fields the source does not map or cannot compare', async () => {
@@ -294,7 +385,7 @@ describe('fetchSampleDocuments', () => {
     });
 
     expect(BasicPrettyPrinter.print(getEntityFilteredCall()!.whereCondition!)).toBe(
-      '(`service.name` != "checkout" OR `service.name` IS NULL)'
+      '((`service.name` NOT IN ("checkout")) OR `service.name` IS NULL)'
     );
   });
 

@@ -86,6 +86,7 @@ toc:
           - file: connectors-kibana/aws-eks-action-type.md
           - file: connectors-kibana/aws-lambda-action-type.md
           - file: connectors-kibana/aws-rds-action-type.md
+          - file: connectors-kibana/aws-ssm-action-type.md
           - file: connectors-kibana/aws-x-ray-action-type.md
           - file: connectors-kibana/azure-aks-action-type.md
           - file: connectors-kibana/azure-blob-action-type.md
