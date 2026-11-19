@@ -5,7 +5,7 @@
  * 2.0.
  */
 import actionCreatorFactory from 'typescript-fsa';
-import type { DataProvider } from '../../../common';
+import type { DataProvider } from '@kbn/securitysolution-timeline-common';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/timeline');
 

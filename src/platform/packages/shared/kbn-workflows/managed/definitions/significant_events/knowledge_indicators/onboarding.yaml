@@ -83,7 +83,7 @@ triggers:
         description: "Max excluded features sent in LLM prompt during features identification."
       - name: featuresMaxEntityFilters
         type: number
-        description: "Max entity filters applied during features identification sampling."
+        description: "Max entity filters applied during features identification sampling. Equality filters on the same field count as one."
       - name: featuresSamplingTimeoutMs
         type: number
         description: "Deadline (ms) per ES|QL sampling query during features identification sampling."
