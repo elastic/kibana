@@ -280,7 +280,10 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         truncateText: true,
         width: '10%',
         render: (policyIds: string[], item: PackSavedObject) => {
-          const effectiveCount = (item.effective_policy_ids ?? policyIds)?.length ?? 0;
+          // A disabled pack is not compiled into any integration, so the server reports
+          // no effective targets for it. Show its saved targets instead of a misleading 0.
+          const effectiveIds = item.enabled ? item.effective_policy_ids ?? policyIds : policyIds;
+          const effectiveCount = effectiveIds?.length ?? 0;
 
           return effectiveCount > (policyIds?.length ?? 0) ? (
             <EuiToolTip

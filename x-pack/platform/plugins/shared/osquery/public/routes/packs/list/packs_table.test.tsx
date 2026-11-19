@@ -203,6 +203,36 @@ describe('PacksTable', () => {
         }
       }
     );
+
+    it.each([
+      { policyIds: ['policy-1'], effectiveIds: [], count: '1' },
+      { policyIds: ['policy-1', 'policy-2'], effectiveIds: undefined, count: '2' },
+      { policyIds: [], effectiveIds: [], count: '0' },
+    ])(
+      'should show saved targets $policyIds for a disabled pack with effective targets $effectiveIds',
+      ({ policyIds, effectiveIds, count }) => {
+        mockUsePacks.mockReturnValue({
+          data: {
+            data: [
+              createPack({
+                enabled: false,
+                policy_ids: policyIds,
+                effective_policy_ids: effectiveIds,
+              }),
+            ],
+            total: 1,
+          },
+          isLoading: false,
+          isFetching: false,
+        });
+        renderComponent();
+        const row = screen.getByText('test-pack').closest('tr');
+        expect(row).not.toBeNull();
+        const cells = within(row as HTMLElement).getAllByRole('cell');
+        expect(cells[2]).toHaveTextContent(count);
+        expect(within(cells[2]).queryByText(count, { selector: 'span[tabindex="0"]' })).toBeNull();
+      }
+    );
   });
 
   describe('active/inactive toggle', () => {
