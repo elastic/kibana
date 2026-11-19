@@ -387,6 +387,35 @@ describe('KpiMetricsSettings', () => {
       expect(onSave).not.toHaveBeenCalled();
     });
 
+    it('shows a duration in the unit of the threshold', async () => {
+      jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({
+        id: 'preview',
+        type: 'value',
+        format: 'duration',
+        value: 144000,
+      });
+
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          kpiMetrics={[
+            {
+              ...customMetric('a'),
+              query: '',
+              aggregation: { type: 'median', field: 'case.time_to_resolve' },
+              threshold: { comparator: 'above', value: 144000, unit: 'h' },
+            },
+          ]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.click(await screen.findByTestId('kpi-metric-test-query'));
+
+      expect(await screen.findByTestId('kpi-metric-preview-value')).toHaveTextContent('40 h');
+    });
+
     it('shows the error of the unsaved metric', async () => {
       jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({
         id: 'preview',

@@ -114,10 +114,13 @@ const DIRECTION_OPTIONS: Array<{ value: DirectionOption; text: string }> = [
   { value: 'lower_is_better', text: i18n.DIRECTION_LOWER_IS_BETTER },
 ];
 
-const getPreviewText = (result: Exclude<KpiMetricResult, KpiMetricErrorResult>): string =>
+const getPreviewText = (
+  result: Exclude<KpiMetricResult, KpiMetricErrorResult>,
+  unit?: KpiMetricThresholdUnit
+): string =>
   result.type === 'breakdown'
     ? i18n.PREVIEW_BREAKDOWN(formatKpiBreakdownSummary(getKpiBreakdownRows(result)))
-    : i18n.PREVIEW_VALUE(formatKpiMetricValue(result.value, result.format));
+    : i18n.PREVIEW_VALUE(formatKpiMetricValue(result.value, result.format, unit));
 
 interface KpiMetricRowsProps {
   state: KpiMetricFormState;
@@ -296,6 +299,10 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
   const errors = useMemo(() => validateKpiMetricForm(state), [state]);
   const hasErrors = Object.keys(errors).length > 0;
   const isBreakdown = isBreakdownMetric(state);
+  const previewUnit = useMemo(
+    () => toKpiMetricRequest(state, metric).threshold?.unit,
+    [state, metric]
+  );
 
   const update = useCallback(
     (changes: Partial<KpiMetricFormState>) => {
@@ -505,7 +512,7 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
                       </EuiText>
                     ) : (
                       <EuiText size="s" data-test-subj="kpi-metric-preview-value">
-                        {getPreviewText(previewResult)}
+                        {getPreviewText(previewResult, previewUnit)}
                       </EuiText>
                     )}
                   </EuiFlexItem>
