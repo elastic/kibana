@@ -671,7 +671,7 @@ describe('buildHuntNarrative when no search ran', () => {
       [
         '6: no_tier2_targets',
         { tier2_skipped_reason: 'no_tier2_targets' as const },
-        'this space has no data source Behavior Hunt can run on',
+        'Behavior Hunt could not select a data source to run on',
       ],
       [
         '7: no_report_text',
@@ -696,6 +696,22 @@ describe('buildHuntNarrative when no search ran', () => {
     ])('row %s', (_label, overrides, clause) => {
       expect(buildHuntNarrative(nothingSearched(overrides), ctx)).toBe(
         expectedText(`${noIocs}, and ${clause}.`)
+      );
+    });
+
+    it('says the query failed when Elasticsearch rejected it, not that none could run', () => {
+      const failed = behavior({
+        execution: {
+          executed: false,
+          row_count: 0,
+          hit: false,
+          inconclusive_reason: 'execute_failed',
+        },
+      });
+      expect(buildHuntNarrative(nothingSearched({ tier2: tier2([failed]) }), ctx)).toBe(
+        expectedText(
+          `${noIocs}, and Behavior Hunt derived 1 behavior from the report, but running the query in Elasticsearch failed.`
+        )
       );
     });
 

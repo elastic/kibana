@@ -150,7 +150,7 @@ const buildNoHitClosureSummary = ({
     return `${found}. Closing: nothing in this environment matched the report at the confirming-index bar.`;
   }
   if (nothingSearched) {
-    return 'Hunt Watch searched nothing for this report: it had nothing Hunt Watch could search. This is not a statement that the environment is clean.';
+    return 'Hunt Watch searched nothing for this report. This is not a statement that the environment is clean.';
   }
   const unsearched = gapPhrase
     ? `${gapPhrase} left part of the report unsearched`

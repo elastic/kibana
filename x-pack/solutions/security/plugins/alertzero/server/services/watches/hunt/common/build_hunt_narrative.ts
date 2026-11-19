@@ -460,10 +460,15 @@ const describeNothingSearchedIocs = (result: HuntCoordinatorCoreResult): string 
 const describeNothingSearchedBehaviors = (result: HuntCoordinatorCoreResult): string => {
   const { tier2 } = result;
   if (tier2 && tier2.behaviors.length > 0 && !tier2.behaviors.some((b) => b.execution?.executed)) {
-    return `Behavior Hunt derived ${plural(
+    const derived = `Behavior Hunt derived ${plural(
       tier2.behaviors.length,
       'behavior'
-    )} from the report, but none produced a query that could run`;
+    )} from the report`;
+    // A query that reached Elasticsearch and failed is recorded as not executed too; say so, so
+    // the reader does not go looking for a query that was never generated.
+    return tier2.behaviors.some((b) => b.execution?.inconclusive_reason === 'execute_failed')
+      ? `${derived}, but running the query in Elasticsearch failed`
+      : `${derived}, but none produced a query that could run`;
   }
   if (tier2 && tier2.behaviors.length === 0 && (tier2.incomplete?.length ?? 0) > 0) {
     return 'Behavior Hunt could not derive a searchable behavior from the report';
@@ -476,7 +481,7 @@ const describeNothingSearchedBehaviors = (result: HuntCoordinatorCoreResult): st
         ? 'the model call that chooses where Behavior Hunt runs failed'
         : 'no model was available for Behavior Hunt';
     case 'no_tier2_targets':
-      return 'this space has no data source Behavior Hunt can run on';
+      return 'Behavior Hunt could not select a data source to run on';
     case 'no_report_text':
       return 'the report has no body text for Behavior Hunt';
     case 'tier2_failed':

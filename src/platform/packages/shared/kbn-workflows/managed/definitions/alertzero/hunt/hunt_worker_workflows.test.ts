@@ -1613,9 +1613,20 @@ describe('Hunt Watch worker: a retired_incomplete hunt', () => {
         [
           '### Hunt Watch run completed: nothing was searched',
           '- **Report:** `rpt-1`',
+          '- **Packaging:** Closed this Investigation as benign.',
           '- **What this means:** no search ran, so this says nothing about whether the environment is clean. The report will not be swept again on its own; a manual run targeting this report replays it.',
           '- **Run:** `exec-1` ([full per-stage detail](https://kibana/exec-1))',
         ].join('\n')
+      );
+    });
+
+    it('keeps the packaging note that says why the Investigation stayed open', () => {
+      const context = retiredContext('retired_incomplete', [nothingSearched]);
+      context.steps.package_report.output.summary =
+        'No confirmed hits this run, but the Investigation still has a Proposal from an earlier run, so packaging left it open.';
+
+      expect(conclusion(context)).toContain(
+        '- **Packaging:** No confirmed hits this run, but the Investigation still has a Proposal from an earlier run, so packaging left it open.'
       );
     });
 
@@ -1629,7 +1640,6 @@ describe('Hunt Watch worker: a retired_incomplete hunt', () => {
 
       expect(message).toContain('### Hunt Watch run completed: nothing was searched');
       expect(message).not.toContain('**Hunt:**');
-      expect(message).not.toContain('**Packaging:**');
     });
 
     it('keeps the long form when some search ran and a gap remained', () => {

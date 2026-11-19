@@ -559,7 +559,7 @@ describe('runPackageReport', () => {
         detail: 'IOC Hunt mapped no searchable term and Behavior Hunt executed no query.',
       };
       const SHORT_SUMMARY =
-        'Hunt Watch searched nothing for this report: it had nothing Hunt Watch could search. This is not a statement that the environment is clean.';
+        'Hunt Watch searched nothing for this report. This is not a statement that the environment is clean.';
 
       it('says nothing was searched, and not that the environment is clean', async () => {
         const result = await retiredRun({ coverageGaps: [nothingSearchedGap] });
