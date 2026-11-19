@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 
-import { buildAttackDetailPath } from '../../../../common/utils/attack_detail_path';
-import { useAppUrl } from '../../../common/lib/kibana/hooks';
+import { buildAttackDetailPath } from '../../../../../common/utils/attack_detail_path';
+import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 
 export interface UseGetAttackFlyoutLinkProps {
   attackId: string;

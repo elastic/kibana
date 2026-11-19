@@ -8,20 +8,20 @@
 import React, { memo, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
-import { HostDetails } from '../../../document_details/left/components/host_details';
-import { UserDetails } from '../../../document_details/left/components/user_details';
-import type { GetFieldsData } from '../../../document_details/shared/hooks/use_get_fields_data';
+import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { HostDetails } from '../../../../../flyout/document_details/left/components/host_details';
+import { UserDetails } from '../../../../../flyout/document_details/left/components/user_details';
+import type { GetFieldsData } from '../../../../../flyout/document_details/shared/hooks/use_get_fields_data';
 import {
   createGetFieldsDataFromAlertSource,
   resolveHostNameForEntityInsightsWithFallback,
   resolveUserNameForEntityInsightsWithFallback,
   type IdentityFields,
-} from '../../../document_details/shared/utils';
-import type { AttackEntityListEntry } from '../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists';
-import type { CspInsightLeftPanelSubTab } from '../../../entity_details/shared/components/left_panel/left_panel_header';
-import type { EntityTableLinkRenderer } from '../../../entity_details/shared/components/entity_table/types';
-import type { EntitySectionOverrides } from '../../../document_details/left/components/entities_details';
+} from '../../../../../flyout/document_details/shared/utils';
+import type { AttackEntityListEntry } from '../hooks/use_attack_entities_lists';
+import type { CspInsightLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityTableLinkRenderer } from '../../../../../flyout/entity_details/shared/components/entity_table/types';
+import type { EntitySectionOverrides } from '../../../../../flyout/document_details/left/components/entities_details';
 
 const resolveUserDisplayForEntities = (
   identityFields: IdentityFields | undefined,

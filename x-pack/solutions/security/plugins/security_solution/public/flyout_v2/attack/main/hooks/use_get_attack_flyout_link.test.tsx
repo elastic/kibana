@@ -6,10 +6,10 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { ATTACK_DETAILS_REDIRECT_PATH } from '../../../../common/constants';
+import { ATTACK_DETAILS_REDIRECT_PATH } from '../../../../../common/constants';
 import { useGetAttackFlyoutLink } from './use_get_attack_flyout_link';
 
-jest.mock('../../../common/lib/kibana/hooks', () => ({
+jest.mock('../../../../common/lib/kibana/hooks', () => ({
   useAppUrl: () => ({
     getAppUrl: ({ path }: { path: string }) => path,
   }),
