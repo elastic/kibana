@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* @notice
+/*
  * The ORCA report instructions in @kbn/evals-suite-nightshift-investigations
  * (`orca/report_prompt/orca_instructions.text`) are adapted from the ORCA benchmark's task template
  * `harbor-template/instruction.md.template` (https://github.com/ORCA-bench/ORCA-bench), from

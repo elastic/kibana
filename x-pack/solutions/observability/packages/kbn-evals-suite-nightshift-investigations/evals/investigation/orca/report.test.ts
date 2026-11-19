@@ -10,7 +10,12 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { InvestigationTaskOutput } from '../types';
 import { NO_CONCLUSION_ERROR } from '../task';
-import { addOrcaReport, MAX_ORCA_REPORT_LENGTH, orcaReportUnscoredReason } from './report';
+import {
+  addOrcaReport,
+  assertOrcaReportsWritten,
+  MAX_ORCA_REPORT_LENGTH,
+  orcaReportUnscoredReason,
+} from './report';
 import { OrcaReportPrompt } from './prompts';
 
 jest.mock('@kbn/inference-tracing', () => ({
@@ -94,14 +99,34 @@ describe('ORCA report.md', () => {
     expect(prompt).toHaveBeenCalledTimes(1);
   });
 
-  it('records a failed write so the graders leave the run unscored', async () => {
+  it('records a failed write so the graders leave the run unscored, and warns', async () => {
     const prompt = jest.fn().mockRejectedValue(new AbortError('model unavailable'));
+    const log = new ToolingLog();
+    const warning = jest.spyOn(log, 'warning');
     const result = await addOrcaReport(
-      { inferenceClient: { prompt } as unknown as BoundInferenceClient, log: new ToolingLog() },
+      { inferenceClient: { prompt } as unknown as BoundInferenceClient, log },
       output()
     );
     expect(result.orca_report_error).toBe('model unavailable');
     expect(orcaReportUnscoredReason(result)).toBe('report.md was not written: model unavailable');
+    expect(warning).toHaveBeenCalledWith(
+      'ORCA report.md for checkout was not written: model unavailable'
+    );
+  });
+
+  it('fails the run when too few of the reports it tried to write were written', () => {
+    const written = output({ orca_report_md: '# Report' });
+    const failed = output({ case_id: 'cart', orca_report_error: 'model unavailable' });
+    // A run ORCA leaves out gets no report, so it does not count against the writer.
+    const skipped = output({ execution_error: 'harness failed' });
+    expect(() =>
+      assertOrcaReportsWritten([written, written, written, written, failed])
+    ).not.toThrow();
+    expect(() => assertOrcaReportsWritten([written, failed, skipped, skipped])).toThrow(
+      '1 of 2 ORCA report.md written, below the 80% threshold:\n- cart: model unavailable'
+    );
+    expect(() => assertOrcaReportsWritten([failed])).toThrow('0 of 1 ORCA report.md written');
+    expect(() => assertOrcaReportsWritten([skipped])).not.toThrow();
   });
 
   it('keeps an oversized report only in part and marks it', async () => {

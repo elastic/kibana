@@ -7,7 +7,12 @@
 
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { InvestigationTaskOutput } from '../types';
-import { NO_CONCLUSION_ERROR } from '../task';
+import {
+  NO_CONCLUSION_ERROR,
+  ROUND_FAILED_ERROR_PREFIX,
+  STILL_IN_PROGRESS_ERROR_PREFIX,
+} from '../task';
+import { MIN_EXECUTION_SUCCESS_RATE } from '../execution_success';
 import type { JudgeDeps } from '../judges/invoke_judge';
 import { invokeJudge } from '../judges/invoke_judge';
 import { composeAnswerText, composeEvidenceText, composeTrajectoryText } from '../judges/scoring';
@@ -54,8 +59,8 @@ export const orcaAgentFailure = (output: InvestigationTaskOutput): string | unde
   if (!reason || output.report_truncated) return undefined;
   const isAgentFailure =
     reason === NO_CONCLUSION_ERROR ||
-    reason.startsWith('Investigation was still in progress after') ||
-    reason.startsWith('Investigation round failed:');
+    reason.startsWith(STILL_IN_PROGRESS_ERROR_PREFIX) ||
+    reason.startsWith(ROUND_FAILED_ERROR_PREFIX);
   return isAgentFailure ? reason : undefined;
 };
 
@@ -130,6 +135,28 @@ export const addOrcaReport = async (
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     output.orca_report_error = message.slice(0, MAX_TEXT_LENGTH);
+    deps.log.warning(`ORCA report.md for ${output.case_id} was not written: ${message}`);
   }
   return output;
+};
+
+/**
+ * Fails the run when too few of the report.md it tried to write were written: a run without one is
+ * left out of every ORCA score, so a broken writer would otherwise leave a green eval unscored.
+ */
+export const assertOrcaReportsWritten = (
+  outputs: readonly InvestigationTaskOutput[],
+  minimumRate: number = MIN_EXECUTION_SUCCESS_RATE
+): void => {
+  const attempted = outputs.filter((output) => !orcaRunUnscoredReason(output));
+  const failed = attempted.filter((output) => output.orca_report_error !== undefined);
+  const written = attempted.length - failed.length;
+  if (attempted.length === 0 || written / attempted.length >= minimumRate) return;
+  throw new Error(
+    `${written} of ${attempted.length} ORCA report.md written, below the ${Math.round(
+      minimumRate * 100
+    )}% threshold:\n${failed
+      .map(({ case_id: caseId, orca_report_error: error }) => `- ${caseId}: ${error}`)
+      .join('\n')}`
+  );
 };

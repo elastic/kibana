@@ -21,8 +21,8 @@ import {
 } from './connector_sets';
 import { createInvestigationJudges } from './judges';
 import { createOrcaEvaluators } from './orca/evaluators';
-import { addOrcaReport } from './orca/report';
-import { loadOrcaRubrics } from './orca/rubrics';
+import { addOrcaReport, assertOrcaReportsWritten } from './orca/report';
+import { assertOrcaRubricsCover, loadOrcaRubrics } from './orca/rubrics';
 import { orcaJudgeConnector } from './orca_judge';
 import { efficiencyEvaluators } from './efficiency_evaluators';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation, waitForInvestigationToEnd } from './task';
@@ -127,12 +127,13 @@ export const registerInvestigationEvaluation = ({
           inferenceClient: inferenceClient.bindTo({ connectorId: connector.id }),
           log,
         };
+        // Every task's events must have a rubric, or the task would silently go unscored.
+        const orcaRubrics = orca ? await loadOrcaRubrics(evalsClient) : undefined;
+        if (orcaRubrics) assertOrcaRubricsCover(dataset.examples, orcaRubrics);
         const judges = createInvestigationJudges(judgeDeps);
         const evaluators = [
           ...judges,
-          ...(orca
-            ? createOrcaEvaluators(judgeDeps, { rubrics: await loadOrcaRubrics(evalsClient) })
-            : []),
+          ...(orcaRubrics ? createOrcaEvaluators(judgeDeps, { rubrics: orcaRubrics }) : []),
           executionSuccessEvaluator,
           ...efficiencyEvaluators,
         ];
@@ -193,7 +194,11 @@ export const registerInvestigationEvaluation = ({
                 ...experimentMetadata,
                 ...knowledgeMetadata,
                 concurrency,
-                ...(orca ? { telemetry_cutoffs: cutoffs.length } : {}),
+                // The ORCA scores come from the ported verifier, not main's earlier flag judges,
+                // so runs can be split by grader.
+                ...(orca
+                  ? { telemetry_cutoffs: cutoffs.length, orca_grader: 'check_prediction' }
+                  : {}),
               },
               task,
             },
@@ -289,6 +294,8 @@ export const registerInvestigationEvaluation = ({
           log.warning(`Investigation ${caseId} did not complete: ${reason}`);
         }
         assertExecutionSuccessRate(failures, runs.length);
+        if (orca)
+          assertOrcaReportsWritten(runs.map(({ output }) => output as InvestigationTaskOutput));
         const casesWithOrcaTelemetry: string[] = [];
 
         await pMap(

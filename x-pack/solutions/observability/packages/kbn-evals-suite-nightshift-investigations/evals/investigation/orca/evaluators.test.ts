@@ -11,7 +11,11 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvalConnector } from '@kbn/evals';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { InvestigationTaskOutput } from '../types';
-import { NO_CONCLUSION_ERROR } from '../task';
+import {
+  NO_CONCLUSION_ERROR,
+  ROUND_FAILED_ERROR_PREFIX,
+  STILL_IN_PROGRESS_ERROR_PREFIX,
+} from '../task';
 import type { JsonValue, OrcaRubric } from './check_prediction';
 import { buildControlPrompt, buildJudgePrompt } from './check_prediction';
 import {
@@ -148,7 +152,7 @@ describe('ORCA graders', () => {
     );
     // Accuracy needs every rubric's flag; one named flag is no hallucination.
     expect(accuracy).toMatchObject({ score: 0, label: 'fail' });
-    expect(depth).toMatchObject({ score: 0.5, label: '1.5/3' });
+    expect(depth).toMatchObject({ score: 0.5, label: '1.50/3' });
     expect(hallucination).toMatchObject({ score: 0, label: 'pass' });
   });
 
@@ -287,8 +291,9 @@ describe('ORCA graders', () => {
   });
 
   it.each([
-    ['a timeout', 'Investigation was still in progress after 30 minutes'],
-    ['a failed agent round', 'Investigation round failed: model error'],
+    // Built from task.ts's own prefixes, so rewording its messages cannot unscore these silently.
+    ['a timeout', `${STILL_IN_PROGRESS_ERROR_PREFIX}30 minutes`],
+    ['a failed agent round', `${ROUND_FAILED_ERROR_PREFIX}model error`],
     ['a run that ended with nothing recorded', NO_CONCLUSION_ERROR],
   ])('scores %s 0, as the verifier scores a trial without report.md', async (_, executionError) => {
     const { deps, prompt } = judgeReturning({});

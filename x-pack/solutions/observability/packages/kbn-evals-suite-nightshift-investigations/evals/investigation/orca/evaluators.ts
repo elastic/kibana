@@ -265,7 +265,7 @@ const createPortedOrcaEvaluators = (
     })),
     create(ORCA_RCA_DEPTH_EVALUATOR, 'maximize', 'incident', (aggregate) => ({
       score: orcaReward(aggregate),
-      label: `${aggregate.rca_depth ?? 0}/3`,
+      label: `${(aggregate.rca_depth ?? 0).toFixed(2)}/3`,
     })),
     create(
       ORCA_HALLUCINATION_EVALUATOR,

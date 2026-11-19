@@ -10,7 +10,13 @@ import { join } from 'path';
 import type { EvalsClient } from '@kbn/evals';
 import type { OrcaRubric } from './check_prediction';
 import type { OrcaRubricsRelease } from './rubrics';
-import { getOrcaExpected, getOrcaRubrics, getOrcaRubricsHash, loadOrcaRubrics } from './rubrics';
+import {
+  assertOrcaRubricsCover,
+  getOrcaExpected,
+  getOrcaRubrics,
+  getOrcaRubricsHash,
+  loadOrcaRubrics,
+} from './rubrics';
 
 const synthetic: Record<string, OrcaRubric> = JSON.parse(
   readFileSync(join(__dirname, '__fixtures__', 'synthetic_rubrics.json'), 'utf8')
@@ -92,5 +98,29 @@ describe('ORCA rubrics', () => {
       'cartOutage',
       'synthLatency',
     ]);
+  });
+
+  it('refuses tasks whose events have no rubric before any run, and passes the rest', () => {
+    const task = (caseId: string, eventIds: string[]) => ({
+      metadata: {
+        case_id: caseId,
+        orca_expected: {
+          events: eventIds.map((eventId) => ({
+            event_id: eventId,
+            root_cause: '',
+            event_time: '',
+          })),
+        },
+      },
+    });
+    const covered = task('covered', ['synthetic-cartOutage-on']);
+    const control = task('control', []);
+    const privateTask = { metadata: { case_id: 'private' } };
+    expect(() => assertOrcaRubricsCover([covered, control, privateTask], rubrics)).not.toThrow();
+    expect(() =>
+      assertOrcaRubricsCover([covered, task('uncovered', ['missing-event'])], rubrics)
+    ).toThrow(
+      '1 ORCA tasks name events without a rubric in the pinned release:\n- uncovered: missing-event'
+    );
   });
 });
