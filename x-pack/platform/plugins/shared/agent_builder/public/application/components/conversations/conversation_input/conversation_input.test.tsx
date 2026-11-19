@@ -23,7 +23,6 @@ import {
   useHasActiveConversation,
   useIsSharedConversation,
 } from '../../../hooks/use_conversation';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -59,9 +58,6 @@ jest.mock('../../../hooks/use_conversation', () => ({
   useConversationTitle: jest.fn(),
   useHasActiveConversation: jest.fn(),
   useIsSharedConversation: jest.fn(),
-}));
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: jest.fn(),
 }));
 jest.mock('../../../hooks/use_is_awaiting_prompt', () => ({
   useIsAwaitingPrompt: jest.fn(),
@@ -190,7 +186,6 @@ const mockedUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 const mockedUseConversationTitle = jest.mocked(useConversationTitle);
 const mockedUseHasActiveConversation = jest.mocked(useHasActiveConversation);
 const mockedUseIsSharedConversation = jest.mocked(useIsSharedConversation);
-const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 const mockedUseIsAwaitingPrompt = jest.mocked(useIsAwaitingPrompt);
 const mockedUseConversationId = jest.mocked(useConversationId);
 const mockedUseConversationContext = jest.mocked(useConversationContext);
@@ -249,7 +244,6 @@ describe('ConversationInput', () => {
     mockedUseConversationTitle.mockReturnValue({ title: '', isLoading: false } as never);
     mockedUseHasActiveConversation.mockReturnValue(false);
     mockedUseIsSharedConversation.mockReturnValue(false);
-    mockedUseExperimentalFeatures.mockReturnValue(false);
     mockedUseIsAwaitingPrompt.mockReturnValue(false);
     mockedUseConversationId.mockReturnValue(undefined);
     mockedUseConversationContext.mockReturnValue({
@@ -520,15 +514,11 @@ describe('ConversationInput', () => {
   });
 
   describe('mentions', () => {
-    it('shows the mention button only in a shared chat with the experimental flag on', () => {
+    it('shows the mention button only in a shared chat', () => {
       const { rerender } = renderInput(<ConversationInput />);
       expect(screen.queryByTestId('mock-mention-button')).not.toBeInTheDocument();
 
       mockedUseIsSharedConversation.mockReturnValue(true);
-      rerenderInput(rerender);
-      expect(screen.queryByTestId('mock-mention-button')).not.toBeInTheDocument();
-
-      mockedUseExperimentalFeatures.mockReturnValue(true);
       rerenderInput(rerender);
       expect(screen.getByTestId('mock-mention-button')).toBeInTheDocument();
 
@@ -538,7 +528,6 @@ describe('ConversationInput', () => {
     });
 
     it('types an @ in the editor when the mention button is clicked', () => {
-      mockedUseExperimentalFeatures.mockReturnValue(true);
       mockedUseIsSharedConversation.mockReturnValue(true);
       renderInput(<ConversationInput />);
 
@@ -566,7 +555,6 @@ describe('ConversationInput', () => {
           clearDraft: jest.fn(),
         });
         mockedUseConversationId.mockReturnValue('conv-1');
-        mockedUseExperimentalFeatures.mockReturnValue(true);
         mockedUseIsSharedConversation.mockReturnValue(true);
       });
 
@@ -690,22 +678,17 @@ describe('ConversationInput', () => {
         expect(modeValue()).toHaveValue('always');
       });
 
-      it('does not switch with the experimental flag off', () => {
-        mockedUseExperimentalFeatures.mockReturnValue(false);
+      it('hides the toggle and the post-to-team header in a chat that is not shared', () => {
+        mockedUseIsSharedConversation.mockReturnValue(false);
         renderInput(<ConversationInput />);
 
         type(`${julian} look`);
 
-        expect(modeValue()).toHaveValue('always');
-      });
-
-      it('still lets the user flip the toggle by hand with the experimental flag off', () => {
-        mockedUseExperimentalFeatures.mockReturnValue(false);
-        renderInput(<ConversationInput />);
-
-        fireEvent.change(modeValue(), { target: { value: 'never' } });
-
-        expect(modeValue()).toHaveValue('never');
+        expect(screen.queryByTestId('mock-trigger-mode-selector')).not.toBeInTheDocument();
+        expect(screen.getByTestId('agentBuilderConversationInputPostToTeamHeader')).toHaveAttribute(
+          'aria-hidden',
+          'true'
+        );
       });
     });
   });

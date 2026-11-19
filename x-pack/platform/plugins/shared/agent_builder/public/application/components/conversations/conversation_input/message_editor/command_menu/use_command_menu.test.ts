@@ -124,7 +124,7 @@ describe('useCommandMenuCommand', () => {
       });
     };
 
-    it('"@" opens the mention menu in a shared chat with the experimental flag on', () => {
+    it('"@" opens the mention menu in a shared chat', () => {
       const { result } = renderHook(() => useCommandMenu());
       typeMention(result);
 
@@ -140,12 +140,12 @@ describe('useCommandMenuCommand', () => {
       expect(result.current.match.isActive).toBe(false);
     });
 
-    it('"@" opens no menu with the experimental flag off', () => {
+    it('"@" opens the mention menu in a shared chat with the experimental flag off', () => {
       mockedUseExperimentalFeatures.mockReturnValue(false);
       const { result } = renderHook(() => useCommandMenu());
       typeMention(result);
 
-      expect(result.current.match.isActive).toBe(false);
+      expect(result.current.match.activeCommand?.command.id).toBe(CommandId.Mention);
     });
 
     it('turns the mention menu on when the chat becomes shared, without a remount', () => {
