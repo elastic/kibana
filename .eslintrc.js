@@ -1417,6 +1417,9 @@ module.exports = {
         'x-pack/platform/plugins/shared/cases/common/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
+      excludedFiles: [
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
+      ],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
