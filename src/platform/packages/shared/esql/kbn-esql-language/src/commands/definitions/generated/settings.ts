@@ -48,13 +48,13 @@ const exemplars = {
   name: EsqlSettingNames.EXEMPLARS,
   type: ['boolean', 'map_param'],
   description:
-    'When enabled, the provided `TS ... | STATS` or `PROMQL` query is not executed. Instead, exemplars considered relevant to the query are returned based on heuristics that take the selected metrics and series into account.',
+    'When enabled, the provided `TS ... | STATS` or `PROMQL` query is not executed. Instead, exemplars considered relevant to the query are returned based on heuristics that take the selected metrics and series into account. For details, refer to [Query exemplars](https://www.elastic.co/docs/reference/query-languages/esql/commands/ts#esql-ts-exemplars).',
   serverlessOnly: false,
-  preview: false,
-  snapshotOnly: true,
+  preview: true,
+  snapshotOnly: false,
   mapParams:
     "{name='limit', values=[], description='Maximum number of exemplars to return. Without it the default limit of a regular query applies.', type=[integer]}, {name='include_timeseries', values=[], description='When enabled, a `_timeseries` column is returned, holding the dimensions that identify the series each exemplar belongs to. Defaults to `false`.', type=[boolean]}",
-  ignoreAsSuggestion: true,
+  ignoreAsSuggestion: false,
 };
 
 const projectRouting = {

@@ -230,6 +230,23 @@ describe('x-ms-paths', () => {
     });
   });
 
+  it('keeps routing to the more specific operation when a less specific one is preferred', async () => {
+    const preferring = createEmulatorFetch({
+      specs: [blob],
+      preferredOperations: [{ method: 'get', path: '/?comp=properties' }],
+    });
+
+    await preferring.fetch(
+      'https://account.blob.core.windows.net/?restype=service&comp=properties'
+    );
+    await preferring.fetch('https://account.blob.core.windows.net/?comp=properties');
+
+    expect(preferring.calls.map(({ operation }) => operation)).toEqual([
+      'Service_GetProperties',
+      'Other_GetProperties',
+    ]);
+  });
+
   it('routes a request missing a discriminator to an operation it fits, whose validation names it', async () => {
     const response = await send('/logs?comp=lease&restype=container', 'PUT');
 

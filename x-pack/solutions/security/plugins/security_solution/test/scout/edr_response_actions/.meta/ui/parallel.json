@@ -1,5 +1,5 @@
 {
-  "sha1": "c6db45bb8b103ed7c9aa4ee255aaa96b66d9105f",
+  "sha1": "f72dd8b13ee582368dab3cc5f2d5a84962272cd4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -136,12 +136,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/response_console_from_alerts.spec.ts",
-        "line": 37,
-        "column": 33
+        "line": 46,
+        "column": 7
       }
     },
     {
@@ -150,12 +151,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/response_console_from_alerts.spec.ts",
-        "line": 51,
-        "column": 53
+        "line": 61,
+        "column": 17
       }
     },
     {

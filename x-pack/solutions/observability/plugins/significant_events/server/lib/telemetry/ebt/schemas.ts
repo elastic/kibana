@@ -11,7 +11,6 @@ import type {
   ExistingAlertIdentityProps,
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
-  AgentToolEventStatusUpdateProps,
   AgentToolFailedProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   KnowledgeIndicatorQueriesGenerationFailedProps,
@@ -478,46 +477,6 @@ const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
     type: 'text',
     _meta: {
       description: 'Error message when event creation fails',
-      optional: true,
-    },
-  },
-};
-
-const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdateProps> = {
-  ...optionalWorkflowExecutionTelemetrySchema,
-  ...existingAlertIdentitySchema,
-  success: {
-    type: 'boolean',
-    _meta: {
-      description: 'Whether the event status update succeeded',
-    },
-  },
-  event_uuid: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'Deprecated — superseded by `event_id`. The identifier of the updated significant event',
-      optional: true,
-    },
-  },
-  event_id: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'The stable event id of the updated significant event, or `unknown` (as is `fingerprint`) when no event matched the requested id; the same value as `fingerprint`, kept for compatibility',
-    },
-  },
-  status: {
-    type: 'keyword',
-    _meta: {
-      description: 'The status value set on the significant event',
-    },
-  },
-  error_message: {
-    type: 'text',
-    _meta: {
-      description:
-        'Error message when event status update fails; `not_found` when no event matched the requested id',
       optional: true,
     },
   },
@@ -1066,7 +1025,6 @@ export {
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
   agentToolEventSearchSchema,
-  agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,

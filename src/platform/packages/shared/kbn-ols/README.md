@@ -25,49 +25,47 @@ none < view < use < edit < manage
 - **Ownership** is a separate relationship, stored as `owner`, not a level. Every ACL Kibana writes has an
   owner.
 
-`isAclLevel`, `isGeneralAccessLevel`, and `isEntryLevel` check values read from storage, and `compareLevels`,
-`maxLevel`, and `lowestAllowed` compare and pick levels. `lowestAllowed` matters for damaged or hand-edited data:
-when a stored value holds several levels, only the most restrictive one that the type allows counts, and values the
-type doesn't know are ignored.
+Only this package uses the order. Code outside it checks operations, and names the values as access (`AclAccess`,
+`GeneralAccess`, and `EntryAccess`). When a stored field holds several values, only the most restrictive one that
+the type allows counts, and values the type doesn't know are ignored.
 
 ## Access policies
 
-Every type that adopts OLS declares one access policy. It says which levels general access can take
-(`generalAccessLevels`), which one new objects and objects without an ACL get (`defaultGeneralAccessLevel`), which
-levels entries can grant (`entryLevels`), and which level each operation needs. The default is required, because it
-decides access to every existing object when a type adopts OLS. For example, a type
-whose objects everyone can edit by default (`edit`), whose owners can let others only use them (`use`) or nothing at
-all (`none`), and whose entries grant `use`:
+Every type that adopts OLS declares one access policy. It says which values general access can take
+(`generalAccess`), which one new objects and objects without an ACL get (`defaultGeneralAccess`), which access
+entries can grant (`entryAccess`), and which access each operation needs. The default is required, because it decides
+access to every existing object when a type adopts OLS. For example, a type whose objects everyone can edit by default
+(`edit`), whose owners can let others only use them (`use`) or nothing at all (`none`), and whose entries grant `use`:
 
 ```ts
 const policy: AccessPolicy = {
-  generalAccessLevels: ['none', 'use', 'edit'],
-  defaultGeneralAccessLevel: 'edit',
-  entryLevels: ['use'],
+  generalAccess: ['none', 'use', 'edit'],
+  defaultGeneralAccess: 'edit',
+  entryAccess: ['use'],
   operations: {
-    view: { level: 'view', privileges: {} },
+    view: { access: 'view', privileges: {} },
     execute: {
-      level: 'use',
+      access: 'use',
       privileges: { api: ['my_feature_run'] },
     },
-    edit: { level: 'edit', privileges: {} },
-    delete: { level: 'edit', privileges: {} },
+    edit: { access: 'edit', privileges: {} },
+    delete: { access: 'edit', privileges: {} },
   },
 };
 ```
 
-Operation names belong to the type, and levels belong to OLS. In this example, the type's own `execute` operation
-needs the `use` level.
+Operation names belong to the type, and access values belong to OLS. In this example, the type's own `execute`
+operation needs `use` access.
 
-An operation's `privileges` are feature privileges the caller must also hold, on top of the level. The list is an
-AND: the caller needs every privilege in it, so adding one can only narrow who can perform the operation. ACLs never
-grant more than the caller's feature privileges allow.
+An operation's `privileges` are feature privileges the caller must also hold, on top of the access the operation
+needs. The list is an AND: the caller needs every privilege in it, so adding one can only narrow who can perform the
+operation. ACLs never grant more than the caller's feature privileges allow.
 
 `validateAccessPolicy` rejects a policy that can't be enforced consistently, for example one that:
 
 - allows `manage` as general access, or defaults to a value it doesn't allow.
-- lets entries grant `none`, or no level at all.
-- misses `view`, `edit`, or `delete`, or gives `view` a level other than `view`.
+- lets entries grant `none`, or nothing at all.
+- misses `view`, `edit`, or `delete`, or lets `view` need access other than `view`.
 - defines `manage_access` or `transfer`, which belong to the platform (`isReservedOperation`).
 
 ## ACL shapes
@@ -78,7 +76,7 @@ An ACL lives in the object's `acl` field. Kibana always writes it in one shape, 
 {
   "version": 1,
   "owner": { "type": "user", "id": "u_owner" },
-  "general_access": "none",
+  "general": { "access": "none" },
   "entries": [
     { "type": "user", "id": "u_grantee", "access": "use", "added_at": "2026-10-21T00:00:00Z" }
   ]
@@ -86,12 +84,12 @@ An ACL lives in the object's `acl` field. Kibana always writes it in one shape, 
 ```
 
 Stored data can still drift from that shape. Elasticsearch lets any field hold several values, so a manual edit or a
-direct write to the index can leave, for example, `"general_access": ["edit", "none"]`, and a search matches the
-document when any of those values matches. So reads use a different type, `StoredAcl`, which keeps every value of
+direct write to the index can leave, for example, `"general": { "access": ["edit", "none"] }`, and a search matches
+the document when any of those values matches. So reads use a different type, `StoredAcl`, which keeps every value of
 every field. Reading a single object then works from the same data a search does, and the access rules decide what
-several values mean (for levels, the lowest allowed one wins), so opening an object and finding it in a list always
-agree. Fields that don't affect access, such as `added_at`, are arrays too, only so that every field is read the same
-way.
+several values mean (for access values, the lowest allowed one wins), so opening an object and finding it in a list
+always agree. Fields that don't affect access, such as `added_at`, are arrays too, only so that every field is read
+the same way.
 
 An ACL is in one of three states (`AclState`):
 
@@ -103,8 +101,9 @@ An ACL is in one of three states (`AclState`):
 
 The `acl` field has the Elasticsearch mapping `ACL_MAPPING`, and every rule in this README assumes it. It indexes
 or rejects every stored value: it sets no `ignore_above` and no `ignore_malformed`, and `version` doesn't coerce. It
-ignores keys it doesn't define, and maps `entries` as `nested`, so that one entry's kind, ID, and level always match
-together.
+ignores keys it doesn't define, and maps `entries` as `nested`, so that one entry's kind, ID, and access always match
+together. General access is an object, `general.access`, with the same field name as an entry's `access`, so that
+both grants have one shape and `general` can get more fields later without a new mapping.
 
 ## Reading a stored ACL
 
@@ -119,7 +118,7 @@ so an unreadable entry just grants nothing.
   `valid` when all of these hold, and `invalid` when any doesn't:
   - It has at least one version value, and every one is `1`.
   - The owner has exactly one known kind, once unknown kinds are ignored, and at least one ID.
-  - General access has at least one value that general access can take (`isGeneralAccessLevel`): `none`, `view`,
+  - General access has at least one value that general access can take (a `GeneralAccess`): `none`, `view`,
     `use`, or `edit`.
 
   These checks don't depend on the type's policy, so a type that later stops allowing a general access value
@@ -131,18 +130,20 @@ so an unreadable entry just grants nothing.
   unknown value.
 - **General access.** Values the type doesn't allow are ignored, and the lowest allowed one applies. When the type
   allows none of them, general access is `none`: the object becomes private, and the owner and entries still apply.
+  Only values at `general.access` count. A value elsewhere, such as a plain value at `general` or a key that the
+  mapping doesn't define, is never general access.
 - **Owner IDs.** Every stored owner ID counts, so an owner with several IDs makes each of them an owner. This is the
   one place where several values don't fall back to the most restrictive reading: a search matches a document when
   any stored ID matches, and a search filter can't cheaply tell one stored ID from several, so reading a single
   object has to agree with it. Kibana never writes more than one owner ID, so only a direct write to the index can
   produce such an ACL.
-- **Entries.** Unknown kinds and levels the type doesn't allow for entries are ignored. An entry with exactly one
-  known kind and at least one allowed level grants the lowest of those levels to each of its IDs. Any other entry
-  grants nothing, and the rest of the ACL still applies. When several entries grant to the same principal, the
-  highest of their grants applies.
+- **Entries.** Unknown kinds and access values the type doesn't allow for entries are ignored. An entry with
+  exactly one known kind and at least one allowed access value grants the lowest of them to each of its IDs. Any
+  other entry grants nothing, and the rest of the ACL still applies. When several entries grant to the same
+  principal, the highest of their grants applies.
 - **Kinds match exactly.** A principal only matches its own kind, so a service account never matches a user whose
   ID has the same text.
-- **Entries stay separate.** A kind, an ID, and a level from different entries never combine into a grant.
+- **Entries stay separate.** A kind, an ID, and access from different entries never combine into a grant.
 - **One ACL, however it is spelled.** Dotted keys, such as `"acl.owner.id"` at the document root or `"owner.id"`
   inside `acl`, and an array of `acl` objects all add their values to the same ACL, the way Elasticsearch indexes
   them. A dotted `"acl.entries"` key adds its own entries.
@@ -182,25 +183,25 @@ keys from the document root, so that they cannot keep a grant that a later chang
 
 ## Filtering a search
 
-`buildAclReadFilter` builds the query clause that keeps the objects of one type that a caller can access at a level,
-usually `view`. A search adds the clause to its filters. The clause applies the rules in
+`buildAclReadFilter` builds the query clause that keeps the objects of one type that a caller can reach with the
+requested `access`, usually `view`. A search adds the clause to its filters. The clause applies the rules in
 [Reading a stored ACL](#reading-a-stored-acl), so a list never shows an object that opening it would deny:
 
-- An absent ACL matches only when the type's default general access reaches the level.
-- A valid ACL matches when its general access reaches the level, when the caller is the owner, or when an entry
-  names the caller with a level that reaches it. The owner matches at every level, because the owner acts at
-  `manage`.
+- An absent ACL matches only when the type's default general access reaches the requested access.
+- A valid ACL matches when its general access reaches the requested access, when the caller is the owner, or when
+  an entry names the caller with access that reaches it. The owner matches for any requested access, because the
+  owner acts at `manage`.
 - An invalid ACL never matches. The checks for a valid ACL do not depend on the type's policy.
-- An entry matches only when its own kind, ID, and level match. The clause on `acl.entries` is a `nested` query, so
+- An entry matches only when its own kind, ID, and access match. The clause on `acl.entries` is a `nested` query, so
   values from different entries never combine.
 - A caller without a principal matches only through general access or an absent ACL.
 
 The filter takes two lists of spaces:
 
 - `ordinarySpaces`: the rules above apply.
-- `recoverySpaces`: the caller has recovery authority, the right to repair any object of the type. At `view`, the
-  caller sees every object in these spaces, whatever its ACL. At any other level, the rules above apply, because
-  recovery never lets a caller use, edit, or delete an object.
+- `recoverySpaces`: the caller has recovery authority, the right to repair any object of the type. When the requested
+  access is `view`, the caller sees every object in these spaces, whatever its ACL. For any other access, the rules
+  above apply, because recovery never lets a caller use, edit, or delete an object.
 
 An object in neither list never matches, and when both lists are empty, the filter matches nothing. A space in both
 lists counts as a recovery space. `['*']` stands for every space that the search already covers. An object shared to
@@ -208,11 +209,11 @@ all spaces is stored with `"namespaces": ["*"]`, and it counts as being in every
 Objects repository treats it.
 
 The filter contains `nested` queries on `acl.entries` in most cases: the absent-ACL clause uses one whenever the
-type's default general access reaches the level, and the entry clause uses one when the caller has a principal and
-the type allows an entry level that reaches it. Elasticsearch rejects a search that contains a `nested` query when
-`search.allow_expensive_queries` is `false`, so those searches fail, and Kibana never retries them without the filter.
-A filter without a `nested` query, such as a filter for recovery spaces only at `view`, still filters completely, so
-its search runs.
+type's default general access reaches the requested access, and the entry clause uses one when the caller has a
+principal and the type allows entry access that reaches it. Elasticsearch rejects a search that contains a `nested`
+query when `search.allow_expensive_queries` is `false`, so those searches fail, and Kibana never retries them without
+the filter. A filter without a `nested` query, such as a filter for recovery spaces only with `view` access, still
+filters completely, so its search runs.
 
 ## Deciding access to one object
 
@@ -220,22 +221,22 @@ its search runs.
 `normalizeAclSource` returns it, the caller, and whether the caller has recovery authority. It applies the rules in
 [Reading a stored ACL](#reading-a-stored-acl), and `getAclState` returns the state on its own.
 
-- **Level.** Without an ACL, the caller's level is the type's default general access. With a valid ACL, it is the
+- **Access.** Without an ACL, the caller's `access` is the type's default general access. With a valid ACL, it is the
   highest of general access and every entry that names the caller. With an invalid ACL, it is `none`.
-- **Operations.** The caller can perform every operation of the type whose level the caller's level reaches. At
+- **Operations.** The caller can perform every operation of the type whose access the caller's access reaches. At
   `manage`, the caller can also manage access (`manage_access`).
 - **Ownership.** The owner of a valid ACL can perform every operation of the type, manage access, and transfer
-  ownership (`transfer`). Only the owner can transfer ownership. Ownership isn't a level, so it doesn't raise the
-  level the decision reports. The owner of an invalid ACL gets nothing.
+  ownership (`transfer`). Only the owner can transfer ownership. Ownership isn't access, so it doesn't raise the
+  `access` the decision reports. The owner of an invalid ACL gets nothing.
 - **Recovery.** Recovery authority adds viewing, managing access, and transferring ownership, and nothing else. It
   never lets a caller use, edit, or delete an object. On an object without an ACL, it adds only viewing, because
   there is no owner to recover access from. `operationsViaRecovery` lists the operations that only recovery allows.
-  Recovery adds the `view` operation only, not other operations that a type gives the `view` level.
+  Recovery adds the `view` operation only, not other operations that a type gives `view` access.
 - **Restricted.** A valid ACL is restricted when its general access is lower than the type's default, or when it has
   at least one entry that grants something. `isRestricted` checks the same thing without a caller.
 
 Recovery and the search filter agree at `view`: in recovery spaces, a list of the objects a caller can view shows
-every object. Recovery isn't a level, so a filter for a higher level applies the ordinary rules in recovery spaces.
+every object. Recovery isn't access, so a filter for higher access applies the ordinary rules in recovery spaces.
 A list built at `manage` therefore leaves out the objects whose access the caller can manage only through recovery.
 
 The decision covers object-level access only. A caller also needs the feature privileges that the operation lists in
@@ -252,15 +253,16 @@ the object, and `not_found` when the caller can't, so that a denial never reveal
 
 `prepareInitialAcl` and `prepareAclChange` check the access a caller asks for, and build the complete ACL to store, in
 the shape Kibana writes. They don't store anything. A caller asks for the access of a new object as `InitialAccess`,
-and for a change as `AclChange`. Both list grants as `AclGrant`, a level for one principal, because the caller never
-sets the owner of a new object, the version, or `added_at`. When a request isn't valid or isn't allowed, they throw an
-`AclChangeError`. Its `code` is `bad_request`, `forbidden`, `not_found`, or `conflict`, which a caller returns as 400,
-403, 404, or 409. When OLS is disabled, both refuse every request for access.
+and for a change as `AclChange`. Both give general access as `AclGeneral`, the same `general` object an ACL stores,
+and list grants as `AclGrant`, access for one principal, because the caller never sets the owner of a new object,
+the version, or `added_at`. When a request isn't valid or isn't allowed, they throw an `AclChangeError`. Its `code`
+is `bad_request`, `forbidden`, `not_found`, or `conflict`, which a caller returns as 400, 403, 404, or 409. When OLS
+is disabled, both refuse every request for access.
 
 Requested access follows these rules in both functions:
 
-- General access is a level the type allows for general access.
-- Each entry names a known principal kind and an ID that isn't blank (empty or only whitespace), once, with a level
+- General access is a value the type allows for general access.
+- Each entry names a known principal kind and an ID that isn't blank (empty or only whitespace), once, with access
   the type allows for entries.
 - An entry for the owner is dropped, because ownership already covers it.
 - A request has at most `MAX_ACL_ENTRIES` (100) entries. An entry for the owner counts, even though it's
@@ -273,7 +275,7 @@ listed, so that a deleted or disabled recipient never blocks an unrelated change
 new or claimed object isn't listed either.
 
 `prepareInitialAcl` builds the ACL of a new object. The caller becomes the owner, general access is the requested
-level or the type's default, and every entry gets the current time as `added_at`. A request without a principal
+value or the type's default, and every entry gets the current time as `added_at`. A request without a principal
 creates the object without an ACL, so the type's default applies. Asking for anything else, such as entries or other
 general access, is refused, because nobody could own the object.
 
@@ -284,7 +286,7 @@ other refusal reveals something about the object, such as that it exists or alre
 - **`replace`** sets general access and replaces every entry. It keeps the owner, and needs `manage_access`. The
   stored owner has to be a single principal: one known kind and exactly one ID that isn't blank. Otherwise, the
   replacement is refused, and only a transfer can repair the ACL. A kept entry keeps its `added_at`, even when its
-  level changes, or gets the current time when it has none.
+  access changes, or gets the current time when it has none.
 - **`claim`** makes the caller the owner of an object without an ACL, with the requested or the default general
   access and no entries. It needs `edit` and a principal. An object with an ACL, even an invalid one, can't be
   claimed.

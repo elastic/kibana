@@ -220,15 +220,7 @@ export const ControlPanel = ({
         disabledActions={disabledActionIds}
         prependWrapperRef={prependWrapperRef}
       >
-        <EuiFormRow
-          data-test-subj="control-frame-title"
-          fullWidth
-          id={`control-title-${id}`}
-          aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
-            defaultMessage: 'Control for ${controlTitle}',
-            values: { controlTitle: panelLabel },
-          })}
-        >
+        <EuiFormRow data-test-subj="control-frame-title" fullWidth id={`control-title-${id}`}>
           <EuiFormControlLayout
             fullWidth
             className={classNames('controlFrame__formControlLayout', {

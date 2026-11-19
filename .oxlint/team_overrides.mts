@@ -928,8 +928,8 @@ export const teamOverrides: OxlintOverride[] = [
    */
   {
     files: [
-      'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
       'src/platform/plugins/shared/workflows_extensions/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
@@ -1014,8 +1014,8 @@ export const teamOverrides: OxlintOverride[] = [
    */
   {
     files: [
-      'src/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}',
-      'src/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
       'src/platform/plugins/shared/workflows_extensions/**/*.{test,mock,test_helper}.{ts,tsx}',
       'src/platform/packages/shared/kbn-workflows/**/*.{test,mock,test_helper}.{ts,tsx}',
       'src/platform/packages/shared/kbn-workflows-ui/**/*.{test,mock,test_helper}.{ts,tsx}',

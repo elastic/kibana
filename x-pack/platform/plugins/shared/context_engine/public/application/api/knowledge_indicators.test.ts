@@ -9,11 +9,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import {
   AI_INDEX_INTERNAL_API_VERSION,
   AI_INDEX_KI_BY_ID_PATH,
+  AI_INDEX_KI_GROUPS_PATH,
   AI_INDEX_KI_LIST_PATH,
 } from '../../../common/constants';
 import { KI_STATUSES } from '../../../common/ki_lifecycle_status';
 import type { GetKiResponse, ListKisResponse } from '../../../common/http_api/knowledge_indicators';
-import { getKi, listKis } from './knowledge_indicators';
+import { getKi, listKiGroups, listKis } from './knowledge_indicators';
 
 const emptyListKisResponse: ListKisResponse = {
   kis: [],
@@ -53,7 +54,7 @@ describe('listKis', () => {
     });
   });
 
-  it('passes size, type, and status when provided', async () => {
+  it('passes size, type, status, and sort when provided', async () => {
     const http = createHttp();
     http.get.mockResolvedValue(emptyListKisResponse);
 
@@ -62,6 +63,7 @@ describe('listKis', () => {
       size: 50,
       type: 'playbook',
       status: [...KI_STATUSES],
+      sort: 'title',
     });
 
     expect(http.get).toHaveBeenCalledWith('/internal/context_engine/ai_index/support/kis', {
@@ -70,6 +72,7 @@ describe('listKis', () => {
         size: 50,
         type: 'playbook',
         status: ['active', 'deleted', 'verification_failed', 'expired'],
+        sort: 'title',
       },
     });
   });
@@ -110,6 +113,51 @@ describe('listKis', () => {
     expect(http.get).toHaveBeenCalledWith(
       '/internal/context_engine/ai_index/my-index/kis',
       expect.any(Object)
+    );
+  });
+});
+
+describe('listKiGroups', () => {
+  const GROUPS_ARGS = {
+    aiIndexId: 'support',
+    maxGroups: 10,
+    previewSize: 50,
+    status: ['active' as const],
+    sort: 'updated' as const,
+  };
+
+  it('sends exclude_types when given', async () => {
+    const http = coreMock.createStart().http;
+    http.get.mockResolvedValue({ total: 0, total_other: 0, groups: [] });
+
+    await listKiGroups(http, { ...GROUPS_ARGS, excludeTypes: ['faq', 'policy'] });
+
+    expect(http.get).toHaveBeenCalledWith(
+      AI_INDEX_KI_GROUPS_PATH.replace('{aiIndexId}', 'support'),
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        query: {
+          max_groups: 10,
+          exclude_types: ['faq', 'policy'],
+          preview_size: 50,
+          status: ['active'],
+          sort: 'updated',
+        },
+      }
+    );
+  });
+
+  it('leaves exclude_types out when it is empty', async () => {
+    const http = coreMock.createStart().http;
+    http.get.mockResolvedValue({ total: 0, total_other: 0, groups: [] });
+
+    await listKiGroups(http, { ...GROUPS_ARGS, excludeTypes: [] });
+
+    expect(http.get).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        query: expect.not.objectContaining({ exclude_types: expect.anything() }),
+      })
     );
   });
 });

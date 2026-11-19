@@ -12,6 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod/v4';
 import { registerGetStepDefinitionsRoute } from './get_step_definitions';
 import { ServerStepRegistry } from '../step_registry';
+import type { ServerStepDefinition } from '../step_registry/types';
 
 describe('registerGetStepDefinitionsRoute', () => {
   const router = httpServiceMock.createRouter();
@@ -57,6 +58,29 @@ describe('registerGetStepDefinitionsRoute', () => {
     expect(steps[1].definitionHash).toBe(steps[2].definitionHash);
     // Hashes are non-empty hex strings
     expect(steps[0].definitionHash).toMatch(/^[a-f0-9]+$/);
+  });
+
+  it('waits for pending async loaders before returning steps', async () => {
+    const stepRegistry = new ServerStepRegistry(logger);
+    const handler = async () => ({ output: {} });
+    stepRegistry.register({ id: 'sync.step', handler } as any);
+    stepRegistry.register(
+      () =>
+        new Promise<ServerStepDefinition>((resolve) => {
+          setTimeout(() => resolve({ id: 'async.step', handler } as any), 0);
+        })
+    );
+
+    const testRouter = httpServiceMock.createRouter();
+    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
+
+    const [, routeHandler] = testRouter.get.mock.calls[0];
+    const response = httpServerMock.createResponseFactory();
+    await routeHandler({} as any, httpServerMock.createKibanaRequest(), response);
+
+    const { body } = response.ok.mock.calls[0][0]!;
+    const { steps } = body as { steps: Array<{ id: string }> };
+    expect(steps.map(({ id }) => id)).toEqual(['async.step', 'sync.step']);
   });
 
   it('returns empty steps array when registry is empty', async () => {
@@ -116,13 +140,43 @@ describe('registerGetStepDefinitionsRoute', () => {
     expect(steps[0].definitionHash).not.toBe(steps[1].definitionHash);
   });
 
-  it('logs an error and returns a fallback hash when hashing fails', async () => {
+  it('computes a real hash for schemas with parts JSON Schema cannot represent', async () => {
     const stepRegistry = new ServerStepRegistry(logger);
-    // z.date() is unrepresentable in JSON Schema and makes z.toJSONSchema throw.
+    // Transforms and z.date() are unrepresentable in JSON Schema; they must not break hashing.
     stepRegistry.register({
       id: 'a.step',
       handler: async () => ({ output: 'a' }),
+      inputSchema: z.object({ name: z.string().transform((value) => value.trim()) }),
+    } as any);
+    stepRegistry.register({
+      id: 'b.step',
+      handler: async () => ({ output: 'b' }),
       inputSchema: z.date(),
+    } as any);
+
+    const testRouter = httpServiceMock.createRouter();
+    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
+
+    const [, handler] = testRouter.get.mock.calls[0];
+    const response = httpServerMock.createResponseFactory();
+    await handler({} as any, httpServerMock.createKibanaRequest(), response);
+
+    const { body } = response.ok.mock.calls[0][0]!;
+    const { steps } = body as { steps: Array<{ id: string; definitionHash: string }> };
+    expect(steps.map(({ definitionHash }) => definitionHash)).toEqual([
+      expect.stringMatching(/^[a-f0-9]{64}$/),
+      expect.stringMatching(/^[a-f0-9]{64}$/),
+    ]);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs an error and returns a fallback hash when hashing fails', async () => {
+    const stepRegistry = new ServerStepRegistry(logger);
+    // A value that is not a zod schema makes z.toJSONSchema throw even when unrepresentable types are allowed.
+    stepRegistry.register({
+      id: 'a.step',
+      handler: async () => ({ output: 'a' }),
+      inputSchema: {},
     } as any);
 
     const testRouter = httpServiceMock.createRouter();
