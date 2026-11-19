@@ -16,6 +16,7 @@ import {
   LEGACY_ANALYTICS_ONBOARDING_PATH,
 } from './analytics/constants';
 import { storePreferredJourney } from './analytics/hooks/use_analytics_preferences';
+import { WEB_CRAWLS_ROUTE } from './home_config';
 
 const UnifiedHomePage = lazy(() =>
   import('./analytics/components/home/unified_home').then(({ UnifiedHomePage: Page }) => ({
@@ -25,6 +26,12 @@ const UnifiedHomePage = lazy(() =>
 
 const GuidedSetupPage = lazy(() =>
   import('./analytics/components/onboarding/guided_setup').then(({ GuidedSetupPage: Page }) => ({
+    default: Page,
+  }))
+);
+
+const SearchWebCrawlsPage = lazy(() =>
+  import('./components/web_crawls/web_crawls').then(({ SearchWebCrawlsPage: Page }) => ({
     default: Page,
   }))
 );
@@ -53,6 +60,9 @@ export const HomepageRouter = (): React.JSX.Element => (
       </Route>
       <Route exact path={LEGACY_ANALYTICS_HOME_PATH}>
         <LegacyAnalyticsRedirect to={HOME_PATH} />
+      </Route>
+      <Route exact path={WEB_CRAWLS_ROUTE}>
+        <SearchWebCrawlsPage />
       </Route>
       <Route>
         <UnifiedHomePage />

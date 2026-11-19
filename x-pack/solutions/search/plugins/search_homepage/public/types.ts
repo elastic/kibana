@@ -12,6 +12,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ElasticsearchHomePublicStart } from '@kbn/elasticsearch-home/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { WebCrawlerPublicStart } from '@kbn/web-crawler-plugin/public';
 
 export interface SearchHomepageAppPluginStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
@@ -20,6 +21,7 @@ export interface SearchHomepageAppPluginStartDependencies {
   usageCollection?: UsageCollectionStart;
   searchNavigation?: SearchNavigationPluginStart;
   share: SharePluginStart;
+  webCrawler?: WebCrawlerPublicStart;
 }
 
 export type SearchHomepageServicesContextDeps = SearchHomepageAppPluginStartDependencies & {

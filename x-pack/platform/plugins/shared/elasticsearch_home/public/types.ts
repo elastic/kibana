@@ -11,12 +11,14 @@ import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { WebCrawlerPublicStart } from '@kbn/web-crawler-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
 export interface ElasticsearchHomeStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   share: SharePluginStart;
   cloud?: CloudStart;
+  webCrawler?: WebCrawlerPublicStart;
 }
 
 export type ElasticsearchHomeServices = CoreStart & ElasticsearchHomeStartDependencies;
@@ -79,6 +81,13 @@ export interface ElasticsearchHomePageProps {
   dataCardTooltip?: string;
   /** The "Add data" entries, in display order. */
   addDataLinks: HomeAddDataLink[];
+  /**
+   * Shows the web crawler's form that crawls a website into an index, below the "Add data"
+   * entries. It has no effect when the `webCrawler` plugin is unavailable.
+   */
+  showWebCrawl?: boolean;
+  /** Opens the host's route for the web crawler's page. Omit it to leave the form without that link. */
+  onManageWebCrawls?: () => void;
   /** The host's classic-navigation side nav, for hosts rendered under the classic chrome style. */
   solutionNav?: KibanaPageTemplateProps['solutionNav'];
 }

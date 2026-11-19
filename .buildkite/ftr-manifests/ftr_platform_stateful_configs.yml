@@ -231,6 +231,7 @@ enabled:
   - x-pack/platform/test/functional/apps/monitoring/config.group1.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
+  - x-pack/platform/test/functional/apps/security/cookie_login/config.ts
   - x-pack/platform/test/functional/apps/status_page/config.ts
   - x-pack/platform/test/functional/apps/visualize/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts

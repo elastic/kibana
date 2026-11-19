@@ -23,6 +23,7 @@
       "licensing",
       "searchNavigation",
       "usageCollection",
+      "webCrawler",
     ],
     "requiredBundles": [
       "kibanaReact"

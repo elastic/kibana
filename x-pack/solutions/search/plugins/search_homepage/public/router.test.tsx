@@ -20,6 +20,10 @@ jest.mock('./analytics/components/onboarding/guided_setup', () => ({
   GuidedSetupPage: () => <div data-test-subj="guidedSetupPage" />,
 }));
 
+jest.mock('./components/web_crawls/web_crawls', () => ({
+  SearchWebCrawlsPage: () => <div data-test-subj="searchWebCrawlsPage" />,
+}));
+
 describe('HomepageRouter', () => {
   const renderRouter = (path = '/') => {
     const history = createMemoryHistory({ initialEntries: [path] });
@@ -60,6 +64,14 @@ describe('HomepageRouter', () => {
       expect(getStoredJourney()).toBeUndefined();
     }
   );
+
+  it('renders the web crawls page on its route', async () => {
+    const history = renderRouter('/web_crawls');
+
+    expect(await screen.findByTestId('searchWebCrawlsPage')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/web_crawls');
+    expect(screen.queryByTestId('unifiedHomePage')).not.toBeInTheDocument();
+  });
 
   it('renders the home when local storage is unavailable', async () => {
     const getItem = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {

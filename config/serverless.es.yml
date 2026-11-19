@@ -71,6 +71,7 @@ xpack.serverless.search.enabled: true
 
 ## Enable the shared Elasticsearch home page
 xpack.elasticsearchHome.enabled: true
+xpack.webCrawler.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch

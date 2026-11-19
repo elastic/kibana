@@ -238,5 +238,6 @@ pageLoadAssetSize:
   visualizationListing: 1488
   visualizations: 1147
   watcher: 5497
+  webCrawler: 3000
   workflowsExtensions: 38186
   workflowsManagement: 41727

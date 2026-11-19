@@ -66,6 +66,8 @@ Anything that names a product is injected rather than imported:
 | `banner`, `primaryAddDataLink` | no | Product-specific navigation targets. Omit them to render neither. |
 | `addDataLinks` | no | Replaces the generic "Add data" entries, for hosts whose options differ, e.g. no sample data. |
 | `dataCardTooltip` | no | Product-specific copy for an info icon next to the Data card's title, e.g. explaining that data streams are included. Omit it to show no icon, as Vector DB does since it has no data streams. |
+| `showWebCrawl` | no | Opts the host into the web crawler's "Crawl a website" form, rendered by the optional `webCrawler` plugin. It needs a `document_extraction` inference endpoint, which not every host's deployments have. |
+| `onManageWebCrawls` | no | Opens the host's route for the `webCrawler` plugin's `WebCrawlsPage`. With it, the crawl form links to that page. |
 | `solutionNav` | no | The host's side nav under the classic chrome style, e.g. `searchNavigation.useClassicNavigation(history)`. |
 
 Elements this plugin owns namespace their own telemetry ids under `telemetryPrefix`. A

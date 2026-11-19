@@ -14,7 +14,7 @@ import { useKibana } from './use_kibana';
 const DOT_PREFIXED_EXCLUSION = '-.*';
 const NOT_ROLLUP_INDEX = () => false;
 
-/** Cap on combobox options after type filtering, to keep the list usable. */
+/** Cap on selectable options after type filtering, to keep the list usable. */
 export const MAX_INDEX_SEARCH_RESULTS = 50;
 
 export type IndexResourceType = 'index' | 'alias' | 'data_stream';

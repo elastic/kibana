@@ -39,6 +39,8 @@ export type ApplicationsLinkId = 'searchApplications';
 
 export type SynonymsLinkId = 'synonyms';
 
+export type HomepageLinkId = 'webCrawls';
+
 export type DeepLinkId =
   | EnterpriseSearchApp
   | EnterpriseSearchContentApp
@@ -49,6 +51,7 @@ export type DeepLinkId =
   | SearchSynonymsId
   | SearchQueryRulesId
   | SearchHomepage
+  | `${SearchHomepage}:${HomepageLinkId}`
   | `${EnterpriseSearchContentApp}:${ContentLinkId}`
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
   | `${SearchSynonymsId}:${SynonymsLinkId}`

@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/search-code-examples'
   - '@kbn/cloud'
+  - '@kbn/web-crawler-plugin'
 tags:
   - plugin
   - prod
