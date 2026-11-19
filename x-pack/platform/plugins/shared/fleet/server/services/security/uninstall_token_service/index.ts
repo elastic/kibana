@@ -608,11 +608,14 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
       const esClient = appContextService.getInternalUserESClient();
       // The uninstall token hash is part of the full agent policy, so the policy revision has to be
-      // bumped for fleet-server to hand the rotated token off to agents.
+      // bumped for fleet-server to hand the rotated token off to agents. Each bump deploys its own
+      // policy, which is heavier than one batched deploy when forcing many policies at once.
       await asyncForEach(chunk(policyIds, batchSize), async (policyIdsBatch) => {
         await Promise.all(
           policyIdsBatch.map((policyId) =>
-            agentPolicyService.bumpRevision(this.soClient, esClient, policyId)
+            agentPolicyService.bumpRevision(this.soClient, esClient, policyId, {
+              agentVersionConditionsUnchanged: true,
+            })
           )
         );
       });

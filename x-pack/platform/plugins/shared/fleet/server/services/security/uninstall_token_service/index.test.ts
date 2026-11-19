@@ -631,7 +631,8 @@ describe('UninstallTokenService', () => {
             expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
               soClientMock,
               expect.anything(),
-              so.attributes.policy_id
+              so.attributes.policy_id,
+              { agentVersionConditionsUnchanged: true }
             );
             expect(agentPolicyService.deployPolicies).not.toHaveBeenCalled();
           });
@@ -665,7 +666,8 @@ describe('UninstallTokenService', () => {
               expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
                 soClientMock,
                 expect.anything(),
-                policyId
+                policyId,
+                { agentVersionConditionsUnchanged: true }
               )
             );
             expect(agentPolicyService.deployPolicies).not.toHaveBeenCalled();
