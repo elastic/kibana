@@ -146,12 +146,19 @@ describe('DirectorStep', () => {
       status: 'active' as const,
     };
     const director = createMockDirectorService();
-    // Second batch recomputes `e1` (a repeat) and surfaces `e2` for the first
-    // time: the repeat must be skipped while the newly-arriving episode counts.
+    // Batch 1 opens `e1`. Batch 2 recomputes `e1` (a repeat) and surfaces `e2`
+    // for the first time. Batch 3 recomputes both (all repeats). The repeats
+    // must be skipped while a newly-arriving episode still counts, and a batch
+    // whose transitions were all already counted must emit nothing.
     director.run
       .mockResolvedValueOnce({
         alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
         stats: { newEpisodeIds: [], statusTransitions: [e1ToActive] },
+        previousAlertStateByGroupHash: new Map(),
+      })
+      .mockResolvedValueOnce({
+        alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+        stats: { newEpisodeIds: [], statusTransitions: [e1ToActive, e2ToActive] },
         previousAlertStateByGroupHash: new Map(),
       })
       .mockResolvedValueOnce({
@@ -166,8 +173,8 @@ describe('DirectorStep', () => {
       alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
     });
 
-    const [first, second] = await collectStreamResults(
-      step.executeStream(createPipelineStream([batchState, batchState]))
+    const [first, second, third] = await collectStreamResults(
+      step.executeStream(createPipelineStream([batchState, batchState, batchState]))
     );
 
     // @ts-expect-error: meta is present on the result
@@ -179,6 +186,9 @@ describe('DirectorStep', () => {
     expect(second.meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.episodesTransitionedToActive]: 1,
     });
+    // Every transition in the third batch was already counted, so it emits nothing.
+    // @ts-expect-error: meta is present on the result
+    expect(third.meta?.counters).toEqual({});
   });
 
   it('emits a counter for transitions to pending', async () => {
