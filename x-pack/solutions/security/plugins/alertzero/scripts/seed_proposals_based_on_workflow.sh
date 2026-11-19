@@ -36,7 +36,7 @@ set -euo pipefail
 # managed *parent* run, so a manual run of this helper fails with
 # `Workflow not found: "system-create-proposal"`. To seed locally,
 # force the parent to count as managed in
-# `src/platform/plugins/shared/workflows_execution_engine/server/step/workflow_execute_step/workflow_execute_step_impl.ts`:
+# `x-pack/platform/plugins/shared/workflows_execution_engine/server/step/workflow_execute_step/workflow_execute_step_impl.ts`:
 #
 #   private async getWorkflow(workflowId: string): Promise<EsWorkflow | null> {
 #     const isManagedParentRun = true; // was: this.isManagedParentExecution();

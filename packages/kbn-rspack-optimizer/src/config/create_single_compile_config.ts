@@ -52,6 +52,9 @@ import { PluginWatchPlugin } from '../plugins/plugin_watch_plugin';
 export { signalShutdown, resetShutdown };
 export { findTargetEntry };
 
+/** Files in the bundles dir that watch-mode cleaning must not delete. */
+export const WATCH_CLEAN_KEEP = /(^|\/)(stats\.json|[^/]*\.hot-update\.(js|json)(\.map)?)$/;
+
 /**
  * Files that affect the main Kibana RSPack build. Used as the single source of
  * truth for both computeConfigHash (version string) and buildDependencies so they
@@ -239,7 +242,11 @@ export async function createSingleCompileConfig(
       chunkFilename: 'chunks/[name].[contenthash:8].js',
       // Use 'auto' to dynamically resolve publicPath at runtime based on document.currentScript
       publicPath: 'auto',
-      clean: !watch,
+      // Also clean in watch mode: chunk names are content-hashed, so without it every rebuild
+      // leaves its old chunks and source maps behind and target/public/bundles grows unbounded.
+      // Keep what the compilation doesn't emit itself: stats.json is written after the build, and
+      // hot-update files of the previous build are pruned by cleanupStaleHotUpdates in run_build.ts.
+      clean: watch ? { keep: WATCH_CLEAN_KEEP } : true,
       uniqueName: 'kibana-bundle',
       pathinfo: false,
       ...(dist ? {} : { devtoolModuleFilenameTemplate: 'kibana:///[resource-path]' }),

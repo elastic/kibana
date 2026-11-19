@@ -24,7 +24,9 @@ import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { reportToolFailure } from '../tool_failure';
 import {
   KNOWLEDGE_INDICATOR_FEATURE_TYPES,
   MAX_COMPACT_META_ARRAY_SAMPLE,
@@ -126,10 +128,12 @@ export function createSearchKnowledgeIndicatorsTool({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   getScopedClients: GetScopedClients;
   server: SignificantEventsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof searchKnowledgeIndicatorsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof searchKnowledgeIndicatorsSchema> = {
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
@@ -221,12 +225,15 @@ export function createSearchKnowledgeIndicatorsTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running ki_search: ${message}`);
-        if (error instanceof Error) {
-          logger.debug(error.stack ?? error.message);
-        } else {
-          logger.debug(String(error));
-        }
+        reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
+          errorLogMessage: `Error running ki_search: ${message}`,
+          logger,
+          telemetry,
+          request,
+          runContext: context.runContext,
+        });
 
         return {
           results: [
