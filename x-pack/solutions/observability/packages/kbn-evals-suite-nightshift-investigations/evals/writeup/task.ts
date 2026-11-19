@@ -71,7 +71,7 @@ export const hashText = (text: string): string =>
  * The commit a prompt spec names. `merge-base` is where this checkout branched from `main`, the
  * baseline a branch's change should be compared against. In a fork checkout `origin` is the fork,
  * whose `main` can lag behind, so `upstream/main` is used when it exists. A commit this checkout
- * doesn't have (a shallow CI clone) is fetched from `origin` first.
+ * doesn't have (a shallow CI clone) is fetched from `origin` first, shallow only if the clone is.
  */
 export const resolvePromptCommit = (spec: string, repoRoot = REPO_ROOT): string => {
   const git = (...args: string[]) =>
@@ -88,7 +88,9 @@ export const resolvePromptCommit = (spec: string, repoRoot = REPO_ROOT): string 
     return git('merge-base', 'HEAD', hasRef('upstream/main') ? 'upstream/main' : 'origin/main');
   }
   if (!hasRef(spec) && /^[0-9a-f]{40}$/.test(spec)) {
-    git('fetch', '--quiet', '--no-tags', '--depth=1', 'origin', spec);
+    // Only a clone that is already shallow fetches shallow; a full clone must not become one.
+    const shallow = git('rev-parse', '--is-shallow-repository') === 'true';
+    git('fetch', '--quiet', '--no-tags', ...(shallow ? ['--depth=1'] : []), 'origin', spec);
   }
   return git('rev-parse', '--verify', `${spec}^{commit}`);
 };

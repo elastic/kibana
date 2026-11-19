@@ -148,6 +148,19 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
         `Too few replies were generated (${failed.length} of ${runs.length} failed)`
       ).toBeGreaterThanOrEqual(MIN_REPLY_RATE);
 
+      // With a baseline, the head to head is the point of the run (a PR's before and after), so a
+      // baseline that mostly failed to reply leaves nothing to compare and fails the run too.
+      if (baseline) {
+        const compared = runs.filter(({ output }) => {
+          const { reply, baseline: base } = output as WriteupTaskOutput;
+          return reply && base?.reply;
+        }).length;
+        expect(
+          compared / runs.length,
+          `Too few rounds have both replies to compare (${compared} of ${runs.length})`
+        ).toBeGreaterThanOrEqual(MIN_REPLY_RATE);
+      }
+
       // A judge outage turns every judge score into null; that's a broken run, not a passing one.
       const judged = judgeCoverage(experiment.evaluationRuns);
       if (judged.missing) {
