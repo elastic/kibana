@@ -9,7 +9,7 @@
 
 import { isColumn } from '@elastic/esql';
 import type { ESQLAstCommand } from '@elastic/esql/types';
-import { getSummaryPerCommand } from './get_query_summary';
+import { createQuerySummaryContext, getSummaryPerCommand } from './get_query_summary';
 import { parseEsqlCached } from './parse_esql_cached';
 
 const getColumnNames = (command: ESQLAstCommand): string[] =>
@@ -23,10 +23,11 @@ const getColumnNames = (command: ESQLAstCommand): string[] =>
  */
 export const getComputedColumnsInOutput = (query: string): Set<string> => {
   const { root } = parseEsqlCached(query);
+  const context = createQuerySummaryContext(root, query);
   let computed = new Set<string>();
 
   for (const command of root.commands) {
-    const summary = getSummaryPerCommand(query, command);
+    const summary = getSummaryPerCommand(query, command, context);
 
     switch (command.name) {
       case 'stats':
