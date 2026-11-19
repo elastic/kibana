@@ -175,14 +175,16 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
           { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
         );
         expect(response).toHaveStatusCode(200);
-        return (response.body as ApplicationsResponse).applications;
+        return response.body as ApplicationsResponse;
       };
 
-      const unfiltered = await listApplications();
+      // The picker offers it even though the range also has logs.
+      const { applications: unfiltered, environments } = await listApplications();
+      expect(environments).toContain(withRequests.environment);
       expect(findApplication(unfiltered, withRequests.serviceName, 'otel')).toBeDefined();
       expect(findApplication(unfiltered, OTEL_APPS.shop, 'otel')).toBeDefined();
 
-      const filtered = await listApplications(withRequests.environment);
+      const { applications: filtered } = await listApplications(withRequests.environment);
       expect(findApplication(filtered, withRequests.serviceName, 'otel')).toMatchObject({
         environments: [withRequests.environment],
         httpRequests: { count: 1, failedCount: 0, failedRatio: 0 },
