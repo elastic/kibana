@@ -9,6 +9,7 @@ import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { ALERT_SEVERITY_VALUES, type AlertSeverity } from '@kbn/rule-data-utils';
 import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+import { scheduleRruleSchemaV3 as scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
 import {
   ALLOWED_MAX_ALERTS,
   MAX_SNOOZED_INSTANCE_CONDITIONS,
@@ -28,12 +29,27 @@ import { notifyWhenSchema } from './notify_when_schema';
 import { actionSchema, systemActionSchema } from './action_schemas';
 import { flappingSchema } from './flapping_schema';
 import { artifactsSchema } from './artifacts_schema';
+import { validateDuration } from '../validation';
 
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
 export const intervalScheduleSchema = schema.object({
   interval: schema.string(),
 });
+
+export { scheduleRruleSchemaV3 as scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+
+// A rule is scheduled either by interval or by rrule, never by both.
+export const scheduleSchema = schema.oneOf([intervalScheduleSchema, scheduleRruleSchema]);
+
+// Same as scheduleSchema, but checks the interval is a valid duration string.
+// Used for the schedule callers pass in, not for the one read back from the saved object.
+export const validatedScheduleSchema = schema.oneOf([
+  schema.object({
+    interval: schema.string({ validate: validateDuration }),
+  }),
+  scheduleRruleSchema,
+]);
 
 export const ruleExecutionStatusSchema = schema.object({
   status: schema.oneOf([
@@ -204,7 +220,7 @@ export const ruleDomainSchema = schema.object({
   tags: schema.arrayOf(schema.string()),
   alertTypeId: schema.string(),
   consumer: schema.string(),
-  schedule: intervalScheduleSchema,
+  schedule: scheduleSchema,
   actions: schema.arrayOf(actionSchema),
   systemActions: schema.maybe(schema.arrayOf(systemActionSchema)),
   params: ruleParamsSchema,
@@ -256,7 +272,7 @@ export const ruleSchema = schema.object({
   tags: schema.arrayOf(schema.string()),
   alertTypeId: schema.string(),
   consumer: schema.string(),
-  schedule: intervalScheduleSchema,
+  schedule: scheduleSchema,
   actions: schema.arrayOf(actionSchema),
   systemActions: schema.maybe(schema.arrayOf(systemActionSchema)),
   params: ruleParamsSchema,

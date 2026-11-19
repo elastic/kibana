@@ -21,6 +21,8 @@ import {
 } from '../../../../saved_objects';
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 import { getRulesClientMockParams } from '../../../../test_utils';
+import { Frequency } from '@kbn/rrule';
+import { validateScheduleLimit } from '../get_schedule_frequency';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -1172,6 +1174,48 @@ describe('enable()', () => {
         }),
         expect.anything()
       );
+    });
+  });
+  describe('rrule schedules', () => {
+    const mockRruleSchedule = {
+      rrule: {
+        freq: Frequency.DAILY,
+        interval: 1,
+        tzid: 'UTC',
+        byhour: [9],
+        byminute: [0],
+      },
+    };
+
+    const existingRruleRule = {
+      ...existingRule,
+      attributes: { ...existingRule.attributes, schedule: mockRruleSchedule },
+    };
+
+    beforeEach(() => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRruleRule);
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existingRruleRule);
+    });
+
+    // Without a dtstart the occurrence inherits the milliseconds of "now", the same way
+    // Task Manager builds the first run, so the rule's nextRun matches the task's runAt.
+    it('sets nextRun to the next rrule occurrence', async () => {
+      await rulesClient.enableRule({ id: '1' });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          schedule: mockRruleSchedule,
+          nextRun: '2019-02-13T09:00:00.479Z',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('does not run the schedule limit check for rrule schedules', async () => {
+      await rulesClient.enableRule({ id: '1' });
+
+      expect(validateScheduleLimit).not.toHaveBeenCalled();
     });
   });
 });

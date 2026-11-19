@@ -16,6 +16,10 @@ import type {
   AlertsFilter,
 } from '@kbn/alerting-types';
 
+// Server side rules can be scheduled by interval or by rrule. The Rule type keeps the
+// narrower IntervalSchedule until the rule APIs accept rrule.
+export type { Schedule as RuleSchedule } from '@kbn/response-ops-scheduling-types';
+
 export type {
   ActionVariable,
   Rule,

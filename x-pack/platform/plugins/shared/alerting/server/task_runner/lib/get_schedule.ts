@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { Interval } from '@kbn/task-manager-plugin/server/lib/intervals';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { resolveErr, type Result } from '../../lib/result_type';
-import type { IntervalSchedule } from '../../types';
+import type { RuleSchedule } from '../../../common';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../../lib/is_alerting_error';
 import { parseDuration } from '../../../common';
 import { isClusterBlockError } from '../../lib/error_with_type';
@@ -24,13 +24,13 @@ export function getSchedule({
   retryInterval,
   logger,
 }: {
-  schedule: Result<IntervalSchedule, Error>;
+  schedule: Result<RuleSchedule, Error>;
   ruleId: string;
   spaceId: string;
   retryInterval: Interval;
   logger: Logger;
 }) {
-  return resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
+  return resolveErr<RuleSchedule | undefined, Error>(schedule, (error) => {
     if (isAlertSavedObjectNotFoundError(error, ruleId)) {
       const spaceMessage = spaceId ? `in the "${spaceId}" space ` : '';
       logger.warn(

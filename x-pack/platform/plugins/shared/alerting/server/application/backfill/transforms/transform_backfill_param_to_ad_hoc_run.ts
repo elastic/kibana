@@ -26,7 +26,7 @@ export const transformBackfillParamToAdHocRun = (
   actions: DenormalizedAction[],
   spaceId: string
 ): TransformBackfillResult => {
-  const { schedule, truncated } = calculateSchedule(rule.schedule.interval, param.ranges);
+  const { schedule, truncated } = calculateSchedule(rule.schedule, param.ranges);
   const shouldRunActions = param.runActions !== undefined ? param.runActions : true;
   const uiamApiKeyId = getUiamApiKeyId(rule.uiamApiKey);
   const start = param.ranges[0].start;
@@ -55,7 +55,9 @@ export const transformBackfillParamToAdHocRun = (
       ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
       ...(rule.uiamApiKey && rule.uiamApiKeyExternal === true ? { uiamApiKeyExternal: true } : {}),
       createdAt: new Date().toISOString(),
-      duration: rule.schedule.interval,
+      // Display metadata only, returned in backfill API responses. Taken from the first
+      // scheduled run so rrule rules report the real gap between occurrences.
+      duration: schedule[0]?.interval ?? '',
       enabled: true,
       end,
       initiator: param.initiator ?? backfillInitiator.USER,

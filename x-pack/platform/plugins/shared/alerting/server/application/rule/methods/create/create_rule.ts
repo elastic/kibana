@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
@@ -126,7 +127,9 @@ export async function createRule<Params extends RuleParams = never>(
   context.ruleTypeRegistry.get(data.alertTypeId);
 
   let validationPayload: ValidateScheduleLimitResult = null;
-  if (data.enabled) {
+  // TODO: rrule schedules are not counted towards the schedule limit yet, see
+  // https://github.com/elastic/kibana-team/issues/2683
+  if (data.enabled && isIntervalSchedule(data.schedule)) {
     validationPayload = await validateScheduleLimit({
       context,
       updatedInterval: data.schedule.interval,
@@ -203,15 +206,15 @@ export async function createRule<Params extends RuleParams = never>(
     })
   );
 
-  // Throw error if schedule interval is less than the minimum and we are enforcing it
-  const intervalInMs = parseDuration(data.schedule.interval);
-  if (
-    intervalInMs < context.minimumScheduleIntervalInMs &&
-    context.minimumScheduleInterval.enforce
-  ) {
-    throw Boom.badRequest(
-      `Error creating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
-    );
+  // Throw error if schedule interval is less than the minimum and we are enforcing it.
+  // The minimum does not apply to rrule schedules, which have no single interval.
+  if (isIntervalSchedule(data.schedule) && context.minimumScheduleInterval.enforce) {
+    const intervalInMs = parseDuration(data.schedule.interval);
+    if (intervalInMs < context.minimumScheduleIntervalInMs) {
+      throw Boom.badRequest(
+        `Error creating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
+      );
+    }
   }
 
   const allActions = [...data.actions, ...(data.systemActions ?? [])];
@@ -281,7 +284,6 @@ export async function createRule<Params extends RuleParams = never>(
     { name: 'createRuleSavedObject', type: 'rules' },
     () =>
       createRuleSavedObject(context, {
-        intervalInMs,
         rawRule: ruleAttributes,
         references,
         ruleId: id,

@@ -560,7 +560,7 @@ describe('Task Runner', () => {
     expect(alertsClient.getAlertsToUpdateWithLastScheduledActions).toHaveBeenCalledTimes(1);
   });
 
-  test('throws error when schedule.interval is not provided', async () => {
+  test('throws error when the schedule has neither an interval nor an rrule', async () => {
     mockGetRuleFromRaw.mockReturnValue({ ...mockedRuleTypeSavedObject, schedule: {} } as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       ...mockedRawRuleSO,
@@ -579,7 +579,7 @@ describe('Task Runner', () => {
     });
 
     await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"Interval is required to calculate next run"'
+      '"Schedule is neither an interval nor an rrule, unable to calculate next run"'
     );
   });
 

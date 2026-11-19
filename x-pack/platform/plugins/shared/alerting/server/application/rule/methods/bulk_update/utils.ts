@@ -9,7 +9,8 @@ import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import type { SavedObject } from '@kbn/core/server';
-import { parseDuration, type IntervalSchedule } from '../../../../../common';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import { parseDuration, type RuleSchedule } from '../../../../../common';
 import {
   convertRuleIdsToKueryNode,
   validateRuleTypeParams,
@@ -139,21 +140,20 @@ export const prepareUpdate = async <Params extends RuleParams>({
       rule: { consumer: originalRule.consumer, producer: ruleType.producer },
     });
 
-    const intervalInMs = parseDuration(data.schedule.interval);
-    if (
-      intervalInMs < context.minimumScheduleIntervalInMs &&
-      context.minimumScheduleInterval.enforce
-    ) {
+    // The minimum interval does not apply to rrule schedules, which have no single interval.
+    const updatedInterval = isIntervalSchedule(data.schedule) ? data.schedule.interval : undefined;
+    const intervalInMs = updatedInterval != null ? parseDuration(updatedInterval) : undefined;
+    const isBelowMinimumInterval =
+      intervalInMs != null && intervalInMs < context.minimumScheduleIntervalInMs;
+
+    if (isBelowMinimumInterval && context.minimumScheduleInterval.enforce) {
       throw Boom.badRequest(
         `Error updating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
       );
     }
-    if (
-      intervalInMs < context.minimumScheduleIntervalInMs &&
-      !context.minimumScheduleInterval.enforce
-    ) {
+    if (isBelowMinimumInterval && !context.minimumScheduleInterval.enforce) {
       context.logger.warn(
-        `Rule schedule interval (${data.schedule.interval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+        `Rule schedule interval (${updatedInterval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
       );
     }
 
@@ -297,7 +297,7 @@ export const updateTaskSchedules = async (
   context: RulesClientContext,
   updated: PreparedUpdate[]
 ): Promise<void> => {
-  const groups = new Map<string, { taskIds: string[]; schedule: IntervalSchedule }>();
+  const groups = new Map<string, { taskIds: string[]; schedule: RuleSchedule }>();
 
   for (const prepared of updated) {
     if (!prepared.scheduledTaskId) {
@@ -306,7 +306,8 @@ export const updateTaskSchedules = async (
     if (isEqual(prepared.previousSchedule, prepared.newSchedule)) {
       continue;
     }
-    const key = prepared.newSchedule.interval;
+    // Rrule schedules have no single scalar to group by, so key on the whole schedule.
+    const key = JSON.stringify(prepared.newSchedule);
     const group = groups.get(key) ?? { taskIds: [], schedule: prepared.newSchedule };
     group.taskIds.push(prepared.scheduledTaskId);
     groups.set(key, group);

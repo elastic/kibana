@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import { withSpan } from '@kbn/apm-utils';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { RuleChangeTrackingAction, type RuleChangeTracking } from '@kbn/alerting-types';
@@ -187,7 +188,12 @@ async function runBatch<Params extends RuleParams>({
   const updatedInterval: string[] = [];
   for (const { item, original } of toPrepare) {
     const { enabled, schedule } = original.attributes;
-    if (enabled && schedule?.interval && schedule.interval !== item.data.schedule.interval) {
+    if (
+      enabled &&
+      isIntervalSchedule(schedule) &&
+      isIntervalSchedule(item.data.schedule) &&
+      schedule.interval !== item.data.schedule.interval
+    ) {
       prevInterval.push(schedule.interval);
       updatedInterval.push(item.data.schedule.interval);
     }

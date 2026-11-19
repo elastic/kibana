@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
+import type { Schedule as RuleSchedule } from '@kbn/response-ops-scheduling-types';
 
 import type {
   rawRuleExecutionStatusSchema,
@@ -15,7 +16,7 @@ import type {
 
 import type { rawRuleMonitoringSchema } from './v11';
 import type { rawRuleSnoozedInstanceSchema } from './v14';
-import type { rawRuleSchema } from './v16';
+import type { rawRuleSchema } from './v17';
 
 type Mutable<T> = { -readonly [P in keyof T]: T[P] extends object ? Mutable<T[P]> : T[P] };
 
@@ -25,4 +26,9 @@ export type RawRuleAlertsFilter = Mutable<TypeOf<typeof rawRuleAlertsFilterSchem
 export type RawRuleLastRun = Mutable<TypeOf<typeof rawRuleLastRunSchema>>;
 export type RawRuleMonitoring = Mutable<TypeOf<typeof rawRuleMonitoringSchema>>;
 export type RawRuleSnoozedInstance = Mutable<TypeOf<typeof rawRuleSnoozedInstanceSchema>>;
-export type RawRule = Mutable<TypeOf<typeof rawRuleSchema>>;
+// The schedule is validated by the config-schema above, but exposed as the scheduling-types
+// union. config-schema turns the mutually exclusive rrule fields into required `never`
+// properties, which no caller can write without a cast.
+export type RawRule = Omit<Mutable<TypeOf<typeof rawRuleSchema>>, 'schedule'> & {
+  schedule: RuleSchedule;
+};

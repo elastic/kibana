@@ -10,6 +10,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { SavedObject } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { asSpaceId } from '@kbn/core-spaces-common';
+import type { IntervalSchedule } from '@kbn/alerting-types';
 import type {
   Rule,
   RuleTypeParams,
@@ -288,6 +289,7 @@ export const mockedRawRuleSO: SavedObject<RawRule> = {
 export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params> = {
   id: mockedRawRuleSO.id,
   ...mockedRawRuleSO.attributes,
+  schedule: mockedRawRuleSO.attributes.schedule as IntervalSchedule,
   nextRun: undefined,
   createdAt: new Date(mockedRawRuleSO.attributes.createdAt),
   updatedAt: new Date(mockedRawRuleSO.attributes.updatedAt),

@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { Schedule as RuleSchedule } from '@kbn/response-ops-scheduling-types';
 import type { updateRuleDataSchema } from '../schemas';
 import type { RuleParams } from '../../../types';
 
@@ -16,7 +17,7 @@ export interface UpdateRuleData<Params extends RuleParams = never> {
   tags: UpdateRuleDataType['tags'];
   throttle?: UpdateRuleDataType['throttle'];
   params: Params;
-  schedule: UpdateRuleDataType['schedule'];
+  schedule: RuleSchedule;
   actions: UpdateRuleDataType['actions'];
   systemActions?: UpdateRuleDataType['systemActions'];
   notifyWhen?: UpdateRuleDataType['notifyWhen'];

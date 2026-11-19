@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+import type { Schedule as RuleSchedule } from '@kbn/response-ops-scheduling-types';
 import type {
   ruleNotifyWhen,
   ruleLastRunOutcomeValues,
@@ -58,7 +59,7 @@ export interface Rule<Params extends RuleParams = never> {
   tags: RuleSchemaType['tags'];
   alertTypeId: RuleSchemaType['alertTypeId'];
   consumer: RuleSchemaType['consumer'];
-  schedule: RuleSchemaType['schedule'];
+  schedule: RuleSchedule;
   actions: RuleSchemaType['actions'];
   systemActions?: RuleSchemaType['systemActions'];
   params: Params;
@@ -102,7 +103,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   tags: RuleDomainSchemaType['tags'];
   alertTypeId: RuleDomainSchemaType['alertTypeId'];
   consumer: RuleDomainSchemaType['consumer'];
-  schedule: RuleDomainSchemaType['schedule'];
+  schedule: RuleSchedule;
   actions: RuleDomainSchemaType['actions'];
   systemActions?: RuleDomainSchemaType['systemActions'];
   params: Params;

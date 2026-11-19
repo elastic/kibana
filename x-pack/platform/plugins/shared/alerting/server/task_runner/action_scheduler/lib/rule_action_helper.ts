@@ -6,7 +6,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { IntervalSchedule, RuleAction, ThrottledActions } from '../../../../common';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import type { RuleSchedule, RuleAction, ThrottledActions } from '../../../../common';
 import { parseDuration, RuleNotifyWhenTypeValues } from '../../../../common';
 
 export const isSummaryAction = (action?: RuleAction) => {
@@ -91,9 +92,11 @@ export const getSummaryActionsFromTaskState = ({
   }, {} as ThrottledActions);
 };
 
+const FALLBACK_SUMMARY_WINDOW = '1h';
+
 export const getSummaryActionTimeBounds = (
   action: RuleAction,
-  ruleSchedule: IntervalSchedule,
+  ruleSchedule: RuleSchedule,
   previousStartedAt: Date | null
 ): { start?: number; end?: number } => {
   if (!isSummaryAction(action)) {
@@ -112,9 +115,13 @@ export const getSummaryActionTimeBounds = (
     // If previousStartedAt is null, use the rule schedule interval
     if (previousStartedAt) {
       startDate = previousStartedAt;
-    } else {
+    } else if (isIntervalSchedule(ruleSchedule)) {
       const scheduleMillis = parseDuration(ruleSchedule.interval);
       startDate = new Date(now - scheduleMillis);
+    } else {
+      // Rrule schedules have no interval to look back by, and this only happens on the first
+      // run of a rule, so approximate the window instead of walking the rrule backwards.
+      startDate = new Date(now - parseDuration(FALLBACK_SUMMARY_WINDOW));
     }
   }
 

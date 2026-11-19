@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleSchema } from '../../rule/schemas';
+import { intervalScheduleSchema, ruleSchema } from '../../rule/schemas';
 
 ruleSchema.getPropSchemas();
 
@@ -15,7 +15,8 @@ export const ruleTemplateSchema = schema.object({
   name: ruleSchema.getPropSchemas().name,
   tags: ruleSchema.getPropSchemas().tags,
   ruleTypeId: ruleSchema.getPropSchemas().alertTypeId,
-  schedule: ruleSchema.getPropSchemas().schedule,
+  // Rule templates stay interval only for now, they do not support rrule schedules.
+  schedule: intervalScheduleSchema,
   flapping: ruleSchema.getPropSchemas().flapping,
   alertDelay: ruleSchema.getPropSchemas().alertDelay,
   params: ruleSchema.getPropSchemas().params,

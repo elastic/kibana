@@ -16,7 +16,9 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { Frequency } from '@kbn/rrule';
 import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../../lib';
+import { validateScheduleLimit } from '../get_schedule_frequency';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ConnectorAdapter } from '../../../../connector_adapters/types';
 import type { RuleDomain } from '../../types';
@@ -5425,5 +5427,117 @@ This is the type of text _investigation guides_ will contain.`;
       }),
       expect.any(Object)
     );
+  });
+
+  // Placed last so the shared uuid counter these tests advance does not shift the
+  // generated action uuids the tests above assert on.
+  describe('rrule schedules', () => {
+    const mockRruleSchedule = {
+      rrule: {
+        freq: Frequency.DAILY,
+        interval: 1,
+        tzid: 'UTC',
+        byhour: [9],
+        byminute: [0],
+      },
+    };
+
+    const mockRruleCreatedAttributes = (data: ReturnType<typeof getMockData>) => ({
+      ...data,
+      alertTypeId: '123',
+      params: { bar: true },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      muteAll: false,
+      snoozeSchedule: [],
+      mutedInstanceIds: [],
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          uuid: 'test-uuid',
+          params: { foo: true },
+        },
+      ],
+    });
+
+    const mockCreateResponses = (data: ReturnType<typeof getMockData>) => {
+      const createdAttributes = mockRruleCreatedAttributes(data);
+      const references = [{ name: 'action_0', type: 'action', id: '1' }];
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...createdAttributes,
+          running: false,
+          executionStatus: getRuleExecutionStatusPending(createdAttributes.createdAt),
+        },
+        references,
+      });
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...createdAttributes,
+          running: false,
+          executionStatus: getRuleExecutionStatusPending(createdAttributes.createdAt),
+          scheduledTaskId: 'task-123',
+        },
+        references,
+      });
+    };
+
+    it('saves the rrule schedule on the rule saved object', async () => {
+      const data = getMockData({ schedule: mockRruleSchedule });
+      mockCreateResponses(data);
+
+      const result = await rulesClient.create({ data });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ schedule: mockRruleSchedule }),
+        expect.any(Object)
+      );
+      expect(result.schedule).toEqual(mockRruleSchedule);
+    });
+
+    it('schedules the rule task with the rrule schedule', async () => {
+      const data = getMockData({ schedule: mockRruleSchedule });
+      mockCreateResponses(data);
+
+      await rulesClient.create({ data });
+
+      expect(taskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({ schedule: mockRruleSchedule })
+      );
+    });
+
+    it('does not run the schedule limit check for rrule schedules', async () => {
+      const data = getMockData({ schedule: mockRruleSchedule });
+      mockCreateResponses(data);
+
+      await rulesClient.create({ data });
+
+      expect(validateScheduleLimit).not.toHaveBeenCalled();
+    });
+
+    it('does not enforce the minimum schedule interval for rrule schedules', async () => {
+      const data = getMockData({ schedule: mockRruleSchedule });
+      mockCreateResponses(data);
+
+      rulesClient = new RulesClient({
+        ...rulesClientParams,
+        minimumScheduleInterval: { value: '1d', enforce: true },
+      });
+
+      await expect(rulesClient.create({ data })).resolves.toEqual(
+        expect.objectContaining({ schedule: mockRruleSchedule })
+      );
+    });
   });
 });
