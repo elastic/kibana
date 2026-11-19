@@ -1213,6 +1213,17 @@ export const ConsoleStepInputSchema = lazySchema(() =>
   })
 );
 
+/** Params of the generic `elasticsearch.request` step, which calls an Elasticsearch API by method and path. */
+export const ElasticsearchRequestStepInputSchema = lazySchema(() =>
+  z.object({
+    method: z.string(),
+    path: z.string(),
+    body: z.any().optional(),
+    params: z.any().optional(),
+    headers: z.any().optional(),
+  })
+);
+
 export const WorkflowRunAsModeSchema = z.enum(['default', 'inherit', 'override']);
 export type WorkflowRunAsMode = z.infer<typeof WorkflowRunAsModeSchema>;
 
