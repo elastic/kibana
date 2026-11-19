@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangeHistoryClient, ChangeHistoryDocument } from '@kbn/change-history';
+import type { ChangeHistoryDocument, IChangeHistoryClient } from '@kbn/change-history';
 import {
   getRuleChangeHistoryEventParamsSchema,
   listRuleChangeHistoryRequestSchema,
@@ -53,12 +53,14 @@ const createDocument = (
     service: { type: 'kibana', version: '9.0.0' },
   } as ChangeHistoryDocument);
 
-const createChangeHistoryMock = (): jest.Mocked<
-  Pick<ChangeHistoryClient, 'isInitialized' | 'getHistory' | 'getEvent'>
-> => ({
+const createChangeHistoryMock = (): jest.Mocked<IChangeHistoryClient> => ({
   isInitialized: jest.fn().mockReturnValue(true),
+  initialize: jest.fn(),
+  log: jest.fn(),
+  logBulk: jest.fn(),
   getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
   getEvent: jest.fn().mockResolvedValue(undefined),
+  getHistoryByFields: jest.fn(),
 });
 
 describe('RuleChangesHistoryClient', () => {
@@ -78,10 +80,7 @@ describe('RuleChangesHistoryClient', () => {
       });
       changeHistory.getHistory.mockResolvedValue({ items: [newest, older], total: 2 });
 
-      const client = new RuleChangesHistoryClient(
-        changeHistory as unknown as ChangeHistoryClient,
-        'default'
-      );
+      const client = new RuleChangesHistoryClient(changeHistory, 'default');
 
       const result = await client.listRuleChanges({ ruleId: 'rule-1', page: 1, perPage: 1 });
 
@@ -111,10 +110,7 @@ describe('RuleChangesHistoryClient', () => {
         total: 1,
       });
 
-      const client = new RuleChangesHistoryClient(
-        changeHistory as unknown as ChangeHistoryClient,
-        'default'
-      );
+      const client = new RuleChangesHistoryClient(changeHistory, 'default');
 
       const result = await client.listRuleChanges({ ruleId: 'rule-1', page: 1, perPage: 20 });
 
@@ -129,10 +125,7 @@ describe('RuleChangesHistoryClient', () => {
         total: 3,
       });
 
-      const client = new RuleChangesHistoryClient(
-        changeHistory as unknown as ChangeHistoryClient,
-        'default'
-      );
+      const client = new RuleChangesHistoryClient(changeHistory, 'default');
 
       const result = await client.listRuleChanges({ ruleId: 'rule-1', page: 2, perPage: 1 });
 
@@ -147,10 +140,7 @@ describe('RuleChangesHistoryClient', () => {
       const changeHistory = createChangeHistoryMock();
       changeHistory.isInitialized.mockReturnValue(false);
 
-      const client = new RuleChangesHistoryClient(
-        changeHistory as unknown as ChangeHistoryClient,
-        'default'
-      );
+      const client = new RuleChangesHistoryClient(changeHistory, 'default');
 
       await expect(
         client.listRuleChanges({ ruleId: 'rule-1', page: 1, perPage: 20 })
@@ -183,10 +173,7 @@ describe('RuleChangesHistoryClient', () => {
         .mockResolvedValueOnce({ items: [previous], total: 1 })
         .mockResolvedValueOnce({ items: [current], total: 1 });
 
-      const client = new RuleChangesHistoryClient(
-        changeHistory as unknown as ChangeHistoryClient,
-        'default'
-      );
+      const client = new RuleChangesHistoryClient(changeHistory, 'default');
 
       const result = await client.getRuleChange({ eventId: 'event-2' });
 
@@ -216,10 +203,7 @@ describe('RuleChangesHistoryClient', () => {
       const changeHistory = createChangeHistoryMock();
       changeHistory.getEvent.mockResolvedValue(undefined);
 
-      const client = new RuleChangesHistoryClient(
-        changeHistory as unknown as ChangeHistoryClient,
-        'default'
-      );
+      const client = new RuleChangesHistoryClient(changeHistory, 'default');
 
       await expect(client.getRuleChange({ eventId: 'missing' })).rejects.toMatchObject({
         output: { statusCode: 404 },
@@ -239,16 +223,71 @@ describe('RuleChangesHistoryClient', () => {
         object: { ...document.object, type: 'workflow' },
       });
 
-      const client = new RuleChangesHistoryClient(
-        changeHistory as unknown as ChangeHistoryClient,
-        'default'
-      );
+      const client = new RuleChangesHistoryClient(changeHistory, 'default');
 
       await expect(client.getRuleChange({ eventId: 'event-1' })).rejects.toMatchObject({
         output: { statusCode: 404 },
         data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND },
       });
       expect(changeHistory.getHistory).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getRuleSnapshot', () => {
+    it('returns the rule id and snapshot', async () => {
+      const changeHistory = createChangeHistoryMock();
+      changeHistory.getEvent.mockResolvedValue(
+        createDocument({ id: 'event-1', snapshot: { id: 'rule-1', metadata: { name: 'A' } } })
+      );
+
+      const client = new RuleChangesHistoryClient(changeHistory, 'default');
+
+      await expect(client.getRuleSnapshot({ eventId: 'event-1' })).resolves.toEqual({
+        ruleId: 'rule-1',
+        snapshot: { id: 'rule-1', metadata: { name: 'A' } },
+      });
+      expect(changeHistory.getEvent).toHaveBeenCalledWith('default', 'event-1');
+      expect(changeHistory.getHistory).not.toHaveBeenCalled();
+    });
+
+    it('throws RULE_CHANGE_NOT_FOUND when the event is missing', async () => {
+      const changeHistory = createChangeHistoryMock();
+
+      const client = new RuleChangesHistoryClient(changeHistory, 'default');
+
+      await expect(client.getRuleSnapshot({ eventId: 'missing' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND },
+      });
+    });
+
+    it('throws RULE_CHANGE_NOT_FOUND when the event belongs to another object type', async () => {
+      const changeHistory = createChangeHistoryMock();
+      const document = createDocument({ id: 'event-1' });
+      changeHistory.getEvent.mockResolvedValue({
+        ...document,
+        object: { ...document.object, type: 'workflow' },
+      });
+
+      const client = new RuleChangesHistoryClient(changeHistory, 'default');
+
+      await expect(client.getRuleSnapshot({ eventId: 'event-1' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND },
+      });
+    });
+
+    it('throws RULE_CHANGE_HISTORY_UNAVAILABLE when the data stream is not initialized', async () => {
+      const changeHistory = createChangeHistoryMock();
+      changeHistory.isInitialized.mockReturnValue(false);
+
+      const client = new RuleChangesHistoryClient(changeHistory, 'default');
+
+      await expect(client.getRuleSnapshot({ eventId: 'event-1' })).rejects.toMatchObject({
+        output: { statusCode: 503 },
+        data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_HISTORY_UNAVAILABLE },
+      });
+      expect(changeHistory.getEvent).not.toHaveBeenCalled();
     });
   });
 });

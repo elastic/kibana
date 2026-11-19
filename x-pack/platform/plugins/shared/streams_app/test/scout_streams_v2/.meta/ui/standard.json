@@ -1,5 +1,5 @@
 {
-  "sha1": "5be7661ac38a844537ae4eb04894f3ee77f87f6f",
+  "sha1": "bc4399ac882dc430759ba2a28a85e7be56e8e46c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -237,6 +237,20 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
         "line": 194,
         "column": 24
+      }
+    },
+    {
+      "id": "a570088069a2c16-b1ca2e5ba67df21",
+      "title": "Stream map warns before leaving the map with unsaved changes, but not for a flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
+        "line": 190,
+        "column": 11
       }
     },
     {

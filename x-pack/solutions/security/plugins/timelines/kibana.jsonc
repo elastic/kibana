@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/timelines-plugin",
   "owner": [
-    "@elastic/security-threat-hunting"
+    "@elastic/security-investigations"
   ],
   "group": "security",
   "visibility": "private",
