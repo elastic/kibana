@@ -399,6 +399,7 @@ describe('BurnRateRuleExecutor', () => {
 
       expect(servicesMock.alertsClient?.report).not.toHaveBeenCalled();
       expect(servicesMock.alertsClient?.setAlertData).not.toHaveBeenCalled();
+      expect(servicesMock.alertsClient?.setAlertLimitReached).toHaveBeenCalledWith(false);
     });
 
     it('does not schedule an alert when the short window burn rate is below the threshold', async () => {
