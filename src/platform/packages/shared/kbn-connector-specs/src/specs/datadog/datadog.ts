@@ -58,7 +58,12 @@ import {
  */
 const applyDatadogAuthHeaders = (ctx: ActionContext): void => {
   const secrets = ctx.secrets;
-  if (!secrets || secrets.authType !== 'basic') {
+  if (!secrets || secrets.authType === 'none') {
+    throw new Error(
+      'Datadog connector has no API Key or Application Key. Edit the connector to add them, or use a connector configured with API and Application keys for this action.'
+    );
+  }
+  if (secrets.authType !== 'basic') {
     throw new Error('Datadog connector requires API Key and Application Key (basic auth secrets).');
   }
   const apiKey = secrets.username;
@@ -192,6 +197,17 @@ export const Datadog: ConnectorSpec = {
               }),
             },
           },
+        },
+      },
+      {
+        // For connectors that only receive events. Datadog actions need both keys and fail
+        // with an actionable message when they are missing.
+        type: 'none',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('connectorSpecs.datadog.auth.none.label', {
+            defaultMessage: 'No authentication (receive events only)',
+          }),
         },
       },
     ],
