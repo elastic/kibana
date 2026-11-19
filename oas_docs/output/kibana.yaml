@@ -184968,7 +184968,7 @@ components:
             description: A list of data source names or wildcard patterns to which the permissions in this entry apply.
             maxLength: 1000
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
@@ -184997,7 +184997,7 @@ components:
           items:
             description: Cluster privileges that define the cluster level actions that users can perform.
             type: string
-          maxItems: 100
+          maxItems: 1000
           type: array
         global:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_global_privileges'
@@ -185009,7 +185009,7 @@ components:
         remote_cluster:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_remote_cluster_privileges'
-          maxItems: 100
+          maxItems: 1000
           type: array
         remote_indices:
           items:
@@ -185020,7 +185020,7 @@ components:
           items:
             description: A username that members of this role can impersonate.
             type: string
-          maxItems: 100
+          maxItems: 1000
           type: array
       title: security_role_elasticsearch
       type: object
@@ -185093,14 +185093,14 @@ components:
           items:
             description: The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
           items:
             description: The index level privileges that the role members have for the data streams and indices.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         query:
@@ -185160,7 +185160,7 @@ components:
             items:
               description: The privileges that the role member has for the feature.
               type: string
-            maxItems: 100
+            maxItems: 1000
             type: array
           type: object
         spaces:
@@ -185246,14 +185246,14 @@ components:
           items:
             description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
           items:
             description: The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
       required:
@@ -185272,7 +185272,7 @@ components:
           items:
             description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         field_security:
@@ -185287,14 +185287,14 @@ components:
           items:
             description: A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
           items:
             description: The index level privileges that role members have for the specified indices.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         query:
