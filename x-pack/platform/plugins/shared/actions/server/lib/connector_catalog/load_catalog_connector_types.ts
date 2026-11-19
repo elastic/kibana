@@ -77,7 +77,6 @@ export const loadCatalogConnectorTypes = async ({
     return 0;
   }
 
-  logger.debug('Reading the connector catalog manifest.');
   const manifest = await storage.getManifest({ signal });
   if (!manifest) {
     logger.debug(
@@ -92,9 +91,10 @@ export const loadCatalogConnectorTypes = async ({
     return 0;
   }
   logger.debug(
-    `The connector catalog manifest lists ${rows.length} connector(s): ${rows
-      .map(({ id, version }) => `${id}@${version}`)
-      .join(', ')}`
+    () =>
+      `The connector catalog manifest lists ${rows.length} connector(s): ${rows
+        .map(({ id, version }) => `${id}@${version}`)
+        .join(', ')}`
   );
 
   const definitions = await storage.getDefinitions(rows, { signal });

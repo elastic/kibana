@@ -118,7 +118,6 @@ export const createConnectorCatalogStorage = ({
       if (refs.length === 0) {
         return [];
       }
-      logger.debug(`Reading ${refs.length} connector catalog definition(s) with mget.`);
       try {
         const response = await esClient.mget<DefinitionSource>(
           { index: CONNECTOR_TYPE_CATALOG_INDEX, ids: refs.map(getCatalogDefinitionDocId) },

@@ -75,7 +75,11 @@ export const startConnectorCatalog = ({
     });
     // A result that arrives after an abort registers nothing and logs nothing.
     if (!signal.aborted) {
-      logger.info(`Registered ${count} connector type(s) from the connector catalog.`);
+      logger.info(
+        `Registered ${count} connector type(s) from the connector catalog in ${
+          Date.now() - startedAt
+        } ms.`
+      );
     }
   };
 
@@ -103,7 +107,6 @@ export const startConnectorCatalog = ({
   return {
     ready,
     stop: () => {
-      logger.debug('Stopping the connector catalog.');
       controller.abort();
     },
   };

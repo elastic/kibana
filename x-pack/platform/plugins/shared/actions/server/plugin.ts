@@ -143,7 +143,6 @@ import {
   buildTypeFromStoredSpec,
   createConnectorCatalogStorage,
   startConnectorCatalog,
-  CONNECTOR_TYPE_CATALOG_INDEX,
   type ConnectorCatalogHandle,
 } from './lib/connector_catalog';
 
@@ -1229,9 +1228,6 @@ export class ActionsPlugin
     // 1 context for the whole catalog start, so `plugins.actions.connectorCatalog` filters it.
     const logger = this.logger.get('connectorCatalog');
     const isEnabled = this.actionsConfig.catalog.enabled;
-    logger.debug(
-      `Connector catalog start requested. Config "xpack.actions.catalog.enabled": ${isEnabled}. Index: "${CONNECTOR_TYPE_CATALOG_INDEX}".`
-    );
     const handle = startConnectorCatalog({
       isEnabled,
       storage: createConnectorCatalogStorage({
@@ -1271,7 +1267,6 @@ export class ActionsPlugin
     );
     const catalogLogger = this.logger.get('connectorCatalog');
     if (pendingTypes.length === 0) {
-      catalogLogger.debug('All enabled connector types are registered at start.');
       return;
     }
 
