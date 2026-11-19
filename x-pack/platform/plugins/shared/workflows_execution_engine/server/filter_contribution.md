@@ -63,7 +63,7 @@ this.engine.registerFilter('prefix', (value: unknown, prefix: unknown): unknown 
 The UI uses liquidjs for validation. Register the filter in the validation instance:
 
 ```typescript
-// src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_liquid_template.ts
+// x-pack/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_liquid_template.ts
 
 function getLiquidInstance(): Liquid {
   if (!liquidInstance) {
@@ -98,7 +98,7 @@ The hover tooltip in the YAML editor evaluates template expressions client-side 
 Custom filters must also be registered here, otherwise hover evaluation falls back to path-only
 resolution and shows incorrect results (or "undefined").
 
-**File:** `src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/template_expression/evaluate_expression.ts`
+**File:** `x-pack/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/template_expression/evaluate_expression.ts`
 
 ```typescript
 // Register custom filters that match server-side exactly
@@ -119,7 +119,7 @@ needs the **real implementation** since it evaluates expressions against actual 
 Add your filter to the autocompletion provider:
 
 ```typescript
-// src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/autocomplete/suggestions/liquid/liquid_completions.ts
+// x-pack/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/autocomplete/suggestions/liquid/liquid_completions.ts
 
 export const LIQUID_FILTERS = [
   // ... existing filters ...
@@ -144,7 +144,7 @@ If your filter transforms the output type (e.g., `entries` converts an object to
 the foreach schema resolver needs to know about it. Otherwise, the editor will show "Expected array for foreach
 iteration, but got object" when using `| your_filter` in a `foreach:` expression.
 
-**File:** `src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_foreach_state_schema.ts`
+**File:** `x-pack/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_foreach_state_schema.ts`
 
 Add a check for your filter in the `getForeachItemSchema` function, before the final `else` branch
 that throws `InvalidForeachParameterError`:

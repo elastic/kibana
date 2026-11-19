@@ -962,8 +962,6 @@ src/platform/plugins/shared/usage_collection @elastic/kibana-core
 src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-dashboards
 src/platform/plugins/shared/visualization_listing @elastic/kibana-dashboards
 src/platform/plugins/shared/visualizations @elastic/kibana-dashboards
-src/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
-src/platform/plugins/shared/workflows_management @elastic/workflows-eng
 src/platform/test
 src/platform/test_plugins/analytics/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test_plugins/analytics/analytics_plugin_a @elastic/kibana-core
@@ -1348,6 +1346,8 @@ x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/plugins/shared/usage_api @elastic/kibana-core
 x-pack/platform/plugins/shared/workflows_execution_engine @elastic/workflows-eng
+x-pack/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
+x-pack/platform/plugins/shared/workflows_management @elastic/workflows-eng
 x-pack/platform/test
 x-pack/platform/test_plugins/agent_builder_sml_test_types @elastic/workchat-eng
 x-pack/platform/test_plugins/cloud_integration/saml_provider @elastic/kibana-core
@@ -3978,6 +3978,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # No owner - generated files covered by CI checks
 **/moon.yml
+# Only the workflow step schema sync PR changes these (auto-approved), feature PRs never do
+/src/platform/packages/private/kbn-workflow-step-schema-cli/generated/
 
 # Operations (last-match override)
 /src/platform/test/package @elastic/kibana-operations
