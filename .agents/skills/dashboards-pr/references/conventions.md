@@ -107,4 +107,4 @@ Suggest, in chat (never inside the body):
 - one `backport:*` (`backport:skip`, `backport:version` with the version labels, e.g. `v9.7.0`);
 - `Team:*` and `Feature:*`, taken from the issue's labels when present, otherwise from the owners of the touched files (`kibana.jsonc` `owner`, `.github/CODEOWNERS`).
 
-Apply labels with `--label` at creation (or `gh pr edit --add-label` in Update mode) only after approval; otherwise list them for the user to add. When an approved update changes the `release_note:*` or `backport:*` type, remove the old label in the same command with `--remove-label`, since a PR must carry exactly one of each.
+In Update mode, apply labels with `gh pr edit --add-label` only after approval; otherwise list them for the user to add. When an approved update changes the `release_note:*` or `backport:*` type, remove the old label in the same command with `--remove-label`, since a PR must carry exactly one of each.

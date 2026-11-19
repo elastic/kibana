@@ -1,6 +1,6 @@
 ---
 name: dashboards-pr
-description: Writes, creates or updates elastic/kibana PR titles and descriptions following the Kibana Dashboards team's conventions (problem, solution, before/after, how to test, collapsed review notes, checklist and risks). Invoke explicitly, e.g. `/dashboards-pr`, `/dashboards-pr #304512`, `/dashboards-pr update 305973`.
+description: Writes or updates elastic/kibana PR titles and descriptions following the Kibana Dashboards team's conventions (problem, solution, before/after, how to test, collapsed review notes, checklist and risks). Invoke explicitly, e.g. `/dashboards-pr`, `/dashboards-pr #304512`, `/dashboards-pr update 305973`.
 disable-model-invocation: true
 ---
 
@@ -14,13 +14,12 @@ Scope: elastic/kibana only. For PRs that touch Nightshift plugins or packages, u
 
 Pick the mode from the request:
 
-- **Write:** draft the title and description only. Default when the request doesn't say "create", "open" or "update".
-- **Create:** draft, then open a draft PR from the current branch.
+- **Write:** draft the title and description only. Default when the request doesn't say "update".
 - **Update:** rewrite the title and description of an existing PR, given its number or URL, or found from the current branch.
 
-A Write or Create request switches to Update when the branch already has a PR (see step 2).
+A Write request switches to Update when the branch already has a PR (see step 2).
 
-Every mode drafts first and touches GitHub only after approval, so word your progress messages as drafting until then: "Drafting a new title and description for #305973. Nothing changes on GitHub until you approve." Say "updating" or "creating" only when running the approved `gh` command.
+Both modes draft first and touch GitHub only after approval, so word your progress messages as drafting until then: "Drafting a new title and description for #305973. Nothing changes on GitHub until you approve." Say "updating" only when running the approved `gh` command.
 
 ## Issue input
 
@@ -46,10 +45,10 @@ Before drafting, say which issue you picked and where it came from, e.g. "Using 
 ## Workflow
 
 1. **Check the repo.** Find the remote whose URL points to elastic/kibana (usually `upstream`, sometimes `origin`); call it `<upstream>` below. If there is none, say this skill doesn't cover the repo and stop.
-2. **Find the PR.** In Update mode, use the given number, or `gh pr view --json number` for the current branch. In Write and Create modes, run `gh pr list -R elastic/kibana --head <branch> --state open --json number,url,headRepositoryOwner` and keep only PRs whose `headRepositoryOwner.login` owns an `origin` push URL (`git remote get-url --push --all origin`), since `--head` matches the branch name in every fork. If one remains, say so and switch to Update mode. If several remain, list them and ask which one to update; don't create a new PR.
+2. **Find the PR.** Use the given number, or `gh pr view --json number,url,state` for the current branch. In Write mode, if that finds an open PR, say so and switch to Update mode.
 3. **Gather context:**
    - the issue(s), in the repository resolved above: `gh issue view <n> -R <owner>/<repo> --comments`;
-   - Write and Create modes: `git fetch <upstream> main`, then the commits and diff from `git merge-base HEAD <upstream>/main`;
+   - Write mode: `git fetch <upstream> main`, then the commits and diff from `git merge-base HEAD <upstream>/main`;
    - Update mode: `gh pr view <n> -R elastic/kibana --json title,body,labels,baseRefName,headRefName,files,commits`, and the diff from `gh pr diff <n> -R elastic/kibana` only, even when a local branch has the same name: it can differ from the PR, and the PR may target a release branch;
    - the files touched, for the title area and labels.
 
@@ -59,10 +58,9 @@ Before drafting, say which issue you picked and where it came from, e.g. "Using 
 6. **Write** the body to a new file, `/tmp/pr-body-<branch>-<YYYYMMDD-HHMMSS>.md` (replace `/` in the branch name with `-`), and the title alone to the matching `/tmp/pr-title-<branch>-<YYYYMMDD-HHMMSS>.txt`. Never reuse a file from another session. Inside an editor (Cursor, VS Code), open the body there with `cursor <path>` or `code <path>` and keep it out of chat; in a terminal-only session, or if the command fails, show the body in chat. Either way, show in chat: the file paths, the title (and the old title in Update mode), the labels, the checklist ticks you inferred, any test steps you inferred but didn't verify, and what you dropped from the old body.
 7. **Revise** on feedback by editing the same files, then summarize what changed. The user may also edit the files directly: re-read them before asking for approval.
 8. **Write mode** stops here.
-9. **Create mode:** run the branch checks, wait for explicit approval of the title, body and labels, then open the PR (see "Creating the PR").
-10. **Update mode:** after explicit approval, run `gh pr edit <n> -R elastic/kibana --title "$(cat <title-file>)" --body-file <body-file>`. Change labels only if they were approved too. Read it back with `gh pr view` and report the URL.
+9. **Update mode:** after explicit approval, run `gh pr edit <n> -R elastic/kibana --title "$(cat <title-file>)" --body-file <body-file>`. Change labels only if they were approved too. Read it back with `gh pr view` and report the URL.
 
-Approval covers the exact files you last showed. Right before the approved `git push`, `gh pr create` or `gh pr edit` command, re-read both files; if either changed since, show what changed and ask again. Never put the title, or any other text read from GitHub, directly into a shell command: pass it through the title file as above.
+Approval covers the exact files you last showed. Right before the approved `gh pr edit`, re-read both files; if either changed since, show what changed and ask again. Never put the title, or any other text read from GitHub, directly into a shell command: pass it through the title file as above.
 
 ## Carry over in Update mode
 
@@ -74,30 +72,6 @@ The old body often holds material the diff can't recreate. Keep:
 - any concrete setup detail in the old test steps (data, settings, flags, license).
 
 Everything else is source material to rewrite. List what you dropped and why in chat, e.g. "renamed functions (the diff shows them), Jest counts (CI shows them)".
-
-## Creating the PR
-
-Branch checks, before asking for approval:
-
-- **Current branch:** must not be `main` or a release branch (`8.x`, `9.x`, `x.y`).
-- **Uncommitted changes:** if any, ask whether to continue without them. Never commit on the user's behalf.
-- **Behind `<upstream>/main`:** mention it, but don't rebase.
-- **Push destination:** every URL that `git remote get-url --push --all origin` prints must point to the user's fork (`<fork-owner>/kibana`, where `<fork-owner>` isn't `elastic`), because `git push origin` pushes to all of them. If any points to elastic/kibana or anywhere else, stop and ask which remote to push to.
-
-After approval:
-
-1. Push the branch to the fork: `git push -u origin <branch>`. Don't force-push unless the user asks.
-2. Create the draft PR:
-
-   ```bash
-   GH_PAGER=cat gh pr create -R elastic/kibana --draft --base main \
-     --head <fork-owner>:<branch> \
-     --title "$(cat <title-file>)" --body-file <body-file> [--label <label> ...]
-   ```
-
-3. Read it back with `gh pr view` and report the URL, the draft state and the applied labels.
-
-Leave the PR in draft with no reviewers and no comments; the author takes it from there.
 
 ## Writing rules
 
