@@ -170,7 +170,12 @@ export const fillMissingHeatmapYBuckets = (
   }
 
   const span = maxIndex - minIndex + 1;
-  if (span > MAX_NEW_BUCKETS || rowsByIndex.size === span) {
+  if (
+    span > MAX_NEW_BUCKETS ||
+    rowsByIndex.size === span ||
+    !Number.isSafeInteger(minIndex) ||
+    !Number.isSafeInteger(maxIndex)
+  ) {
     return rows;
   }
 

@@ -312,4 +312,10 @@ describe('fillMissingHeatmapYBuckets', () => {
 
     expect(fillMissingHeatmapYBuckets(rows, 'y', 'value', 1)).toBe(rows);
   });
+
+  it('does nothing when a bucket index is past the safe integer range', () => {
+    const rows = [row(2 ** 53, 1), row(2 ** 53 + 2, 2)];
+
+    expect(fillMissingHeatmapYBuckets(rows, 'y', 'value', 1)).toBe(rows);
+  });
 });
