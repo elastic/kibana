@@ -2123,14 +2123,6 @@
       "enabled": true
     },
     {
-      "groupName": "hdr-histogram-js",
-      "matchDepNames": ["hdr-histogram-js"],
-      "reviewers": ["team:obs-signals-metrics-team"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "@appland/sql-parser",
       "matchDepNames": ["@appland/sql-parser"],
       "reviewers": ["team:security-defend-workflows"],

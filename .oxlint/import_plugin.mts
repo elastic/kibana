@@ -209,7 +209,7 @@ export const importPluginOverrides: OxlintOverride[] = [
       'x-pack/platform/plugins/shared/spaces',
       'x-pack/platform/test/spaces_api_integration',
       'src/platform/plugins/shared/workflows_management',
-      'src/platform/plugins/shared/workflows_execution_engine',
+      'x-pack/platform/plugins/shared/workflows_execution_engine',
       'src/platform/plugins/shared/workflows_extensions',
       'src/platform/packages/shared/kbn-workflows',
       'src/platform/packages/shared/kbn-workflows-ui',

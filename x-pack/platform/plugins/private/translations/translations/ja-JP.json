@@ -33577,7 +33577,6 @@
     "xpack.fleet.packagePolicyValidation.requiredErrorMessage": "{fieldName}が必要です",
     "xpack.fleet.packageUpload.datasetOwned": "アップロードされたパッケージで宣言されているデータセット \"{dataset}\" は、インストール済みパッケージ \"{packageName}\" によってすでに所有されています。",
     "xpack.fleet.packageUpload.dataStreamLookupFailed": "アップロードされたパッケージのデータセット \"{dataset}\" が既存のElasticsearchデータストリームと一致しないことを確認できませんでした。",
-    "xpack.fleet.packageUpload.existingDataStream": "データセット \"{dataset}\" に一致するライブデータストリーム \"{dataStreamName}\" がすでに存在します。新しいパッケージをアップロードする前に、移行または削除する必要があります。",
     "xpack.fleet.packageUpload.forbiddenArchiveAsset": "アップロードされたパッケージには禁止されているアセットが含まれています：{path}",
     "xpack.fleet.packageUpload.invalidDataset": "アップロードされたパッケージで宣言されているデータセット \"{dataset}\" は無効です。",
     "xpack.fleet.packageUpload.invalidDataStreamType": "アップロードされたパッケージで宣言されているデータストリームタイプ \"{type}\" は無効です：{reason}",
