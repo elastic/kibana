@@ -349,9 +349,20 @@ describe('toSlackPlainText', () => {
     ],
     ['a wildcard kept', 'Check *.log for *failed* requests', 'Check *.log for failed requests'],
     [
-      'private-use characters kept',
-      'a\uE0000\uE001 `\uE000b\uE001` *c*',
-      'a\uE0000\uE001 `\uE000b\uE001` c',
+      'a link kept as written',
+      '*<https://github.com/x/__init__.py>* failed',
+      'https://github.com/x/__init__.py failed',
+    ],
+    [
+      'labelled mentions and other links',
+      '<!here|here> <!subteam^S1|eng> <tel:+1555>',
+      '@here @eng tel:+1555',
+    ],
+    ['quote markers dropped', '&gt; quoted\n&gt; more, 5 &gt; 3', 'quoted more, 5 > 3'],
+    [
+      'private-use characters and replacement patterns kept',
+      'a\uE0000\uE001 `\uE000b\uE001 $$ $&` *c*',
+      'a\uE0000\uE001 `\uE000b\uE001 $$ $&` c',
     ],
     ['whitespace collapsed', 'a\n\n  b', 'a b'],
   ])('reads %s', (_, text, expected) => {

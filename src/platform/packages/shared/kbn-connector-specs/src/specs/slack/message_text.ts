@@ -228,22 +228,38 @@ const cutText = (text: string, maxLength: number): string => {
 };
 
 const SLACK_BROADCASTS = new Set(['!here', '!channel', '!everyone']);
+const SLACK_MENTION = /^(?:@|!(?:here|channel|everyone|subteam\^))/;
+
+const toTokenPrefix = (target: string): string => {
+  if (target.startsWith('#')) {
+    return '#';
+  }
+  return SLACK_MENTION.test(target) ? '@' : '';
+};
 
 const toPlainToken = (token: string): string => {
   const separator = token.indexOf('|');
   const target = separator === -1 ? token : token.slice(0, separator);
   const label = separator === -1 ? '' : token.slice(separator + 1);
-  const prefix = target.startsWith('#') || target.startsWith('@') ? target[0] : '';
+  const prefix = toTokenPrefix(target);
   if (label) {
     return label.startsWith(prefix) ? label : `${prefix}${label}`;
   }
-  if (/^(https?|mailto):/i.test(target)) {
+  if (!/^[#@!]/.test(target)) {
     return target;
   }
   return SLACK_BROADCASTS.has(target) ? `@${target.slice(1)}` : '';
 };
 
-const SLACK_CODE_SPAN = /```[\s\S]*?```|`[^`\n]+`/g;
+/** Code spans and `<...>` tokens, which emphasis never applies inside. */
+const SLACK_VERBATIM = /```[\s\S]*?```|`[^`\n]+`|<[^<>]*>/g;
+const SLACK_TOKEN = /<([^<>]*)>/g;
+const SLACK_QUOTE = /^&gt; ?/gm;
+
+const toVerbatim = (span: string): string =>
+  span.startsWith('<')
+    ? toPlainToken(span.slice(1, -1))
+    : span.replace(SLACK_TOKEN, (_, token: string) => toPlainToken(token));
 
 /**
  * Bold, italic and strikethrough pairs at word edges. The marker only appears inside a pair within a
@@ -259,22 +275,24 @@ const toEmphasisPattern = (marker: string): RegExp => {
 
 const SLACK_EMPHASIS = ['*', '_', '~'].map(toEmphasisPattern);
 
-const stripEmphasis = (text: string): string => {
+const stripMarkup = (text: string): string => {
   let markerPrefix = '\uE000';
   while (text.includes(markerPrefix)) markerPrefix += '\uE000';
   const toMarker = (index: number) => `${markerPrefix}${index}\uE001`;
 
-  const codeSpans: string[] = [];
-  const masked = text.replace(SLACK_CODE_SPAN, (span) => toMarker(codeSpans.push(span) - 1));
-  return codeSpans.reduce(
-    (result, span, index) => result.replaceAll(toMarker(index), span),
+  const spans: string[] = [];
+  const masked = text
+    .replace(SLACK_VERBATIM, (span) => toMarker(spans.push(toVerbatim(span)) - 1))
+    .replace(SLACK_QUOTE, '');
+  return spans.reduce(
+    (result, span, index) => result.replaceAll(toMarker(index), () => span),
     SLACK_EMPHASIS.reduce((result, pattern) => result.replace(pattern, '$1$2'), masked)
   );
 };
 
 /** Slack markup as one readable line; ids Slack sends without a name are dropped. */
 export const toSlackPlainText = (text: string | undefined): string =>
-  stripEmphasis((text ?? '').replace(/<([^<>]*)>/g, (_, token: string) => toPlainToken(token)))
+  stripMarkup(text ?? '')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&amp;/g, '&')
