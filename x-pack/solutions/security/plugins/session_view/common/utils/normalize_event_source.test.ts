@@ -126,6 +126,24 @@ describe('normalizeEventSource', () => {
       ]);
     });
 
+    it('skips null entries and null args instead of throwing', () => {
+      const result = normalizeEventSource({
+        process: {
+          entity_id: 'abc',
+          previous: [
+            null,
+            { args: null, executable: '/bin/sh' },
+            { args: 'bash', executable: '/bin/bash' },
+          ],
+        },
+      });
+
+      expect(result?.process?.previous).toEqual([
+        { executable: '/bin/sh' },
+        { args: ['bash'], executable: '/bin/bash' },
+      ]);
+    });
+
     it('keeps args paired when a non-nested mapping holds a single entry', () => {
       const result = normalizeEventSource({
         'process.entity_id': 'abc',

@@ -29,16 +29,19 @@ const hasDottedKeys = (source: object): boolean =>
  * their executable, so only the executables are kept.
  */
 const normalizeProcessPrevious = (
-  previous: RawProcessPrevious | RawProcessPrevious[]
+  previous: RawProcessPrevious | Array<RawProcessPrevious | null>
 ): ProcessPrevious[] => {
   if (!Array.isArray(previous) && Array.isArray(previous.executable)) {
     return previous.executable.map((executable) => ({ executable }));
   }
 
-  return toArray(previous).map(({ args, ...rest }) => ({
-    ...(rest as ProcessPrevious),
-    ...(args !== undefined ? { args: toArray(args) } : {}),
-  }));
+  // a stored _source can contain null entries; skip them rather than fail the whole page.
+  return toArray(previous)
+    .filter((entry): entry is RawProcessPrevious => entry !== null && typeof entry === 'object')
+    .map(({ args, ...rest }) => ({
+      ...(rest as ProcessPrevious),
+      ...(args !== undefined && args !== null ? { args: toArray(args) } : {}),
+    }));
 };
 
 /**
@@ -61,7 +64,7 @@ const coerceArrayFieldsInPlace = (source: ProcessEvent): void => {
 
   if (process?.previous !== undefined && process.previous !== null) {
     process.previous = normalizeProcessPrevious(
-      process.previous as RawProcessPrevious | RawProcessPrevious[]
+      process.previous as RawProcessPrevious | Array<RawProcessPrevious | null>
     ) as ProcessSelf['previous'];
   }
 
