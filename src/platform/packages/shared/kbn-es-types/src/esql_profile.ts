@@ -9,13 +9,7 @@
 
 import type { esqlProfileResponseSchema } from '@elastic/esql-definitions/profile-schema';
 import type { FromSchema } from 'json-schema-to-ts';
-
-/** Makes every property optional all the way down, for data that other versions fill differently. */
-type DeepPartial<T> = T extends ReadonlyArray<infer Item>
-  ? Array<DeepPartial<Item>>
-  : T extends object
-  ? { [Key in keyof T]?: DeepPartial<T[Key]> }
-  : T;
+import type { DeepPartial } from '@kbn/utility-types';
 
 /** What the schema describes, with every property optional. */
 type ProfileFromSchema = DeepPartial<FromSchema<typeof esqlProfileResponseSchema>>;
