@@ -90,6 +90,7 @@ module.exports = {
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]components[\/\\]package_icon.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]layouts[\/\\]without_header.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]triggers_actions_ui[\/\\]public[\/\\]application[\/\\]sections[\/\\]actions_connectors_list[\/\\]components[\/\\]actions_connectors_list.test.tsx/,
+    /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]workflows_management[\/\\]public[\/\\]widgets[\/\\]workflow_search_field[\/\\]ui[\/\\]workflow_search_field.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability[\/\\]public[\/\\]pages[\/\\]overview[\/\\]components[\/\\]news_feed[\/\\]news_feed.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability[\/\\]public[\/\\]pages[\/\\]overview[\/\\]components[\/\\]sections[\/\\]ux[\/\\]core_web_vitals[\/\\]color_palette_flex_item.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability[\/\\]public[\/\\]pages[\/\\]overview[\/\\]components[\/\\]sections[\/\\]ux[\/\\]core_web_vitals[\/\\]palette_legends.tsx/,
@@ -330,6 +331,5 @@ module.exports = {
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_py[\/\\]elasticsearch_py_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_ruby[\/\\]elasticsearch_ruby_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]sample[\/\\]sample_client_readme.tsx/,
-    /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]workflows_management[\/\\]public[\/\\]widgets[\/\\]workflow_search_field[\/\\]ui[\/\\]workflow_search_field.tsx/,
   ],
 };

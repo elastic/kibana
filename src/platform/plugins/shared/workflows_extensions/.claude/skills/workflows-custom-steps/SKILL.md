@@ -239,7 +239,7 @@ When reviewing a PR that adds or modifies a custom step:
 | Agent Builder | `x-pack/platform/plugins/shared/agent_builder/public/step_types/run_agent_step.ts` | `connectorIdSelection` with restricted `connectorTypes` and `enableCreation: false`; `dynamicSchema.getOutputSchema` extending the base schema |
 | Cases | `x-pack/platform/plugins/shared/cases/public/workflows/create_case_from_template.tsx` | Custom `input` `selection` with `dependsOnValues: ['input.owner']`; uses domain helpers (`collectSelectionSearchOptions`, `isValidOwner`) |
 | Cases (server) | `x-pack/platform/plugins/shared/cases/server/workflows/` | Many handlers built from a factory `(getCasesClient) => createServerStepDefinition(...)` — use the typed `CasesClient`, not `callKibanaApi` |
-| Internal index steps | `src/platform/plugins/shared/workflows_management/public/common/context/internal_steps/editor_handlers/editor_handlers.ts` | `getIndexSelectionHandler` constructed with different `allowWildcard` / `showAllIndices` per use case (search vs write vs delete) |
+| Internal index steps | `x-pack/platform/plugins/shared/workflows_management/public/common/context/internal_steps/editor_handlers/editor_handlers.ts` | `getIndexSelectionHandler` constructed with different `allowWildcard` / `showAllIndices` per use case (search vs write vs delete) |
 | Security Solution | `x-pack/solutions/security/plugins/security_solution/{server,public}/workflows/step_types/` | Async loader gated on a feature flag resolved from `core.getStartServices().featureFlags` |
 | Alerting v2 | `x-pack/platform/plugins/shared/alerting_v2/server/lib/workflow_extensions/register_step_definitions.ts` | Multiple step definitions registered from a single plugin |
 

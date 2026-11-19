@@ -109,7 +109,7 @@ In addition to the dev-only `@kbn/evals` CLI (which runs suites in CI), the plug
 
 An **experiment** evaluates one task model against one or more datasets. Running the same configuration against several models produces multiple experiments you can compare.
 
-> Running experiments requires an **Enterprise** license (it runs on [Kibana Workflows](../../../../src/platform/plugins/shared/workflows_management)). When Workflows is unavailable, experiment execution is disabled; the rest of the plugin (browsing, ingestion, datasets, tracing) is unaffected.
+> Running experiments requires an **Enterprise** license (it runs on [Kibana Workflows](../../../../x-pack/platform/plugins/shared/workflows_management)). When Workflows is unavailable, experiment execution is disabled; the rest of the plugin (browsing, ingestion, datasets, tracing) is unaffected.
 
 ### Running experiments
 
