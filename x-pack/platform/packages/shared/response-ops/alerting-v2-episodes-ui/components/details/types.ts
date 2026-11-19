@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ManualAddToChatServices } from '@kbn/alerting-v2-browser-shared';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -15,6 +16,7 @@ import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/publi
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 export interface AlertEpisodeDetailsServices {
+  agentBuilder?: ManualAddToChatServices['agentBuilder'];
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;

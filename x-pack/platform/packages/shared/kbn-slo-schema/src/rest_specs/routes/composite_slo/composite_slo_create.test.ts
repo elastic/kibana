@@ -85,6 +85,33 @@ describe('CreateCompositeSLO schema validation', () => {
     expect(result.success).toBe(false);
   });
 
+  describe('string bounds', () => {
+    const members = buildMembers(2);
+    const parseBody = (overrides: Record<string, unknown>) =>
+      createCompositeSLOParamsSchema.safeParse({ body: { ...BASE_BODY, members, ...overrides } });
+
+    it.each([
+      ['name', 'a'.repeat(1024), 'a'.repeat(1025)],
+      ['description', 'a'.repeat(10000), 'a'.repeat(10001)],
+    ])('bounds %s', (field, valid, tooLong) => {
+      expect(parseBody({ [field]: valid }).success).toBe(true);
+      expect(parseBody({ [field]: tooLong }).success).toBe(false);
+    });
+
+    it('rejects an empty name', () => {
+      expect(parseBody({ name: '' }).success).toBe(false);
+    });
+
+    it('bounds timeWindow.duration', () => {
+      expect(parseBody({ timeWindow: { duration: '1'.repeat(16), type: 'rolling' } }).success).toBe(
+        true
+      );
+      expect(parseBody({ timeWindow: { duration: '1'.repeat(17), type: 'rolling' } }).success).toBe(
+        false
+      );
+    });
+  });
+
   it.each(['short', 'Invalid-Upper-Case', 'a'.repeat(49)])(
     'rejects a member sloId of "%s"',
     (sloId) => {

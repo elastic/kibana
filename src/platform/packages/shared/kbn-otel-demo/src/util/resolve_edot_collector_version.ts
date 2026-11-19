@@ -9,6 +9,9 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
+import { promises as Fs } from 'fs';
+import Os from 'os';
+import Path from 'path';
 
 const EDOT_IMAGE = 'docker.elastic.co/elastic-agent/elastic-otel-collector';
 
@@ -25,35 +28,51 @@ export async function resolveEdotCollectorVersion(log: ToolingLog): Promise<stri
     return kibanaPackageJson.version.replace(/-SNAPSHOT$/, '');
   }
 
-  let { major, minor, patch } = current;
-  while (major > 0) {
-    const version = `${major}.${minor}.${patch}`;
-    try {
-      await execa.command(`docker manifest inspect ${EDOT_IMAGE}:${version}`, {
-        stdio: 'ignore',
-        timeout: 10000,
-      });
-      log.debug(`Found EDOT image: ${EDOT_IMAGE}:${version}`);
-      return version;
-    } catch {
-      log.debug(`Image ${EDOT_IMAGE}:${version} not found, trying older version...`);
+  // Public image. Docker CLI auto-selects the platform credential helper
+  // (osxkeychain, wincred, pass) when the config has no auth settings, so an
+  // empty directory can still send a rejected docker.elastic.co login. A
+  // placeholder auth entry with no credentials keeps the request on the file
+  // store and skips that helper.
+  const dockerConfigDir = await Fs.mkdtemp(Path.join(Os.tmpdir(), 'edot-collector-docker-config-'));
+  try {
+    await Fs.writeFile(
+      Path.join(dockerConfigDir, 'config.json'),
+      JSON.stringify({ auths: { 'edot-collector.invalid': {} } }),
+      'utf8'
+    );
+
+    let { major, minor, patch } = current;
+    while (major > 0) {
+      const version = `${major}.${minor}.${patch}`;
+      try {
+        await execa.command(`docker manifest inspect ${EDOT_IMAGE}:${version}`, {
+          timeout: 10000,
+          env: { DOCKER_CONFIG: dockerConfigDir },
+        });
+        log.debug(`Found EDOT image: ${EDOT_IMAGE}:${version}`);
+        return version;
+      } catch {
+        log.debug(`Image ${EDOT_IMAGE}:${version} not found, trying older version...`);
+      }
+
+      if (patch > 0) {
+        patch--;
+      } else if (minor > 0) {
+        minor--;
+        patch = 0;
+      } else {
+        major--;
+        // Arbitrary upper bound for minor versions when crossing a major boundary.
+        // EDOT Collector releases may lag behind Kibana, so we probe a wide range.
+        minor = 20;
+        patch = 0;
+      }
     }
 
-    if (patch > 0) {
-      patch--;
-    } else if (minor > 0) {
-      minor--;
-      patch = 0;
-    } else {
-      major--;
-      // Arbitrary upper bound for minor versions when crossing a major boundary.
-      // EDOT Collector releases may lag behind Kibana, so we probe a wide range.
-      minor = 20;
-      patch = 0;
-    }
+    const fallback = kibanaPackageJson.version.replace(/-SNAPSHOT$/, '');
+    log.warning(`Could not find any EDOT Collector image, falling back to ${fallback}`);
+    return fallback;
+  } finally {
+    await Fs.rm(dockerConfigDir, { recursive: true, force: true });
   }
-
-  const fallback = kibanaPackageJson.version.replace(/-SNAPSHOT$/, '');
-  log.warning(`Could not find any EDOT Collector image, falling back to ${fallback}`);
-  return fallback;
 }

@@ -1,5 +1,5 @@
 {
-  "sha1": "0b8af276fae1b3e8e248e98b9b8050e503b7ff61",
+  "sha1": "5c141e14a4aa34a82c739e7d3692721f408b595c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -798,7 +798,7 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_telemetry.spec.ts",
         "line": 44,
-        "column": 61
+        "column": 63
       }
     },
     {
@@ -811,7 +811,7 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_telemetry.spec.ts",
         "line": 52,
-        "column": 48
+        "column": 32
       }
     },
     {
@@ -823,8 +823,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_workload_names_permissions.spec.ts",
-        "line": 103,
-        "column": 64
+        "line": 105,
+        "column": 9
       }
     },
     {
@@ -836,8 +836,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_workload_names_permissions.spec.ts",
-        "line": 123,
-        "column": 20
+        "line": 124,
+        "column": 76
       }
     },
     {
@@ -850,8 +850,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_workload_names.spec.ts",
-        "line": 36,
-        "column": 7
+        "line": 35,
+        "column": 80
       }
     }
   ]

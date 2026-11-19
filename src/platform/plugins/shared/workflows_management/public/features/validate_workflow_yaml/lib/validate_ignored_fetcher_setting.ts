@@ -9,22 +9,18 @@
 
 import type { LineCounter } from 'yaml';
 import { isMap, isPair, isScalar } from 'yaml';
-import {
-  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
-  shouldWarnIgnoredKibanaFetcher,
-} from '@kbn/workflows';
+import { IGNORED_KIBANA_FETCHER_SETTING_MESSAGE, isKibanaWorkflowStepType } from '@kbn/workflows';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 export function validateIgnoredFetcherSetting(
   workflowLookup: WorkflowLookup,
-  lineCounter: LineCounter,
-  warnKibanaRequestFetcher = false
+  lineCounter: LineCounter
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
 
   for (const step of Object.values(workflowLookup.steps)) {
-    if (shouldWarnIgnoredKibanaFetcher(step.stepType, warnKibanaRequestFetcher)) {
+    if (isKibanaWorkflowStepType(step.stepType)) {
       const fetcherKey = findWithFetcherKey(step.stepYamlNode);
       if (fetcherKey?.range) {
         const [startOffset, endOffset] = fetcherKey.range;
