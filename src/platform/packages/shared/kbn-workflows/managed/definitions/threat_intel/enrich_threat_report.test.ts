@@ -151,10 +151,11 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       with?: { query?: { bool?: { must_not?: unknown[] } } };
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
+    // Object form is what the editor's ES connector schema requires for a boolean term.
     expect(mustNot).toEqual(
       expect.arrayContaining([
         { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
-        { term: { 'extracted.gate.is_intelligence': false } },
+        { term: { 'extracted.gate.is_intelligence': { value: false } } },
       ])
     );
   });
@@ -171,10 +172,11 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       with?: { query?: { bool?: { must_not?: unknown[] } } };
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
+    // Object form is what the editor's ES connector schema requires for a boolean term.
     expect(mustNot).toEqual(
       expect.arrayContaining([
         { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
-        { term: { 'extracted.gate.is_intelligence': false } },
+        { term: { 'extracted.gate.is_intelligence': { value: false } } },
       ])
     );
   });

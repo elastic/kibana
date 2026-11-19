@@ -60656,7 +60656,6 @@
     "xpack.securitySolution.headerPage.pageSubtitle": "Último evento: {beat}",
     "xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage": "{fieldOrValue} adicionado à linha do tempo",
     "xpack.securitySolution.hooks.useAddToTimeline.template.addedFieldMessage": "{fieldOrValue} adicionado ao modelo da linha do tempo",
-    "xpack.securitySolution.hooks.useGetAIConnectors.fetchError": "Erro ao buscar conectores de IA",
     "xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage": "Falha ao carregar a consulta salva",
     "xpack.securitySolution.host.details.architectureLabel": "Arquitetura",
     "xpack.securitySolution.host.details.endpoint.endpointPolicy": "Política de integração de endpoint",

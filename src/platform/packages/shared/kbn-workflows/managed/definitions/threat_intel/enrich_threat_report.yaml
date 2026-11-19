@@ -82,8 +82,10 @@ steps:
                     lineage.extraction_method: pending
                 - term:
                     lineage.extraction_method: workflow_v4_rejected
+                # The editor schema requires the object form for non-string term values.
                 - term:
-                    extracted.gate.is_intelligence: false
+                    extracted.gate.is_intelligence:
+                      value: false
                 - ids:
                     values:
                       - "{{ foreach.item._id }}"
@@ -316,8 +318,10 @@ steps:
                 # they must not surface as related intelligence.
                 - term:
                     lineage.extraction_method: workflow_v4_rejected
+                # The editor schema requires the object form for non-string term values.
                 - term:
-                    extracted.gate.is_intelligence: false
+                    extracted.gate.is_intelligence:
+                      value: false
               should:
                 - term:
                     extracted.ioc_set_hash:
